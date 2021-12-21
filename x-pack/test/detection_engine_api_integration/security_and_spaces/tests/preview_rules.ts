@@ -64,8 +64,10 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .send(getSimplePreviewRule('', 3))
             .expect(200);
-          const { errors } = getSimpleRulePreviewOutput(undefined, ['Invalid invocation count']);
-          expect(body).to.eql({ errors });
+          const { logs } = getSimpleRulePreviewOutput(undefined, [
+            { errors: ['Invalid invocation count'], warnings: [] },
+          ]);
+          expect(body).to.eql({ logs });
         });
       });
 

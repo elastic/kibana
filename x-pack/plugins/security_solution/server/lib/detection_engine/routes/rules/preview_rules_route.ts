@@ -89,11 +89,15 @@ export const previewRulesRoute = async (
             RULE_PREVIEW_INVOCATION_COUNT.MONTH,
           ].includes(invocationCount)
         ) {
-          return response.ok({ body: { errors: ['Invalid invocation count'] } });
+          return response.ok({
+            body: { logs: [{ errors: ['Invalid invocation count'], warnings: [] }] },
+          });
         }
 
         if (request.body.type === 'threat_match') {
-          return response.ok({ body: { errors: ['Preview for rule type not supported'] } });
+          return response.ok({
+            body: { logs: [{ errors: ['Preview for rule type not supported'], warnings: [] }] },
+          });
         }
 
         const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient, false);
