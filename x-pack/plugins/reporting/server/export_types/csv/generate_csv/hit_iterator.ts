@@ -7,10 +7,10 @@
 import type { TransportResult } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient } from 'src/core/server';
-import { CancellationToken } from '../../../../common';
-import { LevelLogger } from '../../../lib';
-import { ScrollConfig } from '../../../types';
+import type { ElasticsearchClient } from 'src/core/server';
+import type { CancellationToken } from '../../../../common/cancellation_token';
+import type { LevelLogger } from '../../../lib';
+import type { ScrollConfig } from '../../../types';
 
 function parseResponse(response: TransportResult<estypes.SearchResponse>) {
   if (!response?.body._scroll_id) {

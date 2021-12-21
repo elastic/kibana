@@ -20,12 +20,14 @@ interface BulkInstallPackagesParams {
   packagesToInstall: Array<string | { name: string; version: string }>;
   esClient: ElasticsearchClient;
   force?: boolean;
+  spaceId: string;
 }
 
 export async function bulkInstallPackages({
   savedObjectsClient,
   packagesToInstall,
   esClient,
+  spaceId,
   force,
 }: BulkInstallPackagesParams): Promise<BulkInstallResponse[]> {
   const logger = appContextService.getLogger();
@@ -70,6 +72,7 @@ export async function bulkInstallPackages({
           esClient,
           pkgkey: Registry.pkgToPkgKey(pkgKeyProps),
           installSource,
+          spaceId,
           force,
         });
         if (installResult.error) {
