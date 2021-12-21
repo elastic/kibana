@@ -15,7 +15,7 @@ export interface IMyStrategyRequest extends IEsSearchRequest {
 export interface IMyStrategyResponse extends IEsSearchResponse {
   executed_at: number;
 }
-
+/*
 const technicalFieldRuntimeType = runtimeTypeFromFieldMap(technicalRuleFieldMap);
 
 export const parseTechnicalFields = (input: unknown) => {
@@ -28,3 +28,4 @@ export const parseTechnicalFields = (input: unknown) => {
 };
 
 export type ParsedTechnicalFields = ReturnType<typeof parseTechnicalFields>;
+*/

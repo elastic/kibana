@@ -1,0 +1,45 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true,
+  },
+  "include": [
+    // add all the folders containing files to be compiled
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../typings/**/*"
+  ],
+  "references": [
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../data/tsconfig.json" },
+    { "path": "../kibana_utils/tsconfig.json" },
+    { "path": "../kibana_react/tsconfig.json" },
+    { "path": "../navigation/tsconfig.json" },
+    { "path": "../share/tsconfig.json" },
+    // add references to other TypeScript projects the plugin depends on
+
+    // requiredPlugins from ./kibana.json
+    // { "path": "../licensing/tsconfig.json" },
+    // { "path": "../../../src/plugins/data/tsconfig.json" },
+    // { "path": "../encrypted_saved_objects/tsconfig.json" },
+
+    // optionalPlugins from ./kibana.json
+    // { "path": "../security/tsconfig.json" },
+    // { "path": "../features/tsconfig.json" },
+    // { "path": "../cloud/tsconfig.json" },
+    // { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
+    // { "path": "../../../src/plugins/home/tsconfig.json" },
+
+    // requiredBundles from ./kibana.json
+    // { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
+    // { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
+    // { "path": "../infra/tsconfig.json" },
+    // { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
+  ]
+}
