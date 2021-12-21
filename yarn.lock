@@ -1601,10 +1601,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@41.2.3":
-  version "41.2.3"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-41.2.3.tgz#00f437bf197a809a7092524073174f413ce33f46"
-  integrity sha512-sBPn2O1nn8ZJZncUQf88jzxWtnXcx/X/CubvH8LS7H+GX94PQs1BWXKQtYBI21kUAevSiRdPeX66x3ywZpZliQ==
+"@elastic/eui@43.1.1":
+  version "43.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-43.1.1.tgz#5a4526c0a3fad45dcbe470dc33d1d9b701904494"
+  integrity sha512-ilVAfhM2QtrA8RiG5vgVBOW5xqyjpDeMTH2c/Nf8vEYVgebmTnDAJuaDj5lHpk01oqt2jEEelZkD40XKY2376w==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -1644,7 +1644,6 @@
     url-parse "^1.5.3"
     uuid "^8.3.0"
     vfile "^4.2.0"
-    yargs "^17.2.1"
 
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
@@ -5882,6 +5881,18 @@
   uid ""
 
 "@types/kbn__plugin-helpers@link:bazel-bin/packages/kbn-plugin-helpers/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__react-field@link:bazel-bin/packages/kbn-react-field/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__rule-data-utils@link:bazel-bin/packages/kbn-rule-data-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__securitysolution-autocomplete@link:bazel-bin/packages/kbn-securitysolution-autocomplete/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -29970,19 +29981,6 @@ yargs@^17.0.1:
     y18n "^5.0.5"
     yargs-parser "^20.2.2"
 
-yargs@^17.2.1, yargs@~17.2.1:
-  version "17.2.1"
-  resolved "https://registry.yarnpkg.com/yargs/-/yargs-17.2.1.tgz#e2c95b9796a0e1f7f3bf4427863b42e0418191ea"
-  integrity sha512-XfR8du6ua4K6uLGm5S6fA+FIJom/MdJcFNVY8geLlp2v8GYbOXD4EB1tPNZsRn4vBzKGMgb5DRZMeWuFc2GO8Q==
-  dependencies:
-    cliui "^7.0.2"
-    escalade "^3.1.1"
-    get-caller-file "^2.0.5"
-    require-directory "^2.1.1"
-    string-width "^4.2.0"
-    y18n "^5.0.5"
-    yargs-parser "^20.2.2"
-
 yargs@^3.15.0:
   version "3.32.0"
   resolved "https://registry.yarnpkg.com/yargs/-/yargs-3.32.0.tgz#03088e9ebf9e756b69751611d2a5ef591482c995"
@@ -30014,6 +30012,19 @@ yargs@^7.1.0:
     which-module "^1.0.0"
     y18n "^3.2.1"
     yargs-parser "5.0.0-security.0"
+
+yargs@~17.2.1:
+  version "17.2.1"
+  resolved "https://registry.yarnpkg.com/yargs/-/yargs-17.2.1.tgz#e2c95b9796a0e1f7f3bf4427863b42e0418191ea"
+  integrity sha512-XfR8du6ua4K6uLGm5S6fA+FIJom/MdJcFNVY8geLlp2v8GYbOXD4EB1tPNZsRn4vBzKGMgb5DRZMeWuFc2GO8Q==
+  dependencies:
+    cliui "^7.0.2"
+    escalade "^3.1.1"
+    get-caller-file "^2.0.5"
+    require-directory "^2.1.1"
+    string-width "^4.2.0"
+    y18n "^5.0.5"
+    yargs-parser "^20.2.2"
 
 yargs@~3.10.0:
   version "3.10.0"
