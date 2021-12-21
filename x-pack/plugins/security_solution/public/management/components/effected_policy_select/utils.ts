@@ -74,9 +74,6 @@ export function isGlobalPolicyEffected(tags?: string[]): boolean {
   return tags !== undefined && tags.find((tag) => tag === GLOBAL_POLICY_TAG) !== undefined;
 }
 
-export function getArtifactPoliciesIdByTag(tags?: string[]): string[] {
-  if (tags === undefined) {
-    return [];
-  }
+export function getArtifactPoliciesIdByTag(tags: string[] = []): string[] {
   return tags.filter((tag) => tag.startsWith('policy:')).map((tag) => tag.substring(7));
 }
