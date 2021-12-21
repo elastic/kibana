@@ -49,7 +49,7 @@ function toPoint(val: Point | { lat: number; lon: number } | string): Point | nu
     lon = val.lon;
   } else if (typeof val === 'string') {
     if (val.startsWith('POINT (')) {
-      const pointArg = val.slice('POINT('.length, val.length);
+      const pointArg = val.slice('POINT ('.length, val.length);
       const split = pointArg.split(' ');
       if (split.length === 2) {
         lat = parseFloat(split[1]);
