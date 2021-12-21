@@ -364,7 +364,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
     id: SecurityPageName.cloud_posture,
     title: 'Cloud Posture',
     path: CSP_ROOT_PATH,
-    status: AppStatus.accessible,
     navLinkStatus: AppNavLinkStatus.hidden,
     keywords: [],
     deepLinks: [
