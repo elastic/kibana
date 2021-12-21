@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { journey, step, beforeAll } from '@elastic/synthetics';
+import { journey, step } from '@elastic/synthetics';
 import { NETWORK_PROFILES } from '../../../../../test/functional/services/remote/network_profiles';
 
 journey('perf_login_and_home', async ({ page, params, client }) => {
-  beforeAll(async () => {
+  step('Go to Kibana login page', async () => {
+    await client.send('Network.clearBrowserCache');
     await client.send('Network.setCacheDisabled', { cacheDisabled: true });
     await client.send('Network.emulateNetworkConditions', {
       latency: NETWORK_PROFILES.CLOUD_USER.LATENCY,
@@ -17,13 +18,18 @@ journey('perf_login_and_home', async ({ page, params, client }) => {
       uploadThroughput: NETWORK_PROFILES.CLOUD_USER.UPLOAD,
       offline: false,
     });
-  });
-
-  step('Go to Kibana login page', async () => {
     await page.goto(`${params.kibanaUrl}`, { waitUntil: 'networkidle' });
   });
 
   step('Login to Kibana', async () => {
+    await client.send('Network.clearBrowserCache');
+    await client.send('Network.setCacheDisabled', { cacheDisabled: true });
+    await client.send('Network.emulateNetworkConditions', {
+      latency: NETWORK_PROFILES.CLOUD_USER.LATENCY,
+      downloadThroughput: NETWORK_PROFILES.CLOUD_USER.DOWNLOAD,
+      uploadThroughput: NETWORK_PROFILES.CLOUD_USER.UPLOAD,
+      offline: false,
+    });
     await page.fill('[data-test-subj=loginUsername]', 'elastic', { timeout: 60 * 1000 });
     await page.fill('[data-test-subj=loginPassword]', 'changeme');
     await page.click('[data-test-subj=loginSubmit]');
@@ -31,6 +37,14 @@ journey('perf_login_and_home', async ({ page, params, client }) => {
   });
 
   step('Dismiss Synthetics Notice', async () => {
+    await client.send('Network.clearBrowserCache');
+    await client.send('Network.setCacheDisabled', { cacheDisabled: true });
+    await client.send('Network.emulateNetworkConditions', {
+      latency: NETWORK_PROFILES.CLOUD_USER.LATENCY,
+      downloadThroughput: NETWORK_PROFILES.CLOUD_USER.DOWNLOAD,
+      uploadThroughput: NETWORK_PROFILES.CLOUD_USER.UPLOAD,
+      offline: false,
+    });
     await page.click('[data-test-subj=skipWelcomeScreen]', { timeout: 60 * 1000 });
     await page.locator('Welcome home');
   });
