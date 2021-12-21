@@ -188,6 +188,33 @@ export const getExistingPrepackagedTimelines = async (
   return getAllSavedTimeline(request, elasticTemplateTimelineOptions);
 };
 
+function getSearchOptions(
+  request: FrameworkRequest,
+  search: string | null,
+  onlyUserFavorite: boolean | null
+) {
+  const userName = request.user?.username ?? UNAUTHENTICATED_USER;
+  if (onlyUserFavorite) {
+    return [
+      {
+        search: search != null ? search : undefined,
+        searchFields: ['title', 'description'],
+      },
+      {
+        search: convertStringToBase64(userName),
+        searchFields: ['favorite.keySearch'],
+      },
+    ];
+  } else {
+    return [
+      {
+        search: search != null ? search : undefined,
+        searchFields: ['title', 'description'],
+      },
+    ];
+  }
+}
+
 export const getAllTimeline = async (
   request: FrameworkRequest,
   onlyUserFavorite: boolean | null,
@@ -201,10 +228,7 @@ export const getAllTimeline = async (
     type: timelineSavedObjectType,
     perPage: pageInfo.pageSize,
     page: pageInfo.pageIndex,
-    search: search != null ? search : undefined,
-    searchFields: onlyUserFavorite
-      ? ['title', 'description', 'favorite.keySearch']
-      : ['title', 'description'],
+    searchOptions: getSearchOptions(request, search, onlyUserFavorite),
     filter: getTimelineTypeFilter(timelineType ?? null, status ?? null),
     sortField: sort != null ? sort.sortField : undefined,
     sortOrder: sort != null ? sort.sortOrder : undefined,
@@ -623,11 +647,8 @@ const getSavedTimeline = async (request: FrameworkRequest, timelineId: string) =
 const getAllSavedTimeline = async (request: FrameworkRequest, options: SavedObjectsFindOptions) => {
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
   const savedObjectsClient = request.context.core.savedObjects.client;
-  if (options.searchFields != null && options.searchFields.includes('favorite.keySearch')) {
-    options.search = `${options.search != null ? options.search : ''} ${
-      userName != null ? convertStringToBase64(userName) : null
-    }`;
-  }
+
+  // console.log(options.searchOptions);
 
   const savedObjects = await savedObjectsClient.find<TimelineWithoutExternalRefs>(options);
 

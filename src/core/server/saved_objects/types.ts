@@ -30,6 +30,7 @@ export type {
 
 import { SavedObject } from '../../types';
 import { ElasticsearchClient } from '../elasticsearch';
+import type { SearchOption } from './service/lib/search_dsl/query_params';
 
 type KueryNode = any;
 
@@ -88,19 +89,14 @@ export interface SavedObjectsFindOptions {
    * SavedObjects.find({type: 'dashboard', fields: ['attributes.name', 'attributes.location']})
    */
   fields?: string[];
-  /** Search documents using the Elasticsearch Simple Query String syntax. See Elasticsearch Simple Query String `query` argument for more information */
-  search?: string;
-  /** The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information */
-  searchFields?: string[];
+  /**
+   * Apply these search options when retrieving saved objects
+   */
+  searchOptions?: SearchOption[];
   /**
    * Use the sort values from the previous page to retrieve the next page of results.
    */
   searchAfter?: estypes.Id[];
-  /**
-   * The fields to perform the parsed query against. Unlike the `searchFields` argument, these are expected to be root fields and will not
-   * be modified. If used in conjunction with `searchFields`, both are concatenated together.
-   */
-  rootSearchFields?: string[];
 
   /**
    * Search for documents having a reference to the specified objects.
@@ -112,10 +108,6 @@ export interface SavedObjectsFindOptions {
    */
   hasReferenceOperator?: 'AND' | 'OR';
 
-  /**
-   * The search operator to use with the provided filter. Defaults to `OR`
-   */
-  defaultSearchOperator?: 'AND' | 'OR';
   filter?: string | KueryNode;
   /**
    * A record of aggregations to perform.

@@ -850,10 +850,6 @@ export class SavedObjectsRepository {
   /**
    * @param {object} [options={}]
    * @property {(string|Array<string>)} [options.type]
-   * @property {string} [options.search]
-   * @property {string} [options.defaultSearchOperator]
-   * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
-   *                                        Query field argument for more information
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
    * @property {Array<unknown>} [options.searchAfter]
@@ -870,10 +866,7 @@ export class SavedObjectsRepository {
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponse<T, A>> {
     const {
-      search,
-      defaultSearchOperator = 'OR',
-      searchFields,
-      rootSearchFields,
+      searchOptions,
       hasReference,
       hasReferenceOperator,
       page = FIND_DEFAULT_PAGE,
@@ -923,8 +916,15 @@ export class SavedObjectsRepository {
       return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
     }
 
-    if (searchFields && !Array.isArray(searchFields)) {
-      throw SavedObjectsErrorHelpers.createBadRequestError('options.searchFields must be an array');
+    if (searchOptions) {
+      const hasInvalidSearchFields = searchOptions.some(
+        ({ searchFields }) => searchFields && !Array.isArray(searchFields)
+      );
+      if (hasInvalidSearchFields) {
+        throw SavedObjectsErrorHelpers.createBadRequestError(
+          'options.searchFields must be an array'
+        );
+      }
     }
 
     if (fields && !Array.isArray(fields)) {
@@ -969,11 +969,8 @@ export class SavedObjectsRepository {
         _source: includedFields(allowedTypes, fields),
         ...(aggsObject ? { aggs: aggsObject } : {}),
         ...getSearchDsl(this._mappings, this._registry, {
-          search,
-          defaultSearchOperator,
-          searchFields,
+          searchOptions,
           pit,
-          rootSearchFields,
           type: allowedTypes,
           searchAfter,
           sortField,
@@ -993,6 +990,7 @@ export class SavedObjectsRepository {
         ignore: [404],
       }
     );
+
     if (statusCode === 404) {
       if (!isSupportedEsServer(headers)) {
         throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();

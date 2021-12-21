@@ -11,7 +11,12 @@ import Boom from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndexMapping } from '../../../mappings';
 import { SavedObjectsPitParams } from '../../../types';
-import { getQueryParams, HasReferenceQueryParams, SearchOperator } from './query_params';
+import {
+  getQueryParams,
+  HasReferenceQueryParams,
+  SearchOperator,
+  SearchOption,
+} from './query_params';
 import { getPitParams } from './pit_params';
 import { getSortingParams } from './sorting_params';
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
@@ -20,10 +25,7 @@ type KueryNode = any;
 
 interface GetSearchDslOptions {
   type: string | string[];
-  search?: string;
-  defaultSearchOperator?: SearchOperator;
-  searchFields?: string[];
-  rootSearchFields?: string[];
+  searchOptions?: SearchOption[];
   searchAfter?: estypes.Id[];
   sortField?: string;
   sortOrder?: estypes.SortOrder;
@@ -42,10 +44,7 @@ export function getSearchDsl(
 ) {
   const {
     type,
-    search,
-    defaultSearchOperator,
-    searchFields,
-    rootSearchFields,
+    searchOptions = [],
     searchAfter,
     sortField,
     sortOrder,
@@ -71,10 +70,7 @@ export function getSearchDsl(
       namespaces,
       type,
       typeToNamespacesMap,
-      search,
-      searchFields,
-      rootSearchFields,
-      defaultSearchOperator,
+      searchOptions,
       hasReference,
       hasReferenceOperator,
       kueryNode,
