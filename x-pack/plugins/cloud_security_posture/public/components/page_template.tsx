@@ -8,7 +8,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
-  useKibana,
   KibanaPageTemplate,
   KibanaPageTemplateProps,
 } from '../../../../../src/plugins/kibana_react/public';
