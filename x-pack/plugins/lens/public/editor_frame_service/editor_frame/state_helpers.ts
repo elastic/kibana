@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectReference } from 'kibana/public';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import memoizeOne from 'memoize-one';
 import {
   Datasource,

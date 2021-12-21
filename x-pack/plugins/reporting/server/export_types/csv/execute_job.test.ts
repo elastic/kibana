@@ -23,7 +23,7 @@ import {
   CSV_QUOTE_VALUES_SETTING,
   CSV_SEPARATOR_SETTING,
 } from '../../../../../../src/plugins/share/server';
-import { CancellationToken } from '../../../common';
+import { CancellationToken } from '../../../common/cancellation_token';
 import { CSV_BOM_CHARS } from '../../../common/constants';
 import { LevelLogger } from '../../lib';
 import { setFieldFormats } from '../../services';
@@ -62,7 +62,7 @@ describe('CSV Execute Job', function () {
   let mockEsClient: DeeplyMockedKeys<ElasticsearchClient>;
   let mockReportingConfig: ReportingConfig;
   let mockReportingCore: ReportingCore;
-  let cancellationToken: any;
+  let cancellationToken: CancellationToken;
   let stream: jest.Mocked<Writable>;
   let content: string;
 
