@@ -123,7 +123,9 @@ export const getPayload = (
       }),
     ...(isEmpty(payload.status) &&
       type === ActionTypes.create_case && { status: CaseStatuses.open }),
-    ...(type === ActionTypes.create_case && { owner }),
+    ...(type === ActionTypes.create_case && isEmpty(payload.owner) && { owner }),
+    ...(type === ActionTypes.create_case &&
+      isEmpty(payload.settings) && { settings: { syncAlerts: true } }),
   };
 };
 

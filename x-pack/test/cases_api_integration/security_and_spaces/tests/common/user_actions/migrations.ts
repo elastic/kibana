@@ -23,6 +23,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
   describe('migrations', () => {
     describe('7.10.0', () => {
+      const CASE_ID = 'e1900ac0-017f-11eb-93f8-d161651bf509';
+
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.10.0');
       });
@@ -33,7 +35,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       it('7.10.0 migrates user actions connector', async () => {
         const { body } = await supertest
-          .get(`${CASES_URL}/e1900ac0-017f-11eb-93f8-d161651bf509/user_actions`)
+          .get(`${CASES_URL}/${CASE_ID}/user_actions`)
           .set('kbn-xsrf', 'true')
           .send()
           .expect(200);
@@ -50,9 +52,95 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           },
         });
       });
+
+      it('7.10.0 migrates user actions correctly', async () => {
+        const userActions = await getCaseUserActions({
+          supertest,
+          caseID: CASE_ID,
+        });
+
+        expect(userActions).to.eql([
+          {
+            owner: 'securitySolution',
+            action: 'create',
+            created_at: '2020-09-28T11:43:52.158Z',
+            created_by: {
+              email: null,
+              full_name: null,
+              username: 'elastic',
+            },
+            payload: {
+              description: 'This is a brand new case of a bad meanie defacing data',
+              status: 'open',
+              tags: ['defacement'],
+              title: 'Super Bad Security Issue',
+              connector: {
+                name: 'none',
+                type: '.none',
+                fields: null,
+                id: 'none',
+              },
+              owner: 'securitySolution',
+              settings: { syncAlerts: true },
+            },
+            type: 'create_case',
+            action_id: 'e22a7600-017f-11eb-93f8-d161651bf509',
+            case_id: 'e1900ac0-017f-11eb-93f8-d161651bf509',
+            comment_id: null,
+            sub_case_id: '',
+          },
+          {
+            owner: 'securitySolution',
+            action: 'update',
+            created_at: '2020-09-28T11:53:52.158Z',
+            created_by: {
+              email: null,
+              full_name: null,
+              username: 'elastic',
+            },
+            payload: {
+              connector: {
+                name: 'none',
+                type: '.none',
+                fields: null,
+                id: 'b1900ac0-017f-11eb-93f8-d161651bf509',
+              },
+            },
+            type: 'connector',
+            action_id: 'a22a7600-017f-11eb-93f8-d161651bf509',
+            case_id: 'e1900ac0-017f-11eb-93f8-d161651bf509',
+            comment_id: null,
+            sub_case_id: '',
+          },
+          {
+            owner: 'securitySolution',
+            action: 'create',
+            created_at: '2020-10-30T15:52:02.984Z',
+            created_by: {
+              email: null,
+              full_name: null,
+              username: 'elastic',
+            },
+            payload: {
+              comment: {
+                comment: 'This is a cool comment',
+                type: 'user',
+                owner: 'securitySolution',
+              },
+            },
+            type: 'comment',
+            action_id: 'db027ec0-1ac7-11eb-b5a3-25ee88122510',
+            case_id: 'e1900ac0-017f-11eb-93f8-d161651bf509',
+            comment_id: 'da677740-1ac7-11eb-b5a3-25ee88122510',
+            sub_case_id: '',
+          },
+        ]);
+      });
     });
 
     describe('7.13.2', () => {
+      const CASE_ID = 'e49ad6e0-cf9d-11eb-a603-13e7747d215c';
+
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/cases/migrations/7.13.2');
       });
@@ -64,13 +152,110 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       it('adds the owner field', async () => {
         const userActions = await getCaseUserActions({
           supertest,
-          caseID: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+          caseID: CASE_ID,
         });
 
         expect(userActions.length).to.not.be(0);
         for (const action of userActions) {
           expect(action.owner).to.be(SECURITY_SOLUTION_OWNER);
         }
+      });
+
+      it('7.13.2 migrates user actions correctly', async () => {
+        const userActions = await getCaseUserActions({
+          supertest,
+          caseID: CASE_ID,
+        });
+
+        expect(userActions).to.eql([
+          {
+            owner: 'securitySolution',
+            action: 'create',
+            created_at: '2021-06-17T18:57:41.682Z',
+            created_by: {
+              email: null,
+              full_name: 'j@j.com',
+              username: '711621466',
+            },
+            payload: {
+              description: 'asdf',
+              status: 'open',
+              tags: ['some tag'],
+              title: 'A case',
+              connector: {
+                name: 'Test Jira',
+                type: '.jira',
+                fields: {
+                  issueType: '10002',
+                  parent: null,
+                  priority: null,
+                },
+                id: 'd68508f0-cf9d-11eb-a603-13e7747d215c',
+              },
+              settings: {
+                syncAlerts: true,
+              },
+              owner: 'securitySolution',
+            },
+            type: 'create_case',
+            action_id: 'e5509250-cf9d-11eb-a603-13e7747d215c',
+            case_id: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+            comment_id: null,
+            sub_case_id: '',
+          },
+          {
+            owner: 'securitySolution',
+            action: 'push_to_service',
+            created_at: '2021-06-17T18:57:45.524Z',
+            created_by: {
+              email: null,
+              full_name: 'j@j.com',
+              username: '711621466',
+            },
+            payload: {
+              externalService: {
+                pushed_at: '2021-06-17T18:57:45.524Z',
+                pushed_by: {
+                  username: '711621466',
+                  full_name: 'j@j.com',
+                  email: null,
+                },
+                connector_name: 'Test Jira',
+                external_id: '10106',
+                external_title: 'TPN-99',
+                external_url: 'https://cases-testing.atlassian.net/browse/TPN-99',
+                connector_id: 'd68508f0-cf9d-11eb-a603-13e7747d215c',
+              },
+            },
+            type: 'pushed',
+            action_id: 'e6e0f650-cf9d-11eb-a603-13e7747d215c',
+            case_id: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+            comment_id: null,
+            sub_case_id: '',
+          },
+          {
+            owner: 'securitySolution',
+            action: 'create',
+            created_at: '2021-06-17T18:57:58.037Z',
+            created_by: {
+              email: null,
+              full_name: 'j@j.com',
+              username: '711621466',
+            },
+            payload: {
+              comment: {
+                comment: 'A comment',
+                type: 'user',
+                owner: 'securitySolution',
+              },
+            },
+            type: 'comment',
+            action_id: 'eee3be50-cf9d-11eb-a603-13e7747d215c',
+            case_id: 'e49ad6e0-cf9d-11eb-a603-13e7747d215c',
+            comment_id: 'ee59cdd0-cf9d-11eb-a603-13e7747d215c',
+            sub_case_id: '',
+          },
+        ]);
       });
     });
 
@@ -87,6 +272,308 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/cases/migrations/7.13_user_actions'
         );
+      });
+
+      it('7.13 migrates user actions correctly for case with ID aa8ac630-005e-11ec-91f1-6daf2ab59fb5', async () => {
+        userActions = await getCaseUserActions({
+          supertest,
+          caseID: 'aa8ac630-005e-11ec-91f1-6daf2ab59fb5',
+        });
+
+        expect(userActions).to.eql([
+          {
+            owner: 'securitySolution',
+            action: 'create',
+            created_at: '2021-08-18T19:58:32.955Z',
+            created_by: {
+              email: null,
+              full_name: 'j@elastic.co',
+              username: '1234',
+            },
+            payload: {
+              description: 'a description',
+              status: 'open',
+              tags: ['super'],
+              title: 'a case',
+              connector: {
+                name: 'none',
+                type: '.none',
+                fields: null,
+                id: 'none',
+              },
+              settings: {
+                syncAlerts: true,
+              },
+              owner: 'securitySolution',
+            },
+            type: 'create_case',
+            action_id: 'ab43b5f0-005e-11ec-91f1-6daf2ab59fb5',
+            case_id: 'aa8ac630-005e-11ec-91f1-6daf2ab59fb5',
+            comment_id: null,
+            sub_case_id: '',
+          },
+          {
+            owner: 'securitySolution',
+            action: 'create',
+            created_at: '2021-08-18T19:58:47.229Z',
+            created_by: {
+              email: null,
+              full_name: 'j@elastic.co',
+              username: '1234',
+            },
+            payload: {
+              connector: {
+                name: 'none',
+                type: '.none',
+                fields: null,
+                id: 'none',
+              },
+              status: 'open',
+              owner: 'securitySolution',
+              settings: {
+                syncAlerts: true,
+              },
+            },
+            type: 'create_case',
+            action_id: 'b3094de0-005e-11ec-91f1-6daf2ab59fb5',
+            case_id: 'aa8ac630-005e-11ec-91f1-6daf2ab59fb5',
+            comment_id: null,
+            sub_case_id: '',
+          },
+        ]);
+      });
+
+      it('7.13 migrates user actions correctly for case with ID e6fa9370-005e-11ec-91f1-6daf2ab59fb5', async () => {
+        userActions = await getCaseUserActions({
+          supertest,
+          caseID: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
+        });
+
+        expect(userActions).to.eql([
+          {
+            owner: 'securitySolution',
+            action: 'create',
+            created_at: '2021-08-18T20:00:14.343Z',
+            created_by: {
+              email: null,
+              full_name: 'j@elastic.co',
+              username: '1234',
+            },
+            payload: {
+              description: 'a description',
+              status: 'open',
+              tags: ['super'],
+              title: 'a case',
+              connector: {
+                name: 'a jira connector',
+                type: '.jira',
+                fields: {
+                  issueType: '10002',
+                  parent: null,
+                  priority: 'Highest',
+                },
+                id: 'd92243b0-005e-11ec-91f1-6daf2ab59fb5',
+              },
+              settings: {
+                syncAlerts: true,
+              },
+              owner: 'securitySolution',
+            },
+            type: 'create_case',
+            action_id: 'e7882d70-005e-11ec-91f1-6daf2ab59fb5',
+            case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
+            comment_id: null,
+            sub_case_id: '',
+          },
+          {
+            owner: 'securitySolution',
+            action: 'push_to_service',
+            created_at: '2021-08-18T20:00:18.230Z',
+            created_by: {
+              email: null,
+              full_name: 'j@elastic.co',
+              username: '1234',
+            },
+            payload: {
+              externalService: {
+                pushed_at: '2021-08-18T20:00:18.230Z',
+                pushed_by: {
+                  username: '1234',
+                  full_name: 'j@elastic.co',
+                  email: null,
+                },
+                connector_name: 'a jira connector',
+                external_id: '10117',
+                external_title: 'TPN-110',
+                external_url: 'https://cases-testing.atlassian.net/browse/TPN-110',
+                connector_id: 'd92243b0-005e-11ec-91f1-6daf2ab59fb5',
+              },
+            },
+            type: 'pushed',
+            action_id: 'e9471b80-005e-11ec-91f1-6daf2ab59fb5',
+            case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
+            comment_id: null,
+            sub_case_id: '',
+          },
+          {
+            owner: 'securitySolution',
+            action: 'create',
+            created_at: '2021-08-18T20:00:28.419Z',
+            created_by: {
+              email: null,
+              full_name: 'j@elastic.co',
+              username: '1234',
+            },
+            payload: {
+              comment: {
+                comment: 'a comment',
+                type: 'user',
+                owner: 'securitySolution',
+              },
+            },
+            type: 'comment',
+            action_id: 'efe9de50-005e-11ec-91f1-6daf2ab59fb5',
+            case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
+            comment_id: 'ef5f0370-005e-11ec-91f1-6daf2ab59fb5',
+            sub_case_id: '',
+          },
+          {
+            owner: 'securitySolution',
+            action: 'update',
+            created_at: '2021-08-18T20:01:33.450Z',
+            created_by: {
+              email: null,
+              full_name: 'j@elastic.co',
+              username: '1234',
+            },
+            payload: {
+              connector: {
+                name: 'a different jira connector',
+                type: '.jira',
+                fields: {
+                  issueType: '10002',
+                  parent: null,
+                  priority: 'Low',
+                },
+                id: '0a572860-005f-11ec-91f1-6daf2ab59fb5',
+              },
+            },
+            type: 'connector',
+            action_id: '16cd9e30-005f-11ec-91f1-6daf2ab59fb5',
+            case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
+            comment_id: null,
+            sub_case_id: '',
+          },
+          {
+            owner: 'securitySolution',
+            action: 'push_to_service',
+            created_at: '2021-08-18T20:01:47.755Z',
+            created_by: {
+              email: null,
+              full_name: 'j@elastic.co',
+              username: '1234',
+            },
+            payload: {
+              externalService: {
+                pushed_at: '2021-08-18T20:01:47.755Z',
+                pushed_by: {
+                  username: '1234',
+                  full_name: 'j@elastic.co',
+                  email: null,
+                },
+                connector_name: 'a different jira connector',
+                external_id: '10118',
+                external_title: 'TPN-111',
+                external_url: 'https://cases-testing.atlassian.net/browse/TPN-111',
+                connector_id: '0a572860-005f-11ec-91f1-6daf2ab59fb5',
+              },
+            },
+            type: 'pushed',
+            action_id: '1ea33bb0-005f-11ec-91f1-6daf2ab59fb5',
+            case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
+            comment_id: null,
+            sub_case_id: '',
+          },
+          {
+            owner: 'securitySolution',
+            action: 'create',
+            created_at: '2021-08-18T20:02:05.465Z',
+            created_by: {
+              email: null,
+              full_name: 'j@elastic.co',
+              username: '1234',
+            },
+            payload: {
+              comment: {
+                comment: 'second comment',
+                type: 'user',
+                owner: 'securitySolution',
+              },
+            },
+            type: 'comment',
+            action_id: '29c98ad0-005f-11ec-91f1-6daf2ab59fb5',
+            case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
+            comment_id: '29351300-005f-11ec-91f1-6daf2ab59fb5',
+            sub_case_id: '',
+          },
+          {
+            owner: 'securitySolution',
+            action: 'update',
+            created_at: '2021-08-18T20:02:14.332Z',
+            created_by: {
+              email: null,
+              full_name: 'j@elastic.co',
+              username: '1234',
+            },
+            payload: {
+              connector: {
+                name: 'a jira connector',
+                type: '.jira',
+                fields: {
+                  issueType: '10002',
+                  parent: null,
+                  priority: 'Highest',
+                },
+                id: 'd92243b0-005e-11ec-91f1-6daf2ab59fb5',
+              },
+            },
+            type: 'connector',
+            action_id: '2f6e65a0-005f-11ec-91f1-6daf2ab59fb5',
+            case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
+            comment_id: null,
+            sub_case_id: '',
+          },
+          {
+            owner: 'securitySolution',
+            action: 'push_to_service',
+            created_at: '2021-08-18T20:02:21.310Z',
+            created_by: {
+              email: null,
+              full_name: 'j@elastic.co',
+              username: '1234',
+            },
+            payload: {
+              externalService: {
+                pushed_at: '2021-08-18T20:02:21.310Z',
+                pushed_by: {
+                  username: '1234',
+                  full_name: 'j@elastic.co',
+                  email: null,
+                },
+                connector_name: 'a jira connector',
+                external_id: '10117',
+                external_title: 'TPN-110',
+                external_url: 'https://cases-testing.atlassian.net/browse/TPN-110',
+                connector_id: 'd92243b0-005e-11ec-91f1-6daf2ab59fb5',
+              },
+            },
+            type: 'pushed',
+            action_id: '32a351e0-005f-11ec-91f1-6daf2ab59fb5',
+            case_id: 'e6fa9370-005e-11ec-91f1-6daf2ab59fb5',
+            comment_id: null,
+            sub_case_id: '',
+          },
+        ]);
       });
 
       describe('none connector case', () => {
@@ -173,8 +660,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
     });
 
-    // From 8.0.0 to 8.1.0
-    describe('8.1.0', () => {
+    describe('8.0.0', () => {
       const CASE_ID = '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c';
 
       before(async () => {
@@ -223,6 +709,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               status: 'open',
               tags: ['user', 'actions'],
               title: 'User actions',
+              owner: 'securitySolution',
             },
             sub_case_id: '',
             type: 'create_case',

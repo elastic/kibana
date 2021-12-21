@@ -9,6 +9,7 @@
 
 import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { migrationMocks } from 'src/core/server/mocks';
+import { CommentType } from '../../../../common/api';
 import {
   CASE_USER_ACTION_SAVED_OBJECT,
   SECURITY_SOLUTION_OWNER,
@@ -82,6 +83,31 @@ describe('user action migrations', () => {
     });
 
     describe('payloadMigration', () => {
+      const expectedCreateCaseUserAction = {
+        action: 'create',
+        created_at: '2022-01-09T22:00:00.000Z',
+        created_by: {
+          email: 'elastic@elastic.co',
+          full_name: 'Elastic User',
+          username: 'elastic',
+        },
+        owner: 'securitySolution',
+        payload: {
+          connector: {
+            fields: null,
+            name: 'none',
+            type: '.none',
+          },
+          description: 'a desc',
+          tags: ['some tags'],
+          title: 'old case',
+          status: 'open',
+          owner: 'securitySolution',
+          settings: { syncAlerts: true },
+        },
+        type: 'create_case',
+      };
+
       it('it transforms a comment user action where the new_value is a string', () => {
         const userAction = create_7_14_0_userAction({
           action: 'create',
@@ -111,15 +137,11 @@ describe('user action migrations', () => {
         });
       });
 
-      it('it transforms a create case user action without a connector or status', () => {
+      it('adds the owner to the comment if it is missing', () => {
         const userAction = create_7_14_0_userAction({
           action: 'create',
-          action_field: ['description', 'title', 'tags'],
-          new_value: {
-            title: 'old case',
-            description: 'a desc',
-            tags: ['some tags'],
-          },
+          action_field: ['comment'],
+          new_value: { comment: 'A comment', type: CommentType.user },
           old_value: null,
         });
 
@@ -134,18 +156,65 @@ describe('user action migrations', () => {
           },
           owner: 'securitySolution',
           payload: {
-            connector: {
-              fields: null,
-              name: 'none',
-              type: '.none',
+            comment: {
+              comment: 'A comment',
+              owner: 'securitySolution',
+              type: 'user',
             },
+          },
+          type: 'comment',
+        });
+      });
+
+      it('transforms a create case user action without a connector or status', () => {
+        const userAction = create_7_14_0_userAction({
+          action: 'create',
+          action_field: ['description', 'title', 'tags', 'owner', 'settings'],
+          new_value: {
+            title: 'old case',
             description: 'a desc',
             tags: ['some tags'],
-            title: 'old case',
-            status: 'open',
+            owner: SECURITY_SOLUTION_OWNER,
+            settings: { syncAlerts: true },
           },
-          type: 'create_case',
+          old_value: null,
         });
+
+        const migratedUserAction = payloadMigration(userAction, context);
+        expect(migratedUserAction.attributes).toEqual(expectedCreateCaseUserAction);
+      });
+
+      it('adds the owner in the payload on a create case user action if it is missing', () => {
+        const userAction = create_7_14_0_userAction({
+          action: 'create',
+          action_field: ['description', 'title', 'tags', 'settings'],
+          new_value: {
+            title: 'old case',
+            description: 'a desc',
+            tags: ['some tags'],
+            settings: { syncAlerts: true },
+          },
+          old_value: null,
+        });
+
+        const migratedUserAction = payloadMigration(userAction, context);
+        expect(migratedUserAction.attributes).toEqual(expectedCreateCaseUserAction);
+      });
+
+      it('adds the settings in the payload on a create case user action if it is missing', () => {
+        const userAction = create_7_14_0_userAction({
+          action: 'create',
+          action_field: ['description', 'title', 'tags'],
+          new_value: {
+            title: 'old case',
+            description: 'a desc',
+            tags: ['some tags'],
+          },
+          old_value: null,
+        });
+
+        const migratedUserAction = payloadMigration(userAction, context);
+        expect(migratedUserAction.attributes).toEqual(expectedCreateCaseUserAction);
       });
 
       describe('user actions', () => {
@@ -185,7 +254,7 @@ describe('user action migrations', () => {
               title: 'old case',
               description: 'a desc',
               tags: ['some tags'],
-              status: 'open',
+              status: 'in-progress',
               settings: { syncAlerts: false },
               connector: {
                 fields: {
@@ -196,7 +265,7 @@ describe('user action migrations', () => {
                 name: '.jira',
                 type: '.jira',
               },
-              owner: SECURITY_SOLUTION_OWNER,
+              owner: 'testOwner',
             },
             old_value: null,
           });
@@ -227,7 +296,8 @@ describe('user action migrations', () => {
               settings: {
                 syncAlerts: false,
               },
-              status: 'open',
+              status: 'in-progress',
+              owner: 'testOwner',
             },
             type: 'create_case',
           });
