@@ -14,7 +14,7 @@ import { REPO_ROOT } from '@kbn/utils';
 import { Project } from 'ts-morph';
 
 import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
-import { ApiDeclaration, PluginMetaInfo } from './types';
+import { ApiDeclaration, ApiStats, PluginMetaInfo } from './types';
 import { findPlugins } from './find_plugins';
 import { pathsOutsideScopes } from './build_api_declarations/utils';
 import { getPluginApiMap } from './get_plugin_api_map';
@@ -70,7 +70,7 @@ export function runBuildApiDocsCli() {
       }
       const collectReferences = flags.references as boolean;
 
-      const { pluginApiMap, missingApiItems, unReferencedDeprecations, referencedDeprecations } =
+      const { pluginApiMap, missingApiItems, unreferencedDeprecations, referencedDeprecations } =
         getPluginApiMap(project, plugins, log, {
           collectReferences,
           pluginFilter: pluginFilter as string[],
@@ -88,7 +88,7 @@ export function runBuildApiDocsCli() {
           isPlugin: plugin.isPlugin,
         };
         return acc;
-      }, {} as { [key: string]: PluginMetaInfo });
+      }, {} as { [key: string]: PluginMetaInfo & ApiStats });
 
       writePluginDirectoryDoc(outputFolder, pluginApiMap, allPluginStats, log);
 
@@ -106,6 +106,12 @@ export function runBuildApiDocsCli() {
         const pluginTeam = plugin.manifest.owner.name;
 
         reporter.metrics([
+          {
+            id,
+            meta: { pluginTeam },
+            group: 'Unreferenced deprecated APIs',
+            value: unreferencedDeprecations[id] ? unreferencedDeprecations[id].length : 0,
+          },
           {
             id,
             meta: { pluginTeam },
@@ -224,7 +230,7 @@ export function runBuildApiDocsCli() {
         writeDeprecationDocByApi(
           outputFolder,
           referencedDeprecations,
-          unReferencedDeprecations,
+          unreferencedDeprecations,
           log
         );
       });
