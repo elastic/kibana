@@ -23,7 +23,6 @@ import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {
   ALERT_DURATION,
   ALERT_END,
-  ALERT_INSTANCE_ID,
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
@@ -88,7 +87,6 @@ export type LifecycleRuleExecutor<
 ) => Promise<State | void>;
 
 const trackedAlertStateRt = rt.type({
-  alertId: rt.string,
   alertUuid: rt.string,
   started: rt.string,
 });
@@ -225,9 +223,9 @@ export const createLifecycleExecutor =
       });
 
       hits.hits.forEach((hit) => {
-        const alertId = hit._source[ALERT_INSTANCE_ID];
-        if (alertId) {
-          trackedAlertsDataMap[alertId] = {
+        const alertUuid = hit._source[ALERT_UUID];
+        if (alertUuid) {
+          trackedAlertsDataMap[alertUuid] = {
             indexName: hit._index,
             fields: hit._source,
           };
@@ -259,7 +257,6 @@ export const createLifecycleExecutor =
           ...currentAlertData,
           [ALERT_DURATION]: (options.startedAt.getTime() - new Date(started).getTime()) * 1000,
 
-          [ALERT_INSTANCE_ID]: alertId,
           [ALERT_START]: started,
           [ALERT_UUID]: alertUuid,
           [ALERT_STATUS]: isRecovered ? ALERT_STATUS_RECOVERED : ALERT_STATUS_ACTIVE,
@@ -305,10 +302,9 @@ export const createLifecycleExecutor =
       allEventsToIndex
         .filter(({ event }) => event[ALERT_STATUS] !== ALERT_STATUS_RECOVERED)
         .map(({ event }) => {
-          const alertId = event[ALERT_INSTANCE_ID]!;
           const alertUuid = event[ALERT_UUID]!;
           const started = new Date(event[ALERT_START]!).toISOString();
-          return [alertId, { alertId, alertUuid, started }];
+          return [alertUuid, { alertUuid, started }];
         })
     );
 
