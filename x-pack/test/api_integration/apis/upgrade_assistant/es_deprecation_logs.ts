@@ -5,7 +5,6 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import moment from 'moment-timezone';
 
 import {
   DEPRECATION_LOGS_INDEX,
@@ -32,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
           const IS_ELASTIC_PRODUCT = true;
           const doc1 = await createDeprecationLog();
           const doc2 = await createDeprecationLog(IS_ELASTIC_PRODUCT);
-          const checkpoint = moment('2000-01-01').toISOString();
+          const checkpoint = '2000-01-01T00:00:00.000Z';
 
           const allDeprecations = (
             await es.search({
