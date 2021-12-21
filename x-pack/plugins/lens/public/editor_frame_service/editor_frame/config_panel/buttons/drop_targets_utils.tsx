@@ -36,7 +36,7 @@ function getPropsForDropType(type: 'swap' | 'duplicate' | 'combine') {
       };
     case 'combine':
       return {
-        icon: 'visTagCloud',
+        icon: 'aggregate',
         label: i18n.translate('xpack.lens.dragDrop.combine', {
           defaultMessage: 'Combine',
         }),
