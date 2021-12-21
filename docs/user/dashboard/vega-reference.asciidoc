@@ -352,7 +352,7 @@ a configuration option for changing the tooltip position and padding:
 then restart {kib}.
 
 Please be aware the files served by those external URLs must allow https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[CORS].
-It is necessary the remote URL has `Access-Control-Allow-Origin` which allows requests from the Kibana URL.
+The remote URL must include `Access-Control-Allow-Origin`, which allows requests from the {kib} URL.
 
 
 [float]
