@@ -120,7 +120,7 @@ export const useExceptionListItems = ({
 
             // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
             // for context around the temporary `id`
-            const transformedData = data.map((item) => transformInput(item));
+            const transformedData = data.map((item: any) => transformInput(item));
 
             if (isSubscribed) {
               setPagination({

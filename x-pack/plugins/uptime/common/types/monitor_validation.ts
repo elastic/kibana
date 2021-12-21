@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-export * from './csv';
-export * from './csv_searchsource';
-export * from './csv_searchsource_immediate';
-export * from './png';
-export * from './png_v2';
-export * from './printable_pdf';
-export * from './printable_pdf_v2';
+import { ConfigKey, MonitorFields } from '../runtime_types';
+
+export type Validator = (config: Partial<MonitorFields>) => boolean;
+
+export type Validation = Partial<Record<ConfigKey, Validator>>;

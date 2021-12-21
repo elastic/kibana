@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-export const metadata = {
-  id: 'csv',
-  name: 'CSV',
-};
+import { SimpleSavedObject } from 'kibana/public';
+import { SyntheticsMonitor } from '../runtime_types';
+
+export interface MonitorIdParam {
+  monitorId: string;
+}
+
+export type SyntheticsMonitorSavedObject = SimpleSavedObject<SyntheticsMonitor>;
