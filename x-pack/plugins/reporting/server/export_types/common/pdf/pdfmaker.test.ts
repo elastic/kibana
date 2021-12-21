@@ -13,8 +13,7 @@ const imageBase64 = Buffer.from(
   'base64'
 );
 
-// FLAKY: https://github.com/elastic/kibana/issues/118484
-describe.skip('PdfMaker', () => {
+describe('PdfMaker', () => {
   let layout: ReturnType<typeof createMockLayout>;
   let pdf: PdfMaker;
 
