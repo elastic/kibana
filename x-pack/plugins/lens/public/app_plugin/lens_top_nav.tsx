@@ -8,6 +8,7 @@
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Datatable } from 'src/plugins/expressions';
 import { TopNavMenuData } from '../../../../../src/plugins/navigation/public';
 import {
   LensAppServices,
@@ -238,6 +239,33 @@ export const LensTopNavMenu = ({
   const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
     defaultMessage: 'unsaved',
   });
+
+  // Compute the list of visible columns, per layer/datatable, once
+  const tableVisibleColumnsPerLayer = React.useMemo(() => {
+    if (!activeData) {
+      return {};
+    }
+    const datatableColumns: Record<string, Datatable['columns']> = {};
+    const layerIds = Object.keys(activeData);
+    for (const layerId of layerIds) {
+      const visibleColumns = new Set(
+        activeDatasourceId
+          ? datasourceMap[activeDatasourceId]
+              .getPublicAPI({
+                state: datasourceStates[activeDatasourceId].state,
+                layerId,
+              })
+              .getTableSpec()
+              .map(({ columnId }) => columnId)
+          : []
+      );
+
+      datatableColumns[layerId] = activeData[layerId].columns.filter(
+        ({ id }) => visibleColumns.has(id) || !activeDatasourceId
+      );
+    }
+    return datatableColumns;
+  }, [activeData, activeDatasourceId, datasourceMap, datasourceStates]);
   const topNavConfig = useMemo(
     () =>
       getLensTopNavConfig({
@@ -255,9 +283,10 @@ export const LensTopNavMenu = ({
         tooltips: {
           showExportWarning: () => {
             if (activeData) {
-              const datatables = Object.values(activeData);
-              const formulaDetected = datatables.some((datatable) => {
-                return tableHasFormulas(datatable.columns, datatable.rows);
+              const layerIds = Object.keys(activeData);
+              const formulaDetected = layerIds.some((layerId) => {
+                const datatable = activeData[layerId];
+                return tableHasFormulas(tableVisibleColumnsPerLayer[layerId], datatable.rows);
               });
               if (formulaDetected) {
                 return i18n.translate('xpack.lens.app.downloadButtonFormulasWarning', {
@@ -275,15 +304,22 @@ export const LensTopNavMenu = ({
             if (!activeData) {
               return;
             }
-            const datatables = Object.values(activeData);
-            const content = datatables.reduce<Record<string, { content: string; type: string }>>(
-              (memo, datatable, i) => {
+            const layerIds = Object.keys(activeData);
+
+            const content = layerIds.reduce<Record<string, { content: string; type: string }>>(
+              (memo, layerId, i) => {
+                const datatable = activeData[layerId];
                 // skip empty datatables
                 if (datatable) {
-                  const postFix = datatables.length > 1 ? `-${i + 1}` : '';
+                  const postFix = layerIds.length > 1 ? `-${i + 1}` : '';
+
+                  const filteredDatatable = {
+                    ...datatable,
+                    columns: tableVisibleColumnsPerLayer[layerId],
+                  };
 
                   memo[`${title || unsavedTitle}${postFix}.csv`] = {
-                    content: exporters.datatableToCSV(datatable, {
+                    content: exporters.datatableToCSV(filteredDatatable, {
                       csvSeparator: uiSettings.get('csv:separator', ','),
                       quoteValues: uiSettings.get('csv:quoteValues', true),
                       formatFactory: fieldFormats.deserialize,
@@ -341,6 +377,7 @@ export const LensTopNavMenu = ({
       initialInput,
       isLinkedToOriginatingApp,
       isSaveable,
+      lensInspector,
       title,
       onAppLeave,
       redirectToOrigin,
@@ -348,9 +385,9 @@ export const LensTopNavMenu = ({
       savingToDashboardPermitted,
       savingToLibraryPermitted,
       setIsSaveModalVisible,
+      tableVisibleColumnsPerLayer,
       uiSettings,
       unsavedTitle,
-      lensInspector,
     ]
   );
 
