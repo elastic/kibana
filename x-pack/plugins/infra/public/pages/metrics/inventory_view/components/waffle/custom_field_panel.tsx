@@ -8,12 +8,11 @@
 import { EuiButton, EuiComboBox, EuiForm, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { IFieldType } from 'src/plugins/data/public';
 import { InfraGroupByOptions } from '../../../../../lib/lib';
-
+import { DerivedIndexPattern } from '../../../../../containers/metrics_source';
 interface Props {
   onSubmit: (field: string) => void;
-  fields: IFieldType[];
+  fields: DerivedIndexPattern['fields'];
   currentOptions: InfraGroupByOptions[];
 }
 
