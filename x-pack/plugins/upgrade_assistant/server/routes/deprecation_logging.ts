@@ -117,6 +117,7 @@ export function registerDeprecationLoggingRoutes({
                     range: {
                       '@timestamp': {
                         gte: request.query.from,
+                        lte: Date.now(),
                       },
                     },
                   },
