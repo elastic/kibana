@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { login } from '../tasks/login';
-import { navigateTo } from '../tasks/navigation';
+import { login } from '../../tasks/login';
+import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
   inputQuery,
@@ -14,9 +14,9 @@ import {
   submitQuery,
   typeInECSFieldInput,
   typeInOsqueryFieldInput,
-} from '../tasks/live_query';
+} from '../../tasks/live_query';
 
-describe('Live Query', () => {
+describe('SU - Live Query', () => {
   beforeEach(() => {
     login();
   });

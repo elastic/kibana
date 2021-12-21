@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { navigateTo } from '../tasks/navigation';
+import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
   DEFAULT_QUERY,
@@ -15,10 +15,10 @@ import {
   inputQuery,
   selectAllAgents,
   submitQuery,
-} from '../tasks/live_query';
-import { login } from '../tasks/login';
+} from '../../tasks/live_query';
+import { login } from '../../tasks/login';
 
-describe('Osquery works as CRUD for', () => {
+describe('SU - Osquery works as CRUD for', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
   const SAVED_QUERY_DESCRIPTION = 'Saved Query Description';
 
@@ -138,6 +138,8 @@ describe('Osquery works as CRUD for', () => {
       cy.contains(PACK_NAME);
     });
     describe('should be editable', () => {
+      const NEW_QUERY_NAME = 'new-query-name';
+
       beforeEach(() => {
         cy.contains('Packs').click();
         const createdPack = cy.contains(PACK_NAME);
@@ -145,7 +147,6 @@ describe('Osquery works as CRUD for', () => {
         cy.react('EuiTableRow').contains(SAVED_QUERY_ID);
       });
       it('by clicking the edit button', () => {
-        const NEW_QUERY_NAME = 'new-query-name';
         findAndClickButton('Edit');
         cy.contains(`Edit ${PACK_NAME}`);
         findAndClickButton('Add query');
@@ -160,10 +161,10 @@ describe('Osquery works as CRUD for', () => {
       });
       it('by clicking in Discovery button', () => {
         cy.react('CustomItemAction', {
-          props: { index: 0, item: { id: SAVED_QUERY_ID } },
+          props: { index: 0, item: { id: NEW_QUERY_NAME } },
         }).click();
         cy.get('[data-test-subj="discoverDocTable"]').contains(
-          `pack_${PACK_NAME}_${SAVED_QUERY_ID}`
+          `pack_${PACK_NAME}_${NEW_QUERY_NAME}`
         );
       });
       // it('by clicking in Lens button', () => {

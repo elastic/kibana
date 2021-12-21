@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { FLEET_AGENT_POLICIES, navigateTo } from '../tasks/navigation';
-import { addIntegration } from '../tasks/integrations';
+import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
+import { addIntegration } from '../../tasks/integrations';
 
-import { loginWithRole } from '../tasks/login';
-import { ROLES } from '../test';
+import { login } from '../../tasks/login';
 
-describe('Add Integration', () => {
+describe('SU - Add Integration', () => {
   const integration = 'Osquery Manager';
   beforeEach(() => {
-    loginWithRole(ROLES.t1_analyst);
+    login();
   });
 
   it('should display Osquery integration in the Policies list once installed ', () => {
