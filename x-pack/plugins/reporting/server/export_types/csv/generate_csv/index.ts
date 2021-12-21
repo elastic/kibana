@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { Writable } from 'stream';
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient, IUiSettingsClient } from 'src/core/server';
+import type { ElasticsearchClient, IUiSettingsClient } from 'src/core/server';
 import type { DataView, DataViewsService } from 'src/plugins/data/common';
-import { ReportingConfig } from '../../../';
+import type { Writable } from 'stream';
+import type { ReportingConfig } from '../../../';
 import { createEscapeValue } from '../../../../../../../src/plugins/data/common';
-import { CancellationToken } from '../../../../../../plugins/reporting/common';
+import type { CancellationToken } from '../../../../common/cancellation_token';
 import { CSV_BOM_CHARS } from '../../../../common/constants';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
-import { LevelLogger } from '../../../lib';
+import type { LevelLogger } from '../../../lib';
 import { getFieldFormats } from '../../../services';
 import { MaxSizeStringBuilder } from '../../csv_searchsource/generate_csv/max_size_string_builder';
-import { SavedSearchGeneratorResultDeprecatedCSV } from '../types';
+import type { SavedSearchGeneratorResultDeprecatedCSV } from '../types';
 import { checkIfRowsHaveFormulas } from './check_cells_for_formulas';
 import { fieldFormatMapFactory } from './field_format_map';
 import { createFlattenHit } from './flatten_hit';
