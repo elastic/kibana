@@ -9,22 +9,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
 
   describe('maps_telemetry', () => {
-    before(async () => {
-      await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
-      );
-    });
-
-    after(async () => {
-      await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
-      );
-    });
-
     it('should return the correct telemetry values for map saved objects', async () => {
       const {
         body: [{ stats: apiResponse }],

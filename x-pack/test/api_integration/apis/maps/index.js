@@ -6,17 +6,24 @@
  */
 
 export default function ({ loadTestFile, getService }) {
+  const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
 
   describe('Maps endpoints', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.load('x-pack/test/functional/es_archives/maps/data');
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+      );
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await esArchiver.unload('x-pack/test/functional/es_archives/maps/data');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+      );
     });
 
     describe('', () => {
