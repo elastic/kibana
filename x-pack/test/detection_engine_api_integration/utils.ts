@@ -35,6 +35,7 @@ import {
   ThresholdCreateSchema,
   PreviewRulesSchema,
   ThreatMatchCreateSchema,
+  RulePreviewLogs,
 } from '../../plugins/security_solution/common/detection_engine/schemas/request';
 import { signalsMigrationType } from '../../plugins/security_solution/server/lib/detection_engine/migrations/saved_objects';
 import {

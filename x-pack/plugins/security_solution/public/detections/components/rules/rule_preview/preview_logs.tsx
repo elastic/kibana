@@ -36,8 +36,14 @@ export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = ({
         warnings: SortedLogs[];
       }>(
         (acc, curr) => ({
-          errors: [{ startedAt: curr.startedAt, logs: curr.errors }, ...acc.errors],
-          warnings: [{ startedAt: curr.startedAt, logs: curr.warnings }, ...acc.warnings],
+          errors:
+            curr.errors.length > 0 // Filter out empty error logs
+              ? [{ startedAt: curr.startedAt, logs: curr.errors }, ...acc.errors]
+              : acc.errors,
+          warnings:
+            curr.warnings.length > 0 // Filter out empty warning logs
+              ? [{ startedAt: curr.startedAt, logs: curr.warnings }, ...acc.warnings]
+              : acc.warnings,
         }),
         { errors: [], warnings: [] }
       ),
