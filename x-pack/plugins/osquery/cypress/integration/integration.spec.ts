@@ -13,7 +13,7 @@ import { login } from '../tasks/login';
 describe('Add Integration', () => {
   const integration = 'Osquery Manager';
 
-  before(() => {
+  beforeEach(() => {
     login();
     navigateTo('/app/osquery');
   });
