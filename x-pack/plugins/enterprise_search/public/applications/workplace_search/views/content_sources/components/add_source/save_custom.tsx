@@ -174,7 +174,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                   <p>
                     <FormattedMessage
                       id="xpack.enterpriseSearch.workplaceSearch.contentSource.saveCustom.permissions.text"
-                      defaultMessage="{link} manage content access content on individual or group attributes. Allow or deny access to specific documents."
+                      defaultMessage="{link} manage content access on individual or group attributes. Allow or deny access to specific documents."
                       values={{
                         link: (
                           <EuiLink
