@@ -195,7 +195,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Applies options list control options to dashboard', async () => {
-        expect(await pieChart.getPieSliceCount()).to.be(2);
+        await retry.try(async () => {
+          expect(await pieChart.getPieSliceCount()).to.be(2);
+        });
       });
 
       it('Applies options list control options to dashboard by default on open', async () => {
