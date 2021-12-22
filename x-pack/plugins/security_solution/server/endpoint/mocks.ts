@@ -83,6 +83,7 @@ export const createMockEndpointAppContextService = (
     getManifestManager: jest.fn().mockReturnValue(mockManifestManager ?? jest.fn()),
     getEndpointMetadataService: jest.fn(() => mockEndpointMetadataContext.endpointMetadataService),
     getInternalFleetServices: jest.fn(() => mockEndpointMetadataContext.fleetServices),
+    getInternalRepository: () => savedObjectsRepositoryMock.create(),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 
