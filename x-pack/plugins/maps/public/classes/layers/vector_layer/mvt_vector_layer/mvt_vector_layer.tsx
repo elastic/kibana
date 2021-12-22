@@ -129,6 +129,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       }
     });
 
+    // Documents may be counted multiple times if geometry crosses tile boundaries.
     const canMultiCountShapes =
       !this.getStyle().getIsPointsOnly() && totalFeaturesCount > 1 && tilesWithFeatures > 1;
     const countPrefix = canMultiCountShapes ? '~' : '';
@@ -151,7 +152,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       ? countMsg +
         i18n.translate('xpack.maps.tiles.shapeCountMsg', {
           defaultMessage:
-            ' Documents may be counted multiple times if geometry crosses tile boundaries.',
+            ' This count is approximate.',
         })
       : countMsg;
 
