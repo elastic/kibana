@@ -1481,6 +1481,26 @@ invalid: "
       }
     });
 
+    it('return multiple errors if formula filter has not same type of multiple inner operations filter', () => {
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula(
+            `count(kql='bytes > 4000') + sum(bytes, kql='bytes > 4000')`,
+            true,
+            {
+              filter: { language: 'lucene', query: 'bytes:[400 TO *]' },
+            }
+          ),
+          'col1',
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual([
+        `The Formula filter of type "lucene" is not compatible with the inner filter of type "kql" from the count operation.`,
+        `The Formula filter of type "lucene" is not compatible with the inner filter of type "kql" from the sum operation.`,
+      ]);
+    });
+
     it('returns no error if formula filter and operation inner filters are compatible', () => {
       const formulas = [
         `count(kql='bytes > 4000')`,
