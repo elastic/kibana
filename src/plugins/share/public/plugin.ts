@@ -21,6 +21,10 @@ import { UrlService } from '../common/url_service';
 import { RedirectManager } from './url_service';
 import type { RedirectOptions } from '../common/url_service/locators/redirect';
 import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
+import {
+  BrowserShortUrlClientFactory,
+  BrowserShortUrlClientFactoryCreateParams,
+} from './url_service/short_urls/short_url_client_factory';
 import { AnonymousAccessServiceContract } from '../common';
 
 /** @public */
@@ -85,7 +89,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
     const { application, http } = core;
     const { basePath } = http;
 
-    this.url = new UrlService({
+    this.url = new UrlService<BrowserShortUrlClientFactoryCreateParams>({
       baseUrl: basePath.publicBaseUrl || basePath.serverBasePath,
       version: this.initializerContext.env.packageInfo.version,
       navigate: async ({ app, path, state }, { replace = false } = {}) => {
@@ -104,22 +108,11 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
         });
         return url;
       },
-      shortUrls: () => ({
-        get: () => ({
-          create: async () => {
-            throw new Error('Not implemented');
-          },
-          get: async () => {
-            throw new Error('Not implemented');
-          },
-          delete: async () => {
-            throw new Error('Not implemented');
-          },
-          resolve: async () => {
-            throw new Error('Not implemented.');
-          },
+      shortUrls: ({ locators }) =>
+        new BrowserShortUrlClientFactory({
+          http,
+          locators,
         }),
-      }),
     });
 
     this.url.locators.create(new LegacyShortUrlLocatorDefinition());
