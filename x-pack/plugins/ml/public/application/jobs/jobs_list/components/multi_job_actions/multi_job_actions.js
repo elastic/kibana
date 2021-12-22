@@ -64,9 +64,11 @@ export class MultiJobActions extends Component {
             <EuiFlexItem grow={false}>
               <MultiJobActionsMenu
                 jobs={this.props.selectedJobs}
+                showStartDatafeedsConfirmModal={this.props.showStartDatafeedsConfirmModal}
                 showStartDatafeedModal={this.props.showStartDatafeedModal}
                 showDeleteJobModal={this.props.showDeleteJobModal}
                 showResetJobModal={this.props.showResetJobModal}
+                showStopDatafeedsConfirmModal={this.props.showStopDatafeedsConfirmModal}
                 refreshJobs={this.props.refreshJobs}
                 showCreateAlertFlyout={this.props.showCreateAlertFlyout}
               />
@@ -81,8 +83,10 @@ MultiJobActions.propTypes = {
   selectedJobs: PropTypes.array.isRequired,
   allJobIds: PropTypes.array.isRequired,
   showStartDatafeedModal: PropTypes.func.isRequired,
+  showStartDatafeedsConfirmModal: PropTypes.func.isRequired,
   showDeleteJobModal: PropTypes.func.isRequired,
   showResetJobModal: PropTypes.func.isRequired,
+  showStopDatafeedsConfirmModal: PropTypes.func.isRequired,
   refreshJobs: PropTypes.func.isRequired,
   showCreateAlertFlyout: PropTypes.func.isRequired,
 };

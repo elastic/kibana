@@ -79,41 +79,13 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
   }
 
   if (canDelete) {
-    const title = hasManagedJob ? (
-      <FormattedMessage
-        id="xpack.ml.jobsList.deleteJobModal.deleteManagedJobsTitle"
-        defaultMessage="Are you sure you want to delete {jobsCount, plural, one {{jobId}} other {# jobs}}?"
-        values={{
-          jobsCount: jobIds.length,
-          jobId: jobIds[0],
-        }}
-      />
-    ) : (
+    const title = (
       <FormattedMessage
         id="xpack.ml.jobsList.deleteJobModal.deleteJobsTitle"
         defaultMessage="Delete {jobsCount, plural, one {{jobId}} other {# jobs}}?"
         values={{
           jobsCount: jobIds.length,
           jobId: jobIds[0],
-        }}
-      />
-    );
-    const content = hasManagedJob ? (
-      <FormattedMessage
-        id="xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription"
-        defaultMessage="{jobsCount, plural, one {This job has} other {these jobs have}} been deployed and managed by Elastic so deleting {jobsCount, plural, one {it} other {them}} may impact other parts of the product."
-        values={{
-          jobsCount: jobIds.length,
-        }}
-      />
-    ) : (
-      <FormattedMessage
-        id="xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription"
-        defaultMessage="Deleting {jobsCount, plural, one {a job} other {multiple jobs}} can be time consuming.
-                {jobsCount, plural, one {It} other {They}} will be deleted in the background
-                and may not disappear from the jobs list instantly."
-        values={{
-          jobsCount: jobIds.length,
         }}
       />
     );
@@ -142,22 +114,24 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
                   {hasManagedJob ? (
                     <FormattedMessage
                       id="xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription"
-                      defaultMessage="{jobsCount, plural, one {This job has} other {These jobs have}} been deployed and managed by Elastic so deleting {jobsCount, plural, one {it} other {them}} may impact other parts of the product."
+                      defaultMessage="{jobsCount, plural, one {This job was} other {At least one of these jobs was}} deployed as part of a module; deleting {jobsCount, plural, one {it} other {them}} might impact other parts of the product.
+                {jobsCount, plural, one {It} other {They}} will be deleted in the background
+                and may not disappear from the jobs list instantly."
                       values={{
                         jobsCount: jobIds.length,
                       }}
                     />
                   ) : null}
-                  &nbsp;
-                  <FormattedMessage
-                    id="xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription"
-                    defaultMessage="Deleting {jobsCount, plural, one {a job} other {multiple jobs}} can be time consuming.
-                {jobsCount, plural, one {It} other {They}} will be deleted in the background
-                and may not disappear from the jobs list instantly."
-                    values={{
-                      jobsCount: jobIds.length,
-                    }}
-                  />
+                  {/*  &nbsp;*/}
+                  {/*  <FormattedMessage*/}
+                  {/*    id="xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription"*/}
+                  {/*    defaultMessage="Deleting {jobsCount, plural, one {a job} other {multiple jobs}} can be time consuming.*/}
+                  {/* {jobsCount, plural, one {It} other {They}} will be deleted in the background*/}
+                  {/* and may not disappear from the jobs list instantly."*/}
+                  {/*    values={{*/}
+                  {/*      jobsCount: jobIds.length,*/}
+                  {/*    }}*/}
+                  {/*  />*/}
                 </EuiText>
               </>
             )}

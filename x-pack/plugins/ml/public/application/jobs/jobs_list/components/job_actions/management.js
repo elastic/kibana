@@ -19,12 +19,16 @@ import {
   isResettable,
 } from '../utils';
 import { i18n } from '@kbn/i18n';
+import { isManagedJob } from '../../../jobs_utils';
 
 export function actionsMenuContent(
+  showEditJobConfirmModal,
   showEditJobFlyout,
   showDeleteJobModal,
   showResetJobModal,
   showStartDatafeedModal,
+  showStartDatafeedsConfirmModal,
+  showStopDatafeedsConfirmModal,
   refreshJobs,
   showCreateAlertFlyout
 ) {
@@ -49,7 +53,12 @@ export function actionsMenuContent(
       enabled: (item) => isJobBlocked(item) === false && canStartStopDatafeed,
       available: (item) => isStartable([item]),
       onClick: (item) => {
-        showStartDatafeedModal([item]);
+        if (isManagedJob(item)) {
+          showStartDatafeedsConfirmModal([item]);
+        } else {
+          showStartDatafeedModal([item]);
+        }
+
         closeMenu();
       },
       'data-test-subj': 'mlActionButtonStartDatafeed',
@@ -65,7 +74,12 @@ export function actionsMenuContent(
       enabled: (item) => isJobBlocked(item) === false && canStartStopDatafeed,
       available: (item) => isStoppable([item]),
       onClick: (item) => {
-        stopDatafeeds([item], refreshJobs);
+        if (isManagedJob(item)) {
+          showStopDatafeedsConfirmModal([item]);
+        } else {
+          stopDatafeeds([item], refreshJobs);
+        }
+
         closeMenu(true);
       },
       'data-test-subj': 'mlActionButtonStopDatafeed',
@@ -149,7 +163,11 @@ export function actionsMenuContent(
       icon: 'pencil',
       enabled: (item) => isJobBlocked(item) === false && canUpdateJob && canUpdateDatafeed,
       onClick: (item) => {
-        showEditJobFlyout(item);
+        if (isManagedJob(item)) {
+          showEditJobConfirmModal(item);
+        } else {
+          showEditJobFlyout(item);
+        }
         closeMenu();
       },
       'data-test-subj': 'mlActionButtonEditJob',

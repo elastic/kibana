@@ -355,10 +355,13 @@ export class JobsList extends Component {
           </EuiScreenReaderOnly>
         ),
         actions: actionsMenuContent(
+          this.props.showEditJobConfirmModal,
           this.props.showEditJobFlyout,
           this.props.showDeleteJobModal,
           this.props.showResetJobModal,
           this.props.showStartDatafeedModal,
+          this.props.showStartDatafeedsConfirmModal,
+          this.props.showStopDatafeedsConfirmModal,
           this.props.refreshJobs,
           this.props.showCreateAlertFlyout
         ),
@@ -433,7 +436,9 @@ JobsList.propTypes = {
   showEditJobFlyout: PropTypes.func,
   showDeleteJobModal: PropTypes.func,
   showStartDatafeedModal: PropTypes.func,
+  showStartDatafeedsConfirmModal: PropTypes.func,
   showCreateAlertFlyout: PropTypes.func,
+  showStopDatafeedsConfirmModal: PropTypes.func,
   refreshJobs: PropTypes.func,
   selectedJobsCount: PropTypes.number.isRequired,
   loading: PropTypes.bool,
