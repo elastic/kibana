@@ -7,15 +7,17 @@
 
 import { EuiSpacer, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { PolicyData } from '../../../../../../common/endpoint/types';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
   getPolicyDetailPath,
   getPolicyEventFiltersPath,
   getPolicyHostIsolationExceptionsPath,
   getPolicyTrustedAppsPath,
 } from '../../../../common/routing';
+import { useFetchHostIsolationExceptionsList } from '../../../host_isolation_exceptions/view/hooks';
 import {
   isOnHostIsolationExceptionsView,
   isOnPolicyEventFiltersView,
@@ -30,6 +32,19 @@ import { PolicyFormLayout } from '../policy_forms/components';
 import { usePolicyDetailsSelector } from '../policy_hooks';
 import { PolicyTrustedAppsLayout } from '../trusted_apps/layout';
 
+const enum PolicyTabsKeys {
+  SETTINGS = 'settings',
+  TRUSTED_APPS = 'trustedApps',
+  EVENT_FILTERS = 'eventFilters',
+  HOST_ISOLATION_EXCEPTIONS = 'hostIsolationExceptions',
+}
+
+interface PolicyTab {
+  id: PolicyTabsKeys;
+  name: string;
+  content: React.ReactNode;
+}
+
 export const PolicyTabs = React.memo(() => {
   const history = useHistory();
   const isInSettingsTab = usePolicyDetailsSelector(isOnPolicyFormView);
@@ -38,11 +53,30 @@ export const PolicyTabs = React.memo(() => {
   const isInHostIsolationExceptionsTab = usePolicyDetailsSelector(isOnHostIsolationExceptionsView);
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
   const policyItem = usePolicyDetailsSelector(policyDetails);
+  const privileges = useUserPrivileges().endpointPrivileges;
 
-  const tabs = useMemo(
-    () => [
-      {
-        id: 'settings',
+  const allPolicyHostIsolationExceptionsListRequest = useFetchHostIsolationExceptionsList({
+    page: 1,
+    perPage: 100,
+    policies: [policyId, 'all'],
+    // only enable if privilges are not loading
+    enabled: !privileges.loading && !privileges.canIsolateHost,
+  });
+
+  const canSeeHostIsolationExceptions =
+    privileges.canIsolateHost || allPolicyHostIsolationExceptionsListRequest.data?.total !== 0;
+
+  // move the use out of this route if they can't access it
+  useEffect(() => {
+    if (isInHostIsolationExceptionsTab && !canSeeHostIsolationExceptions) {
+      history.replace(getPolicyDetailPath(policyId));
+    }
+  }, [canSeeHostIsolationExceptions, history, isInHostIsolationExceptionsTab, policyId]);
+
+  const tabs: Record<PolicyTabsKeys, PolicyTab | undefined> = useMemo(() => {
+    return {
+      [PolicyTabsKeys.SETTINGS]: {
+        id: PolicyTabsKeys.SETTINGS,
         name: i18n.translate('xpack.securitySolution.endpoint.policy.details.tabs.policyForm', {
           defaultMessage: 'Policy settings',
         }),
@@ -53,8 +87,8 @@ export const PolicyTabs = React.memo(() => {
           </>
         ),
       },
-      {
-        id: 'trustedApps',
+      [PolicyTabsKeys.TRUSTED_APPS]: {
+        id: PolicyTabsKeys.TRUSTED_APPS,
         name: i18n.translate('xpack.securitySolution.endpoint.policy.details.tabs.trustedApps', {
           defaultMessage: 'Trusted applications',
         }),
@@ -65,8 +99,8 @@ export const PolicyTabs = React.memo(() => {
           </>
         ),
       },
-      {
-        id: 'eventFilters',
+      [PolicyTabsKeys.EVENT_FILTERS]: {
+        id: PolicyTabsKeys.EVENT_FILTERS,
         name: i18n.translate('xpack.securitySolution.endpoint.policy.details.tabs.eventFilters', {
           defaultMessage: 'Event filters',
         }),
@@ -77,56 +111,64 @@ export const PolicyTabs = React.memo(() => {
           </>
         ),
       },
-      {
-        id: 'hostIsolationExceptions',
-        name: i18n.translate(
-          'xpack.securitySolution.endpoint.policy.details.tabs.isInHostIsolationExceptions',
-          {
-            defaultMessage: 'Host isolation exceptions',
+      [PolicyTabsKeys.HOST_ISOLATION_EXCEPTIONS]: canSeeHostIsolationExceptions
+        ? {
+            id: PolicyTabsKeys.HOST_ISOLATION_EXCEPTIONS,
+            name: i18n.translate(
+              'xpack.securitySolution.endpoint.policy.details.tabs.isInHostIsolationExceptions',
+              {
+                defaultMessage: 'Host isolation exceptions',
+              }
+            ),
+            content: (
+              <>
+                <EuiSpacer />
+                <PolicyHostIsolationExceptionsTab policy={policyItem as PolicyData} />
+              </>
+            ),
           }
-        ),
-        content: (
-          <>
-            <EuiSpacer />
-            <PolicyHostIsolationExceptionsTab policy={policyItem as PolicyData} />
-          </>
-        ),
-      },
-    ],
-    [policyItem]
+        : undefined,
+    };
+  }, [canSeeHostIsolationExceptions, policyItem]);
+
+  // convert tabs object into an array EuiTabbedContent can understand
+  const tabsList: PolicyTab[] = useMemo(
+    () => Object.values(tabs).filter((tab): tab is PolicyTab => tab !== undefined),
+    [tabs]
   );
 
   const currentSelectedTab = useMemo(() => {
-    let initialTab = tabs[0];
+    const defaultTab = tabs[PolicyTabsKeys.SETTINGS];
+    let selectedTab: PolicyTab | undefined;
 
     if (isInSettingsTab) {
-      initialTab = tabs[0];
+      selectedTab = tabs[PolicyTabsKeys.SETTINGS];
     } else if (isInTrustedAppsTab) {
-      initialTab = tabs[1];
+      selectedTab = tabs[PolicyTabsKeys.TRUSTED_APPS];
     } else if (isInEventFilters) {
-      initialTab = tabs[2];
+      selectedTab = tabs[PolicyTabsKeys.EVENT_FILTERS];
     } else if (isInHostIsolationExceptionsTab) {
-      initialTab = tabs[3];
+      selectedTab = tabs[PolicyTabsKeys.HOST_ISOLATION_EXCEPTIONS];
     }
 
-    return initialTab;
-  }, [isInSettingsTab, isInTrustedAppsTab, isInEventFilters, isInHostIsolationExceptionsTab, tabs]);
+    return selectedTab || defaultTab;
+  }, [tabs, isInSettingsTab, isInTrustedAppsTab, isInEventFilters, isInHostIsolationExceptionsTab]);
 
   const onTabClickHandler = useCallback(
     (selectedTab: EuiTabbedContentTab) => {
       let path: string = '';
       switch (selectedTab.id) {
-        case 'settings':
+        case PolicyTabsKeys.SETTINGS:
           path = getPolicyDetailPath(policyId);
           break;
-        case 'trustedApps':
+        case PolicyTabsKeys.TRUSTED_APPS:
           path = getPolicyTrustedAppsPath(policyId);
           break;
-        case 'hostIsolationExceptions':
-          path = getPolicyHostIsolationExceptionsPath(policyId);
-          break;
-        case 'eventFilters':
+        case PolicyTabsKeys.EVENT_FILTERS:
           path = getPolicyEventFiltersPath(policyId);
+          break;
+        case PolicyTabsKeys.HOST_ISOLATION_EXCEPTIONS:
+          path = getPolicyHostIsolationExceptionsPath(policyId);
           break;
       }
       history.push(path);
@@ -136,7 +178,7 @@ export const PolicyTabs = React.memo(() => {
 
   return (
     <EuiTabbedContent
-      tabs={tabs}
+      tabs={tabsList}
       selectedTab={currentSelectedTab}
       size="l"
       onTabClick={onTabClickHandler}
