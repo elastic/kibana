@@ -261,9 +261,7 @@ export const getTopNavConfig = (
         });
   const showSaveAndReturn = originatingApp && (savedVis?.id || allowByValue);
 
-  const showSaveButton =
-    visualizeCapabilities.save ||
-    (allowByValue && !showSaveAndReturn && dashboardCapabilities.showWriteControls);
+  const showSaveButton = visualizeCapabilities.save || (allowByValue && !showSaveAndReturn);
 
   const topNavMenu: TopNavMenuData[] = [
     {
@@ -556,7 +554,7 @@ export const getTopNavConfig = (
               }
             ),
             testId: 'visualizesaveAndReturnButton',
-            disableButton: hasUnappliedChanges || !dashboardCapabilities.showWriteControls,
+            disableButton: hasUnappliedChanges,
             tooltip() {
               if (hasUnappliedChanges) {
                 return i18n.translate(

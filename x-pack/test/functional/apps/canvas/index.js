@@ -17,8 +17,6 @@ export default function canvasApp({ loadTestFile, getService }) {
         'global_canvas_all',
         'global_discover_all',
         'global_maps_all',
-        // TODO: Fix permission check, save and return button is disabled when dashboard is disabled
-        'global_dashboard_all',
       ]);
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
     });
