@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['canvas', 'common', 'header', 'discover']);
   const testSubjects = getService('testSubjects');
-  const security = getService('security');
   const esArchiver = getService('esArchiver');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');

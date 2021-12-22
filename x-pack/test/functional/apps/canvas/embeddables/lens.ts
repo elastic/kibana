@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function canvasLensTest({ getService, getPageObjects }: FtrProviderContext) {
+  const retry = getService('retry');
   const PageObjects = getPageObjects(['canvas', 'common', 'header', 'lens']);
   const esArchiver = getService('esArchiver');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -37,7 +39,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
       await kibanaServer.importExport.unload(archives.kbn);
     });
 
-    describe.skip('by-reference', () => {
+    describe('by-reference', () => {
       it('renders lens visualization using savedLens expression', async () => {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -62,6 +64,8 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
 
     describe('by-value', () => {
       it('creates new lens embeddable', async () => {
+        await PageObjects.canvas.deleteSelectedElement();
+        const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
         await PageObjects.canvas.createNewVis('lens');
         await PageObjects.lens.goToTimeRange();
         await PageObjects.lens.configureDimension({
@@ -75,10 +79,22 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
           field: 'bytes',
         });
         await PageObjects.lens.saveAndReturn();
-        await testSubjects.existOrFail('embeddablePanelHeading-Artistpreviouslyknownaslensv2');
+        await retry.try(async () => {
+          const embeddableCount = await PageObjects.canvas.getEmbeddableCount();
+          expect(embeddableCount).to.eql(originalEmbeddableCount + 1);
+        });
       });
 
-      it('edits lens by-value embeddable', async () => {});
+      it('edits lens by-value embeddable', async () => {
+        const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
+        await dashboardPanelActions.toggleContextMenu();
+        await dashboardPanelActions.clickEdit();
+        await PageObjects.lens.saveAndReturn();
+        await retry.try(async () => {
+          const embeddableCount = await PageObjects.canvas.getEmbeddableCount();
+          expect(embeddableCount).to.eql(originalEmbeddableCount);
+        });
+      });
     });
   });
 }
