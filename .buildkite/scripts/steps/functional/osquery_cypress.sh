@@ -6,7 +6,7 @@ source .buildkite/scripts/common/util.sh
 
 export BUILD_TS_REFS_DISABLE=false
 .buildkite/scripts/bootstrap.sh
-.buildkite/scripts/download_build_artifacts.sh
+node scripts/build_kibana_platform_plugins.js
 
 export JOB=kibana-osquery-cypress
 
