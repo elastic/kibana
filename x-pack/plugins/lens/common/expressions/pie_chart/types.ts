@@ -20,6 +20,7 @@ export interface SharedPieLayerState {
   showValuesInLegend?: boolean;
   nestedLegend?: boolean;
   percentDecimals?: number;
+  emptySizeRatio?: number;
   legendMaxLines?: number;
   truncateLegend?: boolean;
 }
