@@ -136,7 +136,7 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
                   iconType="plusInCircle"
                   data-test-subj="cases-table-add-case"
                 >
-                  {i18n.ADD_NEW_CASE}
+                  {i18n.CREATE_TITLE}
                 </LinkButton>
               )
             }
