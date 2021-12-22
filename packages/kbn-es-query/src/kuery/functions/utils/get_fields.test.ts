@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternBase } from '../../..';
+import { DataViewBase } from '../../..';
 import { fields } from '../../../filters/stubs';
 
 import { nodeTypes } from '../../index';
@@ -15,12 +15,12 @@ import { getFields } from './get_fields';
 jest.mock('../../grammar');
 
 describe('getFields', () => {
-  let indexPattern: IndexPatternBase;
+  let indexPattern: DataViewBase;
 
   beforeEach(() => {
     indexPattern = {
       fields,
-    } as unknown as IndexPatternBase;
+    } as unknown as DataViewBase;
   });
 
   describe('field names without a wildcard', () => {
@@ -41,14 +41,14 @@ describe('getFields', () => {
     });
 
     test('should not match a wildcard in a literal node', () => {
-      const indexPatternWithWildField: IndexPatternBase = {
+      const indexPatternWithWildField: DataViewBase = {
         title: 'wildIndex',
         fields: [
           {
             name: 'foo*',
           },
         ],
-      } as unknown as IndexPatternBase;
+      } as unknown as DataViewBase;
 
       const fieldNameNode = nodeTypes.literal.buildNode('foo*');
       const results = getFields(fieldNameNode, indexPatternWithWildField);

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase } from '@kbn/es-query';
 import type {
   CreateExceptionListItemSchema,
   Entry,
@@ -33,13 +33,13 @@ export interface OperatorOption {
 
 export interface FormattedBuilderEntry {
   id: string;
-  field: IndexPatternFieldBase | undefined;
+  field: DataViewFieldBase | undefined;
   operator: OperatorOption;
   value: string | string[] | undefined;
   nested: 'parent' | 'child' | undefined;
   entryIndex: number;
   parent: { parent: BuilderEntryNested; parentIndex: number } | undefined;
-  correspondingKeywordField: IndexPatternFieldBase | undefined;
+  correspondingKeywordField: DataViewFieldBase | undefined;
 }
 
 export interface EmptyEntry {

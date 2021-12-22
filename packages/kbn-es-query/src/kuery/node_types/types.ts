@@ -12,7 +12,7 @@
 
 import { JsonValue } from '@kbn/utility-types';
 import { KueryNode, KueryQueryOptions } from '..';
-import { IndexPatternBase } from '../..';
+import { DataViewBase } from '../..';
 
 export type FunctionName = 'is' | 'and' | 'or' | 'not' | 'range' | 'exists' | 'nested';
 
@@ -21,7 +21,7 @@ interface FunctionType {
   buildNodeWithArgumentNodes: (functionName: FunctionName, args: any[]) => FunctionTypeBuildNode;
   toElasticsearchQuery: (
     node: any,
-    indexPattern?: IndexPatternBase,
+    indexPattern?: DataViewBase,
     config?: KueryQueryOptions,
     context?: Record<string, any>
   ) => JsonValue;

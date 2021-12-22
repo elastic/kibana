@@ -12,7 +12,7 @@ This hook uses the kibana `services.data.autocomplete.getValueSuggestions()` ser
 
 This component can be used to display available indexPattern fields. It requires an indexPattern to be passed in and will show an error state if value is not one of the available indexPattern fields. Users will be able to select only one option.
 
-The `onChange` handler is passed `IndexPatternFieldBase[]`.
+The `onChange` handler is passed `DataViewFieldBase[]`.
 
 ```js
 <FieldComponent
