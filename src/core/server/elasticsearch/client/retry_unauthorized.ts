@@ -11,31 +11,48 @@ import { AuthHeaders, KibanaRequest, SetAuthHeaders, isRealRequest } from '../..
 import { ScopeableRequest } from '../types';
 import { UnauthorizedError } from './errors';
 
+/**
+ * @public
+ */
 export interface UnauthorizedErrorHandlerOptions {
   error: UnauthorizedError;
   request: KibanaRequest;
 }
 
-export type UnauthorizedErrorHandlerResultType = 'notHandled';
-
+/**
+ * @public
+ */
 export interface UnauthorizedErrorHandlerResultRetryParams {
   authHeaders: AuthHeaders;
 }
 
+/**
+ * @public
+ */
 export interface UnauthorizedErrorHandlerRetryResult
   extends UnauthorizedErrorHandlerResultRetryParams {
   type: 'retry';
 }
 
+/**
+ * @public
+ */
 export interface UnauthorizedErrorHandlerNotHandledResult {
   type: 'notHandled';
 }
 
+/**
+ * @public
+ */
 export type UnauthorizedErrorHandlerResult =
   | UnauthorizedErrorHandlerRetryResult
   | UnauthorizedErrorHandlerNotHandledResult;
 
-interface UnauthorizedErrorHandlerToolkit {
+/**
+ * Toolkit passed to a {@link UnauthorizedErrorHandler} used to generate responses from the handler
+ * @public
+ */
+export interface UnauthorizedErrorHandlerToolkit {
   /**
    * The handler cannot handle the error, or was not able to reauthenticate
    * */
@@ -47,6 +64,22 @@ interface UnauthorizedErrorHandlerToolkit {
   retry: (params: UnauthorizedErrorHandlerResultRetryParams) => UnauthorizedErrorHandlerResult;
 }
 
+/**
+ * A handler used to handle unauthorized error returned by elasticsearch
+ *
+ * @public
+ */
+export type UnauthorizedErrorHandler = (
+  options: UnauthorizedErrorHandlerOptions,
+  toolkit: UnauthorizedErrorHandlerToolkit
+) => MaybePromise<UnauthorizedErrorHandlerResult>;
+
+/** @internal */
+export type InternalUnauthorizedErrorHandler = (
+  error: UnauthorizedError
+) => MaybePromise<UnauthorizedErrorHandlerResult>;
+
+/** @internal */
 export const toolkit: UnauthorizedErrorHandlerToolkit = {
   notHandled: () => ({ type: 'notHandled' }),
   retry: ({ authHeaders }) => ({
@@ -54,15 +87,6 @@ export const toolkit: UnauthorizedErrorHandlerToolkit = {
     authHeaders,
   }),
 };
-
-export type UnauthorizedErrorHandler = (
-  options: UnauthorizedErrorHandlerOptions,
-  toolkit: UnauthorizedErrorHandlerToolkit
-) => MaybePromise<UnauthorizedErrorHandlerResult>;
-
-export type InternalUnauthorizedErrorHandler = (
-  error: UnauthorizedError
-) => MaybePromise<UnauthorizedErrorHandlerResult>;
 
 export const notHandledInternalErrorHandler: InternalUnauthorizedErrorHandler = () =>
   toolkit.notHandled();
