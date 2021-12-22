@@ -17,7 +17,7 @@
         }
       }
     ],
-    "id": "Test-saved-query",
+    "id": "Saved-Query-Id",
     "interval": "3600",
     "query": "select * from uptime;",
     "updated_at": "2021-12-21T08:54:38.648Z",
