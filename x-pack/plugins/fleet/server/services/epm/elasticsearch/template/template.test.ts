@@ -811,8 +811,7 @@ describe('EPM template', () => {
           data_streams: [{ name: 'test.prefix1-default' }],
         },
       } as any);
-      const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
+      await updateCurrentWriteIndices(esClient, [
         {
           templateName: 'test',
           indexTemplate: {
