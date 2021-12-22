@@ -28,11 +28,10 @@ import {
   EuiSelect,
   keysOf,
   TimeUnitId,
-  EuiRefreshInterval,
-  OnRefreshChangeProps,
 } from '@elastic/eui';
 
 import { DevToolsSettings } from '../../services';
+import { EuiRefreshInterval } from '../components/refresh_interval';
 
 export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
 
@@ -66,10 +65,9 @@ export function DevToolsSettingsModal(props: Props) {
   const [refreshFrequency, setRefreshFrequency] = useState(1000);
   const [refreshFrequencyUnit, setRefreshFrequencyUnit] = useState('s');
   const [refreshInterval, setRefreshInterval] = useState(1000);
-  const [isPaused, setIsPaused] = useState(true);
 
-  const onRefreshChange = ({ isPaused, refreshInterval }: OnRefreshChangeProps) => {
-    setIsPaused(isPaused);
+  const onRefreshChange = ({ isPaused, refreshInterval }) => {
+    setPolling(isPaused);
     setRefreshInterval(refreshInterval);
   };
 
@@ -153,11 +151,6 @@ export function DevToolsSettingsModal(props: Props) {
             />
           }
         >
-          <EuiRefreshInterval
-            isPaused={isPaused}
-            refreshInterval={refreshInterval}
-            // onRefreshChange={onRefreshChange}
-          />
           {/* <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
             <EuiFlexItem grow={false}>
               <EuiSwitch
@@ -196,6 +189,11 @@ export function DevToolsSettingsModal(props: Props) {
               />
             </EuiFlexItem>
           </EuiFlexGroup> */}
+          <EuiRefreshInterval
+            isPaused={polling}
+            refreshInterval={refreshInterval}
+            onRefreshChange={onRefreshChange}
+          />
         </EuiFormRow>
 
         <EuiButton
