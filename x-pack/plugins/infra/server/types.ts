@@ -31,3 +31,19 @@ export interface InfraPluginRequestHandlerContext extends RequestHandlerContext 
   infra: InfraRequestHandlerContext;
   search: SearchRequestHandlerContext;
 }
+
+export interface InfraConfig {
+  alerting: {
+    group_by_page_size: number;
+  };
+  inventory: {
+    compositeSize: number;
+  };
+  sources?: {
+    default?: {
+      fields?: {
+        message?: string[];
+      };
+    };
+  };
+}

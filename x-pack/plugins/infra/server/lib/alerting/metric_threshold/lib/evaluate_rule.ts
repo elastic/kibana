@@ -66,6 +66,7 @@ export const evaluateRule = <Params extends EvaluatedRuleParams = EvaluatedRuleP
   params: Params,
   config: InfraSource['configuration'],
   prevGroups: string[],
+  compositeSize: number,
   timeframe?: { start?: number; end: number }
 ) => {
   const { criteria, groupBy, filterQuery, shouldDropPartialBuckets } = params;
@@ -78,6 +79,7 @@ export const evaluateRule = <Params extends EvaluatedRuleParams = EvaluatedRuleP
         config.metricAlias,
         groupBy,
         filterQuery,
+        compositeSize,
         timeframe,
         shouldDropPartialBuckets
       );
@@ -150,6 +152,7 @@ const getMetric: (
   index: string,
   groupBy: string | undefined | string[],
   filterQuery: string | undefined,
+  compositeSize: number,
   timeframe?: { start?: number; end: number },
   shouldDropPartialBuckets?: boolean
 ) => Promise<Record<string, Array<{ key: string; value: number }>>> = async function (
@@ -158,6 +161,7 @@ const getMetric: (
   index,
   groupBy,
   filterQuery,
+  compositeSize,
   timeframe,
   shouldDropPartialBuckets
 ) {
@@ -172,6 +176,7 @@ const getMetric: (
   const searchBody = getElasticsearchMetricQuery(
     params,
     calculatedTimerange,
+    compositeSize,
     hasGroupBy ? groupBy : undefined,
     filterQuery
   );
