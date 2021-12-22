@@ -68,7 +68,9 @@ const registerCreateDataViewRouteFactory =
           body: schema.object({
             override: schema.maybe(schema.boolean({ defaultValue: false })),
             refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
-            [serviceKey]: indexPatternSpecSchema,
+            data_view: serviceKey === SERVICE_KEY ? indexPatternSpecSchema : schema.never(),
+            index_pattern:
+              serviceKey === SERVICE_KEY_LEGACY ? indexPatternSpecSchema : schema.never(),
           }),
         },
       },
@@ -84,9 +86,11 @@ const registerCreateDataViewRouteFactory =
           );
           const body = req.body;
 
+          const spec = serviceKey === SERVICE_KEY ? body.data_view : body.index_pattern;
+
           const indexPattern = await indexPatternsService.createAndSave(
-            body[serviceKey] as DataViewSpec,
-            body.override as boolean,
+            spec as DataViewSpec,
+            body.override,
             !body.refresh_fields
           );
 
