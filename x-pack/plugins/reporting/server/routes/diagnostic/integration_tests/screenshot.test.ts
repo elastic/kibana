@@ -19,7 +19,7 @@ import {
 import type { ReportingRequestHandlerContext } from '../../../types';
 import { registerDiagnoseScreenshot } from '../screenshot';
 
-jest.mock('../../export_types/common/generate_png');
+jest.mock('../../../export_types/common/generate_png');
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 

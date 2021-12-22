@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../lib/content_stream', () => ({
+jest.mock('../../../lib/content_stream', () => ({
   getContentStream: jest.fn(),
 }));
 
