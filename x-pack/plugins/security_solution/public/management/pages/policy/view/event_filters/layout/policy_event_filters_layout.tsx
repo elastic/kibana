@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
+  EuiButton,
 } from '@elastic/eui';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
@@ -23,6 +24,9 @@ import { getEventFiltersListPath } from '../../../../../common/routing';
 import { useGetAllAssignedEventFilters, useGetAllEventFilters } from '../hooks';
 import { ManagementPageLoader } from '../../../../../components/management_page_loader';
 import { PolicyEventFiltersEmptyUnassigned, PolicyEventFiltersEmptyUnexisting } from '../empty';
+import { usePolicyDetailsSelector } from '../../policy_hooks';
+import { getCurrentArtifactsLocation } from '../../../store/policy_details/selectors';
+import { PolicyEventFiltersFlyout } from '../flyout';
 
 interface PolicyEventFiltersLayoutProps {
   policyItem?: ImmutableObject<PolicyData> | undefined;
@@ -30,18 +34,22 @@ interface PolicyEventFiltersLayoutProps {
 export const PolicyEventFiltersLayout = React.memo<PolicyEventFiltersLayoutProps>(
   ({ policyItem }) => {
     const { getAppUrl } = useAppUrl();
+    const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
 
     const {
       data: allAssigned,
       isLoading: isLoadingAllAssigned,
       isRefetching: isRefetchingAllAssigned,
-    } = useGetAllAssignedEventFilters(policyItem?.id);
+    } = useGetAllAssignedEventFilters(policyItem?.id || '', !!policyItem?.id);
 
     const {
       data: allEventFilters,
       isLoading: isLoadingAllEventFilters,
       isRefetching: isRefetchingAllEventFilters,
     } = useGetAllEventFilters();
+
+    const handleOnClickAssignButton = useCallback(() => {}, []);
+    const handleOnCloseFlyout = useCallback(() => {}, []);
 
     const aboutInfo = useMemo(() => {
       const link = (
@@ -117,7 +125,25 @@ export const PolicyEventFiltersLayout = React.memo<PolicyEventFiltersLayoutProps
               <p>{aboutInfo}</p>
             </EuiText>
           </EuiPageHeaderSection>
+          <EuiPageHeaderSection>
+            <EuiButton
+              fill
+              iconType="plusInCircle"
+              data-test-subj="eventFilters-assign-button"
+              onClick={handleOnClickAssignButton}
+            >
+              {i18n.translate(
+                'xpack.securitySolution.endpoint.policy.eventFilters.layout.assignToPolicy',
+                {
+                  defaultMessage: 'Assign event filters to policy',
+                }
+              )}
+            </EuiButton>
+          </EuiPageHeaderSection>
         </EuiPageHeader>
+        {urlParams.show === 'list' && (
+          <PolicyEventFiltersFlyout policyItem={policyItem} onClose={handleOnCloseFlyout} />
+        )}
       </div>
     );
   }

@@ -13,13 +13,15 @@ import { parseQueryFilterToKQL } from '../../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../../../event_filters/constants';
 
 export function useGetAllAssignedEventFilters(
-  policyId?: string
+  policyId: string,
+  enabled: boolean = true,
+  customQueryId: string = ''
 ): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
   const http = useHttp();
   const eventFiltersService = new EventFiltersHttpService(http);
 
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
-    ['eventFilters', 'assigned', policyId],
+    ['eventFilters', 'assigned', policyId, customQueryId],
     () => {
       return eventFiltersService.getList({
         filter: `(exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`,
@@ -28,8 +30,7 @@ export function useGetAllAssignedEventFilters(
     {
       refetchIntervalInBackground: false,
       refetchOnWindowFocus: false,
-      enabled: !!policyId,
-      refetchOnMount: true,
+      enabled,
     }
   );
 }
@@ -44,6 +45,39 @@ export function useSearchAssignedEventFilters(
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
     ['eventFilters', 'assigned', policyId],
     () => {
+      const kuery = [
+        `((exception-list-agnostic.attributes.tags:"policy:${policyId}") OR (exception-list-agnostic.attributes.tags:"policy:all"))`,
+      ];
+
+      if (filter) {
+        const filterKuery = parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined;
+        if (filterKuery) {
+          kuery.push(filterKuery);
+        }
+      }
+
+      return eventFiltersService.getList({
+        filter: kuery.join(' AND '),
+      });
+    },
+    {
+      refetchIntervalInBackground: false,
+      refetchOnWindowFocus: false,
+      enabled: !!policyId,
+      refetchOnMount: true,
+    }
+  );
+}
+
+export function useSearchNotAssignedEventFilters(
+  eventFiltersService: EventFiltersHttpService,
+  policyId: string,
+  options: { filter?: string }
+): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
+  return useQuery<FoundExceptionListItemSchema, ServerApiError>(
+    ['eventFilters', 'notAssigned', policyId, options],
+    () => {
+      const { filter } = options;
       const kuery = [
         `((exception-list-agnostic.attributes.tags:"policy:${policyId}") OR (exception-list-agnostic.attributes.tags:"policy:all"))`,
       ];
