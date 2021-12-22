@@ -123,11 +123,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Generate CSV: sparse data', () => {
-      interface TestDoc {
-        timestamp: string;
-        name: string;
-        updated_at?: string;
-      }
       const TEST_INDEX_NAME = 'sparse_data';
       const TEST_DOC_COUNT = 510;
 
@@ -140,6 +135,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       };
 
       const createDocs = async () => {
+        interface TestDoc {
+          timestamp: string;
+          name: string;
+          updated_at?: string;
+        }
+
         const docs = Array<TestDoc>(TEST_DOC_COUNT);
 
         for (let i = 0; i <= docs.length - 1; i++) {
