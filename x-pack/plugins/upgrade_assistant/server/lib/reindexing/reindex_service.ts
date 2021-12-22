@@ -42,7 +42,7 @@ export interface ReindexService {
    * Resolves to null if index does not exist.
    * @param indexName
    */
-  detectReindexWarnings(indexName: string): Promise<ReindexWarning[] | null>;
+  detectReindexWarnings(indexName: string): Promise<ReindexWarning[]>;
 
   /**
    * Creates a new reindex operation for a given index.
@@ -409,10 +409,6 @@ export const reindexServiceFactory = (
       const warnings: ReindexWarning[] = [
         {
           warningType: 'replaceIndexWithAlias',
-          meta: {
-            indexName,
-            reindexName: generateNewIndexName(indexName),
-          },
         },
       ];
 

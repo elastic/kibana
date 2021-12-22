@@ -20,7 +20,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { ReindexWarning, ReindexWarningTypes } from '../../../../../../../common/types';
+import {
+  ReindexWarning,
+  ReindexWarningTypes,
+  ReindexStatusResponse,
+} from '../../../../../../../common/types';
 import { useAppContext } from '../../../../../app_context';
 import {
   CustomTypeNameWarningCheckbox,
@@ -46,6 +50,7 @@ interface WarningsConfirmationFlyoutProps {
   hideWarningsStep: () => void;
   continueReindex: () => void;
   warnings: ReindexWarning[];
+  meta: ReindexStatusResponse['meta'];
 }
 
 /**
@@ -56,6 +61,7 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
   warnings,
   hideWarningsStep,
   continueReindex,
+  meta,
 }) => {
   const {
     services: {
@@ -126,7 +132,7 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
                   onChange={onChange}
                   docLinks={links}
                   id={idForWarning(index)}
-                  meta={warning.meta}
+                  meta={{ ...meta, ...warning.meta }}
                 />
               );
             })}

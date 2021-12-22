@@ -8,7 +8,7 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
 
 import {
-  ReindexOperation,
+  ReindexStatusResponse,
   ReindexStatus,
   ReindexStep,
   ReindexWarning,
@@ -27,20 +27,19 @@ export interface ReindexState {
   errorMessage: string | null;
   reindexWarnings?: ReindexWarning[];
   hasRequiredPrivileges?: boolean;
-}
-
-interface StatusResponse {
-  warnings?: ReindexWarning[];
-  reindexOp?: ReindexOperation;
-  hasRequiredPrivileges?: boolean;
+  meta: {
+    indexName: string;
+    reindexName: string;
+  };
 }
 
 const getReindexState = (
   reindexState: ReindexState,
-  { reindexOp, warnings, hasRequiredPrivileges }: StatusResponse
+  { reindexOp, warnings, hasRequiredPrivileges, meta }: ReindexStatusResponse
 ) => {
   const newReindexState = {
     ...reindexState,
+    meta,
     loadingState: LoadingState.Success,
   };
 
@@ -85,6 +84,10 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
     loadingState: LoadingState.Loading,
     errorMessage: null,
     reindexTaskPercComplete: null,
+    meta: {
+      indexName,
+      reindexName: '', // will be known after fetching the reindexStatus
+    },
   });
 
   const pollIntervalIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -111,6 +114,10 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
           status: ReindexStatus.fetchFailed,
         };
       });
+      return;
+    }
+
+    if (data === null) {
       return;
     }
 
@@ -153,7 +160,7 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
     }
 
     setReindexState((prevValue: ReindexState) => {
-      return getReindexState(prevValue, { reindexOp });
+      return getReindexState(prevValue, { reindexOp, meta: prevValue.meta });
     });
     updateStatus();
   }, [api, indexName, updateStatus]);

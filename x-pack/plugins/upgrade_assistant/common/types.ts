@@ -41,7 +41,18 @@ export enum ReindexStatus {
   fetchFailed,
 }
 
+export interface ReindexStatusResponse {
+  meta: {
+    indexName: string;
+    reindexName: string;
+  };
+  warnings?: ReindexWarning[];
+  reindexOp?: ReindexOperation;
+  hasRequiredPrivileges?: boolean;
+}
+
 export const REINDEX_OP_TYPE = 'upgrade-assistant-reindex-operation';
+
 export interface QueueSettings extends SavedObjectAttributes {
   /**
    * A Unix timestamp of when the reindex operation was enqueued.
@@ -107,6 +118,7 @@ export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
 // 7.0 -> 8.0 warnings
 export type ReindexWarningTypes = 'customTypeName' | 'indexSetting' | 'replaceIndexWithAlias';
+
 export interface ReindexWarning {
   warningType: ReindexWarningTypes;
   /**
