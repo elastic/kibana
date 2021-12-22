@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Ast, fromExpression, toExpression } from '@kbn/interpreter/common';
+import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
 import { Serializable } from '@kbn/utility-types';
 import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { flowRight, mapValues } from 'lodash';

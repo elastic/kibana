@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fromExpression } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter';
 import { FC } from 'react';
 import {
   Filter as FilterType,

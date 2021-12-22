@@ -10,7 +10,7 @@ import {
   ExpressionAstExpression,
   ExpressionAstFunction,
 } from 'src/plugins/expressions';
-import { fromExpression } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter';
 import { buildFiltersFunction } from '../../../common/functions';
 import type { FiltersFunction } from '../../../common/functions';
 

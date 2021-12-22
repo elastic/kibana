@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { fromExpression, getType } from '@kbn/interpreter/common';
+import { fromExpression, getType } from '@kbn/interpreter';
 import {
   ExpressionAstExpression,
   ExpressionExecutionParams,
