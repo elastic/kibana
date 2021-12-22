@@ -32,7 +32,7 @@ import { PolicyFormLayout } from '../policy_forms/components';
 import { usePolicyDetailsSelector } from '../policy_hooks';
 import { PolicyTrustedAppsLayout } from '../trusted_apps/layout';
 
-const enum PolicyTabsKeys {
+const enum PolicyTabKeys {
   SETTINGS = 'settings',
   TRUSTED_APPS = 'trustedApps',
   EVENT_FILTERS = 'eventFilters',
@@ -40,7 +40,7 @@ const enum PolicyTabsKeys {
 }
 
 interface PolicyTab {
-  id: PolicyTabsKeys;
+  id: PolicyTabKeys;
   name: string;
   content: React.ReactNode;
 }
@@ -73,10 +73,10 @@ export const PolicyTabs = React.memo(() => {
     }
   }, [canSeeHostIsolationExceptions, history, isInHostIsolationExceptionsTab, policyId]);
 
-  const tabs: Record<PolicyTabsKeys, PolicyTab | undefined> = useMemo(() => {
+  const tabs: Record<PolicyTabKeys, PolicyTab | undefined> = useMemo(() => {
     return {
-      [PolicyTabsKeys.SETTINGS]: {
-        id: PolicyTabsKeys.SETTINGS,
+      [PolicyTabKeys.SETTINGS]: {
+        id: PolicyTabKeys.SETTINGS,
         name: i18n.translate('xpack.securitySolution.endpoint.policy.details.tabs.policyForm', {
           defaultMessage: 'Policy settings',
         }),
@@ -87,8 +87,8 @@ export const PolicyTabs = React.memo(() => {
           </>
         ),
       },
-      [PolicyTabsKeys.TRUSTED_APPS]: {
-        id: PolicyTabsKeys.TRUSTED_APPS,
+      [PolicyTabKeys.TRUSTED_APPS]: {
+        id: PolicyTabKeys.TRUSTED_APPS,
         name: i18n.translate('xpack.securitySolution.endpoint.policy.details.tabs.trustedApps', {
           defaultMessage: 'Trusted applications',
         }),
@@ -99,8 +99,8 @@ export const PolicyTabs = React.memo(() => {
           </>
         ),
       },
-      [PolicyTabsKeys.EVENT_FILTERS]: {
-        id: PolicyTabsKeys.EVENT_FILTERS,
+      [PolicyTabKeys.EVENT_FILTERS]: {
+        id: PolicyTabKeys.EVENT_FILTERS,
         name: i18n.translate('xpack.securitySolution.endpoint.policy.details.tabs.eventFilters', {
           defaultMessage: 'Event filters',
         }),
@@ -111,9 +111,9 @@ export const PolicyTabs = React.memo(() => {
           </>
         ),
       },
-      [PolicyTabsKeys.HOST_ISOLATION_EXCEPTIONS]: canSeeHostIsolationExceptions
+      [PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS]: canSeeHostIsolationExceptions
         ? {
-            id: PolicyTabsKeys.HOST_ISOLATION_EXCEPTIONS,
+            id: PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS,
             name: i18n.translate(
               'xpack.securitySolution.endpoint.policy.details.tabs.isInHostIsolationExceptions',
               {
@@ -138,17 +138,17 @@ export const PolicyTabs = React.memo(() => {
   );
 
   const currentSelectedTab = useMemo(() => {
-    const defaultTab = tabs[PolicyTabsKeys.SETTINGS];
+    const defaultTab = tabs[PolicyTabKeys.SETTINGS];
     let selectedTab: PolicyTab | undefined;
 
     if (isInSettingsTab) {
-      selectedTab = tabs[PolicyTabsKeys.SETTINGS];
+      selectedTab = tabs[PolicyTabKeys.SETTINGS];
     } else if (isInTrustedAppsTab) {
-      selectedTab = tabs[PolicyTabsKeys.TRUSTED_APPS];
+      selectedTab = tabs[PolicyTabKeys.TRUSTED_APPS];
     } else if (isInEventFilters) {
-      selectedTab = tabs[PolicyTabsKeys.EVENT_FILTERS];
+      selectedTab = tabs[PolicyTabKeys.EVENT_FILTERS];
     } else if (isInHostIsolationExceptionsTab) {
-      selectedTab = tabs[PolicyTabsKeys.HOST_ISOLATION_EXCEPTIONS];
+      selectedTab = tabs[PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS];
     }
 
     return selectedTab || defaultTab;
@@ -158,16 +158,16 @@ export const PolicyTabs = React.memo(() => {
     (selectedTab: EuiTabbedContentTab) => {
       let path: string = '';
       switch (selectedTab.id) {
-        case PolicyTabsKeys.SETTINGS:
+        case PolicyTabKeys.SETTINGS:
           path = getPolicyDetailPath(policyId);
           break;
-        case PolicyTabsKeys.TRUSTED_APPS:
+        case PolicyTabKeys.TRUSTED_APPS:
           path = getPolicyTrustedAppsPath(policyId);
           break;
-        case PolicyTabsKeys.EVENT_FILTERS:
+        case PolicyTabKeys.EVENT_FILTERS:
           path = getPolicyEventFiltersPath(policyId);
           break;
-        case PolicyTabsKeys.HOST_ISOLATION_EXCEPTIONS:
+        case PolicyTabKeys.HOST_ISOLATION_EXCEPTIONS:
           path = getPolicyHostIsolationExceptionsPath(policyId);
           break;
       }
