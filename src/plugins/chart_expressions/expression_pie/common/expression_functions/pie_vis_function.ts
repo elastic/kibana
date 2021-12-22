@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { PieVisParams } from '../types/expression_renderers';
 import { prepareLogTable } from '../../../../visualizations/common/prepare_log_table';
 import { PieVisExpressionFunctionDefinition } from '../types/expression_functions';
-import { PIE_LABELS_VALUE, PIE_VIS_EXPRESSION_NAME } from '../constants';
+import { PIE_LABELS_FUNCTION, PIE_LABELS_VALUE, PIE_VIS_EXPRESSION_NAME } from '../constants';
 
 export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
   name: PIE_VIS_EXPRESSION_NAME,
@@ -120,6 +120,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       help: i18n.translate('expressionPie.pieVis.function.args.labelsHelpText', {
         defaultMessage: 'Pie labels config',
       }),
+      default: `{${PIE_LABELS_FUNCTION}}`,
     },
   },
   fn(context, args, handlers) {

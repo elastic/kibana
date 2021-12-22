@@ -25,7 +25,7 @@ const EMPTY_SLICE = Symbol('empty_slice');
 export const computeColor = (
   d: ShapeTreeNode,
   isSplitChart: boolean,
-  overwriteColors: { [key: string]: string },
+  overwriteColors: { [key: string]: string } = {},
   columns: Array<Partial<BucketColumns>>,
   rows: DatatableRow[],
   visParams: PieVisParams,
@@ -126,7 +126,7 @@ export const computeColor = (
 export const getLayers = (
   columns: Array<Partial<BucketColumns>>,
   visParams: PieVisParams,
-  overwriteColors: { [key: string]: string },
+  overwriteColors: { [key: string]: string } = {},
   rows: DatatableRow[],
   palettes: PaletteRegistry | null,
   formatter: FieldFormatsStart,
