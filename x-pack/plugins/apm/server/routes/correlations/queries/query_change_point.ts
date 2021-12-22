@@ -8,7 +8,10 @@ import { uniqBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from 'kibana/server';
 import { ERROR_CORRELATION_THRESHOLD } from '../../../../common/correlations/constants';
-import { CorrelationsParams } from '../../../../common/correlations/types';
+import {
+  ResponseHit,
+  CorrelationsParams,
+} from '../../../../common/correlations/types';
 import { ChangePointParams } from '../../../../common/correlations/change_point/types';
 import { getCorrelationsFilters } from './get_filters';
 import { getRequestBase } from './get_request_base';
@@ -100,6 +103,20 @@ export const getChangePointRequest = (
   };
 };
 
+interface ChangePointPValue
+  extends estypes.AggregationsSignificantTermsAggregation {
+  buckets: Array<{
+    key: string | number;
+    doc_count: number;
+    bg_count: number;
+    score: number;
+  }>;
+}
+
+interface Aggs {
+  change_point_p_value: ChangePointPValue;
+}
+
 export const fetchChangePointPValues = async (
   esClient: ElasticsearchClient,
   params: ChangePointParams & CorrelationsParams,
@@ -115,19 +132,13 @@ export const fetchChangePointPValues = async (
 
   for (const fieldName of fieldNames) {
     const request = getChangePointRequest(params, fieldName, windowParameters);
-    const resp = await esClient.search(request);
+    const resp = await esClient.search<ResponseHit, Aggs>(request);
 
     if (resp.body.aggregations === undefined) {
       throw new Error('fetchChangePoint failed, did not return aggregations.');
     }
 
-    const overallResult = resp.body.aggregations
-      .change_point_p_value as estypes.AggregationsSignificantTermsAggregate<{
-      key: string | number;
-      doc_count: number;
-      bg_count: number;
-      score: number;
-    }>;
+    const overallResult = resp.body.aggregations.change_point_p_value;
 
     // Using for of to sequentially augment the results with histogram data.
     for (const bucket of overallResult.buckets) {

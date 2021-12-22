@@ -6,98 +6,127 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { brush, brushSelection, brushX } from 'd3-brush';
-import { scaleLinear } from 'd3-scale';
-import { select } from 'd3-selection';
 
-import { useResizeObserver } from '@elastic/eui';
+import { brush, brushSelection, brushX } from 'd3-brush';
+import type { BrushBehavior } from 'd3-brush';
+import { scaleLinear } from 'd3-scale';
+// Import fix to apply correct types for the use of d3.select(this).transition()
+import { select as d3Select, BaseType } from 'd3-selection';
+import { transition as d3Transition } from 'd3-transition';
+d3Select.prototype.transition = d3Transition;
 
 import { WindowParameters } from '../../../../common/correlations/change_point/types';
 
 import './brush.scss';
 
-const d3 = { brush, brushSelection, brushX, scaleLinear, select };
+const d3 = {
+  brush,
+  brushSelection,
+  brushX,
+  scaleLinear,
+  select: d3Select,
+  transition: d3Transition,
+};
+
+const isBrushXSelection = (arg: unknown): arg is [number, number] => {
+  return (
+    Array.isArray(arg) &&
+    arg.length === 2 &&
+    typeof arg[0] === 'number' &&
+    typeof arg[1] === 'number'
+  );
+};
 
 interface MlBrush {
   id: string;
-  brush: unknown;
+  brush: BrushBehavior<MlBrush>;
   start: number;
   end: number;
 }
 
-const margin = {
-  top: 0,
-  right: 30,
-  bottom: 0,
-  left: 60,
-};
-
-// const width = 400 - margin.left - margin.right;
-const height = 40 - margin.top - margin.bottom;
+const BRUSH_HEIGHT = 20;
+const BRUSH_MARGIN = 4;
+const BRUSH_HANDLE_SIZE = 4;
+const BRUSH_HANDLE_ROUNDED_CORNER = 2;
 
 export function MlBrush({
   windowParameters,
   min,
   max,
   onChange,
+  marginLeft,
+  width,
 }: {
   windowParameters: WindowParameters;
   min: number;
   max: number;
-  onChange?: (windowParameters: WindowParameters) => {};
+  onChange?: (windowParameters: WindowParameters) => void;
+  marginLeft: number;
+  width: number;
 }) {
-  const stageSvgRef = useRef(null);
-  const d3Container = useRef(null);
-  const stageDimensions = useResizeObserver(stageSvgRef.current);
-  const width =
-    stageDimensions.width > 0
-      ? stageDimensions.width - margin.left - margin.right
-      : null;
+  const d3BrushContainer = useRef(null);
+  const brushes = useRef<MlBrush[]>([]);
+  const widthRef = useRef(width);
 
   const { baselineMin, baselineMax, deviationMin, deviationMax } =
     windowParameters;
 
   useEffect(() => {
-    if (d3Container.current && stageSvgRef.current && width) {
-      const x = d3.scaleLinear().domain([min, max]).rangeRound([0, width]);
-      const px2ts = (px: number) => Math.round(x.invert(px));
-      const minExtentPx = Math.round((x(max) - x(min)) / 100);
-      const brushes: MlBrush[] = [];
-
-      const svg = d3.select(d3Container.current);
-
-      const gElement = svg.select('g');
-
-      const gBrushes = gElement.select('.brushes');
+    if (d3BrushContainer.current && width > 0) {
+      const gBrushes = d3.select(d3BrushContainer.current);
 
       function newBrush(id: string, start: number, end: number) {
-        brushes.push({
+        brushes.current.push({
           id,
           brush: d3
-            .brushX()
-            .on('start', brushstart)
-            .on('brush', brushed)
+            .brushX<MlBrush>()
+            .handleSize(BRUSH_HANDLE_SIZE)
             .on('end', brushend),
           start,
           end,
         });
 
-        function brushstart() {
-          // your stuff here
-        }
+        function brushend(this: BaseType) {
+          const currentWidth = widthRef.current;
 
-        function brushed() {
-          // your stuff here
-        }
+          const x = d3
+            .scaleLinear()
+            .domain([min, max])
+            .rangeRound([0, currentWidth]);
 
-        function brushend() {
-          const baselineBrush = document.getElementById('brush-baseline');
-          const baselineSelection = d3.brushSelection(baselineBrush);
+          const px2ts = (px: number) => Math.round(x.invert(px));
+          const minExtentPx = Math.round((x(max) - x(min)) / 100);
 
-          const deviationBrush = document.getElementById('brush-deviation');
-          const deviationSelection = d3.brushSelection(deviationBrush);
+          const baselineBrush = d3.select('#brush-baseline');
+          const baselineSelection = d3.brushSelection(
+            baselineBrush.node() as SVGGElement
+          );
 
-          if (!deviationSelection || !baselineSelection) {
+          const deviationBrush = d3.select('#brush-deviation');
+          const deviationSelection = d3.brushSelection(
+            deviationBrush.node() as SVGGElement
+          );
+
+          if (
+            !isBrushXSelection(deviationSelection) ||
+            !isBrushXSelection(baselineSelection)
+          ) {
+            return;
+          }
+
+          const baselineOverlay = baselineBrush.selectAll('.overlay');
+          const deviationOverlay = deviationBrush.selectAll('.overlay');
+
+          let baselineWidth;
+          let deviationWidth;
+          baselineOverlay.each((d, i, n) => {
+            baselineWidth = d3.select(n[i]).attr('width');
+          });
+          deviationOverlay.each((d, i, n) => {
+            deviationWidth = d3.select(n[i]).attr('width');
+          });
+
+          if (baselineWidth !== deviationWidth) {
             return;
           }
 
@@ -126,7 +155,11 @@ export function MlBrush({
             d3.select(this)
               .transition()
               .duration(200)
-              .call(brushes[1].brush.move, [newDeviationMin, newDeviationMax]);
+              // @ts-ignore call doesn't allow the brush move function
+              .call(brushes.current[1].brush.move, [
+                newDeviationMin,
+                newDeviationMax,
+              ]);
           } else if (
             id === 'baseline' &&
             deviationSelection &&
@@ -145,8 +178,17 @@ export function MlBrush({
             d3.select(this)
               .transition()
               .duration(200)
-              .call(brushes[0].brush.move, [newBaselineMin, newBaselineMax]);
+              // @ts-ignore call doesn't allow the brush move function
+              .call(brushes.current[0].brush.move, [
+                newBaselineMin,
+                newBaselineMax,
+              ]);
           }
+
+          brushes.current[0].start = newWindowParameters.baselineMin;
+          brushes.current[0].end = newWindowParameters.baselineMax;
+          brushes.current[1].start = newWindowParameters.deviationMin;
+          brushes.current[1].end = newWindowParameters.deviationMax;
 
           if (onChange) {
             onChange(newWindowParameters);
@@ -158,21 +200,23 @@ export function MlBrush({
       function drawBrushes() {
         const mlBrushSelection = gBrushes
           .selectAll('.brush')
-          .data(brushes, function (d: MlBrush) {
-            return d.id;
-          });
+          .data<MlBrush>(brushes.current, (d) => (d as MlBrush).id);
 
         // Set up new brushes
         mlBrushSelection
           .enter()
           .insert('g', '.brush')
           .attr('class', 'brush')
-          .attr('id', function (b: MlBrush) {
+          .attr('id', (b: MlBrush) => {
             return 'brush-' + b.id;
           })
-          .each(function (brushObject: MlBrush) {
-            brushObject.brush(d3.select(this));
-            brushObject.brush.move(d3.select(this), [
+          .each((brushObject: MlBrush, i, n) => {
+            const x = d3
+              .scaleLinear()
+              .domain([min, max])
+              .rangeRound([0, widthRef.current]);
+            brushObject.brush(d3.select(n[i]));
+            brushObject.brush.move(d3.select(n[i]), [
               x(brushObject.start),
               x(brushObject.end),
             ]);
@@ -182,13 +226,50 @@ export function MlBrush({
         mlBrushSelection
           .attr('class', 'brush')
           .selectAll('.overlay')
+          .attr('width', width)
           .style('pointer-events', 'none');
+
+        mlBrushSelection
+          .selectAll('.handle')
+          .attr('rx', BRUSH_HANDLE_ROUNDED_CORNER)
+          .attr('ry', BRUSH_HANDLE_ROUNDED_CORNER);
 
         mlBrushSelection.exit().remove();
       }
 
-      newBrush('baseline', baselineMin, baselineMax);
-      newBrush('deviation', deviationMin, deviationMax);
+      function updateBrushes() {
+        const mlBrushSelection = gBrushes
+          .selectAll('.brush')
+          .data<MlBrush>(brushes.current, (d) => (d as MlBrush).id);
+
+        mlBrushSelection.each(function (brushObject, i, n) {
+          const x = d3
+            .scaleLinear()
+            .domain([min, max])
+            .rangeRound([0, widthRef.current]);
+          brushObject.brush.extent([
+            [0, BRUSH_MARGIN],
+            [width, BRUSH_HEIGHT - BRUSH_MARGIN],
+          ]);
+          brushObject.brush(d3.select(n[i] as SVGGElement));
+          brushObject.brush.move(d3.select(n[i] as SVGGElement), [
+            x(brushObject.start),
+            x(brushObject.end),
+          ]);
+        });
+      }
+
+      if (brushes.current.length !== 2) {
+        widthRef.current = width;
+        newBrush('baseline', baselineMin, baselineMax);
+        newBrush('deviation', deviationMin, deviationMax);
+      } else {
+        if (widthRef.current !== width) {
+          widthRef.current = width;
+          updateBrushes();
+        }
+      }
+
       drawBrushes();
     }
   }, [
@@ -203,21 +284,17 @@ export function MlBrush({
   ]);
 
   return (
-    <div className="ml-state-svg" ref={stageSvgRef}>
-      {width && (
+    <>
+      {width > 0 && (
         <svg
           className="ml-d3-component"
           width={width}
-          height={height + 5}
-          style={{ marginLeft: margin.left, marginTop: margin.top }}
-          ref={d3Container}
+          height={BRUSH_HEIGHT}
+          style={{ marginLeft }}
         >
-          <g className="ml-d3-component-transform" width={width}>
-            <rect className="grid-background" width={width} height={height} />
-            <g className="brushes" />
-          </g>
+          <g className="brushes" width={width} ref={d3BrushContainer} />
         </svg>
       )}
-    </div>
+    </>
   );
 }

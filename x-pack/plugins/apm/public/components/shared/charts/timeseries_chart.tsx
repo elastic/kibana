@@ -190,11 +190,12 @@ export function TimeseriesChart({
     }
   };
 
-  const { progress, response, startFetch } = useChangePointDetection(
-    windowParameters ?? {}
-  );
+  const { progress, response, startFetch } =
+    useChangePointDetection(windowParameters);
 
   const [showModal, setShowModal] = useState(false);
+  const [mlBrushWidth, setMlBrushWidth] = useState<number>();
+  const [mlBrushMarginLeft, setMlBrushMarginLeft] = useState<number>();
 
   useEffect(() => {
     if (windowParameters) {
@@ -372,21 +373,33 @@ export function TimeseriesChart({
 
   const chart = (
     <>
-      {originalWindowParameters && (
-        <MlBrush
-          windowParameters={originalWindowParameters}
-          min={min}
-          max={max}
-          onChange={onWindowParametersChange}
-        />
-      )}
+      {originalWindowParameters &&
+        mlBrushMarginLeft &&
+        mlBrushWidth &&
+        mlBrushWidth > 0 && (
+          <MlBrush
+            windowParameters={originalWindowParameters}
+            min={min}
+            max={max}
+            onChange={onWindowParametersChange}
+            marginLeft={mlBrushMarginLeft}
+            width={mlBrushWidth}
+          />
+        )}
       <ChartContainer
         hasData={!isEmpty}
         height={height}
         status={fetchStatus}
         id={id}
       >
-        <Chart ref={chartRef} id={id}>
+        <Chart
+          ref={chartRef}
+          id={id}
+          onInternalMainProjectionAreaDimensionsChange={(d) => {
+            setMlBrushMarginLeft(d.left);
+            setMlBrushWidth(d.width);
+          }}
+        >
           <Settings
             debugState={true}
             tooltip={{ stickTo: 'top', showNullValues: true }}
@@ -402,6 +415,9 @@ export function TimeseriesChart({
               {
                 areaSeriesStyle: {
                   line: { visible: false },
+                },
+                chartMargins: {
+                  top: 0,
                 },
               },
               ...chartTheme,

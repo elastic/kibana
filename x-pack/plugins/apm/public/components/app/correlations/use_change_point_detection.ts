@@ -13,11 +13,11 @@ import { IHttpFetchError, ResponseErrorBody } from 'src/core/public';
 import { DEBOUNCE_INTERVAL } from '../../../../common/correlations/constants';
 import type {
   ChangePoint,
-  ChangePointParams,
   ChangePointsResponse,
+  WindowParameters,
 } from '../../../../common/correlations/change_point/types';
 
-import { callApmApi } from '../../../services/rest/createCallApmApi';
+import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
 import {
   getInitialResponse,
@@ -34,7 +34,7 @@ const LOADED_DONE = 1;
 const PROGRESS_STEP_P_VALUES = 0.9;
 
 export function useChangePointDetection(
-  searchStrategyParams: ChangePointParams
+  searchStrategyParams?: WindowParameters
 ) {
   const fetchParams = useFetchParams();
 
@@ -67,6 +67,9 @@ export function useChangePointDetection(
     setResponse.flush();
 
     try {
+      if (!searchStrategyParams) {
+        return;
+      }
       // `responseUpdate` will be enriched with additional data with subsequent
       // calls to the overall histogram, field candidates, field value pairs, correlation results
       // and histogram data for statistically significant results.
@@ -80,13 +83,15 @@ export function useChangePointDetection(
       });
       setResponse.flush();
 
-      const { fieldCandidates } = await callApmApi({
-        endpoint: 'GET /internal/apm/correlations/field_candidates',
-        signal: abortCtrl.current.signal,
-        params: {
-          query: fetchParams,
-        },
-      });
+      const { fieldCandidates } = await callApmApi(
+        'GET /internal/apm/correlations/field_candidates',
+        {
+          signal: abortCtrl.current.signal,
+          params: {
+            query: fetchParams,
+          },
+        }
+      );
       // console.log('fieldCandidates', fieldCandidates);
 
       // if (abortCtrl.current.signal.aborted) {
@@ -107,18 +112,19 @@ export function useChangePointDetection(
       // console.log('fieldCandidatesChunks', fieldCandidatesChunks);
 
       for (const fieldCandidatesChunk of fieldCandidatesChunks) {
-        const { changePoints: pValues } = await callApmApi({
-          endpoint: 'POST /internal/apm/correlations/change_point_p_values',
-          signal: abortCtrl.current.signal,
-          params: {
-            body: {
-              ...fetchParams,
-              fieldCandidates: fieldCandidatesChunk,
-              ...searchStrategyParams,
+        const { changePoints: pValues } = await callApmApi(
+          'POST /internal/apm/correlations/change_point_p_values',
+          {
+            signal: abortCtrl.current.signal,
+            params: {
+              body: {
+                ...fetchParams,
+                fieldCandidates: fieldCandidatesChunk,
+                ...searchStrategyParams,
+              },
             },
-          },
-        });
-        // console.log('pValues', pValues);
+          }
+        );
 
         if (pValues.length > 0) {
           pValues.forEach((d) => {
@@ -146,16 +152,18 @@ export function useChangePointDetection(
 
       setResponse.flush();
 
-      const { stats } = await callApmApi({
-        endpoint: 'POST /internal/apm/correlations/field_stats',
-        signal: abortCtrl.current.signal,
-        params: {
-          body: {
-            ...fetchParams,
-            fieldsToSample: [...fieldsToSample],
+      const { stats } = await callApmApi(
+        'POST /internal/apm/correlations/field_stats',
+        {
+          signal: abortCtrl.current.signal,
+          params: {
+            body: {
+              ...fetchParams,
+              fieldsToSample: [...fieldsToSample],
+            },
           },
-        },
-      });
+        }
+      );
 
       responseUpdate.fieldStats = stats;
       setResponse({
