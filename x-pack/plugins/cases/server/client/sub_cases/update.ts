@@ -36,7 +36,6 @@ import {
 } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getCaseToUpdate } from '../utils';
-import { buildSubCaseUserActions } from '../../services/user_actions/helpers';
 import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateRequest,
@@ -381,14 +380,11 @@ export async function update({
       []
     );
 
-    await userActionService.bulkCreate({
+    await userActionService.bulkCreateUpdateCase({
       unsecuredSavedObjectsClient,
-      actions: buildSubCaseUserActions({
-        originalSubCases: bulkSubCases.saved_objects,
-        updatedSubCases: updatedCases.saved_objects,
-        actionDate: updatedAt,
-        actionBy: user,
-      }),
+      originalCases: bulkSubCases.saved_objects,
+      updatedCases: updatedCases.saved_objects,
+      user,
     });
 
     return SubCasesResponseRt.encode(returnUpdatedSubCases);

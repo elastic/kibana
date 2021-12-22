@@ -48,7 +48,7 @@ export const caseTypeField = 'type';
 
 const CaseTypeRt = rt.union([rt.literal(CaseType.collection), rt.literal(CaseType.individual)]);
 
-const SettingsRt = rt.type({
+export const SettingsRt = rt.type({
   syncAlerts: rt.boolean,
 });
 
@@ -102,7 +102,7 @@ export const CaseUserActionExternalServiceRt = rt.type({
 
 export const CaseExternalServiceBasicRt = rt.intersection([
   rt.type({
-    connector_id: rt.union([rt.string, rt.null]),
+    connector_id: rt.string,
   }),
   CaseUserActionExternalServiceRt,
 ]);
@@ -339,6 +339,7 @@ export type CasesPatchRequest = rt.TypeOf<typeof CasesPatchRequestRt>;
 export type CaseFullExternalService = rt.TypeOf<typeof CaseFullExternalServiceRt>;
 export type CaseSettings = rt.TypeOf<typeof SettingsRt>;
 export type ExternalServiceResponse = rt.TypeOf<typeof ExternalServiceResponseRt>;
+export type CaseExternalServiceBasic = rt.TypeOf<typeof CaseExternalServiceBasicRt>;
 
 export type AllTagsFindRequest = rt.TypeOf<typeof AllTagsFindRequestRt>;
 export type AllReportersFindRequest = AllTagsFindRequest;

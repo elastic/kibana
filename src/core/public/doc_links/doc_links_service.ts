@@ -311,6 +311,7 @@ export class DocLinksService {
         },
         securitySolution: {
           trustedApps: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/trusted-apps-ov.html`,
+          eventFilters: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/event-filters.html`,
         },
         query: {
           eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -801,6 +802,7 @@ export interface DocLinksStart {
     };
     readonly securitySolution: {
       readonly trustedApps: string;
+      readonly eventFilters: string;
     };
     readonly query: {
       readonly eql: string;
