@@ -56,12 +56,12 @@ export interface UnauthorizedErrorHandlerToolkit {
   /**
    * The handler cannot handle the error, or was not able to reauthenticate
    * */
-  notHandled: () => UnauthorizedErrorHandlerResult;
+  notHandled: () => UnauthorizedErrorHandlerNotHandledResult;
   /**
    * The handle was able to reauthenticate.
    * @param params
    */
-  retry: (params: UnauthorizedErrorHandlerResultRetryParams) => UnauthorizedErrorHandlerResult;
+  retry: (params: UnauthorizedErrorHandlerResultRetryParams) => UnauthorizedErrorHandlerRetryResult;
 }
 
 /**
@@ -88,8 +88,7 @@ export const toolkit: UnauthorizedErrorHandlerToolkit = {
   }),
 };
 
-export const notHandledInternalErrorHandler: InternalUnauthorizedErrorHandler = () =>
-  toolkit.notHandled();
+const notHandledInternalErrorHandler: InternalUnauthorizedErrorHandler = () => toolkit.notHandled();
 
 /**
  * Converts the public version of `UnauthorizedErrorHandler` to the internal one used by the ES client
