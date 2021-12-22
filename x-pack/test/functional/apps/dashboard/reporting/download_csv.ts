@@ -31,10 +31,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
 
   const navigateToDashboardApp = async () => {
-    log.debug('navigating to dashboard app');
+    log.debug('in navigateToDashboardApp');
     await PageObjects.common.navigateToApp('dashboard');
     await retry.tryForTime(10000, async () => {
-      testSubjects.existOrFail('dashboardLandingPage');
+      expect(await PageObjects.dashboard.onDashboardLandingPage()).to.be(true);
     });
   };
 
@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
     });
 
-    describe('Default Search Setup', () => {
+    describe('Default Saved Search Data', () => {
       const dashboardAllDataHiddenTitles = 'Ecom Dashboard Hidden Panel Titles';
       const dashboardPeriodOf2DaysData = 'Ecom Dashboard - 3 Day Period';
 
@@ -130,7 +130,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Filtered Search Setup', () => {
+    describe('Filtered Saved Search', () => {
       const TEST_SEARCH_TITLE = 'A Saved Search With a DATE FILTER';
       const TEST_DASHBOARD_TITLE = 'Filtered Search Data';
       const setTimeRange = async () => {
@@ -156,7 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.emptyKibanaIndex();
       });
 
-      it('filtered download', async () => {
+      it('Downloads filtered Discover saved search report', async () => {
         await clickActionsMenu(TEST_SEARCH_TITLE.replace(/ /g, ''));
         await clickDownloadCsv();
 
