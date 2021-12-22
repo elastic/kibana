@@ -8,26 +8,49 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import * as rt from 'io-ts';
-import { isString } from 'lodash';
 
-import { SavedObjectReference } from '../../../../../../src/core/server';
-import { isCreateConnector, isPush, isUpdateConnector } from '../../../common/utils/user_actions';
+import {
+  SavedObjectMigrationContext,
+  SavedObjectReference,
+  SavedObjectSanitizedDoc,
+  SavedObjectUnsanitizedDoc,
+} from '../../../../../../../src/core/server';
 import {
   CaseAttributes,
   CaseConnector,
   CaseConnectorRt,
   CaseExternalServiceBasicRt,
-  noneConnectorId,
-} from '../../../common/api';
+  NONE_CONNECTOR_ID,
+} from '../../../../common/api';
 import {
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
-  USER_ACTION_OLD_ID_REF_NAME,
-  USER_ACTION_OLD_PUSH_ID_REF_NAME,
-} from '../../common/constants';
-import { getNoneCaseConnector } from '../../common/utils';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
-import { UserActionFieldType } from './types';
+} from '../../../common/constants';
+import { getNoneCaseConnector } from '../../../common/utils';
+import { ACTION_SAVED_OBJECT_TYPE } from '../../../../../actions/server';
+import { UserActionUnmigratedConnectorDocument } from './types';
+import { logError } from '../utils';
+import { USER_ACTION_OLD_ID_REF_NAME, USER_ACTION_OLD_PUSH_ID_REF_NAME } from './constants';
+
+export function isCreateConnector(action?: string, actionFields?: string[]): boolean {
+  return action === 'create' && actionFields != null && actionFields.includes('connector');
+}
+
+export function isUpdateConnector(action?: string, actionFields?: string[]): boolean {
+  return action === 'update' && actionFields != null && actionFields.includes('connector');
+}
+
+export function isPush(action?: string, actionFields?: string[]): boolean {
+  return action === 'push-to-service' && actionFields != null && actionFields.includes('pushed');
+}
+
+/**
+ * Indicates whether which user action field is being parsed, the new_value or the old_value.
+ */
+export enum UserActionFieldType {
+  New = 'New',
+  Old = 'Old',
+}
 
 /**
  * Extracts the connector id from a json encoded string and formats it as a saved object reference. This will remove
@@ -56,49 +79,6 @@ export function extractConnectorIdFromJson({
     actionDetails: decodedJson,
     fieldType,
   });
-}
-
-/**
- * Extracts the connector id from an unencoded object and formats it as a saved object reference.
- * This will remove the field it extracted the connector id from.
- */
-export function extractConnectorId({
-  action,
-  actionFields,
-  actionDetails,
-  fieldType,
-}: {
-  action: string;
-  actionFields: string[];
-  actionDetails?: Record<string, unknown> | string | null;
-  fieldType: UserActionFieldType;
-}): {
-  transformedActionDetails?: string | null;
-  references: SavedObjectReference[];
-} {
-  if (!actionDetails || isString(actionDetails)) {
-    // the action was null, undefined, or a regular string so just return it unmodified and not encoded
-    return { transformedActionDetails: actionDetails, references: [] };
-  }
-
-  try {
-    return extractConnectorIdHelper({
-      action,
-      actionFields,
-      actionDetails,
-      fieldType,
-    });
-  } catch (error) {
-    return { transformedActionDetails: encodeActionDetails(actionDetails), references: [] };
-  }
-}
-
-function encodeActionDetails(actionDetails: Record<string, unknown>): string | null {
-  try {
-    return JSON.stringify(actionDetails);
-  } catch (error) {
-    return null;
-  }
 }
 
 /**
@@ -153,7 +133,7 @@ export function extractConnectorIdHelper({
   };
 }
 
-function isCreateCaseConnector(
+export function isCreateCaseConnector(
   action: string,
   actionFields: string[],
   actionDetails: unknown
@@ -176,7 +156,7 @@ export const ConnectorIdReferenceName: Record<UserActionFieldType, ConnectorIdRe
   [UserActionFieldType.Old]: USER_ACTION_OLD_ID_REF_NAME,
 };
 
-function transformConnectorFromCreateAndUpdateAction(
+export function transformConnectorFromCreateAndUpdateAction(
   connector: CaseConnector,
   fieldType: UserActionFieldType
 ): {
@@ -240,7 +220,7 @@ const createConnectorReference = (
 };
 
 const isConnectorIdValid = (id: string | null | undefined): id is string =>
-  id != null && id !== noneConnectorId;
+  id != null && id !== NONE_CONNECTOR_ID;
 
 function isUpdateCaseConnector(
   action: string,
@@ -316,3 +296,72 @@ export const transformPushConnectorIdToReference = (
     references,
   };
 };
+
+export function isConnectorUserAction(action?: string, actionFields?: string[]): boolean {
+  return (
+    isCreateConnector(action, actionFields) ||
+    isUpdateConnector(action, actionFields) ||
+    isPush(action, actionFields)
+  );
+}
+
+export function formatDocumentWithConnectorReferences(
+  doc: SavedObjectUnsanitizedDoc<UserActionUnmigratedConnectorDocument>
+): SavedObjectSanitizedDoc<unknown> {
+  const { new_value, old_value, action, action_field, ...restAttributes } = doc.attributes;
+  const { references = [] } = doc;
+
+  const { transformedActionDetails: transformedNewValue, references: newValueConnectorRefs } =
+    extractConnectorIdFromJson({
+      action,
+      actionFields: action_field,
+      actionDetails: new_value,
+      fieldType: UserActionFieldType.New,
+    });
+
+  const { transformedActionDetails: transformedOldValue, references: oldValueConnectorRefs } =
+    extractConnectorIdFromJson({
+      action,
+      actionFields: action_field,
+      actionDetails: old_value,
+      fieldType: UserActionFieldType.Old,
+    });
+
+  return {
+    ...doc,
+    attributes: {
+      ...restAttributes,
+      action,
+      action_field,
+      new_value: transformedNewValue,
+      old_value: transformedOldValue,
+    },
+    references: [...references, ...newValueConnectorRefs, ...oldValueConnectorRefs],
+  };
+}
+
+// 8.1.0 migration util functions
+export function userActionsConnectorIdMigration(
+  doc: SavedObjectUnsanitizedDoc<UserActionUnmigratedConnectorDocument>,
+  context: SavedObjectMigrationContext
+): SavedObjectSanitizedDoc<unknown> {
+  const originalDocWithReferences = { ...doc, references: doc.references ?? [] };
+
+  if (!isConnectorUserAction(doc.attributes.action, doc.attributes.action_field)) {
+    return originalDocWithReferences;
+  }
+
+  try {
+    return formatDocumentWithConnectorReferences(doc);
+  } catch (error) {
+    logError({
+      id: doc.id,
+      context,
+      error,
+      docType: 'user action connector',
+      docKey: 'userAction',
+    });
+
+    return originalDocWithReferences;
+  }
+}
