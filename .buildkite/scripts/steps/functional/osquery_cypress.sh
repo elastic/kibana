@@ -21,10 +21,9 @@ echo "--- Osquery Cypress tests"
 
 cd x-pack
 
-checks-reporter-with-killswitch "Osquery Cypress Tests" \
-  node scripts/functional_tests \
-    --debug --bail \
-    --config test/osquery_cypress/cli_config.ts
+node scripts/functional_tests \
+  --debug --bail \
+  --config test/osquery_cypress/cli_config.ts
 
 ls -a plugins/osquery
 ls -a plugins/osquery/cypress
