@@ -34,7 +34,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "props",
-            "description": [],
+            "description": [
+              "{@link TrackApplicationViewProps }"
+            ],
             "signature": [
               "React.PropsWithChildren<",
               {
@@ -90,7 +92,7 @@
               "\nThe React component to be tracked."
             ],
             "signature": [
-              "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | null | undefined"
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "src/plugins/usage_collection/public/components/track_application_view/types.ts",
             "deprecated": false
@@ -140,13 +142,7 @@
           ],
           "signature": [
             "(appName: string, type: ",
-            {
-              "pluginId": "@kbn/analytics",
-              "scope": "common",
-              "docId": "kibKbnAnalyticsPluginApi",
-              "section": "def-common.UiCounterMetricType",
-              "text": "UiCounterMetricType"
-            },
+            "UiCounterMetricType",
             ", eventNames: string | string[], count?: number | undefined) => void"
           ],
           "path": "src/plugins/usage_collection/public/plugin.tsx",
@@ -174,13 +170,7 @@
               "label": "type",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "@kbn/analytics",
-                  "scope": "common",
-                  "docId": "kibKbnAnalyticsPluginApi",
-                  "section": "def-common.UiCounterMetricType",
-                  "text": "UiCounterMetricType"
-                }
+                "UiCounterMetricType"
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
@@ -244,13 +234,7 @@
           ],
           "signature": [
             "(appName: string, type: ",
-            {
-              "pluginId": "@kbn/analytics",
-              "scope": "common",
-              "docId": "kibKbnAnalyticsPluginApi",
-              "section": "def-common.UiCounterMetricType",
-              "text": "UiCounterMetricType"
-            },
+            "UiCounterMetricType",
             ", eventNames: string | string[], count?: number | undefined) => void"
           ],
           "path": "src/plugins/usage_collection/public/plugin.tsx",
@@ -278,13 +262,7 @@
               "label": "type",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "@kbn/analytics",
-                  "scope": "common",
-                  "docId": "kibKbnAnalyticsPluginApi",
-                  "section": "def-common.UiCounterMetricType",
-                  "text": "UiCounterMetricType"
-                }
+                "UiCounterMetricType"
               ],
               "path": "src/plugins/usage_collection/public/plugin.tsx",
               "deprecated": false,
@@ -384,9 +362,7 @@
             ],
             "signature": [
               "ICollectorOptionsFetchExtendedContext",
-              "<boolean> | (",
-              "ICollectorOptionsFetchExtendedContext",
-              "<boolean> & Required<Pick<",
+              "<boolean> & ({} | Required<Pick<",
               "ICollectorOptionsFetchExtendedContext",
               "<true>, \"kibanaRequest\">>)"
             ],
@@ -453,15 +429,15 @@
                     "section": "def-server.ElasticsearchClient",
                     "text": "ElasticsearchClient"
                   },
-                  "; soClient: Pick<",
+                  "; soClient: ",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsClient",
-                    "text": "SavedObjectsClient"
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
                   },
-                  ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; } & (WithKibanaRequest extends true ? { kibanaRequest?: ",
+                  "; } & (WithKibanaRequest extends true ? { kibanaRequest?: ",
                   {
                     "pluginId": "core",
                     "scope": "server",
@@ -594,7 +570,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": [],
+                "description": [
+                  "{@link IncrementCounterParams }"
+                ],
                 "signature": [
                   {
                     "pluginId": "usageCollection",
@@ -701,7 +679,7 @@
           "\nPossible type values in the schema"
         ],
         "signature": [
-          "\"boolean\" | \"date\" | \"keyword\" | \"long\" | \"double\" | \"text\" | \"short\" | \"float\" | \"integer\" | \"byte\""
+          "\"boolean\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"text\" | \"integer\" | \"short\" | \"byte\" | \"float\""
         ],
         "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,
@@ -725,15 +703,15 @@
             "section": "def-server.ElasticsearchClient",
             "text": "ElasticsearchClient"
           },
-          "; soClient: Pick<",
+          "; soClient: ",
           {
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsClient",
-            "text": "SavedObjectsClient"
+            "section": "def-server.SavedObjectsClientContract",
+            "text": "SavedObjectsClientContract"
           },
-          ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; } & (WithKibanaRequest extends true ? { kibanaRequest?: ",
+          "; } & (WithKibanaRequest extends true ? { kibanaRequest?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -795,15 +773,15 @@
                 "section": "def-server.ElasticsearchClient",
                 "text": "ElasticsearchClient"
               },
-              "; soClient: Pick<",
+              "; soClient: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClient",
-                "text": "SavedObjectsClient"
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
               },
-              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; } & (WithKibanaRequest extends true ? { kibanaRequest?: ",
+              "; } & (WithKibanaRequest extends true ? { kibanaRequest?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
