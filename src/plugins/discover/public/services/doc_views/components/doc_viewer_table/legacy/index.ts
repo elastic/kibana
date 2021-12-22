@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DocViewerTable } from './table';
+import { DocViewerLegacyTable } from './table';
 
 // Required for usage in React.lazy
 // eslint-disable-next-line import/no-default-export
-export default DocViewerTable;
+export default DocViewerLegacyTable;
