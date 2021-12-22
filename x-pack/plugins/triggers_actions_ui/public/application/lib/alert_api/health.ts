@@ -41,11 +41,11 @@ export async function alertingFrameworkHealth({
   const res = await http.get<AsApiContract<AlertingFrameworkHealth>>(
     `${BASE_ALERTING_API_PATH}/_health`
   );
-  const alertingFrameworkHealth = rewriteAlertingFrameworkHealth(
+  const alertingFrameworkHealthRewrited = rewriteAlertingFrameworkHealth(
     res.alerting_framework_health as unknown as AsApiContract<AlertsHealth>
   );
   return {
     ...rewriteBodyRes(res),
-    alertingFrameworkHealth,
+    alertingFrameworkHealth: alertingFrameworkHealthRewrited,
   };
 }
