@@ -86,7 +86,7 @@ Breaking changes can prevent your application from optimal operation and perform
 The 7.16.2 release includes the following bug fixes.
 
 Fleet::
-* Omit elasticsearch field for policy update API (partial backport of {kibana-pull}121412[#121412]
+* Omits `elasticsearch` field for policy update API (partial backport of {kibana-pull}121412[#121412])
 Lens & Visualizations::
 * Fixes the broken chart when an agg is placed in another axis and then is hidden {kibana-pull}121488[#121488]
 Metrics::
