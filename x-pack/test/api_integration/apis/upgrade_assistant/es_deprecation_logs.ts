@@ -38,7 +38,7 @@ export default function ({ getService }: FtrProviderContext) {
               index: DEPRECATION_LOGS_INDEX,
               size: 10000,
             })
-          ).body.hits.hits;
+          ).hits.hits;
 
           const nonElasticProductDeprecations = allDeprecations.filter(
             (deprecation) =>
