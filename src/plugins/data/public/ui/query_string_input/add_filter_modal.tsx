@@ -31,6 +31,7 @@ import {
   EuiSpacer,
   EuiHorizontalRule,
   EuiButtonIcon,
+  EuiText,
 } from '@elastic/eui';
 import { XJsonLang } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
@@ -74,6 +75,11 @@ interface FilterGroup {
   field: IFieldType | undefined;
   operator: Operator | undefined;
   value: any;
+  relationship?: string;
+}
+
+interface FilterGroups {
+  [key: string]: FilterGroup[];
 }
 
 export function AddFilterModal({
@@ -111,7 +117,8 @@ export function AddFilterModal({
 
   const onFieldChange = ([field]: IFieldType[], localFilterIndex: number) => {
     const updatedLocalFilter = { ...localFilters[localFilterIndex], field };
-    setLocalFilters([...localFilters.slice(0, localFilterIndex), updatedLocalFilter]);
+    localFilters[localFilterIndex] = updatedLocalFilter;
+    setLocalFilters([...localFilters]);
   };
 
   const onOperatorChange = ([operator]: Operator[], localFilterIndex: number) => {
@@ -121,12 +128,14 @@ export function AddFilterModal({
         ? localFilters[localFilterIndex].value
         : undefined;
     const updatedLocalFilter = { ...localFilters[localFilterIndex], operator, value: params };
-    setLocalFilters([...localFilters.slice(0, localFilterIndex), updatedLocalFilter]);
+    localFilters[localFilterIndex] = updatedLocalFilter;
+    setLocalFilters([...localFilters]);
   };
 
   const onParamsChange = (newFilterParams: any, localFilterIndex: number) => {
     const updatedLocalFilter = { ...localFilters[localFilterIndex], value: newFilterParams };
-    setLocalFilters([...localFilters.slice(0, localFilterIndex), updatedLocalFilter]);
+    localFilters[localFilterIndex] = updatedLocalFilter;
+    setLocalFilters([...localFilters]);
   };
 
   const renderIndexPatternInput = () => {
@@ -353,7 +362,7 @@ export function AddFilterModal({
   };
 
   return (
-    <EuiModal maxWidth={800} onClose={onCancel} style={{ width: 700 }}>
+    <EuiModal maxWidth={800} onClose={onCancel} className="kbnQueryBar--addFilterModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h3>
@@ -382,10 +391,10 @@ export function AddFilterModal({
 
       <EuiHorizontalRule margin="none" />
 
-      <EuiModalBody>
-        <EuiForm>
+      <EuiModalBody className="kbnQueryBar__filterModalWrapper">
+        <EuiForm className="kbnQueryBar__filterModalForm">
           {addFilterMode === 'quick_form' &&
-            localFilters.map((localFilter, index) => {
+            localFilters.map((localfilter, index) => {
               return (
                 <>
                   <EuiFlexGroup>
@@ -397,14 +406,37 @@ export function AddFilterModal({
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiButtonIcon
-                        display="base"
                         onClick={() => {
+                          const updatedLocalFilter = { ...localfilter, relationship: 'OR' };
                           setLocalFilters([
-                            ...localFilters,
+                            ...localFilters.slice(0, index),
+                            updatedLocalFilter,
                             {
                               field: undefined,
                               operator: undefined,
                               value: undefined,
+                              relationship: undefined,
+                            },
+                          ]);
+                        }}
+                        iconType="returnKey"
+                        size="s"
+                        aria-label="Add filter group with OR"
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        display="base"
+                        onClick={() => {
+                          const updatedLocalFilter = { ...localfilter, relationship: 'AND' };
+                          setLocalFilters([
+                            ...localFilters.slice(0, index),
+                            updatedLocalFilter,
+                            {
+                              field: undefined,
+                              operator: undefined,
+                              value: undefined,
+                              relationship: undefined,
                             },
                           ]);
                         }}
@@ -419,6 +451,7 @@ export function AddFilterModal({
                           display="base"
                           onClick={() => {
                             const updatedFilters = localFilters.filter((_, idx) => idx !== index);
+                            updatedFilters[index - 1].relationship = 'AND';
                             setLocalFilters(updatedFilters);
                           }}
                           iconType="trash"
@@ -429,7 +462,26 @@ export function AddFilterModal({
                       </EuiFlexItem>
                     )}
                   </EuiFlexGroup>
-                  <EuiSpacer size="s" />
+                  {localfilter?.relationship && localfilter.relationship === 'OR' ? (
+                    <>
+                      <EuiFlexGroup gutterSize="none">
+                        <EuiFlexItem>
+                          <EuiHorizontalRule margin="s" />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText color="subdued" className="kbnQueryBar__filterModalORText">
+                            {' '}
+                            OR{' '}
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiHorizontalRule margin="s" />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </>
+                  ) : (
+                    <EuiSpacer size="m" />
+                  )}
                 </>
               );
             })}

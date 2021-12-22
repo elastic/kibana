@@ -28,6 +28,16 @@
   }
 }
 
+.kbnQueryBar__filterModalWrapper {
+  width: 700px;
+
+  .kbnQueryBar__filterModalORText {
+    color: $euiColorLightShade;
+    font-size: 12px;
+    padding: 6px;
+  }
+}
+
 .kbnQueryBar__textarea {
   z-index: $euiZContentMenu;
   resize: none !important; // When in the group, it will autosize
