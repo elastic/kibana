@@ -5957,6 +5957,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__securitysolution-io-ts-utils@link:bazel-bin/packages/kbn-securitysolution-io-ts-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__securitysolution-list-api@link:bazel-bin/packages/kbn-securitysolution-list-api/npm_module_types":
   version "0.0.0"
   uid ""
@@ -5969,6 +5973,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__securitysolution-list-utils@link:bazel-bin/packages/kbn-securitysolution-list-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__securitysolution-rules@link:bazel-bin/packages/kbn-securitysolution-rules/npm_module_types":
   version "0.0.0"
   uid ""
@@ -5978,6 +5986,18 @@
   uid ""
 
 "@types/kbn__securitysolution-utils@link:bazel-bin/packages/kbn-securitysolution-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__server-http-tools@link:bazel-bin/packages/kbn-server-http-tools/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__server-route-repository@link:bazel-bin/packages/kbn-server-route-repository/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__std@link:bazel-bin/packages/kbn-std/npm_module_types":
   version "0.0.0"
   uid ""
 
