@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export type {
-  RawValue,
-  JobParamsDeprecatedCSV,
-  TaskPayloadDeprecatedCSV,
-  SearchRequestDeprecatedCSV,
-  SavedSearchGeneratorResultDeprecatedCSV,
-} from '../../../common/types/export_types/csv';
+import { services as apiServices } from '../../../api_integration/services';
+import { clusterClientProvider } from './cluster_client';
+
+export const services = {
+  ...apiServices,
+  cluster_client: clusterClientProvider,
+};
