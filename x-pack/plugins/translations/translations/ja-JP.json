@@ -243,6 +243,7 @@
     "console.settingsPage.templatesLabelText": "テンプレート",
     "console.settingsPage.tripleQuotesMessage": "出力ウィンドウでは三重引用符を使用してください",
     "console.settingsPage.wrapLongLinesLabelText": "長い行を改行",
+    "console.splitPanel.adjustPanelSizeAriaLabel": "左右のキーを押してパネルサイズを調整します",
     "console.topNav.helpTabDescription": "ヘルプ",
     "console.topNav.helpTabLabel": "ヘルプ",
     "console.topNav.historyTabDescription": "履歴",

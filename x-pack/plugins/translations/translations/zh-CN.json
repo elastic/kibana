@@ -246,6 +246,7 @@
     "console.settingsPage.templatesLabelText": "模板",
     "console.settingsPage.tripleQuotesMessage": "在输出窗格中使用三重引号",
     "console.settingsPage.wrapLongLinesLabelText": "长行换行",
+    "console.splitPanel.adjustPanelSizeAriaLabel": "按左/右箭头键调整面板大小",
     "console.topNav.helpTabDescription": "帮助",
     "console.topNav.helpTabLabel": "帮助",
     "console.topNav.historyTabDescription": "历史记录",
