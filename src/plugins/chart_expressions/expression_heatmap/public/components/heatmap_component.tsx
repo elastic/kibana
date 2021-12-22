@@ -258,7 +258,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         const percentageNumber = (Math.abs(value - min) / (max - min)) * 100;
         value = parseInt(percentageNumber.toString(), 10) / 100;
       }
-      return metricFormatter.convert(value).toString();
+      return `${metricFormatter.convert(value) ?? ''}`;
     };
 
     const { colors, ranges } = computeColorRanges(
@@ -416,7 +416,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         ...(yAxisColumn
           ? {
               formatter: (v: number | string) =>
-                formatFactory(yAxisColumn.meta.params).convert(v).toString(),
+                `${formatFactory(yAxisColumn.meta.params).convert(v) ?? ''}`,
             }
           : {}),
       },
@@ -425,7 +425,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         // eui color subdued
         textColor: chartTheme.axes?.tickLabel?.fill ?? `#6a717d`,
         padding: xAxisColumn?.name ? 8 : 0,
-        formatter: (v: number | string) => xValuesFormatter.convert(v).toString(),
+        formatter: (v: number | string) => `${xValuesFormatter.convert(v) ?? ''}`,
         name: xAxisColumn?.name ?? '',
       },
       brushMask: {
