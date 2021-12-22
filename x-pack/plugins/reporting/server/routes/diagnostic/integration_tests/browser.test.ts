@@ -6,19 +6,19 @@
  */
 
 import { UnwrapPromise } from '@kbn/utility-types';
+import * as Rx from 'rxjs';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
-import * as Rx from 'rxjs';
-import type { ScreenshottingStart } from '../../../../screenshotting/server';
-import { ReportingCore } from '../..';
+import { ReportingCore } from '../../../';
+import type { ScreenshottingStart } from '../../../../../screenshotting/server';
 import {
   createMockConfigSchema,
   createMockLevelLogger,
   createMockPluginSetup,
   createMockReportingCore,
-} from '../../test_helpers';
-import type { ReportingRequestHandlerContext } from '../../types';
-import { registerDiagnoseBrowser } from './browser';
+} from '../../../test_helpers';
+import type { ReportingRequestHandlerContext } from '../../../types';
+import { registerDiagnoseBrowser } from '../browser';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 

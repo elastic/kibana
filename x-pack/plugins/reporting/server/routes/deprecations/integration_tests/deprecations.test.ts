@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
 import { UnwrapPromise } from '@kbn/utility-types';
+import { of } from 'rxjs';
 import { setupServer } from 'src/core/server/test_utils';
-import { API_GET_ILM_POLICY_STATUS } from '../../common/constants';
-import { securityMock } from '../../../security/server/mocks';
-
 import supertest from 'supertest';
-
+import { securityMock } from '../../../../../security/server/mocks';
+import { API_GET_ILM_POLICY_STATUS } from '../../../../common/constants';
 import {
   createMockConfigSchema,
+  createMockLevelLogger,
   createMockPluginSetup,
   createMockReportingCore,
-  createMockLevelLogger,
-} from '../test_helpers';
-
-import { registerDeprecationsRoutes } from './deprecations';
+} from '../../../test_helpers';
+import { registerDeprecationsRoutes } from '../deprecations';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
