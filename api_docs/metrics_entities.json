@@ -56,9 +56,9 @@
               "label": "esClient",
               "description": [],
               "signature": [
-                "Pick<",
+                "Omit<",
                 "KibanaClient",
-                ", \"name\" | \"create\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"knnSearch\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchMvt\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request<TResponse = unknown>(params: ",
+                ", \"extend\" | \"connectionPool\" | \"transport\" | \"serializer\" | \"child\" | \"close\" | \"diagnostic\"> & { transport: { request<TResponse = unknown>(params: ",
                 "TransportRequestParams",
                 ", options?: ",
                 "TransportRequestOptions",
@@ -96,81 +96,7 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "metricsEntities",
-        "id": "def-common.ELASTIC_NAME",
-        "type": "string",
-        "tags": [],
-        "label": "ELASTIC_NAME",
-        "description": [
-          "\nGlobal prefix for all the transform jobs"
-        ],
-        "signature": [
-          "\"estc\""
-        ],
-        "path": "x-pack/plugins/metrics_entities/common/constants.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "metricsEntities",
-        "id": "def-common.METRICS_ENTITIES_TRANSFORMS",
-        "type": "string",
-        "tags": [],
-        "label": "METRICS_ENTITIES_TRANSFORMS",
-        "description": [
-          "\nTransforms route"
-        ],
-        "path": "x-pack/plugins/metrics_entities/common/constants.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "metricsEntities",
-        "id": "def-common.METRICS_ENTITIES_URL",
-        "type": "string",
-        "tags": [],
-        "label": "METRICS_ENTITIES_URL",
-        "description": [
-          "\nBase route"
-        ],
-        "signature": [
-          "\"/api/metrics_entities\""
-        ],
-        "path": "x-pack/plugins/metrics_entities/common/constants.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "metricsEntities",
-        "id": "def-common.PLUGIN_ID",
-        "type": "string",
-        "tags": [],
-        "label": "PLUGIN_ID",
-        "description": [],
-        "signature": [
-          "\"metricsEntities\""
-        ],
-        "path": "x-pack/plugins/metrics_entities/common/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "metricsEntities",
-        "id": "def-common.PLUGIN_NAME",
-        "type": "string",
-        "tags": [],
-        "label": "PLUGIN_NAME",
-        "description": [],
-        "signature": [
-          "\"metrics_entities\""
-        ],
-        "path": "x-pack/plugins/metrics_entities/common/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   }
 }
