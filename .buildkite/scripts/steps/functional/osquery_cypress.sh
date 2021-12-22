@@ -4,9 +4,14 @@ set -uo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-export BUILD_TS_REFS_DISABLE=false
-export BUILD_TS_REFS_CACHE_ENABLE=false
-export DEBUG=code-coverage
+KIBANA_DIR=$(pwd)
+export KIBANA_DIR
+export XPACK_DIR="$KIBANA_DIR/x-pack"
+
+export CACHE_DIR="$HOME/.kibana"
+
+source .buildkite/scripts/common/setup_node.sh
+
 yarn kbn bootstrap
 node scripts/build_kibana_platform_plugins.js
 
