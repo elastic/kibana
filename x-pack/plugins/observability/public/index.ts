@@ -24,6 +24,7 @@ export type {
   ObservabilityPublicPluginsStart,
 };
 export { enableInspectEsQueries } from '../common/ui_settings_keys';
+export { uptimeOverviewLocator } from '../common';
 
 export interface ConfigSchema {
   unsafe: {
