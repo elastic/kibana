@@ -7,16 +7,17 @@
 
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import uuid from 'uuid';
-import { getPolicyHostIsolationExceptionsPath } from '../../../../../common/routing';
+import { getExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
+import { getPolicyHostIsolationExceptionsPath } from '../../../../../common/routing';
 import { PolicyHostIsolationExceptionsList } from './list';
-import userEvent from '@testing-library/user-event';
 
 const emptyList = {
   data: [],
@@ -90,5 +91,57 @@ describe('Policy details host isolation exceptions tab', () => {
     render(getFoundExceptionListItemSchemaMock(1));
     userEvent.type(renderResult.getByTestId('searchField'), 'search me{enter}');
     expect(history.location.search).toBe('?filter=search%20me');
+  });
+
+  it('should disable the "remove from policy" option to global exceptions', () => {
+    const testException = getExceptionListItemSchemaMock({ tags: ['policy:all'] });
+    const exceptions = {
+      ...emptyList,
+      data: [testException],
+      total: 1,
+    };
+    render(exceptions);
+    // click the actions button
+    userEvent.click(
+      renderResult.getByTestId('hostIsolationExceptions-collapsed-list-card-header-actions-button')
+    );
+    expect(renderResult.getByTestId('remove-from-policy-action')).toBeDisabled();
+  });
+
+  it('should enable the "remove from policy" option to policy-specific exceptions ', () => {
+    const testException = getExceptionListItemSchemaMock({
+      tags: [`policy:${policyId}`, 'policy:1234', 'not-a-policy-tag'],
+    });
+    const exceptions = {
+      ...emptyList,
+      data: [testException],
+      total: 1,
+    };
+    render(exceptions);
+    // click the actions button
+    userEvent.click(
+      renderResult.getByTestId('hostIsolationExceptions-collapsed-list-card-header-actions-button')
+    );
+    expect(renderResult.getByTestId('remove-from-policy-action')).toBeEnabled();
+  });
+
+  it('should render the delete dialog when the "remove from policy" button is clicked', () => {
+    const testException = getExceptionListItemSchemaMock({
+      tags: [`policy:${policyId}`, 'policy:1234', 'not-a-policy-tag'],
+    });
+    const exceptions = {
+      ...emptyList,
+      data: [testException],
+      total: 1,
+    };
+    render(exceptions);
+    // click the actions button
+    userEvent.click(
+      renderResult.getByTestId('hostIsolationExceptions-collapsed-list-card-header-actions-button')
+    );
+    userEvent.click(renderResult.getByTestId('remove-from-policy-action'));
+
+    // check the dialog is there
+    expect(renderResult.getByTestId('remove-from-policy-dialog')).toBeTruthy();
   });
 });
