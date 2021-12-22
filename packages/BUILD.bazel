@@ -116,6 +116,7 @@ filegroup(
       "//packages/kbn-securitysolution-t-grid:build_types",
       "//packages/kbn-securitysolution-utils:build_types",
       "//packages/kbn-server-http-tools:build_types",
+      "//packages/kbn-server-route-repository:build_types",
   ],
 )
 
