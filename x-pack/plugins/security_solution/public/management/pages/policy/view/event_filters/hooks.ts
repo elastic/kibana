@@ -8,7 +8,7 @@ import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { QueryObserverResult, useQuery } from 'react-query';
 import { ServerApiError } from '../../../../../common/types';
 import { EventFiltersHttpService } from '../../../event_filters/service';
-import { parseQueryFilterToKQL } from '../../../../common/utils';
+import { parseQueryFilterToKQL, parsePoliciesAndFilterToKql } from '../../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../../../event_filters/constants';
 
 export function useGetAllAssignedEventFilters(
@@ -19,7 +19,7 @@ export function useGetAllAssignedEventFilters(
     ['eventFilters', 'assigned', policyId],
     () => {
       return eventFiltersService.getList({
-        filter: `(exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`,
+        filter: parsePoliciesAndFilterToKql({ policies: [...(policyId ? [policyId] : []), 'all'] }),
       });
     },
     {
@@ -41,19 +41,11 @@ export function useSearchAssignedEventFilters(
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
     ['eventFilters', 'assigned', 'search', policyId, options],
     () => {
-      const kuery = [
-        `((exception-list-agnostic.attributes.tags:"policy:${policyId}") OR (exception-list-agnostic.attributes.tags:"policy:all"))`,
-      ];
-
-      if (filter) {
-        const filterKuery = parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined;
-        if (filterKuery) {
-          kuery.push(filterKuery);
-        }
-      }
-
       return eventFiltersService.getList({
-        filter: kuery.join(' AND '),
+        filter: parsePoliciesAndFilterToKql({
+          policies: [policyId, 'all'],
+          kuery: parseQueryFilterToKQL(filter || '', SEARCHABLE_FIELDS),
+        }),
         perPage,
         page: (page ?? 0) + 1,
       });
