@@ -10,18 +10,17 @@ import { i18n } from '@kbn/i18n';
 export * from '../../common/translations';
 
 export const NO_CASES = i18n.translate('xpack.cases.caseTable.noCases.title', {
-  defaultMessage: 'No Cases',
+  defaultMessage: 'No cases to display',
 });
 
 export const NO_CASES_BODY = i18n.translate('xpack.cases.caseTable.noCases.body', {
-  defaultMessage:
-    'There are no cases to display. Please create a new case or change your filter settings above.',
+  defaultMessage: 'Create a case or edit your filters.',
 });
 
 export const NO_CASES_BODY_READ_ONLY = i18n.translate(
   'xpack.cases.caseTable.noCases.readonly.body',
   {
-    defaultMessage: 'There are no cases to display. Please change your filter settings above.',
+    defaultMessage: 'Edit your filters.',
   }
 );
 
