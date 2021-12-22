@@ -106,7 +106,7 @@ export interface ReindexOperation extends SavedObjectAttributes {
 export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
 // 7.0 -> 8.0 warnings
-export type ReindexWarningTypes = 'customTypeName' | 'indexSetting';
+export type ReindexWarningTypes = 'customTypeName' | 'indexSetting' | 'replaceIndexWithAlias';
 export interface ReindexWarning {
   warningType: ReindexWarningTypes;
   /**

@@ -25,6 +25,7 @@ import { useAppContext } from '../../../../../app_context';
 import {
   CustomTypeNameWarningCheckbox,
   DeprecatedSettingWarningCheckbox,
+  ReplaceIndexWithAliasWarningCheckbox,
   WarningCheckboxProps,
 } from './warning_step_checkbox';
 
@@ -37,6 +38,7 @@ const warningToComponentMap: {
 } = {
   customTypeName: CustomTypeNameWarningCheckbox,
   indexSetting: DeprecatedSettingWarningCheckbox,
+  replaceIndexWithAlias: ReplaceIndexWithAliasWarningCheckbox,
 };
 
 export const idForWarning = (id: number) => `reindexWarning-${id}`;
