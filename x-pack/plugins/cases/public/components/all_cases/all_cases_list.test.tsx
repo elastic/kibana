@@ -8,8 +8,9 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import moment from 'moment-timezone';
-import { act, waitFor } from '@testing-library/react';
+import { act, render, waitFor, screen } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
+import userEvent from '@testing-library/user-event';
 
 import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
@@ -36,6 +37,7 @@ import { CasesColumns, GetCasesColumn, useCasesColumns } from './columns';
 import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
+import { waitForComponentToUpdate } from '../../common/test_utils';
 
 jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');
@@ -776,5 +778,74 @@ describe('AllCasesListGeneric', () => {
     });
 
     expect(doRefresh).toHaveBeenCalled();
+  });
+
+  it('should deselect cases when refreshing', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      selectedCases: [],
+    });
+
+    render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    userEvent.click(screen.getByTestId('checkboxSelectAll'));
+    const checkboxes = await screen.findAllByRole('checkbox');
+
+    for (const checkbox of checkboxes) {
+      expect(checkbox).toBeChecked();
+    }
+
+    userEvent.click(screen.getByText('Refresh'));
+    for (const checkbox of checkboxes) {
+      expect(checkbox).not.toBeChecked();
+    }
+
+    waitForComponentToUpdate();
+  });
+
+  it('should deselect cases when changing filters', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      selectedCases: [],
+    });
+
+    const { rerender } = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    /** Something really weird is going on and we have to rerender
+     * to get the correct html output. Not sure why.
+     *
+     * If you run the test alone the rerender is not needed.
+     * If you run the test along with the above test
+     * then you need the rerender
+     */
+    rerender(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    userEvent.click(screen.getByTestId('checkboxSelectAll'));
+    const checkboxes = await screen.findAllByRole('checkbox');
+
+    for (const checkbox of checkboxes) {
+      expect(checkbox).toBeChecked();
+    }
+
+    userEvent.click(screen.getByTestId('case-status-filter'));
+    userEvent.click(screen.getByTestId('case-status-filter-closed'));
+
+    for (const checkbox of checkboxes) {
+      expect(checkbox).not.toBeChecked();
+    }
+
+    waitForComponentToUpdate();
   });
 });
