@@ -14,7 +14,7 @@ export JOB=kibana-osquery-cypress
 
 echo "--- Osquery Cypress tests"
 
-cd "$XPACK_DIR"
+cd x-pack
 
 checks-reporter-with-killswitch "Osquery Cypress Tests" \
   node scripts/functional_tests \
