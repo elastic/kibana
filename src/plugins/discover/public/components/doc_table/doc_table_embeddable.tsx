@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import './index.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { SAMPLE_SIZE_SETTING } from '../../../common';
-import { usePager } from './lib/use_pager';
+import { usePager } from '../../utils/use_pager';
 import { ToolBarPagination } from './components/pager/tool_bar_pagination';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
@@ -25,10 +25,18 @@ const DocTableWrapperMemoized = memo(DocTableWrapper);
 
 export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   const tableWrapperRef = useRef<HTMLDivElement>(null);
-  const { currentPage, pageSize, totalPages, startIndex, hasNextPage, changePage, changePageSize } =
-    usePager({
-      totalItems: props.rows.length,
-    });
+  const {
+    curPageIndex,
+    pageSize,
+    totalPages,
+    startIndex,
+    hasNextPage,
+    changePageIndex,
+    changePageSize,
+  } = usePager({
+    initialPageSize: 50,
+    totalItems: props.rows.length,
+  });
   const showPagination = totalPages !== 0;
 
   const scrollTop = useCallback(() => {
@@ -45,9 +53,9 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   const onPageChange = useCallback(
     (page: number) => {
       scrollTop();
-      changePage(page);
+      changePageIndex(page);
     },
-    [changePage, scrollTop]
+    [changePageIndex, scrollTop]
   );
 
   const onPageSizeChange = useCallback(
@@ -57,15 +65,6 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
     },
     [changePageSize, scrollTop]
   );
-
-  /**
-   * Go to the first page if the current is no longer available
-   */
-  useEffect(() => {
-    if (totalPages < currentPage + 1) {
-      onPageChange(0);
-    }
-  }, [currentPage, totalPages, onPageChange]);
 
   const shouldShowLimitedResultsWarning = useMemo(
     () => !hasNextPage && props.rows.length < props.totalHitCount,
@@ -128,7 +127,7 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
           <ToolBarPagination
             pageSize={pageSize}
             pageCount={totalPages}
-            activePage={currentPage}
+            activePage={curPageIndex}
             onPageClick={onPageChange}
             onPageSizeChange={onPageSizeChange}
           />

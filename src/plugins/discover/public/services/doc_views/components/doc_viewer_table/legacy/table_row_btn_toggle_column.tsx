@@ -54,7 +54,7 @@ export function DocViewTableRowBtnToggleColumn({
         aria-pressed={active}
         onClick={onClick}
         className="kbnDocViewer__actionButton"
-        data-test-subj={`toggleColumnButton_${fieldname}`}
+        data-test-subj={`toggleColumnButton-${fieldname}`}
         iconType={'listAdd'}
         iconSize={'s'}
       />

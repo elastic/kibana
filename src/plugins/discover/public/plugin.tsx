@@ -43,6 +43,7 @@ import {
   setScopedHistory,
   getScopedHistory,
   syncHistoryLocations,
+  getServices,
 } from './kibana_services';
 import { registerFeature } from './register_feature';
 import { buildServices } from './build_services';
@@ -62,7 +63,7 @@ import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
 import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 import { FieldFormatsStart } from '../../field_formats/public';
 import { injectTruncateStyles } from './utils/truncate_styles';
-import { TRUNCATE_MAX_HEIGHT } from '../common';
+import { DOC_TABLE_LEGACY, TRUNCATE_MAX_HEIGHT } from '../common';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -70,6 +71,9 @@ declare module '../../share/public' {
   }
 }
 
+const DocViewerLegacyTable = React.lazy(
+  () => import('./services/doc_views/components/doc_viewer_table/legacy')
+);
 const DocViewerTable = React.lazy(() => import('./services/doc_views/components/doc_viewer_table'));
 const SourceViewer = React.lazy(() => import('./services/doc_views/components/doc_viewer_source'));
 
@@ -237,17 +241,22 @@ export class DiscoverPlugin
         defaultMessage: 'Table',
       }),
       order: 10,
-      component: (props) => (
-        <React.Suspense
-          fallback={
-            <DeferredSpinner>
-              <EuiLoadingContent />
-            </DeferredSpinner>
-          }
-        >
-          <DocViewerTable {...props} />
-        </React.Suspense>
-      ),
+      component: (props) => {
+        const Component = getServices().uiSettings.get(DOC_TABLE_LEGACY)
+          ? DocViewerLegacyTable
+          : DocViewerTable;
+        return (
+          <React.Suspense
+            fallback={
+              <DeferredSpinner>
+                <EuiLoadingContent />
+              </DeferredSpinner>
+            }
+          >
+            <Component {...props} />
+          </React.Suspense>
+        );
+      },
     });
     this.docViewsRegistry.addDocView({
       title: i18n.translate('discover.docViews.json.jsonTitle', {

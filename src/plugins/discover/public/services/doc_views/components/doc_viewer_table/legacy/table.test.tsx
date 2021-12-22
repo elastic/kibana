@@ -9,15 +9,16 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { DocViewerTable, DocViewerTableProps } from './table';
-import { IndexPattern } from '../../../../../../data/public';
+import { DocViewerLegacyTable } from './table';
+import { IndexPattern } from '../../../../../../../data/public';
+import { DocViewRenderProps } from '../../../doc_views_types';
 
-jest.mock('../../../../kibana_services', () => ({
+jest.mock('../../../../../kibana_services', () => ({
   getServices: jest.fn(),
 }));
 
-import { getServices } from '../../../../kibana_services';
-import { ElasticSearchHit } from '../../../../types';
+import { getServices } from '../../../../../kibana_services';
+import { ElasticSearchHit } from '../../../../../types';
 
 (getServices as jest.Mock).mockImplementation(() => ({
   uiSettings: {
@@ -76,8 +77,8 @@ indexPattern.fields.getByName = (name: string) => {
   return indexPattern.fields.getAll().find((field) => field.name === name);
 };
 
-const mountComponent = (props: DocViewerTableProps) => {
-  return mountWithIntl(<DocViewerTable {...props} />);
+const mountComponent = (props: DocViewRenderProps) => {
+  return mountWithIntl(<DocViewerLegacyTable {...props} />);
 };
 
 describe('DocViewTable at Discover', () => {
