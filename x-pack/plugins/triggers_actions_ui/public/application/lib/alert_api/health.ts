@@ -24,6 +24,7 @@ const rewriteAlertingFrameworkHealth: RewriteRequestCase<AlertsHealth> = ({
 const rewriteBodyRes: RewriteRequestCase<AlertingFrameworkHealth> = ({
   is_sufficiently_secure: isSufficientlySecure,
   has_permanent_encryption_key: hasPermanentEncryptionKey,
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   alerting_framework_health: alertingFrameworkHealth,
   ...res
 }: AsApiContract<AlertingFrameworkHealth>) => ({
