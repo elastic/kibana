@@ -59,12 +59,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       `);
       expectSnapshot(
         response.body.traceDocs.map((doc) =>
-          // @ts-expect-error Property 'processor' does not exist on type 'Profile'.
-          doc.processor.event === 'transaction'
-            ? // @ts-expect-error
-              `${doc.transaction.name} (transaction)`
-            : // @ts-expect-error
-              `${doc.span.name} (span)`
+          'span' in doc ? `${doc.span.name} (span)` : `${doc.transaction.name} (transaction)`
         )
       ).toMatchInline(`
         Array [

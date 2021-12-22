@@ -66,7 +66,7 @@ export async function getTraceItems(
         { _score: { order: 'asc' as const } },
         { [TRANSACTION_DURATION]: { order: 'desc' as const } },
         { [SPAN_DURATION]: { order: 'desc' as const } },
-      ],
+      ] as Sort,
       track_total_hits: true,
     },
   });

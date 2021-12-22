@@ -267,7 +267,6 @@ const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
 
 const getWaterfallItems = (items: TraceAPIResponse['traceDocs']) =>
   items.map((item) => {
-    // @ts-expect-error 'processor' does not exist on type 'Profile'
     const docType: 'span' | 'transaction' = item.processor.event;
     switch (docType) {
       case 'span':
