@@ -533,8 +533,8 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
         return dropTypes[1];
       } else if (e.shiftKey && dropTypes[2]) {
         return dropTypes[2];
-      } else if (e.ctrlKey && (dropTypes[1] || dropTypes[3])) {
-        return dropTypes[1] || dropTypes[3];
+      } else if (e.ctrlKey && (dropTypes.length > 3 ? dropTypes[3] : dropTypes[1])) {
+        return dropTypes.length > 3 ? dropTypes[3] : dropTypes[1];
       }
     }
     return dropType;
