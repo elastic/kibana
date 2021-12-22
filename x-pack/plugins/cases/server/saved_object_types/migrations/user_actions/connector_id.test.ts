@@ -11,25 +11,32 @@ import {
   SavedObjectMigrationContext,
   SavedObjectSanitizedDoc,
   SavedObjectsMigrationLogger,
+  SavedObjectUnsanitizedDoc,
 } from 'kibana/server';
 import { migrationMocks } from 'src/core/server/mocks';
-import { CaseUserActionAttributes } from '../../../common/api';
-import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_USER_ACTION_SAVED_OBJECT,
+  SECURITY_SOLUTION_OWNER,
+} from '../../../../common/constants';
 import {
   createConnectorObject,
   createExternalService,
   createJiraConnector,
-} from '../../services/test_utils';
-import { userActionsConnectorIdMigration } from './user_actions';
+} from '../../../services/test_utils';
+import { userActionsConnectorIdMigration } from './connector_id';
+import { UserActions } from './types';
 
-const create_7_14_0_userAction = (
-  params: {
-    action?: string;
-    action_field?: string[];
-    new_value?: string | null | object;
-    old_value?: string | null | object;
-  } = {}
-) => {
+interface Pre810UserActionAttributes {
+  new_value?: string;
+  old_value?: string;
+}
+
+const create_7_14_0_userAction = (params: {
+  action: string;
+  action_field: string[];
+  new_value: string | null | object;
+  old_value: string | null | object;
+}): SavedObjectUnsanitizedDoc<UserActions> => {
   const { new_value, old_value, ...restParams } = params;
 
   return {
@@ -37,8 +44,17 @@ const create_7_14_0_userAction = (
     id: '1',
     attributes: {
       ...restParams,
-      new_value: new_value && typeof new_value === 'object' ? JSON.stringify(new_value) : new_value,
-      old_value: old_value && typeof old_value === 'object' ? JSON.stringify(old_value) : old_value,
+      action_at: '2022-01-09T22:00:00.000Z',
+      action_by: {
+        email: 'elastic@elastic.co',
+        full_name: 'Elastic User',
+        username: 'elastic',
+      },
+      new_value:
+        new_value && typeof new_value === 'object' ? JSON.stringify(new_value) : new_value ?? null,
+      old_value:
+        old_value && typeof old_value === 'object' ? JSON.stringify(old_value) : old_value ?? null,
+      owner: SECURITY_SOLUTION_OWNER,
     },
   };
 };
@@ -64,7 +80,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           const parsedExternalService = JSON.parse(migratedUserAction.attributes.new_value!);
           expect(parsedExternalService).not.toHaveProperty('connector_id');
@@ -107,7 +123,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           const parsedNewExternalService = JSON.parse(migratedUserAction.attributes.new_value!);
           const parsedOldExternalService = JSON.parse(migratedUserAction.attributes.old_value!);
@@ -134,7 +150,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           const parsedNewExternalService = JSON.parse(migratedUserAction.attributes.new_value!);
           const parsedOldExternalService = JSON.parse(migratedUserAction.attributes.old_value!);
@@ -159,18 +175,25 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           expect(migratedUserAction.attributes.old_value).toBeNull();
           expect(migratedUserAction).toMatchInlineSnapshot(`
             Object {
               "attributes": Object {
                 "action": "push-to-service",
+                "action_at": "2022-01-09T22:00:00.000Z",
+                "action_by": Object {
+                  "email": "elastic@elastic.co",
+                  "full_name": "Elastic User",
+                  "username": "elastic",
+                },
                 "action_field": Array [
                   "invalid field",
                 ],
                 "new_value": "hello",
                 "old_value": null,
+                "owner": "securitySolution",
               },
               "id": "1",
               "references": Array [],
@@ -190,7 +213,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           expect(migratedUserAction.attributes.old_value).toBeNull();
           expect(migratedUserAction.attributes.new_value).toEqual('{a');
@@ -198,11 +221,18 @@ describe('user action migrations', () => {
             Object {
               "attributes": Object {
                 "action": "push-to-service",
+                "action_at": "2022-01-09T22:00:00.000Z",
+                "action_by": Object {
+                  "email": "elastic@elastic.co",
+                  "full_name": "Elastic User",
+                  "username": "elastic",
+                },
                 "action_field": Array [
                   "pushed",
                 ],
                 "new_value": "{a",
                 "old_value": null,
+                "owner": "securitySolution",
               },
               "id": "1",
               "references": Array [],
@@ -249,7 +279,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           const parsedConnector = JSON.parse(migratedUserAction.attributes.new_value!);
           expect(parsedConnector).not.toHaveProperty('id');
@@ -289,7 +319,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           const parsedNewConnector = JSON.parse(migratedUserAction.attributes.new_value!);
           const parsedOldConnector = JSON.parse(migratedUserAction.attributes.new_value!);
@@ -317,7 +347,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           const parsedNewConnectorId = JSON.parse(migratedUserAction.attributes.new_value!);
           const parsedOldConnectorId = JSON.parse(migratedUserAction.attributes.old_value!);
@@ -342,17 +372,24 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           expect(migratedUserAction).toMatchInlineSnapshot(`
             Object {
               "attributes": Object {
                 "action": "update",
+                "action_at": "2022-01-09T22:00:00.000Z",
+                "action_by": Object {
+                  "email": "elastic@elastic.co",
+                  "full_name": "Elastic User",
+                  "username": "elastic",
+                },
                 "action_field": Array [
                   "invalid action",
                 ],
                 "new_value": "new json value",
                 "old_value": "old value",
+                "owner": "securitySolution",
               },
               "id": "1",
               "references": Array [],
@@ -372,17 +409,24 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           expect(migratedUserAction).toMatchInlineSnapshot(`
             Object {
               "attributes": Object {
                 "action": "update",
+                "action_at": "2022-01-09T22:00:00.000Z",
+                "action_by": Object {
+                  "email": "elastic@elastic.co",
+                  "full_name": "Elastic User",
+                  "username": "elastic",
+                },
                 "action_field": Array [
                   "connector",
                 ],
                 "new_value": "{}",
                 "old_value": "{b",
+                "owner": "securitySolution",
               },
               "id": "1",
               "references": Array [],
@@ -429,7 +473,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           const parsedConnector = JSON.parse(migratedUserAction.attributes.new_value!);
           expect(parsedConnector.connector).not.toHaveProperty('id');
@@ -471,7 +515,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           const parsedNewConnector = JSON.parse(migratedUserAction.attributes.new_value!);
           const parsedOldConnector = JSON.parse(migratedUserAction.attributes.new_value!);
@@ -499,7 +543,7 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           const parsedNewConnectorId = JSON.parse(migratedUserAction.attributes.new_value!);
           const parsedOldConnectorId = JSON.parse(migratedUserAction.attributes.old_value!);
@@ -524,17 +568,24 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           expect(migratedUserAction).toMatchInlineSnapshot(`
             Object {
               "attributes": Object {
                 "action": "create",
+                "action_at": "2022-01-09T22:00:00.000Z",
+                "action_by": Object {
+                  "email": "elastic@elastic.co",
+                  "full_name": "Elastic User",
+                  "username": "elastic",
+                },
                 "action_field": Array [
                   "invalid action",
                 ],
                 "new_value": "new json value",
                 "old_value": "old value",
+                "owner": "securitySolution",
               },
               "id": "1",
               "references": Array [],
@@ -554,17 +605,24 @@ describe('user action migrations', () => {
           const migratedUserAction = userActionsConnectorIdMigration(
             userAction,
             context
-          ) as SavedObjectSanitizedDoc<CaseUserActionAttributes>;
+          ) as SavedObjectSanitizedDoc<Pre810UserActionAttributes>;
 
           expect(migratedUserAction).toMatchInlineSnapshot(`
             Object {
               "attributes": Object {
                 "action": "create",
+                "action_at": "2022-01-09T22:00:00.000Z",
+                "action_by": Object {
+                  "email": "elastic@elastic.co",
+                  "full_name": "Elastic User",
+                  "username": "elastic",
+                },
                 "action_field": Array [
                   "connector",
                 ],
                 "new_value": "new json value",
                 "old_value": "old value",
+                "owner": "securitySolution",
               },
               "id": "1",
               "references": Array [],
