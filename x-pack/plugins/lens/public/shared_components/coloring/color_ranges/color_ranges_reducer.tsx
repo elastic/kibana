@@ -24,6 +24,7 @@ import type {
   UpdateColorPayload,
   UpdateColorRangeValuePayload,
   DeleteColorRangePayload,
+  DistributeEquallyPayload,
 } from './types';
 
 export const colorRangesReducer: Reducer<ColorRangesState, ColorRangesActions> = (
@@ -54,9 +55,10 @@ export const colorRangesReducer: Reducer<ColorRangesState, ColorRangesActions> =
       };
     }
     case 'distributeEqually': {
+      const { dataBounds } = action.payload as DistributeEquallyPayload;
       return {
         ...state,
-        colorRanges: distributeEqually(state.colorRanges),
+        colorRanges: distributeEqually(state.colorRanges, state.rangeType, dataBounds),
       };
     }
     case 'updateColor': {

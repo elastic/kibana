@@ -43,8 +43,8 @@ export function ColorRangesFooter({
   }, [dispatch]);
 
   const onDistributeEqually = useCallback(() => {
-    dispatch({ type: 'distributeEqually' });
-  }, [dispatch]);
+    dispatch({ type: 'distributeEqually', payload: { dataBounds } });
+  }, [dataBounds, dispatch]);
 
   return (
     <EuiFlexGroup justifyContent="flexStart" gutterSize="none" wrap={true}>

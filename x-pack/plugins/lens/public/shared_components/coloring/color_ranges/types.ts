@@ -37,6 +37,11 @@ export interface AddColorRangePayload {
 }
 
 /** @internal **/
+export interface DistributeEquallyPayload {
+  dataBounds: DataBounds;
+}
+
+/** @internal **/
 export interface UpdateColorPayload {
   index: number;
   color: string;
@@ -61,7 +66,7 @@ export type SetColorRangesPayload = Partial<ColorRangesState>;
 export type ColorRangesActions =
   | { type: 'reversePalette' }
   | { type: 'sortColorRanges' }
-  | { type: 'distributeEqually' }
+  | { type: 'distributeEqually'; payload: DistributeEquallyPayload }
   | { type: 'set'; payload: SetColorRangesPayload }
   | { type: 'deleteColorRange'; payload: DeleteColorRangePayload }
   | {

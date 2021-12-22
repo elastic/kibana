@@ -117,17 +117,20 @@ export const updateColorRangeColor = (index: number, color: string, colorRanges:
   return [...colorRanges];
 };
 
-export const distributeEqually = (colorRanges: ColorRange[]) => {
+export const distributeEqually = (
+  colorRanges: ColorRange[],
+  rangeType: CustomPaletteParamsConfig['rangeType'],
+  dataBounds: DataBounds
+) => {
   const colorsCount = colorRanges.length;
-  const start = colorRanges[0].start;
-  const end = colorRanges[colorsCount - 1].end;
-  const step = roundValue((end - start) / colorsCount);
+  const { min, max } = getDataMinMax(rangeType, dataBounds);
+  const step = roundValue((max - min) / colorsCount);
 
   return colorRanges.map((colorRange, index) => ({
     color: colorRange.color,
-    start: roundValue(start + (step * 100 * index) / 100),
+    start: roundValue(min + (step * 100 * index) / 100),
     end:
-      index === colorRanges.length - 1 ? end : roundValue(start + (step * 100 * (index + 1)) / 100),
+      index === colorRanges.length - 1 ? max : roundValue(min + (step * 100 * (index + 1)) / 100),
   }));
 };
 
