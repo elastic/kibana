@@ -22,7 +22,7 @@ describe('T1 - Live Query', () => {
     after(() => {
       runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
     });
-    it('and enable ecs mapping', () => {
+    it('when passed as a saved query ', () => {
       navigateTo('/app/osquery/saved_queries');
       cy.waitForReact(1000);
     });

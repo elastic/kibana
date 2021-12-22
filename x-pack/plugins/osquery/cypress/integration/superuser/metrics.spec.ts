@@ -18,6 +18,12 @@ describe('SU - Metrics', () => {
     beforeEach(() => {
       navigateTo('/app/osquery');
     });
+    before(() => {
+      runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
+    });
+    after(() => {
+      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
+    });
 
     it('by being able to run the query', () => {
       cy.get('[data-test-subj="toggleNavButton"]').click();
@@ -33,8 +39,6 @@ describe('SU - Metrics', () => {
       checkResults();
     });
     it('by being able to run the previously saved query', () => {
-      runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
-      cy.wait(500);
       cy.get('[data-test-subj="toggleNavButton"]').click();
       cy.get('[data-test-subj="collapsibleNavAppLink"').contains('Metrics').click();
 
@@ -42,13 +46,13 @@ describe('SU - Metrics', () => {
       cy.get('[data-test-subj="nodeContainer"]').click();
       cy.contains('Osquery').click();
 
-      cy.get('[data-test-subj="comboBoxInput"]').first().wait(500).click();
+      cy.get('[data-test-subj="comboBoxInput"]').first().click();
       cy.wait(500);
-      cy.get('div[role=listBox]').should('have.lengthOf.above', 0).first().click();
+      cy.get('div[role=listBox]').should('have.lengthOf.above', 0);
+      cy.get('[data-test-subj="comboBoxInput"]').first().type('{downArrow}{enter}');
 
       submitQuery();
       checkResults();
-      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
     });
   });
 });

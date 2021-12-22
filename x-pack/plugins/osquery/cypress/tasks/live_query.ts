@@ -12,8 +12,9 @@ export const DEFAULT_QUERY = 'select * from processes;';
 export const selectAllAgents = () => {
   cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } })
     .type('All agents')
-    .wait(500)
+    .wait(1000)
     .type('{downArrow}{enter}');
+  // TODO add a check if loading indicator is visible then not visible any more
   // cy.react('EuiFilterSelectItem').contains('All agents').click();
 };
 

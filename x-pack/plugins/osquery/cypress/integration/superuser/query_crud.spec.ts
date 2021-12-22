@@ -29,11 +29,10 @@ describe('SU - Osquery works as CRUD for', () => {
   describe('saved queries:', () => {
     beforeEach(() => {
       navigateTo('/app/osquery');
-      cy.waitForReact(1000);
     });
 
     it('should save the query', () => {
-      cy.wait(1000);
+      cy.waitForReact(1000);
       cy.contains('New live query').click();
       selectAllAgents();
       inputQuery(DEFAULT_QUERY);
@@ -47,6 +46,7 @@ describe('SU - Osquery works as CRUD for', () => {
     });
 
     it('should view query details in status', () => {
+      cy.waitForReact(1000);
       cy.contains('New live query');
       cy.react('ActionTableResultsButton').first().click();
       cy.wait(1000);
@@ -59,6 +59,7 @@ describe('SU - Osquery works as CRUD for', () => {
     });
 
     it('should display a previously saved query and run it', () => {
+      cy.waitForReact(1000);
       cy.contains('Saved queries').click();
       cy.contains(SAVED_QUERY_ID);
       cy.react('PlayButtonComponent', {
@@ -69,6 +70,7 @@ describe('SU - Osquery works as CRUD for', () => {
     });
 
     it('should edit the saved query', () => {
+      cy.waitForReact(1000);
       cy.contains('Saved queries').click();
       cy.contains(SAVED_QUERY_ID);
       cy.react('CustomItemAction', {
@@ -80,6 +82,7 @@ describe('SU - Osquery works as CRUD for', () => {
     });
 
     it('should delete the saved query', () => {
+      cy.waitForReact(1000);
       cy.contains('Saved queries').click();
       cy.contains(SAVED_QUERY_ID);
       cy.react('CustomItemAction', {
@@ -94,10 +97,9 @@ describe('SU - Osquery works as CRUD for', () => {
     const PACK_NAME = 'Pack-name';
     beforeEach(() => {
       navigateTo('/app/osquery');
-      cy.waitForReact(1000);
     });
     it('should create a saved query', () => {
-      cy.wait(1000);
+      cy.waitForReact(1000);
       cy.contains('New live query').click();
       selectAllAgents();
       inputQuery(DEFAULT_QUERY);
@@ -111,6 +113,7 @@ describe('SU - Osquery works as CRUD for', () => {
     });
 
     it('should add a pack from a saved query', () => {
+      cy.waitForReact(1000);
       cy.contains('Packs').click();
       findAndClickButton('Add pack');
       findFormFieldByRowsLabelAndType('Name', PACK_NAME);
@@ -129,7 +132,7 @@ describe('SU - Osquery works as CRUD for', () => {
       cy.react('EuiFormRow', { props: { label: 'Interval (s)' } })
         .click()
         .clear()
-        .type('1800');
+        .type('10');
       cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
       cy.react('EuiTableRow').contains(SAVED_QUERY_ID);
       findAndClickButton('Save pack');
@@ -144,6 +147,7 @@ describe('SU - Osquery works as CRUD for', () => {
         cy.contains('Packs').click();
         const createdPack = cy.contains(PACK_NAME);
         createdPack.click();
+        cy.waitForReact(1000);
         cy.react('EuiTableRow').contains(SAVED_QUERY_ID);
       });
       it('by clicking the edit button', () => {
@@ -161,10 +165,15 @@ describe('SU - Osquery works as CRUD for', () => {
       });
       it('by clicking in Discovery button', () => {
         cy.react('CustomItemAction', {
-          props: { index: 0, item: { id: NEW_QUERY_NAME } },
+          props: { index: 0, item: { id: SAVED_QUERY_ID } },
         }).click();
+        cy.get('[data-test-subj="superDatePickerShowDatesButton"').click();
+        cy.get('[data-test-subj="superDatePickerRelativeDateInputUnitSelector"').select(
+          'Minutes ago'
+        );
+        cy.get('[data-test-subj="querySubmitButton"').contains('Update').click();
         cy.get('[data-test-subj="discoverDocTable"]').contains(
-          `pack_${PACK_NAME}_${NEW_QUERY_NAME}`
+          `pack_${PACK_NAME}_${SAVED_QUERY_ID}`
         );
       });
       // it('by clicking in Lens button', () => {
