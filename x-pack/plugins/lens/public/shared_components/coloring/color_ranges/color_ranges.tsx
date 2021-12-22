@@ -10,7 +10,7 @@ import React, { useState, useEffect, useReducer } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
-import { EuiFlexGroup, EuiTextColor, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { EuiFlexGroup, EuiTextColor, EuiFlexItem } from '@elastic/eui';
 
 import { ColorRangesFooter } from './color_ranges_footer';
 import { ColorRangeItem } from './color_ranges_item';
@@ -125,58 +125,51 @@ export function ColorRanges({
   const error = getErrorMessage(colorRangesValidity);
 
   return (
-    <EuiFormRow
-      label={i18n.translate('xpack.lens.dynamicColoring.customPalette.colorRangesLabel', {
-        defaultMessage: 'Color Ranges',
-      })}
-      display="rowCompressed"
+    <EuiFlexGroup
+      data-test-subj={`dynamicColoring_custom_color_ranges`}
+      direction="column"
+      gutterSize="s"
     >
-      <EuiFlexGroup
-        data-test-subj={`dynamicColoring_custom_color_ranges`}
-        direction="column"
-        gutterSize="s"
-      >
-        {localState.colorRanges.map((colorRange, index) => (
-          <EuiFlexItem grow={false}>
-            <ColorRangeItem
-              key={`${colorRange.end ?? 0 + colorRange.start ?? 0}${index}`}
-              colorRange={colorRange}
-              dispatch={dispatch}
-              colorRanges={localState.colorRanges}
-              continuity={localState.continuity}
-              rangeType={localState.rangeType}
-              dataBounds={dataBounds}
-              index={index}
-              isValid={colorRangesValidity[index]?.isValid}
-              accessor="start"
-            />
-          </EuiFlexItem>
-        ))}
-        {lastColorRange ? (
+      {localState.colorRanges.map((colorRange, index) => (
+        <EuiFlexItem grow={false}>
           <ColorRangeItem
-            colorRange={lastColorRange}
+            key={`${colorRange.end ?? 0 + colorRange.start ?? 0}${index}`}
+            colorRange={colorRange}
             dispatch={dispatch}
             colorRanges={localState.colorRanges}
             continuity={localState.continuity}
             rangeType={localState.rangeType}
             dataBounds={dataBounds}
-            index={localState.colorRanges.length - 1}
-            isValid={colorRangesValidity.last?.isValid}
-            accessor="end"
-          />
-        ) : null}
-        <EuiFlexItem grow={false}>
-          {error ? <EuiTextColor color="danger">{error}</EuiTextColor> : null}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <ColorRangesFooter
-            dispatch={dispatch}
-            colorRanges={localState.colorRanges}
-            dataBounds={dataBounds}
-            maxSteps={paletteConfiguration?.maxSteps}
+            index={index}
+            isValid={colorRangesValidity[index]?.isValid}
+            accessor="start"
           />
         </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFormRow>
+      ))}
+      {lastColorRange ? (
+        <ColorRangeItem
+          colorRange={lastColorRange}
+          dispatch={dispatch}
+          colorRanges={localState.colorRanges}
+          continuity={localState.continuity}
+          rangeType={localState.rangeType}
+          dataBounds={dataBounds}
+          index={localState.colorRanges.length - 1}
+          isValid={colorRangesValidity.last?.isValid}
+          accessor="end"
+        />
+      ) : null}
+      <EuiFlexItem grow={false}>
+        {error ? <EuiTextColor color="danger">{error}</EuiTextColor> : null}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <ColorRangesFooter
+          dispatch={dispatch}
+          colorRanges={localState.colorRanges}
+          dataBounds={dataBounds}
+          maxSteps={paletteConfiguration?.maxSteps}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { EuiFormRow, htmlIdGenerator, EuiButtonGroup, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -112,6 +112,26 @@ export function CustomizablePalette({
   dataBounds?: { min: number; max: number };
   showRangeTypeSelector?: boolean;
 }) {
+  const onChangeColorRanges = useCallback(
+    (colorStops, upperMax, continuity) => {
+      const newParams = getSwitchToCustomParams(
+        palettes,
+        activePalette!,
+        {
+          continuity,
+          colorStops,
+          steps: activePalette!.params?.steps || DEFAULT_COLOR_STEPS,
+          reverse: !activePalette!.params?.reverse,
+          rangeMin: colorStops[0]?.stop,
+          rangeMax: upperMax,
+        },
+        dataBounds!
+      );
+      return setPalette(newParams);
+    },
+    [activePalette, dataBounds, palettes, setPalette]
+  );
+
   if (!dataBounds || !activePalette) {
     return null;
   }
@@ -278,28 +298,21 @@ export function CustomizablePalette({
           />
         </EuiFormRow>
       )}
-      <ColorRanges
-        paletteConfiguration={activePalette?.params}
-        colorRanges={colorRangesToShow}
-        dataBounds={dataBounds}
-        data-test-prefix="lnsPalettePanel"
-        onChange={(colorStops, upperMax, continuity) => {
-          const newParams = getSwitchToCustomParams(
-            palettes,
-            activePalette,
-            {
-              continuity,
-              colorStops,
-              steps: activePalette.params?.steps || DEFAULT_COLOR_STEPS,
-              reverse: !activePalette.params?.reverse,
-              rangeMin: colorStops[0]?.stop,
-              rangeMax: upperMax,
-            },
-            dataBounds
-          );
-          return setPalette(newParams);
-        }}
-      />
+      <EuiFormRow
+        label={i18n.translate('xpack.lens.palettePicker.colorRangesLabel', {
+          defaultMessage: 'Color Ranges',
+        })}
+        fullWidth
+        display="rowCompressed"
+      >
+        <ColorRanges
+          paletteConfiguration={activePalette?.params}
+          colorRanges={colorRangesToShow}
+          dataBounds={dataBounds}
+          data-test-prefix="lnsPalettePanel"
+          onChange={onChangeColorRanges}
+        />
+      </EuiFormRow>
     </div>
   );
 }
