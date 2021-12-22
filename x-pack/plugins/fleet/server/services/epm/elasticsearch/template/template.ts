@@ -448,8 +448,11 @@ const getDataStreams = async (
   esClient: ElasticsearchClient,
   template: IndexTemplateEntry
 ): Promise<CurrentDataStream[] | undefined> => {
-  const { templateName, indexTemplate } = template;
-  const { body } = await esClient.indices.getDataStream({ name: `${templateName}-*` });
+  const { indexTemplate } = template;
+
+  const { body } = await esClient.indices.getDataStream({
+    name: indexTemplate.index_patterns.join(','),
+  });
 
   const dataStreams = body.data_streams;
 
