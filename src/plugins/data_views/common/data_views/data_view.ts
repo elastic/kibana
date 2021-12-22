@@ -36,7 +36,6 @@ interface SavedObjectBody {
   fieldAttrs?: string;
   title?: string;
   timeFieldName?: string;
-  intervalName?: string;
   fields?: string;
   sourceFilters?: string;
   fieldFormatMap?: string;
@@ -62,12 +61,6 @@ export class DataView implements IIndexPattern {
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList & { toSpec: () => DataViewFieldMap };
   public timeFieldName: string | undefined;
-  /**
-   * @deprecated Used by time range index patterns
-   * @removeBy 8.1
-   *
-   */
-  public intervalName: string | undefined;
   /**
    * Type is used to identify rollup index patterns
    */
@@ -117,7 +110,6 @@ export class DataView implements IIndexPattern {
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
     this.fieldAttrs = spec.fieldAttrs || {};
-    this.intervalName = spec.intervalName;
     this.allowNoIndex = spec.allowNoIndex || false;
     this.runtimeFieldMap = spec.runtimeFieldMap || {};
   }
@@ -217,7 +209,6 @@ export class DataView implements IIndexPattern {
       fieldFormats: this.fieldFormatMap,
       runtimeFieldMap: this.runtimeFieldMap,
       fieldAttrs: this.fieldAttrs,
-      intervalName: this.intervalName,
       allowNoIndex: this.allowNoIndex,
     };
   }
@@ -297,7 +288,6 @@ export class DataView implements IIndexPattern {
       fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
       title: this.title,
       timeFieldName: this.timeFieldName,
-      intervalName: this.intervalName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
       fields: JSON.stringify(this.fields?.filter((field) => field.scripted) ?? []),
       fieldFormatMap,

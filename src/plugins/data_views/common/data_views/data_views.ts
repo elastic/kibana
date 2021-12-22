@@ -383,7 +383,6 @@ export class DataViewsService {
       attributes: {
         title,
         timeFieldName,
-        intervalName,
         fields,
         sourceFilters,
         fieldFormatMap,
@@ -408,7 +407,6 @@ export class DataViewsService {
       id,
       version,
       title,
-      intervalName,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
       fields: this.fieldArrayToMap(parsedFields, parsedFieldAttrs),
