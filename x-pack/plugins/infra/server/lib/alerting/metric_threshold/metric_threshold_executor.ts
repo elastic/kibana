@@ -250,7 +250,6 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         });
       }
     }
-
     return { groups, groupBy: params.groupBy, filterQuery: params.filterQuery };
   });
 
