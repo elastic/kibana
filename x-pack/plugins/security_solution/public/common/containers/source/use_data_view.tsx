@@ -26,6 +26,8 @@ import {
 } from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
 import { getBrowserFields, getDocValueFields } from './';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+import { getSourcererDataview } from '../sourcerer/api';
 
 const getEsFields = memoizeOne(
   (fields: IndexField[]): FieldSpec[] =>
@@ -37,7 +39,13 @@ const getEsFields = memoizeOne(
   (newArgs, lastArgs) => newArgs[0].length === lastArgs[0].length
 );
 
-export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string) => void } => {
+export const useDataView = (): {
+  indexFieldsSearch: (
+    selectedDataViewId: string,
+    scopeId?: SourcererScopeName,
+    needToBeInit?: boolean
+  ) => void;
+} => {
   const { data } = useKibana().services;
   const abortCtrl = useRef<Record<string, AbortController>>({});
   const searchSubscription$ = useRef<Record<string, Subscription>>({});
@@ -51,13 +59,29 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
     [dispatch]
   );
   const indexFieldsSearch = useCallback(
-    (selectedDataViewId: string) => {
+    (
+      selectedDataViewId: string,
+      scopeId: SourcererScopeName = SourcererScopeName.default,
+      needToBeInit: boolean = false
+    ) => {
       const asyncSearch = async () => {
         abortCtrl.current = {
           ...abortCtrl.current,
           [selectedDataViewId]: new AbortController(),
         };
         setLoading({ id: selectedDataViewId, loading: true });
+        if (needToBeInit) {
+          const dataViewToUpdate = await getSourcererDataview(
+            selectedDataViewId,
+            abortCtrl.current[selectedDataViewId].signal
+          );
+          dispatch(
+            sourcererActions.updateSourcererDataViews({
+              dataView: dataViewToUpdate,
+            })
+          );
+        }
+
         const subscription = data.search
           .search<IndexFieldsStrategyRequest<'dataView'>, IndexFieldsStrategyResponse>(
             {
@@ -73,7 +97,15 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
             next: (response) => {
               if (isCompleteResponse(response)) {
                 const patternString = response.indicesExist.sort().join();
-
+                if (needToBeInit && scopeId) {
+                  dispatch(
+                    sourcererActions.setSelectedDataView({
+                      id: scopeId,
+                      selectedDataViewId,
+                      selectedPatterns: response.indicesExist,
+                    })
+                  );
+                }
                 dispatch(
                   sourcererActions.setDataView({
                     browserFields: getBrowserFields(patternString, response.indexFields),
@@ -84,15 +116,11 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
                     runtimeMappings: response.runtimeMappings,
                   })
                 );
-                if (searchSubscription$.current[selectedDataViewId]) {
-                  searchSubscription$.current[selectedDataViewId].unsubscribe();
-                }
+                searchSubscription$.current[selectedDataViewId]?.unsubscribe();
               } else if (isErrorResponse(response)) {
                 setLoading({ id: selectedDataViewId, loading: false });
                 addWarning(i18n.ERROR_BEAT_FIELDS);
-                if (searchSubscription$.current[selectedDataViewId]) {
-                  searchSubscription$.current[selectedDataViewId].unsubscribe();
-                }
+                searchSubscription$.current[selectedDataViewId]?.unsubscribe();
               }
             },
             error: (msg) => {
@@ -104,9 +132,7 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
               addError(msg, {
                 title: i18n.FAIL_BEAT_FIELDS,
               });
-              if (searchSubscription$.current[selectedDataViewId]) {
-                searchSubscription$.current[selectedDataViewId].unsubscribe();
-              }
+              searchSubscription$.current[selectedDataViewId]?.unsubscribe();
             },
           });
         searchSubscription$.current = {
@@ -114,11 +140,10 @@ export const useDataView = (): { indexFieldsSearch: (selectedDataViewId: string)
           [selectedDataViewId]: subscription,
         };
       };
-      if (searchSubscription$.current[selectedDataViewId] != null) {
+      if (searchSubscription$.current[selectedDataViewId]) {
         searchSubscription$.current[selectedDataViewId].unsubscribe();
       }
-
-      if (abortCtrl.current[selectedDataViewId] != null) {
+      if (abortCtrl.current[selectedDataViewId]) {
         abortCtrl.current[selectedDataViewId].abort();
       }
       asyncSearch();
