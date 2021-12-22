@@ -43,7 +43,11 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
     getDefaultLabel: (column, indexPattern) => column.params.formula ?? defaultLabel,
     input: 'managedReference',
     hidden: true,
-    filterable: true,
+    filterable: {
+      helpMessage: i18n.translate('xpack.lens.indexPattern.formulaFilterableHelpText', {
+        defaultMessage: 'The provided filter will be applied to the entire formula.',
+      }),
+    },
     getDisabledStatus(indexPattern: IndexPattern) {
       return undefined;
     },
