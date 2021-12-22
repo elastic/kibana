@@ -178,6 +178,7 @@ export class IndexActionsContextMenu extends Component {
       });
       if (allFrozen) {
         items.push({
+          'data-test-subj': 'unfreezeIndexMenuButton',
           name: i18n.translate('xpack.idxMgmt.indexActionsMenu.unfreezeIndexLabel', {
             defaultMessage: 'Unfreeze {selectedIndexCount, plural, one {index} other {indices} }',
             values: { selectedIndexCount },
