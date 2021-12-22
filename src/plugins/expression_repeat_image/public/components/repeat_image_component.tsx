@@ -49,7 +49,6 @@ function createImageJSX(img: HTMLImageElement | null) {
   if (!img) {
     return null;
   }
-  // console.log(img.height, img.width);
   const params = img.width > img.height ? { height: img.height } : { width: img.width };
   return <img src={img.src} {...params} alt="" />;
 }
