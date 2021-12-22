@@ -122,8 +122,11 @@ describe('ESSearchSource', () => {
   });
 
   describe('isFilterByMapBounds', () => {
-    it('default', () => {
-      const esSearchSource = new ESSearchSource(mockDescriptor);
+    it('limit', () => {
+      const esSearchSource = new ESSearchSource({
+        ...mockDescriptor,
+        scalingType: SCALING_TYPES.LIMIT,
+      });
       expect(esSearchSource.isFilterByMapBounds()).toBe(true);
     });
     it('mvt', () => {
@@ -136,8 +139,11 @@ describe('ESSearchSource', () => {
   });
 
   describe('getJoinsDisabledReason', () => {
-    it('default', () => {
-      const esSearchSource = new ESSearchSource(mockDescriptor);
+    it('limit', () => {
+      const esSearchSource = new ESSearchSource({
+        ...mockDescriptor,
+        scalingType: SCALING_TYPES.LIMIT,
+      });
       expect(esSearchSource.getJoinsDisabledReason()).toBe(null);
     });
     it('mvt', () => {
