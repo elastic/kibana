@@ -813,7 +813,20 @@ describe('AllCasesListGeneric', () => {
       selectedCases: [],
     });
 
-    render(
+    const { rerender } = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    /** Something really weird is going on and we have to rerender
+     * to get the correct html output. Not sure why.
+     *
+     * If you run the test alone the rerender is not needed.
+     * If you run the test along with the above test
+     * then you need the rerender
+     */
+    rerender(
       <TestProviders>
         <AllCasesList />
       </TestProviders>
