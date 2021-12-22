@@ -9,4 +9,5 @@
 // TODO: https://github.com/elastic/kibana/issues/109898
 /* eslint-disable @kbn/eslint/no_export_all */
 
+export * from './eui_provider';
 export * from './eui_styled_components';

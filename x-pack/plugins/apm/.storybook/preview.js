@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-import { EuiThemeProviderDecorator } from '../../../../src/plugins/kibana_react/common';
+import {
+  EuiProviderDecorator,
+  EuiThemeProviderDecorator,
+} from '../../../../src/plugins/kibana_react/common';
 
-export const decorators = [EuiThemeProviderDecorator];
+export const decorators = [EuiProviderDecorator, EuiThemeProviderDecorator];
