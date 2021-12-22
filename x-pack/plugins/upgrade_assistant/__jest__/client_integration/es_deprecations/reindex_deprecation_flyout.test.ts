@@ -54,6 +54,10 @@ describe('Reindex deprecation flyout', () => {
       reindexOp: null,
       warnings: [],
       hasRequiredPrivileges: true,
+      meta: {
+        indexName: 'foo',
+        reindexName: 'reindexed-foo',
+      },
     });
 
     await act(async () => {
@@ -113,6 +117,10 @@ describe('Reindex deprecation flyout', () => {
         },
         warnings: [],
         hasRequiredPrivileges: true,
+        meta: {
+          indexName: 'foo',
+          reindexName: 'reindexed-foo',
+        },
       });
 
       await act(async () => {
@@ -137,6 +145,10 @@ describe('Reindex deprecation flyout', () => {
         },
         warnings: [],
         hasRequiredPrivileges: true,
+        meta: {
+          indexName: 'foo',
+          reindexName: 'reindexed-foo',
+        },
       });
 
       await act(async () => {
@@ -161,6 +173,10 @@ describe('Reindex deprecation flyout', () => {
         },
         warnings: [],
         hasRequiredPrivileges: true,
+        meta: {
+          indexName: 'foo',
+          reindexName: 'reindexed-foo',
+        },
       });
 
       await act(async () => {
@@ -185,6 +201,10 @@ describe('Reindex deprecation flyout', () => {
         },
         warnings: [],
         hasRequiredPrivileges: true,
+        meta: {
+          indexName: 'foo',
+          reindexName: 'reindexed-foo',
+        },
       });
 
       await act(async () => {

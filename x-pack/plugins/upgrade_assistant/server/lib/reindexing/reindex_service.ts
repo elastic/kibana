@@ -42,7 +42,7 @@ export interface ReindexService {
    * Resolves to null if index does not exist.
    * @param indexName
    */
-  detectReindexWarnings(indexName: string): Promise<ReindexWarning[]>;
+  detectReindexWarnings(indexName: string): Promise<ReindexWarning[] | undefined>;
 
   /**
    * Creates a new reindex operation for a given index.
@@ -402,21 +402,20 @@ export const reindexServiceFactory = (
       return resp.has_all_requested;
     },
 
-    async detectReindexWarnings(indexName: string): Promise<ReindexWarning[]> {
-      // By default all reindexing operations will replace an index with an alias (with the same name)
-      // pointing to a newly created "reindexed" index. This is destructive as delete operations originally
-      // done on the index itself will now need to be done to the "reindexed-{indexName}"
-      const warnings: ReindexWarning[] = [
-        {
-          warningType: 'replaceIndexWithAlias',
-        },
-      ];
-
+    async detectReindexWarnings(indexName: string): Promise<ReindexWarning[] | undefined> {
       const flatSettings = await actions.getFlatSettings(indexName, true);
       if (!flatSettings) {
-        return warnings;
+        return undefined;
       } else {
-        return [...warnings, ...getReindexWarnings(flatSettings)];
+        return [
+          // By default all reindexing operations will replace an index with an alias (with the same name)
+          // pointing to a newly created "reindexed" index. This is destructive as delete operations originally
+          // done on the index itself will now need to be done to the "reindexed-{indexName}"
+          {
+            warningType: 'replaceIndexWithAlias',
+          },
+          ...getReindexWarnings(flatSettings),
+        ];
       }
     },
 

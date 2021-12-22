@@ -39,7 +39,7 @@ const getReindexState = (
 ) => {
   const newReindexState = {
     ...reindexState,
-    meta,
+    meta: { ...(meta ?? reindexState.meta) },
     loadingState: LoadingState.Success,
   };
 

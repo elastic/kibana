@@ -22,6 +22,10 @@ describe('ReindexProgress', () => {
             status: ReindexStatus.inProgress,
             reindexTaskPercComplete: null,
             errorMessage: null,
+            meta: {
+              indexName: 'foo',
+              reindexName: 'reindexed-foo',
+            },
           } as ReindexState
         }
         cancelReindex={jest.fn()}
@@ -52,17 +56,29 @@ describe('ReindexProgress', () => {
               Object {
                 "status": "inProgress",
                 "title": <FormattedMessage
-                  defaultMessage="Setting original index to read-only."
+                  defaultMessage="Setting {indexName} index to read-only."
                   id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.readonlyStepTitle"
-                  values={Object {}}
+                  values={
+                    Object {
+                      "indexName": <EuiCode>
+                        foo
+                      </EuiCode>,
+                    }
+                  }
                 />,
               },
               Object {
                 "status": "incomplete",
                 "title": <FormattedMessage
-                  defaultMessage="Create new index."
+                  defaultMessage="Create {reindexName} index."
                   id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.createIndexStepTitle"
-                  values={Object {}}
+                  values={
+                    Object {
+                      "reindexName": <EuiCode>
+                        reindexed-foo
+                      </EuiCode>,
+                    }
+                  }
                 />,
               },
               Object {
@@ -73,6 +89,10 @@ describe('ReindexProgress', () => {
                     Object {
                       "errorMessage": null,
                       "lastCompletedStep": 0,
+                      "meta": Object {
+                        "indexName": "foo",
+                        "reindexName": "reindexed-foo",
+                      },
                       "reindexTaskPercComplete": null,
                       "status": 0,
                     }
@@ -82,9 +102,18 @@ describe('ReindexProgress', () => {
               Object {
                 "status": "incomplete",
                 "title": <FormattedMessage
-                  defaultMessage="Swap original index with alias."
+                  defaultMessage="Create {indexName} alias for {reindexName} index, delete original {indexName} index."
                   id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
-                  values={Object {}}
+                  values={
+                    Object {
+                      "indexName": <EuiCode>
+                        foo
+                      </EuiCode>,
+                      "reindexName": <EuiCode>
+                        reindexed-foo
+                      </EuiCode>,
+                    }
+                  }
                 />,
               },
             ]
@@ -103,6 +132,10 @@ describe('ReindexProgress', () => {
             status: ReindexStatus.failed,
             reindexTaskPercComplete: 1,
             errorMessage: `This is an error that happened on alias switch`,
+            meta: {
+              indexName: 'foo',
+              reindexName: 'reindexed-foo',
+            },
           } as ReindexState
         }
         cancelReindex={jest.fn()}
