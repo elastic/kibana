@@ -13,7 +13,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const reportingAPI = getService('reporting');
   const log = getService('log');
   const es = getService('es');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const retry = getService('retry');
@@ -38,22 +37,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('Discover CSV Export', () => {
-    before('initialize tests', async () => {
-      log.debug('ReportingPage:initTests');
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await browser.setWindowSize(1600, 850);
-    });
-
-    after('clean up archives', async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await reportingAPI.deleteAllReports();
-      await esArchiver.emptyKibanaIndex();
-    });
-
     describe('Check Available', () => {
-      before(reportingAPI.initEcommerce);
+      before(async () => {
+        await reportingAPI.initEcommerce();
+      });
 
-      after(reportingAPI.teardownEcommerce);
+      after(async () => {
+        await reportingAPI.teardownEcommerce();
+      });
 
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
@@ -73,9 +64,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Generate CSV: new search', () => {
-      before(reportingAPI.initEcommerce);
+      before(async () => {
+        await reportingAPI.initEcommerce();
+      });
 
-      after(reportingAPI.teardownEcommerce);
+      after(async () => {
+        await reportingAPI.teardownEcommerce();
+      });
 
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
@@ -176,7 +171,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await reportingAPI.initLogs();
       });
 
-      after(reportingAPI.teardownLogs);
+      after(async () => {
+        await reportingAPI.teardownLogs();
+        await reset();
+      });
 
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
@@ -188,8 +186,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await PageObjects.discover.getHitCount()).to.equal(TEST_DOC_COUNT.toString());
         });
       });
-
-      after(reset);
 
       it(`handles field formatting for a field that doesn't exist initially`, async () => {
         const res = await getReport();
@@ -208,9 +204,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       };
 
-      before(reportingAPI.initEcommerce);
+      before(async () => {
+        await reportingAPI.initEcommerce();
+      });
 
-      after(reportingAPI.teardownEcommerce);
+      after(async () => {
+        await reportingAPI.teardownEcommerce();
+      });
 
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
