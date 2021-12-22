@@ -33,7 +33,7 @@ export const computePercentageData = (
     }
   }
   //  sum up all the yAccessors per group
-  const sums: Array<{ id: string; sum: number }> = [];
+  const sums: Record<string, number> = {};
   for (const key in groupedData) {
     if (Object.prototype.hasOwnProperty.call(groupedData, key)) {
       let sum = 0;
@@ -43,7 +43,7 @@ export const computePercentageData = (
           sum += row[yAccessor];
         }
       });
-      sums.push({ id: key, sum });
+      sums[key] = sum;
     }
   }
   //  compute the ratio of each group
@@ -51,7 +51,7 @@ export const computePercentageData = (
     const groupValue = splitChartAccessor
       ? `${row[String(xAccessor)]}-${row[splitChartAccessor]}`
       : row[String(xAccessor)];
-    const sum = sums.find((s) => s.id === String(groupValue))?.sum ?? 0;
+    const sum = sums[groupValue] ?? 0;
     let metricsSum = 0;
     for (const yAccessor of yAccessors) {
       metricsSum += row[yAccessor];
