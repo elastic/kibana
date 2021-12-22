@@ -15,7 +15,7 @@ import {
 } from '../../../../expressions/common';
 import { RenderValue, PieVisConfig } from './expression_renderers';
 
-export interface Arguments {
+export interface PieLabelsArguments {
   show: boolean;
   position: string;
   values: boolean;
