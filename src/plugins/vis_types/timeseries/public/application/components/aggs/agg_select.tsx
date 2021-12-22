@@ -11,7 +11,6 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
 import { isMetricEnabled } from '../../lib/check_ui_restrictions';
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { VisDataContext } from '../../contexts/vis_data_context';
 import { getAggsByType, getAggsByPredicate } from '../../../../common/agg_utils';
 import type { Agg } from '../../../../common/agg_utils';
@@ -29,11 +28,6 @@ const {
 } = getAggsByType(mapAggToSelectOption);
 
 const allAggOptions = [...metricAggs, ...pipelineAggs, ...siblingAggs, ...specialAggs];
-
-function filterByPanelType(panelType: string) {
-  return (agg: AggSelectOption) =>
-    panelType === 'table' ? agg.value !== TSVB_METRIC_TYPES.SERIES_AGG : true;
-}
 
 interface AggSelectUiProps {
   id: string;
@@ -87,7 +81,7 @@ export function AggSelect(props: AggSelectUiProps) {
         label: i18n.translate('visTypeTimeseries.aggSelect.aggGroups.parentPipelineAggLabel', {
           defaultMessage: 'Parent Pipeline Aggregations',
         }),
-        options: pipelineAggs.filter(filterByPanelType(panelType)).map(disableSiblingAggs),
+        options: pipelineAggs.map(disableSiblingAggs),
       },
       {
         label: i18n.translate('visTypeTimeseries.aggSelect.aggGroups.siblingPipelineAggLabel', {
