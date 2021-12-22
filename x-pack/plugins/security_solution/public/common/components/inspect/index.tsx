@@ -6,50 +6,34 @@
  */
 
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { getOr, omit } from 'lodash/fp';
+import { omit } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
-import styled, { css } from 'styled-components';
 
 import { inputsSelectors, State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
 import { inputsActions } from '../../store/inputs';
+
+import { HoverVisibilityContainer } from '../hover_visibility_container';
 
 import { ModalInspectQuery } from './modal';
 import * as i18n from './translations';
 
 export const BUTTON_CLASS = 'inspectButtonComponent';
 
-export const InspectButtonContainer = styled.div<{ show?: boolean }>`
-  width: 100%;
-  display: flex;
-  flex-grow: 1;
+interface InspectButtonContainerProps {
+  show?: boolean;
+  children: React.ReactNode;
+}
 
-  > * {
-    max-width: 100%;
-  }
-
-  .${BUTTON_CLASS} {
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity ${(props) => getOr(250, 'theme.eui.euiAnimSpeedNormal', props)} ease;
-  }
-
-  ${({ show }) =>
-    show &&
-    css`
-      &:hover .${BUTTON_CLASS} {
-        pointer-events: auto;
-        opacity: 1;
-      }
-    `}
-`;
-
-InspectButtonContainer.displayName = 'InspectButtonContainer';
-
-InspectButtonContainer.defaultProps = {
-  show: true,
-};
+export const InspectButtonContainer: React.FC<InspectButtonContainerProps> = ({
+  children,
+  show = true,
+}) => (
+  <HoverVisibilityContainer show={show} targetClassNames={[BUTTON_CLASS]}>
+    {children}
+  </HoverVisibilityContainer>
+);
 
 interface OwnProps {
   compact?: boolean;

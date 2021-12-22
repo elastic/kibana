@@ -99,4 +99,14 @@ describe('HostRiskScore', () => {
       context
     );
   });
+
+  it("doesn't render background-color when hideBackgroundColor is true", () => {
+    const { queryByTestId } = render(
+      <TestProviders>
+        <HostRiskScore severity={HostRiskSeverity.critical} hideBackgroundColor />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('host-risk-score')).toHaveStyleRule('background-color', undefined);
+  });
 });
