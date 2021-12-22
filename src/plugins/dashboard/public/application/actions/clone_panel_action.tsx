@@ -11,7 +11,6 @@ import uuid from 'uuid';
 
 import { CoreStart } from 'src/core/public';
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
-import { SavedObject } from '../../services/saved_objects';
 import {
   ViewMode,
   PanelState,
@@ -28,7 +27,6 @@ import {
 } from '../embeddable/panel/dashboard_panel_placement';
 import { dashboardClonePanelAction } from '../../dashboard_strings';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
-import { convertSavedDashboardPanelToPanelState } from '../../../common/embeddable/embeddable_saved_object_converters';
 
 export const ACTION_CLONE_PANEL = 'clonePanel';
 
@@ -95,12 +93,17 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
     panelToClone: DashboardPanelState,
     embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>
   ): Promise<Partial<PanelState>> {
+    // console.log('Panel to Clone:', panelToClone);
+
     let explicitInputCopy: Partial<EmbeddableInput>;
     if (isReferenceOrValueEmbeddable(embeddable) && embeddable.inputIsRefType) {
+      // console.log('saved to library');
       explicitInputCopy = await embeddable.getInputAsValueType();
     } else {
+      // console.log('not saved to library');
       explicitInputCopy = panelToClone.explicitInput;
     }
+    // console.log('----> Explicit Input:', explicitInputCopy);
 
     const panelState: PanelState<EmbeddableInput> = {
       type: embeddable.type,
@@ -109,6 +112,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
         id: uuid.v4(),
       },
     };
+    // console.log('Panel State:', panelState);
 
     this.core.notifications.toasts.addSuccess({
       title: dashboardClonePanelAction.getSuccessMessage(),
