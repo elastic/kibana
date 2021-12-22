@@ -3117,8 +3117,8 @@ export interface UnauthorizedErrorHandlerRetryResult extends UnauthorizedErrorHa
 
 // @public
 export interface UnauthorizedErrorHandlerToolkit {
-    notHandled: () => UnauthorizedErrorHandlerResult;
-    retry: (params: UnauthorizedErrorHandlerResultRetryParams) => UnauthorizedErrorHandlerResult;
+    notHandled: () => UnauthorizedErrorHandlerNotHandledResult;
+    retry: (params: UnauthorizedErrorHandlerResultRetryParams) => UnauthorizedErrorHandlerRetryResult;
 }
 
 // @public

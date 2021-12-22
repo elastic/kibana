@@ -9,5 +9,5 @@ The handler cannot handle the error, or was not able to reauthenticate
 <b>Signature:</b>
 
 ```typescript
-notHandled: () => UnauthorizedErrorHandlerResult;
+notHandled: () => UnauthorizedErrorHandlerNotHandledResult;
 ```

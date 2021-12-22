@@ -16,6 +16,6 @@ export interface UnauthorizedErrorHandlerToolkit
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [notHandled](./kibana-plugin-core-server.unauthorizederrorhandlertoolkit.nothandled.md) | () =&gt; UnauthorizedErrorHandlerResult | The handler cannot handle the error, or was not able to reauthenticate |
-|  [retry](./kibana-plugin-core-server.unauthorizederrorhandlertoolkit.retry.md) | (params: UnauthorizedErrorHandlerResultRetryParams) =&gt; UnauthorizedErrorHandlerResult | The handle was able to reauthenticate. |
+|  [notHandled](./kibana-plugin-core-server.unauthorizederrorhandlertoolkit.nothandled.md) | () =&gt; UnauthorizedErrorHandlerNotHandledResult | The handler cannot handle the error, or was not able to reauthenticate |
+|  [retry](./kibana-plugin-core-server.unauthorizederrorhandlertoolkit.retry.md) | (params: UnauthorizedErrorHandlerResultRetryParams) =&gt; UnauthorizedErrorHandlerRetryResult | The handle was able to reauthenticate. |
 

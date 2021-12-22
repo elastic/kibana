@@ -9,5 +9,5 @@ The handle was able to reauthenticate.
 <b>Signature:</b>
 
 ```typescript
-retry: (params: UnauthorizedErrorHandlerResultRetryParams) => UnauthorizedErrorHandlerResult;
+retry: (params: UnauthorizedErrorHandlerResultRetryParams) => UnauthorizedErrorHandlerRetryResult;
 ```
