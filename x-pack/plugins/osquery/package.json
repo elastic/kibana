@@ -13,7 +13,6 @@
   },
   "nyc": {
     "excludeAfterRemap": true,
-    "include": ["public"],
-    "report-dir": "../../../target/kibana-osquery/cypress/coverage"
+    "include": ["public"]
   }
 }
