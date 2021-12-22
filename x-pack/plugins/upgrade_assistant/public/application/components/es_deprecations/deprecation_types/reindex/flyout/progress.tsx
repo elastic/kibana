@@ -359,7 +359,11 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
               id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingInProgressTitle"
               defaultMessage="Reindexing in progress… {percents}"
               values={{
-                percents: getReindexProgressLabel(reindexTaskPercComplete, lastCompletedStep),
+                percents: getReindexProgressLabel(
+                  reindexTaskPercComplete,
+                  lastCompletedStep,
+                  hasExistingAlias
+                ),
               }}
             />
           ) : (

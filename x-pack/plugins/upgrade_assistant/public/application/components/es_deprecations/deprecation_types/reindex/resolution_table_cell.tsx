@@ -104,7 +104,8 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
               {i18nTexts.reindexInProgressText}{' '}
               {getReindexProgressLabel(
                 reindexState.reindexTaskPercComplete,
-                reindexState.lastCompletedStep
+                reindexState.lastCompletedStep,
+                reindexState.meta.aliases.length > 0
               )}
             </EuiText>
           </EuiFlexItem>
