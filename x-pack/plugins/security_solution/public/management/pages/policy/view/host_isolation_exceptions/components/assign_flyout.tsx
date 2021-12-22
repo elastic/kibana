@@ -236,6 +236,11 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
     exceptionsRequest.isLoading,
   ]);
 
+  // do not render if doesn't have adecuate privleges
+  if (!privileges.loading && !privileges.canIsolateHost) {
+    return null;
+  }
+
   return (
     <EuiFlyout onClose={onClose} data-test-subj="hostIsolationExceptions-assign-flyout">
       <EuiFlyoutHeader hasBorder>
