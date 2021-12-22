@@ -17,6 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   dataSource: string;
@@ -54,14 +55,17 @@ export function CompletedStatusBox({ dataSource, modules, integrationLink }: Pro
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty size="xs" iconType="plusInCircle" flush="right" href={integrationLink}>
-            Add
+            <FormattedMessage
+              id="xpack.observability.status.addIntegrationLink"
+              defaultMessage="Add"
+            />
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiFlexGroup alignItems="baseline" gutterSize="s" style={{ marginTop: 8 }}>
+      <EuiFlexGroup alignItems="baseline" gutterSize="s" style={{ marginTop: 8 }} role="list">
         {modules.map((module) => (
-          <EuiFlexItem>
+          <EuiFlexItem role="listitem" key={module.name}>
             <EuiBadge
               color={module.hasData ? 'success' : 'hollow'}
               iconType="check"
@@ -107,7 +111,10 @@ export function EmptyStatusBox({ dataSource, description, learnMoreLink }: Props
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiButton color="primary" size="s" href={learnMoreLink}>
-            Learn more
+            <FormattedMessage
+              id="xpack.observability.status.learnMoreButton"
+              defaultMessage="Learn more"
+            />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

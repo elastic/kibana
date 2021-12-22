@@ -10,6 +10,7 @@ import { ObservabilityStatusBox } from './observability_status_box';
 
 export interface ObservabilityStatusProps {
   boxes: Array<{
+    id: string;
     dataSource: string;
     hasData: boolean;
     description: string;
@@ -23,7 +24,7 @@ export function ObservabilityStatusBoxes({ boxes }: ObservabilityStatusProps) {
   return (
     <div>
       {boxes.map((box) => (
-        <ObservabilityStatusBox {...box} />
+        <ObservabilityStatusBox key={box.id} {...box} />
       ))}
     </div>
   );

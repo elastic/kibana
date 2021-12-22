@@ -16,6 +16,7 @@ export default {
 
 const testBoxes = [
   {
+    id: 'logs',
     dataSource: 'Logs',
     hasData: true,
     description: 'This is the description for logs',
@@ -28,6 +29,7 @@ const testBoxes = [
     learnMoreLink: 'http://example.com',
   },
   {
+    id: 'metrics',
     dataSource: 'Metrics',
     hasData: true,
     description: 'This is the description for metrics',
@@ -40,6 +42,7 @@ const testBoxes = [
     learnMoreLink: 'http://example.com',
   },
   {
+    id: 'apm',
     dataSource: 'APM',
     hasData: true,
     description: 'This is the description for apm',
@@ -52,6 +55,7 @@ const testBoxes = [
     learnMoreLink: 'http://example.com',
   },
   {
+    id: 'uptime',
     dataSource: 'Uptime',
     hasData: false,
     description: 'This is the description for uptime',
@@ -64,6 +68,7 @@ const testBoxes = [
     learnMoreLink: 'http://example.com',
   },
   {
+    id: 'ux',
     dataSource: 'User experience',
     hasData: false,
     description: 'This is the description for user experience',
@@ -76,6 +81,7 @@ const testBoxes = [
     learnMoreLink: 'http://example.com',
   },
   {
+    id: 'alerts',
     dataSource: 'Alerts and rules',
     hasData: true,
     description: 'This is the description for alerts and rules',

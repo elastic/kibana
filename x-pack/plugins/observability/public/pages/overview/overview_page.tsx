@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
+import { EuiButton, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { useTrackPageview } from '../..';
 import { DatePicker } from '../../components/shared/date_picker';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -31,6 +32,7 @@ export function OverviewPage({ routeParams }: Props) {
       }),
     },
   ]);
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   const { core, ObservabilityPageTemplate } = usePluginContext();
 
@@ -74,9 +76,26 @@ export function OverviewPage({ routeParams }: Props) {
       }
     >
       {hasData && (
-        <div style={{ width: 380 }}>
-          <ObservabilityStatus />
-        </div>
+        <>
+          <EuiButton onClick={() => setIsFlyoutVisible(true)}>Show observability status</EuiButton>
+          {isFlyoutVisible && (
+            <EuiFlyout
+              size="s"
+              ownFocus
+              onClose={() => setIsFlyoutVisible(false)}
+              aria-labelledby="flyout-id"
+            >
+              <EuiFlyoutHeader hasBorder>
+                <EuiTitle size="m">
+                  <h2 id="flyout-id">Status</h2>
+                </EuiTitle>
+              </EuiFlyoutHeader>
+              <EuiFlyoutBody>
+                <ObservabilityStatus />
+              </EuiFlyoutBody>
+            </EuiFlyout>
+          )}
+        </>
       )}
     </ObservabilityPageTemplate>
   );
