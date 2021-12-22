@@ -117,6 +117,8 @@ filegroup(
       "//packages/kbn-securitysolution-utils:build_types",
       "//packages/kbn-server-http-tools:build_types",
       "//packages/kbn-server-route-repository:build_types",
+      "//packages/kbn-std:build_types",
+      "//packages/kbn-telemetry-tools:build_types",
       "//packages/kbn-utility-types:build_types",
   ],
 )

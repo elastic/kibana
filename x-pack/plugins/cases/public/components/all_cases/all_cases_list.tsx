@@ -97,23 +97,30 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const filterRefetch = useRef<() => void>();
     const tableRef = useRef<EuiBasicTable>();
+    const [isLoading, handleIsLoading] = useState<boolean>(false);
+
     const setFilterRefetch = useCallback(
       (refetchFilter: () => void) => {
         filterRefetch.current = refetchFilter;
       },
       [filterRefetch]
     );
-    const [isLoading, handleIsLoading] = useState<boolean>(false);
+
+    const deselectCases = useCallback(() => {
+      setSelectedCases([]);
+      tableRef.current?.setSelection([]);
+    }, [setSelectedCases]);
+
     const refreshCases = useCallback(
       (dataRefresh = true) => {
+        deselectCases();
         if (dataRefresh) refetchCases();
         if (doRefresh) doRefresh();
-        setSelectedCases([]);
         if (filterRefetch.current != null) {
           filterRefetch.current();
         }
       },
-      [doRefresh, filterRefetch, refetchCases, setSelectedCases]
+      [deselectCases, doRefresh, refetchCases]
     );
 
     const tableOnChangeCallback = useCallback(
@@ -152,12 +159,11 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           setQueryParams({ sortField: SortFieldCase.createdAt });
         }
 
-        setSelectedCases([]);
-        tableRef.current?.setSelection([]);
+        deselectCases();
         setFilters(newFilterOptions);
         refreshCases(false);
       },
-      [setSelectedCases, setFilters, refreshCases, setQueryParams]
+      [deselectCases, setFilters, refreshCases, setQueryParams]
     );
 
     const showActions = userCanCrud && !isSelectorView;
