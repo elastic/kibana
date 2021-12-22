@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { compareFilters, COMPARE_ALL_OPTIONS, Filter, isFilterPinned } from '@kbn/es-query';
 import _ from 'lodash';
 import { DashboardPanelState } from '..';
-import { esFilters, Filter } from '../../services/data';
 import { EmbeddableInput } from '../../services/embeddable';
 import {
   DashboardContainerInput,
@@ -132,10 +132,10 @@ const commonDiffFilters = <T extends { filters: Filter[] }>(
   ignorePinned?: boolean
 ): Partial<T> => {
   const filtersAreDifferent = () =>
-    !esFilters.compareFilters(
+    !compareFilters(
       originalObj.filters,
-      ignorePinned ? newObj.filters.filter((f) => !esFilters.isFilterPinned(f)) : newObj.filters,
-      esFilters.COMPARE_ALL_OPTIONS
+      ignorePinned ? newObj.filters.filter((f) => !isFilterPinned(f)) : newObj.filters,
+      COMPARE_ALL_OPTIONS
     );
   const otherDifferences = commonDiff<T>(originalObj, newObj, [...omitKeys, 'filters']);
   return _.cloneDeep({

@@ -12,6 +12,7 @@ import { filter, map } from 'rxjs/operators';
 
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { isFilterPinned } from '@kbn/es-query';
 import { APP_WRAPPER_CLASS } from '../../../core/public';
 import {
   App,
@@ -33,7 +34,7 @@ import { UiActionsSetup, UiActionsStart } from './services/ui_actions';
 import { PresentationUtilPluginStart } from './services/presentation_util';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from './services/home';
 import { NavigationPublicPluginStart as NavigationStart } from './services/navigation';
-import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from './services/data';
+import { DataPublicPluginSetup, DataPublicPluginStart } from './services/data';
 import { SharePluginSetup, SharePluginStart, UrlGeneratorContract } from './services/share';
 import type { SavedObjectTaggingOssPluginStart } from './services/saved_objects_tagging_oss';
 import type {
@@ -255,7 +256,7 @@ export class DashboardPlugin
             ),
             map(({ state }) => ({
               ...state,
-              filters: state.filters?.filter(esFilters.isFilterPinned),
+              filters: state.filters?.filter(isFilterPinned),
             }))
           ),
         },

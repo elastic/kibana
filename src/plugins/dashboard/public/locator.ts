@@ -8,11 +8,11 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { flow } from 'lodash';
-import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
+import { Filter, isFilterPinned } from '@kbn/es-query';
+import type { TimeRange, Query, QueryState, RefreshInterval } from '../../data/public';
 import type { LocatorDefinition, LocatorPublic } from '../../share/public';
 import type { SavedDashboardPanel } from '../common/types';
 import type { RawDashboardState } from './types';
-import { esFilters } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { ViewMode } from '../../embeddable/public';
 import { DashboardConstants } from './dashboard_constants';
@@ -157,7 +157,7 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       '_g',
       cleanEmptyKeys({
         time: params.timeRange,
-        filters: filters?.filter((f) => esFilters.isFilterPinned(f)),
+        filters: filters?.filter((f) => isFilterPinned(f)),
         refreshInterval: params.refreshInterval,
       }),
       { useHash },

@@ -13,48 +13,51 @@ import { distinctUntilChanged, switchMap, filter, mapTo, map } from 'rxjs/operat
 
 import { DashboardContainer } from '..';
 import { isErrorEmbeddable } from '../../services/embeddable';
-import { IndexPattern, IndexPatternsContract } from '../../services/data';
+import { DataViewsContract } from '../../services/data';
+import { DataView } from '../../services/data_views';
 
-interface SyncDashboardIndexPatternsProps {
+interface SyncDashboardDataViewsProps {
   dashboardContainer: DashboardContainer;
-  indexPatterns: IndexPatternsContract;
-  onUpdateIndexPatterns: (newIndexPatterns: IndexPattern[]) => void;
+  dataViews: DataViewsContract;
+  onUpdateDataViews: (newDataViews: DataView[]) => void;
 }
 
-export const syncDashboardIndexPatterns = ({
+export const syncDashboardDataViews = ({
   dashboardContainer,
-  indexPatterns,
-  onUpdateIndexPatterns,
-}: SyncDashboardIndexPatternsProps) => {
-  const updateIndexPatternsOperator = pipe(
+  dataViews,
+  onUpdateDataViews,
+}: SyncDashboardDataViewsProps) => {
+  const updateDataViewsOperator = pipe(
     filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
-    map((container: DashboardContainer): IndexPattern[] | undefined => {
-      let panelIndexPatterns: IndexPattern[] = [];
+    map((container: DashboardContainer): DataView[] | undefined => {
+      let panelDataViews: DataView[] = [];
 
       Object.values(container.getChildIds()).forEach((id) => {
         const embeddableInstance = container.getChild(id);
         if (isErrorEmbeddable(embeddableInstance)) return;
-        const embeddableIndexPatterns = (embeddableInstance.getOutput() as any).indexPatterns;
-        if (!embeddableIndexPatterns) return;
-        panelIndexPatterns.push(...embeddableIndexPatterns);
+        const embeddableDataViews = (
+          embeddableInstance.getOutput() as { indexPatterns: DataView[] }
+        ).indexPatterns;
+        if (!embeddableDataViews) return;
+        panelDataViews.push(...embeddableDataViews);
       });
       if (container.controlGroup) {
-        panelIndexPatterns.push(...(container.controlGroup.getOutput().dataViews ?? []));
+        panelDataViews.push(...(container.controlGroup.getOutput().dataViews ?? []));
       }
-      panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
+      panelDataViews = uniqBy(panelDataViews, 'id');
 
       /**
        * If no index patterns have been returned yet, and there is at least one embeddable which
        * hasn't yet loaded, defer the loading of the default index pattern by returning undefined.
        */
       if (
-        panelIndexPatterns.length === 0 &&
+        panelDataViews.length === 0 &&
         Object.keys(container.getOutput().embeddableLoaded).length > 0 &&
         Object.values(container.getOutput().embeddableLoaded).some((value) => value === false)
       ) {
         return;
       }
-      return panelIndexPatterns;
+      return panelDataViews;
     }),
     distinctUntilChanged((a, b) =>
       deepEqual(
@@ -63,17 +66,17 @@ export const syncDashboardIndexPatterns = ({
       )
     ),
     // using switchMap for previous task cancellation
-    switchMap((panelIndexPatterns?: IndexPattern[]) => {
+    switchMap((panelDataViews?: DataView[]) => {
       return new Observable((observer) => {
-        if (!panelIndexPatterns) return;
-        if (panelIndexPatterns.length > 0) {
+        if (!panelDataViews) return;
+        if (panelDataViews.length > 0) {
           if (observer.closed) return;
-          onUpdateIndexPatterns(panelIndexPatterns);
+          onUpdateDataViews(panelDataViews);
           observer.complete();
         } else {
-          indexPatterns.getDefault().then((defaultIndexPattern) => {
+          dataViews.getDefault().then((defaultDataView) => {
             if (observer.closed) return;
-            onUpdateIndexPatterns([defaultIndexPattern as IndexPattern]);
+            onUpdateDataViews([defaultDataView as DataView]);
             observer.complete();
           });
         }
@@ -81,11 +84,11 @@ export const syncDashboardIndexPatterns = ({
     })
   );
 
-  const indexPatternSources = [dashboardContainer.getOutput$()];
+  const dataViewSources = [dashboardContainer.getOutput$()];
   if (dashboardContainer.controlGroup)
-    indexPatternSources.push(dashboardContainer.controlGroup.getOutput$());
+    dataViewSources.push(dashboardContainer.controlGroup.getOutput$());
 
-  return combineLatest(indexPatternSources)
-    .pipe(mapTo(dashboardContainer), updateIndexPatternsOperator)
+  return combineLatest(dataViewSources)
+    .pipe(mapTo(dashboardContainer), updateDataViewsOperator)
     .subscribe();
 };

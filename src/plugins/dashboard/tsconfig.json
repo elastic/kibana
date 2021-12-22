@@ -17,6 +17,7 @@
     { "path": "../../core/tsconfig.json" },
     { "path": "../inspector/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
+    { "path": "../data_views/tsconfig.json" },
     { "path": "../kibana_utils/tsconfig.json" },
     { "path": "../share/tsconfig.json" },
     { "path": "../presentation_util/tsconfig.json" },

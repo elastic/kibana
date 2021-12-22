@@ -9,8 +9,8 @@
 import { createDashboardUrlGenerator } from './url_generator';
 import { hashedItemStore } from '../../kibana_utils/public';
 import { mockStorage } from '../../kibana_utils/public/storage/hashed_item_store/mock';
-import { esFilters, Filter } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
+import { Filter, FilterStateStore } from '@kbn/es-query';
 
 const APP_BASE_PATH: string = 'xyz/app/dashboards';
 
@@ -99,7 +99,7 @@ describe('dashboard url generator', () => {
           },
           query: { query: 'hi' },
           $state: {
-            store: esFilters.FilterStateStore.GLOBAL_STATE,
+            store: FilterStateStore.GLOBAL_STATE,
           },
         },
       ],

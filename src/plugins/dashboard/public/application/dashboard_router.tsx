@@ -110,7 +110,7 @@ export async function mountApp({
     uiSettings: coreStart.uiSettings,
     scopedHistory: () => scopedHistory,
     screenshotModeService: screenshotMode,
-    indexPatterns: dataStart.indexPatterns,
+    dataViews: dataStart.dataViews,
     savedQueryService: dataStart.query.savedQueries,
     savedObjectsClient: coreStart.savedObjects.client,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
@@ -212,7 +212,7 @@ export async function mountApp({
       .getIncomingEmbeddablePackage(DashboardConstants.DASHBOARDS_ID, false)
   );
   if (!hasEmbeddableIncoming) {
-    dataStart.indexPatterns.clearCache();
+    dataStart.dataViews.clearCache();
   }
 
   // dispatch synthetic hash change event to update hash history objects
