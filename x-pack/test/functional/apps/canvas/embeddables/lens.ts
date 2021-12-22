@@ -46,7 +46,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
         await PageObjects.lens.assertMetric('Maximum of bytes', '16,788');
       });
 
-      it('adds existing saved search embeddable from the visualize library', async () => {
+      it('adds existing lens embeddable from the visualize library', async () => {
         await PageObjects.canvas.goToListingPageViaBreadcrumbs();
         await PageObjects.canvas.createNewWorkpad();
         await PageObjects.canvas.setWorkpadName('lens tests');
@@ -55,7 +55,7 @@ export default function canvasLensTest({ getService, getPageObjects }: FtrProvid
         await testSubjects.existOrFail('embeddablePanelHeading-Artistpreviouslyknownaslens');
       });
 
-      it('edits saved search by-reference embeddable', async () => {
+      it('edits lens by-reference embeddable', async () => {
         await dashboardPanelActions.editPanelByTitle('Artistpreviouslyknownaslens');
         await PageObjects.lens.save('Artistpreviouslyknownaslens v2', false, true);
         await testSubjects.existOrFail('embeddablePanelHeading-Artistpreviouslyknownaslensv2');
