@@ -151,8 +151,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     const tooltipContent = canMultiCountShapes
       ? countMsg +
         i18n.translate('xpack.maps.tiles.shapeCountMsg', {
-          defaultMessage:
-            ' This count is approximate.',
+          defaultMessage: ' This count is approximate.',
         })
       : countMsg;
 
