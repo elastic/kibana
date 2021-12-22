@@ -21,8 +21,8 @@ import { registerDeprecationsRoutes } from '../deprecations';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
-// https://github.com/elastic/kibana/issues/115881
-describe.skip(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
+describe(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
+  jest.setTimeout(6000);
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
@@ -51,6 +51,11 @@ describe.skip(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     ({ server, httpSetup } = await setupServer(reportingSymbol));
+  });
+
+  afterEach(async () => {
+    jest.restoreAllMocks();
+    await server.stop();
   });
 
   it('correctly handles authz when security is unavailable', async () => {
