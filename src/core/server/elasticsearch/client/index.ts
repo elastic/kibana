@@ -33,3 +33,4 @@ export type {
   UnauthorizedErrorHandlerToolkit,
   UnauthorizedErrorHandler,
 } from './retry_unauthorized';
+export type { UnauthorizedError } from './errors';
