@@ -5,6 +5,8 @@ steps:
       queue: ci-group-6
     depends_on: build
     timeout_in_minutes: 120
+    artifact_paths:
+      - "target/kibana-osquery/**/*"
     retry:
       automatic:
         - exit_status: '*'

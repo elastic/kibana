@@ -5,6 +5,8 @@ set -uo pipefail
 source .buildkite/scripts/common/util.sh
 
 export BUILD_TS_REFS_DISABLE=false
+export CODE_COVERAGE=1
+export DEBUG=code-coverage
 .buildkite/scripts/bootstrap.sh
 node scripts/build_kibana_platform_plugins.js
 
@@ -18,5 +20,3 @@ checks-reporter-with-killswitch "Osquery Cypress Tests" \
   node scripts/functional_tests \
     --debug --bail \
     --config test/osquery_cypress/cli_config.ts
-
-buildkite-agent artifact upload '../target/kibana-osquery/**/*'
