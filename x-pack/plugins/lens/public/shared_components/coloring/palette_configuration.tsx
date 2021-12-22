@@ -24,7 +24,6 @@ import {
   getSwitchToCustomParams,
   roundStopValues,
   roundValue,
-  getAutoValues,
 } from './utils';
 
 import { ColorRanges } from './color_ranges';
@@ -54,38 +53,9 @@ function getColorRanges(
   const colorStopsToShow = roundStopValues(
     getColorStops(palettes, colorStops || [], activePalette, dataBounds)
   );
-  const rangeType = activePalette.params?.rangeType ?? 'percent';
-
   const continuity = activePalette.params?.continuity;
-  let max = activePalette.params?.rangeMax || dataBounds.max;
-  let min = activePalette.params?.rangeMin || dataBounds.min;
-
-  if (continuity) {
-    const { max: autoMax, min: autoMin } = getAutoValues(
-      {
-        first: colorStopsToShow[1].stop,
-        preLast: colorStopsToShow[colorStopsToShow.length - 2].stop,
-        last: colorStopsToShow[colorStopsToShow.length - 1].stop,
-      },
-      rangeType,
-      dataBounds
-    );
-    if (['above', 'all'].includes(continuity)) {
-      max = autoMax;
-    }
-
-    // as 0-stop is -infinity when auto detected min value
-    if (['below', 'all'].includes(continuity)) {
-      min = autoMin;
-    }
-  }
-
-  if (rangeType === 'percent') {
-    const oldMin = min;
-    const interval = max - min;
-    min = ((min - oldMin) * 100) / interval;
-    max = ((max - oldMin) * 100) / interval;
-  }
+  const max = activePalette.params?.rangeMax ?? dataBounds.max;
+  const min = activePalette.params?.rangeMin ?? dataBounds.min;
 
   return colorStopsToShow.map((colorStop, index) => {
     return {

@@ -12,7 +12,7 @@ import { EuiButtonIcon } from '@elastic/eui';
 
 import { ValueMaxIcon } from '../../../assets/value_max';
 import { ValueMinIcon } from '../../../assets/value_min';
-import { getAutoValues, getDataMinMax, getStepValue, roundValue } from '../utils';
+import { getDataMinMax, roundValue } from '../utils';
 import { isLastItem } from './utils';
 
 import type { DataBounds, ColorRangesActions, ColorRange, ColorRangeAccessor } from './types';
@@ -65,31 +65,24 @@ export function ColorRangeEditButton({
   const isLast = isLastItem(accessor);
 
   const onExecuteAction = useCallback(() => {
-    const { max } = getDataMinMax(rangeType, dataBounds);
-    let newValue;
     let newContinuity: CustomPaletteParams['continuity'];
-
-    const colorStops = colorRanges.map(({ color, start }) => ({
-      color,
-      stop: Number(start),
-    }));
-    const step = roundValue(getStepValue(colorStops, colorStops, max));
+    let newValue;
 
     if (isLast) {
-      newValue = colorRanges[index].start + step;
+      newValue = Infinity;
       newContinuity = continuity === 'all' ? 'below' : 'none';
     } else {
-      newValue = colorRanges[index].end - step;
+      newValue = -Infinity;
       newContinuity = continuity === 'all' ? 'above' : 'none';
     }
 
-    colorRanges[index][isLast ? 'end' : 'start'] = roundValue(newValue);
+    colorRanges[index][isLast ? 'end' : 'start'] = newValue;
 
     dispatch({
       type: 'set',
       payload: { colorRanges: [...colorRanges], continuity: newContinuity },
     });
-  }, [rangeType, dataBounds, colorRanges, isLast, index, dispatch, continuity]);
+  }, [colorRanges, isLast, index, dispatch, continuity]);
 
   const title = i18n.translate('xpack.lens.dynamicColoring.customPalette.editButtonAriaLabel', {
     defaultMessage: 'Edit',
@@ -118,15 +111,8 @@ export function ColorRangeAutoDetectButton({
   const isLast = isLastItem(accessor);
 
   const onExecuteAction = useCallback(() => {
-    const { max: autoMax, min: autoMin } = getAutoValues(
-      {
-        first: colorRanges[1].start,
-        preLast: colorRanges[colorRanges.length - 2].start,
-        last: colorRanges[colorRanges.length - 1].start,
-      },
-      rangeType,
-      dataBounds
-    );
+    const { max: autoMax, min: autoMin } = getDataMinMax(rangeType, dataBounds);
+
     const newValue = roundValue(isLast ? autoMax : autoMin);
     let newContinuity: CustomPaletteParams['continuity'];
 
@@ -135,7 +121,6 @@ export function ColorRangeAutoDetectButton({
     } else {
       newContinuity = continuity === 'none' ? 'below' : 'all';
     }
-
     colorRanges[index][isLast ? 'end' : 'start'] = newValue;
 
     dispatch({

@@ -33,6 +33,7 @@ export const colorRangesReducer: Reducer<ColorRangesState, ColorRangesActions> =
   switch (action.type) {
     case 'set': {
       const payload = action.payload as SetColorRangesPayload;
+
       return {
         colorRanges: payload.colorRanges ?? state.colorRanges,
         continuity: payload.continuity ?? state.continuity,

@@ -98,12 +98,12 @@ export function ColorRanges({
     () => {
       const { continuity: localContinuity, colorRanges: localColorRanges } = localState;
       const upperMin = ['below', 'all'].includes(localContinuity!)
-        ? -Infinity
-        : localColorRanges[0].start;
+        ? localColorRanges[0].start
+        : -Infinity;
 
       const upperMax = ['above', 'all'].includes(localContinuity!)
-        ? Infinity
-        : last(localColorRanges)!.end;
+        ? last(localColorRanges)!.end
+        : Infinity;
 
       const colorStops = localColorRanges.map((colorRange, i) => ({
         color: colorRange.color,

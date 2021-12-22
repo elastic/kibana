@@ -55,6 +55,15 @@ const getMode = (
   return (isLast ? ['above', 'all'] : ['below', 'all']).includes(continuity) ? 'edit' : 'auto';
 };
 
+const getPlaceholderForAutoMode = (isLast: boolean) =>
+  isLast
+    ? i18n.translate('xpack.lens.dynamicColoring.customPalette.maxValuePlaceholder', {
+        defaultMessage: 'Max. value',
+      })
+    : i18n.translate('xpack.lens.dynamicColoring.customPalette.mionValuePlaceholder', {
+        defaultMessage: 'Min. value',
+      });
+
 export function ColorRangeItem({
   accessor,
   index,
@@ -162,9 +171,10 @@ export function ColorRangeItem({
           fullWidth={true}
           isInvalid={!isValid}
           data-test-subj={`dynamicColoring_range_value`}
-          value={localValue}
+          value={mode !== 'auto' ? localValue : ''}
           disabled={isDisabled}
           onChange={onValueChange}
+          placeholder={mode === 'auto' ? getPlaceholderForAutoMode(isLast) : ''}
           append={rangeType === 'percent' ? '%' : undefined}
           onBlur={onLeaveFocus}
           prepend={<span className="euiFormLabel">{isLast ? '\u2264' : '\u2265'}</span>}
