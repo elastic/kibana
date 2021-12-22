@@ -20,7 +20,7 @@ export const NO_CASES_BODY = i18n.translate('xpack.cases.caseTable.noCases.body'
 export const NO_CASES_BODY_READ_ONLY = i18n.translate(
   'xpack.cases.caseTable.noCases.readonly.body',
   {
-    defaultMessage: 'Edit your filters.',
+    defaultMessage: 'Edit your filter settings.',
   }
 );
 
