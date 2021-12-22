@@ -20,6 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .send({
           unencrypted: true,
+          refreshCache: true,
         })
         .expect(200);
 
