@@ -48,6 +48,7 @@
   },
   "results_index_name" : "custom-apm",
   "custom_settings": {
-    "created_by": "ml-module-apm-transaction"
+    "created_by": "ml-module-apm-transaction",
+    "managed": true
   }
 }
