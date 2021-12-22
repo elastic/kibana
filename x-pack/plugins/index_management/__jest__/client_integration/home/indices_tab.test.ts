@@ -12,6 +12,31 @@ import { setupEnvironment, nextTick } from '../helpers';
 import { IndicesTestBed, setup } from './indices_tab.helpers';
 import { createDataStreamPayload, createNonDataStreamIndex } from './data_streams_tab.helpers';
 
+// Since the editor component being used for editing index settings is not a React
+// component but an editor being instantiated on a div reference, we cannot mock
+// the component and replace it with something else. In this particular case we're
+// mocking the returned instance of the editor to always have the same values.
+const mockGetAceEditorValue = jest.fn().mockReturnValue(`{}`);
+
+jest.mock('../../../public/application/lib/ace.js', () => {
+  const createAceEditor = () => {
+    return {
+      getValue: mockGetAceEditorValue,
+      getSession: () => {
+        return {
+          on: () => null,
+          getValue: () => null,
+        };
+      },
+      destroy: () => null,
+    };
+  };
+
+  return {
+    createAceEditor,
+  };
+});
+
 /**
  * The below import is required to avoid a console error warn from the "brace" package
  * console.warn ../node_modules/brace/index.js:3999
@@ -238,7 +263,7 @@ describe('<IndexManagementHome />', () => {
     test('should be able to unfreeze a frozen index', async () => {
       const { actions, exists } = testBed;
 
-      httpRequestsMockHelpers.setReloadIndicesResponse([{ ...indexMockA, isFrozen: false }]);
+      httpRequestsMockHelpers.setReloadIndicesResponse([{ ...indexMockA }]);
 
       // Open context menu
       await actions.clickManageContextMenuButton();
@@ -251,14 +276,22 @@ describe('<IndexManagementHome />', () => {
       // After the index is unfrozen, we imediately do a reload. So we need to expect to see
       // a reload server call also.
       expect(server.requests[requestsCount - 1].url).toBe(`${API_BASE_PATH}/indices/reload`);
-      // Open context menu once again, since clicking an action will close it.
-      await actions.clickManageContextMenuButton();
-      // The unfreeze action should not be present anymore
-      expect(exists('unfreezeIndexMenuButton')).toBe(false);
     });
   });
 
   describe('Edit index settings', () => {
+    const indexName = 'testIndex';
+
+    beforeEach(async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
+
+      testBed = await setup();
+      const { find, component } = testBed;
+      component.update();
+
+      find('indexTableIndexNameLink').at(0).simulate('click');
+    });
+
     test('shows error callout when request fails', async () => {
       const { actions, find, component, exists } = testBed;
 

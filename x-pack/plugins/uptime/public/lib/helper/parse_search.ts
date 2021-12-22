@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export interface ConfigType {
-  loginAssistanceMessage: string;
-  showInsecureClusterWarning: boolean;
-  sameSiteCookies: 'Strict' | 'Lax' | 'None' | undefined;
+import { parse } from 'query-string';
+
+export function getParsedParams(search: string) {
+  return search ? parse(search[0] === '?' ? search.slice(1) : search, { sort: false }) : {};
 }
