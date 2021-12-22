@@ -63,30 +63,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response3.body.index_pattern.timeFieldName).to.be('timeFieldName2');
     });
 
-    it('can update index_pattern intervalName', async () => {
-      const title = `foo-${Date.now()}-${Math.random()}*`;
-      const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
-        index_pattern: {
-          title,
-        },
-      });
-
-      expect(response1.body.index_pattern.intervalName).to.be(undefined);
-
-      const id = response1.body.index_pattern.id;
-      const response2 = await supertest.post('/api/index_patterns/index_pattern/' + id).send({
-        index_pattern: {
-          intervalName: 'intervalName2',
-        },
-      });
-
-      expect(response2.body.index_pattern.intervalName).to.be('intervalName2');
-
-      const response3 = await supertest.get('/api/index_patterns/index_pattern/' + id);
-
-      expect(response3.body.index_pattern.intervalName).to.be('intervalName2');
-    });
-
     it('can update index_pattern sourceFilters', async () => {
       const title = `foo-${Date.now()}-${Math.random()}*`;
       const response1 = await supertest.post('/api/index_patterns/index_pattern').send({
