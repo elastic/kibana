@@ -61,7 +61,7 @@ describe('Overview - Upgrade Step', () => {
     test('When not ready for upgrade, the CTA button is disabled', async () => {
       httpRequestsMockHelpers.setGetUpgradeStatusResponse({
         readyForUpgrade: false,
-        details: 'Resolve critical deprecations firs',
+        details: 'Resolve critical deprecations first',
       });
 
       testBed = await setupCloudOverviewPage();
