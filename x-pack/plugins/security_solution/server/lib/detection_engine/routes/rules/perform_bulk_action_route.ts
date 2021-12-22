@@ -51,6 +51,35 @@ interface RuleActionError {
   };
 }
 
+interface NormalizedRuleError {
+  message: string;
+  status_code: number;
+  rules: Array<{
+    id: string;
+    name: string;
+  }>;
+}
+
+const normalizeErrorResponse = (errors: RuleActionError[]): NormalizedRuleError[] => {
+  const errorsMap = new Map();
+
+  errors.forEach((ruleError) => {
+    const { message } = ruleError.error;
+    if (errorsMap.has(message)) {
+      errorsMap.get(message).rules.push(ruleError.rule);
+    } else {
+      const { error, rule } = ruleError;
+      errorsMap.set(message, {
+        message: error.message,
+        status_code: error.statusCode,
+        rule: [rule],
+      });
+    }
+  });
+
+  return Array.from(errorsMap, ([_, normalizedError]) => normalizedError);
+};
+
 const executeActionAndHandleErrors = async (
   rule: Rule,
   action: RuleActionFn
@@ -223,19 +252,19 @@ export const performBulkActionRoute = (
           const responseBody = {
             message: errorsCount === rulesCount ? 'Bulk edit failed' : 'Bulk edit partially failed',
             status_code: 500,
-            errors: errors.map(({ error, rule }) => ({
-              rule_id: rule.id,
-              rule_name: rule.name,
-              error_message:
-                error.message.length > MAX_ERROR_MESSAGE_LENGTH
-                  ? error.message.slice(0, MAX_ERROR_MESSAGE_LENGTH)
-                  : error.message,
-              error_status_code: error.statusCode,
-            })),
-            rules: {
-              total: rulesCount,
-              failed: errorsCount,
-              succeeded: rulesCount - errorsCount,
+            attributes: {
+              errors: normalizeErrorResponse(errors).map(({ message, ...error }) => ({
+                ...error,
+                message:
+                  message.length > MAX_ERROR_MESSAGE_LENGTH
+                    ? `${message.slice(0, MAX_ERROR_MESSAGE_LENGTH - 3)}...`
+                    : message,
+              })),
+              rules: {
+                total: rulesCount,
+                failed: errorsCount,
+                succeeded: rulesCount - errorsCount,
+              },
             },
           };
 
