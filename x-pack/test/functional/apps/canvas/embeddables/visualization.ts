@@ -6,15 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const log = getService('log');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['canvas', 'common', 'header', 'visualize']);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
-  const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const archives = {
