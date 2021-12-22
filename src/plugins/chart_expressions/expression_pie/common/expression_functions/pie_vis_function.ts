@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PieVisParams } from '../types/expression_renderers';
+import { EmptySizeRatios, PieVisParams } from '../types/expression_renderers';
 import { prepareLogTable } from '../../../../visualizations/common/prepare_log_table';
 import { PieVisExpressionFunctionDefinition } from '../types/expression_functions';
 import { PIE_LABELS_FUNCTION, PIE_LABELS_VALUE, PIE_VIS_EXPRESSION_NAME } from '../constants';
@@ -107,6 +107,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       help: i18n.translate('expressionPie.pieVis.function.args.emptySizeRatioHelpText', {
         defaultMessage: 'Defines donut inner empty area size',
       }),
+      default: EmptySizeRatios.SMALL,
     },
     palette: {
       types: ['palette', 'system_palette'],
