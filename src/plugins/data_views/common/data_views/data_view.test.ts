@@ -10,7 +10,7 @@ import { map, last } from 'lodash';
 
 import { IndexPattern } from './data_view';
 
-import { CharacterNotAllowedInField, DuplicateField } from '../../../kibana_utils/common';
+import { CharacterNotAllowedInField } from '../../../kibana_utils/common';
 
 import { IndexPatternField } from '../fields';
 
