@@ -83,23 +83,11 @@
               "() => Partial<",
               "DataFilters",
               " & { applyGlobalQuery: boolean; applyGlobalTime: boolean; applyForceRefresh: boolean; fieldNames: string[]; geogridPrecision?: number | undefined; timesliceMaskField?: string | undefined; sourceQuery?: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | undefined; sourceMeta: object | null; isForceRefresh: boolean; } & Pick<",
-              "VectorSourceRequestMeta",
-              ", \"query\" | \"filters\" | \"searchSessionId\" | \"buffer\" | \"extent\" | \"timeFilters\" | \"timeslice\" | \"zoom\" | \"isReadOnly\" | \"applyGlobalQuery\" | \"applyGlobalTime\" | \"applyForceRefresh\" | \"fieldNames\" | \"timesliceMaskField\" | \"sourceQuery\" | \"sourceMeta\" | \"isForceRefresh\"> & { dynamicStyleFields: string[]; isTimeAware: boolean; sourceQuery: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
+              " | undefined; sourceMeta: object | null; isForceRefresh: boolean; } & ",
+              "VectorJoinSourceRequestMeta",
+              " & { dynamicStyleFields: string[]; isTimeAware: boolean; sourceQuery: ",
+              "Query",
               "; timeFilters: ",
               {
                 "pluginId": "data",
@@ -356,13 +344,9 @@
             "description": [],
             "signature": [
               "(input: ",
-              {
-                "pluginId": "maps",
-                "scope": "public",
-                "docId": "kibMapsPluginApi",
-                "section": "def-public.MapEmbeddableInput",
-                "text": "MapEmbeddableInput"
-              },
+              "MapByValueInput",
+              " | ",
+              "MapByReferenceInput",
               ") => input is ",
               "MapByReferenceInput"
             ],
@@ -377,13 +361,9 @@
                 "label": "input",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "maps",
-                    "scope": "public",
-                    "docId": "kibMapsPluginApi",
-                    "section": "def-public.MapEmbeddableInput",
-                    "text": "MapEmbeddableInput"
-                  }
+                  "MapByValueInput",
+                  " | ",
+                  "MapByReferenceInput"
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
                 "deprecated": false,
@@ -626,13 +606,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
@@ -869,13 +843,7 @@
             "description": [],
             "signature": [
               "(filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[], actionId?: string) => Promise<void>"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
@@ -889,13 +857,7 @@
                 "label": "filters",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/es-query",
-                    "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
-                    "section": "def-common.Filter",
-                    "text": "Filter"
-                  },
+                  "Filter",
                   "[]"
                 ],
                 "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
@@ -1084,13 +1046,7 @@
             "label": "filters",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
@@ -1104,13 +1060,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               " | undefined"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
@@ -1124,13 +1074,7 @@
             "label": "sourceQuery",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
+              "Query",
               " | undefined"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
@@ -1616,6 +1560,21 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.IField.isCount",
+            "type": "Function",
+            "tags": [],
+            "label": "isCount",
+            "description": [],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/fields/field.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1714,13 +1673,7 @@
             "description": [],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[]>"
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
@@ -2288,7 +2241,7 @@
             "label": "addFeature",
             "description": [],
             "signature": [
-              "(geometry: GeoJSON.Point | GeoJSON.MultiPoint | GeoJSON.LineString | GeoJSON.MultiLineString | GeoJSON.Polygon | GeoJSON.MultiPolygon | GeoJSON.GeometryCollection | GeoJSON.Position[], defaultFields: Record<string, Record<string, string>>) => Promise<void>"
+              "(geometry: GeoJSON.Geometry | GeoJSON.Position[], defaultFields: Record<string, Record<string, string>>) => Promise<void>"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
             "deprecated": false,
@@ -2301,7 +2254,7 @@
                 "label": "geometry",
                 "description": [],
                 "signature": [
-                  "GeoJSON.Point | GeoJSON.MultiPoint | GeoJSON.LineString | GeoJSON.MultiLineString | GeoJSON.Polygon | GeoJSON.MultiPolygon | GeoJSON.GeometryCollection | GeoJSON.Position[]"
+                  "GeoJSON.Geometry | GeoJSON.Position[]"
                 ],
                 "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
                 "deprecated": false,
@@ -2422,13 +2375,7 @@
             "description": [],
             "signature": [
               "((filters: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Filter",
-                "text": "Filter"
-              },
+              "Filter",
               "[], actionId: string) => Promise<void>) | null"
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
@@ -2635,7 +2582,7 @@
             "label": "loadFeatureGeometry",
             "description": [],
             "signature": [
-              "({ layerId, featureId, }: { layerId: string; featureId?: string | number | undefined; }) => GeoJSON.Point | GeoJSON.MultiPoint | GeoJSON.LineString | GeoJSON.MultiLineString | GeoJSON.Polygon | GeoJSON.MultiPolygon | GeoJSON.GeometryCollection | null"
+              "({ layerId, featureId, }: { layerId: string; featureId?: string | number | undefined; }) => GeoJSON.Geometry | null"
             ],
             "path": "x-pack/plugins/maps/public/classes/tooltips/tooltip_property.ts",
             "deprecated": false,
@@ -2878,7 +2825,7 @@
             "section": "def-public.RenderWizardArguments",
             "text": "RenderWizardArguments"
           },
-          "): React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>; title: string; showFeatureEditTools?: boolean | undefined; }"
+          "): React.ReactElement<any, string | React.JSXElementConstructor<any>>; title: string; showFeatureEditTools?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/maps/public/classes/layers/wizards/layer_wizard_registry.ts",
         "deprecated": false,
@@ -3271,6 +3218,17 @@
       },
       {
         "parentPluginId": "maps",
+        "id": "def-common.SCALING_TYPES",
+        "type": "Enum",
+        "tags": [],
+        "label": "SCALING_TYPES",
+        "description": [],
+        "path": "x-pack/plugins/maps/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-common.SOURCE_TYPES",
         "type": "Enum",
         "tags": [],
@@ -3331,13 +3289,7 @@
           " & { id: string; indexPatternId: string; geoField?: string | undefined; applyGlobalQuery: boolean; applyGlobalTime: boolean; applyForceRefresh: boolean; } & { metrics: ",
           "AggDescriptor",
           "[]; } & { indexPatternTitle?: string | undefined; term: string; whereQuery?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
+          "Query",
           " | undefined; size?: number | undefined; type: ",
           {
             "pluginId": "maps",
@@ -3379,13 +3331,7 @@
           " | null; type?: string | undefined; visible?: boolean | undefined; style?: ",
           "StyleDescriptor",
           " | null | undefined; query?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
+          "Query",
           " | undefined; includeInFitToBounds?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/maps/common/descriptor_types/layer_descriptor_types.ts",
@@ -3414,7 +3360,7 @@
         "label": "TooltipFeature",
         "description": [],
         "signature": [
-          "{ id?: string | number | undefined; layerId: string; geometry?: GeoJSON.Point | GeoJSON.MultiPoint | GeoJSON.LineString | GeoJSON.MultiLineString | GeoJSON.Polygon | GeoJSON.MultiPolygon | GeoJSON.GeometryCollection | undefined; mbProperties: GeoJSON.GeoJsonProperties; actions: ",
+          "{ id?: string | number | undefined; layerId: string; geometry?: GeoJSON.Geometry | undefined; mbProperties: GeoJSON.GeoJsonProperties; actions: ",
           "TooltipFeatureAction",
           "[]; }"
         ],
@@ -3445,7 +3391,7 @@
             "section": "def-common.LAYER_TYPE",
             "text": "LAYER_TYPE"
           },
-          ".VECTOR | ",
+          ".GEOJSON_VECTOR | ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -3461,7 +3407,7 @@
             "section": "def-common.LAYER_TYPE",
             "text": "LAYER_TYPE"
           },
-          ".TILED_VECTOR; joins?: ",
+          ".MVT_VECTOR; joins?: ",
           "JoinDescriptor",
           "[] | undefined; style: ",
           {
