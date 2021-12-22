@@ -217,7 +217,7 @@ export const useCasesColumns = ({
                 size="s"
               />
               <Spacer data-test-subj="case-table-column-createdBy">
-                {createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN}
+                {createdBy.username ?? i18n.UNKNOWN}
               </Spacer>
             </>
           );
