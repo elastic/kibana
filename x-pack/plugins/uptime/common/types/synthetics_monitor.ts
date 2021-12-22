@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-export type {
-  RawValue,
-  JobParamsDeprecatedCSV,
-  TaskPayloadDeprecatedCSV,
-  SearchRequestDeprecatedCSV,
-  SavedSearchGeneratorResultDeprecatedCSV,
-} from '../../../common/types/export_types/csv';
+import { SimpleSavedObject } from 'kibana/public';
+import { SyntheticsMonitor } from '../runtime_types';
+
+export interface MonitorIdParam {
+  monitorId: string;
+}
+
+export type SyntheticsMonitorSavedObject = SimpleSavedObject<SyntheticsMonitor>;
