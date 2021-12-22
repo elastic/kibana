@@ -183,11 +183,23 @@ describe('<IndexManagementHome />', () => {
   });
 
   describe('index actions', () => {
-    const indexName = 'testIndex';
+    const indexNameA = 'testIndexA';
+    const indexNameB = 'testIndexB';
+    const indexMockA = createNonDataStreamIndex(indexNameA);
+    const indexMockB = createNonDataStreamIndex(indexNameB);
 
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
-      httpRequestsMockHelpers.setReloadIndicesResponse({ indexNames: [indexName] });
+      httpRequestsMockHelpers.setLoadIndicesResponse([
+        {
+          ...indexMockA,
+          isFrozen: true,
+        },
+        {
+          ...indexMockB,
+          status: 'closed',
+        },
+      ]);
+      httpRequestsMockHelpers.setReloadIndicesResponse({ indexNames: [indexNameA, indexNameB] });
 
       testBed = await setup();
       const { component, find } = testBed;
@@ -207,6 +219,22 @@ describe('<IndexManagementHome />', () => {
       expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/close`);
     });
 
+    test('should be able to open a closed index', async () => {
+      testBed = await setup();
+      const { component, find, actions } = testBed;
+
+      component.update();
+
+      find('indexTableIndexNameLink').at(1).simulate('click');
+
+      await actions.clickManageContextMenuButton();
+      await actions.clickContextMenuOption('openIndexMenuButton');
+
+      // A refresh call was added after closing an index so we need to check the second to last request.
+      const latestRequest = server.requests[server.requests.length - 2];
+      expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/open`);
+    });
+
     test('should be able to flush index', async () => {
       const { actions } = testBed;
 
@@ -219,21 +247,41 @@ describe('<IndexManagementHome />', () => {
       // a reload server call also.
       expect(server.requests[requestsCount - 1].url).toBe(`${API_BASE_PATH}/indices/reload`);
     });
+
+    test("should be able to clear an index's cache", async () => {
+      const { actions } = testBed;
+      actions.clickManageContextMenuButton();
+
+      await actions.clickManageContextMenuButton();
+      await actions.clickContextMenuOption('clearCacheIndexMenuButton');
+
+      const latestRequest = server.requests[server.requests.length - 2];
+      expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/clear_cache`);
+    });
+
+    test('should be able to unfreeze a frozen index', async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([
+        {
+          ...indexMockA,
+          isFrozen: true,
+        },
+      ]);
+      const { actions, exists } = testBed;
+      // Open context menu
+      await actions.clickManageContextMenuButton();
+      // Check that the unfreeze action exists for the current index and unfreeze it
+      expect(exists('unfreezeIndexMenuButton')).toBe(true);
+      await actions.clickContextMenuOption('unfreezeIndexMenuButton');
+
+      const requestsCount = server.requests.length;
+      expect(server.requests[requestsCount - 2].url).toBe(`${API_BASE_PATH}/indices/unfreeze`);
+      // After the index is unfrozen, we imediately do a reload. So we need to expect to see
+      // a reload server call also.
+      expect(server.requests[requestsCount - 1].url).toBe(`${API_BASE_PATH}/indices/reload`);
+    });
   });
 
   describe('Edit index settings', () => {
-    const indexName = 'testIndex';
-
-    beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
-
-      testBed = await setup();
-      const { find, component } = testBed;
-      component.update();
-
-      find('indexTableIndexNameLink').at(0).simulate('click');
-    });
-
     test('shows error callout when request fails', async () => {
       const { actions, find, component, exists } = testBed;
 
