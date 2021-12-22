@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const reportingAPI = getService('reporting');
   const log = getService('log');
   const es = getService('es');
+  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
   const retry = getService('retry');
@@ -39,16 +40,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Discover CSV Export', () => {
     describe('Check Available', () => {
       before(async () => {
+        await esArchiver.emptyKibanaIndex();
         await reportingAPI.initEcommerce();
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectIndexPattern('ecommerce');
       });
 
       after(async () => {
         await reportingAPI.teardownEcommerce();
-      });
-
-      beforeEach(async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.selectIndexPattern('ecommerce');
       });
 
       it('is available if new', async () => {
@@ -169,6 +168,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await reset();
         await createDocs();
         await reportingAPI.initLogs();
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.loadSavedSearch('Sparse Columns');
       });
 
       after(async () => {
@@ -177,8 +178,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.loadSavedSearch('Sparse Columns');
         const fromTime = 'Jan 10, 2005 @ 00:00:00.000';
         const toTime = 'Dec 23, 2006 @ 00:00:00.000';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
@@ -206,6 +205,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await reportingAPI.initEcommerce();
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectIndexPattern('ecommerce');
       });
 
       after(async () => {
@@ -213,7 +214,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       beforeEach(async () => {
-        await PageObjects.common.navigateToApp('discover');
         await setupPage();
       });
 
