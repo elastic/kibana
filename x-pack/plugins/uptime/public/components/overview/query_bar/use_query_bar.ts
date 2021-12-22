@@ -12,7 +12,7 @@ import { Query } from 'src/plugins/data/common';
 import {
   useGetUrlParams,
   useIndexPattern,
-  useUpdateKueryString,
+  generateUpdatedKueryString,
   useUrlParams,
 } from '../../../hooks';
 import { setEsKueryString } from '../../../state/actions';
@@ -74,7 +74,7 @@ export const useQueryBar = (): UseQueryBarUtils => {
 
   const [, updateUrlParams] = useUrlParams();
 
-  const [esFilters, error] = useUpdateKueryString(
+  const [esFilters, error] = generateUpdatedKueryString(
     indexPattern,
     query.language === SyntaxType.kuery ? (query.query as string) : undefined,
     paramFilters,
