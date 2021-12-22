@@ -37,8 +37,8 @@ export const elasticsearch = new ElasticsearchService(logger, kibanaPackageJson.
   elasticsearch: {
     createClient: (type, config) => {
       const defaults = configSchema.validate({});
-      return new ClusterClient(
-        merge(
+      return new ClusterClient({
+        config: merge(
           defaults,
           {
             hosts: Array.isArray(defaults.hosts) ? defaults.hosts : [defaults.hosts],
@@ -46,8 +46,8 @@ export const elasticsearch = new ElasticsearchService(logger, kibanaPackageJson.
           config
         ),
         logger,
-        type
-      );
+        type,
+      });
     },
   },
 });
