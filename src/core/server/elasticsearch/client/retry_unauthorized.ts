@@ -64,6 +64,9 @@ export type InternalUnauthorizedErrorHandler = (
   error: UnauthorizedError
 ) => MaybePromise<UnauthorizedErrorHandlerResult>;
 
+export const notHandledInternalErrorHandler: InternalUnauthorizedErrorHandler = () =>
+  toolkit.notHandled();
+
 /**
  * Converts the public version of `UnauthorizedErrorHandler` to the internal one used by the ES client
  *
@@ -80,7 +83,7 @@ export const createInternalErrorHandler = ({
 }): InternalUnauthorizedErrorHandler => {
   // we don't want to support 401 retry for fake requests
   if (!isRealRequest(request)) {
-    return () => toolkit.notHandled();
+    return notHandledInternalErrorHandler;
   }
   return async (error) => {
     try {

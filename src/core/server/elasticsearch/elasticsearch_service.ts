@@ -16,7 +16,7 @@ import { Logger } from '../logging';
 
 import { ClusterClient, ElasticsearchClientConfig } from './client';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
-import type { InternalHttpServiceSetup, GetAuthHeaders, SetAuthHeaders } from '../http';
+import type { InternalHttpServiceSetup, IAuthHeadersStorage } from '../http';
 import type { InternalExecutionContextSetup, IExecutionContext } from '../execution_context';
 import {
   InternalElasticsearchServicePreboot,
@@ -43,8 +43,7 @@ export class ElasticsearchService
   private readonly config$: Observable<ElasticsearchConfig>;
   private stop$ = new Subject();
   private kibanaVersion: string;
-  private getAuthHeaders?: GetAuthHeaders;
-  private setAuthHeaders?: SetAuthHeaders;
+  private authHeaders?: IAuthHeadersStorage;
   private executionContextClient?: IExecutionContext;
   private esNodesCompatibility$?: Observable<NodesVersionCompatibility>;
   private client?: ClusterClient;
@@ -79,8 +78,7 @@ export class ElasticsearchService
 
     const config = await this.config$.pipe(first()).toPromise();
 
-    this.getAuthHeaders = deps.http.getAuthHeaders;
-    this.setAuthHeaders = deps.http.setAuthHeaders;
+    this.authHeaders = deps.http.authRequestHeaders;
     this.executionContextClient = deps.executionContext;
     this.client = this.createClusterClient('data', config);
 
@@ -167,8 +165,7 @@ export class ElasticsearchService
       config,
       logger: this.coreContext.logger.get('elasticsearch'),
       type,
-      getAuthHeaders: this.getAuthHeaders,
-      setAuthHeaders: this.setAuthHeaders,
+      authHeaders: this.authHeaders,
       getExecutionContext: () => this.executionContextClient?.getAsHeader(),
       unauthorizedErrorHandler: this.unauthorizedErrorHandler,
     });

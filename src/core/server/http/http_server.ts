@@ -42,7 +42,7 @@ import {
   createCookieSessionStorageFactory,
 } from './cookie_session_storage';
 import { AuthStateStorage } from './auth_state_storage';
-import { AuthHeadersStorage, GetAuthHeaders, SetAuthHeaders } from './auth_headers_storage';
+import { AuthHeadersStorage, IAuthHeadersStorage } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { getEcsResponseLog } from './logging';
 import { HttpServiceSetup, HttpServerInfo, HttpAuth } from './types';
@@ -71,8 +71,7 @@ export interface HttpServerSetup {
   registerAuth: HttpServiceSetup['registerAuth'];
   registerOnPostAuth: HttpServiceSetup['registerOnPostAuth'];
   registerOnPreResponse: HttpServiceSetup['registerOnPreResponse'];
-  getAuthHeaders: GetAuthHeaders;
-  setAuthHeaders: SetAuthHeaders;
+  authRequestHeaders: IAuthHeadersStorage;
   auth: HttpAuth;
   getServerInfo: () => HttpServerInfo;
 }
@@ -172,8 +171,7 @@ export class HttpServer {
         get: this.authState.get,
         isAuthenticated: this.authState.isAuthenticated,
       },
-      getAuthHeaders: this.authRequestHeaders.get,
-      setAuthHeaders: this.authRequestHeaders.set,
+      authRequestHeaders: this.authRequestHeaders,
       getServerInfo: () => ({
         name: config.name,
         hostname: config.host,

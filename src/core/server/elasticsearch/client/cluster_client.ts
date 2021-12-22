@@ -8,13 +8,7 @@
 
 import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { Logger } from '../../logging';
-import {
-  GetAuthHeaders,
-  SetAuthHeaders,
-  Headers,
-  isKibanaRequest,
-  isRealRequest,
-} from '../../http';
+import { IAuthHeadersStorage, Headers, isKibanaRequest, isRealRequest } from '../../http';
 import { ensureRawRequest, filterHeaders } from '../../http/router';
 import { ScopeableRequest } from '../types';
 import { ElasticsearchClient } from './types';
@@ -61,8 +55,7 @@ export interface ICustomClusterClient extends IClusterClient {
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {
   private readonly config: ElasticsearchClientConfig;
-  private readonly getAuthHeaders: GetAuthHeaders;
-  private readonly setAuthHeaders: SetAuthHeaders;
+  private readonly authHeaders?: IAuthHeadersStorage;
   private readonly rootScopedClient: KibanaClient;
   private readonly allowListHeaders: string[];
   private readonly unauthorizedErrorHandler?: UnauthorizedErrorHandler;
@@ -76,22 +69,19 @@ export class ClusterClient implements ICustomClusterClient {
     config,
     logger,
     type,
-    getAuthHeaders = noop,
-    setAuthHeaders = noop,
+    authHeaders,
     getExecutionContext = noop,
     unauthorizedErrorHandler,
   }: {
     config: ElasticsearchClientConfig;
     logger: Logger;
     type: string;
-    getAuthHeaders?: GetAuthHeaders;
-    setAuthHeaders?: SetAuthHeaders;
+    authHeaders?: IAuthHeadersStorage;
     getExecutionContext?: () => string | undefined;
     unauthorizedErrorHandler?: UnauthorizedErrorHandler;
   }) {
     this.config = config;
-    this.getAuthHeaders = getAuthHeaders;
-    this.setAuthHeaders = setAuthHeaders;
+    this.authHeaders = authHeaders;
     this.getExecutionContext = getExecutionContext;
     this.unauthorizedErrorHandler = unauthorizedErrorHandler;
 
@@ -108,17 +98,20 @@ export class ClusterClient implements ICustomClusterClient {
   asScoped(request: ScopeableRequest) {
     const scopedHeaders = this.getScopedHeaders(request);
 
-    const internalErrorHandler = this.unauthorizedErrorHandler
-      ? createInternalErrorHandler({
-          handler: this.unauthorizedErrorHandler,
-          request,
-          setAuthHeaders: this.setAuthHeaders,
-        })
-      : undefined;
+    const createUnauthorizedErrorHandler =
+      this.unauthorizedErrorHandler && this.authHeaders
+        ? () => {
+            return createInternalErrorHandler({
+              handler: this.unauthorizedErrorHandler!,
+              request,
+              setAuthHeaders: this.authHeaders!.set,
+            });
+          }
+        : undefined;
 
     const transportClass = createTransport({
       getExecutionContext: this.getExecutionContext,
-      unauthorizedErrorHandler: internalErrorHandler,
+      getUnauthorizedErrorHandler: createUnauthorizedErrorHandler,
     });
 
     const scopedClient = this.rootScopedClient.child({
@@ -141,7 +134,7 @@ export class ClusterClient implements ICustomClusterClient {
     if (isRealRequest(request)) {
       const requestHeaders = ensureRawRequest(request).headers;
       const requestIdHeaders = isKibanaRequest(request) ? { 'x-opaque-id': request.id } : {};
-      const authHeaders = this.getAuthHeaders(request);
+      const authHeaders = this.authHeaders ? this.authHeaders.get(request) : {};
 
       scopedHeaders = filterHeaders(
         { ...requestHeaders, ...requestIdHeaders, ...authHeaders },

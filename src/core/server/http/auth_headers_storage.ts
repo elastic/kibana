@@ -18,14 +18,23 @@ import { AuthHeaders } from './lifecycle/auth';
  * */
 export type GetAuthHeaders = (request: KibanaRequest) => AuthHeaders | undefined;
 
+/** @internal */
 export type SetAuthHeaders = (request: KibanaRequest, headers: AuthHeaders) => void;
 
 /** @internal */
-export class AuthHeadersStorage {
+export interface IAuthHeadersStorage {
+  set: SetAuthHeaders;
+  get: GetAuthHeaders;
+}
+
+/** @internal */
+export class AuthHeadersStorage implements IAuthHeadersStorage {
   private authHeadersCache = new WeakMap<Request, AuthHeaders>();
+
   public set = (request: KibanaRequest | Request, headers: AuthHeaders) => {
     this.authHeadersCache.set(ensureRawRequest(request), headers);
   };
+
   public get: GetAuthHeaders = (request) => {
     return this.authHeadersCache.get(ensureRawRequest(request));
   };

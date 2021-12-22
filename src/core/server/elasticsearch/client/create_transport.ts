@@ -19,14 +19,16 @@ import { InternalUnauthorizedErrorHandler, isRetryResult } from './retry_unautho
 
 type TransportClass = typeof Transport;
 
+export type ErrorHandlerAccessor = () => InternalUnauthorizedErrorHandler;
+
 const noop = () => undefined;
 
 export const createTransport = ({
   getExecutionContext = noop,
-  unauthorizedErrorHandler,
+  getUnauthorizedErrorHandler,
 }: {
   getExecutionContext?: () => string | undefined;
-  unauthorizedErrorHandler?: InternalUnauthorizedErrorHandler;
+  getUnauthorizedErrorHandler?: ErrorHandlerAccessor;
 }): TransportClass => {
   class KibanaTransport extends Transport {
     private headers: IncomingHttpHeaders = {};
@@ -59,18 +61,23 @@ export const createTransport = ({
       try {
         return (await super.request(params, opts)) as TransportResult<any, any>;
       } catch (e) {
-        if (isUnauthorizedError(e) && unauthorizedErrorHandler) {
-          const result = await unauthorizedErrorHandler(e);
-          if (isRetryResult(result)) {
-            this.headers = {
-              ...this.headers,
-              ...result.authHeaders,
-            };
-            opts.headers = {
-              ...this.headers,
-              ...(options?.headers ?? {}),
-            };
-            return (await super.request(params, opts)) as TransportResult<any, any>;
+        if (isUnauthorizedError(e)) {
+          const unauthorizedErrorHandler = getUnauthorizedErrorHandler
+            ? getUnauthorizedErrorHandler()
+            : undefined;
+          if (unauthorizedErrorHandler) {
+            const result = await unauthorizedErrorHandler(e);
+            if (isRetryResult(result)) {
+              this.headers = {
+                ...this.headers,
+                ...result.authHeaders,
+              };
+              opts.headers = {
+                ...this.headers,
+                ...(options?.headers ?? {}),
+              };
+              return (await super.request(params, opts)) as TransportResult<any, any>;
+            }
           }
         }
         throw e;
