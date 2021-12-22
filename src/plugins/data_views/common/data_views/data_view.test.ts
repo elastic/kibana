@@ -199,25 +199,6 @@ describe('IndexPattern', () => {
       expect(indexPattern.getScriptedFields().length).toEqual(oldCount - 1);
       expect(indexPattern.fields.getByName(scriptedField.name)).toEqual(undefined);
     });
-
-    test('should not allow duplicate names', async () => {
-      const scriptedFields = indexPattern.getScriptedFields();
-      const scriptedField = last(scriptedFields) as any;
-      expect.assertions(1);
-      try {
-        await indexPattern.addScriptedField(scriptedField.name, "'new script'", 'string');
-      } catch (e) {
-        expect(e).toBeInstanceOf(DuplicateField);
-      }
-    });
-
-    test('should not allow scripted field with * in name', async () => {
-      try {
-        await indexPattern.addScriptedField('test*123', "'new script'", 'string');
-      } catch (e) {
-        expect(e).toBeInstanceOf(CharacterNotAllowedInField);
-      }
-    });
   });
 
   describe('setFieldFormat and deleteFieldFormaat', () => {
