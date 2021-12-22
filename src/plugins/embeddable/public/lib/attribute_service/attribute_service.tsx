@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { get, omit } from 'lodash';
@@ -144,10 +145,14 @@ export class AttributeService<
       return input as ValType;
     }
     const { attributes } = await this.unwrapAttributes(input);
+    const libraryTitle = attributes.title;
     const { savedObjectId, ...originalInputToPropagate } = input;
+
     return {
       ...originalInputToPropagate,
-      attributes,
+      // by value visualizations should not have default titles and/or descriptions
+      ...{ attributes: _.omit(attributes, ['title', 'description']) },
+      title: libraryTitle,
     } as unknown as ValType;
   };
 
