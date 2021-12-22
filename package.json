@@ -599,6 +599,8 @@
     "@types/kbn__securitysolution-t-grid": "link:bazel-bin/packages/kbn-securitysolution-t-grid/npm_module_types",
     "@types/kbn__securitysolution-utils": "link:bazel-bin/packages/kbn-securitysolution-utils/npm_module_types",
     "@types/kbn__server-http-tools": "link:bazel-bin/packages/kbn-server-http-tools/npm_module_types",
+    "@types/kbn__server-route-repository": "link:bazel-bin/packages/kbn-server-route-repository/npm_module_types",
+    "@types/kbn__std": "link:bazel-bin/packages/kbn-std/npm_module_types",
     "@types/license-checker": "15.0.0",
     "@types/listr": "^0.14.0",
     "@types/loader-utils": "^1.1.3",

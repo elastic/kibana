@@ -66,30 +66,6 @@ export default function ({ getService }: FtrProviderContext) {
           expect(response3.body[config.serviceKey].timeFieldName).to.be('timeFieldName2');
         });
 
-        it('can update index_pattern intervalName', async () => {
-          const title = `foo-${Date.now()}-${Math.random()}*`;
-          const response1 = await supertest.post(config.path).send({
-            [config.serviceKey]: {
-              title,
-            },
-          });
-
-          expect(response1.body[config.serviceKey].intervalName).to.be(undefined);
-
-          const id = response1.body[config.serviceKey].id;
-          const response2 = await supertest.post(`${config.path}/${id}`).send({
-            [config.serviceKey]: {
-              intervalName: 'intervalName2',
-            },
-          });
-
-          expect(response2.body[config.serviceKey].intervalName).to.be('intervalName2');
-
-          const response3 = await supertest.get(`${config.path}/${id}`);
-
-          expect(response3.body[config.serviceKey].intervalName).to.be('intervalName2');
-        });
-
         it('can update index_pattern sourceFilters', async () => {
           const title = `foo-${Date.now()}-${Math.random()}*`;
           const response1 = await supertest.post(config.path).send({
@@ -265,26 +241,22 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           expect(response1.body[config.serviceKey].timeFieldName).to.be('timeFieldName1');
-          expect(response1.body[config.serviceKey].intervalName).to.be(undefined);
           expect(response1.body[config.serviceKey].typeMeta.foo).to.be('bar');
 
           const id = response1.body[config.serviceKey].id;
           const response2 = await supertest.post(`${config.path}/${id}`).send({
             [config.serviceKey]: {
               timeFieldName: 'timeFieldName2',
-              intervalName: 'intervalName2',
               typeMeta: { baz: 'qux' },
             },
           });
 
           expect(response2.body[config.serviceKey].timeFieldName).to.be('timeFieldName2');
-          expect(response2.body[config.serviceKey].intervalName).to.be('intervalName2');
           expect(response2.body[config.serviceKey].typeMeta.baz).to.be('qux');
 
           const response3 = await supertest.get(`${config.path}/${id}`);
 
           expect(response3.body[config.serviceKey].timeFieldName).to.be('timeFieldName2');
-          expect(response3.body[config.serviceKey].intervalName).to.be('intervalName2');
           expect(response3.body[config.serviceKey].typeMeta.baz).to.be('qux');
         });
 
