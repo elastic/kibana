@@ -77,9 +77,6 @@ describe('IndexPattern', () => {
     test('should have expected properties', () => {
       expect(indexPattern).toHaveProperty('getScriptedFields');
       expect(indexPattern).toHaveProperty('getNonScriptedFields');
-      expect(indexPattern).toHaveProperty('addScriptedField');
-      expect(indexPattern).toHaveProperty('removeScriptedField');
-      expect(indexPattern).toHaveProperty('addScriptedField');
       expect(indexPattern).toHaveProperty('removeScriptedField');
       expect(indexPattern).toHaveProperty('addRuntimeField');
       expect(indexPattern).toHaveProperty('removeRuntimeField');
@@ -173,11 +170,17 @@ describe('IndexPattern', () => {
         type: 'boolean',
       };
 
-      await indexPattern.addScriptedField(
-        scriptedField.name,
-        scriptedField.script,
-        scriptedField.type
-      );
+      indexPattern.fields.add({
+        name: scriptedField.name,
+        script: scriptedField.script,
+        type: scriptedField.type,
+        scripted: true,
+        lang: 'painless',
+        aggregatable: true,
+        searchable: true,
+        count: 0,
+        readFromDocValues: false,
+      });
 
       const scriptedFields = indexPattern.getScriptedFields();
       expect(scriptedFields).toHaveLength(oldCount + 1);
