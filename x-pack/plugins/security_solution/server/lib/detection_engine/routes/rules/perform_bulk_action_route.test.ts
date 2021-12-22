@@ -87,18 +87,24 @@ describe.each([
       expect(response.body).toEqual({
         message: 'Bulk edit failed',
         status_code: 500,
-        errors: [
-          {
-            error_message: 'Test error',
-            error_status_code: 500,
-            rule_id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-            rule_name: 'Detect Root/Admin Users',
+        attributes: {
+          errors: [
+            {
+              message: 'Test error',
+              status_code: 500,
+              rules: [
+                {
+                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
+          rules: {
+            failed: 1,
+            succeeded: 0,
+            total: 1,
           },
-        ],
-        rules: {
-          failed: 1,
-          succeeded: 0,
-          total: 1,
         },
       });
     });
@@ -113,31 +119,41 @@ describe.each([
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
-        errors: [
-          {
-            error_message: 'mocked validation message',
-            error_status_code: 403,
-            rule_id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-            rule_name: 'Detect Root/Admin Users',
+        attributes: {
+          errors: [
+            {
+              message: 'mocked validation message',
+              status_code: 403,
+              rules: [
+                {
+                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
+          rules: {
+            failed: 1,
+            succeeded: 0,
+            total: 1,
           },
-        ],
-        message: 'Bulk edit failed',
-        rules: {
-          failed: 1,
-          succeeded: 0,
-          total: 1,
         },
+        message: 'Bulk edit failed',
         status_code: 500,
       });
     });
 
-    it('returns partial failure error if one of rule validations fails and the rest are successfull', async () => {
-      const failedRuleId = 'fail-rule-id';
-      const failedRuleName = 'Rule that fails';
+    it('returns partial failure error if couple of rule validations fail and the rest are successfull', async () => {
       clients.rulesClient.find.mockResolvedValue(
         getFindResultWithMultiHits({
-          data: [{ ...mockRule, id: failedRuleId, name: failedRuleName }, mockRule, mockRule],
-          total: 3,
+          data: [
+            { ...mockRule, id: 'failed-rule-id-1' },
+            { ...mockRule, id: 'failed-rule-id-2' },
+            { ...mockRule, id: 'failed-rule-id-3' },
+            mockRule,
+            mockRule,
+          ],
+          total: 5,
         })
       );
 
@@ -145,6 +161,8 @@ describe.each([
         validateRuleType: jest
           .fn()
           .mockImplementationOnce(() => ({ valid: false, message: 'mocked validation message' }))
+          .mockImplementationOnce(() => ({ valid: false, message: 'mocked validation message' }))
+          .mockImplementationOnce(() => ({ valid: false, message: 'test failure' }))
           .mockImplementationOnce(() => ({ valid: true }))
           .mockImplementationOnce(() => ({ valid: true })),
       });
@@ -152,20 +170,40 @@ describe.each([
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
-        errors: [
-          {
-            error_message: 'mocked validation message',
-            error_status_code: 403,
-            rule_id: 'fail-rule-id',
-            rule_name: 'Rule that fails',
+        attributes: {
+          rules: {
+            failed: 3,
+            succeeded: 2,
+            total: 5,
           },
-        ],
-        message: 'Bulk edit partially failed',
-        rules: {
-          failed: 1,
-          succeeded: 2,
-          total: 3,
+          errors: [
+            {
+              message: 'mocked validation message',
+              status_code: 403,
+              rules: [
+                {
+                  id: 'failed-rule-id-1',
+                  name: 'Detect Root/Admin Users',
+                },
+                {
+                  id: 'failed-rule-id-2',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+            {
+              message: 'test failure',
+              status_code: 403,
+              rules: [
+                {
+                  id: 'failed-rule-id-3',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
         },
+        message: 'Bulk edit partially failed',
         status_code: 500,
       });
     });
@@ -176,7 +214,7 @@ describe.each([
       });
       const response = await server.inject(getBulkActionRequest(), context);
       expect(response.status).toEqual(500);
-      expect(response.body.errors[0].error_message.length).toEqual(1000);
+      expect(response.body.attributes.errors[0].message.length).toEqual(1000);
     });
   });
 

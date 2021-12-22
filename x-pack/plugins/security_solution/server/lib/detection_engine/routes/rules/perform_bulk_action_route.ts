@@ -72,7 +72,7 @@ const normalizeErrorResponse = (errors: RuleActionError[]): NormalizedRuleError[
       errorsMap.set(message, {
         message: error.message,
         status_code: error.statusCode,
-        rule: [rule],
+        rules: [rule],
       });
     }
   });
