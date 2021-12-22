@@ -43,33 +43,23 @@ import {
   buildExistsFilter as oldBuildExistsFilter,
   toggleFilterNegated as oldtoggleFilterNegated,
   Filter as oldFilter,
-  RangeFilterMeta as oldRangeFilterMeta,
   RangeFilterParams as oldRangeFilterParams,
   ExistsFilter as oldExistsFilter,
-  PhrasesFilter as oldPhrasesFilter,
   PhraseFilter as oldPhraseFilter,
   MatchAllFilter as oldMatchAllFilter,
-  CustomFilter as oldCustomFilter,
   RangeFilter as oldRangeFilter,
   KueryNode as oldKueryNode,
   FilterMeta as oldFilterMeta,
   FILTERS as oldFILTERS,
-  IFieldSubType as oldIFieldSubType,
   EsQueryConfig as oldEsQueryConfig,
   compareFilters as oldCompareFilters,
   COMPARE_ALL_OPTIONS as OLD_COMPARE_ALL_OPTIONS,
   dedupFilters as oldDedupFilters,
-  isFilter as oldIsFilter,
   onlyDisabledFiltersChanged as oldOnlyDisabledFiltersChanged,
   uniqFilters as oldUniqFilters,
   FilterStateStore,
 } from '@kbn/es-query';
 
-/**
- * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.1
- */
-const isFilter = oldIsFilter;
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
  * @removeBy 8.1
@@ -300,12 +290,6 @@ type Filter = oldFilter;
  * @deprecated Import from the "@kbn/es-query" package directly instead.
  * @removeBy 8.1
  */
-type RangeFilterMeta = oldRangeFilterMeta;
-
-/**
- * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.1
- */
 type RangeFilterParams = oldRangeFilterParams;
 
 /**
@@ -318,12 +302,6 @@ type ExistsFilter = oldExistsFilter;
  * @deprecated Import from the "@kbn/es-query" package directly instead.
  * @removeBy 8.1
  */
-type PhrasesFilter = oldPhrasesFilter;
-
-/**
- * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.1
- */
 type PhraseFilter = oldPhraseFilter;
 
 /**
@@ -331,12 +309,6 @@ type PhraseFilter = oldPhraseFilter;
  * @removeBy 8.1
  */
 type MatchAllFilter = oldMatchAllFilter;
-
-/**
- * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.1
- */
-type CustomFilter = oldCustomFilter;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
@@ -360,12 +332,6 @@ type FilterMeta = oldFilterMeta;
  * @deprecated Import from the "@kbn/es-query" package directly instead.
  * @removeBy 8.1
  */
-type IFieldSubType = oldIFieldSubType;
-
-/**
- * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.1
- */
 type EsQueryConfig = oldEsQueryConfig;
 
 /**
@@ -375,17 +341,13 @@ type EsQueryConfig = oldEsQueryConfig;
 
 export type {
   Filter,
-  RangeFilterMeta,
   RangeFilterParams,
   ExistsFilter,
-  PhrasesFilter,
   PhraseFilter,
   MatchAllFilter,
-  CustomFilter,
   RangeFilter,
   KueryNode,
   FilterMeta,
-  IFieldSubType,
   EsQueryConfig,
 };
 export {
@@ -423,7 +385,6 @@ export {
   buildExistsFilter,
   toggleFilterNegated,
   FILTERS,
-  isFilter,
   isFilterDisabled,
   dedupFilters,
   onlyDisabledFiltersChanged,

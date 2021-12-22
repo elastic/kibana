@@ -36,18 +36,13 @@ import {
   luceneStringToDsl,
   decorateQuery,
   FILTERS,
-  isFilter,
   isFilters,
   KueryNode,
   RangeFilter,
-  RangeFilterMeta,
   RangeFilterParams,
   ExistsFilter,
-  PhrasesFilter,
   PhraseFilter,
-  CustomFilter,
   MatchAllFilter,
-  IFieldSubType,
   EsQueryConfig,
   FilterStateStore,
   compareFilters,
@@ -140,17 +135,13 @@ export const esFilters = {
 export type {
   KueryNode,
   RangeFilter,
-  RangeFilterMeta,
   RangeFilterParams,
   ExistsFilter,
-  PhrasesFilter,
   PhraseFilter,
-  CustomFilter,
   MatchAllFilter,
-  IFieldSubType,
   EsQueryConfig,
 };
-export { isFilter, isFilters };
+export { isFilters };
 
 /**
  * @deprecated Import helpers from the "@kbn/es-query" package directly instead.

@@ -67,4 +67,4 @@ export const esQuery = {
   buildEsQuery,
 };
 
-export type { Filter, Query, EsQueryConfig, KueryNode, IFieldSubType } from '../common';
+export type { Filter, Query, EsQueryConfig, KueryNode } from '../common';
