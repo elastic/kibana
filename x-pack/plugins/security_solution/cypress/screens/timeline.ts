@@ -86,7 +86,7 @@ export const NOTES_TAB_BUTTON = '[data-test-subj="timelineTabs-notes"]';
 
 export const NOTES_TEXT = '.euiMarkdownFormat';
 
-export const NOTES_CODE_BLOCK = '.euiCodeBlock__code';
+export const NOTES_CODE_BLOCK = '.euiCode';
 
 export const NOTES_AUTHOR = '.euiCommentEvent__headerUsername';
 

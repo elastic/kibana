@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Registry } from '@kbn/interpreter/common';
+import { Registry } from '@kbn/interpreter';
 import { ArgType, ArgTypeProps } from './arg_type';
 
 class ArgTypeRegistry extends Registry<ArgTypeProps, ArgType> {

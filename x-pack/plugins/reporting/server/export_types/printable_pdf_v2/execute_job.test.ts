@@ -10,7 +10,7 @@ jest.mock('./lib/generate_pdf');
 import * as Rx from 'rxjs';
 import { Writable } from 'stream';
 import { ReportingCore } from '../../';
-import { CancellationToken } from '../../../common';
+import { CancellationToken } from '../../../common/cancellation_token';
 import { LocatorParams } from '../../../common/types';
 import { cryptoFactory, LevelLogger } from '../../lib';
 import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
