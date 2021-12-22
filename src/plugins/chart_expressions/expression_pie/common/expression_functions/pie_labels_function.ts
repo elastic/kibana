@@ -9,12 +9,12 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, Datatable } from '../../../../expressions/common';
 import { PIE_LABELS_FUNCTION, PIE_LABELS_VALUE } from '../constants';
-import { ExpressionValuePieLabels, Arguments } from '../types/expression_functions';
+import { ExpressionValuePieLabels, PieLabelsArguments } from '../types/expression_functions';
 
 export const pieLabelsFunction = (): ExpressionFunctionDefinition<
   typeof PIE_LABELS_FUNCTION,
   Datatable | null,
-  Arguments,
+  PieLabelsArguments,
   ExpressionValuePieLabels
 > => ({
   name: PIE_LABELS_FUNCTION,
