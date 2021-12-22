@@ -9,6 +9,7 @@ export KIBANA_DIR
 export XPACK_DIR="$KIBANA_DIR/x-pack"
 
 export CACHE_DIR="$HOME/.kibana"
+export GCS_UPLOAD_PREFIX="FAKE_GCS_UPLOAD_PREFIX"
 
 source .buildkite/scripts/common/setup_node.sh
 
