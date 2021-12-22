@@ -119,7 +119,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
     this.redirectManager = new RedirectManager({
       url: this.url,
     });
-    this.redirectManager.registerRedirectApp(core);
+    this.redirectManager.registerLocatorRedirectApp(core);
     this.redirectManager.registerShortUrlRedirectApp(core);
 
     return {

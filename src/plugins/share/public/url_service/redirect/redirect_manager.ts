@@ -26,7 +26,7 @@ export class RedirectManager {
 
   constructor(public readonly deps: RedirectManagerDependencies) {}
 
-  public registerRedirectApp(core: CoreSetup) {
+  public registerLocatorRedirectApp(core: CoreSetup) {
     core.application.register({
       id: 'r',
       title: 'Redirect endpoint',
