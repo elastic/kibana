@@ -24,10 +24,6 @@ export const NO_CASES_BODY_READ_ONLY = i18n.translate(
   }
 );
 
-export const ADD_NEW_CASE = i18n.translate('xpack.cases.caseTable.addNewCase', {
-  defaultMessage: 'Add New Case',
-});
-
 export const SHOWING_SELECTED_CASES = (totalRules: number) =>
   i18n.translate('xpack.cases.caseTable.selectedCasesTitle', {
     values: { totalRules },
