@@ -78,7 +78,8 @@ export const computeColor = (
         totalSeries: allSeries.length || 1,
         behindText: visParams.labels.show,
         syncColors,
-      }
+      },
+      visParams.palette?.params ?? { colors: [] }
     );
   }
   const seriesLayers: SeriesLayer[] = [];
@@ -115,12 +116,16 @@ export const computeColor = (
   if (overwriteColor) {
     return lightenColor(overwriteColor, seriesLayers.length, columns.length);
   }
-  return palettes?.get(visParams.palette.name).getCategoricalColor(seriesLayers, {
-    behindText: visParams.labels.show,
-    maxDepth: columns.length,
-    totalSeries: rows.length,
-    syncColors,
-  });
+  return palettes?.get(visParams.palette.name).getCategoricalColor(
+    seriesLayers,
+    {
+      behindText: visParams.labels.show,
+      maxDepth: columns.length,
+      totalSeries: rows.length,
+      syncColors,
+    },
+    visParams.palette?.params ?? { colors: [] }
+  );
 };
 
 export const getLayers = (

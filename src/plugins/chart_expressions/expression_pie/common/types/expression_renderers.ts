@@ -68,7 +68,7 @@ export interface PieVisConfig extends PieCommonParams {
   splitColumn?: ExpressionValueVisDimension[];
   splitRow?: ExpressionValueVisDimension[];
   labels: ExpressionValuePieLabels;
-  palette: string;
+  palette: PaletteOutput;
 }
 
 export interface RenderValue {

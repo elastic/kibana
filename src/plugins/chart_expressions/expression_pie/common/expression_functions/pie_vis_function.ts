@@ -109,11 +109,11 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       }),
     },
     palette: {
-      types: ['string'],
+      types: ['palette', 'system_palette'],
       help: i18n.translate('expressionPie.pieVis.function.args.paletteHelpText', {
         defaultMessage: 'Defines the chart palette name',
       }),
-      default: 'default',
+      default: '{palette}',
     },
     labels: {
       types: [PIE_LABELS_VALUE],
@@ -126,10 +126,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
   fn(context, args, handlers) {
     const visConfig: PieVisParams = {
       ...args,
-      palette: {
-        type: 'palette',
-        name: args.palette,
-      },
+      palette: args.palette,
       dimensions: {
         metric: args.metric,
         buckets: args.buckets,
