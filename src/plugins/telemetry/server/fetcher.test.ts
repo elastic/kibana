@@ -35,38 +35,6 @@ describe('FetcherTask', () => {
       );
     });
 
-    it('stops when all collectors are not ready', async () => {
-      const initializerContext = coreMock.createPluginInitializerContext({});
-      const fetcherTask = new FetcherTask(initializerContext);
-      const getCurrentConfigs = jest.fn().mockResolvedValue({});
-      const areAllCollectorsReady = jest.fn().mockResolvedValue(false);
-      const shouldSendReport = jest.fn().mockReturnValue(true);
-      const fetchTelemetry = jest.fn();
-      const sendTelemetry = jest.fn();
-      const updateReportFailure = jest.fn();
-
-      Object.assign(fetcherTask, {
-        getCurrentConfigs,
-        areAllCollectorsReady,
-        shouldSendReport,
-        fetchTelemetry,
-        updateReportFailure,
-        sendTelemetry,
-      });
-
-      await fetcherTask['sendIfDue']();
-
-      expect(fetchTelemetry).toBeCalledTimes(0);
-      expect(sendTelemetry).toBeCalledTimes(0);
-
-      expect(areAllCollectorsReady).toBeCalledTimes(1);
-      expect(updateReportFailure).toBeCalledTimes(0);
-      expect(fetcherTask['logger'].warn).toBeCalledTimes(1);
-      expect(fetcherTask['logger'].warn).toHaveBeenCalledWith(
-        `Error fetching usage. (Error: Not all collectors are ready.)`
-      );
-    });
-
     it('fetches usage and send telemetry', async () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
       const fetcherTask = new FetcherTask(initializerContext);
@@ -79,7 +47,6 @@ describe('FetcherTask', () => {
       const getCurrentConfigs = jest.fn().mockResolvedValue({
         telemetryUrl: mockTelemetryUrl,
       });
-      const areAllCollectorsReady = jest.fn().mockResolvedValue(true);
       const shouldSendReport = jest.fn().mockReturnValue(true);
 
       const fetchTelemetry = jest.fn().mockResolvedValue(mockClusters);
@@ -88,7 +55,6 @@ describe('FetcherTask', () => {
 
       Object.assign(fetcherTask, {
         getCurrentConfigs,
-        areAllCollectorsReady,
         shouldSendReport,
         fetchTelemetry,
         updateReportFailure,
@@ -97,7 +63,6 @@ describe('FetcherTask', () => {
 
       await fetcherTask['sendIfDue']();
 
-      expect(areAllCollectorsReady).toBeCalledTimes(1);
       expect(fetchTelemetry).toBeCalledTimes(1);
       expect(sendTelemetry).toBeCalledTimes(1);
       expect(sendTelemetry).toHaveBeenNthCalledWith(1, mockTelemetryUrl, mockClusters);

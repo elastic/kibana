@@ -23,6 +23,8 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
   mlApi: MlApi
 ) {
   const headerPage = getPageObject('header');
+  const commonPage = getPageObject('common');
+
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
@@ -31,6 +33,10 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
   return {
     async assertJobTypeSelectExists() {
       await testSubjects.existOrFail('mlAnalyticsCreateJobWizardJobTypeSelect');
+    },
+
+    async scrollJobTypeSelectionIntoView() {
+      await testSubjects.scrollIntoView('mlAnalyticsCreateJobWizardJobTypeSelect');
     },
 
     async assertJobTypeSelection(jobTypeAttribute: string) {
@@ -324,16 +330,24 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       await this.assertDependentVariableSelection([dependentVariable]);
     },
 
-    async assertScatterplotMatrix(expectedValue: CanvasElementColorStats) {
+    async assertScatterplotMatrixLoaded() {
       await testSubjects.existOrFail(
         'mlAnalyticsCreateJobWizardScatterplotMatrixPanel > mlScatterplotMatrix loaded',
         {
           timeout: 5000,
         }
       );
+    },
+
+    async scrollScatterplotMatrixIntoView() {
       await testSubjects.scrollIntoView(
         'mlAnalyticsCreateJobWizardScatterplotMatrixPanel > mlScatterplotMatrix loaded'
       );
+    },
+
+    async assertScatterplotMatrix(expectedValue: CanvasElementColorStats) {
+      await this.assertScatterplotMatrixLoaded();
+      await this.scrollScatterplotMatrixIntoView();
       await mlCommonUI.assertColorsInCanvasElement(
         'mlAnalyticsCreateJobWizardScatterplotMatrixPanel',
         expectedValue,
@@ -671,6 +685,22 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
       });
       await testSubjects.click('analyticsWizardCardManagement');
       await testSubjects.existOrFail('mlPageDataFrameAnalytics');
+    },
+
+    async assertQueryBarValue(expectedValue: string) {
+      const actualQuery = await testSubjects.getAttribute('mlDFAnalyticsQueryInput', 'value');
+      expect(actualQuery).to.eql(
+        expectedValue,
+        `Query should be '${expectedValue}' (got '${actualQuery}')`
+      );
+    },
+
+    async setQueryBarValue(query: string) {
+      await mlCommonUI.setValueWithChecks('mlDFAnalyticsQueryInput', query, {
+        clearWithKeyboard: true,
+      });
+      await commonPage.pressEnterKey();
+      await this.assertQueryBarValue(query);
     },
   };
 }
