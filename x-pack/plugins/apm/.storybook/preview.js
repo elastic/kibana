@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiProviderDecorator,
-  EuiThemeProviderDecorator,
-} from '../../../../src/plugins/kibana_react/common';
+import { EuiProviderDecorator } from '@kbn/storybook';
+import { EuiThemeProviderDecorator } from '../../../../src/plugins/kibana_react/common';
 
 export const decorators = [EuiProviderDecorator, EuiThemeProviderDecorator];

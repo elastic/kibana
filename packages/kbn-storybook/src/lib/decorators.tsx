@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { DecoratorFn } from '@storybook/react';
 import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import createCache from '@emotion/cache';
+import type { DecoratorFn } from '@storybook/react';
 
 /**
  * Storybook decorator using the EUI provider. Uses the value from
