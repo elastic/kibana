@@ -59,7 +59,7 @@ export const PolicyTabs = React.memo(() => {
     page: 1,
     perPage: 100,
     policies: [policyId, 'all'],
-    // only enable if privilges are not loading
+    // only enable if privileges are not loading and can not isolate a host
     enabled: !privileges.loading && !privileges.canIsolateHost,
   });
 
