@@ -235,7 +235,6 @@
     "console.settingsPage.indicesAndAliasesLabelText": "インデックスとエイリアス",
     "console.settingsPage.jsonSyntaxLabel": "JSON構文",
     "console.settingsPage.pageTitle": "コンソール設定",
-    "console.settingsPage.pollingLabelText": "自動入力候補を自動的に更新",
     "console.settingsPage.refreshButtonLabel": "自動入力候補の更新",
     "console.settingsPage.refreshingDataDescription": "コンソールは、Elasticsearchをクエリして自動入力候補を更新します。クラスターが大きい場合や、ネットワークの制限がある場合には、自動更新で問題が発生する可能性があります。",
     "console.settingsPage.refreshingDataLabel": "自動入力候補を更新しています",

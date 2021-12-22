@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import React, { ChangeEventHandler, Fragment, useState } from 'react';
+import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -23,11 +23,6 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSwitch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSelect,
-  keysOf,
-  TimeUnitId,
 } from '@elastic/eui';
 
 import { DevToolsSettings } from '../../services';
@@ -42,17 +37,6 @@ interface Props {
   settings: DevToolsSettings;
 }
 
-const timeUnits = {
-  s: 'seconds',
-  m: 'minutes',
-  h: 'hours',
-};
-
-const refreshUnitsOptions = keysOf(timeUnits).map((timeUnit) => ({
-  value: timeUnit,
-  text: timeUnits[timeUnit],
-}));
-
 export function DevToolsSettingsModal(props: Props) {
   const [fontSize, setFontSize] = useState(props.settings.fontSize);
   const [wrapMode, setWrapMode] = useState(props.settings.wrapMode);
@@ -60,16 +44,9 @@ export function DevToolsSettingsModal(props: Props) {
   const [indices, setIndices] = useState(props.settings.autocomplete.indices);
   const [templates, setTemplates] = useState(props.settings.autocomplete.templates);
   const [polling, setPolling] = useState(props.settings.polling);
+  const [pollInterval, setPollInterval] = useState(props.settings.pollInterval);
   const [tripleQuotes, setTripleQuotes] = useState(props.settings.tripleQuotes);
   const [historyDisabled, setHistoryDisabled] = useState(props.settings.historyDisabled);
-  const [refreshFrequency, setRefreshFrequency] = useState(1000);
-  const [refreshFrequencyUnit, setRefreshFrequencyUnit] = useState('s');
-  const [refreshInterval, setRefreshInterval] = useState(1000);
-
-  const onRefreshChange = ({ isPaused, refreshInterval }) => {
-    setPolling(isPaused);
-    setRefreshInterval(refreshInterval);
-  };
 
   const autoCompleteCheckboxes = [
     {
@@ -108,15 +85,6 @@ export function DevToolsSettingsModal(props: Props) {
     }
   };
 
-  const onRefreshFrequencyChange: ChangeEventHandler<HTMLInputElement> = (event) => {
-    const sanitizedValue = parseFloat(event.target.value);
-    setRefreshFrequency(sanitizedValue);
-  };
-
-  const onRefreshFrequencyUnitsChange: ChangeEventHandler<HTMLSelectElement> = (event) => {
-    setRefreshFrequencyUnit(event.target.value as TimeUnitId);
-  };
-
   function saveSettings() {
     props.onSaveSettings({
       fontSize,
@@ -127,6 +95,7 @@ export function DevToolsSettingsModal(props: Props) {
         templates,
       },
       polling,
+      pollInterval,
       tripleQuotes,
       historyDisabled,
     });
@@ -151,48 +120,13 @@ export function DevToolsSettingsModal(props: Props) {
             />
           }
         >
-          {/* <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
-            <EuiFlexItem grow={false}>
-              <EuiSwitch
-                checked={polling}
-                data-test-subj="autocompletePolling"
-                id="autocompletePolling"
-                label={
-                  <FormattedMessage
-                    defaultMessage="Refresh every"
-                    id="console.settingsPage.pollingLabelText"
-                  />
-                }
-                onChange={(e) => setPolling(e.target.checked)}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem style={{ minWidth: 60 }}>
-              <EuiFieldNumber
-                compressed
-                fullWidth
-                value={refreshFrequency}
-                onChange={onRefreshFrequencyChange}
-                isInvalid={refreshFrequency <= 0}
-                disabled={!polling}
-                aria-label="Refresh frequecy value"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem style={{ minWidth: 100 }} grow={2}>
-              <EuiSelect
-                compressed
-                fullWidth
-                aria-label="Refresh frequency units"
-                value={refreshFrequencyUnit}
-                disabled={!polling}
-                options={refreshUnitsOptions}
-                onChange={onRefreshFrequencyUnitsChange}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup> */}
           <EuiRefreshInterval
-            isPaused={polling}
-            refreshInterval={refreshInterval}
-            onRefreshChange={onRefreshChange}
+            isPaused={!polling}
+            refreshInterval={pollInterval}
+            onRefreshChange={({ isPaused, refreshInterval }) => {
+              setPolling(!isPaused);
+              setPollInterval(refreshInterval);
+            }}
           />
         </EuiFormRow>
 

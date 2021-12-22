@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+// Note: This component source code is taken from eui version 43.1.1 https://github.com/elastic/eui/blob/v43.1.1/src/components/date_picker/auto_refresh/refresh_interval.tsx
+// We should remove it from here and import it from eui, once we upgrade eui to version 43 or above.
+
 import React, { Component, ChangeEventHandler, KeyboardEventHandler } from 'react';
 import {
   EuiFieldNumber,
@@ -226,7 +229,6 @@ export class EuiRefreshInterval extends Component<
               aria-describedby={this.refreshSelectionId}
               checked={!isPaused}
               onChange={this.toggleRefresh}
-              compressed
               label={
                 <EuiFormLabel type="legend" id={this.legendId}>
                   <EuiI18n token="euiRefreshInterval.legend" default="Refresh every" />
