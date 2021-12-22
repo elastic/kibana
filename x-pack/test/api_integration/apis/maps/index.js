@@ -12,10 +12,10 @@ export default function ({ loadTestFile, getService }) {
   describe('Maps endpoints', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.load('x-pack/test/functional/es_archives/maps/data');
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
       );
+      await esArchiver.load('x-pack/test/functional/es_archives/maps/data');
     });
 
     after(async () => {
