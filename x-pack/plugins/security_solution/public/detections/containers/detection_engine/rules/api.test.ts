@@ -521,6 +521,7 @@ describe('Detections Rules API', () => {
         },
         query: {
           overwrite: false,
+          overwrite_exceptions: false,
         },
       });
     });
@@ -536,6 +537,7 @@ describe('Detections Rules API', () => {
         },
         query: {
           overwrite: true,
+          overwrite_exceptions: false,
         },
       });
     });
@@ -545,12 +547,18 @@ describe('Detections Rules API', () => {
         success: true,
         success_count: 33,
         errors: [],
+        exceptions_errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 0,
       });
       const resp = await importRules({ fileToImport, signal: abortCtrl.signal });
       expect(resp).toEqual({
         success: true,
         success_count: 33,
         errors: [],
+        exceptions_errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 0,
       });
     });
   });

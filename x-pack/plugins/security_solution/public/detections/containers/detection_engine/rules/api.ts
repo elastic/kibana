@@ -311,6 +311,7 @@ export const createPrepackagedRules = async ({
 export const importRules = async ({
   fileToImport,
   overwrite = false,
+  overwriteExceptions = false,
   signal,
 }: ImportDataProps): Promise<ImportDataResponse> => {
   const formData = new FormData();
@@ -321,7 +322,7 @@ export const importRules = async ({
     {
       method: 'POST',
       headers: { 'Content-Type': undefined },
-      query: { overwrite },
+      query: { overwrite, overwrite_exceptions: overwriteExceptions },
       body: formData,
       signal,
     }
