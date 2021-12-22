@@ -74,7 +74,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>{i18n.CREATE_TITLE}</h2>
+            <h2>{i18n.CREATE_CASE_TITLE}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <StyledEuiFlyoutBody>

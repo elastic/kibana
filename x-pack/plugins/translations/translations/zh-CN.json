@@ -7542,7 +7542,6 @@
     "xpack.cases.allCases.actions": "操作",
     "xpack.cases.allCases.comments": "注释",
     "xpack.cases.allCases.noTagsAvailable": "没有可用标记",
-    "xpack.cases.caseTable.addNewCase": "添加新案例",
     "xpack.cases.caseTable.bulkActions": "批处理操作",
     "xpack.cases.caseTable.bulkActions.closeSelectedTitle": "关闭所选",
     "xpack.cases.caseTable.bulkActions.deleteSelectedTitle": "删除所选",

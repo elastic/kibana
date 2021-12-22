@@ -33,7 +33,7 @@ export const CreateCase = React.memo<CreateCaseFormProps>(
         <HeaderPage
           showBackButton={true}
           data-test-subj="case-create-title"
-          title={i18n.CREATE_PAGE_TITLE}
+          title={i18n.CREATE_CASE_TITLE}
         />
         <CreateCaseForm
           afterCaseCreated={afterCaseCreated}

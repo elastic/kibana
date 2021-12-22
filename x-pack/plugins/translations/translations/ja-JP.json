@@ -7488,7 +7488,6 @@
     "xpack.cases.allCases.actions": "アクション",
     "xpack.cases.allCases.comments": "コメント",
     "xpack.cases.allCases.noTagsAvailable": "利用可能なタグがありません",
-    "xpack.cases.caseTable.addNewCase": "新規ケースの追加",
     "xpack.cases.caseTable.bulkActions": "一斉アクション",
     "xpack.cases.caseTable.bulkActions.closeSelectedTitle": "選択した項目を閉じる",
     "xpack.cases.caseTable.bulkActions.deleteSelectedTitle": "選択した項目を削除",
