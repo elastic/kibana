@@ -102,6 +102,9 @@ describe.each([
         ],
         success: false,
         success_count: 0,
+        exceptions_errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 0,
       });
     });
 
@@ -172,6 +175,9 @@ describe.each([
         errors: [],
         success: true,
         success_count: 1,
+        exceptions_errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 0,
       });
     });
 
@@ -193,6 +199,9 @@ describe.each([
         ],
         success: false,
         success_count: 0,
+        exceptions_errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 0,
       });
     });
 
@@ -216,6 +225,9 @@ describe.each([
           ],
           success: false,
           success_count: 0,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -233,6 +245,9 @@ describe.each([
           errors: [],
           success: true,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
     });
@@ -250,6 +265,9 @@ describe.each([
         errors: [],
         success: true,
         success_count: 2,
+        exceptions_errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 0,
       });
     });
 
@@ -263,6 +281,9 @@ describe.each([
         errors: [],
         success: true,
         success_count: 9999,
+        exceptions_errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 0,
       });
     });
 
@@ -299,6 +320,9 @@ describe.each([
         ],
         success: false,
         success_count: 0,
+        exceptions_errors: [],
+        exceptions_success: true,
+        exceptions_success_count: 0,
       });
     });
 
@@ -322,6 +346,9 @@ describe.each([
           ],
           success: false,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -336,6 +363,9 @@ describe.each([
           errors: [],
           success: true,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
     });
@@ -365,6 +395,9 @@ describe.each([
           ],
           success: false,
           success_count: 2,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -378,6 +411,9 @@ describe.each([
           errors: [],
           success: true,
           success_count: 3,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
     });

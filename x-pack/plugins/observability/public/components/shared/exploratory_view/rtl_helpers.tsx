@@ -14,7 +14,7 @@ import { Route, Router } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from 'kibana/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock, themeServiceMock } from 'src/core/public/mocks';
 import {
   KibanaContextProvider,
   KibanaServices,
@@ -48,7 +48,7 @@ import { ListItem } from '../../../hooks/use_values_list';
 import { TRANSACTION_DURATION } from './configurations/constants/elasticsearch_fieldnames';
 import { casesPluginMock } from '../../../../../cases/public/mocks';
 import { dataTypes, obsvReportConfigMap, reportTypesList } from './obsv_exploratory_view';
-import { ExploratoryViewContextProvider } from './contexts/exploatory_view_config';
+import { ExploratoryViewContextProvider } from './contexts/exploratory_view_config';
 
 interface KibanaProps {
   services?: KibanaServices;
@@ -207,6 +207,7 @@ export function render<ExtraCore>(
           indexPatterns={{}}
           reportConfigMap={obsvReportConfigMap}
           setHeaderActionMenu={jest.fn()}
+          theme$={themeServiceMock.createTheme$()}
         >
           <UrlStorageContext.Provider value={{ ...seriesContextValue }}>
             {ui}

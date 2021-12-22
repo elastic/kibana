@@ -15,14 +15,14 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
-  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
 import { getEventFiltersListPath } from '../../../../../common/routing';
-import { useGetAllAssignedEventFilters } from '../hooks';
-import { ManagementEmptyStateWraper } from '../../../../../components/management_empty_state_wraper';
+import { useGetAllAssignedEventFilters, useGetAllEventFilters } from '../hooks';
+import { ManagementPageLoader } from '../../../../../components/management_page_loader';
+import { PolicyEventFiltersEmptyUnassigned, PolicyEventFiltersEmptyUnexisting } from '../empty';
 
 interface PolicyEventFiltersLayoutProps {
   policyItem?: ImmutableObject<PolicyData> | undefined;
@@ -36,6 +36,12 @@ export const PolicyEventFiltersLayout = React.memo<PolicyEventFiltersLayoutProps
       isLoading: isLoadingAllAssigned,
       isRefetching: isRefetchingAllAssigned,
     } = useGetAllAssignedEventFilters(policyItem?.id);
+
+    const {
+      data: allEventFilters,
+      isLoading: isLoadingAllEventFilters,
+      isRefetching: isRefetchingAllEventFilters,
+    } = useGetAllEventFilters();
 
     const aboutInfo = useMemo(() => {
       const link = (
@@ -63,44 +69,56 @@ export const PolicyEventFiltersLayout = React.memo<PolicyEventFiltersLayoutProps
     }, [getAppUrl, allAssigned]);
 
     const isGlobalLoading = useMemo(
-      () => isLoadingAllAssigned || isRefetchingAllAssigned,
-      [isLoadingAllAssigned, isRefetchingAllAssigned]
+      () =>
+        isLoadingAllAssigned ||
+        isRefetchingAllAssigned ||
+        isLoadingAllEventFilters ||
+        isRefetchingAllEventFilters,
+      [
+        isLoadingAllAssigned,
+        isLoadingAllEventFilters,
+        isRefetchingAllAssigned,
+        isRefetchingAllEventFilters,
+      ]
     );
 
     const isEmptyState = useMemo(() => allAssigned && allAssigned.total === 0, [allAssigned]);
 
-    return policyItem && !isGlobalLoading ? (
-      isEmptyState ? (
-        // TODO: Display empty state when needed
-        <></>
+    if (!policyItem || isGlobalLoading) {
+      return <ManagementPageLoader data-test-subj="policy-event-filters-loading-spinner" />;
+    }
+
+    if (isEmptyState) {
+      return allEventFilters && allEventFilters.total !== 0 ? (
+        <PolicyEventFiltersEmptyUnassigned policyId={policyItem.id} policyName={policyItem.name} />
       ) : (
-        <div>
-          <EuiPageHeader alignItems="center">
-            <EuiPageHeaderSection>
-              <EuiTitle size="m">
-                <h2>
-                  {i18n.translate(
-                    'xpack.securitySolution.endpoint.policy.eventFilters.layout.title',
-                    {
-                      defaultMessage: 'Assigned event filters',
-                    }
-                  )}
-                </h2>
-              </EuiTitle>
+        <PolicyEventFiltersEmptyUnexisting policyId={policyItem.id} policyName={policyItem.name} />
+      );
+    }
 
-              <EuiSpacer size="s" />
+    return (
+      <div>
+        <EuiPageHeader alignItems="center">
+          <EuiPageHeaderSection data-test-subj="policy-event-filters-header-section">
+            <EuiTitle size="m">
+              <h2>
+                {i18n.translate(
+                  'xpack.securitySolution.endpoint.policy.eventFilters.layout.title',
+                  {
+                    defaultMessage: 'Assigned event filters',
+                  }
+                )}
+              </h2>
+            </EuiTitle>
 
-              <EuiText size="xs">
-                <p>{aboutInfo}</p>
-              </EuiText>
-            </EuiPageHeaderSection>
-          </EuiPageHeader>
-        </div>
-      )
-    ) : (
-      <ManagementEmptyStateWraper>
-        <EuiLoadingSpinner size="l" />
-      </ManagementEmptyStateWraper>
+            <EuiSpacer size="s" />
+
+            <EuiText size="xs" data-test-subj="policy-event-filters-layout-about">
+              <p>{aboutInfo}</p>
+            </EuiText>
+          </EuiPageHeaderSection>
+        </EuiPageHeader>
+      </div>
     );
   }
 );
