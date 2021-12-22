@@ -11,8 +11,6 @@ export JOB=kibana-osquery-cypress
 
 echo "--- Osquery Cypress tests"
 
-export CODE_COVERAGE=1
-
 checks-reporter-with-killswitch "Osquery Cypress Tests" \
    yarn --cwd x-pack/plugins/osquery cypress:run-as-ci
 
