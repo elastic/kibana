@@ -13,7 +13,7 @@ import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldAttrs, FieldAttrSet, DataViewAttributes } from '..';
 import type { RuntimeField } from '../types';
-import { CharacterNotAllowedInField, DuplicateField } from '../../../kibana_utils/common';
+import { CharacterNotAllowedInField } from '../../../kibana_utils/common';
 
 import { IIndexPattern, IFieldType } from '../../common';
 import { DataViewField, IIndexPatternFieldList, fieldList } from '../fields';
@@ -229,40 +229,6 @@ export class DataView implements IIndexPattern {
     return {
       excludes: (this.sourceFilters && this.sourceFilters.map((filter) => filter.value)) || [],
     };
-  }
-
-  /**
-   * Add scripted field to field list
-   *
-   * @param name field name
-   * @param script script code
-   * @param fieldType
-   * @param lang
-   * @deprecated use runtime field instead
-   */
-  async addScriptedField(name: string, script: string, fieldType: string = 'string') {
-    const scriptedFields = this.getScriptedFields();
-    const names = _.map(scriptedFields, 'name');
-
-    if (name.includes('*')) {
-      throw new CharacterNotAllowedInField('*', name);
-    }
-
-    if (_.includes(names, name)) {
-      throw new DuplicateField(name);
-    }
-
-    this.fields.add({
-      name,
-      script,
-      type: fieldType,
-      scripted: true,
-      lang: 'painless',
-      aggregatable: true,
-      searchable: true,
-      count: 0,
-      readFromDocValues: false,
-    });
   }
 
   /**
