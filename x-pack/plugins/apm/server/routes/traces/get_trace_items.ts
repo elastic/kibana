@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  QueryDslQueryContainer,
+  Sort,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProcessorEvent } from '../../../common/processor_event';
 import {
   TRACE_ID,
