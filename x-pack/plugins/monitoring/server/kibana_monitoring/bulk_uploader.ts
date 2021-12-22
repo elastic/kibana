@@ -27,6 +27,7 @@ import { sendBulkPayload } from './lib';
 import { getKibanaSettings } from './collectors';
 import type { MonitoringConfig } from '../config';
 import type { IBulkUploader } from '../types';
+import { MonitoringCollectionSetup } from '../../../monitoring_collection/server';
 
 export interface BulkUploaderOptions {
   log: Logger;
@@ -36,6 +37,7 @@ export interface BulkUploaderOptions {
   opsMetrics$: Observable<OpsMetrics>;
   kibanaStats: KibanaStats;
   usageCollection?: UsageCollectionSetup;
+  monitoringCollection?: MonitoringCollectionSetup;
 }
 
 export interface KibanaStats {
@@ -77,6 +79,7 @@ export class BulkUploader implements IBulkUploader {
   private readonly _interval: number;
   private readonly config: MonitoringConfig;
   private readonly usageCollection?: UsageCollectionSetup;
+  private readonly monitoringCollection?: MonitoringCollectionSetup;
   private esClient!: ElasticsearchClient;
 
   constructor({
@@ -87,6 +90,7 @@ export class BulkUploader implements IBulkUploader {
     opsMetrics$,
     kibanaStats,
     usageCollection,
+    monitoringCollection,
   }: BulkUploaderOptions) {
     if (typeof interval !== 'number') {
       throw new Error('interval number of milliseconds is required');
@@ -105,6 +109,7 @@ export class BulkUploader implements IBulkUploader {
     this.kibanaStatusGetter$ = statusGetter$;
 
     this.usageCollection = usageCollection;
+    this.monitoringCollection = monitoringCollection;
   }
 
   /*
@@ -178,7 +183,7 @@ export class BulkUploader implements IBulkUploader {
   }
 
   private async getKibanaMetrics() {
-    const kibanaMetrics = await this.usageCollection?.bulkFetchKibanaMetrics(this.esClient);
+    const kibanaMetrics = await this.monitoringCollection?.getMetrics();
     if (!kibanaMetrics) {
       return [
         {
@@ -187,8 +192,9 @@ export class BulkUploader implements IBulkUploader {
         },
       ];
     }
-    const metrics = kibanaMetrics?.reduce(
-      (accum: Array<{ type: string; result: unknown }>, { type, result }) => {
+    const metrics = Object.keys(kibanaMetrics).reduce(
+      (accum: Array<{ type: string; result: unknown }>, type) => {
+        const result = kibanaMetrics[type];
         if (Array.isArray(result)) {
           accum.push(
             ...result.map((item) => {
@@ -216,15 +222,12 @@ export class BulkUploader implements IBulkUploader {
       },
       []
     );
-    // console.log(JSON.stringify(metrics))
-    // console.log('************')
     return metrics;
   }
 
   private async _fetchAndUpload(esClient: ElasticsearchClient) {
     const data = await Promise.all([
       { type: KIBANA_STATS_TYPE_MONITORING, result: await this.getOpsMetrics() },
-      // { type: KIBANA_METRICS_TYPE_MONITORING, result: await this.getKibanaMetrics() },
       { type: KIBANA_SETTINGS_TYPE, result: await getKibanaSettings(this._log, this.config) },
       ...(await this.getKibanaMetrics()),
     ]);

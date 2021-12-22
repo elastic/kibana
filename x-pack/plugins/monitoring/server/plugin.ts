@@ -113,6 +113,7 @@ export class MonitoringPlugin
         snapshot: snapshotRegex.test(this.initializerContext.env.packageInfo.version),
       },
       usageCollection: plugins.usageCollection,
+      monitoringCollection: plugins.monitoringCollection,
     });
 
     Globals.init({

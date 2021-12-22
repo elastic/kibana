@@ -10,6 +10,7 @@ import type { Request } from '@hapi/hapi';
 import { first } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { MonitoringCollectionSetup, MetricResult } from '../../monitoring_collection/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -127,6 +128,7 @@ export interface AlertingPluginsSetup {
   usageCollection?: UsageCollectionSetup;
   eventLog: IEventLogService;
   statusService: StatusServiceSetup;
+  monitoringCollection?: MonitoringCollectionSetup;
 }
 
 export interface AlertingPluginsStart {
@@ -254,143 +256,246 @@ export class AlertingPlugin {
       this.createRouteHandlerContext(core)
     );
 
-    interface RuleMetric {
+    interface RuleMetric extends MetricResult {
       name: string;
       id: string;
       lastExecutionDuration: number;
       averageDrift: number;
       averageDuration: number;
       totalExecutions: number;
-      lastExecutionTimeout?: string;
+      lastExecutionTimeout: string;
     }
 
-    if (plugins.usageCollection) {
-      plugins.usageCollection.registerCollector(
-        plugins.usageCollection.makeKibanaMetricsCollector<RuleMetric, false>({
-          type: 'rule',
-          isReady: () => true,
-          schema: {
-            name: {
-              type: 'keyword',
-            },
-            id: {
-              type: 'keyword',
-            },
-            lastExecutionDuration: {
-              type: 'long',
-            },
-            averageDrift: {
-              type: 'long',
-            },
-            averageDuration: {
-              type: 'long',
-            },
-            lastExecutionTimeout: {
-              type: 'keyword',
-            },
-          },
-          fetch: async () => {
-            const services = await core.getStartServices();
-            const savedObjectClient = await services[0].savedObjects.createInternalRepository([
-              'alert',
-            ]);
-            const esoClient = await services[1].encryptedSavedObjects.getClient({
-              includedHiddenTypes: ['alert'],
-            });
+    if (plugins.monitoringCollection) {
+      plugins.monitoringCollection.registerMetric({
+        type: 'rule',
+        fetch: async () => {
+          const services = await core.getStartServices();
+          const savedObjectClient = await services[0].savedObjects.createInternalRepository([
+            'alert',
+          ]);
+          const esoClient = await services[1].encryptedSavedObjects.getClient({
+            includedHiddenTypes: ['alert'],
+          });
 
-            // Find all rules
-            const response = await savedObjectClient.find<RawRule>({ type: 'alert' });
-            const rules = response.saved_objects;
+          // Find all rules
+          const response = await savedObjectClient.find<RawRule>({ type: 'alert' });
+          const rules = response.saved_objects;
 
-            const ruleMetrics: RuleMetric[] = await Promise.all(
-              rules.map(async ({ attributes: rule, id, namespaces }) => {
-                // Get the last execute event log
-                const {
-                  attributes: { apiKey },
-                } = await esoClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
-                  namespace: namespaces ? namespaces[0] : undefined,
-                });
+          const ruleMetrics: RuleMetric[] = await Promise.all(
+            rules.map(async ({ attributes: rule, id, namespaces }) => {
+              // Get the last execute event log
+              const {
+                attributes: { apiKey },
+              } = await esoClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
+                namespace: namespaces ? namespaces[0] : undefined,
+              });
 
-                // rule.
-                const requestHeaders: Record<string, string> = {};
-                if (apiKey) {
-                  requestHeaders.authorization = `ApiKey ${apiKey}`;
-                }
-                const fakeRequest = KibanaRequest.from({
-                  headers: requestHeaders,
-                  path: '/',
-                  route: { settings: {} },
-                  url: {
-                    href: '/',
+              // rule.
+              const requestHeaders: Record<string, string> = {};
+              if (apiKey) {
+                requestHeaders.authorization = `ApiKey ${apiKey}`;
+              }
+              const fakeRequest = KibanaRequest.from({
+                headers: requestHeaders,
+                path: '/',
+                route: { settings: {} },
+                url: {
+                  href: '/',
+                },
+                raw: {
+                  req: {
+                    url: '/',
                   },
-                  raw: {
-                    req: {
-                      url: '/',
+                },
+              } as unknown as Request);
+
+              const eventLogClient = services[1].eventLog.getClient(fakeRequest);
+
+              const events = await eventLogClient.findEventsBySavedObjectIds('alert', [id], {
+                page: 1,
+                per_page: 1000,
+                sort_order: 'desc',
+                // filter: '(event.action: "execute")',
+              });
+
+              const aggResult = await eventLogClient.getAggregatedData(
+                'alert',
+                [id],
+                {
+                  types: {
+                    terms: {
+                      field: 'event.action',
+                      size: 100,
                     },
                   },
-                } as unknown as Request);
-
-                const eventLogClient = services[1].eventLog.getClient(fakeRequest);
-
-                const events = await eventLogClient.findEventsBySavedObjectIds('alert', [id], {
-                  page: 1,
-                  per_page: 1000,
+                },
+                {
                   sort_order: 'desc',
                   // filter: '(event.action: "execute")',
-                });
-
-                const aggResult = await eventLogClient.getAggregatedData(
-                  'alert',
-                  [id],
-                  {
-                    types: {
-                      terms: {
-                        field: 'event.action',
-                        size: 100,
-                      },
-                    },
-                  },
-                  {
-                    sort_order: 'desc',
-                    // filter: '(event.action: "execute")',
-                  }
-                );
-
-                let totalExecutions = 0;
-                if (aggResult) {
-                  const executeBucket = aggResult.types.buckets.find(
-                    (bucket) => bucket.key === EVENT_LOG_ACTIONS.execute
-                  );
-                  totalExecutions = executeBucket?.doc_count;
                 }
+              );
 
-                const lastExecute = events.data.find(
-                  (event) =>
-                    event?.event?.action === EVENT_LOG_ACTIONS.execute && event?.event?.duration
+              let totalExecutions = 0;
+              if (aggResult) {
+                const executeBucket = aggResult.types.buckets.find(
+                  (bucket) => bucket.key === EVENT_LOG_ACTIONS.execute
                 );
-                const lastTimeout = events.data.find(
-                  (event) => event?.event?.action === EVENT_LOG_ACTIONS.executeTimeout
-                );
+                totalExecutions = executeBucket?.doc_count;
+              }
 
-                const metrics = services[1].taskManager.getHealthMetrics(id);
-                const ruleMetric = {
-                  name: rule.name,
-                  id,
-                  lastExecutionDuration: lastExecute?.event?.duration ?? 0,
-                  lastExecutionTimeout: lastTimeout?.['@timestamp'],
-                  averageDrift: metrics.drift,
-                  averageDuration: metrics.duration,
-                  totalExecutions,
-                };
+              const lastExecute = events.data.find(
+                (event) =>
+                  event?.event?.action === EVENT_LOG_ACTIONS.execute && event?.event?.duration
+              );
+              const lastTimeout = events.data.find(
+                (event) => event?.event?.action === EVENT_LOG_ACTIONS.executeTimeout
+              );
 
-                return ruleMetric;
-              })
-            );
+              const metrics = services[1].taskManager.getHealthMetrics(id);
+              const ruleMetric = {
+                name: rule.name,
+                id,
+                lastExecutionDuration: lastExecute?.event?.duration ?? 0,
+                lastExecutionTimeout: lastTimeout?.['@timestamp'],
+                averageDrift: metrics.drift,
+                averageDuration: metrics.duration,
+                totalExecutions,
+              };
 
-            return ruleMetrics;
-          },
-        })
-      );
+              return ruleMetric;
+            })
+          );
+
+          return ruleMetrics;
+        },
+      });
+      // plugins.monitoringCollection.registerCollector(
+      //   plugins.usageCollection.makeKibanaMetricsCollector<RuleMetric, false>({
+      //     type: 'rule',
+      //     isReady: () => true,
+      //     schema: {
+      //       name: {
+      //         type: 'keyword',
+      //       },
+      //       id: {
+      //         type: 'keyword',
+      //       },
+      //       lastExecutionDuration: {
+      //         type: 'long',
+      //       },
+      //       averageDrift: {
+      //         type: 'long',
+      //       },
+      //       averageDuration: {
+      //         type: 'long',
+      //       },
+      //       lastExecutionTimeout: {
+      //         type: 'keyword',
+      //       },
+      //     },
+      //     fetch: async () => {
+      //       const services = await core.getStartServices();
+      //       const savedObjectClient = await services[0].savedObjects.createInternalRepository([
+      //         'alert',
+      //       ]);
+      //       const esoClient = await services[1].encryptedSavedObjects.getClient({
+      //         includedHiddenTypes: ['alert'],
+      //       });
+
+      //       // Find all rules
+      //       const response = await savedObjectClient.find<RawRule>({ type: 'alert' });
+      //       const rules = response.saved_objects;
+
+      //       const ruleMetrics: RuleMetric[] = await Promise.all(
+      //         rules.map(async ({ attributes: rule, id, namespaces }) => {
+      //           // Get the last execute event log
+      //           const {
+      //             attributes: { apiKey },
+      //           } = await esoClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
+      //             namespace: namespaces ? namespaces[0] : undefined,
+      //           });
+
+      //           // rule.
+      //           const requestHeaders: Record<string, string> = {};
+      //           if (apiKey) {
+      //             requestHeaders.authorization = `ApiKey ${apiKey}`;
+      //           }
+      //           const fakeRequest = KibanaRequest.from({
+      //             headers: requestHeaders,
+      //             path: '/',
+      //             route: { settings: {} },
+      //             url: {
+      //               href: '/',
+      //             },
+      //             raw: {
+      //               req: {
+      //                 url: '/',
+      //               },
+      //             },
+      //           } as unknown as Request);
+
+      //           const eventLogClient = services[1].eventLog.getClient(fakeRequest);
+
+      //           const events = await eventLogClient.findEventsBySavedObjectIds('alert', [id], {
+      //             page: 1,
+      //             per_page: 1000,
+      //             sort_order: 'desc',
+      //             // filter: '(event.action: "execute")',
+      //           });
+
+      //           const aggResult = await eventLogClient.getAggregatedData(
+      //             'alert',
+      //             [id],
+      //             {
+      //               types: {
+      //                 terms: {
+      //                   field: 'event.action',
+      //                   size: 100,
+      //                 },
+      //               },
+      //             },
+      //             {
+      //               sort_order: 'desc',
+      //               // filter: '(event.action: "execute")',
+      //             }
+      //           );
+
+      //           let totalExecutions = 0;
+      //           if (aggResult) {
+      //             const executeBucket = aggResult.types.buckets.find(
+      //               (bucket) => bucket.key === EVENT_LOG_ACTIONS.execute
+      //             );
+      //             totalExecutions = executeBucket?.doc_count;
+      //           }
+
+      //           const lastExecute = events.data.find(
+      //             (event) =>
+      //               event?.event?.action === EVENT_LOG_ACTIONS.execute && event?.event?.duration
+      //           );
+      //           const lastTimeout = events.data.find(
+      //             (event) => event?.event?.action === EVENT_LOG_ACTIONS.executeTimeout
+      //           );
+
+      //           const metrics = services[1].taskManager.getHealthMetrics(id);
+      //           const ruleMetric = {
+      //             name: rule.name,
+      //             id,
+      //             lastExecutionDuration: lastExecute?.event?.duration ?? 0,
+      //             lastExecutionTimeout: lastTimeout?.['@timestamp'],
+      //             averageDrift: metrics.drift,
+      //             averageDuration: metrics.duration,
+      //             totalExecutions,
+      //           };
+
+      //           return ruleMetric;
+      //         })
+      //       );
+
+      //       return ruleMetrics;
+      //     },
+      //   })
+      // );
     }
 
     // Routes
