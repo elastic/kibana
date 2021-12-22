@@ -88,7 +88,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
           ]}
         >
           <EuiText data-test-subj="whatsNewLink">
-            <EuiLink href={docLinks.links.elasticsearch.releaseHighlights} target="_blank">
+            <EuiLink href={docLinks.links.elasticsearch.version8ReleaseHighlights} target="_blank">
               <FormattedMessage
                 id="xpack.upgradeAssistant.overview.whatsNewLink"
                 defaultMessage="What's new in 8.x?"
