@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionFunctionAST, fromExpression } from '@kbn/interpreter/common';
+import { ExpressionFunctionAST, fromExpression } from '@kbn/interpreter';
 import { shallowEqual, useSelector } from 'react-redux';
 import { State } from '../../../../types';
 import { getFiltersByFilterExpressions } from '../../../lib/filter';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fromExpression } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter';
 import { get } from 'lodash';
 import { pluginServices } from '../services';
 import type { FiltersFunction } from '../../common/functions';
