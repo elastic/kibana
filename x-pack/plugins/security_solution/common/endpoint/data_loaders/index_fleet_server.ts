@@ -23,7 +23,7 @@ export const enableFleetServerIfNecessary = async (esClient: Client, version: st
     rest_total_hits_as_int: true,
   });
 
-  if (!!res.hits.total) {
+  if (res.hits.total) {
     return;
   }
 
