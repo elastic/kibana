@@ -11,7 +11,7 @@ import { ApplicationStart } from 'kibana/public';
 import { esFilters } from '../../../../data/public';
 import { createHashHistory } from 'history';
 import { createKbnUrlStateStorage } from '../../../../kibana_utils/public';
-import { GLOBAL_STATE_STORAGE_KEY } from '../../url_generator';
+import { GLOBAL_STATE_STORAGE_KEY } from '../../dashboard_constants';
 
 const DASHBOARD_ID = '13823000-99b9-11ea-9eb6-d9e8adceb647';
 
