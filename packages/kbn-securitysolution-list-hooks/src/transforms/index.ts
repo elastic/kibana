@@ -74,11 +74,11 @@ export const transformInput = (exceptionItem: ExceptionListItemSchema): Exceptio
 export const addIdToExceptionItemEntries = (
   exceptionItem: ExceptionListItemSchema
 ): ExceptionListItemSchema => {
-  const entries = exceptionItem.entries.map((entry: any) => {
+  const entries = exceptionItem.entries.map((entry) => {
     if (entry.type === 'nested') {
       return addIdToItem({
         ...entry,
-        entries: entry.entries.map((nestedEntry: any) => addIdToItem(nestedEntry)),
+        entries: entry.entries.map((nestedEntry) => addIdToItem(nestedEntry)),
       });
     } else {
       return addIdToItem(entry);
@@ -100,11 +100,11 @@ export const removeIdFromExceptionItemsEntries = <T extends { entries: EntriesAr
   exceptionItem: T
 ): T => {
   const { entries } = exceptionItem;
-  const entriesNoId = entries.map((entry: any) => {
+  const entriesNoId = entries.map((entry) => {
     if (entry.type === 'nested') {
       return removeIdFromItem({
         ...entry,
-        entries: entry.entries.map((nestedEntry: any) => removeIdFromItem(nestedEntry)),
+        entries: entry.entries.map((nestedEntry) => removeIdFromItem(nestedEntry)),
       });
     } else {
       return removeIdFromItem<Entry>(entry);

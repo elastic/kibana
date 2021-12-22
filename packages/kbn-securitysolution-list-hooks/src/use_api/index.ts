@@ -203,7 +203,7 @@ export const useApi = (http: HttpStart): ExceptionsApi => {
               // This data transform is UI specific and useful for UI concerns
               // to compensate for the differences and preferences of how ReactJS might prefer
               // data vs. how we want to model data. View `transformInput` for more details
-              exceptions: data.map((item: any) => transformInput(item)),
+              exceptions: data.map((item) => transformInput(item)),
               pagination: {
                 page,
                 perPage,
