@@ -12,6 +12,10 @@ import { BehaviorSubject } from 'rxjs';
 import { migrateToLatest } from '../../../../kibana_utils/common';
 import type { UrlService } from '../../../common/url_service';
 import { parseSearchParams, RedirectOptions } from '../../../common/url_service/locators/redirect';
+import {
+  LEGACY_SHORT_URL_LOCATOR_ID,
+  LegacyShortUrlLocatorParams,
+} from '../../../common/url_service/locators/legacy_short_url_locator';
 
 export interface RedirectManagerDependencies {
   url: UrlService;
@@ -34,6 +38,39 @@ export class RedirectManager {
         return () => {
           unmount();
         };
+      },
+    });
+  }
+
+  public registerShortUrlRedirectApp(core: CoreSetup) {
+    core.application.register({
+      id: 'short_url_redirect',
+      appRoute: '/goto',
+      title: 'Short URL Redirect',
+      chromeless: true,
+      mount: async () => {
+        const urlId = location.pathname.match(new RegExp(`/goto/(.*)$`))?.[1];
+        if (!urlId) throw new Error('Url id not present in path');
+        const urlService = this.deps.url;
+        const shortUrls = urlService.shortUrls.get(null);
+        const shortUrl = await shortUrls.get(urlId);
+        const locatorId = shortUrl.data.locator.id;
+        const locator = urlService.locators.get(locatorId);
+        if (!locator) throw new Error(`Locator [id = ${locatorId}] not found.`);
+        const locatorState = shortUrl.data.locator.state;
+        if (shortUrl.data.locator.id !== LEGACY_SHORT_URL_LOCATOR_ID) {
+          await locator.navigate(locatorState, { replace: true });
+          return () => {};
+        }
+        let redirectUrl = (locatorState as LegacyShortUrlLocatorParams).url;
+        const storeInSessionStorage = core.uiSettings.get('state:storeInSessionStorage');
+        if (storeInSessionStorage) {
+          const { hashUrl } = await import('../../../../kibana_utils/public');
+          redirectUrl = hashUrl(redirectUrl);
+        }
+        const url = core.http.basePath.prepend(redirectUrl);
+        location.href = url;
+        return () => {};
       },
     });
   }

@@ -11,7 +11,6 @@ import './index.scss';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
-import { createShortUrlRedirectApp } from './services/short_url_redirect_app';
 import {
   UrlGeneratorsService,
   UrlGeneratorsSetup,
@@ -86,7 +85,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): SharePluginSetup {
-    const { application, http } = core;
+    const { http } = core;
     const { basePath } = http;
 
     this.url = new UrlService<BrowserShortUrlClientFactoryCreateParams>({
@@ -117,12 +116,11 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
 
     this.url.locators.create(new LegacyShortUrlLocatorDefinition());
 
-    application.register(createShortUrlRedirectApp(core, window.location, this.url));
-
     this.redirectManager = new RedirectManager({
       url: this.url,
     });
     this.redirectManager.registerRedirectApp(core);
+    this.redirectManager.registerShortUrlRedirectApp(core);
 
     return {
       ...this.shareMenuRegistry.setup(),
