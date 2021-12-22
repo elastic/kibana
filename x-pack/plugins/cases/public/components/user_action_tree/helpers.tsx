@@ -16,18 +16,20 @@ import {
 import React, { useContext } from 'react';
 import classNames from 'classnames';
 import { ThemeContext } from 'styled-components';
-import { Comment } from '../../../common/ui/types';
+import { CaseExternalService, Comment } from '../../../common/ui/types';
 import {
-  CaseFullExternalService,
   ActionConnector,
   CaseStatuses,
   CommentType,
   CommentRequestActionsType,
-  noneConnectorId,
+  NONE_CONNECTOR_ID,
+  Actions,
+  ConnectorUserAction,
+  PushedUserAction,
+  TagsUserAction,
 } from '../../../common/api';
 import { CaseUserActions } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { parseStringAsConnector, parseStringAsExternalService } from '../../common/user_actions';
 import { Tags } from '../tag_list/tags';
 import { UserActionUsernameWithAvatar } from './user_action_username_with_avatar';
 import { UserActionTimestamp } from './user_action_timestamp';
@@ -41,10 +43,17 @@ import { AlertCommentEvent } from './user_action_alert_comment_event';
 import { CasesNavigation } from '../links';
 import { HostIsolationCommentEvent } from './user_action_host_isolation_comment_event';
 import { MarkdownRenderer } from '../markdown_editor';
+import {
+  isCommentUserAction,
+  isDescriptionUserAction,
+  isStatusUserAction,
+  isTagsUserAction,
+  isTitleUserAction,
+} from '../../../common/utils/user_actions';
+import { SnakeToCamelCase } from '../../../common/types';
 
 interface LabelTitle {
   action: CaseUserActions;
-  field: string;
 }
 
 export type RuleDetailsNavigation = CasesNavigation<string | null | undefined, 'configurable'>;
@@ -68,23 +77,23 @@ const getStatusTitle = (id: string, status: CaseStatuses) => (
 const isStatusValid = (status: string): status is CaseStatuses =>
   Object.prototype.hasOwnProperty.call(statuses, status);
 
-export const getLabelTitle = ({ action, field }: LabelTitle) => {
-  if (field === 'tags') {
+export const getLabelTitle = ({ action }: LabelTitle) => {
+  if (isTagsUserAction(action)) {
     return getTagsLabelTitle(action);
-  } else if (field === 'title' && action.action === 'update') {
+  } else if (isTitleUserAction(action)) {
     return `${i18n.CHANGED_FIELD.toLowerCase()} ${i18n.CASE_NAME.toLowerCase()}  ${i18n.TO} "${
-      action.newValue
+      action.payload.title
     }"`;
-  } else if (field === 'description' && action.action === 'update') {
+  } else if (isDescriptionUserAction(action) && action.action === Actions.update) {
     return `${i18n.EDITED_FIELD} ${i18n.DESCRIPTION.toLowerCase()}`;
-  } else if (field === 'status' && action.action === 'update') {
-    const status = action.newValue ?? '';
+  } else if (isStatusUserAction(action)) {
+    const status = action.payload.status ?? '';
     if (isStatusValid(status)) {
       return getStatusTitle(action.actionId, status);
     }
 
     return '';
-  } else if (field === 'comment' && action.action === 'update') {
+  } else if (isCommentUserAction(action) && action.action === Actions.update) {
     return `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
   }
 
@@ -95,25 +104,19 @@ export const getConnectorLabelTitle = ({
   action,
   connectors,
 }: {
-  action: CaseUserActions;
+  action: ConnectorUserAction;
   connectors: ActionConnector[];
 }) => {
-  const oldConnector = parseStringAsConnector(action.oldValConnectorId, action.oldValue);
-  const newConnector = parseStringAsConnector(action.newValConnectorId, action.newValue);
+  const connector = action.payload.connector;
 
-  if (!oldConnector || !newConnector) {
+  if (connector == null) {
     return '';
-  }
-
-  // if the ids are the same, assume we just changed the fields
-  if (oldConnector.id === newConnector.id) {
-    return i18n.CHANGED_CONNECTOR_FIELD;
   }
 
   // ids are not the same so check and see if the id is a valid connector and then return its name
   // if the connector id is the none connector value then it must have been removed
-  const newConnectorActionInfo = connectors.find((c) => c.id === newConnector.id);
-  if (newConnector.id !== noneConnectorId && newConnectorActionInfo != null) {
+  const newConnectorActionInfo = connectors.find((c) => c.id === connector.id);
+  if (connector.id !== NONE_CONNECTOR_ID && newConnectorActionInfo != null) {
     return i18n.SELECTED_THIRD_PARTY(newConnectorActionInfo.name);
   }
 
@@ -121,14 +124,14 @@ export const getConnectorLabelTitle = ({
   return i18n.REMOVED_THIRD_PARTY;
 };
 
-const getTagsLabelTitle = (action: CaseUserActions) => {
-  const tags = action.newValue != null ? action.newValue.split(',') : [];
+const getTagsLabelTitle = (action: TagsUserAction) => {
+  const tags = action.payload.tags ?? [];
 
   return (
     <EuiFlexGroup alignItems="baseline" gutterSize="xs" component="span" responsive={false}>
       <EuiFlexItem data-test-subj="ua-tags-label" grow={false}>
-        {action.action === 'add' && i18n.ADDED_FIELD}
-        {action.action === 'delete' && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
+        {action.action === Actions.add && i18n.ADDED_FIELD}
+        {action.action === Actions.delete && i18n.REMOVED_FIELD} {i18n.TAGS.toLowerCase()}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <Tags tags={tags} gutterSize="xs" />
@@ -137,8 +140,11 @@ const getTagsLabelTitle = (action: CaseUserActions) => {
   );
 };
 
-export const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: boolean) => {
-  const externalService = parseStringAsExternalService(action.newValConnectorId, action.newValue);
+export const getPushedServiceLabelTitle = (
+  action: SnakeToCamelCase<PushedUserAction>,
+  firstPush: boolean
+) => {
+  const externalService = action.payload.externalService;
 
   return (
     <EuiFlexGroup
@@ -149,12 +155,12 @@ export const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: b
     >
       <EuiFlexItem data-test-subj="pushed-label">
         {`${firstPush ? i18n.PUSHED_NEW_INCIDENT : i18n.UPDATE_INCIDENT} ${
-          externalService?.connector_name
+          externalService?.connectorName
         }`}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink data-test-subj="pushed-value" href={externalService?.external_url} target="_blank">
-          {externalService?.external_title}
+        <EuiLink data-test-subj="pushed-value" href={externalService?.externalUrl} target="_blank">
+          {externalService?.externalTitle}
         </EuiLink>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -163,25 +169,25 @@ export const getPushedServiceLabelTitle = (action: CaseUserActions, firstPush: b
 
 export const getPushInfo = (
   caseServices: CaseServices,
-  externalService: CaseFullExternalService | undefined,
+  externalService: CaseExternalService | undefined,
   index: number
 ) =>
-  externalService != null && externalService.connector_id != null
+  externalService != null && externalService.connectorId !== NONE_CONNECTOR_ID
     ? {
-        firstPush: caseServices[externalService.connector_id]?.firstPushIndex === index,
-        parsedConnectorId: externalService.connector_id,
-        parsedConnectorName: externalService.connector_name,
+        firstPush: caseServices[externalService.connectorId]?.firstPushIndex === index,
+        parsedConnectorId: externalService.connectorId,
+        parsedConnectorName: externalService.connectorName,
       }
     : {
         firstPush: false,
-        parsedConnectorId: noneConnectorId,
-        parsedConnectorName: noneConnectorId,
+        parsedConnectorId: NONE_CONNECTOR_ID,
+        parsedConnectorName: NONE_CONNECTOR_ID,
       };
 
-const getUpdateActionIcon = (actionField: string): string => {
-  if (actionField === 'tags') {
+const getUpdateActionIcon = (fields: string): string => {
+  if (fields === 'tags') {
     return 'tag';
-  } else if (actionField === 'status') {
+  } else if (fields === 'status') {
     return 'folderClosed';
   }
 
@@ -199,21 +205,21 @@ export const getUpdateAction = ({
 }): EuiCommentProps => ({
   username: (
     <UserActionUsernameWithAvatar
-      username={action.actionBy.username}
-      fullName={action.actionBy.fullName}
+      username={action.createdBy.username}
+      fullName={action.createdBy.fullName}
     />
   ),
   type: 'update',
   event: label,
-  'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
-  timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
-  timelineIcon: getUpdateActionIcon(action.actionField[0]),
+  'data-test-subj': `${action.type}-${action.action}-action-${action.actionId}`,
+  timestamp: <UserActionTimestamp createdAt={action.createdAt} />,
+  timelineIcon: getUpdateActionIcon(action.type),
   actions: (
     <EuiFlexGroup responsive={false}>
       <EuiFlexItem grow={false}>
         <UserActionCopyLink id={action.actionId} />
       </EuiFlexItem>
-      {action.action === 'update' && action.commentId != null && (
+      {action.action === Actions.update && action.commentId != null && (
         <EuiFlexItem grow={false}>
           <UserActionMoveToReference id={action.commentId} outlineComment={handleOutlineComment} />
         </EuiFlexItem>
@@ -245,8 +251,8 @@ export const getAlertAttachment = ({
 }): EuiCommentProps => ({
   username: (
     <UserActionUsernameWithAvatar
-      username={action.actionBy.username}
-      fullName={action.actionBy.fullName}
+      username={action.createdBy.username}
+      fullName={action.createdBy.fullName}
     />
   ),
   className: 'comment-alert',
@@ -262,8 +268,8 @@ export const getAlertAttachment = ({
       commentType={CommentType.alert}
     />
   ),
-  'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
-  timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+  'data-test-subj': `${action.type}-${action.action}-action-${action.actionId}`,
+  timestamp: <UserActionTimestamp createdAt={action.createdAt} />,
   timelineIcon: 'bell',
   actions: (
     <EuiFlexGroup responsive={false}>
@@ -281,41 +287,6 @@ export const getAlertAttachment = ({
     </EuiFlexGroup>
   ),
 });
-
-export const toStringArray = (value: unknown): string[] => {
-  if (Array.isArray(value)) {
-    return value.reduce<string[]>((acc, v) => {
-      if (v != null) {
-        switch (typeof v) {
-          case 'number':
-          case 'boolean':
-            return [...acc, v.toString()];
-          case 'object':
-            try {
-              return [...acc, JSON.stringify(v)];
-            } catch {
-              return [...acc, 'Invalid Object'];
-            }
-          case 'string':
-            return [...acc, v];
-          default:
-            return [...acc, `${v}`];
-        }
-      }
-      return acc;
-    }, []);
-  } else if (value == null) {
-    return [];
-  } else if (typeof value === 'object') {
-    try {
-      return [JSON.stringify(value)];
-    } catch {
-      return ['Invalid Object'];
-    }
-  } else {
-    return [`${value}`];
-  }
-};
 
 export const getGeneratedAlertsAttachment = ({
   action,
@@ -348,8 +319,8 @@ export const getGeneratedAlertsAttachment = ({
       commentType={CommentType.generatedAlert}
     />
   ),
-  'data-test-subj': `${action.actionField[0]}-${action.action}-action-${action.actionId}`,
-  timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+  'data-test-subj': `${action.type}-${action.action}-action-${action.actionId}`,
+  timestamp: <UserActionTimestamp createdAt={action.createdAt} />,
   timelineIcon: 'bell',
   actions: (
     <EuiFlexGroup responsive={false}>
@@ -412,7 +383,7 @@ export const getActionAttachment = ({
     />
   ),
   'data-test-subj': 'endpoint-action',
-  timestamp: <UserActionTimestamp createdAt={action.actionAt} />,
+  timestamp: <UserActionTimestamp createdAt={action.createdAt} />,
   timelineIcon: <ActionIcon actionType={comment.actions.type} />,
   actions: <UserActionCopyLink id={comment.id} />,
   children: comment.comment.trim().length > 0 && (

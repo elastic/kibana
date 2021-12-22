@@ -442,7 +442,7 @@ export const removeServerGeneratedPropertiesFromSavedObject = <
 export const removeServerGeneratedPropertiesFromUserAction = (
   attributes: CaseUserActionResponse
 ) => {
-  const keysToRemove: Array<keyof CaseUserActionResponse> = ['action_id', 'action_at'];
+  const keysToRemove: Array<keyof CaseUserActionResponse> = ['action_id', 'created_at'];
   return removeServerGeneratedPropertiesFromObject<
     CaseUserActionResponse,
     typeof keysToRemove[number]
@@ -694,6 +694,7 @@ export const createCaseWithConnector = async ({
 }): Promise<{
   postedCase: CaseResponse;
   connector: CreateConnectorResponse;
+  configuration: CasesConfigureResponse;
 }> => {
   const connector = await createConnector({
     supertest,
@@ -705,7 +706,7 @@ export const createCaseWithConnector = async ({
   });
 
   actionsRemover.add(auth.space ?? 'default', connector.id, 'action', 'actions');
-  await createConfiguration(
+  const configuration = await createConfiguration(
     supertest,
     {
       ...getConfigurationRequest({
@@ -740,7 +741,7 @@ export const createCaseWithConnector = async ({
     auth
   );
 
-  return { postedCase, connector };
+  return { postedCase, connector, configuration };
 };
 
 export const createCase = async (

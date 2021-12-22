@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { pick } from 'lodash/fp';
 import Boom from '@hapi/boom';
 
 import { SavedObjectsClientContract, Logger } from 'kibana/server';
@@ -13,8 +12,7 @@ import { LensServerPluginSetup } from '../../../../lens/server';
 import { CommentableCase } from '../../common/models';
 import { createCaseError } from '../../common/error';
 import { checkEnabledCaseConnectorOrThrow } from '../../common/utils';
-import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
-import { CaseResponse, CommentPatchRequest, CommentRequest } from '../../../common/api';
+import { Actions, ActionTypes, CaseResponse, CommentPatchRequest } from '../../../common/api';
 import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
 import { AttachmentService, CasesService } from '../../services';
 import { CasesClientArgs } from '..';
@@ -180,26 +178,16 @@ export async function update(
         user,
       });
 
-    await userActionService.bulkCreate({
+    await userActionService.createUserAction({
+      type: ActionTypes.comment,
+      action: Actions.update,
       unsecuredSavedObjectsClient,
-      actions: [
-        buildCommentUserActionItem({
-          action: 'update',
-          actionAt: updatedDate,
-          actionBy: user,
-          caseId: caseID,
-          subCaseId: subCaseID,
-          commentId: updatedComment.id,
-          fields: ['comment'],
-          // casting because typescript is complaining that it's not a Record<string, unknown> even though it is
-          newValue: queryRestAttributes as CommentRequest,
-          oldValue:
-            // We are interested only in ContextBasicRt attributes
-            // myComment.attribute contains also CommentAttributesBasicRt attributes
-            pick(Object.keys(queryRestAttributes), myComment.attributes),
-          owner: myComment.attributes.owner,
-        }),
-      ],
+      caseId: caseID,
+      subCaseId: subCaseID,
+      attachmentId: updatedComment.id,
+      payload: { attachment: queryRestAttributes },
+      user,
+      owner: myComment.attributes.owner,
     });
 
     return await updatedCase.encode();

@@ -9,6 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { act, render } from '@testing-library/react';
 
+import { NONE_CONNECTOR_ID } from '../../../common/api';
 import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useConnectors } from '../../containers/configure/use_connectors';
@@ -35,7 +36,7 @@ const initialCaseValue: FormProps = {
   description: '',
   tags: [],
   title: '',
-  connectorId: 'none',
+  connectorId: NONE_CONNECTOR_ID,
   fields: null,
   syncAlerts: true,
 };

@@ -8,12 +8,11 @@
 import pMap from 'p-map';
 import { Boom } from '@hapi/boom';
 import { SavedObject, SavedObjectsClientContract, SavedObjectsFindResponse } from 'kibana/server';
-import { CommentAttributes, SubCaseAttributes, OWNER_FIELD } from '../../../common/api';
+import { CommentAttributes, SubCaseAttributes } from '../../../common/api';
 import { ENABLE_CASE_CONNECTOR, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { CasesClientArgs } from '..';
 import { createCaseError } from '../../common/error';
 import { AttachmentService, CasesService } from '../../services';
-import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 import { Operations, OwnerEntity } from '../../authorization';
 
 async function deleteSubCases({
@@ -144,30 +143,14 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
       });
     }
 
-    const deleteDate = new Date().toISOString();
-
-    await userActionService.bulkCreate({
+    await userActionService.bulkCreateCaseDeletion({
       unsecuredSavedObjectsClient,
-      actions: cases.saved_objects.map((caseInfo) =>
-        buildCaseUserActionItem({
-          action: 'delete',
-          actionAt: deleteDate,
-          actionBy: user,
-          caseId: caseInfo.id,
-          fields: [
-            'description',
-            'status',
-            'tags',
-            'title',
-            'connector',
-            'settings',
-            OWNER_FIELD,
-            'comment',
-            ...(ENABLE_CASE_CONNECTOR ? ['sub_case' as const] : []),
-          ],
-          owner: caseInfo.attributes.owner,
-        })
-      ),
+      cases: cases.saved_objects.map((caseInfo) => ({
+        id: caseInfo.id,
+        owner: caseInfo.attributes.owner,
+        connectorId: caseInfo.attributes.connector.id,
+      })),
+      user,
     });
   } catch (error) {
     throw createCaseError({
