@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { FilterMeta } from '@kbn/es-query';
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { EsQuerySortValue } from 'src/plugins/data/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -21,7 +19,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['reporting', 'common', 'discover', 'timePicker']);
   const filterBar = getService('filterBar');
-  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 
   const setFieldsFromSource = async (setValue: boolean) => {
     await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': setValue });
@@ -44,19 +41,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await kibanaServer.importExport.load(ecommerceSOPath);
       await browser.setWindowSize(1600, 850);
     });
 
     after('clean up archives', async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-      await kibanaServer.importExport.unload(ecommerceSOPath);
       await reportingAPI.deleteAllReports();
       await esArchiver.emptyKibanaIndex();
     });
 
     describe('Check Available', () => {
-      beforeEach(() => PageObjects.common.navigateToApp('discover'));
+      before(reportingAPI.initEcommerce);
+
+      after(reportingAPI.teardownEcommerce);
+
+      beforeEach(async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectIndexPattern('ecommerce');
+      });
 
       it('is available if new', async () => {
         await PageObjects.reporting.openCsvReportingPanel();
@@ -71,8 +73,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Generate CSV: new search', () => {
+      before(reportingAPI.initEcommerce);
+
+      after(reportingAPI.teardownEcommerce);
+
       beforeEach(async () => {
-        await kibanaServer.importExport.load(ecommerceSOPath);
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('ecommerce');
       });
@@ -118,38 +123,34 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Generate CSV: sparse data', () => {
+      interface TestDoc {
+        timestamp: string;
+        name: string;
+        updated_at?: string;
+      }
       const TEST_INDEX_NAME = 'sparse_data';
+      const TEST_DOC_COUNT = 510;
 
       const reset = async () => {
         try {
-          await esArchiver.emptyKibanaIndex();
           await es.indices.delete({ index: TEST_INDEX_NAME });
         } catch (err) {
           // ignore 404 error
         }
       };
 
-      let indexPatternId: string;
-      before(async () => {
-        await reset();
+      const createDocs = async () => {
+        const docs = Array<TestDoc>(TEST_DOC_COUNT);
 
-        interface TestDoc {
-          timestamp: string;
-          name: string;
-          updated_at?: string;
-        }
-
-        // setup: add 510 test documents
-        // conditionally set a value for a date field in the last 5 rows of data
-        const docs = Array<TestDoc>(510);
         for (let i = 0; i <= docs.length - 1; i++) {
           const name = `test-${i + 1}`;
           const timestamp = moment
             .utc('2006-08-14T00:00:00')
-            .subtract(510 - i, 'days')
+            .subtract(TEST_DOC_COUNT - i, 'days')
             .format();
 
-          if (i >= 500) {
+          if (i === 0) {
+            // only the oldest document has a value for updated_at
             docs[i] = {
               timestamp,
               name,
@@ -160,94 +161,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             docs[i] = { timestamp, name };
           }
         }
-
         const res = await es.bulk({
           index: TEST_INDEX_NAME,
           body: docs.map((d) => `{"index": {}}\n${JSON.stringify(d)}\n`),
         });
 
         log.info(`Indexed ${res.items.length} test data docs.`);
+      };
 
-        // setup: create index pattern
-        const indexPatternCreateResponse = await kibanaServer.savedObjects.create({
-          type: 'index-pattern',
-          overwrite: true,
-          attributes: { title: TEST_INDEX_NAME, timeFieldName: 'timestamp' },
+      before(async () => {
+        await reset();
+        await createDocs();
+        await reportingAPI.initLogs();
+      });
+
+      after(reportingAPI.teardownLogs);
+
+      beforeEach(async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.loadSavedSearch('Sparse Columns');
+        const fromTime = 'Jan 10, 2005 @ 00:00:00.000';
+        const toTime = 'Dec 23, 2006 @ 00:00:00.000';
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await retry.try(async () => {
+          expect(await PageObjects.discover.getHitCount()).to.equal(TEST_DOC_COUNT.toString());
         });
-
-        indexPatternId = indexPatternCreateResponse.id;
-        log.info(`Created data view ${indexPatternId}`);
       });
 
       after(reset);
 
-      it('uses correct formats for fields that did not exist in previous pages of data', async () => {
-        await kibanaServer.uiSettings.update({ 'csv:quoteValues': true });
+      it(`handles field formatting for a field that doesn't exist initially`, async () => {
+        const res = await getReport();
+        expect(res.status).to.equal(200);
+        expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
 
-        // 1. check the data
-        const { text: reportApiJson, status } = await reportingAPI.generateCsv({
-          browserTimezone: 'UTC',
-          columns: ['timestamp', 'name', 'updated_at'],
-          objectType: 'search',
-          searchSource: {
-            fields: [{ field: '*', include_unmapped: 'true' }],
-            filter: [
-              {
-                meta: {
-                  field: 'timestamp',
-                  index: indexPatternId,
-                  params: {},
-                } as FilterMeta,
-                query: {
-                  range: {
-                    timestamp: {
-                      format: 'strict_date_optional_time',
-                      gte: '2005-01-01T00:00:00.000Z',
-                      lte: '2006-12-01T00:00:00.000Z',
-                    },
-                  },
-                },
-              },
-              {
-                meta: {
-                  field: 'timestamp',
-                  index: indexPatternId,
-                  params: {},
-                } as FilterMeta,
-                query: {
-                  range: {
-                    timestamp: {
-                      format: 'strict_date_optional_time',
-                      gte: '2005-01-01T00:00:00.000Z',
-                      lte: '2006-12-01T00:00:00.000Z',
-                    },
-                  },
-                },
-              },
-            ],
-            index: indexPatternId,
-            parent: {
-              filter: [],
-              index: indexPatternId,
-              query: { language: 'kuery', query: '' },
-            },
-            sort: [{ timestamp: 'asc' }] as EsQuerySortValue[],
-            trackTotalHits: true,
-          },
-          title: 'Sparse data search',
-          version: '8.1.0',
-        });
-        expect(status).to.be(200);
-
-        const { path } = JSON.parse(reportApiJson) as { path: string };
-
-        // wait for the the pending job to complete
-        await reportingAPI.waitForJobToFinish(path);
-
-        const csvFile = await reportingAPI.getCompletedJobOutput(path);
+        const csvFile = res.text;
         expectSnapshot(csvFile).toMatch();
-
-        await reportingAPI.deleteAllReports();
       });
     });
 
@@ -258,20 +207,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       };
 
-      before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
-        await kibanaServer.importExport.load(ecommerceSOPath);
-      });
+      before(reportingAPI.initEcommerce);
 
-      after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
-        await kibanaServer.importExport.unload(ecommerceSOPath);
-      });
+      after(reportingAPI.teardownEcommerce);
 
-      beforeEach(() => PageObjects.common.navigateToApp('discover'));
+      beforeEach(async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await setupPage();
+      });
 
       it('generates a report with data', async () => {
-        await setupPage();
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
         await retry.try(async () => {
           expect(await PageObjects.discover.getHitCount()).to.equal('740');
@@ -282,7 +227,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('generates a report with filtered data', async () => {
-        await setupPage();
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
         await retry.try(async () => {
           expect(await PageObjects.discover.getHitCount()).to.equal('740');
@@ -299,7 +243,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('generates a report with discover:searchFieldsFromSource = true', async () => {
-        await setupPage();
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
 
         await retry.try(async () => {
