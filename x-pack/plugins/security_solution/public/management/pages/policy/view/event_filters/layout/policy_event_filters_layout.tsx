@@ -17,7 +17,7 @@ import {
   EuiLink,
   EuiPageContent,
 } from '@elastic/eui';
-import { useAppUrl } from '../../../../../../common/lib/kibana';
+import { useAppUrl, useHttp } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
 import { getEventFiltersListPath } from '../../../../../common/routing';
@@ -25,6 +25,7 @@ import { useGetAllAssignedEventFilters, useGetAllEventFilters } from '../hooks';
 import { ManagementPageLoader } from '../../../../../components/management_page_loader';
 import { PolicyEventFiltersEmptyUnassigned, PolicyEventFiltersEmptyUnexisting } from '../empty';
 import { PolicyEventFiltersList } from '../list';
+import { EventFiltersHttpService } from '../../../../event_filters/service';
 
 interface PolicyEventFiltersLayoutProps {
   policyItem?: ImmutableObject<PolicyData> | undefined;
@@ -32,18 +33,20 @@ interface PolicyEventFiltersLayoutProps {
 export const PolicyEventFiltersLayout = React.memo<PolicyEventFiltersLayoutProps>(
   ({ policyItem }) => {
     const { getAppUrl } = useAppUrl();
+    const http = useHttp();
+    const eventFiltersService = useMemo(() => new EventFiltersHttpService(http), [http]);
 
     const {
       data: allAssigned,
       isLoading: isLoadingAllAssigned,
       isRefetching: isRefetchingAllAssigned,
-    } = useGetAllAssignedEventFilters(policyItem?.id);
+    } = useGetAllAssignedEventFilters(eventFiltersService, policyItem?.id);
 
     const {
       data: allEventFilters,
       isLoading: isLoadingAllEventFilters,
       isRefetching: isRefetchingAllEventFilters,
-    } = useGetAllEventFilters();
+    } = useGetAllEventFilters(eventFiltersService);
 
     const aboutInfo = useMemo(() => {
       const link = (
