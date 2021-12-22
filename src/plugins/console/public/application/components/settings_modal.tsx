@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 
 import { DevToolsSettings } from '../../services';
+import { EuiRefreshInterval } from './refresh_interval';
 
 export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
 
@@ -43,6 +44,7 @@ export function DevToolsSettingsModal(props: Props) {
   const [indices, setIndices] = useState(props.settings.autocomplete.indices);
   const [templates, setTemplates] = useState(props.settings.autocomplete.templates);
   const [polling, setPolling] = useState(props.settings.polling);
+  const [pollInterval, setPollInterval] = useState(props.settings.pollInterval);
   const [tripleQuotes, setTripleQuotes] = useState(props.settings.tripleQuotes);
   const [historyDisabled, setHistoryDisabled] = useState(props.settings.historyDisabled);
 
@@ -93,6 +95,7 @@ export function DevToolsSettingsModal(props: Props) {
         templates,
       },
       polling,
+      pollInterval,
       tripleQuotes,
       historyDisabled,
     });
@@ -117,17 +120,13 @@ export function DevToolsSettingsModal(props: Props) {
             />
           }
         >
-          <EuiSwitch
-            checked={polling}
-            data-test-subj="autocompletePolling"
-            id="autocompletePolling"
-            label={
-              <FormattedMessage
-                defaultMessage="Automatically refresh autocomplete suggestions"
-                id="console.settingsPage.pollingLabelText"
-              />
-            }
-            onChange={(e) => setPolling(e.target.checked)}
+          <EuiRefreshInterval
+            isPaused={!polling}
+            refreshInterval={pollInterval}
+            onRefreshChange={({ isPaused, refreshInterval }) => {
+              setPolling(!isPaused);
+              setPollInterval(refreshInterval);
+            }}
           />
         </EuiFormRow>
 
