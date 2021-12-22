@@ -94,7 +94,7 @@ export function Filtering({
 
   return (
     <EuiFormRow
-      display="columnCompressed"
+      display="rowCompressed"
       label={filterByLabel}
       fullWidth
       isInvalid={!isInputFilterValid}

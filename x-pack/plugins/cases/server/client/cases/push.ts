@@ -17,9 +17,9 @@ import {
   CaseType,
   CasesConfigureAttributes,
   CaseAttributes,
+  ActionTypes,
 } from '../../../common/api';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
-import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
 
 import { createIncident, getCommentContextFromAttributes } from './utils';
 import { createCaseError } from '../../common/error';
@@ -217,36 +217,27 @@ export const push = async (
             version: comment.version,
           })),
       }),
-
-      userActionService.bulkCreate({
-        unsecuredSavedObjectsClient,
-        actions: [
-          ...(shouldMarkAsClosed
-            ? [
-                buildCaseUserActionItem({
-                  action: 'update',
-                  actionAt: pushedDate,
-                  actionBy: { username, full_name, email },
-                  caseId,
-                  fields: ['status'],
-                  newValue: CaseStatuses.closed,
-                  oldValue: myCase.attributes.status,
-                  owner: myCase.attributes.owner,
-                }),
-              ]
-            : []),
-          buildCaseUserActionItem({
-            action: 'push-to-service',
-            actionAt: pushedDate,
-            actionBy: { username, full_name, email },
-            caseId,
-            fields: ['pushed'],
-            newValue: externalService,
-            owner: myCase.attributes.owner,
-          }),
-        ],
-      }),
     ]);
+
+    if (shouldMarkAsClosed) {
+      await userActionService.createUserAction({
+        type: ActionTypes.status,
+        unsecuredSavedObjectsClient,
+        payload: { status: CaseStatuses.closed },
+        user,
+        caseId,
+        owner: myCase.attributes.owner,
+      });
+    }
+
+    await userActionService.createUserAction({
+      type: ActionTypes.pushed,
+      unsecuredSavedObjectsClient,
+      payload: { externalService },
+      user,
+      caseId,
+      owner: myCase.attributes.owner,
+    });
 
     /* End of update case with push information */
 

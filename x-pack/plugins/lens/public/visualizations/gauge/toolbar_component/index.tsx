@@ -8,10 +8,11 @@
 import React, { memo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { GaugeLabelMajorMode } from '../../../../../../../src/plugins/chart_expressions/expression_gauge/common';
 import type { VisualizationToolbarProps } from '../../../types';
 import { ToolbarPopover, useDebouncedValue, VisLabel } from '../../../shared_components';
 import './gauge_config_panel.scss';
-import { GaugeLabelMajorMode, GaugeVisualizationState } from '../../../../common/expressions';
+import type { GaugeVisualizationState } from '../constants';
 
 export const GaugeToolbar = memo((props: VisualizationToolbarProps<GaugeVisualizationState>) => {
   const { state, setState, frame } = props;

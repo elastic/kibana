@@ -36,7 +36,7 @@ const mockSavedObjectsClient = {
     saved_object: { id: 10, _version: '7.15.0', attributes: { wsState: '{}' } },
     outcome: 'exactMatch',
   }),
-  find: jest.fn().mockResolvedValue({ title: 'test' }),
+  find: jest.fn().mockResolvedValue({ title: 'test', perPage: 1, total: 1, page: 1 }),
 } as unknown as SavedObjectsClientCommon;
 
 describe('use_workspace_loader', () => {

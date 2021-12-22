@@ -49,6 +49,7 @@ cases.getCases({
   basePath: '/investigate/cases',
   userCanCrud: true,
   owner: ['securitySolution'],
+  features: { alerts: { sync: false }, metrics: ['alerts.count', 'lifespan'] }
   timelineIntegration: {
     plugins: {
       parsingPlugin,
@@ -68,24 +69,27 @@ cases.getCases({
 
 Arguments:
 
-| Property                                                             | Description                                                                                   |
-| -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| userCanCrud                                                          | `boolean;` user permissions to crud                                                           |
-| owner                                                                | `string[];` owner ids of the cases                                                            |
-| basePath                                                             | `string;` path to mount the Cases router on top of                                            |
-| useFetchAlertData                                                    | `(alertIds: string[]) => [boolean, Record<string, Ecs>];` fetch alerts                        |
-| disableAlerts?                                                       | `boolean` (default: false) flag to not show alerts information                                |
-| actionsNavigation?                                                   | <code>CasesNavigation<string, 'configurable'></code>                                          |
-| ruleDetailsNavigation?                                               | <code>CasesNavigation<string &vert; null &vert; undefined, 'configurable'></code>             |
-| onComponentInitialized?                                              | `() => void;` callback when component has initialized                                         |
-| showAlertDetails?                                                    | `(alertId: string, index: string) => void;` callback to show alert details                    |
-| timelineIntegration?.editor_plugins                                  | Plugins needed for integrating timeline into markdown editor.                                 |
-| timelineIntegration?.editor_plugins.parsingPlugin                    | `Plugin;`                                                                                     |
-| timelineIntegration?.editor_plugins.processingPluginRenderer         | `React.FC<TimelineProcessingPluginRendererProps & { position: EuiMarkdownAstNodePosition }>`  |
-| timelineIntegration?.editor_plugins.uiPlugin?                        | `EuiMarkdownEditorUiPlugin`                                                                   |
-| timelineIntegration?.hooks.useInsertTimeline                         | `(value: string, onChange: (newValue: string) => void): UseInsertTimelineReturn`              |
-| timelineIntegration?.ui?.renderInvestigateInTimelineActionComponent? | `(alertIds: string[]) => JSX.Element;` space to render `InvestigateInTimelineActionComponent` |
-| timelineIntegration?.ui?renderTimelineDetailsPanel?                  | `() => JSX.Element;` space to render `TimelineDetailsPanel`                                   |
+| Property                                                             | Description                                                                                                                                                       |
+| -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| userCanCrud                                                          | `boolean;` user permissions to crud                                                                                                                               |
+| owner                                                                | `string[];` owner ids of the cases                                                                                                                                |
+| basePath                                                             | `string;` path to mount the Cases router on top of                                                                                                                |
+| useFetchAlertData                                                    | `(alertIds: string[]) => [boolean, Record<string, Ecs>];` fetch alerts                                                                                            |
+| disableAlerts?                                                       | `boolean` (default: false) flag to not show alerts information                                                                                                    |
+| actionsNavigation?                                                   | <code>CasesNavigation<string, 'configurable'></code>                                                                                                              |
+| ruleDetailsNavigation?                                               | <code>CasesNavigation<string &vert; null &vert; undefined, 'configurable'></code>                                                                                 |
+| onComponentInitialized?                                              | `() => void;` callback when component has initialized                                                                                                             |
+| showAlertDetails?                                                    | `(alertId: string, index: string) => void;` callback to show alert details                                                                                        |
+| features?                                                            | `CasesFeatures` object defining the features to enable/disable                                                                                                    |
+| features?.alerts.sync                                                | `boolean` (default: `true`) defines wether the alert sync action should be enabled/disabled                                                                       |
+| features?.metrics                                                    | `string[]` (default: `[]`) defines the metrics to show in the Case Detail View. Allowed metrics: "alerts.count", "alerts.users", "alerts.hosts", "connectors", "lifespan". |
+| timelineIntegration?.editor_plugins                                  | Plugins needed for integrating timeline into markdown editor.                                                                                                     |
+| timelineIntegration?.editor_plugins.parsingPlugin                    | `Plugin;`                                                                                                                                                         |
+| timelineIntegration?.editor_plugins.processingPluginRenderer         | `React.FC<TimelineProcessingPluginRendererProps & { position: EuiMarkdownAstNodePosition }>`                                                                      |
+| timelineIntegration?.editor_plugins.uiPlugin?                        | `EuiMarkdownEditorUiPlugin`                                                                                                                                       |
+| timelineIntegration?.hooks.useInsertTimeline                         | `(value: string, onChange: (newValue: string) => void): UseInsertTimelineReturn`                                                                                  |
+| timelineIntegration?.ui?.renderInvestigateInTimelineActionComponent? | `(alertIds: string[]) => JSX.Element;` space to render `InvestigateInTimelineActionComponent`                                                                     |
+| timelineIntegration?.ui?renderTimelineDetailsPanel?                  | `() => JSX.Element;` space to render `TimelineDetailsPanel`                                                                                                       |
 
 UI component:
 ![All Cases Component][all-cases-img]
@@ -127,11 +131,11 @@ UI component:
 
 Arguments:
 
-| Property       | Description                                          |
-| -------------- | ---------------------------------------------------- |
-| userCanCrud    | `boolean;` user permissions to crud                  |
-| owner          | `string[];` owner ids of the cases                   |
-| maxCasesToShow | `number;` number of cases to show in widget          |
+| Property       | Description                                 |
+| -------------- | ------------------------------------------- |
+| userCanCrud    | `boolean;` user permissions to crud         |
+| owner          | `string[];` owner ids of the cases          |
+| maxCasesToShow | `number;` number of cases to show in widget |
 
 UI component:
 ![Recent Cases Component][recent-cases-img]

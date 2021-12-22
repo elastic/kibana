@@ -10,7 +10,9 @@
     "embeddable",
     "share",
     "discover",
-    "fileUpload"
+    "fileUpload",
+    "uiActions",
+    "charts"
   ],
   "optionalPlugins": [
     "security",
@@ -26,7 +28,7 @@
     "maps",
     "esUiShared",
     "fieldFormats",
-    "charts"
+    "uiActions"
   ],
   "extraPublicDirs": [
     "common"

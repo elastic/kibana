@@ -8,11 +8,11 @@ import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { parseDuration } from '../../../../../alerting/common/parse_duration';
 import {
-  AlertTypeModel,
-  Alert,
+  RuleTypeModel,
+  Rule,
   IErrorObject,
   AlertAction,
-  AlertType,
+  RuleType,
   ValidationResult,
   ActionTypeRegistryContract,
 } from '../../../types';
@@ -20,7 +20,7 @@ import { InitialAlert } from './alert_reducer';
 
 export function validateBaseProperties(
   alertObject: InitialAlert,
-  serverRuleType?: AlertType<string, string>
+  serverRuleType?: RuleType<string, string>
 ): ValidationResult {
   const validationResult = { errors: {} };
   const errors = {
@@ -80,9 +80,9 @@ export function validateBaseProperties(
 }
 
 export function getAlertErrors(
-  alert: Alert,
-  alertTypeModel: AlertTypeModel | null,
-  serverRuleType?: AlertType<string, string>
+  alert: Rule,
+  alertTypeModel: RuleTypeModel | null,
+  serverRuleType?: RuleType<string, string>
 ) {
   const alertParamsErrors: IErrorObject = alertTypeModel
     ? alertTypeModel.validate(alert.params).errors
@@ -101,7 +101,7 @@ export function getAlertErrors(
 }
 
 export async function getAlertActionErrors(
-  alert: Alert,
+  alert: Rule,
   actionTypeRegistry: ActionTypeRegistryContract
 ): Promise<IErrorObject[]> {
   return await Promise.all(
@@ -121,10 +121,10 @@ export const hasObjectErrors: (errors: IErrorObject) => boolean = (errors) =>
   });
 
 export function isValidAlert(
-  alertObject: InitialAlert | Alert,
+  alertObject: InitialAlert | Rule,
   validationResult: IErrorObject,
   actionsErrors: IErrorObject[]
-): alertObject is Alert {
+): alertObject is Rule {
   return (
     !hasObjectErrors(validationResult) &&
     actionsErrors.every((error: IErrorObject) => !hasObjectErrors(error))
