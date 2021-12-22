@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ReactText } from 'react';
+import { FieldFormatEditorFactory } from '../types';
+import { formatId } from './constants';
 
-export type SampleInput = ReactText | ReactText[] | Record<string, ReactText[]> | object;
-
-export interface Sample {
-  input: SampleInput;
-  output: string;
-}
+export type { GeoPointFormatEditor } from './geo_point';
+export const geoPointFormatEditorFactory: FieldFormatEditorFactory = () =>
+  import('./geo_point').then((m) => m.GeoPointFormatEditor);
+geoPointFormatEditorFactory.formatId = formatId;

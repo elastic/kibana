@@ -6,11 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { ReactText } from 'react';
-
-export type SampleInput = ReactText | ReactText[] | Record<string, ReactText[]> | object;
-
-export interface Sample {
-  input: SampleInput;
-  output: string;
-}
+export const formatId = 'geo_point';
