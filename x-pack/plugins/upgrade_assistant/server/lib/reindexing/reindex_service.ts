@@ -115,6 +115,8 @@ export interface ReindexService {
    * @param indexName
    */
   cancelReindexing(indexName: string): Promise<ReindexSavedObject>;
+
+  getIndexAliases(indexName: string): any;
 }
 
 export const reindexServiceFactory = (
@@ -311,6 +313,14 @@ export const reindexServiceFactory = (
     return reindexOp;
   };
 
+  const getIndexAliases = async (indexName: string) => {
+    const { body: response } = await esClient.indices.getAlias({
+      index: indexName,
+    });
+
+    return response[indexName]?.aliases ?? {};
+  };
+
   /**
    * Creates an alias that points the old index to the new index, deletes the old index.
    * @param reindexOp
@@ -318,11 +328,7 @@ export const reindexServiceFactory = (
   const switchAlias = async (reindexOp: ReindexSavedObject) => {
     const { indexName, newIndexName, reindexOptions } = reindexOp.attributes;
 
-    const { body: response } = await esClient.indices.getAlias({
-      index: indexName,
-    });
-
-    const existingAliases = response[indexName].aliases;
+    const existingAliases = await getIndexAliases(indexName);
 
     const extraAliases = Object.keys(existingAliases).map((aliasName) => ({
       add: { index: newIndexName, alias: aliasName, ...existingAliases[aliasName] },
@@ -610,5 +616,7 @@ export const reindexServiceFactory = (
 
       return reindexOp;
     },
+
+    getIndexAliases,
   };
 };

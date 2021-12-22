@@ -182,7 +182,7 @@ const getStepTitle = (
     return inProgress ? (
       <FormattedMessage
         id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.aliasSwapStepTitle"
-        defaultMessage="Creating {indexName} alias for {reindexName} index, deleting original {indexName} index."
+        defaultMessage="Creating {indexName} alias for {reindexName} index."
         values={{
           indexName: <EuiCode>{meta.indexName}</EuiCode>,
           reindexName: <EuiCode>{meta.reindexName}</EuiCode>,
@@ -191,9 +191,51 @@ const getStepTitle = (
     ) : (
       <FormattedMessage
         id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
-        defaultMessage="Create {indexName} alias for {reindexName} index, delete original {indexName} index."
+        defaultMessage="Create {indexName} alias for {reindexName} index."
         values={{
           indexName: <EuiCode>{meta.indexName}</EuiCode>,
+          reindexName: <EuiCode>{meta.reindexName}</EuiCode>,
+        }}
+      />
+    );
+  }
+
+  if (step === ReindexStep.originalIndexDeleted) {
+    return inProgress ? (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.aliasSwapStepTitle"
+        defaultMessage="Deleting original {indexName} index."
+        values={{
+          indexName: <EuiCode>{meta.indexName}</EuiCode>,
+        }}
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
+        defaultMessage="Delete original {indexName} index."
+        values={{
+          indexName: <EuiCode>{meta.indexName}</EuiCode>,
+        }}
+      />
+    );
+  }
+
+  if (step === ReindexStep.existingAliasUpdated) {
+    return inProgress ? (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.aliasSwapStepTitle"
+        defaultMessage="Updating {existingAliases} aliases to point to {reindexName} index."
+        values={{
+          existingAliases: <EuiCode>{`[${meta.aliases.join(',')}]`}</EuiCode>,
+          reindexName: <EuiCode>{meta.reindexName}</EuiCode>,
+        }}
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
+        defaultMessage="Update {existingAliases} aliases to point to {reindexName} index."
+        values={{
+          existingAliases: <EuiCode>{`[${meta.aliases.join(',')}]`}</EuiCode>,
           reindexName: <EuiCode>{meta.reindexName}</EuiCode>,
         }}
       />
@@ -218,9 +260,10 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
     reindexTaskPercComplete,
   } = props.reindexState;
 
+  const { meta } = props.reindexState;
+
   const getProgressStep = (thisStep: ReindexStep): StepProgressStep => {
     const previousStep = orderedSteps[orderedSteps.indexOf(thisStep) - 1];
-    const { meta } = props.reindexState;
 
     if (status === ReindexStatus.failed && lastCompletedStep === previousStep) {
       return {
@@ -298,7 +341,14 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
     getProgressStep(ReindexStep.newIndexCreated),
     reindexingDocsStep,
     getProgressStep(ReindexStep.aliasCreated),
+    getProgressStep(ReindexStep.originalIndexDeleted),
   ];
+
+  const hasExistingAlias = meta.aliases.length > 0;
+
+  if (hasExistingAlias) {
+    steps.push(getProgressStep(ReindexStep.existingAliasUpdated));
+  }
 
   return (
     <>

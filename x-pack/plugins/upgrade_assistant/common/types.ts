@@ -28,6 +28,8 @@ export enum ReindexStep {
   reindexStarted = 40,
   reindexCompleted = 50,
   aliasCreated = 60,
+  originalIndexDeleted = 70,
+  existingAliasUpdated = 80,
 }
 
 export enum ReindexStatus {
@@ -45,6 +47,8 @@ export interface ReindexStatusResponse {
   meta: {
     indexName: string;
     reindexName: string;
+    // Array of aliases pointing to the index being reindexed
+    aliases: string[];
   };
   warnings?: ReindexWarning[];
   reindexOp?: ReindexOperation;

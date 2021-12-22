@@ -115,6 +115,8 @@ export function registerReindexIndicesRoutes(
             ? await reindexService.detectReindexWarnings(indexName)
             : [];
 
+          const indexAliases = await reindexService.getIndexAliases(indexName);
+
           const body: ReindexStatusResponse = {
             reindexOp: reindexOp ? reindexOp.attributes : undefined,
             warnings,
@@ -122,6 +124,7 @@ export function registerReindexIndicesRoutes(
             meta: {
               indexName,
               reindexName: generateNewIndexName(indexName),
+              aliases: Object.keys(indexAliases),
             },
           };
 
