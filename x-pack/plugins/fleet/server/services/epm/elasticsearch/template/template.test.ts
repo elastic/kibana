@@ -9,7 +9,7 @@ import { readFileSync } from 'fs';
 import path from 'path';
 
 import { safeLoad } from 'js-yaml';
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 import { createAppContextStartContractMock } from '../../../../mocks';

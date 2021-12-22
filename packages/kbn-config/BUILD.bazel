@@ -47,7 +47,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "//packages/elastic-safer-lodash-set",
   "//packages/kbn-config-schema:npm_module_types",
-  "//packages/kbn-logging",
+  "//packages/kbn-logging:npm_module_types",
   "//packages/kbn-std:npm_module_types",
   "//packages/kbn-utility-types",
   "//packages/kbn-i18n:npm_module_types",

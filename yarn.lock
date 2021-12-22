@@ -5905,6 +5905,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__logging@link:bazel-bin/packages/kbn-logging/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__mapbox-gl@link:bazel-bin/packages/kbn-mapbox-gl/npm_module_types":
   version "0.0.0"
   uid ""

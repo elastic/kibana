@@ -7,7 +7,7 @@
  */
 
 import mockFs from 'mock-fs';
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging';
 import { OsCgroupMetricsCollector } from './cgroup';
 
 describe('OsCgroupMetricsCollector', () => {

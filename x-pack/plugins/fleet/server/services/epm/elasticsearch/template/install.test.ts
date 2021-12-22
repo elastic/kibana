@@ -6,7 +6,7 @@
  */
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging';
 
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../../../services';

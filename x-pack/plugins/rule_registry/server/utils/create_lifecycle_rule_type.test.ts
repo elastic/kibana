@@ -13,7 +13,7 @@ import {
   ALERT_STATUS_RECOVERED,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging';
 import { castArray, omit } from 'lodash';
 import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
