@@ -13,6 +13,7 @@ import {
   PROCESS_TREE,
   PROCESS_TREE_NODE_ALERT,
   SEARCH_BAR,
+  SESSION_COMMANDS,
   DETAILS_PANEL,
   DETAILS_PANEL_TOGGLE,
   DETAILS_PANEL_ALERT,
@@ -44,6 +45,7 @@ const ALERT_NODE_TEST_ID = getProcessTreeNodeAlertDetailViewRule(
   '64940663527c71b1f577df2aa529c42afc1c023108154714b49966e517e395b8'
 );
 const ALERT_RULE_ID = 'd9f45980-5e10-11ec-b7c6-17150991b0b3';
+const FIRST_CHILD_COMMAND = '/usr/bin/id'
 
 describe('Session view', () => {
   context('Rendering table empty state', () => {
@@ -132,5 +134,58 @@ describe('Session view', () => {
       cy.get(ALERT_NODE_TEST_ID).first().click();
       cy.location('pathname').should('contain', `app/security/rules/id/${ALERT_RULE_ID}`);
     });
+
+    it('renders child processes correctly', () => {
+      openSessionView(TEST_EVENT_ID);
+
+      // Amount of visible commands on the session view should increase when user clicks on the Child Process dropdown button
+      cy.get(SESSION_COMMANDS).children().its('length').then(lengthBefore =>{
+        const beforeClick = lengthBefore;
+        cy.contains('Child processes').click()
+        cy.contains(FIRST_CHILD_COMMAND).should('exist');
+        cy.get(SESSION_COMMANDS).children().its('length').then(lengthAfter =>{
+          //const afterClick = lengthAfter;
+          expect(lengthAfter).to.be.greaterThan(beforeClick)
+        })
+      })
+
+      //Checks the left margin value for each command line, left margin of child would be more to the right compared the parent 
+      
+      //Get the margin-left value for parent command
+      cy.get(SESSION_COMMANDS).eq(1).then(element => {
+        const win = element[0].ownerDocument!.defaultView
+        const before = win!.getComputedStyle(element[0],'before')
+        const contentValue = before.getPropertyValue('margin-left')
+        const parentCommandLeftMargin = parseInt(contentValue.replace('px',''))
+      //Get the margin-left value for child command and compares both of them
+        cy.get(SESSION_COMMANDS).eq(2).then(element => {
+          const win = element[0].ownerDocument!.defaultView
+          const before = win!.getComputedStyle(element[0],'before')
+          const contentValue = before.getPropertyValue('margin-left')
+          const childCommandLeftMargin = parseInt(contentValue.replace('px',''))
+          expect(parentCommandLeftMargin).to.be.greaterThan(childCommandLeftMargin)
+        })
+      })
+    })
+    //Commented out Root Escalation check until we have better filtering
+/*
+    it('root escalation', () => {
+      openSessionView(TEST_EVENT_ID);
+
+      // Get the parent div for Root Escalation button and checks if Sudo su and Root Escalation button is with same parent or not
+      
+      cy.get('span:contains("Root escalation")').its('length').then(lengthBefore =>{
+        console.log("LENGHT BEFORE IS " + lengthBefore )
+        const beforeClick = lengthBefore;
+        const genArr = Array.from({length:beforeClick},(v,k)=>k)
+        console.log(genArr)
+        cy.wrap(genArr).each((index)=>{
+
+          cy.get('span:contains("Root escalation"):eq('+index+')').parent().parent().parent().contains('sudo').should('exist');
+          cy.get('span:contains("Root escalation"):eq('+index+')').parent().parent().parent().contains('su').should('exist');
+        })
+      })
+    });
+    */
   });
 });
