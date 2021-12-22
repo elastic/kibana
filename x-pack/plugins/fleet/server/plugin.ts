@@ -20,12 +20,17 @@ import type {
   ServiceStatus,
   ElasticsearchClient,
   ISavedObjectsRepository,
+  SavedObjectsClientContract,
 } from 'kibana/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import type { TelemetryPluginSetup, TelemetryPluginStart } from 'src/plugins/telemetry/server';
 
-import { DEFAULT_APP_CATEGORIES, ServiceStatusLevels } from '../../../../src/core/server';
+import {
+  DEFAULT_APP_CATEGORIES,
+  ServiceStatusLevels,
+  SavedObjectsClient,
+} from '../../../../src/core/server';
 import type { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import type { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import type {
@@ -188,8 +193,7 @@ export class FleetPlugin
 
   private agentService?: AgentService;
   private packageService?: PackageService;
-  private internalSoClient?: ISavedObjectsRepository;
-
+  private internalSoRepository?: ISavedObjectsRepository;
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
     this.isProductionMode = this.initializerContext.env.mode.prod;
@@ -289,7 +293,7 @@ export class FleetPlugin
           authz: await getAuthzFromRequest(request),
           epm: {
             get internalSoClient(): ISavedObjectsRepository {
-              return this.internalSoClient;
+              return plugin.internalSoRepository!;
             },
           },
           get spaceId() {
@@ -357,7 +361,7 @@ export class FleetPlugin
     licenseService.start(this.licensing$);
 
     this.telemetryEventsSender.start(plugins.telemetry, core);
-    this.internalSoClient = core.savedObjects.createInternalRepository();
+    this.internalSoRepository = core.savedObjects.createInternalRepository();
     const logger = appContextService.getLogger();
 
     const fleetSetupPromise = (async () => {
@@ -369,7 +373,7 @@ export class FleetPlugin
           summary: 'Fleet is setting up',
         });
 
-        await setupFleet(this.internalSoClient!, core.elasticsearch.client.asInternalUser);
+        await setupFleet(this.internalSoRepository!, core.elasticsearch.client.asInternalUser);
 
         this.fleetStatus$.next({
           level: ServiceStatusLevels.available,
