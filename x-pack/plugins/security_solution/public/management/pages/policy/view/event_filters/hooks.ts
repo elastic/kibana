@@ -35,14 +35,16 @@ export function useGetAllAssignedEventFilters(
 }
 
 export function useSearchAssignedEventFilters(
-  policyId?: string,
-  filter?: string
+  policyId: string,
+  options: { filter?: string; page?: number; perPage?: number }
 ): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
   const http = useHttp();
   const eventFiltersService = new EventFiltersHttpService(http);
 
+  const { filter, page, perPage } = options;
+
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
-    ['eventFilters', 'assigned', policyId],
+    ['eventFilters', 'assigned', 'search', policyId],
     () => {
       const kuery = [
         `((exception-list-agnostic.attributes.tags:"policy:${policyId}") OR (exception-list-agnostic.attributes.tags:"policy:all"))`,
@@ -62,8 +64,6 @@ export function useSearchAssignedEventFilters(
     {
       refetchIntervalInBackground: false,
       refetchOnWindowFocus: false,
-      enabled: !!policyId,
-      refetchOnMount: true,
     }
   );
 }
