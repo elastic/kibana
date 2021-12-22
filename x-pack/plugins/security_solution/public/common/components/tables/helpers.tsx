@@ -184,7 +184,12 @@ export const OverflowItemComponent: React.FC<OverflowItemProps> = ({
   }, []);
 
   return (
-    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" direction="row">
+    <EuiFlexGroup
+      gutterSize="none"
+      justifyContent="spaceBetween"
+      direction="row"
+      data-test-subj={`${field}-${dragDisplayValue ?? rowItem}`}
+    >
       <EuiFlexItem grow={1}>{defaultToEmptyTag(rowItem)} </EuiFlexItem>
       <EuiFlexItem grow={false} data-test-subj="hover-actions">
         <HoverActions
@@ -290,11 +295,22 @@ interface PopoverComponentProps {
 
 const PopoverComponent: React.FC<PopoverComponentProps> = ({ children, count, idPrefix }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const onButtonClick = useCallback(() => {
+    setIsOpen(!isOpen);
+  }, [isOpen]);
 
   return (
     <Subtext>
       <EuiPopover
-        button={<EuiLink onClick={() => setIsOpen(!isOpen)}>{`+${count} More`}</EuiLink>}
+        button={
+          <EuiLink onClick={onButtonClick} data-test-subj="overflow-button">
+            <FormattedMessage
+              id="xpack.securitySolution.tables.rowItemHelper.overflowButtonDescription"
+              defaultMessage="+{count} More"
+              values={{ count }}
+            />
+          </EuiLink>
+        }
         closePopover={() => setIsOpen(!isOpen)}
         id={`${idPrefix}-popover`}
         isOpen={isOpen}
