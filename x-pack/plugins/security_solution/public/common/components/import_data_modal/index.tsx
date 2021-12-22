@@ -107,17 +107,17 @@ export const ImportDataModalComponent = ({
           signal: abortCtrl.signal,
         });
 
+        // rules response actions
+        if (importResponse.success) {
+          addSuccess(successMessage(importResponse.success_count));
+        }
+        if (importResponse.errors.length > 0) {
+          const error = formatError(importResponse, importResponse.errors);
+          addError(error, { title: errorMessage(importResponse.errors.length) });
+        }
+
         // if import includes exceptions
         if (showExceptionsCheckBox) {
-          // rules response actions
-          if (importResponse.success) {
-            addSuccess(successMessage(importResponse.success_count));
-          }
-          if (importResponse.errors.length > 0) {
-            const error = formatError(importResponse, importResponse.errors);
-            addError(error, { title: errorMessage(importResponse.errors.length) });
-          }
-
           // exceptions response actions
           if (
             importResponse.exceptions_success &&
@@ -134,14 +134,6 @@ export const ImportDataModalComponent = ({
           ) {
             const error = formatError(importResponse, importResponse.exceptions_errors);
             addError(error, { title: i18n.IMPORT_FAILED(importResponse.exceptions_errors.length) });
-          }
-        } else {
-          if (importResponse.success) {
-            addSuccess(successMessage(importResponse.success_count));
-          }
-          if (importResponse.errors.length > 0) {
-            const error = formatError(importResponse, importResponse.errors);
-            addError(error, { title: errorMessage(importResponse.errors.length) });
           }
         }
 
