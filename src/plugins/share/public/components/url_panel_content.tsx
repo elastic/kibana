@@ -143,21 +143,27 @@ export class UrlPanelContent extends Component<Props, State> {
   }
 
   public render() {
+    const shortUrlSwitch = this.renderShortUrlSwitch();
+    const publicUrlSwitch = this.renderPublicUrlSwitch();
+
+    const urlRow = (!!shortUrlSwitch || !!publicUrlSwitch) && (
+      <EuiFormRow
+        label={<FormattedMessage id="share.urlPanel.urlGroupTitle" defaultMessage="URL" />}
+      >
+        <>
+          <EuiSpacer size={'s'} />
+          {shortUrlSwitch}
+          {publicUrlSwitch}
+        </>
+      </EuiFormRow>
+    );
+
     return (
       <I18nProvider>
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
           {this.renderExportAsRadioGroup()}
           {this.renderUrlParamExtensions()}
-
-          <EuiFormRow
-            label={<FormattedMessage id="share.urlPanel.urlGroupTitle" defaultMessage="URL" />}
-          >
-            <>
-              <EuiSpacer size={'s'} />
-              {this.renderShortUrlSwitch()}
-              {this.renderPublicUrlSwitch()}
-            </>
-          </EuiFormRow>
+          {urlRow}
 
           <EuiSpacer size="m" />
 
@@ -474,7 +480,7 @@ export class UrlPanelContent extends Component<Props, State> {
       this.state.exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT ||
       !this.props.allowShortUrl
     ) {
-      return;
+      return null;
     }
     const shortUrlLabel = (
       <FormattedMessage id="share.urlPanel.shortUrlLabel" defaultMessage="Short URL" />
