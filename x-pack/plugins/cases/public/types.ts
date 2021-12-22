@@ -54,9 +54,12 @@ export type StartServices = CoreStart &
 
 export interface CasesUiStart {
   /**
-   * Determines whether the current user has the ability to use Cases.
-   * @param owners optional array of owner types. All by default.
-   * @return An object denoting a users access to any case type.
+   * Returns an object denoting the current user's ability to read and crud cases.
+   * If any owner(securitySolution, Observability) is found with crud or read capability respectively,
+   * then crud or read is set to true.
+   * Permissions for specific owners can be found by passing an owner array
+   * @param owners an array of CaseOwners that should be queried for permission
+   * @returns An object denoting the case permissions of the current user
    */
   canUseCases: (owners?: CasesOwners[]) => { crud: boolean; read: boolean };
   /**

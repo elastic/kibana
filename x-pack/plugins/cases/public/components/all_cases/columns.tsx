@@ -263,7 +263,7 @@ export const useCasesColumns = ({
             name: i18n.SOLUTION,
             render: (caseOwner: CasesOwners) => {
               const ownerInfo = OWNER_INFO[caseOwner];
-              return caseOwner ? (
+              return ownerInfo ? (
                 <EuiIcon size="s" type={ownerInfo.iconType} title={ownerInfo.label} />
               ) : (
                 getEmptyTagValue()

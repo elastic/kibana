@@ -10,6 +10,13 @@ import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../common/const
 
 export type CasesOwners = typeof SECURITY_SOLUTION_OWNER | typeof OBSERVABILITY_OWNER;
 
+/*
+ * Returns an object denoting the current user's ability to read and crud cases.
+ * If any owner(securitySolution, Observability) is found with crud or read capability respectively,
+ * then crud or read is set to true.
+ * Permissions for a specific owners can be found by passing an owner array
+ */
+
 export const canUseCases =
   (capabilities: Partial<ApplicationStart['capabilities']>) =>
   (
