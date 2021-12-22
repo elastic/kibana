@@ -22,6 +22,7 @@ export type TestSubjects =
   | 'documentationLink'
   | 'emptyPrompt'
   | 'filterList.filterItem'
+  | 'freezeIndexMenuButton'
   | 'ilmPolicyLink'
   | 'includeStatsSwitch'
   | 'includeManagedSwitch'

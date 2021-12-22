@@ -183,11 +183,23 @@ describe('<IndexManagementHome />', () => {
   });
 
   describe('index actions', () => {
-    const indexName = 'testIndex';
+    const indexNameA = 'testIndexA';
+    const indexNameB = 'testIndexB';
+    const indexMockA = createNonDataStreamIndex(indexNameA);
+    const indexMockB = createNonDataStreamIndex(indexNameB);
 
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
-      httpRequestsMockHelpers.setReloadIndicesResponse({ indexNames: [indexName] });
+      httpRequestsMockHelpers.setLoadIndicesResponse([
+        {
+          ...indexMockA,
+          isFrozen: true,
+        },
+        {
+          ...indexMockB,
+          status: 'closed',
+        },
+      ]);
+      httpRequestsMockHelpers.setReloadIndicesResponse({ indexNames: [indexNameA, indexNameB] });
 
       testBed = await setup();
       const { component, find } = testBed;
@@ -205,6 +217,22 @@ describe('<IndexManagementHome />', () => {
       // A refresh call was added after closing an index so we need to check the second to last request.
       const latestRequest = server.requests[server.requests.length - 2];
       expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/close`);
+    });
+
+    test('should be able to open a closed index', async () => {
+      testBed = await setup();
+      const { component, find, actions } = testBed;
+
+      component.update();
+
+      find('indexTableIndexNameLink').at(1).simulate('click');
+
+      await actions.clickManageContextMenuButton();
+      await actions.clickContextMenuOption('openIndexMenuButton');
+
+      // A refresh call was added after closing an index so we need to check the second to last request.
+      const latestRequest = server.requests[server.requests.length - 2];
+      expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/open`);
     });
 
     test('should be able to flush index', async () => {
@@ -232,10 +260,13 @@ describe('<IndexManagementHome />', () => {
     });
 
     test('should be able to unfreeze a frozen index', async () => {
+      httpRequestsMockHelpers.setLoadIndicesResponse([
+        {
+          ...indexMockA,
+          isFrozen: true,
+        },
+      ]);
       const { actions, exists } = testBed;
-
-      httpRequestsMockHelpers.setReloadIndicesResponse([{ ...indexMock, isFrozen: false }]);
-
       // Open context menu
       await actions.clickManageContextMenuButton();
       // Check that the unfreeze action exists for the current index and unfreeze it
@@ -247,65 +278,10 @@ describe('<IndexManagementHome />', () => {
       // After the index is unfrozen, we imediately do a reload. So we need to expect to see
       // a reload server call also.
       expect(server.requests[requestsCount - 1].url).toBe(`${API_BASE_PATH}/indices/reload`);
-      // Open context menu once again, since clicking an action will close it.
-      await actions.clickManageContextMenuButton();
-      // The unfreeze action should not be present anymore
-      expect(exists('unfreezeIndexMenuButton')).toBe(false);
     });
   });
 
   describe('Edit index settings', () => {
-    const indexName = 'testIndex';
-
-    beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
-
-      testBed = await setup();
-      const { find, component } = testBed;
-      component.update();
-
-      find('indexTableIndexNameLink').at(0).simulate('click');
-    });
-
-    test('shows error callout when request fails', async () => {
-      const { actions, find, component, exists } = testBed;
-
-      mockGetAceEditorValue.mockReturnValue(`{
-        "index.routing.allocation.include._tier_preference": "non_existent_tier"
-      }`);
-
-      const error = {
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'invalid tier names found in ...',
-      };
-      httpRequestsMockHelpers.setUpdateIndexSettingsResponse(undefined, error);
-
-      await actions.selectIndexDetailsTab('edit_settings');
-
-      await act(async () => {
-        find('updateEditIndexSettingsButton').simulate('click');
-      });
-
-      component.update();
-
-      expect(exists('updateIndexSettingsErrorCallout')).toBe(true);
-    });
-  });
-
-  describe('Edit index settings', () => {
-    const indexName = 'testIndex';
-
-    beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
-
-      testBed = await setup();
-      const { find, component } = testBed;
-      component.update();
-
-      find('indexTableIndexNameLink').at(0).simulate('click');
-    });
-
     test('shows error callout when request fails', async () => {
       const { actions, find, component, exists } = testBed;
 
