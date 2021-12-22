@@ -11,14 +11,16 @@ import uuid from 'uuid';
 
 import { CoreStart } from 'src/core/public';
 import { Action, IncompatibleActionError } from '../../services/ui_actions';
+import { SavedObject } from '../../services/saved_objects';
 import {
   ViewMode,
   PanelState,
   IEmbeddable,
   PanelNotFoundError,
   EmbeddableInput,
-  isReferenceOrValueEmbeddable,
   isErrorEmbeddable,
+  isReferenceOrValueEmbeddable,
+  EmbeddableOutput,
 } from '../../services/embeddable';
 import {
   placePanelBeside,
@@ -26,6 +28,7 @@ import {
 } from '../embeddable/panel/dashboard_panel_placement';
 import { dashboardClonePanelAction } from '../../dashboard_strings';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
+import { convertSavedDashboardPanelToPanelState } from '../../../common/embeddable/embeddable_saved_object_converters';
 
 export const ACTION_CLONE_PANEL = 'clonePanel';
 
@@ -66,14 +69,10 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
   }
 
   public async execute({ embeddable }: ClonePanelActionContext) {
-    if (
-      !embeddable.getRoot() ||
-      !embeddable.getRoot().isContainer ||
-      !isReferenceOrValueEmbeddable(embeddable)
-    ) {
+    if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
       throw new IncompatibleActionError();
     }
-    const byValueClone = await embeddable.getInputAsValueType();
+
     const dashboard = embeddable.getRoot() as DashboardContainer;
     const panelToClone = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
     if (!panelToClone) {
@@ -81,7 +80,7 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
     }
 
     dashboard.showPlaceholderUntil(
-      this.cloneEmbeddable(byValueClone, embeddable.type),
+      this.cloneEmbeddable(panelToClone, embeddable),
       placePanelBeside,
       {
         width: panelToClone.gridData.w,
@@ -93,16 +92,24 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
   }
 
   private async cloneEmbeddable(
-    newPanel: EmbeddableInput,
-    embeddableType: string
+    panelToClone: DashboardPanelState,
+    embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>
   ): Promise<Partial<PanelState>> {
+    let explicitInputCopy: Partial<EmbeddableInput>;
+    if (isReferenceOrValueEmbeddable(embeddable) && embeddable.inputIsRefType) {
+      explicitInputCopy = await embeddable.getInputAsValueType();
+    } else {
+      explicitInputCopy = panelToClone.explicitInput;
+    }
+
     const panelState: PanelState<EmbeddableInput> = {
-      type: embeddableType,
+      type: embeddable.type,
       explicitInput: {
-        ...newPanel,
+        ...explicitInputCopy,
         id: uuid.v4(),
       },
     };
+
     this.core.notifications.toasts.addSuccess({
       title: dashboardClonePanelAction.getSuccessMessage(),
       'data-test-subj': 'addObjectToContainerSuccess',
