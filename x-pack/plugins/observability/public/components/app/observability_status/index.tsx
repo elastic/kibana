@@ -19,6 +19,7 @@ export function ObservabilityStatus() {
 
   const boxes = appEmptySections.map((app) => {
     return {
+      id: app.id,
       dataSource: app.title,
       hasData: hasDataMap[app.id]?.hasData ?? false,
       description: app.description,
