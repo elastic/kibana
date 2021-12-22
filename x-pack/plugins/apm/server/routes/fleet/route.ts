@@ -128,12 +128,12 @@ const getMigrationCheckRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/migration_check',
   options: { tags: ['access:apm'] },
   handler: async (resources) => {
-    const { core, plugins, context, config, request } = resources;
+    const { core, plugins, config, request } = resources;
     const cloudApmMigrationEnabled = config.agent.migrations.enabled;
     if (!plugins.fleet || !plugins.security) {
       throw Boom.internal(FLEET_SECURITY_REQUIRED_MESSAGE);
     }
-    const savedObjectsClient = context.core.savedObjects.client;
+    const savedObjectsClient = await getInternalSavedObjectsClient(core.setup);
     const [fleetPluginStart, securityPluginStart] = await Promise.all([
       plugins.fleet.start(),
       plugins.security.start(),

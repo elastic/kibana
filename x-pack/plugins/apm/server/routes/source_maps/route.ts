@@ -6,8 +6,7 @@
  */
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import { SavedObjectsClientContract } from 'kibana/server';
-import { jsonRt } from '@kbn/io-ts-utils';
+import { jsonRt } from '@kbn/io-ts-utils/json_rt';
 import {
   createApmArtifact,
   deleteApmArtifact,
@@ -98,8 +97,7 @@ const uploadSourceMapRoute = createApmServerRoute({
         await updateSourceMapsOnFleetPolicies({
           core,
           fleetPluginStart,
-          savedObjectsClient:
-            savedObjectsClient as unknown as SavedObjectsClientContract,
+          savedObjectsClient,
           elasticsearchClient: esClient,
         });
 
@@ -134,8 +132,7 @@ const deleteSourceMapRoute = createApmServerRoute({
         await updateSourceMapsOnFleetPolicies({
           core,
           fleetPluginStart,
-          savedObjectsClient:
-            savedObjectsClient as unknown as SavedObjectsClientContract,
+          savedObjectsClient,
           elasticsearchClient: esClient,
         });
       }

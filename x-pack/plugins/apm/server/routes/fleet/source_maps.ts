@@ -8,7 +8,7 @@ import {
   CoreSetup,
   CoreStart,
   ElasticsearchClient,
-  SavedObjectsClientContract,
+  ISavedObjectsRepository,
 } from 'kibana/server';
 import { promisify } from 'util';
 import { unzip } from 'zlib';
@@ -134,7 +134,7 @@ export async function updateSourceMapsOnFleetPolicies({
 }: {
   core: { setup: CoreSetup; start: () => Promise<CoreStart> };
   fleetPluginStart: FleetPluginStart;
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient: ISavedObjectsRepository;
   elasticsearchClient: ElasticsearchClient;
 }) {
   const artifacts = await listArtifacts({ fleetPluginStart });

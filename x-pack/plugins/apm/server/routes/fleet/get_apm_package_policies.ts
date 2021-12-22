@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  CoreStart,
-  SavedObjectsClientContract,
-} from 'kibana/server';
+import { CoreSetup, CoreStart } from 'kibana/server';
 import { APMPluginStartDependencies } from '../../types';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 
@@ -20,9 +16,7 @@ export async function getApmPackgePolicies({
   core: { setup: CoreSetup; start: () => Promise<CoreStart> };
   fleetPluginStart: NonNullable<APMPluginStartDependencies['fleet']>;
 }) {
-  // @ts-ignore
-  const savedObjectsClient: SavedObjectsClientContract =
-    await getInternalSavedObjectsClient(core.setup);
+  const savedObjectsClient = await getInternalSavedObjectsClient(core.setup);
   return await fleetPluginStart.packagePolicyService.list(savedObjectsClient, {
     kuery: 'ingest-package-policies.package.name:apm',
   });
