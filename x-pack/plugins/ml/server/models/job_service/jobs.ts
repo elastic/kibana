@@ -220,6 +220,7 @@ export function jobsProvider(
       const tempJob: MlSummaryJob = {
         id: job.job_id,
         description: job.description || '',
+        customSettings: job.custom_settings,
         groups: Array.isArray(job.groups) ? job.groups.sort() : [],
         processed_record_count: job.data_counts?.processed_record_count,
         earliestStartTimestampMs: getEarliestDatafeedStartTime(

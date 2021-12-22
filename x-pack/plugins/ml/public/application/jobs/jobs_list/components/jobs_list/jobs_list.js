@@ -24,10 +24,12 @@ import {
   EuiIcon,
   EuiScreenReaderOnly,
   EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AnomalyDetectionJobIdLink } from './job_id_link';
+import { isManagedJob } from '../../../jobs_utils';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
@@ -169,7 +171,24 @@ export class JobsList extends Component {
         truncateText: false,
         width: '15%',
         scope: 'row',
-        render: isManagementTable ? (id) => this.getJobIdLink(id) : undefined,
+        render: isManagementTable
+          ? (id) => this.getJobIdLink(id)
+          : (id, item) => {
+              if (!isManagedJob(item)) return id;
+
+              return (
+                <>
+                  <span>
+                    {id} &nbsp;
+                    <EuiBadge color="hollow" data-test-subj="mlJobListRowManagedLabel" size="xs">
+                      {i18n.translate('xpack.ml.jobsList.managedBadgeLabel', {
+                        defaultMessage: 'Managed',
+                      })}
+                    </EuiBadge>
+                  </span>
+                </>
+              );
+            },
       },
       {
         field: 'auditMessage',
