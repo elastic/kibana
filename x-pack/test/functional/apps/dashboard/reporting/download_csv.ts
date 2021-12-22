@@ -131,17 +131,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Filtered Saved Search', () => {
-      const TEST_SEARCH_TITLE = 'A Saved Search With a DATE FILTER';
+      const TEST_SEARCH_TITLE = 'Customer Betty';
       const TEST_DASHBOARD_TITLE = 'Filtered Search Data';
       const setTimeRange = async () => {
-        const fromTime = 'Sep 20, 2015 @ 00:00:00.000';
-        const toTime = 'Sep 21, 2015 @ 00:00:00.000';
-        log.info(`Setting time range to ${[fromTime, toTime]}`);
+        const fromTime = 'Jun 20, 2019 @ 23:56:51.374';
+        const toTime = 'Jun 25, 2019 @ 16:18:51.821';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       };
 
       before(async () => {
-        await reporting.initLogs();
+        await reporting.initEcommerce();
         await navigateToDashboardApp();
         log.info(`Creating empty dashboard`);
         await PageObjects.dashboard.clickNewDashboard();
@@ -152,7 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await reporting.teardownLogs();
+        await reporting.teardownEcommerce();
         await esArchiver.emptyKibanaIndex();
       });
 
