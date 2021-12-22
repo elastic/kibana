@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { ToastsApi } from 'kibana/public';
 import React, { useState, useEffect } from 'react';
-import { Alert, AlertSummary, AlertType } from '../../../../types';
+import { Rule, AlertSummary, RuleType } from '../../../../types';
 import {
   ComponentOpts as AlertApis,
   withBulkAlertOperations,
@@ -18,8 +18,8 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
 type WithAlertSummaryProps = {
-  rule: Alert;
-  ruleType: AlertType;
+  rule: Rule;
+  ruleType: RuleType;
   readOnly: boolean;
   requestRefresh: () => Promise<void>;
 } & Pick<AlertApis, 'loadAlertSummary'>;
