@@ -13,6 +13,7 @@ import type { SerializedFieldFormat } from '../../../../field_formats/common';
 import { ExpressionValueVisDimension } from '../../../../visualizations/public';
 import { ExpressionValuePieLabels } from '../expression_functions/pie_labels';
 import { PaletteOutput, ChartsPluginSetup } from '../../../../charts/public';
+import { EMPTY_SIZE_RATIOS } from '../editor/constants';
 
 export interface Dimension {
   accessor: number;
@@ -38,6 +39,7 @@ interface PieCommonParams {
   maxLegendLines: number;
   distinctColors: boolean;
   isDonut: boolean;
+  emptySizeRatio?: EMPTY_SIZE_RATIOS;
 }
 
 export interface LabelsParams {
