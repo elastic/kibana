@@ -12,6 +12,112 @@
     "classes": [
       {
         "parentPluginId": "@kbn/config-schema",
+        "id": "def-server.AnyType",
+        "type": "Class",
+        "tags": [],
+        "label": "AnyType",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.AnyType",
+            "text": "AnyType"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
+          "<any>"
+        ],
+        "path": "packages/kbn-config-schema/src/types/any_type.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/config-schema",
+            "id": "def-server.AnyType.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-config-schema/src/types/any_type.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-server.AnyType.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "TypeOptions",
+                  "<any> | undefined"
+                ],
+                "path": "packages/kbn-config-schema/src/types/any_type.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/config-schema",
+            "id": "def-server.AnyType.handleError",
+            "type": "Function",
+            "tags": [],
+            "label": "handleError",
+            "description": [],
+            "signature": [
+              "(type: string, { value }: Record<string, any>) => string | undefined"
+            ],
+            "path": "packages/kbn-config-schema/src/types/any_type.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-server.AnyType.handleError.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-config-schema/src/types/any_type.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-server.AnyType.handleError.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ value }",
+                "description": [],
+                "signature": [
+                  "Record<string, any>"
+                ],
+                "path": "packages/kbn-config-schema/src/types/any_type.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/config-schema",
         "id": "def-server.ByteSizeValue",
         "type": "Class",
         "tags": [],
@@ -242,7 +348,9 @@
             "label": "toString",
             "description": [],
             "signature": [
-              "(returnUnit?: \"b\" | \"kb\" | \"mb\" | \"gb\" | undefined) => string"
+              "(returnUnit?: ",
+              "ByteSizeValueUnit",
+              " | undefined) => string"
             ],
             "path": "packages/kbn-config-schema/src/byte_size_value/index.ts",
             "deprecated": false,
@@ -255,11 +363,199 @@
                 "label": "returnUnit",
                 "description": [],
                 "signature": [
-                  "\"b\" | \"kb\" | \"mb\" | \"gb\" | undefined"
+                  "ByteSizeValueUnit",
+                  " | undefined"
                 ],
                 "path": "packages/kbn-config-schema/src/byte_size_value/index.ts",
                 "deprecated": false,
                 "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/config-schema",
+        "id": "def-server.ConditionalType",
+        "type": "Class",
+        "tags": [],
+        "label": "ConditionalType",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.ConditionalType",
+            "text": "ConditionalType"
+          },
+          "<A, B, C> extends ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.Type",
+            "text": "Type"
+          },
+          "<B | C>"
+        ],
+        "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/config-schema",
+            "id": "def-server.ConditionalType.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-server.ConditionalType.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "leftOperand",
+                "description": [],
+                "signature": [
+                  "Reference",
+                  "<A>"
+                ],
+                "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-server.ConditionalType.Unnamed.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "rightOperand",
+                "description": [],
+                "signature": [
+                  "A | ",
+                  "Reference",
+                  "<A> | ",
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
+                  "<unknown>"
+                ],
+                "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-server.ConditionalType.Unnamed.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "equalType",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
+                  "<B>"
+                ],
+                "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-server.ConditionalType.Unnamed.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "notEqualType",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "server",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-server.Type",
+                    "text": "Type"
+                  },
+                  "<C>"
+                ],
+                "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-server.ConditionalType.Unnamed.$5",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "TypeOptions",
+                  "<B | C> | undefined"
+                ],
+                "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/config-schema",
+            "id": "def-server.ConditionalType.handleError",
+            "type": "Function",
+            "tags": [],
+            "label": "handleError",
+            "description": [],
+            "signature": [
+              "(type: string, { value }: Record<string, any>) => string | undefined"
+            ],
+            "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-server.ConditionalType.handleError.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-server.ConditionalType.handleError.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ value }",
+                "description": [],
+                "signature": [
+                  "Record<string, any>"
+                ],
+                "path": "packages/kbn-config-schema/src/types/conditional_type.ts",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -290,7 +586,7 @@
             "section": "def-server.Type",
             "text": "Type"
           },
-          "<Readonly<{ [K in keyof Pick<P, { [Key in keyof P]: undefined extends ",
+          "<Readonly<{ [K in keyof OptionalProperties<P>]?: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "server",
@@ -298,23 +594,7 @@
             "section": "def-server.TypeOf",
             "text": "TypeOf"
           },
-          "<P[Key]> ? Key : never; }[keyof P]>]?: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.TypeOf",
-            "text": "TypeOf"
-          },
-          "<P[K]> | undefined; } & { [K in keyof Pick<P, { [Key in keyof P]: undefined extends ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.TypeOf",
-            "text": "TypeOf"
-          },
-          "<P[Key]> ? never : Key; }[keyof P]>]: ",
+          "<P[K]> | undefined; } & { [K in keyof RequiredProperties<P>]: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "server",
@@ -382,17 +662,15 @@
               "\nReturn a new `ObjectType` instance extended with given `newProps` properties.\nOriginal properties can be deleted from the copy by passing a `null` or `undefined` value for the key.\n"
             ],
             "signature": [
-              "<NP extends Record<string, ",
+              "<NP extends ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "server",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
-                "text": "Type"
+                "section": "def-server.NullableProps",
+                "text": "NullableProps"
               },
-              "<any> | null | undefined>>(newProps: NP, newOptions?: ",
-              "ObjectTypeOptions",
-              "<ExtendedProps<P, NP>> | undefined) => ExtendedObjectType<P, NP>"
+              ">(newProps: NP, newOptions?: ExtendedObjectTypeOptions<P, NP> | undefined) => ExtendedObjectType<P, NP>"
             ],
             "path": "packages/kbn-config-schema/src/types/object_type.ts",
             "deprecated": false,
@@ -419,8 +697,7 @@
                 "label": "newOptions",
                 "description": [],
                 "signature": [
-                  "ObjectTypeOptions",
-                  "<ExtendedProps<P, NP>> | undefined"
+                  "ExtendedObjectTypeOptions<P, NP> | undefined"
                 ],
                 "path": "packages/kbn-config-schema/src/types/object_type.ts",
                 "deprecated": false,
@@ -988,7 +1265,13 @@
           "{ any: (options?: ",
           "TypeOptions",
           "<any> | undefined) => ",
-          "AnyType",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.AnyType",
+            "text": "AnyType"
+          },
           "; arrayOf: <T>(itemType: ",
           {
             "pluginId": "@kbn/config-schema",
@@ -1049,9 +1332,7 @@
           "ConditionalTypeValue",
           ", B, C>(leftOperand: ",
           "Reference",
-          "<A>, rightOperand: A | ",
-          "Reference",
-          "<A> | ",
+          "<A>, rightOperand: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "server",
@@ -1059,7 +1340,9 @@
             "section": "def-server.Type",
             "text": "Type"
           },
-          "<unknown>, equalType: ",
+          "<unknown> | A | ",
+          "Reference",
+          "<A>, equalType: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "server",
@@ -1078,7 +1361,13 @@
           "<C>, options?: ",
           "TypeOptions",
           "<B | C> | undefined) => ",
-          "ConditionalType",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "server",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-server.ConditionalType",
+            "text": "ConditionalType"
+          },
           "<A, B, C>; contextRef: <T>(key: string) => ",
           "ContextReference",
           "<T>; duration: (options?: ",
@@ -1185,15 +1474,15 @@
             "section": "def-server.Type",
             "text": "Type"
           },
-          "<number>; object: <P extends Record<string, ",
+          "<number>; object: <P extends ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "server",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
+            "section": "def-server.Props",
+            "text": "Props"
           },
-          "<any>>>(props: P, options?: ",
+          ">(props: P, options?: ",
           "ObjectTypeOptions",
           "<P> | undefined) => ",
           {
@@ -1848,7 +2137,13 @@
               "(options?: ",
               "TypeOptions",
               "<any> | undefined) => ",
-              "AnyType"
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.AnyType",
+                "text": "AnyType"
+              }
             ],
             "path": "packages/kbn-config-schema/src/index.ts",
             "deprecated": false,
@@ -2078,9 +2373,7 @@
               "ConditionalTypeValue",
               ", B, C>(leftOperand: ",
               "Reference",
-              "<A>, rightOperand: A | ",
-              "Reference",
-              "<A> | ",
+              "<A>, rightOperand: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "server",
@@ -2088,7 +2381,9 @@
                 "section": "def-server.Type",
                 "text": "Type"
               },
-              "<unknown>, equalType: ",
+              "<unknown> | A | ",
+              "Reference",
+              "<A>, equalType: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "server",
@@ -2107,7 +2402,13 @@
               "<C>, options?: ",
               "TypeOptions",
               "<B | C> | undefined) => ",
-              "ConditionalType",
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "server",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-server.ConditionalType",
+                "text": "ConditionalType"
+              },
               "<A, B, C>"
             ],
             "path": "packages/kbn-config-schema/src/index.ts",
@@ -2136,9 +2437,6 @@
                 "label": "rightOperand",
                 "description": [],
                 "signature": [
-                  "A | ",
-                  "Reference",
-                  "<A> | ",
                   {
                     "pluginId": "@kbn/config-schema",
                     "scope": "server",
@@ -2146,7 +2444,9 @@
                     "section": "def-server.Type",
                     "text": "Type"
                   },
-                  "<unknown>"
+                  "<unknown> | A | ",
+                  "Reference",
+                  "<A>"
                 ],
                 "path": "packages/kbn-config-schema/src/index.ts",
                 "deprecated": false
@@ -2623,15 +2923,15 @@
             "label": "object",
             "description": [],
             "signature": [
-              "<P extends Record<string, ",
+              "<P extends ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "server",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
-                "text": "Type"
+                "section": "def-server.Props",
+                "text": "Props"
               },
-              "<any>>>(props: P, options?: ",
+              ">(props: P, options?: ",
               "ObjectTypeOptions",
               "<P> | undefined) => ",
               {
