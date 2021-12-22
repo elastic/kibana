@@ -13,6 +13,8 @@ echo "--- Osquery Cypress tests"
 cd "$KIBANA_DIR"
 
 checks-reporter-with-killswitch "Osquery Cypress Tests" \
-   yarn --cwd x-pack/plugins/osquery cypress:run-as-ci
+  node scripts/functional_tests \
+    --debug --bail \
+    --config test/osquery_cypress/cli_config.ts
 
 buildkite-agent artifact upload 'target/kibana-osquery/**/*'
