@@ -6,7 +6,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { SavedObjectsErrorHelpers } from 'src/core/server';
+
+import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 
 import type {
   GetAgentsResponse,

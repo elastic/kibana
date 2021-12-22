@@ -8,8 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import type Boom from '@hapi/boom';
-import { SavedObjectsClient } from 'src/core/server';
-import type { ElasticsearchClient, SavedObject, ISavedObjectsRepository } from 'src/core/server';
+
+import type {
+  ElasticsearchClient,
+  SavedObject,
+  ISavedObjectsRepository,
+} from '../../../../../../../src/core/server';
+
+import { SavedObjectsClient } from '../../../../../../../src/core/server';
 
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';

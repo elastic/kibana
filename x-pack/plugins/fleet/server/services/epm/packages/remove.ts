@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers, SavedObjectsClient, SavedObjectsUtils } from 'src/core/server';
-import type { ElasticsearchClient, ISavedObjectsRepository, SavedObject } from 'src/core/server';
-
 import Boom from '@hapi/boom';
+
+import {
+  SavedObjectsErrorHelpers,
+  SavedObjectsClient,
+  SavedObjectsUtils,
+} from '../../../../../../../src/core/server';
+import type {
+  ElasticsearchClient,
+  ISavedObjectsRepository,
+  SavedObject,
+} from '../../../../../../../src/core/server';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';

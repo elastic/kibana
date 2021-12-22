@@ -32,7 +32,7 @@ export async function syncAgentConfigsToApmPackagePolicies({
   }
   const coreStart = await core.start();
   const savedObjectsRepository =
-    await coreStart.savedObjects.createInternalRepository();
+    coreStart.savedObjects.createInternalRepository();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
   const [agentConfigurations, packagePolicies] = await Promise.all([
     listConfigurations({ setup }),

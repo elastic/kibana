@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from 'src/core/server';
 import type {
   ElasticsearchClient,
   Logger,
   SavedObject,
   ISavedObjectsRepository,
   SavedObjectsImporter,
-} from 'src/core/server';
+} from '../../../../../../../src/core/server';
+
+import { SavedObjectsErrorHelpers } from '../../../../../../../src/core/server';
 
 import {
   MAX_TIME_COMPLETE_INSTALL,
