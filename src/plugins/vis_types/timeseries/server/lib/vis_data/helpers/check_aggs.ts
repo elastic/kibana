@@ -6,21 +6,36 @@
  * Side Public License, v 1.
  */
 
+import { get } from 'lodash';
 import { AggNotSupportedInMode } from '../../../../common/errors';
-import { getAggsByType, AGG_TYPE } from '../../../../common/agg_utils';
-import { TSVB_METRIC_TYPES, TIME_RANGE_DATA_MODES } from '../../../../common/enums';
-import { Metric } from '../../../../common/types';
+import { TIME_RANGE_DATA_MODES } from '../../../../common/enums';
+import { DEFAULT_UI_RESTRICTION, RESTRICTIONS_KEYS } from '../../../../common/ui_restrictions';
 
-export function isAggSupported(metrics: Metric[]) {
-  const parentPipelineAggs = getAggsByType<string>((agg) => agg.id)[AGG_TYPE.PARENT_PIPELINE];
+import { Metric } from '../../../../common/types';
+import { SearchCapabilities } from '../../search_strategies';
+
+// @todo: will be removed in 8.1
+// That logic was moved into common folder in that PR https://github.com/elastic/kibana/pull/119967
+// isMetricEnabled method should be used instead. See check_ui_restrictions.ts file
+const checkUIRestrictions = (key: string, restrictions: Record<string, unknown>, type: string) => {
+  const isAllEnabled = get(restrictions ?? DEFAULT_UI_RESTRICTION, `${type}.*`, true);
+
+  return isAllEnabled || Boolean(get(restrictions ?? DEFAULT_UI_RESTRICTION, [type, key], false));
+};
+
+export function isAggSupported(metrics: Metric[], capabilities: SearchCapabilities) {
   const metricTypes = metrics.filter(
     (metric) =>
-      parentPipelineAggs.includes(metric.type) || metric.type === TSVB_METRIC_TYPES.SERIES_AGG
+      !checkUIRestrictions(
+        metric.type,
+        capabilities.uiRestrictions,
+        RESTRICTIONS_KEYS.WHITE_LISTED_METRICS
+      )
   );
 
   if (metricTypes.length) {
     throw new AggNotSupportedInMode(
-      metricTypes.map((metric) => metric.type).join(', '),
+      metricTypes.map((metric) => `"${metric.type}"`).join(', '),
       TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE
     );
   }
