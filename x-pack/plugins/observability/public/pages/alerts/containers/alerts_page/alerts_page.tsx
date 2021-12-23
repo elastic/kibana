@@ -7,12 +7,11 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 
-import { IndexPatternBase } from '@kbn/es-query';
+import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { AlertStatus } from '@kbn/rule-data-utils/alerts_as_data_status';
-import { ALERT_STATUS } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_STATUS, AlertStatus } from '@kbn/rule-data-utils';
 
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { loadAlertAggregations as loadRuleAggregations } from '../../../../../../../plugins/triggers_actions_ui/public';
@@ -58,7 +57,7 @@ const Divider = euiStyled.div`
 
 const regExpEscape = (str: string) => str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 const NO_INDEX_NAMES: string[] = [];
-const NO_INDEX_PATTERNS: IndexPatternBase[] = [];
+const NO_INDEX_PATTERNS: DataViewBase[] = [];
 const BASE_ALERT_REGEX = new RegExp(`\\s*${regExpEscape(ALERT_STATUS)}\\s*:\\s*"(.*?|\\*?)"`);
 const ALERT_STATUS_REGEX = new RegExp(
   `\\s*and\\s*${regExpEscape(ALERT_STATUS)}\\s*:\\s*(".+?"|\\*?)|${regExpEscape(
@@ -158,7 +157,7 @@ function AlertsPage() {
     });
   }, []);
 
-  const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<IndexPatternBase[]> => {
+  const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {
     if (indexNames.length === 0) {
       return [];
     }
