@@ -24,8 +24,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { isEmpty, without } from 'lodash/fp';
 import pMap from 'p-map';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQueryClient } from 'react-query';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import { PolicyData } from '../../../../../../../common/endpoint/types';
 import { useHttp, useToasts } from '../../../../../../common/lib/kibana';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
@@ -45,6 +46,13 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
   const http = useHttp();
   const toasts = useToasts();
   const queryClient = useQueryClient();
+  const privileges = useUserPrivileges().endpointPrivileges;
+
+  useEffect(() => {
+    if (!privileges.canIsolateHost) {
+      onClose();
+    }
+  }, [onClose, privileges.canIsolateHost]);
 
   const [selectedArtifactIds, setSelectedArtifactIds] = useState<string[]>([]);
   const [currentFilter, setCurrentFilter] = useState('');
@@ -227,6 +235,11 @@ export const PolicyHostIsolationExceptionsAssignFlyout = ({
     exceptionsRequest.data?.total,
     exceptionsRequest.isLoading,
   ]);
+
+  // do not render if doesn't have adecuate privleges
+  if (!privileges.loading && !privileges.canIsolateHost) {
+    return null;
+  }
 
   return (
     <EuiFlyout onClose={onClose} data-test-subj="hostIsolationExceptions-assign-flyout">

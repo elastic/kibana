@@ -12,12 +12,17 @@ import React from 'react';
 import uuid from 'uuid';
 import { getExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import { getPolicyHostIsolationExceptionsPath } from '../../../../../common/routing';
 import { PolicyHostIsolationExceptionsList } from './list';
+
+jest.mock('../../../../../../common/components/user_privileges');
+
+const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 
 const emptyList = {
   data: [],
@@ -37,6 +42,11 @@ describe('Policy details host isolation exceptions tab', () => {
 
   beforeEach(() => {
     policyId = uuid.v4();
+    useUserPrivilegesMock.mockReturnValue({
+      endpointPrivileges: {
+        canIsolateHost: true,
+      },
+    });
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
     render = (exceptions: FoundExceptionListItemSchema) =>
@@ -143,5 +153,24 @@ describe('Policy details host isolation exceptions tab', () => {
 
     // check the dialog is there
     expect(renderResult.getByTestId('remove-from-policy-dialog')).toBeTruthy();
+  });
+
+  describe('without privileges', () => {
+    beforeEach(() => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: {
+          canIsolateHost: false,
+        },
+      });
+    });
+
+    it('should not display the delete action', () => {
+      render(getFoundExceptionListItemSchemaMock(3));
+      expect(
+        renderResult.queryByTestId(
+          'hostIsolationExceptions-collapsed-list-card-header-actions-button'
+        )
+      ).toBeFalsy();
+    });
   });
 });
