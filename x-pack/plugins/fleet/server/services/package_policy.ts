@@ -1386,7 +1386,7 @@ export async function incrementPackageName(
     ? packagePolicyData.items
         .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
         .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
-        .sort()
+        .sort((a, b) => a - b)
     : [];
 
   return `${packageName}-${
