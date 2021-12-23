@@ -6005,6 +6005,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__utility-types@link:bazel-bin/packages/kbn-utility-types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__utils@link:bazel-bin/packages/kbn-utils/npm_module_types":
   version "0.0.0"
   uid ""
