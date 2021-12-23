@@ -38,6 +38,7 @@ exports[`ChecklistFlyout renders 1`] = `
           "lastCompletedStep": undefined,
           "loadingState": 1,
           "meta": Object {
+            "aliases": Array [],
             "indexName": "myIndex",
             "reindexName": "reindexed-myIndex",
           },

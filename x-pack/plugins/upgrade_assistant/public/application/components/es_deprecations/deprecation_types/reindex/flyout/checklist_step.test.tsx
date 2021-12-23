@@ -57,6 +57,7 @@ describe('ChecklistFlyout', () => {
       meta: {
         indexName: 'myIndex',
         reindexName: 'reindexed-myIndex',
+        aliases: [],
       },
     } as ReindexState,
   };

@@ -47,7 +47,7 @@ export const getDeprecationsUpperLimit = (count: number) => {
 export const getReindexProgressLabel = (
   reindexTaskPercComplete: number | null,
   lastCompletedStep: ReindexStep | undefined,
-  hasExistingAliases: boolean
+  hasExistingAliases: boolean = false
 ): string => {
   let percentsComplete = 0;
   switch (lastCompletedStep) {
