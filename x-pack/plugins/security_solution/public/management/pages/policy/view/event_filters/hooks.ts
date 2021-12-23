@@ -38,7 +38,9 @@ export function useGetAllAssignedEventFilters(
     {
       refetchIntervalInBackground: false,
       refetchOnWindowFocus: false,
+      refetchOnMount: true,
       enabled,
+      keepPreviousData: true,
     }
   );
 }
@@ -72,27 +74,29 @@ export function useSearchAssignedEventFilters(
 }
 
 export function useSearchNotAssignedEventFilters(
-  eventFiltersService: EventFiltersHttpService,
   policyId: string,
-  options: { filter?: string }
+  options: { filter?: string; perPage?: number; enabled?: boolean }
 ): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
+  const service = useGetEventFiltersService();
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
     ['eventFilters', 'notAssigned', policyId, options],
     () => {
-      const { filter } = options;
+      const { filter, perPage } = options;
 
-      return eventFiltersService.getList({
+      return service.getList({
         filter: parsePoliciesAndFilterToKql({
           excludedPolicies: [policyId, 'all'],
           kuery: parseQueryFilterToKQL(filter || '', SEARCHABLE_FIELDS),
         }),
+        perPage,
       });
     },
     {
       refetchIntervalInBackground: false,
       refetchOnWindowFocus: false,
-      enabled: !!policyId,
       refetchOnMount: true,
+      keepPreviousData: true,
+      enabled: options.enabled ?? true,
     }
   );
 }
@@ -104,8 +108,7 @@ export function useBulkUpdateEventFilters(
     onSettledCallback?: () => void;
   } = {}
 ) {
-  const http = useHttp();
-  const eventFiltersService = new EventFiltersHttpService(http);
+  const service = useGetEventFiltersService();
   const queryClient = useQueryClient();
 
   const {
@@ -119,7 +122,7 @@ export function useBulkUpdateEventFilters(
       return pMap(
         eventFilters,
         (eventFilter) => {
-          return eventFiltersService.updateOne(eventFilter);
+          return service.updateOne(eventFilter);
         },
         {
           concurrency: 5,
@@ -130,9 +133,8 @@ export function useBulkUpdateEventFilters(
       onSuccess: onUpdateSuccess,
       onError: onUpdateError,
       onSettled: () => {
-        queryClient.invalidateQueries(['notAssigned']);
-        queryClient.invalidateQueries(['assigned']);
-        queryClient.invalidateQueries(['eventFilters', 'all']);
+        queryClient.invalidateQueries(['eventFilters', 'notAssigned']);
+        queryClient.invalidateQueries(['eventFilters', 'assigned']);
         onSettledCallback();
       },
     }
@@ -153,6 +155,7 @@ export function useGetAllEventFilters(): QueryObserverResult<
       refetchIntervalInBackground: false,
       refetchOnWindowFocus: false,
       refetchOnMount: true,
+      keepPreviousData: true,
     }
   );
 }

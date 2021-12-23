@@ -25,7 +25,10 @@ import { getEventFiltersListPath } from '../../../../../common/routing';
 import { useGetAllAssignedEventFilters, useGetAllEventFilters } from '../hooks';
 import { ManagementPageLoader } from '../../../../../components/management_page_loader';
 import { PolicyEventFiltersEmptyUnassigned, PolicyEventFiltersEmptyUnexisting } from '../empty';
-import { usePolicyDetailsSelector } from '../../policy_hooks';
+import {
+  usePolicyDetailsSelector,
+  usePolicyDetailsEventFiltersNavigateCallback,
+} from '../../policy_hooks';
 import { getCurrentArtifactsLocation } from '../../../store/policy_details/selectors';
 import { PolicyEventFiltersFlyout } from '../flyout';
 import { PolicyEventFiltersList } from '../list';
@@ -36,22 +39,22 @@ interface PolicyEventFiltersLayoutProps {
 export const PolicyEventFiltersLayout = React.memo<PolicyEventFiltersLayoutProps>(
   ({ policyItem }) => {
     const { getAppUrl } = useAppUrl();
+    const navigateCallback = usePolicyDetailsEventFiltersNavigateCallback();
     const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
 
-    const {
-      data: allAssigned,
-      isLoading: isLoadingAllAssigned,
-      isRefetching: isRefetchingAllAssigned,
-    } = useGetAllAssignedEventFilters(policyItem?.id || '', !!policyItem?.id);
+    const { data: allAssigned, isLoading: isLoadingAllAssigned } = useGetAllAssignedEventFilters(
+      policyItem?.id || '',
+      !!policyItem?.id
+    );
 
-    const {
-      data: allEventFilters,
-      isLoading: isLoadingAllEventFilters,
-      isRefetching: isRefetchingAllEventFilters,
-    } = useGetAllEventFilters();
+    const { data: allEventFilters, isLoading: isLoadingAllEventFilters } = useGetAllEventFilters();
 
-    const handleOnClickAssignButton = useCallback(() => {}, []);
-    const handleOnCloseFlyout = useCallback(() => {}, []);
+    const handleOnClickAssignButton = useCallback(() => {
+      navigateCallback({ show: 'list' });
+    }, [navigateCallback]);
+    const handleOnCloseFlyout = useCallback(() => {
+      navigateCallback({ show: undefined });
+    }, [navigateCallback]);
 
     const aboutInfo = useMemo(() => {
       const link = (
@@ -79,17 +82,8 @@ export const PolicyEventFiltersLayout = React.memo<PolicyEventFiltersLayoutProps
     }, [getAppUrl, allAssigned]);
 
     const isGlobalLoading = useMemo(
-      () =>
-        isLoadingAllAssigned ||
-        isRefetchingAllAssigned ||
-        isLoadingAllEventFilters ||
-        isRefetchingAllEventFilters,
-      [
-        isLoadingAllAssigned,
-        isLoadingAllEventFilters,
-        isRefetchingAllAssigned,
-        isRefetchingAllEventFilters,
-      ]
+      () => isLoadingAllAssigned || isLoadingAllEventFilters,
+      [isLoadingAllAssigned, isLoadingAllEventFilters]
     );
 
     const isEmptyState = useMemo(() => allAssigned && allAssigned.total === 0, [allAssigned]);

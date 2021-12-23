@@ -26,13 +26,8 @@ import {
 } from '@elastic/eui';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
 import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
-import { EventFiltersHttpService } from '../../../../event_filters/service';
-import { useHttp, useToasts } from '../../../../../../common/lib/kibana';
-import {
-  useSearchNotAssignedEventFilters,
-  useGetAllAssignedEventFilters,
-  useBulkUpdateEventFilters,
-} from '../hooks';
+import { useToasts } from '../../../../../../common/lib/kibana';
+import { useSearchNotAssignedEventFilters, useBulkUpdateEventFilters } from '../hooks';
 import { PolicyArtifactsAssignableList } from '../../artifacts/assignable';
 
 interface PolicyEventFiltersFlyoutProps {
@@ -47,8 +42,6 @@ export const PolicyEventFiltersFlyout = React.memo<PolicyEventFiltersFlyoutProps
     const toasts = useToasts();
     const [selectedArtifactIds, setSelectedArtifactIds] = useState<string[]>([]);
     const [currentFilter, setCurrentFilter] = useState<string>('');
-    const http = useHttp();
-    const eventFiltersService = useMemo(() => new EventFiltersHttpService(http), [http]);
 
     const bulkUpdateMutation = useBulkUpdateEventFilters({
       onUpdateSuccess: (updatedExceptions: ExceptionListItemSchema[]) => {
@@ -77,20 +70,32 @@ export const PolicyEventFiltersFlyout = React.memo<PolicyEventFiltersFlyoutProps
                 ),
         });
       },
-      onUpdateError: () => {},
-      onSettledCallback: () => {},
+      onUpdateError: () => {
+        toasts.addDanger(
+          i18n.translate(
+            'xpack.securitySolution.endpoint.policy.eventFilters.layout.flyout.toastError.text',
+            {
+              defaultMessage: `An error occurred updating artifacts`,
+            }
+          )
+        );
+      },
+      onSettledCallback: onClose,
     });
 
-    const { data: eventFilters, isLoading: isLoadingEventFilters } =
-      useSearchNotAssignedEventFilters(eventFiltersService, policyItem.id, {
-        filter: currentFilter,
-      });
+    const {
+      data: eventFilters,
+      isLoading: isLoadingEventFilters,
+      isRefetching: isRefetchingEventFilters,
+    } = useSearchNotAssignedEventFilters(policyItem.id, {
+      perPage: MAX_ALLOWED_RESULTS,
+      filter: currentFilter,
+    });
 
-    const { data: allAssigned, isLoading: isLoadingAllAssigned } = useGetAllAssignedEventFilters(
-      policyItem.id,
-      currentFilter !== '' && eventFilters?.total === 0,
-      'assignmentFlyout'
-    );
+    const { data: allNotAssigned, isLoading: isLoadingAllNotAssigned } =
+      useSearchNotAssignedEventFilters(policyItem.id, {
+        enabled: currentFilter !== '' && eventFilters?.total === 0,
+      });
 
     const handleOnSearch = useCallback((query) => {
       setSelectedArtifactIds([]);
@@ -150,12 +155,12 @@ export const PolicyEventFiltersFlyout = React.memo<PolicyEventFiltersFlyoutProps
     );
 
     const noItemsMessage = useMemo(() => {
-      if (isLoadingEventFilters || isLoadingAllAssigned) {
+      if (isLoadingEventFilters || isRefetchingEventFilters || isLoadingAllNotAssigned) {
         return null;
       }
 
       // there are no event filters assignable to this policy
-      if (allAssigned?.total === 0 || (eventFilters?.total === 0 && currentFilter === '')) {
+      if (allNotAssigned?.total === 0 || (eventFilters?.total === 0 && currentFilter === '')) {
         return (
           <EuiEmptyPrompt
             data-test-subj="eventFilters-no-assignable-items"
@@ -184,11 +189,12 @@ export const PolicyEventFiltersFlyout = React.memo<PolicyEventFiltersFlyoutProps
         );
       }
     }, [
-      allAssigned?.total,
+      allNotAssigned?.total,
       currentFilter,
       eventFilters?.total,
-      isLoadingAllAssigned,
+      isLoadingAllNotAssigned,
       isLoadingEventFilters,
+      isRefetchingEventFilters,
     ]);
 
     return (
@@ -227,7 +233,7 @@ export const PolicyEventFiltersFlyout = React.memo<PolicyEventFiltersFlyoutProps
             data-test-subj="eventFilters-assignable-list"
             artifacts={eventFilters}
             selectedArtifactIds={selectedArtifactIds}
-            isListLoading={isLoadingEventFilters}
+            isListLoading={isLoadingEventFilters || isRefetchingEventFilters}
             selectedArtifactsUpdated={handleSelectArtifacts}
           />
 
@@ -250,7 +256,9 @@ export const PolicyEventFiltersFlyout = React.memo<PolicyEventFiltersFlyoutProps
                 data-test-subj="eventFilters-assign-confirm-button"
                 fill
                 onClick={handleOnConfirmAction}
-                isLoading={bulkUpdateMutation.isLoading || isLoadingEventFilters}
+                isLoading={
+                  bulkUpdateMutation.isLoading || isLoadingEventFilters || isRefetchingEventFilters
+                }
                 disabled={isEmpty(selectedArtifactIds)}
                 title={policyItem.name}
               >
