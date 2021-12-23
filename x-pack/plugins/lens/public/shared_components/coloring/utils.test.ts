@@ -17,7 +17,6 @@ import {
   mergePaletteParams,
   remapStopsByNewInterval,
   reversePalette,
-  roundStopValues,
 } from './utils';
 
 describe('applyPaletteParams', () => {
@@ -408,14 +407,6 @@ describe('isValidColor', () => {
     expect(isValidColor('#fff00')).toBe(false);
     // this version of chroma does not support hex4 format
     expect(isValidColor('#fffa')).toBe(false);
-  });
-});
-
-describe('roundStopValues', () => {
-  it('should round very long values', () => {
-    expect(roundStopValues([{ color: 'red', stop: 0.1515 }])).toEqual([
-      { color: 'red', stop: 0.15 },
-    ]);
   });
 });
 

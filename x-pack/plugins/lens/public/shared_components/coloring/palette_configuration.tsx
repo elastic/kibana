@@ -22,52 +22,11 @@ import {
   getDataMinMax,
   getStopsFromColorRangesByNewInterval,
   getSwitchToCustomParams,
-  roundStopValues,
-  roundValue,
+  toColorRanges,
 } from './utils';
 
 import { ColorRanges } from './color_ranges';
 const idPrefix = htmlIdGenerator()();
-
-/**
- * Some name conventions here:
- * * `stops` => final steps used to table coloring. It is a rightShift of the colorStops
- * * `colorStops` => used for correct work other part of application based on `stops`.  Used to compute range min.
- * * `colorRanges` => user's color ranges inputs.  Used to compute colorStops. The main diff here we have completely range for each color.
- *
- * Both table coloring logic and EuiPaletteDisplay format implementation works differently than our current `colorStops`,
- * by having the stop values at the end of each color segment rather than at the beginning: `stops` values are computed by a rightShift of `colorStops`.
- * EuiPaletteDisplay has an additional requirement as it is always mapped against a domain [0, N]: from `stops` the `displayStops` are computed with
- * some continuity enrichment and a remap against a [0, 100] domain to make the palette component work ok.
- *
- * These naming conventions would be useful to track the code flow in this feature as multiple transformations are happening
- * for a single change.
- */
-
-function getColorRanges(
-  palettes: PaletteRegistry,
-  colorStops: CustomPaletteParams['colorStops'],
-  activePalette: PaletteOutput<CustomPaletteParams>,
-  dataBounds: { min: number; max: number }
-) {
-  const colorStopsToShow = roundStopValues(
-    getColorStops(palettes, colorStops || [], activePalette, dataBounds)
-  );
-  const continuity = activePalette.params?.continuity;
-  const max = activePalette.params?.rangeMax ?? dataBounds.max;
-  const min = activePalette.params?.rangeMin ?? dataBounds.min;
-
-  return colorStopsToShow.map((colorStop, index) => {
-    return {
-      color: colorStop.color,
-      start:
-        index === 0 && continuity && ['below', 'all'].includes(continuity)
-          ? roundValue(min)
-          : colorStop.stop ?? activePalette.params?.rangeMin,
-      end: index < colorStopsToShow.length - 1 ? colorStopsToShow[index + 1].stop : roundValue(max),
-    };
-  });
-}
 
 export function CustomizablePalette({
   palettes,
@@ -107,7 +66,7 @@ export function CustomizablePalette({
   }
   const isCurrentPaletteCustom = activePalette.params?.name === CUSTOM_PALETTE;
 
-  const colorRangesToShow = getColorRanges(
+  const colorRangesToShow = toColorRanges(
     palettes,
     activePalette?.params?.colorStops || [],
     activePalette,

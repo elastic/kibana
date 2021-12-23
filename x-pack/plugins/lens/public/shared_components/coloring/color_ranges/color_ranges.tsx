@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-import { last } from 'lodash';
 import React, { useState, useEffect, useReducer } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
@@ -15,10 +13,16 @@ import { EuiFlexGroup, EuiTextColor, EuiFlexItem } from '@elastic/eui';
 import { ColorRangesFooter } from './color_ranges_footer';
 import { ColorRangeItem } from './color_ranges_item';
 import { colorRangesReducer } from './color_ranges_reducer';
-import { validateColorRanges } from './utils';
+import {
+  validateColorRanges,
+  getErrorMessages,
+  ColorRangeValidation,
+} from './color_ranges_validation';
+import { toColorStops } from './utils';
 
 import type { CustomPaletteParamsConfig, ColorStop } from '../../../../common';
-import type { ColorRange, DataBounds, ColorRangeValidation, ColorRangesState } from './types';
+import type { ColorRange, DataBounds, ColorRangesState } from './types';
+import { defaultPaletteParams } from '../constants';
 
 export interface ColorRangesProps {
   colorRanges: ColorRange[];
@@ -36,34 +40,9 @@ const toLocalState = (
   paletteConfiguration: ColorRangesProps['paletteConfiguration']
 ): ColorRangesState => ({
   colorRanges,
-  rangeType: paletteConfiguration?.rangeType ?? 'percent',
-  continuity: paletteConfiguration?.continuity ?? 'none',
+  rangeType: paletteConfiguration?.rangeType ?? defaultPaletteParams.rangeType,
+  continuity: paletteConfiguration?.continuity ?? defaultPaletteParams.continuity,
 });
-
-const getErrorMessages = (colorRangesValidity: Record<string, ColorRangeValidation>) => {
-  return [
-    ...new Set(
-      Object.values(colorRangesValidity).reduce<ColorRangeValidation['errors']>(
-        (acc, item) => [...acc, ...item.errors],
-        []
-      )
-    ),
-  ].map((item) => {
-    switch (item) {
-      case 'invalidColor':
-      case 'invalidValue':
-        return i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidValueOrColor', {
-          defaultMessage: 'At least one color range contains the wrong value or color',
-        });
-      case 'greaterThanMaxValue':
-        return i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidMaxValue', {
-          defaultMessage: 'Maximum value should be greater than preceding values',
-        });
-      default:
-        return '';
-    }
-  });
-};
 
 export function ColorRanges({
   colorRanges,
@@ -101,31 +80,21 @@ export function ColorRanges({
   useDebounce(
     () => {
       const { continuity: localContinuity, colorRanges: localColorRanges } = localState;
-      const upperMin = ['below', 'all'].includes(localContinuity!)
-        ? localColorRanges[0].start
-        : -Infinity;
-
-      const upperMax = ['above', 'all'].includes(localContinuity!)
-        ? last(localColorRanges)!.end
-        : Infinity;
-
-      const colorStops = localColorRanges.map((colorRange, i) => ({
-        color: colorRange.color,
-        stop: i === 0 ? upperMin : colorRange.start,
-      }));
 
       if (
         Object.values(validateColorRanges(localColorRanges)).every(({ isValid }) => isValid) &&
         localColorRanges !== colorRanges
       ) {
-        onChange(colorStops, upperMax, localContinuity);
+        const { max, colorStops } = toColorStops(localColorRanges, localContinuity);
+
+        onChange(colorStops, max, localContinuity);
       }
     },
     250,
     [localState]
   );
 
-  const lastColorRange = last(localState.colorRanges);
+  const lastColorRange = localState.colorRanges[localState.colorRanges.length - 1];
 
   return (
     <EuiFlexGroup

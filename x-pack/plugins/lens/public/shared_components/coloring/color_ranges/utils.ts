@@ -4,40 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { getDataMinMax, isValidColor, roundValue } from '../utils';
+import { getDataMinMax, roundValue } from '../utils';
 
-import type { ColorRange, DataBounds, ColorRangeValidation, ColorRangeAccessor } from './types';
+import type { ColorRange, DataBounds, ColorRangeAccessor } from './types';
 import type { CustomPaletteParamsConfig } from '../../../../common';
 
+/**
+ * Check if item is last
+ * @internal
+ */
 export const isLastItem = (accessor: ColorRangeAccessor) => accessor === 'end';
 
-export const reversePalette = (colorRanges: ColorRange[]) => {
-  return colorRanges
-    .map(({ color }, i) => ({
-      color,
-      start: colorRanges[colorRanges.length - i - 1].start,
-      end: colorRanges[colorRanges.length - i - 1].end,
-    }))
-    .reverse();
-};
-
+/**
+ * Add new color range after the last item
+ * @internal
+ */
 export const addColorRange = (
   colorRanges: ColorRange[],
   rangeType: CustomPaletteParamsConfig['rangeType'],
   dataBounds: DataBounds
 ) => {
   const newColorRanges = [...colorRanges];
-  const { max } = getDataMinMax(rangeType, dataBounds);
   const lastIndex = newColorRanges.length - 1;
+  const lastStart = newColorRanges[lastIndex].start;
+  const lastEnd = newColorRanges[lastIndex].end;
+  const lastColor = newColorRanges[lastIndex].color;
+
+  const { max: dataMax } = getDataMinMax(rangeType, dataBounds);
+  const max = Math.max(dataMax, lastEnd);
 
   const step = calculateMaxStep(
     newColorRanges.map((item) => item.start),
     max
   );
-
-  const lastStart = newColorRanges[lastIndex].start;
-  const lastEnd = newColorRanges[lastIndex].end;
-  const lastColor = newColorRanges[lastIndex].color;
 
   let insertEnd = Math.min(lastStart + step, max);
 
@@ -50,33 +49,32 @@ export const addColorRange = (
   newColorRanges.push({
     color: lastColor,
     start: insertEnd,
-    end: lastEnd,
+    end: lastEnd === insertEnd ? lastEnd + 1 : lastEnd,
   });
+
   return newColorRanges;
 };
 
+/**
+ * Sort Color ranges array
+ * @internal
+ */
 export const sortColorRanges = (colorRanges: ColorRange[]) => {
   const maxValue = colorRanges[colorRanges.length - 1].end;
 
-  const newColorRanges = [...colorRanges]
+  return [...colorRanges]
     .sort(({ start: startA }, { start: startB }) => Number(startA) - Number(startB))
     .map((newColorRange, i, array) => ({
       color: newColorRange.color,
       start: newColorRange.start,
       end: i !== array.length - 1 ? array[i + 1].start : maxValue,
     }));
-
-  const lastRange = newColorRanges[newColorRanges.length - 1];
-
-  if (lastRange.start > lastRange.end) {
-    const oldEnd = lastRange.end;
-    lastRange.end = lastRange.start;
-    lastRange.start = oldEnd;
-  }
-
-  return newColorRanges;
 };
 
+/**
+ * Delete ColorRange
+ * @internal
+ */
 export const deleteColorRange = (index: number, colorRanges: ColorRange[]) => {
   const lastIndex = colorRanges.length - 1;
 
@@ -92,6 +90,10 @@ export const deleteColorRange = (index: number, colorRanges: ColorRange[]) => {
   return colorRanges.filter((item, i) => i !== index);
 };
 
+/**
+ * Update ColorRange value
+ * @internal
+ */
 export const updateColorRangeValue = (
   index: number,
   value: string,
@@ -112,76 +114,55 @@ export const updateColorRangeValue = (
   return [...colorRanges];
 };
 
+/**
+ * Reverse Palette
+ * @internal
+ */
+export const reversePalette = (colorRanges: ColorRange[]) => {
+  return colorRanges
+    .map(({ color }, i) => ({
+      color,
+      start: colorRanges[colorRanges.length - i - 1].start,
+      end: colorRanges[colorRanges.length - i - 1].end,
+    }))
+    .reverse();
+};
+
+/**
+ * Update ColorRange color
+ * @internal
+ */
 export const updateColorRangeColor = (index: number, color: string, colorRanges: ColorRange[]) => {
   colorRanges[index].color = color;
   return [...colorRanges];
 };
 
+/**
+ * Distribute equally
+ * @internal
+ */
 export const distributeEqually = (
   colorRanges: ColorRange[],
   rangeType: CustomPaletteParamsConfig['rangeType'],
   dataBounds: DataBounds
 ) => {
   const colorsCount = colorRanges.length;
+  const lastIndex = colorRanges.length - 1;
+
   const { min, max } = getDataMinMax(rangeType, dataBounds);
   const step = roundValue((max - min) / colorsCount);
 
   return colorRanges.map((colorRange, index) => ({
     color: colorRange.color,
     start: roundValue(min + (step * 100 * index) / 100),
-    end:
-      index === colorRanges.length - 1 ? max : roundValue(min + (step * 100 * (index + 1)) / 100),
+    end: index === lastIndex ? max : roundValue(min + (step * 100 * (index + 1)) / 100),
   }));
 };
 
-export const validateСolorRange = (
-  colorRange: ColorRange,
-  accessor: ColorRangeAccessor
-): ColorRangeValidation => {
-  const errors: ColorRangeValidation['errors'] = [];
-  const validateStartColorRange = ({ start, color }: ColorRange) => {
-    if (!isValidColor(color)) {
-      errors.push('invalidColor');
-    }
-
-    if (Number.isNaN(start)) {
-      errors.push('invalidValue');
-    }
-  };
-
-  const validateEndRange = ({ end, start }: ColorRange) => {
-    if (start > end) {
-      errors.push('greaterThanMaxValue');
-    }
-  };
-
-  if (accessor === 'end') {
-    validateEndRange(colorRange);
-  } else {
-    validateStartColorRange(colorRange);
-  }
-
-  return {
-    isValid: !errors.length,
-    errors,
-  };
-};
-
-export const validateColorRanges = (colorRanges: ColorRange[]) => {
-  const validations = colorRanges.reduce<Record<string, ColorRangeValidation>>(
-    (acc, item, index, array) => ({
-      ...acc,
-      [index]: validateСolorRange(item, 'start'),
-    }),
-    {}
-  );
-
-  return {
-    ...validations,
-    last: validateСolorRange(colorRanges[colorRanges.length - 1], 'end'),
-  };
-};
-
+/**
+ * Caclulate max step
+ * @internal
+ */
 export const calculateMaxStep = (stops: number[], max: number) => {
   let step = 1;
 
@@ -195,4 +176,27 @@ export const calculateMaxStep = (stops: number[], max: number) => {
   }
 
   return step;
+};
+
+/**
+ * Convert ColorRange to ColorStops
+ * @internal
+ */
+export const toColorStops = (
+  colorRanges: ColorRange[],
+  continuity: CustomPaletteParamsConfig['continuity']
+) => {
+  const min = ['below', 'all'].includes(continuity!) ? colorRanges[0].start : -Infinity;
+  const max = ['above', 'all'].includes(continuity!)
+    ? colorRanges[colorRanges.length - 1].end
+    : Infinity;
+
+  return {
+    min,
+    max,
+    colorStops: colorRanges.map((colorRange, i) => ({
+      color: colorRange.color,
+      stop: i === 0 ? min : colorRange.start,
+    })),
+  };
 };

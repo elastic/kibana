@@ -258,14 +258,6 @@ export function roundValue(value: number) {
   return Number((Math.floor(value * 100) / 100).toFixed(2));
 }
 
-export function roundStopValues(colorStops: ColorStop[]) {
-  return colorStops.map(({ color, stop }) => {
-    // when rounding mind to not go in excess, rather use the floor function
-    const roundedStop = roundValue(stop);
-    return { color, stop: roundedStop };
-  });
-}
-
 // very simple heuristic: pick last two stops and compute a new stop based on the same distance
 // if the new stop is above max, then reduce the step to reach max, or if zero then just 1.
 //
@@ -351,6 +343,52 @@ export function getColorStops(
     freshColorStops = reversePalette(freshColorStops);
   }
   return freshColorStops;
+}
+
+/**
+ * Some name conventions here:
+ * * `stops` => final steps used to table coloring. It is a rightShift of the colorStops
+ * * `colorStops` => used for correct work other part of application based on `stops`.  Used to compute range min.
+ * * `colorRanges` => user's color ranges inputs.  Used to compute colorStops. The main diff here we have completely range for each color.
+ *
+ * Both table coloring logic and EuiPaletteDisplay format implementation works differently than our current `colorStops`,
+ * by having the stop values at the end of each color segment rather than at the beginning: `stops` values are computed by a rightShift of `colorStops`.
+ * EuiPaletteDisplay has an additional requirement as it is always mapped against a domain [0, N]: from `stops` the `displayStops` are computed with
+ * some continuity enrichment and a remap against a [0, 100] domain to make the palette component work ok.
+ *
+ * These naming conventions would be useful to track the code flow in this feature as multiple transformations are happening
+ * for a single change.
+ */
+export function toColorRanges(
+  palettes: PaletteRegistry,
+  colorStops: CustomPaletteParams['colorStops'],
+  activePalette: PaletteOutput<CustomPaletteParams>,
+  dataBounds: { min: number; max: number }
+) {
+  const {
+    continuity = defaultPaletteParams.continuity,
+    rangeType = defaultPaletteParams.rangeType,
+  } = activePalette.params ?? {};
+  const { min: dataMin, max: dataMax } = getDataMinMax(rangeType, dataBounds);
+
+  return getColorStops(palettes, colorStops || [], activePalette, dataBounds).map(
+    (colorStop, index, array) => {
+      const isFirst = index === 0;
+      const isLast = index === array.length - 1;
+
+      return {
+        color: colorStop.color,
+        start:
+          isFirst && ['above', 'none'].includes(continuity)
+            ? -Infinity
+            : roundValue(colorStop.stop ?? activePalette.params?.rangeMin ?? dataMin),
+        end:
+          isLast && ['below', 'none'].includes(continuity)
+            ? +Infinity
+            : roundValue(array[index + 1]?.stop ?? activePalette.params?.rangeMax ?? dataMax),
+      };
+    }
+  );
 }
 
 export function getContrastColor(color: string, isDarkTheme: boolean) {

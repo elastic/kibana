@@ -13,12 +13,6 @@ export interface ColorRange {
 }
 
 /** @internal **/
-export interface ColorRangeValidation {
-  errors: Array<'invalidColor' | 'invalidValue' | 'greaterThanMaxValue'>;
-  isValid: boolean;
-}
-
-/** @internal **/
 export interface DataBounds {
   min: number;
   max: number;
