@@ -21,4 +21,5 @@ export type {
   ServerRouteRepository,
   ServerRoute,
   RouteParamsRT,
+  RouteState,
 } from './typings';
