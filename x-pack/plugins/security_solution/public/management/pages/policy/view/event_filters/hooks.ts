@@ -4,21 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useMemo } from 'react';
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { QueryObserverResult, useQuery } from 'react-query';
 import { ServerApiError } from '../../../../../common/types';
+import { useHttp } from '../../../../../common/lib/kibana';
 import { EventFiltersHttpService } from '../../../event_filters/service';
 import { parseQueryFilterToKQL, parsePoliciesAndFilterToKql } from '../../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../../../event_filters/constants';
 
+export function useGetEventFiltersService() {
+  const http = useHttp();
+  return useMemo(() => new EventFiltersHttpService(http), [http]);
+}
+
 export function useGetAllAssignedEventFilters(
-  eventFiltersService: EventFiltersHttpService,
   policyId?: string
 ): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
+  const service = useGetEventFiltersService();
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
     ['eventFilters', 'assigned', policyId],
     () => {
-      return eventFiltersService.getList({
+      return service.getList({
         filter: parsePoliciesAndFilterToKql({ policies: [...(policyId ? [policyId] : []), 'all'] }),
       });
     },
@@ -32,16 +39,16 @@ export function useGetAllAssignedEventFilters(
 }
 
 export function useSearchAssignedEventFilters(
-  eventFiltersService: EventFiltersHttpService,
   policyId: string,
   options: { filter?: string; page?: number; perPage?: number }
 ): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
+  const service = useGetEventFiltersService();
   const { filter, page, perPage } = options;
 
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
     ['eventFilters', 'assigned', 'search', policyId, options],
     () => {
-      return eventFiltersService.getList({
+      return service.getList({
         filter: parsePoliciesAndFilterToKql({
           policies: [policyId, 'all'],
           kuery: parseQueryFilterToKQL(filter || '', SEARCHABLE_FIELDS),
@@ -53,18 +60,21 @@ export function useSearchAssignedEventFilters(
     {
       refetchIntervalInBackground: false,
       refetchOnWindowFocus: false,
-      cacheTime: 0, // No cache this query as the search results need to be fresh
+      refetchOnMount: true,
+      keepPreviousData: true,
     }
   );
 }
 
-export function useGetAllEventFilters(
-  eventFiltersService: EventFiltersHttpService
-): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
+export function useGetAllEventFilters(): QueryObserverResult<
+  FoundExceptionListItemSchema,
+  ServerApiError
+> {
+  const service = useGetEventFiltersService();
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
     ['eventFilters', 'all'],
     () => {
-      return eventFiltersService.getList();
+      return service.getList();
     },
     {
       refetchIntervalInBackground: false,

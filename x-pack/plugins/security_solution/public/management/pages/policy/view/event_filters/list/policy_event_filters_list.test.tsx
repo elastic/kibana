@@ -8,49 +8,61 @@
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import uuid from 'uuid';
-import { getExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
+import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
+import { PolicyData } from '../../../../../../../common/endpoint/types';
 import { getPolicyEventFiltersPath } from '../../../../../common/routing';
 import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_utils';
 import { PolicyEventFiltersList } from './policy_event_filters_list';
+import { parseQueryFilterToKQL, parsePoliciesAndFilterToKql } from '../../../../../common/utils';
+import { SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
+
+const endpointGenerator = new EndpointDocGenerator('seed');
+const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
+  path: '/api/exception_lists/items/_find',
+  query: {
+    filter: customFilter,
+    list_id: ['endpoint_event_filters'],
+    namespace_type: ['agnostic'],
+    page: 1,
+    per_page: 10,
+    sort_field: undefined,
+    sort_order: undefined,
+  },
+});
 
 describe('Policy details event filters list', () => {
-  let policyId: string;
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
   let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
+  let policy: PolicyData;
 
   beforeEach(() => {
-    policyId = uuid.v4();
+    policy = endpointGenerator.generatePolicyPackagePolicy();
     mockedContext = createAppRootMockRenderer();
     mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
     ({ history } = mockedContext);
     render = async () => {
       await act(async () => {
-        renderResult = mockedContext.render(<PolicyEventFiltersList policyId={policyId} />);
+        renderResult = mockedContext.render(<PolicyEventFiltersList policy={policy} />);
         await waitFor(mockedApi.responseProvider.eventFiltersList);
       });
       return renderResult;
     };
 
-    act(() => {
-      history.push(getPolicyEventFiltersPath(policyId));
-    });
+    history.push(getPolicyEventFiltersPath(policy.id));
   });
 
   it('should display a searchbar and count even with no exceptions', async () => {
-    mockedApi.responseProvider.eventFiltersList.mockReturnValue({
-      total: 0,
-      page: 1,
-      per_page: 10,
-      data: [],
-    });
+    mockedApi.responseProvider.eventFiltersList.mockReturnValue(
+      getFoundExceptionListItemSchemaMock(0)
+    );
     await render();
     expect(renderResult.getByTestId('policyDetailsEventFiltersSearchCount')).toHaveTextContent(
       'Showing 0 exceptions'
@@ -58,13 +70,10 @@ describe('Policy details event filters list', () => {
     expect(renderResult.getByTestId('searchField')).toBeTruthy();
   });
 
-  it('should render the list of exceptions collapsed and expand it when clicked', async () => {
-    mockedApi.responseProvider.eventFiltersList.mockReturnValue({
-      total: 3,
-      page: 1,
-      per_page: 10,
-      data: Array.from({ length: 3 }, () => getExceptionListItemSchemaMock()),
-    });
+  it('should render the list of exceptions collapsed', async () => {
+    mockedApi.responseProvider.eventFiltersList.mockReturnValue(
+      getFoundExceptionListItemSchemaMock(3)
+    );
     await render();
     expect(renderResult.getAllByTestId('eventFilters-collapsed-list-card')).toHaveLength(3);
     expect(
@@ -89,5 +98,27 @@ describe('Policy details event filters list', () => {
     await render();
     userEvent.type(renderResult.getByTestId('searchField'), 'search me{enter}');
     expect(history.location.search).toBe('?filter=search%20me');
+  });
+
+  it('should call query with and without a filter', async () => {
+    await render();
+    expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenLastCalledWith(
+      getDefaultQueryParameters(
+        parsePoliciesAndFilterToKql({
+          policies: [policy.id, 'all'],
+          kuery: parseQueryFilterToKQL('', SEARCHABLE_FIELDS),
+        })
+      )
+    );
+    userEvent.type(renderResult.getByTestId('searchField'), 'search me{enter}');
+    await waitFor(mockedApi.responseProvider.eventFiltersList);
+    expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenLastCalledWith(
+      getDefaultQueryParameters(
+        parsePoliciesAndFilterToKql({
+          policies: [policy.id, 'all'],
+          kuery: parseQueryFilterToKQL('search me', SEARCHABLE_FIELDS),
+        })
+      )
+    );
   });
 });

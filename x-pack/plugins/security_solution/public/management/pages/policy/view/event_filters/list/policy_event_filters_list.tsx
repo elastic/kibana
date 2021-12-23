@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, Pagination } from '@elastic/eui';
-import {
-  ExceptionListItemSchema,
-  FoundExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useSearchAssignedEventFilters } from '../hooks';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
@@ -29,37 +26,33 @@ import {
   usePolicyDetailsSelector,
 } from '../../policy_hooks';
 import { getCurrentArtifactsLocation } from '../../../store/policy_details/selectors';
-import { EventFiltersHttpService } from '../../../../event_filters/service';
-import { useHttp } from '../../../../../../common/lib/kibana';
+import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
 
 interface PolicyEventFiltersListProps {
-  policyId: string;
+  policy: ImmutableObject<PolicyData>;
 }
-export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({ policyId }) => {
-  const http = useHttp();
-  const eventFiltersService = useMemo(() => new EventFiltersHttpService(http), [http]);
+export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({ policy }) => {
   const policiesRequest = useGetEndpointSpecificPolicies();
   const navigateCallback = usePolicyDetailsEventFiltersNavigateCallback();
   const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const [expandedItemsMap, setExpandedItemsMap] = useState<Map<string, boolean>>(new Map());
-  const [eventFiltersResults, setEventFiltersResults] = useState<FoundExceptionListItemSchema>();
+
+  const {
+    data: eventFilters,
+    isLoading: isLoadingEventFilters,
+    isRefetching: isRefetchingEventFilters,
+  } = useSearchAssignedEventFilters(policy.id, {
+    page: urlParams.page_index || 0,
+    perPage: urlParams.page_size || MANAGEMENT_DEFAULT_PAGE_SIZE,
+    filter: urlParams.filter,
+  });
 
   const pagination: Pagination = {
     pageSize: urlParams.page_size || MANAGEMENT_DEFAULT_PAGE_SIZE,
     pageIndex: urlParams.page_index || 0,
     pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
-    totalItemCount: eventFiltersResults?.total || 0,
+    totalItemCount: eventFilters?.total || 0,
   };
-
-  const { data: eventFilters, isLoading: isLoadingEventFilters } = useSearchAssignedEventFilters(
-    eventFiltersService,
-    policyId,
-    { page: pagination.pageIndex, perPage: pagination.pageSize, filter: urlParams.filter }
-  );
-
-  useEffect(() => {
-    if (eventFilters) setEventFiltersResults(eventFilters);
-  }, [eventFilters]);
 
   const handleOnSearch = useCallback(
     (filter) => {
@@ -67,6 +60,7 @@ export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({
     },
     [navigateCallback]
   );
+
   const handleOnExpandCollapse: ArtifactCardGridProps['onExpandCollapse'] = ({
     expanded,
     collapsed,
@@ -92,10 +86,10 @@ export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({
       'xpack.securitySolution.endpoint.policy.eventFilters.list.totalItemCount',
       {
         defaultMessage: 'Showing {totalItemsCount, plural, one {# exception} other {# exceptions}}',
-        values: { totalItemsCount: eventFiltersResults?.data.length || 0 },
+        values: { totalItemsCount: eventFilters?.data.length || 0 },
       }
     );
-  }, [eventFiltersResults?.data.length]);
+  }, [eventFilters?.data.length]);
 
   const artifactCardPolicies = useEndpointPoliciesToArtifactPolicies(policiesRequest.data?.items);
   const provideCardProps: ArtifactCardGridProps['cardComponentProps'] = (artifact) => {
@@ -126,12 +120,12 @@ export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({
       </EuiText>
       <EuiSpacer size="m" />
       <ArtifactCardGrid
-        items={eventFiltersResults?.data || []}
+        items={eventFilters?.data || []}
         onPageChange={handleOnPageChange}
         onExpandCollapse={handleOnExpandCollapse}
         cardComponentProps={provideCardProps}
-        pagination={eventFiltersResults ? pagination : undefined}
-        loading={isLoadingEventFilters}
+        pagination={eventFilters ? pagination : undefined}
+        loading={isLoadingEventFilters || isRefetchingEventFilters}
         data-test-subj={'eventFilters-collapsed-list'}
       />
     </>
