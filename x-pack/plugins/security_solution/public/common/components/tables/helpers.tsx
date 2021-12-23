@@ -252,7 +252,12 @@ export const RowItemOverflowComponent: React.FC<RowItemOverflowProps> = ({
 
           return (
             <EuiFlexItem key={`${idPrefix}-${id}`}>
-              <OverflowItem dataProvider={dataProvider} rowItem={rowItem} field={attrName} />
+              <OverflowItem
+                dataProvider={dataProvider}
+                dragDisplayValue={dragDisplayValue}
+                rowItem={rowItem}
+                field={attrName}
+              />
             </EuiFlexItem>
           );
         }),
