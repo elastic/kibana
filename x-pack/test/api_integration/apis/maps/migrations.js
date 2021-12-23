@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const kibanaServer = getService('kibanaServer');
 
   describe('map migrations', () => {
     describe('saved object migrations', () => {
