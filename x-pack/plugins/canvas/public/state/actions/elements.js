@@ -344,11 +344,16 @@ export const setAstAtIndex = createThunk(
   }
 );
 
-// index here is the top-level argument in the expression. for example in the expression
-// demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
-// argIndex is the index in multi-value arguments, and is optional. excluding it will cause
-// the entire argument from be set to the passed value
-export const setArgumentAtIndex = createThunk('setArgumentAtIndex', ({ dispatch }, args) => {
+/**
+ * Updating the value of the given argument of the element's expression.
+ * @param {string} args.path - the path to the argument at the AST. Example: "ast.chain.0.arguments.some_arg.chain.1.arguments".
+ * @param {string} args.argName - the argument name at the AST.
+ * @param {number} args.valueIndex - the index of the value in the array of argument's values.
+ * @param {any} args.value - the value to be set to the AST.
+ * @param {any} args.element - the element, which contains the expression.
+ * @param {any} args.pageId - the workpad's page, where element is located.
+ */
+export const setArgument = createThunk('setArgument', ({ dispatch }, args) => {
   const { argName, value, valueIndex, element, pageId, path } = args;
   let selector = `${path}.${argName}`;
   if (valueIndex != null) {
@@ -363,22 +368,25 @@ export const setArgumentAtIndex = createThunk('setArgumentAtIndex', ({ dispatch 
   dispatch(setAstAtIndex(argumnentChainIndex, newAst, element, pageId));
 });
 
-// index here is the top-level argument in the expression. for example in the expression
-// demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2
-export const addArgumentValueAtIndex = createThunk(
-  'addArgumentValueAtIndex',
-  ({ dispatch }, args) => {
-    const { argName, value, element, path } = args;
-    const values = get(element, [...path.split('.'), argName], []);
-    const newValue = values.concat(value);
-    dispatch(
-      setArgumentAtIndex({
-        ...args,
-        value: newValue,
-      })
-    );
-  }
-);
+/**
+ * Adding the value to the given argument of the element's expression.
+ * @param {string} args.path - the path to the argument at the AST. Example: "ast.chain.0.arguments.some_arg.chain.1.arguments".
+ * @param {string} args.argName - the argument name at the given path of the AST.
+ * @param {any} args.value - the value to be added to the array of argument's values at the AST.
+ * @param {any} args.element - the element, which contains the expression.
+ * @param {any} args.pageId - the workpad's page, where element is located.
+ */
+export const addArgumentValue = createThunk('addArgumentValue', ({ dispatch }, args) => {
+  const { argName, value, element, path } = args;
+  const values = get(element, [...path.split('.'), argName], []);
+  const newValue = values.concat(value);
+  dispatch(
+    setArgument({
+      ...args,
+      value: newValue,
+    })
+  );
+});
 
 export const deleteArgumentAtIndex = createThunk('deleteArgumentAtIndex', ({ dispatch }, args) => {
   const { element, pageId, argName, argIndex, path } = args;

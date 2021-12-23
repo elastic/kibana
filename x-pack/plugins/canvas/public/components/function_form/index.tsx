@@ -19,8 +19,8 @@ import { getId } from '../../lib/get_id';
 import { createAsset } from '../../state/actions/assets';
 import {
   fetchContext,
-  setArgumentAtIndex,
-  addArgumentValueAtIndex,
+  setArgument as setArgumentValue,
+  addArgumentValue,
   deleteArgumentAtIndex,
   // @ts-expect-error untyped local
 } from '../../state/actions/elements';
@@ -72,7 +72,7 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
 
   const addArgument = useCallback(
     (argName: string, argValue: string | Ast | null) => () => {
-      dispatch(addArgumentValueAtIndex({ element, pageId, argName, value: argValue, path }));
+      dispatch(addArgumentValue({ element, pageId, argName, value: argValue, path }));
     },
     [dispatch, element, pageId, path]
   );
@@ -83,7 +83,7 @@ export const FunctionForm: React.FunctionComponent<FunctionFormProps> = (props) 
 
   const setArgument = useCallback(
     (argName: string, valueIndex: number) => (value: string | Ast | null) => {
-      dispatch(setArgumentAtIndex({ element, pageId, argName, value, valueIndex, path }));
+      dispatch(setArgumentValue({ element, pageId, argName, value, valueIndex, path }));
     },
     [dispatch, element, pageId, path]
   );
