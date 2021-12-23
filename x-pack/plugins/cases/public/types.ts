@@ -8,8 +8,8 @@
 import { CoreStart } from 'kibana/public';
 import { ReactElement } from 'react';
 
-import { LensPublicStart } from '../../lens/public';
-import { SecurityPluginSetup } from '../../security/public';
+import type { LensPublicStart } from '../../lens/public';
+import type { SecurityPluginSetup } from '../../security/public';
 import type {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
@@ -19,11 +19,12 @@ import type { EmbeddableStart } from '../../../../src/plugins/embeddable/public'
 import type { SpacesPluginStart } from '../../spaces/public';
 import type { Storage } from '../../../../src/plugins/kibana_utils/public';
 
-import {
+import type {
   GetCasesProps,
   GetAllCasesSelectorModalProps,
   GetCreateCaseFlyoutProps,
   GetRecentCasesProps,
+  CasesOwners,
 } from './methods';
 
 export interface SetupPlugins {
@@ -52,6 +53,15 @@ export type StartServices = CoreStart &
   };
 
 export interface CasesUiStart {
+  /**
+   * Returns an object denoting the current user's ability to read and crud cases.
+   * If any owner(securitySolution, Observability) is found with crud or read capability respectively,
+   * then crud or read is set to true.
+   * Permissions for specific owners can be found by passing an owner array
+   * @param owners an array of CaseOwners that should be queried for permission
+   * @returns An object denoting the case permissions of the current user
+   */
+  canUseCases: (owners?: CasesOwners[]) => { crud: boolean; read: boolean };
   /**
    * Get cases
    * @param props GetCasesProps

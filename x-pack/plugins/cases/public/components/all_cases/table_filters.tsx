@@ -27,6 +27,7 @@ interface CasesTableFiltersProps {
   initial: FilterOptions;
   setFilterRefetch: (val: () => void) => void;
   hiddenStatuses?: CaseStatusWithAllStatus[];
+  availableSolutions: string[];
 }
 
 // Fix the width of the status dropdown to prevent hiding long text items
@@ -48,6 +49,7 @@ const defaultInitial = {
   reporters: [],
   status: StatusAll,
   tags: [],
+  owner: [],
 };
 
 const CasesTableFiltersComponent = ({
@@ -58,12 +60,14 @@ const CasesTableFiltersComponent = ({
   initial = defaultInitial,
   setFilterRefetch,
   hiddenStatuses,
+  availableSolutions,
 }: CasesTableFiltersProps) => {
   const [selectedReporters, setSelectedReporters] = useState(
     initial.reporters.map((r) => r.full_name ?? r.username ?? '')
   );
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
+  const [selectedOwner, setSelectedOwner] = useState(initial.owner);
   const { tags, fetchTags } = useGetTags();
   const { reporters, respReporters, fetchReporters } = useGetReporters();
 
@@ -106,6 +110,16 @@ const CasesTableFiltersComponent = ({
       }
     },
     [onFilterChanged, selectedTags]
+  );
+
+  const handleSelectedSolution = useCallback(
+    (newOwner) => {
+      if (!isEqual(newOwner, selectedOwner) && newOwner.length) {
+        setSelectedOwner(newOwner);
+        onFilterChanged({ owner: newOwner });
+      }
+    },
+    [onFilterChanged, selectedOwner]
   );
 
   useEffect(() => {
@@ -183,6 +197,14 @@ const CasesTableFiltersComponent = ({
             options={tags}
             optionsEmptyLabel={i18n.NO_TAGS_AVAILABLE}
           />
+          {availableSolutions.length > 1 && (
+            <FilterPopover
+              buttonLabel={i18n.SOLUTION}
+              onSelectedOptionsChanged={handleSelectedSolution}
+              selectedOptions={selectedOwner}
+              options={availableSolutions}
+            />
+          )}
         </EuiFilterGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

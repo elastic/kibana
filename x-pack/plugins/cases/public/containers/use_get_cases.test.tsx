@@ -61,7 +61,7 @@ describe('useGetCases', () => {
       });
       await waitForNextUpdate();
       expect(spyOnGetCases).toBeCalledWith({
-        filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
+        filterOptions: { ...DEFAULT_FILTER_OPTIONS },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,
       });
@@ -174,6 +174,7 @@ describe('useGetCases', () => {
         search: 'new',
         tags: ['new'],
         status: CaseStatuses.closed,
+        owner: [SECURITY_SOLUTION_OWNER],
       };
 
       const { result, waitForNextUpdate } = renderHook<string, UseGetCases>(() => useGetCases(), {
@@ -212,7 +213,7 @@ describe('useGetCases', () => {
       await waitForNextUpdate();
 
       expect(spyOnGetCases.mock.calls[1][0]).toEqual({
-        filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [SECURITY_SOLUTION_OWNER] },
+        filterOptions: { ...DEFAULT_FILTER_OPTIONS },
         queryParams: {
           ...DEFAULT_QUERY_PARAMS,
           ...newQueryParams,
