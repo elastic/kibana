@@ -81,7 +81,7 @@ export const ArgForm = (props) => {
           argId,
           assets,
         };
-        // console.log(argumentProps);
+
         const expandableLabel = Boolean(hasError || template);
 
         const simpleArg = (
