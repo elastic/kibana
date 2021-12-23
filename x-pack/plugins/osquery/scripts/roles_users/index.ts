@@ -6,8 +6,3 @@
  */
 
 export * from './t1_analyst';
-
-// TODO: Steph/sourcerer remove from detections_role.json once we have our internal saved object client
-// https://github.com/elastic/security-team/issues/1978
-// "indexPatterns": ["read"],
-// "savedObjectsManagement": ["read"],

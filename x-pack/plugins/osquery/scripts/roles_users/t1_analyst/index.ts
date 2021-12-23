@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as t1AnalystUser from './detections_user.json';
-import * as t1AnalystRole from './detections_role.json';
+import * as t1AnalystUser from './user.json';
+import * as t1AnalystRole from './role.json';
 
 export { t1AnalystUser, t1AnalystRole };
