@@ -2374,4 +2374,62 @@ describe('migration visualization', () => {
       expect(params.markdown_css).toEqual('test { color: red }');
     });
   });
+
+  describe('7.17.0 tsvb - add drop last bucket into TSVB model', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.14.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const migrateAgain = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.17.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const createTestDocWithType = (params: any) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: `{
+          "type":"metrics",
+          "params": ${JSON.stringify(params)}
+        }`,
+      },
+    });
+
+    it('should add "drop_last_bucket" into model if it not exist and run twice', () => {
+      const params = {};
+      const migratedTestDoc = migrate(createTestDocWithType(params));
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      expect(migratedParams).toMatchInlineSnapshot(`
+        Object {
+          "drop_last_bucket": 1,
+        }
+      `);
+
+      const migratedTestDocNew = migrateAgain(migratedTestDoc);
+      const { params: migratedNewParams } = JSON.parse(migratedTestDocNew.attributes.visState);
+
+      expect(migratedNewParams).toMatchInlineSnapshot(`
+        Object {
+          "drop_last_bucket": 1,
+        }
+      `);
+    });
+
+    it('should not set "drop_last_bucket" to 1 into model if it exists', () => {
+      const params = { drop_last_bucket: 0 };
+      const migratedTestDoc = migrate(createTestDocWithType(params));
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      expect(migratedParams).toMatchInlineSnapshot(`
+        Object {
+          "drop_last_bucket": 0,
+        }
+      `);
+    });
+  });
 });
