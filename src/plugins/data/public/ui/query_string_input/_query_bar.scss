@@ -31,10 +31,25 @@
 .kbnQueryBar__filterModalWrapper {
   width: 700px;
 
+  .kbnQueryBar__filterModalForm {
+    border-radius: 8px;
+    background-color: #F8FAFD;
+    padding: 12px;
+  }
+
   .kbnQueryBar__filterModalORText {
     color: $euiColorLightShade;
     font-size: 12px;
     padding: 6px;
+  }
+
+  .kbnQueryBar__filterModalGroups {
+    background-color: $euiColorEmptyShade;
+    border-radius: $euiBorderRadius;
+    box-shadow: inset 0 0 0 1px rgba(17, 43, 134, .1);
+    padding: 12px;
+    margin-top: 12px;
+    margin-bottom: 12px;
   }
 }
 
