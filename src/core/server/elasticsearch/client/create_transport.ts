@@ -40,7 +40,8 @@ export const createTransport = ({
     }
 
     async request(params: TransportRequestParams, options?: TransportRequestOptions) {
-      const opts: TransportRequestOptions = options || {};
+      const opts: TransportRequestOptions = { ...options } || {};
+      const optionHeaders = { ...opts.headers };
       const opaqueId = getExecutionContext();
       if (opaqueId && !opts.opaqueId) {
         // rewrites headers['x-opaque-id'] if it presents
@@ -55,7 +56,7 @@ export const createTransport = ({
       // add stored headers to the options
       opts.headers = {
         ...this.headers,
-        ...(options?.headers ?? {}),
+        ...optionHeaders,
       };
 
       try {
@@ -72,11 +73,12 @@ export const createTransport = ({
                 ...this.headers,
                 ...result.authHeaders,
               };
-              opts.headers = {
+              const retryOpts = { ...opts };
+              retryOpts.headers = {
                 ...this.headers,
-                ...(options?.headers ?? {}),
+                ...optionHeaders,
               };
-              return (await super.request(params, opts)) as TransportResult<any, any>;
+              return (await super.request(params, retryOpts)) as TransportResult<any, any>;
             }
           }
         }
