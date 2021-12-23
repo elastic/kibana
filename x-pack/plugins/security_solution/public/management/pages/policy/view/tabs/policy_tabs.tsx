@@ -17,6 +17,7 @@ import {
   getPolicyHostIsolationExceptionsPath,
   getPolicyTrustedAppsPath,
 } from '../../../../common/routing';
+import { ManagementPageLoader } from '../../../../components/management_page_loader';
 import { useFetchHostIsolationExceptionsList } from '../../../host_isolation_exceptions/view/hooks';
 import {
   isOnHostIsolationExceptionsView,
@@ -175,6 +176,14 @@ export const PolicyTabs = React.memo(() => {
     },
     [history, policyId]
   );
+
+  // show loader for privileges validation
+  if (
+    isInHostIsolationExceptionsTab &&
+    (privileges.loading || allPolicyHostIsolationExceptionsListRequest.isLoading)
+  ) {
+    return <ManagementPageLoader data-test-subj="policyHostIsolationExceptionsTabLoading" />;
+  }
 
   return (
     <EuiTabbedContent
