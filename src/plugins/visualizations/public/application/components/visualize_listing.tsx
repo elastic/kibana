@@ -17,6 +17,9 @@ import useMount from 'react-use/lib/useMount';
 
 import { useLocation } from 'react-router-dom';
 
+import { findListItems } from '../../utils/saved_visualize_utils';
+import { showNewVisModal } from '../../wizard';
+import { getTypes } from '../../services';
 import { SavedObjectsFindOptionsReference } from '../../../../../core/public';
 import { useKibana, TableListView } from '../../../../kibana_react/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../visualizations/public';
@@ -29,10 +32,8 @@ export const VisualizeListing = () => {
     services: {
       application,
       chrome,
-      dashboard,
       history,
       toastNotifications,
-      visualizations,
       stateTransferService,
       savedObjects,
       savedObjectsPublic,
@@ -50,7 +51,7 @@ export const VisualizeListing = () => {
   useEffect(() => {
     if (pathname === '/new') {
       // In case the user navigated to the page via the /visualize/new URL we start the dialog immediately
-      closeNewVisModal.current = visualizations.showNewVisModal({
+      closeNewVisModal.current = showNewVisModal({
         onClose: () => {
           // In case the user came via a URL to this page, change the URL to the regular landing page URL after closing the modal
           history.push(VisualizeConstants.LANDING_PAGE_PATH);
@@ -60,7 +61,7 @@ export const VisualizeListing = () => {
       // close modal window if exists
       closeNewVisModal.current();
     }
-  }, [history, pathname, visualizations]);
+  }, [history, pathname]);
 
   useMount(() => {
     // Reset editor state for all apps if the visualize listing page is loaded.
@@ -79,8 +80,8 @@ export const VisualizeListing = () => {
   useUnmount(() => closeNewVisModal.current());
 
   const createNewVis = useCallback(() => {
-    closeNewVisModal.current = visualizations.showNewVisModal();
-  }, [visualizations]);
+    closeNewVisModal.current = showNewVisModal();
+  }, []);
 
   const editItem = useCallback(
     ({ editUrl, editApp }) => {
@@ -112,16 +113,18 @@ export const VisualizeListing = () => {
       }
 
       const isLabsEnabled = uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
-      return visualizations
-        .findListItems(searchTerm, listingLimit, references)
-        .then(({ total, hits }: { total: number; hits: Array<Record<string, unknown>> }) => ({
-          total,
-          hits: hits.filter(
-            (result: any) => isLabsEnabled || result.type?.stage !== 'experimental'
-          ),
-        }));
+      return findListItems(
+        savedObjects.client,
+        getTypes(),
+        searchTerm,
+        listingLimit,
+        references
+      ).then(({ total, hits }: { total: number; hits: Array<Record<string, unknown>> }) => ({
+        total,
+        hits: hits.filter((result: any) => isLabsEnabled || result.type?.stage !== 'experimental'),
+      }));
     },
-    [listingLimit, uiSettings, savedObjectsTagging, visualizations]
+    [listingLimit, uiSettings, savedObjectsTagging, savedObjects.client]
   );
 
   const deleteItems = useCallback(
@@ -199,13 +202,12 @@ export const VisualizeListing = () => {
       toastNotifications={toastNotifications}
       searchFilters={searchFilters}
     >
-      {dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&
-        dashboardCapabilities.createNew && (
-          <>
-            <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
-            <EuiSpacer size="m" />
-          </>
-        )}
+      {dashboardCapabilities.createNew && (
+        <>
+          <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
+          <EuiSpacer size="m" />
+        </>
+      )}
     </TableListView>
   );
 };

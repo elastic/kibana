@@ -130,7 +130,7 @@ export function makeDefaultServices(
       ...core.application,
       capabilities: {
         ...core.application.capabilities,
-        visualizations: { save: true, saveQuery: true, show: true },
+        visualize: { save: true, saveQuery: true, show: true },
       },
       getUrlForApp: jest.fn((appId: string) => `/testbasepath/app/${appId}#/`),
     },

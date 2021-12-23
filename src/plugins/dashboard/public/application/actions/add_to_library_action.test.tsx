@@ -49,7 +49,7 @@ beforeEach(async () => {
   coreStart = coreMock.createStart();
   capabilities = {
     ...coreStart.application.capabilities,
-    visualizations: { save: true },
+    visualize: { save: true },
     maps: { save: true },
   };
 
@@ -110,7 +110,7 @@ test('Add to library is incompatible with Error Embeddables', async () => {
 test('Add to library is incompatible on visualize embeddable without visualize save permissions', async () => {
   const action = new AddToLibraryAction({
     toasts: coreStart.notifications.toasts,
-    capabilities: { ...capabilities, visualizations: { save: false } },
+    capabilities: { ...capabilities, visualize: { save: false } },
   });
   expect(await action.isCompatible({ embeddable })).toBe(false);
 });

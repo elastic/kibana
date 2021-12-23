@@ -83,7 +83,6 @@ describe('useSavedVisInstance', () => {
         },
         replace: () => {},
       },
-      dashboard: { dashboardFeatureFlagConfig: { allowByValueEmbeddables: false } },
       visualizations: {
         all: jest.fn(() => [
           {

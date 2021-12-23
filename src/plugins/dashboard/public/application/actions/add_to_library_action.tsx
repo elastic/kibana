@@ -59,7 +59,7 @@ export class AddToLibraryAction implements Action<AddToLibraryActionContext> {
     const canSave =
       embeddable.type === 'map'
         ? this.deps.capabilities.maps?.save
-        : this.deps.capabilities.visualizations.save;
+        : this.deps.capabilities.visualize.save;
 
     return Boolean(
       canSave &&

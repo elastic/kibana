@@ -16,13 +16,15 @@ import {
 import { SerializedSearchSourceFields } from 'src/plugins/data/public';
 import { cloneDeep } from 'lodash';
 import { ExpressionValueError } from 'src/plugins/expressions/public';
+import { createVisAsync } from '../../vis_async';
+import { convertToSerializedVis, getSavedVisualization } from '../../utils/saved_visualize_utils';
+import { VisualizeServices } from '../types';
+import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '../../../../kibana_utils/common';
 import {
   getSavedSearch,
   SavedSearch,
   throwErrorOnSavedSearchUrlConflict,
 } from '../../../../discover/public';
-import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '../../../../kibana_utils/common';
-import { VisualizeServices } from '../types';
 
 function isErrorRelatedToRuntimeFields(error: ExpressionValueError['error']) {
   const originalError = error.original || error;
@@ -72,20 +74,26 @@ export const getVisualizationInstanceFromInput = async (
   visualizeServices: VisualizeServices,
   input: VisualizeInput
 ) => {
-  const { visualizations } = visualizeServices;
+  const { data, savedObjects, spaces, savedObjectsTagging } = visualizeServices;
   const visState = input.savedVis as SerializedVis;
 
   /**
    * A saved vis is needed even in by value mode to support 'save to library' which converts the 'by value'
    * state of the visualization, into a new saved object.
    */
-  const savedVis: VisSavedObject = await visualizations.getSavedVisualization();
+  const savedVis: VisSavedObject = await getSavedVisualization({
+    search: data.search,
+    savedObjectsClient: savedObjects.client,
+    dataViews: data.dataViews,
+    spaces,
+    savedObjectsTagging,
+  });
 
   if (visState.uiState && Object.keys(visState.uiState).length !== 0) {
     savedVis.uiStateJSON = JSON.stringify(visState.uiState);
   }
 
-  let vis = await visualizations.createVis(visState.type, cloneDeep(visState));
+  let vis = await createVisAsync(visState.type, cloneDeep(visState));
   if (vis.type.setup) {
     try {
       vis = await vis.type.setup(vis);
@@ -114,14 +122,24 @@ export const getVisualizationInstance = async (
    */
   opts?: Record<string, unknown> | string
 ) => {
-  const { visualizations } = visualizeServices;
-  const savedVis: VisSavedObject = await visualizations.getSavedVisualization(opts);
+  const { data, savedObjects, spaces, savedObjectsTagging } = visualizeServices;
+
+  const savedVis: VisSavedObject = await getSavedVisualization(
+    {
+      search: data.search,
+      savedObjectsClient: savedObjects.client,
+      dataViews: data.dataViews,
+      spaces,
+      savedObjectsTagging,
+    },
+    opts
+  );
 
   if (typeof opts !== 'string') {
     savedVis.searchSourceFields = { index: opts?.indexPattern } as SerializedSearchSourceFields;
   }
-  const serializedVis = visualizations.convertToSerializedVis(savedVis);
-  let vis = await visualizations.createVis(serializedVis.type, serializedVis);
+  const serializedVis = convertToSerializedVis(savedVis);
+  let vis = await createVisAsync(serializedVis.type, serializedVis);
   if (vis.type.setup) {
     try {
       vis = await vis.type.setup(vis);

@@ -117,9 +117,7 @@ export function SaveModalContainer({
     }
   };
 
-  const savingToLibraryPermitted = Boolean(
-    isSaveable && application.capabilities.visualizations.save
-  );
+  const savingToLibraryPermitted = Boolean(isSaveable && application.capabilities.visualize.save);
 
   return (
     <SaveModal

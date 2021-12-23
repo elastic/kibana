@@ -52,8 +52,6 @@ describe('getVisualizationInstance', () => {
     // @ts-expect-error
     mockServices.data.search.showError.mockImplementation(() => {});
     // @ts-expect-error
-    mockServices.visualizations.convertToSerializedVis.mockImplementation(() => serializedVisMock);
-    // @ts-expect-error
     mockServices.visualizations.getSavedVisualization.mockImplementation(
       (opts: unknown) => savedVisMock
     );
@@ -81,7 +79,6 @@ describe('getVisualizationInstance', () => {
     expect(savedVisMock.searchSourceFields).toEqual({
       index: opts.indexPattern,
     });
-    expect(mockServices.visualizations.convertToSerializedVis).toHaveBeenCalledWith(savedVisMock);
     expect(mockServices.visualizations.createVis).toHaveBeenCalledWith(
       serializedVisMock.type,
       serializedVisMock

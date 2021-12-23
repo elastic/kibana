@@ -20,7 +20,7 @@ const mockServices = {
     },
   }),
   capabilities: {
-    visualizations: {
+    visualize: {
       show: true,
     },
     discover: {

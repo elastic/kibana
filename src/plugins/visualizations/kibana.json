@@ -12,7 +12,6 @@
     "embeddable",
     "inspector",
     "savedObjects",
-    "dashboard",
     "presentationUtil"
   ],
   "optionalPlugins": [ "home", "share", "usageCollection", "spaces", "savedObjectsTaggingOss"],

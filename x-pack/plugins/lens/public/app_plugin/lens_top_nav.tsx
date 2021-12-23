@@ -230,9 +230,7 @@ export const LensTopNavMenu = ({
   const { TopNavMenu } = navigation.ui;
   const { from, to } = data.query.timefilter.timefilter.getTime();
 
-  const savingToLibraryPermitted = Boolean(
-    isSaveable && application.capabilities.visualizations.save
-  );
+  const savingToLibraryPermitted = Boolean(isSaveable && application.capabilities.visualize.save);
   const savingToDashboardPermitted = Boolean(
     isSaveable && application.capabilities.dashboard?.showWriteControls
   );
@@ -414,7 +412,7 @@ export const LensTopNavMenu = ({
     <TopNavMenu
       setMenuMountPoint={setHeaderActionMenu}
       config={topNavConfig}
-      showSaveQuery={Boolean(application.capabilities.visualizations.saveQuery)}
+      showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
       savedQuery={savedQuery}
       onQuerySubmit={onQuerySubmitWrapped}
       onSaved={onSavedWrapped}

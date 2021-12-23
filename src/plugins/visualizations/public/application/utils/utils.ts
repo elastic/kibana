@@ -13,6 +13,7 @@ import { Filter } from '@kbn/es-query';
 import { redirectWhenMissing } from '../../../../kibana_utils/public';
 import { VisualizeConstants } from '../../../common/constants';
 import { VisualizeServices, VisualizeEditorVisInstance } from '../types';
+import { convertFromSerializedVis } from '../../utils/saved_visualize_utils';
 
 export const addHelpMenuToAppChrome = (chrome: ChromeStart, docLinks: DocLinksStart) => {
   chrome.setHelpExtension({
@@ -49,7 +50,7 @@ export const visStateToEditorState = (
   services: VisualizeServices
 ) => {
   const vis = visInstance.vis;
-  const savedVisState = services.visualizations.convertFromSerializedVis(vis.serialize());
+  const savedVisState = convertFromSerializedVis(vis.serialize());
   const savedVis = 'savedVis' in visInstance ? visInstance.savedVis : undefined;
   return {
     uiState:

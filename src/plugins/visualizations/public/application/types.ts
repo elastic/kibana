@@ -20,7 +20,6 @@ import type {
 } from 'kibana/public';
 
 import type {
-  VisualizationsStart,
   Vis,
   VisualizeEmbeddableContract,
   VisSavedObject,
@@ -35,7 +34,7 @@ import type {
 } from 'src/plugins/kibana_utils/public';
 
 import type { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import type { Query, DataPublicPluginStart, TimeRange } from 'src/plugins/data/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
 import type { SavedObjectsStart } from 'src/plugins/saved_objects/public';
@@ -43,12 +42,12 @@ import type { EmbeddableStart, EmbeddableStateTransfer } from 'src/plugins/embed
 import type { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
 import type { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
 import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
-import type { DashboardStart } from '../../../dashboard/public';
 import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 import type { UsageCollectionStart } from '../../../usage_collection/public';
 import type { SavedSearch } from '../../../discover/public';
 
-import { PureVisState } from '../../common/types';
+import type { PureVisState } from '../../common/types';
+import type { createVisEmbeddableFromObject } from '../embeddable';
 
 export interface VisualizeAppState {
   filters: Filter[];
@@ -94,13 +93,11 @@ export interface VisualizeServices extends CoreStart {
   share?: SharePluginStart;
   visualizeCapabilities: Record<string, boolean | Record<string, boolean>>;
   dashboardCapabilities: Record<string, boolean | Record<string, boolean>>;
-  visualizations: VisualizationsStart;
   savedObjectsPublic: SavedObjectsStart;
   setActiveUrl: (newUrl: string) => void;
-  createVisEmbeddableFromObject: VisualizationsStart['__LEGACY']['createVisEmbeddableFromObject'];
+  createVisEmbeddableFromObject: ReturnType<typeof createVisEmbeddableFromObject>;
   restorePreviousUrl: () => void;
   scopedHistory: ScopedHistory;
-  dashboard: DashboardStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
   presentationUtil: PresentationUtilPluginStart;

@@ -92,7 +92,7 @@ const buildCapabilities = () =>
     },
     catalogue: {
       discover: true,
-      visualizations: false,
+      visualize: false,
       feature3Entry: true,
     },
     management: {

@@ -22,7 +22,7 @@ import {
 import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 import { VisualizeAppProps } from '../app';
-import { VisualizeConstants } from '../..';
+import { VisualizeConstants } from '../../../common/constants';
 
 export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const { id: visualizationIdFromUrl } = useParams<{ id: string }>();

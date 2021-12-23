@@ -15,7 +15,7 @@ import { getVisualizationInstance } from '../get_visualization_instance';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { SavedVisInstance, VisualizeServices, IEditorController } from '../../types';
 import { VisualizeConstants } from '../../../../common/constants';
-import { getVisEditorsRegistry } from '../../../services';
+import { getTypes, getVisEditorsRegistry } from '../../../services';
 import { redirectToSavedObjectPage } from '../utils';
 
 /**
@@ -41,7 +41,6 @@ export const useSavedVisInstance = (
     const {
       chrome,
       history,
-      dashboard,
       toastNotifications,
       stateTransferService,
       application: { navigateToApp },
@@ -51,7 +50,7 @@ export const useSavedVisInstance = (
         let savedVisInstance: SavedVisInstance;
         if (history.location.pathname === '/create') {
           const searchParams = parse(history.location.search);
-          const visTypes = services.visualizations.all();
+          const visTypes = [...Object.values(getTypes().all())];
           const visType = visTypes.find(({ name }) => name === searchParams.type);
 
           if (!visType) {
@@ -87,8 +86,6 @@ export const useSavedVisInstance = (
           ? stateTransferService.getAppNameFromId(originatingApp)
           : undefined;
         const redirectToOrigin = originatingApp ? () => navigateToApp(originatingApp) : undefined;
-        const byValueCreateMode =
-          Boolean(originatingApp) && dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
 
         if (savedVis.id) {
           chrome.setBreadcrumbs(
@@ -98,7 +95,7 @@ export const useSavedVisInstance = (
         } else {
           chrome.setBreadcrumbs(
             getCreateBreadcrumbs({
-              byValue: byValueCreateMode,
+              byValue: Boolean(originatingApp),
               originatingAppName,
               redirectToOrigin,
             })

@@ -17,6 +17,7 @@ import {
   VisualizeEditorVisInstance,
   IEditorController,
 } from '../../types';
+import { convertFromSerializedVis } from '../../../utils/saved_visualize_utils';
 
 export const useEditorUpdates = (
   services: VisualizeServices,
@@ -113,7 +114,7 @@ export const useEditorUpdates = (
           savedVis &&
           !isEqual(
             {
-              ...services.visualizations.convertFromSerializedVis(vis.serialize()).visState,
+              ...convertFromSerializedVis(vis.serialize()).visState,
               title: vis.title,
             },
             state.vis

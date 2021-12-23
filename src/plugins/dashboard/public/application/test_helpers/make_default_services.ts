@@ -66,7 +66,7 @@ export function makeDefaultServices(): DashboardAppServices {
     showWriteControls: true,
     storeSearchSession: true,
     mapsCapabilities: { save: true },
-    visualizationsCapabilities: { save: true },
+    visualizeCapabilities: { save: true },
   };
   const initializerContext = {
     env: { packageInfo: { version: '8.0.0' } },

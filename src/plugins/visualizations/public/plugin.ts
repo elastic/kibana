@@ -8,7 +8,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
-import type { SavedObjectsFindOptionsReference } from 'kibana/public';
 import { createHashHistory } from 'history';
 import { BehaviorSubject } from 'rxjs';
 import {
@@ -40,11 +39,10 @@ import {
   setVisEditorsRegistry,
 } from './services';
 import {
+  createVisEmbeddableFromObject,
   VISUALIZE_EMBEDDABLE_TYPE,
   VisualizeEmbeddableFactory,
-  createVisEmbeddableFromObject,
 } from './embeddable';
-import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 import { TypesService } from './vis_types/types_service';
 import { range as rangeExpressionFunction } from '../common/expression_functions/range';
 import { visDimension as visDimensionExpressionFunction } from '../common/expression_functions/vis_dimension';
@@ -54,22 +52,16 @@ import {
   createKbnUrlStateStorage,
   createKbnUrlTracker,
   createStartServicesGetter,
-  StartServicesGetter,
   Storage,
   withNotifyOnErrors,
 } from '../../kibana_utils/public';
 import { VisualizeLocatorDefinition } from '../common/locator';
-import type { SerializedVis, Vis } from './vis';
 import { showNewVisModal } from './wizard';
+import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
+import { esFilters } from '../../../plugins/data/public';
+import { FeatureCatalogueCategory } from '../../home/public';
 
-import {
-  convertFromSerializedVis,
-  convertToSerializedVis,
-  getSavedVisualization,
-  saveVisualization,
-  findListItems,
-} from './utils/saved_visualize_utils';
-
+import type { VisualizeServices } from './application/types';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -90,19 +82,13 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '../../../plug
 import type { ExpressionsSetup, ExpressionsStart } from '../../expressions/public';
 import type { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
-import { createVisAsync } from './vis_async';
-import type { VisSavedObject, SaveVisOptions, GetVisOptions } from './types';
 import type { NavigationPublicPluginStart as NavigationStart } from '../../navigation/public';
 import type { SharePluginSetup, SharePluginStart } from '../../share/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
-import type { DashboardStart } from '../../dashboard/public';
 import type { PresentationUtilPluginStart } from '../../presentation_util/public';
 import type { UsageCollectionStart } from '../../usage_collection/public';
 import type { HomePublicPluginSetup } from '../../home/public';
-import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
-import { esFilters } from '../../../plugins/data/public';
-import { FeatureCatalogueCategory } from '../../home/public';
-import { VisualizationServices } from './types';
+import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -113,18 +99,7 @@ import { VisualizationServices } from './types';
 export type VisualizationsSetup = TypesSetup & { visEditorsRegistry: VisEditorsRegistry };
 
 export interface VisualizationsStart extends TypesStart {
-  createVis: (visType: string, visState: SerializedVis) => Promise<Vis>;
-  convertToSerializedVis: typeof convertToSerializedVis;
-  convertFromSerializedVis: typeof convertFromSerializedVis;
   showNewVisModal: typeof showNewVisModal;
-  getSavedVisualization: (opts?: GetVisOptions | string) => Promise<VisSavedObject>;
-  saveVisualization: (savedVis: VisSavedObject, saveOptions: SaveVisOptions) => Promise<string>;
-  findListItems: (
-    searchTerm: string,
-    listingLimit: number,
-    references?: SavedObjectsFindOptionsReference[]
-  ) => Promise<{ hits: Array<Record<string, unknown>>; total: number }>;
-  __LEGACY: { createVisEmbeddableFromObject: ReturnType<typeof createVisEmbeddableFromObject> };
 }
 
 export interface VisualizationsSetupDeps {
@@ -145,7 +120,6 @@ export interface VisualizationsStartDeps {
   inspector: InspectorStart;
   uiActions: UiActionsStart;
   application: ApplicationStart;
-  dashboard: DashboardStart;
   getAttributeService: EmbeddableStart['getAttributeService'];
   navigation: NavigationStart;
   presentationUtil: PresentationUtilPluginStart;
@@ -176,7 +150,6 @@ export class VisualizationsPlugin
     >
 {
   private readonly types: TypesService = new TypesService();
-  private getStartServicesOrDie?: StartServicesGetter<VisualizationsStartDeps, VisualizationsStart>;
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
@@ -236,7 +209,7 @@ export class VisualizationsPlugin
       stopUrlTracker();
     };
 
-    setUISettings(core.uiSettings);
+    const start = createStartServicesGetter(core.getStartServices);
 
     core.application.register({
       id: VisualizeConstants.APP_ID,
@@ -280,7 +253,7 @@ export class VisualizationsPlugin
          * this should be replaced to use only scoped history after moving legacy apps to browser routing
          */
         const history = createHashHistory();
-        const services: VisualizationServices = {
+        const services: VisualizeServices = {
           ...coreStart,
           history,
           kbnUrlStateStorage: createKbnUrlStateStorage({
@@ -296,14 +269,15 @@ export class VisualizationsPlugin
           navigation: pluginsStart.navigation,
           share: pluginsStart.share,
           toastNotifications: coreStart.notifications.toasts,
+          visualizeCapabilities: coreStart.application.capabilities.visualize,
           dashboardCapabilities: coreStart.application.capabilities.dashboard,
           embeddable: pluginsStart.embeddable,
           stateTransferService: pluginsStart.embeddable.getStateTransfer(),
           setActiveUrl,
+          createVisEmbeddableFromObject: createVisEmbeddableFromObject({ start }),
           savedObjectsPublic: pluginsStart.savedObjects,
           scopedHistory: params.history,
           restorePreviousUrl,
-          dashboard: pluginsStart.dashboard,
           setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
           presentationUtil: pluginsStart.presentationUtil,
@@ -345,8 +319,6 @@ export class VisualizationsPlugin
     if (share) {
       share.url.locators.create(new VisualizeLocatorDefinition());
     }
-
-    const start = (this.getStartServicesOrDie = createStartServicesGetter(core.getStartServices));
 
     setUISettings(core.uiSettings);
     setUsageCollector(usageCollection);
@@ -392,52 +364,15 @@ export class VisualizationsPlugin
     setAggs(data.search.aggs);
     setOverlays(core.overlays);
     setChrome(core.chrome);
+    setVisEditorsRegistry(this.visEditorsRegistry);
 
     if (spaces) {
       setSpaces(spaces);
     }
 
-    setVisEditorsRegistry(this.visEditorsRegistry);
-
     return {
       ...types,
       showNewVisModal,
-      getSavedVisualization: async (opts) => {
-        return getSavedVisualization(
-          {
-            search: data.search,
-            savedObjectsClient: core.savedObjects.client,
-            dataViews: data.dataViews,
-            spaces,
-            savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
-          },
-          opts
-        );
-      },
-      saveVisualization: async (savedVis, saveOptions) => {
-        return saveVisualization(savedVis, saveOptions, {
-          savedObjectsClient: core.savedObjects.client,
-          overlays: core.overlays,
-          savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
-        });
-      },
-      findListItems: async (searchTerm, listingLimit, references) => {
-        return findListItems(core.savedObjects.client, types, searchTerm, listingLimit, references);
-      },
-      /**
-       * creates new instance of Vis
-       * @param {IndexPattern} indexPattern - index pattern to use
-       * @param {VisState} visState - visualization configuration
-       */
-      createVis: async (visType: string, visState: SerializedVis) =>
-        await createVisAsync(visType, visState),
-      convertToSerializedVis,
-      convertFromSerializedVis,
-      __LEGACY: {
-        createVisEmbeddableFromObject: createVisEmbeddableFromObject({
-          start: this.getStartServicesOrDie!,
-        }),
-      },
     };
   }
 

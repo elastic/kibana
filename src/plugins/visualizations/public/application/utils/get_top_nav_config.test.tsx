@@ -73,11 +73,6 @@ describe('getTopNavConfig', () => {
   const share = sharePluginMock.createStartContract();
   const services = {
     ...mockServices,
-    dashboard: {
-      dashboardFeatureFlagConfig: {
-        allowByValueEmbeddables: true,
-      },
-    },
     visualizeCapabilities: {
       save: true,
     },

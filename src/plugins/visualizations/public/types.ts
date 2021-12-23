@@ -28,7 +28,6 @@ import type { NavigationPublicPluginStart as NavigationStart } from 'src/plugins
 import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
 import type { UsageCollectionStart } from '../../usage_collection/public';
 import type { SavedObjectsTaggingApi } from '../../saved_objects_tagging_oss/public';
-import type { DashboardStart } from '../../dashboard/public';
 import type { VisParams } from '../common';
 import type { PersistedState } from './persisted_state';
 import type { SerializedVis, Vis } from './vis';
@@ -134,7 +133,6 @@ export interface VisualizationServices extends CoreStart {
   setActiveUrl: (newUrl: string) => void;
   restorePreviousUrl: () => void;
   scopedHistory: ScopedHistory;
-  dashboard: DashboardStart;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
   presentationUtil: PresentationUtilPluginStart;

@@ -14,6 +14,7 @@ import { parse } from 'query-string';
 
 import { Capabilities } from 'src/core/public';
 import { TopNavMenuData } from 'src/plugins/navigation/public';
+import { saveVisualization } from '../../utils/saved_visualize_utils';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
   VisualizeInput,
@@ -101,13 +102,11 @@ export const getTopNavConfig = (
     visualizeCapabilities,
     dashboardCapabilities,
     i18n: { Context: I18nContext },
-    dashboard,
     savedObjectsTagging,
     presentationUtil,
     usageCollection,
     getKibanaVersion,
     savedObjects,
-    visualizations,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -140,7 +139,11 @@ export const getTopNavConfig = (
     setHasUnsavedChanges(false);
 
     try {
-      const id = await visualizations.saveVisualization(savedVis, saveOptions);
+      const id = await saveVisualization(savedVis, saveOptions, {
+        savedObjectsClient: savedObjects.client,
+        overlays,
+        savedObjectsTagging,
+      });
 
       if (id) {
         toastNotifications.addSuccess({
@@ -246,9 +249,8 @@ export const getTopNavConfig = (
     }
   };
 
-  const allowByValue = dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
   const saveButtonLabel =
-    !savedVis.id && allowByValue && originatingApp
+    !savedVis.id && originatingApp
       ? i18n.translate('visualize.topNavMenu.saveVisualizationToLibraryButtonLabel', {
           defaultMessage: 'Save to library',
         })
@@ -259,11 +261,10 @@ export const getTopNavConfig = (
       : i18n.translate('visualize.topNavMenu.saveVisualizationButtonLabel', {
           defaultMessage: 'Save',
         });
-  const showSaveAndReturn = originatingApp && (savedVis?.id || allowByValue);
+  const showSaveAndReturn = originatingApp && savedVis?.id;
 
   const showSaveButton =
-    visualizeCapabilities.save ||
-    (allowByValue && !showSaveAndReturn && dashboardCapabilities.showWriteControls);
+    visualizeCapabilities.save || (!showSaveAndReturn && dashboardCapabilities.showWriteControls);
 
   const topNavMenu: TopNavMenuData[] = [
     {
@@ -341,7 +342,7 @@ export const getTopNavConfig = (
         }
       },
       // disable the Share button if no action specified and fot byValue visualizations
-      disableButton: !share || Boolean(!savedVis.id && allowByValue && originatingApp),
+      disableButton: !share || Boolean(!savedVis.id && originatingApp),
     },
     ...(originatingApp
       ? [
@@ -483,12 +484,9 @@ export const getTopNavConfig = (
                 );
               }
 
-              const useByRefFlow =
-                !!originatingApp || !dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables;
-
               let saveModal;
 
-              if (useByRefFlow) {
+              if (originatingApp) {
                 saveModal = (
                   <SavedObjectSaveModalOrigin
                     documentInfo={savedVis || { title: '' }}
@@ -534,7 +532,7 @@ export const getTopNavConfig = (
               showSaveModal(
                 saveModal,
                 I18nContext,
-                !useByRefFlow ? presentationUtil.ContextProvider : React.Fragment
+                !originatingApp ? presentationUtil.ContextProvider : React.Fragment
               );
             },
           },
