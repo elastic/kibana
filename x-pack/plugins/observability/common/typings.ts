@@ -7,10 +7,7 @@
 import * as t from 'io-ts';
 
 export type Maybe<T> = T | null | undefined;
-import {
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
-} from '@kbn/rule-data-utils/alerts_as_data_status';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 
 export const alertWorkflowStatusRt = t.keyof({
   open: null,
