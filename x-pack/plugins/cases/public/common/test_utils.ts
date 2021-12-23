@@ -20,3 +20,8 @@ export async function waitForComponentToPaint<P = {}>(wrapper: ReactWrapper<P>, 
     wrapper.update();
   });
 }
+
+export const waitForComponentToUpdate = async () =>
+  act(async () => {
+    return Promise.resolve();
+  });
