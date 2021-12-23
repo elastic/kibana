@@ -16,6 +16,7 @@ import { EventFilterGenerator } from '../../../../../../../common/endpoint/data_
 
 import { EventFiltersHttpService } from '../../../../event_filters/service';
 import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
+import { parsePoliciesAndFilterToKql } from '../../../../../common/utils';
 
 jest.mock('../../../../event_filters/service');
 const EventFiltersHttpServiceMock = EventFiltersHttpService as jest.Mock;
@@ -64,8 +65,7 @@ describe('Policy event filters layout', () => {
         ) => {
           if (
             params &&
-            params.filter ===
-              `(exception-list-agnostic.attributes.tags:"policy:${policyItem.id}" OR exception-list-agnostic.attributes.tags:"policy:all")`
+            params.filter === parsePoliciesAndFilterToKql({ policies: [policyItem.id, 'all'] })
           ) {
             return {
               total: 0,
