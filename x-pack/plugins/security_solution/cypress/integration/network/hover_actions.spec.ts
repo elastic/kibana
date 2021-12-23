@@ -25,7 +25,7 @@ import { TIMELINE_TOGGLE_BUTTON } from '../../screens/security_main';
 
 const testDomain = 'endpoint-dev-es.app.elstc.co';
 
-describe('hover actions', () => {
+describe('Hover actions', () => {
   beforeEach(() => {
     cleanKibana();
     loginAndWaitForPage(NETWORK_URL);
@@ -57,7 +57,7 @@ describe('hover actions', () => {
     cy.get(DATA_PROVIDERS)
       .invoke('text')
       .then((value) => {
-        expect(value).to.eq(`destination.domain: ${testDomain}`);
+        expect(value).to.eq(`destination.domain: "${testDomain}"`);
       });
   });
 
