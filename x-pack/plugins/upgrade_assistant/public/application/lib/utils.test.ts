@@ -99,7 +99,7 @@ describe('getReindexProgressLabel', () => {
 
     it('returns 100% when original index has been deleted', () => {
       expect(
-        getReindexProgressLabel(null, ReindexStep.existingAliasUpdated, withExistingAliases)
+        getReindexProgressLabel(null, ReindexStep.existingAliasesUpdated, withExistingAliases)
       ).toBe('100%');
     });
   });

@@ -29,7 +29,7 @@ export enum ReindexStep {
   reindexCompleted = 50,
   aliasCreated = 60,
   originalIndexDeleted = 70,
-  existingAliasUpdated = 80,
+  existingAliasesUpdated = 80,
 }
 
 export enum ReindexStatus {

@@ -78,6 +78,7 @@ const i18nTexts = {
 
 export const ReindexResolutionCell: React.FunctionComponent = () => {
   const { reindexState } = useReindexContext();
+  const hasExistingAliases = reindexState.meta.aliases.length > 0;
 
   if (reindexState.loadingState === LoadingState.Loading) {
     return (
@@ -105,7 +106,7 @@ export const ReindexResolutionCell: React.FunctionComponent = () => {
               {getReindexProgressLabel(
                 reindexState.reindexTaskPercComplete,
                 reindexState.lastCompletedStep,
-                reindexState.meta.aliases.length > 0
+                hasExistingAliases
               )}
             </EuiText>
           </EuiFlexItem>

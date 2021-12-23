@@ -220,7 +220,7 @@ const getStepTitle = (
     );
   }
 
-  if (step === ReindexStep.existingAliasUpdated) {
+  if (step === ReindexStep.existingAliasesUpdated) {
     return inProgress ? (
       <FormattedMessage
         id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.aliasSwapStepTitle"
@@ -258,9 +258,8 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
     lastCompletedStep = -1,
     status,
     reindexTaskPercComplete,
+    meta,
   } = props.reindexState;
-
-  const { meta } = props.reindexState;
 
   const getProgressStep = (thisStep: ReindexStep): StepProgressStep => {
     const previousStep = orderedSteps[orderedSteps.indexOf(thisStep) - 1];
@@ -344,10 +343,10 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
     getProgressStep(ReindexStep.originalIndexDeleted),
   ];
 
-  const hasExistingAlias = meta.aliases.length > 0;
+  const hasExistingAliases = meta.aliases.length > 0;
 
-  if (hasExistingAlias) {
-    steps.push(getProgressStep(ReindexStep.existingAliasUpdated));
+  if (hasExistingAliases) {
+    steps.push(getProgressStep(ReindexStep.existingAliasesUpdated));
   }
 
   return (
@@ -362,7 +361,7 @@ export const ReindexProgress: React.FunctionComponent<Props> = (props) => {
                 percents: getReindexProgressLabel(
                   reindexTaskPercComplete,
                   lastCompletedStep,
-                  hasExistingAlias
+                  hasExistingAliases
                 ),
               }}
             />

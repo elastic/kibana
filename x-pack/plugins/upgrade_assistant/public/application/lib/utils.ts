@@ -88,7 +88,7 @@ export const getReindexProgressLabel = (
       percentsComplete = hasExistingAliases ? 95 : 100;
       break;
     }
-    case ReindexStep.existingAliasUpdated: {
+    case ReindexStep.existingAliasesUpdated: {
       // step 6 completed, 100% progress
       percentsComplete = 100;
       break;

@@ -147,7 +147,7 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
         return {
           ...prevValue,
           status: ReindexStatus.completed,
-          lastCompletedStep: ReindexStep.existingAliasUpdated,
+          lastCompletedStep: ReindexStep.existingAliasesUpdated,
         };
       });
     };
