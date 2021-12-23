@@ -355,7 +355,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     <>
       {isLive && <EuiProgress color="primary" size="xs" />}
 
-      {isFetched && !allResultsData?.edges.length && !aggregations?.totalRowCount ? (
+      {isFetched && (!allResultsData?.edges.length || !aggregations?.totalRowCount) ? (
         <>
           <EuiCallOut title={generateEmptyDataMessage(aggregations.totalResponded)} />
           <EuiSpacer />

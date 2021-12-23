@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
+import { FLEET_AGENT_POLICIES } from '../../tasks/navigation';
 import { addIntegration } from '../../tasks/integrations';
 
 import { login } from '../../tasks/login';
 
-describe('SU - Add Integration', () => {
+describe('Super User - Add Integration', () => {
   const integration = 'Osquery Manager';
   beforeEach(() => {
     login();
   });
 
   it('should display Osquery integration in the Policies list once installed ', () => {
-    navigateTo(FLEET_AGENT_POLICIES);
+    cy.visit(FLEET_AGENT_POLICIES);
     cy.contains('Default Fleet Server policy').click();
     cy.contains('Add integration').click();
     cy.contains(integration).click();

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -uo pipefail
+set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
@@ -19,4 +19,3 @@ checks-reporter-with-killswitch "Osquery Cypress Tests" \
    --debug --bail \
    --config test/osquery_cypress/cli_config.ts
 
-buildkite-agent artifact upload '../target/kibana-osquery/**/*'

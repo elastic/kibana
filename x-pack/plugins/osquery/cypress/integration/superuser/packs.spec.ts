@@ -14,8 +14,9 @@ import {
 } from '../../tasks/live_query';
 import { login } from '../../tasks/login';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
+import { preparePack } from '../../tasks/packs';
 
-describe('SU - Packs', () => {
+describe('SuperUser - Packs', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
   const PACK_NAME = 'Pack-name';
   const NEW_QUERY_NAME = 'new-query-name';
@@ -33,7 +34,6 @@ describe('SU - Packs', () => {
   });
 
   it('should add a pack from a saved query', () => {
-    cy.waitForReact(1000);
     cy.contains('Packs').click();
     findAndClickButton('Add pack');
     findFormFieldByRowsLabelAndType('Name', PACK_NAME);
@@ -61,54 +61,47 @@ describe('SU - Packs', () => {
     cy.contains(PACK_NAME);
   });
 
-  describe('should be editable', () => {
-    beforeEach(() => {
-      cy.contains('Packs').click();
-      const createdPack = cy.contains(PACK_NAME);
-      createdPack.click();
-      cy.waitForReact(1000);
-      cy.react('EuiTableRow').contains(SAVED_QUERY_ID);
-    });
-
-    it('by clicking the edit button', () => {
-      findAndClickButton('Edit');
-      cy.contains(`Edit ${PACK_NAME}`);
-      findAndClickButton('Add query');
-      cy.contains('Attach next query');
-      inputQuery('select * from uptime');
-      findFormFieldByRowsLabelAndType('ID', NEW_QUERY_NAME);
-      cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
-      cy.react('EuiTableRow').contains(NEW_QUERY_NAME);
-      findAndClickButton('Update pack');
-      cy.contains('Save and deploy changes');
-      findAndClickButton('Save and deploy changes');
-    });
-    // THIS TESTS TAKES TOO LONG FOR NOW - LET ME THINK IT THROUGH
-    it.skip('by clicking in Discovery button', () => {
-      cy.react('CustomItemAction', {
-        props: { index: 0, item: { id: SAVED_QUERY_ID } },
-      }).click();
-      cy.wait(11000);
-      // cy.get('[data-test-subj="superDatePickerShowDatesButton"').click();
-      // cy.get('[data-test-subj="superDatePickerRelativeDateInputUnitSelector"').select(
-      //   'Minutes ago'
-      // );
-      // cy.get('[data-test-subj="querySubmitButton"').contains('Update').click();
-      cy.get('[data-test-subj="querySubmitButton"').contains('Refresh').click();
-      cy.get('[data-test-subj="discoverDocTable"]').contains(`pack_${PACK_NAME}_${SAVED_QUERY_ID}`);
-    });
-    // it('by clicking in Lens button', () => {
-    //   cy.react('CustomItemAction', {
-    //     props: { index: 1, item: { id: SAVED_QUERY_ID } },
-    //   }).click();
-    //   cy.get('[data-test-subj="lnsWorkspace"]');
-    //   cy.get('[data-test-subj="breadcrumbs"]').contains(
-    //     `Action pack_${PACK_NAME}_${SAVED_QUERY_ID} results`
-    //   );
-    // });
-    it('by clicking the delete button', () => {
-      findAndClickButton('Edit');
-      deleteAndConfirm('pack');
-    });
+  it('to click the edit button and edit pack', () => {
+    preparePack(PACK_NAME, SAVED_QUERY_ID);
+    findAndClickButton('Edit');
+    cy.contains(`Edit ${PACK_NAME}`);
+    findAndClickButton('Add query');
+    cy.contains('Attach next query');
+    inputQuery('select * from uptime');
+    findFormFieldByRowsLabelAndType('ID', NEW_QUERY_NAME);
+    cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
+    cy.react('EuiTableRow').contains(NEW_QUERY_NAME);
+    findAndClickButton('Update pack');
+    cy.contains('Save and deploy changes');
+    findAndClickButton('Save and deploy changes');
+  });
+  // THIS TESTS TAKES TOO LONG FOR NOW - LET ME THINK IT THROUGH
+  it('to click the icon and visit discover', () => {
+    preparePack(PACK_NAME, SAVED_QUERY_ID);
+    cy.react('CustomItemAction', {
+      props: { index: 0, item: { id: SAVED_QUERY_ID } },
+    }).click();
+    cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"').click();
+    cy.get('[data-test-subj="superDatePickerToggleRefreshButton"').click();
+    cy.get('[data-test-subj="superDatePickerRefreshIntervalInput"').clear().type('10');
+    cy.get('button').contains('Apply').click();
+    cy.get('[data-test-subj="discoverDocTable"]', { timeout: 60000 }).contains(
+      `pack_${PACK_NAME}_${SAVED_QUERY_ID}`
+    );
+  });
+  // it('by clicking in Lens button', () => {
+  // preparePack(PACK_NAME, SAVED_QUERY_ID);
+  //   cy.react('CustomItemAction', {
+  //     props: { index: 1, item: { id: SAVED_QUERY_ID } },
+  //   }).click();
+  //   cy.get('[data-test-subj="lnsWorkspace"]');
+  //   cy.get('[data-test-subj="breadcrumbs"]').contains(
+  //     `Action pack_${PACK_NAME}_${SAVED_QUERY_ID} results`
+  //   );
+  // });
+  it('to click delete button', () => {
+    preparePack(PACK_NAME, SAVED_QUERY_ID);
+    findAndClickButton('Edit');
+    deleteAndConfirm('pack');
   });
 });

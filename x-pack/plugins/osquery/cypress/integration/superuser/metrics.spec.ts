@@ -10,49 +10,45 @@ import { login } from '../../tasks/login';
 import { checkResults, inputQuery, submitQuery } from '../../tasks/live_query';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 
-describe('SU - Metrics', () => {
+describe('Super User - Metrics', () => {
   beforeEach(() => {
     login();
+    navigateTo('/app/osquery');
   });
-  describe('should enable usage of Osquery', () => {
-    beforeEach(() => {
-      navigateTo('/app/osquery');
-    });
-    before(() => {
-      runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
-    });
-    after(() => {
-      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
-    });
+  before(() => {
+    runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
+  });
+  after(() => {
+    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
+  });
 
-    it('by being able to run the query', () => {
-      cy.get('[data-test-subj="toggleNavButton"]').click();
-      cy.contains('Metrics').click();
+  it('should be able to run the query', () => {
+    cy.get('[data-test-subj="toggleNavButton"]').click();
+    cy.contains('Metrics').click();
 
-      cy.wait(1000);
+    cy.wait(1000);
 
-      cy.get('[data-test-subj="nodeContainer"]').click();
-      cy.contains('Osquery').click();
-      inputQuery('select * from uptime;');
+    cy.get('[data-test-subj="nodeContainer"]').click();
+    cy.contains('Osquery').click();
+    inputQuery('select * from uptime;');
 
-      submitQuery();
-      checkResults();
-    });
-    it('by being able to run the previously saved query', () => {
-      cy.get('[data-test-subj="toggleNavButton"]').click();
-      cy.get('[data-test-subj="collapsibleNavAppLink"').contains('Metrics').click();
+    submitQuery();
+    checkResults();
+  });
+  it('should be able to run the previously saved query', () => {
+    cy.get('[data-test-subj="toggleNavButton"]').click();
+    cy.get('[data-test-subj="collapsibleNavAppLink"').contains('Metrics').click();
 
-      cy.wait(500);
-      cy.get('[data-test-subj="nodeContainer"]').click();
-      cy.contains('Osquery').click();
+    cy.wait(500);
+    cy.get('[data-test-subj="nodeContainer"]').click();
+    cy.contains('Osquery').click();
 
-      cy.get('[data-test-subj="comboBoxInput"]').first().click();
-      cy.wait(500);
-      cy.get('div[role=listBox]').should('have.lengthOf.above', 0);
-      cy.get('[data-test-subj="comboBoxInput"]').first().type('{downArrow}{enter}');
+    cy.get('[data-test-subj="comboBoxInput"]').first().click();
+    cy.wait(500);
+    cy.get('div[role=listBox]').should('have.lengthOf.above', 0);
+    cy.get('[data-test-subj="comboBoxInput"]').first().type('{downArrow}{enter}');
 
-      submitQuery();
-      checkResults();
-    });
+    submitQuery();
+    checkResults();
   });
 });

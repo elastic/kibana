@@ -10,7 +10,7 @@ import { navigateTo } from '../../tasks/navigation';
 import { ROLES } from '../../test';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 
-describe('T1 - Live Query', () => {
+describe('T1 Analyst - Live Query', () => {
   beforeEach(() => {
     login(ROLES.t1_analyst);
   });

@@ -17,7 +17,7 @@ import {
 } from '../../tasks/live_query';
 import { login } from '../../tasks/login';
 
-describe('SU - Saved queries', () => {
+describe('Super User - Saved queries', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
   const SAVED_QUERY_DESCRIPTION = 'Saved Query Description';
 
@@ -27,7 +27,6 @@ describe('SU - Saved queries', () => {
   });
 
   it('should save the query', () => {
-    cy.waitForReact(1000);
     cy.contains('New live query').click();
     selectAllAgents();
     inputQuery(DEFAULT_QUERY);
@@ -41,7 +40,6 @@ describe('SU - Saved queries', () => {
   });
 
   it('should view query details in status', () => {
-    cy.waitForReact(1000);
     cy.contains('New live query');
     cy.react('ActionTableResultsButton').first().click();
     cy.wait(1000);
@@ -54,7 +52,6 @@ describe('SU - Saved queries', () => {
   });
 
   it('should display a previously saved query and run it', () => {
-    cy.waitForReact(1000);
     cy.contains('Saved queries').click();
     cy.contains(SAVED_QUERY_ID);
     cy.react('PlayButtonComponent', {
@@ -65,7 +62,6 @@ describe('SU - Saved queries', () => {
   });
 
   it('should edit the saved query', () => {
-    cy.waitForReact(1000);
     cy.contains('Saved queries').click();
     cy.contains(SAVED_QUERY_ID);
     cy.react('CustomItemAction', {
@@ -77,7 +73,6 @@ describe('SU - Saved queries', () => {
   });
 
   it('should delete the saved query', () => {
-    cy.waitForReact(1000);
     cy.contains('Saved queries').click();
     cy.contains(SAVED_QUERY_ID);
     cy.react('CustomItemAction', {

@@ -10,13 +10,11 @@ import { LIVE_QUERY_EDITOR } from '../screens/live_query';
 export const DEFAULT_QUERY = 'select * from processes;';
 
 export const selectAllAgents = () => {
-  cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } })
-    .type('All agents')
-    // SAFETY MEASURES - sometimes fails otherwise, let's observe how it
-    .wait(2000)
-    .type('{downArrow}{enter}');
-  // TODO add a check if loading indicator is visible then not visible any more
-  // cy.react('EuiFilterSelectItem').contains('All agents').click();
+  cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } }).type('All agents');
+  cy.react('EuiFilterSelectItem').contains('All agents').should('exist');
+  cy.react('EuiComboBox', { props: { placeholder: 'Select agents or groups' } }).type(
+    '{downArrow}{enter}'
+  );
 };
 
 export const inputQuery = (query: string) => cy.get(LIVE_QUERY_EDITOR).type(query);

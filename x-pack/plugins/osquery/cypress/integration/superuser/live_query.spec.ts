@@ -16,44 +16,37 @@ import {
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
 
-describe('SU - Live Query', () => {
+describe('Super User - Live Query', () => {
   beforeEach(() => {
     login();
+    navigateTo('/app/osquery');
   });
 
-  describe('should run a query', () => {
-    beforeEach(() => {
-      navigateTo('/app/osquery');
-      cy.waitForReact(1000);
+  it('should run query and enable ecs mapping', () => {
+    cy.contains('New live query').click();
+    selectAllAgents();
+    inputQuery('select * from uptime;');
+    submitQuery();
+
+    checkResults();
+    cy.react('EuiDataGridHeaderCellWrapper', {
+      props: { id: 'osquery.days', index: 1 },
+    });
+    cy.react('EuiDataGridHeaderCellWrapper', {
+      props: { id: 'osquery.hours', index: 2 },
     });
 
-    it('and enable ecs mapping', () => {
-      cy.wait(1000);
-      cy.contains('New live query').click();
-      selectAllAgents();
-      inputQuery('select * from uptime;');
-      submitQuery();
+    cy.react('EuiAccordion', { props: { buttonContent: 'Advanced' } }).click();
+    typeInECSFieldInput('message{downArrow}{enter}');
+    typeInOsqueryFieldInput('days{downArrow}{enter}');
+    submitQuery();
 
-      checkResults();
-      cy.react('EuiDataGridHeaderCellWrapper', {
-        props: { id: 'osquery.days', index: 1 },
-      });
-      cy.react('EuiDataGridHeaderCellWrapper', {
-        props: { id: 'osquery.hours', index: 2 },
-      });
-
-      cy.react('EuiAccordion', { props: { buttonContent: 'Advanced' } }).click();
-      typeInECSFieldInput('message{downArrow}{enter}');
-      typeInOsqueryFieldInput('days{downArrow}{enter}');
-      submitQuery();
-
-      checkResults();
-      cy.react('EuiDataGridHeaderCellWrapper', {
-        props: { id: 'message', index: 1 },
-      });
-      cy.react('EuiDataGridHeaderCellWrapper', {
-        props: { id: 'osquery.days', index: 2 },
-      }).react('EuiIconIndexMapping');
+    checkResults();
+    cy.react('EuiDataGridHeaderCellWrapper', {
+      props: { id: 'message', index: 1 },
     });
+    cy.react('EuiDataGridHeaderCellWrapper', {
+      props: { id: 'osquery.days', index: 2 },
+    }).react('EuiIconIndexMapping');
   });
 });
