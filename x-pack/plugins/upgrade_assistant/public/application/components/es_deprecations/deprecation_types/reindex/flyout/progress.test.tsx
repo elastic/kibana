@@ -108,7 +108,7 @@ describe('ReindexProgress', () => {
                 "status": "incomplete",
                 "title": <FormattedMessage
                   defaultMessage="Create {indexName} alias for {reindexName} index."
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasCreatedStepTitle"
                   values={
                     Object {
                       "indexName": <EuiCode>
@@ -125,7 +125,7 @@ describe('ReindexProgress', () => {
                 "status": "incomplete",
                 "title": <FormattedMessage
                   defaultMessage="Delete original {indexName} index."
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.originalIndexDeletedStepTitle"
                   values={
                     Object {
                       "indexName": <EuiCode>
