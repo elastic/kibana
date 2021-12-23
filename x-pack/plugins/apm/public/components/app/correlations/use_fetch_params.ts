@@ -24,7 +24,7 @@ export const useFetchParams = () => {
       transactionName,
       transactionType,
     },
-  } = useApmParams('/*');
+  } = useApmParams('/services/{serviceName}/transactions/view');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
