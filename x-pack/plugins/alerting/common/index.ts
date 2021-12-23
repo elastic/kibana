@@ -24,7 +24,7 @@ export * from './parse_duration';
 export interface AlertingFrameworkHealth {
   isSufficientlySecure: boolean;
   hasPermanentEncryptionKey: boolean;
-  alertingFrameworkHeath: AlertsHealth;
+  alertingFrameworkHealth: AlertsHealth;
 }
 
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
