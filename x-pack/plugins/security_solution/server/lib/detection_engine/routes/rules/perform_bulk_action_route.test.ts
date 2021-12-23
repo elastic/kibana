@@ -19,13 +19,16 @@ import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { performBulkActionRoute } from './perform_bulk_action_route';
 import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { loggingSystemMock } from 'src/core/server/mocks';
+import { isElasticRule } from '../../../../usage/detections';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
+jest.mock('../../../../usage/detections', () => ({ isElasticRule: jest.fn() }));
 
 describe.each([
   ['Legacy', false],
   ['RAC', true],
 ])('perform_bulk_action - %s', (_, isRuleRegistryEnabled) => {
+  const isElasticRuleMock = isElasticRule as jest.Mock;
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -37,7 +40,7 @@ describe.each([
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
-
+    isElasticRuleMock.mockReturnValue(false);
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
 
     performBulkActionRoute(server.router, ml, logger, isRuleRegistryEnabled);
@@ -78,6 +81,43 @@ describe.each([
   });
 
   describe('rules execution failures', () => {
+    it('returns error if rule is immutable/elastic', async () => {
+      isElasticRuleMock.mockReturnValue(true);
+      clients.rulesClient.find.mockResolvedValue(
+        getFindResultWithMultiHits({
+          data: [mockRule],
+          total: 1,
+        })
+      );
+
+      const response = await server.inject(getBulkActionEditRequest(), context);
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: 'Bulk edit failed',
+        status_code: 500,
+        attributes: {
+          errors: [
+            {
+              message: 'Elastic rule can`t be edited',
+              status_code: 403,
+              rules: [
+                {
+                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
+          rules: {
+            failed: 1,
+            succeeded: 0,
+            total: 1,
+          },
+        },
+      });
+    });
+
     it('returns error if disable rule throws error', async () => {
       clients.rulesClient.disable.mockImplementation(async () => {
         throw new Error('Test error');

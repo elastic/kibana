@@ -20,6 +20,7 @@ import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { initPromisePool } from '../../../../utils/promise_pool';
+import { isElasticRule } from '../../../../usage/detections';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { deleteRules } from '../../rules/delete_rules';
@@ -221,6 +222,11 @@ export const performBulkActionRoute = (
             });
           case BulkAction.edit:
             processingResponse = await executeBulkAction(rules.data, async (rule) => {
+              throwHttpError({
+                valid: !isElasticRule(rule.tags),
+                message: 'Elastic rule can`t be edited',
+              });
+
               throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
               const editedRule = body[BulkAction.edit].reduce(
