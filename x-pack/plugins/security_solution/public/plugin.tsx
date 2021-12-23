@@ -314,8 +314,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     plugins: StartPlugins
   ): Promise<StartedSubPlugins> {
     const subPlugins = await this.subPlugins();
-    // eslint-disable-next-line no-console
-    console.log('start sub plugins');
     return {
       overview: subPlugins.overview.start(),
       alerts: subPlugins.alerts.start(storage),
