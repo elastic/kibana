@@ -7,9 +7,13 @@
 
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  ExceptionListItemSchema,
+  FoundExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 import {
   MANAGEMENT_DEFAULT_PAGE_SIZE,
   MANAGEMENT_PAGE_SIZE_OPTIONS,
@@ -20,10 +24,12 @@ import {
   ArtifactCardGridProps,
 } from '../../../../../components/artifact_card_grid';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
+import { isGlobalPolicyEffected } from '../../../../../components/effected_policy_select/utils';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
 import { useGetEndpointSpecificPolicies } from '../../../../../services/policies/hooks';
 import { getCurrentArtifactsLocation } from '../../../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
+import { PolicyHostIsolationExceptionsDeleteModal } from './delete_modal';
 
 export const PolicyHostIsolationExceptionsList = ({
   exceptions,
@@ -33,9 +39,15 @@ export const PolicyHostIsolationExceptionsList = ({
   policyId: string;
 }) => {
   const history = useHistory();
+  const privileges = useUserPrivileges().endpointPrivileges;
+
   // load the list of policies>
   const policiesRequest = useGetEndpointSpecificPolicies();
   const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
+
+  const [exceptionItemToDelete, setExceptionItemToDelete] = useState<
+    ExceptionListItemSchema | undefined
+  >();
 
   const [expandedItemsMap, setExpandedItemsMap] = useState<Map<string, boolean>>(new Map());
 
@@ -73,11 +85,35 @@ export const PolicyHostIsolationExceptionsList = ({
   );
 
   const artifactCardPolicies = useEndpointPoliciesToArtifactPolicies(policiesRequest.data?.items);
+  const provideCardProps: ArtifactCardGridProps['cardComponentProps'] = (artifact) => {
+    const item = artifact as ExceptionListItemSchema;
+    const isGlobal = isGlobalPolicyEffected(item.tags);
+    const deleteAction = {
+      icon: 'trash',
+      children: i18n.translate(
+        'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.removeAction',
+        { defaultMessage: 'Remove from policy' }
+      ),
+      onClick: () => {
+        setExceptionItemToDelete(item);
+      },
+      disabled: isGlobal,
+      toolTipContent: isGlobal
+        ? i18n.translate(
+            'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.removeActionNotAllowed',
+            {
+              defaultMessage:
+                'Globally applied host isolation exceptions cannot be removed from policy.',
+            }
+          )
+        : undefined,
+      toolTipPosition: 'top' as const,
+      'data-test-subj': 'remove-from-policy-action',
+    };
 
-  const provideCardProps: ArtifactCardGridProps['cardComponentProps'] = (item) => {
     return {
       expanded: expandedItemsMap.get(item.id) || false,
-      actions: [],
+      actions: privileges.canIsolateHost ? [deleteAction] : [],
       policies: artifactCardPolicies,
     };
   };
@@ -96,6 +132,10 @@ export const PolicyHostIsolationExceptionsList = ({
     setExpandedItemsMap(newExpandedMap);
   };
 
+  const handleDeleteModalClose = useCallback(() => {
+    setExceptionItemToDelete(undefined);
+  }, [setExceptionItemToDelete]);
+
   const totalItemsCountLabel = useMemo<string>(() => {
     return i18n.translate(
       'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.totalItemCount',
@@ -108,6 +148,13 @@ export const PolicyHostIsolationExceptionsList = ({
 
   return (
     <>
+      {exceptionItemToDelete ? (
+        <PolicyHostIsolationExceptionsDeleteModal
+          policyId={policyId}
+          exception={exceptionItemToDelete}
+          onCancel={handleDeleteModalClose}
+        />
+      ) : null}
       <SearchExceptions
         placeholder={i18n.translate(
           'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.search.placeholder',

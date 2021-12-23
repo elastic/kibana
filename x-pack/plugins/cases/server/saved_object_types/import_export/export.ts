@@ -75,7 +75,7 @@ async function getAttachmentsAndUserActionsForCases(
     getAssociatedObjects<CaseUserActionAttributes>({
       savedObjectsClient,
       caseIds,
-      sortField: 'action_at',
+      sortField: defaultSortField,
       type: CASE_USER_ACTION_SAVED_OBJECT,
     }),
   ]);

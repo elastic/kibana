@@ -8,7 +8,7 @@
 
 import { uniq } from 'lodash';
 // @ts-expect-error untyped library
-import { parse } from '@kbn/interpreter/common';
+import { parse } from '@kbn/interpreter';
 import {
   ExpressionAstExpression,
   ExpressionAstFunction,
