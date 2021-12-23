@@ -140,7 +140,7 @@ const isAddCommentRef = (
   return false;
 };
 
-export const UserActionTree = React.memo(
+export const UserActions = React.memo(
   ({
     caseServices,
     caseUserActions,
@@ -686,4 +686,4 @@ export const UserActionTree = React.memo(
   }
 );
 
-UserActionTree.displayName = 'UserActionTree';
+UserActions.displayName = 'UserActions';

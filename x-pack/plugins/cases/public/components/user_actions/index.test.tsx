@@ -20,7 +20,7 @@ import {
   hostIsolationComment,
   hostReleaseComment,
 } from '../../containers/mock';
-import { UserActionTree } from '.';
+import { UserActions } from '.';
 import { TestProviders } from '../../common/mock';
 import { Ecs } from '../../../common/ui/types';
 import { Actions } from '../../../common/api';
@@ -60,7 +60,7 @@ jest.mock('../../common/lib/kibana');
 
 const patchComment = jest.fn();
 
-describe(`UserActionTree`, () => {
+describe(`UserActions`, () => {
   const sampleData = {
     content: 'what a great comment update',
   };
@@ -79,7 +79,7 @@ describe(`UserActionTree`, () => {
   it('Loading spinner when user actions loading and displays fullName/username', () => {
     const wrapper = mount(
       <TestProviders>
-        <UserActionTree {...{ ...defaultProps, isLoadingUserActions: true }} />
+        <UserActions {...{ ...defaultProps, isLoadingUserActions: true }} />
       </TestProviders>
     );
     expect(wrapper.find(`[data-test-subj="user-actions-loading"]`).exists()).toEqual(true);
@@ -114,7 +114,7 @@ describe(`UserActionTree`, () => {
     };
     const wrapper = mount(
       <TestProviders>
-        <UserActionTree {...props} />
+        <UserActions {...props} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -141,7 +141,7 @@ describe(`UserActionTree`, () => {
 
     const wrapper = mount(
       <TestProviders>
-        <UserActionTree {...props} />
+        <UserActions {...props} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -161,7 +161,7 @@ describe(`UserActionTree`, () => {
 
     const wrapper = mount(
       <TestProviders>
-        <UserActionTree {...props} />
+        <UserActions {...props} />
       </TestProviders>
     );
     expect(
@@ -196,7 +196,7 @@ describe(`UserActionTree`, () => {
 
     const wrapper = mount(
       <TestProviders>
-        <UserActionTree {...props} />
+        <UserActions {...props} />
       </TestProviders>
     );
 
@@ -240,7 +240,7 @@ describe(`UserActionTree`, () => {
 
     const wrapper = mount(
       <TestProviders>
-        <UserActionTree {...props} />
+        <UserActions {...props} />
       </TestProviders>
     );
 
@@ -296,7 +296,7 @@ describe(`UserActionTree`, () => {
   it('calls update description when description markdown is saved', async () => {
     const wrapper = mount(
       <TestProviders>
-        <UserActionTree {...defaultProps} />
+        <UserActions {...defaultProps} />
       </TestProviders>
     );
 
@@ -340,7 +340,7 @@ describe(`UserActionTree`, () => {
 
     const wrapper = mount(
       <TestProviders>
-        <UserActionTree {...defaultProps} />
+        <UserActions {...defaultProps} />
       </TestProviders>
     );
 
@@ -373,7 +373,7 @@ describe(`UserActionTree`, () => {
 
     const wrapper = mount(
       <TestProviders>
-        <UserActionTree {...props} />
+        <UserActions {...props} />
       </TestProviders>
     );
     await waitFor(() => {
@@ -397,7 +397,7 @@ describe(`UserActionTree`, () => {
 
       const wrapper = mount(
         <TestProviders>
-          <UserActionTree {...props} />
+          <UserActions {...props} />
         </TestProviders>
       );
       await waitFor(() => {
@@ -415,7 +415,7 @@ describe(`UserActionTree`, () => {
 
       const wrapper = mount(
         <TestProviders>
-          <UserActionTree {...props} />
+          <UserActions {...props} />
         </TestProviders>
       );
       await waitFor(() => {
@@ -435,7 +435,7 @@ describe(`UserActionTree`, () => {
 
       const wrapper = mount(
         <TestProviders>
-          <UserActionTree {...props} />
+          <UserActions {...props} />
         </TestProviders>
       );
       await waitFor(() => {
@@ -454,7 +454,7 @@ describe(`UserActionTree`, () => {
 
       const wrapper = mount(
         <TestProviders>
-          <UserActionTree {...props} />
+          <UserActions {...props} />
         </TestProviders>
       );
       await waitFor(() => {
