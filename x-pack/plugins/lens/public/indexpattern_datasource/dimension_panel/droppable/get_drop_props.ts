@@ -169,7 +169,7 @@ function getDropPropsForCompatibleGroup(
     dimensionGroups
       .find((group) => group.accessors.some((accessor) => accessor.columnId === sourceId))
       ?.filterOperations(targetColumn);
-  const swapType = canSwap ? ['swap_compatible' as const] : [];
+  const swapType: DropType[] = canSwap ? ['swap_compatible'] : [];
 
   if (!targetColumn) {
     return { dropTypes: ['move_compatible', 'duplicate_compatible', ...swapType] };
@@ -177,14 +177,15 @@ function getDropPropsForCompatibleGroup(
   if (!indexPattern || !hasField(targetColumn)) {
     return { dropTypes: ['replace_compatible', 'replace_duplicate_compatible', ...swapType] };
   }
+  const combineType: DropType[] = hasOperationSupportForMultipleFields(targetColumn, sourceColumn)
+    ? ['combine_compatible']
+    : [];
   return {
     dropTypes: [
       'replace_compatible',
       'replace_duplicate_compatible',
       ...swapType,
-      ...(hasOperationSupportForMultipleFields(targetColumn, sourceColumn)
-        ? ['combine_compatible']
-        : []),
+      ...combineType,
     ] as DropType[],
   };
 }
@@ -208,7 +209,7 @@ function getDropPropsFromIncompatibleGroup({
 
   if (newOperationForSource) {
     const targetField = getField(targetColumn, layerIndexPattern);
-    const canSwap = !!getNewOperation(targetField, dragging.filterOperations, sourceColumn);
+    const canSwap = Boolean(getNewOperation(targetField, dragging.filterOperations, sourceColumn));
 
     const dropTypes: DropType[] = [];
     if (targetColumn) {

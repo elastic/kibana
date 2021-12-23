@@ -87,10 +87,13 @@ function onCombineCompatible({
     return false;
   }
   // pass it to the target column and delete the source column
-  const incompleteParams = getOperationHelperForMultipleFields(targetColumn.operationType)?.({
-    targetColumn,
-    sourceColumn,
-  });
+  const initialParams = {
+    params:
+      getOperationHelperForMultipleFields(targetColumn.operationType)?.({
+        targetColumn,
+        sourceColumn,
+      }) ?? {},
+  };
 
   const modifiedLayer = replaceColumn({
     layer,
@@ -100,7 +103,7 @@ function onCombineCompatible({
     field: targetField,
     visualizationGroups: dimensionGroups,
     targetGroup: groupId,
-    incompleteParams,
+    initialParams,
     shouldCombineField: true,
   });
   const newLayer = deleteColumn({
@@ -153,12 +156,15 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boo
     return false;
   }
   const field = shouldAddField ? getField(targetColumn, indexPattern) : droppedItem.field;
-  const incompleteParams = shouldAddField
-    ? getOperationHelperForMultipleFields(targetColumn.operationType)?.({
-        targetColumn,
-        field: droppedItem.field,
-      }) || {}
-    : {};
+  const initialParams = shouldAddField
+    ? {
+        params:
+          getOperationHelperForMultipleFields(targetColumn.operationType)?.({
+            targetColumn,
+            field: droppedItem.field,
+          }) || {},
+      }
+    : undefined;
 
   const newLayer = insertOrReplaceColumn({
     layer,
@@ -169,7 +175,7 @@ function onFieldDrop(props: DropHandlerProps<DraggedField>, shouldAddField?: boo
     visualizationGroups: dimensionGroups,
     targetGroup: groupId,
     shouldCombineField: shouldAddField,
-    incompleteParams,
+    initialParams,
   });
 
   trackUiEvent('drop_onto_dimension');

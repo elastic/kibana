@@ -96,7 +96,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       secondaryFields.add(field.name);
     }
     return {
-      secondaryFields: [...secondaryFields.keys()].filter((f) => targetColumn.sourceField !== f),
+      secondaryFields: [...secondaryFields].filter((f) => targetColumn.sourceField !== f),
     };
   },
   canAddNewField: ({ targetColumn, sourceColumn, field }) => {

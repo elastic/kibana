@@ -375,7 +375,7 @@ export function replaceColumn({
   op,
   field,
   visualizationGroups,
-  incompleteParams,
+  initialParams,
   shouldResetLabel,
   shouldCombineField,
 }: ColumnChange): IndexPatternLayer {
@@ -655,7 +655,7 @@ export function replaceColumn({
     let newColumn = operationDefinition.onFieldChange(
       previousColumn,
       field,
-      shouldCombineField ? incompleteParams : undefined
+      shouldCombineField ? initialParams?.params : undefined
     );
     if (!shouldResetLabel) {
       newColumn = copyCustomLabel(newColumn, previousColumn);
