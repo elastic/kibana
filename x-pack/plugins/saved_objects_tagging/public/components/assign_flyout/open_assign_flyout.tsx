@@ -7,13 +7,14 @@
 
 import React from 'react';
 import { EuiDelayRender, EuiLoadingSpinner } from '@elastic/eui';
-import { NotificationsStart, OverlayStart, OverlayRef } from 'src/core/public';
+import { NotificationsStart, OverlayStart, ThemeServiceStart, OverlayRef } from 'src/core/public';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { ITagAssignmentService, ITagsCache } from '../../services';
 
 export interface GetAssignFlyoutOpenerOptions {
   overlays: OverlayStart;
   notifications: NotificationsStart;
+  theme: ThemeServiceStart;
   tagCache: ITagsCache;
   assignmentService: ITagAssignmentService;
   assignableTypes: string[];
@@ -42,6 +43,7 @@ export const getAssignFlyoutOpener =
   ({
     overlays,
     notifications,
+    theme,
     tagCache,
     assignmentService,
     assignableTypes,
@@ -58,7 +60,8 @@ export const getAssignFlyoutOpener =
             assignmentService={assignmentService}
             onClose={() => flyout.close()}
           />
-        </React.Suspense>
+        </React.Suspense>,
+        { theme$: theme.theme$ }
       ),
       { size: 'm', maxWidth: 600 }
     );
