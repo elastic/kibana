@@ -12,41 +12,17 @@ import {
   EuiCommentList,
   EuiCommentProps,
 } from '@elastic/eui';
-import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
 import classNames from 'classnames';
-import { get, isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { isRight } from 'fp-ts/Either';
-
-import * as i18n from './translations';
 
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../common/lib/kibana';
 import { AddComment, AddCommentRefObject } from '../add_comment';
 import { Case, CaseUserActions, Ecs } from '../../../common/ui/types';
-import {
-  ActionConnector,
-  Actions,
-  ActionsCommentRequestRt,
-  AlertCommentRequestRt,
-  CommentType,
-  ContextTypeUserRt,
-} from '../../../common/api';
+import { ActionConnector } from '../../../common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
-import {
-  getConnectorLabelTitle,
-  getLabelTitle,
-  getPushedServiceLabelTitle,
-  getPushInfo,
-  getUpdateAction,
-  getAlertAttachment,
-  getGeneratedAlertsAttachment,
-  RuleDetailsNavigation,
-  ActionsNavigation,
-  getActionAttachment,
-} from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown, UserActionMarkdownRefObject } from './user_action_markdown';
 import { UserActionTimestamp } from './user_action_timestamp';
@@ -55,8 +31,11 @@ import { UserActionContentToolbar } from './user_action_content_toolbar';
 import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 import { useCaseViewParams } from '../../common/navigation';
-import { isConnectorUserAction, isPushedUserAction } from '../../../common/utils/user_actions';
 import type { OnUpdateFields } from '../case_view/types';
+import { builderMap } from './builder';
+import { ActionsNavigation, RuleDetailsNavigation } from './types';
+import * as i18n from './translations';
+import { isUserActionTypeSupported } from './helpers';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -338,258 +317,33 @@ export const UserActions = React.memo(
     const userActions: EuiCommentProps[] = useMemo(
       () =>
         caseUserActions.reduce<EuiCommentProps[]>(
-          // TODO: Decrease complexity. https://github.com/elastic/kibana/issues/115730
-          // eslint-disable-next-line complexity
-          (comments, action, index) => {
-            // Comment creation
-            if (action.commentId != null && action.action === Actions.create) {
-              const comment = caseData.comments.find((c) => c.id === action.commentId);
-              if (
-                comment != null &&
-                isRight(ContextTypeUserRt.decode(comment)) &&
-                comment.type === CommentType.user
-              ) {
-                return [
-                  ...comments,
-                  {
-                    username: (
-                      <UserActionUsername
-                        username={comment.createdBy.username}
-                        fullName={comment.createdBy.fullName}
-                      />
-                    ),
-                    'data-test-subj': `comment-create-action-${comment.id}`,
-                    timestamp: (
-                      <UserActionTimestamp
-                        createdAt={comment.createdAt}
-                        updatedAt={comment.updatedAt}
-                      />
-                    ),
-                    className: classNames('userAction__comment', {
-                      outlined: comment.id === selectedOutlineCommentId,
-                      isEdit: manageMarkdownEditIds.includes(comment.id),
-                    }),
-                    children: (
-                      <UserActionMarkdown
-                        ref={(element) => (commentRefs.current[comment.id] = element)}
-                        id={comment.id}
-                        content={comment.comment}
-                        isEditable={manageMarkdownEditIds.includes(comment.id)}
-                        onChangeEditable={handleManageMarkdownEditId}
-                        onSaveContent={handleSaveComment.bind(null, {
-                          id: comment.id,
-                          version: comment.version,
-                        })}
-                      />
-                    ),
-                    timelineIcon: (
-                      <UserActionAvatar
-                        username={comment.createdBy.username}
-                        fullName={comment.createdBy.fullName}
-                      />
-                    ),
-                    actions: (
-                      <UserActionContentToolbar
-                        id={comment.id}
-                        commentMarkdown={comment.comment}
-                        editLabel={i18n.EDIT_COMMENT}
-                        quoteLabel={i18n.QUOTE}
-                        isLoading={isLoadingIds.includes(comment.id)}
-                        onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
-                        onQuote={handleManageQuote.bind(null, comment.comment)}
-                        userCanCrud={userCanCrud}
-                      />
-                    ),
-                  },
-                ];
-              } else if (
-                comment != null &&
-                isRight(AlertCommentRequestRt.decode(comment)) &&
-                comment.type === CommentType.alert
-              ) {
-                // TODO: clean this up
-                const alertId = Array.isArray(comment.alertId)
-                  ? comment.alertId.length > 0
-                    ? comment.alertId[0]
-                    : ''
-                  : comment.alertId;
-
-                const alertIndex = Array.isArray(comment.index)
-                  ? comment.index.length > 0
-                    ? comment.index[0]
-                    : ''
-                  : comment.index;
-
-                if (isEmpty(alertId)) {
-                  return comments;
-                }
-
-                const ruleId =
-                  comment?.rule?.id ??
-                  manualAlertsData[alertId]?.signal?.rule?.id?.[0] ??
-                  get(manualAlertsData[alertId], ALERT_RULE_UUID)[0] ??
-                  null;
-                const ruleName =
-                  comment?.rule?.name ??
-                  manualAlertsData[alertId]?.signal?.rule?.name?.[0] ??
-                  get(manualAlertsData[alertId], ALERT_RULE_NAME)[0] ??
-                  null;
-
-                return [
-                  ...comments,
-                  ...(getRuleDetailsHref != null
-                    ? [
-                        getAlertAttachment({
-                          action,
-                          alertId,
-                          getRuleDetailsHref,
-                          index: alertIndex,
-                          loadingAlertData,
-                          onRuleDetailsClick,
-                          ruleId,
-                          ruleName,
-                          onShowAlertDetails,
-                        }),
-                      ]
-                    : []),
-                ];
-              } else if (comment != null && comment.type === CommentType.generatedAlert) {
-                // TODO: clean this up
-                const alertIds = Array.isArray(comment.alertId)
-                  ? comment.alertId
-                  : [comment.alertId];
-
-                if (isEmpty(alertIds)) {
-                  return comments;
-                }
-
-                return [
-                  ...comments,
-                  ...(getRuleDetailsHref != null
-                    ? [
-                        getGeneratedAlertsAttachment({
-                          action,
-                          alertIds,
-                          getRuleDetailsHref,
-                          onRuleDetailsClick,
-                          renderInvestigateInTimelineActionComponent,
-                          ruleId: comment.rule?.id ?? '',
-                          ruleName: comment.rule?.name ?? i18n.UNKNOWN_RULE,
-                        }),
-                      ]
-                    : []),
-                ];
-              } else if (
-                comment != null &&
-                isRight(ActionsCommentRequestRt.decode(comment)) &&
-                comment.type === CommentType.actions
-              ) {
-                return [
-                  ...comments,
-                  ...(comment.actions !== null
-                    ? [
-                        getActionAttachment({
-                          comment,
-                          userCanCrud,
-                          isLoadingIds,
-                          actionsNavigation,
-                          action,
-                        }),
-                      ]
-                    : []),
-                ];
-              }
-            }
-
-            // Connectors
-            if (isConnectorUserAction(action)) {
-              const label = getConnectorLabelTitle({ action, connectors });
-              return [
-                ...comments,
-                getUpdateAction({
-                  action,
-                  label,
-                  handleOutlineComment,
-                }),
-              ];
-            }
-
-            // Pushed information
-            if (isPushedUserAction<'camelCase'>(action)) {
-              const parsedExternalService = action.payload.externalService;
-
-              const { firstPush, parsedConnectorId, parsedConnectorName } = getPushInfo(
+          (comments, userAction, index) => {
+            if (isUserActionTypeSupported(userAction.type)) {
+              const builder = builderMap[userAction.type];
+              const userActionBuilder = builder({
+                caseData,
+                userAction,
                 caseServices,
-                parsedExternalService,
-                index
-              );
-
-              const label = getPushedServiceLabelTitle(action, firstPush);
-
-              const showTopFooter =
-                action.action === Actions.push_to_service &&
-                index === caseServices[parsedConnectorId]?.lastPushIndex;
-
-              const showBottomFooter =
-                action.action === Actions.push_to_service &&
-                index === caseServices[parsedConnectorId]?.lastPushIndex &&
-                caseServices[parsedConnectorId].hasDataToPush;
-
-              let footers: EuiCommentProps[] = [];
-
-              if (showTopFooter) {
-                footers = [
-                  ...footers,
-                  {
-                    username: '',
-                    type: 'update',
-                    event: i18n.ALREADY_PUSHED_TO_SERVICE(`${parsedConnectorName}`),
-                    timelineIcon: 'sortUp',
-                    'data-test-subj': 'top-footer',
-                  },
-                ];
-              }
-
-              if (showBottomFooter) {
-                footers = [
-                  ...footers,
-                  {
-                    username: '',
-                    type: 'update',
-                    event: i18n.REQUIRED_UPDATE_TO_SERVICE(`${parsedConnectorName}`),
-                    timelineIcon: 'sortDown',
-                    'data-test-subj': 'bottom-footer',
-                  },
-                ];
-              }
-
-              return [
-                ...comments,
-                getUpdateAction({
-                  action,
-                  label,
-                  handleOutlineComment,
-                }),
-                ...footers,
-              ];
-            }
-
-            // title, description, comment updates, tags
-            if (['title', 'description', 'comment', 'tags', 'status'].includes(action.type)) {
-              const label: string | JSX.Element = getLabelTitle({
-                action,
+                comments: caseData.comments,
+                index,
+                userCanCrud,
+                commentRefs,
+                manageMarkdownEditIds,
+                selectedOutlineCommentId,
+                isLoadingIds,
+                loadingAlertData,
+                alertData: manualAlertsData,
+                handleOutlineComment,
+                handleManageMarkdownEditId,
+                handleSaveComment,
+                handleManageQuote,
+                onShowAlertDetails,
+                actionsNavigation,
+                getRuleDetailsHref,
+                onRuleDetailsClick,
               });
-
-              return [
-                ...comments,
-                getUpdateAction({
-                  action,
-                  label,
-                  handleOutlineComment,
-                }),
-              ];
+              return [...comments, ...userActionBuilder.build()];
             }
-
             return comments;
           },
           [descriptionCommentListObj]
@@ -597,24 +351,22 @@ export const UserActions = React.memo(
       [
         caseUserActions,
         descriptionCommentListObj,
-        caseData.comments,
-        selectedOutlineCommentId,
+        caseData,
+        caseServices,
+        userCanCrud,
         manageMarkdownEditIds,
+        selectedOutlineCommentId,
+        isLoadingIds,
+        loadingAlertData,
+        manualAlertsData,
+        handleOutlineComment,
         handleManageMarkdownEditId,
         handleSaveComment,
-        actionsNavigation,
-        userCanCrud,
-        isLoadingIds,
         handleManageQuote,
-        manualAlertsData,
-        getRuleDetailsHref,
-        loadingAlertData,
-        onRuleDetailsClick,
         onShowAlertDetails,
-        renderInvestigateInTimelineActionComponent,
-        connectors,
-        handleOutlineComment,
-        caseServices,
+        actionsNavigation,
+        getRuleDetailsHref,
+        onRuleDetailsClick,
       ]
     );
 

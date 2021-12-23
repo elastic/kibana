@@ -18,6 +18,7 @@ import {
   CaseExternalServiceBasic,
   CaseUserActionResponse,
   CaseMetricsResponse,
+  CommentResponse,
 } from '../api';
 import { SnakeToCamelCase } from '../types';
 
@@ -62,18 +63,7 @@ export type CaseViewRefreshPropInterface = null | {
   refreshCase: () => Promise<void>;
 };
 
-export type Comment = CommentRequest & {
-  associationType: AssociationType;
-  id: string;
-  createdAt: string;
-  createdBy: ElasticUser;
-  pushedAt: string | null;
-  pushedBy: string | null;
-  updatedAt: string | null;
-  updatedBy: ElasticUser | null;
-  version: string;
-};
-
+export type Comment = SnakeToCamelCase<CommentResponse>;
 export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
 export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
 

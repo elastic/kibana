@@ -5,4 +5,13 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
+import { ActionTypes } from '../../../common/api';
+import { SupportedUserActionTypes } from './types';
+
 export const DRAFT_COMMENT_STORAGE_ID = 'xpack.cases.commentDraft';
+
+export const UNSUPPORTED_ACTION_TYPES = ['create_case', 'delete_case', 'settings'] as const;
+export const SUPPORTED_ACTION_TYPES: SupportedUserActionTypes[] = Object.keys(
+  omit(ActionTypes, UNSUPPORTED_ACTION_TYPES)
+) as SupportedUserActionTypes[];
