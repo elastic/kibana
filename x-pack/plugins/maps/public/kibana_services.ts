@@ -38,7 +38,7 @@ export const getToasts = () => coreStart.notifications.toasts;
 export const getSavedObjectsClient = () => coreStart.savedObjects.client;
 export const getCoreChrome = () => coreStart.chrome;
 export const getMapsCapabilities = () => coreStart.application.capabilities.maps;
-export const getVisualizeCapabilities = () => coreStart.application.capabilities.visualizations;
+export const getVisualizeCapabilities = () => coreStart.application.capabilities.visualize;
 export const getDocLinks = () => coreStart.docLinks;
 export const getCoreOverlays = () => coreStart.overlays;
 export const getData = () => pluginsStart.data;

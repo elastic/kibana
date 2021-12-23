@@ -14,7 +14,8 @@ import {
   syncState,
   IKbnUrlStateStorage,
 } from '../../../../kibana_utils/public';
-import { PureVisState, VisualizeAppState, VisualizeAppStateTransitions } from '../types';
+import type { SavedVisState } from '../../types';
+import type { VisualizeAppState, VisualizeAppStateTransitions } from '../types';
 
 const STATE_STORAGE_KEY = '_a';
 
@@ -24,10 +25,10 @@ interface Arguments {
   byValue?: boolean;
 }
 
-function toObject(state: PureVisState): PureVisState {
+function toObject(state: SavedVisState): SavedVisState {
   return omitBy(state, (value, key: string) => {
     return key.charAt(0) === '$' || key.charAt(0) === '_' || isFunction(value);
-  }) as PureVisState;
+  }) as SavedVisState;
 }
 
 const pureTransitions = {

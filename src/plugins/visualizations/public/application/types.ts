@@ -46,13 +46,13 @@ import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/
 import type { UsageCollectionStart } from '../../../usage_collection/public';
 import type { SavedSearch } from '../../../discover/public';
 
-import type { PureVisState } from '../../common/types';
+import type { SavedVisState } from '../types';
 import type { createVisEmbeddableFromObject } from '../embeddable';
 
 export interface VisualizeAppState {
   filters: Filter[];
   uiState: SerializableRecord;
-  vis: PureVisState;
+  vis: SavedVisState;
   query: Query;
   savedQuery?: string;
   linked: boolean;
@@ -65,11 +65,11 @@ export interface VisualizeAppStateTransitions {
     prop: T,
     value: VisualizeAppState[T]
   ) => VisualizeAppState;
-  setVis: (state: VisualizeAppState) => (vis: Partial<PureVisState>) => VisualizeAppState;
+  setVis: (state: VisualizeAppState) => (vis: Partial<SavedVisState>) => VisualizeAppState;
   unlinkSavedSearch: (
     state: VisualizeAppState
   ) => ({ query, parentFilters }: { query?: Query; parentFilters?: Filter[] }) => VisualizeAppState;
-  updateVisState: (state: VisualizeAppState) => (vis: PureVisState) => VisualizeAppState;
+  updateVisState: (state: VisualizeAppState) => (vis: SavedVisState) => VisualizeAppState;
   updateSavedQuery: (state: VisualizeAppState) => (savedQueryId?: string) => VisualizeAppState;
 }
 
@@ -142,5 +142,3 @@ export interface EditorRenderProps {
    */
   linked: boolean;
 }
-
-export type { PureVisState };

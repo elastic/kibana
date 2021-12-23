@@ -17,7 +17,7 @@ import type { LocatorDefinition, LocatorPublic } from 'src/plugins/share/common'
 import { isFilterPinned } from '../../data/common';
 import { url } from '../../kibana_utils/common';
 import { GLOBAL_STATE_STORAGE_KEY, STATE_STORAGE_KEY, VisualizeConstants } from './constants';
-import { PureVisState } from './types';
+import type { SavedVisState } from './types';
 
 const removeEmptyKeys = (o: Record<string, Serializable>): Record<string, Serializable> =>
   omitBy(o, (v) => v == null);
@@ -59,7 +59,7 @@ export type VisualizeLocatorParams = {
    *
    * @note This is required to navigate to "create" page (i.e., when no `visId` has been provided).
    */
-  vis?: PureVisState;
+  vis?: SavedVisState;
 
   /**
    * Whether this visualization is linked a saved search.

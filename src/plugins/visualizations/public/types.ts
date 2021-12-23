@@ -17,7 +17,7 @@ import {
   ToastsStart,
 } from 'kibana/public';
 import type { Storage, IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
-import { History } from 'history';
+import type { History } from 'history';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
 import type { SharePluginStart } from 'src/plugins/share/public';
 import type { SavedObjectsStart } from 'src/plugins/saved_objects/public';
@@ -31,7 +31,7 @@ import type { SavedObjectsTaggingApi } from '../../saved_objects_tagging_oss/pub
 import type { VisParams } from '../common';
 import type { PersistedState } from './persisted_state';
 import type { SerializedVis, Vis } from './vis';
-import { ExpressionAstExpression } from '../../expressions/public';
+import type { ExpressionAstExpression } from '../../expressions/public';
 import type { ISearchSource } from '../../data/common';
 import {
   IAggConfigs,

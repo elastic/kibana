@@ -154,7 +154,6 @@ export class VisualizationsPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private isLinkedToOriginatingApp: (() => boolean) | undefined = undefined;
-
   private readonly visEditorsRegistry = createVisEditorsRegistry();
 
   constructor(private initializerContext: PluginInitializerContext) {}
