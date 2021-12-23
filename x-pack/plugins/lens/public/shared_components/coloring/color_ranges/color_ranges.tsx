@@ -40,13 +40,16 @@ const toLocalState = (
   continuity: paletteConfiguration?.continuity ?? 'none',
 });
 
-const getErrorMessage = (
-  colorRangesValidity: Record<string, ColorRangeValidation>
-): string | undefined => {
-  const firstError = Object.values(colorRangesValidity).find((item) => !item.isValid);
-
-  if (firstError) {
-    switch (firstError.errors[0]) {
+const getErrorMessages = (colorRangesValidity: Record<string, ColorRangeValidation>) => {
+  return [
+    ...new Set(
+      Object.values(colorRangesValidity).reduce<ColorRangeValidation['errors']>(
+        (acc, item) => [...acc, ...item.errors],
+        []
+      )
+    ),
+  ].map((item) => {
+    switch (item) {
       case 'invalidColor':
       case 'invalidValue':
         return i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidValueOrColor', {
@@ -56,9 +59,10 @@ const getErrorMessage = (
         return i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidMaxValue', {
           defaultMessage: 'Maximum value should be greater than preceding values',
         });
+      default:
+        return '';
     }
-  }
-  return undefined;
+  });
 };
 
 export function ColorRanges({
@@ -122,7 +126,6 @@ export function ColorRanges({
   );
 
   const lastColorRange = last(localState.colorRanges);
-  const error = getErrorMessage(colorRangesValidity);
 
   return (
     <EuiFlexGroup
@@ -160,7 +163,9 @@ export function ColorRanges({
         />
       ) : null}
       <EuiFlexItem grow={false}>
-        {error ? <EuiTextColor color="danger">{error}</EuiTextColor> : null}
+        {getErrorMessages(colorRangesValidity).map((error) => (
+          <EuiTextColor color="danger">{error}</EuiTextColor>
+        ))}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <ColorRangesFooter
