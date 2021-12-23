@@ -377,6 +377,7 @@ export function AddFilterModal({
       applySavedQueries();
     }
   };
+  // console.dir(localFilters);
 
   const renderGroupedFilters = () => {
     const groupedFiltersNew = groupBy(localFilters, 'groupId');
@@ -419,7 +420,10 @@ export function AddFilterModal({
                   display="base"
                   onClick={() => {
                     const updatedLocalFilter = { ...localfilter, relationship: 'AND' };
-                    localFilters[index] = updatedLocalFilter;
+                    const idx = localFilters.findIndex(
+                      (f) => f.id === index && f.groupId === Number(groupId)
+                    );
+                    localFilters[idx] = updatedLocalFilter;
                     setLocalFilters([
                       ...localFilters,
                       {
