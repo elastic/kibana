@@ -7,23 +7,16 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import {
-  EuiButtonIcon,
-  EuiDualRange,
-  EuiText,
-  EuiPopover,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiDualRange, EuiText } from '@elastic/eui';
 import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
 import { i18n } from '@kbn/i18n';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { epochToKbnDateFormat, getInterval, getTicks, newTicks, getTimeRanges } from './time_utils';
+import { epochToKbnDateFormat, getInterval, getTicks, newTicks } from './time_utils';
 import { TimeRange, TimeRangeBounds } from '../../../../../../src/plugins/data/common';
 import { getTimeFilter } from '../../kibana_services';
 import { Timeslice } from '../../../common/descriptor_types';
+import { TimeSliderPopover } from './timeslider_popover';
 
 export interface Props {
   closeTimeslider: () => void;
@@ -199,56 +192,6 @@ class KeyedTimeslider extends Component<Props, State> {
     });
   }
 
-  _togglePopover = () => {
-    this.setState((prevState) => ({
-      isPopoverOpen: !prevState.isPopoverOpen,
-    }));
-  };
-
-  _closePopover = () => {
-    this.setState({
-      isPopoverOpen: false,
-    });
-  };
-
-  _renderFilteredPeriods = () => {
-    const filteredPeriods = getTimeRanges(this.defaultRange.timeRangeBounds).map(
-      (range: { label: string; ms: number }, index: number) => {
-        return (
-          <EuiContextMenuItem
-            key={index}
-            onClick={() => {
-              this._updateTimeRange(range);
-            }}
-          >
-            {range.label}
-          </EuiContextMenuItem>
-        );
-      }
-    );
-
-    filteredPeriods?.unshift(
-      <EuiContextMenuItem
-        key="default"
-        onClick={() => {
-          this._updateTimeRange({
-            label: i18n.translate('xpack.maps.timeslider.autoPeriod', {
-              defaultMessage: 'Auto',
-            }),
-            ms: 0,
-            default: true,
-          });
-        }}
-      >
-        {i18n.translate('xpack.maps.timeslider.autoPeriod', {
-          defaultMessage: 'Auto',
-        })}
-      </EuiContextMenuItem>
-    );
-
-    return filteredPeriods;
-  };
-
   _updateTimeRange = (data: { label: string; ms: number; default?: boolean }) => {
     if (!data.default) {
       const updatedTicks = newTicks(this.defaultRange.min, this.defaultRange.max, data.ms);
@@ -258,19 +201,17 @@ class KeyedTimeslider extends Component<Props, State> {
         max: updatedTicks[updatedTicks.length - 1].value,
         ticks: updatedTicks,
         step: data.ms,
-        rangeButtonMsg: data.label,
       });
+      this._onChange([updatedTicks[0].value, updatedTicks[1].value]);
     } else {
       this.setState({
         min: this.defaultRange.min,
         max: this.defaultRange.max,
         ticks: this.defaultRange.ticks,
         step: this.defaultRange.step,
-        rangeButtonMsg: this.defaultRange.rangeButtonMsg,
       });
+      this._onChange([this.defaultRange.ticks[0].value, this.defaultRange.ticks[1].value]);
     }
-
-    this._closePopover();
   };
 
   render() {
@@ -291,30 +232,10 @@ class KeyedTimeslider extends Component<Props, State> {
             })}
           />
 
-          {this._renderFilteredPeriods()?.length > 0 && (
-            <div className="mapTimeslider__timeRange">
-              <EuiPopover
-                id="metricsPopover"
-                isOpen={this.state.isPopoverOpen}
-                closePopover={this._closePopover}
-                panelPaddingSize="none"
-                ownFocus
-                anchorPosition="upCenter"
-                button={
-                  <EuiButton
-                    iconType="controlsVertical"
-                    size="s"
-                    className="mapTimeslider__euiButton-controls"
-                    onClick={this._togglePopover}
-                  >
-                    {this.state.rangeButtonMsg}
-                  </EuiButton>
-                }
-              >
-                <EuiContextMenuPanel size="s" items={this._renderFilteredPeriods()} />
-              </EuiPopover>
-            </div>
-          )}
+          <TimeSliderPopover
+            timeRangeBounds={this.defaultRange.timeRangeBounds}
+            handler={this._updateTimeRange}
+          />
 
           <div className="mapTimeslider__timeWindow">
             <EuiText size="s">{prettyPrintTimeslice(this.state.timeslice)}</EuiText>

@@ -44,7 +44,10 @@ $timesliderWidth: 650px;
 .mapTimeslider__timeRange {
   display: inline-flex;
   align-items: center;
-  margin-right: 10px;
+
+  > .euiPopover {
+    margin-right: 10px;
+  }
 }
 
 .mapTimeslider__timeWindow {
