@@ -109,6 +109,9 @@ describe('the InfraSources lib', () => {
 });
 
 const createMockStaticConfiguration = (sources: any) => ({
+  alerting: {
+    group_by_page_size: 10000,
+  },
   enabled: true,
   inventory: {
     compositeSize: 2000,
