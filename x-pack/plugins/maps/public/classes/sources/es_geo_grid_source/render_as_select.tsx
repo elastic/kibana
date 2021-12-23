@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RENDER_AS } from '../../../../common/constants';
 
 const options = [
   {
+    id: 'clusters',
     label: i18n.translate('xpack.maps.source.esGeoGrid.pointsDropdownOption', {
       defaultMessage: 'clusters',
     }),
     value: RENDER_AS.POINT,
   },
   {
+    id: 'grids',
     label: i18n.translate('xpack.maps.source.esGeoGrid.gridRectangleDropdownOption', {
       defaultMessage: 'grids',
     }),
@@ -30,21 +32,17 @@ export function RenderAsSelect(props: {
   onChange: (newValue: RENDER_AS) => void;
   isColumnCompressed?: boolean;
 }) {
+  const currentOption = options.find((option) => option.value === props.renderAs) || options[0];
+  const [selectedOption, setSelectedOption] = useState(currentOption.id);
+
   if (props.renderAs === RENDER_AS.HEATMAP) {
     return null;
   }
 
-  function onChange(selectedOptions: Array<EuiComboBoxOptionOption<RENDER_AS>>) {
-    if (!selectedOptions || !selectedOptions.length) {
-      return;
-    }
-    props.onChange(selectedOptions[0].value as RENDER_AS);
-  }
-
-  const selectedOptions = [];
-  const selectedOption = options.find((option) => option.value === props.renderAs);
-  if (selectedOption) {
-    selectedOptions.push(selectedOption);
+  function onChange(id: string) {
+    const data = options.find((option) => option.id === id);
+    props.onChange(data?.value as RENDER_AS);
+    setSelectedOption(id);
   }
 
   return (
@@ -54,13 +52,16 @@ export function RenderAsSelect(props: {
       })}
       display={props.isColumnCompressed ? 'columnCompressed' : 'row'}
     >
-      <EuiComboBox
-        singleSelection={{ asPlainText: true }}
+      <EuiButtonGroup
+        type="single"
+        legend={i18n.translate('xpack.maps.source.esGeoGrid.showAsSelector', {
+          defaultMessage: 'Choose the view',
+        })}
         options={options}
-        selectedOptions={selectedOptions}
-        onChange={onChange}
-        isClearable={false}
-        compressed
+        idSelected={selectedOption}
+        onChange={(id: string) => onChange(id)}
+        isFullWidth={true}
+        buttonSize="compressed"
       />
     </EuiFormRow>
   );
