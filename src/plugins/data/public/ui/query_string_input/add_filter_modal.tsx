@@ -397,7 +397,10 @@ export function AddFilterModal({
                 <EuiButtonIcon
                   onClick={() => {
                     const updatedLocalFilter = { ...localfilter, relationship: 'OR' };
-                    localFilters[index] = updatedLocalFilter;
+                    const idx = localFilters.findIndex(
+                      (f) => f.id === localfilter.id && f.groupId === Number(groupId)
+                    );
+                    localFilters[idx] = updatedLocalFilter;
                     setLocalFilters([
                       ...localFilters,
                       {
@@ -446,10 +449,13 @@ export function AddFilterModal({
                   <EuiButtonIcon
                     display="base"
                     onClick={() => {
-                      if (index > 0) {
-                        localFilters[index - 1].relationship = 'AND';
+                      const currentIdx = localFilters.findIndex((f) => f.id === localfilter.id);
+                      if (currentIdx > 0) {
+                        localFilters[currentIdx - 1].relationship = 'AND';
                       }
-                      const updatedFilters = localFilters.filter((_, idx) => idx !== index);
+                      const updatedFilters = localFilters.filter(
+                        (_, idx) => idx !== localfilter.id
+                      );
                       setLocalFilters(updatedFilters);
                     }}
                     iconType="trash"
@@ -460,7 +466,7 @@ export function AddFilterModal({
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
-            {localfilter?.relationship && localfilter.relationship === 'OR' ? (
+            {localfilter.relationship && localfilter.relationship === 'OR' ? (
               <>
                 <EuiFlexGroup gutterSize="none">
                   <EuiFlexItem>
