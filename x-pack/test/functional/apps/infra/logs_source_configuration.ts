@@ -98,6 +98,35 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(logStreamEntryColumns).to.have.length(3);
       });
 
+<<<<<<< HEAD
+=======
+      it('records telemetry for logs', async () => {
+        await logsUi.logStreamPage.navigateTo({
+          logPosition: {
+            start: DATES.metricsAndLogs.stream.startWithData,
+            end: DATES.metricsAndLogs.stream.endWithData,
+          },
+        });
+
+        await logsUi.logStreamPage.getStreamEntries();
+
+        const [{ stats }] = await supertest
+          .post(`/api/telemetry/v2/clusters/_stats`)
+          .set(COMMON_REQUEST_HEADERS)
+          .set('Accept', 'application/json')
+          .send({
+            unencrypted: true,
+            refreshCache: true,
+          })
+          .expect(200)
+          .then((res: any) => res.body);
+
+        expect(stats.stack_stats.kibana.plugins.infraops.last_24_hours.hits.logs).to.be.greaterThan(
+          0
+        );
+      });
+
+>>>>>>> acb8e54d479 ([Telemetry] Ensure `refreshCache: true` in tests and helpers (#121913))
       it('can change the log columns', async () => {
         await pageObjects.infraLogs.navigateToTab('settings');
 
