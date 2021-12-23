@@ -7,7 +7,6 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { UnwrapPromise } from '@kbn/utility-types';
 
 import {
   MetricsServiceSetup,
@@ -26,7 +25,7 @@ import supertest from 'supertest';
 import { CollectorSet } from '../../collector';
 
 type HttpService = ReturnType<typeof createHttpServer>;
-type HttpSetup = UnwrapPromise<ReturnType<HttpService['setup']>>;
+type HttpSetup = Awaited<ReturnType<HttpService['setup']>>;
 
 describe('/api/stats', () => {
   let server: HttpService;

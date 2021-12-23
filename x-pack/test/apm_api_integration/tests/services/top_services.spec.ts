@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import { apm, timerange } from '@elastic/apm-synthtrace';
 import { APIReturnType } from '../../../../plugins/apm/public/services/rest/createCallApmApi';
-import { PromiseReturnType } from '../../../../plugins/observability/typings/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { ENVIRONMENT_ALL } from '../../../../plugins/apm/common/environment_filter_values';
@@ -339,7 +338,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('with a user that does not have access to ML', () => {
-        let response: PromiseReturnType<typeof supertest.get>;
+        let response: Awaited<ReturnType<typeof supertest.get>>;
         before(async () => {
           response = await supertestAsApmReadUserWithoutMlAccess.get(
             `/internal/apm/services?start=${archiveStart}&end=${archiveEnd}&environment=ENVIRONMENT_ALL&kuery=`
@@ -364,7 +363,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('and fetching a list of services with a filter', () => {
-        let response: PromiseReturnType<typeof supertest.get>;
+        let response: Awaited<ReturnType<typeof supertest.get>>;
         before(async () => {
           response = await supertest.get(
             `/internal/apm/services?environment=ENVIRONMENT_ALL&start=${archiveStart}&end=${archiveEnd}&kuery=${encodeURIComponent(

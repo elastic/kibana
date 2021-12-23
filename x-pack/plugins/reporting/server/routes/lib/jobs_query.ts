@@ -14,7 +14,6 @@ import {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { errors } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { UnwrapPromise } from '@kbn/utility-types';
 import { ElasticsearchClient } from 'src/core/server';
 import { PromiseType } from 'utility-types';
 import { ReportingCore } from '../../';
@@ -63,7 +62,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
 
   async function execQuery<
     T extends (client: ElasticsearchClient) => Promise<PromiseType<ReturnType<T>> | undefined>
-  >(callback: T): Promise<UnwrapPromise<ReturnType<T>> | undefined> {
+  >(callback: T): Promise<Awaited<ReturnType<T>> | undefined> {
     try {
       const { asInternalUser: client } = await reportingCore.getEsClient();
 

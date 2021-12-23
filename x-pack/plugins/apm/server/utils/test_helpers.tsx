@@ -6,7 +6,6 @@
  */
 
 import { APMConfig } from '../';
-import { PromiseReturnType } from '../../../observability/typings/common';
 import {
   ESSearchRequest,
   ESSearchResponse,
@@ -113,7 +112,7 @@ export async function inspectSearchParams(
   };
 }
 
-export type SearchParamsMock = PromiseReturnType<typeof inspectSearchParams>;
+export type SearchParamsMock = Awaited<ReturnType<typeof inspectSearchParams>>;
 
 export function mockNow(date: string | number | Date) {
   const fakeNow = new Date(date).getTime();

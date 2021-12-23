@@ -29,8 +29,7 @@ export default {
   decorators,
 };
 
-type UnwrapPromise<T> = T extends Promise<infer P> ? P : T;
-type EmbeddableType = UnwrapPromise<ReturnType<ControlGroupContainerFactory['create']>>;
+type EmbeddableType = Awaited<ReturnType<ControlGroupContainerFactory['create']>>;
 
 injectStorybookDataView(storybookFlightsDataView);
 replaceValueSuggestionMethod(getFlightOptionsAsync);

@@ -164,8 +164,3 @@ export interface MemoryRouterConfig {
   /** A callBack that will be called with the React Router instance once mounted  */
   onRouter?: (router: any) => void;
 }
-
-/**
- * Utility type: extracts returned type from a Promise.
- */
-export type UnwrapPromise<T> = T extends Promise<infer P> ? P : T;

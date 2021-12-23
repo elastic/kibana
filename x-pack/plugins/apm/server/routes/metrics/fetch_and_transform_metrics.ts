@@ -21,7 +21,6 @@ import {
 import { kqlQuery, rangeQuery } from '../../../../observability/server';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../observability/typings/common';
 
 type MetricsAggregationMap = Unionize<{
   min: AggregationOptionsByType['min'];
@@ -43,8 +42,8 @@ export type GenericMetricsRequest = APMEventESSearchRequest & {
   };
 };
 
-export type GenericMetricsChart = PromiseReturnType<
-  typeof fetchAndTransformMetrics
+export type GenericMetricsChart = Awaited<
+  ReturnType<typeof fetchAndTransformMetrics>
 >;
 
 export async function fetchAndTransformMetrics<T extends MetricAggs>({

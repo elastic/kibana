@@ -12,7 +12,6 @@ export type {
   TestBedConfig,
   AsyncTestBedConfig,
   SetupFunc,
-  UnwrapPromise,
   SyncSetupFunc,
   AsyncSetupFunc,
 } from './types';

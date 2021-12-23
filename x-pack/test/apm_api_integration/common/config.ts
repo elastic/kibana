@@ -10,7 +10,6 @@ import supertest from 'supertest';
 import { format, UrlObject } from 'url';
 import { SecurityServiceProvider } from 'test/common/services/security';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
-import { PromiseReturnType } from '../../../plugins/observability/typings/common';
 import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
 import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
@@ -24,7 +23,7 @@ export interface ApmFtrConfig {
   kibanaConfig?: Record<string, string | string[]>;
 }
 
-type SecurityService = PromiseReturnType<typeof SecurityServiceProvider>;
+type SecurityService = Awaited<ReturnType<typeof SecurityServiceProvider>>;
 
 function getLegacySupertestClient(kibanaServer: UrlObject, apmUser: ApmUser) {
   return async (context: InheritedFtrProviderContext) => {
@@ -136,4 +135,4 @@ export function createTestConfig(config: ApmFtrConfig) {
   };
 }
 
-export type ApmServices = PromiseReturnType<ReturnType<typeof createTestConfig>>['services'];
+export type ApmServices = Awaited<ReturnType<CreateTestConfig>>['services'];

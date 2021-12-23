@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { UnwrapPromise } from '@kbn/utility-types';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import * as Rx from 'rxjs';
@@ -20,7 +19,7 @@ import {
 import type { ReportingRequestHandlerContext } from '../../types';
 import { registerDiagnoseBrowser } from './browser';
 
-type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
 const devtoolMessage = 'DevTools listening on (ws://localhost:4000)';
 const fontNotFoundMessage = 'Could not find the default font';

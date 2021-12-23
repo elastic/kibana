@@ -6,7 +6,6 @@
  */
 
 import { of } from 'rxjs';
-import { UnwrapPromise } from '@kbn/utility-types';
 import { setupServer } from 'src/core/server/test_utils';
 import { API_GET_ILM_POLICY_STATUS } from '../../common/constants';
 import { securityMock } from '../../../security/server/mocks';
@@ -22,7 +21,7 @@ import {
 
 import { registerDeprecationsRoutes } from './deprecations';
 
-type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
 // https://github.com/elastic/kibana/issues/115881
 describe.skip(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
