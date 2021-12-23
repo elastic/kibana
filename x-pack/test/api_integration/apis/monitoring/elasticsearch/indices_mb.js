@@ -10,10 +10,12 @@ import relocatingShardsFixture from './fixtures/indices_shards_relocating';
 import relocationShardsAllFixture from './fixtures/indices_shards_relocating_all';
 import indicesRedClusterFixture from './fixtures/indices_red_cluster';
 import indicesRedClusterAllFixture from './fixtures/indices_red_cluster_all';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('indices mb', () => {
     describe('shard-relocation', () => {
@@ -25,11 +27,11 @@ export default function ({ getService }) {
       };
 
       before('load archive', () => {
-        return esArchiver.load(archive);
+        return setup(archive);
       });
 
       after('unload archive', () => {
-        return esArchiver.unload(archive);
+        return tearDown();
       });
 
       it('should summarize the non-system indices with stats', async () => {
