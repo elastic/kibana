@@ -16,6 +16,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiButton,
+  EuiPageContent,
 } from '@elastic/eui';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
@@ -27,6 +28,7 @@ import { PolicyEventFiltersEmptyUnassigned, PolicyEventFiltersEmptyUnexisting } 
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { getCurrentArtifactsLocation } from '../../../store/policy_details/selectors';
 import { PolicyEventFiltersFlyout } from '../flyout';
+import { PolicyEventFiltersList } from '../list';
 
 interface PolicyEventFiltersLayoutProps {
   policyItem?: ImmutableObject<PolicyData> | undefined;
@@ -144,6 +146,16 @@ export const PolicyEventFiltersLayout = React.memo<PolicyEventFiltersLayoutProps
         {urlParams.show === 'list' && (
           <PolicyEventFiltersFlyout policyItem={policyItem} onClose={handleOnCloseFlyout} />
         )}
+        <EuiSpacer size="l" />
+        <EuiPageContent
+          hasBorder={false}
+          hasShadow={false}
+          paddingSize="none"
+          color="transparent"
+          borderRadius="none"
+        >
+          <PolicyEventFiltersList policy={policyItem} />
+        </EuiPageContent>
       </div>
     );
   }
