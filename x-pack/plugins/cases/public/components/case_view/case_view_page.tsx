@@ -18,7 +18,7 @@ import { CaseStatuses, CaseAttributes, CaseType, CaseConnector } from '../../../
 import { Case, UpdateKey, UpdateByKey } from '../../../common/ui';
 import { EditableTitle } from '../header_page/editable_title';
 import { TagList } from '../tag_list';
-import { UserActionTree } from '../user_action_tree';
+import { UserActionTree } from '../user_actions';
 import { UserList } from '../user_list';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
