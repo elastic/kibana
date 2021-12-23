@@ -7,7 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 
@@ -116,7 +116,7 @@ const getModelSnapshotUpgradeStatus = async (
     const { body } = (await esClient.asCurrentUser.transport.request({
       method: 'GET',
       path: `/_ml/anomaly_detectors/${jobId}/model_snapshots/${snapshotId}/_upgrade/_stats`,
-    })) as ApiResponse<ModelSnapshotUpgradeStatus>;
+    })) as TransportResult<ModelSnapshotUpgradeStatus>;
 
     return body && body.model_snapshot_upgrades[0];
   } catch (err) {
