@@ -449,9 +449,9 @@ export class AlertingPlugin {
     data: DataPluginStart
   ): (request: KibanaRequest) => Services {
     return (request) => ({
-      data,
       savedObjectsClient: this.getScopedClientWithAlertSavedObjectType(savedObjects, request),
       scopedClusterClient: elasticsearch.client.asScoped(request),
+      searchSourceClient: data.search.searchSource.asScoped(request),
     });
   }
 

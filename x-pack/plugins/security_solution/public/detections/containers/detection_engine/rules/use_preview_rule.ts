@@ -52,17 +52,24 @@ export const usePreviewRule = (timeframe: Unit = 'h') => {
   }, [rule]);
 
   useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log('usePreviewRule effect');
     let isSubscribed = true;
     const abortCtrl = new AbortController();
     setResponse(emptyPreviewRule);
     const createPreviewId = async () => {
+      // eslint-disable-next-line no-console
+      console.log('rule', rule);
       if (rule != null) {
         try {
           setIsLoading(true);
+
           const previewRuleResponse = await previewRule({
             rule: { ...transformOutput(rule), invocationCount },
             signal: abortCtrl.signal,
           });
+          // eslint-disable-next-line no-console
+          console.log('previewRuleResponse', previewRuleResponse);
           if (isSubscribed) {
             setResponse(previewRuleResponse);
           }

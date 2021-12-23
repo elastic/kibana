@@ -204,8 +204,7 @@ export function getRuleType(logger: Logger, core: CoreSetup): SearchThresholdRul
       typeof ActionGroupId
     >
   ) {
-    const { name, params, alertId, state, request, services } = options;
-    const { data } = services;
+    const { name, params, alertId, state, services } = options;
     const timestamp = new Date().toISOString();
     const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
     logger.debug(
@@ -224,7 +223,7 @@ export function getRuleType(logger: Logger, core: CoreSetup): SearchThresholdRul
       );
     }
 
-    const searchSourceClient = await data.search.searchSource.asScoped(request);
+    const searchSourceClient = await services.searchSourceClient;
     const loadedSearchSource = await searchSourceClient.create(params.searchSource);
     const index = loadedSearchSource.getField('index');
     const timeFieldName = index?.timeFieldName;

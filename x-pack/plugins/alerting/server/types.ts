@@ -7,7 +7,6 @@
 
 import type { IRouter, RequestHandlerContext, SavedObjectReference } from 'src/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import { PublicAlertInstance } from './alert_instance';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -37,6 +36,7 @@ import {
 } from '../common';
 import { LicenseType } from '../../licensing/server';
 import { IAbortableClusterClient } from './lib/create_abortable_es_client_factory';
+import { ISearchStartSearchSource } from '../../../../src/plugins/data/common';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type GetServicesFunction = (request: KibanaRequest) => Services;
@@ -67,7 +67,7 @@ export type AlertingRouter = IRouter<AlertingRequestHandlerContext>;
 export interface Services {
   savedObjectsClient: SavedObjectsClientContract;
   scopedClusterClient: IScopedClusterClient;
-  data: DataPluginStart;
+  searchSourceClient: Promise<ISearchStartSearchSource>;
 }
 
 export interface AlertServices<
@@ -94,7 +94,6 @@ export interface AlertExecutorOptions<
   startedAt: Date;
   previousStartedAt: Date | null;
   services: AlertServices<InstanceState, InstanceContext, ActionGroupIds>;
-  request: KibanaRequest;
   params: Params;
   state: State;
   rule: SanitizedRuleConfig;

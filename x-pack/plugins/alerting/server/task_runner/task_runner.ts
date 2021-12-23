@@ -302,15 +302,7 @@ export class TaskRunner<
     const eventLogger = this.context.eventLogger;
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
 
-    let apiKey: string | null;
-    try {
-      apiKey = (await this.getDecryptedAttributes(ruleId, spaceId)).apiKey;
-    } catch (err) {
-      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
-    }
-
     let updatedRuleTypeState: void | Record<string, unknown>;
-
     try {
       const ctx = {
         type: 'alert',
@@ -338,7 +330,6 @@ export class TaskRunner<
               abortController: this.searchAbortController,
             }),
           },
-          request: this.getFakeKibanaRequest(spaceId, apiKey),
           params,
           state: alertTypeState as State,
           startedAt: this.taskInstance.startedAt!,

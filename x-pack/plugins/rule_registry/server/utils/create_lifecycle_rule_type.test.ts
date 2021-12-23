@@ -14,12 +14,11 @@ import {
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { loggerMock } from '@kbn/logging/mocks';
-import { KibanaRequest } from 'src/core/server';
-import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
 import { castArray, omit } from 'lodash';
 import { RuleDataClient } from '../rule_data_client';
 import { createRuleDataClientMock } from '../rule_data_client/rule_data_client.mock';
 import { createLifecycleRuleTypeFactory } from './create_lifecycle_rule_type_factory';
+import { ISearchStartSearchSource } from '../../../../../src/plugins/data/common';
 
 type RuleTestHelpers = ReturnType<typeof createRule>;
 
@@ -89,7 +88,6 @@ function createRule(shouldWriteAlerts: boolean = true) {
         params: {},
         previousStartedAt,
         startedAt,
-        request: {} as KibanaRequest,
         rule: {
           actions: [],
           consumer: 'consumer',
@@ -116,7 +114,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
           shouldWriteAlerts: () => shouldWriteAlerts,
           shouldStopExecution: () => false,
           search: {} as any,
-          data: {} as DataPluginStart,
+          searchSourceClient: Promise.resolve({} as ISearchStartSearchSource),
         },
         spaceId: 'spaceId',
         state,

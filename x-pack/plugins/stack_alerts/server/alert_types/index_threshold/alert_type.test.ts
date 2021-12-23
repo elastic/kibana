@@ -7,7 +7,6 @@
 
 import uuid from 'uuid';
 import type { Writable } from '@kbn/utility-types';
-import { KibanaRequest } from 'src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { AlertServices } from '../../../../alerting/server';
 import { getAlertType, ActionGroupId } from './alert_type';
@@ -182,7 +181,6 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
-      request: {} as KibanaRequest,
       rule: {
         name: uuid.v4(),
         tags: [],
@@ -248,7 +246,6 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
-      request: {} as KibanaRequest,
       rule: {
         name: uuid.v4(),
         tags: [],
@@ -314,7 +311,6 @@ describe('alertType', () => {
       tags: [],
       createdBy: null,
       updatedBy: null,
-      request: {} as KibanaRequest,
       rule: {
         name: uuid.v4(),
         tags: [],

@@ -44,6 +44,7 @@ import {
 } from '../../rule_types';
 import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
 import { RULE_PREVIEW_INVOCATION_COUNT } from '../../../../../common/detection_engine/constants';
+import { ISearchStartSearchSource } from '../../../../../../../../src/plugins/data/common';
 
 export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
@@ -177,6 +178,8 @@ export const previewRulesRoute = async (
                 search: context.core.elasticsearch.client,
                 savedObjectsClient: context.core.savedObjects.client,
                 scopedClusterClient: context.core.elasticsearch.client,
+                // TBD
+                searchSourceClient: Promise.resolve({} as ISearchStartSearchSource),
               },
               spaceId,
               startedAt: startedAt.toDate(),

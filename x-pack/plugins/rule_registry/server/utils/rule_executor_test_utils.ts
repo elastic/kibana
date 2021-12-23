@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
 import {
   elasticsearchServiceMock,
+  httpServerMock,
   savedObjectsClientMock,
 } from '../../../../../src/core/server/mocks';
 import {
@@ -69,7 +69,6 @@ export const createDefaultAlertExecutorOptions = <
   tags: [],
   params,
   spaceId: 'SPACE_ID',
-  request: {} as KibanaRequest,
   services: {
     alertInstanceFactory: alertsMock.createAlertServices<InstanceState, InstanceContext>()
       .alertInstanceFactory,
@@ -78,7 +77,11 @@ export const createDefaultAlertExecutorOptions = <
     shouldWriteAlerts: () => shouldWriteAlerts,
     shouldStopExecution: () => false,
     search: alertsMock.createAlertServices<InstanceState, InstanceContext>().search,
-    data: dataPluginMock.createStartContract(),
+    searchSourceClient: Promise.resolve(
+      dataPluginMock
+        .createStartContract()
+        .search.searchSource.asScoped(httpServerMock.createKibanaRequest())
+    ),
   },
   state,
   updatedBy: null,

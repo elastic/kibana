@@ -88,6 +88,8 @@ const StepDefineRuleAccordion: StyledComponent<
 StepDefineRuleAccordion.displayName = 'StepDefineRuleAccordion';
 
 const CreateRulePageComponent: React.FC = () => {
+  // eslint-disable-next-line no-console
+  console.log('create rule');
   const [
     {
       loading: userInfoLoading,

@@ -29,7 +29,6 @@ import {
   CountMetricExpressionParams,
   NonCountMetricExpressionParams,
 } from './types';
-import { KibanaRequest } from 'src/core/server';
 
 interface AlertTestInstance {
   instance: AlertInstanceMock;
@@ -74,7 +73,6 @@ const mockOptions = {
   tags: [],
   createdBy: null,
   updatedBy: null,
-  request: {} as KibanaRequest,
   rule: {
     name: '',
     tags: [],
