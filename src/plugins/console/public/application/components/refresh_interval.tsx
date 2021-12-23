@@ -197,6 +197,7 @@ export class EuiRefreshInterval extends Component<
     const { isPaused } = this.props;
     const { value, units } = this.state;
 
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     const options = refreshUnitsOptions.find(({ value }) => value === units);
     const optionText = options ? options.text : '';
 
