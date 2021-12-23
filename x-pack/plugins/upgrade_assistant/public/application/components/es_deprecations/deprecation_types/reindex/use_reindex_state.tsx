@@ -60,7 +60,23 @@ const getReindexState = (
 
   if (reindexOp) {
     // Prevent the UI flickering back to inProgress after cancelling
-    newReindexState.lastCompletedStep = reindexOp.lastCompletedStep;
+
+    let updateLastCompletedStep = true;
+    if (
+      reindexOp.lastCompletedStep === ReindexStep.aliasCreated &&
+      reindexOp.status !== ReindexStatus.completed
+    ) {
+      // "ReindexStep.aliasCreated" is the last step coming from the server
+      // There is a delay between the moment the server returns that the "lastCompletedStep"
+      // is "aliasCreated" and when the server marks reindexing as "completed".
+      // We will correct this timing error by only marking the "aliasCreated" step as done
+      // when the reindex status is "completed".
+      updateLastCompletedStep = false;
+    }
+
+    if (updateLastCompletedStep) {
+      newReindexState.lastCompletedStep = reindexOp.lastCompletedStep;
+    }
     newReindexState.status = reindexOp.status;
     newReindexState.reindexTaskPercComplete = reindexOp.reindexTaskPercComplete;
     newReindexState.errorMessage = reindexOp.errorMessage;
@@ -113,6 +129,52 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
     }
   }, []);
 
+  /**
+   * When the server says that reindexing is complete we will fake
+   * one (or two in case there are existing aliases to update) extra steps in the UI
+   */
+  const simulateExtraSteps = useCallback(() => {
+    const delay = 1000;
+    const hasExistingAliases = reindexState.meta.aliases.length > 0;
+
+    // Mark "update existing aliases" as completed
+    const completeUpdateExistingAliasesStep = () => {
+      if (!isMounted.current) {
+        return;
+      }
+
+      setReindexState((prevValue: ReindexState) => {
+        return {
+          ...prevValue,
+          status: ReindexStatus.completed,
+          lastCompletedStep: ReindexStep.existingAliasUpdated,
+        };
+      });
+    };
+
+    // Mark "original index deleted" as completed
+    const completeDeleteOriginalIndexStep = () => {
+      if (!isMounted.current) {
+        return;
+      }
+
+      setReindexState((prevValue: ReindexState) => {
+        return {
+          ...prevValue,
+          status: hasExistingAliases ? ReindexStatus.inProgress : ReindexStatus.completed,
+          lastCompletedStep: ReindexStep.originalIndexDeleted,
+        };
+      });
+
+      if (hasExistingAliases) {
+        // Still one step to go!
+        setTimeout(completeUpdateExistingAliasesStep, delay);
+      }
+    };
+
+    setTimeout(completeDeleteOriginalIndexStep, delay);
+  }, [reindexState.meta.aliases.length]);
+
   const updateStatus = useCallback(async () => {
     clearPollInterval();
 
@@ -142,46 +204,9 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
       // Only keep polling if it exists and is in progress.
       pollIntervalIdRef.current = setTimeout(updateStatus, POLL_INTERVAL);
     } else if (data.reindexOp && data.reindexOp.status === ReindexStatus.completed) {
-      // When completed we will fake the 2 last step with a simple timeout
-      const delay = 500;
-      const hasExistingAliases = reindexState.meta.aliases.length > 0;
-
-      const completeUpdateExistingAliasesStep = () => {
-        if (!isMounted.current) {
-          return;
-        }
-
-        setReindexState((prevValue: ReindexState) => {
-          return {
-            ...prevValue,
-            status: ReindexStatus.completed,
-            lastCompletedStep: ReindexStep.existingAliasUpdated,
-          };
-        });
-      };
-
-      const completeDeleteOriginalIndexStep = () => {
-        if (!isMounted.current) {
-          return;
-        }
-
-        setReindexState((prevValue: ReindexState) => {
-          return {
-            ...prevValue,
-            status: hasExistingAliases ? ReindexStatus.inProgress : ReindexStatus.completed,
-            lastCompletedStep: ReindexStep.originalIndexDeleted,
-          };
-        });
-
-        if (hasExistingAliases) {
-          // Still one step to go!
-          setTimeout(completeUpdateExistingAliasesStep, delay);
-        }
-      };
-
-      setTimeout(completeDeleteOriginalIndexStep, delay);
+      simulateExtraSteps();
     }
-  }, [clearPollInterval, api, indexName, reindexState.meta.aliases.length]);
+  }, [clearPollInterval, api, indexName, simulateExtraSteps]);
 
   const startReindex = useCallback(async () => {
     setReindexState((prevValue: ReindexState) => {
