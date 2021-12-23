@@ -229,7 +229,7 @@ describe('Reindex deprecation flyout', () => {
       // In reality that was done in the last step (when the alias was created),
       // but for the user we will display it as a separate reindex step
       await act(async () => {
-        jest.advanceTimersByTime(500);
+        jest.advanceTimersByTime(1000);
       });
       component.update();
 

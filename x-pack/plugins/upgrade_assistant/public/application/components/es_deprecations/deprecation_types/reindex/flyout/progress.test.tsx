@@ -9,6 +9,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { ReindexStatus, ReindexStep } from '../../../../../../../common/types';
+import { LoadingState } from '../../../../types';
 import type { ReindexState } from '../use_reindex_state';
 import { ReindexProgress } from './progress';
 
@@ -22,9 +23,11 @@ describe('ReindexProgress', () => {
             status: ReindexStatus.inProgress,
             reindexTaskPercComplete: null,
             errorMessage: null,
+            loadingState: LoadingState.Success,
             meta: {
               indexName: 'foo',
               reindexName: 'reindexed-foo',
+              aliases: [],
             },
           } as ReindexState
         }
@@ -89,7 +92,9 @@ describe('ReindexProgress', () => {
                     Object {
                       "errorMessage": null,
                       "lastCompletedStep": 0,
+                      "loadingState": 1,
                       "meta": Object {
+                        "aliases": Array [],
                         "indexName": "foo",
                         "reindexName": "reindexed-foo",
                       },
@@ -102,7 +107,7 @@ describe('ReindexProgress', () => {
               Object {
                 "status": "incomplete",
                 "title": <FormattedMessage
-                  defaultMessage="Create {indexName} alias for {reindexName} index, delete original {indexName} index."
+                  defaultMessage="Create {indexName} alias for {reindexName} index."
                   id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
                   values={
                     Object {
@@ -111,6 +116,20 @@ describe('ReindexProgress', () => {
                       </EuiCode>,
                       "reindexName": <EuiCode>
                         reindexed-foo
+                      </EuiCode>,
+                    }
+                  }
+                />,
+              },
+              Object {
+                "status": "incomplete",
+                "title": <FormattedMessage
+                  defaultMessage="Delete original {indexName} index."
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasSwapStepTitle"
+                  values={
+                    Object {
+                      "indexName": <EuiCode>
+                        foo
                       </EuiCode>,
                     }
                   }
@@ -132,9 +151,11 @@ describe('ReindexProgress', () => {
             status: ReindexStatus.failed,
             reindexTaskPercComplete: 1,
             errorMessage: `This is an error that happened on alias switch`,
+            loadingState: LoadingState.Success,
             meta: {
               indexName: 'foo',
               reindexName: 'reindexed-foo',
+              aliases: [],
             },
           } as ReindexState
         }

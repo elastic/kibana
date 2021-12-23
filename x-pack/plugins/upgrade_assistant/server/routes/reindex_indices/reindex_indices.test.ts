@@ -23,6 +23,7 @@ const mockReindexService = {
   processNextStep: jest.fn(),
   resumeReindexOperation: jest.fn(),
   cancelReindexing: jest.fn(),
+  getIndexAliases: jest.fn().mockResolvedValue({}),
 };
 jest.mock('../../lib/es_version_precheck', () => ({
   versionCheckHandlerWrapper: (a: any) => a,
