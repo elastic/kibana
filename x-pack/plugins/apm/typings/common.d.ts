@@ -23,8 +23,6 @@ type AllowUnknownObjectProperties<T> = T extends object
     }
   : T;
 
-export type PromiseValueType<T extends Promise<any>> = Awaited<T>;
-
 export type Maybe<T> = T | null | undefined;
 
 export type RecursivePartial<T> = {
