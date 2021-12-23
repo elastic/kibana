@@ -24,12 +24,11 @@ export function useGetEventFiltersService() {
 
 export function useGetAllAssignedEventFilters(
   policyId: string,
-  enabled: boolean = true,
-  customQueryId: string = ''
+  enabled: boolean = true
 ): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
   const service = useGetEventFiltersService();
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
-    ['eventFilters', 'assigned', policyId, customQueryId],
+    ['eventFilters', 'assigned', policyId],
     () => {
       return service.getList({
         filter: parsePoliciesAndFilterToKql({ policies: [...(policyId ? [policyId] : []), 'all'] }),
