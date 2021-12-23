@@ -27,7 +27,7 @@ import {
 import { SearchExceptions } from '../../../../../components/search_exceptions';
 import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
 import { EventFiltersHttpService } from '../../../../event_filters/service';
-import { useHttp } from '../../../../../../common/lib/kibana';
+import { useHttp, useToasts } from '../../../../../../common/lib/kibana';
 import {
   useSearchNotAssignedEventFilters,
   useGetAllAssignedEventFilters,
@@ -44,12 +44,43 @@ const MAX_ALLOWED_RESULTS = 100;
 
 export const PolicyEventFiltersFlyout = React.memo<PolicyEventFiltersFlyoutProps>(
   ({ policyItem, onClose }) => {
+    const toasts = useToasts();
     const [selectedArtifactIds, setSelectedArtifactIds] = useState<string[]>([]);
     const [currentFilter, setCurrentFilter] = useState<string>('');
     const http = useHttp();
     const eventFiltersService = useMemo(() => new EventFiltersHttpService(http), [http]);
 
-    const bulkUpdateMutation = useBulkUpdateEventFilters();
+    const bulkUpdateMutation = useBulkUpdateEventFilters({
+      onUpdateSuccess: (updatedExceptions: ExceptionListItemSchema[]) => {
+        toasts.addSuccess({
+          title: i18n.translate(
+            'xpack.securitySolution.endpoint.policy.eventFilters.layout.flyout.toastSuccess.title',
+            {
+              defaultMessage: 'Success',
+            }
+          ),
+          text:
+            updatedExceptions.length > 1
+              ? i18n.translate(
+                  'xpack.securitySolution.endpoint.policy.eventFilters.layout.flyout.toastSuccess.textMultiples',
+                  {
+                    defaultMessage: '{count} event filters have been added to your list.',
+                    values: { count: updatedExceptions.length },
+                  }
+                )
+              : i18n.translate(
+                  'xpack.securitySolution.endpoint.policy.eventFilters.layout.flyout.toastSuccess.textSingle',
+                  {
+                    defaultMessage: '"{name}" has been added to your event filters list.',
+                    values: { name: updatedExceptions[0].name },
+                  }
+                ),
+        });
+      },
+      onUpdateError: () => {},
+      onSettledCallback: () => {},
+    });
+
     const { data: eventFilters, isLoading: isLoadingEventFilters } =
       useSearchNotAssignedEventFilters(eventFiltersService, policyItem.id, {
         filter: currentFilter,

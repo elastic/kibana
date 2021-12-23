@@ -101,7 +101,7 @@ export function useSearchNotAssignedEventFilters(
 
 export function useBulkUpdateEventFilters(
   callbacks: {
-    onUpdateSuccess?: () => void;
+    onUpdateSuccess?: (updatedExceptions: ExceptionListItemSchema[]) => void;
     onUpdateError?: () => void;
     onSettledCallback?: () => void;
   } = {}
