@@ -64,18 +64,6 @@ export default function ({ getService }) {
     });
 
     describe('embeddable migrations', () => {
-      before(async () => {
-        await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
-        );
-      });
-
-      after(async () => {
-        await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
-        );
-      });
-
       it('should apply embeddable migrations', async () => {
         const resp = await supertest
           .get(`/api/saved_objects/dashboard/4beb0d80-c2ef-11eb-b0cb-bd162d969e6b`)
