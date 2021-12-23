@@ -19,6 +19,7 @@ import {
   commonAddEmptyValueColorRule,
   commonMigrateTagCloud,
   commonAddDropLastBucketIntoTSVBModel,
+  commonAddDropLastBucketIntoTSVBModel714Above,
 } from './visualization_common_migrations';
 
 const migrateIndexPattern: SavedObjectMigrationFn<any, any> = (doc) => {
@@ -979,6 +980,23 @@ const addDropLastBucketIntoTSVBModel: SavedObjectMigrationFn<any, any> = (doc) =
   return doc;
 };
 
+const addDropLastBucketIntoTSVBModel714Above: SavedObjectMigrationFn<any, any> = (doc) => {
+  try {
+    const visState = JSON.parse(doc.attributes.visState);
+    const newVisState = commonAddDropLastBucketIntoTSVBModel714Above(visState);
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify(newVisState),
+      },
+    };
+  } catch (e) {
+    // Let it go, the data is invalid and we'll leave it as is
+  }
+  return doc;
+};
+
 const removeDefaultIndexPatternAndTimeFieldFromTSVBModel: SavedObjectMigrationFn<any, any> = (
   doc
 ) => {
@@ -1137,4 +1155,5 @@ export const visualizationSavedObjectTypeMigrations = {
     replaceIndexPatternReference,
     addDropLastBucketIntoTSVBModel
   ),
+  '7.17.0': flow(addDropLastBucketIntoTSVBModel714Above),
 };
