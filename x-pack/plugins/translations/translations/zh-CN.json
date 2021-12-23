@@ -7468,7 +7468,6 @@
     "xpack.canvas.workpadHeaderElementMenu.chartMenuItemLabel": "图表",
     "xpack.canvas.workpadHeaderElementMenu.elementMenuButtonLabel": "添加元素",
     "xpack.canvas.workpadHeaderElementMenu.elementMenuLabel": "添加元素",
-    "xpack.canvas.workpadHeaderElementMenu.embedObjectMenuItemLabel": "从 Kibana 添加",
     "xpack.canvas.workpadHeaderElementMenu.filterMenuItemLabel": "筛选",
     "xpack.canvas.workpadHeaderElementMenu.imageMenuItemLabel": "图像",
     "xpack.canvas.workpadHeaderElementMenu.manageAssetsMenuItemLabel": "管理资产",
