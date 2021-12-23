@@ -5,31 +5,19 @@
  * 2.0.
  */
 
-import { mockHttpRequest, pageHelpers, nextTick } from './helpers';
+import { mockHttpRequest, pageHelpers } from './helpers';
+
+import { act } from 'react-dom/test-utils';
 import { JOB_TO_CLONE, JOB_CLONE_INDEX_PATTERN_CHECK } from './helpers/constants';
 import { getRouter } from '../../crud_app/services/routing';
 import { setHttp } from '../../crud_app/services';
 import { coreMock } from '../../../../../../src/core/public/mocks';
-
-jest.mock('lodash', () => ({
-  ...jest.requireActual('lodash'),
-  debounce: (fn) => fn,
-}));
 
 jest.mock('../../kibana_services', () => {
   const services = jest.requireActual('../../kibana_services');
   return {
     ...services,
     getUiStatsReporter: jest.fn(() => () => {}),
-  };
-});
-
-jest.mock('../../crud_app/services/documentation_links', () => {
-  const coreMocks = jest.requireActual('../../../../../../src/core/public/mocks');
-
-  return {
-    init: jest.fn(),
-    documentationLinks: coreMocks.docLinksServiceMock.createStartContract().links,
   };
 });
 
@@ -43,8 +31,13 @@ describe('Smoke test cloning an existing rollup job from job list', () => {
   let startMock;
 
   beforeAll(() => {
+    jest.useFakeTimers();
     startMock = coreMock.createStart();
     setHttp(startMock.http);
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   beforeEach(async () => {
@@ -53,9 +46,10 @@ describe('Smoke test cloning an existing rollup job from job list', () => {
       indxPatternVldtResp: JOB_CLONE_INDEX_PATTERN_CHECK,
     });
 
-    ({ find, exists, table, component } = setup());
+    await act(async () => {
+      ({ find, exists, table, component } = setup());
+    });
 
-    await nextTick(); // We need to wait next tick for the mock server response to comes in
     component.update();
   });
 

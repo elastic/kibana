@@ -29,7 +29,10 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
           field: ConditionEntryField.PATH,
           operator: 'included',
           type: 'match',
-          value: '/one/two/three',
+          value:
+            overrides.os_types && overrides.os_types[0] === 'windows'
+              ? 'c:\\fol\\bin.exe'
+              : '/one/two/three',
         },
       ],
       id: this.seededUUIDv4(),
