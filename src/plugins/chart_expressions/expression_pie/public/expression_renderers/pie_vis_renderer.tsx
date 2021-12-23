@@ -10,7 +10,7 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { ExpressionRenderDefinition } from '../../../../expressions/public';
+import { Datatable, ExpressionRenderDefinition } from '../../../../expressions/public';
 import { VisualizationContainer } from '../../../../visualizations/public';
 import type { PersistedState } from '../../../../visualizations/public';
 import { KibanaThemeProvider } from '../../../../kibana_react/public';
@@ -33,9 +33,9 @@ export const strings = {
 
 const PieComponent = lazy(() => import('../components/pie_vis_component'));
 
-function shouldShowNoResultsMessage(visData: any): boolean {
+function shouldShowNoResultsMessage(visData: Datatable | undefined): boolean {
   const rows: object[] | undefined = visData?.rows;
-  const isZeroHits = visData?.hits === 0 || (rows && !rows.length);
+  const isZeroHits = !rows || !rows.length;
 
   return Boolean(isZeroHits);
 }
