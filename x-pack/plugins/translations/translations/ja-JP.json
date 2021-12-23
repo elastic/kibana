@@ -15375,8 +15375,6 @@
     "xpack.maps.styles.vector.orientationLabel": "記号の向き",
     "xpack.maps.styles.vector.selectFieldPlaceholder": "フィールドを選択",
     "xpack.maps.styles.vector.symbolSizeLabel": "シンボルのサイズ",
-    "xpack.maps.tiles.resultsCompleteMsg": "{count} 件のドキュメントが見つかりました。",
-    "xpack.maps.tiles.resultsTrimmedMsg": "結果は{count}件のドキュメントに制限されています。",
     "xpack.maps.timeslider.closeLabel": "時間スライダーを閉じる",
     "xpack.maps.timeslider.nextTimeWindowLabel": "次の時間ウィンドウ",
     "xpack.maps.timeslider.pauseLabel": "一時停止",
