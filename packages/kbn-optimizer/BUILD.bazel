@@ -71,7 +71,7 @@ TYPES_DEPS = [
   "//packages/kbn-std:npm_module_types",
   "//packages/kbn-ui-shared-deps-npm",
   "//packages/kbn-ui-shared-deps-src",
-  "//packages/kbn-utils",
+  "//packages/kbn-utils:npm_module_types",
   "@npm//chalk",
   "@npm//clean-webpack-plugin",
   "@npm//cpy",
