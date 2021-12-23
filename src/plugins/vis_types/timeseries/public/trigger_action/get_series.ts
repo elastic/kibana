@@ -12,9 +12,12 @@ import {
   getPercentilesSeries,
   getFormulaSeries,
   getParentPipelineSeries,
-  getSiblingPipelineSeries,
+  getSiblingPipelineSeriesFormula,
   getPipelineAgg,
   computeParentSeries,
+  getFormulaEquivalent,
+  getParentPipelineSeriesFormula,
+  getFilterRatioFormula,
 } from './metrics_helpers';
 
 export const getSeries = (
@@ -59,13 +62,9 @@ export const getSeries = (
         const currentMetric = metrics[layerMetricIdx];
         const [_, meta] = variables[layerMetricIdx]?.field?.split('[') ?? [];
         const metaValue = Number(meta?.replace(']', ''));
-        const agg = SUPPORTED_METRICS[currentMetric.type].name;
-        finalScript = finalScript?.replace(
-          `params.${variables[layerMetricIdx].name}`,
-          `${agg}(${currentMetric.type === 'count' ? '' : currentMetric.field}${
-            metaValue && agg === 'percentile' ? `, percentile=${metaValue}` : ''
-          })`
-        );
+        const script = getFormulaEquivalent(currentMetric, metaValue, layerMetricsArray);
+        if (!script) return null;
+        finalScript = finalScript?.replace(`params.${variables[layerMetricIdx].name}`, script);
       }
       metricsArray = getFormulaSeries(finalScript, color);
       break;
@@ -92,38 +91,16 @@ export const getSeries = (
         return null;
       }
       if (pipelineAgg !== 'count' && pipelineAgg !== 'sum') {
-        const subMetricField = subFunctionMetric.field;
-        const [nestedFieldId, nestedMeta] = subMetricField?.split('[') ?? [];
-        // support nested aggs
-        const additionalSubFunction = metrics.find((metric) => metric.id === nestedFieldId);
-
-        if (additionalSubFunction) {
-          // support nested aggs with formula
-          const additionalPipelineAggMap = SUPPORTED_METRICS[additionalSubFunction.type];
-          if (!additionalPipelineAggMap) {
-            return null;
-          }
-          const nestedMetaValue = Number(nestedMeta?.replace(']', ''));
-          const aggMap = SUPPORTED_METRICS[aggregation];
-          let additionalFunctionArgs;
-          if (additionalPipelineAggMap.name === 'percentile' && nestedMetaValue) {
-            additionalFunctionArgs = `, percentile=${nestedMetaValue}`;
-          }
-          const formula = `${aggMap.name}(${pipelineAgg}(${additionalPipelineAggMap.name}(${
-            additionalSubFunction.field ?? ''
-          }${additionalFunctionArgs ? `${additionalFunctionArgs}` : ''})))`;
-          metricsArray = getFormulaSeries(formula, color);
-        } else {
-          const metaValue = Number(meta?.replace(']', ''));
-          let additionalFunctionArgs;
-          if (pipelineAgg === 'percentile' && metaValue) {
-            additionalFunctionArgs = `, percentile=${metaValue}`;
-          }
-          const script = `${aggregationMap.name}(${pipelineAgg}(${subFunctionMetric.field}${
-            additionalFunctionArgs ? `${additionalFunctionArgs}` : ''
-          }))`;
-          metricsArray = getFormulaSeries(script, color);
-        }
+        const metaValue = Number(meta?.replace(']', ''));
+        const formula = getParentPipelineSeriesFormula(
+          metrics,
+          subFunctionMetric,
+          pipelineAgg,
+          aggregation,
+          metaValue
+        );
+        if (!formula) return null;
+        metricsArray = getFormulaSeries(formula, color);
       } else {
         metricsArray = computeParentSeries(
           aggregation,
@@ -139,22 +116,16 @@ export const getSeries = (
     case 'max_bucket':
     case 'min_bucket':
     case 'sum_bucket': {
-      metricsArray = getSiblingPipelineSeries(
-        aggregation,
-        metrics[metricIdx],
-        metrics,
-        color
-      ) as VisualizeEditorLayersContext['metrics'];
+      const formula = getSiblingPipelineSeriesFormula(aggregation, metrics[metricIdx], metrics);
+      if (!formula) {
+        return null;
+      }
+      metricsArray = getFormulaSeries(formula, color) as VisualizeEditorLayersContext['metrics'];
       break;
     }
     case 'filter_ratio': {
-      const { numerator, denominator } = metrics[metricIdx];
-      const script = `count(${numerator?.language === 'kuery' ? 'kql' : 'lucene'}='${
-        numerator?.query ?? '*'
-      }') / count(${denominator?.language === 'kuery' ? 'kql' : 'lucene'}='${
-        denominator?.query ?? '*'
-      }')`;
-      metricsArray = getFormulaSeries(script, color);
+      const formula = getFilterRatioFormula(metrics[metricIdx]);
+      metricsArray = getFormulaSeries(formula, color);
       break;
     }
     default: {

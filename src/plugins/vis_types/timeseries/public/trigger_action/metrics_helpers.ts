@@ -81,28 +81,24 @@ export const getParentPipelineSeries = (
   if (!pipelineAgg) {
     return null;
   }
+  const metaValue = Number(meta?.replace(']', ''));
   const subMetricField = subFunctionMetric.field;
-  const [nestedFieldId, nestedMeta] = subMetricField?.split('[') ?? [];
-  // support nested aggs
+  const [nestedFieldId, _] = subMetricField?.split('[') ?? [];
+  // support nested aggs with formula
   const additionalSubFunction = metrics.find((metric) => metric.id === nestedFieldId);
   if (additionalSubFunction) {
-    // support nested aggs with formula
-    const additionalPipelineAggMap = SUPPORTED_METRICS[additionalSubFunction.type];
-    if (!additionalPipelineAggMap) {
+    const formula = getParentPipelineSeriesFormula(
+      metrics,
+      subFunctionMetric,
+      pipelineAgg,
+      aggregation,
+      metaValue
+    );
+    if (!formula) {
       return null;
     }
-    const nestedMetaValue = Number(nestedMeta?.replace(']', ''));
-    const aggregationMap = SUPPORTED_METRICS[aggregation];
-    let additionalFunctionArgs;
-    if (additionalPipelineAggMap.name === 'percentile' && nestedMetaValue) {
-      additionalFunctionArgs = `, percentile=${nestedMetaValue}`;
-    }
-    const formula = `${aggregationMap.name}(${pipelineAgg}(${additionalPipelineAggMap.name}(${
-      additionalSubFunction.field ?? ''
-    }${additionalFunctionArgs ? `${additionalFunctionArgs}` : ''})))`;
     return getFormulaSeries(formula, color);
   } else {
-    const metaValue = Number(meta?.replace(']', ''));
     return computeParentSeries(
       aggregation,
       currentMetric,
@@ -114,11 +110,51 @@ export const getParentPipelineSeries = (
   }
 };
 
-export const getSiblingPipelineSeries = (
+export const getParentPipelineSeriesFormula = (
+  metrics: Metric[],
+  subFunctionMetric: Metric,
+  pipelineAgg: string,
+  aggregation: MetricType,
+  percentileValue?: number
+) => {
+  let formula = '';
+  const aggregationMap = SUPPORTED_METRICS[aggregation];
+  const subMetricField = subFunctionMetric.field;
+  const [nestedFieldId, nestedMeta] = subMetricField?.split('[') ?? [];
+  // support nested aggs
+  const additionalSubFunction = metrics.find((metric) => metric.id === nestedFieldId);
+
+  if (additionalSubFunction) {
+    // support nested aggs with formula
+    const additionalPipelineAggMap = SUPPORTED_METRICS[additionalSubFunction.type];
+    if (!additionalPipelineAggMap) {
+      return null;
+    }
+    const nestedMetaValue = Number(nestedMeta?.replace(']', ''));
+    const aggMap = SUPPORTED_METRICS[aggregation];
+    let additionalFunctionArgs;
+    if (additionalPipelineAggMap.name === 'percentile' && nestedMetaValue) {
+      additionalFunctionArgs = `, percentile=${nestedMetaValue}`;
+    }
+    formula = `${aggMap.name}(${pipelineAgg}(${additionalPipelineAggMap.name}(${
+      additionalSubFunction.field ?? ''
+    }${additionalFunctionArgs ? `${additionalFunctionArgs}` : ''})))`;
+  } else {
+    let additionalFunctionArgs;
+    if (pipelineAgg === 'percentile' && percentileValue) {
+      additionalFunctionArgs = `, percentile=${percentileValue}`;
+    }
+    formula = `${aggregationMap.name}(${pipelineAgg}(${subFunctionMetric.field}${
+      additionalFunctionArgs ? `${additionalFunctionArgs}` : ''
+    }))`;
+    return formula;
+  }
+};
+
+export const getSiblingPipelineSeriesFormula = (
   aggregation: MetricType,
   currentMetric: Metric,
-  metrics: Metric[],
-  color: string
+  metrics: Metric[]
 ) => {
   const subFunctionMetric = metrics.find((metric) => metric.id === currentMetric.field);
   if (!subFunctionMetric) {
@@ -130,7 +166,7 @@ export const getSiblingPipelineSeries = (
   }
   const aggregationMap = SUPPORTED_METRICS[aggregation];
   const subMetricField = subFunctionMetric.field;
-  // support nested aggs
+  // support nested aggs with formula
   const additionalSubFunction = metrics.find((metric) => metric.id === subMetricField);
   let formula = `${aggregationMap.name}(`;
   if (additionalSubFunction) {
@@ -144,5 +180,77 @@ export const getSiblingPipelineSeries = (
   } else {
     formula += `${pipelineAggMap.name}(${subFunctionMetric.field ?? ''}))`;
   }
-  return getFormulaSeries(formula, color);
+  return formula;
+};
+
+export const getFilterRatioFormula = (currentMetric: Metric) => {
+  const { numerator, denominator } = currentMetric;
+  return `count(${numerator?.language === 'kuery' ? 'kql' : 'lucene'}='${
+    numerator?.query ?? '*'
+  }') / count(${denominator?.language === 'kuery' ? 'kql' : 'lucene'}='${
+    denominator?.query ?? '*'
+  }')`;
+};
+
+export const getFormulaEquivalent = (
+  currentMetric: Metric,
+  metaValue: number,
+  metrics: Metric[]
+) => {
+  const aggregation = SUPPORTED_METRICS[currentMetric.type].name;
+  let formula = null;
+  switch (currentMetric.type) {
+    case 'avg_bucket':
+    case 'max_bucket':
+    case 'min_bucket':
+    case 'sum_bucket': {
+      formula = getSiblingPipelineSeriesFormula(currentMetric.type, currentMetric, metrics);
+      break;
+    }
+    case 'count': {
+      formula = `${aggregation}()`;
+      break;
+    }
+    case 'percentile': {
+      formula = `${aggregation}(${currentMetric.field}${
+        metaValue ? `, percentile=${metaValue}` : ''
+      })`;
+      break;
+    }
+    case 'cumulative_sum':
+    case 'derivative':
+    case 'moving_average': {
+      const [fieldId, _] = currentMetric?.field?.split('[') ?? [];
+      const subFunctionMetric = metrics.find((metric) => metric.id === fieldId);
+      if (!subFunctionMetric) {
+        return null;
+      }
+      const pipelineAgg = getPipelineAgg(subFunctionMetric);
+      if (!pipelineAgg) {
+        return null;
+      }
+      formula = getParentPipelineSeriesFormula(
+        metrics,
+        subFunctionMetric,
+        pipelineAgg,
+        currentMetric.type,
+        metaValue
+      );
+      break;
+    }
+    case 'positive_rate': {
+      formula = `${aggregation}(max(${currentMetric.field}))`;
+      break;
+    }
+    case 'filter_ratio': {
+      formula = getFilterRatioFormula(currentMetric);
+      break;
+    }
+    default: {
+      formula = `${aggregation}(${currentMetric.field})`;
+      break;
+    }
+  }
+
+  return formula;
 };
