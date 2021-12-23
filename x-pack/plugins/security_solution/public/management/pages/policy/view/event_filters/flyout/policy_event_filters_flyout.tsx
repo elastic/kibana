@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty, without } from 'lodash/fp';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   EuiTitle,
   EuiFlyout,
@@ -27,7 +28,11 @@ import { SearchExceptions } from '../../../../../components/search_exceptions';
 import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
 import { EventFiltersHttpService } from '../../../../event_filters/service';
 import { useHttp } from '../../../../../../common/lib/kibana';
-import { useSearchNotAssignedEventFilters, useGetAllAssignedEventFilters } from '../hooks';
+import {
+  useSearchNotAssignedEventFilters,
+  useGetAllAssignedEventFilters,
+  useBulkUpdateEventFilters,
+} from '../hooks';
 import { PolicyArtifactsAssignableList } from '../../artifacts/assignable';
 
 interface PolicyEventFiltersFlyoutProps {
@@ -44,20 +49,7 @@ export const PolicyEventFiltersFlyout = React.memo<PolicyEventFiltersFlyoutProps
     const http = useHttp();
     const eventFiltersService = useMemo(() => new EventFiltersHttpService(http), [http]);
 
-    const handleOnSearch = useCallback((query) => {
-      setSelectedArtifactIds([]);
-      setCurrentFilter(query);
-    }, []);
-    const handleOnConfirmAction = useCallback(() => {}, []);
-
-    const handleSelectArtifacts = (artifactId: string, selected: boolean) => {
-      setSelectedArtifactIds((currentSelectedArtifactIds) =>
-        selected
-          ? [...currentSelectedArtifactIds, artifactId]
-          : without([artifactId], currentSelectedArtifactIds)
-      );
-    };
-
+    const bulkUpdateMutation = useBulkUpdateEventFilters();
     const { data: eventFilters, isLoading: isLoadingEventFilters } =
       useSearchNotAssignedEventFilters(eventFiltersService, policyItem.id, {
         filter: currentFilter,
@@ -68,6 +60,34 @@ export const PolicyEventFiltersFlyout = React.memo<PolicyEventFiltersFlyoutProps
       currentFilter !== '' && eventFilters?.total === 0,
       'assignmentFlyout'
     );
+
+    const handleOnSearch = useCallback((query) => {
+      setSelectedArtifactIds([]);
+      setCurrentFilter(query);
+    }, []);
+
+    const handleOnConfirmAction = useCallback(() => {
+      if (!eventFilters) {
+        return;
+      }
+      const eventFiltersToUpdate: ExceptionListItemSchema[] = [];
+      selectedArtifactIds.forEach((selectedId) => {
+        const eventFilter = eventFilters.data.find((current) => current.id === selectedId);
+        if (eventFilter) {
+          eventFilter.tags = [...eventFilter.tags, `policy:${policyItem.id}`];
+          eventFiltersToUpdate.push(eventFilter);
+        }
+      });
+      bulkUpdateMutation.mutate(eventFiltersToUpdate);
+    }, [bulkUpdateMutation, eventFilters, policyItem.id, selectedArtifactIds]);
+
+    const handleSelectArtifacts = (artifactId: string, selected: boolean) => {
+      setSelectedArtifactIds((currentSelectedArtifactIds) =>
+        selected
+          ? [...currentSelectedArtifactIds, artifactId]
+          : without([artifactId], currentSelectedArtifactIds)
+      );
+    };
 
     const searchWarningMessage = useMemo(
       () => (
@@ -199,8 +219,7 @@ export const PolicyEventFiltersFlyout = React.memo<PolicyEventFiltersFlyoutProps
                 data-test-subj="eventFilters-assign-confirm-button"
                 fill
                 onClick={handleOnConfirmAction}
-                // isLoading={mutation.isLoading}
-                isLoading={isLoadingEventFilters}
+                isLoading={bulkUpdateMutation.isLoading || isLoadingEventFilters}
                 disabled={isEmpty(selectedArtifactIds)}
                 title={policyItem.name}
               >
