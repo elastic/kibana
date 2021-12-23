@@ -144,7 +144,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           // add columns
           const fields = ['_id', '_index', 'agent'];
           for (const field of fields) {
-            await testSubjects.click(`toggleColumnButton_${field}`);
+            await testSubjects.click(`openFieldActionsButton-${field}`);
+            await testSubjects.click(`toggleColumnButton-${field}`);
           }
 
           const headerWithFields = await dataGrid.getHeaderFields();
@@ -152,7 +153,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           // remove columns
           for (const field of fields) {
-            await testSubjects.click(`toggleColumnButton_${field}`);
+            await testSubjects.click(`openFieldActionsButton-${field}`);
+            await testSubjects.click(`toggleColumnButton-${field}`);
           }
 
           const headerWithoutFields = await dataGrid.getHeaderFields();
