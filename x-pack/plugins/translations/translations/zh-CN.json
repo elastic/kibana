@@ -15571,8 +15571,6 @@
     "xpack.maps.styles.vector.orientationLabel": "符号方向",
     "xpack.maps.styles.vector.selectFieldPlaceholder": "选择字段",
     "xpack.maps.styles.vector.symbolSizeLabel": "符号大小",
-    "xpack.maps.tiles.resultsCompleteMsg": "找到 {count} 个文档。",
-    "xpack.maps.tiles.resultsTrimmedMsg": "结果仅限于 {count} 个文档。",
     "xpack.maps.timeslider.closeLabel": "关闭时间滑块",
     "xpack.maps.timeslider.nextTimeWindowLabel": "下一时间窗口",
     "xpack.maps.timeslider.pauseLabel": "暂停",
