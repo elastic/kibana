@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
@@ -40,6 +41,9 @@ const i18nTexts = {
   upgradeStepCloudLink: i18n.translate('xpack.upgradeAssistant.overview.upgradeStepCloudLink', {
     defaultMessage: 'Upgrade on Cloud',
   }),
+  loadingUpgradeStatus: i18n.translate('xpack.upgradeAssistant.overview.loadingUpgradeStatus', {
+    defaultMessage: 'Loading upgrade status',
+  }),
   upgradeGuideLink: i18n.translate('xpack.upgradeAssistant.overview.upgradeGuideLink', {
     defaultMessage: 'View upgrade guide',
   }),
@@ -49,41 +53,75 @@ const UpgradeStep = () => {
   const {
     plugins: { cloud },
     services: {
+      api,
       core: { docLinks },
     },
   } = useAppContext();
   const isCloudEnabled: boolean = Boolean(cloud?.isCloudEnabled);
+
+  const { data: upgradeStatus, isLoading, error, resendRequest } = api.useLoadUpgradeStatus();
+
   let callToAction;
 
   if (isCloudEnabled) {
-    const upgradeOnCloudUrl = cloud!.deploymentUrl + '?show_upgrade=true';
-    callToAction = (
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
+    if (error) {
+      callToAction = (
+        <EuiCallOut
+          title={i18n.translate('xpack.upgradeAssistant.overview.errorLoadingUpgradeStatus', {
+            defaultMessage: 'An error occurred while retrieving the upgrade status',
+          })}
+          color="danger"
+          iconType="alert"
+          data-test-subj="upgradeStatusErrorCallout"
+        >
+          <p>
+            {error.statusCode} - {error.message}
+          </p>
           <EuiButton
-            href={upgradeOnCloudUrl}
-            target="_blank"
-            data-test-subj="upgradeSetupCloudLink"
-            iconSide="right"
-            iconType="popout"
+            color="danger"
+            onClick={resendRequest}
+            data-test-subj="upgradeStatusRetryButton"
+            isLoading={isLoading}
           >
-            {i18nTexts.upgradeStepCloudLink}
+            {i18n.translate('xpack.upgradeAssistant.overview.upgradeStatus.retryButton', {
+              defaultMessage: 'Try again',
+            })}
           </EuiButton>
-        </EuiFlexItem>
+        </EuiCallOut>
+      );
+    } else {
+      const readyForUpgrade = upgradeStatus?.readyForUpgrade;
+      const upgradeOnCloudUrl = cloud!.deploymentUrl + '?show_upgrade=true';
+      callToAction = (
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              href={upgradeOnCloudUrl}
+              target="_blank"
+              data-test-subj="upgradeSetupCloudLink"
+              iconSide="right"
+              iconType="popout"
+              isLoading={isLoading}
+              isDisabled={!readyForUpgrade}
+            >
+              {isLoading ? i18nTexts.loadingUpgradeStatus : i18nTexts.upgradeStepCloudLink}
+            </EuiButton>
+          </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            href={docLinks.links.upgrade.upgradingElasticStack}
-            target="_blank"
-            data-test-subj="upgradeSetupDocsLink"
-            iconSide="right"
-            iconType="popout"
-          >
-            {i18nTexts.upgradeGuideLink}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              href={docLinks.links.upgrade.upgradingElasticStack}
+              target="_blank"
+              data-test-subj="upgradeSetupDocsLink"
+              iconSide="right"
+              iconType="popout"
+            >
+              {i18nTexts.upgradeGuideLink}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
   } else {
     callToAction = (
       <EuiButton
