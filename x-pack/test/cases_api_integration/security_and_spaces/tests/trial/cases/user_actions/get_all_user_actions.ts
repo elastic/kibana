@@ -9,20 +9,24 @@ import http from 'http';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 
-import { CASE_CONFIGURE_URL, CASES_URL } from '../../../../../../../plugins/cases/common/constants';
-import { defaultUser, postCaseReq } from '../../../../../common/lib/mock';
+import { defaultUser } from '../../../../../common/lib/mock';
 import {
+  createCaseWithConnector,
   deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
   deleteConfiguration,
-  getConfigurationRequest,
-  getServiceNowConnector,
+  getCaseUserActions,
   getServiceNowSimulationServer,
+  pushCase,
+  updateConfiguration,
 } from '../../../../../common/lib/utils';
 
 import { ObjectRemover as ActionsRemover } from '../../../../../../alerting_api_integration/common/lib';
-import { getCreateConnectorUrl } from '../../../../../../../plugins/cases/common/utils/connectors_api';
+import {
+  UserActionWithResponse,
+  PushedUserAction,
+} from '../../../../../../../plugins/cases/common/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -52,71 +56,65 @@ export default ({ getService }: FtrProviderContext): void => {
       serviceNowServer.close();
     });
 
-    it(`on new push to service, user action: 'push-to-service' should be called with actionFields: ['pushed']`, async () => {
-      const { body: connector } = await supertest
-        .post(getCreateConnectorUrl())
-        .set('kbn-xsrf', 'true')
-        .send({
-          ...getServiceNowConnector(),
-          config: { apiUrl: serviceNowSimulatorURL },
-        })
-        .expect(200);
+    it('creates a push to service user action', async () => {
+      const { postedCase, connector } = await createCaseWithConnector({
+        supertest,
+        serviceNowSimulatorURL,
+        actionsRemover,
+      });
 
-      actionsRemover.add('default', connector.id, 'action', 'actions');
+      const theCase = await pushCase({
+        supertest,
+        caseId: postedCase.id,
+        connectorId: connector.id,
+      });
 
-      const { body: configure } = await supertest
-        .post(CASE_CONFIGURE_URL)
-        .set('kbn-xsrf', 'true')
-        .send(
-          getConfigurationRequest({
-            id: connector.id,
-            name: connector.name,
-            type: connector.connector_type_id,
-          })
-        )
-        .expect(200);
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+      const pushUserAction = userActions[1] as UserActionWithResponse<PushedUserAction>;
 
-      const { body: postedCase } = await supertest
-        .post(CASES_URL)
-        .set('kbn-xsrf', 'true')
-        .send({
-          ...postCaseReq,
-          connector: getConfigurationRequest({
-            id: connector.id,
-            name: connector.name,
-            type: connector.connector_type_id,
-            fields: {
-              urgency: '2',
-              impact: '2',
-              severity: '2',
-              category: 'software',
-              subcategory: 'os',
-            },
-          }).connector,
-        })
-        .expect(200);
+      expect(userActions.length).to.eql(2);
+      expect(pushUserAction.type).to.eql('pushed');
+      expect(pushUserAction.action).to.eql('push_to_service');
+      expect(pushUserAction.created_by).to.eql(defaultUser);
+      expect(pushUserAction.case_id).to.eql(postedCase.id);
+      expect(pushUserAction.comment_id).to.eql(null);
+      expect(pushUserAction.owner).to.eql('securitySolutionFixture');
+      expect(pushUserAction.payload.externalService).to.eql({
+        pushed_at: theCase.external_service!.pushed_at,
+        connector_id: connector.id,
+        connector_name: connector.name,
+        pushed_by: defaultUser,
+        external_id: '123',
+        external_title: 'INC01',
+        external_url: `${connector.config!.apiUrl}/nav_to.do?uri=incident.do?sys_id=123`,
+      });
+    });
 
-      await supertest
-        .post(`${CASES_URL}/${postedCase.id}/connector/${connector.id}/_push`)
-        .set('kbn-xsrf', 'true')
-        .send({})
-        .expect(200);
+    it('creates a push to service user action and a status update user action when the case is closed after a push', async () => {
+      const { postedCase, connector, configuration } = await createCaseWithConnector({
+        supertest,
+        serviceNowSimulatorURL,
+        actionsRemover,
+      });
 
-      const { body } = await supertest
-        .get(`${CASES_URL}/${postedCase.id}/user_actions`)
-        .set('kbn-xsrf', 'true')
-        .send()
-        .expect(200);
+      await updateConfiguration(supertest, configuration.id, {
+        closure_type: 'close-by-pushing',
+        version: configuration.version,
+      });
 
-      expect(body.length).to.eql(2);
-      expect(body[1].action_field).to.eql(['pushed']);
-      expect(body[1].action).to.eql('push-to-service');
-      expect(body[1].old_value).to.eql(null);
-      expect(body[1].old_val_connector_id).to.eql(null);
-      expect(body[1].new_val_connector_id).to.eql(configure.connector.id);
-      const newValue = JSON.parse(body[1].new_value);
-      expect(newValue).to.not.have.property('connector_id');
-      expect(newValue.pushed_by).to.eql(defaultUser);
+      const theCase = await pushCase({
+        supertest,
+        caseId: postedCase.id,
+        connectorId: connector.id,
+      });
+
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+      const statusUserAction = userActions[1] as PushedUserAction;
+
+      expect(userActions.length).to.eql(3);
+      expect(statusUserAction.type).to.eql('status');
+      expect(statusUserAction.action).to.eql('update');
+      expect(statusUserAction.payload).to.eql({ status: 'closed' });
     });
   });
 };
