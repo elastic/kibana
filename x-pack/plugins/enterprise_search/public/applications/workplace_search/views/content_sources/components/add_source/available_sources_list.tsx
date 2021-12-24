@@ -51,12 +51,19 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
     // does this card need a disabled state?
     const card = (
       <>
-        <EuiFlexGroup justifyContent="center" alignItems="center">
-          <EuiFlexItem>
+        <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
             <SourceIcon serviceType={serviceType} name={name} size="m" />
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="m">
+              {name}
+            </EuiText>
+          </EuiFlexItem>
           <EuiFlexItem>
-            <EuiLinkTo to={getSourcesPath(addPath, true)}>{name}</EuiLinkTo>
+            <EuiText textAlign="right">
+              <EuiLinkTo to={getSourcesPath(addPath, true)}>Connect</EuiLinkTo>
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule size="full" margin="s" />
@@ -86,24 +93,25 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
   };
 
   const visibleSources = (
-    <EuiListGroup
-      gutterSize="none"
-      flush={true}
-      maxWidth={false}
-    >
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        {sources.map((source, i) => (
+          <>
+            <EuiFlexGroup
+              justifyContent="center"
+              alignItems="stretch"
+              key={i}
+              data-test-subj="AvailableSourceCard"
+            >
+              <EuiFlexItem>
+                {getSourceCard(source)}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        ))}
 
-      {sources.map((source, i) => (
-        <EuiListGroupItem
-          key={i}
-          data-test-subj="AvailableSourceCard"
-          label={getSourceCard(source)}
-        >
-
-          {console.log(getSourceCard(source))}
-        </EuiListGroupItem>
-      ))}
-
-    </EuiListGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 
   const emptyState = (
