@@ -65,7 +65,7 @@ function ViewAlert({ services, from, to, checksum }: ViewAlertProps) {
           `${LEGACY_BASE_ALERT_API_PATH}/alert/${id}`
         );
       } catch (error) {
-        const errorTitle = i18n.translate('discover.viewAlert.alertRuleRemovedErrorTitle', {
+        const errorTitle = i18n.translate('discover.viewAlert.alertRuleFetchErrorTitle', {
           defaultMessage: 'Alert rule fetch error',
         });
         displayError(errorTitle, error.message, toastNotifications);
@@ -77,7 +77,7 @@ function ViewAlert({ services, from, to, checksum }: ViewAlertProps) {
       try {
         return await data.search.searchSource.create(fetchedAlert.params.searchSource);
       } catch (error) {
-        const errorTitle = i18n.translate('discover.viewAlert.alertRuleRemovedErrorTitle', {
+        const errorTitle = i18n.translate('discover.viewAlert.searchSourceErrorTitle', {
           defaultMessage: 'Search source fetch error',
         });
         displayError(errorTitle, error.message, toastNotifications);
