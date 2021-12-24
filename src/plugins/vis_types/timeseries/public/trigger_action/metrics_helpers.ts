@@ -20,12 +20,11 @@ export const getPercentilesSeries = (percentiles: Metric['percentiles'], fieldNa
   });
 };
 
-export const getFormulaSeries = (script: string, color: string) => {
+export const getFormulaSeries = (script: string) => {
   return [
     {
       agg: 'formula',
       isFullReference: true,
-      color,
       fieldName: 'document',
       params: { formula: script },
     },
@@ -45,7 +44,6 @@ export const computeParentSeries = (
   currentMetric: Metric,
   subFunctionMetric: Metric,
   pipelineAgg: string,
-  color: string,
   meta?: number
 ) => {
   const aggregationMap = SUPPORTED_METRICS[aggregation];
@@ -54,7 +52,6 @@ export const computeParentSeries = (
       agg: aggregationMap.name,
       isFullReference: aggregationMap.isFullReference,
       pipelineAggType: pipelineAgg,
-      color,
       fieldName:
         subFunctionMetric?.field && pipelineAgg !== 'count' ? subFunctionMetric?.field : 'document',
       params: {
@@ -68,8 +65,7 @@ export const computeParentSeries = (
 export const getParentPipelineSeries = (
   aggregation: MetricType,
   currentMetric: Metric,
-  metrics: Metric[],
-  color: string
+  metrics: Metric[]
 ) => {
   //  percentile value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
   const [fieldId, meta] = currentMetric?.field?.split('[') ?? [];
@@ -97,14 +93,13 @@ export const getParentPipelineSeries = (
     if (!formula) {
       return null;
     }
-    return getFormulaSeries(formula, color);
+    return getFormulaSeries(formula);
   } else {
     return computeParentSeries(
       aggregation,
       currentMetric,
       subFunctionMetric,
       pipelineAgg,
-      color,
       metaValue
     );
   }

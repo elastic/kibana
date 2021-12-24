@@ -20,10 +20,7 @@ import {
   getFilterRatioFormula,
 } from './metrics_helpers';
 
-export const getSeries = (
-  metrics: Metric[],
-  color: string
-): VisualizeEditorLayersContext['metrics'] | null => {
+export const getSeries = (metrics: Metric[]): VisualizeEditorLayersContext['metrics'] | null => {
   const metricIdx = metrics.length - 1;
   // find the metric idx that has math expression
   const mathMetricIdx = metrics.findIndex((metric) => metric.type === 'math');
@@ -66,7 +63,7 @@ export const getSeries = (
         if (!script) return null;
         finalScript = finalScript?.replace(`params.${variables[layerMetricIdx].name}`, script);
       }
-      metricsArray = getFormulaSeries(finalScript, color);
+      metricsArray = getFormulaSeries(finalScript);
       break;
     }
     case 'moving_average':
@@ -74,8 +71,7 @@ export const getSeries = (
       metricsArray = getParentPipelineSeries(
         aggregation,
         metrics[metricIdx],
-        metrics,
-        color
+        metrics
       ) as VisualizeEditorLayersContext['metrics'];
       break;
     }
@@ -100,14 +96,13 @@ export const getSeries = (
           metaValue
         );
         if (!formula) return null;
-        metricsArray = getFormulaSeries(formula, color);
+        metricsArray = getFormulaSeries(formula);
       } else {
         metricsArray = computeParentSeries(
           aggregation,
           metrics[metricIdx],
           subFunctionMetric,
-          pipelineAgg,
-          color
+          pipelineAgg
         );
       }
       break;
@@ -120,12 +115,12 @@ export const getSeries = (
       if (!formula) {
         return null;
       }
-      metricsArray = getFormulaSeries(formula, color) as VisualizeEditorLayersContext['metrics'];
+      metricsArray = getFormulaSeries(formula) as VisualizeEditorLayersContext['metrics'];
       break;
     }
     case 'filter_ratio': {
       const formula = getFilterRatioFormula(metrics[metricIdx]);
-      metricsArray = getFormulaSeries(formula, color);
+      metricsArray = getFormulaSeries(formula);
       break;
     }
     default: {
@@ -133,7 +128,6 @@ export const getSeries = (
         {
           agg: aggregationMap.name,
           isFullReference: aggregationMap.isFullReference,
-          color,
           fieldName: aggregation !== 'count' && fieldName ? fieldName : 'document',
           params: {
             ...(metrics[metricIdx].unit && {

@@ -121,6 +121,15 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
 
     const termsColumnParams = params as TermsIndexPatternColumn['params'];
 
+    const orderBy = (
+      termsColumnParams && termsColumnParams.orderBy.type === 'column'
+        ? {
+            type: 'column',
+            columnId: existingMetricColumn,
+          }
+        : termsColumnParams?.orderBy ?? undefined
+    ) as TermsIndexPatternColumn['params']['orderBy'];
+
     return {
       label: ofName(field.displayName),
       dataType: field.type as DataType,
@@ -134,13 +143,19 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           : previousBucketsLength === 0
           ? 5
           : DEFAULT_SIZE,
-        orderBy: existingMetricColumn
+        orderBy: orderBy
+          ? orderBy
+          : existingMetricColumn
           ? {
               type: 'column',
               columnId: existingMetricColumn,
             }
           : { type: 'alphabetical', fallback: true },
-        orderDirection: existingMetricColumn ? 'desc' : 'asc',
+        orderDirection: termsColumnParams
+          ? termsColumnParams.orderDirection
+          : existingMetricColumn
+          ? 'desc'
+          : 'asc',
         otherBucket: params ? termsColumnParams.otherBucket : !indexPattern.hasRestrictions,
         missingBucket: false,
       },

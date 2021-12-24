@@ -42,30 +42,30 @@ export const triggerVisualizeToLensOptions = async (
       layer.series_index_pattern
     );
 
-    const timeShift = layer.offset_time;
-    // translate to Lens seriesType
-    const chartType = layer.chart_type === 'line' && layer.fill !== '0' ? 'area' : layer.chart_type;
     if (!indexPatternId) {
       return null;
     }
 
+    const timeShift = layer.offset_time;
+    // translate to Lens seriesType
+    const chartType = layer.chart_type === 'line' && layer.fill !== '0' ? 'area' : layer.chart_type;
+
     // handle multiple metrics
-    let metricsArray = getSeries(layer.metrics, layer.color);
+    let metricsArray = getSeries(layer.metrics);
     if (!metricsArray) {
       return null;
     }
 
-    if (timeShift) {
-      metricsArray = metricsArray.map((metric) => {
-        return {
-          ...metric,
-          params: {
-            ...metric.params,
-            shift: timeShift,
-          },
-        };
-      });
-    }
+    metricsArray = metricsArray.map((metric) => {
+      return {
+        ...metric,
+        color: layer.color,
+        params: {
+          ...metric.params,
+          ...(timeShift && { shift: timeShift }),
+        },
+      };
+    });
 
     const triggerOptions: VisualizeEditorLayersContext = {
       indexPatternId,
@@ -81,7 +81,15 @@ export const triggerVisualizeToLensOptions = async (
       splitFilters: layer.split_filters ?? undefined,
       palette: (layer.palette as PaletteOutput) ?? undefined,
       ...(layer.split_mode === 'terms' && {
-        termsParams: { size: layer.terms_size ?? 10, otherBucket: false },
+        termsParams: {
+          size: layer.terms_size ?? 10,
+          otherBucket: false,
+          orderDirection: layer.terms_direction,
+          orderBy:
+            layer.terms_order_by === '_key'
+              ? { type: 'alphabetical', fallback: true }
+              : { type: 'column' },
+        },
       }),
       metrics: [...metricsArray],
       timeInterval: model.interval || 'auto',
