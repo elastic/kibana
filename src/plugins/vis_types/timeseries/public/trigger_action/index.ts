@@ -76,6 +76,7 @@ export const triggerVisualizeToLensOptions = async (
           : chartType !== 'line'
           ? `${chartType}_stacked`
           : 'line',
+      axisPosition: layer.separate_axis ? layer.axis_position : model.axis_position,
       splitField: layer.terms_field ?? undefined,
       splitMode: layer.split_mode !== 'everything' ? layer.split_mode : undefined,
       splitFilters: layer.split_filters ?? undefined,

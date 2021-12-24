@@ -94,6 +94,7 @@ export interface VisualizeEditorLayersContext {
   indexPatternId: string;
   timeFieldName?: string;
   chartType?: string;
+  axisPosition?: string;
   termsParams?: Record<string, unknown>;
   splitField?: string;
   splitMode?: string;

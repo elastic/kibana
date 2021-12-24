@@ -20,7 +20,7 @@ import { XyToolbar, DimensionEditor } from './xy_config_panel';
 import { LayerHeader } from './xy_config_panel/layer_header';
 import type { Visualization, OperationMetadata, VisualizationType, AccessorConfig } from '../types';
 import { State, visualizationTypes } from './types';
-import { SeriesType, XYLayerConfig } from '../../common/expressions';
+import { SeriesType, XYLayerConfig, YAxisMode } from '../../common/expressions';
 import { LayerType, layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
@@ -525,15 +525,17 @@ export const getXyVisualization = ({
   },
 
   updateLayersConfigurationFromContext({ prevState, layerId, context }) {
-    const { chartType, palette, metrics } = context;
+    const { chartType, axisPosition, palette, metrics } = context;
     const foundLayer = prevState?.layers.find((l) => l.layerId === layerId);
     if (!foundLayer) {
       return prevState;
     }
+    const axisMode = axisPosition as YAxisMode;
     const yConfig = metrics.map((metric, idx) => {
       return {
         color: metric.color,
         forAccessor: foundLayer.accessors[idx],
+        ...(axisMode && { axisMode }),
       };
     });
     const newLayer = {
