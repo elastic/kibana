@@ -15,19 +15,19 @@ import { TooltipWrapper } from '../../index';
 
 import type { ColorRange, DataBounds, ColorRangesActions } from './types';
 
-export interface ColorRangesActionsProps {
+export interface ColorRangesExtraActionsProps {
   colorRanges: ColorRange[];
   dispatch: Dispatch<ColorRangesActions>;
   dataBounds: DataBounds;
   maxSteps?: number;
 }
 
-export function ColorRangesFooter({
+export function ColorRangesExtraActions({
   colorRanges,
   dispatch,
   maxSteps,
   dataBounds,
-}: ColorRangesActionsProps) {
+}: ColorRangesExtraActionsProps) {
   const shouldDisableAdd = Boolean(maxSteps && colorRanges.length >= maxSteps);
   const hasOneColorRange = colorRanges.length === 1;
 

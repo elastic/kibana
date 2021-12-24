@@ -17,22 +17,32 @@ import { isLastItem } from './utils';
 
 import type { DataBounds, ColorRangesActions, ColorRange, ColorRangeAccessor } from './types';
 import type { CustomPaletteParams } from '../../../../common';
+import type { PaletteContinuity } from '../../../../../../../src/plugins/charts/common';
 
 export interface ColorRangesItemButtonProps {
   index: number;
   colorRanges: ColorRange[];
   rangeType: CustomPaletteParams['rangeType'];
-  continuity: CustomPaletteParams['continuity'];
+  continuity: PaletteContinuity;
   dataBounds: DataBounds;
   dispatch: Dispatch<ColorRangesActions>;
   accessor: ColorRangeAccessor;
 }
 
-export function ColorRangeDeleteButton({
-  index,
-  dispatch,
-  colorRanges,
-}: ColorRangesItemButtonProps) {
+const switchContinuity = (isLast: boolean, continuity: PaletteContinuity) => {
+  switch (continuity) {
+    case 'none':
+      return isLast ? 'above' : 'below';
+    case 'above':
+      return isLast ? 'none' : 'all';
+    case 'below':
+      return isLast ? 'all' : 'none';
+    case 'all':
+      return isLast ? 'below' : 'above';
+  }
+};
+
+export function ColorRangeDeleteButton({ index, dispatch }: ColorRangesItemButtonProps) {
   const onExecuteAction = useCallback(() => {
     dispatch({ type: 'deleteColorRange', payload: { index } });
   }, [dispatch, index]);
@@ -55,9 +65,7 @@ export function ColorRangeDeleteButton({
 
 export function ColorRangeEditButton({
   index,
-  dataBounds,
   colorRanges,
-  rangeType,
   continuity,
   dispatch,
   accessor,
@@ -65,18 +73,8 @@ export function ColorRangeEditButton({
   const isLast = isLastItem(accessor);
 
   const onExecuteAction = useCallback(() => {
-    let newContinuity: CustomPaletteParams['continuity'];
-    let newValue;
-
-    if (isLast) {
-      newValue = Infinity;
-      newContinuity = continuity === 'all' ? 'below' : 'none';
-    } else {
-      newValue = -Infinity;
-      newContinuity = continuity === 'all' ? 'above' : 'none';
-    }
-
-    colorRanges[index][isLast ? 'end' : 'start'] = newValue;
+    const newContinuity = switchContinuity(isLast, continuity);
+    colorRanges[index][isLast ? 'end' : 'start'] = isLast ? Infinity : -Infinity;
 
     dispatch({
       type: 'set',
@@ -112,16 +110,9 @@ export function ColorRangeAutoDetectButton({
 
   const onExecuteAction = useCallback(() => {
     const { max: autoMax, min: autoMin } = getDataMinMax(rangeType, dataBounds);
+    const newContinuity = switchContinuity(isLast, continuity);
 
-    const newValue = roundValue(isLast ? autoMax : autoMin);
-    let newContinuity: CustomPaletteParams['continuity'];
-
-    if (isLast) {
-      newContinuity = continuity === 'none' ? 'above' : 'all';
-    } else {
-      newContinuity = continuity === 'none' ? 'below' : 'all';
-    }
-    colorRanges[index][isLast ? 'end' : 'start'] = newValue;
+    colorRanges[index][isLast ? 'end' : 'start'] = roundValue(isLast ? autoMax : autoMin);
 
     dispatch({
       type: 'set',

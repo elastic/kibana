@@ -127,7 +127,6 @@ export function getStopsFromColorRangesByNewInterval(
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getColorPaletteParams(params: any) {
-  const continuity = params.continuity ?? params.stops.length > 0 ? 'none' : 'above';
   let stops = params.stops;
   let colorsForStops = params.colors;
 
@@ -140,7 +139,6 @@ export function getColorPaletteParams(params: any) {
     ...params,
     stops,
     colors: colorsForStops,
-    continuity,
   };
 }
 
@@ -379,11 +377,11 @@ export function toColorRanges(
       return {
         color: colorStop.color,
         start:
-          isFirst && ['above', 'none'].includes(continuity)
+          isFirst && ['below', 'all'].includes(continuity)
             ? -Infinity
             : roundValue(colorStop.stop ?? activePalette.params?.rangeMin ?? dataMin),
         end:
-          isLast && ['below', 'none'].includes(continuity)
+          isLast && ['above', 'all'].includes(continuity)
             ? +Infinity
             : roundValue(array[index + 1]?.stop ?? activePalette.params?.rangeMax ?? dataMax),
       };

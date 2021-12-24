@@ -8,6 +8,7 @@ import { getDataMinMax, roundValue } from '../utils';
 
 import type { ColorRange, DataBounds, ColorRangeAccessor } from './types';
 import type { CustomPaletteParamsConfig } from '../../../../common';
+import { PaletteContinuity } from '../../../../../../../src/plugins/charts/common';
 
 /**
  * Check if item is last
@@ -182,14 +183,11 @@ export const calculateMaxStep = (stops: number[], max: number) => {
  * Convert ColorRange to ColorStops
  * @internal
  */
-export const toColorStops = (
-  colorRanges: ColorRange[],
-  continuity: CustomPaletteParamsConfig['continuity']
-) => {
-  const min = ['below', 'all'].includes(continuity!) ? colorRanges[0].start : -Infinity;
+export const toColorStops = (colorRanges: ColorRange[], continuity: PaletteContinuity) => {
+  const min = ['below', 'all'].includes(continuity!) ? -Infinity : colorRanges[0].start;
   const max = ['above', 'all'].includes(continuity!)
-    ? colorRanges[colorRanges.length - 1].end
-    : Infinity;
+    ? Infinity
+    : colorRanges[colorRanges.length - 1].end;
 
   return {
     min,

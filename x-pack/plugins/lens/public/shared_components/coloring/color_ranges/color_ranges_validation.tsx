@@ -46,26 +46,19 @@ export const validateColorRange = (
   accessor: ColorRangeAccessor
 ): ColorRangeValidation => {
   const errors: ColorRangeValidation['errors'] = [];
-  const validateStartColorRange = ({ start, color }: ColorRange) => {
-    if (!isValidColor(color)) {
-      errors.push('invalidColor');
-    }
 
-    if (Number.isNaN(start)) {
-      errors.push('invalidValue');
-    }
-  };
-
-  const validateEndRange = ({ end, start }: ColorRange) => {
-    if (start > end) {
-      errors.push('greaterThanMaxValue');
-    }
-  };
+  if (Number.isNaN(colorRange[accessor])) {
+    errors.push('invalidValue');
+  }
 
   if (accessor === 'end') {
-    validateEndRange(colorRange);
+    if (colorRange.start > colorRange.end) {
+      errors.push('greaterThanMaxValue');
+    }
   } else {
-    validateStartColorRange(colorRange);
+    if (!isValidColor(colorRange.color)) {
+      errors.push('invalidColor');
+    }
   }
 
   return {

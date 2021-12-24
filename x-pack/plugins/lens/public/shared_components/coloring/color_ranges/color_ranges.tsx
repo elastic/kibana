@@ -10,7 +10,7 @@ import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import { EuiFlexGroup, EuiTextColor, EuiFlexItem } from '@elastic/eui';
 
-import { ColorRangesFooter } from './color_ranges_footer';
+import { ColorRangesExtraActions } from './color_ranges_extra_actions';
 import { ColorRangeItem } from './color_ranges_item';
 import { colorRangesReducer } from './color_ranges_reducer';
 import {
@@ -22,17 +22,16 @@ import { toColorStops } from './utils';
 
 import type { CustomPaletteParamsConfig, ColorStop } from '../../../../common';
 import type { ColorRange, DataBounds, ColorRangesState } from './types';
+import type { PaletteContinuity } from '../../../../../../../src/plugins/charts/common';
+
 import { defaultPaletteParams } from '../constants';
 
 export interface ColorRangesProps {
   colorRanges: ColorRange[];
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
-  onChange: (
-    colorStops: ColorStop[],
-    upperMax: number,
-    continuity: CustomPaletteParamsConfig['continuity']
-  ) => void;
+  onChange: (colorStops: ColorStop[], upperMax: number, continuity: PaletteContinuity) => void;
   dataBounds: DataBounds;
+  showExtraActions?: boolean;
 }
 
 const toLocalState = (
@@ -49,6 +48,7 @@ export function ColorRanges({
   onChange,
   dataBounds,
   paletteConfiguration,
+  showExtraActions = true,
 }: ColorRangesProps) {
   const [localState, dispatch] = useReducer(
     colorRangesReducer,
@@ -136,14 +136,16 @@ export function ColorRanges({
           <EuiTextColor color="danger">{error}</EuiTextColor>
         ))}
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <ColorRangesFooter
-          dispatch={dispatch}
-          colorRanges={localState.colorRanges}
-          dataBounds={dataBounds}
-          maxSteps={paletteConfiguration?.maxSteps}
-        />
-      </EuiFlexItem>
+      {showExtraActions ? (
+        <EuiFlexItem grow={false}>
+          <ColorRangesExtraActions
+            dispatch={dispatch}
+            colorRanges={localState.colorRanges}
+            dataBounds={dataBounds}
+            maxSteps={paletteConfiguration?.maxSteps}
+          />
+        </EuiFlexItem>
+      ) : null}
     </EuiFlexGroup>
   );
 }

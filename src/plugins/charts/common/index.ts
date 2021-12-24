@@ -33,4 +33,4 @@ export {
   MULTILAYER_TIME_AXIS_STYLE,
 } from './static';
 
-export type { ColorSchemaParams, Labels, Style } from './types';
+export type { ColorSchemaParams, Labels, Style, PaletteContinuity } from './types';

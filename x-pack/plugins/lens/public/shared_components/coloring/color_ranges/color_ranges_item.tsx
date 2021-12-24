@@ -31,6 +31,7 @@ import {
 
 import type { ColorRange, DataBounds, ColorRangeAccessor, ColorRangesActions } from './types';
 import type { CustomPaletteParams } from '../../../../common';
+import { PaletteContinuity } from '../../../../../../../src/plugins/charts/common';
 
 export interface ColorRangesItemProps {
   colorRange: ColorRange;
@@ -39,20 +40,22 @@ export interface ColorRangesItemProps {
   dispatch: Dispatch<ColorRangesActions>;
   dataBounds: DataBounds;
   rangeType: CustomPaletteParams['rangeType'];
-  continuity: CustomPaletteParams['continuity'];
+  continuity: PaletteContinuity;
   accessor: ColorRangeAccessor;
   isValid?: boolean;
 }
 
+type ColorRangeItemMode = 'value' | 'auto' | 'edit';
+
 const getMode = (
   index: ColorRangesItemProps['index'],
   isLast: boolean,
-  continuity: ColorRangesItemProps['continuity'] = 'none'
-) => {
+  continuity: PaletteContinuity
+): ColorRangeItemMode => {
   if (!isLast && index > 0) {
     return 'value';
   }
-  return (isLast ? ['above', 'all'] : ['below', 'all']).includes(continuity) ? 'edit' : 'auto';
+  return (isLast ? ['above', 'all'] : ['below', 'all']).includes(continuity) ? 'auto' : 'edit';
 };
 
 const getPlaceholderForAutoMode = (isLast: boolean) =>

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { CustomPaletteParams } from '../../../../common';
+import type { PaletteContinuity } from '../../../../../../../src/plugins/charts/common';
 
 export interface ColorRange {
   color: string;
@@ -22,7 +23,7 @@ export interface DataBounds {
 export interface ColorRangesState {
   colorRanges: ColorRange[];
   rangeType: CustomPaletteParams['rangeType'];
-  continuity: CustomPaletteParams['continuity'];
+  continuity: PaletteContinuity;
 }
 
 /** @internal **/
