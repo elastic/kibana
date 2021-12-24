@@ -7,7 +7,7 @@
  */
 
 import { FieldFormatsStart } from '../../../field_formats/public';
-import { CoreSetup, CoreStart, DocLinksStart, ThemeServiceStart } from '../../../../core/public';
+import { CoreSetup, CoreStart, ThemeServiceStart } from '../../../../core/public';
 import { ChartsPluginSetup } from '../../../charts/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { pieLabelsFunction, pieVisFunction } from '../common';
@@ -21,7 +21,6 @@ export interface VisTypePieDependencies {
   getStartDeps: () => Promise<{
     data: DataPublicPluginStart;
     fieldFormats: FieldFormatsStart;
-    docLinks: DocLinksStart;
     kibanaTheme: ThemeServiceStart;
   }>;
 }
@@ -42,8 +41,8 @@ export class ExpressionPiePlugin {
     const getStartDeps = async () => {
       const [coreStart, deps] = await core.getStartServices();
       const { data, fieldFormats } = deps;
-      const { docLinks, theme: kibanaTheme } = coreStart;
-      return { data, fieldFormats, docLinks, kibanaTheme };
+      const { theme: kibanaTheme } = coreStart;
+      return { data, fieldFormats, kibanaTheme };
     };
 
     expressions.registerRenderer(
