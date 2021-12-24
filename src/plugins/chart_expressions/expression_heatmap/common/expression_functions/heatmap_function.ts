@@ -109,6 +109,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       help: i18n.translate('expressionHeatmap.function.args.xAccessorHelpText', {
         defaultMessage: 'The id of the x axis column or the corresponding dimension',
       }),
+      required: true,
     },
     yAccessor: {
       types: ['string', 'vis_dimension'],
@@ -116,6 +117,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       help: i18n.translate('expressionHeatmap.function.args.yAccessorHelpText', {
         defaultMessage: 'The id of the y axis column or the corresponding dimension',
       }),
+      required: true,
     },
     valueAccessor: {
       types: ['string', 'vis_dimension'],
@@ -123,6 +125,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
       help: i18n.translate('expressionHeatmap.function.args.valueAccessorHelpText', {
         defaultMessage: 'The id of the value column or the corresponding dimension',
       }),
+      required: true,
     },
     // not supported yet, small multiples accessor
     splitRowAccessor: {
