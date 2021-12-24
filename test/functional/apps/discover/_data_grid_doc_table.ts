@@ -104,6 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show popover with expanded cell content by click on expand button on embeddable', async () => {
       log.debug('open popover with expanded cell content to get json from the editor');
+      await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.saveSearch('expand-cell-search');
@@ -131,9 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.waitForWithTimeout('expandDocId to be valid', 5000, async () => {
         const text = await monacoEditor.getCodeEditorValue();
-        const flyoutJson = text?.trim().charAt(0) === '{' ? JSON.parse(text) : {};
-        expandDocId = flyoutJson._id;
-        return !!expandDocId && expandDocId === 'AU_x3_g4GFA8no6QjkYX';
+        return (expandDocId = JSON.parse(text)._id) === 'AU_x3_g4GFA8no6QjkYX';
       });
       log.debug(`expanded document id: ${expandDocId}`);
 
@@ -145,7 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         5000,
         async () => {
           const text = await monacoEditor.getCodeEditorValue();
-          const flyoutJson = text?.trim().charAt(0) === '{' ? JSON.parse(text) : {};
+          const flyoutJson = JSON.parse(text);
           log.debug(`flyout document id: ${flyoutJson._id}`);
           return flyoutJson._id === expandDocId;
         }
