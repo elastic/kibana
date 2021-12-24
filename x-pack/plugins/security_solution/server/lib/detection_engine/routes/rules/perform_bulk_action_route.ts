@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { Logger } from 'src/core/server';
 
@@ -81,6 +82,28 @@ const normalizeErrorResponse = (errors: RuleActionError[]): NormalizedRuleError[
   return Array.from(errorsMap, ([_, normalizedError]) => normalizedError);
 };
 
+const getErrorResponseBody = (errors: RuleActionError[], rulesCount: number) => {
+  const errorsCount = errors.length;
+  return {
+    message: errorsCount === rulesCount ? 'Bulk edit failed' : 'Bulk edit partially failed',
+    status_code: 500,
+    attributes: {
+      errors: normalizeErrorResponse(errors).map(({ message, ...error }) => ({
+        ...error,
+        message:
+          message.length > MAX_ERROR_MESSAGE_LENGTH
+            ? `${message.slice(0, MAX_ERROR_MESSAGE_LENGTH - 3)}...`
+            : message,
+      })),
+      rules: {
+        total: rulesCount,
+        failed: errorsCount,
+        succeeded: rulesCount - errorsCount,
+      },
+    },
+  };
+};
+
 const executeActionAndHandleErrors = async (
   rule: Rule,
   action: RuleActionFn
@@ -96,11 +119,12 @@ const executeActionAndHandleErrors = async (
   }
 };
 
-const executeBulkAction = async (rules: Rule[], action: RuleActionFn) =>
+const executeBulkAction = async (rules: Rule[], action: RuleActionFn, abortSignal: AbortSignal) =>
   initPromisePool({
     concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
     items: rules,
     executor: async (rule) => executeActionAndHandleErrors(rule, action),
+    abortSignal,
   });
 
 export const performBulkActionRoute = (
@@ -117,11 +141,19 @@ export const performBulkActionRoute = (
       },
       options: {
         tags: ['access:securitySolution'],
+        timeout: {
+          idleSocket: moment.duration(15, 'minutes').asMilliseconds(),
+        },
       },
     },
     async (context, request, response) => {
       const { body } = request;
       const siemResponse = buildSiemResponse(response);
+      const abortController = new AbortController();
+
+      // subscribing to completed$, because it handles both cases when request was completed and aborted.
+      // when route is finished by timeout, aborted$ is not getting fired
+      request.events.completed$.subscribe(() => abortController.abort());
 
       try {
         const rulesClient = context.alerting?.getRulesClient();
@@ -165,41 +197,57 @@ export const performBulkActionRoute = (
         };
         switch (body.action) {
           case BulkAction.enable:
-            processingResponse = await executeBulkAction(rules.data, async (rule) => {
-              if (!rule.enabled) {
-                throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
-                await enableRule({
-                  rule,
-                  rulesClient,
-                });
-              }
-            });
+            processingResponse = await executeBulkAction(
+              rules.data,
+              async (rule) => {
+                if (!rule.enabled) {
+                  throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
+                  await enableRule({
+                    rule,
+                    rulesClient,
+                  });
+                }
+              },
+              abortController.signal
+            );
             break;
           case BulkAction.disable:
-            processingResponse = await executeBulkAction(rules.data, async (rule) => {
-              if (rule.enabled) {
-                throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
-                await rulesClient.disable({ id: rule.id });
-              }
-            });
+            processingResponse = await executeBulkAction(
+              rules.data,
+              async (rule) => {
+                if (rule.enabled) {
+                  throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
+                  await rulesClient.disable({ id: rule.id });
+                }
+              },
+              abortController.signal
+            );
             break;
           case BulkAction.delete:
-            processingResponse = await executeBulkAction(rules.data, async (rule) => {
-              await deleteRules({
-                ruleId: rule.id,
-                rulesClient,
-                ruleStatusClient,
-              });
-            });
+            processingResponse = await executeBulkAction(
+              rules.data,
+              async (rule) => {
+                await deleteRules({
+                  ruleId: rule.id,
+                  rulesClient,
+                  ruleStatusClient,
+                });
+              },
+              abortController.signal
+            );
             break;
           case BulkAction.duplicate:
-            processingResponse = await executeBulkAction(rules.data, async (rule) => {
-              throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
+            processingResponse = await executeBulkAction(
+              rules.data,
+              async (rule) => {
+                throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
-              await rulesClient.create({
-                data: duplicateRule(rule, isRuleRegistryEnabled),
-              });
-            });
+                await rulesClient.create({
+                  data: duplicateRule(rule, isRuleRegistryEnabled),
+                });
+              },
+              abortController.signal
+            );
             break;
           case BulkAction.export:
             const exported = await getExportByObjectIds(
@@ -221,58 +269,48 @@ export const performBulkActionRoute = (
               body: responseBody,
             });
           case BulkAction.edit:
-            processingResponse = await executeBulkAction(rules.data, async (rule) => {
-              throwHttpError({
-                valid: !isElasticRule(rule.tags),
-                message: 'Elastic rule can`t be edited',
-              });
+            processingResponse = await executeBulkAction(
+              rules.data,
+              async (rule) => {
+                throwHttpError({
+                  valid: !isElasticRule(rule.tags),
+                  message: 'Elastic rule can`t be edited',
+                });
 
-              throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
+                throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
-              const editedRule = body[BulkAction.edit].reduce(
-                (acc, action) => appplyBulkActionEditToRule(acc, action),
-                rule
-              );
+                const editedRule = body[BulkAction.edit].reduce(
+                  (acc, action) => appplyBulkActionEditToRule(acc, action),
+                  rule
+                );
 
-              const { tags, params: { timelineTitle, timelineId } = {} } = editedRule;
-              const index = 'index' in editedRule.params ? editedRule.params.index : undefined;
+                const { tags, params: { timelineTitle, timelineId } = {} } = editedRule;
+                const index = 'index' in editedRule.params ? editedRule.params.index : undefined;
 
-              await patchRules({
-                rulesClient,
-                rule,
-                tags,
-                index,
-                timelineTitle,
-                timelineId,
-              });
-            });
+                await patchRules({
+                  rulesClient,
+                  rule,
+                  tags,
+                  index,
+                  timelineTitle,
+                  timelineId,
+                });
+              },
+              abortController.signal
+            );
+        }
+
+        if (abortController.signal.aborted === true) {
+          throw Error('Bulk action was aborted');
         }
 
         const errors = processingResponse.results.filter(
           (resp): resp is RuleActionError => resp?.error !== undefined
         );
         const rulesCount = rules.data.length;
-        const errorsCount = errors.length;
 
-        if (errorsCount > 0) {
-          const responseBody = {
-            message: errorsCount === rulesCount ? 'Bulk edit failed' : 'Bulk edit partially failed',
-            status_code: 500,
-            attributes: {
-              errors: normalizeErrorResponse(errors).map(({ message, ...error }) => ({
-                ...error,
-                message:
-                  message.length > MAX_ERROR_MESSAGE_LENGTH
-                    ? `${message.slice(0, MAX_ERROR_MESSAGE_LENGTH - 3)}...`
-                    : message,
-              })),
-              rules: {
-                total: rulesCount,
-                failed: errorsCount,
-                succeeded: rulesCount - errorsCount,
-              },
-            },
-          };
+        if (errors.length > 0) {
+          const responseBody = getErrorResponseBody(errors, rulesCount);
 
           return response.custom({
             headers: {
