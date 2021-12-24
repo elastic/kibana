@@ -20,6 +20,7 @@ import {
   TooltipType,
   SeriesIdentifier,
 } from '@elastic/charts';
+import { useEuiTheme } from '@elastic/eui';
 import {
   LegendToggle,
   ClickTriggerEvent,
@@ -54,9 +55,8 @@ import {
 } from '../utils';
 import { ChartSplit, SMALL_MULTIPLES_ID } from './chart_split';
 import { VisualizationNoResults } from './visualization_noresults';
-
-import './pie_vis_component.scss';
 import { VisTypePiePluginStartDependencies } from '../plugin';
+import { pieChartWrapperStyle, pieChartContainerStyleFactory } from './pie_vis_component.styles';
 
 declare global {
   interface Window {
@@ -79,9 +79,9 @@ export interface PieComponentProps {
 }
 
 const PieComponent = (props: PieComponentProps) => {
+  const theme = useEuiTheme();
   const chartTheme = props.chartsThemeService.useChartsTheme();
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
-
   const [showLegend, setShowLegend] = useState<boolean>(() => {
     const bwcLegendStateDefault =
       props.visParams.addLegend == null ? false : props.visParams.addLegend;
@@ -327,11 +327,11 @@ const PieComponent = (props: PieComponentProps) => {
   const canShowPieChart = !isAllZeros && !hasNegative;
 
   return (
-    <div className="pieChart__container" data-test-subj="visTypePieChart">
+    <div css={pieChartContainerStyleFactory(theme.euiTheme)} data-test-subj="visTypePieChart">
       {!canShowPieChart ? (
         <VisualizationNoResults hasNegativeValues={hasNegative} />
       ) : (
-        <div className="pieChart__wrapper" ref={parentRef}>
+        <div css={pieChartWrapperStyle} ref={parentRef}>
           <LegendToggle
             onClick={toggleLegend}
             showLegend={showLegend}
@@ -369,7 +369,7 @@ const PieComponent = (props: PieComponentProps) => {
                 services.fieldFormats
               )}
               theme={[
-                // Chart background should be transparent for usage at Canvas.
+                // Chart background should be transparent for the usage at Canvas.
                 { ...chartTheme, background: { color: 'transparent' } },
                 {
                   legend: {
