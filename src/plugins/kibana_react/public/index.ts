@@ -18,7 +18,6 @@ export * from './overlays';
 export * from './ui_settings';
 export * from './table_list_view';
 export * from './toolbar_button';
-export * from './split_panel';
 export * from './react_router_navigate';
 export * from './page_template';
 export type { Value } from './validated_range';

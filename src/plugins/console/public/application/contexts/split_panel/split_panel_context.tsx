@@ -7,7 +7,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { PanelRegistry } from './registry';
+import { PanelRegistry } from './split_panel_registry';
 
 const PanelContext = createContext({ registry: new PanelRegistry() });
 

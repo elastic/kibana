@@ -24,7 +24,7 @@ export function Resizer(props: Props) {
     <button
       {...props}
       data-test-subj="splitPanelResizer"
-      aria-label={i18n.translate('kibana-react.splitPanel.adjustPanelSizeAriaLabel', {
+      aria-label={i18n.translate('console.splitPanel.adjustPanelSizeAriaLabel', {
         defaultMessage: 'Press left/right to adjust panels size',
       })}
     >
