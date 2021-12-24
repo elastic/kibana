@@ -81,6 +81,7 @@ export interface PieComponentProps {
 const PieComponent = (props: PieComponentProps) => {
   const chartTheme = props.chartsThemeService.useChartsTheme();
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
+
   const [showLegend, setShowLegend] = useState<boolean>(() => {
     const bwcLegendStateDefault =
       props.visParams.addLegend == null ? false : props.visParams.addLegend;
@@ -368,7 +369,8 @@ const PieComponent = (props: PieComponentProps) => {
                 services.fieldFormats
               )}
               theme={[
-                chartTheme,
+                // Chart background should be transparent for usage at Canvas.
+                { ...chartTheme, background: { color: 'transparent' } },
                 {
                   legend: {
                     labelOptions: {
