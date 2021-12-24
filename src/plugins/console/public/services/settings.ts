@@ -10,7 +10,7 @@ import { Storage } from './index';
 
 export const DEFAULT_SETTINGS = Object.freeze({
   fontSize: 14,
-  polling: false,
+  polling: true,
   pollInterval: 60000,
   tripleQuotes: true,
   wrapMode: true,

@@ -23,12 +23,18 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSwitch,
+  EuiSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import { DevToolsSettings } from '../../services';
-import { EuiRefreshInterval } from './refresh_interval';
 
 export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
+
+const MILLISECONDS_IN_MINUTE = 60000;
+const MILLISECONDS_IN_FIVE_MINUTES = 300000;
+const MILLISECONDS_IN_TEN_MINUTES = 600000;
 
 interface Props {
   onSaveSettings: (newSettings: DevToolsSettings) => void;
@@ -101,6 +107,27 @@ export function DevToolsSettingsModal(props: Props) {
     });
   }
 
+  const intervalOptions = [
+    {
+      value: MILLISECONDS_IN_MINUTE,
+      text: i18n.translate('console.settingsPage.refreshInterval.oneMinute', {
+        defaultMessage: '1 minute',
+      }),
+    },
+    {
+      value: MILLISECONDS_IN_FIVE_MINUTES,
+      text: i18n.translate('console.settingsPage.refreshInterval.fiveMinutes', {
+        defaultMessage: '5 minutes',
+      }),
+    },
+    {
+      value: MILLISECONDS_IN_TEN_MINUTES,
+      text: i18n.translate('console.settingsPage.refreshInterval.tenMinutes', {
+        defaultMessage: '10 minutes',
+      }),
+    },
+  ];
+
   // It only makes sense to show polling options if the user needs to fetch any data.
   const pollingFields =
     fields || indices || templates ? (
@@ -120,14 +147,34 @@ export function DevToolsSettingsModal(props: Props) {
             />
           }
         >
-          <EuiRefreshInterval
-            isPaused={!polling}
-            refreshInterval={pollInterval}
-            onRefreshChange={({ isPaused, refreshInterval }) => {
-              setPolling(!isPaused);
-              setPollInterval(refreshInterval);
-            }}
-          />
+          <EuiFlexGroup alignItems="center" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                checked={polling}
+                data-test-subj="autocompletePolling"
+                id="autocompletePolling"
+                label={
+                  <FormattedMessage
+                    defaultMessage="Refresh every"
+                    id="console.settingsPage.pollingLabelText"
+                  />
+                }
+                onChange={(e) => setPolling(e.target.checked)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiSelect
+                fullWidth
+                compressed
+                options={intervalOptions}
+                value={pollInterval}
+                onChange={(e) => {
+                  setPollInterval(parseInt(e.target.value, 10));
+                }}
+                disabled={!polling}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFormRow>
 
         <EuiButton
