@@ -6,12 +6,8 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { expectAssignable } from 'tsd';
-import { UnwrapPromise } from '../..';
+import { DocViewerLegacyTable } from './table';
 
-type STRING = UnwrapPromise<Promise<string>>;
-type TUPLE = UnwrapPromise<Promise<[number, number]>>;
-
-expectAssignable<STRING>('adf');
-expectAssignable<TUPLE>([1, 2]);
+// Required for usage in React.lazy
+// eslint-disable-next-line import/no-default-export
+export default DocViewerLegacyTable;
