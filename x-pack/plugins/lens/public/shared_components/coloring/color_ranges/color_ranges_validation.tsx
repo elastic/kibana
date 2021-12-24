@@ -10,8 +10,11 @@ import { isValidColor } from '../utils';
 import type { ColorRange, ColorRangeAccessor } from './types';
 
 /** @internal **/
+type ColorRangeValidationErrors = 'invalidColor' | 'invalidValue' | 'greaterThanMaxValue';
+
+/** @internal **/
 export interface ColorRangeValidation {
-  errors: Array<'invalidColor' | 'invalidValue' | 'greaterThanMaxValue'>;
+  errors: ColorRangeValidationErrors[];
   isValid: boolean;
 }
 
@@ -20,7 +23,7 @@ export const getErrorMessages = (colorRangesValidity: Record<string, ColorRangeV
   return [
     ...new Set(
       Object.values(colorRangesValidity)
-        .reduce<ColorRangeValidation['errors']>((acc, item) => [...acc, ...item.errors], [])
+        .reduce<ColorRangeValidationErrors[]>((acc, item) => [...acc, ...item.errors], [])
         .flat()
     ),
   ].map((item) => {
@@ -41,11 +44,8 @@ export const getErrorMessages = (colorRangesValidity: Record<string, ColorRangeV
 };
 
 /** @internal **/
-export const validateColorRange = (
-  colorRange: ColorRange,
-  accessor: ColorRangeAccessor
-): ColorRangeValidation => {
-  const errors: ColorRangeValidation['errors'] = [];
+export const validateColorRange = (colorRange: ColorRange, accessor: ColorRangeAccessor) => {
+  const errors: ColorRangeValidationErrors[] = [];
 
   if (Number.isNaN(colorRange[accessor])) {
     errors.push('invalidValue');
@@ -64,12 +64,12 @@ export const validateColorRange = (
   return {
     isValid: !errors.length,
     errors,
-  };
+  } as ColorRangeValidation;
 };
 
 export const validateColorRanges = (colorRanges: ColorRange[]) => {
   const validations = colorRanges.reduce<Record<string, ColorRangeValidation>>(
-    (acc, item, index, array) => ({
+    (acc, item, index) => ({
       ...acc,
       [index]: validateColorRange(item, 'start'),
     }),

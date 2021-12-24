@@ -11,19 +11,6 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ColorRanges, ColorRangesProps } from './color_ranges';
 
-// mocking random id generator function
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-
-  return {
-    ...original,
-    htmlIdGenerator: (fn: unknown) => {
-      let counter = 0;
-      return () => counter++;
-    },
-  };
-});
-
 describe('Color Ranges component', () => {
   let props: ColorRangesProps;
   beforeEach(() => {

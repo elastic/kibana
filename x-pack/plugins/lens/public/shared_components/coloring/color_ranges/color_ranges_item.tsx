@@ -31,7 +31,7 @@ import {
 
 import type { ColorRange, DataBounds, ColorRangeAccessor, ColorRangesActions } from './types';
 import type { CustomPaletteParams } from '../../../../common';
-import { PaletteContinuity } from '../../../../../../../src/plugins/charts/common';
+import type { PaletteContinuity } from '../../../../../../../src/plugins/charts/common';
 
 export interface ColorRangesItemProps {
   colorRange: ColorRange;
@@ -63,7 +63,7 @@ const getPlaceholderForAutoMode = (isLast: boolean) =>
     ? i18n.translate('xpack.lens.dynamicColoring.customPalette.maxValuePlaceholder', {
         defaultMessage: 'Max. value',
       })
-    : i18n.translate('xpack.lens.dynamicColoring.customPalette.mionValuePlaceholder', {
+    : i18n.translate('xpack.lens.dynamicColoring.customPalette.minValuePlaceholder', {
         defaultMessage: 'Min. value',
       });
 
@@ -173,7 +173,7 @@ export function ColorRangeItem({
           compressed
           fullWidth={true}
           isInvalid={!isValid}
-          data-test-subj={`dynamicColoring_range_value`}
+          data-test-subj={`dynamicColoring_range_value_${localValue}`}
           value={mode !== 'auto' ? localValue : ''}
           disabled={isDisabled}
           onChange={onValueChange}

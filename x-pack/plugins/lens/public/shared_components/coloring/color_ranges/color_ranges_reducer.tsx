@@ -58,7 +58,12 @@ export const colorRangesReducer: Reducer<ColorRangesState, ColorRangesActions> =
       const { dataBounds } = action.payload as DistributeEquallyPayload;
       return {
         ...state,
-        colorRanges: distributeEqually(state.colorRanges, state.rangeType, dataBounds),
+        colorRanges: distributeEqually(
+          state.colorRanges,
+          state.rangeType,
+          state.continuity,
+          dataBounds
+        ),
       };
     }
     case 'updateColor': {

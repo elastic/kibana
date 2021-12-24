@@ -73,7 +73,7 @@ export function shiftPalette(stops: ColorStop[], max: number) {
 }
 
 /** @internal **/
-function calculateStop(
+export function calculateStop(
   stopValue: number,
   newMin: number,
   oldMin: number,
@@ -379,11 +379,11 @@ export function toColorRanges(
         start:
           isFirst && ['below', 'all'].includes(continuity)
             ? -Infinity
-            : roundValue(colorStop.stop ?? activePalette.params?.rangeMin ?? dataMin),
+            : colorStop.stop ?? activePalette.params?.rangeMin ?? dataMin,
         end:
           isLast && ['above', 'all'].includes(continuity)
             ? +Infinity
-            : roundValue(array[index + 1]?.stop ?? activePalette.params?.rangeMax ?? dataMax),
+            : array[index + 1]?.stop ?? activePalette.params?.rangeMax ?? dataMax,
       };
     }
   );

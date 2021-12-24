@@ -95,6 +95,7 @@ export function ColorRanges({
   );
 
   const lastColorRange = localState.colorRanges[localState.colorRanges.length - 1];
+  const errors = getErrorMessages(colorRangesValidity);
 
   return (
     <EuiFlexGroup
@@ -132,7 +133,7 @@ export function ColorRanges({
         />
       ) : null}
       <EuiFlexItem grow={false}>
-        {getErrorMessages(colorRangesValidity).map((error) => (
+        {errors.map((error) => (
           <EuiTextColor color="danger">{error}</EuiTextColor>
         ))}
       </EuiFlexItem>
@@ -140,9 +141,14 @@ export function ColorRanges({
         <EuiFlexItem grow={false}>
           <ColorRangesExtraActions
             dispatch={dispatch}
-            colorRanges={localState.colorRanges}
+            shouldDisableAdd={Boolean(
+              (paletteConfiguration?.maxSteps &&
+                localState.colorRanges.length >= paletteConfiguration?.maxSteps) ||
+                errors.length
+            )}
+            shouldDisableDistribute={Boolean(localState.colorRanges.length === 1)}
+            shouldDisableReverse={Boolean(localState.colorRanges.length === 1)}
             dataBounds={dataBounds}
-            maxSteps={paletteConfiguration?.maxSteps}
           />
         </EuiFlexItem>
       ) : null}

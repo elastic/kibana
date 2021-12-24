@@ -4,33 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import React, { useCallback, Dispatch } from 'react';
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, Dispatch } from 'react';
 import { EuiFlexGroup, EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
+
 import { DistributeEquallyIcon } from '../../../assets/distribute_equally';
 import { TooltipWrapper } from '../../index';
 
-import type { ColorRange, DataBounds, ColorRangesActions } from './types';
+import type { DataBounds, ColorRangesActions } from './types';
 
 export interface ColorRangesExtraActionsProps {
-  colorRanges: ColorRange[];
   dispatch: Dispatch<ColorRangesActions>;
   dataBounds: DataBounds;
-  maxSteps?: number;
+  shouldDisableAdd?: boolean;
+  shouldDisableReverse?: boolean;
+  shouldDisableDistribute?: boolean;
 }
 
 export function ColorRangesExtraActions({
-  colorRanges,
   dispatch,
-  maxSteps,
   dataBounds,
+  shouldDisableAdd = false,
+  shouldDisableReverse = false,
+  shouldDisableDistribute = false,
 }: ColorRangesExtraActionsProps) {
-  const shouldDisableAdd = Boolean(maxSteps && colorRanges.length >= maxSteps);
-  const hasOneColorRange = colorRanges.length === 1;
-
   const onAddColorRange = useCallback(() => {
     dispatch({
       type: 'addColorRange',
@@ -93,7 +91,7 @@ export function ColorRangesExtraActions({
           size="xs"
           flush="left"
           onClick={onReversePalette}
-          disabled={hasOneColorRange}
+          disabled={shouldDisableReverse}
         >
           <FormattedMessage
             id="xpack.lens.dynamicColoring.customPalette.reverseColors"
@@ -114,7 +112,7 @@ export function ColorRangesExtraActions({
           )}
           size="xs"
           flush="left"
-          disabled={hasOneColorRange}
+          disabled={shouldDisableDistribute}
           onClick={onDistributeEqually}
         >
           <FormattedMessage
