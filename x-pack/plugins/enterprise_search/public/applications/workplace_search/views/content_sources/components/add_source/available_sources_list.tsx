@@ -40,6 +40,11 @@ interface AvailableSourcesListProps {
   sources: SourceDataItem[];
 }
 
+const columnStyle = {
+  columnCount: "2",
+  columnGap: "2em"
+}
+
 export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sources }) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
@@ -51,9 +56,14 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
     // does this card need a disabled state?
     const card = (
       <>
-        <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false}>
+        <EuiFlexGroup
+          justifyContent="center"
+          alignItems="center"
+          responsive={false}
+          gutterSize="m"
+        >
           <EuiFlexItem grow={false}>
-            <SourceIcon serviceType={serviceType} name={name} size="m" />
+            <SourceIcon serviceType={serviceType} name={name} size="l" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="m">
@@ -93,25 +103,31 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
   };
 
   const visibleSources = (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        {sources.map((source, i) => (
-          <>
-            <EuiFlexGroup
-              justifyContent="center"
-              alignItems="stretch"
-              key={i}
-              data-test-subj="AvailableSourceCard"
-            >
-              <EuiFlexItem>
-                {getSourceCard(source)}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        ))}
+    // TODO probably should be using something other than a div here
+    <div style={columnStyle}>
+      <EuiFlexGroup
+        justifyContent="center"
+        alignItems="center"
+        responsive={false}
+        gutterSize="none"
+      >
+      </EuiFlexGroup>
 
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      {sources.map((source, i) => (
+        <EuiFlexItem grow={false} key={i}>
+          <EuiFlexGroup
+            justifyContent="center"
+            alignItems="stretch"
+            data-test-subj="AvailableSourceCard"
+          >
+            <EuiFlexItem>
+              {getSourceCard(source)}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      ))}
+
+    </div>
   );
 
   const emptyState = (
