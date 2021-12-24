@@ -16,6 +16,7 @@ interface UrlParts {
   auth?: string;
   username?: string;
   password?: string;
+  pathname?: string;
 }
 
 export const kbnTestConfig = new (class KbnTestConfig {
@@ -34,6 +35,7 @@ export const kbnTestConfig = new (class KbnTestConfig {
         auth: testKibanaUrl.auth === null ? undefined : testKibanaUrl.auth,
         username: testKibanaUrl.auth?.split(':')[0],
         password: testKibanaUrl.auth?.split(':')[1],
+        pathname: testKibanaUrl.path === null ? undefined : testKibanaUrl.path,
       };
     }
 
