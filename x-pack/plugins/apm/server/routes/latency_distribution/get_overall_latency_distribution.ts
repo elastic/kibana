@@ -23,6 +23,12 @@ import type {
   OverallLatencyDistributionResponse,
 } from './types';
 
+interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
+  buckets: Array<{
+    from: number;
+    doc_count: number;
+  }>;
+}
 export async function getOverallLatencyDistribution(
   options: OverallLatencyDistributionOptions
 ) {
@@ -62,8 +68,8 @@ export async function getOverallLatencyDistribution(
       }
     )) as {
       aggregations?: {
-        transaction_duration_min: estypes.AggregationsValueAggregate;
-        transaction_duration_max: estypes.AggregationsValueAggregate;
+        transaction_duration_min: estypes.AggregationsRateAggregate;
+        transaction_duration_max: estypes.AggregationsRateAggregate;
       };
       hits: { total: estypes.SearchTotalHits };
     };
@@ -99,10 +105,7 @@ export async function getOverallLatencyDistribution(
       }
     )) as {
       aggregations?: {
-        logspace_ranges: estypes.AggregationsMultiBucketAggregate<{
-          from: number;
-          doc_count: number;
-        }>;
+        logspace_ranges: Aggs;
       };
     };
 

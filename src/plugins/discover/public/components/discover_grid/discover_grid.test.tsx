@@ -142,7 +142,6 @@ describe('DiscoverGrid', () => {
             _index: 'i',
             _id: '6',
             _score: 1,
-            _type: '_doc',
             _source: {
               date: '2020-20-02T12:12:12.128',
               name: 'test6',

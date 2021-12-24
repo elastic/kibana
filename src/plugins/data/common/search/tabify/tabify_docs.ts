@@ -23,7 +23,6 @@ type ValidMetaFieldNames = keyof Pick<
   | '_seq_no'
   | '_shard'
   | '_source'
-  | '_type'
   | '_version'
 >;
 const VALID_META_FIELD_NAMES: ValidMetaFieldNames[] = [
@@ -37,7 +36,6 @@ const VALID_META_FIELD_NAMES: ValidMetaFieldNames[] = [
   '_seq_no',
   '_shard',
   '_source',
-  '_type',
   '_version',
 ];
 

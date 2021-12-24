@@ -40,11 +40,15 @@ export const getNumOverlapped = (
   });
   return sum;
 };
+interface Aggs extends estypes.AggregationsTermsAggregateBase {
+  buckets: AggregationDataPoint[];
+}
+
 export const processAggregations = (aggs: Record<string, estypes.AggregationsAggregate>) => {
   const platforms: Group[] = [];
   const overlap: Overlap = {};
-  const platformTerms = aggs.platforms as estypes.AggregationsTermsAggregate<AggregationDataPoint>;
-  const policyTerms = aggs.policies as estypes.AggregationsTermsAggregate<AggregationDataPoint>;
+  const platformTerms = aggs.platforms as Aggs;
+  const policyTerms = aggs.policies as Aggs;
 
   const policies =
     policyTerms?.buckets.map((o) => ({ name: o.key, id: o.key, size: o.doc_count })) ?? [];

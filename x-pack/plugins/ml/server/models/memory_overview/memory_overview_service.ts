@@ -81,6 +81,7 @@ export function memoryOverviewServiceProvider(mlClient: MlClient) {
         .map((jobStats) => {
           return {
             node_id: jobStats.node.id,
+            // @ts-expect-error model_bytes can be string | number, cannot sum it with AD_PROCESS_MEMORY_OVERHEAD
             model_size: jobStats.model_size_stats.model_bytes + AD_PROCESS_MEMORY_OVERHEAD,
             job_id: jobStats.job_id,
           };

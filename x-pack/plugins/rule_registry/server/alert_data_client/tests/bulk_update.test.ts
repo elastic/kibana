@@ -88,6 +88,7 @@ describe('bulkUpdate()', () => {
             body: {
               docs: [
                 {
+                  found: true,
                   _id: fakeAlertId,
                   _index: indexName,
                   _source: {
@@ -145,6 +146,7 @@ describe('bulkUpdate()', () => {
             body: {
               docs: [
                 {
+                  found: true,
                   _id: fakeAlertId,
                   _index: indexName,
                   _source: {
@@ -191,6 +193,7 @@ describe('bulkUpdate()', () => {
             body: {
               docs: [
                 {
+                  found: true,
                   _id: successfulAuthzHit,
                   _index: indexName,
                   _source: {
@@ -201,6 +204,7 @@ describe('bulkUpdate()', () => {
                   },
                 },
                 {
+                  found: true,
                   _id: unsuccessfulAuthzHit,
                   _index: indexName,
                   _source: {

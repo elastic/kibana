@@ -99,7 +99,7 @@ export const legacyRulesNotificationAlertType = ({
     const signals = results.hits.hits.map((hit) => hit._source);
 
     const signalsCount =
-      typeof results.hits.total === 'number' ? results.hits.total : results.hits.total.value;
+      typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value ?? 0;
 
     const resultsLink = getNotificationResultsLink({
       from: fromInMs,

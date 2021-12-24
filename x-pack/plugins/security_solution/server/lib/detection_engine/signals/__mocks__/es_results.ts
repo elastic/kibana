@@ -107,7 +107,6 @@ export const expectedRule = (): RulesSchema => {
 
 export const sampleDocNoSortIdNoVersion = (someUuid: string = sampleIdGuid): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
-  _type: 'doc',
   _score: 100,
   _id: someUuid,
   _source: {
@@ -123,7 +122,6 @@ export const sampleDocWithSortId = (
   destIp?: string | string[]
 ): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
-  _type: 'doc',
   _score: 100,
   _version: 1,
   _id: someUuid,
@@ -151,7 +149,6 @@ export const sampleDocNoSortId = (
   ip?: string
 ): SignalSourceHit & { _source: Required<SignalSourceHit>['_source'] } => ({
   _index: 'myFakeSignalIndex',
-  _type: 'doc',
   _score: 100,
   _version: 1,
   _id: someUuid,
@@ -206,7 +203,6 @@ export const sampleDocSeverity = (severity?: unknown, fieldName?: string): Signa
 
 export const sampleDocRiskScore = (riskScore?: unknown): SignalSourceHit => ({
   _index: 'myFakeSignalIndex',
-  _type: 'doc',
   _score: 100,
   _version: 1,
   _id: sampleIdGuid,

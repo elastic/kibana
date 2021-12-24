@@ -143,7 +143,7 @@ export interface FindOptions extends IndexType {
   defaultSearchOperator?: 'AND' | 'OR';
   searchFields?: string[];
   sortField?: string;
-  sortOrder?: estypes.SearchSortOrder;
+  sortOrder?: estypes.SortOrder;
   hasReference?: {
     type: string;
     id: string;

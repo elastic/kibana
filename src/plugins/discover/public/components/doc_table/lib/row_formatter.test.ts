@@ -89,10 +89,6 @@ describe('Row formatter', () => {
               "_score",
               1,
             ],
-            Array [
-              "_type",
-              "doc",
-            ],
           ]
         }
       />
@@ -137,10 +133,6 @@ describe('Row formatter', () => {
               "_score",
               1,
             ],
-            Array [
-              "_type",
-              "doc",
-            ],
           ]
         }
       />
@@ -176,10 +168,6 @@ describe('Row formatter', () => {
             Array [
               "_score",
               1,
-            ],
-            Array [
-              "_type",
-              "doc",
             ],
           ]
         }

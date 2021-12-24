@@ -33,6 +33,13 @@ export const getTransactionDurationRangesRequest = (
   },
 });
 
+interface Aggs {
+  latency_ranges: {
+    buckets: Array<{
+      doc_count: number;
+    }>;
+  };
+}
 /**
  * Compute the actual percentile bucket counts and actual fractions
  */
@@ -41,7 +48,7 @@ export const fetchTransactionDurationFractions = async (
   params: CorrelationsParams,
   ranges: estypes.AggregationsAggregationRange[]
 ): Promise<{ fractions: number[]; totalDocCount: number }> => {
-  const resp = await esClient.search(
+  const resp = await esClient.search<unknown, Aggs>(
     getTransactionDurationRangesRequest(params, ranges)
   );
 
@@ -58,12 +65,7 @@ export const fetchTransactionDurationFractions = async (
     );
   }
 
-  const buckets = (
-    resp.body.aggregations
-      .latency_ranges as estypes.AggregationsMultiBucketAggregate<{
-      doc_count: number;
-    }>
-  )?.buckets;
+  const buckets = resp.body.aggregations.latency_ranges?.buckets;
 
   const totalDocCount = buckets.reduce((acc, bucket) => {
     return acc + bucket.doc_count;

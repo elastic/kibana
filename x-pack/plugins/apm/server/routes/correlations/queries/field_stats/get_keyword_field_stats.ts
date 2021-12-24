@@ -48,6 +48,10 @@ export const getKeywordFieldStatsRequest = (
   };
 };
 
+interface SampledTopAggs
+  extends estypes.AggregationsTermsAggregateBase<TopValueBucket> {
+  buckets: TopValueBucket[];
+}
 export const fetchKeywordFieldStats = async (
   esClient: ElasticsearchClient,
   params: FieldStatsCommonRequestParams,
@@ -59,18 +63,19 @@ export const fetchKeywordFieldStats = async (
     field.fieldName,
     termFilters
   );
-  const { body } = await esClient.search(request);
-  const aggregations = body.aggregations as {
-    sampled_top: estypes.AggregationsTermsAggregate<TopValueBucket>;
-  };
-  const topValues: TopValueBucket[] = aggregations?.sampled_top?.buckets ?? [];
+  const { body } = await esClient.search<
+    unknown,
+    { sampled_top: SampledTopAggs }
+  >(request);
+  const aggregations = body.aggregations;
+  const topValues = aggregations?.sampled_top?.buckets ?? [];
 
   const stats = {
     fieldName: field.fieldName,
     topValues,
     topValuesSampleSize: topValues.reduce(
       (acc, curr) => acc + curr.doc_count,
-      aggregations.sampled_top?.sum_other_doc_count ?? 0
+      aggregations?.sampled_top?.sum_other_doc_count ?? 0
     ),
   };
 

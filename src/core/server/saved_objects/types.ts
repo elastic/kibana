@@ -81,7 +81,7 @@ export interface SavedObjectsFindOptions {
   page?: number;
   perPage?: number;
   sortField?: string;
-  sortOrder?: estypes.SearchSortOrder;
+  sortOrder?: estypes.SortOrder;
   /**
    * An array of fields to include in the results
    * @example

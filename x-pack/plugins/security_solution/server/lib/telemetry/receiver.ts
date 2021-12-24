@@ -86,7 +86,7 @@ export class TelemetryReceiver {
     }
 
     const query: SearchRequest = {
-      expand_wildcards: 'open,hidden',
+      expand_wildcards: ['open' as const, 'hidden' as const],
       index: `.ds-metrics-endpoint.policy*`,
       ignore_unavailable: false,
       size: 0, // no query results required - only aggregation quantity
@@ -133,7 +133,7 @@ export class TelemetryReceiver {
     }
 
     const query: SearchRequest = {
-      expand_wildcards: 'open,hidden',
+      expand_wildcards: ['open' as const, 'hidden' as const],
       index: `.ds-metrics-endpoint.metrics-*`,
       ignore_unavailable: false,
       size: 0, // no query results required - only aggregation quantity
@@ -180,7 +180,7 @@ export class TelemetryReceiver {
     }
 
     const query = {
-      expand_wildcards: 'open,hidden',
+      expand_wildcards: ['open' as const, 'hidden' as const],
       index: '.logs-endpoint.diagnostic.collection-*',
       ignore_unavailable: true,
       size: TELEMETRY_MAX_BUFFER_SIZE,
@@ -271,7 +271,7 @@ export class TelemetryReceiver {
     }
 
     const query: SearchRequest = {
-      expand_wildcards: 'open,hidden',
+      expand_wildcards: ['open' as const, 'hidden' as const],
       index: `${this.kibanaIndex}*`,
       ignore_unavailable: true,
       size: this.max_records,

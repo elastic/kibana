@@ -102,10 +102,7 @@ if (doc['task.runAt'].size()!=0) {
     },
   },
 };
-export const SortByRunAtAndRetryAt = SortByRunAtAndRetryAtScript as unknown as Record<
-  string,
-  estypes.SearchSort
->;
+export const SortByRunAtAndRetryAt = SortByRunAtAndRetryAtScript as estypes.SortCombinations;
 
 export const updateFieldsAndMarkAsFailed = (
   fieldUpdates: {

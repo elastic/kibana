@@ -266,11 +266,11 @@ export function jobAuditMessagesProvider(
 
     interface LevelsPerJob {
       key: string;
-      levels: estypes.AggregationsTermsAggregate<{
+      levels: estypes.AggregationsTermsAggregateBase<{
         key: LevelName;
-        latestMessage: estypes.AggregationsTermsAggregate<{
+        latestMessage: estypes.AggregationsTermsAggregateBase<{
           key: string;
-          latestMessage: estypes.AggregationsValueAggregate;
+          latestMessage: estypes.AggregationsRateAggregate;
         }>;
       }>;
     }
@@ -280,7 +280,7 @@ export function jobAuditMessagesProvider(
     const jobMessages: AuditMessage[] = [];
 
     const bodyAgg = body.aggregations as {
-      levelsPerJob?: estypes.AggregationsTermsAggregate<LevelsPerJob>;
+      levelsPerJob?: estypes.AggregationsTermsAggregateBase<LevelsPerJob>;
     };
 
     if (
@@ -290,7 +290,7 @@ export function jobAuditMessagesProvider(
       bodyAgg.levelsPerJob.buckets &&
       bodyAgg.levelsPerJob.buckets.length
     ) {
-      messagesPerJob = bodyAgg.levelsPerJob.buckets;
+      messagesPerJob = bodyAgg.levelsPerJob.buckets as LevelsPerJob[];
     }
 
     messagesPerJob.forEach((job) => {
@@ -300,7 +300,15 @@ export function jobAuditMessagesProvider(
         let highestLevelText = '';
         let msgTime = 0;
 
-        job.levels.buckets.forEach((level) => {
+        (
+          job.levels.buckets as Array<{
+            key: LevelName;
+            latestMessage: estypes.AggregationsTermsAggregateBase<{
+              key: string;
+              latestMessage: estypes.AggregationsRateAggregate;
+            }>;
+          }>
+        ).forEach((level) => {
           const label = level.key;
           // note the highest message level
           if (LEVEL[label] > highestLevel) {
@@ -310,7 +318,12 @@ export function jobAuditMessagesProvider(
               level.latestMessage.buckets &&
               level.latestMessage.buckets.length
             ) {
-              level.latestMessage.buckets.forEach((msg) => {
+              (
+                level.latestMessage.buckets as Array<{
+                  key: string;
+                  latestMessage: estypes.AggregationsRateAggregate;
+                }>
+              ).forEach((msg) => {
                 // there should only be one result here.
                 highestLevelText = msg.key;
 
@@ -456,13 +469,19 @@ export function jobAuditMessagesProvider(
       },
     });
 
-    const errors = body.aggregations!.by_job as estypes.AggregationsTermsAggregate<{
+    const errors = body.aggregations!.by_job as estypes.AggregationsTermsAggregateBase<{
       key: string;
       doc_count: number;
       latest_errors: Pick<estypes.SearchResponse<JobMessage>, 'hits'>;
     }>;
 
-    return errors.buckets.map((bucket) => {
+    return (
+      errors.buckets as Array<{
+        key: string;
+        doc_count: number;
+        latest_errors: Pick<estypes.SearchResponse<JobMessage>, 'hits'>;
+      }>
+    ).map((bucket) => {
       return {
         job_id: bucket.key,
         errors: bucket.latest_errors.hits.hits.map((v) => v._source!),

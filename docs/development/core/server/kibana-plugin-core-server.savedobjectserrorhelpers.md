@@ -18,6 +18,7 @@ export declare class SavedObjectsErrorHelpers
 |  [createBadRequestError(reason)](./kibana-plugin-core-server.savedobjectserrorhelpers.createbadrequesterror.md) | <code>static</code> |  |
 |  [createConflictError(type, id, reason)](./kibana-plugin-core-server.savedobjectserrorhelpers.createconflicterror.md) | <code>static</code> |  |
 |  [createGenericNotFoundError(type, id)](./kibana-plugin-core-server.savedobjectserrorhelpers.creategenericnotfounderror.md) | <code>static</code> |  |
+|  [createGenericNotFoundEsUnavailableError(type, id)](./kibana-plugin-core-server.savedobjectserrorhelpers.creategenericnotfoundesunavailableerror.md) | <code>static</code> |  |
 |  [createIndexAliasNotFoundError(alias)](./kibana-plugin-core-server.savedobjectserrorhelpers.createindexaliasnotfounderror.md) | <code>static</code> |  |
 |  [createInvalidVersionError(versionInput)](./kibana-plugin-core-server.savedobjectserrorhelpers.createinvalidversionerror.md) | <code>static</code> |  |
 |  [createTooManyRequestsError(type, id)](./kibana-plugin-core-server.savedobjectserrorhelpers.createtoomanyrequestserror.md) | <code>static</code> |  |

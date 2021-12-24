@@ -185,7 +185,6 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     this.setState({
       isReady: true,
       isCreating: !indexPattern.fields.getByName(spec.name),
-      // @ts-expect-error '' is not a valid ScriptLanguage
       isDeprecatedLang: this.deprecatedLangs.includes(spec.lang || ''),
       errors: [],
       scriptingLangs,

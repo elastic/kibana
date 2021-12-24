@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import {
-  IndicesAlias,
-  IndicesIndexStatePrefixedSettings,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { asyncForEach } from '@kbn/std';
 import { getIlmPolicy, getIndexTemplate } from './documents';
@@ -99,9 +95,7 @@ class EsInitializationSteps {
     }
     asyncForEach(Object.keys(indices), async (indexName: string) => {
       try {
-        const hidden: string | boolean | undefined = (
-          indices[indexName]?.settings as IndicesIndexStatePrefixedSettings
-        )?.index?.hidden;
+        const hidden: string | boolean | undefined = indices[indexName]?.settings?.index?.hidden;
 
         // Check to see if this index template is hidden
         if (hidden !== true && hidden !== 'true') {
@@ -135,7 +129,7 @@ class EsInitializationSteps {
       try {
         const aliases = indexAliases[indexName]?.aliases;
         const hasNotHiddenAliases: boolean = Object.keys(aliases).some((alias: string) => {
-          return (aliases[alias] as IndicesAlias)?.is_hidden !== true;
+          return (aliases[alias] as estypes.IndicesAlias)?.is_hidden !== true;
         });
 
         if (hasNotHiddenAliases) {

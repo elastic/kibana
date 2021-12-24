@@ -128,6 +128,7 @@ export function initIndexingRoutes({
           id: request.params.featureId,
           refresh: true,
         });
+        // @ts-expect-error always false
         if (resp.result === 'Error') {
           throw resp;
         } else {

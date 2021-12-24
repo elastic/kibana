@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  QueryDslQueryContainer,
+  Sort,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProcessorEvent } from '../../../common/processor_event';
 import {
   TRACE_ID,
@@ -66,7 +69,7 @@ export async function getTraceItems(
         { _score: { order: 'asc' as const } },
         { [TRANSACTION_DURATION]: { order: 'desc' as const } },
         { [SPAN_DURATION]: { order: 'desc' as const } },
-      ],
+      ] as Sort,
       track_total_hits: true,
     },
   });

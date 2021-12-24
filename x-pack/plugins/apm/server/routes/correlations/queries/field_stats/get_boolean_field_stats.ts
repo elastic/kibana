@@ -51,6 +51,16 @@ export const getBooleanFieldStatsRequest = (
   };
 };
 
+interface SamplesValuesAggs
+  extends estypes.AggregationsTermsAggregateBase<TopValueBucket> {
+  buckets: TopValueBucket[];
+}
+
+interface FieldStatsAggs {
+  sampled_value_count: estypes.AggregationsSingleBucketAggregateBase;
+  sampled_values: SamplesValuesAggs;
+}
+
 export const fetchBooleanFieldStats = async (
   esClient: ElasticsearchClient,
   params: FieldStatsCommonRequestParams,
@@ -62,19 +72,14 @@ export const fetchBooleanFieldStats = async (
     field.fieldName,
     termFilters
   );
-  const { body } = await esClient.search(request);
-  const aggregations = body.aggregations as {
-    sampled_value_count: estypes.AggregationsFiltersBucketItemKeys;
-    sampled_values: estypes.AggregationsTermsAggregate<TopValueBucket>;
-  };
-
+  const { body } = await esClient.search<unknown, FieldStatsAggs>(request);
+  const aggregations = body.aggregations;
   const stats: BooleanFieldStats = {
     fieldName: field.fieldName,
     count: aggregations?.sampled_value_count.doc_count ?? 0,
   };
 
-  const valueBuckets: TopValueBucket[] =
-    aggregations?.sampled_values?.buckets ?? [];
+  const valueBuckets = aggregations?.sampled_values?.buckets ?? [];
   valueBuckets.forEach((bucket) => {
     stats[`${bucket.key.toString()}Count`] = bucket.doc_count;
   });

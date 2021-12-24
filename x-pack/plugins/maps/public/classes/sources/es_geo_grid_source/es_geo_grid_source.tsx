@@ -292,7 +292,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
       features.push(...convertCompositeRespToGeoJson(esResponse, this._descriptor.requestType));
 
       const aggr = esResponse.aggregations
-        ?.compositeSplit as estypes.AggregationsCompositeBucketAggregate;
+        ?.compositeSplit as estypes.AggregationsCompositeAggregate;
       afterKey = aggr.after_key;
       if (aggr.buckets.length < gridsPerRequest) {
         // Finished because request did not get full resultset back
