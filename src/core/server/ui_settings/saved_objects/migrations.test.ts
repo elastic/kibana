@@ -211,3 +211,51 @@ describe('ui_settings 8.0.0 migrations', () => {
     });
   });
 });
+
+describe('ui_settings 8.1.0 migrations', () => {
+  const migration = migrations['8.1.0'];
+
+  test('returns doc on empty object', () => {
+    expect(migration({} as SavedObjectUnsanitizedDoc)).toEqual({
+      references: [],
+    });
+  });
+
+  test('adds geo_point type to default map', () => {
+    const initialDefaultTypeMap = {
+      ip: { id: 'ip', params: {} },
+      date: { id: 'date', params: {} },
+      date_nanos: { id: 'date_nanos', params: {}, es: true },
+      number: { id: 'number', params: {} },
+      boolean: { id: 'boolean', params: {} },
+      histogram: { id: 'histogram', params: {} },
+      _source: { id: '_source', params: {} },
+      _default_: { id: 'string', params: {} },
+    };
+
+    const doc = {
+      type: 'config',
+      id: '8.0.0',
+      attributes: {
+        buildNum: 9007199254740991,
+        'format:defaultTypeMap': JSON.stringify(initialDefaultTypeMap),
+      },
+      references: [],
+      updated_at: '2020-06-09T20:18:20.349Z',
+      migrationVersion: {},
+    };
+    const migrated = migration(doc);
+    expect(migrated.attributes.buildNum).toBe(9007199254740991);
+    expect(JSON.parse(migrated.attributes['format:defaultTypeMap'])).toEqual({
+      ip: { id: 'ip', params: {} },
+      date: { id: 'date', params: {} },
+      date_nanos: { id: 'date_nanos', params: {}, es: true },
+      number: { id: 'number', params: {} },
+      boolean: { id: 'boolean', params: {} },
+      histogram: { id: 'histogram', params: {} },
+      _source: { id: '_source', params: {} },
+      _default_: { id: 'string', params: {} },
+      geo_point: { id: 'geo_point', params: { transform: 'wkt' } },
+    });
+  });
+});
