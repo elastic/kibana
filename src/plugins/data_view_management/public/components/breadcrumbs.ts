@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IndexPattern } from '../../../data/public';
+import { DataView } from '../../../data_views/public';
 
 export function getListBreadcrumbs() {
   return [
@@ -32,7 +32,7 @@ export function getCreateBreadcrumbs() {
   ];
 }
 
-export function getEditBreadcrumbs(indexPattern: IndexPattern) {
+export function getEditBreadcrumbs(indexPattern: DataView) {
   return [
     ...getListBreadcrumbs(),
     {
@@ -42,7 +42,7 @@ export function getEditBreadcrumbs(indexPattern: IndexPattern) {
   ];
 }
 
-export function getEditFieldBreadcrumbs(indexPattern: IndexPattern, fieldName: string) {
+export function getEditFieldBreadcrumbs(indexPattern: DataView, fieldName: string) {
   return [
     ...getEditBreadcrumbs(indexPattern),
     {
@@ -51,7 +51,7 @@ export function getEditFieldBreadcrumbs(indexPattern: IndexPattern, fieldName: s
   ];
 }
 
-export function getCreateFieldBreadcrumbs(indexPattern: IndexPattern) {
+export function getCreateFieldBreadcrumbs(indexPattern: DataView) {
   return [
     ...getEditBreadcrumbs(indexPattern),
     {

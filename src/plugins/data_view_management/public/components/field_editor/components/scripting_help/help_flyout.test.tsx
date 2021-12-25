@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { ScriptingHelpFlyout } from './help_flyout';
 
-import { IndexPattern } from '../../../../../../data/public';
+import { DataView } from '../../../../../../data_views/public';
 
 import { ExecuteScript } from '../../types';
 
@@ -21,7 +21,7 @@ jest.mock('./test_script', () => ({
   },
 }));
 
-const indexPatternMock = {} as IndexPattern;
+const indexPatternMock = {} as DataView;
 
 describe('ScriptingHelpFlyout', () => {
   it('should render normally', async () => {

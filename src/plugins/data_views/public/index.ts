@@ -16,7 +16,7 @@ export {
 export { onRedirectNoIndexPattern } from './data_views';
 
 export type { IIndexPatternFieldList, TypeMeta } from '../common';
-export { IndexPatternField, DataViewField } from '../common';
+export { IndexPatternField, DataViewField, DataViewType, META_FIELDS } from '../common';
 
 export type { IndexPatternsContract, DataViewsContract } from './data_views';
 export {
@@ -25,6 +25,7 @@ export {
   DataViewsApiClient,
   DataViewsService,
   DataView,
+  DataViewListItem,
 } from './data_views';
 export { UiSettingsPublicToCommon } from './ui_settings_wrapper';
 export { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';
@@ -42,4 +43,4 @@ export function plugin() {
 export type { DataViewsPublicPluginSetup, DataViewsPublicPluginStart } from './types';
 
 // Export plugin after all other imports
-export type { DataViewsPublicPlugin as DataPlugin };
+export type { DataViewsPublicPlugin as DataViewsPlugin };

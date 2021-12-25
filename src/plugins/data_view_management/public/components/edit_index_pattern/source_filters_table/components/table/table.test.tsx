@@ -11,13 +11,13 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { Table, TableProps, TableState } from './table';
 import { EuiTableFieldDataColumnType, keys } from '@elastic/eui';
-import { IndexPattern } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data_views/public';
 import { SourceFiltersTableFilter } from '../../types';
 
-const indexPattern = {} as IndexPattern;
+const indexPattern = {} as DataView;
 const items: SourceFiltersTableFilter[] = [{ value: 'tim*', clientId: '' }];
 
-const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IndexPattern);
+const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as DataView);
 
 const getTableColumnRender = (
   component: ShallowWrapper<TableProps, TableState, Table>,

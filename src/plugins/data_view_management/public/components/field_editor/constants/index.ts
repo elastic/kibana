@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getKbnTypeNames } from '../../../../../data/public';
+import { getKbnTypeNames } from '@kbn/field-types';
 
 export const FIELD_TYPES_BY_LANG = {
   painless: ['number', 'string', 'date', 'boolean'],

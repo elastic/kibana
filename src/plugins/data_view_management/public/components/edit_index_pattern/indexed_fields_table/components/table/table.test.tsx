@@ -8,14 +8,14 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { IndexPattern } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data_views/public';
 import { IndexedFieldItem } from '../../types';
 import { Table, renderFieldName, getConflictModalContent } from './table';
 import { overlayServiceMock } from 'src/core/public/mocks';
 
 const indexPattern = {
   timeFieldName: 'timestamp',
-} as IndexPattern;
+} as DataView;
 
 const items: IndexedFieldItem[] = [
   {
