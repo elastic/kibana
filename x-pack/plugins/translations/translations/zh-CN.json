@@ -14583,7 +14583,6 @@
     "xpack.lens.metric.addLayer": "添加可视化图层",
     "xpack.lens.metric.groupLabel": "表和单值",
     "xpack.lens.metric.label": "指标",
-    "xpack.lens.pageTitle": "Lens",
     "xpack.lens.paletteHeatmapGradient.customize": "编辑",
     "xpack.lens.paletteHeatmapGradient.customizeLong": "编辑调色板",
     "xpack.lens.paletteHeatmapGradient.label": "颜色",

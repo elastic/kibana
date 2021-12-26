@@ -14393,7 +14393,6 @@
     "xpack.lens.metric.addLayer": "ビジュアライゼーションレイヤーを追加",
     "xpack.lens.metric.groupLabel": "表形式の値と単一の値",
     "xpack.lens.metric.label": "メトリック",
-    "xpack.lens.pageTitle": "レンズ",
     "xpack.lens.paletteHeatmapGradient.customize": "編集",
     "xpack.lens.paletteHeatmapGradient.customizeLong": "パレットを編集",
     "xpack.lens.paletteHeatmapGradient.label": "色",
