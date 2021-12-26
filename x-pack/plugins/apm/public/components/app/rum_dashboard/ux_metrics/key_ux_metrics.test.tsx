@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import * as fetcherHook from '../../../../hooks/use_fetcher';
-import { KeyUXMetrics } from './KeyUXMetrics';
+import { KeyUXMetrics } from './key_ux_metrics';
 
 describe('KeyUXMetrics', () => {
   it('renders metrics with correct formats', () => {

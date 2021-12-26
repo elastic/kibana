@@ -15,7 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { I18LABELS } from '../translations';
-import { KeyUXMetrics } from './KeyUXMetrics';
+import { KeyUXMetrics } from './key_ux_metrics';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useUxQuery } from '../hooks/useUxQuery';
 import { getCoreVitalsComponent } from '../../../../../../observability/public';

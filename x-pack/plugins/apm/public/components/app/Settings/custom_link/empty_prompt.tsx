@@ -8,7 +8,7 @@
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { CreateCustomLinkButton } from './CreateCustomLinkButton';
+import { CreateCustomLinkButton } from './create_custom_link_button';
 
 export function EmptyPrompt({
   onCreateCustomLinkClick,

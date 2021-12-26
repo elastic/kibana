@@ -15,7 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CustomLink } from '../../../../../../common/custom_link/custom_link_types';
-import { Documentation } from './Documentation';
+import { Documentation } from './documentation';
 
 interface InputField {
   name: keyof CustomLink;

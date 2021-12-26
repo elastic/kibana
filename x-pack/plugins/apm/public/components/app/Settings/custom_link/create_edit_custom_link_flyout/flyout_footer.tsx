@@ -14,7 +14,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DeleteButton } from './DeleteButton';
+import { DeleteButton } from './delete_button';
 
 export function FlyoutFooter({
   onClose,

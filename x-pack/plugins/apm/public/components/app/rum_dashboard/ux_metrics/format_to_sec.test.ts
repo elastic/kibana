@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { formatToSec } from './KeyUXMetrics';
+import { formatToSec } from './key_ux_metrics';
 
 describe('FormatToSec', () => {
   test('it returns the expected value', () => {

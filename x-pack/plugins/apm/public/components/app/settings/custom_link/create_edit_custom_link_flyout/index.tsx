@@ -17,12 +17,12 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { Filter } from '../../../../../../common/custom_link/custom_link_types';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
-import { FiltersSection } from './FiltersSection';
-import { FlyoutFooter } from './FlyoutFooter';
-import { LinkSection } from './LinkSection';
-import { saveCustomLink } from './saveCustomLink';
+import { FiltersSection } from './filters_section';
+import { FlyoutFooter } from './flyout_footer';
+import { LinkSection } from './link_section';
+import { saveCustomLink } from './save_custom_link';
 import { LinkPreview } from './link_preview';
-import { Documentation } from './Documentation';
+import { Documentation } from './documentation';
 
 interface Props {
   onClose: () => void;

@@ -11,7 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { EuiThemeProvider } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { MockApmPluginContextWrapper } from '../../../../../../context/apm_plugin/mock_apm_plugin_context';
 import * as apmApi from '../../../../../../services/rest/create_call_apm_api';
-import { DeleteButton } from './DeleteButton';
+import { DeleteButton } from './delete_button';
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
