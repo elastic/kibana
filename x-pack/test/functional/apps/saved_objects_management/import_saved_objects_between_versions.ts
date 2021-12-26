@@ -31,7 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   };
 
-  describe('FOO Export import saved objects between versions', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/121968
+  describe.skip('FOO Export import saved objects between versions', function () {
     before(async function () {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await kibanaServer.uiSettings.replace({});
