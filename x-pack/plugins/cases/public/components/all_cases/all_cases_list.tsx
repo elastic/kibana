@@ -23,6 +23,7 @@ import { SELECTABLE_MESSAGE_COLLECTIONS } from '../../common/translations';
 import { useGetCases } from '../../containers/use_get_cases';
 import { usePostComment } from '../../containers/use_post_comment';
 
+import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumns } from './columns';
 import { getExpandedRowMap } from './expanded_row';
 import { CasesTableFilters } from './table_filters';
@@ -66,10 +67,15 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     updateCase,
     doRefresh,
   }) => {
-    const { userCanCrud } = useCasesContext();
+    const { owner, userCanCrud } = useCasesContext();
+    const hasOwner = !!owner.length;
+    const availableSolutions = useAvailableCasesOwners();
+
     const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
-    const initialFilterOptions =
-      !isEmpty(hiddenStatuses) && firstAvailableStatus ? { status: firstAvailableStatus } : {};
+    const initialFilterOptions = {
+      ...(!isEmpty(hiddenStatuses) && firstAvailableStatus && { status: firstAvailableStatus }),
+      owner: hasOwner ? owner : availableSolutions,
+    };
 
     const {
       data,
@@ -181,6 +187,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       alertData,
       postComment,
       updateCase,
+      showSolutionColumn: !hasOwner && availableSolutions.length > 1,
     });
 
     const itemIdToExpandedRowMap = useMemo(
@@ -235,11 +242,13 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           countOpenCases={data.countOpenCases}
           countInProgressCases={data.countInProgressCases}
           onFilterChanged={onFilterChangedCallback}
+          availableSolutions={hasOwner ? [] : availableSolutions}
           initial={{
             search: filterOptions.search,
             reporters: filterOptions.reporters,
             tags: filterOptions.tags,
             status: filterOptions.status,
+            owner: filterOptions.owner,
           }}
           setFilterRefetch={setFilterRefetch}
           hiddenStatuses={hiddenStatuses}

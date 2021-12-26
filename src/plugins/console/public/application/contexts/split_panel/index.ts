@@ -6,12 +6,5 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { expectAssignable } from 'tsd';
-import { UnwrapPromise } from '../..';
-
-type STRING = UnwrapPromise<Promise<string>>;
-type TUPLE = UnwrapPromise<Promise<[number, number]>>;
-
-expectAssignable<STRING>('adf');
-expectAssignable<TUPLE>([1, 2]);
+export { usePanelContext, PanelContextProvider } from './split_panel_context';
+export { PanelRegistry } from './split_panel_registry';
