@@ -57,6 +57,7 @@ describe('runWithOptions', () => {
       autoMergeMethod: 'merge',
       branchLabelMapping: undefined,
       ci: false,
+      cherrypickRef: true,
       commitPaths: [],
       details: false,
       editor: 'code',
@@ -265,7 +266,7 @@ describe('runWithOptions', () => {
           },
         ],
         Array [
-          "git cherry-pick 2e63475c483f7844b0f2833bc57fdee32095bacb",
+          "git cherry-pick -x 2e63475c483f7844b0f2833bc57fdee32095bacb",
           Object {
             "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
           },

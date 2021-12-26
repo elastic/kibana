@@ -114,6 +114,7 @@ describe('getOptions', () => {
       autoMerge: false,
       autoMergeMethod: 'merge',
       ci: false,
+      cherrypickRef: true,
       details: false,
       fork: true,
       gitHostname: 'github.com',
@@ -140,6 +141,49 @@ describe('getOptions', () => {
       upstream: 'elastic/kibana',
       username: 'sqren',
       verbose: false,
+    });
+  });
+
+  describe('cherrypickRef', () => {
+    beforeEach(() => {
+      mockGetGithubConfigOptions({ defaultBranch: 'my-default-branch' });
+    });
+    const defaultArgs = [
+      // use localhost to avoid CORS issues with nock
+      '--github-api-base-url-v4',
+      'http://localhost/graphql',
+    ];
+
+    it('should default to true', async () => {
+      const { cherrypickRef } = await getOptions(defaultArgs);
+      expect(cherrypickRef).toBe(true);
+    });
+
+    it('should negate with `noCherrypickRef` cli arg', async () => {
+      const { cherrypickRef } = await getOptions([
+        ...defaultArgs,
+        '--no-cherrypick-ref',
+      ]);
+      expect(cherrypickRef).toBe(false);
+    });
+
+    it('should be settable via config file', async () => {
+      const { cherrypickRef } = await getOptions([...defaultArgs], {
+        cherrypickRef: false,
+      });
+
+      expect(cherrypickRef).toBe(false);
+    });
+
+    it('cli args overwrites config', async () => {
+      const { cherrypickRef } = await getOptions(
+        [...defaultArgs, '--cherrypick-ref'],
+        {
+          cherrypickRef: false,
+        }
+      );
+
+      expect(cherrypickRef).toBe(true);
     });
   });
 });

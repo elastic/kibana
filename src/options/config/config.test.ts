@@ -16,6 +16,7 @@ describe('getOptionsFromConfigFiles', () => {
       autoMerge: false,
       autoMergeMethod: 'merge',
       ci: false,
+      cherrypickRef: true,
       details: false,
       fork: true,
       gitHostname: 'github.com',

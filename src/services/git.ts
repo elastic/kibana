@@ -195,10 +195,11 @@ export async function cherrypick(
   unstagedFiles: string[];
   needsResolving: boolean;
 }> {
-  const mainline =
+  const mainlinArg =
     options.mainline != undefined ? ` --mainline ${options.mainline}` : '';
 
-  const cmd = `git cherry-pick${mainline} ${sha}`;
+  const cherrypickRefArg = options.cherrypickRef ? ' -x' : '';
+  const cmd = `git cherry-pick${cherrypickRefArg}${mainlinArg} ${sha}`;
   try {
     await exec(cmd, { cwd: getRepoPath(options) });
     return { conflictingFiles: [], unstagedFiles: [], needsResolving: false };

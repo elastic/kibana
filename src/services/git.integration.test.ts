@@ -166,7 +166,10 @@ describe('git.integration', () => {
     });
 
     it('should cherrypick commit cleanly', async () => {
-      const res = await cherrypick({} as ValidConfigOptions, secondSha);
+      const res = await cherrypick(
+        { cherrypickRef: false } as ValidConfigOptions,
+        secondSha
+      );
       expect(res).toEqual({
         conflictingFiles: [],
         needsResolving: false,
@@ -176,6 +179,24 @@ describe('git.integration', () => {
       const message = await getCurrentMessage(execOpts);
 
       expect(message).toEqual(`Update bar.md`);
+    });
+
+    it('should cherrypick commit cleanly and append "(cherry picked from commit...)"', async () => {
+      const res = await cherrypick(
+        { cherrypickRef: true } as ValidConfigOptions,
+        secondSha
+      );
+      expect(res).toEqual({
+        conflictingFiles: [],
+        needsResolving: false,
+        unstagedFiles: [],
+      });
+
+      const message = await getCurrentMessage(execOpts);
+
+      expect(message).toEqual(
+        `Update bar.md\n\n(cherry picked from commit ${secondSha})`
+      );
     });
 
     it('should cherrypick commit with conflicts', async () => {
