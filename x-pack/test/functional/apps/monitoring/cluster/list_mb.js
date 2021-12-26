@@ -10,7 +10,6 @@ import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 export default function ({ getService, getPageObjects }) {
   const clusterList = getService('monitoringClusterList');
-  const testSubjects = getService('testSubjects');
 
   describe('Cluster listing mb', () => {
     describe('with standalone cluster', () => {
