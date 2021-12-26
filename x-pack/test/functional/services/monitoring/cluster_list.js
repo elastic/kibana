@@ -82,7 +82,7 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
       );
     }
     hasCluster(clusterUuid) {
-        return testSubjects.exists(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid}`);
+      return testSubjects.exists(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid}`);
     }
   })();
 }
