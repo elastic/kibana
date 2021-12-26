@@ -32,6 +32,7 @@ describe('getOptionsFromCliArgs', () => {
         upstream: 'elastic/kibana',
         username: 'sqren',
         mainline: 1,
+        reviewers: [],
         assignees: [],
         commitPaths: [],
       });

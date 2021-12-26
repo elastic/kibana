@@ -55,16 +55,17 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
     beforeEach(async () => {
       const options = {
         assignees: [] as string[],
-        githubApiBaseUrlV3: 'https://api.github.com',
         fork: true,
-        targetPRLabels: ['backport'],
+        githubApiBaseUrlV3: 'https://api.github.com',
         prDescription: 'myPrSuffix',
         prTitle: '[{targetBranch}] {commitMessages}',
         repoName: 'kibana',
         repoOwner: 'elastic',
-        username: 'sqren',
+        reviewers: [] as string[],
         sourceBranch: 'myDefaultSourceBranch',
         sourcePRLabels: [] as string[],
+        targetPRLabels: ['backport'],
+        username: 'sqren',
       } as ValidConfigOptions;
 
       const commits: Commit[] = [
@@ -146,14 +147,15 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
     beforeEach(async () => {
       const options = {
         assignees: [] as string[],
-        githubApiBaseUrlV3: 'https://api.github.com',
         fork: true,
-        targetPRLabels: ['backport'],
+        githubApiBaseUrlV3: 'https://api.github.com',
         prTitle: '[{targetBranch}] {commitMessages}',
         repoName: 'kibana',
         repoOwner: 'elastic',
-        username: 'sqren',
+        reviewers: [] as string[],
         sourcePRLabels: [] as string[],
+        targetPRLabels: ['backport'],
+        username: 'sqren',
       } as ValidConfigOptions;
 
       const commits = [
@@ -207,6 +209,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         prTitle: '[{targetBranch}] {commitMessages}',
         repoName: 'kibana',
         repoOwner: 'elastic',
+        reviewers: [] as string[],
         sourceBranch: 'myDefaultSourceBranch',
         sourcePRLabels: [] as string[],
         targetPRLabels: ['backport'],

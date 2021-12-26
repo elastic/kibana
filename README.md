@@ -60,8 +60,8 @@ Please note that dashes between the words are optional, for instance you can typ
 | --access-token      |                    | Github access token                                           |                | `string`  |
 | --all               | -a                 | Show commits from other than yourself                         | false          | `boolean` |
 | --author            |                    | Filter commits by Github username                             | _Current user_ | `string`  |
-| --assignee          | --assign           | Assign users to target pull request                           |                | `string`  |
-| --auto-assign       |                    | Assign current user to target pull request                    | false          | `boolean` |
+| --assignee          | --assign           | Assign users to the target PR                                 |                | `string`  |
+| --auto-assign       |                    | Assign current user to the target PR                          | false          | `boolean` |
 | --branch            | -b                 | Target branch to backport to                                  |                | `string`  |
 | --ci                |                    | Disable interactive prompts                                   | false          | `boolean` |
 | --dry-run           |                    | Perform backport without pushing to Github                    | false          | `string`  |
@@ -81,6 +81,7 @@ Please note that dashes between the words are optional, for instance you can typ
 | --pr-filter         |                    | Find PRs using [Github's search syntax][2]                    |                | `string`  |
 | --pr-title          | --title            | Title of pull request                                         |                | `string`  |
 | --reset-author      |                    | Set yourself as commit author                                 |                | `boolean` |
+| --reviewer          |                    | Add reviewer to the target PR                                 |                | `boolean` |
 | --sha               |                    | Sha of commit to backport                                     |                | `string`  |
 | --source-branch     |                    | Specify a non-default branch to backport from                 |                | `string`  |
 | --source-pr-label   |                    | Labels added to the source PR                                 |                | `string`  |

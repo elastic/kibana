@@ -357,6 +357,12 @@ Change the author of the backported commit to the current user
 
 CLI: `--reset-author`
 
+#### `reviewers`
+
+Add reviewers to the target pull request
+
+CLI: `--reviewer`
+
 #### `sha`
 
 Backport a commit by specifying its commit sha

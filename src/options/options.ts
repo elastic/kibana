@@ -8,6 +8,7 @@ import { parseRequiredOptions } from './parseRequiredOptions';
 export type ValidConfigOptions = Readonly<
   Awaited<ReturnType<typeof getOptions>>
 >;
+
 export async function getOptions(
   argv: string[],
   optionsFromModule?: ConfigOptions

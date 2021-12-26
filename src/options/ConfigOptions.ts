@@ -48,6 +48,7 @@ export type ConfigOptions = Partial<{
   prTitle: string;
   pullNumber: number;
   resetAuthor: boolean;
+  reviewers: string[];
   sha: string;
   sourceBranch: string;
   sourcePRLabels: string[];

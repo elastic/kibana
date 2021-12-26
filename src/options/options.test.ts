@@ -130,6 +130,7 @@ describe('getOptions', () => {
       repoName: 'kibana',
       repoOwner: 'elastic',
       resetAuthor: false,
+      reviewers: [],
       sourceBranch: 'default-branch-from-github',
       sourcePRLabels: [],
       targetBranchChoices: [

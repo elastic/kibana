@@ -204,6 +204,12 @@ export function getOptionsFromCliArgs(
       type: 'boolean',
     })
 
+    .option('reviewer', {
+      description: 'Add reviewer to the target PR',
+      type: 'array',
+      string: true,
+    })
+
     .option('sha', {
       conflicts: ['pullNumber', 'prFilter'],
       description: 'Commit sha to backport',
@@ -304,6 +310,7 @@ export function getOptionsFromCliArgs(
     // array types (should be renamed to plural form)
     assignee,
     path,
+    reviewer,
     sourcePRLabel,
     targetBranch,
     targetBranchChoice,
@@ -322,6 +329,7 @@ export function getOptionsFromCliArgs(
     // rename array types to plural
     assignees: assignee ?? [],
     commitPaths: path ?? [],
+    reviewers: reviewer ?? [],
     sourcePRLabels: sourcePRLabel,
     targetBranchChoices: targetBranchChoice,
     targetBranches: targetBranch,

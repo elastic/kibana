@@ -22,6 +22,7 @@ import {
 import { getFirstLine, getShortSha } from '../services/github/commitFormatters';
 import { addAssigneesToPullRequest } from '../services/github/v3/addAssigneesToPullRequest';
 import { addLabelsToPullRequest } from '../services/github/v3/addLabelsToPullRequest';
+import { addReviewersToPullRequest } from '../services/github/v3/addReviewersToPullRequest';
 import {
   createPullRequest,
   getTitle,
@@ -71,6 +72,15 @@ export async function cherrypickAndCreateTargetPullRequest({
       options,
       targetPullRequest.number,
       options.assignees
+    );
+  }
+
+  // add reviewers to target pull request
+  if (options.reviewers.length > 0) {
+    await addReviewersToPullRequest(
+      options,
+      targetPullRequest.number,
+      options.reviewers
     );
   }
 
