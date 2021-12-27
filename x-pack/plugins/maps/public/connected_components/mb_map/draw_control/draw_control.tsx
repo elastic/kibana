@@ -114,6 +114,7 @@ export class DrawControl extends Component<Props> {
 
   _updateDrawControl() {
     if (!this.props.drawShape) {
+      this._removeDrawControl();
       return;
     }
 
