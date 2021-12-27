@@ -22,8 +22,6 @@ function getTestSuitesFromMetadata() {
       overrideCount || execSync(`buildkite-agent meta-data get '${key}'`).toString().trim();
 
     const count = value === '' ? defaultCount : parseInt(value);
-    totalJobs += count;
-
     testSuites.push({
       key: key.replace('ftsr-suite/', ''),
       count: count,
