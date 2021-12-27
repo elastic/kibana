@@ -7,8 +7,6 @@ steps:
     timeout_in_minutes: 120
     env:
       SKIP_CI_SETUP: 'true'
-      CI: 'false'
-      DEBUG: '*'
     artifact_paths:
       - "target/kibana-osquery/**/*"
     retry:
