@@ -9,15 +9,27 @@ import { resetContext } from 'kea';
 
 import { httpServiceMock } from 'src/core/public/mocks';
 
-import { HttpLogic, mountHttpLogic } from './http_logic';
+import { HttpLogic, HttpValues, mountHttpLogic } from './http_logic';
 
 describe('HttpLogic', () => {
   const mockHttp = httpServiceMock.createSetupContract();
-  const mount = () => mountHttpLogic({ http: mockHttp });
+  const mount = (values: Partial<HttpValues> = {}) => mountHttpLogic({ http: mockHttp, ...values });
 
   beforeEach(() => {
     jest.clearAllMocks();
     resetContext({});
+  });
+
+  it('has the correct defaults', () => {
+    mount();
+
+    expect(HttpLogic.values).toEqual({
+      http: mockHttp,
+      httpInterceptors: expect.any(Array),
+      errorConnecting: false,
+      errorConnectingMessage: '',
+      readOnlyMode: false,
+    });
   });
 
   describe('mounts', () => {
@@ -25,6 +37,7 @@ describe('HttpLogic', () => {
       mountHttpLogic({
         http: mockHttp,
         errorConnecting: true,
+        errorConnectingMessage: '500 Error',
         readOnlyMode: true,
       });
 
@@ -32,21 +45,35 @@ describe('HttpLogic', () => {
         http: mockHttp,
         httpInterceptors: expect.any(Array),
         errorConnecting: true,
+        errorConnectingMessage: '500 Error',
         readOnlyMode: true,
       });
     });
   });
 
-  describe('setErrorConnecting()', () => {
-    it('sets errorConnecting value', () => {
-      mount();
-      expect(HttpLogic.values.errorConnecting).toEqual(false);
+  describe('onConnectionError', () => {
+    it('sets the error connecting flag and related message ', () => {
+      mount({
+        errorConnecting: false,
+        errorConnectingMessage: '',
+      });
 
-      HttpLogic.actions.setErrorConnecting(true);
+      HttpLogic.actions.onConnectionError('500 Error');
       expect(HttpLogic.values.errorConnecting).toEqual(true);
+      expect(HttpLogic.values.errorConnectingMessage).toEqual('500 Error');
+    });
+  });
 
-      HttpLogic.actions.setErrorConnecting(false);
+  describe('onConnectionSuccess', () => {
+    it('sets the error connecting flag and related message ', () => {
+      mount({
+        errorConnecting: true,
+        errorConnectingMessage: '500 error',
+      });
+
+      HttpLogic.actions.onConnectionSuccess();
       expect(HttpLogic.values.errorConnecting).toEqual(false);
+      expect(HttpLogic.values.errorConnectingMessage).toEqual('');
     });
   });
 
@@ -88,16 +115,21 @@ describe('HttpLogic', () => {
 
         beforeEach(() => {
           interceptedResponse = mockHttp.intercept.mock.calls[0][0].responseError;
-          jest.spyOn(HttpLogic.actions, 'setErrorConnecting');
+          jest.spyOn(HttpLogic.actions, 'onConnectionError');
+          jest.spyOn(HttpLogic.actions, 'onConnectionSuccess');
         });
 
         it('sets errorConnecting to true if the response header is true', async () => {
           const httpResponse = {
             response: { url: '/internal/app_search/engines', headers: { get: () => 'true' } },
+            body: {
+              statusCode: 500,
+              message: 'Error',
+            },
           };
           await expect(interceptedResponse(httpResponse)).rejects.toEqual(httpResponse);
 
-          expect(HttpLogic.actions.setErrorConnecting).toHaveBeenCalledWith(true);
+          expect(HttpLogic.actions.onConnectionError).toHaveBeenCalledWith('500 Error');
         });
 
         it('sets errorConnecting to false if the response header is false', async () => {
@@ -109,7 +141,7 @@ describe('HttpLogic', () => {
           };
           await expect(interceptedResponse(httpResponse)).rejects.toEqual(httpResponse);
 
-          expect(HttpLogic.actions.setErrorConnecting).toHaveBeenCalledWith(false);
+          expect(HttpLogic.actions.onConnectionSuccess).toHaveBeenCalled();
         });
 
         describe('isEnterpriseSearchApi check', () => {
@@ -118,7 +150,8 @@ describe('HttpLogic', () => {
           afterEach(async () => {
             // Should always re-reject the promise and not call setErrorConnecting
             await expect(interceptedResponse(httpResponse)).rejects.toEqual(httpResponse);
-            expect(HttpLogic.actions.setErrorConnecting).not.toHaveBeenCalled();
+            expect(HttpLogic.actions.onConnectionError).not.toHaveBeenCalled();
+            expect(HttpLogic.actions.onConnectionError).not.toHaveBeenCalled();
           });
 
           it('does not handle non-Enterprise Search API calls', async () => {
