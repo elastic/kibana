@@ -36,10 +36,11 @@ import { createRulesAndExceptionsStreamFromNdJson } from '../../rules/create_rul
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { HapiReadableStream } from '../../rules/types';
 import {
-  importRuleExceptions,
   importRules as importRulesHelper,
   RuleExceptionsPromiseFromStreams,
 } from './utils/import_rules_utils';
+import { getReferencedExceptionLists } from './utils/gather_referenced_exceptions';
+import { importRuleExceptions } from './utils/import_rule_exceptions';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
@@ -118,8 +119,7 @@ export const importRulesRoute = (
         } = await importRuleExceptions({
           exceptions,
           exceptionsClient,
-          // TODO: Add option of overwriting exceptions separately
-          overwrite: request.query.overwrite,
+          overwrite: request.query.overwrite_exceptions,
           maxExceptionsImportSize: objectLimit,
         });
 
@@ -131,6 +131,12 @@ export const importRulesRoute = (
           parsedObjectsWithoutDuplicateErrors,
           actionsClient
         );
+
+        // gather all exception lists that the imported rules reference
+        const foundReferencedExceptionLists = await getReferencedExceptionLists({
+          rules: uniqueParsedObjects,
+          savedObjectsClient,
+        });
 
         const chunkParseObjects = chunk(CHUNK_PARSED_OBJECT_SIZE, uniqueParsedObjects);
 
@@ -146,6 +152,7 @@ export const importRulesRoute = (
           isRuleRegistryEnabled,
           spaceId: context.securitySolution.getSpaceId(),
           signalsIndex,
+          existingLists: foundReferencedExceptionLists,
         });
 
         const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];
@@ -157,9 +164,12 @@ export const importRulesRoute = (
           }
         });
         const importRules: ImportRulesResponseSchema = {
-          success: errorsResp.length === 0 && exceptionsSuccess,
-          success_count: successes.length + exceptionsSuccessCount,
-          errors: [...errorsResp, ...exceptionsErrors],
+          success: errorsResp.length === 0,
+          success_count: successes.length,
+          errors: errorsResp,
+          exceptions_errors: exceptionsErrors,
+          exceptions_success: exceptionsSuccess,
+          exceptions_success_count: exceptionsSuccessCount,
         };
 
         const [validated, errors] = validate(importRules, importRulesResponseSchema);
