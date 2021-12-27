@@ -2,21 +2,14 @@
 
 set -euo pipefail
 
-KIBANA_DIR=$(pwd)
-export KIBANA_DIR
-export XPACK_DIR="$KIBANA_DIR/x-pack"
-export CACHE_DIR="$HOME/.kibana"
-export GCS_UPLOAD_PREFIX="FAKE_GCS_UPLOAD_PREFIX"
-
 source .buildkite/scripts/common/util.sh
-source .buildkite/scripts/common/setup_node.sh
 
 export NODE_OPTIONS=--max_old_space_size=8192
 export CODE_COVERAGE=1
 
 .buildkite/scripts/bootstrap.sh
-.buildkite/scripts/build_kibana_plugins.sh
 .buildkite/scripts/download_build_artifacts.sh
+.buildkite/scripts/build_kibana_plugins.sh
 
 export DEBUG="code-coverage"
 
