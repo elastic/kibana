@@ -121,7 +121,7 @@ export async function getKibanas(
 
   const buildKibanaDetails = (hit: ElasticsearchResponseHit): KibanaDetails => {
     const source = hit._source;
-    if (source.kibana_stats) return source.kibana_stats as KibanaDetails;
+    if (source.kibana_stats) return source.kibana_stats.kibana as KibanaDetails;
 
     return {
       name: source.kibana?.stats?.name,
