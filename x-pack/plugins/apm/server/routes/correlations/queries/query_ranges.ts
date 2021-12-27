@@ -55,13 +55,20 @@ export const getTransactionDurationRangesRequest = (
   };
 };
 
+interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
+  buckets: Array<{
+    from: number;
+    doc_count: number;
+  }>;
+}
+
 export const fetchTransactionDurationRanges = async (
   esClient: ElasticsearchClient,
   params: CorrelationsParams,
   rangesSteps: number[],
   termFilters?: FieldValuePair[]
 ): Promise<Array<{ key: number; doc_count: number }>> => {
-  const resp = await esClient.search<ResponseHit>(
+  const resp = await esClient.search<ResponseHit, { logspace_ranges: Aggs }>(
     getTransactionDurationRangesRequest(params, rangesSteps, termFilters)
   );
 
@@ -71,13 +78,7 @@ export const fetchTransactionDurationRanges = async (
     );
   }
 
-  return (
-    resp.body.aggregations
-      .logspace_ranges as estypes.AggregationsMultiBucketAggregate<{
-      from: number;
-      doc_count: number;
-    }>
-  ).buckets
+  return resp.body.aggregations.logspace_ranges.buckets
     .map((d) => ({
       key: d.from,
       doc_count: d.doc_count,
