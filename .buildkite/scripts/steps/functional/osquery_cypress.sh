@@ -11,13 +11,14 @@ export GCS_UPLOAD_PREFIX="FAKE_GCS_UPLOAD_PREFIX"
 source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/common/setup_node.sh
 
+export NODE_OPTIONS=--max_old_space_size=8192
+export CODE_COVERAGE=1
+
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/build_kibana_plugins.sh
 
 export CI="false"
 export DEBUG="code-coverage"
-export NODE_OPTIONS=--max_old_space_size=8192
-export CODE_COVERAGE=1
 
 export JOB=kibana-osquery-cypress
 
