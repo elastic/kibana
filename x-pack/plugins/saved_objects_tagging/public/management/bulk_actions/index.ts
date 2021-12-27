@@ -25,7 +25,7 @@ interface GetBulkActionOptions {
 }
 
 export const getBulkActions = ({
-  core: { notifications, overlays },
+  core: { notifications, overlays, theme },
   capabilities,
   tagClient,
   tagCache,
@@ -41,6 +41,7 @@ export const getBulkActions = ({
       getBulkAssignAction({
         notifications,
         overlays,
+        theme,
         tagCache,
         assignmentService,
         assignableTypes,
