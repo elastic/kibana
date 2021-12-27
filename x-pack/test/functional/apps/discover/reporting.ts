@@ -135,27 +135,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           updated_at?: string;
         }
 
-        const docs = Array<TestDoc>(TEST_DOC_COUNT);
-
-        for (let i = 0; i <= docs.length - 1; i++) {
+        const docs = Array(TEST_DOC_COUNT).map<TestDoc>((value, index) => {
           const name = `test-${i + 1}`;
           const timestamp = moment
             .utc('2006-08-14T00:00:00')
             .subtract(TEST_DOC_COUNT - i, 'days')
             .format();
 
-          if (i === 0) {
-            // only the oldest document has a value for updated_at
-            docs[i] = {
+          if (index === 0) {
+            return {
               timestamp,
               name,
               updated_at: moment.utc('2006-08-14T00:00:00').format(),
             };
-          } else {
-            // updated_at field does not exist in first 500 documents
-            docs[i] = { timestamp, name };
           }
-        }
+
+          return { timestamp, name };
+        });
+
         const res = await es.bulk({
           index: TEST_INDEX_NAME,
           body: docs.map((d) => `{"index": {}}\n${JSON.stringify(d)}\n`),
