@@ -11,7 +11,8 @@ import { mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { spy } from 'sinon';
 
-import { PanelsContainer, Panel } from './index';
+import { Panel } from './panel';
+import { PanelsContainer } from './panel_container';
 
 const testComponentA = <p style={{ width: '50px' }}>A</p>;
 const testComponentB = <p style={{ width: '50px' }}>B</p>;
