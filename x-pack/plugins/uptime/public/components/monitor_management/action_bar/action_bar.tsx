@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useContext, useState, useEffect } from 'react';
 import { useParams, Redirect } from 'react-router-dom';
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 import { MONITOR_MANAGEMENT } from '../../../../common/constants';
+import { UptimeSettingsContext } from '../../../contexts';
 import { setMonitor } from '../../../state/api';
 
-import { SyntheticsMonitor } from '../../fleet_package/types';
+import { SyntheticsMonitor } from '../../../../common/runtime_types';
 
 interface Props {
   monitor: SyntheticsMonitor;
@@ -26,6 +27,7 @@ interface Props {
 
 export const ActionBar = ({ monitor, isValid, onSave }: Props) => {
   const { monitorId } = useParams<{ monitorId: string }>();
+  const { basePath } = useContext(UptimeSettingsContext);
 
   const [hasBeenSubmitted, setHasBeenSubmitted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -81,31 +83,38 @@ export const ActionBar = ({ monitor, isValid, onSave }: Props) => {
   return status === FETCH_STATUS.SUCCESS ? (
     <Redirect to={MONITOR_MANAGEMENT} />
   ) : (
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-      <EuiFlexItem>{!isValid && hasBeenSubmitted && VALIDATION_ERROR_LABEL}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="ghost" size="s" iconType="cross">
-              {DISCARD_LABEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="primary"
-              fill
-              size="s"
-              iconType="check"
-              onClick={handleOnSave}
-              isLoading={isSaving}
-              disabled={hasBeenSubmitted && !isValid}
-            >
-              {monitorId ? EDIT_MONITOR_LABEL : SAVE_MONITOR_LABEL}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiBottomBar>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem>{!isValid && hasBeenSubmitted && VALIDATION_ERROR_LABEL}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="ghost"
+                size="s"
+                iconType="cross"
+                href={`${basePath}/app/uptime/manage-monitors`}
+              >
+                {DISCARD_LABEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="primary"
+                fill
+                size="s"
+                iconType="check"
+                onClick={handleOnSave}
+                isLoading={isSaving}
+                disabled={hasBeenSubmitted && !isValid}
+              >
+                {monitorId ? UPDATE_MONITOR_LABEL : SAVE_MONITOR_LABEL}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiBottomBar>
   );
 };
 
@@ -117,8 +126,8 @@ const SAVE_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.saveMo
   defaultMessage: 'Save monitor',
 });
 
-const EDIT_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.editMonitorLabel', {
-  defaultMessage: 'Edit monitor',
+const UPDATE_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.updateMonitorLabel', {
+  defaultMessage: 'Update monitor',
 });
 
 const VALIDATION_ERROR_LABEL = i18n.translate('xpack.uptime.monitorManagement.validationError', {
