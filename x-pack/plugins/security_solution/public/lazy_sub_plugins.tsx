@@ -24,11 +24,6 @@ import { Timelines } from './timelines';
 import { Management } from './management';
 
 /**
- * Temporary initial cloud posture FE
- */
-import { CloudPosture } from './cloud_posture';
-
-/**
  * The classes used to instantiate the sub plugins. These are grouped into a single object for the sake of bundling them in a single dynamic import.
  */
 const subPluginClasses = {
@@ -42,6 +37,5 @@ const subPluginClasses = {
   Rules,
   Timelines,
   Management,
-  CloudPosture,
 };
 export { subPluginClasses };

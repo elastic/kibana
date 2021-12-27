@@ -10,7 +10,6 @@ import {
   SecurityNav,
   SecurityNavGroup,
   SecurityNavGroupKey,
-  NavTab,
 } from '../../common/components/navigation/types';
 import {
   APP_OVERVIEW_PATH,
@@ -28,10 +27,8 @@ import {
   APP_EVENT_FILTERS_PATH,
   APP_UEBA_PATH,
   SecurityPageName,
-  CloudPosturePage,
   APP_HOST_ISOLATION_EXCEPTIONS_PATH,
 } from '../../../common/constants';
-
 
 export const navTabs: SecurityNav = {
   [SecurityPageName.overview]: {

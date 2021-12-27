@@ -42,7 +42,6 @@ import type { Ueba } from './ueba';
 import type { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/public';
 import type { DashboardStart } from '../../../../src/plugins/dashboard/public';
 import type { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_field_editor/public';
-import type { CloudPosture } from './cloud_posture';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -102,7 +101,6 @@ export interface SubPlugins {
   overview: Overview;
   timelines: Timelines;
   management: Management;
-  cloud_posture: CloudPosture;
 }
 
 // TODO: find a better way to defined these types
@@ -117,5 +115,4 @@ export interface StartedSubPlugins {
   overview: ReturnType<Overview['start']>;
   timelines: ReturnType<Timelines['start']>;
   management: ReturnType<Management['start']>;
-  cloud_posture: ReturnType<CloudPosture['start']>;
 }

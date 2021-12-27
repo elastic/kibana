@@ -10,13 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { LicenseType } from '../../../../licensing/common/types';
 import { getCasesDeepLinks } from '../../../../cases/public';
-import { SecurityPageName, CloudPosturePage } from '../types';
-import {
-  AppDeepLink,
-  AppNavLinkStatus,
-  AppStatus,
-  Capabilities,
-} from '../../../../../../src/core/public';
+import { SecurityPageName } from '../types';
+import { AppDeepLink, AppNavLinkStatus, Capabilities } from '../../../../../../src/core/public';
 import {
   OVERVIEW,
   DETECT,
@@ -356,13 +351,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         path: HOST_ISOLATION_EXCEPTIONS_PATH,
       },
     ],
-  },
-  {
-    id: SecurityPageName.cloud_posture,
-    title: 'Cloud Posture',
-    path: '/csp',
-    navLinkStatus: AppNavLinkStatus.hidden,
-    keywords: [],
   },
 ];
 

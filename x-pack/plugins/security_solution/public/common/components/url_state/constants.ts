@@ -35,5 +35,4 @@ export type UrlStateType =
   | 'overview'
   | 'rules'
   | 'timeline'
-  | 'ueba'
-  | 'cloud_posture';
+  | 'ueba';
