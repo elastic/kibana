@@ -8,7 +8,6 @@ steps:
     env:
       SKIP_CI_SETUP: 'true'
       CI: 'false'
-      DEBUG: '*'
     artifact_paths:
       - "target/kibana-osquery/**/*"
     retry:
