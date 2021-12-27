@@ -121,7 +121,8 @@ export class ExtensionPointStorageClient {
         // Log the error that the external callback threw and keep going with the running of others
         this.logger?.error(
           new ExtensionPointError(
-            `Extension point execution error for ${externalExtension.type}: ${extensionRegistrationSource}`
+            `Extension point execution error for ${externalExtension.type}: ${extensionRegistrationSource}`,
+            error
           )
         );
       }
