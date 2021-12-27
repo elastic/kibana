@@ -17,7 +17,6 @@ export interface SearchExceptionsProps {
   placeholder: string;
   hasPolicyFilter?: boolean;
   policyList?: ImmutableArray<PolicyData>;
-  defaultExcludedPolicies?: string;
   defaultIncludedPolicies?: string;
   hideRefreshButton?: boolean;
   onSearch(query: string, includedPolicies?: string): void;
@@ -31,7 +30,6 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
     hasPolicyFilter,
     policyList,
     defaultIncludedPolicies,
-    defaultExcludedPolicies,
     hideRefreshButton = false,
   }) => {
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
@@ -90,7 +88,6 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
           <EuiFlexItem grow={false}>
             <PoliciesSelector
               policies={policyList}
-              defaultExcludedPolicies={defaultExcludedPolicies}
               defaultIncludedPolicies={defaultIncludedPolicies}
               onChangeSelection={onChangeSelection}
             />
