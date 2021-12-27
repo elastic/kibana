@@ -8,11 +8,7 @@
 import _ from 'lodash';
 import { Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
-import { collectStream } from './util';
-
-function isAbortError(error: Error) {
-  return error.message === 'Request aborted' || error.message === 'Aborted';
-}
+import { collectStream, isAbortError } from './util';
 
 export async function getEsTile({
   logger,

@@ -12,3 +12,7 @@ export async function collectStream(stream: Iterable<Buffer>): Promise<Buffer> {
   }
   return Buffer.concat(payload);
 }
+
+export function isAbortError(error: Error) {
+  return error.message === 'Request aborted' || error.message === 'Aborted';
+}
