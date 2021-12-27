@@ -16,6 +16,7 @@ export CODE_COVERAGE=1
 
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/build_kibana_plugins.sh
+.buildkite/scripts/download_build_artifacts.sh
 
 export DEBUG="code-coverage"
 
@@ -23,8 +24,9 @@ export JOB=kibana-osquery-cypress
 
 echo "--- Osquery Cypress tests"
 
-cd x-pack
+cd "$XPACK_DIR"
 
 node scripts/functional_tests \
   --debug --bail \
+  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
   --config test/osquery_cypress/cli_config.ts
