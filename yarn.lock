@@ -1602,12 +1602,12 @@
   dependencies:
     "@elastic/ecs-helpers" "^1.1.0"
 
-"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@^8.0.0-canary.35":
-  version "8.0.0-canary.35"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.0.0-canary.35.tgz#a6023cb83c063cb0a82eac5d0ef1b025d4025c74"
-  integrity sha512-mrMnIDrhZECjIy8sdARsuaRip9xm4xOmi+WtDWpIhmvRNZ3lpw5d9BmEr7+AnduG4HsccCGWY05HrA+iUtRV8w==
+"@elastic/elasticsearch@npm:@elastic/elasticsearch-canary@8.1.0-canary.2":
+  version "8.1.0-canary.2"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch-canary/-/elasticsearch-canary-8.1.0-canary.2.tgz#7676b3bdad79a37be4b4ada38f97751314a33a52"
+  integrity sha512-nmr7yZbvlTqA5SHu/IJZFsU6v14+Y2nx0btMKB9Hjd0vardaibCAdovO9Bp1RPxda2g6XayEkKEzwq5s79xR1g==
   dependencies:
-    "@elastic/transport" "^0.0.15"
+    "@elastic/transport" "^8.1.0-beta.1"
     tslib "^2.3.0"
 
 "@elastic/ems-client@8.0.0":
@@ -1789,10 +1789,10 @@
     ts-node "^10.2.1"
     typescript "^4.3.5"
 
-"@elastic/transport@^0.0.15":
-  version "0.0.15"
-  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-0.0.15.tgz#4f09806035d4959c1e2ab5e395f80927cb0ad821"
-  integrity sha512-V3ROTwKEWLT8X+rntJbZ4wV8sdt7HHSj81yi2Wv0DojQlvYo91Cit8YvdEwZcZHF4z8muIoWJv4G9gyD0MkfHQ==
+"@elastic/transport@^8.1.0-beta.1":
+  version "8.1.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@elastic/transport/-/transport-8.1.0-beta.1.tgz#37fde777cf83226f1ea46bf0a22e51a3e43efb85"
+  integrity sha512-aqncMX86d3r6tNGlve6HEy+NF8XZXetMxDXpplrOAcShL20mHXkMFTJyUyML01tgfkbbgwXnN714YEjin1u1Xg==
   dependencies:
     debug "^4.3.2"
     hpagent "^0.1.2"
@@ -6002,6 +6002,14 @@
   uid ""
 
 "@types/kbn__telemetry-tools@link:bazel-bin/packages/kbn-telemetry-tools/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__utility-types@link:bazel-bin/packages/kbn-utility-types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__utils@link:bazel-bin/packages/kbn-utils/npm_module_types":
   version "0.0.0"
   uid ""
 
