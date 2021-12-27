@@ -7,19 +7,13 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import {
-  HttpSetup,
-  HttpInterceptorResponseError,
-  HttpResponse,
-  ResponseErrorBody,
-} from 'src/core/public';
+import { HttpSetup, HttpInterceptorResponseError, HttpResponse } from 'src/core/public';
 
 import { ERROR_CONNECTING_HEADER, READ_ONLY_MODE_HEADER } from '../../../../common/constants';
 
 export interface HttpValues {
   http: HttpSetup;
   httpInterceptors: Function[];
-  errorConnecting: boolean;
   errorConnectingMessage: string;
   readOnlyMode: boolean;
 }
@@ -27,7 +21,7 @@ export interface HttpValues {
 interface HttpActions {
   initializeHttpInterceptors(): void;
   onConnectionError(errorConnectingMessage: string): { errorConnectingMessage: string };
-  onConnectionSuccess(): void;
+  clearConnectionError(): void;
   setHttpInterceptors(httpInterceptors: Function[]): { httpInterceptors: Function[] };
   setReadOnlyMode(readOnlyMode: boolean): { readOnlyMode: boolean };
 }
@@ -37,7 +31,7 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
   actions: {
     initializeHttpInterceptors: () => null,
     onConnectionError: (errorConnectingMessage) => ({ errorConnectingMessage }),
-    onConnectionSuccess: () => null,
+    clearConnectionError: () => null,
     setHttpInterceptors: (httpInterceptors) => ({ httpInterceptors }),
     setReadOnlyMode: (readOnlyMode) => ({ readOnlyMode }),
   },
@@ -49,18 +43,11 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
         setHttpInterceptors: (_, { httpInterceptors }) => httpInterceptors,
       },
     ],
-    errorConnecting: [
-      props.errorConnecting || false,
-      {
-        onConnectionError: () => true,
-        onConnectionSuccess: () => false,
-      },
-    ],
     errorConnectingMessage: [
       props.errorConnectingMessage || '',
       {
         onConnectionError: (_, { errorConnectingMessage }) => errorConnectingMessage,
-        onConnectionSuccess: () => '',
+        clearConnectionError: () => '',
       },
     ],
     readOnlyMode: [
@@ -80,11 +67,11 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
             const hasErrorConnecting = httpResponse.response!.headers.get(ERROR_CONNECTING_HEADER);
 
             if (hasErrorConnecting === 'true') {
-              const { statusCode, message } = httpResponse.body as ResponseErrorBody;
-              actions.onConnectionError(`${statusCode} ${message}`);
+              const { status, statusText } = httpResponse.response!;
+              actions.onConnectionError(`${status} ${statusText}`);
             } else {
-              // TODO Should we only do this when values.errorConnecting === true?
-              actions.onConnectionSuccess();
+              // TODO Should we only do this when values.errorConnectingMessage === true?
+              actions.clearConnectionError();
             }
           }
 
@@ -131,7 +118,6 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
  */
 interface HttpLogicProps {
   http: HttpSetup;
-  errorConnecting?: boolean;
   errorConnectingMessage?: string;
   readOnlyMode?: boolean;
 }

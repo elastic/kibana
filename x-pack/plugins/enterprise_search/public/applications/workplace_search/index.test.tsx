@@ -49,7 +49,7 @@ describe('WorkplaceSearch', () => {
   });
 
   it('renders ErrorState', () => {
-    setMockValues({ errorConnecting: true });
+    setMockValues({ errorConnectingMessage: 'I am an error' });
 
     const wrapper = shallow(<WorkplaceSearch />);
 

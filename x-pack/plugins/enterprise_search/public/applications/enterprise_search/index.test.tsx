@@ -23,7 +23,7 @@ import { EnterpriseSearch } from './';
 describe('EnterpriseSearch', () => {
   it('renders the Setup Guide and Product Selector', () => {
     setMockValues({
-      errorConnecting: false,
+      errorConnectingMessage: '',
       config: { host: 'localhost' },
     });
     const wrapper = shallow(<EnterpriseSearch />);
@@ -34,7 +34,7 @@ describe('EnterpriseSearch', () => {
 
   it('renders the error connecting prompt only if host is configured', () => {
     setMockValues({
-      errorConnecting: true,
+      errorConnectingMessage: 'I am an error',
       config: { host: 'localhost' },
     });
     const wrapper = shallow(<EnterpriseSearch />);
@@ -45,7 +45,7 @@ describe('EnterpriseSearch', () => {
     expect(wrapper.find(ProductSelector)).toHaveLength(0);
 
     setMockValues({
-      errorConnecting: true,
+      errorConnectingMessage: 'I am an error',
       config: { host: '' },
     });
     rerender(wrapper);
@@ -57,7 +57,7 @@ describe('EnterpriseSearch', () => {
 
   it('renders the version error message if versions mismatch and the host is configured', () => {
     setMockValues({
-      errorConnecting: false,
+      errorConnectingMessage: '',
       config: { host: 'localhost' },
     });
     const wrapper = shallow(
