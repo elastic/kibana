@@ -24,7 +24,11 @@ export async function createPullRequest({
 }: {
   options: ValidConfigOptions;
   prPayload: PullRequestPayload;
-}) {
+}): Promise<{
+  url: string;
+  number: number;
+  didUpdate: boolean;
+}> {
   logger.info(
     `Creating PR with title: "${prPayload.title}". ${prPayload.head} -> ${prPayload.base}`
   );
@@ -46,6 +50,7 @@ export async function createPullRequest({
     return {
       url: res.data.html_url,
       number: res.data.number,
+      didUpdate: false,
     };
   } catch (e) {
     // retrieve url for existing
@@ -57,7 +62,11 @@ export async function createPullRequest({
 
       if (existingPR) {
         spinner.succeed('Updating existing pull request');
-        return existingPR;
+        return {
+          url: existingPR.url,
+          number: existingPR.number,
+          didUpdate: true,
+        };
       }
     } catch (e) {
       logger.info('Could not retrieve existing pull request', e);

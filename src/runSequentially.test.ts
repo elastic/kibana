@@ -1,15 +1,11 @@
 import os from 'os';
-import inquirer from 'inquirer';
 import { last } from 'lodash';
 import nock from 'nock';
 import { ValidConfigOptions } from './options/options';
-import { runWithOptions } from './runWithOptions';
+import { runSequentially } from './runSequentially';
 import * as childProcess from './services/child-process-promisified';
-import * as fs from './services/fs-promisified';
-import { AuthorIdResponse } from './services/github/v4/fetchAuthorId';
-import { CommitByAuthorResponse } from './services/github/v4/fetchCommits/fetchCommitsByAuthor';
-import { commitsByAuthorMock } from './services/github/v4/mocks/commitsByAuthorMock';
-import { mockGqlRequest, getNockCallsForScope } from './test/nockHelpers';
+import { Commit } from './services/sourceCommit/parseSourceCommit';
+import { getNockCallsForScope } from './test/nockHelpers';
 import { SpyHelper } from './types/SpyHelper';
 
 jest.mock('./services/child-process-promisified', () => {
@@ -29,14 +25,11 @@ jest.mock('./services/child-process-promisified', () => {
   };
 });
 
-describe('runWithOptions', () => {
+describe('runSequentially', () => {
   let rpcExecMock: SpyHelper<typeof childProcess.exec>;
   let rpcExecOriginalMock: SpyHelper<typeof childProcess.execAsCallback>;
-  let inquirerPromptMock: SpyHelper<typeof inquirer.prompt>;
-  let res: Awaited<ReturnType<typeof runWithOptions>>;
+  let res: Awaited<ReturnType<typeof runSequentially>>;
   let createPullRequestCalls: unknown[];
-  let commitsByAuthorCalls: ReturnType<typeof mockGqlRequest>;
-  let authorIdCalls: ReturnType<typeof mockGqlRequest>;
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -101,44 +94,39 @@ describe('runWithOptions', () => {
       .mockResolvedValue({ stdout: 'success', stderr: '' });
     rpcExecOriginalMock = jest.spyOn(childProcess, 'execAsCallback');
 
-    jest.spyOn(fs, 'writeFile').mockResolvedValue(undefined);
-
-    inquirerPromptMock = jest
-      .spyOn(inquirer, 'prompt')
-      .mockImplementationOnce((async (args: any) => {
-        return { promptResult: args[0].choices[0].value };
-      }) as any)
-      .mockImplementationOnce((async (args: any) => {
-        return { promptResult: args[0].choices[0].name };
-      }) as any);
-
-    authorIdCalls = mockGqlRequest<AuthorIdResponse>({
-      name: 'AuthorId',
-      statusCode: 200,
-      body: { data: { user: { id: 'sqren_author_id' } } },
-    });
-
-    commitsByAuthorCalls = mockGqlRequest<CommitByAuthorResponse>({
-      name: 'CommitsByAuthor',
-      statusCode: 200,
-      body: { data: commitsByAuthorMock },
-    });
-
     const scope = nock('https://api.github.com')
       .post('/repos/elastic/kibana/pulls')
-      .reply(200, { html_url: 'pull request url', number: 1337 });
+      .reply(200, {
+        number: 1337,
+        html_url: 'myHtmlUrl',
+      });
+
     createPullRequestCalls = getNockCallsForScope(scope);
 
-    res = await runWithOptions(options);
+    const commits: Commit[] = [
+      {
+        sha: 'abcd',
+        committedDate: '1',
+        expectedTargetPullRequests: [],
+        originalMessage: 'My commit message',
+        sourceBranch: 'master',
+        pullNumber: 55,
+      },
+    ];
+    const targetBranches: string[] = ['7.x'];
+
+    res = await runSequentially({ options, commits, targetBranches });
     scope.done();
   });
 
   it('returns pull request', () => {
     expect(res).toEqual([
       {
-        pullRequestUrl: 'pull request url',
-        success: true,
-        targetBranch: '6.x',
+        didUpdate: false,
+        pullRequestNumber: 1337,
+        pullRequestUrl: 'myHtmlUrl',
+        status: 'success',
+        targetBranch: '7.x',
       },
     ]);
   });
@@ -146,78 +134,12 @@ describe('runWithOptions', () => {
   it('creates pull request', () => {
     expect(createPullRequestCalls).toEqual([
       {
-        base: '6.x',
-        body: 'Backports the following commits to 6.x:\n - Add 👻 (2e63475c)\n\nmyPrDescription',
-        head: 'sqren:backport/6.x/commit-2e63475c',
-        title: 'myPrTitle 6.x Add 👻',
+        base: '7.x',
+        body: 'Backports the following commits to 7.x:\n - #55\n\nmyPrDescription',
+        head: 'sqren:backport/7.x/pr-55',
+        title: 'myPrTitle 7.x My commit message',
       },
     ]);
-  });
-
-  it('retrieves author id', () => {
-    expect(authorIdCalls).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "query": "
-          query AuthorId($login: String!) {
-            user(login: $login) {
-              id
-            }
-          }
-        ",
-          "variables": Object {
-            "login": "sqren",
-          },
-        },
-      ]
-    `);
-  });
-
-  it('retrieves commits by author', () => {
-    expect(commitsByAuthorCalls.map((body) => body.variables)).toEqual([
-      {
-        authorId: 'sqren_author_id',
-        maxNumber: 10,
-        commitPath: null,
-        repoName: 'kibana',
-        repoOwner: 'elastic',
-        sourceBranch: 'my-source-branch-from-options',
-      },
-    ]);
-  });
-
-  it('prompt calls should match snapshot', () => {
-    expect(inquirer.prompt).toHaveBeenCalledTimes(2);
-    expect(
-      // @ts-expect-error
-      inquirerPromptMock.mock.calls[0][0][0].choices.map(({ name, short }) => ({
-        name,
-        short,
-      }))
-    ).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "name": "1. Add 👻 ",
-          "short": "2e63475c",
-        },
-        Object {
-          "name": "2. Add witch (#85) ",
-          "short": "#85 (f3b618b9)",
-        },
-        Object {
-          "name": "3. Add SF mention (#80) 6.3",
-          "short": "#80 (79cf1845)",
-        },
-        Object {
-          "name": "4. Add backport config ",
-          "short": "3827bbba",
-        },
-        Object {
-          "name": "5. Initial commit ",
-          "short": "5ea0da55",
-        },
-      ]
-    `);
   });
 
   it('exec should be called with correct args', () => {
@@ -255,31 +177,31 @@ describe('runWithOptions', () => {
           },
         ],
         Array [
-          "git reset --hard && git clean -d --force && git fetch elastic 6.x && git checkout -B backport/6.x/commit-2e63475c elastic/6.x --no-track",
+          "git reset --hard && git clean -d --force && git fetch elastic 7.x && git checkout -B backport/7.x/pr-55 elastic/7.x --no-track",
           Object {
             "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
           },
         ],
         Array [
-          "git fetch elastic my-source-branch-from-options:my-source-branch-from-options --force",
+          "git fetch elastic master:master --force",
           Object {
             "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
           },
         ],
         Array [
-          "git cherry-pick -x 2e63475c483f7844b0f2833bc57fdee32095bacb",
+          "git cherry-pick -x abcd",
           Object {
             "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
           },
         ],
         Array [
-          "git push sqren backport/6.x/commit-2e63475c:backport/6.x/commit-2e63475c --force",
+          "git push sqren backport/7.x/pr-55:backport/7.x/pr-55 --force",
           Object {
             "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
           },
         ],
         Array [
-          "git reset --hard && git checkout my-source-branch-from-options && git branch -D backport/6.x/commit-2e63475c",
+          "git reset --hard && git checkout my-source-branch-from-options && git branch -D backport/7.x/pr-55",
           Object {
             "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
           },

@@ -251,10 +251,10 @@ export async function commitChanges(
   commit: Commit,
   options: ValidConfigOptions
 ) {
-  const noVerify = options.noVerify ? ` --no-verify` : '';
+  const noVerifyFlag = options.noVerify ? ` --no-verify` : '';
 
   try {
-    await exec(`git commit --no-edit${noVerify}`, {
+    await exec(`git commit --no-edit${noVerifyFlag}`, {
       cwd: getRepoPath(options),
     });
   } catch (e) {
@@ -269,7 +269,7 @@ export async function commitChanges(
     // manually set the commit message if the inferred commit message is empty
     // this can happen if the user runs `git reset HEAD` and thereby aborts the cherrypick process
     if (e.stderr?.includes('Aborting commit due to empty commit message')) {
-      await exec(`git commit -m "${commit.originalMessage}" ${noVerify}`, {
+      await exec(`git commit -m "${commit.originalMessage}" ${noVerifyFlag}`, {
         cwd: getRepoPath(options),
       });
       return;
@@ -434,7 +434,7 @@ export async function pushBackportBranch({
 
     if (e.stderr?.toLowerCase().includes(`repository not found`)) {
       throw new HandledError(
-        `Error pushing to https://github.com/${repoForkOwner}/${options.repoName}. Repository does not exist. Either fork the source repository (https://github.com/${options.repoOwner}/${options.repoName}) or disable fork mode "--fork false".  Read more about "fork mode" in the docs: https://github.com/sqren/backport/blob/3a182b17e0e7237c12915895aea9d71f49eb2886/docs/configuration.md#fork`
+        `Error pushing to https://github.com/${repoForkOwner}/${options.repoName}. Repository does not exist. Either fork the source repository (https://github.com/${options.repoOwner}/${options.repoName}) or disable fork mode "--no-fork".  Read more about "fork mode" in the docs: https://github.com/sqren/backport/blob/3a182b17e0e7237c12915895aea9d71f49eb2886/docs/configuration.md#fork`
       );
     }
 

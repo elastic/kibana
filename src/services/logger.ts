@@ -12,7 +12,7 @@ let winstonInstance: winston.Logger;
 // wrapper around console.log
 export function consoleLog(message: string) {
   // eslint-disable-next-line no-console
-  console.log(redact(message));
+  console.log(redactAccessToken(message));
   //process.stdout.write(message);
 }
 
@@ -50,8 +50,8 @@ export function updateLogger(options: ConfigOptions) {
   }
 }
 
-export function redact(str: string) {
-  // redact might be called before access token is set
+export function redactAccessToken(str: string) {
+  // `redactAccessToken` might be called before access token is set
   if (accessToken) {
     return str.replace(new RegExp(accessToken, 'g'), '<REDACTED>');
   }
@@ -75,12 +75,12 @@ export function initLogger() {
           format.printf((info) => {
             // format without metadata
             if (!info.metadata.meta) {
-              return redact(`${info.timestamp}: ${info.message}`);
+              return redactAccessToken(`${info.timestamp}: ${info.message}`);
             }
 
             // format when metadata is a string
             if (isString(info.metadata.meta)) {
-              return redact(
+              return redactAccessToken(
                 `${info.timestamp}: ${info.message}\n${dedent(
                   info.metadata.meta
                 )}\n`
@@ -88,14 +88,14 @@ export function initLogger() {
             }
 
             if (info.metadata.meta.stack) {
-              return redact(
+              return redactAccessToken(
                 `${info.timestamp}: ${info.message}\n${info.metadata.meta.stack}\n`
               );
             }
 
             // format when metadata is an object
 
-            return redact(
+            return redactAccessToken(
               `${info.timestamp}: ${info.message}\n${safeJsonStringify(
                 info.metadata.meta,
                 null,

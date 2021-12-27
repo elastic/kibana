@@ -1,45 +1,74 @@
 import chalk from 'chalk';
 import { ConfigOptions } from './options/ConfigOptions';
-import { getOptions } from './options/options';
-import { runWithOptions, Result } from './runWithOptions';
+import { getOptions, ValidConfigOptions } from './options/options';
+import { runSequentially, Result } from './runSequentially';
 import { HandledError } from './services/HandledError';
 import { getLogfilePath } from './services/env';
-import { initLogger, consoleLog, redact } from './services/logger';
+import { createStatusComment } from './services/github/v3/createStatusComment';
+import { initLogger, consoleLog } from './services/logger';
+import { Commit } from './services/sourceCommit/parseSourceCommit';
+import { getCommits } from './ui/getCommits';
+import { getTargetBranches } from './ui/getTargetBranches';
 
-export type BackportResponse = {
-  success: boolean;
-  results: Result[];
-  errorMessage?: string;
-  error?: Error;
-};
+export type BackportResponse =
+  | {
+      status: 'success';
+      commits: Commit[];
+      results: Result[];
+    }
+  | {
+      status: 'failure';
+      commits: Commit[];
+      errorMessage: string;
+      error: Error;
+    };
 
 export async function main(
   argv: string[],
   optionsFromModule?: ConfigOptions
 ): Promise<BackportResponse> {
   const logger = initLogger();
+  let options: ValidConfigOptions | null = null;
+  let commits: Commit[] = [];
 
   try {
-    const options = await getOptions(argv, optionsFromModule);
-    const results = await runWithOptions(options);
-    return {
-      success: results.every((res) => res.success),
+    options = await getOptions(argv, optionsFromModule);
+    commits = await getCommits(options);
+    const targetBranches = await getTargetBranches(options, commits);
+    const results = await runSequentially({ options, commits, targetBranches });
+    const backportResponse: BackportResponse = {
+      status: 'success',
+      commits,
       results,
     };
+
+    await createStatusComment({
+      options,
+      backportResponse,
+    });
+
+    return backportResponse;
   } catch (e) {
+    const backportResponse: BackportResponse = {
+      status: 'failure',
+      commits,
+      errorMessage: e.message,
+      error: e,
+    };
+
+    if (options?.ci) {
+      await createStatusComment({
+        options,
+        backportResponse,
+      });
+    }
+
     if (e instanceof HandledError) {
       consoleLog(e.message);
-
-      return {
-        success: false,
-        results: [],
-        errorMessage: redact(e.message),
-        error: e,
-      };
     } else if (e instanceof Error) {
       // output
       consoleLog('\n');
-      consoleLog(chalk.bold('⚠️  Ouch! An unknown error occured 😿'));
+      consoleLog(chalk.bold('⚠️  Ouch! An unhandled error occured 😿'));
       consoleLog(`Error message: ${e.message}`);
 
       consoleLog(
@@ -52,20 +81,8 @@ export async function main(
 
       // log file
       logger.info('Unknown error:', e);
-
-      return {
-        success: false,
-        results: [],
-        errorMessage: `An unhandled error occurred: ${redact(e.message)}`,
-        error: e,
-      };
     }
 
-    return {
-      success: false,
-      results: [],
-      errorMessage: 'Unknown error',
-      error: new Error('Unknown error'),
-    };
+    return backportResponse;
   }
 }

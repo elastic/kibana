@@ -108,7 +108,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
     });
 
     it('returns the expected response', () => {
-      expect(res).toEqual({ url: 'myHtmlUrl', number: 1337 });
+      expect(res).toEqual({ didUpdate: false, url: 'myHtmlUrl', number: 1337 });
     });
 
     it('should make correct git commands', () => {
@@ -187,7 +187,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
     });
 
     it('returns the expected response', () => {
-      expect(res).toEqual({ url: 'myHtmlUrl', number: 1337 });
+      expect(res).toEqual({ didUpdate: false, url: 'myHtmlUrl', number: 1337 });
     });
   });
 
@@ -251,7 +251,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
     });
 
     it('creates pull request', () => {
-      expect(res).toEqual({ url: 'myHtmlUrl', number: 1337 });
+      expect(res).toEqual({ didUpdate: false, url: 'myHtmlUrl', number: 1337 });
     });
 
     it('shows the right prompts', () => {
@@ -389,7 +389,7 @@ describe('getCommitsWithoutBackports', () => {
       const commitsWithoutBackports = await setup({
         expectedTargetPullRequests: [],
       });
-      expect(commitsWithoutBackports[0]).toEqual(
+      expect(commitsWithoutBackports[0].formatted).toEqual(
         ' - First commit (#1)\n   https://www.github.com/foo'
       );
     });
@@ -398,7 +398,7 @@ describe('getCommitsWithoutBackports', () => {
       const commitsWithoutBackports = await setup({
         expectedTargetPullRequests: [{ state: 'OPEN', branch: '7.x' }],
       });
-      expect(stripAnsi(commitsWithoutBackports[0])).toEqual(
+      expect(stripAnsi(commitsWithoutBackports[0].formatted)).toEqual(
         ' - First commit (#1) (backport pending)\n   https://www.github.com/foo'
       );
     });
@@ -462,7 +462,9 @@ describe('getCommitsWithoutBackports', () => {
         offendingCommitDate: '10',
         currentCommitDate: '100',
       });
-      expect(commitsWithoutBackports[0]).toEqual(' - First commit (#1)');
+      expect(commitsWithoutBackports[0].formatted).toEqual(
+        ' - First commit (#1)'
+      );
     });
   });
 
@@ -507,7 +509,9 @@ describe('getCommitsWithoutBackports', () => {
 
     it('should display commit as unbackport if `isCommitInBranch=false`', async () => {
       const commitsWithoutBackports = await setup({ isCommitInBranch: false });
-      expect(commitsWithoutBackports[0]).toEqual(' - First commit (#1)');
+      expect(commitsWithoutBackports[0].formatted).toEqual(
+        ' - First commit (#1)'
+      );
     });
   });
 
@@ -556,7 +560,7 @@ describe('getCommitsWithoutBackports', () => {
         offendingCommitTargetBranch: '7.x',
         currentCommitTargetBranch: '7.x',
       });
-      expect(stripAnsi(commitsWithoutBackports[0])).toEqual(
+      expect(stripAnsi(commitsWithoutBackports[0].formatted)).toEqual(
         ' - First commit (#1) (backport pending)'
       );
     });
@@ -566,7 +570,7 @@ describe('getCommitsWithoutBackports', () => {
         offendingCommitTargetBranch: '7.x',
         currentCommitTargetBranch: '8.x',
       });
-      expect(stripAnsi(commitsWithoutBackports[0])).toEqual(
+      expect(stripAnsi(commitsWithoutBackports[0].formatted)).toEqual(
         ' - First commit (#1)'
       );
     });

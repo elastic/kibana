@@ -66,6 +66,7 @@ export function getOptionsFromCliArgs(
     .option('cherrypickRef', {
       description: 'Append commit message with "(cherry picked from commit...)',
       type: 'boolean',
+      conflicts: ['noCherrypickRef'],
     })
 
     .option('details', {
@@ -88,6 +89,7 @@ export function getOptionsFromCliArgs(
     .option('fork', {
       description: 'Create backports in fork or origin repo',
       type: 'boolean',
+      conflicts: ['noFork'],
     })
 
     .option('gitHostname', {
@@ -160,11 +162,18 @@ export function getOptionsFromCliArgs(
       description:
         'Do not append commit message with "(cherry picked from commit...)"',
       type: 'boolean',
+      conflicts: ['cherrypickRef'],
     })
 
     .option('noVerify', {
       description: 'Bypass the pre-commit and commit-msg hooks',
       type: 'boolean',
+    })
+
+    .option('noFork', {
+      description: 'Create backports in the origin repo',
+      type: 'boolean',
+      conflicts: ['fork'],
     })
 
     .option('path', {
@@ -304,8 +313,8 @@ export function getOptionsFromCliArgs(
     // negations
     verify,
     noVerify,
-    cherrypickRef,
     noCherrypickRef,
+    noFork,
 
     // array types (should be renamed to plural form)
     assignee,
@@ -336,7 +345,8 @@ export function getOptionsFromCliArgs(
     targetPRLabels: targetPRLabel,
 
     // negations (cli-only flags)
-    cherrypickRef: noCherrypickRef ? false : cherrypickRef,
+    cherrypickRef: noCherrypickRef === true ? false : restOptions.cherrypickRef,
+    fork: noFork === true ? false : restOptions.fork,
     noVerify: verify ?? noVerify,
   });
 }
