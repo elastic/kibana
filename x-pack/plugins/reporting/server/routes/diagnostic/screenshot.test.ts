@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { UnwrapPromise } from '@kbn/utility-types';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
 import { ReportingCore } from '../..';
@@ -22,7 +21,7 @@ jest.mock('../../export_types/common/generate_png');
 
 import { generatePngObservable } from '../../export_types/common';
 
-type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
 describe('POST /diagnose/screenshot', () => {
   const reportingSymbol = Symbol('reporting');

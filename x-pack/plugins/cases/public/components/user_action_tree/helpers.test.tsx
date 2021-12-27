@@ -8,65 +8,71 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { CaseStatuses, ConnectorTypes } from '../../../common/api';
-import { basicPush, getUserAction } from '../../containers/mock';
 import {
-  getLabelTitle,
-  getPushedServiceLabelTitle,
-  getConnectorLabelTitle,
-  toStringArray,
-} from './helpers';
+  Actions,
+  CaseStatuses,
+  CommentType,
+  ConnectorTypes,
+  ConnectorUserAction,
+  PushedUserAction,
+  TagsUserAction,
+  TitleUserAction,
+} from '../../../common/api';
+import { basicPush, getUserAction } from '../../containers/mock';
+import { getLabelTitle, getPushedServiceLabelTitle, getConnectorLabelTitle } from './helpers';
 import { connectorsMock } from '../../containers/configure/mock';
 import * as i18n from './translations';
+import { SnakeToCamelCase } from '../../../common/types';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 
 describe('User action tree helpers', () => {
   const connectors = connectorsMock;
   it('label title generated for update tags', () => {
-    const action = getUserAction(['tags'], 'update');
+    const action = getUserAction('tags', Actions.update, { payload: { tags: ['test'] } });
     const result: string | JSX.Element = getLabelTitle({
       action,
-      field: 'tags',
     });
+
+    const tags = (action as unknown as TagsUserAction).payload.tags;
 
     const wrapper = mount(<>{result}</>);
     expect(wrapper.find(`[data-test-subj="ua-tags-label"]`).first().text()).toEqual(
       ` ${i18n.TAGS.toLowerCase()}`
     );
 
-    expect(wrapper.find(`[data-test-subj="tag-${action.newValue}"]`).first().text()).toEqual(
-      action.newValue
-    );
+    expect(wrapper.find(`[data-test-subj="tag-${tags[0]}"]`).first().text()).toEqual(tags[0]);
   });
 
   it('label title generated for update title', () => {
-    const action = getUserAction(['title'], 'update');
+    const action = getUserAction('title', Actions.update, { payload: { title: 'test' } });
     const result: string | JSX.Element = getLabelTitle({
       action,
-      field: 'title',
     });
 
+    const title = (action as unknown as TitleUserAction).payload.title;
+
     expect(result).toEqual(
-      `${i18n.CHANGED_FIELD.toLowerCase()} ${i18n.CASE_NAME.toLowerCase()}  ${i18n.TO} "${
-        action.newValue
-      }"`
+      `${i18n.CHANGED_FIELD.toLowerCase()} ${i18n.CASE_NAME.toLowerCase()}  ${i18n.TO} "${title}"`
     );
   });
 
   it('label title generated for update description', () => {
-    const action = getUserAction(['description'], 'update');
+    const action = getUserAction('description', Actions.update, {
+      payload: { description: 'test' },
+    });
     const result: string | JSX.Element = getLabelTitle({
       action,
-      field: 'description',
     });
 
     expect(result).toEqual(`${i18n.EDITED_FIELD} ${i18n.DESCRIPTION.toLowerCase()}`);
   });
 
   it('label title generated for update status to open', () => {
-    const action = { ...getUserAction(['status'], 'update'), newValue: CaseStatuses.open };
+    const action = {
+      ...getUserAction('status', Actions.update, { payload: { status: CaseStatuses.open } }),
+    };
     const result: string | JSX.Element = getLabelTitle({
       action,
-      field: 'status',
     });
 
     const wrapper = mount(<>{result}</>);
@@ -75,12 +81,12 @@ describe('User action tree helpers', () => {
 
   it('label title generated for update status to in-progress', () => {
     const action = {
-      ...getUserAction(['status'], 'update'),
-      newValue: CaseStatuses['in-progress'],
+      ...getUserAction('status', Actions.update, {
+        payload: { status: CaseStatuses['in-progress'] },
+      }),
     };
     const result: string | JSX.Element = getLabelTitle({
       action,
-      field: 'status',
     });
 
     const wrapper = mount(<>{result}</>);
@@ -90,10 +96,13 @@ describe('User action tree helpers', () => {
   });
 
   it('label title generated for update status to closed', () => {
-    const action = { ...getUserAction(['status'], 'update'), newValue: CaseStatuses.closed };
+    const action = {
+      ...getUserAction('status', Actions.update, {
+        payload: { status: CaseStatuses.closed },
+      }),
+    };
     const result: string | JSX.Element = getLabelTitle({
       action,
-      field: 'status',
     });
 
     const wrapper = mount(<>{result}</>);
@@ -101,64 +110,67 @@ describe('User action tree helpers', () => {
   });
 
   it('label title is empty when status is not valid', () => {
-    const action = { ...getUserAction(['status'], 'update'), newValue: CaseStatuses.closed };
+    const action = {
+      ...getUserAction('status', Actions.update, {
+        payload: { status: '' },
+      }),
+    };
+
     const result: string | JSX.Element = getLabelTitle({
-      action: { ...action, newValue: 'not-exist' },
-      field: 'status',
+      action,
     });
 
     expect(result).toEqual('');
   });
 
   it('label title generated for update comment', () => {
-    const action = getUserAction(['comment'], 'update');
+    const action = getUserAction('comment', Actions.update, {
+      payload: {
+        comment: { comment: 'a comment', type: CommentType.user, owner: SECURITY_SOLUTION_OWNER },
+      },
+    });
     const result: string | JSX.Element = getLabelTitle({
       action,
-      field: 'comment',
     });
 
     expect(result).toEqual(`${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`);
   });
 
   it('label title generated for pushed incident', () => {
-    const action = getUserAction(['pushed'], 'push-to-service');
+    const action = getUserAction('pushed', 'push_to_service', {
+      payload: { externalService: basicPush },
+    }) as SnakeToCamelCase<PushedUserAction>;
     const result: string | JSX.Element = getPushedServiceLabelTitle(action, true);
+    const externalService = (action as SnakeToCamelCase<PushedUserAction>).payload.externalService;
 
     const wrapper = mount(<>{result}</>);
     expect(wrapper.find(`[data-test-subj="pushed-label"]`).first().text()).toEqual(
       `${i18n.PUSHED_NEW_INCIDENT} ${basicPush.connectorName}`
     );
     expect(wrapper.find(`[data-test-subj="pushed-value"]`).first().prop('href')).toEqual(
-      JSON.parse(action.newValue!).external_url
+      externalService.externalUrl
     );
   });
 
   it('label title generated for needs update incident', () => {
-    const action = getUserAction(['pushed'], 'push-to-service');
+    const action = getUserAction('pushed', 'push_to_service') as SnakeToCamelCase<PushedUserAction>;
     const result: string | JSX.Element = getPushedServiceLabelTitle(action, false);
+    const externalService = (action as SnakeToCamelCase<PushedUserAction>).payload.externalService;
 
     const wrapper = mount(<>{result}</>);
     expect(wrapper.find(`[data-test-subj="pushed-label"]`).first().text()).toEqual(
       `${i18n.UPDATE_INCIDENT} ${basicPush.connectorName}`
     );
     expect(wrapper.find(`[data-test-subj="pushed-value"]`).first().prop('href')).toEqual(
-      JSON.parse(action.newValue!).external_url
+      externalService.externalUrl
     );
   });
 
   describe('getConnectorLabelTitle', () => {
-    it('returns an empty string when the encoded old value is null', () => {
+    it('returns an empty string when the encoded value is null', () => {
       const result = getConnectorLabelTitle({
-        action: getUserAction(['connector'], 'update', { oldValue: null }),
-        connectors,
-      });
-
-      expect(result).toEqual('');
-    });
-
-    it('returns an empty string when the encoded new value is null', () => {
-      const result = getConnectorLabelTitle({
-        action: getUserAction(['connector'], 'update', { newValue: null }),
+        // @ts-expect-error
+        action: getUserAction(['connector'], Actions.update, { payload: { connector: null } }),
         connectors,
       });
 
@@ -167,16 +179,16 @@ describe('User action tree helpers', () => {
 
     it('returns the change connector label', () => {
       const result: string | JSX.Element = getConnectorLabelTitle({
-        action: getUserAction(['connector'], 'update', {
-          oldValue: JSON.stringify({
-            type: ConnectorTypes.serviceNowITSM,
-            name: 'a',
-            fields: null,
-          }),
-          oldValConnectorId: 'servicenow-1',
-          newValue: JSON.stringify({ type: ConnectorTypes.resilient, name: 'a', fields: null }),
-          newValConnectorId: 'resilient-2',
-        }),
+        action: getUserAction('connector', Actions.update, {
+          payload: {
+            connector: {
+              id: 'resilient-2',
+              type: ConnectorTypes.resilient,
+              name: 'a',
+              fields: null,
+            },
+          },
+        }) as unknown as ConnectorUserAction,
         connectors,
       });
 
@@ -185,64 +197,15 @@ describe('User action tree helpers', () => {
 
     it('returns the removed connector label', () => {
       const result: string | JSX.Element = getConnectorLabelTitle({
-        action: getUserAction(['connector'], 'update', {
-          oldValue: JSON.stringify({ type: ConnectorTypes.serviceNowITSM, name: '', fields: null }),
-          oldValConnectorId: 'servicenow-1',
-          newValue: JSON.stringify({ type: ConnectorTypes.none, name: '', fields: null }),
-          newValConnectorId: 'none',
-        }),
+        action: getUserAction('connector', Actions.update, {
+          payload: {
+            connector: { id: 'none', type: ConnectorTypes.none, name: 'test', fields: null },
+          },
+        }) as unknown as ConnectorUserAction,
         connectors,
       });
 
       expect(result).toEqual('removed external incident management system');
-    });
-
-    it('returns the connector fields changed label', () => {
-      const result: string | JSX.Element = getConnectorLabelTitle({
-        action: getUserAction(['connector'], 'update', {
-          oldValue: JSON.stringify({ type: ConnectorTypes.serviceNowITSM, name: '', fields: null }),
-          oldValConnectorId: 'servicenow-1',
-          newValue: JSON.stringify({ type: ConnectorTypes.serviceNowITSM, name: '', fields: null }),
-          newValConnectorId: 'servicenow-1',
-        }),
-        connectors,
-      });
-
-      expect(result).toEqual('changed connector field');
-    });
-  });
-
-  describe('toStringArray', () => {
-    const circularReference = { otherData: 123, circularReference: undefined };
-    // @ts-ignore testing catch on circular reference
-    circularReference.circularReference = circularReference;
-    it('handles all data types in an array', () => {
-      const value = [1, true, { a: 1 }, circularReference, 'yeah', 100n, null];
-      const res = toStringArray(value);
-      expect(res).toEqual(['1', 'true', '{"a":1}', 'Invalid Object', 'yeah', '100']);
-    });
-    it('handles null', () => {
-      const value = null;
-      const res = toStringArray(value);
-      expect(res).toEqual([]);
-    });
-
-    it('handles object', () => {
-      const value = { a: true };
-      const res = toStringArray(value);
-      expect(res).toEqual([JSON.stringify(value)]);
-    });
-
-    it('handles Invalid Object', () => {
-      const value = circularReference;
-      const res = toStringArray(value);
-      expect(res).toEqual(['Invalid Object']);
-    });
-
-    it('handles unexpected value', () => {
-      const value = 100n;
-      const res = toStringArray(value);
-      expect(res).toEqual(['100']);
     });
   });
 });

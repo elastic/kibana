@@ -48,7 +48,7 @@
                 "description": [],
                 "signature": [
                   "History",
-                  "<any>"
+                  "<HistoryLocationState>"
                 ],
                 "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
@@ -81,7 +81,7 @@
               "\nCreates a `ScopedHistory` for a subpath of this `ScopedHistory`. Useful for applications that may have sub-apps\nthat do not need access to the containing application's history.\n"
             ],
             "signature": [
-              "<SubHistoryLocationState = unknown>(basePath: string) => ",
+              "(basePath: string) => ",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -89,7 +89,7 @@
                 "section": "def-public.ScopedHistory",
                 "text": "ScopedHistory"
               },
-              "<SubHistoryLocationState>"
+              "<HistoryLocationState>"
             ],
             "path": "src/core/public/application/scoped_history.ts",
             "deprecated": false,
@@ -339,8 +339,8 @@
             ],
             "signature": [
               "(prompt?: string | boolean | ",
-              "History",
-              ".TransitionPromptHook<HistoryLocationState> | undefined) => ",
+              "TransitionPromptHook",
+              "<HistoryLocationState> | undefined) => ",
               "UnregisterCallback"
             ],
             "path": "src/core/public/application/scoped_history.ts",
@@ -355,8 +355,8 @@
                 "description": [],
                 "signature": [
                   "string | boolean | ",
-                  "History",
-                  ".TransitionPromptHook<HistoryLocationState> | undefined"
+                  "TransitionPromptHook",
+                  "<HistoryLocationState> | undefined"
                 ],
                 "path": "src/core/public/application/scoped_history.ts",
                 "deprecated": false,
@@ -953,7 +953,7 @@
                 "tags": [],
                 "label": "app",
                 "description": [
-                  "- an {@link App}"
+                  "- an {@link App }"
                 ],
                 "signature": [
                   {
@@ -1359,27 +1359,7 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/public/account_management/account_management_app.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_app.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_app.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/authentication/login/login_app.test.ts"
-              },
-              {
-                "plugin": "security",
                 "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_app.test.ts"
               },
               {
                 "plugin": "fleet",
@@ -1469,32 +1449,12 @@
                 "path": "x-pack/plugins/security_solution/public/app/index.tsx"
               },
               {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/account_management/account_management_app.test.ts"
-              },
-              {
                 "plugin": "maps",
                 "path": "x-pack/plugins/maps/target/types/public/render_app.d.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/public/authentication/access_agreement/access_agreement_app.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/authentication/logged_out/logged_out_app.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/authentication/login/login_app.test.ts"
-              },
-              {
-                "plugin": "security",
                 "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
-              },
-              {
-                "plugin": "security",
-                "path": "x-pack/plugins/security/public/authentication/overwritten_session/overwritten_session_app.test.ts"
               },
               {
                 "plugin": "maps",
@@ -1857,7 +1817,7 @@
           "\nInput type for registering secondary in-app locations for an application.\n\nDeep links must include at least one of `path` or `deepLinks`. A deep link that does not have a `path`\nrepresents a topological level in the application's hierarchy, but does not have a destination URL that is\nuser-accessible."
         ],
         "signature": [
-          "({ id: string; title: string; keywords?: string[] | undefined; navLinkStatus?: ",
+          "{ id: string; title: string; keywords?: string[] | undefined; navLinkStatus?: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1873,7 +1833,7 @@
             "section": "def-public.AppNavOptions",
             "text": "AppNavOptions"
           },
-          " & { path: string; deepLinks?: ",
+          " & ({ path: string; deepLinks?: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1881,23 +1841,7 @@
             "section": "def-public.AppDeepLink",
             "text": "AppDeepLink"
           },
-          "[] | undefined; }) | ({ id: string; title: string; keywords?: string[] | undefined; navLinkStatus?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.AppNavLinkStatus",
-            "text": "AppNavLinkStatus"
-          },
-          " | undefined; searchable?: boolean | undefined; } & ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.AppNavOptions",
-            "text": "AppNavOptions"
-          },
-          " & { path?: string | undefined; deepLinks: ",
+          "[] | undefined; } | { path?: string | undefined; deepLinks: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2090,7 +2034,7 @@
         "path": "src/core/public/application/types.ts",
         "deprecated": false,
         "returnComment": [
-          "An unmounting function that will be called to unmount the application. See {@link AppUnmount}."
+          "An unmounting function that will be called to unmount the application. See {@link AppUnmount }."
         ],
         "children": [
           {
@@ -2099,7 +2043,9 @@
             "type": "Object",
             "tags": [],
             "label": "params",
-            "description": [],
+            "description": [
+              "{@link AppMountParameters }"
+            ],
             "signature": [
               {
                 "pluginId": "core",
@@ -2144,15 +2090,7 @@
           "\nDefines the list of fields that can be updated via an {@link AppUpdater}."
         ],
         "signature": [
-          "{ deepLinks?: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.AppDeepLink",
-            "text": "AppDeepLink"
-          },
-          "[] | undefined; searchable?: boolean | undefined; status?: ",
+          "{ status?: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2160,7 +2098,15 @@
             "section": "def-public.AppStatus",
             "text": "AppStatus"
           },
-          " | undefined; navLinkStatus?: ",
+          " | undefined; deepLinks?: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCoreApplicationPluginApi",
+            "section": "def-public.AppDeepLink",
+            "text": "AppDeepLink"
+          },
+          "[] | undefined; searchable?: boolean | undefined; navLinkStatus?: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2192,15 +2138,15 @@
             "section": "def-public.App",
             "text": "App"
           },
-          "<unknown>) => Partial<Pick<",
+          "<unknown>) => Partial<",
           {
             "pluginId": "core",
             "scope": "public",
             "docId": "kibCoreApplicationPluginApi",
-            "section": "def-public.App",
-            "text": "App"
+            "section": "def-public.AppUpdatableFields",
+            "text": "AppUpdatableFields"
           },
-          "<unknown>, \"deepLinks\" | \"searchable\" | \"status\" | \"navLinkStatus\" | \"defaultPath\" | \"tooltip\">> | undefined"
+          "> | undefined"
         ],
         "path": "src/core/public/application/types.ts",
         "deprecated": false,
@@ -2239,7 +2185,7 @@
           "\nPublic information about a registered app's {@link AppDeepLink | deepLinks}\n"
         ],
         "signature": [
-          "Pick<",
+          "Omit<",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2247,7 +2193,7 @@
             "section": "def-public.AppDeepLink",
             "text": "AppDeepLink"
           },
-          ", \"title\" | \"id\" | \"order\" | \"path\" | \"tooltip\" | \"euiIconType\" | \"icon\"> & { deepLinks: ",
+          ", \"keywords\" | \"deepLinks\" | \"searchable\" | \"navLinkStatus\"> & { deepLinks: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2279,7 +2225,7 @@
           "\nPublic information about a registered {@link App | application}\n"
         ],
         "signature": [
-          "Pick<",
+          "Omit<",
           {
             "pluginId": "core",
             "scope": "public",
@@ -2287,7 +2233,7 @@
             "section": "def-public.App",
             "text": "App"
           },
-          "<unknown>, \"title\" | \"id\" | \"order\" | \"capabilities\" | \"category\" | \"status\" | \"navLinkStatus\" | \"defaultPath\" | \"chromeless\" | \"appRoute\" | \"exactRoute\" | \"tooltip\" | \"euiIconType\" | \"icon\"> & { status: ",
+          "<unknown>, \"mount\" | \"updater$\" | \"keywords\" | \"deepLinks\" | \"searchable\"> & { status: ",
           {
             "pluginId": "core",
             "scope": "public",
