@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export * from './can_use_cases';
 export * from './get_cases';
 export * from './get_recent_cases';
 export * from './get_all_cases_selector_modal';

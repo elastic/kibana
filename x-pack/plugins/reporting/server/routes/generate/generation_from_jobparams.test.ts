@@ -6,7 +6,6 @@
  */
 
 import rison from 'rison-node';
-import { UnwrapPromise } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { of } from 'rxjs';
 import { ElasticsearchClient } from 'kibana/server';
@@ -22,7 +21,7 @@ import {
 import type { ReportingRequestHandlerContext } from '../../types';
 import { registerJobGenerationRoutes } from './generate_from_jobparams';
 
-type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
 describe('POST /api/reporting/generate', () => {
   const reportingSymbol = Symbol('reporting');
