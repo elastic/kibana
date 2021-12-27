@@ -7,7 +7,7 @@
  */
 
 import React, { Component, ReactElement } from 'react';
-
+import { CoreStart } from 'kibana/public';
 import {
   EuiButton,
   EuiCopy,
@@ -26,16 +26,16 @@ import {
 import { format as formatUrl, parse as parseUrl } from 'url';
 
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import { HttpStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import type { Capabilities } from 'src/core/public';
 
-import { shortenUrl } from '../lib/url_shortener';
 import { UrlParamExtension } from '../types';
 import {
   AnonymousAccessServiceContract,
   AnonymousAccessState,
 } from '../../common/anonymous_access';
+import type { UrlService } from '../../common/url_service';
+import { LEGACY_SHORT_URL_LOCATOR_ID } from '../../common/url_service/locators/legacy_short_url_locator';
 
 interface Props {
   allowShortUrl: boolean;
@@ -43,11 +43,11 @@ interface Props {
   objectId?: string;
   objectType: string;
   shareableUrl?: string;
-  basePath: string;
-  post: HttpStart['post'];
   urlParamExtensions?: UrlParamExtension[];
   anonymousAccess?: AnonymousAccessServiceContract;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
+  core: CoreStart;
+  urlService: UrlService;
 }
 
 export enum ExportUrlAsType {
@@ -367,9 +367,19 @@ export class UrlPanelContent extends Component<Props, State> {
     });
 
     try {
-      const shortUrl = await shortenUrl(this.getSnapshotUrl(), {
-        basePath: this.props.basePath,
-        post: this.props.post,
+      const snapshotUrl = this.getSnapshotUrl();
+      const { urlService } = this.props;
+      const locator = urlService.locators.get(LEGACY_SHORT_URL_LOCATOR_ID)!;
+      const { data } = await urlService.shortUrls.get(null).create({
+        locator,
+        humanReadableSlug: true,
+        params: {
+          url: snapshotUrl,
+        },
+      });
+      const shortUrl = this.props.core.application.getUrlForApp('short_url_redirect', {
+        path: `${data.id}`,
+        absolute: true,
       });
 
       if (!this.mounted) {

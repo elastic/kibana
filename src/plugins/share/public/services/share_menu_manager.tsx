@@ -11,7 +11,8 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiWrappingPopover } from '@elastic/eui';
 
-import { CoreStart, HttpStart } from 'kibana/public';
+import { CoreStart } from 'kibana/public';
+import type { UrlService } from '../../common/url_service';
 import { ShareContextMenu } from '../components/share_context_menu';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
@@ -24,6 +25,7 @@ export class ShareMenuManager {
 
   start(
     core: CoreStart,
+    urlService: UrlService,
     shareRegistry: ShareMenuRegistryStart,
     anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract
   ) {
@@ -39,8 +41,8 @@ export class ShareMenuManager {
         this.toggleShareContextMenu({
           ...options,
           menuItems,
-          post: core.http.post,
-          basePath: core.http.basePath.get(),
+          core,
+          urlService,
           anonymousAccess,
         });
       },
@@ -61,15 +63,15 @@ export class ShareMenuManager {
     sharingData,
     menuItems,
     shareableUrl,
-    post,
-    basePath,
     embedUrlParamExtensions,
-    anonymousAccess,
     showPublicUrlSwitch,
+    core,
+    urlService,
+    anonymousAccess,
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
-    post: HttpStart['post'];
-    basePath: string;
+    core: CoreStart;
+    urlService: UrlService;
     anonymousAccess: AnonymousAccessServiceContract | undefined;
   }) {
     if (this.isOpen) {
@@ -99,11 +101,11 @@ export class ShareMenuManager {
             sharingData={sharingData}
             shareableUrl={shareableUrl}
             onClose={this.onClose}
-            post={post}
-            basePath={basePath}
             embedUrlParamExtensions={embedUrlParamExtensions}
             anonymousAccess={anonymousAccess}
             showPublicUrlSwitch={showPublicUrlSwitch}
+            core={core}
+            urlService={urlService}
           />
         </EuiWrappingPopover>
       </I18nProvider>

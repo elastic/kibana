@@ -137,12 +137,15 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   }
 
   public start(core: CoreStart): SharePluginStart {
+    const sharingContextMenuStart = this.shareContextMenu.start(
+      core,
+      this.url!,
+      this.shareMenuRegistry.start(),
+      this.anonymousAccessServiceProvider
+    );
+
     return {
-      ...this.shareContextMenu.start(
-        core,
-        this.shareMenuRegistry.start(),
-        this.anonymousAccessServiceProvider
-      ),
+      ...sharingContextMenuStart,
       urlGenerators: this.urlGeneratorsService.start(core),
       url: this.url!,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
