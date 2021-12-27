@@ -39,6 +39,7 @@ export default async (): Promise<ITestSetup> => {
   }
 
   if (noCache) {
+    await client.send('Network.clearBrowserCache');
     await client.send('Network.setCacheDisabled', { cacheDisabled: true });
   }
 
