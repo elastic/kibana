@@ -28,7 +28,7 @@ export function registerMappingRoute({ router, lib: { handleEsError } }: RouteDe
       const { client } = context.core.elasticsearch;
       const { indexName } = request.params as typeof paramsSchema.type;
       const params = {
-        expand_wildcards: 'none',
+        expand_wildcards: 'none' as const,
         index: indexName,
       };
 

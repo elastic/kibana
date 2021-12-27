@@ -19,7 +19,7 @@ import {
   ALERT_UUID,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_NAME,
-} from '@kbn/rule-data-utils/technical_field_names';
+} from '@kbn/rule-data-utils';
 import React, { Dispatch, SetStateAction } from 'react';
 import { EuiTheme } from 'src/plugins/kibana_react/common';
 import { ValuesType } from 'utility-types';
