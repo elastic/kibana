@@ -38,9 +38,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--env.CODE_COVERAGE=1',
       ],
       serverArgs: [
-        ...xpackFunctionalTestsConfig
-          .get('kbnTestServer.serverArgs')
-          .filter((arg: string) => !arg.includes('test/common/fixtures/plugins/coverage')),
+        ...xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--csp.strict=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
