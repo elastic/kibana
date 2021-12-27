@@ -7,24 +7,21 @@
 
 import { of } from 'rxjs';
 import { setupServer } from 'src/core/server/test_utils';
-import { API_GET_ILM_POLICY_STATUS } from '../../common/constants';
-import { securityMock } from '../../../security/server/mocks';
-
 import supertest from 'supertest';
-
+import { securityMock } from '../../../../../security/server/mocks';
+import { API_GET_ILM_POLICY_STATUS } from '../../../../common/constants';
 import {
   createMockConfigSchema,
+  createMockLevelLogger,
   createMockPluginSetup,
   createMockReportingCore,
-  createMockLevelLogger,
-} from '../test_helpers';
-
-import { registerDeprecationsRoutes } from './deprecations';
+} from '../../../test_helpers';
+import { registerDeprecationsRoutes } from '../deprecations';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
-// https://github.com/elastic/kibana/issues/115881
-describe.skip(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
+describe(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
+  jest.setTimeout(6000);
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
@@ -53,6 +50,11 @@ describe.skip(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     ({ server, httpSetup } = await setupServer(reportingSymbol));
+  });
+
+  afterEach(async () => {
+    jest.restoreAllMocks();
+    await server.stop();
   });
 
   it('correctly handles authz when security is unavailable', async () => {
