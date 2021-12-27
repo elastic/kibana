@@ -39,7 +39,7 @@ import {
 export interface SimpleQuery {
   query_string: {
     query: string;
-    default_operator?: estypes.DefaultOperator;
+    default_operator?: estypes.QueryDslOperator;
   };
 }
 

@@ -122,7 +122,7 @@ describe('discover responsive sidebar', function () {
     const selected = findTestSubject(comp, 'fieldList-selected');
     const unpopular = findTestSubject(comp, 'fieldList-unpopular');
     expect(popular.children().length).toBe(1);
-    expect(unpopular.children().length).toBe(7);
+    expect(unpopular.children().length).toBe(6);
     expect(selected.children().length).toBe(1);
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
@@ -140,7 +140,7 @@ describe('discover responsive sidebar', function () {
     expect(props.onAddFilter).toHaveBeenCalled();
   });
   it('should allow filtering by string, and calcFieldCount should just be executed once', function () {
-    expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(7);
+    expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(6);
     act(() => {
       findTestSubject(comp, 'fieldFilterSearchInput').simulate('change', {
         target: { value: 'abc' },
