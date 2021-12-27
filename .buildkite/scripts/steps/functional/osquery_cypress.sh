@@ -4,6 +4,9 @@ set -uo pipefail
 
 source .buildkite/scripts/common/util.sh
 
+.buildkite/scripts/bootstrap.sh
+.buildkite/scripts/build_kibana_plugins.sh
+
 KIBANA_DIR=$(pwd)
 export KIBANA_DIR
 export XPACK_DIR="$KIBANA_DIR/x-pack"
@@ -14,11 +17,6 @@ export CI="false"
 export DEBUG="code-coverage"
 export NODE_OPTIONS=--max_old_space_size=8192
 export CODE_COVERAGE=1
-
-source .buildkite/scripts/common/setup_node.sh
-
-yarn kbn bootstrap
-node scripts/build_kibana_platform_plugins.js
 
 export JOB=kibana-osquery-cypress
 
