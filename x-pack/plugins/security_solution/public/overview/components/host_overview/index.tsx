@@ -281,6 +281,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           <HostRiskOverviewWrapper
             gutterSize={isInDetailsSidePanel ? 'm' : 'none'}
             direction={isInDetailsSidePanel ? 'column' : 'row'}
+            data-test-subj="host-risk-overview"
           >
             <EuiFlexItem>
               <DescriptionListStyled listItems={[hostRiskScore]} />
