@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { expectAssignable } from 'tsd';
-import { UnwrapPromise } from '../..';
+import { FieldFormatEditorFactory } from '../types';
+import { formatId } from './constants';
 
-type STRING = UnwrapPromise<Promise<string>>;
-type TUPLE = UnwrapPromise<Promise<[number, number]>>;
-
-expectAssignable<STRING>('adf');
-expectAssignable<TUPLE>([1, 2]);
+export type { GeoPointFormatEditor } from './geo_point';
+export const geoPointFormatEditorFactory: FieldFormatEditorFactory = () =>
+  import('./geo_point').then((m) => m.GeoPointFormatEditor);
+geoPointFormatEditorFactory.formatId = formatId;
