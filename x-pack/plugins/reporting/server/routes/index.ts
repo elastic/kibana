@@ -12,7 +12,6 @@ import { registerDiagnosticRoutes } from './diagnostic';
 import {
   registerGenerateCsvFromSavedObjectImmediate,
   registerJobGenerationRoutes,
-  registerLegacy,
 } from './generate';
 import { registerJobInfoRoutes } from './management';
 
@@ -21,6 +20,5 @@ export function registerRoutes(reporting: ReportingCore, logger: LevelLogger) {
   registerDiagnosticRoutes(reporting, logger);
   registerGenerateCsvFromSavedObjectImmediate(reporting, logger);
   registerJobGenerationRoutes(reporting, logger);
-  registerLegacy(reporting, logger);
   registerJobInfoRoutes(reporting);
 }

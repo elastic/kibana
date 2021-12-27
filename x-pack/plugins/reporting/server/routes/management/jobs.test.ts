@@ -10,7 +10,6 @@ jest.mock('../../lib/content_stream', () => ({
 }));
 
 import { Readable } from 'stream';
-import { UnwrapPromise } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { of } from 'rxjs';
 import { ElasticsearchClient } from 'kibana/server';
@@ -27,7 +26,7 @@ import {
 import { ExportTypeDefinition, ReportingRequestHandlerContext } from '../../types';
 import { registerJobInfoRoutes } from './jobs';
 
-type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
 describe('GET /api/reporting/jobs/download', () => {
   const reportingSymbol = Symbol('reporting');
