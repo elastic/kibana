@@ -47,6 +47,7 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
     }
 
     logStart(message: string): ExecuteStart {
+      this.completionLogger.startTiming(this.eventObj);
       const event = deepMerge(
         {
           message,
@@ -58,10 +59,6 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
 
       genericLogger.logEvent(event);
       return event;
-    }
-
-    startTiming() {
-      this.completionLogger.startTiming(this.eventObj);
     }
 
     logComplete(
@@ -106,3 +103,5 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
     }
   };
 }
+
+export type ReportingEventLogger = ReturnType<typeof reportingEventLoggerFactory>;

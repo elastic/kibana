@@ -84,7 +84,6 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         });
 
         eventLog.logStart('starting csv generation');
-        eventLog.startTiming();
 
         try {
           let buffer = Buffer.from('');
