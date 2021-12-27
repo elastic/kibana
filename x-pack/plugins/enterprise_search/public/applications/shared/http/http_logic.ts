@@ -21,7 +21,6 @@ export interface HttpValues {
 interface HttpActions {
   initializeHttpInterceptors(): void;
   onConnectionError(errorConnectingMessage: string): { errorConnectingMessage: string };
-  clearConnectionError(): void;
   setHttpInterceptors(httpInterceptors: Function[]): { httpInterceptors: Function[] };
   setReadOnlyMode(readOnlyMode: boolean): { readOnlyMode: boolean };
 }
@@ -31,7 +30,6 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
   actions: {
     initializeHttpInterceptors: () => null,
     onConnectionError: (errorConnectingMessage) => ({ errorConnectingMessage }),
-    clearConnectionError: () => null,
     setHttpInterceptors: (httpInterceptors) => ({ httpInterceptors }),
     setReadOnlyMode: (readOnlyMode) => ({ readOnlyMode }),
   },
@@ -47,7 +45,6 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
       props.errorConnectingMessage || '',
       {
         onConnectionError: (_, { errorConnectingMessage }) => errorConnectingMessage,
-        clearConnectionError: () => '',
       },
     ],
     readOnlyMode: [
@@ -65,13 +62,9 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
         responseError: async (httpResponse) => {
           if (isEnterpriseSearchApi(httpResponse)) {
             const hasErrorConnecting = httpResponse.response!.headers.get(ERROR_CONNECTING_HEADER);
-
             if (hasErrorConnecting === 'true') {
               const { status, statusText } = httpResponse.response!;
               actions.onConnectionError(`${status} ${statusText}`);
-            } else {
-              // TODO Should we only do this when values.errorConnectingMessage === true?
-              actions.clearConnectionError();
             }
           }
 

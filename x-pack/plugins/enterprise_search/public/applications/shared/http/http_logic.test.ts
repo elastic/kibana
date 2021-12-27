@@ -59,17 +59,6 @@ describe('HttpLogic', () => {
     });
   });
 
-  describe('clearConnectionError', () => {
-    it('sets the error connecting flag and related message ', () => {
-      mount({
-        errorConnectingMessage: '502 Bad Gateway',
-      });
-
-      HttpLogic.actions.clearConnectionError();
-      expect(HttpLogic.values.errorConnectingMessage).toEqual('');
-    });
-  });
-
   describe('setReadOnlyMode()', () => {
     it('sets readOnlyMode value', () => {
       mount();
@@ -109,7 +98,6 @@ describe('HttpLogic', () => {
         beforeEach(() => {
           interceptedResponse = mockHttp.intercept.mock.calls[0][0].responseError;
           jest.spyOn(HttpLogic.actions, 'onConnectionError');
-          jest.spyOn(HttpLogic.actions, 'clearConnectionError');
         });
 
         it('sets the connection error message if the response header is true', async () => {
@@ -126,16 +114,16 @@ describe('HttpLogic', () => {
           expect(HttpLogic.actions.onConnectionError).toHaveBeenCalledWith('500 Error');
         });
 
-        it('clears the connection error message if the response header is false', async () => {
+        it('takes no action if the response header is false', async () => {
           const httpResponse = {
             response: {
-              url: '/internal/workplace_search/overview',
+              url: '/internal/app_search/engines',
               headers: { get: () => 'false' },
             },
           };
           await expect(interceptedResponse(httpResponse)).rejects.toEqual(httpResponse);
 
-          expect(HttpLogic.actions.clearConnectionError).toHaveBeenCalled();
+          expect(HttpLogic.actions.onConnectionError).not.toHaveBeenCalled();
         });
 
         describe('isEnterpriseSearchApi check', () => {
@@ -145,7 +133,6 @@ describe('HttpLogic', () => {
             // Should always re-reject the promise and not call setErrorConnecting
             await expect(interceptedResponse(httpResponse)).rejects.toEqual(httpResponse);
             expect(HttpLogic.actions.onConnectionError).not.toHaveBeenCalled();
-            expect(HttpLogic.actions.clearConnectionError).not.toHaveBeenCalled();
           });
 
           it('does not handle non-Enterprise Search API calls', async () => {
