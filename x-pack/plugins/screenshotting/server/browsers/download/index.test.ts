@@ -84,13 +84,13 @@ describe('ensureDownloaded', () => {
       expect(fetch).not.toHaveBeenCalled();
       expect(readdirSync(path.resolve(`${paths.archivesPath}/x64`))).toEqual(
         expect.arrayContaining([
+          'chrome-mac.zip',
           'chrome-win.zip',
           'chromium-70f5d88-linux_x64.zip',
-          'chromium-d163fd7-darwin_x64.zip',
         ])
       );
       expect(readdirSync(path.resolve(`${paths.archivesPath}/arm64`))).toEqual(
-        expect.arrayContaining(['chromium-70f5d88-linux_arm64.zip'])
+        expect.arrayContaining(['chrome-mac.zip', 'chromium-70f5d88-linux_arm64.zip'])
       );
     });
 

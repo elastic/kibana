@@ -7,13 +7,6 @@
 
 import path from 'path';
 
-enum BaseUrl {
-  // see https://www.chromium.org/getting-involved/download-chromium
-  common = 'https://commondatastorage.googleapis.com/chromium-browser-snapshots',
-  // A GCS bucket under the Kibana team
-  custom = 'https://storage.googleapis.com/headless_shell',
-}
-
 interface PackageInfo {
   platform: 'linux' | 'darwin' | 'win32';
   architecture: 'x64' | 'arm64';
@@ -23,6 +16,13 @@ interface PackageInfo {
   binaryRelativePath: string;
   revision: 901912 | 901913;
   bundled: boolean;
+}
+
+enum BaseUrl {
+  // see https://www.chromium.org/getting-involved/download-chromium
+  common = 'https://commondatastorage.googleapis.com/chromium-browser-snapshots',
+  // A GCS bucket under the Kibana team
+  custom = 'https://storage.googleapis.com/headless_shell',
 }
 
 interface CustomPackageInfo extends PackageInfo {

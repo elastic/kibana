@@ -15,13 +15,13 @@ export const InstallChromium = {
   async run(config, log, build) {
     for (const platform of config.getNodePlatforms()) {
       const packageInfo = paths.find(platform.getName(), platform.getArchitecture());
-      log.info(`Installing Chromium for ${paths.toString(packageInfo)}`);
-
-      if (!packageInfo.bundled) {
+      if (!packageInfo || !packageInfo.bundled) {
         // Unbundled chromium packages (for Darwin): Chromium is downloaded at
         // server startup, rather than being pre-installed
         continue;
       }
+
+      log.info(`Installing Chromium for ${paths.toString(packageInfo)}`);
 
       const logger = {
         get: log.withType.bind(log),
