@@ -312,7 +312,7 @@ async function attemptToCreateCommand(
 
     // Only chrome supports this option.
     log.debug(
-      `NETWORK THROTTLED with profile ${profile}: ${downloadThroughput}kbps down, ${uploadThroughput}kbps up, ${latency} ms latency.`
+      `NETWORK THROTTLED with profile ${profile}: ${downloadThroughput} B/s down, ${uploadThroughput} B/s up, ${latency} ms latency.`
     );
 
     // @ts-expect-error

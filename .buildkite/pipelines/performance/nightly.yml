@@ -33,6 +33,13 @@ steps:
     depends_on: build
     if: build.env('TEST_RUNNER') == "SYNTHETICS"
 
+  - label: ":muscle: Performance Tests with Playwright config"
+    command: .buildkite/scripts/steps/functional/performance_playwright.sh
+    agents:
+      queue: c2-16
+    depends_on: build
+    if: build.env('TEST_RUNNER') == "PLAYWRIGHT"
+
   - wait: ~
     continue_on_failure: true
 
