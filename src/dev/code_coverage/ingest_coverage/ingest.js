@@ -22,7 +22,6 @@ const isResearchJob = process.env.COVERAGE_JOB_NAME === RESEARCH_CI_JOB_NAME ? t
 
 export const ingestList = (log) => async (xs) => {
   await bulkIngest();
-  //fromNullable(process.env.NODE_ENV).fold(bulkIngest, justLog);
 
   async function bulkIngest() {
     log.verbose(`\n${ccMark} Ingesting ${xs.length} docs at a time`);
@@ -30,15 +29,9 @@ export const ingestList = (log) => async (xs) => {
     const body = parseIndexes(xs);
 
     const bulkResponse = await client.bulk({ refresh: true, body });
-    //const { body: bulkResponse } = result;
 
     handleErrors(body, bulkResponse)(log);
   }
-
-  // function justLog() {
-  //   log.verbose(`\n${ccMark} Just logging first item from current (buffered) bulk list`);
-  //   log.verbose(`\n${ccMark} ${JSON.stringify(xs[0], null, 2)}`);
-  // }
 };
 
 function handleErrors(body, bulkResponse) {
