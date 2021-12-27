@@ -6,12 +6,19 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import { EuiProvider } from '@elastic/eui';
 import { ObservabilityStatusBoxes, ObservabilityStatusProps } from './observability_status_boxes';
 
 export default {
   title: 'app/ObservabilityStatusBoxes',
   component: ObservabilityStatusBoxes,
+  decorators: [
+    (Story: ComponentType) => (
+      <EuiProvider>
+        <Story />
+      </EuiProvider>
+    ),
+  ],
 };
 
 const testBoxes = [
@@ -95,7 +102,7 @@ const testBoxes = [
   },
 ];
 
-const Template: Story<ObservabilityStatusProps> = ({ boxes }: ObservabilityStatusProps) => {
+const Template = ({ boxes }: ObservabilityStatusProps) => {
   return (
     <div style={{ width: 380, backgroundColor: '#fff', padding: 40 }}>
       <ObservabilityStatusBoxes boxes={boxes} />
