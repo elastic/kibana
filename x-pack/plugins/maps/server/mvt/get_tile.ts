@@ -8,6 +8,7 @@
 import _ from 'lodash';
 import { Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
+import { collectStream } from './util';
 
 function isAbortError(error: Error) {
   return error.message === 'Request aborted' || error.message === 'Aborted';
@@ -62,11 +63,7 @@ export async function getEsTile({
       }
     );
 
-    const payload = [];
-    for await (const chunk of tile.body) {
-      payload.push(chunk);
-    }
-    return Buffer.concat(payload);
+    return await collectStream(tile.body as Iterable<Buffer>);
   } catch (e) {
     if (!isAbortError(e)) {
       // These are often circuit breaking exceptions

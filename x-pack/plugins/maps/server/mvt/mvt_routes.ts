@@ -52,10 +52,7 @@ export function initMVTRoutes({
     ) => {
       const { query, params } = request;
 
-      const abortController = new AbortController();
-      request.events.aborted$.subscribe(() => {
-        abortController.abort();
-      });
+      const abortController = makeAbortController(request);
 
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
@@ -101,10 +98,7 @@ export function initMVTRoutes({
     ) => {
       const { query, params } = request;
 
-      const abortController = new AbortController();
-      request.events.aborted$.subscribe(() => {
-        abortController.abort();
-      });
+      const abortController = makeAbortController(request);
 
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
@@ -128,27 +122,39 @@ export function initMVTRoutes({
 }
 
 function sendResponse(response: KibanaResponseFactory, gzippedTile: any) {
+  const cacheControl = `public, max-age=${CACHE_TIMEOUT_SECONDS}`;
+  const lastModified = `${new Date().toUTCString()}`;
   if (gzippedTile) {
     return response.ok({
       body: gzippedTile,
       headers: {
+        'content-length': gzippedTile.length,
         'content-disposition': 'inline',
-        'content-length': gzippedTile ? `${gzippedTile.length}` : `0`,
         'content-encoding': 'gzip',
         'Content-Type': 'application/x-protobuf',
-        'Cache-Control': `public, max-age=${CACHE_TIMEOUT_SECONDS}`,
-        'Last-Modified': `${new Date().toUTCString()}`,
+        'Cache-Control': cacheControl,
+        'Last-Modified': lastModified,
       },
     });
   } else {
     return response.ok({
       headers: {
-        'content-disposition': 'inline',
         'content-length': `0`,
+        'content-disposition': 'inline',
         'Content-Type': 'application/x-protobuf',
-        'Cache-Control': `public, max-age=${CACHE_TIMEOUT_SECONDS}`,
-        'Last-Modified': `${new Date().toUTCString()}`,
+        'Cache-Control': cacheControl,
+        'Last-Modified': lastModified,
       },
     });
   }
+}
+
+function makeAbortController(
+  request: KibanaRequest<unknown, Record<string, any>, unknown>
+): AbortController {
+  const abortController = new AbortController();
+  request.events.aborted$.subscribe(() => {
+    abortController.abort();
+  });
+  return abortController;
 }
