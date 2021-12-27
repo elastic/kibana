@@ -56,7 +56,8 @@ const StyledEuiFormRow = styled(EuiFormRow)`
       & > div:first-child {
         margin: 0px 0px 0px 4px;
       }
-      &__wrap {
+      &__wrap,
+      &__textarea {
         z-index: 0;
       }
     }

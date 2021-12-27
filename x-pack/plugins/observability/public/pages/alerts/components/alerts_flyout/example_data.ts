@@ -18,13 +18,11 @@ import {
   ALERT_RULE_NAME,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_PRODUCER,
-  ALERT_RULE_CONSUMER,
-  SPACE_IDS,
-} from '@kbn/rule-data-utils/technical_field_names';
-import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
-} from '@kbn/rule-data-utils/alerts_as_data_status';
+  ALERT_RULE_CONSUMER,
+  SPACE_IDS,
+} from '@kbn/rule-data-utils';
 
 export const apmAlertResponseExample = [
   {
