@@ -160,6 +160,5 @@ export const initRoutes = (
 
   // Sourcerer API to generate default pattern
   createSourcererDataViewRoute(router, getStartServices);
-
   getSourcererDataViewRoute(router, getStartServices);
 };
