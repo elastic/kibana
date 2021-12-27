@@ -1,0 +1,34 @@
+{
+  "groups": [
+    {
+      "key": "oss/cigroup",
+      "name": "OSS CI Group",
+      "ciGroups": 12
+    },
+    {
+      "key": "oss/firefox",
+      "name": "OSS Firefox"
+    },
+    {
+      "key": "oss/accessibility",
+      "name": "OSS Accessibility"
+    },
+    {
+      "key": "xpack/cigroup",
+      "name": "Default CI Group",
+      "ciGroups": 27
+    },
+    {
+      "key": "xpack/cigroup/Docker",
+      "name": "Default CI Group Docker"
+    },
+    {
+      "key": "xpack/firefox",
+      "name": "Default Firefox"
+    },
+    {
+      "key": "xpack/accessibility",
+      "name": "Default Accessibility"
+    }
+  ]
+}
