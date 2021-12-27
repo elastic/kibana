@@ -21275,8 +21275,6 @@
     "xpack.security.users.editUserPage.createBreadcrumb": "创建",
     "xpack.securitySolution.accessibility.tooltipWithKeyboardShortcut.pressTooltipLabel": "按",
     "xpack.securitySolution.actionsContextMenu.label": "打开",
-    "xpack.securitySolution.add_filter_to_global_search_bar.filterForValueHoverAction": "筛留值",
-    "xpack.securitySolution.add_filter_to_global_search_bar.filterOutValueHoverAction": "筛除值",
     "xpack.securitySolution.administration.list.beta": "公测版",
     "xpack.securitySolution.administration.os.linux": "Linux",
     "xpack.securitySolution.administration.os.macos": "Mac",
