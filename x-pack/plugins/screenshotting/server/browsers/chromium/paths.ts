@@ -122,4 +122,8 @@ export class ChromiumArchivePaths {
     const chromiumPath = path.resolve(__dirname, '../../../chromium');
     return path.join(chromiumPath, p.binaryRelativePath);
   }
+
+  public toString(p: PackageInfo) {
+    return `${p.platform}-${p.architecture}`;
+  }
 }

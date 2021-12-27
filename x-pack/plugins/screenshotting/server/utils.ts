@@ -11,3 +11,4 @@ const paths = new ChromiumArchivePaths();
 
 export const download = baseDownload.bind(undefined, paths);
 export const install = baseInstall.bind(undefined, paths);
+export { paths };
