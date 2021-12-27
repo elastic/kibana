@@ -41,7 +41,7 @@ const getReindexState = (
   const meta = { ...(updatedMeta ?? reindexState.meta) };
   // Once we have received an array of existing aliases, we won't update the meta value anymore because
   // when we'll delete the original alias during the reindex process there won't be any aliases pointing
-  // to it anymore and the last reindex step (Updat existing aliases) would be suddenly removed.
+  // to it anymore and the last reindex step (Update existing aliases) would be suddenly removed.
   const aliases =
     reindexState.meta.aliases.length > 0 ? reindexState.meta.aliases : updatedMeta.aliases;
   const newReindexState = {
