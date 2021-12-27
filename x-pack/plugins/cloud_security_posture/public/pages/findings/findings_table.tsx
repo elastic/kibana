@@ -78,7 +78,7 @@ export const FindingsTable = ({ data, status, error, selectItem }: FindingsTable
   );
 };
 
-const RuleName = (name: string) => <EuiLink href="#">{name}</EuiLink>;
+const RuleName = (name: string) => <EuiLink>{name}</EuiLink>;
 const RuleTags = (tags: string[]) => (
   <EuiFlexGroup>
     <EuiFlexItem>
