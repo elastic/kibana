@@ -135,6 +135,15 @@ describe('Policy details host isolation exceptions tab', () => {
     expect(renderResult.getByTestId('remove-from-policy-action')).toBeEnabled();
   });
 
+  it('should enable the "view full details" action', () => {
+    render(getFoundExceptionListItemSchemaMock(1));
+    // click the actions button
+    userEvent.click(
+      renderResult.getByTestId('hostIsolationExceptions-collapsed-list-card-header-actions-button')
+    );
+    expect(renderResult.queryByTestId('view-full-details-action')).toBeTruthy();
+  });
+
   it('should render the delete dialog when the "remove from policy" button is clicked', () => {
     const testException = getExceptionListItemSchemaMock({
       tags: [`policy:${policyId}`, 'policy:1234', 'not-a-policy-tag'],
@@ -164,13 +173,16 @@ describe('Policy details host isolation exceptions tab', () => {
       });
     });
 
-    it('should not display the delete action', () => {
-      render(getFoundExceptionListItemSchemaMock(3));
-      expect(
-        renderResult.queryByTestId(
+    it('should not display the delete action, do show the full details', () => {
+      render(getFoundExceptionListItemSchemaMock(1));
+      // click the actions button
+      userEvent.click(
+        renderResult.getByTestId(
           'hostIsolationExceptions-collapsed-list-card-header-actions-button'
         )
-      ).toBeFalsy();
+      );
+      expect(renderResult.queryByTestId('remove-from-policy-action')).toBeFalsy();
+      expect(renderResult.queryByTestId('view-full-details-action')).toBeTruthy();
     });
   });
 });

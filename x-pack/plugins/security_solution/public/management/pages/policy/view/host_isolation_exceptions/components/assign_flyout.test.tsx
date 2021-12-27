@@ -103,7 +103,7 @@ describe('Policy details host isolation exceptions assign flyout', () => {
     await waitFor(() => {
       expect(getHostIsolationExceptionItemsMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          filter: `((not exception-list-agnostic.attributes.tags:"policy:${policyId}" AND not exception-list-agnostic.attributes.tags:"policy:all")) AND ((exception-list-agnostic.attributes.name:(*no*results*with*this*) OR exception-list-agnostic.attributes.description:(*no*results*with*this*) OR exception-list-agnostic.attributes.entries.value:(*no*results*with*this*)))`,
+          filter: `((not exception-list-agnostic.attributes.tags:"policy:${policyId}" AND not exception-list-agnostic.attributes.tags:"policy:all")) AND ((exception-list-agnostic.attributes.item_id:(*no*results*with*this*) OR exception-list-agnostic.attributes.name:(*no*results*with*this*) OR exception-list-agnostic.attributes.description:(*no*results*with*this*) OR exception-list-agnostic.attributes.entries.value:(*no*results*with*this*)))`,
         })
       );
       expect(renderResult.getByTestId('hostIsolationExceptions-no-items-found')).toBeTruthy();
