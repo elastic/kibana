@@ -39,7 +39,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await page?.fill('[data-test-subj=loginUsername]', 'elastic', { timeout: 180 * 1000 });
       await page?.fill('[data-test-subj=loginPassword]', 'changeme');
       await page?.click('[data-test-subj=loginSubmit]');
-      await page?.waitForNavigation({ waitUntil: 'networkidle' });
     });
 
     it('Dismiss Synthetics Notice', async () => {
