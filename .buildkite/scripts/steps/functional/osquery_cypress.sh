@@ -3,6 +3,7 @@
 set -uo pipefail
 
 source .buildkite/scripts/common/util.sh
+source .buildkite/scripts/common/setup_node.sh
 
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/build_kibana_plugins.sh
