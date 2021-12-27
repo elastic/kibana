@@ -49,6 +49,12 @@ export const navTabsHostDetails = (
       href: getTabsOnHostDetailsUrl(hostName, HostsTableType.alerts),
       disabled: false,
     },
+    [HostsTableType.risk]: {
+      id: HostsTableType.risk,
+      name: i18n.NAVIGATION_HOST_RISK_TITLE,
+      href: getTabsOnHostDetailsUrl(hostName, HostsTableType.risk),
+      disabled: false,
+    },
   };
 
   return hasMlUserPermissions
