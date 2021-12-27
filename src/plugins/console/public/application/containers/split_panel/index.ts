@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { Panel } from './containers/panel';
-export { PanelsContainer } from './containers/panel_container';
+export { Panel } from './panel';
+export { PanelsContainer } from './panel_container';
