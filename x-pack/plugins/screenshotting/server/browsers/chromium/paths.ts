@@ -8,13 +8,13 @@
 import path from 'path';
 
 interface PackageInfo {
-  platform: string;
-  architecture: string;
+  platform: 'linux' | 'darwin' | 'win32';
+  architecture: 'x64' | 'arm64';
   archiveFilename: string;
   archiveChecksum: string;
   binaryChecksum: string;
   binaryRelativePath: string;
-  revision: number;
+  revision: 901912 | 901913;
 }
 
 enum BaseUrl {
@@ -37,12 +37,24 @@ export class ChromiumArchivePaths {
     {
       platform: 'darwin',
       architecture: 'x64',
-      archiveFilename: 'chromium-d163fd7-darwin_x64.zip',
-      archiveChecksum: '19aa88bd59e2575816425bf72786c53f',
-      binaryChecksum: 'dfcd6e007214175997663c50c8d871ea',
-      binaryRelativePath: 'headless_shell-darwin_x64/headless_shell',
-      location: 'custom',
-      revision: 856583,
+      archiveFilename: 'chrome-mac.zip',
+      archiveChecksum: '229fd88c73c5878940821875f77578e4',
+      binaryChecksum: 'b0e5ca009306b14e41527000139852e5',
+      binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
+      location: 'common',
+      archivePath: 'Mac',
+      revision: 901912,
+    },
+    {
+      platform: 'darwin',
+      architecture: 'arm64',
+      archiveFilename: 'chrome-mac.zip',
+      archiveChecksum: 'ecf7aa509c8e2545989ebb9711e35384',
+      binaryChecksum: 'b5072b06ffd2d2af4fea7012914da09f',
+      binaryRelativePath: 'chrome-mac/Chromium.app/Contents/MacOS/Chromium',
+      location: 'common',
+      archivePath: 'Mac_Arm',
+      revision: 901913, // NOTE: 901912 is not available
     },
     {
       platform: 'linux',
