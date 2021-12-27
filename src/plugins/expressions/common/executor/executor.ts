@@ -210,13 +210,8 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     params: ExpressionExecutionParams = {}
   ): Execution<Input, Output> {
     const executionParams = {
+      params,
       executor: this,
-      params: {
-        ...params,
-        // for canvas we are passing this in,
-        // canvas should be refactored to not pass any extra context in
-        extraContext: this.context,
-      },
     } as ExecutionParams;
 
     if (typeof ast === 'string') executionParams.expression = ast;
