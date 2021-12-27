@@ -56,7 +56,7 @@ describe('AppSearch', () => {
   });
 
   it('renders ErrorConnecting when Enterprise Search is unavailable', () => {
-    setMockValues({ errorConnectingMessage: 'I am an error' });
+    setMockValues({ errorConnectingMessage: '502 Bad Gateway' });
     const wrapper = shallow(<AppSearch />);
 
     const errorConnection = wrapper.find(ErrorConnecting);

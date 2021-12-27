@@ -34,7 +34,7 @@ describe('EnterpriseSearch', () => {
 
   it('renders the error connecting prompt only if host is configured', () => {
     setMockValues({
-      errorConnectingMessage: 'I am an error',
+      errorConnectingMessage: '502 Bad Gateway',
       config: { host: 'localhost' },
     });
     const wrapper = shallow(<EnterpriseSearch />);
@@ -45,7 +45,7 @@ describe('EnterpriseSearch', () => {
     expect(wrapper.find(ProductSelector)).toHaveLength(0);
 
     setMockValues({
-      errorConnectingMessage: 'I am an error',
+      errorConnectingMessage: '502 Bad Gateway',
       config: { host: '' },
     });
     rerender(wrapper);

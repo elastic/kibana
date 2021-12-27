@@ -35,14 +35,14 @@ describe('HttpLogic', () => {
     it('sets values from props', () => {
       mountHttpLogic({
         http: mockHttp,
-        errorConnectingMessage: '500 Error',
+        errorConnectingMessage: '502 Bad Gateway',
         readOnlyMode: true,
       });
 
       expect(HttpLogic.values).toEqual({
         http: mockHttp,
         httpInterceptors: expect.any(Array),
-        errorConnectingMessage: '500 Error',
+        errorConnectingMessage: '502 Bad Gateway',
         readOnlyMode: true,
       });
     });
@@ -62,7 +62,7 @@ describe('HttpLogic', () => {
   describe('clearConnectionError', () => {
     it('sets the error connecting flag and related message ', () => {
       mount({
-        errorConnectingMessage: '500 error',
+        errorConnectingMessage: '502 Bad Gateway',
       });
 
       HttpLogic.actions.clearConnectionError();

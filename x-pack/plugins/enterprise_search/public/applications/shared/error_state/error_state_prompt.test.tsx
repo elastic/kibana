@@ -17,7 +17,7 @@ describe('ErrorState', () => {
   const values = {
     config: {},
     cloud: { isCloudEnabled: true },
-    errorConnectingMessage: 'I am an error',
+    errorConnectingMessage: '502 Bad Gateway',
   };
 
   beforeAll(() => {
@@ -26,7 +26,7 @@ describe('ErrorState', () => {
 
   it('renders an error message', () => {
     const wrapper = mountWithIntl(<ErrorStatePrompt />);
-    expect(wrapper.text()).toContain('I am an error');
+    expect(wrapper.text()).toContain('502 Bad Gateway');
   });
 
   it('renders a cloud specific error on cloud deployments', () => {

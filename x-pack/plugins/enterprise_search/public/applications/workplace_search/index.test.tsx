@@ -49,7 +49,7 @@ describe('WorkplaceSearch', () => {
   });
 
   it('renders ErrorState', () => {
-    setMockValues({ errorConnectingMessage: 'I am an error' });
+    setMockValues({ errorConnectingMessage: '502 Bad Gateway' });
 
     const wrapper = shallow(<WorkplaceSearch />);
 
