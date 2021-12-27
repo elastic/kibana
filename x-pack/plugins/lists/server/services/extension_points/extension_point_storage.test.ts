@@ -12,7 +12,6 @@ import { CreateExceptionListItemOptions } from '../exception_lists/exception_lis
 import { DataValidationError } from '../exception_lists/utils/errors';
 
 import {
-  ExtensionPointStorage,
   ExtensionPointStorageClient,
   ExtensionPointStorageClientInterface,
   ExtensionPointStorageInterface,
@@ -23,6 +22,7 @@ import {
   ExtensionPoint,
 } from './types';
 import { ExtensionPointError } from './errors';
+import { createExtensionPointStorageMock } from './extension_point_storage.mock';
 
 describe('When using ExtensionPointStorage', () => {
   let logger: ReturnType<typeof loggerMock.create>;
@@ -36,11 +36,15 @@ describe('When using ExtensionPointStorage', () => {
   };
 
   beforeEach(() => {
-    callbackRunLog = '';
-    logger = loggerMock.create();
-    storageService = new ExtensionPointStorage(logger);
+    const storageContext = createExtensionPointStorageMock();
 
-    // Generic callback function that alos logs to the `callbackRunLog` its id, so we know the order in which they ran.
+    callbackRunLog = '';
+    // eslint-disable-next-line prefer-destructuring
+    logger = storageContext.logger;
+    storageService = storageContext.extensionPointStorage;
+    storageService.clear();
+
+    // Generic callback function that also logs to the `callbackRunLog` its id, so we know the order in which they ran.
     // Each callback also appends its `id` to the item's name property, so that we know the value from one callback is
     // flowing to the next.
     const callbackFn = async <
