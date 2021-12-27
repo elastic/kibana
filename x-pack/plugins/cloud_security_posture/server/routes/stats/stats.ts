@@ -18,7 +18,7 @@ import {
   getBenchmarksQuery,
   getLatestFindingQuery,
 } from './stats_queries';
-import { STATS_ROUTH_PATH } from '../../../common/constants';
+import { STATS_ROUTH_PATH, RULE_PASSED, RULE_FAILED } from '../../../common/constants';
 interface LastCycle {
   run_id: string;
 }
@@ -57,8 +57,8 @@ export const getAllFindingsStats = async (
   cycleId: string
 ): Promise<BenchmarkStats> => {
   const findings = await esClient.count(getFindingsEsQuery(cycleId));
-  const passedFindings = await esClient.count(getFindingsEsQuery(cycleId, 'passed'));
-  const failedFindings = await esClient.count(getFindingsEsQuery(cycleId, 'failed'));
+  const passedFindings = await esClient.count(getFindingsEsQuery(cycleId, RULE_PASSED));
+  const failedFindings = await esClient.count(getFindingsEsQuery(cycleId, RULE_FAILED));
 
   const totalFindings = findings.body.count;
   const totalPassed = passedFindings.body.count;
@@ -83,10 +83,10 @@ export const getBenchmarksStats = async (
   for (const benchmark of benchmarks) {
     const benchmarkFindings = await esClient.count(getFindingsEsQuery(benchmark, cycleId));
     const benchmarkPassedFindings = await esClient.count(
-      getFindingsEsQuery(cycleId, 'passed', benchmark)
+      getFindingsEsQuery(cycleId, RULE_PASSED, benchmark)
     );
     const benchmarkFailedFindings = await esClient.count(
-      getFindingsEsQuery(cycleId, 'failed', benchmark)
+      getFindingsEsQuery(cycleId, RULE_FAILED, benchmark)
     );
     const totalFindings = benchmarkFindings.body.count;
     const totalPassed = benchmarkPassedFindings.body.count;
@@ -109,7 +109,7 @@ export const getResourcesEvaluation = async (
   cycleId: string
 ): Promise<EvaluationStats[]> => {
   const failedEvaluationsPerResourceResult = await esClient.search(
-    getResourcesEvaluationEsQuery(cycleId, 'failed', 5)
+    getResourcesEvaluationEsQuery(cycleId, RULE_FAILED, 5)
   );
 
   const failedResourcesGroup = failedEvaluationsPerResourceResult.body.aggregations
@@ -124,7 +124,7 @@ export const getResourcesEvaluation = async (
   });
 
   const passedEvaluationsPerResourceResult = await esClient.search(
-    getResourcesEvaluationEsQuery(cycleId, 'passed', 5, topFailedResources)
+    getResourcesEvaluationEsQuery(cycleId, RULE_PASSED, 5, topFailedResources)
   );
   const passedResourcesGroup = passedEvaluationsPerResourceResult.body.aggregations
     ?.group as AggregationsTermsAggregate<GroupFilename>;
@@ -132,7 +132,7 @@ export const getResourcesEvaluation = async (
     return {
       resource: e.key,
       value: e.doc_count,
-      evaluation: 'passed',
+      evaluation: RULE_PASSED,
     } as const;
   });
 
