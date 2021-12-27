@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { Main } from './main';
-export { Panel, PanelsContainer } from './split_panel';
+export { usePanelContext, PanelContextProvider } from './split_panel_context';
+export { PanelRegistry } from './split_panel_registry';

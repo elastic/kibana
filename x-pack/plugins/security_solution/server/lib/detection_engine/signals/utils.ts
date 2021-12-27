@@ -952,10 +952,10 @@ export const isMachineLearningParams = (params: RuleParams): params is MachineLe
  * Ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
  *
  * return stringified Long.MAX_VALUE if we receive Number.MAX_SAFE_INTEGER
- * @param sortIds estypes.SearchSortResults | undefined
+ * @param sortIds estypes.SortResults | undefined
  * @returns SortResults
  */
-export const getSafeSortIds = (sortIds: estypes.SearchSortResults | undefined) => {
+export const getSafeSortIds = (sortIds: estypes.SortResults | undefined) => {
   return sortIds?.map((sortId) => {
     // haven't determined when we would receive a null value for a sort id
     // but in case we do, default to sending the stringified Java max_int
