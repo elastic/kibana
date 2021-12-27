@@ -12,7 +12,7 @@ import { DatasourcePublicAPI, Operation, Datasource, FramePublicAPI } from '../t
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getFieldByNameFactory } from './pure_helpers';
 import {
@@ -156,12 +156,12 @@ const expectedIndexPatterns = {
   },
 };
 
-type IndexPatternBaseState = Omit<
+type DataViewBaseState = Omit<
   IndexPatternPrivateState,
   'indexPatternRefs' | 'indexPatterns' | 'existingFields' | 'isFirstExistenceFetch'
 >;
 
-function enrichBaseState(baseState: IndexPatternBaseState): IndexPatternPrivateState {
+function enrichBaseState(baseState: DataViewBaseState): IndexPatternPrivateState {
   return {
     currentIndexPatternId: baseState.currentIndexPatternId,
     layers: baseState.layers,
@@ -304,7 +304,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should create a table when there is a formula without aggs', async () => {
-      const queryBaseState: IndexPatternBaseState = {
+      const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -342,7 +342,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should generate an expression for an aggregated query', async () => {
-      const queryBaseState: IndexPatternBaseState = {
+      const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -492,7 +492,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should put all time fields used in date_histograms to the esaggs timeFields parameter', async () => {
-      const queryBaseState: IndexPatternBaseState = {
+      const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -538,7 +538,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should pass time shift parameter to metric agg functions', async () => {
-      const queryBaseState: IndexPatternBaseState = {
+      const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -575,7 +575,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should wrap filtered metrics in filtered metric aggregation', async () => {
-      const queryBaseState: IndexPatternBaseState = {
+      const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -705,7 +705,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should add time_scale and format function if time scale is set and supported', async () => {
-      const queryBaseState: IndexPatternBaseState = {
+      const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -788,7 +788,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should put column formatters after calculated columns', async () => {
-      const queryBaseState: IndexPatternBaseState = {
+      const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -837,7 +837,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should rename the output from esaggs when using flat query', () => {
-      const queryBaseState: IndexPatternBaseState = {
+      const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -889,7 +889,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should not put date fields used outside date_histograms to the esaggs timeFields parameter', async () => {
-      const queryBaseState: IndexPatternBaseState = {
+      const queryBaseState: DataViewBaseState = {
         currentIndexPatternId: '1',
         layers: {
           first: {
@@ -939,7 +939,7 @@ describe('IndexPattern Data Source', () => {
       });
 
       it('should collect expression references and append them', async () => {
-        const queryBaseState: IndexPatternBaseState = {
+        const queryBaseState: DataViewBaseState = {
           currentIndexPatternId: '1',
           layers: {
             first: {
@@ -974,7 +974,7 @@ describe('IndexPattern Data Source', () => {
       });
 
       it('should keep correct column mapping keys with reference columns present', async () => {
-        const queryBaseState: IndexPatternBaseState = {
+        const queryBaseState: DataViewBaseState = {
           currentIndexPatternId: '1',
           layers: {
             first: {
@@ -1012,7 +1012,7 @@ describe('IndexPattern Data Source', () => {
 
       it('should topologically sort references', () => {
         // This is a real example of count() + count()
-        const queryBaseState: IndexPatternBaseState = {
+        const queryBaseState: DataViewBaseState = {
           currentIndexPatternId: '1',
           layers: {
             first: {

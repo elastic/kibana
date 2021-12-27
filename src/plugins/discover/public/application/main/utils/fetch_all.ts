@@ -14,7 +14,7 @@ import {
   sendResetMsg,
 } from './use_saved_search_messages';
 import { updateSearchSource } from './update_search_source';
-import type { SortOrder } from '../../../services/saved_searches';
+import type { SavedSearch, SortOrder } from '../../../services/saved_searches';
 import { fetchDocuments } from './fetch_documents';
 import { fetchTotalHits } from './fetch_total_hits';
 import { fetchChart } from './fetch_chart';
@@ -34,6 +34,17 @@ import { DiscoverServices } from '../../../build_services';
 import { ReduxLikeStateContainer } from '../../../../../kibana_utils/common';
 import { DataViewType } from '../../../../../data_views/common';
 
+export interface FetchDeps {
+  abortController: AbortController;
+  appStateContainer: ReduxLikeStateContainer<AppState>;
+  data: DataPublicPluginStart;
+  initialFetchStatus: FetchStatus;
+  inspectorAdapters: Adapters;
+  savedSearch: SavedSearch;
+  searchSessionId: string;
+  services: DiscoverServices;
+  useNewFieldsApi: boolean;
+}
 /**
  * This function starts fetching all required queries in Discover. This will be the query to load the individual
  * documents, and depending on whether a chart is shown either the aggregation query to load the chart data
@@ -46,16 +57,7 @@ export function fetchAll(
   dataSubjects: SavedSearchData,
   searchSource: ISearchSource,
   reset = false,
-  fetchDeps: {
-    abortController: AbortController;
-    appStateContainer: ReduxLikeStateContainer<AppState>;
-    inspectorAdapters: Adapters;
-    data: DataPublicPluginStart;
-    initialFetchStatus: FetchStatus;
-    searchSessionId: string;
-    services: DiscoverServices;
-    useNewFieldsApi: boolean;
-  }
+  fetchDeps: FetchDeps
 ): Promise<void> {
   const { initialFetchStatus, appStateContainer, services, useNewFieldsApi, data } = fetchDeps;
 

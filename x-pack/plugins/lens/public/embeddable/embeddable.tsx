@@ -22,7 +22,7 @@ import type { PaletteOutput } from 'src/plugins/charts/public';
 import type { Start as InspectorStart } from 'src/plugins/inspector/public';
 
 import { Subscription } from 'rxjs';
-import { toExpression, Ast } from '@kbn/interpreter/common';
+import { toExpression, Ast } from '@kbn/interpreter';
 import { RenderMode } from 'src/plugins/expressions';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
