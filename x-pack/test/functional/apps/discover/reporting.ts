@@ -135,11 +135,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           updated_at?: string;
         }
 
-        const docs = Array(TEST_DOC_COUNT).map<TestDoc>((value, index) => {
-          const name = `test-${i + 1}`;
+        const docs = Array(TEST_DOC_COUNT).map<TestDoc>((_value, index) => {
+          const name = `test-${index + 1}`;
           const timestamp = moment
             .utc('2006-08-14T00:00:00')
-            .subtract(TEST_DOC_COUNT - i, 'days')
+            .subtract(TEST_DOC_COUNT - index, 'days')
             .format();
 
           if (index === 0) {
