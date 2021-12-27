@@ -131,12 +131,7 @@ export function ColorRangeItem({
   }, [isValid, localValue, value]);
 
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      gutterSize="s"
-      wrap={false}
-      data-test-subj={`lnsPalettePanel_dynamicColoring_range_row_${index}`}
-    >
+    <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
       <EuiFlexItem grow={false}>
         {!isLast ? (
           <EuiColorPicker
@@ -179,6 +174,7 @@ export function ColorRangeItem({
           placeholder={mode === 'auto' ? getPlaceholderForAutoMode(isLast) : ''}
           append={rangeType === 'percent' ? '%' : undefined}
           onBlur={onLeaveFocus}
+          data-test-subj={`lnsPalettePanel_dynamicColoring_range_value_${index}`}
           prepend={<span className="euiFormLabel">{isLast ? '\u2264' : '\u2265'}</span>}
           aria-label={i18n.translate('xpack.lens.dynamicColoring.customPalette.rangeAriaLabel', {
             defaultMessage: 'Range {index}',

@@ -120,7 +120,7 @@ export function getStopsFromColorRangesByNewInterval(
 
     return {
       color,
-      stop,
+      stop: roundValue(stop),
     };
   });
 }
@@ -252,8 +252,8 @@ export function isValidColor(colorString: string) {
   return colorString !== '' && /^#/.test(colorString) && isValidPonyfill(colorString);
 }
 
-export function roundValue(value: number) {
-  return Number((Math.floor(value * 100) / 100).toFixed(2));
+export function roundValue(value: number, fractionDigits: number = 2) {
+  return Number((Math.floor(value * 100) / 100).toFixed(fractionDigits));
 }
 
 // very simple heuristic: pick last two stops and compute a new stop based on the same distance
