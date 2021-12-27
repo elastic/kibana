@@ -15,7 +15,15 @@ import { calculateAvailability } from '../calculate_availability';
 // @ts-ignore
 import { KibanaMetric } from '../metrics';
 import { LegacyRequest } from '../../types';
-import { ElasticsearchResponse } from '../../../common/types/es';
+import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';
+
+interface KibanaDetails {
+  transport_address?: string;
+  name?: string;
+  host?: string;
+  uuid?: string;
+  status?: string;
+}
 
 interface Kibana {
   process?: {
@@ -36,13 +44,7 @@ interface Kibana {
     total?: number;
   };
   concurrent_connections?: number;
-  kibana?: {
-    transport_address?: string;
-    name?: string;
-    host?: string;
-    uuid?: string;
-    status?: string;
-  };
+  kibana?: KibanaDetails;
   availability: boolean;
 }
 
@@ -98,15 +100,15 @@ export async function getKibanas(
         'kibana_stats.requests.total',
         'kibana.stats.request.total',
         'kibana_stats.kibana.transport_address',
-        'kibana.kibana.transport_address',
+        'kibana.stats.transport_address',
         'kibana_stats.kibana.name',
-        'kibana.kibana.name',
+        'kibana.stats.name',
         'kibana_stats.kibana.host',
-        'kibana.kibana.host',
+        'kibana.stats.host.name',
         'kibana_stats.kibana.uuid',
-        'kibana.kibana.uuid',
+        'service.id',
         'kibana_stats.kibana.status',
-        'kibana.kibana.status',
+        'kibana.stats.status',
         'kibana_stats.concurrent_connections',
         'kibana.stats.concurrent_connections',
       ],
@@ -117,12 +119,25 @@ export async function getKibanas(
   const response: ElasticsearchResponse = await callWithRequest(req, 'search', params);
   const instances = response.hits?.hits ?? [];
 
-  return instances.map((hit) => {
+  const buildKibanaDetails = (hit: ElasticsearchResponseHit): KibanaDetails => {
+    const source = hit._source;
+    if (source.kibana_stats) return source.kibana_stats as KibanaDetails;
+
+    return {
+      name: source.kibana?.stats?.name,
+      host: source.kibana?.stats?.host?.name,
+      status: source.kibana?.stats?.status,
+      transport_address: source.kibana?.stats?.transport_address,
+      uuid: source.service?.id,
+    };
+  };
+
+  return instances.map((hit: ElasticsearchResponseHit) => {
     const legacyStats = hit._source.kibana_stats;
     const mbStats = hit._source.kibana?.stats;
 
     const kibana: Kibana = {
-      kibana: hit._source.kibana?.kibana ?? legacyStats?.kibana,
+      kibana: buildKibanaDetails(hit),
       concurrent_connections:
         mbStats?.concurrent_connections ?? legacyStats?.concurrent_connections,
       process: {

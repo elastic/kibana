@@ -14,11 +14,11 @@ import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
 
 export function handleResponse(resp: ElasticsearchResponse) {
-  const legacySource = resp.hits?.hits[0]?._source.kibana_stats;
-  const mbSource = resp.hits?.hits[0]?._source.kibana?.stats;
-  const kibana = resp.hits?.hits[0]?._source.kibana?.kibana ?? legacySource?.kibana;
-  const availabilityTimestamp =
-    resp.hits?.hits[0]?._source['@timestamp'] ?? legacySource?.timestamp;
+  const hit = resp.hits?.hits[0];
+  const legacySource = hit?._source.kibana_stats;
+  const mbSource = hit?._source.kibana?.stats;
+  const kibana = mbSource ?? legacySource?.kibana;
+  const availabilityTimestamp = hit?._source['@timestamp'] ?? legacySource?.timestamp;
   if (!availabilityTimestamp) {
     throw new MissingRequiredError('timestamp');
   }
@@ -26,6 +26,7 @@ export function handleResponse(resp: ElasticsearchResponse) {
     availability: calculateAvailability(availabilityTimestamp),
     os_memory_free: mbSource?.os?.memory?.free_in_bytes ?? legacySource?.os?.memory?.free_in_bytes,
     uptime: mbSource?.process?.uptime?.ms ?? legacySource?.process?.uptime_in_millis,
+    version: hit?._source.service?.version ?? legacySource?.kibana?.version,
   });
 }
 
@@ -42,13 +43,14 @@ export function getKibanaInfo(
     ignore_unavailable: true,
     filter_path: [
       'hits.hits._source.kibana_stats.kibana',
-      'hits.hits._source.kibana.kibana',
+      'hits.hits._source.kibana.stats',
       'hits.hits._source.kibana_stats.os.memory.free_in_bytes',
       'hits.hits._source.kibana.stats.os.memory.free_in_bytes',
       'hits.hits._source.kibana_stats.process.uptime_in_millis',
       'hits.hits._source.kibana.stats.process.uptime.ms',
       'hits.hits._source.kibana_stats.timestamp',
       'hits.hits._source.@timestamp',
+      'hits.hits._source.service.version',
     ],
     body: {
       query: {
