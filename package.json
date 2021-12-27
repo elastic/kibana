@@ -86,6 +86,7 @@
     "**/istanbul-lib-coverage": "^3.2.0",
     "**/json-schema": "^0.4.0",
     "**/minimist": "^1.2.5",
+    "**/node-jose": "^1.1.4",
     "**/node-jose/node-forge": "^0.10.0",
     "**/pdfkit/crypto-js": "4.0.0",
     "**/react-syntax-highlighter": "^15.3.1",
