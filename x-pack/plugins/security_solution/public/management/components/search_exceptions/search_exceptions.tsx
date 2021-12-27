@@ -20,7 +20,7 @@ export interface SearchExceptionsProps {
   defaultExcludedPolicies?: string;
   defaultIncludedPolicies?: string;
   hideRefreshButton?: boolean;
-  onSearch(query: string, includedPolicies?: string, excludedPolicies?: string): void;
+  onSearch(query: string, includedPolicies?: string): void;
 }
 
 export const SearchExceptions = memo<SearchExceptionsProps>(
@@ -37,7 +37,6 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
     const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const [query, setQuery] = useState<string>(defaultValue);
     const [includedPolicies, setIncludedPolicies] = useState<string>(defaultIncludedPolicies || '');
-    const [excludedPolicies, setExcludedPolicies] = useState<string>(defaultExcludedPolicies || '');
 
     const onChangeSelection = useCallback(
       (items: PolicySelectionItem[]) => {
@@ -45,15 +44,10 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
           .filter((item) => item.checked === 'on')
           .map((item) => item.id)
           .join(',');
-        const excludePoliciesNew = items
-          .filter((item) => item.checked === 'off')
-          .map((item) => item.id)
-          .join(',');
 
         setIncludedPolicies(includePoliciesNew);
-        setExcludedPolicies(excludePoliciesNew);
 
-        onSearch(query, includePoliciesNew, excludePoliciesNew);
+        onSearch(query, includePoliciesNew);
       },
       [onSearch, query]
     );
@@ -63,15 +57,15 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
       [setQuery]
     );
     const handleOnSearch = useCallback(
-      () => onSearch(query, includedPolicies, excludedPolicies),
-      [onSearch, query, includedPolicies, excludedPolicies]
+      () => onSearch(query, includedPolicies),
+      [onSearch, query, includedPolicies]
     );
 
     const handleOnSearchQuery = useCallback(
       (value) => {
-        onSearch(value, includedPolicies, excludedPolicies);
+        onSearch(value, includedPolicies);
       },
-      [onSearch, includedPolicies, excludedPolicies]
+      [onSearch, includedPolicies]
     );
 
     return (
