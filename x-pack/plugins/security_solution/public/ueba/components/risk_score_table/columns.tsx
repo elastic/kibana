@@ -15,10 +15,7 @@ import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { UebaDetailsLink } from '../../../common/components/links';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
-import {
-  AddFilterToGlobalSearchBar,
-  createFilter,
-} from '../../../common/components/add_filter_to_global_search_bar';
+import { DefaultDraggable } from '../../../common/components/draggables';
 import { RiskScoreColumns } from './';
 
 import * as i18n from './translations';
@@ -68,9 +65,14 @@ export const getRiskScoreColumns = (): RiskScoreColumns => [
     render: (riskKeyword) => {
       if (riskKeyword != null) {
         return (
-          <AddFilterToGlobalSearchBar filter={createFilter('risk.keyword', riskKeyword)}>
-            <>{riskKeyword}</>
-          </AddFilterToGlobalSearchBar>
+          <DefaultDraggable
+            id={`risk-score-table-draggable-risk.keyword-${riskKeyword}`}
+            isDraggable={false}
+            field={'risk.keyword'}
+            value={riskKeyword}
+            hideTopN={true}
+            tooltipContent={null}
+          />
         );
       }
       return getEmptyTagValue();

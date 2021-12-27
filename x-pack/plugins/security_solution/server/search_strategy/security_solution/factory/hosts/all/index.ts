@@ -62,7 +62,7 @@ export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
     };
     const showMorePagesIndicator = totalCount > fakeTotalCount;
 
-    const hostNames = buckets.map(getOr('', 'key'));
+    const hostNames = edges.map((edge) => getOr('', 'node.host.name[0]', edge));
 
     const enhancedEdges =
       deps?.spaceId && deps?.endpointContext.experimentalFeatures.riskyHostsEnabled

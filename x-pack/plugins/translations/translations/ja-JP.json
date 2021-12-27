@@ -20968,8 +20968,6 @@
     "xpack.security.users.editUserPage.createBreadcrumb": "作成",
     "xpack.securitySolution.accessibility.tooltipWithKeyboardShortcut.pressTooltipLabel": "プレス",
     "xpack.securitySolution.actionsContextMenu.label": "開く",
-    "xpack.securitySolution.add_filter_to_global_search_bar.filterForValueHoverAction": "値でフィルター",
-    "xpack.securitySolution.add_filter_to_global_search_bar.filterOutValueHoverAction": "値を除外",
     "xpack.securitySolution.administration.list.beta": "ベータ",
     "xpack.securitySolution.administration.os.linux": "Linux",
     "xpack.securitySolution.administration.os.macos": "Mac",
