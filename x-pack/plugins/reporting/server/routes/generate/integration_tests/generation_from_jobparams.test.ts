@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import rison from 'rison-node';
 import { UnwrapPromise } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { of } from 'rxjs';
 import { ElasticsearchClient } from 'kibana/server';
+import rison from 'rison-node';
+import { of } from 'rxjs';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
-import { ReportingCore } from '../..';
-import { ExportTypesRegistry } from '../../lib/export_types_registry';
-import { createMockLevelLogger, createMockReportingCore } from '../../test_helpers';
+import { ReportingCore } from '../../../';
+import { ExportTypesRegistry } from '../../../lib/export_types_registry';
+import { createMockLevelLogger, createMockReportingCore } from '../../../test_helpers';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
-} from '../../test_helpers/create_mock_reportingplugin';
-import type { ReportingRequestHandlerContext } from '../../types';
-import { registerJobGenerationRoutes } from './generate_from_jobparams';
+} from '../../../test_helpers/create_mock_reportingplugin';
+import type { ReportingRequestHandlerContext } from '../../../types';
+import { registerJobGenerationRoutes } from '../generate_from_jobparams';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
