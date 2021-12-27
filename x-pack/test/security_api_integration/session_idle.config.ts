@@ -41,13 +41,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.security.session.idleTimeout=5s',
-        '--xpack.security.session.cleanupInterval=10s',
+        '--xpack.security.session.idleTimeout=10s',
+        '--xpack.security.session.cleanupInterval=20s',
         `--xpack.security.authc.providers=${JSON.stringify({
           basic: { basic1: { order: 0 } },
           saml: {
             saml_fallback: { order: 1, realm: 'saml1' },
-            saml_override: { order: 2, realm: 'saml1', session: { idleTimeout: '1m' } },
+            saml_override: { order: 2, realm: 'saml1', session: { idleTimeout: '2m' } },
             saml_disable: { order: 3, realm: 'saml1', session: { idleTimeout: 0 } },
           },
         })}`,
