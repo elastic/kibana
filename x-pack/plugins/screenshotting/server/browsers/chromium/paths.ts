@@ -7,6 +7,13 @@
 
 import path from 'path';
 
+enum BaseUrl {
+  // see https://www.chromium.org/getting-involved/download-chromium
+  common = 'https://commondatastorage.googleapis.com/chromium-browser-snapshots',
+  // A GCS bucket under the Kibana team
+  custom = 'https://storage.googleapis.com/headless_shell',
+}
+
 interface PackageInfo {
   platform: 'linux' | 'darwin' | 'win32';
   architecture: 'x64' | 'arm64';
@@ -15,13 +22,7 @@ interface PackageInfo {
   binaryChecksum: string;
   binaryRelativePath: string;
   revision: 901912 | 901913;
-}
-
-enum BaseUrl {
-  // see https://www.chromium.org/getting-involved/download-chromium
-  common = 'https://commondatastorage.googleapis.com/chromium-browser-snapshots',
-  // A GCS bucket under the Kibana team
-  custom = 'https://storage.googleapis.com/headless_shell',
+  bundled: boolean;
 }
 
 interface CustomPackageInfo extends PackageInfo {
@@ -44,6 +45,7 @@ export class ChromiumArchivePaths {
       location: 'common',
       archivePath: 'Mac',
       revision: 901912,
+      bundled: false,
     },
     {
       platform: 'darwin',
@@ -55,6 +57,7 @@ export class ChromiumArchivePaths {
       location: 'common',
       archivePath: 'Mac_Arm',
       revision: 901913, // NOTE: 901912 is not available
+      bundled: false,
     },
     {
       platform: 'linux',
@@ -65,6 +68,7 @@ export class ChromiumArchivePaths {
       binaryRelativePath: 'headless_shell-linux_x64/headless_shell',
       location: 'custom',
       revision: 901912,
+      bundled: true,
     },
     {
       platform: 'linux',
@@ -75,6 +79,7 @@ export class ChromiumArchivePaths {
       binaryRelativePath: 'headless_shell-linux_arm64/headless_shell',
       location: 'custom',
       revision: 901912,
+      bundled: true,
     },
     {
       platform: 'win32',
@@ -86,6 +91,7 @@ export class ChromiumArchivePaths {
       location: 'common',
       archivePath: 'Win',
       revision: 901912,
+      bundled: true,
     },
   ];
 
