@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -uo pipefail
+set -euo pipefail
 
 KIBANA_DIR=$(pwd)
 export KIBANA_DIR
@@ -17,7 +17,6 @@ export CODE_COVERAGE=1
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/build_kibana_plugins.sh
 
-export CI="false"
 export DEBUG="code-coverage"
 
 export JOB=kibana-osquery-cypress
@@ -29,6 +28,3 @@ cd x-pack
 node scripts/functional_tests \
   --debug --bail \
   --config test/osquery_cypress/cli_config.ts
-
-ls -a plugins/osquery
-ls -a plugins/osquery/cypress
