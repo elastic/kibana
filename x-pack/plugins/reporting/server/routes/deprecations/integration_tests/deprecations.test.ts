@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { UnwrapPromise } from '@kbn/utility-types';
 import { of } from 'rxjs';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
@@ -19,7 +18,7 @@ import {
 } from '../../../test_helpers';
 import { registerDeprecationsRoutes } from '../deprecations';
 
-type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
 describe(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
   jest.setTimeout(6000);
