@@ -16,6 +16,7 @@ describe('Add Integration', () => {
   before(() => {
     login();
     navigateTo('/app/osquery');
+    cy.window().its('__coverage__').should('be.a', 'object');
   });
 
   it('should display Osquery integration in the Policies list once installed ', () => {
