@@ -20,5 +20,4 @@ cd "$XPACK_DIR"
 
 node scripts/functional_tests \
   --debug --bail \
-
   --config test/osquery_cypress/cli_config.ts
