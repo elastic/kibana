@@ -42,6 +42,32 @@ describe('Event Logger', () => {
         "log": Object {
           "logger": "reporting",
         },
+        "user": undefined,
+      }
+    `);
+  });
+
+  it(`allows optional user name`, () => {
+    const logger = new factory({ ...mockEventObject, user: { name: 'thundercat' } });
+    expect(logger.eventObj).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "id": "12348",
+          "provider": "reporting",
+          "timezone": "UTC",
+        },
+        "kibana": Object {
+          "reporting": Object {
+            "contentType": "text/csv",
+            "jobType": "csv",
+          },
+        },
+        "log": Object {
+          "logger": "reporting",
+        },
+        "user": Object {
+          "name": "thundercat",
+        },
       }
     `);
   });

@@ -17,6 +17,7 @@ import { ErrorAction, ExecuteComplete, ExecuteError, ExecuteStart } from './type
 export interface ReportingEventLoggerOpts {
   event: Pick<ExecuteStart['event'], 'id' | 'timezone'>;
   kibana: Pick<ExecuteStart['kibana'], 'reporting'>;
+  user?: ExecuteStart['user'];
 }
 
 export function reportingEventLoggerFactory(eventLog: IEventLogService) {
@@ -31,6 +32,7 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
       };
       kibana: { reporting: ExecuteStart['kibana']['reporting'] };
       log: { logger: 'reporting' };
+      user?: { name: string };
     };
 
     completionLogger: IEventLogger;
@@ -40,6 +42,7 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
         event: { provider: 'reporting', ...eventObj.event },
         kibana: { ...eventObj.kibana },
         log: { logger: 'reporting' },
+        user: eventObj.user,
       };
 
       // create a "complete" logger that will use EventLog helpers to calculate timings

@@ -81,6 +81,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
               contentType: 'text/csv',
             },
           },
+          ...(user && { name: user.username }),
         });
 
         eventLog.logStart('starting csv generation');
