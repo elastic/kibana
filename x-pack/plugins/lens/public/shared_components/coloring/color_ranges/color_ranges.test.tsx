@@ -5,14 +5,42 @@
  * 2.0.
  */
 
-import { EuiColorPicker } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test/jest';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ColorRanges, ColorRangesProps } from './color_ranges';
+import { ReactWrapper } from 'enzyme';
+import type { ColorRangesItemProps } from './color_ranges_item';
 
-describe('Color Ranges component', () => {
+const colorRangeItemExtractProps = (component: ReactWrapper) => {
+  const props = component.props() as ColorRangesItemProps;
+
+  return {
+    index: props.index,
+    accessor: props.accessor,
+    isValid: props.isValid,
+    colorRange: props.colorRange,
+  };
+};
+
+const extraActionSelectors = {
+  addColorRange: '[data-test-subj^="lnsPalettePanel_dynamicColoring_addColorRange"]',
+  reverseColors: '[data-test-subj^="lnsPalettePanel_dynamicColoring_reverseColors"]',
+  distributeEqually: '[data-test-subj="lnsPalettePanel_dynamicColoring_distributeEqually"]',
+};
+
+const pageObjects = {
+  getAddColorRangeButton: (component: ReactWrapper) =>
+    component.find(extraActionSelectors.addColorRange).first(),
+  reverseColors: (component: ReactWrapper) =>
+    component.find(extraActionSelectors.reverseColors).first(),
+  distributeEqually: (component: ReactWrapper) =>
+    component.find(extraActionSelectors.distributeEqually).first(),
+};
+
+describe('Color Ranges', () => {
   let props: ColorRangesProps;
+
   beforeEach(() => {
     props = {
       colorRanges: [
@@ -22,14 +50,17 @@ describe('Color Ranges component', () => {
       ],
       paletteConfiguration: {
         rangeType: 'number',
+        continuity: 'none',
       },
       dataBounds: { min: 0, max: 200 },
       onChange: jest.fn(),
     };
   });
+
   it('should display all the color ranges passed', () => {
     const component = mountWithIntl(<ColorRanges {...props} />);
-    expect(component.find('input[data-test-subj^="dynamicColoring_range_value_"]')).toHaveLength(4);
+
+    expect(component.find('ColorRangeItem')).toHaveLength(4);
   });
 
   it('should disable "add new" button if there is maxStops configured', () => {
@@ -40,157 +71,40 @@ describe('Color Ranges component', () => {
       { color: '#ccc', start: 80, end: 90 },
       { color: '#ccc', start: 90, end: 100 },
     ];
-    const component = mountWithIntl(<ColorRanges {...props} />);
-    const componentWithMaxSteps = mountWithIntl(
+    const component = mountWithIntl(
       <ColorRanges {...props} paletteConfiguration={{ maxSteps: 5 }} />
     );
-    expect(
-      component.find('[data-test-subj="dynamicColoring_addColorRange"]').first().prop('disabled')
-    ).toBe(false);
 
-    expect(
-      componentWithMaxSteps
-        .find('[data-test-subj="dynamicColoring_addColorRange"]')
-        .first()
-        .prop('disabled')
-    ).toBe(true);
+    expect(pageObjects.getAddColorRangeButton(component).prop('disabled')).toBe(true);
   });
 
   it('should add a new range with default color and reasonable distance from last one', () => {
-    let component = mountWithIntl(<ColorRanges {...props} />);
-    const addStopButton = component
-      .find('[data-test-subj="dynamicColoring_addColorRange"]')
-      .first();
-    act(() => {
-      addStopButton.simulate('click');
-    });
-    component = component.update();
+    const component = mountWithIntl(<ColorRanges {...props} />);
 
-    expect(component.find('input[data-test-subj^="dynamicColoring_range_value_"]')).toHaveLength(5);
-    expect(
-      component.find('input[data-test-subj="dynamicColoring_range_value_3"]').prop('value')
-    ).toBe(80); // 60-40 + 60
-    expect(
-      component
-        // workaround for https://github.com/elastic/eui/issues/4792
-        .find('[data-test-subj="dynamicColoring_range_color_3"]')
-        .last() // pick the inner element
-        .childAt(0)
-        .prop('color')
-    ).toBe('#ccc'); // pick previous color
-  });
+    act(() => {
+      pageObjects.getAddColorRangeButton(component).simulate('click');
+    });
 
-  it('should restore previous color when abandoning the field with an empty color', () => {
-    let component = mountWithIntl(<ColorRanges {...props} />);
-    expect(
-      component
-        .find('[data-test-subj="dynamicColoring_range_row_0"]')
-        .first()
-        .find(EuiColorPicker)
-        .first()
-        .prop('color')
-    ).toBe('#aaa');
-    act(() => {
-      component
-        .find('[data-test-subj="dynamicColoring_range_row_0"]')
-        .first()
-        .find(EuiColorPicker)
-        .first()
-        .prop('onChange')!('', {
-        rgba: [NaN, NaN, NaN, NaN],
-        hex: '',
-        isValid: false,
-      });
-    });
-    component = component.update();
-    expect(
-      component
-        .find('[data-test-subj="dynamicColoring_range_row_0"]')
-        .first()
-        .find(EuiColorPicker)
-        .first()
-        .prop('color')
-    ).toBe('');
-    act(() => {
-      component.find('[data-test-subj="dynamicColoring_range_color_0"]').first().simulate('blur');
-    });
-    component = component.update();
-    expect(
-      component
-        .find('[data-test-subj="dynamicColoring_range_row_0"]')
-        .first()
-        .find(EuiColorPicker)
-        .first()
-        .prop('color')
-    ).toBe('#aaa');
+    component.update();
+
+    expect(component.find('ColorRangeItem').map(colorRangeItemExtractProps)).toMatchSnapshot();
   });
 
   it('should sort ranges value on whole component blur', () => {
-    let component = mountWithIntl(<ColorRanges {...props} />);
-    let firstValueInput = component.find(
-      '[data-test-subj="dynamicColoring_range_value_0"] input[type="number"]'
-    );
+    const component = mountWithIntl(<ColorRanges {...props} />);
+    const firstInput = component.find('ColorRangeItem').first().find('input').first();
 
     act(() => {
-      firstValueInput.simulate('change', { target: { value: ' 90' } });
+      firstInput.simulate('change', { target: { value: ' 65' } });
     });
+
     act(() => {
-      component.find('[data-test-subj="dynamicColoring_range_row_0"]').first().simulate('blur');
+      firstInput.simulate('blur');
     });
-    component = component.update();
 
-    // retrieve again the input
-    firstValueInput = component.find(
-      '[data-test-subj="dynamicColoring_range_value_0"] input[type="number"]'
-    );
-    expect(firstValueInput.prop('value')).toBe(40);
-    // the previous one move at the bottom
-    expect(
-      component
-        .find('[data-test-subj="dynamicColoring_range_value_3"] input[type="number"]')
-        .prop('value')
-    ).toBe(90);
-  });
+    component.update();
 
-  it('should show current max/min value when user use auto detect min/max value', () => {
-    let component = mountWithIntl(<ColorRanges {...props} />);
-
-    let firstValue = component.find(
-      '[data-test-subj="dynamicColoring_range_value_0"] input[type="number"]'
-    );
-
-    expect(firstValue.prop('value')).toBe(20);
-
-    const addDetectMinValueButton = component
-      .find('[data-test-subj="dynamicColoring_autoDetect_minimum"]')
-      .first();
-    act(() => {
-      addDetectMinValueButton.simulate('click');
-    });
-    component = component.update();
-    firstValue = component.find(
-      '[data-test-subj="dynamicColoring_range_value_0"] input[type="number"]'
-    );
-
-    expect(firstValue.prop('value')).toBe(0);
-
-    let lastValueInput = component.find(
-      '[data-test-subj="dynamicColoring_range_value_3"] input[type="number"]'
-    );
-    expect(lastValueInput.prop('value')).toBe(80);
-
-    const addDetectMaxValueButton = component
-      .find('[data-test-subj="dynamicColoring_autoDetect_maximum"]')
-      .first();
-    act(() => {
-      addDetectMaxValueButton.simulate('click');
-    });
-    component = component.update();
-    lastValueInput = component.find(
-      '[data-test-subj="dynamicColoring_range_value_3"] input[type="number"]'
-    );
-
-    expect(lastValueInput.prop('value')).toBe(200);
+    expect(component.find('ColorRangeItem').map(colorRangeItemExtractProps)).toMatchSnapshot();
   });
 
   it('should reverse colors when user click "reverse"', () => {
@@ -200,59 +114,33 @@ describe('Color Ranges component', () => {
       { color: '#ccc', start: 60, end: 90 },
       { color: '#ddd', start: 90, end: 130 },
     ];
-    let component = mountWithIntl(<ColorRanges {...props} />);
+    const component = mountWithIntl(<ColorRanges {...props} />);
 
-    const reverseColorsButton = component
-      .find('[data-test-subj="dynamicColoring_reverseColors"]')
-      .first();
     act(() => {
-      reverseColorsButton.simulate('click');
-    });
-    component = component.update();
-    const colors: string[] = [];
-
-    const ranges = component.find('div[data-test-subj^="dynamicColoring_range_color_"]');
-
-    ranges.map((range) => {
-      if (range.find(EuiColorPicker).length) {
-        colors.push(range.find(EuiColorPicker).first().prop('color') as string);
-      }
+      pageObjects.reverseColors(component).simulate('click');
     });
 
-    expect(colors).toStrictEqual(['#ddd', '#ccc', '#bbb', '#aaa']);
+    component.update();
+
+    expect(component.find('EuiColorPicker').map((item) => item.prop('color'))).toMatchSnapshot();
   });
 
   it('should distribute equally ranges when use click on "Distribute equally" button', () => {
     props.colorRanges = [
-      { color: '#aaa', start: 10, end: 40 },
-      { color: '#bbb', start: 40, end: 60 },
-      { color: '#ccc', start: 60, end: 130 },
+      { color: '#aaa', start: 0, end: 2 },
+      { color: '#bbb', start: 3, end: 4 },
+      { color: '#ccc', start: 5, end: 6 },
+      { color: '#ccc', start: 7, end: 8 },
     ];
-    let component = mountWithIntl(<ColorRanges {...props} />);
 
-    let values: number[] = [];
+    const component = mountWithIntl(<ColorRanges {...props} />);
 
-    let ranges = component.find('input[data-test-subj^="dynamicColoring_range_value_"]');
-    ranges.map((range) => {
-      values.push(range.prop('value') as number);
-    });
-
-    expect(values).toStrictEqual([10, 40, 60, 130]);
-
-    const distributeEquallyButton = component
-      .find('[data-test-subj="dynamicColoring_distributeEqually"]')
-      .first();
     act(() => {
-      distributeEquallyButton.simulate('click');
+      pageObjects.distributeEqually(component).simulate('click');
     });
-    component = component.update();
 
-    values = [];
+    component.update();
 
-    ranges = component.find('input[data-test-subj^="dynamicColoring_range_value_"]');
-    ranges.map((range) => {
-      values.push(range.prop('value') as number);
-    });
-    expect(values).toStrictEqual([10, 50, 90, 130]);
+    expect(component.find('ColorRangeItem').map(colorRangeItemExtractProps)).toMatchSnapshot();
   });
 });

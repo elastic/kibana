@@ -238,7 +238,6 @@ export function CustomizablePalette({
           paletteConfiguration={activePalette?.params}
           colorRanges={colorRangesToShow}
           dataBounds={dataBounds}
-          data-test-prefix="lnsPalettePanel"
           onChange={onChangeColorRanges}
         />
       </EuiFormRow>

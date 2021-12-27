@@ -272,7 +272,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     const smattering = 0.00000001;
     const endValue =
       (paletteParams?.range === 'number' ? paletteParams.rangeMax : max) + smattering;
-    
+
     const overwriteColors = uiState?.get('vis.colors') ?? null;
 
     const bands = ranges.map((start, index, array) => {

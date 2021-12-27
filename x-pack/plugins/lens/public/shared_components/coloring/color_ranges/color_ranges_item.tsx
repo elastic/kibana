@@ -135,7 +135,7 @@ export function ColorRangeItem({
       alignItems="center"
       gutterSize="s"
       wrap={false}
-      data-test-subj={`dynamicColoring_range_row_${index}`}
+      data-test-subj={`lnsPalettePanel_dynamicColoring_range_row_${index}`}
     >
       <EuiFlexItem grow={false}>
         {!isLast ? (
@@ -173,7 +173,6 @@ export function ColorRangeItem({
           compressed
           fullWidth={true}
           isInvalid={!isValid}
-          data-test-subj={`dynamicColoring_range_value_${localValue}`}
           value={mode !== 'auto' ? localValue : ''}
           disabled={isDisabled}
           onChange={onValueChange}

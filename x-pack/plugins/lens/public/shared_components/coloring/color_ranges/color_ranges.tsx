@@ -99,14 +99,13 @@ export function ColorRanges({
 
   return (
     <EuiFlexGroup
-      data-test-subj={`dynamicColoring_custom_color_ranges`}
+      data-test-subj={`lnsPalettePanel_dynamicColoring_custom_color_ranges`}
       direction="column"
       gutterSize="s"
     >
       {localState.colorRanges.map((colorRange, index) => (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} key={`${colorRange.end ?? 0 + colorRange.start ?? 0}${index}`}>
           <ColorRangeItem
-            key={`${colorRange.end ?? 0 + colorRange.start ?? 0}${index}`}
             colorRange={colorRange}
             dispatch={dispatch}
             colorRanges={localState.colorRanges}

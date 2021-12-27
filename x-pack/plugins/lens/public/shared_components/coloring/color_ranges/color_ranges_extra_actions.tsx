@@ -59,7 +59,7 @@ export function ColorRangesExtraActions({
           delay="regular"
         >
           <EuiButtonEmpty
-            data-test-subj={`dynamicColoring_addColorRange`}
+            data-test-subj={`lnsPalettePanel_dynamicColoring_addColorRange`}
             iconType="plusInCircle"
             color="primary"
             aria-label={i18n.translate(
@@ -82,7 +82,7 @@ export function ColorRangesExtraActions({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          data-test-subj={`dynamicColoring_reverseColors`}
+          data-test-subj={`lnsPalettePanel_dynamicColoring_reverseColors`}
           iconType="sortable"
           color="primary"
           aria-label={i18n.translate('xpack.lens.dynamicColoring.customPaletteAriaLabel', {
@@ -101,7 +101,7 @@ export function ColorRangesExtraActions({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          data-test-subj={`dynamicColoring_distributeEqually`}
+          data-test-subj={`lnsPalettePanel_dynamicColoring_distributeEqually`}
           iconType={DistributeEquallyIcon}
           color="primary"
           aria-label={i18n.translate(

@@ -58,7 +58,7 @@ export function ColorRangeDeleteButton({ index, dispatch }: ColorRangesItemButto
       aria-label={title}
       title={title}
       onClick={onExecuteAction}
-      data-test-subj={`dynamicColoring_removeColorRange_${index}`}
+      data-test-subj={`lnsPalettePanel_dynamicColoring_removeColorRange_${index}`}
     />
   );
 }
@@ -92,7 +92,7 @@ export function ColorRangeEditButton({
       aria-label={title}
       title={title}
       onClick={onExecuteAction}
-      data-test-subj={`dynamicColoring_editValue_${index}`}
+      data-test-subj={`lnsPalettePanel_dynamicColoring_editValue_${index}`}
     />
   );
 }
@@ -134,7 +134,9 @@ export function ColorRangeAutoDetectButton({
       aria-label={title}
       title={title}
       onClick={onExecuteAction}
-      data-test-subj={`dynamicColoring_autoDetect_${isLast ? 'maximum' : 'minimum'}`}
+      data-test-subj={`lnsPalettePanel_dynamicColoring_autoDetect_${
+        isLast ? 'maximum' : 'minimum'
+      }`}
     />
   );
 }
