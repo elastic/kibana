@@ -22,7 +22,7 @@ import {
   expectTextsInDocument,
   expectTextsNotInDocument,
 } from '../../../../../utils/test_helpers';
-import * as saveCustomLink from './create_edit_custom_link_flyout/save_custom_link';
+import * as saveCustomLink from './create_edit_custom_link_flyout/saveCustomLink';
 
 const data = {
   customLinks: [

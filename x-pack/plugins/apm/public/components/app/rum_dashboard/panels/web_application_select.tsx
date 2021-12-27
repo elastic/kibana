@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ServiceNameFilter } from '../url_filter/service_name_filter';
+import { ServiceNameFilter } from '../url_filter/ServiceNameFilter';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { RUM_AGENT_NAMES } from '../../../../../common/agent_name';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
