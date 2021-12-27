@@ -51,7 +51,7 @@ import { SetupGuide } from './views/setup_guide';
 export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
   const { errorConnecting } = useValues(HttpLogic);
-  const { enterpriseSearchVersion, kibanaVersion, errorConnectingMessage } = props;
+  const { enterpriseSearchVersion, kibanaVersion } = props;
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
 
   if (!config.host) {
@@ -64,7 +64,7 @@ export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
       />
     );
   } else if (errorConnecting) {
-    return <ErrorState errorConnectingMessage={errorConnectingMessage} />;
+    return <ErrorState />;
   }
 
   return <WorkplaceSearchConfigured {...props} />;

@@ -57,11 +57,10 @@ describe('AppSearch', () => {
 
   it('renders ErrorConnecting when Enterprise Search is unavailable', () => {
     setMockValues({ errorConnecting: true });
-    const wrapper = shallow(<AppSearch errorConnectingMessage="I am an error" />);
+    const wrapper = shallow(<AppSearch />);
 
     const errorConnection = wrapper.find(ErrorConnecting);
     expect(errorConnection).toHaveLength(1);
-    expect(errorConnection.prop('errorConnectingMessage')).toEqual('I am an error');
   });
 
   it('renders AppSearchConfigured when config.host is set & available', () => {

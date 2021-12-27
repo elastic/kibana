@@ -26,7 +26,6 @@ export const EnterpriseSearch: React.FC<InitialAppData> = ({
   workplaceSearch,
   enterpriseSearchVersion,
   kibanaVersion,
-  errorConnectingMessage,
 }) => {
   const { errorConnecting } = useValues(HttpLogic);
   const { config } = useValues(KibanaLogic);
@@ -46,7 +45,7 @@ export const EnterpriseSearch: React.FC<InitialAppData> = ({
         />
       );
     } else if (showErrorConnecting) {
-      return <ErrorConnecting errorConnectingMessage={errorConnectingMessage} />;
+      return <ErrorConnecting />;
     }
 
     return <ProductSelector isWorkplaceSearchAdmin={isWorkplaceSearchAdmin} access={access} />;
