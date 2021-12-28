@@ -16,4 +16,7 @@ module.exports = {
   webpackFinal: (config) => {
     return webpackConfig({ config });
   },
+  config: (entry) => {
+    return [...entry, require.resolve('./target_node/lib/decorators')];
+  },
 };
