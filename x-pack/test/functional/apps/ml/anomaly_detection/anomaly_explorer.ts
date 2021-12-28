@@ -63,7 +63,8 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const elasticChart = getService('elasticChart');
 
-  describe('anomaly explorer', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/118584
+  describe.skip('anomaly explorer', function () {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
