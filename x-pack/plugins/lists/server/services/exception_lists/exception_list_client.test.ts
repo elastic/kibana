@@ -52,36 +52,36 @@ describe('exception_list_client', () => {
       extensionPointStorageContext = createExtensionPointStorageMock();
     });
 
-    describe('when execution of server extensions are enabled', () => {
-      // Test client methods that use the `pipeRun()` method of the ExtensionPointStorageClient`
-      describe.each([
-        [
-          'createExceptionListItem',
-          (): ExceptionListClient['createExceptionListItem'] => {
-            return exceptionListClient.createExceptionListItem.bind(exceptionListClient);
-          },
-          (): Parameters<ExceptionListClient['createExceptionListItem']>[0] => {
-            return getCreateExceptionListItemOptionsMock();
-          },
-          (): ExtensionPointStorageContextMock['exceptionPreCreateCallback'] => {
-            return extensionPointStorageContext.exceptionPreCreateCallback;
-          },
-        ],
-        [
-          'updateExceptionListItem',
-          (): ExceptionListClient['updateExceptionListItem'] => {
-            return exceptionListClient.updateExceptionListItem.bind(exceptionListClient);
-          },
-          (): Parameters<ExceptionListClient['updateExceptionListItem']>[0] => {
-            return getUpdateExceptionListItemOptionsMock();
-          },
-          (): ExtensionPointStorageContextMock['exceptionPreUpdateCallback'] => {
-            return extensionPointStorageContext.exceptionPreUpdateCallback;
-          },
-        ],
-      ])(
-        'and executing `ExceptionListClient#%s()`',
-        (methodName, getExceptionListClientMethod, getMethodParams, getExtensionPointCallback) => {
+    // Test client methods that use the `pipeRun()` method of the ExtensionPointStorageClient`
+    describe.each([
+      [
+        'createExceptionListItem',
+        (): ExceptionListClient['createExceptionListItem'] => {
+          return exceptionListClient.createExceptionListItem.bind(exceptionListClient);
+        },
+        (): Parameters<ExceptionListClient['createExceptionListItem']>[0] => {
+          return getCreateExceptionListItemOptionsMock();
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreCreateCallback'] => {
+          return extensionPointStorageContext.exceptionPreCreateCallback;
+        },
+      ],
+      [
+        'updateExceptionListItem',
+        (): ExceptionListClient['updateExceptionListItem'] => {
+          return exceptionListClient.updateExceptionListItem.bind(exceptionListClient);
+        },
+        (): Parameters<ExceptionListClient['updateExceptionListItem']>[0] => {
+          return getUpdateExceptionListItemOptionsMock();
+        },
+        (): ExtensionPointStorageContextMock['exceptionPreUpdateCallback'] => {
+          return extensionPointStorageContext.exceptionPreUpdateCallback;
+        },
+      ],
+    ])(
+      'and calling `ExceptionListClient#%s()`',
+      (methodName, getExceptionListClientMethod, getMethodParams, getExtensionPointCallback) => {
+        describe('and server extension points are enabled', () => {
           beforeEach(() => {
             exceptionListClient = new ExceptionListClient({
               disableServerExtensionPoints: false,
@@ -126,12 +126,27 @@ describe('exception_list_client', () => {
               })
             );
           });
-        }
-      );
-    });
+        });
 
-    describe('when server extension are disabled', () => {
-      //
-    });
+        describe('and server extension points are DISABLED', () => {
+          beforeEach(() => {
+            exceptionListClient = new ExceptionListClient({
+              disableServerExtensionPoints: true,
+              savedObjectsClient: getExceptionListSavedObjectClientMock(),
+              serverExtensionsClient:
+                extensionPointStorageContext.extensionPointStorage.getClient(),
+              user: 'elastic',
+            });
+          });
+
+          it('should NOT call server extension points', async () => {
+            // @ts-expect-error
+            await getExceptionListClientMethod()(getMethodParams());
+
+            expect(getExtensionPointCallback()).not.toHaveBeenCalled();
+          });
+        });
+      }
+    );
   });
 });
