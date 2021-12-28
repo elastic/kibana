@@ -105,7 +105,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   ]);
   const [columns, setColumns] = useState<EuiDataGridColumn[]>([]);
 
-  const { data: allResultsData, isFetched } = useAllResults({
+  const {
+    data: allResultsData,
+    isFetched,
+    isLoading,
+  } = useAllResults({
     actionId,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
@@ -344,7 +348,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     );
   }
 
-  if (!isFetched) {
+  if (isLoading) {
     return <EuiLoadingContent lines={5} />;
   }
 
