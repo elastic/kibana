@@ -56,6 +56,7 @@ export type DeletePackagePoliciesResponse = Array<{
   name?: string;
   success: boolean;
   package?: PackagePolicyPackage;
+  policy_id?: string;
 }>;
 
 export interface UpgradePackagePolicyBaseResponse {
