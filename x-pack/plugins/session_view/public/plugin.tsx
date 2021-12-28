@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { createStore, Reducer } from 'redux';
 import {
   AppMountParameters,
   CoreSetup,
@@ -14,15 +15,12 @@ import {
   PluginInitializerContext,
 } from '../../../../src/core/public';
 import { SessionViewTableProcessTree } from './components/SessionViewTableProcessTree';
-import { createStore, Reducer } from 'redux';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { SessionViewConfigType, SessionViewServices } from './types';
 
 const createTimelineStore = (reducer: Reducer) => {
   // No initial state for now
-  return createStore(
-    reducer
-  )
+  return createStore(reducer);
 };
 
 export class SessionViewPlugin implements Plugin {
@@ -64,10 +62,8 @@ export class SessionViewPlugin implements Plugin {
     // NO-OP
     return {
       getSessionViewTableProcessTree: () => {
-        return (
-          <SessionViewTableProcessTree />
-        )
-      }
+        return <SessionViewTableProcessTree />;
+      },
     };
   }
 
