@@ -35,6 +35,18 @@ if [[ "${GITHUB_PR_LABELS:-}" == *"ci:deploy-cloud"* ]]; then
   cat << EOF | buildkite-agent annotate --style "info" --context cloud-image
     Cloud image: $CLOUD_IMAGE
 EOF
+
+  VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
+  jq '
+    .resources.kibana[0].plan.kibana.docker_image = "'$CLOUD_IMAGE'" |
+    .name = "pr-'$BUILDKITE_PULL_REQUEST'" |
+    .resources.kibana[0].plan.kibana.version = "'$VERSION'" |
+    .resources.elasticsearch[0].plan.kibana.version = "'$VERSION'" |
+    .resources.apm[0].plan.kibana.version = "'$VERSION'"
+    ' deploy.json > /tmp/deploy.json
+
+  DEPLOYMENT=$(ecctl deployment create --file deploy.json)
+
 fi
 
 echo "--- Archive Kibana Distribution"
