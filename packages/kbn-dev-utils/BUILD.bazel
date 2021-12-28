@@ -66,7 +66,7 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-utils",
+  "//packages/kbn-utils:npm_module_types",
   "@npm//@babel/parser",
   "@npm//@babel/types",
   "@npm//@types/babel__core",
