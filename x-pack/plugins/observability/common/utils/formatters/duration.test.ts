@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { asDuration, toMicroseconds, asMillisecondDuration } from './duration';
+import { asDuration, asTransactionRate, toMicroseconds, asMillisecondDuration } from './duration';
 
 describe('duration formatters', () => {
   describe('asDuration', () => {
@@ -37,6 +37,30 @@ describe('duration formatters', () => {
       expect(toMicroseconds(10, 'minutes')).toEqual(600000000);
       expect(toMicroseconds(10, 'seconds')).toEqual(10000000);
       expect(toMicroseconds(10, 'milliseconds')).toEqual(10000);
+    });
+  });
+
+  describe('asTransactionRate', () => {
+    it('displays the not available label when the number is not finite', () => {
+      expect(asTransactionRate(Infinity)).toBe('N/A');
+      expect(asTransactionRate(-Infinity)).toBe('N/A');
+      expect(asTransactionRate(null)).toBe('N/A');
+      expect(asTransactionRate(undefined)).toBe('N/A');
+    });
+
+    it('displays the correct label when the number is finite', () => {
+      expect(asTransactionRate(0)).toBe('0 tpm');
+      expect(asTransactionRate(0.005)).toBe('< 0.1 tpm');
+      // Integer numbers get zero decimals
+      expect(asTransactionRate(1)).toBe('1.0 tpm');
+      expect(asTransactionRate(10)).toBe('10.0 tpm');
+      expect(asTransactionRate(100)).toBe('100.0 tpm');
+      expect(asTransactionRate(1000)).toBe('1,000.0 tpm');
+      // Decimal numbers are correctly rounded
+      expect(asTransactionRate(1.23)).toBe('1.2 tpm');
+      expect(asTransactionRate(12.34)).toBe('12.3 tpm');
+      expect(asTransactionRate(123.45)).toBe('123.5 tpm');
+      expect(asTransactionRate(1234.56)).toBe('1,234.6 tpm');
     });
   });
 
