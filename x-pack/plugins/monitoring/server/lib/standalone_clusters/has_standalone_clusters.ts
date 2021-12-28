@@ -28,7 +28,7 @@ export async function hasStandaloneClusters(req: LegacyRequest, indexPatterns: s
           },
           {
             terms: {
-              'event.dataset': ['logstash.stats', 'logstash.state', 'beat.stats', 'beat.state'],
+              'event.dataset': ['logstash.node.stats', 'logstash.node', 'beat.stats', 'beat.state'],
             },
           },
         ],
