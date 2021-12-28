@@ -7655,7 +7655,7 @@
                 "description": "The number of spaces which have this feature disabled."
               }
             },
-            "visualize": {
+            "visualizations": {
               "type": "long",
               "_meta": {
                 "description": "The number of spaces which have this feature disabled."
