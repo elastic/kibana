@@ -38,7 +38,7 @@ export interface RouteDependencies {
 /**
  * An object representing a resolved index, data stream or alias
  */
-interface IndexAndAliasFromEs {
+export interface IndexAndAliasFromEs {
   name: string;
   // per https://github.com/elastic/elasticsearch/pull/57626
   attributes: Array<'open' | 'closed' | 'hidden' | 'frozen'>;

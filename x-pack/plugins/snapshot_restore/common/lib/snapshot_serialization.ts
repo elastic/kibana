@@ -23,7 +23,9 @@ import { csvToArray } from './utils';
 export function deserializeSnapshotDetails(
   snapshotDetailsEs: SnapshotDetailsEs,
   managedRepository?: string,
-  successfulSnapshots?: SnapshotDetailsEs[]
+  successfulSnapshots?: SnapshotDetailsEs[],
+  systemIndices?: string[],
+  systemDataStreams?: string[]
 ): SnapshotDetails {
   if (!snapshotDetailsEs || typeof snapshotDetailsEs !== 'object') {
     throw new Error('Unable to deserialize snapshot details');
@@ -101,6 +103,17 @@ export function deserializeSnapshotDetails(
   if (policyName) {
     snapshotDetails.policyName = policyName;
   }
+
+  if (systemDataStreams && systemDataStreams.length) {
+    snapshotDetails.dataStreams = dataStreams
+      .filter((index) => !systemDataStreams.includes(index))
+      .sort();
+  }
+
+  if (systemIndices && systemIndices.length) {
+    snapshotDetails.indices = indices.filter((index) => !systemIndices.includes(index)).sort();
+  }
+
   return snapshotDetails;
 }
 

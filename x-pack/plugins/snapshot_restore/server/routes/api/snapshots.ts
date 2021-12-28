@@ -210,11 +210,34 @@ export function registerSnapshotsRoutes({
             return +new Date(b.end_time!) - +new Date(a.end_time!);
           }) as SnapshotDetailsEs[];
 
+        const { body: allDataStreams } = await clusterClient.asCurrentUser.indices.getDataStream({
+          name: '*',
+          expand_wildcards: ['hidden', 'all'],
+        });
+
+        const { body: allIndices } = await clusterClient.asCurrentUser.indices.get({
+          index: '*',
+          expand_wildcards: ['hidden', 'all'],
+        });
+
+        const systemDataStreams = allDataStreams.data_streams
+          .filter((ds) => ds.hidden)
+          .flatMap((ds) => ds.name);
+        const systemIndices = Object.keys(allIndices).reduce((list: string[], index: string) => {
+          if (allIndices[index].settings?.index?.hidden) {
+            return list.concat(index);
+          }
+
+          return list;
+        }, []);
+
         return res.ok({
           body: deserializeSnapshotDetails(
             selectedSnapshot,
             managedRepository,
-            successfulSnapshots
+            successfulSnapshots,
+            systemIndices,
+            systemDataStreams
           ),
         });
       } catch (e) {
