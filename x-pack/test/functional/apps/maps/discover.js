@@ -36,9 +36,7 @@ export default function ({ getService, getPageObjects }) {
       const doesLayerExist = await PageObjects.maps.doesLayerExist('geo_shapes*');
       expect(doesLayerExist).to.equal(true);
       const tooltipText = await PageObjects.maps.getLayerTocTooltipMsg('geo_shapes*');
-      // 4 features are displayed but tooltip says 8 because geo_shape features that span tile boundaries are double counted
-      // this is a know bug, see https://github.com/elastic/kibana/issues/121564 for more details
-      expect(tooltipText).to.equal('geo_shapes*\nFound 8 documents.');
+      expect(tooltipText).to.equal('geo_shapes*\nFound ~8 documents. This count is approximate.');
       await PageObjects.maps.refreshAndClearUnsavedChangesWarning();
     });
 
