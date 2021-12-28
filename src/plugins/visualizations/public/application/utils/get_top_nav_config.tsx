@@ -261,10 +261,9 @@ export const getTopNavConfig = (
       : i18n.translate('visualize.topNavMenu.saveVisualizationButtonLabel', {
           defaultMessage: 'Save',
         });
-  const showSaveAndReturn = originatingApp && savedVis?.id;
 
   const showSaveButton =
-    visualizeCapabilities.save || (!showSaveAndReturn && dashboardCapabilities.showWriteControls);
+    visualizeCapabilities.save || (!originatingApp && dashboardCapabilities.showWriteControls);
 
   const topNavMenu: TopNavMenuData[] = [
     {
@@ -373,9 +372,9 @@ export const getTopNavConfig = (
       ? [
           {
             id: 'save',
-            iconType: showSaveAndReturn ? undefined : 'save',
+            iconType: originatingApp ? undefined : 'save',
             label: saveButtonLabel,
-            emphasize: !showSaveAndReturn,
+            emphasize: !originatingApp,
             description: i18n.translate('visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
               defaultMessage: 'Save Visualization',
             }),
@@ -538,7 +537,7 @@ export const getTopNavConfig = (
           },
         ]
       : []),
-    ...(showSaveAndReturn
+    ...(originatingApp
       ? [
           {
             id: 'saveAndReturn',

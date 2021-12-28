@@ -8,14 +8,12 @@
 
 import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
-import { visualizationsPluginMock } from '../../../../visualizations/public/mocks';
 import { VisualizeServices } from '../types';
 
 export const createVisualizeServicesMock = () => {
   const coreStartMock = coreMock.createStart();
   const dataStartMock = dataPluginMock.createStartContract();
   const toastNotifications = coreStartMock.notifications.toasts;
-  const visualizations = visualizationsPluginMock.createStartContract();
 
   return {
     ...coreStartMock,
@@ -25,6 +23,5 @@ export const createVisualizeServicesMock = () => {
       replace: jest.fn(),
       location: { pathname: '' },
     },
-    visualizations,
   } as unknown as jest.Mocked<VisualizeServices>;
 };

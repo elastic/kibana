@@ -37,7 +37,6 @@ const createStartContract = (): VisualizationsStart => ({
   getAliases: jest.fn(),
   getByGroup: jest.fn(),
   unRegisterAlias: jest.fn(),
-  getSavedVisualization: jest.fn(),
   showNewVisModal: jest.fn(),
 });
 

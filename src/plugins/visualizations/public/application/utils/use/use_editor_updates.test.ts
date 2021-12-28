@@ -15,6 +15,11 @@ import type { IEditorController } from '../../types';
 import { visualizeAppStateStub } from '../stubs';
 import { createVisualizeServicesMock } from '../mocks';
 
+jest.mock('../../../utils/saved_visualize_utils', () => {
+  const stubs = jest.requireActual('../stubs');
+  return { convertFromSerializedVis: () => ({ visState: stubs.visualizeAppStateStub.vis }) };
+});
+
 describe('useEditorUpdates', () => {
   const eventEmitter = new EventEmitter();
   const setHasUnsavedChangesMock = jest.fn();
@@ -22,10 +27,6 @@ describe('useEditorUpdates', () => {
 
   beforeEach(() => {
     mockServices = createVisualizeServicesMock();
-    // @ts-expect-error
-    mockServices.visualizations.convertFromSerializedVis.mockImplementation(() => ({
-      visState: visualizeAppStateStub.vis,
-    }));
   });
 
   test('should not create any subscriptions if app state container is not ready', () => {

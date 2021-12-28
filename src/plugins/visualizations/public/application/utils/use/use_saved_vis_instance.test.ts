@@ -14,7 +14,7 @@ import { useSavedVisInstance } from './use_saved_vis_instance';
 import { redirectWhenMissing } from '../../../../../kibana_utils/public';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { VisualizeServices } from '../../types';
-import { VisualizeConstants } from '../../visualize_constants';
+import { VisualizeConstants } from '../../../../common/constants';
 import { setVisEditorsRegistry } from '../../../services';
 import { createVisEditorsRegistry } from '../../../vis_editors_registry';
 import { createEmbeddableStateTransferMock } from '../../../../../embeddable/public/mocks';
