@@ -122,37 +122,41 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiFlexGroup>
-        <EuiFlexItem data-test-subj="indices">
-          <EuiDescriptionListTitle data-test-subj="title">
-            <FormattedMessage
-              id="xpack.snapshotRestore.snapshotDetails.itemIndicesLabel"
-              defaultMessage="Indices ({indicesCount})"
-              values={{ indicesCount: indices.length }}
-            />
-          </EuiDescriptionListTitle>
+      {indices.length > 0 && (
+        <EuiFlexGroup>
+          <EuiFlexItem data-test-subj="indices">
+            <EuiDescriptionListTitle data-test-subj="title">
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.itemIndicesLabel"
+                defaultMessage="Indices ({indicesCount})"
+                values={{ indicesCount: indices.length }}
+              />
+            </EuiDescriptionListTitle>
 
-          <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-            <CollapsibleIndicesList indices={indices} />
-          </EuiDescriptionListDescription>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
+              <CollapsibleIndicesList indices={indices} />
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
 
-      <EuiFlexGroup>
-        <EuiFlexItem data-test-subj="dataStreams">
-          <EuiDescriptionListTitle data-test-subj="title">
-            <FormattedMessage
-              id="xpack.snapshotRestore.snapshotDetails.itemDataStreamsLabel"
-              defaultMessage="Data streams ({dataStreamsCount})"
-              values={{ dataStreamsCount: dataStreams.length }}
-            />
-          </EuiDescriptionListTitle>
+      {dataStreams.length > 0 && (
+        <EuiFlexGroup>
+          <EuiFlexItem data-test-subj="dataStreams">
+            <EuiDescriptionListTitle data-test-subj="title">
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotDetails.itemDataStreamsLabel"
+                defaultMessage="Data streams ({dataStreamsCount})"
+                values={{ dataStreamsCount: dataStreams.length }}
+              />
+            </EuiDescriptionListTitle>
 
-          <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-            <CollapsibleDataStreamsList dataStreams={dataStreams} />
-          </EuiDescriptionListDescription>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
+              <CollapsibleDataStreamsList dataStreams={dataStreams} />
+            </EuiDescriptionListDescription>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
 
       <EuiFlexGroup>
         <EuiFlexItem data-test-subj="startTime">
