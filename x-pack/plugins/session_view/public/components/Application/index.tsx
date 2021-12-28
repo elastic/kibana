@@ -24,7 +24,7 @@ const Links = () => {
       css={css`
         padding: 20px;
         display: flex;
-`}
+      `}
     >
       <li css={listItemCss}>
         <Link to="/">Home</Link>
@@ -48,7 +48,7 @@ export const Application = () => {
       css={css`
         height: 100%;
         background: ${euiTheme.colors.emptyShade};
-`}
+      `}
     >
       <Links />
       <Routes />
