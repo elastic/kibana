@@ -41,7 +41,7 @@ jq '
   .resources.kibana[0].plan.kibana.docker_image = "'$CLOUD_IMAGE'" |
   .name = "pr-'$BUILDKITE_PULL_REQUEST'-'$GIT_COMMIT'" |
   .resources.kibana[0].plan.kibana.version = "'$VERSION'" |
-  .resources.elasticsearch[0].plan.kibana.version = "'$VERSION'"
+  .resources.elasticsearch[0].plan.elasticsearch.version = "'$VERSION'"
   ' .buildkite/scripts/steps/cloud/deploy.json > /tmp/deploy.json
 
 DEPLOYMENT=$(ecctl deployment create --file /tmp/deploy.json)
