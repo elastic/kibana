@@ -82,3 +82,6 @@ export const FILTER_FIELDS = {
   LOCATION: 'observer.geo.name',
   TYPE: 'monitor.type',
 };
+
+export const BOTTOM_BAR_PORTAL_SIBLING_MARKER_ID =
+  'uptimeUIMonitorManagementBottomBarPortalSibling';

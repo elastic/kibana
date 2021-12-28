@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import { BOTTOM_BAR_PORTAL_SIBLING_MARKER_ID } from '../../../../common/constants';
 
 import { defaultConfig, usePolicyConfigContext } from '../../fleet_package/contexts';
 
@@ -34,10 +35,22 @@ export const MonitorConfig = () => {
     defaultConfig: defaultConfig[monitorType],
   });
 
+  const bottomBarSiblingDivRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    bottomBarSiblingDivRef.current = document.getElementById(BOTTOM_BAR_PORTAL_SIBLING_MARKER_ID);
+  });
+
   return (
     <>
       <MonitorFields />
-      <ActionBarPortal monitor={policyConfig[monitorType]} isValid={isValid} />
+
+      {bottomBarSiblingDivRef.current ? (
+        <ActionBarPortal
+          monitor={policyConfig[monitorType]}
+          isValid={isValid}
+          portalSibling={bottomBarSiblingDivRef.current}
+        />
+      ) : null}
     </>
   );
 };

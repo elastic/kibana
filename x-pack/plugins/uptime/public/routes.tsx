@@ -21,6 +21,7 @@ import {
   SETTINGS_ROUTE,
   STEP_DETAIL_ROUTE,
   SYNTHETIC_CHECK_STEPS_ROUTE,
+  BOTTOM_BAR_PORTAL_SIBLING_MARKER_ID,
 } from '../common/constants';
 import {
   MappingErrorPage,
@@ -204,7 +205,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
                 />
               ),
             },
-            bottomBar: <div id="uptimeUIMonitorManagementBottomBarPortalSibling" />,
+            bottomBar: <div id={BOTTOM_BAR_PORTAL_SIBLING_MARKER_ID} />,
           },
           {
             title: i18n.translate('xpack.uptime.editMonitorRoute.title', {
@@ -223,7 +224,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
                 />
               ),
             },
-            bottomBar: <div id="uptimeUIMonitorManagementBottomBarPortalSibling" />,
+            bottomBar: <div id={BOTTOM_BAR_PORTAL_SIBLING_MARKER_ID} />,
           },
           {
             title: i18n.translate('xpack.uptime.monitorManagementRoute.title', {

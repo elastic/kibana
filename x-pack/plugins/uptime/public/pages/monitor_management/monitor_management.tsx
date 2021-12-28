@@ -7,10 +7,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTrackPageview } from '../../../observability/public';
-import { getMonitors } from '../state/actions';
-import { monitorManagementListSelector } from '../state/selectors';
-import { MonitorManagementList } from '../components/monitor_management/monitor_list/monitor_list';
+import { useTrackPageview } from '../../../../observability/public';
+import { getMonitors } from '../../state/actions';
+import { monitorManagementListSelector } from '../../state/selectors';
+import { MonitorManagementList } from '../../components/monitor_management/monitor_list/monitor_list';
 
 export const MonitorManagementPage: React.FC = () => {
   const [refresh, setRefresh] = useState(true);
