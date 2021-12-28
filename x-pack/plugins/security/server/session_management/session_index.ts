@@ -37,9 +37,8 @@ const SESSION_INDEX_TEMPLATE_VERSION = 1;
 /**
  * Returns index template that is used for the current version of the session index.
  */
-export function getSessionIndexTemplate(templateName: string, indexName: string) {
+export function getSessionIndexTemplate(indexName: string) {
   return Object.freeze({
-    name: templateName,
     index_patterns: [indexName],
     template: {
       settings: {
@@ -369,9 +368,11 @@ export class SessionIndex {
           this.options.logger.debug('Session index template already exists.');
         } else {
           try {
-            await this.options.elasticsearchClient.indices.putIndexTemplate(
-              getSessionIndexTemplate(sessionIndexTemplateName, this.indexName)
-            );
+            await this.options.elasticsearchClient.indices.putIndexTemplate({
+              name: sessionIndexTemplateName,
+              // @ts-expect-error @elastic/elasticsearch IndicesIndexSettings.index: IndicesIndexSettings
+              body: getSessionIndexTemplate(this.indexName),
+            });
             this.options.logger.debug('Successfully created session index template.');
           } catch (err) {
             this.options.logger.error(`Failed to create session index template: ${err.message}`);
