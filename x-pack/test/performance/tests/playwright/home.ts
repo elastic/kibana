@@ -9,6 +9,10 @@ import { ChromiumBrowser, Page } from 'playwright';
 import testSetup from './setup';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('perf_login_and_home', () => {
     const config = getService('config');
@@ -36,13 +40,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Login to Kibana', async () => {
+      await sleep(2000);
       await page?.fill('[data-test-subj=loginUsername]', 'elastic', { timeout: 180 * 1000 });
+      await sleep(2000);
       await page?.fill('[data-test-subj=loginPassword]', 'changeme');
+      await sleep(2000);
       await page?.click('[data-test-subj=loginSubmit]');
     });
 
     it('Dismiss Synthetics Notice', async () => {
+      await sleep(2000);
       await page?.click('[data-test-subj=skipWelcomeScreen]', { timeout: 180 * 1000 });
+      await sleep(2000);
       await page?.locator('Welcome home');
     });
   });
