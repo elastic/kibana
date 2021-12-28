@@ -25,6 +25,7 @@ import {
   BrowserShortUrlClientFactoryCreateParams,
 } from './url_service/short_urls/short_url_client_factory';
 import { AnonymousAccessServiceContract } from '../common';
+import { ShortUrlRedirectLocatorDefinition } from '../common/url_service/locators/short_url_redirect_locator';
 
 /** @public */
 export type SharePluginSetup = ShareMenuRegistrySetup & {
@@ -115,6 +116,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
     });
 
     this.url.locators.create(new LegacyShortUrlLocatorDefinition());
+    this.url.locators.create(new ShortUrlRedirectLocatorDefinition());
 
     this.redirectManager = new RedirectManager({
       url: this.url,
