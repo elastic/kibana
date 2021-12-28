@@ -17,6 +17,7 @@ import { getHostRiskIndex, HostsRiskScore } from '../../../../common/search_stra
 
 import { useHostsRiskScoreComplete } from './use_hosts_risk_score_complete';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { ESTermQuery } from '../../../../common/typed_json';
 
 export const QUERY_ID = 'host_risk_score';
 const noop = () => {};
@@ -40,9 +41,13 @@ export interface HostRisk {
 export const useHostsRiskScore = ({
   timerange,
   hostName,
+  onlyLatest = true,
+  filterQuery,
 }: {
   timerange?: { to: string; from: string };
+  filterQuery?: ESTermQuery | string;
   hostName?: string;
+  onlyLatest?: boolean;
 }): HostRisk | null => {
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
   const [isModuleEnabled, setIsModuleEnabled] = useState<boolean | undefined>(undefined);
@@ -104,12 +109,14 @@ export const useHostsRiskScore = ({
           timerange: timerange
             ? { to: timerange.to, from: timerange.from, interval: '' }
             : undefined,
+          filterQuery,
           hostNames: hostName ? [hostName] : undefined,
-          defaultIndex: [getHostRiskIndex(space.id)],
+          defaultIndex: [getHostRiskIndex(space.id, onlyLatest)],
+          onlyLatest,
         });
       });
     }
-  }, [start, data, timerange, hostName, riskyHostsFeatureEnabled, spaces]);
+  }, [start, data, timerange, filterQuery, hostName, onlyLatest, riskyHostsFeatureEnabled, spaces]);
 
   if ((!hostName && !timerange) || !riskyHostsFeatureEnabled) {
     return null;

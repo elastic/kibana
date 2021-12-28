@@ -28,6 +28,7 @@ export const getHostsRiskScore = ({
   data,
   defaultIndex,
   timerange,
+  filterQuery,
   hostNames,
   signal,
 }: GetHostsRiskScoreProps): Observable<HostsRiskScoreStrategyResponse> =>
@@ -36,6 +37,7 @@ export const getHostsRiskScore = ({
       defaultIndex,
       factoryQueryType: HostsQueries.hostsRiskScore,
       timerange,
+      filterQuery,
       hostNames,
     },
     {

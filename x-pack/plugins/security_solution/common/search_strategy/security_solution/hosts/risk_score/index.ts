@@ -11,6 +11,7 @@ import type {
   IEsSearchResponse,
 } from '../../../../../../../../src/plugins/data/common';
 import { RISKY_HOSTS_INDEX_PREFIX } from '../../../../constants';
+import { ESTermQuery } from '../../../../typed_json';
 import { Inspect, Maybe, TimerangeInput } from '../../../common';
 
 export interface HostsRiskScoreRequestOptions extends IEsSearchRequest {
@@ -18,6 +19,8 @@ export interface HostsRiskScoreRequestOptions extends IEsSearchRequest {
   factoryQueryType?: FactoryQueryTypes;
   hostNames?: string[];
   timerange?: TimerangeInput;
+  filterQuery?: ESTermQuery | string;
+  onlyLatest?: boolean;
 }
 
 export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
@@ -25,6 +28,7 @@ export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {
 }
 
 export interface HostsRiskScore {
+  '@timestamp': string;
   host: {
     name: string;
   };
@@ -40,6 +44,6 @@ export interface RuleRisk {
   rule_risk: string;
 }
 
-export const getHostRiskIndex = (spaceId: string): string => {
-  return `${RISKY_HOSTS_INDEX_PREFIX}${spaceId}`;
+export const getHostRiskIndex = (spaceId: string, onlyLatest: boolean = true): string => {
+  return `${RISKY_HOSTS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
 };

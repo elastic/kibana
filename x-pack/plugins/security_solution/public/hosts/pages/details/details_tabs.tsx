@@ -104,7 +104,7 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
           <HostAlertsQueryTabBody {...tabProps} pageFilters={pageFilters} />
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.risk})`}>
-          <HostRiskTabBody />
+          <HostRiskTabBody {...tabProps} />
         </Route>
       </Switch>
     );

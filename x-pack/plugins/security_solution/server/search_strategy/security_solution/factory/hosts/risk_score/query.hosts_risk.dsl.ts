@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { HostsRiskScoreRequestOptions } from '../../../../../../common/search_strategy';
+import { Direction, HostsRiskScoreRequestOptions } from '../../../../../../common/search_strategy';
+import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 export const buildHostsRiskScoreQuery = ({
   timerange,
   hostNames,
   defaultIndex,
+  filterQuery,
 }: HostsRiskScoreRequestOptions) => {
-  const filter = [];
+  const filter = [...createQueryFilterClauses(filterQuery)];
 
   if (timerange) {
     filter.push({
@@ -41,6 +43,13 @@ export const buildHostsRiskScoreQuery = ({
           filter,
         },
       },
+      sort: [
+        {
+          '@timestamp': {
+            order: Direction.asc,
+          },
+        },
+      ],
     },
   };
 
