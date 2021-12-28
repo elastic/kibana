@@ -14,6 +14,7 @@ import { useApmRouter } from '../../hooks/use_apm_router';
 import { AgentIcon } from './agent_icon';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { ApmRoutes } from '../routing/apm_route_config';
+import { TruncateWithTooltip } from './truncate_with_tooltip';
 
 const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
@@ -42,7 +43,9 @@ export function ServiceLink({
         <EuiFlexItem grow={false}>
           <AgentIcon agentName={agentName} />
         </EuiFlexItem>
-        <EuiFlexItem>{serviceName}</EuiFlexItem>
+        <EuiFlexItem>
+          <TruncateWithTooltip text={serviceName} content={serviceName} />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </StyledLink>
   );
