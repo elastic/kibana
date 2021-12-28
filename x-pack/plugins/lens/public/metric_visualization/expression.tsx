@@ -149,7 +149,11 @@ export function MetricChart({
           {value}
         </div>
         {mode === 'full' && (
-          <div data-test-subj="lns_metric_title" className="lnsMetricExpression__title">
+          <div
+            data-test-subj="lns_metric_title"
+            className="lnsMetricExpression__title"
+            style={colorMode === ColorMode.Background ? { color: color.color } : {}}
+          >
             {metricTitle}
           </div>
         )}
