@@ -71,7 +71,6 @@ export const getSearchListItemMock = (): estypes.SearchResponse<SearchEsListItem
         _index: LIST_INDEX,
         _score: 0,
         _source: getSearchEsListItemMock(),
-        _type: '',
         matched_queries: ['0.0'],
       },
     ],
