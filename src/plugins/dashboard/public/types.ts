@@ -17,7 +17,7 @@ import type {
   KibanaExecutionContext,
 } from 'kibana/public';
 import { History } from 'history';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { AnyAction, Dispatch } from 'redux';
 import { BehaviorSubject, Subject } from 'rxjs';
 

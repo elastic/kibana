@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Filter, isFilterPinned } from '@kbn/es-query';
+import { type Filter, isFilterPinned } from '@kbn/es-query';
 import { TimeRange, Query, QueryState, RefreshInterval } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { UrlGeneratorsDefinition } from '../../share/public';

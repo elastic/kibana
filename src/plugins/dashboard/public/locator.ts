@@ -8,7 +8,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { flow } from 'lodash';
-import { Filter, isFilterPinned } from '@kbn/es-query';
+import { type Filter, isFilterPinned } from '@kbn/es-query';
 import type { TimeRange, Query, QueryState, RefreshInterval } from '../../data/public';
 import type { LocatorDefinition, LocatorPublic } from '../../share/public';
 import type { SavedDashboardPanel } from '../common/types';

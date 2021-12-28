@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { compareFilters, COMPARE_ALL_OPTIONS, Filter, isFilterPinned } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS, type Filter, isFilterPinned } from '@kbn/es-query';
 import _ from 'lodash';
 import { DashboardPanelState } from '..';
 import { EmbeddableInput } from '../../services/embeddable';

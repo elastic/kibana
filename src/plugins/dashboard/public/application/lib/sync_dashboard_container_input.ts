@@ -10,7 +10,7 @@ import _ from 'lodash';
 import { Subscription } from 'rxjs';
 import { debounceTime, tap } from 'rxjs/operators';
 
-import { compareFilters, COMPARE_ALL_OPTIONS, Filter } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
 import { DashboardContainer } from '../embeddable';
 import { Query } from '../../services/data';
 import { DashboardConstants, DashboardSavedObject } from '../..';

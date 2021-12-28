@@ -32,7 +32,7 @@ import {
 } from '../test_helpers';
 import { DataViewsContract } from '../../services/data';
 import { DataView } from '../../services/data_views';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 
 interface SetupEmbeddableFactoryReturn {
   finalizeEmbeddableCreation: () => void;
