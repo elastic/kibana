@@ -62,6 +62,7 @@ export const useActionDetails = ({ actionId, filterQuery, skip = false }: UseAct
             defaultMessage: 'Error while fetching action details',
           }),
         }),
+      refetchOnWindowFocus: false,
       retryDelay: 1000,
     }
   );

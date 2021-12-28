@@ -78,10 +78,12 @@ export const useAllResults = ({
 
       return {
         ...responseData,
+        columns: Object.keys(responseData.edges[0].fields || {}).sort(),
         inspect: getInspectResponse(responseData, {} as InspectResponse),
       };
     },
     {
+      keepPreviousData: true,
       refetchInterval: isLive ? 5000 : false,
       enabled: !skip,
       onSuccess: () => setErrorToast(),

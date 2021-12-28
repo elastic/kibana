@@ -232,15 +232,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   );
 
   useEffect(() => {
-    if (!allResultsData?.edges?.length) {
+    if (!allResultsData?.columns.length) {
       return;
     }
 
-    const fields = [
-      'agent.name',
-      ...ecsMappingColumns.sort(),
-      ...keys(allResultsData?.edges[0]?.fields || {}).sort(),
-    ];
+    const fields = ['agent.name', ...ecsMappingColumns.sort(), ...allResultsData?.columns];
 
     const newColumns = fields.reduce(
       (acc, fieldName) => {
@@ -298,7 +294,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       !isEqual(map('id', currentColumns), map('id', newColumns)) ? newColumns : currentColumns
     );
     setVisibleColumns(map('id', newColumns));
-  }, [allResultsData?.edges, ecsMappingColumns, getHeaderDisplay]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allResultsData?.columns.length, ecsMappingColumns, getHeaderDisplay]);
 
   const toolbarVisibility = useMemo(
     () => ({
