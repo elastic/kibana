@@ -12,21 +12,21 @@ import { checkParam, MissingRequiredError } from '../error_missing_required';
 import { calculateAvailability } from '../calculate_availability';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
+import { buildKibanaInfo } from './build_kibana_info';
 
 export function handleResponse(resp: ElasticsearchResponse) {
   const hit = resp.hits?.hits[0];
   const legacySource = hit?._source.kibana_stats;
   const mbSource = hit?._source.kibana?.stats;
-  const kibana = mbSource ?? legacySource?.kibana;
   const availabilityTimestamp = hit?._source['@timestamp'] ?? legacySource?.timestamp;
   if (!availabilityTimestamp) {
     throw new MissingRequiredError('timestamp');
   }
-  return merge(kibana, {
+
+  return merge(buildKibanaInfo(hit!), {
     availability: calculateAvailability(availabilityTimestamp),
     os_memory_free: mbSource?.os?.memory?.free_in_bytes ?? legacySource?.os?.memory?.free_in_bytes,
     uptime: mbSource?.process?.uptime?.ms ?? legacySource?.process?.uptime_in_millis,
-    version: hit?._source.service?.version ?? legacySource?.kibana?.version,
   });
 }
 
@@ -50,6 +50,7 @@ export function getKibanaInfo(
       'hits.hits._source.kibana.stats.process.uptime.ms',
       'hits.hits._source.kibana_stats.timestamp',
       'hits.hits._source.@timestamp',
+      'hits.hits._source.service.id',
       'hits.hits._source.service.version',
     ],
     body: {

@@ -16,14 +16,7 @@ import { calculateAvailability } from '../calculate_availability';
 import { KibanaMetric } from '../metrics';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';
-
-interface KibanaInfo {
-  transport_address?: string;
-  name?: string;
-  host?: string;
-  uuid?: string;
-  status?: string;
-}
+import { KibanaInfo, buildKibanaInfo } from './build_kibana_info';
 
 interface Kibana {
   process?: {
@@ -118,19 +111,6 @@ export async function getKibanas(
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response: ElasticsearchResponse = await callWithRequest(req, 'search', params);
   const instances = response.hits?.hits ?? [];
-
-  const buildKibanaInfo = (hit: ElasticsearchResponseHit): KibanaInfo => {
-    const source = hit._source;
-    if (source.kibana_stats) return source.kibana_stats.kibana as KibanaInfo;
-
-    return {
-      name: source.kibana?.stats?.name,
-      host: source.kibana?.stats?.host?.name,
-      status: source.kibana?.stats?.status,
-      transport_address: source.kibana?.stats?.transport_address,
-      uuid: source.service?.id,
-    };
-  };
 
   return instances.map((hit: ElasticsearchResponseHit) => {
     const legacyStats = hit._source.kibana_stats;

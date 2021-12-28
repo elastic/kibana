@@ -539,9 +539,11 @@ export interface ElasticsearchMetricbeatSource {
   kibana?: {
     stats?: {
       name?: string;
+      index?: string;
       status?: string;
       transport_address?: string;
       concurrent_connections?: number;
+      snapshot?: boolean;
       host?: {
         name?: string;
       };
