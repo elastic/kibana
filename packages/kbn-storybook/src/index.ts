@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { EuiProviderDecorator } from './lib/decorators';
 export { defaultConfig, defaultConfigWebFinal, mergeWebpackFinal } from './lib/default_config';
 export { runStorybookCli } from './lib/run_storybook_cli';
 export { default as WebpackConfig } from './webpack.config';

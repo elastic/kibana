@@ -6,7 +6,6 @@
  */
 
 import { addDecorator } from '@storybook/react';
-import { EuiProviderDecorator } from '@kbn/storybook';
 import { routerContextDecorator } from './router_decorator';
 import { kibanaContextDecorator } from './kibana_decorator';
 import { servicesContextDecorator, legacyContextDecorator } from './services_decorator';
@@ -20,7 +19,6 @@ export const addDecorators = () => {
     require('babel-plugin-require-context-hook/register')();
   }
 
-  addDecorator(EuiProviderDecorator);
   addDecorator(kibanaContextDecorator);
   addDecorator(routerContextDecorator);
   addDecorator(legacyContextDecorator());

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiProviderDecorator } from '@kbn/storybook';
 import { EuiThemeProviderDecorator } from '../../../../src/plugins/kibana_react/common';
 
-export const decorators = [EuiProviderDecorator, EuiThemeProviderDecorator];
+export const decorators = [EuiThemeProviderDecorator];

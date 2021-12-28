@@ -15,7 +15,7 @@ import type { DecoratorFn } from '@storybook/react';
  * Storybook decorator using the EUI provider. Uses the value from
  * `globals` provided by the Storybook theme switcher.
  */
-export const EuiProviderDecorator: DecoratorFn = (storyFn, { globals }) => {
+const EuiProviderDecorator: DecoratorFn = (storyFn, { globals }) => {
   const colorMode = globals.euiTheme === 'v8.dark' ? 'dark' : 'light';
   const emotionCache = createCache({
     key: 'eui-styles',
@@ -28,3 +28,5 @@ export const EuiProviderDecorator: DecoratorFn = (storyFn, { globals }) => {
     </EuiProvider>
   );
 };
+
+export const decorators = [EuiProviderDecorator];
