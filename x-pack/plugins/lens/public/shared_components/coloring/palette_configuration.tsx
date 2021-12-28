@@ -13,7 +13,7 @@ import { PalettePicker } from './palette_picker';
 
 import './palette_configuration.scss';
 
-import { CUSTOM_PALETTE, DEFAULT_COLOR_STEPS } from './constants';
+import { CUSTOM_PALETTE, DEFAULT_COLOR_STEPS, DEFAULT_CONTINUITY } from './constants';
 import type { CustomPaletteParams, RequiredPaletteParamTypes } from '../../../common';
 import {
   getColorStops,
@@ -92,33 +92,30 @@ export function CustomizablePalette({
               ...activePalette.params,
               name: newPalette.name,
               colorStops: undefined,
+              continuity: DEFAULT_CONTINUITY,
               reverse: false, // restore the reverse flag
             };
 
             const newColorStops = getColorStops(palettes, [], activePalette, dataBounds);
-            if (isNewPaletteCustom) {
-              newParams.colorStops = newColorStops;
-            }
-
-            newParams.stops = getPaletteStops(palettes, newParams, {
-              prevPalette:
-                isNewPaletteCustom || isCurrentPaletteCustom ? undefined : newPalette.name,
-              dataBounds,
-              mapFromMinValue: true,
-            });
-
-            const rangeType = activePalette.params?.rangeType ?? 'percent';
-            const max = rangeType === 'percent' ? 100 : dataBounds.max;
-            const min = rangeType === 'percent' ? 100 : dataBounds.min;
-            newParams.rangeMin = newColorStops[0].stop > min ? min : newColorStops[0].stop;
-            newParams.rangeMax =
-              newColorStops[newColorStops.length - 1].stop < max
-                ? max
-                : newColorStops[newColorStops.length - 1].stop;
 
             setPalette({
               ...newPalette,
-              params: newParams,
+              params: {
+                ...newParams,
+                colorStops: isNewPaletteCustom ? newColorStops : newParams?.colorStops ?? undefined,
+                stops: getPaletteStops(palettes, newParams, {
+                  prevPalette:
+                    isNewPaletteCustom || isCurrentPaletteCustom ? undefined : newPalette.name,
+                  dataBounds,
+                  mapFromMinValue: true,
+                }),
+                rangeMin: ['below', 'all'].includes(newParams.continuity!)
+                  ? -Infinity
+                  : Math.min(dataBounds.min, newColorStops[0].stop),
+                rangeMax: ['above', 'all'].includes(newParams.continuity!)
+                  ? +Infinity
+                  : Math.min(dataBounds.max, newColorStops[newColorStops.length - 1].stop),
+              },
             });
           }}
           showCustomPalette
@@ -213,6 +210,7 @@ export function CustomizablePalette({
 
               params.rangeMin = newColorStops[0].stop;
               params.rangeMax = newMax;
+
               if (continuity) {
                 if (['above', 'all'].includes(continuity)) {
                   params.rangeMax = Infinity;
@@ -222,6 +220,7 @@ export function CustomizablePalette({
                   params.rangeMin = -Infinity;
                 }
               }
+
               setPalette(mergePaletteParams(activePalette, params));
             }}
           />

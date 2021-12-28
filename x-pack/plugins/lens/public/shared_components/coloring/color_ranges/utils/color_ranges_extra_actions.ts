@@ -24,7 +24,7 @@ export const distributeEqually = (
   const items = colorRanges.length;
   const lastIndex = colorRanges.length - 1;
   const { min, max } = getDataMinMax(rangeType, dataBounds);
-  const step = roundValue((max - min) / items, rangeType === 'percent' ? 0 : 2);
+  const step = roundValue((max - min) / items, 2);
 
   const getValueForIndex = (index: number) => roundValue(min + (step * 100 * index) / 100);
   const getStartValue = (index: number) => {
