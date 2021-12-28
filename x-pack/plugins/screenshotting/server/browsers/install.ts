@@ -23,12 +23,12 @@ export async function install(
   pkg: PackageInfo,
   chromiumPath: string = path.resolve(__dirname, '../../chromium')
 ): Promise<string> {
-  const binaryPath = paths.getBinaryPath(pkg);
+  const binaryPath = paths.getBinaryPath(pkg, chromiumPath);
   const binaryChecksum = await md5(binaryPath).catch(() => 'MISSING');
 
   if (binaryChecksum !== pkg.binaryChecksum) {
     logger?.warn(
-      `Found browser binary checksum for ${pkg.platform}/${pkg.architecture} ` +
+      `Found browser binary checksum for ${pkg.platform}/${pkg.architecture} in ${binaryPath} ` +
         `is ${binaryChecksum} but ${pkg.binaryChecksum} was expected. Re-installing...`
     );
     try {

@@ -92,7 +92,7 @@ export class ChromiumArchivePaths {
       archiveFilename: 'chrome-win.zip',
       archiveChecksum: '861bb8b7b8406a6934a87d3cbbce61d9',
       binaryChecksum: 'ffa0949471e1b9a57bc8f8633fca9c7b',
-      binaryRelativePath: 'chrome-win\\chrome.exe',
+      binaryRelativePath: path.join('chrome-win', 'chrome.exe'),
       location: 'common',
       archivePath: 'Win',
       revision: 901912,
@@ -123,10 +123,7 @@ export class ChromiumArchivePaths {
     return BaseUrl.custom + '/' + p.archiveFilename; // revision is not used for URL if package is a custom build
   }
 
-  public getBinaryPath(
-    p: PackageInfo,
-    chromiumPath = path.resolve(__dirname, '../../../chromium')
-  ) {
+  public getBinaryPath(p: PackageInfo, chromiumPath: string) {
     return path.join(chromiumPath, p.binaryRelativePath);
   }
 
