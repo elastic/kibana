@@ -9,15 +9,16 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { EventEmitter } from 'events';
 
+import { setTypes, setVisEditorsRegistry } from '../../../services';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { useSavedVisInstance } from './use_saved_vis_instance';
 import { redirectWhenMissing } from '../../../../../kibana_utils/public';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
-import { VisualizeServices } from '../../types';
 import { VisualizeConstants } from '../../../../common/constants';
-import { setVisEditorsRegistry } from '../../../services';
-import { createVisEditorsRegistry } from '../../../vis_editors_registry';
+import { createVisEditorsRegistry, VisEditorsRegistry } from '../../../vis_editors_registry';
 import { createEmbeddableStateTransferMock } from '../../../../../embeddable/public/mocks';
+import type { VisualizeServices } from '../../types';
+import type { TypesStart } from '../../../vis_types';
 
 const mockDefaultEditorControllerDestroy = jest.fn();
 const mockEmbeddableHandlerDestroy = jest.fn();
@@ -40,6 +41,10 @@ const mockSavedVisInstance = {
 jest.mock('../get_visualization_instance', () => ({
   getVisualizationInstance: jest.fn(() => mockSavedVisInstance),
 }));
+const mockGetVisualizationInstance = jest.requireMock(
+  '../get_visualization_instance'
+).getVisualizationInstance;
+
 jest.mock('../breadcrumbs', () => ({
   getEditBreadcrumbs: jest.fn((args, title) => title),
   getCreateBreadcrumbs: jest.fn((text) => text),
@@ -53,15 +58,24 @@ jest.mock('../../../../../kibana_utils/public', () => {
   };
 });
 
-const mockGetVisualizationInstance = jest.requireMock(
-  '../get_visualization_instance'
-).getVisualizationInstance;
-
 describe('useSavedVisInstance', () => {
   const coreStartMock = coreMock.createStart();
   const toastNotifications = coreStartMock.notifications.toasts;
   let mockServices: VisualizeServices;
   const eventEmitter = new EventEmitter();
+
+  beforeAll(() => {
+    setTypes({
+      all: jest
+        .fn()
+        .mockReturnValue([
+          { name: 'area', requiresSearch: true, options: { showIndexSelection: true } },
+        ]),
+    } as unknown as TypesStart);
+    setVisEditorsRegistry({
+      get: jest.fn().mockImplementation(() => jest.fn()),
+    } as unknown as VisEditorsRegistry);
+  });
 
   beforeEach(() => {
     const registry = createVisEditorsRegistry();

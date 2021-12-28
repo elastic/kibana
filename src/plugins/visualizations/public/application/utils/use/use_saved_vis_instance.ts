@@ -50,8 +50,9 @@ export const useSavedVisInstance = (
         let savedVisInstance: SavedVisInstance;
         if (history.location.pathname === '/create') {
           const searchParams = parse(history.location.search);
-          const visTypes = [...Object.values(getTypes().all())];
-          const visType = visTypes.find(({ name }) => name === searchParams.type);
+          const visType = getTypes()
+            .all()
+            .find(({ name }) => name === searchParams.type);
 
           if (!visType) {
             throw new Error(
