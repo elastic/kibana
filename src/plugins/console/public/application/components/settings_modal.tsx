@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useCallback, useState, ChangeEventHandler } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -32,9 +32,14 @@ import { DevToolsSettings } from '../../services';
 
 export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
 
-const MILLISECONDS_IN_MINUTE = 60000;
-const MILLISECONDS_IN_FIVE_MINUTES = 300000;
-const MILLISECONDS_IN_TEN_MINUTES = 600000;
+const PRESETS_IN_MINUTES = [1, 5, 10];
+const intervalOptions = PRESETS_IN_MINUTES.map((value) => ({
+  value: value * 60000,
+  text: i18n.translate('console.settingsPage.refreshInterval.timeInterval', {
+    defaultMessage: '{value} {value, plural, one {minute} other {minutes}}',
+    values: { value },
+  }),
+}));
 
 interface Props {
   onSaveSettings: (newSettings: DevToolsSettings) => void;
@@ -107,26 +112,10 @@ export function DevToolsSettingsModal(props: Props) {
     });
   }
 
-  const intervalOptions = [
-    {
-      value: MILLISECONDS_IN_MINUTE,
-      text: i18n.translate('console.settingsPage.refreshInterval.oneMinute', {
-        defaultMessage: '1 minute',
-      }),
-    },
-    {
-      value: MILLISECONDS_IN_FIVE_MINUTES,
-      text: i18n.translate('console.settingsPage.refreshInterval.fiveMinutes', {
-        defaultMessage: '5 minutes',
-      }),
-    },
-    {
-      value: MILLISECONDS_IN_TEN_MINUTES,
-      text: i18n.translate('console.settingsPage.refreshInterval.tenMinutes', {
-        defaultMessage: '10 minutes',
-      }),
-    },
-  ];
+  const onIntervalChange: ChangeEventHandler<HTMLSelectElement> = useCallback(
+    (e) => setPollInterval(parseInt(e.target.value, 10)),
+    []
+  );
 
   // It only makes sense to show polling options if the user needs to fetch any data.
   const pollingFields =
@@ -168,9 +157,7 @@ export function DevToolsSettingsModal(props: Props) {
                 compressed
                 options={intervalOptions}
                 value={pollInterval}
-                onChange={(e) => {
-                  setPollInterval(parseInt(e.target.value, 10));
-                }}
+                onChange={onIntervalChange}
                 disabled={!polling}
               />
             </EuiFlexItem>
