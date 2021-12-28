@@ -17,9 +17,9 @@ export const InstallChromium = {
 
     for (const platform of config.getNodePlatforms()) {
       const pkg = paths.find(platform.getName(), platform.getArchitecture(), preInstalledPackages);
+      const target = `${platform.getName()}-${platform.getArchitecture()}`;
 
       if (!pkg) {
-        const target = `${platform.getName()}-${platform.getArchitecture()}`;
         log.info(`Skipping Chromium install for ${target}`);
 
         // Unbundled chromium packages (for Darwin): Chromium is downloaded at
@@ -27,7 +27,7 @@ export const InstallChromium = {
         continue;
       }
 
-      log.info(`Installing Chromium for ${paths.toString(pkg)}`);
+      log.info(`Installing Chromium for ${target}`);
 
       const logger = {
         get: log.withType.bind(log),

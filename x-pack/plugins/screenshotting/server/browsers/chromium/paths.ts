@@ -126,8 +126,4 @@ export class ChromiumArchivePaths {
   public getBinaryPath(p: PackageInfo, chromiumPath: string) {
     return path.join(chromiumPath, p.binaryRelativePath);
   }
-
-  public toString(p: PackageInfo) {
-    return `${p.platform}-${p.architecture}`;
-  }
 }

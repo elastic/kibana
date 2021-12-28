@@ -77,7 +77,7 @@ async function copySourceAndBabelify() {
           '**/{__tests__,__mocks__,__snapshots__,__fixtures__,__jest__,cypress}/**',
           'plugins/*/target/**',
           'plugins/canvas/shareable_runtime/test/**',
-          'plugins/screenshotting/chromium/**', // Skip previously downloaded Chromium
+          'plugins/screenshotting/chromium/**',
           'plugins/telemetry_collection_xpack/schema/**', // Skip telemetry schemas
         ],
         allowEmpty: true,
