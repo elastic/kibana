@@ -13,9 +13,9 @@ import { hasConfigPathIntersection, ChangedDeprecatedPaths } from '@kbn/config';
 
 import { CoreService } from 'src/core/types';
 import { Logger, SavedObjectsServiceStart, SavedObjectTypeRegistry } from 'src/core/server';
-import {
-  AggregationsFiltersAggregate,
-  AggregationsFiltersBucketItem,
+import type {
+  AggregationsMultiBucketAggregateBase,
+  AggregationsSingleBucketAggregateBase,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CoreContext } from '../core_context';
@@ -74,6 +74,13 @@ const kibanaIndex = '.kibana';
 const kibanaOrTaskManagerIndex = (index: string, kibanaConfigIndex: string) => {
   return index === kibanaConfigIndex ? '.kibana' : '.kibana_task_manager';
 };
+
+interface UsageDataAggs extends AggregationsMultiBucketAggregateBase {
+  buckets: {
+    disabled: AggregationsSingleBucketAggregateBase;
+    active: AggregationsSingleBucketAggregateBase;
+  };
+}
 
 export class CoreUsageDataService
   implements CoreService<InternalCoreUsageDataSetup, CoreUsageDataStart>
@@ -153,7 +160,10 @@ export class CoreUsageDataService
   private async getSavedObjectAliasUsageData(elasticsearch: ElasticsearchServiceStart) {
     // Note: this agg can be changed to use `savedObjectsRepository.find` in the future after `filters` is supported.
     // See src/core/server/saved_objects/service/lib/aggregations/aggs_types/bucket_aggs.ts for supported aggregations.
-    const { body: resp } = await elasticsearch.client.asInternalUser.search({
+    const { body: resp } = await elasticsearch.client.asInternalUser.search<
+      unknown,
+      { aliases: UsageDataAggs }
+    >({
       index: kibanaIndex,
       body: {
         track_total_hits: true,
@@ -179,10 +189,10 @@ export class CoreUsageDataService
 
     const { hits, aggregations } = resp;
     const totalCount = (hits.total as SearchTotalHits).value;
-    const aggregate = aggregations!.aliases as AggregationsFiltersAggregate;
-    const buckets = aggregate.buckets as Record<string, AggregationsFiltersBucketItem>;
-    const disabledCount = buckets.disabled.doc_count as number;
-    const activeCount = buckets.active.doc_count as number;
+    const aggregate = aggregations!.aliases;
+    const buckets = aggregate.buckets;
+    const disabledCount = buckets.disabled.doc_count;
+    const activeCount = buckets.active.doc_count;
     const inactiveCount = totalCount - disabledCount - activeCount;
 
     return { totalCount, disabledCount, activeCount, inactiveCount };

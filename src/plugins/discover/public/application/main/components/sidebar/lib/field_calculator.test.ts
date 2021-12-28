@@ -142,16 +142,11 @@ describe('fieldCalculator', function () {
     it('Should return an array of values for core meta fields', function () {
       const types = fieldCalculator.getFieldValues(
         hits,
-        indexPattern.fields.getByName('_type'),
+        indexPattern.fields.getByName('_id'),
         indexPattern
       );
       expect(types).toBeInstanceOf(Array);
-      expect(
-        filter(types, function (v) {
-          return v === 'apache';
-        }).length
-      ).toBe(18);
-      expect(uniq(clone(types)).sort()).toEqual(['apache', 'nginx']);
+      expect(types.length).toBe(20);
     });
   });
 

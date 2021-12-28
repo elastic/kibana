@@ -30,7 +30,6 @@ describe('Doc table component', () => {
           _index: 'mock_index',
           _id: '1',
           _score: 1,
-          _type: '_doc',
           fields: [
             {
               timestamp: '2020-20-01T12:12:12.123',

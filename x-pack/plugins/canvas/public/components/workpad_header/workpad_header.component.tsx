@@ -169,7 +169,12 @@ export const WorkpadHeader: FC<Props> = ({
               {{
                 primaryActionButton: <ElementMenu addElement={addElement} elements={elements} />,
                 quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
-                addFromLibraryButton: <AddFromLibraryButton onClick={showEmbedPanel} />,
+                addFromLibraryButton: (
+                  <AddFromLibraryButton
+                    onClick={showEmbedPanel}
+                    data-test-subj="canvas-add-from-library-button"
+                  />
+                ),
                 extraButtons: [<EditorMenu addElement={addElement} />],
               }}
             </SolutionToolbar>
