@@ -203,7 +203,7 @@ export function registerPolicyRoutes({
       try {
         const response = await clusterClient.asCurrentUser.indices.resolveIndex({
           name: '*',
-          expand_wildcards: 'all',
+          expand_wildcards: 'open',
         });
         // @ts-expect-error Type 'ResolveIndexAliasItem[]' is not comparable to type 'IndexAndAliasFromEs[]'.
         const resolvedIndicesResponse = response.body as ResolveIndexResponseFromES;
