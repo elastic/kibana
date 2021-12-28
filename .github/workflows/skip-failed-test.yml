@@ -36,7 +36,7 @@ jobs:
           token: ${{secrets.KIBANAMACHINE_TOKEN}}
 
       - name: Install Actions
-        working-directory: ./kibana-operations
+        working-directory: ./kibana-operations/triage
         env:
           GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
         run: |
