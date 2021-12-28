@@ -16,6 +16,8 @@ export const InstallChromium = {
     for (const platform of config.getNodePlatforms()) {
       const packageInfo = paths.find(platform.getName(), platform.getArchitecture());
       if (!packageInfo || !packageInfo.bundled) {
+        const target = `${platform.getName()}-${platform.getArchitecture()}`;
+        log.info(`Skip installing Chromium for ${target}`);
         // Unbundled chromium packages (for Darwin): Chromium is downloaded at
         // server startup, rather than being pre-installed
         continue;

@@ -47,7 +47,7 @@ export async function download(paths: ChromiumArchivePaths, logger?: Logger) {
 
       if (pathExists && foundChecksum === archiveChecksum) {
         logger?.debug(
-          `Browser archive for ${path.platform}/${path.architecture} found in ${resolvedPath}.`
+          `Browser archive for ${path.platform}/${path.architecture} already found in ${resolvedPath}.`
         );
         return;
       }
