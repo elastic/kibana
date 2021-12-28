@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RENDER_AS } from '../../../../common/constants';
 
 const options = [
   {
-    id: 'clusters',
+    id: RENDER_AS.POINT,
     label: i18n.translate('xpack.maps.source.esGeoGrid.pointsDropdownOption', {
       defaultMessage: 'clusters',
     }),
     value: RENDER_AS.POINT,
   },
   {
-    id: 'grids',
+    id: RENDER_AS.GRID,
     label: i18n.translate('xpack.maps.source.esGeoGrid.gridRectangleDropdownOption', {
       defaultMessage: 'grids',
     }),
@@ -33,7 +33,6 @@ export function RenderAsSelect(props: {
   isColumnCompressed?: boolean;
 }) {
   const currentOption = options.find((option) => option.value === props.renderAs) || options[0];
-  const [selectedOption, setSelectedOption] = useState(currentOption.id);
 
   if (props.renderAs === RENDER_AS.HEATMAP) {
     return null;
@@ -42,7 +41,6 @@ export function RenderAsSelect(props: {
   function onChange(id: string) {
     const data = options.find((option) => option.id === id);
     props.onChange(data?.value as RENDER_AS);
-    setSelectedOption(id);
   }
 
   return (
@@ -55,11 +53,11 @@ export function RenderAsSelect(props: {
       <EuiButtonGroup
         type="single"
         legend={i18n.translate('xpack.maps.source.esGeoGrid.showAsSelector', {
-          defaultMessage: 'Choose the view',
+          defaultMessage: 'Choose the display method',
         })}
         options={options}
-        idSelected={selectedOption}
-        onChange={(id: string) => onChange(id)}
+        idSelected={currentOption.id}
+        onChange={onChange}
         isFullWidth={true}
         buttonSize="compressed"
       />
