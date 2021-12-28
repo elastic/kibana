@@ -58,7 +58,7 @@ export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
           iconType="plusInCircle"
           data-test-subj="createNewCaseBtn"
         >
-          {i18n.CREATE_TITLE}
+          {i18n.CREATE_CASE_TITLE}
         </LinkButton>
       </EuiFlexItem>
     </ButtonFlexGroup>
