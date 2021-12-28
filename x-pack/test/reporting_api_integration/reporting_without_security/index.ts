@@ -16,6 +16,5 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     });
     this.tags('ciGroup13');
     loadTestFile(require.resolve('./job_apis_csv'));
-    loadTestFile(require.resolve('./job_apis_csv_deprecated'));
   });
 }

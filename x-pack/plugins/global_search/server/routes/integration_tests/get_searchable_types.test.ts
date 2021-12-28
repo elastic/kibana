@@ -6,12 +6,11 @@
  */
 
 import supertest from 'supertest';
-import { UnwrapPromise } from '@kbn/utility-types';
 import { setupServer } from '../../../../../../src/core/server/test_utils';
 import { globalSearchPluginMock } from '../../mocks';
 import { registerInternalSearchableTypesRoute } from '../get_searchable_types';
 
-type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 const pluginId = Symbol('globalSearch');
 
 describe('GET /internal/global_search/searchable_types', () => {
