@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { EuiSwitch } from '@elastic/eui';
-import { EuiSwitchEvent } from '@elastic/eui/src/components/form/switch/switch';
+import { EuiSwitch, EuiProgress, EuiSwitchEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
@@ -66,15 +65,24 @@ export const MonitorEnabled = ({ id, monitor, setRefresh }: Props) => {
   };
 
   return (
-    <EuiSwitch
-      checked={enabled}
-      disabled={isLoading}
-      showLabel={false}
-      label={enabled ? DISABLE_MONITOR_LABEL : ENABLE_MONITOR_LABEL}
-      title={enabled ? DISABLE_MONITOR_LABEL : ENABLE_MONITOR_LABEL}
-      data-test-subj="syntheticsIsMonitorEnabled"
-      onChange={handleEnabledChange}
-    />
+    <div css={{ position: 'relative' }} aria-busy={isLoading}>
+      <EuiSwitch
+        checked={enabled}
+        disabled={isLoading}
+        showLabel={false}
+        label={enabled ? DISABLE_MONITOR_LABEL : ENABLE_MONITOR_LABEL}
+        title={enabled ? DISABLE_MONITOR_LABEL : ENABLE_MONITOR_LABEL}
+        data-test-subj="syntheticsIsMonitorEnabled"
+        onChange={handleEnabledChange}
+      />
+      {isLoading ? (
+        <EuiProgress
+          css={{ position: 'absolute', left: 0, bottom: -4, width: '100%', height: 2 }}
+          size="xs"
+          color="primary"
+        />
+      ) : null}
+    </div>
   );
 };
 
