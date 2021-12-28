@@ -2868,23 +2868,15 @@ export class SavedObjectsUtils {
 }
 
 // @public
-export class SavedObjectsValidationError extends SchemaTypeError {
-    constructor(error: Error | string, path?: string[]);
-}
-
-// @public
-export type SavedObjectsValidationFunction = (data: {
-    attributes: unknown;
-}) => void;
-
-// @public
 export interface SavedObjectsValidationMap {
     // (undocumented)
     [version: string]: SavedObjectsValidationSpec;
 }
 
+// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "SavedObjectsValidationFunction"
+//
 // @public
-export type SavedObjectsValidationSpec = ObjectType | SavedObjectsValidationFunction;
+export type SavedObjectsValidationSpec = ObjectType;
 
 // Warning: (ae-extra-release-tag) The doc comment should not contain more than one release tag
 //

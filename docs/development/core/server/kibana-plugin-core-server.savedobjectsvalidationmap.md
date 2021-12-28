@@ -22,17 +22,16 @@ const validationMap: SavedObjectValidationMap = {
   '1.0.0': schema.object({
     foo: schema.string(),
   }),
-  '1.1.0': schema.object({
-    foo: schema.oneOf([schema.string(), schema.boolean()]),
+  '2.0.0': schema.object({
+    foo: schema.string({
+      minLength: 2,
+      validate(value) {
+        if (!/^[a-z]+$/.test(value)) {
+          return 'must be lowercase letters only';
+        }
+      }
+    }),
   }),
-  '2.1.0': ({ attributes }) => {
-    if (typeof attributes.bar !== 'string') {
-      throw new Error(`[bar]: expected value of type [string] but got [${typeof data.bar}]`);
-    }
-    if (typeof attributes.foo !== 'string' && typeof attributes.foo !== 'boolean') {
-      throw new Error(`[foo]: expected value of type [string,boolean] but got [${typeof attributes.foo}]`);
-    }
-  }
 }
 ```
 

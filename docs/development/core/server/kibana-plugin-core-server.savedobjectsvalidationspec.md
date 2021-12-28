@@ -6,10 +6,10 @@
 
 Allowed property validation options: either @<!-- -->kbn/config-schema validations or custom validation functions.
 
-See [SavedObjectsValidationFunction](./kibana-plugin-core-server.savedobjectsvalidationfunction.md) for custom validation.
+See  for custom validation.
 
 <b>Signature:</b>
 
 ```typescript
-export declare type SavedObjectsValidationSpec = ObjectType | SavedObjectsValidationFunction;
+export declare type SavedObjectsValidationSpec = ObjectType;
 ```
