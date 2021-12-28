@@ -26,6 +26,8 @@ export interface ExtensionPointStorageContextMock {
 export const createExtensionPointStorageMock = (
   logger: ReturnType<typeof loggerMock.create> = loggerMock.create()
 ): ExtensionPointStorageContextMock => {
+  const extensionPointStorage = new ExtensionPointStorage(logger);
+
   const exceptionPreCreateCallback: ExtensionPointStorageContextMock['exceptionPreCreateCallback'] =
     jest.fn(async (data) => {
       return {
@@ -41,8 +43,6 @@ export const createExtensionPointStorageMock = (
         name: `${data.name}-2`,
       };
     });
-
-  const extensionPointStorage = new ExtensionPointStorage(logger);
 
   extensionPointStorage.add({
     callback: exceptionPreCreateCallback,

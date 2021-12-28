@@ -6,6 +6,11 @@
  */
 
 import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
+import {
+  EXCEPTION_LIST_NAMESPACE,
+  EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
+} from '@kbn/securitysolution-list-constants';
 
 import { getFoundExceptionListSchemaMock } from '../../../common/schemas/response/found_exception_list_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
@@ -16,9 +21,15 @@ import {
   getTrustedAppsListSchemaMock,
 } from '../../../common/schemas/response/exception_list_schema.mock';
 import { ExtensionPointStorage, ExtensionPointStorageClientInterface } from '../extension_points';
+import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
+import { DATE_NOW, ID, _VERSION } from '../../../common/constants.mock';
+import type { SavedObject } from '../../../../../../src/core/types';
 
 import { ExceptionListClient } from './exception_list_client';
-import { CreateExceptionListItemOptions } from './exception_list_client_types';
+import type { CreateExceptionListItemOptions } from './exception_list_client_types';
+
+const isExceptionsListSavedObjectType = (type: string): boolean =>
+  type === EXCEPTION_LIST_NAMESPACE || type === EXCEPTION_LIST_NAMESPACE_AGNOSTIC;
 
 export class ExceptionListClientMock extends ExceptionListClient {
   public getExceptionList = jest.fn().mockResolvedValue(getExceptionListSchemaMock());
@@ -88,4 +99,130 @@ export const getCreateExceptionListItemOptionsMock = (): CreateExceptionListItem
     tags,
     type,
   };
+};
+
+export const getExceptionListSoSchemaMock = (
+  overrides: Partial<ExceptionListSoSchema> = {}
+): ExceptionListSoSchema => {
+  /* eslint-disable @typescript-eslint/naming-convention */
+  const {
+    comments,
+    created_at,
+    created_by,
+    description,
+    entries,
+    item_id,
+    list_id,
+    meta,
+    name,
+    os_types,
+    tags,
+    tie_breaker_id,
+    type,
+    updated_by,
+  } = getExceptionListItemSchemaMock();
+  /* eslint-enable @typescript-eslint/naming-convention */
+
+  const soSchema: ExceptionListSoSchema = {
+    comments,
+    created_at,
+    created_by,
+    description,
+    entries,
+    immutable: undefined,
+    item_id,
+    list_id,
+    list_type: 'item',
+    meta,
+    name,
+    os_types,
+    tags,
+    tie_breaker_id,
+    type,
+    updated_by,
+    version: undefined,
+    ...overrides,
+  };
+
+  return soSchema;
+};
+
+/**
+ * Returns a Saved Object with the `ExceptionListSoSchema` as the attributes
+ * @param attributesOverrides
+ * @param savedObjectOverrides
+ */
+export const getExceptionListItemSavedObject = (
+  attributesOverrides: Partial<ExceptionListSoSchema> = {},
+  savedObjectOverrides: Partial<Omit<SavedObject, 'attributes'>> = {}
+): SavedObject<ExceptionListSoSchema> => {
+  return {
+    attributes: getExceptionListSoSchemaMock(attributesOverrides),
+    coreMigrationVersion: undefined,
+    error: undefined,
+    id: ID,
+    migrationVersion: undefined,
+    namespaces: undefined,
+    originId: undefined,
+    references: [],
+    type: getSavedObjectType({ namespaceType: 'agnostic' }),
+    updated_at: DATE_NOW,
+    version: _VERSION,
+    ...savedObjectOverrides,
+  };
+};
+
+/**
+ * Returns a saved objects client mock that includes method mocks to handle working with the exceptions list client
+ * @param [soClient] can be provided on input and its methods will be mocked
+ */
+export const getExceptionListSavedObjectClientMock = (
+  soClient: ReturnType<typeof savedObjectsClientMock.create> = savedObjectsClientMock.create()
+): ReturnType<typeof savedObjectsClientMock.create> => {
+  // mock `.create()`
+  const origCreateMock = soClient.create.getMockImplementation();
+  // @ts-expect-error
+  soClient.create.mockImplementation(async (...args) => {
+    const [type, attributes] = args;
+
+    if (isExceptionsListSavedObjectType(type)) {
+      return getExceptionListItemSavedObject(attributes as ExceptionListSoSchema, { type });
+    }
+
+    return origCreateMock ? origCreateMock(...args) : undefined;
+  });
+
+  // Mock `.update()`
+  const origUpdateMock = soClient.update.getMockImplementation();
+  soClient.update.mockImplementation(
+    // @ts-expect-error
+    async (...args) => {
+      const [type, id, attributes, { version } = { version: undefined }] = args;
+
+      if (isExceptionsListSavedObjectType(type)) {
+        return getExceptionListItemSavedObject(attributes as ExceptionListSoSchema, {
+          id,
+          type,
+          version: version ?? _VERSION,
+        });
+      }
+
+      return origUpdateMock ? origUpdateMock(...args) : undefined;
+    }
+  );
+
+  // Mock `.get()`
+  const origGetMock = soClient.get.getMockImplementation();
+  // @ts-expect-error
+  soClient.get.mockImplementation(async (...args) => {
+    const [type, id] = args;
+
+    if (isExceptionsListSavedObjectType(type)) {
+      return getExceptionListItemSavedObject({}, { id });
+    }
+
+    return origGetMock ? origGetMock(...args) : undefined;
+  });
+
+  return soClient;
 };
