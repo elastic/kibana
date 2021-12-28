@@ -150,7 +150,6 @@ export class DashboardPlugin
   ): DashboardSetup {
     this.dashboardFeatureFlagConfig =
       this.initializerContext.config.get<DashboardFeatureFlagConfig>();
-    const startServices = core.getStartServices();
 
     const getPlaceholderEmbeddableStartServices = async () => {
       const [coreStart] = await core.getStartServices();
