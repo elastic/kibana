@@ -7,11 +7,8 @@
 
 import type { FieldFormat as IFieldFormat } from 'src/plugins/field_formats/common';
 import { SavedObjectNotFound } from '../../../../../../../../src/plugins/kibana_utils/public';
-import {
-  DataPublicPluginStart,
-  IndexPattern,
-  IndexPatternSpec,
-} from '../../../../../../../../src/plugins/data/public';
+import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
+import type { DataView, DataViewSpec } from '../../../../../../../../src/plugins/data/common';
 import { rumFieldFormats } from '../configurations/rum/field_formats';
 import { syntheticsFieldFormats } from '../configurations/synthetics/field_formats';
 import { AppDataType, FieldFormat, FieldFormatParams } from '../types';
@@ -95,7 +92,7 @@ export class ObservabilityIndexPatterns {
     });
   }
   // we want to make sure field formats remain same
-  async validateFieldFormats(app: AppDataType, indexPattern: IndexPattern) {
+  async validateFieldFormats(app: AppDataType, indexPattern: DataView) {
     const defaultFieldFormats = getFieldFormatsForApp(app);
     if (defaultFieldFormats && defaultFieldFormats.length > 0) {
       let isParamsDifferent = false;
@@ -117,7 +114,7 @@ export class ObservabilityIndexPatterns {
   }
 
   getFieldFormats(app: AppDataType) {
-    const fieldFormatMap: IndexPatternSpec['fieldFormats'] = {};
+    const fieldFormatMap: DataViewSpec['fieldFormats'] = {};
 
     (appFieldFormats?.[app] ?? []).forEach(({ field, format }) => {
       fieldFormatMap[field] = format;
@@ -139,7 +136,7 @@ export class ObservabilityIndexPatterns {
     }
   }
 
-  async getIndexPattern(app: AppDataType, indices?: string): Promise<IndexPattern | undefined> {
+  async getIndexPattern(app: AppDataType, indices?: string): Promise<DataView | undefined> {
     if (!this.data) {
       throw new Error('data is not defined');
     }
