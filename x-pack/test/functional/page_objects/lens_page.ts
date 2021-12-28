@@ -289,6 +289,30 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    async pressMetaKey(metaKey: 'shift' | 'alt' | 'ctrl') {
+      const metaToAction = {
+        shift: 'duplicate',
+        alt: 'swap',
+        ctrl: 'combine',
+      };
+      const waitTime = 1000;
+      log.debug(`Wait ${waitTime}ms for the extra dop options to show up`);
+      await setTimeoutAsync(waitTime);
+      const browserKey =
+        metaKey === 'shift'
+          ? browser.keys.SHIFT
+          : metaKey === 'alt'
+          ? browser.keys.ALT
+          : browser.keys.COMMAND;
+      log.debug(`Press ${metaKey} with keyboard`);
+      await retry.try(async () => {
+        await browser.pressKeys(browserKey);
+        await find.existsByCssSelector(
+          `.lnsDragDrop__extraDrop > [data-test-subj="lnsDragDrop-${metaToAction[metaKey]}"].lnsDragDrop-isActiveDropTarget`
+        );
+      });
+    },
+
     /**
      * Copies field to chosen destination that is defined by distance of `steps`
      * (right arrow presses) from it
@@ -297,7 +321,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param steps - number of steps user has to press right
      * @param reverse - defines the direction of going through drops
      * */
-    async dragFieldWithKeyboard(fieldName: string, steps = 1, reverse = false) {
+    async dragFieldWithKeyboard(
+      fieldName: string,
+      steps = 1,
+      reverse = false,
+      metaKey?: 'shift' | 'alt' | 'ctrl'
+    ) {
       const field = await find.byCssSelector(
         `[data-test-subj="lnsDragDrop_draggable-${fieldName}"] [data-test-subj="lnsDragDrop-keyboardHandler"]`
       );
@@ -308,6 +337,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
       for (let i = 0; i < steps; i++) {
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
+      }
+      if (metaKey) {
+        this.pressMetaKey(metaKey);
       }
       await browser.pressKeys(browser.keys.ENTER);
       await this.waitForLensDragDropToFinish();
@@ -323,7 +355,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param steps - number of steps of presses right or left
      * @param reverse - defines the direction of going through drops
      * */
-    async dimensionKeyboardDragDrop(group: string, index = 0, steps = 1, reverse = false) {
+    async dimensionKeyboardDragDrop(
+      group: string,
+      index = 0,
+      steps = 1,
+      reverse = false,
+      metaKey?: 'shift' | 'alt' | 'ctrl'
+    ) {
       const elements = await find.allByCssSelector(
         `[data-test-subj="${group}"]  [data-test-subj="lnsDragDrop-keyboardHandler"]`
       );
@@ -332,6 +370,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await browser.pressKeys(browser.keys.ENTER);
       for (let i = 0; i < steps; i++) {
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
+      }
+      if (metaKey) {
+        this.pressMetaKey(metaKey);
       }
       await browser.pressKeys(browser.keys.ENTER);
 
@@ -1183,7 +1224,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param to - the selector of the main drop type of dimension being dropped to
      * @param type - extra drop type
      * */
-    async dragDimensionToExtraDropType(from: string, to: string, type: 'duplicate' | 'swap') {
+    async dragDimensionToExtraDropType(
+      from: string,
+      to: string,
+      type: 'duplicate' | 'swap' | 'combine'
+    ) {
       await this.dragEnterDrop(
         testSubjects.getCssSelector(from),
         testSubjects.getCssSelector(`${to} > lnsDragDrop`),

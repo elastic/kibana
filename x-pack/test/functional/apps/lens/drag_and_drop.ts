@@ -246,6 +246,19 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         ]);
         await PageObjects.lens.assertFocusedDimension('Count of records');
       });
+
+      it('should combine field with multi fields dimension', async () => {
+        await PageObjects.lens.removeLayer();
+        await PageObjects.lens.dragFieldWithKeyboard('clientip');
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
+          'Top values of clientip'
+        );
+
+        await PageObjects.lens.dragFieldWithKeyboard('@message.raw', 2, false, 'ctrl');
+        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
+          'Top values of clientip + 1 other'
+        );
+      });
     });
 
     describe('workspace drop', () => {
