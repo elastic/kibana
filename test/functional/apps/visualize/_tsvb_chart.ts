@@ -119,7 +119,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const error = await visualBuilder.getVisualizeError();
 
         expect(error).to.eql(
-          'The aggregation derivative is not supported in entire_time_range mode'
+          'The aggregation "derivative" is not supported in entire_time_range mode'
         );
       });
 
@@ -205,7 +205,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const error = await visualBuilder.getVisualizeError();
 
         expect(error).to.eql(
-          'The aggregation derivative is not supported in entire_time_range mode'
+          'The aggregation "derivative" is not supported in entire_time_range mode'
         );
       });
 
@@ -359,7 +359,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const error = await visualBuilder.getVisualizeError();
 
         expect(error).to.eql(
-          'The aggregation derivative is not supported in entire_time_range mode'
+          'The aggregation "derivative" is not supported in entire_time_range mode'
         );
       });
 

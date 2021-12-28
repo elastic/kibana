@@ -286,12 +286,26 @@ export class GisPageObject extends FtrService {
     await this.testSubjects.click('layerVisibilityToggleButton');
   }
 
+  async openLegend() {
+    const isOpen = await this.testSubjects.exists('mapLayerTOC');
+    if (isOpen === false) {
+      await this.testSubjects.click('mapExpandLayerControlButton');
+      await this.testSubjects.existOrFail('mapLayerTOC');
+    }
+  }
+
   async closeLegend() {
     const isOpen = await this.testSubjects.exists('mapLayerTOC');
     if (isOpen) {
       await this.testSubjects.click('mapToggleLegendButton');
       await this.testSubjects.waitForDeleted('mapLayerTOC');
     }
+  }
+
+  async clickFitToData() {
+    this.log.debug('Fit to data');
+    await this.testSubjects.click('fitToData');
+    await this.waitForMapPanAndZoom();
   }
 
   async clickFitToBounds(layerName: string) {
