@@ -5,9 +5,45 @@
  * 2.0.
  */
 
-import { asPercent, asDecimalOrInteger } from './formatters';
+import { asDecimal, asInteger, asPercent, asDecimalOrInteger } from './formatters';
 
 describe('formatters', () => {
+  describe('asDecimal', () => {
+    it('displays the not available label when the number is not finite', () => {
+      expect(asDecimal(Infinity)).toBe('N/A');
+      expect(asDecimal(-Infinity)).toBe('N/A');
+      expect(asDecimal(null)).toBe('N/A');
+      expect(asDecimal(undefined)).toBe('N/A');
+    });
+
+    it('displays the correct label when the number is finite', () => {
+      expect(asDecimal(0)).toBe('0.0');
+      expect(asDecimal(0.005)).toBe('0.0');
+      expect(asDecimal(1.23)).toBe('1.2');
+      expect(asDecimal(12.34)).toBe('12.3');
+      expect(asDecimal(123.45)).toBe('123.5');
+      expect(asDecimal(1234.56)).toBe('1,234.6');
+    });
+  });
+
+  describe('asInteger', () => {
+    it('displays the not available label when the number is not finite', () => {
+      expect(asInteger(Infinity)).toBe('N/A');
+      expect(asInteger(-Infinity)).toBe('N/A');
+      expect(asInteger(null)).toBe('N/A');
+      expect(asInteger(undefined)).toBe('N/A');
+    });
+
+    it('displays the correct label when the number is finite', () => {
+      expect(asInteger(0)).toBe('0');
+      expect(asInteger(0.005)).toBe('0');
+      expect(asInteger(1.23)).toBe('1');
+      expect(asInteger(12.34)).toBe('12');
+      expect(asInteger(123.45)).toBe('123');
+      expect(asInteger(1234.56)).toBe('1,235');
+    });
+  });
+
   describe('asPercent', () => {
     it('formats as integer when number is above 10', () => {
       expect(asPercent(3725, 10000, 'n/a')).toEqual('37%');
