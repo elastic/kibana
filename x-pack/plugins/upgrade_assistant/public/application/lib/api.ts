@@ -228,6 +228,16 @@ export class ApiService {
       method: 'post',
     });
   }
+
+  public useLoadUpgradeStatus() {
+    return this.useRequest<{
+      readyForUpgrade: boolean;
+      details: string;
+    }>({
+      path: `${API_BASE_PATH}/status`,
+      method: 'get',
+    });
+  }
 }
 
 export const apiService = new ApiService();

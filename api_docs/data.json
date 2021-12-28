@@ -10911,6 +10911,20 @@
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.GetFieldsOptions.filter",
+            "type": "Object",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "QueryDslQueryContainer",
+              " | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -13419,7 +13433,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          ") => Promise<any>; getFieldsForIndexPattern: (indexPattern: ",
+          ") => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; getFieldsForIndexPattern: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -13443,7 +13465,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          " | undefined) => Promise<any>; refreshFields: (indexPattern: ",
+          " | undefined) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; refreshFields: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -14883,7 +14913,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          ") => Promise<any>; getFieldsForIndexPattern: (indexPattern: ",
+          ") => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; getFieldsForIndexPattern: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -14907,7 +14945,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          " | undefined) => Promise<any>; refreshFields: (indexPattern: ",
+          " | undefined) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; refreshFields: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -20245,7 +20291,15 @@
               "section": "def-common.GetFieldsOptions",
               "text": "GetFieldsOptions"
             },
-            ") => Promise<any>; getFieldsForIndexPattern: (indexPattern: ",
+            ") => Promise<",
+            {
+              "pluginId": "dataViews",
+              "scope": "common",
+              "docId": "kibDataViewsPluginApi",
+              "section": "def-common.FieldSpec",
+              "text": "FieldSpec"
+            },
+            "[]>; getFieldsForIndexPattern: (indexPattern: ",
             {
               "pluginId": "dataViews",
               "scope": "common",
@@ -20269,7 +20323,15 @@
               "section": "def-common.GetFieldsOptions",
               "text": "GetFieldsOptions"
             },
-            " | undefined) => Promise<any>; refreshFields: (indexPattern: ",
+            " | undefined) => Promise<",
+            {
+              "pluginId": "dataViews",
+              "scope": "common",
+              "docId": "kibDataViewsPluginApi",
+              "section": "def-common.FieldSpec",
+              "text": "FieldSpec"
+            },
+            "[]>; refreshFields: (indexPattern: ",
             {
               "pluginId": "dataViews",
               "scope": "common",
@@ -20446,7 +20508,15 @@
               "section": "def-common.GetFieldsOptions",
               "text": "GetFieldsOptions"
             },
-            ") => Promise<any>; getFieldsForIndexPattern: (indexPattern: ",
+            ") => Promise<",
+            {
+              "pluginId": "dataViews",
+              "scope": "common",
+              "docId": "kibDataViewsPluginApi",
+              "section": "def-common.FieldSpec",
+              "text": "FieldSpec"
+            },
+            "[]>; getFieldsForIndexPattern: (indexPattern: ",
             {
               "pluginId": "dataViews",
               "scope": "common",
@@ -20470,7 +20540,15 @@
               "section": "def-common.GetFieldsOptions",
               "text": "GetFieldsOptions"
             },
-            " | undefined) => Promise<any>; refreshFields: (indexPattern: ",
+            " | undefined) => Promise<",
+            {
+              "pluginId": "dataViews",
+              "scope": "common",
+              "docId": "kibDataViewsPluginApi",
+              "section": "def-common.FieldSpec",
+              "text": "FieldSpec"
+            },
+            "[]>; refreshFields: (indexPattern: ",
             {
               "pluginId": "dataViews",
               "scope": "common",
@@ -27159,7 +27237,9 @@
               "\n Get a list of field objects for an index pattern that may contain wildcards\n"
             ],
             "signature": [
-              "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; }) => Promise<",
+              "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; filter?: ",
+              "QueryDslQueryContainer",
+              " | undefined; }) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "server",
@@ -27243,6 +27323,20 @@
                     "description": [],
                     "signature": [
                       "string | undefined"
+                    ],
+                    "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.filter",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "filter",
+                    "description": [],
+                    "signature": [
+                      "QueryDslQueryContainer",
+                      " | undefined"
                     ],
                     "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
                     "deprecated": false
@@ -33805,7 +33899,15 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ") => Promise<any>"
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[]>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -33869,7 +33971,15 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              " | undefined) => Promise<any>"
+              " | undefined) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[]>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -42552,6 +42662,20 @@
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.GetFieldsOptions.filter",
+            "type": "Object",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "QueryDslQueryContainer",
+              " | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -45179,7 +45303,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          ") => Promise<any>; getFieldsForIndexPattern: (indexPattern: ",
+          ") => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; getFieldsForIndexPattern: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -45203,7 +45335,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          " | undefined) => Promise<any>; refreshFields: (indexPattern: ",
+          " | undefined) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; refreshFields: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -46497,7 +46637,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          ") => Promise<any>; getFieldsForIndexPattern: (indexPattern: ",
+          ") => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; getFieldsForIndexPattern: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -46521,7 +46669,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          " | undefined) => Promise<any>; refreshFields: (indexPattern: ",
+          " | undefined) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; refreshFields: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
