@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import os from 'os';
 import { from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import type {
@@ -17,8 +16,9 @@ import type {
 } from 'src/core/server';
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import { ChromiumArchivePaths, HeadlessChromiumDriverFactory, install } from './browsers';
-import { createConfig, ConfigType } from './config';
+import { ConfigType, createConfig } from './config';
 import { getScreenshots, ScreenshotOptions } from './screenshots';
+import { getChromiumPackage } from './utils';
 
 interface SetupDeps {
   screenshotMode: ScreenshotModePluginSetup;
@@ -58,17 +58,9 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
     this.browserDriverFactory = (async () => {
       const paths = new ChromiumArchivePaths();
       const logger = this.logger.get('chromium');
-
-      const platform = process.platform;
-      const architecture = os.arch();
-      const chromiumPackageInfo = paths.find(process.platform, architecture);
-      if (!chromiumPackageInfo) {
-        throw new Error(`Unsupported platform: ${platform}-${architecture}`);
-      }
-
       const [config, binaryPath] = await Promise.all([
         createConfig(this.logger, this.config),
-        install(paths, logger, chromiumPackageInfo),
+        install(paths, logger, getChromiumPackage()),
       ]);
 
       return new HeadlessChromiumDriverFactory(this.screenshotMode, config, logger, binaryPath);
