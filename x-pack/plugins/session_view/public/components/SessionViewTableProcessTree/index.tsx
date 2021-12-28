@@ -17,8 +17,9 @@ import { SessionView } from '../SessionView';
 import { ActionProps } from '../../../../timelines/common';
 import { SESSION_ENTRY_LEADERS_ROUTE } from '../../../common/constants';
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SessionViewTableProcessTreeProps {
- // TODO: Not sure how we want to allow other plugins to modifiy this 
+  // TODO: Not sure how we want to allow other plugins to modifiy this
 }
 
 // Initializing react-query
@@ -32,10 +33,7 @@ export const SessionViewTableProcessTreeContent = (props: SessionViewTableProces
 
   const { http } = useKibana<CoreStart>().services;
   const { data } = useQuery<any, Error>(
-    [
-      'SessionViewTableProcessTreeEvent', 
-      eventId,
-    ], 
+    ['SessionViewTableProcessTreeEvent', eventId],
     () => {
       return http.get<any>(SESSION_ENTRY_LEADERS_ROUTE, {
         query: {
@@ -45,7 +43,7 @@ export const SessionViewTableProcessTreeContent = (props: SessionViewTableProces
     },
     {
       enabled: isFetchEnabled,
-    },
+    }
   );
 
   const handleCloseProcessTree = () => {
@@ -58,15 +56,15 @@ export const SessionViewTableProcessTreeContent = (props: SessionViewTableProces
       setSelectedSessionEntityId(data.session_entry_leader.process.entity_id);
     }
   }, [data]);
-  
-  const handleOpenSessionViewer = (props: ActionProps) => {
-    setEventId(props.eventId);
+
+  const handleOpenSessionViewer = (actionProps: ActionProps) => {
+    setEventId(actionProps.eventId);
   };
 
   if (selectedSessionEntityId) {
     return (
       <div>
-        <EuiButtonEmpty 
+        <EuiButtonEmpty
           iconSide="left"
           iconType="cross"
           onClick={handleCloseProcessTree}
@@ -74,14 +72,12 @@ export const SessionViewTableProcessTreeContent = (props: SessionViewTableProces
         >
           Close session viewer
         </EuiButtonEmpty>
-        <SessionView sessionEntityId={selectedSessionEntityId}/>
+        <SessionView sessionEntityId={selectedSessionEntityId} />
       </div>
     );
   }
 
-  return (
-    <SessionLeaderTable onOpenSessionViewer={handleOpenSessionViewer}/>
-  );
+  return <SessionLeaderTable onOpenSessionViewer={handleOpenSessionViewer} />;
 };
 
 export const SessionViewTableProcessTree = (props: SessionViewTableProcessTreeProps) => {

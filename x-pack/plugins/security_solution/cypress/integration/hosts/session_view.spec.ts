@@ -38,14 +38,14 @@ const tableHeaders = {
   'process.args': 'process.args',
 };
 
-const TEST_EVENT_ID = 'cDLmwH0BLujk-6QxyflF';
+const TEST_EVENT_ID = 'K6H1AX4BnCZfhnl7tkjN';
 const LS_TEST_COMMAND = 'ls --color=auto';
-const ALERT_TEST_COMMAND = 'vi cmd/cmd.prj';
+const ALERT_TEST_COMMAND = 'vi cmd/config.ini';
 const ALERT_NODE_TEST_ID = getProcessTreeNodeAlertDetailViewRule(
-  '64940663527c71b1f577df2aa529c42afc1c023108154714b49966e517e395b8'
+  '8a60ee0c7ae7f41d83a07bd80220ec04527464cbf32ea62f9e671c2d43d9d71c'
 );
-const ALERT_RULE_ID = 'd9f45980-5e10-11ec-b7c6-17150991b0b3';
-const FIRST_CHILD_COMMAND = '/usr/bin/id'
+const ALERT_RULE_ID = '422ff92b-837a-49a3-9746-188b7286f56f';
+const FIRST_CHILD_COMMAND = '/usr/bin/id';
 
 describe('Session view', () => {
   context('Rendering table empty state', () => {
@@ -139,36 +139,50 @@ describe('Session view', () => {
       openSessionView(TEST_EVENT_ID);
 
       // Amount of visible commands on the session view should increase when user clicks on the Child Process dropdown button
-      cy.get(SESSION_COMMANDS).children().its('length').then(lengthBefore =>{
-        const beforeClick = lengthBefore;
-        cy.contains('Child processes').click()
-        cy.contains(FIRST_CHILD_COMMAND).should('exist');
-        cy.get(SESSION_COMMANDS).children().its('length').then(lengthAfter =>{
-          //const afterClick = lengthAfter;
-          expect(lengthAfter).to.be.greaterThan(beforeClick)
-        })
-      })
+      cy.get(SESSION_COMMANDS)
+        .children()
+        .its('length')
+        .then((lengthBefore) => {
+          const beforeClick = lengthBefore;
+          cy.contains('Child processes').click();
+          cy.contains(FIRST_CHILD_COMMAND).should('exist');
+          cy.get(SESSION_COMMANDS)
+            .children()
+            .its('length')
+            .then((lengthAfter) => {
+              // const afterClick = lengthAfter;
+              expect(lengthAfter).to.be.greaterThan(beforeClick);
+            });
+        });
 
-      //Checks the left margin value for each command line, left margin of child would be more to the right compared the parent 
-      
-      //Get the margin-left value for parent command
-      cy.get(SESSION_COMMANDS).eq(1).then(element => {
-        const win = element[0].ownerDocument!.defaultView
-        const before = win!.getComputedStyle(element[0],'before')
-        const contentValue = before.getPropertyValue('margin-left')
-        const parentCommandLeftMargin = parseInt(contentValue.replace('px',''))
-      //Get the margin-left value for child command and compares both of them
-        cy.get(SESSION_COMMANDS).eq(2).then(element => {
-          const win = element[0].ownerDocument!.defaultView
-          const before = win!.getComputedStyle(element[0],'before')
-          const contentValue = before.getPropertyValue('margin-left')
-          const childCommandLeftMargin = parseInt(contentValue.replace('px',''))
-          expect(parentCommandLeftMargin).to.be.greaterThan(childCommandLeftMargin)
-        })
-      })
-    })
-    //Commented out Root Escalation check until we have better filtering
-/*
+      // Checks the left margin value for each command line, left margin of child would be more to the right compared the parent
+
+      // Get the margin-left value for parent command
+      cy.get(SESSION_COMMANDS)
+        .eq(1)
+        .then((element) => {
+          const win = element[0].ownerDocument.defaultView;
+          const before = win && win.getComputedStyle(element[0], 'before');
+          const contentValue = before && before.getPropertyValue('margin-left');
+          const parentCommandLeftMargin = contentValue
+            ? parseInt(contentValue.replace('px', ''), 10)
+            : 0;
+          // Get the margin-left value for child command and compares both of them
+          cy.get(SESSION_COMMANDS)
+            .eq(2)
+            .then((childElement) => {
+              const childWin = childElement[0].ownerDocument.defaultView;
+              const childBefore = childWin && childWin.getComputedStyle(childElement[0], 'before');
+              const childContentValue = childBefore && childBefore.getPropertyValue('margin-left');
+              const childCommandLeftMargin = childContentValue
+                ? parseInt(childContentValue.replace('px', ''), 10)
+                : 0;
+              expect(parentCommandLeftMargin).to.be.greaterThan(childCommandLeftMargin);
+            });
+        });
+    });
+    // Commented out Root Escalation check until we have better filtering
+    /*
     it('root escalation', () => {
       openSessionView(TEST_EVENT_ID);
 

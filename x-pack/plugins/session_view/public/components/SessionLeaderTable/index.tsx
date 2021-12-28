@@ -4,11 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { 
-  useCallback,
-  useState,
-} from 'react';
-import { 
+import React, { useCallback, useState } from 'react';
+import {
   EuiCheckbox,
   EuiButtonIcon,
   EuiToolTip,
@@ -19,8 +16,8 @@ import {
 import { useStyles } from './styles';
 import { SessionViewServices } from '../../types';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { 
-  ColumnHeaderOptions, 
+import {
+  ColumnHeaderOptions,
   ActionProps,
   CellValueElementProps,
   RowRenderer,
@@ -39,52 +36,52 @@ export interface SessionLeaderTableProps {
   onInspect?: (props: ActionProps) => void;
   onAnalyzeSession?: (props: ActionProps) => void;
   onOpenSessionViewer?: (props: ActionProps) => void;
-};
+}
 
 // Not sure why the timelines plugins doesn't have a type for the
 // leading control columns props. So this is a hack to get that working for now
 type RenderLeadingControllColumnProps = {
-  isSelectAllChecked: boolean,
-  onSelectAll: (props: { isSelected: boolean }) => void,
+  isSelectAllChecked: boolean;
+  onSelectAll: (props: { isSelected: boolean }) => void;
 };
 
 const STANDALONE_ID = 'standalone-t-grid';
 
 const DEFAULT_COLUMNS: ColumnHeaderOptions[] = [
   {
-    columnHeaderType: "not-filtered",
-    id: "@timestamp",
+    columnHeaderType: 'not-filtered',
+    id: '@timestamp',
     initialWidth: 180,
     isSortable: true,
   },
   {
-    columnHeaderType: "not-filtered",
-    id: "process.user.name",
+    columnHeaderType: 'not-filtered',
+    id: 'process.user.name',
     initialWidth: 180,
     isSortable: true,
   },
   {
-    columnHeaderType: "not-filtered",
-    id: "event.kind",
+    columnHeaderType: 'not-filtered',
+    id: 'event.kind',
     initialWidth: 180,
     isSortable: true,
   },
   {
-    columnHeaderType: "not-filtered",
-    id: "process.session.pid",
+    columnHeaderType: 'not-filtered',
+    id: 'process.session.pid',
     initialWidth: 180,
     isSortable: true,
   },
   {
-    columnHeaderType: "not-filtered",
-    id: "process.args",
+    columnHeaderType: 'not-filtered',
+    id: 'process.args',
     initialWidth: 180,
     isSortable: true,
   },
 ];
 
 // Start date is 7 days ago
-let startDate = new Date()
+const startDate = new Date();
 startDate.setDate(new Date().getDate() - 7);
 const DEFAULT_END_DATE = new Date().toISOString();
 const DEFAULT_START_DATE = startDate.toISOString();
@@ -114,42 +111,41 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
   const [columns, setColumns] = useState<ColumnHeaderOptions[]>(defaultColumns);
   const [openPopoverId, setOpenPopoverId] = useState<string>('');
 
-  const { 
-    rowButtonContainer,
-    rowCheckbox,
-  } = useStyles();
+  const { rowButtonContainer, rowCheckbox } = useStyles();
 
-  const handleStateChange = useCallback((state: TGridState) => {
-    onStateChange(state);
-    const { timelineById } = state;
-    const { [STANDALONE_ID]: standAloneTGrid } = timelineById;
-    const { columns: newColumns } = standAloneTGrid;
-    setColumns(newColumns);
-  }, [setColumns]);
+  const handleStateChange = useCallback(
+    (state: TGridState) => {
+      onStateChange(state);
+      const { timelineById } = state;
+      const { [STANDALONE_ID]: standAloneTGrid } = timelineById;
+      const { columns: newColumns } = standAloneTGrid;
+      setColumns(newColumns);
+    },
+    [onStateChange]
+  );
 
   const handleSetRefetch = (ref: () => void) => {
     setRefetch(ref);
   };
 
-  const handleMoreActionsClick = (eventId: string = '') => () => {
-    if (openPopoverId === eventId) {
-      setOpenPopoverId('');
-    } else {
-      setOpenPopoverId(eventId);
-    }
-  }
+  const handleMoreActionsClick =
+    (eventId: string = '') =>
+    () => {
+      if (openPopoverId === eventId) {
+        setOpenPopoverId('');
+      } else {
+        setOpenPopoverId(eventId);
+      }
+    };
 
   const handleClosePopover = () => {
     setOpenPopoverId('');
-  }
+  };
 
-  // Must cast to any since the timelines plugin expects 
-  // a React component. 
-  const renderLeadingControlColumn = (props: any) => {
-    const { 
-      isSelectAllChecked, 
-      onSelectAll,
-    } = (props as RenderLeadingControllColumnProps);
+  // Must cast to any since the timelines plugin expects
+  // a React component.
+  const renderLeadingControlColumn = (renderProps: any) => {
+    const { isSelectAllChecked, onSelectAll } = renderProps as RenderLeadingControllColumnProps;
 
     return (
       <EuiCheckbox
@@ -160,13 +156,8 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
     );
   };
 
-  const renderRowCheckbox = (props: ActionProps) => {
-    const { 
-      ariaRowindex,
-      eventId,
-      checked,
-      onRowSelected,
-    } = props;
+  const renderRowCheckbox = (actionProps: ActionProps) => {
+    const { ariaRowindex, eventId, checked, onRowSelected } = actionProps;
 
     const checkboxId = `row-${ariaRowindex}-checkbox`;
 
@@ -175,49 +166,45 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
         <EuiCheckbox
           id={checkboxId}
           checked={checked}
-          onChange={() => onRowSelected({
-            eventIds: [eventId],
-            isSelected: !checked,
-          })}
+          onChange={() =>
+            onRowSelected({
+              eventIds: [eventId],
+              isSelected: !checked,
+            })
+          }
         />
       </div>
     );
   };
 
-  const renderExpandButton = (props: ActionProps) => {
+  const renderExpandButton = (actionProps: ActionProps) => {
     return (
-      <EuiToolTip
-        position="top"
-        content="Expand"
-      >
+      <EuiToolTip position="top" content="Expand">
         <EuiButtonIcon
           aria-label="row expand icon button"
           color="primary"
           iconType="expand"
-          onClick={() => onExpand(props)}
+          onClick={() => onExpand(actionProps)}
         />
       </EuiToolTip>
     );
   };
 
-  const renderInspectButton = (props: ActionProps) => {
+  const renderInspectButton = (actionProps: ActionProps) => {
     return (
-      <EuiToolTip
-        position="top"
-        content="Inspect"
-      >
+      <EuiToolTip position="top" content="Inspect">
         <EuiButtonIcon
           aria-label="row inspect icon button"
           color="primary"
           iconType="inspect"
-          onClick={() => onInspect(props)}
+          onClick={() => onInspect(actionProps)}
         />
       </EuiToolTip>
     );
   };
 
-  const renderOpenMoreActionsButton = (props: ActionProps) => {
-    const { eventId } = props;
+  const renderOpenMoreActionsButton = (actionProps: ActionProps) => {
+    const { eventId } = actionProps;
     return (
       <EuiPopover
         anchorPosition="upCenter"
@@ -233,13 +220,13 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
           />
         }
       >
-        <EuiContextMenuPanel 
+        <EuiContextMenuPanel
           size="s"
           items={[
             <EuiContextMenuItem
               key="analyzeSession"
               onClick={() => {
-                onAnalyzeSession(props);
+                onAnalyzeSession(actionProps);
                 handleClosePopover();
               }}
             >
@@ -248,7 +235,7 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
             <EuiContextMenuItem
               key="openSessionViewer"
               onClick={() => {
-                onOpenSessionViewer(props);
+                onOpenSessionViewer(actionProps);
                 handleClosePopover();
               }}
             >
@@ -260,13 +247,13 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
     );
   };
 
-  const renderLeadingControlCell = (props: ActionProps) => {
+  const renderLeadingControlCell = (actionProps: ActionProps) => {
     return (
       <div css={rowButtonContainer}>
-        {renderRowCheckbox(props)}
-        {renderExpandButton(props)}
-        {renderInspectButton(props)}
-        {renderOpenMoreActionsButton(props)}
+        {renderRowCheckbox(actionProps)}
+        {renderExpandButton(actionProps)}
+        {renderInspectButton(actionProps)}
+        {renderOpenMoreActionsButton(actionProps)}
       </div>
     );
   };
@@ -274,14 +261,14 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
   const renderCellValue = ({ columnId, data }: CellValueElementProps) => {
     const value = data.find((o) => o.field === columnId)?.value?.[0];
     return value || <>&#8212;</>;
-  }
+  };
 
   const renderUnit = () => {
     return 'events';
-  }
+  };
 
   const renderTimelinesTable = () => {
-    return (timelines.getTGrid<'standalone'>({
+    return timelines.getTGrid<'standalone'>({
       appId: 'session_view',
       casesOwner: 'session_view_cases_owner',
       casePermissions: null,
@@ -299,29 +286,27 @@ export const SessionLeaderTable = (props: SessionLeaderTableProps) => {
       loadingText: 'Loading text',
       footerText: 'Session Entry Leaders',
       onStateChange: handleStateChange,
-      query: {query: "", language: "kuery"},
+      query: { query: '', language: 'kuery' },
       renderCellValue,
       rowRenderers: NO_ROW_RENDERERS,
       runtimeMappings: {},
       setRefetch: handleSetRefetch,
       sort: [],
       filterStatus: 'open',
-      leadingControlColumns: [{
-        id: 'session-leader-table-leading-columns',
-        headerCellRender: renderLeadingControlColumn,
-        rowCellRender: renderLeadingControlCell,
-        width: 160,
-      }],
+      leadingControlColumns: [
+        {
+          id: 'session-leader-table-leading-columns',
+          headerCellRender: renderLeadingControlColumn,
+          rowCellRender: renderLeadingControlCell,
+          width: 160,
+        },
+      ],
       trailingControlColumns: [],
       unit: renderUnit,
-    }));
-  }
+    });
+  };
 
-  return (
-    <div data-test-subj="session-leader-table">
-      {renderTimelinesTable()}
-    </div>
-  );
+  return <div data-test-subj="session-leader-table">{renderTimelinesTable()}</div>;
 };
 
 SessionLeaderTable.displayName = 'SessionLeaderTable';
