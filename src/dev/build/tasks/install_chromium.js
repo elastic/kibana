@@ -13,17 +13,21 @@ export const InstallChromium = {
   description: 'Installing Chromium',
 
   async run(config, log, build) {
+    const preInstalledPackages = paths.packages.map((p) => p.isPreInstalled);
+
     for (const platform of config.getNodePlatforms()) {
-      const packageInfo = paths.find(platform.getName(), platform.getArchitecture());
-      if (!packageInfo || !packageInfo.bundled) {
+      const pkg = paths.find(platform.getName(), platform.getArchitecture(), preInstalledPackages);
+
+      if (!pkg) {
         const target = `${platform.getName()}-${platform.getArchitecture()}`;
-        log.info(`Skip installing Chromium for ${target}`);
+        log.info(`Skipping Chromium install for ${target}`);
+
         // Unbundled chromium packages (for Darwin): Chromium is downloaded at
         // server startup, rather than being pre-installed
         continue;
       }
 
-      log.info(`Installing Chromium for ${paths.toString(packageInfo)}`);
+      log.info(`Installing Chromium for ${paths.toString(pkg)}`);
 
       const logger = {
         get: log.withType.bind(log),
@@ -36,11 +40,8 @@ export const InstallChromium = {
         log: log.write.bind(log),
       };
 
-      const chromiumPath = build.resolvePathForPlatform(
-        platform,
-        'x-pack/plugins/screenshotting/chromium'
-      );
-      await install(logger, chromiumPath, platform.getName(), platform.getArchitecture());
+      const path = build.resolvePathForPlatform(platform, 'x-pack/plugins/screenshotting/chromium');
+      await install(logger, pkg, path);
     }
   },
 };

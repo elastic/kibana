@@ -6,10 +6,9 @@
  */
 
 import del from 'del';
-import os from 'os';
 import path from 'path';
 import type { Logger } from 'src/core/server';
-import { ChromiumArchivePaths } from './chromium';
+import { ChromiumArchivePaths, PackageInfo } from './chromium';
 import { download } from './download';
 import { md5 } from './download/checksum';
 import { extract } from './extract';
@@ -21,16 +20,9 @@ import { extract } from './extract';
 export async function install(
   paths: ChromiumArchivePaths,
   logger: Logger,
-  chromiumPath: string = path.resolve(__dirname, '../../chromium'),
-  platform: string = process.platform,
-  architecture: string = os.arch()
+  pkg: PackageInfo,
+  chromiumPath: string = path.resolve(__dirname, '../../chromium')
 ): Promise<string> {
-  const pkg = paths.find(platform, architecture);
-
-  if (!pkg) {
-    throw new Error(`Unsupported platform: ${platform}-${architecture}`);
-  }
-
   const binaryPath = paths.getBinaryPath(pkg);
   const binaryChecksum = await md5(binaryPath).catch(() => '');
 

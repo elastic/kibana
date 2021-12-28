@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import os from 'os';
 import { from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import type {
@@ -57,9 +58,17 @@ export class ScreenshottingPlugin implements Plugin<void, ScreenshottingStart, S
     this.browserDriverFactory = (async () => {
       const paths = new ChromiumArchivePaths();
       const logger = this.logger.get('chromium');
+
+      const platform = process.platform;
+      const architecture = os.arch();
+      const chromiumPackageInfo = paths.find(process.platform, architecture);
+      if (!chromiumPackageInfo) {
+        throw new Error(`Unsupported platform: ${platform}-${architecture}`);
+      }
+
       const [config, binaryPath] = await Promise.all([
         createConfig(this.logger, this.config),
-        install(paths, logger),
+        install(paths, logger, chromiumPackageInfo),
       ]);
 
       return new HeadlessChromiumDriverFactory(this.screenshotMode, config, logger, binaryPath);

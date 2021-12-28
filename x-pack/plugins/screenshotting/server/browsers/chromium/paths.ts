@@ -15,7 +15,7 @@ export interface PackageInfo {
   binaryChecksum: string;
   binaryRelativePath: string;
   revision: 901912 | 901913;
-  bundled: boolean;
+  isPreInstalled: boolean;
   location: 'custom' | 'common';
 }
 
@@ -50,7 +50,7 @@ export class ChromiumArchivePaths {
       location: 'common',
       archivePath: 'Mac',
       revision: 901912,
-      bundled: false,
+      isPreInstalled: false,
     },
     {
       platform: 'darwin',
@@ -62,7 +62,7 @@ export class ChromiumArchivePaths {
       location: 'common',
       archivePath: 'Mac_Arm',
       revision: 901913, // NOTE: 901912 is not available
-      bundled: false,
+      isPreInstalled: false,
     },
     {
       platform: 'linux',
@@ -73,7 +73,7 @@ export class ChromiumArchivePaths {
       binaryRelativePath: 'headless_shell-linux_x64/headless_shell',
       location: 'custom',
       revision: 901912,
-      bundled: true,
+      isPreInstalled: true,
     },
     {
       platform: 'linux',
@@ -84,7 +84,7 @@ export class ChromiumArchivePaths {
       binaryRelativePath: 'headless_shell-linux_arm64/headless_shell',
       location: 'custom',
       revision: 901912,
-      bundled: true,
+      isPreInstalled: true,
     },
     {
       platform: 'win32',
@@ -96,15 +96,15 @@ export class ChromiumArchivePaths {
       location: 'common',
       archivePath: 'Win',
       revision: 901912,
-      bundled: true,
+      isPreInstalled: true,
     },
   ];
 
   // zip files get downloaded to a .chromium directory in the kibana root
   public readonly archivesPath = path.resolve(__dirname, '../../../../../../.chromium');
 
-  public find(platform: string, architecture: string) {
-    return this.packages.find((p) => p.platform === platform && p.architecture === architecture);
+  public find(platform: string, architecture: string, packages: PackageInfo[] = this.packages) {
+    return packages.find((p) => p.platform === platform && p.architecture === architecture);
   }
 
   public resolvePath(p: PackageInfo) {
