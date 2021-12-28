@@ -24,7 +24,7 @@ export async function install(
   chromiumPath: string = path.resolve(__dirname, '../../chromium')
 ): Promise<string> {
   const binaryPath = paths.getBinaryPath(pkg);
-  const binaryChecksum = await md5(binaryPath).catch(() => '');
+  const binaryChecksum = await md5(binaryPath).catch(() => 'MISSING');
 
   if (binaryChecksum !== pkg.binaryChecksum) {
     logger?.warn(

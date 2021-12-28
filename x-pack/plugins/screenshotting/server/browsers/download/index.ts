@@ -36,14 +36,9 @@ export async function download(paths: ChromiumArchivePaths, pkg: PackageInfo, lo
   }
 
   const resolvedPath = paths.resolvePath(pkg);
+  const foundChecksum = await md5(resolvedPath).catch(() => 'MISSING');
+
   const pathExists = existsSync(resolvedPath);
-
-  let foundChecksum = 'MISSING';
-  try {
-    foundChecksum = await md5(resolvedPath);
-    // eslint-disable-next-line no-empty
-  } catch {}
-
   if (pathExists && foundChecksum === archiveChecksum) {
     logger?.debug(
       `Browser archive for ${pkg.platform}/${pkg.architecture} already found in ${resolvedPath}.`

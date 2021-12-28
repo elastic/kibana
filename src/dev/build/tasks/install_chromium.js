@@ -13,7 +13,7 @@ export const InstallChromium = {
   description: 'Installing Chromium',
 
   async run(config, log, build) {
-    const preInstalledPackages = paths.packages.map((p) => p.isPreInstalled);
+    const preInstalledPackages = paths.packages.filter((p) => p.isPreInstalled);
 
     for (const platform of config.getNodePlatforms()) {
       const pkg = paths.find(platform.getName(), platform.getArchitecture(), preInstalledPackages);
