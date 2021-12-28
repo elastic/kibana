@@ -241,27 +241,25 @@ export const LensTopNavMenu = ({
   });
 
   // Compute the list of visible columns, per layer/datatable, once
-  const tableVisibleColumnsPerLayer = React.useMemo(() => {
-    if (!activeData) {
+  const tableVisibleColumnsPerLayer = useMemo(() => {
+    if (!activeData || activeDatasourceId == null) {
       return {};
     }
     const datatableColumns: Record<string, Datatable['columns']> = {};
     const layerIds = Object.keys(activeData);
     for (const layerId of layerIds) {
       const visibleColumns = new Set(
-        activeDatasourceId
-          ? datasourceMap[activeDatasourceId]
-              .getPublicAPI({
-                state: datasourceStates[activeDatasourceId].state,
-                layerId,
-              })
-              .getTableSpec()
-              .map(({ columnId }) => columnId)
-          : []
+        datasourceMap[activeDatasourceId]
+          .getPublicAPI({
+            state: datasourceStates[activeDatasourceId].state,
+            layerId,
+          })
+          .getTableSpec()
+          .map(({ columnId }) => columnId)
       );
 
-      datatableColumns[layerId] = activeData[layerId].columns.filter(
-        ({ id }) => visibleColumns.has(id) || !activeDatasourceId
+      datatableColumns[layerId] = activeData[layerId].columns.filter(({ id }) =>
+        visibleColumns.has(id)
       );
     }
     return datatableColumns;

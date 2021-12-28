@@ -306,7 +306,7 @@ export interface DatasourcePublicAPI {
   /**
    * Collect all default visual values given the current state
    */
-  getVisualDefaults: () => Record<string, Record<string, unknown>>;
+  getVisualDefaults: () => Record<string, Record<string, unknown>> | undefined;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {

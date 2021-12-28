@@ -430,18 +430,19 @@ export function getIndexPatternDatasource({
 
     getPublicAPI({ state, layerId }: PublicAPIProps<IndexPatternPrivateState>) {
       const columnLabelMap = indexPatternDatasource.uniqueLabels(state);
+      const layer = state ? state.layers[layerId] : undefined;
 
       return {
         datasourceId: 'indexpattern',
 
         getTableSpec: () => {
-          return state.layers[layerId].columnOrder
-            .filter((colId) => !isReferenced(state.layers[layerId], colId))
-            .map((colId) => ({ columnId: colId }));
+          return layer
+            ? layer.columnOrder
+                .filter((colId) => !isReferenced(layer, colId))
+                .map((colId) => ({ columnId: colId }))
+            : [];
         },
         getOperationForColumnId: (columnId: string) => {
-          const layer = state.layers[layerId];
-
           if (layer && layer.columns[columnId]) {
             if (!isReferenced(layer, columnId)) {
               return columnToOperation(layer.columns[columnId], columnLabelMap[columnId]);
@@ -450,8 +451,7 @@ export function getIndexPatternDatasource({
           return null;
         },
         getVisualDefaults: () => {
-          const layer = state.layers[layerId];
-          return getVisualDefaultsForLayer(layer);
+          return layer && getVisualDefaultsForLayer(layer);
         },
       };
     },
