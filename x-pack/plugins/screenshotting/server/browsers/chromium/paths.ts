@@ -7,7 +7,7 @@
 
 import path from 'path';
 
-interface PackageInfo {
+export interface PackageInfo {
   platform: 'linux' | 'darwin' | 'win32';
   architecture: 'x64' | 'arm64';
   archiveFilename: string;
@@ -16,6 +16,7 @@ interface PackageInfo {
   binaryRelativePath: string;
   revision: 901912 | 901913;
   bundled: boolean;
+  location: 'custom' | 'common';
 }
 
 enum BaseUrl {
@@ -31,6 +32,10 @@ interface CustomPackageInfo extends PackageInfo {
 interface CommonPackageInfo extends PackageInfo {
   location: 'common';
   archivePath: string;
+}
+
+function isCommonPackage(p: PackageInfo): p is CommonPackageInfo {
+  return p.location === 'common';
 }
 
 export class ChromiumArchivePaths {
@@ -111,15 +116,17 @@ export class ChromiumArchivePaths {
     return this.packages.map((p) => this.resolvePath(p));
   }
 
-  public getDownloadUrl(p: CustomPackageInfo | CommonPackageInfo) {
-    if (p.location === 'common') {
+  public getDownloadUrl(p: PackageInfo) {
+    if (isCommonPackage(p)) {
       return `${BaseUrl.common}/${p.archivePath}/${p.revision}/${p.archiveFilename}`;
     }
     return BaseUrl.custom + '/' + p.archiveFilename; // revision is not used for URL if package is a custom build
   }
 
-  public getBinaryPath(p: PackageInfo) {
-    const chromiumPath = path.resolve(__dirname, '../../../chromium');
+  public getBinaryPath(
+    p: PackageInfo,
+    chromiumPath = path.resolve(__dirname, '../../../chromium')
+  ) {
     return path.join(chromiumPath, p.binaryRelativePath);
   }
 

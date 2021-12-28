@@ -46,7 +46,7 @@ export async function install(
     }
 
     try {
-      await download(paths, logger);
+      await download(paths, pkg, logger);
       const archive = path.join(paths.archivesPath, pkg.architecture, pkg.archiveFilename);
       logger.info(`Extracting [${archive}] to [${chromiumPath}]`);
       await extract(archive, chromiumPath);

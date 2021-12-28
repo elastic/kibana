@@ -36,12 +36,11 @@ export const InstallChromium = {
         log: log.write.bind(log),
       };
 
-      await install(
-        logger,
-        build.resolvePathForPlatform(platform, 'x-pack/plugins/screenshotting/chromium'),
-        platform.getName(),
-        platform.getArchitecture()
+      const chromiumPath = build.resolvePathForPlatform(
+        platform,
+        'x-pack/plugins/screenshotting/chromium'
       );
+      await install(logger, chromiumPath, platform.getName(), platform.getArchitecture());
     }
   },
 };
