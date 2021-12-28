@@ -9,7 +9,7 @@
 import React from 'react';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test/jest';
-import { setHeaderActionMenuMounter } from '../../../../kibana_services';
+import { setHeaderActionMenuMounter, setServices } from '../../../../kibana_services';
 import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
@@ -32,18 +32,31 @@ import { RequestAdapter } from '../../../../../../inspector';
 import { Chart } from '../chart/point_series';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 import { ElasticSearchHit } from '../../../../types';
+<<<<<<< HEAD
 import { KibanaContextProvider } from '../../../../../../kibana_react/public';
 import { FieldFormatsStart } from '../../../../../../field_formats/public';
 import { IUiSettingsClient } from 'kibana/public';
+=======
+import { DiscoverServices } from 'src/plugins/discover/public/build_services';
+import { LocalStorageMock } from 'src/plugins/discover/public/__mocks__/local_storage_mock';
+>>>>>>> [Discover] add row height options
 
 setHeaderActionMenuMounter(jest.fn());
 
 function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
   const searchSourceMock = createSearchSourceMock({});
-  const services = discoverServiceMock;
+  const services = {
+    ...discoverServiceMock,
+    fieldFormats: {
+      getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
+      getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+    },
+    storage: new LocalStorageMock({ [SIDEBAR_CLOSED_KEY]: wasSidebarClosed }) as unknown as Storage,
+  } as unknown as DiscoverServices;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
+<<<<<<< HEAD
   services.storage.get = (key: string) => {
     if (key === SIDEBAR_CLOSED_KEY) {
       return prevSidebarClosed;
@@ -57,6 +70,9 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
     ...services.uiSettings,
     get: jest.fn((key: string) => key === 'discover:maxDocFieldsDisplayed' && 50),
   } as unknown as IUiSettingsClient;
+=======
+  setServices(services);
+>>>>>>> [Discover] add row height options
 
   const indexPatternList = [indexPattern].map((ip) => {
     return { ...ip, ...{ attributes: { title: ip.title } } };
@@ -146,7 +162,7 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
     state: { columns: [] },
-    stateContainer: {} as GetStateReturn,
+    stateContainer: { setAppState: () => {} } as unknown as GetStateReturn,
     setExpandedDoc: jest.fn(),
   };
 

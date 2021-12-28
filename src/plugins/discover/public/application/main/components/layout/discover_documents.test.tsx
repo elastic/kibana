@@ -9,7 +9,7 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test/jest';
-import { setHeaderActionMenuMounter } from '../../../../kibana_services';
+import { setHeaderActionMenuMounter, setServices } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { GetStateReturn } from '../../services/discover_state';
@@ -19,7 +19,10 @@ import { FetchStatus } from '../../../types';
 import { DiscoverDocuments } from './discover_documents';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { ElasticSearchHit } from 'src/plugins/discover/public/types';
+<<<<<<< HEAD
 import { KibanaContextProvider } from '../../../../../../kibana_react/public';
+=======
+>>>>>>> [Discover] add row height options
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -28,6 +31,7 @@ function mountComponent(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {
   services.data.query.timefilter.timefilter.getTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
+  setServices(services);
 
   const documents$ = new BehaviorSubject({
     fetchStatus,
@@ -43,7 +47,7 @@ function mountComponent(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {
     searchSource: documents$,
     setExpandedDoc: jest.fn(),
     state: { columns: [] },
-    stateContainer: {} as GetStateReturn,
+    stateContainer: { setAppState: () => {} } as unknown as GetStateReturn,
     navigateTo: jest.fn(),
   };
 
