@@ -79,6 +79,9 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -109,6 +112,9 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 2,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -131,6 +137,9 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           success: false,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -145,6 +154,9 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -173,6 +185,9 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           success: false,
           success_count: 0,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -193,6 +208,9 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -250,6 +268,9 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           success: false,
           success_count: 2,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -285,6 +306,9 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           success: false,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -357,6 +381,9 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             },
           ],
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -383,7 +410,14 @@ export default ({ getService }: FtrProviderContext): void => {
           .set('kbn-xsrf', 'true')
           .attach('file', ruleToNdjson(simpleRule), 'rules.ndjson')
           .expect(200);
-        expect(body).to.eql({ success: true, success_count: 1, errors: [] });
+        expect(body).to.eql({
+          success: true,
+          success_count: 1,
+          errors: [],
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
+        });
       });
 
       it('should be able to import 2 rules with action connectors that exist', async () => {
@@ -427,7 +461,14 @@ export default ({ getService }: FtrProviderContext): void => {
           .attach('file', buffer, 'rules.ndjson')
           .expect(200);
 
-        expect(body).to.eql({ success: true, success_count: 2, errors: [] });
+        expect(body).to.eql({
+          success: true,
+          success_count: 2,
+          errors: [],
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
+        });
       });
 
       it('should be able to import 1 rule with an action connector that exists and get 1 other error back for a second rule that does not have the connector', async () => {
@@ -483,6 +524,9 @@ export default ({ getService }: FtrProviderContext): void => {
               },
             },
           ],
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -591,15 +635,27 @@ export default ({ getService }: FtrProviderContext): void => {
               'rules.ndjson'
             )
             .expect(200);
-          expect(body).to.eql({ success: true, success_count: 3, errors: [] });
+          expect(body).to.eql({
+            success: true,
+            success_count: 1,
+            errors: [],
+            exceptions_errors: [],
+            exceptions_success: true,
+            exceptions_success_count: 2,
+          });
         });
 
-        it('should should only remove non existent exception list references from rule', async () => {
+        it('should only remove non existent exception list references from rule', async () => {
           // create an exception list
           const { body: exceptionBody } = await supertest
             .post(EXCEPTION_LIST_URL)
             .set('kbn-xsrf', 'true')
-            .send({ ...getCreateExceptionListMinimalSchemaMock(), list_id: 'i_exist' })
+            .send({
+              ...getCreateExceptionListMinimalSchemaMock(),
+              list_id: 'i_exist',
+              namespace_type: 'single',
+              type: 'detection',
+            })
             .expect(200);
 
           const simpleRule: ReturnType<typeof getSimpleRule> = {
@@ -653,6 +709,9 @@ export default ({ getService }: FtrProviderContext): void => {
                 },
               },
             ],
+            exceptions_errors: [],
+            exceptions_success: true,
+            exceptions_success_count: 0,
           });
         });
 
@@ -720,8 +779,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
           expect(body).to.eql({
             success: true,
-            success_count: 3,
+            success_count: 1,
             errors: [],
+            exceptions_errors: [],
+            exceptions_success: true,
+            exceptions_success_count: 2,
           });
         });
       });

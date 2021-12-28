@@ -15,15 +15,16 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
-  EuiLoadingSpinner,
+  EuiPageContent,
 } from '@elastic/eui';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
 import { getEventFiltersListPath } from '../../../../../common/routing';
 import { useGetAllAssignedEventFilters, useGetAllEventFilters } from '../hooks';
-import { ManagementEmptyStateWraper } from '../../../../../components/management_empty_state_wraper';
+import { ManagementPageLoader } from '../../../../../components/management_page_loader';
 import { PolicyEventFiltersEmptyUnassigned, PolicyEventFiltersEmptyUnexisting } from '../empty';
+import { PolicyEventFiltersList } from '../list';
 
 interface PolicyEventFiltersLayoutProps {
   policyItem?: ImmutableObject<PolicyData> | undefined;
@@ -86,11 +87,7 @@ export const PolicyEventFiltersLayout = React.memo<PolicyEventFiltersLayoutProps
     const isEmptyState = useMemo(() => allAssigned && allAssigned.total === 0, [allAssigned]);
 
     if (!policyItem || isGlobalLoading) {
-      return (
-        <ManagementEmptyStateWraper>
-          <EuiLoadingSpinner data-test-subj="policy-event-filters-loading-spinner" size="l" />
-        </ManagementEmptyStateWraper>
-      );
+      return <ManagementPageLoader data-test-subj="policy-event-filters-loading-spinner" />;
     }
 
     if (isEmptyState) {
@@ -123,6 +120,16 @@ export const PolicyEventFiltersLayout = React.memo<PolicyEventFiltersLayoutProps
             </EuiText>
           </EuiPageHeaderSection>
         </EuiPageHeader>
+        <EuiSpacer size="l" />
+        <EuiPageContent
+          hasBorder={false}
+          hasShadow={false}
+          paddingSize="none"
+          color="transparent"
+          borderRadius="none"
+        >
+          <PolicyEventFiltersList policy={policyItem} />
+        </EuiPageContent>
       </div>
     );
   }
