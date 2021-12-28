@@ -26,7 +26,10 @@ import { DATE_NOW, ID, _VERSION } from '../../../common/constants.mock';
 import type { SavedObject } from '../../../../../../src/core/types';
 
 import { ExceptionListClient } from './exception_list_client';
-import type { CreateExceptionListItemOptions } from './exception_list_client_types';
+import type {
+  CreateExceptionListItemOptions,
+  UpdateExceptionListItemOptions,
+} from './exception_list_client_types';
 
 const isExceptionsListSavedObjectType = (type: string): boolean =>
   type === EXCEPTION_LIST_NAMESPACE || type === EXCEPTION_LIST_NAMESPACE_AGNOSTIC;
@@ -92,6 +95,26 @@ export const getCreateExceptionListItemOptionsMock = (): CreateExceptionListItem
     entries,
     itemId,
     listId,
+    meta,
+    name,
+    namespaceType,
+    osTypes,
+    tags,
+    type,
+  };
+};
+
+export const getUpdateExceptionListItemOptionsMock = (): UpdateExceptionListItemOptions => {
+  const { comments, entries, itemId, namespaceType, name, osTypes, description, meta, tags, type } =
+    getCreateExceptionListItemOptionsMock();
+
+  return {
+    _version: undefined,
+    comments,
+    description,
+    entries,
+    id: ID,
+    itemId,
     meta,
     name,
     namespaceType,
@@ -173,8 +196,8 @@ export const getExceptionListItemSavedObject = (
 };
 
 /**
- * Returns a saved objects client mock that includes method mocks to handle working with the exceptions list client
- * @param [soClient] can be provided on input and its methods will be mocked
+ * Returns a saved objects client mock that includes method mocks to handle working with the exceptions list client.
+ * @param [soClient] can be provided on input and its methods will be mocked for exceptions list only and will preserve existing ones for other types
  */
 export const getExceptionListSavedObjectClientMock = (
   soClient: ReturnType<typeof savedObjectsClientMock.create> = savedObjectsClientMock.create()

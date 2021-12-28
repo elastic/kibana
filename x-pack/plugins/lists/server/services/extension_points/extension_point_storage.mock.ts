@@ -40,7 +40,7 @@ export const createExtensionPointStorageMock = (
     jest.fn(async (data) => {
       return {
         ...data,
-        name: `${data.name}-2`,
+        name: `${data.name}-1`,
       };
     });
 
