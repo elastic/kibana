@@ -28,8 +28,7 @@ export function BackendLink({
   query,
   subtype,
   type,
-  onClick,
-  ...rest
+  onClick
 }: BackendLinkProps) {
   const { link } = useApmRouter();
 
