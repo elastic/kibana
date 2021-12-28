@@ -2166,7 +2166,7 @@
               "\nDetermine if a service is avaliable"
             ],
             "signature": [
-              "{ (serviceName: \"config\" | \"log\" | \"lifecycle\" | \"failureMetadata\" | \"dockerServers\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
+              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"failureMetadata\" | \"dockerServers\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
@@ -2179,7 +2179,7 @@
                 "label": "serviceName",
                 "description": [],
                 "signature": [
-                  "\"config\" | \"log\" | \"lifecycle\" | \"failureMetadata\" | \"dockerServers\""
+                  "\"log\" | \"config\" | \"lifecycle\" | \"failureMetadata\" | \"dockerServers\""
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
@@ -2196,7 +2196,7 @@
             "label": "hasService",
             "description": [],
             "signature": [
-              "{ (serviceName: \"config\" | \"log\" | \"lifecycle\" | \"failureMetadata\" | \"dockerServers\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
+              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"failureMetadata\" | \"dockerServers\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
@@ -2226,7 +2226,7 @@
             "label": "hasService",
             "description": [],
             "signature": [
-              "{ (serviceName: \"config\" | \"log\" | \"lifecycle\" | \"failureMetadata\" | \"dockerServers\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
+              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"failureMetadata\" | \"dockerServers\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,

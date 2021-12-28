@@ -41,7 +41,7 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-utility-types",
+  "//packages/kbn-utility-types:npm_module_types",
   "//packages/kbn-i18n:npm_module_types",
   "@npm//@elastic/elasticsearch",
   "@npm//tslib",

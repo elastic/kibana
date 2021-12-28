@@ -1492,7 +1492,9 @@
             "label": "search",
             "description": [],
             "signature": [
-              "(query: ",
+              "<TDocument = unknown, TContext = unknown>(query: ",
+              "SearchRequest",
+              " | ",
               "SearchRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -1500,7 +1502,7 @@
               "TransportResult",
               "<",
               "SearchResponse",
-              "<unknown>, unknown>>"
+              "<TDocument>, TContext>>"
             ],
             "path": "x-pack/plugins/alerting/server/lib/create_abortable_es_client_factory.ts",
             "deprecated": false,
@@ -1508,11 +1510,13 @@
               {
                 "parentPluginId": "alerting",
                 "id": "def-server.IAbortableEsClient.search.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "query",
                 "description": [],
                 "signature": [
+                  "SearchRequest",
+                  " | ",
                   "SearchRequest"
                 ],
                 "path": "x-pack/plugins/alerting/server/lib/create_abortable_es_client_factory.ts",
@@ -3446,10 +3450,10 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-common.AlertingFrameworkHealth.alertingFrameworkHeath",
+            "id": "def-common.AlertingFrameworkHealth.alertingFrameworkHealth",
             "type": "Object",
             "tags": [],
-            "label": "alertingFrameworkHeath",
+            "label": "alertingFrameworkHealth",
             "description": [],
             "signature": [
               {
