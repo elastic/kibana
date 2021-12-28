@@ -49,8 +49,7 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
         await bluebird.map(
           agentPolicies,
           (agentPolicy: GetAgentPoliciesResponseItem) =>
-            agentService
-              ?.asScoped(request)
+            agentService?.asInternalUser
               .getAgentStatusForAgentPolicy(agentPolicy.id)
               .then(({ total: agentTotal }) => (agentPolicy.agents = agentTotal)),
           { concurrency: 10 }
