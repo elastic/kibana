@@ -36,7 +36,7 @@ jobs:
           path: ./kibana-operations
           token: ${{secrets.KIBANAMACHINE_TOKEN}}
 
-      - name: Install Actions
+      - name: Skip failed test
         working-directory: ./kibana-operations/triage
         env:
           GITHUB_TOKEN: ${{secrets.KIBANAMACHINE_TOKEN}}
