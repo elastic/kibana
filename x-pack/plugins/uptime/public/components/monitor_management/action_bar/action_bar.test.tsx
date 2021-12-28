@@ -10,7 +10,12 @@ import { screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { render } from '../../../lib/helper/rtl_helpers';
 import * as fetchers from '../../../state/api/monitor_management';
-import { DataStream, HTTPFields, ScheduleUnit, SyntheticsMonitor } from '../../fleet_package/types';
+import {
+  DataStream,
+  HTTPFields,
+  ScheduleUnit,
+  SyntheticsMonitor,
+} from '../../../../common/runtime_types';
 import { ActionBar } from './action_bar';
 
 describe('<ActionBar />', () => {
