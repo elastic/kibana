@@ -13,7 +13,10 @@ import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { metricSet } from './metric_set_overview';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
+import {
+  INDEX_PATTERN_ELASTICSEARCH,
+  INDEX_PATTERN_ELASTICSEARCH_ECS,
+} from '../../../../../common/constants';
 import { getLogs } from '../../../../lib/logs';
 import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
 
@@ -46,9 +49,9 @@ export function esOverviewRoute(server) {
         ccs,
         true
       );
-      const mbIndexPattern = prefixIndexPattern(
+      const esEcsIndexPattern = prefixIndexPattern(
         config,
-        config.get('monitoring.ui.metricbeat.index'),
+        INDEX_PATTERN_ELASTICSEARCH_ECS,
         ccs,
         true
       );
@@ -70,7 +73,7 @@ export function esOverviewRoute(server) {
           getLastRecovery(
             req,
             esLegacyIndexPattern,
-            mbIndexPattern,
+            esEcsIndexPattern,
             config.get('monitoring.ui.max_bucket_size')
           ),
           getLogs(config, req, filebeatIndexPattern, { clusterUuid, start, end }),
