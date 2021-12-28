@@ -78,7 +78,7 @@ export KIBANA_DOCKER_USERNAME
 KIBANA_DOCKER_PASSWORD="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/container-registry)"
 export KIBANA_DOCKER_PASSWORD
 
-EC_API_KEY="$(retry 5 5 vault read -field=password secret/kibana-issues/dev/cloud-deploy-ci-api-key)"
+EC_API_KEY="$(retry 5 5 vault read -field=pr_deploy_api_key secret/kibana-issues/dev/kibana-ci-cloud-deploy)"
 export EC_API_KEY
 
 # Setup Failed Test Reporter Elasticsearch credentials
