@@ -25,4 +25,4 @@ echo "--- Deleting videos after sourcesful tests"
 rm -rf ../target/kibana-osquery/videos
 
 echo "--- Upload coverage"
-tar -zcf ../target/kibana-osquery/coverage.tar.gz ./x-pack/plugins/osquery/coverage
+tar -zcf ../target/kibana-osquery/coverage.tar.gz ./plugins/osquery/coverage
