@@ -98,11 +98,14 @@ export function CustomizablePalette({
 
             const newColorStops = getColorStops(palettes, [], activePalette, dataBounds);
 
+            if (isNewPaletteCustom) {
+              newParams.colorStops = newColorStops;
+            }
+
             setPalette({
               ...newPalette,
               params: {
                 ...newParams,
-                colorStops: isNewPaletteCustom ? newColorStops : newParams?.colorStops ?? undefined,
                 stops: getPaletteStops(palettes, newParams, {
                   prevPalette:
                     isNewPaletteCustom || isCurrentPaletteCustom ? undefined : newPalette.name,
