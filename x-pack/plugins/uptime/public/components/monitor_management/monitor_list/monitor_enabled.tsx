@@ -70,10 +70,9 @@ export const MonitorEnabled = ({ id, monitor, setRefresh }: Props) => {
       checked={enabled}
       disabled={isLoading}
       showLabel={false}
-      label={''}
-      data-test-subj="syntheticsIsMonitorEnabled"
-      aria-label={enabled ? DISABLE_MONITOR_LABEL : ENABLE_MONITOR_LABEL}
+      label={enabled ? DISABLE_MONITOR_LABEL : ENABLE_MONITOR_LABEL}
       title={enabled ? DISABLE_MONITOR_LABEL : ENABLE_MONITOR_LABEL}
+      data-test-subj="syntheticsIsMonitorEnabled"
       onChange={handleEnabledChange}
     />
   );
