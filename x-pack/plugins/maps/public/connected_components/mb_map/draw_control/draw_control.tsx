@@ -140,16 +140,18 @@ export class DrawControl extends Component<Props> {
         },
       });
       this._mbDrawControlAdded = true;
-      this.props.mbMap.getCanvas().style.cursor = 'crosshair';
       this.props.mbMap.on('draw.modechange', this._onModeChange);
       this.props.mbMap.on('draw.create', this._onDraw);
+
       if (this.props.onClick) {
         this.props.mbMap.on('click', this._onClick);
       }
     }
+    this.props.mbMap.getCanvas().style.cursor = 'crosshair';
 
     const { DRAW_LINE_STRING, DRAW_POLYGON, DRAW_POINT, SIMPLE_SELECT } = this._mbDrawControl.modes;
     const drawMode = this._mbDrawControl.getMode();
+
     if (drawMode !== DRAW_RECTANGLE && this.props.drawShape === DRAW_SHAPE.BOUNDS) {
       this._mbDrawControl.changeMode(DRAW_RECTANGLE);
     } else if (drawMode !== DRAW_CIRCLE && this.props.drawShape === DRAW_SHAPE.DISTANCE) {
@@ -160,8 +162,11 @@ export class DrawControl extends Component<Props> {
       this._mbDrawControl.changeMode(DRAW_LINE_STRING);
     } else if (drawMode !== DRAW_POINT && this.props.drawShape === DRAW_SHAPE.POINT) {
       this._mbDrawControl.changeMode(DRAW_POINT);
-    } else if (drawMode !== SIMPLE_SELECT && this.props.drawShape === DRAW_SHAPE.SIMPLE_SELECT) {
+    } else if (this.props.drawShape === DRAW_SHAPE.DELETE) {
       this._mbDrawControl.changeMode(SIMPLE_SELECT);
+    } else {
+      this._mbDrawControl.changeMode(SIMPLE_SELECT);
+      this.props.mbMap.getCanvas().style.cursor = '';
     }
   }
 

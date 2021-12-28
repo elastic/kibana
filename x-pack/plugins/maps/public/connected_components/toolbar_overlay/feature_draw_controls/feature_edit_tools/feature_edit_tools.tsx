@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiButtonIcon, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TrackApplicationView } from '../../../../../../../../src/plugins/usage_collection/public';
@@ -36,15 +36,10 @@ export function FeatureEditTools(props: Props) {
   const drawPointSelected = props.drawShape === DRAW_SHAPE.POINT;
   const deleteSelected = props.drawShape === DRAW_SHAPE.DELETE;
 
-  const [drawMode, setDrawMode] = useState('');
-
-  function toggleDrawShape(mode: DRAW_SHAPE, selected: boolean) {
-    setDrawMode(mode);
+  function toggleDrawShape(mode: DRAW_SHAPE) {
     props.setDrawShape(mode);
-
-    if (selected && mode === drawMode) {
+    if (mode && props.drawShape === mode) {
       props.setDrawShape(null);
-      setDrawMode('');
     }
   }
 
@@ -59,7 +54,7 @@ export function FeatureEditTools(props: Props) {
             <EuiButtonIcon
               key="line"
               size="s"
-              onClick={() => toggleDrawShape(DRAW_SHAPE.LINE, drawLineSelected)}
+              onClick={() => toggleDrawShape(DRAW_SHAPE.LINE)}
               iconType={VectorLineIcon}
               aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawLineLabel', {
                 defaultMessage: 'Draw line',
@@ -75,7 +70,7 @@ export function FeatureEditTools(props: Props) {
             <EuiButtonIcon
               key="polygon"
               size="s"
-              onClick={() => toggleDrawShape(DRAW_SHAPE.POLYGON, drawPolygonSelected)}
+              onClick={() => toggleDrawShape(DRAW_SHAPE.POLYGON)}
               iconType="node"
               aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPolygonLabel', {
                 defaultMessage: 'Draw polygon',
@@ -90,7 +85,7 @@ export function FeatureEditTools(props: Props) {
             <EuiButtonIcon
               key="circle"
               size="s"
-              onClick={() => toggleDrawShape(DRAW_SHAPE.DISTANCE, drawCircleSelected)}
+              onClick={() => toggleDrawShape(DRAW_SHAPE.DISTANCE)}
               iconType={VectorCircleIcon}
               aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawCircleLabel', {
                 defaultMessage: 'Draw circle',
@@ -105,7 +100,7 @@ export function FeatureEditTools(props: Props) {
             <EuiButtonIcon
               key="boundingBox"
               size="s"
-              onClick={() => toggleDrawShape(DRAW_SHAPE.BOUNDS, drawBBoxSelected)}
+              onClick={() => toggleDrawShape(DRAW_SHAPE.BOUNDS)}
               iconType={VectorSquareIcon}
               aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawBBoxLabel', {
                 defaultMessage: 'Draw bounding box',
@@ -122,7 +117,7 @@ export function FeatureEditTools(props: Props) {
         <EuiButtonIcon
           key="point"
           size="s"
-          onClick={() => toggleDrawShape(DRAW_SHAPE.POINT, drawPointSelected)}
+          onClick={() => toggleDrawShape(DRAW_SHAPE.POINT)}
           iconType="dot"
           aria-label={i18n.translate('xpack.maps.toolbarOverlay.featureDraw.drawPointLabel', {
             defaultMessage: 'Draw point',
@@ -137,7 +132,7 @@ export function FeatureEditTools(props: Props) {
         <EuiButtonIcon
           key="delete"
           size="s"
-          onClick={() => toggleDrawShape(DRAW_SHAPE.DELETE, deleteSelected)}
+          onClick={() => toggleDrawShape(DRAW_SHAPE.DELETE)}
           iconType="trash"
           aria-label={i18n.translate(
             'xpack.maps.toolbarOverlay.featureDraw.deletePointOrShapeLabel',
