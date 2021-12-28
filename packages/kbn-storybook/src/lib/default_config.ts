@@ -16,7 +16,7 @@ import { default as WebpackConfig } from '../webpack.config';
 const toPath = (_path: string) => path.join(REPO_ROOT, _path);
 export const defaultConfig: StorybookConfig = {
   addons: ['@kbn/storybook/preset', '@storybook/addon-a11y', '@storybook/addon-essentials'],
-  stories: ['../**/*.stories.tsx'],
+  stories: ['../**/*.stories.tsx', '../**/*.stories.mdx'],
   typescript: {
     reactDocgen: false,
   },
