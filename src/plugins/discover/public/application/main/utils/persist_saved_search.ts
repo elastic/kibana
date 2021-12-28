@@ -51,6 +51,9 @@ export async function persistSavedSearch(
   if (typeof state.hideChart !== 'undefined') {
     savedSearch.hideChart = state.hideChart;
   }
+  if (typeof state.rowHeight !== 'undefined') {
+    savedSearch.rowHeight = state.rowHeight;
+  }
 
   if (state.viewMode) {
     savedSearch.viewMode = state.viewMode;

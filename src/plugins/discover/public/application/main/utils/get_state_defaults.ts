@@ -63,12 +63,16 @@ export function getStateDefaults({
     viewMode: undefined,
     hideAggregatedPreview: undefined,
     savedQuery: undefined,
+    rowHeight: undefined,
   } as AppState;
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;
   }
   if (savedSearch.hideChart !== undefined) {
     defaultState.hideChart = savedSearch.hideChart;
+  }
+  if (savedSearch.rowHeight !== undefined) {
+    defaultState.rowHeight = savedSearch.rowHeight;
   }
   if (savedSearch.viewMode) {
     defaultState.viewMode = savedSearch.viewMode;

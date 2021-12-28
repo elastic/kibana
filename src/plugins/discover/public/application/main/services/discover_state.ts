@@ -82,6 +82,10 @@ export interface AppState {
    * Hide mini distribution/preview charts when in Field Statistics mode
    */
   hideAggregatedPreview?: boolean;
+  /**
+   * Document explorer row height option
+   */
+  rowHeight?: 'auto' | number;
 }
 
 interface GetStateParams {

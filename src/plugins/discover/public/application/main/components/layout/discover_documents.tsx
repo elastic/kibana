@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useMemo, useCallback, memo } from 'react';
+import React, { useMemo, useCallback, memo, useEffect } from 'react';
 import {
   EuiFlexItem,
   EuiSpacer,
@@ -13,6 +13,7 @@ import {
   EuiLoadingSpinner,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
+import type { EuiDataGridRowHeightOption } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
@@ -20,6 +21,7 @@ import { FetchStatus } from '../../../types';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
+  ROW_HEIGHT_OPTION,
   SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../../../../common';
@@ -33,6 +35,16 @@ import { useDataState } from '../../utils/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { SortPairArr } from '../../../../components/doc_table/lib/get_sort';
 import { ElasticSearchHit } from '../../../../types';
+import {
+  getStoredRowHeight,
+  removeStoredRowHeight,
+  setStoredRowHeight,
+} from '../../utils/manage_row_height';
+import {
+  deserializeRowHeight,
+  SerializedRowHeight,
+  serializeRowHeight,
+} from '../../utils/convert_row_height_option';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -59,11 +71,15 @@ function DiscoverDocumentsComponent({
   state: AppState;
   stateContainer: GetStateReturn;
 }) {
-  const { capabilities, indexPatterns, uiSettings } = services;
+  const { capabilities, indexPatterns, uiSettings, storage } = services;
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING), [uiSettings]);
+  const configRowHeight: SerializedRowHeight = useMemo(
+    () => uiSettings.get(ROW_HEIGHT_OPTION) || 'auto',
+    [uiSettings]
+  );
 
   const documentState: DataDocumentsMsg = useDataState(documents$);
   const isLoading = documentState.fetchStatus === FetchStatus.LOADING;
@@ -98,6 +114,47 @@ function DiscoverDocumentsComponent({
       stateContainer.setAppState({ sort });
     },
     [stateContainer]
+  );
+
+  const initialRowHeight: SerializedRowHeight = useMemo(() => {
+    const rowHeightRecordRecord = getStoredRowHeight(storage);
+    if (
+      rowHeightRecordRecord !== null &&
+      rowHeightRecordRecord.prevConfigRowHeight === configRowHeight
+    ) {
+      return rowHeightRecordRecord.previousUsed;
+    }
+
+    return configRowHeight;
+  }, [configRowHeight, storage]);
+
+  /**
+   * When rowHeight has been changed in advanced settings,
+   * local storage value should be removed
+   */
+  useEffect(() => {
+    const rowHeightRecordRecord = getStoredRowHeight(storage);
+    if (
+      rowHeightRecordRecord === null ||
+      rowHeightRecordRecord.prevConfigRowHeight !== configRowHeight
+    ) {
+      removeStoredRowHeight(storage);
+    }
+    // current effect should be executed after resolving initialRowHeight
+  }, [initialRowHeight, configRowHeight, storage]);
+
+  const defaultRowHeight: EuiDataGridRowHeightOption | undefined = useMemo(
+    () => deserializeRowHeight(state.rowHeight || initialRowHeight),
+    [initialRowHeight, state.rowHeight]
+  );
+
+  const onRowHeightChange = useCallback(
+    (rowHeight?: EuiDataGridRowHeightOption) => {
+      const serializedRowHeight = serializeRowHeight(rowHeight);
+      setStoredRowHeight(serializedRowHeight, configRowHeight, storage);
+      stateContainer.setAppState({ rowHeight: serializedRowHeight });
+    },
+    [stateContainer, configRowHeight, storage]
   );
 
   const showTimeCol = useMemo(
@@ -169,6 +226,8 @@ function DiscoverDocumentsComponent({
             onSort={onSort}
             onResize={onResize}
             useNewFieldsApi={useNewFieldsApi}
+            defaultRowHeight={defaultRowHeight}
+            onRowHeightChange={onRowHeightChange}
           />
         </div>
       )}

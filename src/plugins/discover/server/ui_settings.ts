@@ -28,6 +28,7 @@ import {
   SHOW_MULTIFIELDS,
   TRUNCATE_MAX_HEIGHT,
   SHOW_FIELD_STATISTICS,
+  ROW_HEIGHT_OPTION,
 } from '../common';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
@@ -242,15 +243,27 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     category: ['discover'],
     schema: schema.boolean(),
   },
+  [ROW_HEIGHT_OPTION]: {
+    name: i18n.translate('discover.advancedSettings.params.rowHeightTitle', {
+      defaultMessage: 'Maximum lines of document explorer cell',
+    }),
+    value: 3,
+    category: ['discover'],
+    description: i18n.translate('discover.advancedSettings.params.rowHeightText', {
+      defaultMessage:
+        'The maximum lines that a cell in a table should occupy. Auto height might be enabled by setting value to zero.',
+    }),
+    schema: schema.number({ min: 0 }),
+  },
   [TRUNCATE_MAX_HEIGHT]: {
-    name: i18n.translate('discover.advancedSettings.params.maxCellHeightTitle', {
-      defaultMessage: 'Maximum table cell height',
+    name: i18n.translate('discover.advancedSettings.params.truncateHeightTitle', {
+      defaultMessage: 'Maximum height of classic view cell',
     }),
     value: 115,
     category: ['discover'],
-    description: i18n.translate('discover.advancedSettings.params.maxCellHeightText', {
+    description: i18n.translate('discover.advancedSettings.params.truncateHeightText', {
       defaultMessage:
-        'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation',
+        'The maximum height that a cell in a table should occupy. Set to 0 to disable truncation.',
     }),
     schema: schema.number({ min: 0 }),
   },

@@ -21,6 +21,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
 } from '@elastic/eui';
+import type { EuiDataGridRowHeightsOptions, EuiDataGridRowHeightOption } from '@elastic/eui';
 import { flattenHit, IndexPattern } from '../../../../data/common';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
@@ -158,6 +159,14 @@ export interface DiscoverGridProps {
    * List of used control columns (available: 'openDetails', 'select')
    */
   controlColumnIds?: string[];
+  /**
+   * Default row height of Document explorer
+   */
+  defaultRowHeight?: EuiDataGridRowHeightOption;
+  /**
+   * Callback to set row height options of Document explorer
+   */
+  onRowHeightChange: (value?: EuiDataGridRowHeightOption) => void;
 }
 
 export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
@@ -192,6 +201,8 @@ export const DiscoverGrid = ({
   isPaginationEnabled = true,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
   className,
+  defaultRowHeight,
+  onRowHeightChange,
 }: DiscoverGridProps) => {
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
@@ -370,6 +381,15 @@ export const DiscoverGrid = ({
     [defaultColumns, additionalControls, isSortEnabled]
   );
 
+  const rowHeightsOptions = useMemo(
+    (): EuiDataGridRowHeightsOptions => ({
+      defaultHeight: defaultRowHeight,
+      onChange: ({ defaultHeight }: EuiDataGridRowHeightsOptions) =>
+        onRowHeightChange(defaultHeight),
+    }),
+    [defaultRowHeight, onRowHeightChange]
+  );
+
   if (!rowCount && isLoading) {
     return (
       <div className="euiDataGrid__loading">
@@ -436,6 +456,7 @@ export const DiscoverGrid = ({
           schemaDetectors={schemaDetectors}
           sorting={sorting as EuiDataGridSorting}
           toolbarVisibility={toolbarVisibility}
+          rowHeightsOptions={rowHeightsOptions}
         />
 
         {showDisclaimer && (
