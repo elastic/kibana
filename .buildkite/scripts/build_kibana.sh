@@ -39,7 +39,7 @@ EOF
   VERSION="$(jq -r '.version' package.json)-SNAPSHOT"
   jq '
     .resources.kibana[0].plan.kibana.docker_image = "'$CLOUD_IMAGE'" |
-    .name = "pr-'$BUILDKITE_PULL_REQUEST'" |
+    .name = "pr-'$BUILDKITE_PULL_REQUEST'-'$GIT_COMMIT'" |
     .resources.kibana[0].plan.kibana.version = "'$VERSION'" |
     .resources.elasticsearch[0].plan.kibana.version = "'$VERSION'" |
     .resources.apm[0].plan.kibana.version = "'$VERSION'"
