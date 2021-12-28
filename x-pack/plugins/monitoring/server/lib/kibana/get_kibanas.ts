@@ -17,7 +17,7 @@ import { KibanaMetric } from '../metrics';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse, ElasticsearchResponseHit } from '../../../common/types/es';
 
-interface KibanaDetails {
+interface KibanaInfo {
   transport_address?: string;
   name?: string;
   host?: string;
@@ -44,7 +44,7 @@ interface Kibana {
     total?: number;
   };
   concurrent_connections?: number;
-  kibana?: KibanaDetails;
+  kibana?: KibanaInfo;
   availability: boolean;
 }
 
@@ -119,9 +119,9 @@ export async function getKibanas(
   const response: ElasticsearchResponse = await callWithRequest(req, 'search', params);
   const instances = response.hits?.hits ?? [];
 
-  const buildKibanaDetails = (hit: ElasticsearchResponseHit): KibanaDetails => {
+  const buildKibanaInfo = (hit: ElasticsearchResponseHit): KibanaInfo => {
     const source = hit._source;
-    if (source.kibana_stats) return source.kibana_stats.kibana as KibanaDetails;
+    if (source.kibana_stats) return source.kibana_stats.kibana as KibanaInfo;
 
     return {
       name: source.kibana?.stats?.name,
@@ -137,7 +137,7 @@ export async function getKibanas(
     const mbStats = hit._source.kibana?.stats;
 
     const kibana: Kibana = {
-      kibana: buildKibanaDetails(hit),
+      kibana: buildKibanaInfo(hit),
       concurrent_connections:
         mbStats?.concurrent_connections ?? legacyStats?.concurrent_connections,
       process: {
