@@ -28,8 +28,8 @@ export async function install(
 
   if (binaryChecksum !== pkg.binaryChecksum) {
     logger?.warn(
-      `Found browser binary checksum for ${pkg.platform}/${pkg.architecture} in ${binaryPath} ` +
-        `is ${binaryChecksum} but ${pkg.binaryChecksum} was expected. Re-installing...`
+      `Found browser binary checksum for ${pkg.platform}/${pkg.architecture} in ${binaryPath}` +
+        ` is ${binaryChecksum} but ${pkg.binaryChecksum} was expected. Re-installing...`
     );
     try {
       await del(chromiumPath);
