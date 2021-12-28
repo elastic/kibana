@@ -8,14 +8,14 @@ import { errors } from '@elastic/elasticsearch';
 import { SecurityHasPrivilegesIndexPrivilegesCheck } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RequestHandler } from 'src/core/server';
 import {
-  API_MIGRATE_ILM_POLICY_URL,
   API_GET_ILM_POLICY_STATUS,
+  API_MIGRATE_ILM_POLICY_URL,
   ILM_POLICY_NAME,
-} from '../../common/constants';
-import { IlmPolicyStatusResponse } from '../../common/types';
-import { deprecations } from '../lib/deprecations';
-import { ReportingCore } from '../core';
-import { IlmPolicyManager, LevelLogger as Logger } from '../lib';
+} from '../../../common/constants';
+import { IlmPolicyStatusResponse } from '../../../common/types';
+import { ReportingCore } from '../../core';
+import { IlmPolicyManager, LevelLogger as Logger } from '../../lib';
+import { deprecations } from '../../lib/deprecations';
 
 export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Logger) => {
   const { router } = reporting.getPluginSetupDeps();
@@ -69,7 +69,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
             elasticsearch: { client: scopedClient },
           },
         },
-        req,
+        _req,
         res
       ) => {
         const checkIlmMigrationStatus = () => {
@@ -97,7 +97,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
 
   router.put(
     { path: API_MIGRATE_ILM_POLICY_URL, validate: false },
-    authzWrapper(async ({ core: { elasticsearch } }, req, res) => {
+    authzWrapper(async ({ core: { elasticsearch } }, _req, res) => {
       const store = await reporting.getStore();
       const {
         client: { asCurrentUser: client },

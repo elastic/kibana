@@ -26,7 +26,7 @@ export const getAgentDetailsRoute = (router: IRouter, osqueryContext: OsqueryApp
         agent = await osqueryContext.service
           .getAgentService()
           ?.asInternalUser // @ts-expect-error update types
-          .getAgent(request.params.id);
+          ?.getAgent(request.params.id);
       } catch (err) {
         return response.notFound();
       }

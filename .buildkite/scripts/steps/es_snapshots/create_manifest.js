@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 const fs = require('fs');
 const { execSync } = require('child_process');
 const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
@@ -47,7 +55,7 @@ const { BASE_BUCKET_DAILY } = require('./bucket_config.js');
           version: parts[1],
           platform: parts[3],
           architecture: parts[4].split('.')[0],
-          license: parts[0] == 'oss' ? 'oss' : 'default',
+          license: parts[0] === 'oss' ? 'oss' : 'default',
         };
       });
 
