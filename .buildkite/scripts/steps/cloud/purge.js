@@ -9,7 +9,7 @@
 const { execSync } = require('child_process');
 
 const deploymentsListJson = execSync('ecctl deployment list --output json').toString();
-const deployments = JSON.parse(deploymentsListJson);
+const { deployments } = JSON.parse(deploymentsListJson);
 
 const prDeployments = deployments.filter((deployment) => deployment.name.startsWith('kibana-pr-'));
 
