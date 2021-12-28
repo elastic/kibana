@@ -15,11 +15,14 @@ export interface BuildRuleMessageFactoryParams {
 
 export const buildRuleMessageFactory =
   ({ id, ruleId, index, name }: BuildRuleMessageFactoryParams): BuildRuleMessage =>
-  (...messages) =>
-    [
+  (...messages) => {
+    const val = [
       ...messages,
       `name: "${name}"`,
       `id: "${id}"`,
       `rule id: "${ruleId ?? '(unknown rule id)'}"`,
       `signals index: "${index}"`,
     ].join(' ');
+    console.log('RULEMESSAGE: ', val);
+    return val;
+  };

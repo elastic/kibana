@@ -8,19 +8,18 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import {
+  EventCountOptions,
   GetSortWithTieBreakerOptions,
   GetThreatListOptions,
   SortWithTieBreaker,
-  ThreatListCountOptions,
   ThreatListDoc,
 } from './types';
 
-/**
- * This should not exceed 10000 (10k)
- */
-export const MAX_PER_PAGE = 9000;
+const ELASTICSEARCH_MAX_PER_PAGE = 10000;
 
-export const getThreatList = async ({
+export const DETECTION_ENGINE_MAX_PER_PAGE = ELASTICSEARCH_MAX_PER_PAGE;
+
+export const getNextIndicatorPage = async ({
   esClient,
   query,
   language,
@@ -35,8 +34,8 @@ export const getThreatList = async ({
   buildRuleMessage,
   logger,
 }: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
-  const calculatedPerPage = perPage ?? MAX_PER_PAGE;
-  if (calculatedPerPage > 10000) {
+  const calculatedPerPage = perPage ?? DETECTION_ENGINE_MAX_PER_PAGE;
+  if (calculatedPerPage > ELASTICSEARCH_MAX_PER_PAGE) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
   const queryFilter = getQueryFilter(
@@ -112,21 +111,15 @@ export const getSortWithTieBreaker = ({
   }
 };
 
-export const getThreatListCount = async ({
+export const getTotalEventCount = async ({
   esClient,
   query,
   language,
-  threatFilters,
+  filters,
   index,
   exceptionItems,
-}: ThreatListCountOptions): Promise<number> => {
-  const queryFilter = getQueryFilter(
-    query,
-    language ?? 'kuery',
-    threatFilters,
-    index,
-    exceptionItems
-  );
+}: EventCountOptions): Promise<number> => {
+  const queryFilter = getQueryFilter(query, language ?? 'kuery', filters, index, exceptionItems);
   const { body: response } = await esClient.count({
     body: {
       query: queryFilter,
@@ -136,3 +129,13 @@ export const getThreatListCount = async ({
   });
   return response.count;
 };
+
+export const getFirstIndicatorPage = (
+  params: Omit<GetThreatListOptions, 'searchAfter' | 'sortField' | 'sortOrder'>
+) =>
+  getNextIndicatorPage({
+    ...params,
+    searchAfter: undefined,
+    sortField: undefined,
+    sortOrder: undefined,
+  });

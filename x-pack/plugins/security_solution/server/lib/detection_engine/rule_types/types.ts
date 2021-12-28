@@ -131,3 +131,7 @@ export interface CreateRuleOptions {
   eventsTelemetry?: TelemetryEventsSender | undefined;
   version: string;
 }
+
+export type CreateIndicatorMatchRuleOptions = CreateRuleOptions & {
+  percolatorRuleDataClient: IRuleDataClient;
+};

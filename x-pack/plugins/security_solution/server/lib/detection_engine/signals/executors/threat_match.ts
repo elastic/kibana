@@ -21,6 +21,7 @@ import { createThreatSignals } from '../threat_mapping/create_threat_signals';
 import { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 
 export const threatMatchExecutor = async ({
   completeRule,
@@ -36,6 +37,7 @@ export const threatMatchExecutor = async ({
   buildRuleMessage,
   bulkCreate,
   wrapHits,
+  percolatorRuleDataClient,
 }: {
   completeRule: CompleteRule<ThreatRuleParams>;
   tuple: RuleRangeTuple;
@@ -50,6 +52,7 @@ export const threatMatchExecutor = async ({
   buildRuleMessage: BuildRuleMessage;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
+  percolatorRuleDataClient: IRuleDataClient;
 }) => {
   const ruleParams = completeRule.ruleParams;
 
@@ -75,6 +78,7 @@ export const threatMatchExecutor = async ({
       listClient,
       logger,
       outputIndex: ruleParams.outputIndex,
+      percolatorRuleDataClient,
       query: ruleParams.query,
       savedId: ruleParams.savedId,
       searchAfterSize,

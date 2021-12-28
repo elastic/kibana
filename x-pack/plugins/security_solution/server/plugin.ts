@@ -179,6 +179,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const { ruleDataService } = plugins.ruleRegistry;
     let ruleDataClient: IRuleDataClient | null = null;
     let previewRuleDataClient: IRuleDataClient | null = null;
+    let percolatorRuleDataClient: IRuleDataClient | null = null;
 
     // rule options are used both to create and preview rules.
     const ruleOptions: CreateRuleOptions = {
@@ -223,6 +224,14 @@ export class Plugin implements ISecuritySolutionPlugin {
       ilmPolicy: previewIlmPolicy,
     });
 
+    percolatorRuleDataClient = ruleDataService.initializeIndex({
+      ...ruleDataServiceOptions,
+      additionalPrefix: `.percolator`,
+      ilmPolicy: previewIlmPolicy,
+      dataset: Dataset.events,
+      secondaryAlias: undefined,
+    });
+
     const securityRuleTypeOptions = {
       lists: plugins.lists,
       logger: this.logger,
@@ -236,7 +245,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
     plugins.alerting.registerType(securityRuleTypeWrapper(createSavedQueryAlertType(ruleOptions)));
     plugins.alerting.registerType(
-      securityRuleTypeWrapper(createIndicatorMatchAlertType(ruleOptions))
+      securityRuleTypeWrapper(
+        createIndicatorMatchAlertType({ ...ruleOptions, percolatorRuleDataClient })
+      )
     );
     plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(ruleOptions)));
     plugins.alerting.registerType(securityRuleTypeWrapper(createQueryAlertType(ruleOptions)));

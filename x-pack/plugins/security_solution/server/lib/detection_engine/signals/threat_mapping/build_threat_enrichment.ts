@@ -8,7 +8,7 @@
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { SignalSearchResponse, SignalsEnrichment } from '../types';
 import { enrichSignalThreatMatches } from './enrich_signal_threat_matches';
-import { getThreatList } from './get_threat_list';
+import { getFirstIndicatorPage } from './get_threat_list';
 import { BuildThreatEnrichmentOptions, GetMatchedThreats } from './types';
 
 export const buildThreatEnrichment = ({
@@ -33,7 +33,7 @@ export const buildThreatEnrichment = ({
         },
       },
     };
-    const threatResponse = await getThreatList({
+    const threatResponse = await getFirstIndicatorPage({
       esClient: services.scopedClusterClient.asCurrentUser,
       exceptionItems,
       threatFilters: [...threatFilters, matchedThreatsFilter],
@@ -41,9 +41,6 @@ export const buildThreatEnrichment = ({
       language: threatLanguage,
       index: threatIndex,
       listClient,
-      searchAfter: undefined,
-      sortField: undefined,
-      sortOrder: undefined,
       logger,
       buildRuleMessage,
       perPage: undefined,
@@ -55,6 +52,7 @@ export const buildThreatEnrichment = ({
   const defaultedIndicatorPath = threatIndicatorPath
     ? threatIndicatorPath
     : DEFAULT_INDICATOR_SOURCE_PATH;
+
   return (signals: SignalSearchResponse): Promise<SignalSearchResponse> =>
     enrichSignalThreatMatches(signals, getMatchedThreats, defaultedIndicatorPath);
 };

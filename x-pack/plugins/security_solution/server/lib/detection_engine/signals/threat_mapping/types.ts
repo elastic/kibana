@@ -35,6 +35,7 @@ import {
   WrapHits,
 } from '../types';
 import { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
@@ -53,6 +54,7 @@ export interface CreateThreatSignalsOptions {
   listClient: ListClient;
   logger: Logger;
   outputIndex: string;
+  percolatorRuleDataClient: IRuleDataClient;
   query: string;
   savedId: string | undefined;
   searchAfterSize: number;
@@ -146,13 +148,13 @@ export interface GetThreatListOptions {
   threatFilters: unknown[];
 }
 
-export interface ThreatListCountOptions {
+export interface EventCountOptions {
   esClient: ElasticsearchClient;
   exceptionItems: ExceptionListItemSchema[];
   index: string[];
   language: ThreatLanguageOrUndefined;
   query: string;
-  threatFilters: unknown[];
+  filters: unknown[];
 }
 
 export interface GetSortWithTieBreakerOptions {

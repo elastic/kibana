@@ -11,12 +11,13 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 
 import { threatRuleParams, ThreatRuleParams } from '../../schemas/rule_schemas';
 import { threatMatchExecutor } from '../../signals/executors/threat_match';
-import { CreateRuleOptions, SecurityAlertType } from '../types';
+import { SecurityAlertType, CreateIndicatorMatchRuleOptions } from '../types';
 
 export const createIndicatorMatchAlertType = (
-  createOptions: CreateRuleOptions
+  createOptions: CreateIndicatorMatchRuleOptions
 ): SecurityAlertType<ThreatRuleParams, {}, {}, 'default'> => {
-  const { eventsTelemetry, experimentalFeatures, logger, version } = createOptions;
+  const { eventsTelemetry, experimentalFeatures, logger, version, percolatorRuleDataClient } =
+    createOptions;
   return {
     id: INDICATOR_RULE_TYPE_ID,
     name: 'Indicator Match Rule',
@@ -73,6 +74,7 @@ export const createIndicatorMatchAlertType = (
         listClient,
         logger,
         completeRule,
+        percolatorRuleDataClient,
         searchAfterSize,
         services,
         tuple,
