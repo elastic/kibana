@@ -43,5 +43,7 @@ export default async (): Promise<ITestSetup> => {
     await client.send('Network.setCacheDisabled', { cacheDisabled: true });
   }
 
+  page.route('**', (route) => route.continue());
+
   return { browser, page };
 };
