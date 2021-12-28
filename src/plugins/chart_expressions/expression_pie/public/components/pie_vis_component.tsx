@@ -7,8 +7,6 @@
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
-/** @jsx jsx */
-import { jsx } from '@emotion/react';
 import {
   Chart,
   Datum,
