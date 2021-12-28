@@ -143,9 +143,9 @@ export function MetricChart({
   const color = getColorStyling(rawValue, colorMode, palette, uiSettings.get('theme:darkMode'));
 
   return (
-    <VisualizationContainer className="lnsMetricExpression__container">
+    <VisualizationContainer className="lnsMetricExpression__container" style={color}>
       <AutoScale key={value}>
-        <div data-test-subj="lns_metric_value" className="lnsMetricExpression__value" style={color}>
+        <div data-test-subj="lns_metric_value" className="lnsMetricExpression__value">
           {value}
         </div>
         {mode === 'full' && (
