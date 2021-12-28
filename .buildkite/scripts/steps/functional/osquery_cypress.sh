@@ -8,6 +8,7 @@ export NODE_OPTIONS=--max_old_space_size=8192
 export CODE_COVERAGE=1
 
 .buildkite/scripts/bootstrap.sh
+.buildkite/scripts/build_kibana_plugins.sh
 
 export JOB=kibana-osquery-cypress
 
