@@ -45,7 +45,7 @@ EOF
     .resources.apm[0].plan.kibana.version = "'$VERSION'"
     ' deploy.json > /tmp/deploy.json
 
-  DEPLOYMENT=$(ecctl deployment create --file deploy.json)
+  DEPLOYMENT=$(ecctl deployment create --file /tmp/deploy.json)
 
 fi
 
