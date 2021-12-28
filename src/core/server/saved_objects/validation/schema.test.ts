@@ -14,8 +14,7 @@ import { createSavedObjectSanitizedDocSchema } from './schema';
 describe('Saved Objects type validation schema', () => {
   const type = 'my-type';
   const validationMap: SavedObjectsValidationMap = {
-    '1.0.0': (data) => data,
-    '2.0.0': schema.object({
+    '1.0.0': schema.object({
       foo: schema.string(),
     }),
   };
@@ -27,25 +26,25 @@ describe('Saved Objects type validation schema', () => {
     type,
   });
 
-  it('should use generic validation on attributes if a config schema is not provided', () => {
+  it('should validate attributes based on provided spec', () => {
     const objectSchema = createSavedObjectSanitizedDocSchema(validationMap['1.0.0']);
-    const data = createMockObject({ foo: false });
+    const data = createMockObject({ foo: 'heya' });
     expect(() => objectSchema.validate(data)).not.toThrowError();
   });
 
-  it('should fail if attributes do not match generic validation', () => {
-    const objectSchema = createSavedObjectSanitizedDocSchema(validationMap['2.0.0']);
-    const data = createMockObject('oops');
-    expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(
-      `"[attributes]: could not parse object value from json input"`
-    );
-  });
-
-  it('should use config schema if provided', () => {
-    const objectSchema = createSavedObjectSanitizedDocSchema(validationMap['2.0.0']);
+  it('should fail if invalid attributes are provided', () => {
+    const objectSchema = createSavedObjectSanitizedDocSchema(validationMap['1.0.0']);
     const data = createMockObject({ foo: false });
     expect(() => objectSchema.validate(data)).toThrowErrorMatchingInlineSnapshot(
       `"[attributes.foo]: expected value of type [string] but got [boolean]"`
+    );
+  });
+
+  it('should fail if top-level properties are invalid', () => {
+    const objectSchema = createSavedObjectSanitizedDocSchema(validationMap['1.0.0']);
+    const data = createMockObject({ foo: 'heya' });
+    expect(() => objectSchema.validate({ ...data, id: false })).toThrowErrorMatchingInlineSnapshot(
+      `"[id]: expected value of type [string] but got [boolean]"`
     );
   });
 });

@@ -59,10 +59,6 @@ function createRoot() {
   );
 }
 
-function isRecord(obj: unknown): obj is Record<string, unknown> {
-  return typeof obj === 'object' && obj !== null && !Array.isArray(obj);
-}
-
 // To keep this suite from running too long, we are only setting up ES once and registering
 // a handful of SO types to test different scenarios. This means we need to take care when
 // adding new tests, as ES will not be cleaned up in between each test run.
@@ -85,34 +81,6 @@ const savedObjectTypes: SavedObjectsType[] = [
         a: schema.number(),
         b: schema.string(),
       }),
-    },
-  },
-  {
-    name: 'schema-using-custom-function',
-    hidden: false,
-    mappings: {
-      properties: {
-        a: { type: 'integer' },
-        b: { type: 'text' },
-      },
-    },
-    migrations: {
-      [kibanaVersion]: (doc) => doc,
-    },
-    namespaceType: 'agnostic',
-    schemas: {
-      [kibanaVersion]: ({ attributes }) => {
-        if (isRecord(attributes) && typeof attributes.a !== 'number') {
-          throw new Error(
-            `[attributes.a]: expected value of type [number] but got [${typeof attributes.a}]`
-          );
-        }
-        if (isRecord(attributes) && typeof attributes.b !== 'string') {
-          throw new Error(
-            `[attributes.b]: expected value of type [string] but got [${typeof attributes.b}]`
-          );
-        }
-      },
     },
   },
   {
@@ -286,40 +254,6 @@ describe('validates saved object types when a schema is provided', () => {
           b: 'heya',
         },
         { migrationVersion: { foo: '7.16.0' } }
-      );
-      expect(attributes).toEqual(
-        expect.objectContaining({
-          a: 1,
-          b: 'heya',
-        })
-      );
-    });
-  });
-
-  describe('when validating with a custom function', () => {
-    it('throws when an invalid attribute is provided', async () => {
-      expect(async () => {
-        await savedObjectsClient.create(
-          'schema-using-custom-function',
-          {
-            a: 1,
-            b: 2,
-          },
-          { migrationVersion: { bar: '7.16.0' } }
-        );
-      }).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"[attributes.b]: expected value of type [string] but got [number]: Bad Request"`
-      );
-    });
-
-    it('does not throw when valid attributes are provided', async () => {
-      const { attributes } = await savedObjectsClient.create(
-        'schema-using-custom-function',
-        {
-          a: 1,
-          b: 'heya',
-        },
-        { migrationVersion: { bar: '7.16.0' } }
       );
       expect(attributes).toEqual(
         expect.objectContaining({

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isConfigSchema, schema, Type } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
 import { SavedObjectsValidationSpec } from './types';
 import { SavedObjectSanitizedDoc } from '../serialization';
 
@@ -18,17 +18,14 @@ type SavedObjectSanitizedDocSchema = {
 };
 
 /**
- * Returns a validation schema representing a {@link SavedObjectSanitizedDoc}.
- *
- * If a {@link SavedObjectsValidationSpec} is provided and the spec is a
- * config schema, that validation will be used for the object's `attributes`.
- * Otherwise, it falls back to a more generic validation.
+ * Takes a {@link SavedObjectsValidationSpec} and returns a full schema representing
+ * a {@link SavedObjectSanitizedDoc}, with the spec applied to the object's `attributes`.
  *
  * @internal
  */
-export const createSavedObjectSanitizedDocSchema = (rule?: SavedObjectsValidationSpec) =>
+export const createSavedObjectSanitizedDocSchema = (rule: SavedObjectsValidationSpec) =>
   schema.object<SavedObjectSanitizedDocSchema>({
-    attributes: isConfigSchema(rule) ? rule : schema.object({}, { unknowns: 'allow' }),
+    attributes: rule,
     id: schema.string(),
     type: schema.string(),
     references: schema.arrayOf(

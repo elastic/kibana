@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ValidationError, isConfigSchema } from '@kbn/config-schema';
 import { createSavedObjectSanitizedDocSchema } from './schema';
-import { SavedObjectsValidationMap, SavedObjectsValidationFunction } from './types';
-import { SavedObjectsValidationError } from './validator_error';
+import { SavedObjectsValidationMap } from './types';
 import { SavedObjectSanitizedDoc } from '../serialization';
 import { Logger } from '../../logging';
 
@@ -44,27 +42,14 @@ export class SavedObjectsTypeValidator {
       return; // no matching validation rule could be found; proceed without validating
     }
 
-    this.log.debug(`Validating object of type [${this.type}] against version [${objectVersion}]`);
-    const validationSchema = createSavedObjectSanitizedDocSchema(validationRule);
-    validationSchema.validate(data);
-
-    if (!isConfigSchema(validationRule) && isValidationFunction(validationRule)) {
-      this.validateFunction(data, validationRule);
-    }
-  }
-
-  private validateFunction(
-    data: SavedObjectSanitizedDoc,
-    validateFn: SavedObjectsValidationFunction
-  ) {
     try {
-      validateFn({ attributes: data.attributes });
-    } catch (err) {
-      throw new ValidationError(new SavedObjectsValidationError(err));
+      const validationSchema = createSavedObjectSanitizedDocSchema(validationRule);
+      validationSchema.validate(data);
+    } catch (e) {
+      this.log.warn(
+        `Error validating object of type [${this.type}] against version [${objectVersion}]`
+      );
+      throw e;
     }
   }
-}
-
-function isValidationFunction(fn: unknown): fn is SavedObjectsValidationFunction {
-  return typeof fn === 'function';
 }

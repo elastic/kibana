@@ -9,32 +9,13 @@
 import { ObjectType } from '@kbn/config-schema';
 
 /**
- * The custom validation function if @kbn/config-schema is not a valid solution for your specific plugin requirements.
- *
- * Be careful not to mutate the provided attributes.
- *
- * @example
- * The validation should look something like:
- * ```typescript
- * const myAttributesValidation: SavedObjectsValidationFunction = ({ attributes }) => {
- *   if (typeof attributes.bar !== 'string') {
- *     throw new Error(`[bar]: expected value of type [string] but got [${typeof attributes.bar}]`);
- *   }
- * }
- * ```
- *
- * @public
- */
-export type SavedObjectsValidationFunction = (data: { attributes: unknown }) => void;
-
-/**
  * Allowed property validation options: either @kbn/config-schema validations or custom validation functions.
  *
  * See {@link SavedObjectsValidationFunction} for custom validation.
  *
  * @public
  */
-export type SavedObjectsValidationSpec = ObjectType | SavedObjectsValidationFunction;
+export type SavedObjectsValidationSpec = ObjectType;
 
 /**
  * A map of {@link SavedObjectsValidationSpec | validation specs} to be used for a given type.
@@ -49,17 +30,16 @@ export type SavedObjectsValidationSpec = ObjectType | SavedObjectsValidationFunc
  *   '1.0.0': schema.object({
  *     foo: schema.string(),
  *   }),
- *   '1.1.0': schema.object({
- *     foo: schema.oneOf([schema.string(), schema.boolean()]),
+ *   '2.0.0': schema.object({
+ *     foo: schema.string({
+ *       minLength: 2,
+ *       validate(value) {
+ *         if (!/^[a-z]+$/.test(value)) {
+ *           return 'must be lowercase letters only';
+ *         }
+ *       }
+ *     }),
  *   }),
- *   '2.1.0': ({ attributes }) => {
- *     if (typeof attributes.bar !== 'string') {
- *       throw new Error(`[bar]: expected value of type [string] but got [${typeof data.bar}]`);
- *     }
- *     if (typeof attributes.foo !== 'string' && typeof attributes.foo !== 'boolean') {
- *       throw new Error(`[foo]: expected value of type [string,boolean] but got [${typeof attributes.foo}]`);
- *     }
- *   }
  * }
  * ```
  *
