@@ -13,10 +13,15 @@ import { DefaultStringBooleanFalse } from '../default_string_boolean_false';
 export const importQuerySchema = t.exact(
   t.partial({
     overwrite: DefaultStringBooleanFalse,
+    overwrite_exceptions: DefaultStringBooleanFalse,
   })
 );
 
 export type ImportQuerySchema = t.TypeOf<typeof importQuerySchema>;
-export type ImportQuerySchemaDecoded = Omit<ImportQuerySchema, 'overwrite'> & {
+export type ImportQuerySchemaDecoded = Omit<
+  ImportQuerySchema,
+  'overwrite' | 'overwrite_exceptions'
+> & {
   overwrite: boolean;
+  overwrite_exceptions: boolean;
 };

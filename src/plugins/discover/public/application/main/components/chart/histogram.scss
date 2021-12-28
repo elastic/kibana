@@ -11,3 +11,19 @@
   font-weight: $euiFontWeightRegular;
   min-width: $euiSize * 12;
 }
+
+.dscHistogram__errorChartContainer {
+  padding: 0 $euiSizeS 0 $euiSizeS;
+}
+
+.dscHistogram__errorChart {
+  margin-left: $euiSizeXS !important;
+}
+
+.dscHistogram__errorChart__text {
+  margin-top: $euiSizeS;
+}
+
+.dscHistogram__errorChart__icon {
+  padding-top: .5 * $euiSizeXS;
+}
