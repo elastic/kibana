@@ -7,6 +7,7 @@
  */
 
 import { CustomPaletteState } from '../..';
+import { PaletteContinuity } from '../../../common';
 
 function findColorSegment(
   value: number,
@@ -49,6 +50,39 @@ function getNormalizedValueByRange(
   return result;
 }
 
+const checkIsMaxContinuity = (continuity: PaletteContinuity) =>
+  ['above', 'all'].includes(continuity!);
+const checkIsMinContinuity = (continuity: PaletteContinuity) =>
+  ['below', 'all'].includes(continuity!);
+
+const getNormalizedMaxRange = (
+  {
+    stops,
+    colors,
+    rangeMax,
+  }: Pick<CustomPaletteState, 'stops' | 'continuity' | 'colors' | 'rangeMax'>,
+  isMaxContinuity: boolean,
+  [min, max]: [number, number]
+) => {
+  if (isMaxContinuity) {
+    return Number.POSITIVE_INFINITY;
+  }
+
+  return stops.length ? rangeMax : max - (max - min) / colors.length;
+};
+
+const getNormalizedMinRange = (
+  { stops, rangeMin }: Pick<CustomPaletteState, 'stops' | 'continuity' | 'rangeMin'>,
+  isMinContinuity: boolean,
+  min: number
+) => {
+  if (isMinContinuity) {
+    return Number.NEGATIVE_INFINITY;
+  }
+
+  return stops.length ? rangeMin : min;
+};
+
 /**
  * When stops are empty, it is assumed a predefined palette, so colors are distributed uniformly in the whole data range
  * When stops are passed, then rangeMin/rangeMax are used as reference for user defined limits:
@@ -66,26 +100,27 @@ export function workoutColorForValue(
   // ranges can be absolute numbers or percentages
   // normalized the incoming value to the same format as range to make easier comparisons
   const normalizedValue = getNormalizedValueByRange(value, params, minMax);
-  const dataRangeArguments = range === 'percent' ? [0, 100] : [minMax.min, minMax.max];
+
+  const [min, max]: [number, number] = range === 'percent' ? [0, 100] : [minMax.min, minMax.max];
+
+  const isMinContinuity = checkIsMinContinuity(continuity);
+  const isMaxContinuity = checkIsMaxContinuity(continuity);
+
+  const minRange = getNormalizedMinRange({ stops, rangeMin }, isMinContinuity, min);
+  const maxRange = getNormalizedMaxRange({ stops, colors, rangeMax }, isMaxContinuity, [min, max]);
+
   const comparisonFn = (v: number, threshold: number) => v - threshold;
 
-  // if steps are defined consider the specific rangeMax/Min as data boundaries
-  // as of max reduce its value by 1/colors.length for correct continuity checks
-  const maxRange = stops.length
-    ? rangeMax
-    : dataRangeArguments[1] - (dataRangeArguments[1] - dataRangeArguments[0]) / colors.length;
-  const minRange = stops.length ? rangeMin : dataRangeArguments[0];
-
-  // in case of shorter rangers, extends the steps on the sides to cover the whole set
-  if (comparisonFn(normalizedValue, isFinite(maxRange) ? maxRange : stops[stops.length - 1]) > 0) {
-    if (continuity === 'above' || continuity === 'all') {
-      return colors[colors.length - 1];
+  if (comparisonFn(normalizedValue, minRange) < 0) {
+    if (isMinContinuity) {
+      return colors[0];
     }
     return;
   }
-  if (comparisonFn(normalizedValue, isFinite(minRange) ? minRange : stops[0]) < 0) {
-    if (continuity === 'below' || continuity === 'all') {
-      return colors[0];
+
+  if (comparisonFn(normalizedValue, maxRange) > 0) {
+    if (isMaxContinuity) {
+      return colors[colors.length - 1];
     }
     return;
   }
@@ -94,11 +129,5 @@ export function workoutColorForValue(
     return findColorsByStops(normalizedValue, comparisonFn, colors, stops);
   }
 
-  return findColorSegment(
-    normalizedValue,
-    comparisonFn,
-    colors,
-    dataRangeArguments[0],
-    dataRangeArguments[1]
-  );
+  return findColorSegment(normalizedValue, comparisonFn, colors, min, max);
 }

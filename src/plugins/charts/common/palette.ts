@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import type { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { i18n } from '@kbn/i18n';
 import { last } from 'lodash';
 import { paletteIds } from './constants';
+
+import type { PaletteContinuity } from './types';
 
 export interface CustomPaletteArguments {
   color?: string[];
@@ -19,7 +21,7 @@ export interface CustomPaletteArguments {
   range?: 'number' | 'percent';
   rangeMin?: number;
   rangeMax?: number;
-  continuity?: 'above' | 'below' | 'all' | 'none';
+  continuity?: PaletteContinuity;
 }
 
 export interface CustomPaletteState {
@@ -29,7 +31,7 @@ export interface CustomPaletteState {
   range: 'number' | 'percent';
   rangeMin: number;
   rangeMax: number;
-  continuity?: 'above' | 'below' | 'all' | 'none';
+  continuity?: PaletteContinuity;
 }
 
 export interface SystemPaletteArguments {
@@ -169,8 +171,14 @@ export function palette(): ExpressionFunctionDefinition<
           range: range ?? 'percent',
           gradient,
           continuity,
-          rangeMin: calculateRange(rangeMin, stops[0], rangeMinDefault),
-          rangeMax: calculateRange(rangeMax, last(stops), rangeMaxDefault),
+          rangeMin:
+            continuity && ['below', 'all'].includes(continuity)
+              ? Number.NEGATIVE_INFINITY
+              : calculateRange(rangeMin, stops[0], rangeMinDefault),
+          rangeMax:
+            continuity && ['above', 'all'].includes(continuity)
+              ? Number.POSITIVE_INFINITY
+              : calculateRange(rangeMax, last(stops), rangeMaxDefault),
         },
       };
     },
