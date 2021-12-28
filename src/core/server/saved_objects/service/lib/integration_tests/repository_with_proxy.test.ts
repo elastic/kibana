@@ -289,11 +289,17 @@ describe('404s from proxies', () => {
     let repository: ISavedObjectsRepository;
     const myTypeDocs: SavedObject[] = [];
 
-    const SavedObjectsClientEsUnavailable = (err: any) => {
+    const genericNotFoundEsUnavailableError = (err: any, type?: string, id?: string) => {
       expect(err?.output?.statusCode).toBe(503);
-      expect(err?.output?.payload?.message).toBe(
-        `The client noticed that the server is not Elasticsearch and we do not support this unknown product.`
-      );
+      if (type && id) {
+        expect(err?.output?.payload?.message).toBe(
+          `x-elastic-product not present or not recognized: Saved object [${type}/${id}] not found`
+        );
+      } else {
+        expect(err?.output?.payload?.message).toBe(
+          `x-elastic-product not present or not recognized: Not Found`
+        );
+      }
     };
 
     beforeAll(async () => {
@@ -335,7 +341,7 @@ describe('404s from proxies', () => {
       } catch (err) {
         myError = err;
       }
-      expect(SavedObjectsClientEsUnavailable(myError));
+      expect(genericNotFoundEsUnavailableError(myError, 'my_type', 'myTypeId1'));
     });
 
     it('returns an EsUnavailable error on `update` requests that are interrupted', async () => {
@@ -348,7 +354,7 @@ describe('404s from proxies', () => {
       } catch (err) {
         updateError = err;
       }
-      expect(SavedObjectsClientEsUnavailable(updateError));
+      expect(genericNotFoundEsUnavailableError(updateError));
     });
 
     it('returns an EsUnavailable error on `bulkCreate` requests with a 404 proxy response and wrong product header', async () => {
@@ -377,7 +383,7 @@ describe('404s from proxies', () => {
       } catch (err) {
         bulkCreateError = err;
       }
-      expect(SavedObjectsClientEsUnavailable(bulkCreateError));
+      expect(genericNotFoundEsUnavailableError(bulkCreateError));
     });
 
     it('returns an EsUnavailable error on `find` requests with a 404 proxy response and wrong product header', async () => {
@@ -388,7 +394,7 @@ describe('404s from proxies', () => {
       } catch (err) {
         findErr = err;
       }
-      expect(SavedObjectsClientEsUnavailable(findErr));
+      expect(genericNotFoundEsUnavailableError(findErr));
       expect(findErr?.output?.payload?.error).toBe('Service Unavailable');
     });
 
@@ -399,7 +405,7 @@ describe('404s from proxies', () => {
       } catch (err) {
         deleteErr = err;
       }
-      expect(SavedObjectsClientEsUnavailable(deleteErr));
+      expect(genericNotFoundEsUnavailableError(deleteErr, 'my_type', 'myTypeId1'));
     });
 
     it('returns an EsUnavailable error on `bulkResolve` requests with a 404 proxy response and wrong product header for an exact match', async () => {
@@ -411,7 +417,7 @@ describe('404s from proxies', () => {
       } catch (err) {
         testBulkResolveErr = err;
       }
-      expect(SavedObjectsClientEsUnavailable(testBulkResolveErr));
+      expect(genericNotFoundEsUnavailableError(testBulkResolveErr));
     });
 
     it('returns an EsUnavailable error on `resolve` requests with a 404 proxy response and wrong product header for an exact match', async () => {
@@ -422,7 +428,7 @@ describe('404s from proxies', () => {
       } catch (err) {
         testResolveErr = err;
       }
-      expect(SavedObjectsClientEsUnavailable(testResolveErr));
+      expect(genericNotFoundEsUnavailableError(testResolveErr));
     });
 
     it('returns an EsUnavailable error on `bulkGet` requests with a 404 proxy response and wrong product header', async () => {
@@ -434,7 +440,7 @@ describe('404s from proxies', () => {
       } catch (err) {
         bulkGetError = err;
       }
-      expect(SavedObjectsClientEsUnavailable(bulkGetError));
+      expect(genericNotFoundEsUnavailableError(bulkGetError));
     });
 
     it('returns an EsUnavailable error on `openPointInTimeForType` requests with a 404 proxy response and wrong product header', async () => {
@@ -445,7 +451,7 @@ describe('404s from proxies', () => {
       } catch (err) {
         openPitErr = err;
       }
-      expect(SavedObjectsClientEsUnavailable(openPitErr));
+      expect(genericNotFoundEsUnavailableError(openPitErr));
     });
 
     it('returns an EsUnavailable error on `checkConflicts` requests with a 404 proxy response and wrong product header', async () => {
@@ -462,7 +468,7 @@ describe('404s from proxies', () => {
       } catch (err) {
         checkConflictsErr = err;
       }
-      expect(SavedObjectsClientEsUnavailable(checkConflictsErr));
+      expect(genericNotFoundEsUnavailableError(checkConflictsErr));
     });
 
     it('returns an EsUnavailable error on `deleteByNamespace` requests with a 404 proxy response and wrong product header', async () => {
@@ -473,7 +479,7 @@ describe('404s from proxies', () => {
       } catch (err) {
         deleteByNamespaceErr = err;
       }
-      expect(SavedObjectsClientEsUnavailable(deleteByNamespaceErr));
+      expect(genericNotFoundEsUnavailableError(deleteByNamespaceErr));
     });
   });
 });
