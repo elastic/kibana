@@ -69,6 +69,7 @@ export function DependenciesTable(props: Props) {
       name: nameColumnTitle,
       render: (_, item) => {
         const { name, link: itemLink } = item;
+        itemLink.props.children = name;
         return <TruncateWithTooltip text={name} content={itemLink} />;
       },
       sortable: true,
