@@ -16,6 +16,8 @@ import semverPatch from 'semver/functions/patch';
 import type { AgentPolicy } from '../../types';
 import { useKibanaVersion } from '../../hooks';
 
+import { AgentPolicyCreateInlineForm } from '../../applications/fleet/sections/agent_policy/components';
+
 import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
 import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
 
@@ -106,18 +108,21 @@ export const AgentPolicySelectionStep = ({
 
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepChooseAgentPolicyTitle', {
-      defaultMessage: 'Choose an agent policy',
+      defaultMessage: 'What type of host are you adding?',
     }),
-    children: (
-      <EnrollmentStepAgentPolicy
-        agentPolicies={regularAgentPolicies}
-        withKeySelection={setSelectedAPIKeyId ? true : false}
-        selectedApiKeyId={selectedApiKeyId}
-        onKeyChange={setSelectedAPIKeyId}
-        onAgentPolicyChange={onAgentPolicyChange}
-        excludeFleetServer={excludeFleetServer}
-      />
-    ),
+    children:
+      (agentPolicies ?? []).length > 0 ? (
+        <EnrollmentStepAgentPolicy
+          agentPolicies={regularAgentPolicies}
+          withKeySelection={setSelectedAPIKeyId ? true : false}
+          selectedApiKeyId={selectedApiKeyId}
+          onKeyChange={setSelectedAPIKeyId}
+          onAgentPolicyChange={onAgentPolicyChange}
+          excludeFleetServer={excludeFleetServer}
+        />
+      ) : (
+        <AgentPolicyCreateInlineForm updateAgentPolicy={onAgentPolicyChange} />
+      ),
   };
 };
 

@@ -24,7 +24,11 @@ import type {
   GetFullAgentPolicyRequestSchema,
   FleetRequestHandler,
 } from '../../types';
-import { FLEET_ELASTIC_AGENT_PACKAGE, FLEET_SYSTEM_PACKAGE } from '../../../common';
+import {
+  FLEET_ELASTIC_AGENT_PACKAGE,
+  FLEET_SERVER_PACKAGE,
+  FLEET_SYSTEM_PACKAGE,
+} from '../../../common';
 import type {
   GetAgentPoliciesResponse,
   GetAgentPoliciesResponseItem,
@@ -110,10 +114,19 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
+  const isDefaultFleetServer = request.body.is_default_fleet_server ?? false;
   const spaceId = context.fleet.spaceId;
   // TODO set first default policy to is_default
   // TODO installing these packages might take long (about 2 mins) which causes network timeout. this results in an error, and fails next agent policy creation request. Could this be improved by bundled default packages?
   try {
+    if (isDefaultFleetServer) {
+      // install fleet server package if not yet installed
+      await ensureInstalledPackage({
+        savedObjectsClient: soClient,
+        pkgName: FLEET_SERVER_PACKAGE,
+        esClient,
+      });
+    }
     if (withSysMonitoring) {
       // install system package if not yet installed
       await ensureInstalledPackage({
@@ -135,10 +148,15 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       agentPolicyService.create(soClient, esClient, request.body, {
         user,
       }),
-      // If needed, retrieve System package information and build a new package policy for the system package
-      // NOTE: we ignore failures in attempting to create package policy, since agent policy might have been created
-      // successfully
-      withSysMonitoring
+      // TODO case when both isDefaultFleetServer and withSysMonitoring is true
+      isDefaultFleetServer
+        ? packagePolicyService
+            .buildPackagePolicyFromPackage(soClient, FLEET_SERVER_PACKAGE)
+            .catch(() => undefined)
+        : // If needed, retrieve System package information and build a new package policy for the system package
+        // NOTE: we ignore failures in attempting to create package policy, since agent policy might have been created
+        // successfully
+        withSysMonitoring
         ? packagePolicyService
             .buildPackagePolicyFromPackage(soClient, FLEET_SYSTEM_PACKAGE)
             .catch(() => undefined)

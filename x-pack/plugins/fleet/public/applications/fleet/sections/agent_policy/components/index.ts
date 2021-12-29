@@ -16,3 +16,4 @@ export { ConfirmDeployAgentPolicyModal } from './confirm_deploy_modal';
 export { AgentPolicyActionMenu } from './actions_menu';
 export { AgentPolicyIntegrationForm } from './agent_policy_integration';
 export { agentPolicyFormValidation } from './agent_policy_validation';
+export { AgentPolicyCreateInlineForm } from './agent_policy_create_inline';

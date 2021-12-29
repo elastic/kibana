@@ -48,6 +48,8 @@ import type { PackagePolicy } from '../../../../types';
 import { FLEET_SERVER_PACKAGE } from '../../../../constants';
 import { FleetServerOnPremRequiredCallout } from '../../components';
 
+import { AgentPolicyCreateInlineForm } from '../../../agent_policy/components';
+
 import { getInstallCommandForPlatform } from './install_command_utils';
 
 const URL_REGEX = /^(https?):\/\/[^\s$.?#].[^\s]*$/gm;
@@ -368,6 +370,21 @@ const AgentPolicySelectionStep = ({
     },
     [setPolicyId]
   );
+
+  if (agentPolicies.length === 0) {
+    return {
+      title: i18n.translate('xpack.fleet.fleetServerSetup.stepCreateAgentPolicyTitle', {
+        defaultMessage: 'Create a Fleet Server agent policy',
+      }),
+      status: undefined,
+      children: (
+        <AgentPolicyCreateInlineForm
+          updateAgentPolicy={(value: string) => setPolicyId(value)}
+          isFleetServerPolicy={true}
+        />
+      ),
+    };
+  }
 
   return {
     title: i18n.translate('xpack.fleet.fleetServerSetup.stepSelectAgentPolicyTitle', {
