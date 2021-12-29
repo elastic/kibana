@@ -46,7 +46,7 @@ You can also add a `manager.ts` file to customize various aspects of your Storyb
 addons.setConfig({
   theme: create({
     brandTitle: 'My Plugin',
-    brandUrl: 'https://github.com/elastic/kibana/tree/main/src/plugins/my_pluginl',
+    brandUrl: 'https://github.com/elastic/kibana/tree/main/src/plugins/my_plugin',
   }),
 });
 ```
