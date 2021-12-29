@@ -22,7 +22,7 @@ checks-reporter-with-killswitch "Osquery Cypress Tests" \
     --config test/osquery_cypress/cli_config.ts
 
 echo "--- Deleting videos after sourcesful tests"
-rm -rf ../target/kibana-osquery/videos
+rm -rf ../target/kibana-osquery/cypress/videos
 
 echo "--- Upload coverage"
 tar -zcf ../target/kibana-osquery/coverage.tar.gz ./plugins/osquery/coverage
