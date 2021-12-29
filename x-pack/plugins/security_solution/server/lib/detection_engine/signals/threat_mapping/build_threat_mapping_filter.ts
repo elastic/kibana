@@ -124,12 +124,9 @@ export const createAndOrClauses = ({
 export const createPercolateQueries = ({
   threatMapping,
   threatList,
-}: Omit<BuildEntriesMappingFilterOptions, 'chunkSize'>) => {
-  const value = threatList
+}: Omit<BuildEntriesMappingFilterOptions, 'chunkSize'>) =>
+  threatList
     .map((indicator, i) => {
-      if (i === 0) {
-        console.log('___firstIndicator', indicator);
-      }
       const query = createAndOrClauses({
         threatMapping: filterThreatMapping({
           threatMapping,
@@ -137,12 +134,9 @@ export const createPercolateQueries = ({
         }),
         threatListItem: indicator,
       });
-      return query.bool.should.length ? query.bool.should : null;
+      return query.bool.should.length ? query.bool.should[0] : null;
     })
     .filter((query) => query);
-  console.log(value);
-  return value;
-};
 
 export const buildEntriesMappingFilter = ({
   threatMapping,

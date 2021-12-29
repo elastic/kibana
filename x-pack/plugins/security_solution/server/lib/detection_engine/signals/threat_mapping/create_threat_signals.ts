@@ -6,6 +6,7 @@
  */
 
 import chunk from 'lodash/fp/chunk';
+import get from 'lodash/get';
 import { getTotalEventCount, getFirstIndicatorPage, getNextIndicatorPage } from './get_threat_list';
 
 import { CreateThreatSignalsOptions } from './types';
@@ -110,11 +111,9 @@ export const createThreatSignals = async ({
       perPage,
     });
 
-    let innerLoop = 0;
     let allThreatFilters = [];
     let indicatorPage = { ...currentIndicatorPage };
     while (indicatorPage.hits.hits.length !== 0) {
-      console.log('____innerLoopCount', innerLoop);
       allThreatFilters = allThreatFilters.concat(
         createPercolateQueries({ threatMapping, threatList: currentIndicatorPage.hits.hits })
       );
@@ -134,19 +133,19 @@ export const createThreatSignals = async ({
         logger,
         perPage,
       });
-      innerLoop++;
     }
     await percolatorRuleDataClient.getWriter().bulk({
-      body: allThreatFilters.flatMap((filter) => ({
-        query: filter,
-      })),
+      body: allThreatFilters.flatMap((filter) => [
+        {
+          create: {
+            _index: `${percolatorRuleDataClient.indexName}-default`,
+            _id: get(filter, '_name'),
+          },
+        },
+        { query: filter },
+      ]),
       refresh: true,
     });
-    console.log(
-      '____allThreatFilters',
-      allThreatFilters.length,
-      JSON.stringify(allThreatFilters[0])
-    );
 
     const threatEnrichment = buildThreatEnrichment({
       buildRuleMessage,

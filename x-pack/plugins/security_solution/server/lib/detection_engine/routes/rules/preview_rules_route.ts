@@ -52,7 +52,8 @@ export const previewRulesRoute = async (
   security: SetupPlugins['security'],
   ruleOptions: CreateRuleOptions,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
-  previewRuleDataClient: IRuleDataClient
+  previewRuleDataClient: IRuleDataClient,
+  percolatorRuleDataClient: IRuleDataClient
 ) => {
   router.post(
     {
@@ -217,7 +218,7 @@ export const previewRulesRoute = async (
             break;
           case 'threat_match':
             const threatMatchAlertType = previewRuleTypeWrapper(
-              createIndicatorMatchAlertType(ruleOptions)
+              createIndicatorMatchAlertType({ ...ruleOptions, percolatorRuleDataClient })
             );
             await runExecutors(
               threatMatchAlertType.executor,

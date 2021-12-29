@@ -229,7 +229,23 @@ export class Plugin implements ISecuritySolutionPlugin {
       additionalPrefix: `.percolator`,
       ilmPolicy: previewIlmPolicy,
       dataset: Dataset.events,
-      secondaryAlias: undefined,
+      componentTemplates: [
+        {
+          name: 'mappings',
+          mappings: mappingFromFieldMap(
+            {
+              ...technicalRuleFieldMap,
+              ...alertsFieldMap,
+              ...rulesFieldMap,
+              ...aliasesFieldMap,
+              query: {
+                type: 'percolator',
+              },
+            },
+            false
+          ),
+        },
+      ],
     });
 
     const securityRuleTypeOptions = {
@@ -267,7 +283,8 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleOptions,
       core.getStartServices,
       securityRuleTypeOptions,
-      previewRuleDataClient
+      previewRuleDataClient,
+      percolatorRuleDataClient
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
