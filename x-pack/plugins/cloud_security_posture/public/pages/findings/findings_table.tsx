@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Criteria,
   EuiLink,
@@ -28,13 +28,9 @@ interface BaseFindingsTableProps {
 
 type FindingsTableProps = FindingsFetchState & BaseFindingsTableProps;
 
-/**
- * Temporary findings table
- */
 export const FindingsTable = ({ data, status, error, selectItem }: FindingsTableProps) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
-  const columns = useMemo(getColumns, []);
 
   const getCellProps = (item: CSPFinding, column: EuiTableFieldDataColumnType<CSPFinding>) => ({
     onClick: column.field === 'rule.name' ? () => selectItem(item) : undefined,
@@ -48,6 +44,15 @@ export const FindingsTable = ({ data, status, error, selectItem }: FindingsTable
     setPageSize(size);
   };
 
+  const page = useMemo(
+    () =>
+      orderBy(data, ['@timestamp'], ['desc']).slice(
+        pageIndex * pageSize,
+        pageSize * pageIndex + pageSize
+      ),
+    [data, pageSize, pageIndex]
+  );
+
   // TODO: add empty/error/loading views
   if (!data) return null;
 
@@ -59,9 +64,6 @@ export const FindingsTable = ({ data, status, error, selectItem }: FindingsTable
     pageSizeOptions: [5, 10, 25],
     hidePerPageOptions: false,
   };
-
-  const sortedData = orderBy(data, ['@timestamp'], ['desc']);
-  const page = sortedData.slice(pageIndex * pageSize, pageSize * pageIndex + pageSize);
 
   return (
     <EuiBasicTable
@@ -78,8 +80,8 @@ export const FindingsTable = ({ data, status, error, selectItem }: FindingsTable
   );
 };
 
-const RuleName = (name: string) => <EuiLink>{name}</EuiLink>;
-const RuleTags = (tags: string[]) => (
+const ruleNameRenderer = (name: string) => <EuiLink>{name}</EuiLink>;
+const ruleTagsRenderer = (tags: string[]) => (
   <EuiFlexGroup>
     <EuiFlexItem>
       <EuiBadgeGroup>
@@ -92,11 +94,11 @@ const RuleTags = (tags: string[]) => (
     </EuiFlexItem>
   </EuiFlexGroup>
 );
-const ResultEvaluation = (type: PropsOf<typeof CSPEvaluationBadge>['type']) => (
+const resultEvaluationRenderer = (type: PropsOf<typeof CSPEvaluationBadge>['type']) => (
   <CSPEvaluationBadge type={type} />
 );
 
-const getColumns = (): Array<EuiTableFieldDataColumnType<CSPFinding>> => [
+const columns: Array<EuiTableFieldDataColumnType<CSPFinding>> = [
   {
     field: 'resource.filename',
     name: 'Resource',
@@ -107,18 +109,18 @@ const getColumns = (): Array<EuiTableFieldDataColumnType<CSPFinding>> => [
     name: 'Rule Name',
     width: '50%',
     truncateText: true,
-    render: RuleName,
+    render: ruleNameRenderer,
   },
   {
     field: 'result.evaluation',
     name: 'Evaluation',
     width: '80px',
-    render: ResultEvaluation,
+    render: resultEvaluationRenderer,
   },
   {
     field: 'rule.tags',
     name: 'Tags',
-    render: RuleTags,
+    render: ruleTagsRenderer,
   },
   {
     field: '@timestamp',

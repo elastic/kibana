@@ -19,17 +19,14 @@ import type { CspPluginSetup } from '../../types';
 import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
-// TODO: find similar/existing function
-export const extractErrorMessage = (e: unknown) =>
+export const extractErrorMessage = (e: unknown): string =>
   typeof e === 'string' ? e : (e as Error)?.message || 'Unknown Error';
 
-// TODO: find kibanas' equivalent fn
 export const isNonNullable = <T extends unknown>(v: T): v is NonNullable<T> =>
   v !== null && v !== undefined;
 
 /**
- *  Temp DataView Utility
- *  registers a kibana data view for kubebeat* index
+ *  registers a kibana data view for kubebeat* index and fetches it
  *  TODO: use perfected kibana data views
  */
 
@@ -55,9 +52,6 @@ export const useKubebeatDataView = () => {
   return useQuery(['kubebeat_dataview'], getKubebeatDataView);
 };
 
-/**
- * Temp URL state utility
- */
 export const useSourceQueryParam = <T extends object>(getDefaultQuery: () => T) => {
   const history = useHistory();
   const [state, set] = useState<T>(getDefaultQuery());

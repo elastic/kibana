@@ -45,8 +45,8 @@ const getDefaultQuery = (): Required<URLState> => ({
   },
 });
 
-// with https://github.com/microsoft/TypeScript/pull/46266
-// destructuring would make this more concise and won't leak props
+// TODO(TS 4.6): destructure {status, error, data} to make this more concise without losing types
+// see with https://github.com/microsoft/TypeScript/pull/46266
 export const getFetchState = <T extends FindingsEsSearchMutation>(v: T): FindingsFetchState => {
   switch (v.status) {
     case 'error':
@@ -77,7 +77,7 @@ export const FindingsTableContainer = ({ dataView }: { dataView: DataView }) => 
   // This sends a new search request to ES
   // it's called whenever we have a new searchState from the URL
   useEffect(() => {
-    mutation.mutate(void 0, {
+    mutation.mutate(undefined, {
       onError: (e) => {
         notifications?.toasts.addError(e instanceof Error ? e : new Error(), {
           title: 'Search failed',
