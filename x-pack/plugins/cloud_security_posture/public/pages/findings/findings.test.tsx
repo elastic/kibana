@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { Findings } from './findings';
+import { Findings, missingKubebeatErrorMessage } from './findings';
 import { render, screen } from '@testing-library/react';
 import { TestProvider } from '../../application/test_provider';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
@@ -41,7 +41,7 @@ describe('<Findings />', () => {
 
     render(<FindingsComponentWithTestProvider />);
 
-    expect(await screen.findByTestId(TEST_SUBJECTS.FINDINGS_MISSING_INDEX)).toBeInTheDocument();
+    expect(await screen.findByText(missingKubebeatErrorMessage)).toBeInTheDocument();
   });
 
   it("renders the error state component when 'kubebeat' request status is 'error'", async () => {
@@ -49,7 +49,7 @@ describe('<Findings />', () => {
 
     render(<FindingsComponentWithTestProvider />);
 
-    expect(await screen.findByTestId(TEST_SUBJECTS.FINDINGS_MISSING_INDEX)).toBeInTheDocument();
+    expect(await screen.findByText(missingKubebeatErrorMessage)).toBeInTheDocument();
   });
 
   it("renders the success state component when 'kubebeat' DataView exists and request status is 'success'", async () => {

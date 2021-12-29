@@ -34,6 +34,8 @@ export const Findings = () => {
 
 const LoadingPrompt = () => <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} />;
 
+export const missingKubebeatErrorMessage = 'Kubebeat DataView is missing';
+
 // TODO: follow https://elastic.github.io/eui/#/display/empty-prompt/guidelines
 const ErrorPrompt = () => (
   <EuiEmptyPrompt
@@ -41,6 +43,6 @@ const ErrorPrompt = () => (
     color="danger"
     iconType="alert"
     // TODO: account for when we have a dataview without an index
-    title={<h2>Kubebeat DataView is missing</h2>}
+    title={<h2>{missingKubebeatErrorMessage}</h2>}
   />
 );
