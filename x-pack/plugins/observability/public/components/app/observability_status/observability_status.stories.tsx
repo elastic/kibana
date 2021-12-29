@@ -5,21 +5,13 @@
  * 2.0.
  */
 
-import React, { ComponentType } from 'react';
+import React from 'react';
 import { Story } from '@storybook/react';
-import { EuiProvider } from '@elastic/eui';
 import { ObservabilityStatusBoxes, ObservabilityStatusProps } from './observability_status_boxes';
 
 export default {
   title: 'app/ObservabilityStatusBoxes',
   component: ObservabilityStatusBoxes,
-  decorators: [
-    (StoryComponent: ComponentType) => (
-      <EuiProvider>
-        <StoryComponent />
-      </EuiProvider>
-    ),
-  ],
 };
 
 const testBoxes = [
