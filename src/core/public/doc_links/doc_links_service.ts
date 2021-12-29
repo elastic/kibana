@@ -108,6 +108,7 @@ export class DocLinksService {
           configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
           licenseManagement: `${ENTERPRISE_SEARCH_DOCS}license-management.html`,
           mailService: `${ENTERPRISE_SEARCH_DOCS}mailer-configuration.html`,
+          troubleshootSetup: `${ENTERPRISE_SEARCH_DOCS}troubleshoot-setup.html`,
           usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
         },
         workplaceSearch: {
@@ -679,6 +680,7 @@ export interface DocLinksStart {
       readonly licenseManagement: string;
       readonly mailService: string;
       readonly usersAccess: string;
+      readonly troubleshootSetup: string;
     };
     readonly workplaceSearch: {
       readonly apiKeys: string;
