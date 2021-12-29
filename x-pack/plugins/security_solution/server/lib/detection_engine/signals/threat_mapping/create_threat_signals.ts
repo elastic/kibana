@@ -13,6 +13,7 @@ import { createThreatSignal } from './create_threat_signal';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
 import { buildThreatEnrichment } from './build_threat_enrichment';
+import { createPercolateQueries } from './build_threat_mapping_filter';
 
 export const createThreatSignals = async ({
   alertId,
@@ -78,7 +79,7 @@ export const createThreatSignals = async ({
     })
   );
   logDebugMessage(`matchable source event count from all time: ${matchableSourceEventCount}`);
-  console.log('____threatCount', matchableSourceEventCount);
+  console.log('____sourceCount', matchableSourceEventCount);
 
   const matchableIndicatorEventCount = await withTimeout<number>(() =>
     getTotalEventCount({
@@ -108,6 +109,44 @@ export const createThreatSignals = async ({
       buildRuleMessage,
       perPage,
     });
+
+    let innerLoop = 0;
+    let allThreatFilters = [];
+    let indicatorPage = { ...currentIndicatorPage };
+    while (indicatorPage.hits.hits.length !== 0) {
+      console.log('____innerLoopCount', innerLoop);
+      allThreatFilters = allThreatFilters.concat(
+        createPercolateQueries({ threatMapping, threatList: currentIndicatorPage.hits.hits })
+      );
+      indicatorPage = await getNextIndicatorPage({
+        esClient: services.scopedClusterClient.asCurrentUser,
+        exceptionItems,
+        query: threatQuery,
+        language: threatLanguage,
+        threatFilters,
+        index: threatIndex,
+        // @ts-expect-error@elastic/elasticsearch SearchSortResults might contain null
+        searchAfter: indicatorPage.hits.hits[indicatorPage.hits.hits.length - 1].sort,
+        sortField: undefined,
+        sortOrder: undefined,
+        listClient,
+        buildRuleMessage,
+        logger,
+        perPage,
+      });
+      innerLoop++;
+    }
+    await percolatorRuleDataClient.getWriter().bulk({
+      body: allThreatFilters.flatMap((filter) => ({
+        query: filter,
+      })),
+      refresh: true,
+    });
+    console.log(
+      '____allThreatFilters',
+      allThreatFilters.length,
+      JSON.stringify(allThreatFilters[0])
+    );
 
     const threatEnrichment = buildThreatEnrichment({
       buildRuleMessage,

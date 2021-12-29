@@ -43,8 +43,6 @@ export const createThreatSignal = async ({
     threatList: currentThreatList,
   });
 
-  console.log('______threatFilter', threatFilter);
-
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
     // empty threat list and we do not want to return everything as being
     // a hit so opt to return the existing result.
