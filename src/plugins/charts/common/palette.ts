@@ -10,6 +10,7 @@ import type { ExpressionFunctionDefinition } from 'src/plugins/expressions/commo
 import { i18n } from '@kbn/i18n';
 import { last } from 'lodash';
 import { paletteIds } from './constants';
+import { checkIsMaxContinuity, checkIsMinContinuity } from './static';
 
 import type { PaletteContinuity } from './types';
 
@@ -171,14 +172,12 @@ export function palette(): ExpressionFunctionDefinition<
           range: range ?? 'percent',
           gradient,
           continuity,
-          rangeMin:
-            continuity && ['below', 'all'].includes(continuity)
-              ? Number.NEGATIVE_INFINITY
-              : calculateRange(rangeMin, stops[0], rangeMinDefault),
-          rangeMax:
-            continuity && ['above', 'all'].includes(continuity)
-              ? Number.POSITIVE_INFINITY
-              : calculateRange(rangeMax, last(stops), rangeMaxDefault),
+          rangeMin: checkIsMinContinuity(continuity)
+            ? Number.NEGATIVE_INFINITY
+            : calculateRange(rangeMin, stops[0], rangeMinDefault),
+          rangeMax: checkIsMaxContinuity(continuity)
+            ? Number.POSITIVE_INFINITY
+            : calculateRange(rangeMax, last(stops), rangeMaxDefault),
         },
       };
     },

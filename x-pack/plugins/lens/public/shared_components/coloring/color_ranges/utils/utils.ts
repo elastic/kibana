@@ -5,9 +5,12 @@
  * 2.0.
  */
 import { roundValue } from '../../utils';
-
+import {
+  PaletteContinuity,
+  checkIsMaxContinuity,
+  checkIsMinContinuity,
+} from '../../../../../../../../src/plugins/charts/common';
 import type { ColorRange, ColorRangeAccessor } from '../types';
-import type { PaletteContinuity } from '../../../../../../../../src/plugins/charts/common';
 
 /**
  * Check if item is last
@@ -52,10 +55,11 @@ export const calculateMaxStep = (stops: number[], max: number) => {
  * Convert ColorRange to ColorStops
  * @internal
  */
+
 export const toColorStops = (colorRanges: ColorRange[], continuity: PaletteContinuity) => {
-  const min = ['below', 'all'].includes(continuity!) ? -Infinity : colorRanges[0].start;
-  const max = ['above', 'all'].includes(continuity!)
-    ? Infinity
+  const min = checkIsMinContinuity(continuity) ? Number.NEGATIVE_INFINITY : colorRanges[0].start;
+  const max = checkIsMaxContinuity(continuity)
+    ? Number.POSITIVE_INFINITY
     : colorRanges[colorRanges.length - 1].end;
 
   return {

@@ -26,6 +26,10 @@ import {
 } from './utils';
 
 import { ColorRanges } from './color_ranges';
+import {
+  checkIsMinContinuity,
+  checkIsMaxContinuity,
+} from '../../../../../../src/plugins/charts/common';
 const idPrefix = htmlIdGenerator()();
 
 export function CustomizablePalette({
@@ -112,11 +116,11 @@ export function CustomizablePalette({
                   dataBounds,
                   mapFromMinValue: true,
                 }),
-                rangeMin: ['below', 'all'].includes(newParams.continuity!)
-                  ? -Infinity
+                rangeMin: checkIsMinContinuity(newParams.continuity)
+                  ? Number.NEGATIVE_INFINITY
                   : Math.min(dataBounds.min, newColorStops[0].stop),
-                rangeMax: ['above', 'all'].includes(newParams.continuity!)
-                  ? +Infinity
+                rangeMax: checkIsMaxContinuity(newParams.continuity)
+                  ? Number.POSITIVE_INFINITY
                   : Math.min(dataBounds.max, newColorStops[newColorStops.length - 1].stop),
               },
             });
@@ -211,18 +215,13 @@ export function CustomizablePalette({
                 );
               }
 
-              params.rangeMin = newColorStops[0].stop;
-              params.rangeMax = newMax;
+              params.rangeMin = checkIsMinContinuity(continuity)
+                ? Number.NEGATIVE_INFINITY
+                : newColorStops[0].stop;
 
-              if (continuity) {
-                if (['above', 'all'].includes(continuity)) {
-                  params.rangeMax = Infinity;
-                }
-
-                if (['below', 'all'].includes(continuity)) {
-                  params.rangeMin = -Infinity;
-                }
-              }
+              params.rangeMax = checkIsMaxContinuity(continuity)
+                ? Number.POSITIVE_INFINITY
+                : newMax;
 
               setPalette(mergePaletteParams(activePalette, params));
             }}

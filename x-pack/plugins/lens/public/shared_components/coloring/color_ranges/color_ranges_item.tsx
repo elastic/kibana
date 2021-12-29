@@ -31,7 +31,11 @@ import {
 
 import type { ColorRange, DataBounds, ColorRangeAccessor, ColorRangesActions } from './types';
 import type { CustomPaletteParams } from '../../../../common';
-import type { PaletteContinuity } from '../../../../../../../src/plugins/charts/common';
+import {
+  PaletteContinuity,
+  checkIsMaxContinuity,
+  checkIsMinContinuity,
+} from '../../../../../../../src/plugins/charts/common';
 
 export interface ColorRangesItemProps {
   colorRange: ColorRange;
@@ -55,7 +59,7 @@ const getMode = (
   if (!isLast && index > 0) {
     return 'value';
   }
-  return (isLast ? ['above', 'all'] : ['below', 'all']).includes(continuity) ? 'auto' : 'edit';
+  return (isLast ? checkIsMaxContinuity : checkIsMinContinuity)(continuity) ? 'auto' : 'edit';
 };
 
 const getPlaceholderForAutoMode = (isLast: boolean) =>

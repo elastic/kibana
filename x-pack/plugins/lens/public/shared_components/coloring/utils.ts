@@ -19,6 +19,10 @@ import {
 } from './constants';
 import type { ColorRange } from './color_ranges';
 import type { CustomPaletteParams, ColorStop } from '../../../common';
+import {
+  checkIsMinContinuity,
+  checkIsMaxContinuity,
+} from '../../../../../../src/plugins/charts/common';
 
 /**
  * Some name conventions here:
@@ -377,12 +381,12 @@ export function toColorRanges(
       return {
         color: colorStop.color,
         start:
-          isFirst && ['below', 'all'].includes(continuity)
-            ? -Infinity
+          isFirst && checkIsMinContinuity(continuity)
+            ? Number.NEGATIVE_INFINITY
             : colorStop.stop ?? activePalette.params?.rangeMin ?? dataMin,
         end:
-          isLast && ['above', 'all'].includes(continuity)
-            ? +Infinity
+          isLast && checkIsMaxContinuity(continuity)
+            ? Number.POSITIVE_INFINITY
             : array[index + 1]?.stop ?? activePalette.params?.rangeMax ?? dataMax,
       };
     }
@@ -398,27 +402,6 @@ export function getContrastColor(color: string, isDarkTheme: boolean) {
   const finalColor =
     chroma(color).alpha() < 1 ? chroma.blend(backgroundColor, color, 'overlay') : chroma(color);
   return isColorDark(...finalColor.rgb()) ? lightColor : darkColor;
-}
-
-/**
- * Same as stops, but remapped against a range 0-100
- */
-export function getStopsForFixedMode(stops: ColorStop[], colorStops?: ColorStop[]) {
-  const referenceStops =
-    colorStops || stops.map(({ color }, index) => ({ color, stop: 20 * index }));
-  const fallbackStops = stops;
-
-  // what happens when user set two stops with the same value? we'll fallback to the display interval
-  const oldInterval =
-    referenceStops[referenceStops.length - 1].stop - referenceStops[0].stop ||
-    fallbackStops[fallbackStops.length - 1].stop - fallbackStops[0].stop;
-
-  return remapStopsByNewInterval(stops, {
-    newInterval: 100,
-    oldInterval,
-    newMin: 0,
-    oldMin: referenceStops[0].stop,
-  });
 }
 
 function getId(id: string) {

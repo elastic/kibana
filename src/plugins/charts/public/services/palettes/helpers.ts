@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CustomPaletteState } from '../..';
-import { PaletteContinuity } from '../../../common';
+import { checkIsMinContinuity, checkIsMaxContinuity } from '../../../common';
+import type { CustomPaletteState } from '../..';
 
 function findColorSegment(
   value: number,
@@ -49,11 +49,6 @@ function getNormalizedValueByRange(
   }
   return result;
 }
-
-const checkIsMaxContinuity = (continuity: PaletteContinuity) =>
-  ['above', 'all'].includes(continuity!);
-const checkIsMinContinuity = (continuity: PaletteContinuity) =>
-  ['below', 'all'].includes(continuity!);
 
 const getNormalizedMaxRange = (
   {

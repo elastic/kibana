@@ -153,10 +153,7 @@ describe('heatmap', () => {
               {
                 columnId: 'v-accessor',
                 triggerIcon: 'colorBy',
-                palette: [
-                  { color: 'blue', stop: 100 },
-                  { color: 'yellow', stop: 350 },
-                ],
+                palette: ['blue', 'yellow'],
               },
             ],
             filterOperations: isCellValueSupported,
