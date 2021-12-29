@@ -489,6 +489,21 @@ describe('#getQueryParams', () => {
           );
         });
       });
+
+      describe('multiple search options', () => {
+        it('concatenates multiple search options as a `must`', () => {
+          const result = getQueryParams({
+            registry,
+            searchOptions: [{ search }, { search: 'another one' }],
+          });
+          expect(result.query.bool.must).toEqual(
+            expect.arrayContaining([
+              { simple_query_string: expect.objectContaining({ query: search }) },
+              { simple_query_string: expect.objectContaining({ query: 'another one' }) },
+            ])
+          );
+        });
+      });
     });
 
     describe('when using prefix search (query.bool.should)', () => {
