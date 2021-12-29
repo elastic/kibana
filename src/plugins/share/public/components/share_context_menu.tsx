@@ -18,7 +18,7 @@ import type { Capabilities } from 'src/core/public';
 import { UrlPanelContent } from './url_panel_content';
 import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
-import type { UrlService } from '../../common/url_service';
+import type { BrowserUrlService } from '../types';
 
 interface Props {
   allowEmbed: boolean;
@@ -33,7 +33,7 @@ interface Props {
   anonymousAccess?: AnonymousAccessServiceContract;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
   core: CoreStart;
-  urlService: UrlService;
+  urlService: BrowserUrlService;
 }
 
 export class ShareContextMenu extends Component<Props> {

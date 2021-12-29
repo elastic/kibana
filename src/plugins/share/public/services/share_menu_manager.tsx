@@ -12,11 +12,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { EuiWrappingPopover } from '@elastic/eui';
 
 import { CoreStart } from 'kibana/public';
-import type { UrlService } from '../../common/url_service';
 import { ShareContextMenu } from '../components/share_context_menu';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
+import type { BrowserUrlService } from '../types';
 
 export class ShareMenuManager {
   private isOpen = false;
@@ -25,7 +25,7 @@ export class ShareMenuManager {
 
   start(
     core: CoreStart,
-    urlService: UrlService,
+    urlService: BrowserUrlService,
     shareRegistry: ShareMenuRegistryStart,
     anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract
   ) {
@@ -71,7 +71,7 @@ export class ShareMenuManager {
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
     core: CoreStart;
-    urlService: UrlService;
+    urlService: BrowserUrlService;
     anonymousAccess: AnonymousAccessServiceContract | undefined;
   }) {
     if (this.isOpen) {

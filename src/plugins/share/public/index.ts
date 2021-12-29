@@ -22,6 +22,7 @@ export type {
   ShareMenuItem,
   ShowShareMenuOptions,
   ShareContextMenuPanelItem,
+  BrowserUrlService,
 } from './types';
 
 export type {

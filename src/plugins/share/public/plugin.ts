@@ -24,8 +24,10 @@ import {
   BrowserShortUrlClientFactory,
   BrowserShortUrlClientFactoryCreateParams,
 } from './url_service/short_urls/short_url_client_factory';
+import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
 import { AnonymousAccessServiceContract } from '../common';
 import { ShortUrlRedirectLocatorDefinition } from '../common/url_service/locators/short_url_redirect_locator';
+import type { BrowserUrlService } from './types';
 
 /** @public */
 export type SharePluginSetup = ShareMenuRegistrySetup & {
@@ -39,7 +41,7 @@ export type SharePluginSetup = ShareMenuRegistrySetup & {
   /**
    * Utilities to work with URL locators and short URLs.
    */
-  url: UrlService;
+  url: BrowserUrlService;
 
   /**
    * Accepts serialized values for extracting a locator, migrating state from a provided version against
@@ -65,7 +67,7 @@ export type SharePluginStart = ShareMenuManagerStart & {
   /**
    * Utilities to work with URL locators and short URLs.
    */
-  url: UrlService;
+  url: BrowserUrlService;
 
   /**
    * Accepts serialized values for extracting a locator, migrating state from a provided version against
@@ -80,7 +82,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
   private readonly urlGeneratorsService = new UrlGeneratorsService();
 
   private redirectManager?: RedirectManager;
-  private url?: UrlService;
+  private url?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
@@ -89,7 +91,7 @@ export class SharePlugin implements Plugin<SharePluginSetup, SharePluginStart> {
     const { http } = core;
     const { basePath } = http;
 
-    this.url = new UrlService<BrowserShortUrlClientFactoryCreateParams>({
+    this.url = new UrlService<BrowserShortUrlClientFactoryCreateParams, BrowserShortUrlClient>({
       baseUrl: basePath.publicBaseUrl || basePath.serverBasePath,
       version: this.initializerContext.env.packageInfo.version,
       navigate: async ({ app, path, state }, { replace = false } = {}) => {
