@@ -9,6 +9,7 @@
 import type { CoreSetup } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
+import type { Location } from 'history';
 import { migrateToLatest } from '../../../../kibana_utils/common';
 import type { UrlService } from '../../../common/url_service';
 import { parseSearchParams, RedirectOptions } from '../../../common/url_service/locators/redirect';
@@ -34,7 +35,7 @@ export class RedirectManager {
       mount: async (params) => {
         const { render } = await import('./render');
         const unmount = render(params.element, { manager: this });
-        this.onMount(params.history.location.search);
+        this.onMount(params.history.location);
         return () => {
           unmount();
         };
@@ -42,7 +43,7 @@ export class RedirectManager {
     });
   }
 
-  public registerShortUrlRedirectApp(core: CoreSetup) {
+  public registerLegacyShortUrlRedirectApp(core: CoreSetup) {
     core.application.register({
       id: 'short_url_redirect',
       appRoute: '/goto',
@@ -75,9 +76,33 @@ export class RedirectManager {
     });
   }
 
-  public onMount(urlLocationSearch: string) {
+  public onMount(location: Location) {
+    const pathname = location.pathname;
+    const isShortUrlRedirectBySlug = pathname.startsWith('/s/');
+    if (isShortUrlRedirectBySlug) {
+      this.navigateToShortUrlBySlug(pathname.substring('/s/'.length));
+      return;
+    }
+    const urlLocationSearch = location.search;
     const options = this.parseSearchParams(urlLocationSearch);
     this.navigate(options);
+  }
+
+  private navigateToShortUrlBySlug(slug: string) {
+    (async () => {
+      const urlService = this.deps.url;
+      const shortUrls = urlService.shortUrls.get(null);
+      const shortUrl = await shortUrls.resolve(slug);
+      const locatorId = shortUrl.data.locator.id;
+      const locator = urlService.locators.get(locatorId);
+      if (!locator) throw new Error(`Locator "${locatorId}" not found.`);
+      const locatorState = shortUrl.data.locator.state;
+      await locator.navigate(locatorState, { replace: true });
+    })().catch((error) => {
+      this.error$.next(error);
+      // eslint-disable-next-line no-console
+      console.error(error);
+    });
   }
 
   public navigate(options: RedirectOptions) {

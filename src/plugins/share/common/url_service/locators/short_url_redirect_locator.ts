@@ -10,7 +10,6 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { KibanaLocation, LocatorDefinition } from '../../url_service';
 
 export const SHORT_URL_REDIRECT_LOCATOR = 'SHORT_URL_REDIRECT_LOCATOR';
-export const SHORT_URL_REDIRECT_APP = 'short_url_redirect';
 
 export interface ShortUrlRedirectLocatorParams extends SerializableRecord {
   slug: string;
@@ -28,8 +27,8 @@ export class ShortUrlRedirectLocatorDefinition
     const { slug } = params;
 
     return {
-      app: SHORT_URL_REDIRECT_APP,
-      path: '_slug/' + slug,
+      app: 'r',
+      path: 's/' + slug,
       state: {},
     };
   }
