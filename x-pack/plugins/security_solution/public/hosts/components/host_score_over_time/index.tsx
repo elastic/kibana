@@ -86,10 +86,12 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
 
   const data = useMemo(
     () =>
-      hostRisk?.result?.map((result) => ({
-        x: result['@timestamp'],
-        y: result.risk_stats.risk_score,
-      })) ?? [],
+      hostRisk?.result
+        ?.map((result) => ({
+          x: result['@timestamp'],
+          y: result.risk_stats.risk_score,
+        }))
+        .reverse() ?? [],
     [hostRisk]
   );
 

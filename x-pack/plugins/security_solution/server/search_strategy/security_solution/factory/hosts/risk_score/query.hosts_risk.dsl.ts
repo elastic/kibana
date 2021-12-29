@@ -46,7 +46,7 @@ export const buildHostsRiskScoreQuery = ({
       sort: [
         {
           '@timestamp': {
-            order: Direction.asc,
+            order: Direction.desc,
           },
         },
       ],
