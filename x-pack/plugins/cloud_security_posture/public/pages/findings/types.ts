@@ -7,23 +7,22 @@
 
 import type { MutationFetchState } from '../../common/types';
 
-export type FindingsFetchState = MutationFetchState<CSPFinding[], string>;
+export type FindingsFetchState = MutationFetchState<CspFinding[], string>;
 
-export interface CSPFinding {
+export interface CspFinding {
   '@timestamp': string;
   run_id: string;
-  result: CSPFindingResult;
-  resource: CSPFindingResource;
-  rule: CSPRule;
-  host: CSPFindingHost;
-  agent: CSPFindingAgent;
+  result: CspFindingResult;
+  resource: CspFindingResource;
+  rule: CspRule;
+  host: CspFindingHost;
+  agent: CspFindingAgent;
   ecs: {
     version: string;
   };
 }
 
-// TODO: rename
-interface CSPRule {
+interface CspRule {
   benchmark: string;
   description: string;
   impact: string;
@@ -32,16 +31,14 @@ interface CSPRule {
   tags: string[];
 }
 
-// TODO: rename
-interface CSPFindingResult {
+interface CspFindingResult {
   evaluation: 'passed' | 'failed';
   evidence: {
     filemode: string;
   };
 }
 
-// TODO: rename
-interface CSPFindingResource {
+interface CspFindingResource {
   uid: string;
   filename: string;
   gid: string;
@@ -50,8 +47,7 @@ interface CSPFindingResource {
   type: string;
 }
 
-// TODO: rename
-interface CSPFindingHost {
+interface CspFindingHost {
   id: string;
   containerized: boolean;
   ip: string[];
@@ -70,8 +66,7 @@ interface CSPFindingHost {
   };
 }
 
-// TODO: rename
-interface CSPFindingAgent {
+interface CspFindingAgent {
   version: string;
   ephemeral_id: string;
   id: string;

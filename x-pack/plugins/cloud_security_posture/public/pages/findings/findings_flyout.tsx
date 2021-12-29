@@ -23,7 +23,7 @@ import {
   PropsOf,
 } from '@elastic/eui';
 import { assertNever } from '@kbn/std';
-import type { CSPFinding } from './types';
+import type { CspFinding } from './types';
 import { CSPEvaluationBadge } from '../../components/csp_evaluation_badge';
 
 const tabs = ['result', 'rule', 'resource'] as const;
@@ -39,7 +39,7 @@ interface Card {
 
 interface FindingFlyoutProps {
   onClose(): void;
-  findings: CSPFinding;
+  findings: CspFinding;
 }
 
 export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) => {
@@ -89,7 +89,7 @@ const Cards = ({ data }: { data: Card[] }) => (
   </EuiFlexGrid>
 );
 
-const FindingsTab = ({ tab, findings }: { findings: CSPFinding; tab: FindingsTab }) => {
+const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab }) => {
   switch (tab) {
     case 'result':
       return <Cards data={getResultCards(findings)} />;
@@ -102,7 +102,7 @@ const FindingsTab = ({ tab, findings }: { findings: CSPFinding; tab: FindingsTab
   }
 };
 
-const getResourceCards = ({ resource }: CSPFinding): Card[] => [
+const getResourceCards = ({ resource }: CspFinding): Card[] => [
   {
     title: 'Resource',
     listItems: [
@@ -116,7 +116,7 @@ const getResourceCards = ({ resource }: CSPFinding): Card[] => [
   },
 ];
 
-const getRuleCards = ({ rule }: CSPFinding): Card[] => [
+const getRuleCards = ({ rule }: CspFinding): Card[] => [
   {
     title: 'Rule',
     listItems: [
@@ -136,7 +136,7 @@ const getRuleCards = ({ rule }: CSPFinding): Card[] => [
   },
 ];
 
-const getResultCards = ({ result, agent, host, ...rest }: CSPFinding): Card[] => [
+const getResultCards = ({ result, agent, host, ...rest }: CspFinding): Card[] => [
   {
     title: 'Result',
     listItems: [
