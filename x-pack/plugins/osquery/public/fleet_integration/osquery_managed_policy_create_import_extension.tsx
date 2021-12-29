@@ -313,7 +313,6 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         const updatedPolicy = produce(newPolicy, (draft) => {
           if (editMode && policy?.inputs.length) {
             set(draft, 'inputs', policy.inputs);
-            return draft;
           } else {
             set(draft, 'inputs[0]', {
               type: 'osquery',
@@ -321,8 +320,17 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
               streams: [],
               policy_template: 'osquery_manager',
             });
-            return draft;
           }
+          if (!draft.inputs[0].type) {
+            set(draft, 'inputs[0].type', 'osquery');
+          }
+          if (!draft.inputs[0].policy_template) {
+            set(draft, 'inputs[0].policy_template', 'osquery_manager');
+          }
+          if (!draft.inputs[0].enabled) {
+            set(draft, 'inputs[0].enabled', true);
+          }
+          return draft;
         });
 
         if (updatedPolicy?.inputs[0].config) {

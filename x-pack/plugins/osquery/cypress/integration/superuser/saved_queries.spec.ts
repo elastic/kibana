@@ -26,12 +26,39 @@ describe('Super User - Saved queries', () => {
     navigateTo('/app/osquery');
   });
 
-  it('should save the query', () => {
+  it('should save the query and check  if hidden columns and full screen stays open on page change', () => {
     cy.contains('New live query').click();
     selectAllAgents();
     inputQuery(DEFAULT_QUERY);
     submitQuery();
     checkResults();
+    cy.get('[data-test-subj="dataGridFullScreenButton"]').trigger('mouseover');
+    cy.contains(/Full screen$/).should('exist');
+    cy.contains('Exit full screen').should('not.exist');
+    cy.get('[data-test-subj="dataGridFullScreenButton"]').click();
+
+    cy.get('[data-test-subj="dataGridFullScreenButton"]').trigger('mouseover');
+    cy.contains(/Full screen$/).should('not.exist');
+    cy.contains('Exit full screen').should('exist');
+
+    cy.react('EuiDataGridHeaderCellWrapper', { props: { id: 'osquery.cmdline' } }).click();
+    cy.contains(/Hide column$/).click();
+    cy.react('EuiDataGridHeaderCellWrapper', {
+      props: { id: 'osquery.disk_bytes_written.number' },
+    }).click();
+    cy.contains(/Hide column$/).click();
+    cy.contains('2 columns hidden').should('exist');
+    cy.get('[data-test-subj="pagination-button-next"]').click().wait(500).click();
+    cy.contains('2 columns hidden').should('exist');
+
+    cy.get('[data-test-subj="dataGridFullScreenButton"]').trigger('mouseover');
+    cy.contains(/Full screen$/).should('not.exist');
+    cy.contains('Exit full screen').should('exist');
+    cy.get('[data-test-subj="dataGridFullScreenButton"]').click();
+
+    cy.get('[data-test-subj="dataGridFullScreenButton"]').trigger('mouseover');
+    cy.contains(/Full screen$/).should('exist');
+    cy.contains('Exit full screen').should('not.exist');
     cy.contains('Save for later').click();
     cy.contains('Save query');
     findFormFieldByRowsLabelAndType('ID', SAVED_QUERY_ID);

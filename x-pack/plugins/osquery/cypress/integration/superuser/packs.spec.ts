@@ -101,17 +101,38 @@ describe('SuperUser - Packs', () => {
     //   );
     // });
 
-    it('toggle pack pack', () => {
-      preparePack(PACK_NAME, SAVED_QUERY_ID);
+    // strange behaviour with modal
+    it.skip('toggle pack pack', () => {
+      cy.contains('Packs').click();
+      cy.react('ActiveStateSwitchComponent', {
+        props: { item: { attributes: { name: PACK_NAME } } },
+      }).click();
+      cy.contains(`Successfully deactivated ${PACK_NAME} pack`).should('not.exist');
+      cy.contains(`Successfully deactivated ${PACK_NAME} pack`).should('exist');
+      cy.react('ActiveStateSwitchComponent', {
+        props: { item: { attributes: { name: PACK_NAME } } },
+      }).click();
+      cy.react('EuiButtonDisplay')
+        .contains(/^Save and deploy changes$/)
+        .click();
+      cy.contains(`Successfully activated ${PACK_NAME} pack`).should('not.exist');
+      cy.contains(`Successfully activated ${PACK_NAME} pack`).should('exist');
     });
 
     it('delete all queries in the pack', () => {
       preparePack(PACK_NAME, SAVED_QUERY_ID);
-      // See queries and check all queries
-      // delete button
-      // save and deploy
-      // check number of queries in table
-      // enter and see drag and drop
+      cy.contains(/^Edit$/).click();
+
+      cy.get('[data-test-subj="checkboxSelectAll"]').click();
+
+      cy.contains(/^Delete \d+ quer(y|ies)/).click();
+      cy.contains(/^Update pack$/).click();
+      cy.react('EuiButtonDisplay')
+        .contains(/^Save and deploy changes$/)
+        .click();
+      cy.contains(`${PACK_NAME}`).click();
+      cy.contains(`${PACK_NAME} details`);
+      cy.contains(/^No items found/);
     });
 
     it('to click delete button', () => {
@@ -123,14 +144,14 @@ describe('SuperUser - Packs', () => {
   describe.skip('Remove queries from pack', () => {
     const TEST_PACK = 'Test-pack';
     before(() => {
-      runKbnArchiverScript(ArchiverMethod.LOAD, 'test_pack');
+      runKbnArchiverScript(ArchiverMethod.LOAD, 'hardware_monitoring');
     });
     beforeEach(() => {
       login();
       navigateTo('/app/osquery');
     });
     after(() => {
-      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'test_pack');
+      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'hardware_monitoring');
     });
 
     it('should remove ALL queries', () => {

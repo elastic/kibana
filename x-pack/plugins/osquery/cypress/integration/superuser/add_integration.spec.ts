@@ -5,15 +5,24 @@
  * 2.0.
  */
 
-import { FLEET_AGENT_POLICIES } from '../../tasks/navigation';
+import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
 import { addIntegration } from '../../tasks/integrations';
 
 import { login } from '../../tasks/login';
+import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
+import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 
 describe('Super User - Add Integration', () => {
   const integration = 'Osquery Manager';
+  before(() => {
+    runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
+  });
   beforeEach(() => {
     login();
+  });
+
+  after(() => {
+    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
   });
 
   it('should display Osquery integration in the Policies list once installed ', () => {
@@ -23,5 +32,55 @@ describe('Super User - Add Integration', () => {
     cy.contains(integration).click();
     addIntegration();
     cy.contains('osquery_manager-');
+  });
+
+  it('should have integration and packs copied when upgrading integration', () => {
+    const packageName = 'osquery_manager';
+    const oldVersion = '0.7.4';
+    const newVersion = '0.8.0';
+
+    cy.visit(`app/integrations/detail/${packageName}-${oldVersion}/overview`);
+    cy.contains('Add Osquery Manager').click();
+    cy.contains('Save and continue').click();
+    cy.contains('Add Elastic Agent later').click();
+    cy.contains('Upgrade');
+    cy.contains('Default policy').click();
+    cy.get('tr')
+      .should('contain', 'osquery_manager-2')
+      .and('contain', 'Osquery Manager')
+      .and('contain', `v${oldVersion}`);
+    cy.contains('Actions').click();
+    cy.contains('View policy').click();
+    cy.contains('name: osquery_manager-2');
+    cy.contains(`version: ${oldVersion}`);
+    cy.contains('Close').click();
+    navigateTo('app/osquery/packs');
+    findAndClickButton('Add pack');
+    findFormFieldByRowsLabelAndType('Name', 'Integration');
+    findFormFieldByRowsLabelAndType('Scheduled agent policies (optional)', '{downArrow} {enter}');
+    findAndClickButton('Add query');
+    cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
+      .click()
+      .type('{downArrow} {enter}');
+    cy.contains(/^Save$/).click();
+    cy.contains(/^Save pack$/).click();
+    cy.visit('app/fleet/policies');
+    cy.contains('Default policy').click();
+    cy.contains('Upgrade').click();
+    cy.contains(/^Advanced$/).click();
+    cy.contains('"Integration":');
+    cy.contains(/^Upgrade integration$/).click();
+    cy.contains(/^osquery_manager-2$/).click();
+    cy.contains(/^Advanced$/).click();
+    cy.contains('"Integration":');
+    cy.contains('Cancel').click();
+    cy.get('tr')
+      .should('contain', 'osquery_manager-2')
+      .and('contain', 'Osquery Manager')
+      .and('contain', `v${newVersion}`);
+    cy.contains('Actions').click();
+    cy.contains('View policy').click();
+    cy.contains('name: osquery_manager-2');
+    cy.contains(`version: ${newVersion}`);
   });
 });
