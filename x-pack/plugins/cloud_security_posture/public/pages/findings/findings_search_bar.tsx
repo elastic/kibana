@@ -24,10 +24,6 @@ interface BaseFindingsSearchBarProps {
 
 type FindingsSearchBarProps = FindingsFetchState & BaseFindingsSearchBarProps;
 
-/**
- * Temporary Search Bar using x-pack/plugins/data
- *
- */
 export const FindingsSearchBar = ({
   dataView,
   dateRange,
