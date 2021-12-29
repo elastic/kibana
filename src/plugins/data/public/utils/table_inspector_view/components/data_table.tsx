@@ -95,9 +95,16 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
                   className="insDataTableFormat__filter"
                   onClick={() => {
                     const value = table.rows[rowIndex][column.id];
-                    const eventData = { table, column: columnIndex, row: rowIndex, value };
+                    const col = table.columns.find(({ id }) => id === column.id);
+                    const timeFieldName = col?.meta?.type !== 'date' ? undefined : col?.meta?.field;
+                    const eventData = {
+                      table,
+                      column: columnIndex,
+                      row: rowIndex,
+                      value,
+                    };
                     uiActions.executeTriggerActions('VALUE_CLICK_TRIGGER', {
-                      data: { data: [eventData] },
+                      data: { data: [eventData], timeFieldName },
                     });
                   }}
                 />
