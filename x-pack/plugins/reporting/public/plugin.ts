@@ -87,6 +87,10 @@ export interface ReportingPublicPluginStartDendencies {
   share: SharePluginStart;
 }
 
+/**
+ * @internal
+ * @implements Plugin
+ */
 export class ReportingPublicPlugin
   implements
     Plugin<
