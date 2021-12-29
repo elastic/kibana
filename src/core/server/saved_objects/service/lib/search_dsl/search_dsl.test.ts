@@ -54,10 +54,14 @@ describe('getSearchDsl', () => {
         namespaces: ['foo-namespace'],
         type: 'foo',
         typeToNamespacesMap: new Map(),
-        search: 'bar',
-        searchFields: ['baz'],
-        rootSearchFields: ['qux'],
-        defaultSearchOperator: 'AND' as queryParamsNS.SearchOperator,
+        searchOptions: [
+          {
+            search: 'bar',
+            searchFields: ['baz'],
+            rootSearchFields: ['qux'],
+            defaultSearchOperator: 'AND' as queryParamsNS.SearchOperator,
+          },
+        ],
         hasReference: {
           type: 'bar',
           id: '1',
@@ -72,10 +76,7 @@ describe('getSearchDsl', () => {
         namespaces: opts.namespaces,
         type: opts.type,
         typeToNamespacesMap: opts.typeToNamespacesMap,
-        search: opts.search,
-        searchFields: opts.searchFields,
-        rootSearchFields: opts.rootSearchFields,
-        defaultSearchOperator: opts.defaultSearchOperator,
+        searchOptions: opts.searchOptions,
         hasReference: opts.hasReference,
         hasReferenceOperator: opts.hasReferenceOperator,
       });
