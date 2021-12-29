@@ -57,7 +57,7 @@ export const fetchFieldValueFieldStats = async (
 
   const { body } = await esClient.search(request);
   const aggregations = body.aggregations as {
-    filtered_count: estypes.AggregationsFiltersBucketItemKeys;
+    filtered_count: estypes.AggregationsSingleBucketAggregateBase;
   };
   const topValues: TopValueBucket[] = [
     {
