@@ -33,10 +33,6 @@ node scripts/build \
   --skip-docker-contexts
 
 CLOUD_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" docker.elastic.co/kibana-ci/kibana-cloud)
-cat << EOF | buildkite-agent annotate --style "info" --context cloud
-  Cloud image: $CLOUD_IMAGE
-EOF
-
 CLOUD_DEPLOYMENT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST"
 
 jq '
@@ -55,6 +51,8 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
   CLOUD_DEPLOYMENT_ID=$(jq --slurp '.[0].id' "$JSON_FILE")
   CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]' "$JSON_FILE")
 
+  # retry 5 5 vault write "secret/kibana-issues/dev/$DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
+
   echo "Username: $CLOUD_DEPLOYMENT_USERNAME"
   echo ""
   echo "$CLOUD_DEPLOYMENT_STATUS_MESSAGES"
@@ -66,13 +64,16 @@ CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq 
 CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.elasticsearch[0].info.metadata.aliased_url')
 
 cat << EOF | buildkite-agent annotate --style "info" --context cloud
+  ### Cloud Deployment
+
   Kibana: $CLOUD_DEPLOYMENT_KIBANA_URL
+
   Elasticsearch: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL
+
   Image: $CLOUD_IMAGE
 EOF
 
-# TODO add PR comment header bullet
-# buildkite-agent meta-data set pr_comment:deploy_cloud:head "* [Cloud Deployment](${URL_HERE})"
+buildkite-agent meta-data set pr_comment:deploy_cloud:head "* [Cloud Deployment](${CLOUD_DEPLOYMENT_KIBANA_URL})"
 
 # TODO or add PR comment body section if more info than URL
 # cat << EOF | buildkite-agent meta-data set pr_comment:deploy_cloud:body
