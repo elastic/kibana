@@ -108,7 +108,6 @@ describe('metric_expression', () => {
             <div
               className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
-              style={Object {}}
             >
               My fanci metric chart
             </div>
@@ -147,7 +146,6 @@ describe('metric_expression', () => {
             <div
               className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
-              style={Object {}}
             >
               My fanci metric chart
             </div>
@@ -185,7 +183,6 @@ describe('metric_expression', () => {
             <div
               className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
-              style={Object {}}
             >
               My fanci metric chart
             </div>
@@ -304,7 +301,6 @@ describe('metric_expression', () => {
             <div
               className="lnsMetricExpression__title"
               data-test-subj="lns_metric_title"
-              style={Object {}}
             >
               My fanci metric chart
             </div>
