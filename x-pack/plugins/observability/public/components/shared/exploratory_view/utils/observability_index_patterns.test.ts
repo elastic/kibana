@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { indexPatternList, ObservabilityIndexPatterns } from './observability_index_patterns';
+import { dataViewList, ObservabilityDataViews } from './observability_index_patterns';
 import { mockCore, mockIndexPattern } from '../rtl_helpers';
 import { SavedObjectNotFound } from '../../../../../../../../src/plugins/kibana_utils/public';
 
@@ -70,13 +70,13 @@ const fieldFormats = {
 describe('ObservabilityIndexPatterns', function () {
   const { data } = mockCore();
   data!.indexPatterns.get = jest.fn().mockReturnValue({ title: 'index-*' });
-  data!.indexPatterns.createAndSave = jest.fn().mockReturnValue({ id: indexPatternList.ux });
+  data!.indexPatterns.createAndSave = jest.fn().mockReturnValue({ id: dataViewList.ux });
   data!.indexPatterns.updateSavedObject = jest.fn();
 
   it('should return index pattern for app', async function () {
-    const obsv = new ObservabilityIndexPatterns(data!);
+    const obsv = new ObservabilityDataViews(data!);
 
-    const indexP = await obsv.getIndexPattern('ux', 'heartbeat-8*,synthetics-*');
+    const indexP = await obsv.getDataView('ux', 'heartbeat-8*,synthetics-*');
 
     expect(indexP).toEqual({ id: 'rum_static_index_pattern_id' });
 
@@ -91,13 +91,13 @@ describe('ObservabilityIndexPatterns', function () {
       throw new SavedObjectNotFound('index_pattern');
     });
 
-    data!.indexPatterns.createAndSave = jest.fn().mockReturnValue({ id: indexPatternList.ux });
+    data!.indexPatterns.createAndSave = jest.fn().mockReturnValue({ id: dataViewList.ux });
 
-    const obsv = new ObservabilityIndexPatterns(data!);
+    const obsv = new ObservabilityDataViews(data!);
 
-    const indexP = await obsv.getIndexPattern('ux', 'trace-*,apm-*');
+    const indexP = await obsv.getDataView('ux', 'trace-*,apm-*');
 
-    expect(indexP).toEqual({ id: indexPatternList.ux });
+    expect(indexP).toEqual({ id: dataViewList.ux });
 
     expect(data?.indexPatterns.createAndSave).toHaveBeenCalledWith({
       fieldFormats,
@@ -110,7 +110,7 @@ describe('ObservabilityIndexPatterns', function () {
   });
 
   it('should return getFieldFormats', function () {
-    const obsv = new ObservabilityIndexPatterns(data!);
+    const obsv = new ObservabilityDataViews(data!);
 
     expect(obsv.getFieldFormats('ux')).toEqual(fieldFormats);
   });
@@ -118,7 +118,7 @@ describe('ObservabilityIndexPatterns', function () {
   it('should validate field formats', async function () {
     mockIndexPattern.getFormatterForField = jest.fn().mockReturnValue({ params: () => {} });
 
-    const obsv = new ObservabilityIndexPatterns(data!);
+    const obsv = new ObservabilityDataViews(data!);
 
     await obsv.validateFieldFormats('ux', mockIndexPattern);
 

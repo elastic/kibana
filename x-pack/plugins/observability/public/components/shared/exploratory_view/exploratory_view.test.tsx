@@ -40,8 +40,8 @@ describe('ExploratoryView', () => {
       },
     });
 
-    jest.spyOn(obsvInd, 'ObservabilityIndexPatterns').mockReturnValue({
-      getIndexPattern: jest.fn().mockReturnValue(indexPattern),
+    jest.spyOn(obsvInd, 'ObservabilityDataViews').mockReturnValue({
+      getDataView: jest.fn().mockReturnValue(indexPattern),
     } as any);
   });
 

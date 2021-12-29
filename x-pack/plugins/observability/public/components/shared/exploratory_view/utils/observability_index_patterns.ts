@@ -28,7 +28,7 @@ function getFieldFormatsForApp(app: AppDataType) {
   return appFieldFormats[app];
 }
 
-export const indexPatternList: Record<AppDataType, string> = {
+export const dataViewList: Record<AppDataType, string> = {
   synthetics: 'synthetics_static_index_pattern_id',
   apm: 'apm_static_index_pattern_id',
   ux: 'rum_static_index_pattern_id',
@@ -50,11 +50,11 @@ const getAppIndicesWithPattern = (app: AppDataType, indices: string) => {
   return `${appToPatternMap?.[app] ?? app},${indices}`;
 };
 
-const getAppIndexPatternId = (app: AppDataType, indices: string) => {
+const getAppDataViewId = (app: AppDataType, indices: string) => {
   // Replace characters / ? , " < > | * with _
   const postfix = indices.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
 
-  return `${indexPatternList?.[app] ?? app}_${postfix}`;
+  return `${dataViewList?.[app] ?? app}_${postfix}`;
 };
 
 export function isParamsSame(param1: IFieldFormat['_params'], param2: FieldFormatParams) {
@@ -71,14 +71,14 @@ export function isParamsSame(param1: IFieldFormat['_params'], param2: FieldForma
   return isSame;
 }
 
-export class ObservabilityIndexPatterns {
+export class ObservabilityDataViews {
   data?: DataPublicPluginStart;
 
   constructor(data: DataPublicPluginStart) {
     this.data = data;
   }
 
-  async createIndexPattern(app: AppDataType, indices: string) {
+  async createDataView(app: AppDataType, indices: string) {
     if (!this.data) {
       throw new Error('data is not defined');
     }
@@ -86,29 +86,29 @@ export class ObservabilityIndexPatterns {
     const appIndicesPattern = getAppIndicesWithPattern(app, indices);
     return await this.data.indexPatterns.createAndSave({
       title: appIndicesPattern,
-      id: getAppIndexPatternId(app, indices),
+      id: getAppDataViewId(app, indices),
       timeFieldName: '@timestamp',
       fieldFormats: this.getFieldFormats(app),
     });
   }
   // we want to make sure field formats remain same
-  async validateFieldFormats(app: AppDataType, indexPattern: DataView) {
+  async validateFieldFormats(app: AppDataType, dataView: DataView) {
     const defaultFieldFormats = getFieldFormatsForApp(app);
     if (defaultFieldFormats && defaultFieldFormats.length > 0) {
       let isParamsDifferent = false;
       defaultFieldFormats.forEach(({ field, format }) => {
-        const fieldByName = indexPattern.getFieldByName(field);
+        const fieldByName = dataView.getFieldByName(field);
         if (fieldByName) {
-          const fieldFormat = indexPattern.getFormatterForField(fieldByName);
+          const fieldFormat = dataView.getFormatterForField(fieldByName);
           const params = fieldFormat.params();
           if (!isParamsSame(params, format.params)) {
-            indexPattern.setFieldFormat(field, format);
+            dataView.setFieldFormat(field, format);
             isParamsDifferent = true;
           }
         }
       });
       if (isParamsDifferent) {
-        await this.data?.indexPatterns.updateSavedObject(indexPattern);
+        await this.data?.indexPatterns.updateSavedObject(dataView);
       }
     }
   }
@@ -136,7 +136,7 @@ export class ObservabilityIndexPatterns {
     }
   }
 
-  async getIndexPattern(app: AppDataType, indices?: string): Promise<DataView | undefined> {
+  async getDataView(app: AppDataType, indices?: string): Promise<DataView | undefined> {
     if (!this.data) {
       throw new Error('data is not defined');
     }
@@ -147,22 +147,22 @@ export class ObservabilityIndexPatterns {
 
     if (appIndices) {
       try {
-        const indexPatternId = getAppIndexPatternId(app, appIndices);
-        const indexPatternTitle = getAppIndicesWithPattern(app, appIndices);
-        // we will get index pattern by id
-        const indexPattern = await this.data?.indexPatterns.get(indexPatternId);
+        const dataViewId = getAppDataViewId(app, appIndices);
+        const dataViewTitle = getAppIndicesWithPattern(app, appIndices);
+        // we will get the data view by id
+        const dataView = await this.data?.indexPatterns.get(dataViewId);
 
         // and make sure title matches, otherwise, we will need to create it
-        if (indexPattern.title !== indexPatternTitle) {
-          return await this.createIndexPattern(app, appIndices);
+        if (dataView.title !== dataViewTitle) {
+          return await this.createDataView(app, appIndices);
         }
 
         // this is intentional a non blocking call, so no await clause
-        this.validateFieldFormats(app, indexPattern);
-        return indexPattern;
+        this.validateFieldFormats(app, dataView);
+        return dataView;
       } catch (e: unknown) {
         if (e instanceof SavedObjectNotFound) {
-          return await this.createIndexPattern(app, appIndices);
+          return await this.createDataView(app, appIndices);
         }
       }
     }
