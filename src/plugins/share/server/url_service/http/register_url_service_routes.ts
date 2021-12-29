@@ -13,7 +13,6 @@ import { registerGetRoute } from './short_urls/register_get_route';
 import { registerDeleteRoute } from './short_urls/register_delete_route';
 import { registerResolveRoute } from './short_urls/register_resolve_route';
 import { registerGotoRoute } from './short_urls/register_goto_route';
-import { registerShortenUrlRoute } from './short_urls/register_shorten_url_route';
 
 export const registerUrlServiceRoutes = (
   core: CoreSetup,
@@ -25,5 +24,4 @@ export const registerUrlServiceRoutes = (
   registerDeleteRoute(router, url);
   registerResolveRoute(router, url);
   registerGotoRoute(router, core);
-  registerShortenUrlRoute(router, core);
 };
