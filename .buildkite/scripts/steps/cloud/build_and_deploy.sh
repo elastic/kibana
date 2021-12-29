@@ -39,12 +39,19 @@ EOF
 
 jq '
   .resources.kibana[0].plan.kibana.docker_image = "'$CLOUD_IMAGE'" |
-  .name = "pr-'$BUILDKITE_PULL_REQUEST'-'$GIT_COMMIT'" |
+  .name = "kibana-pr-'$BUILDKITE_PULL_REQUEST'" |
   .resources.kibana[0].plan.kibana.version = "'$VERSION'" |
   .resources.elasticsearch[0].plan.elasticsearch.version = "'$VERSION'"
   ' .buildkite/scripts/steps/cloud/deploy.json > /tmp/deploy.json
 
-DEPLOYMENT=$(ecctl deployment create --file /tmp/deploy.json)
+ecctl deployment create --track --format json --file /tmp/deploy.json > target/cloud-deployment.json
+CLOUD_DEPLOYMENT_USERNAME=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' cloud-deploy.json)
+CLOUD_DEPLOYMENT_PASSWORD=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' cloud-deploy.json)
+CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]' cloud-deploy.json)
+
+echo "Username: $CLOUD_DEPLOYMENT_USERNAME"
+echo ""
+echo "$CLOUD_DEPLOYMENT_STATUS_MESSAGES"
 
 # TODO update the annotation to add the deployment details
 # cat << EOF | buildkite-agent annotate --style "info" --context cloud-image

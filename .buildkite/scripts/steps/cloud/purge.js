@@ -28,17 +28,17 @@ for (const deployment of prDeployments) {
 
     if (pullRequest.state !== 'open') {
       console.log(`Pull Request #${prNumber} is no longer open, will delete associated deployment`);
-      deploymentsToPurge.push(deployment.name);
+      deploymentsToPurge.push(deployment);
     } else if (!pullRequest.labels.filter((label) => label.name === 'ci:deploy-cloud')) {
       console.log(
         `Pull Request #${prNumber} no longer has the ci:deploy-cloud label, will delete associated deployment`
       );
-      deploymentsToPurge.push(deployment.name);
+      deploymentsToPurge.push(deployment);
     } else if (lastCommitTimestamp < NOW - 60 * 60 * 24 * 7) {
       console.log(
         `Pull Request #${prNumber} has not been updated in more than 7 days, will delete associated deployment`
       );
-      deploymentsToPurge.push(deployment.name);
+      deploymentsToPurge.push(deployment);
     }
   } catch (ex) {
     console.error(ex.toString());
@@ -49,7 +49,7 @@ for (const deployment of prDeployments) {
 for (const deployment of deploymentsToPurge) {
   console.log(`Scheduling deployment for deletion: ${deployment.name} / ${deployment.id}`);
   try {
-    execSync(`ecctl deployment shutdown '${deployment.id}'`, { stdio: 'inherit' });
+    execSync(`ecctl deployment shutdown --force '${deployment.id}'`, { stdio: 'inherit' });
   } catch (ex) {
     console.error(ex.toString());
   }
