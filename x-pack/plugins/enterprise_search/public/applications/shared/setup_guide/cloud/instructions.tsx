@@ -135,6 +135,37 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
             </EuiCallOut>
           ),
         },
+        {
+          title: i18n.translate('xpack.enterpriseSearch.setupGuide.cloud.step6.title', {
+            defaultMessage: 'Troubleshooting issues',
+          }),
+          children: (
+            <>
+              <EuiText>
+                <p>
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.setupGuide.cloud.step6.instruction1"
+                    defaultMessage="For help with common setup issues, read our {link} guide."
+                    values={{
+                      link: (
+                        <EuiLink
+                          href={docLinks.enterpriseSearchTroubleshootSetup}
+                          target="_blank"
+                          external
+                        >
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.setupGuide.cloud.step6.instruction1LinkText',
+                            { defaultMessage: 'Troubleshoot Enterprise Search setup' }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiText>
+            </>
+          ),
+        },
       ]}
     />
   </EuiPageContent>
