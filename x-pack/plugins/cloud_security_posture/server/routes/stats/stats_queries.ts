@@ -78,8 +78,13 @@ export const getBenchmarksQuery = (): SearchRequest => ({
 export const getLatestFindingQuery = (): SearchRequest => ({
   index: CSP_KUBEBEAT_INDEX_PATTERN,
   size: 1,
-  sort: '@timestamp: desc',
+  /* @ts-expect-error TS2322 - missing SearchSortContainer */
+  sort: { '@timestamp': 'desc' },
+  // sort: '@timestamp:desc',
   query: {
     match_all: {},
   },
 });
+
+//* @ts-expect-error TS2322 - missing SearchSortContainer */
+// sort: { '@timestamp': 'desc' },

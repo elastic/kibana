@@ -23,7 +23,7 @@ import {
   getBenchmarksQuery,
   getLatestFindingQuery,
 } from './stats_queries';
-import { STATS_ROUTH_PATH } from '../../../common/constants';
+import { STATS_ROUTE_PATH } from '../../../common/constants';
 import { RULE_PASSED, RULE_FAILED } from '../../constants';
 interface LastCycle {
   run_id: string;
@@ -87,7 +87,6 @@ export const getBenchmarksStats = async (
   benchmarks: string[]
 ): Promise<BenchmarkStats[]> => {
   const ps = [];
-
   for (const benchmark of benchmarks) {
     const benchmarkFindings = await esClient.count(getFindingsEsQuery(benchmark, cycleId));
     const benchmarkPassedFindings = await esClient.count(
@@ -108,7 +107,8 @@ export const getBenchmarksStats = async (
       totalFailed,
     });
   }
-  const benchmarkScores = Promise.all(ps);
+  const benchmarkScores = await Promise.all(ps);
+
   return benchmarkScores;
 };
 
@@ -160,7 +160,7 @@ export const getResourcesEvaluation = async (
     return {
       resource: e.key,
       value: e.doc_count,
-      evaluation: 'failed',
+      evaluation: RULE_FAILED,
     } as const;
   });
 
@@ -183,7 +183,7 @@ export const getResourcesEvaluation = async (
 export const defineGetStatsRoute = (router: IRouter): void =>
   router.get(
     {
-      path: STATS_ROUTH_PATH,
+      path: STATS_ROUTE_PATH,
       validate: false,
     },
     async (context, _, response) => {
@@ -193,7 +193,6 @@ export const defineGetStatsRoute = (router: IRouter): void =>
           getBenchmarks(esClient),
           getLatestCycleId(esClient),
         ]);
-
         if (latestCycleID === undefined) {
           throw new Error('cycle id is missing');
         }
