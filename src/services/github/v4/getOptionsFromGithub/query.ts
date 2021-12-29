@@ -3,17 +3,14 @@ export type RemoteConfig = {
   file: { object: { text: string } };
 };
 
-type Ref = { name: string } | null;
-type DefaultBranchRef = {
-  name: string;
-  target: {
-    jsonConfigFile: { edges: ({ config: RemoteConfig } | undefined)[] };
-  };
-};
-
 export type Repository = {
-  ref: Ref;
-  defaultBranchRef: DefaultBranchRef;
+  ref: { name: string } | null;
+  defaultBranchRef: {
+    name: string;
+    target: {
+      history: { edges: Array<{ remoteConfig: RemoteConfig }> };
+    };
+  };
 };
 
 export interface GithubConfigOptionsResponse {
@@ -49,9 +46,9 @@ export const query = /* GraphQL */ `
       name
       target {
         ... on Commit {
-          jsonConfigFile: history(first: 1, path: ".backportrc.json") {
+          history(first: 20, path: ".backportrc.json") {
             edges {
-              config: node {
+              remoteConfig: node {
                 committedDate
                 file(path: ".backportrc.json") {
                   ... on TreeEntry {

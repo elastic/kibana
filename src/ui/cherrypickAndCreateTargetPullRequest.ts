@@ -15,9 +15,9 @@ import {
   commitChanges,
   getConflictingFiles,
   getRepoForkOwner,
-  getIsCommitInBranch,
   fetchBranch,
   ConflictingFiles,
+  getIsCommitInBranch,
 } from '../services/git';
 import { getFirstLine, getShortSha } from '../services/github/commitFormatters';
 import { addAssigneesToPullRequest } from '../services/github/v3/addAssigneesToPullRequest';
@@ -26,7 +26,7 @@ import { addReviewersToPullRequest } from '../services/github/v3/addReviewersToP
 import {
   createPullRequest,
   getTitle,
-  getBody,
+  getPullRequestBody,
   PullRequestPayload,
 } from '../services/github/v3/createPullRequest';
 import { enablePullRequestAutoMerge } from '../services/github/v4/enablePullRequestAutoMerge';
@@ -57,7 +57,7 @@ export async function cherrypickAndCreateTargetPullRequest({
     owner: options.repoOwner,
     repo: options.repoName,
     title: getTitle({ options, commits, targetBranch }),
-    body: getBody({ options, commits, targetBranch }),
+    body: getPullRequestBody({ options, commits, targetBranch }),
     head: `${repoForkOwner}:${backportBranch}`, // eg. sqren:backport/7.x/pr-75007
     base: targetBranch, // eg. 7.x
   };
@@ -294,7 +294,7 @@ async function waitForCherrypick(
     options,
     commit,
     targetBranch,
-    conflictingFiles: conflictingFiles.map((f) => f.relative),
+    conflictingFiles: conflictingFiles.map((f) => f.relative).slice(0, 50),
   });
 
   consoleLog(

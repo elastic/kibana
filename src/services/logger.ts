@@ -2,7 +2,7 @@ import dedent from 'dedent';
 import { isString } from 'lodash';
 import safeJsonStringify from 'safe-json-stringify';
 import winston, { format } from 'winston';
-import { ConfigOptions } from '../options/ConfigOptions';
+import { ConfigFileOptions } from '../options/ConfigOptions';
 import { getLogfilePath } from './env';
 
 const { combine } = format;
@@ -38,7 +38,7 @@ export const logger = {
 
 let accessToken: string | undefined;
 
-export function updateLogger(options: ConfigOptions) {
+export function updateLogger(options: ConfigFileOptions) {
   accessToken = options.accessToken;
 
   // set log level

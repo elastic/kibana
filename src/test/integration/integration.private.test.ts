@@ -1,12 +1,13 @@
+/* eslint-disable jest/no-commented-out-tests */
 import os from 'os';
 import { resolve } from 'path';
 import { Octokit } from '@octokit/rest';
 import del = require('del');
 import nock from 'nock';
-import { getOptions, ValidConfigOptions } from '../../options/options';
+import { getOptions } from '../../options/options';
 import { runSequentially } from '../../runSequentially';
 import { getCommits } from '../../ui/getCommits';
-import { getNockCallsForScope } from '../nockHelpers';
+import { listenForCallsToNockScope } from '../nockHelpers';
 import { getDevAccessToken } from '../private/getDevAccessToken';
 
 jest.unmock('make-dir');
@@ -73,14 +74,18 @@ describe('integration', () => {
     });
 
     it('sends the correct http body when creating pull request', () => {
-      expect(createPullRequestsMockCalls).toEqual([
-        {
-          base: '7.x',
-          body: 'Backports the following commits to 7.x:\n - Add ❤️ emoji (5bf29b7d)',
-          head: 'sqren:backport/7.x/commit-5bf29b7d',
-          title: '[7.x] Add ❤️ emoji',
-        },
-      ]);
+      expect(createPullRequestsMockCalls).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "base": "7.x",
+            "body": "This is an automatic backport of commit 5bf29b7d847ea3dbde9280448f0f62ad0f22d3ad to 7.x.
+
+        Please refer to the [Backport tool documentation](https://github.com/sqren/backport) for additional information",
+            "head": "sqren:backport/7.x/commit-5bf29b7d",
+            "title": "[7.x] Add ❤️ emoji",
+          },
+        ]
+      `);
     });
 
     it('should not create new branches in origin (backport-org/integration-test)', async () => {
@@ -117,85 +122,77 @@ describe('integration', () => {
     });
   });
 
-  // eslint-disable-next-line jest/no-disabled-tests
-  describe.skip('when two commits are backported', () => {
-    let createPullRequestsMockCalls: unknown[];
-    let res: Awaited<ReturnType<typeof runSequentially>>;
-    let accessToken: string;
+  // describe.skip('when two commits are backported', () => {
+  //   let createPullRequestsMockCalls: unknown[];
+  //   let res: Awaited<ReturnType<typeof runSequentially>>;
+  //   let accessToken: string;
 
-    beforeAll(async () => {
-      accessToken = await getDevAccessToken();
-      await resetState(accessToken);
+  //   beforeAll(async () => {
+  //     accessToken = await getDevAccessToken();
+  //     await resetState(accessToken);
 
-      createPullRequestsMockCalls = mockCreatePullRequest({
-        number: 1337,
-        html_url: 'myHtmlUrl',
-      });
+  //     createPullRequestsMockCalls = mockCreatePullRequest({
+  //       number: 1337,
+  //       html_url: 'myHtmlUrl',
+  //     });
 
-      const options = {
-        githubApiBaseUrlV3: 'https://api.foo.com',
-        ci: true,
-        sha: '5bf29b7d847ea3dbde9280448f0f62ad0f22d3ad',
-        username: USERNAME,
-        accessToken,
-        upstream: 'backport-org/integration-test',
-      } as ValidConfigOptions;
-      const commits = await getCommits(options);
-      const targetBranches: string[] = ['7.x'];
+  //     const options = {
+  //       githubApiBaseUrlV3: 'https://api.foo.com',
+  //       ci: true,
+  //       sha: '5bf29b7d847ea3dbde9280448f0f62ad0f22d3ad',
+  //       username: USERNAME,
+  //       accessToken,
+  //       upstream: 'backport-org/integration-test',
+  //     } as ValidConfigOptions;
+  //     const commits = await getCommits(options);
+  //     const targetBranches: string[] = ['7.x'];
 
-      res = await runSequentially({ options, commits, targetBranches });
-    });
+  //     res = await runSequentially({ options, commits, targetBranches });
+  //   });
 
-    it('sends the correct http body when creating pull request', () => {
-      expect(createPullRequestsMockCalls).toEqual([
-        {
-          base: '7.x',
-          body: 'Backports the following commits to 7.x:\n - Add ❤️ emoji (5bf29b7d)',
-          head: 'sqren:backport/7.x/commit-5bf29b7d',
-          title: '[7.x] Add ❤️ emoji',
-        },
-      ]);
-    });
+  //   it('sends the correct http body when creating pull request', () => {
+  //     expect(createPullRequestsMockCalls).toMatchInlineSnapshot();
+  //   });
 
-    it('returns pull request', () => {
-      expect(res).toEqual([
-        { pullRequestUrl: 'myHtmlUrl', success: true, targetBranch: '6.0' },
-      ]);
-    });
+  //   it('returns pull request', () => {
+  //     expect(res).toEqual([
+  //       { pullRequestUrl: 'myHtmlUrl', success: true, targetBranch: '6.0' },
+  //     ]);
+  //   });
 
-    it('should not create new branches in origin (backport-org/integration-test)', async () => {
-      const branches = await getBranches({
-        accessToken,
-        repoOwner: REPO_OWNER,
-        repoName: REPO_NAME,
-      });
-      expect(branches.map((b) => b.name)).toEqual(['7.x', '* master']);
-    });
+  //   it('should not create new branches in origin (backport-org/integration-test)', async () => {
+  //     const branches = await getBranches({
+  //       accessToken,
+  //       repoOwner: REPO_OWNER,
+  //       repoName: REPO_NAME,
+  //     });
+  //     expect(branches.map((b) => b.name)).toEqual(['7.x', '* master']);
+  //   });
 
-    it('should create branch in the fork (sqren/integration-test)', async () => {
-      const branches = await getBranches({
-        accessToken,
-        repoOwner: USERNAME,
-        repoName: REPO_NAME,
-      });
-      expect(branches.map((b) => b.name)).toEqual([
-        '7.x',
-        'backport/6.0/pr-85_commit-2e63475c',
-        'master',
-      ]);
-    });
+  //   it('should create branch in the fork (sqren/integration-test)', async () => {
+  //     const branches = await getBranches({
+  //       accessToken,
+  //       repoOwner: USERNAME,
+  //       repoName: REPO_NAME,
+  //     });
+  //     expect(branches.map((b) => b.name)).toEqual([
+  //       '7.x',
+  //       'backport/6.0/pr-85_commit-2e63475c',
+  //       'master',
+  //     ]);
+  //   });
 
-    it('should have cherry picked the correct commit', async () => {
-      const branches = await getBranches({
-        accessToken,
-        repoOwner: USERNAME,
-        repoName: REPO_NAME,
-      });
+  //   it('should have cherry picked the correct commit', async () => {
+  //     const branches = await getBranches({
+  //       accessToken,
+  //       repoOwner: USERNAME,
+  //       repoName: REPO_NAME,
+  //     });
 
-      const sha = branches.find((branch) => branch.name === '7.x')?.commit.sha;
-      expect(sha).toEqual('foo');
-    });
-  });
+  //     const sha = branches.find((branch) => branch.name === '7.x')?.commit.sha;
+  //     expect(sha).toEqual('foo');
+  //   });
+  // });
 
   describe('when disabling fork mode', () => {
     let res: Awaited<ReturnType<typeof runSequentially>>;
@@ -228,14 +225,18 @@ describe('integration', () => {
     });
 
     it('sends the correct http body when creating pull request', () => {
-      expect(createPullRequestsMockCalls).toEqual([
-        {
-          base: '7.x',
-          body: 'Backports the following commits to 7.x:\n - Add ❤️ emoji (5bf29b7d)',
-          head: 'backport-org:backport/7.x/commit-5bf29b7d',
-          title: '[7.x] Add ❤️ emoji',
-        },
-      ]);
+      expect(createPullRequestsMockCalls).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "base": "7.x",
+            "body": "This is an automatic backport of commit 5bf29b7d847ea3dbde9280448f0f62ad0f22d3ad to 7.x.
+
+        Please refer to the [Backport tool documentation](https://github.com/sqren/backport) for additional information",
+            "head": "backport-org:backport/7.x/commit-5bf29b7d",
+            "title": "[7.x] Add ❤️ emoji",
+          },
+        ]
+      `);
     });
 
     it('returns pull request', () => {
@@ -289,7 +290,7 @@ function mockCreatePullRequest(response: { number: number; html_url: string }) {
     .post('/repos/backport-org/integration-test/pulls')
     .reply(200, response);
 
-  return getNockCallsForScope(scope);
+  return listenForCallsToNockScope(scope);
 }
 
 async function getBranches({

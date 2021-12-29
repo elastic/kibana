@@ -134,7 +134,7 @@ function filterPullRequests(
   return targetPullRequest.__typename === 'PullRequest';
 }
 
-export function getTargetBranchForLabel({
+function getTargetBranchForLabel({
   branchLabelMapping,
   label,
 }: {

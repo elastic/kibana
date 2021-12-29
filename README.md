@@ -29,7 +29,11 @@ Add a [project config](https://github.com/sqren/backport/blob/master/docs/config
 // .backportrc.json
 {
   "upstream": "elastic/kibana",
-  "targetBranchChoices": [{ "name": "6.x", "checked": true }, "6.3", "6.2", "6.1", "6.0"],
+  "targetBranchChoices": ["main", "6.3", "6.2", "6.1", "6.0"],
+  "branchLabelMapping": {
+    "^v6.4.0$": "main",
+    "^v(\\d+).(\\d+).\\d+$": "$1.$2"
+  }
 }
 ```
 

@@ -5,7 +5,7 @@ import { OptionsFromGithub } from '../services/github/v4/getOptionsFromGithub';
 import {
   TargetBranchChoiceOrString,
   TargetBranchChoice,
-  ConfigOptions,
+  ConfigFileOptions,
 } from './ConfigOptions';
 import { OptionsFromCliArgs } from './cliArgs';
 import { OptionsFromConfigFiles } from './config/config';
@@ -93,7 +93,7 @@ export function getRequiredOptions({
   accessToken,
   username,
   upstream,
-}: ConfigOptions) {
+}: ConfigFileOptions) {
   // accessToken and username must be supplied in config or via cli args
   if (!accessToken || !username) {
     const globalConfigPath = getGlobalConfigPath();

@@ -24,7 +24,10 @@ export function mockGqlRequest<T>({
     .post(pathname, (body) => getGqlName(body.query) === name)
     .reply(statusCode, body, headers);
 
-  return getNockCallsForScope(scope) as { query: string; variables: string }[];
+  return listenForCallsToNockScope(scope) as {
+    query: string;
+    variables: string;
+  }[];
 }
 
 function getGqlName(query: string) {
@@ -36,7 +39,7 @@ function getGqlName(query: string) {
   return obj.definitions[0].name.value;
 }
 
-export function getNockCallsForScope(scope: nock.Scope) {
+export function listenForCallsToNockScope(scope: nock.Scope) {
   const calls: unknown[] = [];
   scope.on('request', (req, interceptor, body) => {
     calls.push(JSON.parse(body));

@@ -12,7 +12,7 @@ import * as prompts from '../services/prompts';
 import { ExpectedTargetPullRequest } from '../services/sourceCommit/getExpectedTargetPullRequests';
 import { Commit } from '../services/sourceCommit/parseSourceCommit';
 import { ExecError } from '../test/ExecError';
-import { mockGqlRequest } from '../test/nockHelpers';
+import { listenForCallsToNockScope, mockGqlRequest } from '../test/nockHelpers';
 import { SpyHelper } from '../types/SpyHelper';
 import {
   cherrypickAndCreateTargetPullRequest,
@@ -51,6 +51,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
 
   describe('when commit has a pull request reference', () => {
     let res: Awaited<ReturnType<typeof cherrypickAndCreateTargetPullRequest>>;
+    let createPullRequestCalls: unknown[];
 
     beforeEach(async () => {
       const options = {
@@ -88,14 +89,10 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
       ];
 
       const scope = nock('https://api.github.com')
-        .post('/repos/elastic/kibana/pulls', {
-          title:
-            '[6.x] My original commit message (#1000) | My other commit message (#2000)',
-          head: 'sqren:backport/6.x/pr-1000_pr-2000',
-          base: '6.x',
-          body: 'Backports the following commits to 6.x:\n - #1000\n - #2000\n\nmyPrSuffix',
-        })
+        .post('/repos/elastic/kibana/pulls')
         .reply(200, { number: 1337, html_url: 'myHtmlUrl' });
+
+      createPullRequestCalls = listenForCallsToNockScope(scope);
 
       res = await cherrypickAndCreateTargetPullRequest({
         options,
@@ -105,6 +102,25 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
 
       scope.done();
       nock.cleanAll();
+    });
+
+    it('creates the pull request with multiple PR references', () => {
+      expect(createPullRequestCalls).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "base": "6.x",
+            "body": "This is an automatic backport of the following commits to 6.x:
+         - #1000
+         - #2000
+
+        Please refer to the [Backport tool documentation](https://github.com/sqren/backport) for additional information
+
+        myPrSuffix",
+            "head": "sqren:backport/6.x/pr-1000_pr-2000",
+            "title": "[6.x] My original commit message (#1000) | My other commit message (#2000)",
+          },
+        ]
+      `);
     });
 
     it('returns the expected response', () => {
@@ -144,6 +160,8 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
 
   describe('when commit does not have a pull request reference', () => {
     let res: Awaited<ReturnType<typeof cherrypickAndCreateTargetPullRequest>>;
+    let createPullRequestCalls: unknown[];
+
     beforeEach(async () => {
       const options = {
         assignees: [] as string[],
@@ -169,13 +187,10 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
       ];
 
       const scope = nock('https://api.github.com')
-        .post('/repos/elastic/kibana/pulls', {
-          title: '[6.x] My original commit message',
-          head: 'sqren:backport/6.x/commit-mySha',
-          base: '6.x',
-          body: 'Backports the following commits to 6.x:\n - My original commit message (mySha)',
-        })
+        .post('/repos/elastic/kibana/pulls')
         .reply(200, { number: 1337, html_url: 'myHtmlUrl' });
+
+      createPullRequestCalls = listenForCallsToNockScope(scope);
 
       res = await cherrypickAndCreateTargetPullRequest({
         options,
@@ -184,6 +199,21 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
       });
       scope.done();
       nock.cleanAll();
+    });
+
+    it('creates the pull request with commit reference', () => {
+      expect(createPullRequestCalls).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "base": "6.x",
+            "body": "This is an automatic backport of commit mySha to 6.x.
+
+        Please refer to the [Backport tool documentation](https://github.com/sqren/backport) for additional information",
+            "head": "sqren:backport/6.x/commit-mySha",
+            "title": "[6.x] My original commit message",
+          },
+        ]
+      `);
     });
 
     it('returns the expected response', () => {
@@ -196,6 +226,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
     let promptSpy: SpyHelper<typeof prompts['confirmPrompt']>;
     let execSpy: ReturnType<typeof setupExecSpyForCherryPick>;
     let commitsByAuthorCalls: ReturnType<typeof mockGqlRequest>;
+    let createPullRequestCalls: unknown[];
 
     beforeEach(async () => {
       // spies
@@ -217,13 +248,10 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
       } as ValidConfigOptions;
 
       const scope = nock('https://api.github.com')
-        .post('/repos/elastic/kibana/pulls', {
-          title: '[6.x] My original commit message',
-          head: 'sqren:backport/6.x/commit-mySha',
-          base: '6.x',
-          body: 'Backports the following commits to 6.x:\n - My original commit message (mySha)',
-        })
-        .reply(200, { html_url: 'myHtmlUrl', number: 1337 });
+        .post('/repos/elastic/kibana/pulls')
+        .reply(200, { number: 1337, html_url: 'myHtmlUrl' });
+
+      createPullRequestCalls = listenForCallsToNockScope(scope);
 
       commitsByAuthorCalls =
         mockGqlRequest<fetchCommitsByAuthorModule.CommitByAuthorResponse>({
@@ -250,7 +278,22 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
       nock.cleanAll();
     });
 
-    it('creates pull request', () => {
+    it('creates the pull request with commit reference', () => {
+      expect(createPullRequestCalls).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "base": "6.x",
+            "body": "This is an automatic backport of commit mySha to 6.x.
+
+        Please refer to the [Backport tool documentation](https://github.com/sqren/backport) for additional information",
+            "head": "sqren:backport/6.x/commit-mySha",
+            "title": "[6.x] My original commit message",
+          },
+        ]
+      `);
+    });
+
+    it('returns the expected response', () => {
       expect(res).toEqual({ didUpdate: false, url: 'myHtmlUrl', number: 1337 });
     });
 

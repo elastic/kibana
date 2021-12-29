@@ -1,9 +1,12 @@
 import makeDir from 'make-dir';
 import { getGlobalConfigPath, getReposPath } from '../../services/env';
 import { chmod, writeFile } from '../../services/fs-promisified';
+import { ConfigFileOptions } from '../ConfigOptions';
 import { readConfigFile } from './readConfigFile';
 
-export async function getGlobalConfig(ci?: boolean) {
+export async function getGlobalConfig(
+  ci?: boolean
+): Promise<ConfigFileOptions | undefined> {
   // don't attempt to fetch global config in ci environment
   if (ci) {
     return;

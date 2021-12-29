@@ -1,9 +1,10 @@
 import { AxiosError } from 'axios';
 import ora from 'ora';
-import { ConfigOptions } from '../../../../options/ConfigOptions';
+import { ConfigFileOptions } from '../../../../options/ConfigOptions';
 import { OptionsFromCliArgs } from '../../../../options/cliArgs';
 import { OptionsFromConfigFiles } from '../../../../options/config/config';
 import { getRequiredOptions } from '../../../../options/parseRequiredOptions';
+import { filterNil } from '../../../../utils/filterEmpty';
 import { HandledError } from '../../../HandledError';
 import {
   getLocalConfigFileCommitDate,
@@ -28,7 +29,7 @@ export type OptionsFromGithub = Awaited<
   ReturnType<typeof getOptionsFromGithub>
 >;
 export async function getOptionsFromGithub(
-  optionsFromConfigFiles: OptionsFromConfigFiles,
+  optionsFromConfigFiles: ConfigFileOptions,
   optionsFromCliArgs: OptionsFromCliArgs
 ) {
   const options = {
@@ -66,7 +67,7 @@ export async function getOptionsFromGithub(
       (error) =>
         error.type === 'NOT_FOUND' &&
         error.path.join('.') ===
-          'repository.defaultBranchRef.target.jsonConfigFile.edges.0.config.file'
+          'repository.defaultBranchRef.target.history.edges.0.remoteConfig.file'
     );
 
     if (configFileNotFound && error.response?.data.data) {
@@ -88,9 +89,12 @@ export async function getOptionsFromGithub(
     );
   }
 
-  const remoteConfig =
-    repo.defaultBranchRef.target.jsonConfigFile.edges[0]?.config;
-  const remoteConfigFile = await getRemoteConfigFile(options, remoteConfig);
+  const historicalRemoteConfigs = repo.defaultBranchRef.target.history.edges;
+  const latestRemoteConfig = historicalRemoteConfigs[0]?.remoteConfig;
+  const skipRemoteConfig = await getSkipRemoteConfigFile(
+    options,
+    latestRemoteConfig
+  );
   const defaultBranch = repo.defaultBranchRef.name;
 
   // if no sourceBranch is given, use the `defaultBranch` (normally "master")
@@ -100,11 +104,14 @@ export async function getOptionsFromGithub(
 
   return {
     sourceBranch,
-    ...remoteConfigFile,
+    ...(skipRemoteConfig ? {} : parseRemoteConfig(latestRemoteConfig)),
+    historicalBranchLabelMappings: skipRemoteConfig
+      ? []
+      : getHistoricalBranchLabelMappings(historicalRemoteConfigs),
   };
 }
 
-async function getRemoteConfigFile(
+async function getSkipRemoteConfigFile(
   options: OptionsFromCliArgs,
   remoteConfig?: RemoteConfig
 ) {
@@ -112,12 +119,12 @@ async function getRemoteConfigFile(
     logger.info(
       'Skipping remote config: `--force-local-config` specified via config file or cli'
     );
-    return;
+    return true;
   }
 
   if (!remoteConfig) {
     logger.info("Skipping remote config: remote config doesn't exist");
-    return;
+    return true;
   }
 
   const [isLocalConfigModified, isLocalConfigUntracked, localCommitDate] =
@@ -129,12 +136,12 @@ async function getRemoteConfigFile(
 
   if (isLocalConfigUntracked) {
     logger.info('Skipping remote config: local config is new');
-    return;
+    return true;
   }
 
   if (isLocalConfigModified) {
     logger.info('Skipping remote config: local config is modified');
-    return;
+    return true;
   }
 
   if (
@@ -146,14 +153,48 @@ async function getRemoteConfigFile(
         localCommitDate
       ).toISOString()} > ${remoteConfig.committedDate}`
     );
+    return true;
+  }
+
+  return false;
+}
+
+function parseRemoteConfig(remoteConfig?: RemoteConfig) {
+  if (!remoteConfig) {
     return;
   }
 
   try {
     logger.info('Using remote config');
-    return JSON.parse(remoteConfig.file.object.text) as ConfigOptions;
+    return JSON.parse(remoteConfig.file.object.text) as ConfigFileOptions;
   } catch (e) {
     logger.info('Parsing remote config failed', e);
     return;
   }
+}
+
+function getHistoricalBranchLabelMappings(
+  historicalRemoteConfigs: { remoteConfig: RemoteConfig }[]
+) {
+  return historicalRemoteConfigs
+    .map((edge) => {
+      try {
+        const remoteConfig = JSON.parse(
+          edge.remoteConfig.file.object.text
+        ) as ConfigFileOptions;
+
+        if (!remoteConfig.branchLabelMapping) {
+          return;
+        }
+
+        return {
+          branchLabelMapping: remoteConfig.branchLabelMapping,
+          committedDate: edge.remoteConfig.committedDate,
+        };
+      } catch (e) {
+        logger.info('Could not get historical remote config', e);
+        return;
+      }
+    })
+    .filter(filterNil);
 }

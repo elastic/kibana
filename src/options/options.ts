@@ -1,6 +1,6 @@
 import { getOptionsFromGithub } from '../services/github/v4/getOptionsFromGithub';
 import { updateLogger } from './../services/logger';
-import { ConfigOptions } from './ConfigOptions';
+import { ConfigFileOptions } from './ConfigOptions';
 import { getOptionsFromCliArgs } from './cliArgs';
 import { getOptionsFromConfigFiles } from './config/config';
 import { parseRequiredOptions } from './parseRequiredOptions';
@@ -11,7 +11,7 @@ export type ValidConfigOptions = Readonly<
 
 export async function getOptions(
   argv: string[],
-  optionsFromModule?: ConfigOptions
+  optionsFromModule?: ConfigFileOptions
 ) {
   const optionsFromConfigFiles = await getOptionsFromConfigFiles(
     optionsFromModule
@@ -21,7 +21,6 @@ export async function getOptions(
   // update logger
   updateLogger({ ...optionsFromConfigFiles, ...optionsFromCliArgs });
 
-  // TODO: make `username` optional by defaulting to `currentUsername`
   const optionsFromGithub = await getOptionsFromGithub(
     optionsFromConfigFiles,
     optionsFromCliArgs

@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { ConfigOptions } from './options/ConfigOptions';
+import { ConfigFileOptions } from './options/ConfigOptions';
 import { getOptions, ValidConfigOptions } from './options/options';
 import { runSequentially, Result } from './runSequentially';
 import { HandledError } from './services/HandledError';
@@ -25,7 +25,7 @@ export type BackportResponse =
 
 export async function main(
   argv: string[],
-  optionsFromModule?: ConfigOptions
+  optionsFromModule?: ConfigFileOptions
 ): Promise<BackportResponse> {
   const logger = initLogger();
   let options: ValidConfigOptions | null = null;

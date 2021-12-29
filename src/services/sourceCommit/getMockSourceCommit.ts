@@ -1,11 +1,14 @@
 import { SourceCommitWithTargetPullRequest } from './parseSourceCommit';
 
 export function getMockSourceCommit({
-  sourceCommitMessage,
+  sourceCommit,
   sourcePullRequest,
   timelineItems = [],
 }: {
-  sourceCommitMessage: string;
+  sourceCommit: {
+    message: string;
+    commitedDate?: string;
+  };
   sourcePullRequest: {
     number: number;
     labels?: string[];
@@ -21,14 +24,14 @@ export function getMockSourceCommit({
     repoOwner?: string;
   }>;
 }) {
-  const sourceCommit: SourceCommitWithTargetPullRequest = {
+  return {
     repository: {
       name: 'kibana',
       owner: { login: 'elastic' },
     },
-    committedDate: '2021-12-22T00:00:00Z',
+    committedDate: sourceCommit.commitedDate ?? '2021-12-22T00:00:00Z',
     oid: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
-    message: sourceCommitMessage,
+    message: sourceCommit.message,
     associatedPullRequests: {
       edges: !sourcePullRequest
         ? null
@@ -86,6 +89,5 @@ export function getMockSourceCommit({
             },
           ],
     },
-  };
-  return sourceCommit;
+  } as SourceCommitWithTargetPullRequest;
 }

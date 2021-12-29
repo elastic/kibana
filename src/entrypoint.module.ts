@@ -1,9 +1,9 @@
 import { main } from './main';
-import { ConfigOptions } from './options/ConfigOptions';
+import { ConfigFileOptions } from './options/ConfigOptions';
 
 // this is the entry point when importing backport as module:
 export function run(
-  options: ConfigOptions,
+  options: ConfigFileOptions,
 
   // cli args will not automatically be forwarded when consumed as a module (required/imported)
   // It is simple to forward args manually via `process.argv`:
@@ -19,8 +19,7 @@ export function run(
 
 // public API
 export { BackportResponse } from './main';
-export { ConfigOptions } from './options/ConfigOptions';
-export { getTargetBranchForLabel } from './services/sourceCommit/getExpectedTargetPullRequests';
+export { ConfigFileOptions } from './options/ConfigOptions';
 export { fetchCommitsByAuthor } from './services/github/v4/fetchCommits/fetchCommitsByAuthor';
 export { fetchCommitByPullNumber } from './services/github/v4/fetchCommits/fetchCommitByPullNumber';
 export { fetchCommitBySha } from './services/github/v4/fetchCommits/fetchCommitBySha';

@@ -5,7 +5,7 @@ import { ValidConfigOptions } from './options/options';
 import { runSequentially } from './runSequentially';
 import * as childProcess from './services/child-process-promisified';
 import { Commit } from './services/sourceCommit/parseSourceCommit';
-import { getNockCallsForScope } from './test/nockHelpers';
+import { listenForCallsToNockScope } from './test/nockHelpers';
 import { SpyHelper } from './types/SpyHelper';
 
 jest.mock('./services/child-process-promisified', () => {
@@ -49,6 +49,7 @@ describe('runSequentially', () => {
       autoMerge: false,
       autoMergeMethod: 'merge',
       branchLabelMapping: undefined,
+      historicalBranchLabelMappings: [],
       cherrypickRef: true,
       ci: false,
       commitPaths: [],
@@ -101,7 +102,7 @@ describe('runSequentially', () => {
         html_url: 'myHtmlUrl',
       });
 
-    createPullRequestCalls = getNockCallsForScope(scope);
+    createPullRequestCalls = listenForCallsToNockScope(scope);
 
     const commits: Commit[] = [
       {
@@ -132,14 +133,20 @@ describe('runSequentially', () => {
   });
 
   it('creates pull request', () => {
-    expect(createPullRequestCalls).toEqual([
-      {
-        base: '7.x',
-        body: 'Backports the following commits to 7.x:\n - #55\n\nmyPrDescription',
-        head: 'sqren:backport/7.x/pr-55',
-        title: 'myPrTitle 7.x My commit message',
-      },
-    ]);
+    expect(createPullRequestCalls).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "base": "7.x",
+          "body": "This is an automatic backport of pull request #55 to 7.x.
+
+      Please refer to the [Backport tool documentation](https://github.com/sqren/backport) for additional information
+
+      myPrDescription",
+          "head": "sqren:backport/7.x/pr-55",
+          "title": "myPrTitle 7.x My commit message",
+        },
+      ]
+    `);
   });
 
   it('exec should be called with correct args', () => {

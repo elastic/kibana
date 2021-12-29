@@ -49,6 +49,24 @@ describe('getOptionsFromGithub', () => {
             '^v7.9.0$': '7.x',
             '^v8.0.0$': 'master',
           },
+          historicalBranchLabelMappings: [
+            {
+              branchLabelMapping: {
+                '^v(\\d+).(\\d+).\\d+$': '$1.$2',
+                '^v7.9.0$': '7.x',
+                '^v8.0.0$': 'master',
+              },
+              committedDate: '2020-08-15T10:33:06Z',
+            },
+            {
+              branchLabelMapping: { '6.1': '6.1', '6.3': '6.3' },
+              committedDate: '2020-08-15T10:20:23Z',
+            },
+            {
+              branchLabelMapping: { '6.1': '6.1', '6.3': '6.3' },
+              committedDate: '2020-08-15T10:17:57Z',
+            },
+          ],
           sourceBranch: 'master',
           targetBranchChoices: [
             { checked: true, name: 'master' },
@@ -160,7 +178,10 @@ describe('getOptionsFromGithub', () => {
         optionsFromCliArgs
       );
 
-      expect(options).toEqual({ sourceBranch: 'main' });
+      expect(options).toEqual({
+        sourceBranch: 'main',
+        historicalBranchLabelMappings: [],
+      });
     });
   });
 });

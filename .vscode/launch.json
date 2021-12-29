@@ -21,7 +21,7 @@
         "--runInBand",
         "${file}",
         "--config",
-        "${workspaceRoot}/jest.unit.config.js"
+        "${workspaceRoot}/jest.config.js"
       ],
       "port": 9229,
       "address": "localhost",

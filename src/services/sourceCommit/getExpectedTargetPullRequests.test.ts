@@ -9,7 +9,7 @@ describe('getExpectedTargetPullRequests', () => {
 
   it('should return empty when there is no associated PR', () => {
     const mockSourceCommit = getMockSourceCommit({
-      sourceCommitMessage: 'identical messages (#1234)',
+      sourceCommit: { message: 'identical messages (#1234)' },
       sourcePullRequest: null,
     });
 
@@ -23,7 +23,7 @@ describe('getExpectedTargetPullRequests', () => {
 
   it('should return a result when sourceCommit message matches the commit of the target pull request', () => {
     const mockSourceCommit = getMockSourceCommit({
-      sourceCommitMessage: 'identical messages (#1234)',
+      sourceCommit: { message: 'identical messages (#1234)' },
       sourcePullRequest: { number: 1234 },
       timelineItems: [
         {
@@ -51,7 +51,7 @@ describe('getExpectedTargetPullRequests', () => {
 
   it('should return empty when repoName does not match', () => {
     const mockSourceCommit = getMockSourceCommit({
-      sourceCommitMessage: 'identical messages (#1234)',
+      sourceCommit: { message: 'identical messages (#1234)' },
       sourcePullRequest: { number: 1234 },
       timelineItems: [
         {
@@ -73,7 +73,7 @@ describe('getExpectedTargetPullRequests', () => {
 
   it('should return empty when repoOwner does not match', () => {
     const mockSourceCommit = getMockSourceCommit({
-      sourceCommitMessage: 'identical messages (#1234)',
+      sourceCommit: { message: 'identical messages (#1234)' },
       sourcePullRequest: { number: 1234 },
       timelineItems: [
         {
@@ -95,7 +95,7 @@ describe('getExpectedTargetPullRequests', () => {
 
   it('should return empty when commit messages do not match', () => {
     const mockSourceCommit = getMockSourceCommit({
-      sourceCommitMessage: 'message one (#1234)',
+      sourceCommit: { message: 'message one (#1234)' },
       sourcePullRequest: {
         number: 1234,
       },
@@ -118,7 +118,7 @@ describe('getExpectedTargetPullRequests', () => {
 
   it('should return a result if commits messages are different but title includes message and number', () => {
     const mockSourceCommit = getMockSourceCommit({
-      sourceCommitMessage: 'message one (#1234)',
+      sourceCommit: { message: 'message one (#1234)' },
       sourcePullRequest: {
         number: 1234,
       },
@@ -149,7 +149,7 @@ describe('getExpectedTargetPullRequests', () => {
 
   it('should return empty when only pull request title (but not pull number) matches', () => {
     const mockSourceCommit = getMockSourceCommit({
-      sourceCommitMessage: 'message one (#1234)',
+      sourceCommit: { message: 'message one (#1234)' },
       sourcePullRequest: {
         number: 1234,
       },
@@ -173,7 +173,7 @@ describe('getExpectedTargetPullRequests', () => {
 
   it('should return a result when first line of a multiline commit message matches', () => {
     const mockSourceCommit = getMockSourceCommit({
-      sourceCommitMessage: 'message one (#1234)',
+      sourceCommit: { message: 'message one (#1234)' },
       sourcePullRequest: {
         number: 1234,
       },
@@ -203,7 +203,7 @@ describe('getExpectedTargetPullRequests', () => {
 
   it('should return missing target pull requests', () => {
     const mockSourceCommit = getMockSourceCommit({
-      sourceCommitMessage: 'message one (#1234)',
+      sourceCommit: { message: 'message one (#1234)' },
       sourcePullRequest: {
         number: 1234,
         labels: ['v7.2.0', 'v7.1.0'],
@@ -226,7 +226,7 @@ describe('getExpectedTargetPullRequests', () => {
 
   it('should not show merged PRs as missing', () => {
     const mockSourceCommit = getMockSourceCommit({
-      sourceCommitMessage: 'identical messages (#1234)',
+      sourceCommit: { message: 'identical messages (#1234)' },
       sourcePullRequest: {
         number: 1234,
         labels: ['v7.2.0', 'v7.1.0'],
@@ -268,7 +268,7 @@ describe('getExpectedTargetPullRequests', () => {
     };
 
     const mockSourceCommit = getMockSourceCommit({
-      sourceCommitMessage: 'identical messages (#1234)',
+      sourceCommit: { message: 'identical messages (#1234)' },
       sourcePullRequest: {
         number: 1234,
         labels: [
@@ -337,7 +337,7 @@ describe('getExpectedTargetPullRequests', () => {
     };
 
     const mockSourceCommit = getMockSourceCommit({
-      sourceCommitMessage: 'identical messages (#1234)',
+      sourceCommit: { message: 'identical messages (#1234)' },
       sourcePullRequest: {
         number: 1234,
         labels: ['label-2'],
@@ -360,7 +360,7 @@ describe('getExpectedTargetPullRequests', () => {
     };
 
     const mockSourceCommit = getMockSourceCommit({
-      sourceCommitMessage: 'identical messages (#1234)',
+      sourceCommit: { message: 'identical messages (#1234)' },
       sourcePullRequest: {
         number: 1234,
         labels: ['label-1', 'label-2', 'label-3', 'label-4'],
@@ -399,7 +399,7 @@ describe('getExpectedTargetPullRequests', () => {
     };
 
     const mockSourceCommit = getMockSourceCommit({
-      sourceCommitMessage: 'identical messages (#1234)',
+      sourceCommit: { message: 'identical messages (#1234)' },
       sourcePullRequest: {
         number: 1234,
         labels: ['label-1', 'label-2', 'label-3', 'label-4'],
@@ -433,7 +433,7 @@ describe('getExpectedTargetPullRequests', () => {
     };
 
     const mockSourceCommit = getMockSourceCommit({
-      sourceCommitMessage: 'identical messages (#1234)',
+      sourceCommit: { message: 'identical messages (#1234)' },
       sourcePullRequest: {
         number: 1234,
         labels: ['label-1', 'label-2', 'label-3', 'label-4'],

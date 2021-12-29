@@ -18,7 +18,7 @@ type AutoFixConflictsHandler = ({
   targetBranch: string;
 }) => boolean | Promise<boolean>;
 
-export type ConfigOptions = Partial<{
+type Options = Partial<{
   accessToken: string;
   all: boolean;
   assignees: string[];
@@ -27,7 +27,6 @@ export type ConfigOptions = Partial<{
   autoFixConflicts: AutoFixConflictsHandler;
   autoMerge: boolean;
   autoMergeMethod: string;
-  branchLabelMapping: Record<string, string>;
   ci: boolean;
   cherrypickRef: boolean;
   commitPaths: string[];
@@ -58,10 +57,16 @@ export type ConfigOptions = Partial<{
   upstream: string;
   username: string;
   verbose: boolean;
-
-  // deprecated: renamed to `targetBranchChoices`
-  branches: TargetBranchChoiceOrString[];
-
-  // deprecated: renamed to `targetPRLabels`
-  labels: string[];
 }>;
+
+export type ConfigFileOptions = Options &
+  Partial<{
+    // only allowed in project config. Not allowed in CI and denoted in plural (historicalBranchLabelMappings) in options from Github
+    branchLabelMapping: Record<string, string>;
+
+    // deprecated: renamed to `targetBranchChoices`
+    branches: TargetBranchChoiceOrString[];
+
+    // deprecated: renamed to `targetPRLabels`
+    labels: string[];
+  }>;
