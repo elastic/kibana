@@ -19,7 +19,7 @@ import { AbortError } from '../../../../../src/plugins/kibana_utils/common';
 export const pollSearch = <Response extends IKibanaSearchResponse>(
   search: () => Promise<Response>,
   cancel?: () => void,
-  { pollInterval = 1000, abortSignal }: IAsyncSearchOptions = {}
+  { pollInterval = 1000, abortSignal, strategy }: IAsyncSearchOptions = {}
 ): Observable<Response> => {
   return defer(() => {
     if (abortSignal?.aborted) {
@@ -37,9 +37,10 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
     );
 
     const reportInfo = {
-      pollCount: 0,
-      timeTookMs: new Date().getTime(),
+      strategy: strategy || 'default',
       status: '',
+      timeTookMs: new Date().getTime(),
+      pollCount: 0,
       resHitCount: 0,
       resAggCount: 0,
     };
@@ -62,7 +63,7 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
         const { hits, aggregations } = response.rawResponse;
         reportInfo.resHitCount = hits?.hits?.length ?? 0;
         reportInfo.resAggCount = aggregations ? Object.keys(aggregations).length : 0;
-        customEvents.reportCustomEvent('poll-search-done', reportInfo);
+        customEvents.reportCustomEvent('search-done', reportInfo);
       }),
       takeUntil<Response>(aborted$)
     );
