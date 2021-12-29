@@ -20,6 +20,7 @@ export interface ReportingEventLoggerOpts {
   user?: ExecuteStart['user'];
 }
 
+/** @internal */
 export function reportingEventLoggerFactory(eventLog: IEventLogService) {
   const genericLogger = eventLog.getLogger({ event: { provider: PLUGIN_ID } });
 

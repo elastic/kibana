@@ -12,6 +12,9 @@ import {
   PLUGIN_ID,
 } from '../../../common/constants';
 
+/**
+ * @internal
+ */
 export function registerEventLogProviderActions(eventLog: IEventLogService) {
   eventLog.registerProviderActions(PLUGIN_ID, [
     EVENT_ACTION_EXECUTE_START,
