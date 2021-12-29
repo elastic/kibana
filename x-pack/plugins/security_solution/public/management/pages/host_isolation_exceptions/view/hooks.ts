@@ -85,28 +85,31 @@ export function useCanSeeHostIsolationExceptionsMenu(): boolean {
   return canSeeMenu;
 }
 
-const SEARCHABLE_FIELDS: Readonly<string[]> = [`name`, `description`, `entries.value`];
+const SEARCHABLE_FIELDS: Readonly<string[]> = [`item_id`, `name`, `description`, `entries.value`];
 
 export function useFetchHostIsolationExceptionsList({
   filter,
   page,
   perPage,
   policies,
+  excludedPolicies = [],
   enabled = true,
 }: {
   filter?: string;
   page: number;
   perPage: number;
   policies?: string[];
+  excludedPolicies?: string[];
   enabled?: boolean;
 }): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
   const http = useHttp();
 
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
-    ['hostIsolationExceptions', 'list', filter, perPage, page, policies],
+    ['hostIsolationExceptions', 'list', filter, perPage, page, policies, excludedPolicies],
     () => {
       const kql = parsePoliciesAndFilterToKql({
         policies,
+        excludedPolicies,
         kuery: filter ? parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) : undefined,
       });
 

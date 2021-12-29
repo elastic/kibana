@@ -77,23 +77,12 @@ Object {
       },
       "name": "_score",
     },
-    Object {
-      "id": "_type",
-      "meta": Object {
-        "field": "_type",
-        "index": "test-index",
-        "params": undefined,
-        "type": "string",
-      },
-      "name": "_type",
-    },
   ],
   "rows": Array [
     Object {
       "_id": "hit-id-value",
       "_index": "hit-index-value",
       "_score": 77,
-      "_type": "hit-type-value",
       "fieldTest": 123,
       "invalidMapping": 345,
       "nested": Array [
@@ -185,23 +174,12 @@ Object {
       },
       "name": "_score",
     },
-    Object {
-      "id": "_type",
-      "meta": Object {
-        "field": "_type",
-        "index": "test-index",
-        "params": undefined,
-        "type": "string",
-      },
-      "name": "_type",
-    },
   ],
   "rows": Array [
     Object {
       "_id": "hit-id-value",
       "_index": "hit-index-value",
       "_score": 77,
-      "_type": "hit-type-value",
       "fieldTest": 123,
       "invalidMapping": 345,
       "nested": Array [
@@ -293,23 +271,12 @@ Object {
       },
       "name": "_score",
     },
-    Object {
-      "id": "_type",
-      "meta": Object {
-        "field": "_type",
-        "index": "test-index",
-        "params": undefined,
-        "type": "string",
-      },
-      "name": "_type",
-    },
   ],
   "rows": Array [
     Object {
       "_id": "hit-id-value",
       "_index": "hit-index-value",
       "_score": 77,
-      "_type": "hit-type-value",
       "fieldTest": 123,
       "invalidMapping": 345,
       "nested": Array [
