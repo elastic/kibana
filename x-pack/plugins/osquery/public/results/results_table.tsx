@@ -277,12 +277,15 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
         if (fieldName.startsWith('osquery.')) {
           const displayAsText = fieldName.split('.')[1];
+          const hasNumberType = fields.includes(`${fieldName}.number`);
           if (!seen.has(displayAsText)) {
+            const id = hasNumberType ? fieldName + '.number' : fieldName;
             data.push({
-              id: fieldName,
+              id,
               displayAsText,
               display: getHeaderDisplay(displayAsText),
               defaultSortDirection: Direction.asc,
+              ...(hasNumberType ? { schema: 'numeric' } : {}),
             });
             seen.add(displayAsText);
           }
