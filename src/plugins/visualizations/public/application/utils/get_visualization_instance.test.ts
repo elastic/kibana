@@ -7,21 +7,39 @@
  */
 
 import { getSavedSearch } from '../../../../discover/public';
-import { Vis } from '../../vis';
-import { VisualizeInput } from 'src/plugins/visualizations/public';
+import type {
+  VisualizeInput,
+  VisSavedObject,
+  Vis,
+  VisParams,
+} from 'src/plugins/visualizations/public';
 import {
   getVisualizationInstance,
   getVisualizationInstanceFromInput,
 } from './get_visualization_instance';
 import { createVisualizeServicesMock } from './mocks';
 import { BehaviorSubject } from 'rxjs';
-import { SearchSource as mockSearchSource } from '../../../../data/common/search/search_source';
-import { stubIndexPattern as mockStubIndexPattern } from '../../../../data/common/stubs';
-import { setTypes, setAggs, setSearch } from '../../services';
 import type { VisualizeServices } from '../types';
-import type { TypesStart } from '../../vis_types';
-import type { AggsStart } from '../../../../data/common';
-import type { ISearchStart } from '../../../../data/public';
+
+const commonSerializedVisMock = {
+  type: 'area',
+  aggs: [],
+};
+
+jest.mock('../../utils/saved_visualize_utils', () => {
+  const actual = jest.requireActual('../../utils/saved_visualize_utils');
+  return {
+    ...actual,
+    getSavedVisualization: jest.fn(),
+    convertToSerializedVis: jest.fn().mockReturnValue(commonSerializedVisMock),
+  };
+});
+const { getSavedVisualization } = jest.requireMock('../../utils/saved_visualize_utils');
+
+jest.mock('../../vis_async', () => ({
+  createVisAsync: jest.fn(),
+}));
+const { createVisAsync } = jest.requireMock('../../vis_async');
 
 jest.mock('../../../../discover/public', () => ({
   getSavedSearch: jest.fn().mockResolvedValue({
@@ -32,53 +50,25 @@ jest.mock('../../../../discover/public', () => ({
   throwErrorOnSavedSearchUrlConflict: jest.fn(),
 }));
 
-jest.mock('../../../../data/public', () => ({
-  injectSearchSourceReferences: jest.fn((...args) => jest.fn(...args)),
-  parseSearchSourceJSON: jest.fn((...args) => jest.fn(...args)),
-}));
+let savedVisMock: VisSavedObject;
 
 describe('getVisualizationInstance', () => {
+  let visMock: Vis<VisParams>;
   let mockServices: jest.Mocked<VisualizeServices>;
   let subj: BehaviorSubject<any>;
 
   beforeEach(() => {
     mockServices = createVisualizeServicesMock();
     subj = new BehaviorSubject({});
+    visMock = {
+      type: {},
+      data: {},
+    } as Vis<VisParams>;
+    savedVisMock = {} as VisSavedObject;
 
-    setTypes({ get: jest.fn(() => ({ schemas: { all: [] } })) } as unknown as TypesStart);
-    setAggs({
-      createAggConfigs: (indexPattern: any, cfg: any) => ({
-        aggs: cfg.map((aggConfig: any) => ({ ...aggConfig, toJSON: () => aggConfig })),
-      }),
-    } as unknown as AggsStart);
-    setSearch({
-      searchSource: {
-        // @ts-expect-error
-        create: () => new mockSearchSource({ index: mockStubIndexPattern }),
-      },
-    } as unknown as ISearchStart);
-
-    // @ts-expect-error
-    mockServices.data.search.showError.mockImplementation(() => {});
-    mockServices.savedObjects.client.resolve = jest.fn().mockResolvedValue({
-      saved_object: {
-        references: [
-          {
-            id: 'saved_vis_id',
-            type: 'index-pattern',
-          },
-        ],
-        attributes: {
-          visState: JSON.stringify({ type: 'area' }),
-          kibanaSavedObjectMeta: {
-            searchSourceJSON: '{filter: []}',
-          },
-        },
-        _version: '1',
-      },
-      outcome: 'exact',
-      alias_target_id: null,
-    });
+    getSavedVisualization.mockImplementation((opts: unknown) => savedVisMock);
+    createVisAsync.mockImplementation(() => visMock);
+    mockServices.data.search.showError = jest.fn().mockImplementation(() => {});
     mockServices.createVisEmbeddableFromObject = jest.fn().mockImplementation(() => ({
       getOutput$: jest.fn(() => subj.asObservable()),
     }));
@@ -94,29 +84,51 @@ describe('getVisualizationInstance', () => {
       opts
     );
 
-    expect(vis).toBeInstanceOf(Vis);
-    expect(savedVis).toMatchSnapshot();
+    expect(savedVisMock.searchSourceFields).toEqual({
+      index: opts.indexPattern,
+    });
+    expect(createVisAsync).toHaveBeenCalledWith(
+      commonSerializedVisMock.type,
+      commonSerializedVisMock
+    );
+    expect(mockServices.createVisEmbeddableFromObject).toHaveBeenCalledWith(visMock, {
+      searchSessionId: undefined,
+      timeRange: undefined,
+      filters: undefined,
+      renderMode: 'edit',
+      id: '',
+    });
+
+    expect(vis).toBe(visMock);
+    expect(savedVis).toBe(savedVisMock);
     expect(embeddableHandler).toBeDefined();
     expect(savedSearch).toBeUndefined();
   });
 
   test('should load existing vis by id and call vis type setup if exists', async () => {
     const newVisObj = { data: {} };
-    const setupMock = jest.fn(() => newVisObj);
-    setTypes({
-      get: jest.fn(() => ({ setup: setupMock, schemas: { all: [] } })),
-    } as unknown as TypesStart);
+    // @ts-expect-error
+    visMock.type.setup = jest.fn(() => newVisObj);
     const { vis } = await getVisualizationInstance(mockServices, 'saved_vis_id');
 
-    expect(vis.type.setup).toHaveBeenCalled();
+    expect(getSavedVisualization.mock.calls[1][1]).toBe('saved_vis_id');
+    expect(savedVisMock.searchSourceFields).toBeUndefined();
+    expect(visMock.type.setup).toHaveBeenCalledWith(visMock);
     expect(vis).toBe(newVisObj);
   });
 
   test('should create saved search instance if vis based on saved search id', async () => {
+    visMock.data.savedSearchId = 'saved_search_id';
     const { savedSearch } = await getVisualizationInstance(mockServices, 'saved_vis_id');
 
     expect(getSavedSearch).toHaveBeenCalled();
-    expect(savedSearch).toMatchInlineSnapshot(`undefined`);
+    expect(savedSearch).toMatchInlineSnapshot(`
+      Object {
+        "id": "savedSearch",
+        "searchSource": Object {},
+        "title": "savedSearchTitle",
+      }
+    `);
   });
 
   test('should subscribe on embeddable handler updates and send toasts on errors', async () => {
@@ -131,12 +143,24 @@ describe('getVisualizationInstance', () => {
 });
 
 describe('getVisualizationInstanceInput', () => {
+  const serializedVisMock = {
+    type: 'pie',
+  };
+  let visMock: Vis<VisParams>;
   let mockServices: jest.Mocked<VisualizeServices>;
   let subj: BehaviorSubject<any>;
 
   beforeEach(() => {
-    subj = new BehaviorSubject({});
     mockServices = createVisualizeServicesMock();
+    subj = new BehaviorSubject({});
+    visMock = {
+      type: {},
+      data: {},
+    } as Vis<VisParams>;
+    savedVisMock = {} as VisSavedObject;
+
+    createVisAsync.mockImplementation(() => visMock);
+    getSavedVisualization.mockImplementation((opts: unknown) => savedVisMock);
     mockServices.createVisEmbeddableFromObject = jest.fn().mockImplementation(() => ({
       getOutput$: jest.fn(() => subj.asObservable()),
     }));
@@ -174,8 +198,18 @@ describe('getVisualizationInstanceInput', () => {
     const { savedVis, savedSearch, vis, embeddableHandler } =
       await getVisualizationInstanceFromInput(mockServices, input);
 
-    expect(vis).toMatchSnapshot();
-    expect(savedVis).toMatchSnapshot();
+    expect(getSavedVisualization).toHaveBeenCalled();
+    expect(createVisAsync).toHaveBeenCalledWith(serializedVisMock.type, input.savedVis);
+    expect(mockServices.createVisEmbeddableFromObject).toHaveBeenCalledWith(visMock, {
+      searchSessionId: undefined,
+      timeRange: undefined,
+      filters: undefined,
+      renderMode: 'edit',
+      id: '',
+    });
+
+    expect(vis).toBe(visMock);
+    expect(savedVis).toBe(savedVisMock);
     expect(savedVis.uiStateJSON).toBe(JSON.stringify(input.savedVis?.uiState));
     expect(embeddableHandler).toBeDefined();
     expect(savedSearch).toBeUndefined();
