@@ -8,20 +8,17 @@
 
 import { EuiCopy, EuiRadioGroup, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 
-jest.mock('../lib/url_shortener', () => ({ shortenUrl: jest.fn() }));
-
 import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ExportUrlAsType, UrlPanelContent } from './url_panel_content';
 import { act } from 'react-dom/test-utils';
-import { shortenUrl } from '../lib/url_shortener';
 
 const defaultProps = {
   allowShortUrl: true,
   objectType: 'dashboard',
-  basePath: '',
-  post: () => Promise.resolve({} as any),
+  core: {} as any,
+  urlService: {} as any,
 };
 
 describe('share url panel content', () => {
