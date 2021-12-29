@@ -9,11 +9,7 @@ import { ChromiumBrowser, Page } from 'playwright';
 import testSetup from './setup';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   describe('perf_login_and_home', () => {
     const config = getService('config');
     const kibanaUrl = Url.format({
@@ -40,19 +36,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('Login to Kibana', async () => {
-      await sleep(2000);
-      await page?.fill('[data-test-subj=loginUsername]', 'elastic', { timeout: 180 * 1000 });
-      await sleep(2000);
-      await page?.fill('[data-test-subj=loginPassword]', 'changeme');
-      await sleep(2000);
-      await page?.click('[data-test-subj=loginSubmit]');
+      const usernameLocator = page?.locator('[data-test-subj=loginUsername]');
+      const passwordLocator = page?.locator('[data-test-subj=loginPassword]');
+      const submitButtonLocator = page?.locator('[data-test-subj=loginSubmit]');
+
+      await usernameLocator?.isEditable();
+      await usernameLocator?.type('elastic', { delay: 500 });
+      await passwordLocator?.isEditable();
+      await passwordLocator?.type('changeme', { delay: 500 });
+      await submitButtonLocator?.click({ delay: 500 });
     });
 
     it('Dismiss Synthetics Notice', async () => {
-      await sleep(2000);
-      await page?.click('[data-test-subj=skipWelcomeScreen]', { timeout: 180 * 1000 });
-      await sleep(2000);
-      await page?.locator('Welcome home');
+      await page?.waitForLoadState();
+      const skipButtonLocator = page?.locator('[data-test-subj=skipWelcomeScreen]');
+      await skipButtonLocator?.click();
+    });
+
+    it('Navigate to welcome screen', async () => {
+      await page?.waitForLoadState('networkidle');
+      const toggleNavButton = page?.locator('[data-test-subj=toggleNavButton]');
+      await toggleNavButton?.click();
     });
   });
 }
