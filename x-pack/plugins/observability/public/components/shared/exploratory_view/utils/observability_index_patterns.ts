@@ -84,7 +84,7 @@ export class ObservabilityDataViews {
     }
 
     const appIndicesPattern = getAppIndicesWithPattern(app, indices);
-    return await this.data.indexPatterns.createAndSave({
+    return await this.data.dataViews.createAndSave({
       title: appIndicesPattern,
       id: getAppDataViewId(app, indices),
       timeFieldName: '@timestamp',
@@ -108,7 +108,7 @@ export class ObservabilityDataViews {
         }
       });
       if (isParamsDifferent) {
-        await this.data?.indexPatterns.updateSavedObject(dataView);
+        await this.data?.dataViews.updateSavedObject(dataView);
       }
     }
   }
