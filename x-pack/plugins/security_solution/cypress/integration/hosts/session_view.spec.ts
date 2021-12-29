@@ -210,34 +210,38 @@ describe('Session view', () => {
 
    it('selected command is highlighted properly', () => {
     openSessionView(TEST_EVENT_ID);
-
-    cy.contains('/bin/sh')
+    cy.wait(10000)
+    //Click on 1st command and make sure that clicked command is highlighted
+    cy.get(SESSION_COMMANDS)
+      .eq(0)
       .click()
-      .parent()
-      .parent()
-      .parent()
-      .parent()
       .children()
       .eq(0)
       .should('have.css', 'background-color')
       .and('eq',SELECTED_COMMAND_COLOR)
-
   });
-
 
   it('Commands with Alerts is highlighted', () => {
     openSessionView(TEST_EVENT_ID);
-
-    cy.get(PROCESS_TREE_NODE_ALERT)
-      .parent()
-      .parent()
-      .eq(0)
-      .then((childElement) => {
-        const childWin = childElement[0].ownerDocument.defaultView;
-        const alertHighlight = childWin && childWin.getComputedStyle(childElement[0], 'before');
-        const alertHighlightValue = alertHighlight && alertHighlight.getPropertyValue('border-left-color');
-        const alertHighlightColorValue = alertHighlightValue
-        expect( alertHighlightColorValue).to.equal(ALERT_COMMAND_COLOR)
+    
+    //Gets the number of Alerts we have in a session
+    cy.get(PROCESS_TREE_NODE_ALERT).contains("Alerts").its('length').then(lengthBefore =>{
+      console.log("LENGHT BEFORE IS " + lengthBefore )
+      const beforeClick = lengthBefore;
+      const genArr = Array.from({length:beforeClick},(v,k)=>k)
+      console.log(genArr)
+    //Checks every alerts in that session is correctly highlighted 
+      cy.wrap(genArr).each((index)=>{
+        cy.get(PROCESS_TREE_NODE_ALERT+":eq("+index+")")
+        .parent()
+        .parent()
+        .then((childElement) => {
+          const childWin = childElement[0].ownerDocument.defaultView;
+          const alertHighlight = childWin && childWin.getComputedStyle(childElement[0], 'before');
+          const alertHighlightValue = alertHighlight && alertHighlight.getPropertyValue('border-left-color');
+          expect(alertHighlightValue).to.equal(ALERT_COMMAND_COLOR)
+          });
+        });
       });
     });
   });
