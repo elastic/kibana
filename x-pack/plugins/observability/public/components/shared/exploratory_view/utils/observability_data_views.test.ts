@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dataViewList, ObservabilityDataViews } from './observability_index_patterns';
+import { dataViewList, ObservabilityDataViews } from './observability_data_views';
 import { mockCore, mockIndexPattern } from '../rtl_helpers';
 import { SavedObjectNotFound } from '../../../../../../../../src/plugins/kibana_utils/public';
 
