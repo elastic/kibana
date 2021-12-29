@@ -53,7 +53,7 @@ describe.each([
   ['Legacy', false],
   ['RAC', true],
 ])('utils - %s', (_, isRuleRegistryEnabled) => {
-  const { clients, context } = requestContextMock.createTools();
+  const { clients } = requestContextMock.createTools();
 
   describe('transformAlertToRule', () => {
     test('should work with a full data set', () => {

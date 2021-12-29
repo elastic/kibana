@@ -78,9 +78,10 @@ export const importRulesRoute = (
         const rulesClient = context.alerting.getRulesClient();
         const actionsClient = context.actions.getActionsClient();
         const esClient = context.core.elasticsearch.client;
-        const savedObjectsClient = context.core.savedObjects.getClient({
+        const actionSOClient = context.core.savedObjects.getClient({
           includedHiddenTypes: ['action'],
-        }); // context.core.savedObjects.client;
+        });
+        const savedObjectsClient = context.core.savedObjects.client;
         const siemClient = context.securitySolution.getAppClient();
         const exceptionsClient = context.lists?.getExceptionListClient();
 
@@ -135,7 +136,7 @@ export const importRulesRoute = (
 
         const migratedParsedObjectsWithoutDuplicateErrors = await migrateLegacyActionsIds(
           parsedObjectsWithoutDuplicateErrors,
-          savedObjectsClient
+          actionSOClient
         );
 
         const [nonExistentActionErrors, uniqueParsedObjects] = await getInvalidConnectors(
