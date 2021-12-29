@@ -47,6 +47,9 @@ const ALERT_NODE_TEST_ID = getProcessTreeNodeAlertDetailViewRule(
 const ALERT_RULE_ID = '422ff92b-837a-49a3-9746-188b7286f56f';
 const FIRST_CHILD_COMMAND = '/usr/bin/id';
 
+const SELECTED_COMMAND_COLOR = 'rgb(240, 78, 152)'
+const ALERT_COMMAND_COLOR = 'rgba(189, 39, 30, 0.48)'
+
 describe('Session view', () => {
   context('Rendering table empty state', () => {
     before(() => {
@@ -181,6 +184,8 @@ describe('Session view', () => {
             });
         });
     });
+
+    
     // Commented out Root Escalation check until we have better filtering
     /*
     it('root escalation', () => {
@@ -201,5 +206,39 @@ describe('Session view', () => {
       })
     });
     */
+    
+
+   it('selected command is highlighted properly', () => {
+    openSessionView(TEST_EVENT_ID);
+
+    cy.contains('/bin/sh')
+      .click()
+      .parent()
+      .parent()
+      .parent()
+      .parent()
+      .children()
+      .eq(0)
+      .should('have.css', 'background-color')
+      .and('eq',SELECTED_COMMAND_COLOR)
+
+  });
+
+
+  it('Commands with Alerts is highlighted', () => {
+    openSessionView(TEST_EVENT_ID);
+
+    cy.get(PROCESS_TREE_NODE_ALERT)
+      .parent()
+      .parent()
+      .eq(0)
+      .then((childElement) => {
+        const childWin = childElement[0].ownerDocument.defaultView;
+        const alertHighlight = childWin && childWin.getComputedStyle(childElement[0], 'before');
+        const alertHighlightValue = alertHighlight && alertHighlight.getPropertyValue('border-left-color');
+        const alertHighlightColorValue = alertHighlightValue
+        expect( alertHighlightColorValue).to.equal(ALERT_COMMAND_COLOR)
+      });
+    });
   });
 });
