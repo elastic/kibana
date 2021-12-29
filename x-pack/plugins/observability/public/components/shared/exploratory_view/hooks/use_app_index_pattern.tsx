@@ -11,7 +11,7 @@ import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { AppDataType } from '../types';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
-import { ObservabilityDataViews } from '../utils/observability_data_views';
+import { ObservabilityDataViews } from '../../observability_data_views';
 import { getDataHandler } from '../../../../data_handler';
 import { useExploratoryView } from '../contexts/exploratory_view_config';
 

@@ -6,14 +6,14 @@
  */
 
 import type { FieldFormat as IFieldFormat } from 'src/plugins/field_formats/common';
-import { SavedObjectNotFound } from '../../../../../../../../src/plugins/kibana_utils/public';
-import { DataPublicPluginStart } from '../../../../../../../../src/plugins/data/public';
-import type { DataView, DataViewSpec } from '../../../../../../../../src/plugins/data/common';
-import { rumFieldFormats } from '../configurations/rum/field_formats';
-import { syntheticsFieldFormats } from '../configurations/synthetics/field_formats';
-import { AppDataType, FieldFormat, FieldFormatParams } from '../types';
-import { apmFieldFormats } from '../configurations/apm/field_formats';
-import { getDataHandler } from '../../../../data_handler';
+import { SavedObjectNotFound } from '../../../../../../../src/plugins/kibana_utils/public';
+import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import type { DataView, DataViewSpec } from '../../../../../../../src/plugins/data/common';
+import { rumFieldFormats } from '../exploratory_view/configurations/rum/field_formats';
+import { syntheticsFieldFormats } from '../exploratory_view/configurations/synthetics/field_formats';
+import { AppDataType, FieldFormat, FieldFormatParams } from '../exploratory_view/types';
+import { apmFieldFormats } from '../exploratory_view/configurations/apm/field_formats';
+import { getDataHandler } from '../../../data_handler';
 
 const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
   infra_logs: null,

@@ -6,8 +6,8 @@
  */
 
 import { dataViewList, ObservabilityDataViews } from './observability_data_views';
-import { mockCore, mockIndexPattern } from '../rtl_helpers';
-import { SavedObjectNotFound } from '../../../../../../../../src/plugins/kibana_utils/public';
+import { mockCore, mockIndexPattern } from '../exploratory_view/rtl_helpers';
+import { SavedObjectNotFound } from '../../../../../../../src/plugins/kibana_utils/public';
 
 const fieldFormats = {
   'transaction.duration.us': {
