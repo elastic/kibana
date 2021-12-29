@@ -82,11 +82,11 @@ describe('SuperUser - Packs', () => {
       cy.react('CustomItemAction', {
         props: { index: 0, item: { id: SAVED_QUERY_ID } },
       }).click();
-      cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"').click();
-      cy.get('[data-test-subj="superDatePickerToggleRefreshButton"').click();
-      cy.get('[data-test-subj="superDatePickerRefreshIntervalInput"').clear().type('10');
+      cy.getBySel('superDatePickerToggleQuickMenuButton').click();
+      cy.getBySel('superDatePickerToggleRefreshButton').click();
+      cy.getBySel('superDatePickerRefreshIntervalInput').clear().type('10');
       cy.get('button').contains('Apply').click();
-      cy.get('[data-test-subj="discoverDocTable"]', { timeout: 60000 }).contains(
+      cy.getBySel('discoverDocTable', { timeout: 60000 }).contains(
         `pack_${PACK_NAME}_${SAVED_QUERY_ID}`
       );
     });
@@ -95,8 +95,8 @@ describe('SuperUser - Packs', () => {
     //   cy.react('CustomItemAction', {
     //     props: { index: 1, item: { id: SAVED_QUERY_ID } },
     //   }).click();
-    //   cy.get('[data-test-subj="lnsWorkspace"]');
-    //   cy.get('[data-test-subj="breadcrumbs"]').contains(
+    //   cy.getBySel('lnsWorkspace');
+    //   cy.getBySel('breadcrumbs').contains(
     //     `Action pack_${PACK_NAME}_${SAVED_QUERY_ID} results`
     //   );
     // });
@@ -123,7 +123,7 @@ describe('SuperUser - Packs', () => {
       preparePack(PACK_NAME, SAVED_QUERY_ID);
       cy.contains(/^Edit$/).click();
 
-      cy.get('[data-test-subj="checkboxSelectAll"]').click();
+      cy.getBySel('checkboxSelectAll').click();
 
       cy.contains(/^Delete \d+ quer(y|ies)/).click();
       cy.contains(/^Update pack$/).click();

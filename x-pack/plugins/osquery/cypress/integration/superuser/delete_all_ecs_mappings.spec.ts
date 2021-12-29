@@ -34,6 +34,7 @@ describe('SuperUser - Delete ECS Mappings', () => {
     cy.contains('Hours of uptime').should('exist');
     cy.react('EuiButtonIcon', { props: { id: 'labels-trash' } }).click();
     cy.react('EuiButton').contains('Update query').click();
+    cy.wait(1000);
 
     cy.react('CustomItemAction', {
       props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
