@@ -45,9 +45,9 @@ jq '
   ' .buildkite/scripts/steps/cloud/deploy.json > /tmp/deploy.json
 
 ecctl deployment create --track --output json --file /tmp/deploy.json > target/cloud-deployment.json
-CLOUD_DEPLOYMENT_USERNAME=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' cloud-deploy.json)
-CLOUD_DEPLOYMENT_PASSWORD=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' cloud-deploy.json)
-CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]' cloud-deploy.json)
+CLOUD_DEPLOYMENT_USERNAME=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' target/cloud-deployment.json)
+CLOUD_DEPLOYMENT_PASSWORD=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' target/cloud-deployment.json)
+CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]' target/cloud-deployment.json)
 
 echo "Username: $CLOUD_DEPLOYMENT_USERNAME"
 echo ""
