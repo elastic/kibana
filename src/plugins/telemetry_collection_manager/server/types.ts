@@ -21,13 +21,11 @@ export interface TelemetryCollectionManagerPluginSetup {
   ) => void;
   getOptInStats: TelemetryCollectionManagerPlugin['getOptInStats'];
   getStats: TelemetryCollectionManagerPlugin['getStats'];
-  areAllCollectorsReady: TelemetryCollectionManagerPlugin['areAllCollectorsReady'];
 }
 
 export interface TelemetryCollectionManagerPluginStart {
   getOptInStats: TelemetryCollectionManagerPlugin['getOptInStats'];
   getStats: TelemetryCollectionManagerPlugin['getStats'];
-  areAllCollectorsReady: TelemetryCollectionManagerPlugin['areAllCollectorsReady'];
 }
 
 export interface TelemetryOptInStats {

@@ -63,7 +63,7 @@ export const Overview = React.memo<Props>(
     }, [browserFields, contextId, data, eventId, timelineId]);
 
     const severityData = useMemo(() => {
-      const item = find({ field: 'kibana.alert.rule.severity', category: 'kibana' }, data);
+      const item = find({ field: 'kibana.alert.severity', category: 'kibana' }, data);
       return (
         item &&
         getEnrichedFieldInfo({
@@ -77,7 +77,7 @@ export const Overview = React.memo<Props>(
     }, [browserFields, contextId, data, eventId, timelineId]);
 
     const riskScoreData = useMemo(() => {
-      const item = find({ field: 'kibana.alert.rule.risk_score', category: 'kibana' }, data);
+      const item = find({ field: 'kibana.alert.risk_score', category: 'kibana' }, data);
       return (
         item &&
         getEnrichedFieldInfo({

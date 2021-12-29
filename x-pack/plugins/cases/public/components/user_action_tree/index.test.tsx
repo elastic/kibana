@@ -23,6 +23,7 @@ import {
 import { UserActionTree } from '.';
 import { TestProviders } from '../../common/mock';
 import { Ecs } from '../../../common/ui/types';
+import { Actions } from '../../../common/api';
 
 const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();
@@ -94,8 +95,8 @@ describe(`UserActionTree`, () => {
 
   it('Renders service now update line with top and bottom when push is required', async () => {
     const ourActions = [
-      getUserAction(['pushed'], 'push-to-service'),
-      getUserAction(['comment'], 'update'),
+      getUserAction('pushed', 'push_to_service'),
+      getUserAction('comment', Actions.update),
     ];
 
     const props = {
@@ -123,7 +124,7 @@ describe(`UserActionTree`, () => {
   });
 
   it('Renders service now update line with top only when push is up to date', async () => {
-    const ourActions = [getUserAction(['pushed'], 'push-to-service')];
+    const ourActions = [getUserAction('pushed', 'push_to_service')];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
@@ -149,7 +150,10 @@ describe(`UserActionTree`, () => {
     });
   });
   it('Outlines comment when update move to link is clicked', async () => {
-    const ourActions = [getUserAction(['comment'], 'create'), getUserAction(['comment'], 'update')];
+    const ourActions = [
+      getUserAction('comment', Actions.create),
+      getUserAction('comment', Actions.update),
+    ];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
@@ -184,7 +188,7 @@ describe(`UserActionTree`, () => {
     });
   });
   it('Switches to markdown when edit is clicked and back to panel when canceled', async () => {
-    const ourActions = [getUserAction(['comment'], 'create')];
+    const ourActions = [getUserAction('comment', Actions.create)];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
@@ -228,7 +232,7 @@ describe(`UserActionTree`, () => {
   });
 
   it('calls update comment when comment markdown is saved', async () => {
-    const ourActions = [getUserAction(['comment'], 'create')];
+    const ourActions = [getUserAction('comment', Actions.create)];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
@@ -361,7 +365,7 @@ describe(`UserActionTree`, () => {
     const commentId = 'basic-comment-id';
     jest.spyOn(routeData, 'useParams').mockReturnValue({ commentId });
 
-    const ourActions = [getUserAction(['comment'], 'create')];
+    const ourActions = [getUserAction('comment', Actions.create)];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
@@ -381,6 +385,7 @@ describe(`UserActionTree`, () => {
       ).toEqual(true);
     });
   });
+
   describe('Host isolation action', () => {
     it('renders in the cases details view', async () => {
       const isolateAction = [getHostIsolationUserAction()];

@@ -107,14 +107,14 @@ describe('When on the host isolation exceptions page', () => {
         await waitForApiCall();
 
         // see if loader is present
-        expect(renderResult.getByTestId('hostIsolationExceptionsContent-loader')).toBeTruthy();
+        expect(renderResult.getByTestId('hostIsolationExceptionListLoader')).toBeTruthy();
 
         // release the request
         releaseApiResponse!(getFoundExceptionListItemSchemaMock());
 
         //  check the loader is gone
         await waitForElementToBeRemoved(
-          renderResult.getByTestId('hostIsolationExceptionsContent-loader')
+          renderResult.getByTestId('hostIsolationExceptionListLoader')
         );
       });
 
@@ -170,7 +170,7 @@ describe('When on the host isolation exceptions page', () => {
         await waitFor(() =>
           expect(getHostIsolationExceptionItemsMock).toHaveBeenLastCalledWith({
             filter:
-              '(exception-list-agnostic.attributes.name:(*this*does*not*exists*) OR exception-list-agnostic.attributes.description:(*this*does*not*exists*) OR exception-list-agnostic.attributes.entries.value:(*this*does*not*exists*))',
+              '(exception-list-agnostic.attributes.item_id:(*this*does*not*exists*) OR exception-list-agnostic.attributes.name:(*this*does*not*exists*) OR exception-list-agnostic.attributes.description:(*this*does*not*exists*) OR exception-list-agnostic.attributes.entries.value:(*this*does*not*exists*))',
             http: mockedContext.coreStart.http,
             page: 1,
             perPage: 10,
