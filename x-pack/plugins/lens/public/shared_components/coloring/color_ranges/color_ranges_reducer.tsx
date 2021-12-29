@@ -37,7 +37,7 @@ export const colorRangesReducer: Reducer<ColorRangesState, ColorRangesActions> =
 
       return {
         ...state,
-        ...payload
+        ...payload,
       };
     }
     case 'addColorRange': {

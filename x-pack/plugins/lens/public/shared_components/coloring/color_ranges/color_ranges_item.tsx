@@ -26,7 +26,6 @@ import {
   ColorRangeDeleteButton,
   ColorRangeAutoDetectButton,
   ColorRangeEditButton,
-  ColorRangesItemButtonProps,
 } from './color_ranges_item_buttons';
 
 import type { ColorRange, DataBounds, ColorRangeAccessor, ColorRangesActions } from './types';
@@ -71,6 +70,13 @@ const getPlaceholderForAutoMode = (isLast: boolean) =>
         defaultMessage: 'Min. value',
       });
 
+const getActionButton = (mode: ColorRangeItemMode) => {
+  if (mode === 'value') {
+    return ColorRangeDeleteButton;
+  }
+  return mode === 'edit' ? ColorRangeEditButton : ColorRangeAutoDetectButton;
+};
+
 export function ColorRangeItem({
   accessor,
   index,
@@ -89,13 +95,7 @@ export function ColorRangeItem({
   const mode = getMode(index, isLast, continuity);
   const isDisabled = mode === 'auto';
   const isColorValid = isValidColor(colorRange.color);
-
-  let ActionButton: React.FunctionComponent<ColorRangesItemButtonProps>;
-  if (mode === 'value') {
-    ActionButton = ColorRangeDeleteButton;
-  } else {
-    ActionButton = mode === 'edit' ? ColorRangeEditButton : ColorRangeAutoDetectButton;
-  }
+  const ActionButton = getActionButton(mode);
 
   const onLeaveFocus = useCallback(
     (e: FocusEvent<HTMLDivElement>) => {

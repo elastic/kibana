@@ -25,23 +25,26 @@ export const getErrorMessages = (colorRangesValidity: Record<string, ColorRangeV
       Object.values(colorRangesValidity)
         .map((item) => item.errors)
         .flat()
-        )
+        .map((item) => {
+          switch (item) {
+            case 'invalidColor':
+            case 'invalidValue':
+              return i18n.translate(
+                'xpack.lens.dynamicColoring.customPalette.invalidValueOrColor',
+                {
+                  defaultMessage: 'At least one color range contains the wrong value or color',
+                }
+              );
+            case 'greaterThanMaxValue':
+              return i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidMaxValue', {
+                defaultMessage: 'Maximum value should be greater than preceding values',
+              });
+            default:
+              return '';
+          }
+        })
     ),
-  ].map((item) => {
-    switch (item) {
-      case 'invalidColor':
-      case 'invalidValue':
-        return i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidValueOrColor', {
-          defaultMessage: 'At least one color range contains the wrong value or color',
-        });
-      case 'greaterThanMaxValue':
-        return i18n.translate('xpack.lens.dynamicColoring.customPalette.invalidMaxValue', {
-          defaultMessage: 'Maximum value should be greater than preceding values',
-        });
-      default:
-        return '';
-    }
-  });
+  ];
 };
 
 /** @internal **/
