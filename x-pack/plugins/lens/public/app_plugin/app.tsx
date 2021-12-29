@@ -11,6 +11,7 @@ import { isEqual } from 'lodash';
 import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumb } from '@elastic/eui';
+import { customEvents } from '@kbn/custom-events';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
@@ -100,6 +101,7 @@ export function App({
   const [indicateNoData, setIndicateNoData] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(undefined);
+  const savedObjectId = (initialInput as LensByReferenceInput)?.savedObjectId;
 
   useEffect(() => {
     if (currentDoc) {
@@ -112,6 +114,20 @@ export function App({
   }, [setIndicateNoData]);
 
   useEffect(() => {
+    customEvents.setCustomEventContext({
+      entId: savedObjectId || 'new',
+      page: 'editor',
+    });
+
+    return () => {
+      customEvents.setCustomEventContext({
+        entId: undefined,
+        page: undefined,
+      });
+    };
+  }, [savedObjectId]);
+
+  useEffect(() => {
     if (indicateNoData) {
       setIndicateNoData(false);
     }
@@ -121,9 +137,7 @@ export function App({
     () =>
       Boolean(
         // Temporarily required until the 'by value' paradigm is default.
-        dashboardFeatureFlag.allowByValueEmbeddables &&
-          isLinkedToOriginatingApp &&
-          !(initialInput as LensByReferenceInput)?.savedObjectId
+        dashboardFeatureFlag.allowByValueEmbeddables && isLinkedToOriginatingApp && !savedObjectId
       ),
     [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, initialInput]
   );

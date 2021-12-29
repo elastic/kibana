@@ -95,11 +95,15 @@ export function DashboardApp({
   }, [chrome, dashboardState.title, dashboardState.viewMode, redirectTo, savedDashboardId]);
 
   useEffect(() => {
-    if (savedDashboardId) {
-      customEvents.setCustomEventContext({ entId: savedDashboardId });
-    }
+    customEvents.setCustomEventContext({
+      entId: savedDashboardId || 'new',
+      page: 'app',
+    });
     return () => {
-      customEvents.clearCustomEventContext('entId');
+      customEvents.setCustomEventContext({
+        entId: undefined,
+        page: undefined,
+      });
     };
   }, [savedDashboardId]);
 

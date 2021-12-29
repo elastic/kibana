@@ -17,6 +17,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { customEvents } from '@kbn/custom-events';
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
 import {
@@ -62,10 +63,20 @@ export const DashboardListing = ({
       chrome: { setBreadcrumbs },
     },
   } = useKibana<DashboardAppServices>();
-
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
     dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
   );
+
+  useEffect(() => {
+    customEvents.setCustomEventContext({
+      page: 'list',
+    });
+    return () => {
+      customEvents.setCustomEventContext({
+        page: undefined,
+      });
+    };
+  }, []);
 
   // Set breadcrumbs useEffect
   useEffect(() => {
@@ -235,6 +246,7 @@ export const DashboardListing = ({
 
   const fetchItems = useCallback(
     (filter: string) => {
+      const reportTime = new Date().getTime();
       let searchTerm = filter;
       let references: SavedObjectsFindOptionsReference[] | undefined;
       if (savedObjectsTagging) {
@@ -245,10 +257,18 @@ export const DashboardListing = ({
         references = parsed.tagReferences;
       }
 
-      return savedDashboards.find(searchTerm, {
-        size: listingLimit,
-        hasReference: references,
-      });
+      return savedDashboards
+        .find(searchTerm, {
+          size: listingLimit,
+          hasReference: references,
+        })
+        .then((v) => {
+          customEvents.reportCustomEvent('list-loaded', {
+            resHitCount: v.hits.length,
+            timeTookMs: new Date().getTime() - reportTime,
+          });
+          return v;
+        });
     },
     [listingLimit, savedDashboards, savedObjectsTagging]
   );

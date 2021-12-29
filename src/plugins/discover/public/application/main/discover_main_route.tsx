@@ -59,11 +59,9 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
   const { id } = useParams<DiscoverLandingParams>();
 
   useEffect(() => {
-    if (id) {
-      customEvents.setCustomEventContext({ entId: id });
-    }
+    customEvents.setCustomEventContext({ entId: id });
     return () => {
-      customEvents.clearCustomEventContext('entId');
+      customEvents.setCustomEventContext({ entId: undefined });
     };
   }, [id]);
 

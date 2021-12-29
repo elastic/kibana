@@ -17,6 +17,7 @@ import useMount from 'react-use/lib/useMount';
 
 import { useLocation } from 'react-router-dom';
 
+import { customEvents } from '@kbn/custom-events';
 import { SavedObjectsFindOptionsReference } from '../../../../../core/public';
 import { useKibana, TableListView } from '../../../../kibana_react/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../visualizations/public';
@@ -62,6 +63,17 @@ export const VisualizeListing = () => {
     }
   }, [history, pathname, visualizations]);
 
+  useEffect(() => {
+    customEvents.setCustomEventContext({
+      page: 'list',
+    });
+    return () => {
+      customEvents.setCustomEventContext({
+        page: undefined,
+      });
+    };
+  }, []);
+
   useMount(() => {
     // Reset editor state for all apps if the visualize listing page is loaded.
     stateTransferService.clearEditorState();
@@ -102,6 +114,7 @@ export const VisualizeListing = () => {
 
   const fetchItems = useCallback(
     (filter) => {
+      const reportTime = new Date().getTime();
       let searchTerm = filter;
       let references: SavedObjectsFindOptionsReference[] | undefined;
 
@@ -114,6 +127,13 @@ export const VisualizeListing = () => {
       const isLabsEnabled = uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
       return visualizations
         .findListItems(searchTerm, listingLimit, references)
+        .then((v) => {
+          customEvents.reportCustomEvent('list-loaded', {
+            resHitCount: v.hits.length,
+            timeTookMs: new Date().getTime() - reportTime,
+          });
+          return v;
+        })
         .then(({ total, hits }: { total: number; hits: Array<Record<string, unknown>> }) => ({
           total,
           hits: hits.filter(

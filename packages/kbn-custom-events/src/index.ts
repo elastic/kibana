@@ -20,7 +20,7 @@ export interface CustomEventConfig {
 
 // based on https://help.fullstory.com/hc/en-us/articles/360020623234#Custom%20Event%20Name%20Requirements
 type FULLSTORY_EVENT_TYPES = string | number | boolean | Date;
-type FullstoryEventValue = FULLSTORY_EVENT_TYPES | FULLSTORY_EVENT_TYPES[];
+type FullstoryEventValue = FULLSTORY_EVENT_TYPES | FULLSTORY_EVENT_TYPES[] | undefined;
 
 class CustomEvents {
   private fullStory?: FullStoryApi;
@@ -142,15 +142,24 @@ class CustomEvents {
 
   public setCustomEventContext(context: Record<string, FullstoryEventValue>) {
     if (!this.fullStory) return;
-    this.customEventContext = {
-      ...this.customEventContext,
-      ...context,
-    };
+
+    Object.keys(context).forEach((key) => {
+      if (context[key] === undefined) {
+        this.clearCustomEventContext(key);
+      } else {
+        this.customEventContext[key] = context[key];
+      }
+    });
   }
 
-  public clearCustomEventContext(fieldName: string) {
-    if (!this.fullStory || !this.fieldMapping[fieldName]) return;
-    delete this.customEventContext[this.fieldMapping[fieldName]];
+  private clearCustomEventContext(fieldName: string | string[]) {
+    if (!this.fullStory) return;
+    const fields = typeof fieldName === 'string' ? [fieldName] : fieldName;
+    fields.forEach((field) => {
+      if (this.customEventContext[this.fieldMapping[field]]) {
+        delete this.customEventContext[this.fieldMapping[field]];
+      }
+    });
   }
 
   reportCustomEvent = (eventName: string, params: Record<string, FullstoryEventValue> = {}) => {

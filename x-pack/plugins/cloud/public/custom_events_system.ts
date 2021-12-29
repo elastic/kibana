@@ -17,7 +17,7 @@ import { Subscription } from 'rxjs';
 import {
   AuthenticatedUser,
   AuthenticationServiceStart,
-} from '../../../../node_modules/x-pack/plugins/security/public';
+} from '../../../../x-pack/plugins/security/public';
 import { CloudConfigType } from '.';
 
 /**
