@@ -186,7 +186,7 @@
               "APMPluginSetupDependencies",
               ") => { config$: ",
               "Observable",
-              "<Readonly<{} & { indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; sourcemap: string; onboarding: string; }>; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; searchAggregatedTransactions: ",
+              "<Readonly<{} & { indices: Readonly<{} & { error: string; span: string; metric: string; transaction: string; sourcemap: string; onboarding: string; }>; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; searchAggregatedTransactions: ",
               "SearchAggregatedTransactionSetting",
               "; telemetryCollectionEnabled: boolean; metricsInterval: number; profilingEnabled: boolean; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; }>>; getApmIndices: () => Promise<",
               "ApmIndicesConfig",
@@ -378,7 +378,7 @@
             "label": "config",
             "description": [],
             "signature": [
-              "{ readonly indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; sourcemap: string; onboarding: string; }>; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
+              "{ readonly indices: Readonly<{} & { error: string; span: string; metric: string; transaction: string; sourcemap: string; onboarding: string; }>; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
               "SearchAggregatedTransactionSetting",
               "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly profilingEnabled: boolean; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; }"
             ],
@@ -765,7 +765,7 @@
         "label": "APMConfig",
         "description": [],
         "signature": [
-          "{ readonly indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; sourcemap: string; onboarding: string; }>; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
+          "{ readonly indices: Readonly<{} & { error: string; span: string; metric: string; transaction: string; sourcemap: string; onboarding: string; }>; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; readonly searchAggregatedTransactions: ",
           "SearchAggregatedTransactionSetting",
           "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly profilingEnabled: boolean; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; }"
         ],
@@ -781,7 +781,7 @@
         "label": "ApmIndicesConfigName",
         "description": [],
         "signature": [
-          "\"error\" | \"metric\" | \"span\" | \"transaction\" | \"sourcemap\" | \"onboarding\""
+          "\"error\" | \"span\" | \"metric\" | \"transaction\" | \"sourcemap\" | \"onboarding\""
         ],
         "path": "x-pack/plugins/apm/server/index.ts",
         "deprecated": false,
@@ -4146,7 +4146,7 @@
             "section": "def-server.APMRouteHandlerResources",
             "text": "APMRouteHandlerResources"
           },
-          ", { apmIndexSettings: { configurationName: \"error\" | \"metric\" | \"span\" | \"transaction\" | \"sourcemap\" | \"onboarding\"; defaultValue: string; savedValue: string | undefined; }[]; }, ",
+          ", { apmIndexSettings: { configurationName: \"error\" | \"span\" | \"metric\" | \"transaction\" | \"sourcemap\" | \"onboarding\"; defaultValue: string; savedValue: string | undefined; }[]; }, ",
           "APMRouteCreateOptions",
           ">; } & { \"GET /internal/apm/settings/apm-indices\": ",
           {
@@ -5559,7 +5559,7 @@
           "description": [],
           "signature": [
             "Observable",
-            "<Readonly<{} & { indices: Readonly<{} & { error: string; metric: string; span: string; transaction: string; sourcemap: string; onboarding: string; }>; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; searchAggregatedTransactions: ",
+            "<Readonly<{} & { indices: Readonly<{} & { error: string; span: string; metric: string; transaction: string; sourcemap: string; onboarding: string; }>; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapTraceIdBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; ui: Readonly<{} & { enabled: boolean; transactionGroupBucketSize: number; maxTraceItems: number; }>; searchAggregatedTransactions: ",
             "SearchAggregatedTransactionSetting",
             "; telemetryCollectionEnabled: boolean; metricsInterval: number; profilingEnabled: boolean; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; }>>"
           ],
