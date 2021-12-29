@@ -10,7 +10,6 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
 import { ISearchSource } from '../../../../../data/common';
-import { GetStateReturn } from '../services/discover_state';
 import { RequestAdapter } from '../../../../../inspector/public';
 import type { AutoRefreshDoneFn } from '../../../../../data/public';
 import { validateTimeRange } from './validate_time_range';
@@ -24,6 +23,7 @@ import { sendResetMsg } from './use_saved_search_messages';
 import { getFetch$ } from './get_fetch_observable';
 import { ElasticSearchHit } from '../../../types';
 import { SavedSearch } from '../../../services/saved_searches';
+import { DiscoverGetStateReturn } from '../services/discover_state';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -96,7 +96,7 @@ export const useSavedSearch = ({
   searchSessionManager: DiscoverSearchSessionManager;
   searchSource: ISearchSource;
   services: DiscoverServices;
-  stateContainer: GetStateReturn;
+  stateContainer: DiscoverGetStateReturn;
   useNewFieldsApi: boolean;
 }) => {
   const { data, filterManager } = services;

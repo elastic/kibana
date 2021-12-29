@@ -18,7 +18,7 @@ import { ContextErrorMessage } from './components/context_error_message';
 import { IndexPattern, IndexPatternField } from '../../../../data/common';
 import { LoadingStatus } from './services/context_query_state';
 import { getServices } from '../../kibana_services';
-import { AppState, isEqualFilters } from './services/context_state';
+import { ContextAppState, isEqualFilters } from './services/context_state';
 import { useColumns } from '../../utils/use_data_grid_columns';
 import { useContextAppState } from './utils/use_context_app_state';
 import { useContextAppFetch } from './utils/use_context_app_fetch';
@@ -26,6 +26,7 @@ import { popularizeField } from '../../utils/popularize_field';
 import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
+import { ContextViewContext } from './utils/use_context_view_context';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
@@ -44,8 +45,8 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   /**
    * Context app state
    */
-  const { appState, setAppState } = useContextAppState({ services });
-  const prevAppState = useRef<AppState>();
+  const { appState, stateContainer } = useContextAppState({ services });
+  const prevAppState = useRef<ContextAppState>();
 
   /**
    * Context fetched state
@@ -78,7 +79,11 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
       fetchSurroundingRows(SurrDocType.PREDECESSORS);
     } else if (prevAppState.current.successorCount !== appState.successorCount) {
       fetchSurroundingRows(SurrDocType.SUCCESSORS);
-    } else if (!isEqualFilters(prevAppState.current.filters, appState.filters)) {
+    } else if (
+      prevAppState.current.filters &&
+      appState.filters &&
+      !isEqualFilters(prevAppState.current.filters, appState.filters)
+    ) {
       fetchContextRows();
     }
 
@@ -99,7 +104,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
     indexPatterns,
     state: appState,
     useNewFieldsApi,
-    setAppState,
+    setAppState: stateContainer.setAppState,
   });
   const rows = useMemo(
     () => [
@@ -142,8 +147,16 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
     };
   };
 
+  const contextViewContext = useMemo(
+    () => ({
+      state: appState,
+      stateContainer,
+    }),
+    [appState, stateContainer]
+  );
+
   return (
-    <Fragment>
+    <ContextViewContext.Provider value={contextViewContext}>
       {fetchedState.anchorStatus.value === LoadingStatus.FAILED ? (
         <ContextErrorMessage status={fetchedState.anchorStatus} />
       ) : (
@@ -171,9 +184,6 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
                 onAddColumn={onAddColumn}
                 onRemoveColumn={onRemoveColumn}
                 onSetColumns={onSetColumns}
-                predecessorCount={appState.predecessorCount}
-                successorCount={appState.successorCount}
-                setAppState={setAppState}
                 addFilter={addFilter as DocViewFilterFn}
                 rows={rows}
                 predecessors={fetchedState.predecessors}
@@ -186,6 +196,6 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
           </EuiPage>
         </Fragment>
       )}
-    </Fragment>
+    </ContextViewContext.Provider>
   );
 };

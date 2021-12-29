@@ -19,7 +19,7 @@ import {
   getInitialContextQueryState,
   LoadingStatus,
 } from '../services/context_query_state';
-import { AppState } from '../services/context_state';
+import { ContextAppState } from '../services/context_state';
 import { getFirstSortableField } from './sorting';
 import { EsHitRecord } from '../../types';
 
@@ -30,7 +30,7 @@ const createError = (statusKey: string, reason: FailureReason, error?: Error) =>
 export interface ContextAppFetchProps {
   anchorId: string;
   indexPattern: IndexPattern;
-  appState: AppState;
+  appState: ContextAppState;
   useNewFieldsApi: boolean;
   services: DiscoverServices;
 }

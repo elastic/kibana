@@ -16,7 +16,6 @@ import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
 import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
-import { AppState } from './services/context_state';
 import { SurrDocType } from './services/context';
 import { DiscoverServices } from '../../build_services';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
@@ -24,6 +23,7 @@ import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { EsHitRecordList } from '../types';
 import { SortPairArr } from '../../components/doc_table/lib/get_sort';
 import { ElasticSearchHit } from '../../types';
+import { useContextViewContext } from './utils/use_context_view_context';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -32,8 +32,6 @@ export interface ContextAppContentProps {
   onSetColumns: (columnsNames: string[], hideTimeColumn: boolean) => void;
   services: DiscoverServices;
   indexPattern: IndexPattern;
-  predecessorCount: number;
-  successorCount: number;
   rows: EsHitRecordList;
   predecessors: EsHitRecordList;
   successors: EsHitRecordList;
@@ -42,7 +40,6 @@ export interface ContextAppContentProps {
   successorsStatus: LoadingStatus;
   useNewFieldsApi: boolean;
   isLegacy: boolean;
-  setAppState: (newState: Partial<AppState>) => void;
   addFilter: DocViewFilterFn;
 }
 
@@ -63,8 +60,6 @@ export function ContextAppContent({
   onSetColumns,
   services,
   indexPattern,
-  predecessorCount,
-  successorCount,
   rows,
   predecessors,
   successors,
@@ -73,10 +68,14 @@ export function ContextAppContent({
   successorsStatus,
   useNewFieldsApi,
   isLegacy,
-  setAppState,
   addFilter,
 }: ContextAppContentProps) {
   const { uiSettings: config } = services;
+
+  const {
+    state: { predecessorCount, successorCount },
+    stateContainer,
+  } = useContextViewContext();
 
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>();
   const isAnchorLoading =
@@ -93,7 +92,7 @@ export function ContextAppContent({
   );
   const defaultStepSize = useMemo(() => parseInt(config.get(CONTEXT_STEP_SETTING), 10), [config]);
 
-  const loadingFeedback = () => {
+  const loadingFeedback = useCallback(() => {
     if (isLegacy && isAnchorLoading) {
       return (
         <EuiText textAlign="center" data-test-subj="contextApp_loadingIndicator">
@@ -102,14 +101,14 @@ export function ContextAppContent({
       );
     }
     return null;
-  };
+  }, [isAnchorLoading, isLegacy]);
 
   const onChangeCount = useCallback(
     (type: SurrDocType, count: number) => {
       const countKey = type === SurrDocType.SUCCESSORS ? 'successorCount' : 'predecessorCount';
-      setAppState({ [countKey]: clamp(count) });
+      stateContainer.setAppState({ [countKey]: clamp(count) });
     },
-    [setAppState]
+    [stateContainer]
   );
   const sort = useMemo(() => {
     return [[indexPattern.timeFieldName!, SortDirection.desc]];

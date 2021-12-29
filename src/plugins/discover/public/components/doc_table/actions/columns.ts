@@ -7,16 +7,9 @@
  */
 import { Capabilities, IUiSettingsClient } from 'kibana/public';
 import { SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
-import {
-  AppState as DiscoverState,
-  GetStateReturn as DiscoverGetStateReturn,
-} from '../../../application/main/services/discover_state';
-import {
-  AppState as ContextState,
-  GetStateReturn as ContextGetStateReturn,
-} from '../../../application/context/services/context_state';
 import { IndexPattern, IndexPatternsContract } from '../../../../../data/public';
 import { popularizeField } from '../../../utils/popularize_field';
+import { AppState, GetStateReturn } from '../../../application/types';
 
 /**
  * Helper function to provide a fallback to a single _source column if the given array of columns
@@ -60,7 +53,7 @@ export function moveColumn(columns: string[], columnName: string, newIndex: numb
   return modifiedColumns;
 }
 
-export function getStateColumnActions({
+export function getStateColumnActions<T extends AppState>({
   capabilities,
   config,
   indexPattern,
@@ -74,8 +67,8 @@ export function getStateColumnActions({
   indexPattern: IndexPattern;
   indexPatterns: IndexPatternsContract;
   useNewFieldsApi: boolean;
-  setAppState: DiscoverGetStateReturn['setAppState'] | ContextGetStateReturn['setAppState'];
-  state: DiscoverState | ContextState;
+  setAppState: GetStateReturn<T>['setAppState'];
+  state: T;
 }) {
   function onAddColumn(columnName: string) {
     popularizeField(indexPattern, columnName, indexPatterns, capabilities);
@@ -83,7 +76,7 @@ export function getStateColumnActions({
     const defaultOrder = config.get(SORT_DEFAULT_ORDER_SETTING);
     const sort =
       columnName === '_score' && !state.sort?.length ? [['_score', defaultOrder]] : state.sort;
-    setAppState({ columns, sort });
+    setAppState({ columns, sort } as Partial<T>);
   }
 
   function onRemoveColumn(columnName: string) {
@@ -94,12 +87,12 @@ export function getStateColumnActions({
       state.sort && state.sort.length
         ? state.sort.filter((subArr) => subArr[0] !== columnName)
         : [];
-    setAppState({ columns, sort });
+    setAppState({ columns, sort } as Partial<T>);
   }
 
   function onMoveColumn(columnName: string, newIndex: number) {
     const columns = moveColumn(state.columns || [], columnName, newIndex);
-    setAppState({ columns });
+    setAppState({ columns } as Partial<T>);
   }
 
   function onSetColumns(columns: string[], hideTimeColumn: boolean) {
@@ -109,7 +102,7 @@ export function getStateColumnActions({
         ? columns.slice(1)
         : columns;
 
-    setAppState({ columns: actualColumns });
+    setAppState({ columns: actualColumns } as Partial<T>);
   }
   return {
     onAddColumn,

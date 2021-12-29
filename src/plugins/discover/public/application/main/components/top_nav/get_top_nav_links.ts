@@ -14,9 +14,9 @@ import { unhashUrl } from '../../../../../../kibana_utils/public';
 import { DiscoverServices } from '../../../../build_services';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { onSaveSearch } from './on_save_search';
-import { GetStateReturn } from '../../services/discover_state';
 import { openOptionsPopover } from './open_options_popover';
 import type { TopNavMenuData } from '../../../../../../navigation/public';
+import { DiscoverGetStateReturn } from '../../services/discover_state';
 
 /**
  * Helper function to build the top nav links
@@ -35,7 +35,7 @@ export const getTopNavLinks = ({
   navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
-  state: GetStateReturn;
+  state: DiscoverGetStateReturn;
   onOpenInspector: () => void;
   searchSource: ISearchSource;
   onOpenSavedSearch: (id: string) => void;

@@ -18,13 +18,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { HitsCounter } from '../hits_counter';
 import { SavedSearch } from '../../../../services/saved_searches';
-import { AppState, GetStateReturn } from '../../services/discover_state';
 import { DiscoverHistogram } from './histogram';
 import { DataCharts$, DataTotalHits$ } from '../../utils/use_saved_search';
 import { DiscoverServices } from '../../../../build_services';
 import { useChartPanels } from './use_chart_panels';
 import { VIEW_MODE, DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { SHOW_FIELD_STATISTICS } from '../../../../../common';
+import { useDiscoverAppStateContext } from '../../utils/use_discover_app_state_context';
 
 const DiscoverHistogramMemoized = memo(DiscoverHistogram);
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
@@ -35,8 +35,6 @@ export function DiscoverChart({
   savedSearchDataChart$,
   savedSearchDataTotalHits$,
   services,
-  state,
-  stateContainer,
   isTimeBased,
   viewMode,
   setDiscoverViewMode,
@@ -46,12 +44,11 @@ export function DiscoverChart({
   savedSearchDataChart$: DataCharts$;
   savedSearchDataTotalHits$: DataTotalHits$;
   services: DiscoverServices;
-  state: AppState;
-  stateContainer: GetStateReturn;
   isTimeBased: boolean;
   viewMode: VIEW_MODE;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
 }) {
+  const { state, stateContainer } = useDiscoverAppStateContext();
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
   const showViewModeToggle = services.uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
 

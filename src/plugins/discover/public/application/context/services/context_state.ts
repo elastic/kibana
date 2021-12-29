@@ -18,16 +18,9 @@ import {
 } from '../../../../../kibana_utils/public';
 import { esFilters, FilterManager, Filter } from '../../../../../data/public';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
+import { AppState, GetStateReturn } from '../../types';
 
-export interface AppState {
-  /**
-   * Columns displayed in the table, cannot be changed by UI, just in discover's main app
-   */
-  columns: string[];
-  /**
-   * Array of filters
-   */
-  filters: Filter[];
+export interface ContextAppState extends AppState {
   /**
    * Number of records to be fetched before anchor records (newer records)
    */
@@ -36,12 +29,6 @@ export interface AppState {
    * Number of records to be fetched after the anchor records (older records)
    */
   successorCount: number;
-  /**
-   * Array of the used sorting [[field,direction],...]
-   * this is actually not needed in Discover Context, there's no sorting
-   * but it's used in the DocTable component
-   */
-  sort?: string[][];
 }
 
 interface GlobalState {
@@ -64,21 +51,19 @@ export interface GetStateParams {
    * History instance to use
    */
   history: History;
-
   /**
    * Core's notifications.toasts service
    * In case it is passed in,
    * kbnUrlStateStorage will use it notifying about inner errors
    */
   toasts?: NotificationsStart['toasts'];
-
   /**
    * core ui settings service
    */
   uiSettings: IUiSettingsClient;
 }
 
-export interface GetStateReturn {
+export interface ContextGetStateReturn extends GetStateReturn<ContextAppState> {
   /**
    * Global state, the _g part of the URL
    */
@@ -86,7 +71,7 @@ export interface GetStateReturn {
   /**
    * App state, the _a part of the URL
    */
-  appState: ReduxLikeStateContainer<AppState>;
+  appState: ReduxLikeStateContainer<ContextAppState>;
   /**
    * Start sync between state and URL
    */
@@ -95,10 +80,6 @@ export interface GetStateReturn {
    * Stop sync between state and URL
    */
   stopSync: () => void;
-  /**
-   * Set app state to with a partial new app state
-   */
-  setAppState: (newState: Partial<AppState>) => void;
   /**
    * Get all filters, global and app state
    */
@@ -117,7 +98,7 @@ const GLOBAL_STATE_URL_KEY = '_g';
 const APP_STATE_URL_KEY = '_a';
 
 /**
- * Builds and returns appState and globalState containers
+ * Builds and returns ContextAppState and globalState containers
  * provides helper functions to start/stop syncing with URL
  */
 export function getState({
@@ -126,7 +107,7 @@ export function getState({
   history,
   toasts,
   uiSettings,
-}: GetStateParams): GetStateReturn {
+}: GetStateParams): ContextGetStateReturn {
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
@@ -136,9 +117,9 @@ export function getState({
   const globalStateInitial = stateStorage.get(GLOBAL_STATE_URL_KEY) as GlobalState;
   const globalStateContainer = createStateContainer<GlobalState>(globalStateInitial);
 
-  const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
+  const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as ContextAppState;
   const appStateInitial = createInitialAppState(defaultSize, appStateFromUrl, uiSettings);
-  const appStateContainer = createStateContainer<AppState>(appStateInitial);
+  const appStateContainer = createStateContainer<ContextAppState>(appStateInitial);
 
   const { start, stop } = syncStates([
     {
@@ -160,7 +141,7 @@ export function getState({
       stateContainer: {
         ...appStateContainer,
         ...{
-          set: (value: AppState | null) => {
+          set: (value: ContextAppState | null) => {
             if (value) {
               appStateContainer.set(value);
             }
@@ -176,7 +157,7 @@ export function getState({
     appState: appStateContainer,
     startSync: start,
     stopSync: stop,
-    setAppState: (newState: Partial<AppState>) => {
+    setAppState: (newState: Partial<ContextAppState>) => {
       const oldState = appStateContainer.getState();
       const mergedState = { ...oldState, ...newState };
 
@@ -229,7 +210,10 @@ export function isEqualFilters(filtersA: Filter[], filtersB: Filter[]) {
  * Helper function to compare 2 different states, is needed since comparing filters
  * works differently, doesn't work with _.isEqual
  */
-function isEqualState(stateA: AppState | GlobalState, stateB: AppState | GlobalState) {
+function isEqualState(
+  stateA: ContextAppState | GlobalState,
+  stateB: ContextAppState | GlobalState
+) {
   if (!stateA && !stateB) {
     return true;
   } else if (!stateA || !stateB) {
@@ -246,7 +230,7 @@ function isEqualState(stateA: AppState | GlobalState, stateB: AppState | GlobalS
 /**
  * Helper function to return array of filter object of a given state
  */
-function getFilters(state: AppState | GlobalState): Filter[] {
+function getFilters(state: ContextAppState | GlobalState): Filter[] {
   if (!state || !Array.isArray(state.filters)) {
     return [];
   }
@@ -259,10 +243,10 @@ function getFilters(state: AppState | GlobalState): Filter[] {
  */
 function createInitialAppState(
   defaultSize: number,
-  urlState: AppState,
+  urlState: ContextAppState,
   uiSettings: IUiSettingsClient
-): AppState {
-  const defaultState: AppState = {
+): ContextAppState {
+  const defaultState: ContextAppState = {
     columns: ['_source'],
     filters: [],
     predecessorCount: defaultSize,

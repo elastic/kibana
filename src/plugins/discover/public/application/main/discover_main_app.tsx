@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { History } from 'history';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
@@ -16,6 +16,7 @@ import { IndexPatternAttributes, SavedObject } from '../../../../data/common';
 import { DiscoverServices } from '../../build_services';
 import { SavedSearch } from '../../services/saved_searches';
 import { ElasticSearchHit } from '../../types';
+import { DiscoverAppStateContext } from './utils/use_discover_app_state_context';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -98,24 +99,32 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     resetSavedSearch(savedSearch.id);
   }, [resetSavedSearch, savedSearch]);
 
+  const discoverStateContext = useMemo(
+    () => ({
+      state,
+      stateContainer,
+    }),
+    [state, stateContainer]
+  );
+
   return (
-    <DiscoverLayoutMemoized
-      indexPattern={indexPattern}
-      indexPatternList={indexPatternList}
-      inspectorAdapters={inspectorAdapters}
-      expandedDoc={expandedDoc}
-      onChangeIndexPattern={onChangeIndexPattern}
-      onUpdateQuery={onUpdateQuery}
-      resetSavedSearch={resetCurrentSavedSearch}
-      setExpandedDoc={setExpandedDoc}
-      navigateTo={navigateTo}
-      savedSearch={savedSearch}
-      savedSearchData$={data$}
-      savedSearchRefetch$={refetch$}
-      searchSource={searchSource}
-      services={services}
-      state={state}
-      stateContainer={stateContainer}
-    />
+    <DiscoverAppStateContext.Provider value={discoverStateContext}>
+      <DiscoverLayoutMemoized
+        indexPattern={indexPattern}
+        indexPatternList={indexPatternList}
+        inspectorAdapters={inspectorAdapters}
+        expandedDoc={expandedDoc}
+        onChangeIndexPattern={onChangeIndexPattern}
+        onUpdateQuery={onUpdateQuery}
+        resetSavedSearch={resetCurrentSavedSearch}
+        setExpandedDoc={setExpandedDoc}
+        navigateTo={navigateTo}
+        savedSearch={savedSearch}
+        savedSearchData$={data$}
+        savedSearchRefetch$={refetch$}
+        searchSource={searchSource}
+        services={services}
+      />
+    </DiscoverAppStateContext.Provider>
   );
 }

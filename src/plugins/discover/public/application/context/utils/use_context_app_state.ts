@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { cloneDeep } from 'lodash';
 import { CONTEXT_DEFAULT_SIZE_SETTING } from '../../../../common';
 import { DiscoverServices } from '../../../build_services';
-import { AppState, getState } from '../services/context_state';
+import { ContextAppState, getState } from '../services/context_state';
 
 export function useContextAppState({ services }: { services: DiscoverServices }) {
   const { uiSettings: config, history, core, filterManager } = services;
@@ -25,7 +25,7 @@ export function useContextAppState({ services }: { services: DiscoverServices })
     });
   }, [config, history, core.notifications.toasts]);
 
-  const [appState, setState] = useState<AppState>(stateContainer.appState.getState());
+  const [appState, setState] = useState<ContextAppState>(stateContainer.appState.getState());
 
   /**
    * Sync with app state container
@@ -64,6 +64,5 @@ export function useContextAppState({ services }: { services: DiscoverServices })
   return {
     appState,
     stateContainer,
-    setAppState: stateContainer.setAppState,
   };
 }

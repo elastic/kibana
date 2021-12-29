@@ -28,11 +28,11 @@ import { IndexPattern } from '../../../../../../data/common';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { DataDocumentsMsg, DataDocuments$ } from '../../utils/use_saved_search';
 import { DiscoverServices } from '../../../../build_services';
-import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../utils/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { SortPairArr } from '../../../../components/doc_table/lib/get_sort';
 import { ElasticSearchHit } from '../../../../types';
+import { useDiscoverAppStateContext } from '../../utils/use_discover_app_state_context';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -45,8 +45,6 @@ function DiscoverDocumentsComponent({
   savedSearch,
   services,
   setExpandedDoc,
-  state,
-  stateContainer,
 }: {
   documents$: DataDocuments$;
   expandedDoc?: ElasticSearchHit;
@@ -56,10 +54,9 @@ function DiscoverDocumentsComponent({
   savedSearch: SavedSearch;
   services: DiscoverServices;
   setExpandedDoc: (doc?: ElasticSearchHit) => void;
-  state: AppState;
-  stateContainer: GetStateReturn;
 }) {
   const { capabilities, indexPatterns, uiSettings } = services;
+  const { state, stateContainer } = useDiscoverAppStateContext();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
@@ -90,7 +87,7 @@ function DiscoverDocumentsComponent({
       const newGrid = { ...grid, columns: newColumns };
       stateContainer.setAppState({ grid: newGrid });
     },
-    [stateContainer, state]
+    [state.grid, stateContainer]
   );
 
   const onSort = useCallback(

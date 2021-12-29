@@ -33,7 +33,6 @@ import { IndexPatternField, IndexPattern } from '../../../../../../data/public';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { DiscoverServices } from '../../../../build_services';
-import { AppState } from '../../services/discover_state';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { DataDocuments$ } from '../../utils/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
@@ -85,10 +84,6 @@ export interface DiscoverSidebarResponsiveProps {
    * Discover plugin services;
    */
   services: DiscoverServices;
-  /**
-   * Discover App state
-   */
-  state: AppState;
   /**
    * Metric tracking function
    * @param metricType

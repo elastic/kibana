@@ -11,8 +11,8 @@ import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
 import { Query, TimeRange } from '../../../../../../data/common/query';
 import { getHeaderActionMenuMounter } from '../../../../kibana_services';
-import { GetStateReturn } from '../../services/discover_state';
 import { DataViewType } from '../../../../../../data_views/common';
+import { useDiscoverAppStateContext } from '../../utils/use_discover_app_state_context';
 
 export type DiscoverTopNavProps = Pick<
   DiscoverLayoutProps,
@@ -22,7 +22,6 @@ export type DiscoverTopNavProps = Pick<
   query?: Query;
   savedQuery?: string;
   updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
-  stateContainer: GetStateReturn;
   resetSavedSearch: () => void;
 };
 
@@ -31,7 +30,6 @@ export const DiscoverTopNav = ({
   onOpenInspector,
   query,
   savedQuery,
-  stateContainer,
   updateQuery,
   searchSource,
   navigateTo,
@@ -40,6 +38,7 @@ export const DiscoverTopNav = ({
   resetSavedSearch,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
+  const { stateContainer } = useDiscoverAppStateContext();
   const showDatePicker = useMemo(
     () => indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP,
     [indexPattern]

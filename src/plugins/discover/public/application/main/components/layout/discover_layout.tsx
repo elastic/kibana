@@ -47,6 +47,7 @@ import { FieldStatisticsTable } from '../field_stats_table';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { DataViewType } from '../../../../../../data_views/common';
+import { useDiscoverAppStateContext } from '../../utils/use_discover_app_state_context';
 
 /**
  * Local storage key for sidebar persistence state
@@ -73,8 +74,6 @@ export function DiscoverLayout({
   savedSearch,
   searchSource,
   services,
-  state,
-  stateContainer,
 }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
@@ -89,6 +88,10 @@ export function DiscoverLayout({
   } = services;
   const { main$, charts$, totalHits$ } = savedSearchData$;
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
+  const {
+    state,
+    stateContainer: { setAppState },
+  } = useDiscoverAppStateContext();
 
   const viewMode = useMemo(() => {
     if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
@@ -97,7 +100,7 @@ export function DiscoverLayout({
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
-      stateContainer.setAppState({ viewMode: mode });
+      setAppState({ viewMode: mode });
 
       if (trackUiMetric) {
         if (mode === VIEW_MODE.AGGREGATED_LEVEL) {
@@ -107,7 +110,7 @@ export function DiscoverLayout({
         }
       }
     },
-    [trackUiMetric, stateContainer]
+    [trackUiMetric, setAppState]
   );
 
   const fetchCounter = useRef<number>(0);
@@ -161,7 +164,7 @@ export function DiscoverLayout({
     config: uiSettings,
     indexPattern,
     indexPatterns,
-    setAppState: stateContainer.setAppState,
+    setAppState,
     state,
     useNewFieldsApi,
   });
@@ -208,13 +211,10 @@ export function DiscoverLayout({
       <TopNavMemoized
         indexPattern={indexPattern}
         onOpenInspector={onOpenInspector}
-        query={state.query}
         navigateTo={navigateTo}
-        savedQuery={state.savedQuery}
         savedSearch={savedSearch}
         searchSource={searchSource}
         services={services}
-        stateContainer={stateContainer}
         updateQuery={onUpdateQuery}
         resetSavedSearch={resetSavedSearch}
       />
@@ -239,7 +239,6 @@ export function DiscoverLayout({
               onChangeIndexPattern={onChangeIndexPattern}
               selectedIndexPattern={indexPattern}
               services={services}
-              state={state}
               isClosed={isSidebarClosed}
               trackUiMetric={trackUiMetric}
               useNewFieldsApi={useNewFieldsApi}
@@ -303,13 +302,11 @@ export function DiscoverLayout({
                 >
                   <EuiFlexItem grow={false}>
                     <DiscoverChartMemoized
-                      state={state}
                       resetSavedSearch={resetSavedSearch}
                       savedSearch={savedSearch}
                       savedSearchDataChart$={charts$}
                       savedSearchDataTotalHits$={totalHits$}
                       services={services}
-                      stateContainer={stateContainer}
                       isTimeBased={isTimeBased}
                       viewMode={viewMode}
                       setDiscoverViewMode={setDiscoverViewMode}
@@ -326,18 +323,13 @@ export function DiscoverLayout({
                       savedSearch={savedSearch}
                       services={services}
                       setExpandedDoc={setExpandedDoc}
-                      state={state}
-                      stateContainer={stateContainer}
                     />
                   ) : (
                     <FieldStatisticsTableMemoized
                       savedSearch={savedSearch}
                       services={services}
                       indexPattern={indexPattern}
-                      query={state.query}
-                      filters={state.filters}
                       columns={columns}
-                      stateContainer={stateContainer}
                       onAddFilter={onAddFilter}
                       trackUiMetric={trackUiMetric}
                       savedSearchRefetch$={savedSearchRefetch$}

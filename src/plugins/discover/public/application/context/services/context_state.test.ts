@@ -7,7 +7,7 @@
  */
 
 import { IUiSettingsClient } from 'kibana/public';
-import { getState } from './context_state';
+import { ContextGetStateReturn, getState } from './context_state';
 import { createBrowserHistory, History } from 'history';
 import { FilterManager, Filter } from '../../../../../data/public';
 import { coreMock } from '../../../../../../core/public/mocks';
@@ -17,7 +17,7 @@ const setupMock = coreMock.createSetup();
 
 describe('Test Discover Context State', () => {
   let history: History;
-  let state: ReturnType<typeof getState>;
+  let state: ContextGetStateReturn;
   const getCurrentUrl = () => history.createHref(history.location);
   beforeEach(async () => {
     history = createBrowserHistory();

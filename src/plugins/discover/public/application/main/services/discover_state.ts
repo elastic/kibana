@@ -36,16 +36,9 @@ import { SavedSearch } from '../../../services/saved_searches';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../locator';
 import { VIEW_MODE } from '../../../components/view_mode_toggle';
+import { AppState, GetStateReturn } from '../../types';
 
-export interface AppState {
-  /**
-   * Columns displayed in the table
-   */
-  columns?: string[];
-  /**
-   * Array of applied filters
-   */
-  filters?: Filter[];
+export interface DiscoverAppState extends AppState {
   /**
    * Data Grid related state
    */
@@ -67,10 +60,6 @@ export interface AppState {
    */
   query?: Query;
   /**
-   * Array of the used sorting [[field,direction],...]
-   */
-  sort?: string[][];
-  /**
    * id of the used saved query
    */
   savedQuery?: string;
@@ -88,7 +77,7 @@ interface GetStateParams {
   /**
    * Default state used for merging with with URL state to get the initial state
    */
-  getStateDefaults?: () => AppState;
+  getStateDefaults?: () => DiscoverAppState;
   /**
    * Determins the use of long vs. short/hashed urls
    */
@@ -111,7 +100,7 @@ interface GetStateParams {
   uiSettings: IUiSettingsClient;
 }
 
-export interface GetStateReturn {
+export interface DiscoverGetStateReturn extends GetStateReturn<DiscoverAppState> {
   /**
    * kbnUrlStateStorage
    */
@@ -119,7 +108,7 @@ export interface GetStateReturn {
   /**
    * App state, the _a part of the URL
    */
-  appStateContainer: ReduxLikeStateContainer<AppState>;
+  appStateContainer: ReduxLikeStateContainer<DiscoverAppState>;
   /**
    * Initialize state with filters and query,  start state syncing
    */
@@ -137,13 +126,9 @@ export interface GetStateReturn {
    */
   stopSync: () => void;
   /**
-   * Set app state to with a partial new app state
-   */
-  setAppState: (newState: Partial<AppState>) => void;
-  /**
    * Set state in Url using history.replace
    */
-  replaceUrlAppState: (newState: Partial<AppState>) => Promise<void>;
+  replaceUrlAppState: (newState: Partial<DiscoverAppState>) => Promise<void>;
   /**
    * Sync state to URL, used for testing
    */
@@ -153,22 +138,22 @@ export interface GetStateReturn {
    */
   resetInitialAppState: () => void;
   /**
-   * Return the Appstate before the current app state, useful for diffing changes
+   * Return the DiscoverAppState before the current app state, useful for diffing changes
    */
-  getPreviousAppState: () => AppState;
+  getPreviousAppState: () => DiscoverAppState;
   /**
    * Returns whether the current app state is different to the initial state
    */
   isAppStateDirty: () => boolean;
   /**
-   * Reset AppState to default, discarding all changes
+   * Reset DiscoverAppState to default, discarding all changes
    */
   resetAppState: () => void;
 }
 const APP_STATE_URL_KEY = '_a';
 
 /**
- * Builds and returns appState and globalState containers and helper functions
+ * Builds and returns DiscoverAppState and globalState containers and helper functions
  * Used to sync URL with UI state
  */
 export function getState({
@@ -177,7 +162,7 @@ export function getState({
   history,
   toasts,
   uiSettings,
-}: GetStateParams): GetStateReturn {
+}: GetStateParams): DiscoverGetStateReturn {
   const defaultAppState = getStateDefaults ? getStateDefaults() : {};
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
@@ -185,7 +170,7 @@ export function getState({
     ...(toasts && withNotifyOnErrors(toasts)),
   });
 
-  const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as AppState;
+  const appStateFromUrl = stateStorage.get(APP_STATE_URL_KEY) as DiscoverAppState;
 
   if (appStateFromUrl && appStateFromUrl.query && !appStateFromUrl.query.language) {
     appStateFromUrl.query = migrateLegacyQuery(appStateFromUrl.query);
@@ -206,12 +191,12 @@ export function getState({
   );
 
   // todo filter source depending on fields fetching flag (if no columns remain and source fetching is enabled, use default columns)
-  let previousAppState: AppState;
-  const appStateContainer = createStateContainer<AppState>(initialAppState);
+  let previousAppState: DiscoverAppState;
+  const appStateContainer = createStateContainer<DiscoverAppState>(initialAppState);
 
   const appStateContainerModified = {
     ...appStateContainer,
-    set: (value: AppState | null) => {
+    set: (value: DiscoverAppState | null) => {
       if (value) {
         previousAppState = appStateContainer.getState();
         appStateContainer.set(value);
@@ -225,7 +210,7 @@ export function getState({
     stateStorage,
   });
 
-  const replaceUrlAppState = async (newPartial: AppState = {}) => {
+  const replaceUrlAppState = async (newPartial: DiscoverAppState = {}) => {
     const state = { ...appStateContainer.getState(), ...newPartial };
     await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
   };
@@ -235,7 +220,7 @@ export function getState({
     appStateContainer: appStateContainerModified,
     startSync: start,
     stopSync: stop,
-    setAppState: (newPartial: AppState) => setState(appStateContainerModified, newPartial),
+    setAppState: (newPartial: DiscoverAppState) => setState(appStateContainerModified, newPartial),
     replaceUrlAppState,
     resetInitialAppState: () => {
       initialAppState = appStateContainer.getState();
@@ -301,7 +286,10 @@ export function getState({
  * Helper function to merge a given new state with the existing state and to set the given state
  * container
  */
-export function setState(stateContainer: ReduxLikeStateContainer<AppState>, newState: AppState) {
+export function setState(
+  stateContainer: ReduxLikeStateContainer<DiscoverAppState>,
+  newState: DiscoverAppState
+) {
   const oldState = stateContainer.getState();
   const mergedState = { ...oldState, ...newState };
   if (!isEqualState(oldState, mergedState)) {
@@ -325,7 +313,7 @@ export function isEqualFilters(filtersA: Filter[], filtersB: Filter[]) {
  * helper function to extract filters of the given state
  * returns a state object without filters and an array of filters
  */
-export function splitState(state: AppState = {}) {
+export function splitState(state: DiscoverAppState = {}) {
   const { filters = [], ...statePartial } = state;
   return { filters, state: statePartial };
 }
@@ -334,7 +322,7 @@ export function splitState(state: AppState = {}) {
  * Helper function to compare 2 different state, is needed since comparing filters
  * works differently
  */
-export function isEqualState(stateA: AppState, stateB: AppState) {
+export function isEqualState(stateA: DiscoverAppState, stateB: DiscoverAppState) {
   if (!stateA && !stateB) {
     return true;
   } else if (!stateA || !stateB) {
@@ -346,7 +334,7 @@ export function isEqualState(stateA: AppState, stateB: AppState) {
 }
 
 export function createSearchSessionRestorationDataProvider(deps: {
-  appStateContainer: StateContainer<AppState>;
+  appStateContainer: StateContainer<DiscoverAppState>;
   data: DataPublicPluginStart;
   getSavedSearch: () => SavedSearch;
 }): SearchSessionInfoProvider {
@@ -385,7 +373,7 @@ function createUrlGeneratorState({
   getSavedSearchId,
   shouldRestoreSearchSession,
 }: {
-  appStateContainer: StateContainer<AppState>;
+  appStateContainer: StateContainer<DiscoverAppState>;
   data: DataPublicPluginStart;
   getSavedSearchId: () => string | undefined;
   shouldRestoreSearchSession: boolean;

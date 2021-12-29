@@ -20,8 +20,8 @@ import {
 } from '../../../../../../embeddable/public';
 import { FIELD_STATISTICS_LOADED } from './constants';
 import type { SavedSearch } from '../../../../services/saved_searches';
-import type { GetStateReturn } from '../../services/discover_state';
 import { DataRefetch$ } from '../../utils/use_saved_search';
+import { DiscoverGetStateReturn } from '../../services/discover_state';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   indexPattern: IndexPattern;
@@ -75,7 +75,7 @@ export interface FieldStatisticsTableProps {
   /**
    * State container with persisted settings
    */
-  stateContainer?: GetStateReturn;
+  stateContainer?: DiscoverGetStateReturn;
   /**
    * Callback to add a filter to filter bar
    */

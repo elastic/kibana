@@ -12,9 +12,9 @@ import { SavedObjectSaveModal, showSaveModal } from '../../../../../../saved_obj
 import { SavedSearch, SaveSavedSearchOptions } from '../../../../services/saved_searches';
 import { IndexPattern } from '../../../../../../data/common';
 import { DiscoverServices } from '../../../../build_services';
-import { GetStateReturn } from '../../services/discover_state';
 import { setBreadcrumbsTitle } from '../../../../utils/breadcrumbs';
 import { persistSavedSearch } from '../../utils/persist_saved_search';
+import { DiscoverGetStateReturn } from '../../services/discover_state';
 
 async function saveDataSource({
   indexPattern,
@@ -29,7 +29,7 @@ async function saveDataSource({
   savedSearch: SavedSearch;
   saveOptions: SaveSavedSearchOptions;
   services: DiscoverServices;
-  state: GetStateReturn;
+  state: DiscoverGetStateReturn;
 }) {
   const prevSavedSearchId = savedSearch.id;
   function onSuccess(id: string) {
@@ -93,7 +93,7 @@ export async function onSaveSearch({
   navigateTo: (path: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;
-  state: GetStateReturn;
+  state: DiscoverGetStateReturn;
 }) {
   const onSave = async ({
     newTitle,
