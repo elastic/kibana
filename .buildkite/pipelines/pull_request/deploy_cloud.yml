@@ -3,5 +3,5 @@ steps:
     label: 'Build and Deploy to Cloud'
     agents:
       queue: n2-2
-    # depends_on: build # TODO add me back
+    depends_on: build
     timeout_in_minutes: 30

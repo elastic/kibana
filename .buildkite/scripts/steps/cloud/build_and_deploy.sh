@@ -4,8 +4,6 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-KIBANA_BUILD_ID=ce8e2bea-7dfe-468e-90dd-ed2aeeb52d07 # TODO remove me
-
 .buildkite/scripts/bootstrap.sh
 
 export KBN_NP_PLUGINS_BUILT=true
