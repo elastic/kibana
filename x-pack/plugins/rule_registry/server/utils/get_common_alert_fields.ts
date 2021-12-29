@@ -18,7 +18,7 @@ import {
   SPACE_IDS,
   TAGS,
   TIMESTAMP,
-} from '@kbn/rule-data-utils/technical_field_names';
+} from '@kbn/rule-data-utils';
 
 import { AlertExecutorOptions } from '../../../alerting/server';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
