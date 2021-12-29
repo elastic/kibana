@@ -1374,7 +1374,7 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
 export async function incrementPackageName(
   soClient: SavedObjectsClientContract,
   packageName: string
-) {
+): Promise<string> {
   // Fetch all packagePolicies having the package name
   const packagePolicyData = await packagePolicyService.list(soClient, {
     perPage: SO_SEARCH_LIMIT,
@@ -1384,16 +1384,12 @@ export async function incrementPackageName(
   // Retrieve highest number appended to package policy name and increment it by one
   const pkgPoliciesNamePattern = new RegExp(`${packageName}-(\\d+)`);
 
-  const pkgPoliciesWithMatchingNames = packagePolicyData?.items
-    ? packagePolicyData.items
-        .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
-        .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
-        .sort((a, b) => a - b)
-    : [];
+  const maxPkgPolicyName = Math.max(
+    ...(packagePolicyData?.items ?? [])
+      .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
+      .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10)),
+    0
+  );
 
-  return `${packageName}-${
-    pkgPoliciesWithMatchingNames.length
-      ? pkgPoliciesWithMatchingNames[pkgPoliciesWithMatchingNames.length - 1] + 1
-      : 1
-  }`;
+  return `${packageName}-${maxPkgPolicyName + 1}`;
 }
