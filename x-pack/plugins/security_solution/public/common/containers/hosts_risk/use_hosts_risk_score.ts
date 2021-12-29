@@ -43,11 +43,13 @@ export const useHostsRiskScore = ({
   hostName,
   onlyLatest = true,
   filterQuery,
+  queryId = QUERY_ID,
 }: {
   timerange?: { to: string; from: string };
   filterQuery?: ESTermQuery | string;
   hostName?: string;
   onlyLatest?: boolean;
+  queryId?: string;
 }): HostRisk | null => {
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
   const [isModuleEnabled, setIsModuleEnabled] = useState<boolean | undefined>(undefined);
@@ -61,8 +63,8 @@ export const useHostsRiskScore = ({
   const { error, result, start, loading: isHostsRiskScoreLoading } = useHostsRiskScoreComplete();
 
   const deleteQuery = useCallback(() => {
-    dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id: QUERY_ID }));
-  }, [dispatch]);
+    dispatch(inputsActions.deleteOneQuery({ inputId: 'global', id: queryId }));
+  }, [dispatch, queryId]);
 
   useEffect(() => {
     if (!isHostsRiskScoreLoading && result) {
@@ -71,7 +73,7 @@ export const useHostsRiskScore = ({
       dispatch(
         inputsActions.setQuery({
           inputId: 'global',
-          id: QUERY_ID,
+          id: queryId,
           inspect: {
             dsl: result.inspect?.dsl ?? [],
             response: [JSON.stringify(result.rawResponse, null, 2)],
@@ -82,7 +84,7 @@ export const useHostsRiskScore = ({
       );
     }
     return deleteQuery;
-  }, [deleteQuery, dispatch, isHostsRiskScoreLoading, result, setIsModuleEnabled]);
+  }, [deleteQuery, dispatch, isHostsRiskScoreLoading, result, setIsModuleEnabled, queryId]);
 
   useEffect(() => {
     if (error) {

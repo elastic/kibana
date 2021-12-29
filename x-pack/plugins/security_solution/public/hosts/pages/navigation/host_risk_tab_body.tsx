@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { HostRiskScoreOverTime } from '../../components/host_score_over_time';
+import { TopHostScoreContributors } from '../../components/top_host_score_contributors';
 import { HostsComponentsQueryProps } from './types';
 
 const HostRiskTabBodyComponent: React.FC<HostsComponentsQueryProps & { hostName: string }> = ({
@@ -16,12 +18,24 @@ const HostRiskTabBodyComponent: React.FC<HostsComponentsQueryProps & { hostName:
   filterQuery,
 }) => {
   return (
-    <HostRiskScoreOverTime
-      hostName={hostName}
-      from={startDate}
-      to={endDate}
-      filterQuery={filterQuery}
-    />
+    <EuiFlexGroup direction="row">
+      <EuiFlexItem grow={2}>
+        <HostRiskScoreOverTime
+          hostName={hostName}
+          from={startDate}
+          to={endDate}
+          filterQuery={filterQuery}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={1}>
+        <TopHostScoreContributors
+          hostName={hostName}
+          from={startDate}
+          to={endDate}
+          filterQuery={filterQuery}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 

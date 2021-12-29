@@ -41,7 +41,7 @@ export interface HostsRiskScore {
 
 export interface RuleRisk {
   rule_name: string;
-  rule_risk: string;
+  rule_risk: number;
 }
 
 export const getHostRiskIndex = (spaceId: string, onlyLatest: boolean = true): string => {

@@ -20,17 +20,13 @@ import {
 import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText, EuiPanel } from '@elastic/eui';
 import styled from 'styled-components';
-
 import { chartDefaultSettings, useTheme } from '../../../common/components/charts/common';
 import { useTimeZone } from '../../../common/lib/kibana';
 import { histogramDateTimeFormatter } from '../../../common/components/utils';
 import { HeaderSection } from '../../../common/components/header_section';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import * as i18n from './translations';
-import {
-  QUERY_ID,
-  useHostsRiskScore,
-} from '../../../common/containers/hosts_risk/use_hosts_risk_score';
+import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 
@@ -43,6 +39,7 @@ export interface HostRiskScoreOverTimeProps {
 
 const RISKY_TRESHOULD = 70;
 const DEFAULT_CHART_HEIGH = 250;
+const QUERY_ID = 'HostRiskScoreOverTimeQuery';
 
 const StyledEuiText = styled(EuiText)`
   font-size: 9px;
@@ -84,6 +81,7 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
     onlyLatest: false,
     timerange,
     filterQuery,
+    queryId: QUERY_ID,
   });
 
   const data = useMemo(
@@ -100,7 +98,7 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
       <EuiPanel hasBorder>
         <EuiFlexGroup gutterSize={'none'}>
           <EuiFlexItem grow={1}>
-            <HeaderSection title={i18n.HOST_RISK_SCORE_OVER_TIME} />
+            <HeaderSection title={i18n.HOST_RISK_SCORE_OVER_TIME} hideSubtitle />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
