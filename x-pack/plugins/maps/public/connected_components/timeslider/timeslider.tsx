@@ -23,6 +23,7 @@ export interface Props {
   isTimesliderOpen: boolean;
   timeRange: TimeRange;
   waitForTimesliceToLoad$: Observable<void>;
+  updateGlobalTimeRange: (timeslice: number[]) => void;
 }
 
 interface State {
@@ -181,6 +182,17 @@ class KeyedTimeslider extends Component<Props, State> {
           <div className="mapTimeslider__timeWindow">
             <EuiText size="s">{prettyPrintTimeslice(this.state.timeslice)}</EuiText>
           </div>
+
+          <EuiButtonIcon
+            onClick={() => {
+              this.props.updateGlobalTimeRange(this.state.timeslice);
+            }}
+            iconType="calendar"
+            display="fill"
+            aria-label={i18n.translate('xpack.maps.timeslider.setGlobalTime', {
+              defaultMessage: 'Set global time window to selected time slice',
+            })}
+          />
 
           <div className="mapTimeslider__innerPanel">
             <div className="mapTimeslider__controls">
