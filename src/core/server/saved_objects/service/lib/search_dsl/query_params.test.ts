@@ -296,7 +296,7 @@ describe('#getQueryParams', () => {
       it('deduplicates provided namespaces', () => {
         const result = getQueryParams({
           registry,
-          search: '*',
+          searchOptions: [{ search: '*' }],
           namespaces: ['foo', '*', 'foo', 'bar', 'default'],
         });
 
@@ -366,7 +366,7 @@ describe('#getQueryParams', () => {
         it('does not include clause when `search` is not specified', () => {
           const result = getQueryParams({
             registry,
-            search: undefined,
+            searchOptions: undefined,
           });
           expect(result.query.bool.must).toBeUndefined();
         });
@@ -374,7 +374,7 @@ describe('#getQueryParams', () => {
         it('creates a clause with query for specified search', () => {
           const result = getQueryParams({
             registry,
-            search,
+            searchOptions: [{ search }],
           });
           expectResult(result, expect.objectContaining({ query: search }));
         });
@@ -397,9 +397,7 @@ describe('#getQueryParams', () => {
             const result = getQueryParams({
               registry,
               type: typeOrTypes,
-              search,
-              searchFields,
-              rootSearchFields,
+              searchOptions: [{ search, searchFields, rootSearchFields }],
             });
             let fields = rootSearchFields || [];
             if (searchFields) {
@@ -411,9 +409,7 @@ describe('#getQueryParams', () => {
           const result = getQueryParams({
             registry,
             type: undefined,
-            search,
-            searchFields,
-            rootSearchFields,
+            searchOptions: [{ search, searchFields, rootSearchFields }],
           });
           let fields = rootSearchFields || [];
           if (searchFields) {
@@ -427,9 +423,9 @@ describe('#getQueryParams', () => {
             getQueryParams({
               registry,
               type: undefined,
-              search,
-              searchFields: undefined,
-              rootSearchFields: ['foo', 'bar.baz'],
+              searchOptions: [
+                { search, searchFields: undefined, rootSearchFields: ['foo', 'bar.baz'] },
+              ],
             })
           ).toThrowErrorMatchingInlineSnapshot(
             `"rootSearchFields entry \\"bar.baz\\" is invalid: cannot contain \\".\\" character"`
@@ -439,9 +435,7 @@ describe('#getQueryParams', () => {
         it('includes lenient flag and all fields when `searchFields` and `rootSearchFields` are not specified', () => {
           const result = getQueryParams({
             registry,
-            search,
-            searchFields: undefined,
-            rootSearchFields: undefined,
+            searchOptions: [{ search, searchFields: undefined, rootSearchFields: undefined }],
           });
           expectResult(result, expect.objectContaining({ lenient: true, fields: ['*'] }));
         });
@@ -475,8 +469,7 @@ describe('#getQueryParams', () => {
         it('does not include default_operator when `defaultSearchOperator` is not specified', () => {
           const result = getQueryParams({
             registry,
-            search,
-            defaultSearchOperator: undefined,
+            searchOptions: [{ search, defaultSearchOperator: undefined }],
           });
           expectResult(
             result,
@@ -488,8 +481,7 @@ describe('#getQueryParams', () => {
           const defaultSearchOperator = 'AND';
           const result = getQueryParams({
             registry,
-            search,
-            defaultSearchOperator,
+            searchOptions: [{ search, defaultSearchOperator }],
           });
           expectResult(
             result,
@@ -513,8 +505,7 @@ describe('#getQueryParams', () => {
       }) =>
         getQueryParams({
           registry,
-          search,
-          searchFields,
+          searchOptions: [{ searchFields, search }],
           type,
         });
 
