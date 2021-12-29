@@ -23,6 +23,9 @@ import type {
 } from './types';
 import { registerReportingUsageCollector } from './usage';
 
+/*
+ * @internal
+ */
 export class ReportingPlugin
   implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps>
 {

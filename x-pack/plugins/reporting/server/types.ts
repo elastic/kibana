@@ -32,23 +32,6 @@ import type { ReportTaskParams } from './lib/tasks';
  * Plugin Contract
  */
 
-export interface ReportingSetupDeps {
-  licensing: LicensingPluginSetup;
-  eventLog: IEventLogService;
-  features: FeaturesPluginSetup;
-  screenshotMode: ScreenshotModePluginSetup;
-  security?: SecurityPluginSetup;
-  spaces?: SpacesPluginSetup;
-  taskManager: TaskManagerSetupContract;
-  usageCollection?: UsageCollectionSetup;
-}
-
-export interface ReportingStartDeps {
-  data: DataPluginStart;
-  screenshotting: ScreenshottingStart;
-  taskManager: TaskManagerStartContract;
-}
-
 export interface ReportingSetup {
   usesUiCapabilities: () => boolean;
 }
@@ -102,6 +85,29 @@ export interface ExportTypeDefinition<
   createJobFnFactory: CreateJobFnFactory<CreateJobFnType> | null; // immediate job does not have a "create" phase
   runTaskFnFactory: RunTaskFnFactory<RunTaskFnType>;
   validLicenses: string[];
+}
+
+/*
+ * @internal
+ */
+export interface ReportingSetupDeps {
+  licensing: LicensingPluginSetup;
+  eventLog: IEventLogService;
+  features: FeaturesPluginSetup;
+  screenshotMode: ScreenshotModePluginSetup;
+  security?: SecurityPluginSetup;
+  spaces?: SpacesPluginSetup;
+  taskManager: TaskManagerSetupContract;
+  usageCollection?: UsageCollectionSetup;
+}
+
+/*
+ * @internal
+ */
+export interface ReportingStartDeps {
+  data: DataPluginStart;
+  screenshotting: ScreenshottingStart;
+  taskManager: TaskManagerStartContract;
 }
 
 /**
