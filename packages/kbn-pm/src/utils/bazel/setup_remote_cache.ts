@@ -21,7 +21,23 @@ async function isVaultAvailable() {
   }
 }
 
+async function isElasticCommitter() {
+  try {
+    const { stdout: email } = await spawn('git', ['config', 'user.email'], {
+      stdio: 'pipe',
+    });
+
+    return email.trim().endsWith('@elastic.co');
+  } catch {
+    return false;
+  }
+}
+
 export async function setupRemoteCache(repoRootPath: string) {
+  if (!(await isElasticCommitter())) {
+    return;
+  }
+
   log.debug(`[bazel_tools] setting up remote cache settings if necessary`);
 
   const settingsPath = resolve(repoRootPath, '.bazelrc.cache');
@@ -44,7 +60,7 @@ export async function setupRemoteCache(repoRootPath: string) {
   try {
     const { stdout } = await spawn(
       'vault',
-      ['read', '-field=readonly-key', 'secret/kibana-issues/dev/bazel-remote-cachxe'],
+      ['read', '-field=readonly-key', 'secret/kibana-issues/dev/bazel-remote-cache'],
       {
         stdio: 'pipe',
       }
