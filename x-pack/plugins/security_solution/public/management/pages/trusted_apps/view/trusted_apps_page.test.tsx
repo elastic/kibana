@@ -20,7 +20,6 @@ import { HttpFetchOptions, HttpFetchOptionsWithPath } from 'kibana/public';
 import { isFailedResourceState, isLoadedResourceState } from '../state';
 import { forceHTMLElementOffsetWidth } from '../../../components/effected_policy_select/test_utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { licenseService } from '../../../../common/hooks/use_license';
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
