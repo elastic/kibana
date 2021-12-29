@@ -19,20 +19,6 @@ steps:
       queue: c2-16
     key: build
 
-  - label: ":muscle: Performance Tests with FTR config"
-    command: .buildkite/scripts/steps/functional/performance_ftr.sh
-    agents:
-      queue: c2-16
-    depends_on: build
-    if: build.env('TEST_RUNNER') == null || build.env('TEST_RUNNER') == "FTR"
-
-  - label: ":muscle: Performance Tests with Synthetics config"
-    command: .buildkite/scripts/steps/functional/performance_synthetics.sh
-    agents:
-      queue: c2-16
-    depends_on: build
-    if: build.env('TEST_RUNNER') == "SYNTHETICS"
-
   - label: ":muscle: Performance Tests with Playwright config"
     command: .buildkite/scripts/steps/functional/performance_playwright.sh
     agents:
