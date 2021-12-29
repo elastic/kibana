@@ -369,35 +369,14 @@ export class UrlPanelContent extends Component<Props, State> {
 
     try {
       const snapshotUrl = this.getSnapshotUrl();
-      const parsedUrl = urllib.parse(snapshotUrl);
-
-      if (!parsedUrl || !parsedUrl.path) {
-        return;
-      }
-
-      const { urlService, core } = this.props;
-      const path = parsedUrl.path.replace(core.http.basePath.get(), '');
-      const hash = parsedUrl.hash ? parsedUrl.hash : '';
-      const relativeUrl = path + hash;
-      const locator = urlService.locators.get(LEGACY_SHORT_URL_LOCATOR_ID)!;
-      const shortUrl = await urlService.shortUrls.get(null).create({
-        locator,
-        humanReadableSlug: true,
-        params: {
-          url: relativeUrl,
-        },
-      });
+      const { urlService } = this.props;
+      const shortUrl = await urlService.shortUrls.get(null).createFromLongUrl(snapshotUrl);
 
       if (!this.mounted) {
         return;
       }
 
-      this.shortUrlCache = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
-
-      if (!this.mounted) {
-        return;
-      }
-
+      this.shortUrlCache = shortUrl.url;
       this.setState(
         {
           isCreatingShortUrl: false,
