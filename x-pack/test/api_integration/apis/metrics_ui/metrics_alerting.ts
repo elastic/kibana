@@ -37,11 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
             start: moment().subtract(25, 'minutes').valueOf(),
             end: moment().valueOf(),
           };
-          const searchBody = getElasticsearchMetricQuery(
-            getSearchParams(aggType),
-            '@timestamp',
-            timeframe
-          );
+          const searchBody = getElasticsearchMetricQuery(getSearchParams(aggType), timeframe);
           const result = await client.search({
             index,
             // @ts-expect-error @elastic/elasticsearch AggregationsBucketsPath is not valid
@@ -61,7 +57,6 @@ export default function ({ getService }: FtrProviderContext) {
         };
         const searchBody = getElasticsearchMetricQuery(
           getSearchParams('avg'),
-          '@timestamp',
           timeframe,
           undefined,
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'
@@ -85,7 +80,6 @@ export default function ({ getService }: FtrProviderContext) {
           };
           const searchBody = getElasticsearchMetricQuery(
             getSearchParams(aggType),
-            '@timestamp',
             timeframe,
             'agent.id'
           );
@@ -106,7 +100,6 @@ export default function ({ getService }: FtrProviderContext) {
         };
         const searchBody = getElasticsearchMetricQuery(
           getSearchParams('avg'),
-          '@timestamp',
           timeframe,
           'agent.id',
           '{"bool":{"should":[{"match_phrase":{"agent.hostname":"foo"}}],"minimum_should_match":1}}'

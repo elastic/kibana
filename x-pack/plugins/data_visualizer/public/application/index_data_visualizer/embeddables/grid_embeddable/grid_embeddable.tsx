@@ -8,19 +8,22 @@
 import { Observable, Subject } from 'rxjs';
 import { CoreStart } from 'kibana/public';
 import ReactDOM from 'react-dom';
-import React, { Suspense, useCallback, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { Required } from 'utility-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
   IContainer,
 } from '../../../../../../../../src/plugins/embeddable/public';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../../../../../src/plugins/kibana_react/public';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
 import { DataVisualizerStartDependencies } from '../../../../plugin';
@@ -36,24 +39,26 @@ import {
 } from '../../../common/components/stats_table';
 import { FieldVisConfig } from '../../../common/components/stats_table/types';
 import { getDefaultDataVisualizerListState } from '../../components/index_data_visualizer_view/index_data_visualizer_view';
-import { DataVisualizerTableState } from '../../../../../common';
+import { DataVisualizerTableState, SavedSearchSavedObject } from '../../../../../common';
 import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
-import { useDataVisualizerGridData } from './use_data_visualizer_grid_data';
+import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 
 export type DataVisualizerGridEmbeddableServices = [CoreStart, DataVisualizerStartDependencies];
-export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
+export interface DataVisualizerGridInput {
   indexPattern: IndexPattern;
-  savedSearch?: SavedSearch;
+  savedSearch?: SavedSearch | SavedSearchSavedObject | null;
   query?: Query;
   visibleFieldNames?: string[];
   filters?: Filter[];
   showPreviewByDefault?: boolean;
+  allowEditDataView?: boolean;
   /**
    * Callback to add a filter to filter bar
    */
   onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
 }
+export type DataVisualizerGridEmbeddableInput = EmbeddableInput & DataVisualizerGridInput;
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
 
 export type IDataVisualizerGridEmbeddable = typeof DataVisualizerGridEmbeddable;
@@ -79,8 +84,13 @@ export const EmbeddableWrapper = ({
     },
     [dataVisualizerListState, onOutputChange]
   );
-  const { configs, searchQueryLanguage, searchString, extendedColumns, loaded } =
+  const { configs, searchQueryLanguage, searchString, extendedColumns, progress, setLastRefresh } =
     useDataVisualizerGridData(input, dataVisualizerListState);
+
+  useEffect(() => {
+    setLastRefresh(Date.now());
+  }, [input?.lastReloadRequestTime, setLastRefresh]);
+
   const getItemIdToExpandedRowMap = useCallback(
     function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {
       return itemIds.reduce((m: ItemIdToExpandedRowMap, fieldName: string) => {
@@ -101,13 +111,7 @@ export const EmbeddableWrapper = ({
     [input, searchQueryLanguage, searchString]
   );
 
-  if (
-    loaded &&
-    (configs.length === 0 ||
-      // FIXME: Configs might have a placeholder document count stats field
-      // This will be removed in the future
-      (configs.length === 1 && configs[0].fieldName === undefined))
-  ) {
+  if (progress === 100 && configs.length === 0) {
     return (
       <div
         style={{
@@ -138,6 +142,7 @@ export const EmbeddableWrapper = ({
       extendedColumns={extendedColumns}
       showPreviewByDefault={input?.showPreviewByDefault}
       onChange={onOutputChange}
+      loading={progress < 100}
     />
   );
 };
@@ -202,16 +207,18 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
 
     ReactDOM.render(
       <I18nContext>
-        <KibanaContextProvider services={{ ...this.services[0], ...this.services[1] }}>
-          <Suspense fallback={<EmbeddableLoading />}>
-            <IndexDataVisualizerViewWrapper
-              id={this.input.id}
-              embeddableContext={this}
-              embeddableInput={this.getInput$()}
-              onOutputChange={(output) => this.updateOutput(output)}
-            />
-          </Suspense>
-        </KibanaContextProvider>
+        <KibanaThemeProvider theme$={this.services[0].theme.theme$}>
+          <KibanaContextProvider services={{ ...this.services[0], ...this.services[1] }}>
+            <Suspense fallback={<EmbeddableLoading />}>
+              <IndexDataVisualizerViewWrapper
+                id={this.input.id}
+                embeddableContext={this}
+                embeddableInput={this.getInput$()}
+                onOutputChange={(output) => this.updateOutput(output)}
+              />
+            </Suspense>
+          </KibanaContextProvider>
+        </KibanaThemeProvider>
       </I18nContext>,
       node
     );

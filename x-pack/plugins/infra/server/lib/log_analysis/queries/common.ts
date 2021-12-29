@@ -36,6 +36,7 @@ export const createTimeRangeFilters = (startTime: number, endTime: number) => [
       timestamp: {
         gte: startTime,
         lte: endTime,
+        format: 'epoch_millis',
       },
     },
   },

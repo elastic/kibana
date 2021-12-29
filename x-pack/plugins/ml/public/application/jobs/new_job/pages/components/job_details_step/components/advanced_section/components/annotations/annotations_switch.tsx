@@ -8,7 +8,7 @@
 import React, { FC, useState, useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiSpacer, EuiSwitch } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 

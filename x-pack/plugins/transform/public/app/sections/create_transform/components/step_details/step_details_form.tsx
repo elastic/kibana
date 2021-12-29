@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiAccordion,
@@ -20,6 +20,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiCallOut,
+  EuiText,
 } from '@elastic/eui';
 
 import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
@@ -68,6 +69,7 @@ interface StepDetailsFormProps {
 export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
   ({ overrides = {}, onChange, searchItems, stepDefineState }) => {
     const deps = useAppDependencies();
+    const { capabilities } = deps.application;
     const toastNotifications = useToastNotifications();
     const { esIndicesCreateIndex } = useDocumentationLinks();
 
@@ -83,9 +85,18 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     const [transformIds, setTransformIds] = useState<TransformId[]>([]);
     const [indexNames, setIndexNames] = useState<EsIndexName[]>([]);
 
+    const canCreateDataView = useMemo(
+      () =>
+        capabilities.savedObjectsManagement.edit === true ||
+        capabilities.indexPatterns.save === true,
+      [capabilities]
+    );
+
     // Index pattern state
     const [indexPatternTitles, setIndexPatternTitles] = useState<IndexPatternTitle[]>([]);
-    const [createIndexPattern, setCreateIndexPattern] = useState(defaults.createIndexPattern);
+    const [createIndexPattern, setCreateIndexPattern] = useState(
+      canCreateDataView === false ? false : defaults.createIndexPattern
+    );
     const [indexPatternAvailableTimeFields, setIndexPatternAvailableTimeFields] = useState<
       string[]
     >([]);
@@ -107,6 +118,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       [setIndexPatternTimeField, indexPatternAvailableTimeFields]
     );
 
+    const { overlays, theme } = useAppDependencies();
     const api = useApi();
 
     // fetch existing transform IDs and indices once for form validation
@@ -139,9 +151,11 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
             }),
             text: toMountPoint(
               <ToastNotificationText
-                overlays={deps.overlays}
+                overlays={overlays}
+                theme={theme}
                 text={getErrorMessage(transformPreview)}
-              />
+              />,
+              { theme$: theme.theme$ }
             ),
           });
         }
@@ -154,7 +168,12 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               defaultMessage: 'An error occurred getting the existing transform IDs:',
             }),
             text: toMountPoint(
-              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(resp)} />
+              <ToastNotificationText
+                overlays={overlays}
+                theme={theme}
+                text={getErrorMessage(resp)}
+              />,
+              { theme$: theme.theme$ }
             ),
           });
         } else {
@@ -171,7 +190,12 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               defaultMessage: 'An error occurred getting the existing index names:',
             }),
             text: toMountPoint(
-              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(indices)} />
+              <ToastNotificationText
+                overlays={overlays}
+                theme={theme}
+                text={getErrorMessage(indices)}
+              />,
+              { theme$: theme.theme$ }
             ),
           });
         }
@@ -184,7 +208,8 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
               defaultMessage: 'An error occurred getting the existing data view titles:',
             }),
             text: toMountPoint(
-              <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(e)} />
+              <ToastNotificationText overlays={overlays} theme={theme} text={getErrorMessage(e)} />,
+              { theme$: theme.theme$ }
             ),
           });
         }
@@ -443,18 +468,31 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
           ) : null}
 
           <EuiFormRow
-            isInvalid={createIndexPattern && indexPatternTitleExists}
-            error={
-              createIndexPattern &&
-              indexPatternTitleExists && [
-                i18n.translate('xpack.transform.stepDetailsForm.dataViewTitleError', {
-                  defaultMessage: 'A data view with this title already exists.',
-                }),
-              ]
+            isInvalid={
+              (createIndexPattern && indexPatternTitleExists) || canCreateDataView === false
             }
+            error={[
+              ...(canCreateDataView === false
+                ? [
+                    <EuiText size="xs" color="warning">
+                      {i18n.translate('xpack.transform.stepDetailsForm.dataViewPermissionWarning', {
+                        defaultMessage: 'You need permission to create data views.',
+                      })}
+                    </EuiText>,
+                  ]
+                : []),
+              ...(createIndexPattern && indexPatternTitleExists
+                ? [
+                    i18n.translate('xpack.transform.stepDetailsForm.dataViewTitleError', {
+                      defaultMessage: 'A data view with this title already exists.',
+                    }),
+                  ]
+                : []),
+            ]}
           >
             <EuiSwitch
               name="transformCreateIndexPattern"
+              disabled={canCreateDataView === false}
               label={i18n.translate('xpack.transform.stepCreateForm.createDataViewLabel', {
                 defaultMessage: 'Create Kibana data view',
               })}

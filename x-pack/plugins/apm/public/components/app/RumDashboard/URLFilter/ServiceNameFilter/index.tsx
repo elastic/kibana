@@ -9,7 +9,7 @@ import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../../../../shared/Links/url_helpers';
 
 interface Props {
@@ -21,7 +21,7 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
   const history = useHistory();
   const {
     urlParams: { serviceName: selectedServiceName },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const options = serviceNames.map((type) => ({
     text: type,

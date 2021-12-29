@@ -63,21 +63,26 @@ export async function getSearchAggregatedTransactions({
   apmEventClient: APMEventClient;
   kuery: string;
 }): Promise<boolean> {
-  const searchAggregatedTransactions = config.searchAggregatedTransactions;
+  switch (config.searchAggregatedTransactions) {
+    case SearchAggregatedTransactionSetting.always:
+      return kuery
+        ? getHasAggregatedTransactions({ start, end, apmEventClient, kuery })
+        : true;
 
-  if (
-    kuery ||
-    searchAggregatedTransactions === SearchAggregatedTransactionSetting.auto
-  ) {
-    return getHasAggregatedTransactions({ start, end, apmEventClient, kuery });
+    case SearchAggregatedTransactionSetting.auto:
+      return getHasAggregatedTransactions({
+        start,
+        end,
+        apmEventClient,
+        kuery,
+      });
+
+    case SearchAggregatedTransactionSetting.never:
+      return false;
   }
-
-  return (
-    searchAggregatedTransactions === SearchAggregatedTransactionSetting.always
-  );
 }
 
-export function getTransactionDurationFieldForTransactions(
+export function getDurationFieldForTransactions(
   searchAggregatedTransactions: boolean
 ) {
   return searchAggregatedTransactions

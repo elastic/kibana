@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-export const DynamicSettingsType = t.type({
+export const DynamicSettingsType = t.strict({
   heartbeatIndices: t.string,
   certAgeThreshold: t.number,
   certExpirationThreshold: t.number,

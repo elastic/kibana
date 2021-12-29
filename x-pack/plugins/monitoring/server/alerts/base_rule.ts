@@ -8,7 +8,7 @@
 import { Logger, ElasticsearchClient } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import {
-  AlertType,
+  RuleType,
   AlertExecutorOptions,
   AlertInstance,
   RulesClient,
@@ -27,13 +27,12 @@ import {
   CommonAlertFilter,
   CommonAlertParams,
 } from '../../common/types/alerts';
-import { fetchAvailableCcs } from '../lib/alerts/fetch_available_ccs';
 import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 import { AlertSeverity } from '../../common/enums';
 import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
-import { parseDuration } from '../../../alerting/common/parse_duration';
+import { parseDuration } from '../../../alerting/common';
 import { Globals } from '../static_globals';
 
 type ExecutedState =
@@ -81,7 +80,7 @@ export class BaseRule {
     this.scopedLogger = Globals.app.getLogger(ruleOptions.id);
   }
 
-  public getRuleType(): AlertType<never, never, never, never, never, 'default'> {
+  public getRuleType(): RuleType<never, never, never, never, never, 'default'> {
     const { id, name, actionVariables } = this.ruleOptions;
     return {
       id,
@@ -125,8 +124,7 @@ export class BaseRule {
     });
 
     if (existingRuleData.total > 0) {
-      const existingRule = existingRuleData.data[0] as Alert;
-      return existingRule;
+      return existingRuleData.data[0] as Alert;
     }
 
     const ruleActions = [];
@@ -228,7 +226,7 @@ export class BaseRule {
     );
 
     const esClient = services.scopedClusterClient.asCurrentUser;
-    const availableCcs = Globals.app.config.ui.ccs.enabled ? await fetchAvailableCcs(esClient) : [];
+    const availableCcs = Globals.app.config.ui.ccs.enabled;
     const clusters = await this.fetchClusters(esClient, params as CommonAlertParams, availableCcs);
     const data = await this.fetchData(params, esClient, clusters, availableCcs);
     return await this.processData(data, clusters, services, state);
@@ -237,10 +235,10 @@ export class BaseRule {
   protected async fetchClusters(
     esClient: ElasticsearchClient,
     params: CommonAlertParams,
-    ccs?: string[]
+    ccs?: boolean
   ) {
     let esIndexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN_ELASTICSEARCH);
-    if (ccs?.length) {
+    if (ccs) {
       esIndexPattern = getCcsIndexPattern(esIndexPattern, ccs);
     }
     if (!params.limit) {
@@ -262,7 +260,7 @@ export class BaseRule {
     params: CommonAlertParams | unknown,
     esClient: ElasticsearchClient,
     clusters: AlertCluster[],
-    availableCcs: string[]
+    availableCcs: boolean
   ): Promise<Array<AlertData & unknown>> {
     throw new Error('Child classes must implement `fetchData`');
   }

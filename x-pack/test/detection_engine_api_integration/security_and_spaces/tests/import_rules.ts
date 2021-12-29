@@ -7,6 +7,8 @@
 
 import expect from '@kbn/expect';
 
+import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { getCreateExceptionListMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -16,23 +18,31 @@ import {
   getSimpleRule,
   getSimpleRuleAsNdjson,
   getSimpleRuleOutput,
+  getWebHookAction,
   removeServerGeneratedProperties,
   ruleToNdjson,
 } from '../../utils';
+import {
+  toNdJsonString,
+  getImportExceptionsListItemSchemaMock,
+  getImportExceptionsListSchemaMock,
+} from '../../../../plugins/lists/common/schemas/request/import_exceptions_schema.mock';
+import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('import_rules', () => {
     describe('importing rules with an index', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should set the response content types to be expected', async () => {
@@ -68,6 +78,9 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -98,6 +111,9 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 2,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -120,6 +136,9 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           success: false,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -134,6 +153,9 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -162,6 +184,9 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           success: false,
           success_count: 0,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -182,6 +207,9 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [],
           success: true,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -239,6 +267,9 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           success: false,
           success_count: 2,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -274,6 +305,9 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           success: false,
           success_count: 1,
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
         });
       });
 
@@ -314,6 +348,361 @@ export default ({ getService }: FtrProviderContext): void => {
           getSimpleRuleOutput('rule-2'),
           getSimpleRuleOutput('rule-3'),
         ]);
+      });
+
+      it('should give single connector error back if we have a single connector error message', async () => {
+        const simpleRule: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [
+            {
+              group: 'default',
+              id: '123',
+              action_type_id: '456',
+              params: {},
+            },
+          ],
+        };
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', ruleToNdjson(simpleRule), 'rules.ndjson')
+          .expect(200);
+
+        expect(body).to.eql({
+          success: false,
+          success_count: 0,
+          errors: [
+            {
+              rule_id: 'rule-1',
+              error: {
+                status_code: 404,
+                message: '1 connector is missing. Connector id missing is: 123',
+              },
+            },
+          ],
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
+        });
+      });
+
+      it('should be able to import a rule with an action connector that exists', async () => {
+        // create a new action
+        const { body: hookAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+        const simpleRule: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [
+            {
+              group: 'default',
+              id: hookAction.id,
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', ruleToNdjson(simpleRule), 'rules.ndjson')
+          .expect(200);
+        expect(body).to.eql({
+          success: true,
+          success_count: 1,
+          errors: [],
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
+        });
+      });
+
+      it('should be able to import 2 rules with action connectors that exist', async () => {
+        // create a new action
+        const { body: hookAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+
+        const rule1: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [
+            {
+              group: 'default',
+              id: hookAction.id,
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+
+        const rule2: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-2'),
+          actions: [
+            {
+              group: 'default',
+              id: hookAction.id,
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+        const rule1String = JSON.stringify(rule1);
+        const rule2String = JSON.stringify(rule2);
+        const buffer = Buffer.from(`${rule1String}\n${rule2String}\n`);
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', buffer, 'rules.ndjson')
+          .expect(200);
+
+        expect(body).to.eql({
+          success: true,
+          success_count: 2,
+          errors: [],
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
+        });
+      });
+
+      it('should be able to import 1 rule with an action connector that exists and get 1 other error back for a second rule that does not have the connector', async () => {
+        // create a new action
+        const { body: hookAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+
+        const rule1: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-1'),
+          actions: [
+            {
+              group: 'default',
+              id: hookAction.id,
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+
+        const rule2: ReturnType<typeof getSimpleRule> = {
+          ...getSimpleRule('rule-2'),
+          actions: [
+            {
+              group: 'default',
+              id: '123', // <-- This does not exist
+              action_type_id: hookAction.actionTypeId,
+              params: {},
+            },
+          ],
+        };
+        const rule1String = JSON.stringify(rule1);
+        const rule2String = JSON.stringify(rule2);
+        const buffer = Buffer.from(`${rule1String}\n${rule2String}\n`);
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', buffer, 'rules.ndjson')
+          .expect(200);
+
+        expect(body).to.eql({
+          success: false,
+          success_count: 1,
+          errors: [
+            {
+              rule_id: 'rule-2',
+              error: {
+                status_code: 404,
+                message: '1 connector is missing. Connector id missing is: 123',
+              },
+            },
+          ],
+          exceptions_errors: [],
+          exceptions_success: true,
+          exceptions_success_count: 0,
+        });
+      });
+
+      describe('importing with exceptions', () => {
+        beforeEach(async () => {
+          await deleteAllExceptions(supertest, log);
+        });
+
+        it('should be able to import a rule and an exception list', async () => {
+          const simpleRule = getSimpleRule('rule-1');
+
+          const { body } = await supertest
+            .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+            .set('kbn-xsrf', 'true')
+            .attach(
+              'file',
+              Buffer.from(
+                toNdJsonString([
+                  simpleRule,
+                  getImportExceptionsListSchemaMock('test_list_id'),
+                  getImportExceptionsListItemSchemaMock('test_item_id', 'test_list_id'),
+                ])
+              ),
+              'rules.ndjson'
+            )
+            .expect(200);
+          expect(body).to.eql({
+            success: true,
+            success_count: 1,
+            errors: [],
+            exceptions_errors: [],
+            exceptions_success: true,
+            exceptions_success_count: 2,
+          });
+        });
+
+        it('should only remove non existent exception list references from rule', async () => {
+          // create an exception list
+          const { body: exceptionBody } = await supertest
+            .post(EXCEPTION_LIST_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              ...getCreateExceptionListMinimalSchemaMock(),
+              list_id: 'i_exist',
+              namespace_type: 'single',
+              type: 'detection',
+            })
+            .expect(200);
+
+          const simpleRule: ReturnType<typeof getSimpleRule> = {
+            ...getSimpleRule('rule-1'),
+            exceptions_list: [
+              {
+                id: exceptionBody.id,
+                list_id: 'i_exist',
+                type: 'detection',
+                namespace_type: 'single',
+              },
+              {
+                id: 'i_dont_exist',
+                list_id: '123',
+                type: 'detection',
+                namespace_type: 'single',
+              },
+            ],
+          };
+          const { body } = await supertest
+            .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+            .set('kbn-xsrf', 'true')
+            .attach('file', ruleToNdjson(simpleRule), 'rules.ndjson')
+            .expect(200);
+
+          const { body: ruleResponse } = await supertest
+            .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
+            .send()
+            .expect(200);
+
+          const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
+          expect(bodyToCompare.exceptions_list).to.eql([
+            {
+              id: exceptionBody.id,
+              list_id: 'i_exist',
+              namespace_type: 'single',
+              type: 'detection',
+            },
+          ]);
+
+          expect(body).to.eql({
+            success: false,
+            success_count: 1,
+            errors: [
+              {
+                rule_id: 'rule-1',
+                error: {
+                  message:
+                    'Rule with rule_id: "rule-1" references a non existent exception list of list_id: "123". Reference has been removed.',
+                  status_code: 400,
+                },
+              },
+            ],
+            exceptions_errors: [],
+            exceptions_success: true,
+            exceptions_success_count: 0,
+          });
+        });
+
+        it('should resolve exception references when importing into a clean slate', async () => {
+          // So importing a rule that references an exception list
+          // Keep in mind, no exception lists or rules exist yet
+          const simpleRule: ReturnType<typeof getSimpleRule> = {
+            ...getSimpleRule('rule-1'),
+            exceptions_list: [
+              {
+                id: 'abc',
+                list_id: 'i_exist',
+                type: 'detection',
+                namespace_type: 'single',
+              },
+            ],
+          };
+
+          // Importing the "simpleRule", along with the exception list
+          // it's referencing and the list's item
+          const { body } = await supertest
+            .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+            .set('kbn-xsrf', 'true')
+            .attach(
+              'file',
+              Buffer.from(
+                toNdJsonString([
+                  simpleRule,
+                  {
+                    ...getImportExceptionsListSchemaMock('i_exist'),
+                    id: 'abc',
+                    type: 'detection',
+                    namespace_type: 'single',
+                  },
+                  getImportExceptionsListItemSchemaMock('test_item_id', 'i_exist'),
+                ])
+              ),
+              'rules.ndjson'
+            )
+            .expect(200);
+
+          const { body: ruleResponse } = await supertest
+            .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
+            .send()
+            .expect(200);
+          const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
+          const referencedExceptionList = ruleResponse.exceptions_list[0];
+
+          // create an exception list
+          const { body: exceptionBody } = await supertest
+            .get(
+              `${EXCEPTION_LIST_URL}?list_id=${referencedExceptionList.list_id}&id=${referencedExceptionList.id}`
+            )
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          expect(bodyToCompare.exceptions_list).to.eql([
+            {
+              id: exceptionBody.id,
+              list_id: 'i_exist',
+              namespace_type: 'single',
+              type: 'detection',
+            },
+          ]);
+
+          expect(body).to.eql({
+            success: true,
+            success_count: 1,
+            errors: [],
+            exceptions_errors: [],
+            exceptions_success: true,
+            exceptions_success_count: 2,
+          });
+        });
       });
     });
   });

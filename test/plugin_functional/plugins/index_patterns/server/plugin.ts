@@ -38,7 +38,8 @@ export class IndexPatternsTestPlugin
         const savedObjectsClient = savedObjects.getScopedClient(req);
         const service = await data.indexPatterns.indexPatternsServiceFactory(
           savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser
+          elasticsearch.client.asScoped(req).asCurrentUser,
+          req
         );
         const ids = await service.createAndSave(req.body);
         return res.ok({ body: ids });
@@ -52,7 +53,8 @@ export class IndexPatternsTestPlugin
         const savedObjectsClient = savedObjects.getScopedClient(req);
         const service = await data.indexPatterns.indexPatternsServiceFactory(
           savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser
+          elasticsearch.client.asScoped(req).asCurrentUser,
+          req
         );
         const ids = await service.getIds(true);
         return res.ok({ body: ids });
@@ -74,7 +76,8 @@ export class IndexPatternsTestPlugin
         const savedObjectsClient = savedObjects.getScopedClient(req);
         const service = await data.indexPatterns.indexPatternsServiceFactory(
           savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser
+          elasticsearch.client.asScoped(req).asCurrentUser,
+          req
         );
         const ip = await service.get(id);
         return res.ok({ body: ip.toSpec() });
@@ -96,7 +99,8 @@ export class IndexPatternsTestPlugin
         const savedObjectsClient = savedObjects.getScopedClient(req);
         const service = await data.indexPatterns.indexPatternsServiceFactory(
           savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser
+          elasticsearch.client.asScoped(req).asCurrentUser,
+          req
         );
         const ip = await service.get(id);
         await service.updateSavedObject(ip);
@@ -119,7 +123,8 @@ export class IndexPatternsTestPlugin
         const savedObjectsClient = savedObjects.getScopedClient(req);
         const service = await data.indexPatterns.indexPatternsServiceFactory(
           savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser
+          elasticsearch.client.asScoped(req).asCurrentUser,
+          req
         );
         await service.delete(id);
         return res.ok();

@@ -75,6 +75,9 @@ const getDestinationWithoutConflicts = () => 'space_2';
 const getDestinationWithConflicts = (originSpaceId?: string) =>
   !originSpaceId || originSpaceId === DEFAULT_SPACE_ID ? 'space_1' : DEFAULT_SPACE_ID;
 
+interface Aggs extends estypes.AggregationsMultiBucketAggregateBase {
+  buckets: SpaceBucket[];
+}
 export function copyToSpaceTestSuiteFactory(
   es: Client,
   esArchiver: EsArchiver,
@@ -87,10 +90,7 @@ export function copyToSpaceTestSuiteFactory(
       'index-pattern',
     ]);
 
-    const aggs = response.aggregations as Record<
-      string,
-      estypes.AggregationsMultiBucketAggregate<SpaceBucket>
-    >;
+    const aggs = response.aggregations as Record<string, Aggs>;
     return {
       buckets: aggs.count.buckets,
     };

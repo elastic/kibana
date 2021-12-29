@@ -13,7 +13,7 @@ import type { DataView } from '../../../../../../../src/plugins/data_views/publi
 
 import { extractErrorMessage } from '../../../../common/util/errors';
 
-import { getIndexPatternIdFromName } from '../../util/index_utils';
+import { getDataViewIdFromName } from '../../util/index_utils';
 import { ml } from '../../services/ml_api_service';
 import { newJobCapsServiceAnalytics } from '../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlContext } from '../../contexts/ml';
@@ -98,36 +98,36 @@ export const useResultsViewConfig = (jobId: string) => {
             const destIndex = Array.isArray(jobConfigUpdate.dest.index)
               ? jobConfigUpdate.dest.index[0]
               : jobConfigUpdate.dest.index;
-            const destIndexPatternId = getIndexPatternIdFromName(destIndex) || destIndex;
-            let indexP: DataView | undefined;
+            const destDataViewId = (await getDataViewIdFromName(destIndex)) ?? destIndex;
+            let dataView: DataView | undefined;
 
             try {
-              indexP = await mlContext.indexPatterns.get(destIndexPatternId);
+              dataView = await mlContext.dataViewsContract.get(destDataViewId);
 
               // Force refreshing the fields list here because a user directly coming
               // from the job creation wizard might land on the page without the
               // data view being fully initialized because it was created
               // before the analytics job populated the destination index.
-              await mlContext.indexPatterns.refreshFields(indexP);
+              await mlContext.dataViewsContract.refreshFields(dataView);
             } catch (e) {
-              indexP = undefined;
+              dataView = undefined;
             }
 
-            if (indexP === undefined) {
+            if (dataView === undefined) {
               setNeedsDestIndexPattern(true);
               const sourceIndex = jobConfigUpdate.source.index[0];
-              const sourceIndexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
+              const sourceDataViewId = (await getDataViewIdFromName(sourceIndex)) ?? sourceIndex;
               try {
-                indexP = await mlContext.indexPatterns.get(sourceIndexPatternId);
+                dataView = await mlContext.dataViewsContract.get(sourceDataViewId);
               } catch (e) {
-                indexP = undefined;
+                dataView = undefined;
               }
             }
 
-            if (indexP !== undefined) {
-              await newJobCapsServiceAnalytics.initializeFromIndexPattern(indexP);
+            if (dataView !== undefined) {
+              await newJobCapsServiceAnalytics.initializeFromDataVIew(dataView);
               setJobConfig(analyticsConfigs.data_frame_analytics[0]);
-              setIndexPattern(indexP);
+              setIndexPattern(dataView);
               setIsInitialized(true);
               setIsLoadingJobConfig(false);
             } else {

@@ -7,8 +7,8 @@
 
 import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
 import classNames from 'classnames';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { toExpression } from '@kbn/interpreter/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import {
   EuiEmptyPrompt,
@@ -52,7 +52,7 @@ import { DefaultInspectorAdapters } from '../../../../../../../src/plugins/expre
 import {
   onActiveDataChange,
   useLensDispatch,
-  updateVisualizationState,
+  editVisualizationAction,
   updateDatasourceState,
   setSaveable,
   useLensSelector,
@@ -246,9 +246,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       }
       if (isLensEditEvent(event) && activeVisualization?.onEditAction) {
         dispatchLens(
-          updateVisualizationState({
+          editVisualizationAction({
             visualizationId: activeVisualization.id,
-            updater: (oldState: unknown) => activeVisualization.onEditAction!(oldState, event),
+            event,
           })
         );
       }

@@ -8,7 +8,7 @@
 import { useState, useEffect } from 'react';
 import { useRouteSpy } from '../route/use_route_spy';
 import { SecurityPageName } from '../../../app/types';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../containers/sourcerer';
 
 // Used to detect if we're on a top level page that is empty and set page background color to match the subdued Empty State
 const isPageNameWithEmptyView = (currentName: string) => {
@@ -23,7 +23,7 @@ const isPageNameWithEmptyView = (currentName: string) => {
 
 export const useShowPagesWithEmptyView = () => {
   const [{ pageName }] = useRouteSpy();
-  const { indicesExist } = useSourcererScope();
+  const { indicesExist } = useSourcererDataView();
 
   const shouldShowEmptyState = isPageNameWithEmptyView(pageName) && !indicesExist;
 

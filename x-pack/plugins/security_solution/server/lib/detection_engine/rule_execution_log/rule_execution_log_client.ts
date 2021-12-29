@@ -5,79 +5,127 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '../../../../../../../src/core/server';
-import { IEventLogService } from '../../../../../event_log/server';
+import { Logger, SavedObjectsClientContract } from 'src/core/server';
+import { IEventLogClient, IEventLogService } from '../../../../../event_log/server';
+import { IRuleStatusSOAttributes } from '../rules/types';
 import { EventLogAdapter } from './event_log_adapter/event_log_adapter';
 import { SavedObjectsAdapter } from './saved_objects_adapter/saved_objects_adapter';
 import {
-  LogExecutionMetricsArgs,
   FindBulkExecutionLogArgs,
   FindExecutionLogArgs,
   IRuleExecutionLogClient,
   LogStatusChangeArgs,
-  UpdateExecutionLogArgs,
   UnderlyingLogClient,
+  GetLastFailuresArgs,
+  GetCurrentStatusArgs,
+  GetCurrentStatusBulkArgs,
+  GetCurrentStatusBulkResult,
+  ExtMeta,
 } from './types';
 import { truncateMessage } from './utils/normalization';
+import { withSecuritySpan } from '../../../utils/with_security_span';
 
-export interface RuleExecutionLogClientArgs {
+interface ConstructorParams {
+  underlyingClient: UnderlyingLogClient;
   savedObjectsClient: SavedObjectsClientContract;
   eventLogService: IEventLogService;
-  underlyingClient: UnderlyingLogClient;
+  eventLogClient?: IEventLogClient;
+  logger: Logger;
 }
 
 export class RuleExecutionLogClient implements IRuleExecutionLogClient {
-  private client: IRuleExecutionLogClient;
+  private readonly client: IRuleExecutionLogClient;
+  private readonly logger: Logger;
 
-  constructor({
-    savedObjectsClient,
-    eventLogService,
-    underlyingClient,
-  }: RuleExecutionLogClientArgs) {
+  constructor(params: ConstructorParams) {
+    const { underlyingClient, eventLogService, eventLogClient, savedObjectsClient, logger } =
+      params;
+
     switch (underlyingClient) {
       case UnderlyingLogClient.savedObjects:
         this.client = new SavedObjectsAdapter(savedObjectsClient);
         break;
       case UnderlyingLogClient.eventLog:
-        this.client = new EventLogAdapter(eventLogService, savedObjectsClient);
+        this.client = new EventLogAdapter(eventLogService, eventLogClient, savedObjectsClient);
         break;
     }
+
+    // We write rule execution logs via a child console logger with the context
+    // "plugins.securitySolution.ruleExecution"
+    this.logger = logger.get('ruleExecution');
   }
 
+  /** @deprecated */
   public find(args: FindExecutionLogArgs) {
-    return this.client.find(args);
+    return withSecuritySpan('RuleExecutionLogClient.find', () => this.client.find(args));
   }
 
+  /** @deprecated */
   public findBulk(args: FindBulkExecutionLogArgs) {
-    return this.client.findBulk(args);
+    return withSecuritySpan('RuleExecutionLogClient.findBulk', () => this.client.findBulk(args));
   }
 
-  public async update(args: UpdateExecutionLogArgs) {
-    const { lastFailureMessage, lastSuccessMessage, ...restAttributes } = args.attributes;
-
-    return this.client.update({
-      ...args,
-      attributes: {
-        lastFailureMessage: truncateMessage(lastFailureMessage),
-        lastSuccessMessage: truncateMessage(lastSuccessMessage),
-        ...restAttributes,
-      },
-    });
+  public getLastFailures(args: GetLastFailuresArgs): Promise<IRuleStatusSOAttributes[]> {
+    return withSecuritySpan('RuleExecutionLogClient.getLastFailures', () =>
+      this.client.getLastFailures(args)
+    );
   }
 
-  public async delete(id: string) {
-    return this.client.delete(id);
+  public getCurrentStatus(
+    args: GetCurrentStatusArgs
+  ): Promise<IRuleStatusSOAttributes | undefined> {
+    return withSecuritySpan('RuleExecutionLogClient.getCurrentStatus', () =>
+      this.client.getCurrentStatus(args)
+    );
   }
 
-  public async logExecutionMetrics(args: LogExecutionMetricsArgs) {
-    return this.client.logExecutionMetrics(args);
+  public getCurrentStatusBulk(args: GetCurrentStatusBulkArgs): Promise<GetCurrentStatusBulkResult> {
+    return withSecuritySpan('RuleExecutionLogClient.getCurrentStatusBulk', () =>
+      this.client.getCurrentStatusBulk(args)
+    );
   }
 
-  public async logStatusChange(args: LogStatusChangeArgs) {
-    const message = args.message ? truncateMessage(args.message) : args.message;
-    return this.client.logStatusChange({
-      ...args,
-      message,
-    });
+  public async deleteCurrentStatus(ruleId: string): Promise<void> {
+    await withSecuritySpan('RuleExecutionLogClient.deleteCurrentStatus', () =>
+      this.client.deleteCurrentStatus(ruleId)
+    );
+  }
+
+  public async logStatusChange(args: LogStatusChangeArgs): Promise<void> {
+    const { newStatus, message, ruleId, ruleName, ruleType, spaceId } = args;
+
+    try {
+      const truncatedMessage = message ? truncateMessage(message) : message;
+      await withSecuritySpan(
+        {
+          name: 'RuleExecutionLogClient.logStatusChange',
+          labels: { new_rule_execution_status: args.newStatus },
+        },
+        () =>
+          this.client.logStatusChange({
+            ...args,
+            message: truncatedMessage,
+          })
+      );
+    } catch (e) {
+      const logMessage = 'Error logging rule execution status change';
+      const logAttributes = `status: "${newStatus}", rule id: "${ruleId}", rule name: "${ruleName}"`;
+      const logReason = e instanceof Error ? `${e.stack}` : `${e}`;
+      const logMeta: ExtMeta = {
+        rule: {
+          id: ruleId,
+          name: ruleName,
+          type: ruleType,
+          execution: {
+            status: newStatus,
+          },
+        },
+        kibana: {
+          spaceId,
+        },
+      };
+
+      this.logger.error<ExtMeta>(`${logMessage}; ${logAttributes}; ${logReason}`, logMeta);
+    }
   }
 }

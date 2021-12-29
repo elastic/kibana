@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-import type {
-  CreateExceptionListItemSchema,
-  ExceptionListItemSchema,
-  FoundExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
-} from '@kbn/securitysolution-io-ts-list-types';
-import { AsyncResourceState } from '../../state/async_resource_state';
-
 export interface HostIsolationExceptionsPageLocation {
   page_index: number;
   page_size: number;
@@ -20,17 +12,10 @@ export interface HostIsolationExceptionsPageLocation {
   /** Used for editing. The ID of the selected event filter */
   id?: string;
   filter: string;
+  // A string with comma dlimetered list of included policy IDs
+  included_policies: string;
 }
 
 export interface HostIsolationExceptionsPageState {
-  entries: AsyncResourceState<FoundExceptionListItemSchema>;
   location: HostIsolationExceptionsPageLocation;
-  deletion: {
-    item?: ExceptionListItemSchema;
-    status: AsyncResourceState<ExceptionListItemSchema>;
-  };
-  form: {
-    entry?: CreateExceptionListItemSchema | UpdateExceptionListItemSchema;
-    status: AsyncResourceState<CreateExceptionListItemSchema | UpdateExceptionListItemSchema>;
-  };
 }

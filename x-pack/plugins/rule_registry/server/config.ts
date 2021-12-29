@@ -12,6 +12,7 @@ export const config: PluginConfigDescriptor = {
   deprecations: ({ deprecate, unused }) => [unused('unsafe.indexUpgrade.enabled')],
   schema: schema.object({
     write: schema.object({
+      disabledRegistrationContexts: schema.arrayOf(schema.string(), { defaultValue: [] }),
       enabled: schema.boolean({ defaultValue: true }),
       cache: schema.object({
         enabled: schema.boolean({ defaultValue: true }),
@@ -31,4 +32,3 @@ export const config: PluginConfigDescriptor = {
 export type RuleRegistryPluginConfig = TypeOf<typeof config.schema>;
 
 export const INDEX_PREFIX = '.alerts' as const;
-export const INDEX_PREFIX_FOR_BACKING_INDICES = '.internal.alerts' as const;

@@ -76,6 +76,9 @@ const SortableControlInner = forwardRef<
   return (
     <EuiFlexItem
       grow={width === 'auto'}
+      data-control-id={embeddableId}
+      data-test-subj={`control-frame`}
+      data-render-complete="true"
       className={classNames('controlFrameWrapper', {
         'controlFrameWrapper-isDragging': isDragging,
         'controlFrameWrapper--small': width === 'small',
@@ -116,11 +119,15 @@ export const ControlClone = ({ draggingId }: { draggingId: string }) => {
       })}
     >
       {controlStyle === 'twoLine' ? <EuiFormLabel>{title}</EuiFormLabel> : undefined}
-      <EuiFlexGroup gutterSize="none" className={'controlFrame__draggable'}>
+      <EuiFlexGroup responsive={false} gutterSize="none" className={'controlFrame__draggable'}>
         <EuiFlexItem grow={false}>
           <EuiIcon type="grabHorizontal" className="controlFrame__dragHandle" />
         </EuiFlexItem>
-        {controlStyle === 'oneLine' ? <EuiFlexItem>{title}</EuiFlexItem> : undefined}
+        {controlStyle === 'oneLine' ? (
+          <EuiFlexItem>
+            <label className="controlFrameCloneWrapper__label">{title}</label>
+          </EuiFlexItem>
+        ) : undefined}
       </EuiFlexGroup>
     </EuiFlexItem>
   );

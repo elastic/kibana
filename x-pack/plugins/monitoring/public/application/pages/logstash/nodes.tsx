@@ -92,7 +92,7 @@ export const LogStashNodesPage: React.FC<ComponentProps> = ({ clusters }) => {
       getPageData={getPageData}
       cluster={cluster}
     >
-      <div>
+      <div data-test-subj="logstashNodesPage">
         <SetupModeRenderer
           productName={LOGSTASH_SYSTEM_ID}
           render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (

@@ -6,12 +6,13 @@
  */
 import React, { FC } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   ENTITY_FIELD_OPERATIONS,
   EntityFieldOperation,
 } from '../../../../../../../common/util/anomaly_utils';
+import { blurButtonOnClick } from '../../../../../util/component_utils';
 import './_entity_filter.scss';
 
 interface EntityFilterProps {
@@ -41,13 +42,13 @@ export const EntityFilter: FC<EntityFilterProps> = ({
         <EuiButtonIcon
           size="s"
           className="filter-button"
-          onClick={() =>
+          onClick={blurButtonOnClick(() => {
             onFilter({
               influencerFieldName,
               influencerFieldValue,
               action: ENTITY_FIELD_OPERATIONS.ADD,
-            })
-          }
+            });
+          })}
           iconType="plusInCircle"
           aria-label={i18n.translate('xpack.ml.entityFilter.addFilterAriaLabel', {
             defaultMessage: 'Add filter for {influencerFieldName} {influencerFieldValue}',
@@ -66,13 +67,13 @@ export const EntityFilter: FC<EntityFilterProps> = ({
         <EuiButtonIcon
           size="s"
           className="filter-button"
-          onClick={() =>
+          onClick={blurButtonOnClick(() => {
             onFilter({
               influencerFieldName,
               influencerFieldValue,
               action: ENTITY_FIELD_OPERATIONS.REMOVE,
-            })
-          }
+            });
+          })}
           iconType="minusInCircle"
           aria-label={i18n.translate('xpack.ml.entityFilter.removeFilterAriaLabel', {
             defaultMessage: 'Remove filter for {influencerFieldName} {influencerFieldValue}',

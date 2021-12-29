@@ -8,9 +8,9 @@
 import React, { FC, useCallback, useMemo, useState } from 'react';
 import { EuiComboBoxOptionOption, EuiForm, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { AlertTypeParamsExpressionProps } from '../../../../triggers_actions_ui/public';
+import { RuleTypeParamsExpressionProps } from '../../../../triggers_actions_ui/public';
 import { MlAnomalyDetectionJobsHealthRuleParams } from '../../../common/types/alerts';
 import { JobSelectorControl } from '../job_selector';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
@@ -23,11 +23,11 @@ import { BetaBadge } from '../beta_badge';
 import { isDefined } from '../../../common/types/guards';
 
 export type MlAnomalyAlertTriggerProps =
-  AlertTypeParamsExpressionProps<MlAnomalyDetectionJobsHealthRuleParams>;
+  RuleTypeParamsExpressionProps<MlAnomalyDetectionJobsHealthRuleParams>;
 
 const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
-  alertParams,
-  setAlertParams,
+  ruleParams,
+  setRuleParams,
   errors,
 }) => {
   const {
@@ -40,19 +40,19 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   >([]);
 
   const includeJobsAndGroupIds: string[] = useMemo(
-    () => (Object.values(alertParams.includeJobs ?? {}) as string[][]).flat(),
-    [alertParams.includeJobs]
+    () => (Object.values(ruleParams.includeJobs ?? {}) as string[][]).flat(),
+    [ruleParams.includeJobs]
   );
 
   const excludeJobsAndGroupIds: string[] = useMemo(
-    () => (Object.values(alertParams.excludeJobs ?? {}) as string[][]).flat(),
-    [alertParams.excludeJobs]
+    () => (Object.values(ruleParams.excludeJobs ?? {}) as string[][]).flat(),
+    [ruleParams.excludeJobs]
   );
 
   const onAlertParamChange = useCallback(
     <T extends keyof MlAnomalyDetectionJobsHealthRuleParams>(param: T) =>
       (update: MlAnomalyDetectionJobsHealthRuleParams[T]) => {
-        setAlertParams(param, update);
+        setRuleParams(param, update);
       },
     []
   );
@@ -62,16 +62,16 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
 
   useDebounce(
     function updateExcludeJobsOptions() {
-      const areAllJobsSelected = alertParams.includeJobs?.jobIds?.[0] === ALL_JOBS_SELECTION;
+      const areAllJobsSelected = ruleParams.includeJobs?.jobIds?.[0] === ALL_JOBS_SELECTION;
 
-      if (!areAllJobsSelected && !alertParams.includeJobs?.groupIds?.length) {
+      if (!areAllJobsSelected && !ruleParams.includeJobs?.groupIds?.length) {
         // It only makes sense to suggest excluded jobs options when at least one group or all jobs are selected
         setExcludeJobsOptions([]);
         return;
       }
 
       adJobsApiService
-        .jobs(areAllJobsSelected ? [] : (alertParams.includeJobs.groupIds as string[]))
+        .jobs(areAllJobsSelected ? [] : (ruleParams.includeJobs.groupIds as string[]))
         .then((jobs) => {
           setExcludeJobsOptions([
             {
@@ -89,7 +89,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
                   jobs
                     .map((v) => v.groups)
                     .flat()
-                    .filter((v) => isDefined(v) && !alertParams.includeJobs.groupIds?.includes(v))
+                    .filter((v) => isDefined(v) && !ruleParams.includeJobs.groupIds?.includes(v))
                 ),
               ].map((v) => ({ label: v! })),
             },
@@ -97,7 +97,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
         });
     },
     500,
-    [alertParams.includeJobs]
+    [ruleParams.includeJobs]
   );
 
   return (
@@ -158,7 +158,7 @@ const AnomalyDetectionJobsHealthRuleTrigger: FC<MlAnomalyAlertTriggerProps> = ({
       <EuiSpacer size="m" />
 
       <TestsSelectionControl
-        config={alertParams.testsConfig}
+        config={ruleParams.testsConfig}
         onChange={useCallback(onAlertParamChange('testsConfig'), [])}
         errors={Array.isArray(errors.testsConfig) ? errors.testsConfig : []}
       />

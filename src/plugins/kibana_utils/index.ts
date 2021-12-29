@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { createStateContainer, StateContainer, of } from './common';
+export type { StateContainer } from './common';
+export { createStateContainer, of } from './common';

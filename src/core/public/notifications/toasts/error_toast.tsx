@@ -19,7 +19,7 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { OverlayStart } from 'kibana/public';
 import { I18nStart } from '../../i18n';
 

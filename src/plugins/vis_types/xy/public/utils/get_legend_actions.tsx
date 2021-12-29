@@ -10,7 +10,12 @@ import React, { useState, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
-import { LegendAction, XYChartSeriesIdentifier, SeriesName } from '@elastic/charts';
+import {
+  LegendAction,
+  XYChartSeriesIdentifier,
+  SeriesName,
+  useLegendAction,
+} from '@elastic/charts';
 
 import { ClickTriggerEvent } from '../../../../charts/public';
 
@@ -25,6 +30,7 @@ export const getLegendActions = (
     const [isfilterable, setIsfilterable] = useState(false);
     const series = xySeries as XYChartSeriesIdentifier;
     const filterData = useMemo(() => getFilterEventData(series), [series]);
+    const [ref, onClose] = useLegendAction<HTMLDivElement>();
 
     useEffect(() => {
       (async () => setIsfilterable(await canFilter(filterData)))();
@@ -69,6 +75,7 @@ export const getLegendActions = (
     const Button = (
       <div
         tabIndex={0}
+        ref={ref}
         role="button"
         aria-pressed="false"
         style={{
@@ -92,7 +99,10 @@ export const getLegendActions = (
         id="contextMenuNormal"
         button={Button}
         isOpen={popoverOpen}
-        closePopover={() => setPopoverOpen(false)}
+        closePopover={() => {
+          setPopoverOpen(false);
+          onClose();
+        }}
         panelPaddingSize="none"
         anchorPosition="upLeft"
         title={i18n.translate('visTypeXy.legend.filterOptionsLegend', {

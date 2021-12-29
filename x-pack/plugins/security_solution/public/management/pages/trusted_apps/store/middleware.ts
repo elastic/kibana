@@ -63,7 +63,6 @@ import {
   editItemId,
   editingTrustedApp,
   getListItems,
-  editItemState,
   getCurrentLocationIncludedPolicies,
   getCurrentLocationExcludedPolicies,
 } from './selectors';
@@ -106,7 +105,11 @@ const refreshListIfNeeded = async (
       const filterKuery = parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined;
       if (filterKuery) kuery.push(filterKuery);
 
-      const policiesKuery = parsePoliciesToKQL(includedPolicies, excludedPolicies) || undefined;
+      const policiesKuery =
+        parsePoliciesToKQL(
+          includedPolicies ? includedPolicies.split(',') : [],
+          excludedPolicies ? excludedPolicies.split(',') : []
+        ) || undefined;
       if (policiesKuery) kuery.push(policiesKuery);
 
       const response = await trustedAppsService.getTrustedAppsList({
@@ -413,10 +416,7 @@ const fetchEditTrustedAppIfNeeded = async (
         dispatch({
           type: 'trustedAppCreationEditItemStateChanged',
           payload: {
-            // @ts-expect-error-next-line will be fixed with when AsyncResourceState is refactored (#830)
             type: 'LoadingResourceState',
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            previousState: editItemState(currentState)!,
           },
         });
 
@@ -478,5 +478,6 @@ export const createTrustedAppsPageMiddleware = (
   };
 };
 
-export const trustedAppsPageMiddlewareFactory: ImmutableMiddlewareFactory<TrustedAppsListPageState> =
-  (coreStart) => createTrustedAppsPageMiddleware(new TrustedAppsHttpService(coreStart.http));
+export const trustedAppsPageMiddlewareFactory: ImmutableMiddlewareFactory<
+  TrustedAppsListPageState
+> = (coreStart) => createTrustedAppsPageMiddleware(new TrustedAppsHttpService(coreStart.http));

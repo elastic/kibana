@@ -7,7 +7,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -30,6 +30,7 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import 'react-ace';
 import 'brace/theme/textmate';
 
 import { getIndexListUri } from '../../../../../../../../../plugins/index_management/public';

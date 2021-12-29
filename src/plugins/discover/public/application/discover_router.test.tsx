@@ -11,10 +11,10 @@ import { Route, RouteProps } from 'react-router-dom';
 import { createSearchSessionMock } from '../__mocks__/search_session';
 import { discoverServiceMock as mockDiscoverServices } from '../__mocks__/services';
 import { discoverRouter } from './discover_router';
-import { DiscoverMainRoute } from './apps/main';
-import { DiscoverMainProps } from './apps/main/discover_main_route';
-import { SingleDocRoute } from './apps/doc';
-import { ContextAppRoute } from './apps/context';
+import { DiscoverMainRoute } from './main';
+import { DiscoverMainProps } from './main/discover_main_route';
+import { SingleDocRoute } from './doc';
+import { ContextAppRoute } from './context';
 
 const pathMap: Record<string, never> = {};
 let mainRouteProps: DiscoverMainProps;

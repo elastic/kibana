@@ -340,7 +340,7 @@ test('throws if reading "enabled" when it is not present in the schema', async (
     })
   );
 
-  expect(
+  await expect(
     async () => await configService.isEnabledAtPath('foo')
   ).rejects.toThrowErrorMatchingInlineSnapshot(
     `"[config validation of [foo].enabled]: definition for this key is missing"`
@@ -357,7 +357,7 @@ test('throws if reading "enabled" when no schema exists', async () => {
   const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
 
-  expect(
+  await expect(
     async () => await configService.isEnabledAtPath('foo')
   ).rejects.toThrowErrorMatchingInlineSnapshot(`"No validation schema has been defined for [foo]"`);
 });
@@ -372,7 +372,7 @@ test('throws if reading any config value when no schema exists', async () => {
   const rawConfigProvider = rawConfigServiceMock.create({ rawConfig: initialConfig });
   const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
 
-  expect(
+  await expect(
     async () => await configService.isEnabledAtPath('foo')
   ).rejects.toThrowErrorMatchingInlineSnapshot(`"No validation schema has been defined for [foo]"`);
 });

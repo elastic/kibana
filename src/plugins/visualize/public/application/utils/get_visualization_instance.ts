@@ -13,7 +13,7 @@ import {
   VisualizeEmbeddableContract,
   VisualizeInput,
 } from 'src/plugins/visualizations/public';
-import { SearchSourceFields } from 'src/plugins/data/public';
+import { SerializedSearchSourceFields } from 'src/plugins/data/public';
 import { cloneDeep } from 'lodash';
 import { ExpressionValueError } from 'src/plugins/expressions/public';
 import {
@@ -42,6 +42,7 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
     timeRange: data.query.timefilter.timefilter.getTime(),
     filters: data.query.filterManager.getFilters(),
     searchSessionId: data.search.session.getSessionId(),
+    renderMode: 'edit',
   })) as VisualizeEmbeddableContract;
 
   embeddableHandler.getOutput$().subscribe((output) => {
@@ -117,7 +118,7 @@ export const getVisualizationInstance = async (
   const savedVis: VisSavedObject = await visualizations.getSavedVisualization(opts);
 
   if (typeof opts !== 'string') {
-    savedVis.searchSourceFields = { index: opts?.indexPattern } as SearchSourceFields;
+    savedVis.searchSourceFields = { index: opts?.indexPattern } as SerializedSearchSourceFields;
   }
   const serializedVis = visualizations.convertToSerializedVis(savedVis);
   let vis = await visualizations.createVis(serializedVis.type, serializedVis);

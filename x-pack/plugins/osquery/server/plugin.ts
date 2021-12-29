@@ -134,7 +134,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
             groupType: 'mutually_exclusive',
             privileges: [
               {
-                api: [`${PLUGIN_ID}-writeSavedQueries`],
+                api: [`${PLUGIN_ID}-writeSavedQueries`, `${PLUGIN_ID}-readSavedQueries`],
                 id: 'saved_queries_all',
                 includeIn: 'all',
                 name: 'All',
@@ -168,7 +168,7 @@ const registerFeatures = (features: SetupPlugins['features']) => {
             groupType: 'mutually_exclusive',
             privileges: [
               {
-                api: [`${PLUGIN_ID}-writePacks`],
+                api: [`${PLUGIN_ID}-writePacks`, `${PLUGIN_ID}-readPacks`],
                 id: 'packs_all',
                 includeIn: 'all',
                 name: 'All',
@@ -227,7 +227,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       security: plugins.security,
     };
 
-    initSavedObjects(core.savedObjects, osqueryContext);
+    initSavedObjects(core.savedObjects);
     initUsageCollectors({
       core,
       osqueryContext,

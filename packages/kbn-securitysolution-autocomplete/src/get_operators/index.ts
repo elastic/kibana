@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase } from '@kbn/es-query';
 
 import {
   EXCEPTION_OPERATORS,
@@ -20,10 +20,10 @@ import {
 /**
  * Returns the appropriate operators given a field type
  *
- * @param field IndexPatternFieldBase selected field
+ * @param field DataViewFieldBase selected field
  *
  */
-export const getOperators = (field: IndexPatternFieldBase | undefined): OperatorOption[] => {
+export const getOperators = (field: DataViewFieldBase | undefined): OperatorOption[] => {
   if (field == null) {
     return [isOperator];
   } else if (field.type === 'boolean') {

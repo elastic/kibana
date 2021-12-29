@@ -14,19 +14,17 @@
   display: flex;
   flex: 1 1 100%;
   position: relative;
+  background-color: $euiFormBackgroundColor;
+  border-radius: $euiFormControlBorderRadius;
 
-  @include kbnThemeStyle('v8') {
-    background-color: $euiFormBackgroundColor;
-    border-radius: $euiFormControlBorderRadius;
+  &.kbnQueryBar__textareaWrap--hasPrepend {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
 
-    &.kbnQueryBar__textareaWrap--hasPrepend {
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-    }
-    &.kbnQueryBar__textareaWrap--hasAppend {
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-    }
+  &.kbnQueryBar__textareaWrap--hasAppend {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
   }
 }
 
@@ -39,24 +37,17 @@
   // shadow to line up correctly.
   padding: $euiSizeS;
   box-shadow: 0 0 0 1px $euiFormBorderColor;
+  padding-bottom: $euiSizeS + 1px;
+  // Firefox adds margin to textarea
+  margin: 0;
 
-  @include kbnThemeStyle('v7') {
-    padding-top: $euiSizeS + 2px;
+  &.kbnQueryBar__textarea--hasPrepend {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
   }
-
-  @include kbnThemeStyle('v8') {
-    padding-bottom: $euiSizeS + 1px;
-    // Firefox adds margin to textarea
-    margin: 0;
-
-    &.kbnQueryBar__textarea--hasPrepend {
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
-    }
-    &.kbnQueryBar__textarea--hasAppend {
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-    }
+  &.kbnQueryBar__textarea--hasAppend {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
   }
 
   &:not(.kbnQueryBar__textarea--autoHeight):not(:invalid) {

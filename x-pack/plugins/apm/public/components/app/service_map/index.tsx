@@ -168,8 +168,8 @@ export function ServiceMap({
     status === FETCH_STATUS.FAILURE &&
     error &&
     'body' in error &&
-    error.body.statusCode === 500 &&
-    error.body.message === SERVICE_MAP_TIMEOUT_ERROR
+    error.body?.statusCode === 500 &&
+    error.body?.message === SERVICE_MAP_TIMEOUT_ERROR
   ) {
     return (
       <PromptContainer>
@@ -180,7 +180,7 @@ export function ServiceMap({
 
   return (
     <>
-      <SearchBar showKueryBar={false} />
+      <SearchBar showKueryBar={false} showTimeComparison />
       <EuiPanel hasBorder={true} paddingSize="none">
         <div
           data-test-subj="ServiceMap"

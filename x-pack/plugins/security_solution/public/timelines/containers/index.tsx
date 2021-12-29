@@ -11,8 +11,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESQuery } from '../../../common/typed_json';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugins/data/public';
+import { isCompleteResponse, isErrorResponse } from '../../../../../../src/plugins/data/common';
+
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { inputsModel } from '../../common/store';
 import { useKibana } from '../../common/lib/kibana';
@@ -74,15 +76,16 @@ type TimelineResponse<T extends KueryFilterQueryKind> = T extends 'kuery'
 
 export interface UseTimelineEventsProps {
   docValueFields?: DocValueFields[];
-  filterQuery?: ESQuery | string;
-  skip?: boolean;
   endDate: string;
   eqlOptions?: EqlOptionsSelected;
-  id: string;
   fields: string[];
+  filterQuery?: ESQuery | string;
+  id: string;
   indexNames: string[];
   language?: KueryFilterQueryKind;
   limit: number;
+  runtimeMappings: MappingRuntimeFields;
+  skip?: boolean;
   sort?: TimelineRequestSortField[];
   startDate: string;
   timerangeKind?: 'absolute' | 'relative';
@@ -131,6 +134,7 @@ export const useTimelineEvents = ({
   indexNames,
   fields,
   filterQuery,
+  runtimeMappings,
   startDate,
   language = 'kuery',
   limit,
@@ -341,6 +345,7 @@ export const useTimelineEvents = ({
         querySize: prevRequest?.pagination.querySize ?? 0,
         sort: prevRequest?.sort ?? initSortDefault,
         timerange: prevRequest?.timerange ?? {},
+        runtimeMappings: prevRequest?.runtimeMappings ?? {},
         ...deStructureEqlOptions(prevEqlRequest),
       };
 
@@ -354,6 +359,7 @@ export const useTimelineEvents = ({
           from: startDate,
           to: endDate,
         },
+        runtimeMappings,
         ...deStructureEqlOptions(eqlOptions),
       };
 
@@ -373,6 +379,7 @@ export const useTimelineEvents = ({
           querySize: limit,
         },
         language,
+        runtimeMappings,
         sort,
         timerange: {
           interval: '12h',
@@ -411,6 +418,7 @@ export const useTimelineEvents = ({
     startDate,
     sort,
     fields,
+    runtimeMappings,
   ]);
 
   useEffect(() => {

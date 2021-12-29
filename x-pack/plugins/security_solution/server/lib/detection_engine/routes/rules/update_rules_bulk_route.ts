@@ -78,7 +78,7 @@ export const updateRulesBulkRoute = (
               id: payloadRule.id,
             });
 
-            await legacyMigrate({
+            const migratedRule = await legacyMigrate({
               rulesClient,
               savedObjectsClient,
               rule: existingRule,
@@ -88,18 +88,17 @@ export const updateRulesBulkRoute = (
               spaceId: context.securitySolution.getSpaceId(),
               rulesClient,
               ruleStatusClient,
-              savedObjectsClient,
               defaultOutputIndex: siemClient.getSignalsIndex(),
+              existingRule: migratedRule,
               ruleUpdate: payloadRule,
               isRuleRegistryEnabled,
             });
             if (rule != null) {
-              const ruleStatuses = await ruleStatusClient.find({
-                logsCount: 1,
+              const ruleStatus = await ruleStatusClient.getCurrentStatus({
                 ruleId: rule.id,
                 spaceId: context.securitySolution.getSpaceId(),
               });
-              return transformValidateBulkError(rule.id, rule, ruleStatuses, isRuleRegistryEnabled);
+              return transformValidateBulkError(rule.id, rule, ruleStatus, isRuleRegistryEnabled);
             } else {
               return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
             }

@@ -15,7 +15,7 @@ import {
 } from 'src/core/public';
 import { BehaviorSubject } from 'rxjs';
 import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
-import { ISearchSetup, ISearchStart } from './types';
+import type { ISearchSetup, ISearchStart } from './types';
 
 import { handleResponse } from './fetch';
 import {

@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { ResponsiveWrapperProps, withResponsiveWrapper } from './responsive_wrapper';
+export type { ResponsiveWrapperProps } from './responsive_wrapper';
+export { withResponsiveWrapper } from './responsive_wrapper';

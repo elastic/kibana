@@ -7,15 +7,11 @@
 
 export { ProcessorsEditorContextProvider } from './context';
 
-export {
-  TestPipelineContextProvider,
-  useTestPipelineContext,
-  TestPipelineData,
-  TestPipelineContext,
-} from './test_pipeline_context';
+export type { TestPipelineData, TestPipelineContext } from './test_pipeline_context';
+export { TestPipelineContextProvider, useTestPipelineContext } from './test_pipeline_context';
 
+export type { Props } from './processors_context';
 export {
   PipelineProcessorsContextProvider,
   usePipelineProcessorsContext,
-  Props,
 } from './processors_context';

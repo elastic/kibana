@@ -9,6 +9,7 @@ import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { CoreSetup, SavedObjectReference } from 'kibana/public';
 import type { PaletteOutput } from 'src/plugins/charts/public';
 import type { MutableRefObject } from 'react';
+import { Filter } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
   ExpressionRendererEvent,
@@ -17,7 +18,7 @@ import type {
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType } from '../common';
-import type { Query, Filter } from '../../../../src/plugins/data/public';
+import type { Query } from '../../../../src/plugins/data/public';
 import type {
   RangeSelectContext,
   ValueClickContext,
@@ -26,6 +27,7 @@ import type {
   LensSortActionData,
   LensResizeActionData,
   LensToggleActionData,
+  LensPagesizeActionData,
 } from './datatable_visualization/components/types';
 import type {
   UiActionsStart,
@@ -37,6 +39,7 @@ import {
   LENS_EDIT_SORT_ACTION,
   LENS_EDIT_RESIZE_ACTION,
   LENS_TOGGLE_ACTION,
+  LENS_EDIT_PAGESIZE_ACTION,
 } from './datatable_visualization/components/constants';
 import type { LensInspector } from './lens_inspector_service';
 
@@ -214,6 +217,7 @@ export interface Datasource<T = unknown, P = unknown> {
     props: DatasourceDimensionDropProps<T> & {
       groupId: string;
       dragging: DragContextState['dragging'];
+      prioritizedOperation?: string;
     }
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
@@ -299,6 +303,10 @@ export interface DatasourcePublicAPI {
   datasourceId: string;
   getTableSpec: () => Array<{ columnId: string }>;
   getOperationForColumnId: (columnId: string) => Operation | null;
+  /**
+   * Collect all default visual values given the current state
+   */
+  getVisualDefaults: () => Record<string, Record<string, unknown>>;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {
@@ -338,7 +346,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   invalid?: boolean;
   invalidMessage?: string;
 };
-
+export type ParamEditorCustomProps = Record<string, unknown> & { label?: string };
 // The only way a visualization has to restrict the query building
 export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionProps<T> & {
   // Not a StateSetter because we have this unique use case of determining valid columns
@@ -356,6 +364,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   isFullscreen: boolean;
   layerType: LayerType | undefined;
   supportStaticValue: boolean;
+  paramEditorCustomProps?: ParamEditorCustomProps;
   supportFieldFormat?: boolean;
 };
 
@@ -427,6 +436,8 @@ export interface OperationMetadata {
   // TODO currently it's not possible to differentiate between a field from a raw
   // document and an aggregated metric which might be handy in some cases. Once we
   // introduce a raw document datasource, this should be considered here.
+
+  isStaticValue?: boolean;
 }
 
 export interface VisualizationConfigProps<T = unknown> {
@@ -469,7 +480,10 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   supportsMoreColumns: boolean;
   /** If required, a warning will appear if accessors are empty */
   required?: boolean;
+  requiredMinDimensionCount?: number;
   dataTestSubj?: string;
+  prioritizedOperation?: string;
+  suggestedValue?: () => number | undefined;
 
   /**
    * When the dimension editor is enabled for this group, all dimensions in the group
@@ -485,6 +499,9 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   invalidMessage?: string;
   // need a special flag to know when to pass the previous column on duplicating
   requiresPreviousColumnOnDuplicate?: boolean;
+  supportStaticValue?: boolean;
+  paramEditorCustomProps?: ParamEditorCustomProps;
+  supportFieldFormat?: boolean;
 };
 
 interface VisualizationDimensionChangeProps<T> {
@@ -673,8 +690,6 @@ export interface Visualization<T = unknown> {
    */
   getConfiguration: (props: VisualizationConfigProps<T>) => {
     groups: VisualizationDimensionGroupConfig[];
-    supportStaticValue?: boolean;
-    supportFieldFormat?: boolean;
   };
 
   /**
@@ -776,10 +791,11 @@ export interface LensBrushEvent {
 }
 
 // Use same technique as TriggerContext
-interface LensEditContextMapping {
+export interface LensEditContextMapping {
   [LENS_EDIT_SORT_ACTION]: LensSortActionData;
   [LENS_EDIT_RESIZE_ACTION]: LensResizeActionData;
   [LENS_TOGGLE_ACTION]: LensToggleActionData;
+  [LENS_EDIT_PAGESIZE_ACTION]: LensPagesizeActionData;
 }
 
 type LensEditSupportedActions = keyof LensEditContextMapping;

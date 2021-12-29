@@ -22,4 +22,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new VisTypeVegaPlugin(initializerContext);
 }
 
-export { VisTypeVegaPluginStart, VisTypeVegaPluginSetup } from './types';
+export type { VisTypeVegaPluginStart, VisTypeVegaPluginSetup } from './types';

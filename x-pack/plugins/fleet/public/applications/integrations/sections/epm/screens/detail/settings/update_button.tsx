@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -289,6 +289,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
             onClick={
               upgradePackagePolicies ? () => setIsUpdateModalVisible(true) : handleClickUpdate
             }
+            data-test-subj="updatePackageBtn"
           >
             <FormattedMessage
               id="xpack.fleet.integrations.updatePackage.updatePackageButtonLabel"

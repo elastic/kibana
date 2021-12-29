@@ -59,15 +59,7 @@ export class AlertingPublicPlugin implements Plugin<PluginSetupContract, PluginS
       ruleTypeId: string,
       handler: AlertNavigationHandler
     ) => {
-      const alertType = await loadAlertType({ http: core.http, id: ruleTypeId });
-      if (!alertType) {
-        // eslint-disable-next-line no-console
-        console.log(
-          `Unable to register navigation for rule type "${ruleTypeId}" because it is not registered on the server side.`
-        );
-        return;
-      }
-      this.alertNavigationRegistry!.register(applicationId, alertType, handler);
+      this.alertNavigationRegistry!.register(applicationId, ruleTypeId, handler);
     };
 
     const registerDefaultNavigation = async (

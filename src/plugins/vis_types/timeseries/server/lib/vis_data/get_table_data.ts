@@ -31,7 +31,10 @@ export async function getTableData(
   panel: Panel,
   services: VisTypeTimeseriesRequestServices
 ) {
-  const panelIndex = await services.cachedIndexPatternFetcher(panel.index_pattern);
+  const panelIndex = await services.cachedIndexPatternFetcher(
+    panel.index_pattern,
+    !panel.use_kibana_indexes
+  );
 
   const strategy = await services.searchStrategyRegistry.getViableStrategy(
     requestContext,
@@ -75,7 +78,7 @@ export async function getTableData(
   try {
     if (isEntireTimeRangeMode(panel)) {
       panel.series.forEach((column) => {
-        isAggSupported(column.metrics);
+        isAggSupported(column.metrics, capabilities);
       });
     }
 

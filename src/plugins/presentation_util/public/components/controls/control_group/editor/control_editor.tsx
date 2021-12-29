@@ -86,21 +86,8 @@ export const ControlEditor = ({
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="control-editor-flyout">
         <EuiForm>
-          <EuiFormRow label={ControlGroupStrings.manageControl.getWidthInputTitle()}>
-            <EuiButtonGroup
-              color="primary"
-              legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
-              options={CONTROL_WIDTH_OPTIONS}
-              idSelected={currentWidth}
-              onChange={(newWidth: string) => {
-                setCurrentWidth(newWidth as ControlWidth);
-                updateWidth(newWidth as ControlWidth);
-              }}
-            />
-          </EuiFormRow>
-
           <EuiSpacer size="l" />
           {ControlTypeEditor && (
             <ControlTypeEditor
@@ -118,11 +105,24 @@ export const ControlEditor = ({
           )}
           <EuiFormRow label={ControlGroupStrings.manageControl.getTitleInputTitle()}>
             <EuiFieldText
+              data-test-subj="control-editor-title-input"
               placeholder={defaultTitle}
               value={currentTitle}
               onChange={(e) => {
                 updateTitle(e.target.value || defaultTitle);
                 setCurrentTitle(e.target.value);
+              }}
+            />
+          </EuiFormRow>
+          <EuiFormRow label={ControlGroupStrings.manageControl.getWidthInputTitle()}>
+            <EuiButtonGroup
+              color="primary"
+              legend={ControlGroupStrings.management.controlWidth.getWidthSwitchLegend()}
+              options={CONTROL_WIDTH_OPTIONS}
+              idSelected={currentWidth}
+              onChange={(newWidth: string) => {
+                setCurrentWidth(newWidth as ControlWidth);
+                updateWidth(newWidth as ControlWidth);
               }}
             />
           </EuiFormRow>
@@ -148,6 +148,7 @@ export const ControlEditor = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               aria-label={`cancel-${title}`}
+              data-test-subj="control-editor-cancel"
               iconType="cross"
               onClick={() => {
                 onCancel();
@@ -159,6 +160,7 @@ export const ControlEditor = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               aria-label={`save-${title}`}
+              data-test-subj="control-editor-save"
               iconType="check"
               color="primary"
               disabled={!controlEditorValid}

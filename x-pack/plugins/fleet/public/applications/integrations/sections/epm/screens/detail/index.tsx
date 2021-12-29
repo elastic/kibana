@@ -24,9 +24,10 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
 
+import { splitPkgKey } from '../../../../../../../common';
 import {
   useGetPackageInstallStatus,
   useSetPackageInstallStatus,
@@ -132,26 +133,27 @@ export function Detail() {
     packageInfo.savedObject &&
     semverLt(packageInfo.savedObject.attributes.version, packageInfo.latestVersion);
 
+  const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   // Fetch package info
   const {
     data: packageInfoData,
     error: packageInfoError,
     isLoading: packageInfoLoading,
-  } = useGetPackageInfoByKey(pkgkey);
+  } = useGetPackageInfoByKey(pkgName, pkgVersion);
 
   const isLoading = packageInfoLoading || permissionCheck.isLoading;
 
   const showCustomTab =
-    useUIExtension(packageInfoData?.response.name ?? '', 'package-detail-custom') !== undefined;
+    useUIExtension(packageInfoData?.item.name ?? '', 'package-detail-custom') !== undefined;
 
   // Track install status state
   useEffect(() => {
-    if (packageInfoData?.response) {
-      const packageInfoResponse = packageInfoData.response;
+    if (packageInfoData?.item) {
+      const packageInfoResponse = packageInfoData.item;
       setPackageInfo(packageInfoResponse);
 
       let installedVersion;
-      const { name } = packageInfoData.response;
+      const { name } = packageInfoData.item;
       if ('savedObject' in packageInfoResponse) {
         installedVersion = packageInfoResponse.savedObject.attributes.version;
       }
@@ -370,12 +372,12 @@ export function Detail() {
                             content: missingSecurityConfiguration ? (
                               <FormattedMessage
                                 id="xpack.fleet.epm.addPackagePolicyButtonSecurityRequiredTooltip"
-                                defaultMessage="To add Elastic Agent Integrations, you must have security enabled and have the minimum required privileges. Contact your administrator."
+                                defaultMessage="To add Elastic Agent Integrations, you must have security enabled and have the superuser role. Contact your administrator."
                               />
                             ) : (
                               <FormattedMessage
                                 id="xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip"
-                                defaultMessage="To add Elastic Agent integrations, you must have the minimum required privileges. Contact your adminstrator."
+                                defaultMessage="To add Elastic Agent integrations, you must have the superuser role. Contact your adminstrator."
                               />
                             ),
                           }
@@ -454,7 +456,7 @@ export function Detail() {
         name: (
           <FormattedMessage
             id="xpack.fleet.epm.packageDetailsNav.packagePoliciesLinkText"
-            defaultMessage="Integration Policies"
+            defaultMessage="Integration policies"
           />
         ),
         isSelected: panel === 'policies',
@@ -614,13 +616,14 @@ export function Detail() {
 
 type EuiButtonPropsFull = Parameters<typeof EuiButton>[0];
 
-const EuiButtonWithTooltip: React.FC<EuiButtonPropsFull & { tooltip?: Partial<EuiToolTipProps> }> =
-  ({ tooltip: tooltipProps, ...buttonProps }) => {
-    return tooltipProps ? (
-      <EuiToolTip {...tooltipProps}>
-        <EuiButton {...buttonProps} />
-      </EuiToolTip>
-    ) : (
+const EuiButtonWithTooltip: React.FC<
+  EuiButtonPropsFull & { tooltip?: Partial<EuiToolTipProps> }
+> = ({ tooltip: tooltipProps, ...buttonProps }) => {
+  return tooltipProps ? (
+    <EuiToolTip {...tooltipProps}>
       <EuiButton {...buttonProps} />
-    );
-  };
+    </EuiToolTip>
+  ) : (
+    <EuiButton {...buttonProps} />
+  );
+};

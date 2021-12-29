@@ -1107,6 +1107,9 @@ export const mockTimelineData: TimelineItem[] = [
               field: ['source.ip'],
               type: ['ip'],
             },
+            feed: {
+              name: ['feed_name'],
+            },
           },
         ],
       },
@@ -1549,6 +1552,7 @@ export const mockTgridModel: TGridModel = {
     },
   ],
   dataProviders: [],
+  dataViewId: null,
   defaultColumns: [],
   queryFields: [],
   dateRange: {

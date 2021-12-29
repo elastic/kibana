@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient, Logger } from 'kibana/server';
 
 import type { Field, Fields } from '../../fields/field';
 import type {
@@ -17,6 +17,8 @@ import type {
 import { appContextService } from '../../../';
 import { getRegistryDataStreamAssetBaseName } from '../index';
 import { FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME } from '../../../../constants';
+import { getESAssetMetadata } from '../meta';
+import { retryTransientEsErrors } from '../retry';
 
 interface Properties {
   [key: string]: any;
@@ -31,6 +33,7 @@ export interface IndexTemplateMapping {
 }
 export interface CurrentDataStream {
   dataStreamName: string;
+  replicated: boolean;
   indexTemplate: IndexTemplate;
 }
 const DEFAULT_SCALING_FACTOR = 1000;
@@ -140,6 +143,13 @@ export function generateMappings(fields: Field[]): IndexTemplateMappings {
         case 'keyword':
           const keywordMapping = generateKeywordMapping(field);
           fieldProps = { ...fieldProps, ...keywordMapping, type: 'keyword' };
+          if (field.multi_fields) {
+            fieldProps.fields = generateMultiFields(field.multi_fields);
+          }
+          break;
+        case 'wildcard':
+          const wildcardMapping = generateWildcardMapping(field);
+          fieldProps = { ...fieldProps, ...wildcardMapping, type: 'wildcard' };
           if (field.multi_fields) {
             fieldProps.fields = generateMultiFields(field.multi_fields);
           }
@@ -268,6 +278,19 @@ function generateTextMapping(field: Field): IndexTemplateMapping {
   return mapping;
 }
 
+function generateWildcardMapping(field: Field): IndexTemplateMapping {
+  const mapping: IndexTemplateMapping = {
+    ignore_above: DEFAULT_IGNORE_ABOVE,
+  };
+  if (field.null_value) {
+    mapping.null_value = field.null_value;
+  }
+  if (field.ignore_above) {
+    mapping.ignore_above = field.ignore_above;
+  }
+  return mapping;
+}
+
 function getDefaultProperties(field: Field): Properties {
   const properties: Properties = {};
 
@@ -367,13 +390,7 @@ function getBaseTemplate(
   hidden?: boolean
 ): IndexTemplate {
   // Meta information to identify Ingest Manager's managed templates and indices
-  const _meta = {
-    package: {
-      name: packageName,
-    },
-    managed_by: 'ingest-manager',
-    managed: true,
-  };
+  const _meta = getESAssetMetadata({ packageName });
 
   return {
     priority: templatePriority,
@@ -413,13 +430,23 @@ function getBaseTemplate(
 
 export const updateCurrentWriteIndices = async (
   esClient: ElasticsearchClient,
+  logger: Logger,
   templates: IndexTemplateEntry[]
 ): Promise<void> => {
   if (!templates.length) return;
 
   const allIndices = await queryDataStreamsFromTemplates(esClient, templates);
-  if (!allIndices.length) return;
-  return updateAllDataStreams(allIndices, esClient);
+  const allUpdatablesIndices = allIndices.filter((indice) => {
+    if (indice.replicated) {
+      logger.warn(
+        `Datastream ${indice.dataStreamName} cannot be updated because this is a replicated datastream.`
+      );
+      return false;
+    }
+    return true;
+  });
+  if (!allUpdatablesIndices.length) return;
+  return updateAllDataStreams(allUpdatablesIndices, esClient, logger);
 };
 
 function isCurrentDataStream(item: CurrentDataStream[] | undefined): item is CurrentDataStream[] {
@@ -441,23 +468,29 @@ const getDataStreams = async (
   esClient: ElasticsearchClient,
   template: IndexTemplateEntry
 ): Promise<CurrentDataStream[] | undefined> => {
-  const { templateName, indexTemplate } = template;
-  const { body } = await esClient.indices.getDataStream({ name: `${templateName}-*` });
+  const { indexTemplate } = template;
+
+  const { body } = await esClient.indices.getDataStream({
+    name: indexTemplate.index_patterns.join(','),
+  });
+
   const dataStreams = body.data_streams;
   if (!dataStreams.length) return;
   return dataStreams.map((dataStream: any) => ({
     dataStreamName: dataStream.name,
+    replicated: dataStream.replicated,
     indexTemplate,
   }));
 };
 
 const updateAllDataStreams = async (
   indexNameWithTemplates: CurrentDataStream[],
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  logger: Logger
 ): Promise<void> => {
   const updatedataStreamPromises = indexNameWithTemplates.map(
     ({ dataStreamName, indexTemplate }) => {
-      return updateExistingDataStream({ dataStreamName, esClient, indexTemplate });
+      return updateExistingDataStream({ dataStreamName, esClient, logger, indexTemplate });
     }
   );
   await Promise.all(updatedataStreamPromises);
@@ -465,10 +498,12 @@ const updateAllDataStreams = async (
 const updateExistingDataStream = async ({
   dataStreamName,
   esClient,
+  logger,
   indexTemplate,
 }: {
   dataStreamName: string;
   esClient: ElasticsearchClient;
+  logger: Logger;
   indexTemplate: IndexTemplate;
 }) => {
   const { settings, mappings } = indexTemplate.template;
@@ -478,17 +513,21 @@ const updateExistingDataStream = async ({
   // to skip updating and assume the value in the index mapping is correct
   delete mappings.properties.stream;
   delete mappings.properties.data_stream;
-
   // try to update the mappings first
   try {
-    await esClient.indices.putMapping({
-      index: dataStreamName,
-      body: mappings,
-      write_index_only: true,
-    });
+    await retryTransientEsErrors(
+      () =>
+        esClient.indices.putMapping({
+          index: dataStreamName,
+          body: mappings,
+          write_index_only: true,
+        }),
+      { logger }
+    );
     // if update fails, rollover data stream
   } catch (err) {
     try {
+      // Do no wrap rollovers in retryTransientEsErrors since it is not idempotent
       const path = `/${dataStreamName}/_rollover`;
       await esClient.transport.request({
         method: 'POST',
@@ -503,10 +542,14 @@ const updateExistingDataStream = async ({
   // for now, only update the pipeline
   if (!settings.index.default_pipeline) return;
   try {
-    await esClient.indices.putSettings({
-      index: dataStreamName,
-      body: { default_pipeline: settings.index.default_pipeline },
-    });
+    await retryTransientEsErrors(
+      () =>
+        esClient.indices.putSettings({
+          index: dataStreamName,
+          body: { default_pipeline: settings.index.default_pipeline },
+        }),
+      { logger }
+    );
   } catch (err) {
     throw new Error(`could not update index template settings for ${dataStreamName}`);
   }

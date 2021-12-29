@@ -16,6 +16,7 @@ import '../../../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 import { HydratedCurationSuggestion } from '../../types';
 
 import { CurationSuggestionLogic } from './curation_suggestion_logic';
@@ -180,20 +181,6 @@ describe('CurationSuggestionLogic', () => {
     });
   };
 
-  const itHandlesErrors = (httpMethod: any, callback: () => void) => {
-    it('handles errors', async () => {
-      httpMethod.mockReturnValueOnce(Promise.reject('error'));
-      mountLogic({
-        suggestion,
-      });
-
-      callback();
-      await nextTick();
-
-      expect(flashAPIErrors).toHaveBeenCalledWith('error');
-    });
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -241,7 +228,7 @@ describe('CurationSuggestionLogic', () => {
         await nextTick();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions/foo-query',
+          '/internal/app_search/engines/some-engine/adaptive_relevance/suggestions/foo-query',
           {
             query: {
               type: 'curation',
@@ -271,7 +258,7 @@ describe('CurationSuggestionLogic', () => {
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations');
       });
 
-      itHandlesErrors(http.get, () => {
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         CurationSuggestionLogic.actions.loadSuggestion();
       });
     });
@@ -297,7 +284,7 @@ describe('CurationSuggestionLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions',
+          '/internal/app_search/engines/some-engine/adaptive_relevance/suggestions',
           {
             body: JSON.stringify([
               {
@@ -350,7 +337,8 @@ describe('CurationSuggestionLogic', () => {
         });
       });
 
-      itHandlesErrors(http.put, () => {
+      itShowsServerErrorAsFlashMessage(http.put, () => {
+        jest.spyOn(global, 'confirm').mockReturnValueOnce(true);
         CurationSuggestionLogic.actions.acceptSuggestion();
       });
 
@@ -380,7 +368,7 @@ describe('CurationSuggestionLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions',
+          '/internal/app_search/engines/some-engine/adaptive_relevance/suggestions',
           {
             body: JSON.stringify([
               {
@@ -433,7 +421,8 @@ describe('CurationSuggestionLogic', () => {
         });
       });
 
-      itHandlesErrors(http.put, () => {
+      itShowsServerErrorAsFlashMessage(http.put, () => {
+        jest.spyOn(global, 'confirm').mockReturnValueOnce(true);
         CurationSuggestionLogic.actions.acceptAndAutomateSuggestion();
       });
 
@@ -463,7 +452,7 @@ describe('CurationSuggestionLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions',
+          '/internal/app_search/engines/some-engine/adaptive_relevance/suggestions',
           {
             body: JSON.stringify([
               {
@@ -478,7 +467,7 @@ describe('CurationSuggestionLogic', () => {
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations');
       });
 
-      itHandlesErrors(http.put, () => {
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         CurationSuggestionLogic.actions.rejectSuggestion();
       });
 
@@ -508,7 +497,7 @@ describe('CurationSuggestionLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions',
+          '/internal/app_search/engines/some-engine/adaptive_relevance/suggestions',
           {
             body: JSON.stringify([
               {
@@ -523,7 +512,7 @@ describe('CurationSuggestionLogic', () => {
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations');
       });
 
-      itHandlesErrors(http.put, () => {
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         CurationSuggestionLogic.actions.rejectAndDisableSuggestion();
       });
 

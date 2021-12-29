@@ -14,6 +14,7 @@ import { DEFAULT_PERCENT_DECIMALS } from '../../common';
 import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getPieOptions } from '../editor/components';
+import { EMPTY_SIZE_RATIOS } from '../editor/constants';
 
 export const getPieVisTypeDefinition = ({
   showElasticChartsOptions = false,
@@ -39,6 +40,7 @@ export const getPieVisTypeDefinition = ({
       maxLegendLines: 1,
       distinctColors: false,
       isDonut: true,
+      emptySizeRatio: EMPTY_SIZE_RATIOS.SMALL,
       palette: {
         type: 'palette',
         name: 'default',
@@ -80,7 +82,14 @@ export const getPieVisTypeDefinition = ({
         }),
         min: 0,
         max: Infinity,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: [
+          '!geohash_grid',
+          '!geotile_grid',
+          '!filter',
+          '!sampler',
+          '!diversified_sampler',
+          '!multi_terms',
+        ],
       },
       {
         group: AggGroupNames.Buckets,
@@ -91,7 +100,14 @@ export const getPieVisTypeDefinition = ({
         mustBeFirst: true,
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: [
+          '!geohash_grid',
+          '!geotile_grid',
+          '!filter',
+          '!sampler',
+          '!diversified_sampler',
+          '!multi_terms',
+        ],
       },
     ],
   },

@@ -115,7 +115,6 @@ export interface Series {
   terms_size?: string;
   time_range_mode?: string;
   trend_arrows?: number;
-  type?: string;
   value_template?: string;
   var_name?: string;
 }

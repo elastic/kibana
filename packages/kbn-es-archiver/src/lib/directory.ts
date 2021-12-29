@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { readdir } from 'fs';
-import { fromNode } from 'bluebird';
+import { readdir } from 'fs/promises';
 
 export async function readDirectory(path: string) {
-  const allNames = await fromNode<string[]>((cb) => readdir(path, cb));
+  const allNames = await readdir(path);
   return allNames.filter((name) => !name.startsWith('.'));
 }

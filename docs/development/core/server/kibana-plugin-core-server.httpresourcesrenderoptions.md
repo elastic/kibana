@@ -16,5 +16,5 @@ export interface HttpResourcesRenderOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [headers](./kibana-plugin-core-server.httpresourcesrenderoptions.headers.md) | <code>ResponseHeaders</code> | HTTP Headers with additional information about response. |
+|  [headers?](./kibana-plugin-core-server.httpresourcesrenderoptions.headers.md) | ResponseHeaders | <i>(Optional)</i> HTTP Headers with additional information about response. |
 

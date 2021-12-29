@@ -16,6 +16,6 @@ export interface ErrorHttpResponseOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [body](./kibana-plugin-core-server.errorhttpresponseoptions.body.md) | <code>ResponseError</code> | HTTP message to send to the client |
-|  [headers](./kibana-plugin-core-server.errorhttpresponseoptions.headers.md) | <code>ResponseHeaders</code> | HTTP Headers with additional information about response |
+|  [body?](./kibana-plugin-core-server.errorhttpresponseoptions.body.md) | ResponseError | <i>(Optional)</i> HTTP message to send to the client |
+|  [headers?](./kibana-plugin-core-server.errorhttpresponseoptions.headers.md) | ResponseHeaders | <i>(Optional)</i> HTTP Headers with additional information about response |
 

@@ -17,7 +17,7 @@ import { EuiButton, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elasti
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
-import { CommentType } from '../../../common';
+import { CommentType } from '../../../common/api';
 import { usePostComment } from '../../containers/use_post_comment';
 import { Case } from '../../containers/types';
 import { EuiMarkdownEditorRef, MarkdownEditorForm } from '../markdown_editor';
@@ -26,7 +26,7 @@ import { Form, useForm, UseField, useFormData } from '../../common/shared_import
 import * as i18n from './translations';
 import { schema, AddCommentFormSchema } from './schema';
 import { InsertTimeline } from '../insert_timeline';
-import { useOwnerContext } from '../owner_context/use_owner_context';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 const MySpinner = styled(EuiLoadingSpinner)`
   position: absolute;
@@ -72,7 +72,7 @@ export const AddComment = React.memo(
     ) => {
       const editorRef = useRef<EuiMarkdownEditorRef>(null);
       const [focusOnContext, setFocusOnContext] = useState(false);
-      const owner = useOwnerContext();
+      const { owner } = useCasesContext();
       const { isLoading, postComment } = usePostComment();
 
       const { form } = useForm<AddCommentFormSchema>({

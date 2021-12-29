@@ -63,4 +63,42 @@ describe.each([
       })
     );
   });
+
+  it('should update threat match rules', async () => {
+    const updatedThreatParams = {
+      threat_index: ['test-index'],
+      threat_indicator_path: 'test.path',
+      threat_query: 'threat:*',
+    };
+    const prepackagedRule = getAddPrepackagedRulesSchemaDecodedMock();
+    rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
+
+    await updatePrepackagedRules(
+      rulesClient,
+      savedObjectsClient,
+      'default',
+      ruleStatusClient,
+      [{ ...prepackagedRule, ...updatedThreatParams }],
+      'output-index',
+      isRuleRegistryEnabled
+    );
+
+    expect(patchRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        threatIndicatorPath: 'test.path',
+      })
+    );
+
+    expect(patchRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        threatIndex: ['test-index'],
+      })
+    );
+
+    expect(patchRules).toHaveBeenCalledWith(
+      expect.objectContaining({
+        threatQuery: 'threat:*',
+      })
+    );
+  });
 });

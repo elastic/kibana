@@ -7,4 +7,4 @@
  */
 
 export { EmbeddableStateTransfer } from './embeddable_state_transfer';
-export { EmbeddableEditorState, EmbeddablePackageState } from './types';
+export type { EmbeddableEditorState, EmbeddablePackageState } from './types';

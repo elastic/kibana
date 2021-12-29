@@ -9,7 +9,10 @@ import expect from '@kbn/expect';
 import {
   ALERT_REASON,
   ALERT_RULE_NAMESPACE,
+  ALERT_RULE_PARAMETERS,
   ALERT_RULE_UPDATED_AT,
+  ALERT_SEVERITY,
+  ALERT_RISK_SCORE,
   ALERT_STATUS,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
@@ -37,13 +40,15 @@ import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
   ALERT_ORIGINAL_TIME,
-} from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names';
+} from '../../../../plugins/security_solution/common/field_maps/field_names';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
+  const log = getService('log');
+
   const siemModule = 'siem_auditbeat';
   const mlJobId = 'linux_anomalous_network_activity_ecs';
   const testRule: MachineLearningCreateSchema = {
@@ -102,12 +107,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     afterEach(async () => {
-      await deleteAllAlerts(supertest);
+      await deleteAllAlerts(supertest, log);
     });
 
     it('should create 1 alert from ML rule when record meets anomaly_threshold', async () => {
-      const createdRule = await createRule(supertest, testRule);
-      const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+      const createdRule = await createRule(supertest, log, testRule);
+      const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
       expect(signalsOpen.hits.hits.length).eql(1);
       const signal = signalsOpen.hits.hits[0];
       if (!signal._source) {
@@ -155,6 +160,29 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_STATUS]: 'active',
         [SPACE_IDS]: ['default'],
         [TAGS]: [`__internal_rule_id:${createdRule.rule_id}`, '__internal_immutable:false'],
+        [ALERT_SEVERITY]: 'critical',
+        [ALERT_RISK_SCORE]: 50,
+        [ALERT_RULE_PARAMETERS]: {
+          anomaly_threshold: 30,
+          author: [],
+          description: 'Test ML rule description',
+          exceptions_list: [],
+          false_positives: [],
+          from: '1900-01-01T00:00:00.000Z',
+          immutable: false,
+          machine_learning_job_id: ['linux_anomalous_network_activity_ecs'],
+          max_signals: 100,
+          references: [],
+          risk_score: 50,
+          risk_score_mapping: [],
+          rule_id: createdRule.rule_id,
+          severity: 'critical',
+          severity_mapping: [],
+          threat: [],
+          to: 'now',
+          type: 'machine_learning',
+          version: 1,
+        },
         ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
           uuid: createdRule.id,
           category: 'Machine Learning Rule',
@@ -187,8 +215,6 @@ export default ({ getService }: FtrProviderContext) => {
           exceptions_list: [],
           immutable: false,
           type: 'machine_learning',
-          anomaly_threshold: 30,
-          machine_learning_job_id: ['linux_anomalous_network_activity_ecs'],
         }),
         [ALERT_DEPTH]: 1,
         [ALERT_REASON]: `event with process store, by root on mothra created critical alert Test ML rule.`,
@@ -208,17 +234,17 @@ export default ({ getService }: FtrProviderContext) => {
         ...testRule,
         anomaly_threshold: 20,
       };
-      const createdRule = await createRule(supertest, rule);
-      const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+      const createdRule = await createRule(supertest, log, rule);
+      const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
       expect(signalsOpen.hits.hits.length).eql(7);
     });
 
     describe('with non-value list exception', () => {
       afterEach(async () => {
-        await deleteAllExceptions(supertest);
+        await deleteAllExceptions(supertest, log);
       });
       it('generates no signals when an exception is added for an ML rule', async () => {
-        const createdRule = await createRuleWithExceptionEntries(supertest, testRule, [
+        const createdRule = await createRuleWithExceptionEntries(supertest, log, testRule, [
           [
             {
               field: 'host.name',
@@ -228,25 +254,25 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+        const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
         expect(signalsOpen.hits.hits.length).equal(0);
       });
     });
 
     describe('with value list exception', () => {
       beforeEach(async () => {
-        await createListsIndex(supertest);
+        await createListsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteListsIndex(supertest);
-        await deleteAllExceptions(supertest);
+        await deleteListsIndex(supertest, log);
+        await deleteAllExceptions(supertest, log);
       });
 
       it('generates no signals when a value list exception is added for an ML rule', async () => {
         const valueListId = 'value-list-id';
-        await importFile(supertest, 'keyword', ['mothra'], valueListId);
-        const createdRule = await createRuleWithExceptionEntries(supertest, testRule, [
+        await importFile(supertest, log, 'keyword', ['mothra'], valueListId);
+        const createdRule = await createRuleWithExceptionEntries(supertest, log, testRule, [
           [
             {
               field: 'host.name',
@@ -259,7 +285,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         ]);
-        const signalsOpen = await getOpenSignals(supertest, es, createdRule);
+        const signalsOpen = await getOpenSignals(supertest, log, es, createdRule);
         expect(signalsOpen.hits.hits.length).equal(0);
       });
     });

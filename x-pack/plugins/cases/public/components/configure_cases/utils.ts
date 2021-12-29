@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConnectorTypeFields, ConnectorTypes } from '../../../common';
+import { ConnectorTypeFields, ConnectorTypes } from '../../../common/api';
 import {
   CaseField,
   ActionType,

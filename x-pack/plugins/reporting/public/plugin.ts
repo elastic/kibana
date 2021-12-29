@@ -18,6 +18,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'src/core/public';
+import type { ScreenshottingSetup } from '../../screenshotting/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
 import {
   FeatureCatalogueCategory,
@@ -26,7 +27,6 @@ import {
 } from '../../../../src/plugins/home/public';
 import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
-import { constants } from '../common';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';
 import { ReportingSetup, ReportingStart } from './';
@@ -41,9 +41,10 @@ import type {
   UiActionsSetup,
   UiActionsStart,
 } from './shared_imports';
+import { AppNavLinkStatus } from './shared_imports';
 import { ReportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
-import { isRedirectAppPath } from './utils';
+import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../common/constants';
 
 export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
@@ -51,7 +52,7 @@ export interface ClientConfigType {
 }
 
 function getStored(): JobId[] {
-  const sessionValue = sessionStorage.getItem(constants.JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
+  const sessionValue = sessionStorage.getItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
   return sessionValue ? JSON.parse(sessionValue) : [];
 }
 
@@ -73,6 +74,7 @@ export interface ReportingPublicPluginSetupDendencies {
   management: ManagementSetup;
   licensing: LicensingPluginSetup;
   uiActions: UiActionsSetup;
+  screenshotting: ScreenshottingSetup;
   share: SharePluginSetup;
 }
 
@@ -145,6 +147,7 @@ export class ReportingPublicPlugin
       home,
       management,
       licensing: { license$ }, // FIXME: 'license$' is deprecated
+      screenshotting,
       share,
       uiActions,
     } = setupDeps;
@@ -173,15 +176,6 @@ export class ReportingPublicPlugin
       title: this.title,
       order: 1,
       mount: async (params) => {
-        // The redirect app will be mounted if reporting is opened on a specific path. The redirect app expects a
-        // specific environment to be present so that it can navigate to a specific application. This is used by
-        // report generation to navigate to the correct place with full app state.
-        if (isRedirectAppPath(params.history.location.pathname)) {
-          const { mountRedirectApp } = await import('./redirect');
-          return mountRedirectApp({ ...params, share, apiClient });
-        }
-
-        // Otherwise load the reporting management UI.
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
         const [[start], { mountManagementSection }] = await Promise.all([
           getStartServices(),
@@ -206,6 +200,19 @@ export class ReportingPublicPlugin
           umountAppCallback();
         };
       },
+    });
+
+    core.application.register({
+      id: 'reportingRedirect',
+      mount: async (params) => {
+        const { mountRedirectApp } = await import('./redirect');
+        return mountRedirectApp({ ...params, apiClient, screenshotting, share });
+      },
+      title: 'Reporting redirect app',
+      searchable: false,
+      chromeless: true,
+      exactRoute: true,
+      navLinkStatus: AppNavLinkStatus.hidden,
     });
 
     uiActions.addTriggerAction(

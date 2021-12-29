@@ -10,7 +10,7 @@ import React from 'react';
 import { shallow, mount } from 'enzyme';
 
 import { EuiForm, EuiFieldText, EuiModal } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SchemaFieldTypeSelect } from '../index';
 import { SchemaType } from '../types';

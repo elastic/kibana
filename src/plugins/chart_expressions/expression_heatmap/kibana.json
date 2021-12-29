@@ -1,0 +1,16 @@
+{
+  "id": "expressionHeatmap",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  },
+  "description": "Expression Heatmap plugin adds a `heatmap` renderer and function to the expression plugin. The renderer will display the `heatmap` chart.",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["expressions", "fieldFormats", "charts", "visualizations", "presentationUtil", "data"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact"],
+  "optionalPlugins": [],
+  "extraPublicDirs": ["common"]
+}

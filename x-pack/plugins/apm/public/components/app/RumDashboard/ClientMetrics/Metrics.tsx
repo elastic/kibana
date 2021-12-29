@@ -55,7 +55,7 @@ export function Metrics() {
     (callApmApi) => {
       if (uxQuery) {
         return callApmApi({
-          endpoint: 'GET /api/apm/rum/client-metrics',
+          endpoint: 'GET /internal/apm/ux/client-metrics',
           params: {
             query: {
               ...uxQuery,

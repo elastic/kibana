@@ -206,10 +206,6 @@ export async function getReportingUsage(
     .search(params)
     .then(({ body: response }) => handleResponse(response))
     .then((usage: Partial<RangeStatSets>): ReportingUsageType => {
-      // Allow this to explicitly throw an exception if/when this config is deprecated,
-      // because we shouldn't collect browserType in that case!
-      const browserType = config.get('capture', 'browser', 'type');
-
       const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
       const availability = exportTypesHandler.getAvailability(
         featureAvailability
@@ -219,7 +215,6 @@ export async function getReportingUsage(
 
       return {
         available: true,
-        browser_type: browserType,
         enabled: true,
         last7Days: getExportStats(last7Days, availability, exportTypesHandler),
         ...getExportStats(all, availability, exportTypesHandler),

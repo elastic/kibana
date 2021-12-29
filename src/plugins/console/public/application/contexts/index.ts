@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { useServicesContext, ServicesContextProvider, ContextValue } from './services_context';
+export type { ContextValue } from './services_context';
+export { useServicesContext, ServicesContextProvider } from './services_context';
 
 export {
   useRequestActionContext,
@@ -19,3 +20,5 @@ export {
   useEditorReadContext,
   EditorContextProvider,
 } from './editor_context';
+
+export { usePanelContext, PanelContextProvider, PanelRegistry } from './split_panel';

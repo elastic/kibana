@@ -93,8 +93,9 @@ export const getListFetchError: EventFiltersSelector<Immutable<ServerApiError> |
     return (isFailedResourceState(listPageDataState) && listPageDataState.error) || undefined;
   });
 
-export const getListPageDataExistsState: EventFiltersSelector<StoreState['listPage']['dataExist']> =
-  ({ listPage: { dataExist } }) => dataExist;
+export const getListPageDataExistsState: EventFiltersSelector<
+  StoreState['listPage']['dataExist']
+> = ({ listPage: { dataExist } }) => dataExist;
 
 export const getListIsLoading: EventFiltersSelector<boolean> = createSelector(
   getCurrentListPageDataState,

@@ -10,7 +10,7 @@ import Url, { UrlObject } from 'url';
 
 import { ROLES } from '../../common/test';
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
-import { hostDetailsUrl } from '../urls/navigation';
+import { hostDetailsUrl, LOGOUT_URL } from '../urls/navigation';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -295,6 +295,12 @@ export const loginAndWaitForPage = (url: string, role?: ROLES) => {
   );
   cy.get('[data-test-subj="headerGlobalNav"]');
 };
+export const waitForPage = (url: string) => {
+  cy.visit(
+    `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`
+  );
+  cy.get('[data-test-subj="headerGlobalNav"]');
+};
 
 export const loginAndWaitForPageWithoutDateRange = (url: string, role?: ROLES) => {
   login(role);
@@ -325,4 +331,8 @@ export const loginAndWaitForHostDetailsPage = () => {
 export const waitForPageWithoutDateRange = (url: string, role?: ROLES) => {
   cy.visit(role ? getUrlWithRoute(role, url) : url);
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
+};
+
+export const logout = () => {
+  cy.visit(LOGOUT_URL);
 };

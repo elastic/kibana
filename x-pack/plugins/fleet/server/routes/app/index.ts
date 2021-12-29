@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandler } from 'src/core/server';
+import type { RequestHandler } from 'src/core/server';
 
-import { PLUGIN_ID, APP_API_ROUTES } from '../../constants';
+import { APP_API_ROUTES } from '../../constants';
 import { appContextService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common';
 import { defaultIngestErrorHandler, GenerateServiceTokenError } from '../../errors';
+import type { FleetAuthzRouter } from '../security';
 
 export const getCheckPermissionsHandler: RequestHandler = async (context, request, response) => {
   const missingSecurityBody: CheckPermissionsResponse = {
@@ -18,7 +19,7 @@ export const getCheckPermissionsHandler: RequestHandler = async (context, reques
     error: 'MISSING_SECURITY',
   };
 
-  if (!appContextService.hasSecurity() || !appContextService.getSecurityLicense().isEnabled()) {
+  if (!appContextService.getSecurityLicense().isEnabled()) {
     return response.ok({ body: missingSecurityBody });
   } else {
     const security = appContextService.getSecurity();
@@ -46,6 +47,7 @@ export const getCheckPermissionsHandler: RequestHandler = async (context, reques
 };
 
 export const generateServiceTokenHandler: RequestHandler = async (context, request, response) => {
+  // Generate the fleet server service token as the current user as the internal user do not have the correct permissions
   const esClient = context.core.elasticsearch.client.asCurrentUser;
   try {
     const { body: tokenResponse } = await esClient.transport.request<{
@@ -71,12 +73,13 @@ export const generateServiceTokenHandler: RequestHandler = async (context, reque
   }
 };
 
-export const registerRoutes = (router: IRouter) => {
+export const registerRoutes = (router: FleetAuthzRouter) => {
   router.get(
     {
       path: APP_API_ROUTES.CHECK_PERMISSIONS_PATTERN,
       validate: {},
       options: { tags: [] },
+      // no permission check for that route
     },
     getCheckPermissionsHandler
   );
@@ -85,7 +88,20 @@ export const registerRoutes = (router: IRouter) => {
     {
       path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
       validate: {},
-      options: { tags: [`access:${PLUGIN_ID}-all`] },
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    generateServiceTokenHandler
+  );
+
+  router.post(
+    {
+      path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED,
+      validate: {},
+      fleetAuthz: {
+        fleet: { all: true },
+      },
     },
     generateServiceTokenHandler
   );

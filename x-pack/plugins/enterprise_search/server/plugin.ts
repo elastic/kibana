@@ -172,7 +172,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     /*
      * Register logs source configuration, used by LogStream components
-     * @see https://github.com/elastic/kibana/blob/master/x-pack/plugins/infra/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
+     * @see https://github.com/elastic/kibana/blob/main/x-pack/plugins/infra/public/components/log_stream/log_stream.stories.mdx#with-a-source-configuration
      */
     infra.defineInternalSourceConfiguration(LOGS_SOURCE_ID, {
       name: 'Enterprise Search Logs',

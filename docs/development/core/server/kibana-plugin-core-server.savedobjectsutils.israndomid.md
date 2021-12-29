@@ -16,9 +16,9 @@ static isRandomId(id: string | undefined): boolean;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  id | <code>string &#124; undefined</code> |  |
+|  id | string \| undefined | The ID of a saved object.  Use <code>uuid.validate</code> once upgraded to v5.3+ |
 
 <b>Returns:</b>
 
-`boolean`
+boolean
 

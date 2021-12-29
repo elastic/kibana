@@ -102,20 +102,9 @@ export function loadSavedDashboards(maxNumber) {
   });
 }
 
-export function loadIndexPatterns(maxNumber) {
-  // Loads the list of Kibana data views, as used in editing custom URLs.
-  return new Promise((resolve, reject) => {
-    const dataViewsContract = getDataViews();
-    dataViewsContract
-      .find('*', maxNumber)
-      .then((dataViews) => {
-        const sortedDataViews = dataViews.sort((a, b) => a.title.localeCompare(b.title));
-        resolve(sortedDataViews);
-      })
-      .catch((resp) => {
-        reject(resp);
-      });
-  });
+export async function loadDataViewListItems() {
+  const dataViewsContract = getDataViews();
+  return (await dataViewsContract.getIdsWithTitle()).sort((a, b) => a.title.localeCompare(b.title));
 }
 
 function extractDescription(job, newJobData) {

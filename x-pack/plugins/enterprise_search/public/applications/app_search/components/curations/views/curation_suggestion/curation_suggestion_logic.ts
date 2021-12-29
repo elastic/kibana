@@ -79,8 +79,9 @@ export const CurationSuggestionLogic = kea<
       const { engineName } = EngineLogic.values;
 
       try {
-        const suggestionResponse = await http.get(
-          `/internal/app_search/engines/${engineName}/search_relevance_suggestions/${props.query}`,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const suggestionResponse = await http.get<any>(
+          `/internal/app_search/engines/${engineName}/adaptive_relevance/suggestions/${props.query}`,
           {
             query: {
               type: 'curation',
@@ -250,7 +251,7 @@ const updateSuggestion = async (
   status: string
 ) => {
   const response = await http.put<{ results: Array<CurationSuggestion | Error> }>(
-    `/internal/app_search/engines/${engineName}/search_relevance_suggestions`,
+    `/internal/app_search/engines/${engineName}/adaptive_relevance/suggestions`,
     {
       body: JSON.stringify([
         {

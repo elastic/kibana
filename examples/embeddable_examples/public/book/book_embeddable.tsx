@@ -113,7 +113,7 @@ export class BookEmbeddable
   }
 
   public async reload() {
-    this.attributes = await this.attributeService.unwrapAttributes(this.input);
+    this.attributes = (await this.attributeService.unwrapAttributes(this.input)).attributes;
 
     this.updateOutput({
       attributes: this.attributes,

@@ -112,8 +112,7 @@ const setup = async (opts: SetupOpts = {}) => {
   return { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToCopy };
 };
 
-// flaky https://github.com/elastic/kibana/issues/96708
-describe.skip('CopyToSpaceFlyout', () => {
+describe('CopyToSpaceFlyout', () => {
   it('waits for spaces to load', async () => {
     const { wrapper } = await setup({ returnBeforeSpacesLoad: true });
 

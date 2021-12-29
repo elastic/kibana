@@ -7,10 +7,13 @@
 import type { ReactElement } from 'react';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { NoArgCallback } from '@elastic/eui';
 import { EuiTourStep, EuiLink, EuiText } from '@elastic/eui';
+import { useTheme } from 'styled-components';
+
+import type { EuiTheme } from '../../../../../src/plugins/kibana_react/common';
 
 import { useStartServices } from '../hooks';
 
@@ -26,7 +29,7 @@ export const AddAgentHelpPopover = ({
   closePopover: NoArgCallback<void>;
 }) => {
   const { docLinks } = useStartServices();
-
+  const theme = useTheme() as EuiTheme;
   const optionalProps: { offset?: number } = {};
 
   if (offset !== undefined) {
@@ -55,6 +58,7 @@ export const AddAgentHelpPopover = ({
           />
         </EuiText>
       }
+      zIndex={theme.eui.euiZLevel1 - 1} // put popover behind any modals that happen to be open
       isStepOpen={isOpen}
       minWidth={300}
       onFinish={() => {}}

@@ -45,7 +45,7 @@ export function Synopsis({
       onClick={onClick}
       href={url}
       data-test-subj={`homeSynopsisLink${id.toLowerCase()}`}
-      betaBadgeLabel={isBeta ? 'Beta' : null}
+      betaBadgeProps={{ label: isBeta ? 'Beta' : null }}
       titleElement="h3"
     />
   );

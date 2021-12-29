@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { get, includes } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { HttpStart, IHttpFetchError } from 'kibana/public';
+import { HttpStart, IHttpFetchError, ResponseErrorBody } from 'kibana/public';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { Legacy } from '../legacy_shims';
 import { SetupModeEnterButton } from '../components/setup_mode/enter_button';
@@ -23,7 +23,7 @@ function isOnPage(hash: string) {
 
 let globalState: GlobalState;
 let httpService: HttpStart;
-let errorHandler: (error: IHttpFetchError) => void;
+let errorHandler: (error: IHttpFetchError<ResponseErrorBody>) => void;
 
 interface ISetupModeState {
   enabled: boolean;
@@ -162,7 +162,7 @@ export const setSetupModeMenuItem = () => {
 export const initSetupModeState = async (
   state: GlobalState,
   http: HttpStart,
-  handleErrors: (error: IHttpFetchError) => void,
+  handleErrors: (error: IHttpFetchError<ResponseErrorBody>) => void,
   callback?: () => void
 ) => {
   globalState = state;

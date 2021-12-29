@@ -4,13 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { synthtrace } from '../../../synthtrace';
+import { opbeans } from '../../fixtures/synthtrace/opbeans';
+
+const start = '2021-10-10T00:00:00.000Z';
+const end = '2021-10-10T00:15:00.000Z';
 
 const timeRange = {
-  rangeFrom: Cypress.env('START_DATE'),
-  rangeTo: Cypress.env('END_DATE'),
+  rangeFrom: start,
+  rangeTo: end,
 };
 
 describe('Dependencies', () => {
+  before(async () => {
+    await synthtrace.index(
+      opbeans({
+        from: new Date(start).getTime(),
+        to: new Date(end).getTime(),
+      })
+    );
+  });
+
+  after(async () => {
+    await synthtrace.clean();
+  });
+
   beforeEach(() => {
     cy.loginAsReadOnlyUser();
   });
@@ -40,21 +58,21 @@ describe('Dependencies', () => {
       cy.get('[data-test-subj="throughputChart"]');
       cy.get('[data-test-subj="errorRateChart"]');
 
-      cy.contains('opbeans-python').click({ force: true });
+      cy.contains('opbeans-java').click({ force: true });
 
-      cy.contains('h1', 'opbeans-python');
+      cy.contains('h1', 'opbeans-java');
     });
   });
 
   describe('service overview page', () => {
     it('shows dependency information and you can navigate to a page for a dependency', () => {
       cy.visit(
-        `/app/apm/services/opbeans-python/overview?${new URLSearchParams(
+        `/app/apm/services/opbeans-java/overview?${new URLSearchParams(
           timeRange
         )}`
       );
 
-      cy.contains('postgresql').click({ force: true });
+      cy.contains('a', 'postgresql').click({ force: true });
 
       cy.contains('h1', 'postgresql');
     });
@@ -63,7 +81,7 @@ describe('Dependencies', () => {
   describe('service dependencies tab', () => {
     it('shows dependency information and you can navigate to a page for a dependency', () => {
       cy.visit(
-        `/app/apm/services/opbeans-python/overview?${new URLSearchParams(
+        `/app/apm/services/opbeans-java/overview?${new URLSearchParams(
           timeRange
         )}`
       );
@@ -72,7 +90,7 @@ describe('Dependencies', () => {
 
       cy.contains('Time spent by dependency');
 
-      cy.contains('postgresql').click({ force: true });
+      cy.contains('a', 'postgresql').click({ force: true });
 
       cy.contains('h1', 'postgresql');
     });

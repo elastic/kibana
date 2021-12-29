@@ -16,7 +16,7 @@ import {
   EuiPageContentBody,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
 import { getJobCreatorTitle } from '../../common/job_creator/util/general';
@@ -55,7 +55,7 @@ export interface PageProps {
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const mlContext = useMlContext();
   const jobCreator = jobCreatorFactory(jobType)(
-    mlContext.currentIndexPattern,
+    mlContext.currentDataView,
     mlContext.currentSavedSearch,
     mlContext.combinedQuery
   );
@@ -184,7 +184,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   chartInterval.setMaxBars(MAX_BARS);
   chartInterval.setInterval('auto');
 
-  const chartLoader = new ChartLoader(mlContext.currentIndexPattern, mlContext.combinedQuery);
+  const chartLoader = new ChartLoader(mlContext.currentDataView, mlContext.combinedQuery);
 
   const jobValidator = new JobValidator(jobCreator);
 

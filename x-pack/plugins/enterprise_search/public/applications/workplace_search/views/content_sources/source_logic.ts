@@ -39,10 +39,20 @@ export interface SourceActions {
     sourceId: string;
     source: ContentSourceFullData;
   };
+  updateContentSourceConfiguration(
+    sourceId: string,
+    source: SourceUpdatePayload
+  ): {
+    sourceId: string;
+    source: ContentSourceFullData;
+  };
   resetSourceState(): void;
   removeContentSource(sourceId: string): { sourceId: string };
   initializeSource(sourceId: string): { sourceId: string };
   setButtonNotLoading(): void;
+  setStagedPrivateKey(stagedPrivateKey: string | null): string | null;
+  setConfigurationUpdateButtonNotLoading(): void;
+  showDiagnosticDownloadButton(): void;
 }
 
 interface SourceValues {
@@ -50,9 +60,12 @@ interface SourceValues {
   dataLoading: boolean;
   sectionLoading: boolean;
   buttonLoading: boolean;
+  diagnosticDownloadButtonVisible: boolean;
   contentItems: SourceContentItem[];
   contentMeta: Meta;
   contentFilterValue: string;
+  stagedPrivateKey: string | null;
+  isConfigurationUpdateButtonLoading: boolean;
 }
 
 interface SearchResultsResponse {
@@ -62,6 +75,7 @@ interface SearchResultsResponse {
 
 interface SourceUpdatePayload {
   name?: string;
+  private_key?: string | null;
   indexing?: {
     enabled?: boolean;
     features?: {
@@ -85,11 +99,18 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     initializeSourceSynchronization: (sourceId: string) => ({ sourceId }),
     searchContentSourceDocuments: (sourceId: string) => ({ sourceId }),
     updateContentSource: (sourceId: string, source: SourceUpdatePayload) => ({ sourceId, source }),
+    updateContentSourceConfiguration: (sourceId: string, source: SourceUpdatePayload) => ({
+      sourceId,
+      source,
+    }),
     removeContentSource: (sourceId: string) => ({
       sourceId,
     }),
     resetSourceState: () => true,
     setButtonNotLoading: () => false,
+    setStagedPrivateKey: (stagedPrivateKey: string) => stagedPrivateKey,
+    setConfigurationUpdateButtonNotLoading: () => false,
+    showDiagnosticDownloadButton: true,
   },
   reducers: {
     contentSource: [
@@ -129,6 +150,13 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         setSearchResults: () => false,
       },
     ],
+    diagnosticDownloadButtonVisible: [
+      false,
+      {
+        showDiagnosticDownloadButton: () => true,
+        initializeSource: () => false,
+      },
+    ],
     contentItems: [
       [],
       {
@@ -150,6 +178,20 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         resetSourceState: () => '',
       },
     ],
+    stagedPrivateKey: [
+      null,
+      {
+        setStagedPrivateKey: (_, stagedPrivateKey) => stagedPrivateKey,
+        setContentSource: () => null,
+      },
+    ],
+    isConfigurationUpdateButtonLoading: [
+      false,
+      {
+        updateContentSourceConfiguration: () => true,
+        setConfigurationUpdateButtonNotLoading: () => false,
+      },
+    ],
   },
   listeners: ({ actions, values }) => ({
     initializeSource: async ({ sourceId }) => {
@@ -159,13 +201,18 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         : `/internal/workplace_search/account/sources/${sourceId}`;
 
       try {
-        const response = await HttpLogic.values.http.get(route);
+        const response = await HttpLogic.values.http.get<
+          ContentSourceFullData & { errors?: string }
+        >(route);
         actions.setContentSource(response);
         if (response.isFederatedSource) {
           actions.initializeFederatedSummary(sourceId);
         }
         if (response.errors) {
           setErrorMessage(response.errors);
+          if (errorsHaveDiagnosticBundleString(response.errors as unknown as string[])) {
+            actions.showDiagnosticDownloadButton();
+          }
         } else {
           clearFlashMessages();
         }
@@ -186,7 +233,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
     initializeFederatedSummary: async ({ sourceId }) => {
       const route = `/internal/workplace_search/account/sources/${sourceId}/federated_summary`;
       try {
-        const response = await HttpLogic.values.http.get(route);
+        const response = await HttpLogic.values.http.get<{ summary: DocumentSummaryItem[] }>(route);
         actions.onUpdateSummary(response.summary);
       } catch (e) {
         flashAPIErrors(e);
@@ -206,7 +253,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
       } = values;
 
       try {
-        const response = await HttpLogic.values.http.post(route, {
+        const response = await HttpLogic.values.http.post<SearchResultsResponse>(route, {
           body: JSON.stringify({ query, page }),
         });
         actions.setSearchResults(response);
@@ -221,7 +268,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         : `/internal/workplace_search/account/sources/${sourceId}/settings`;
 
       try {
-        const response = await HttpLogic.values.http.patch(route, {
+        const response = await HttpLogic.values.http.patch<{ name: string }>(route, {
           body: JSON.stringify({ content_source: source }),
         });
         if (source.name) {
@@ -229,6 +276,26 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         }
       } catch (e) {
         flashAPIErrors(e);
+      }
+    },
+    updateContentSourceConfiguration: async ({ sourceId, source }) => {
+      const { isOrganization } = AppLogic.values;
+      const route = isOrganization
+        ? `/internal/workplace_search/org/sources/${sourceId}/settings`
+        : `/internal/workplace_search/account/sources/${sourceId}/settings`;
+
+      try {
+        const response = await HttpLogic.values.http.patch<ContentSourceFullData>(route, {
+          body: JSON.stringify({ content_source: source }),
+        });
+
+        actions.setContentSource(response);
+
+        flashSuccessToast('Content source configuration was updated.');
+      } catch (e) {
+        flashAPIErrors(e);
+      } finally {
+        actions.setConfigurationUpdateButtonNotLoading();
       }
     },
     removeContentSource: async ({ sourceId }) => {
@@ -239,7 +306,7 @@ export const SourceLogic = kea<MakeLogicType<SourceValues, SourceActions>>({
         : `/internal/workplace_search/account/sources/${sourceId}`;
 
       try {
-        const response = await HttpLogic.values.http.delete(route);
+        const response = await HttpLogic.values.http.delete<{ name: string }>(route);
         KibanaLogic.values.navigateToUrl(getSourcesPath(SOURCES_PATH, isOrganization));
         flashSuccessToast(
           i18n.translate(
@@ -289,3 +356,8 @@ const setPage = (state: Meta, page: number) => ({
     current: page,
   },
 });
+
+const errorsHaveDiagnosticBundleString = (errors: string[]) => {
+  const ERROR_SUBSTRING = 'Check diagnostic bundle for details';
+  return errors.find((e) => e.includes(ERROR_SUBSTRING));
+};

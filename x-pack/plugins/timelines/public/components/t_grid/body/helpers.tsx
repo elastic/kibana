@@ -188,10 +188,10 @@ export const allowSorting = ({
     'kibana.alert.rule.output_index',
     'kibana.alert.rule.query',
     'kibana.alert.rule.references',
-    'kibana.alert.rule.risk_score',
+    'kibana.alert.risk_score',
     'kibana.alert.rule.rule_id',
     'kibana.alert.rule.saved_id',
-    'kibana.alert.rule.severity',
+    'kibana.alert.severity',
     'kibana.alert.rule.size',
     'kibana.alert.rule.tags',
     'kibana.alert.rule.threat',
@@ -236,3 +236,12 @@ export const addBuildingBlockStyle = (
     });
   }
 };
+
+/** Returns true when the specified column has cell actions */
+export const hasCellActions = ({
+  columnId,
+  disabledCellActions,
+}: {
+  columnId: string;
+  disabledCellActions: string[];
+}) => !disabledCellActions.includes(columnId);

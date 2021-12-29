@@ -396,6 +396,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'visualization:visualize:legacyHeatmapChartsLibrary': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'doc_table:legacy': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -420,6 +424,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:enableComparisonByDefault': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'banners:placement': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
@@ -437,6 +445,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'labs:canvas:enable_ui': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'labs:canvas:byValueEmbeddable': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

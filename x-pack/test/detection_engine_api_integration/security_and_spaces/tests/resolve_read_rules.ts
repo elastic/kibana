@@ -18,19 +18,20 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
 
   describe('resolve_read_rules', () => {
     describe('reading rules', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
         await esArchiver.load(
           'x-pack/test/functional/es_archives/security_solution/resolve_read_rules/7_14'
         );
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/resolve_read_rules/7_14'
         );

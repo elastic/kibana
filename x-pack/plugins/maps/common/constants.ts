@@ -36,8 +36,6 @@ export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
 // Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
 export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__';
 
-export const MVT_TOKEN_PARAM_NAME = 'token';
-
 export function getNewMapPath() {
   return `/${MAPS_APP_PATH}/${MAP_PATH}`;
 }
@@ -49,12 +47,12 @@ export function getEditPath(id: string | undefined) {
 }
 
 export enum LAYER_TYPE {
-  TILE = 'TILE',
-  VECTOR = 'VECTOR',
-  VECTOR_TILE = 'VECTOR_TILE', // for static display of mvt vector tiles with a mapbox stylesheet. Does not support any ad-hoc configurations. Used for consuming EMS vector tiles.
+  RASTER_TILE = 'RASTER_TILE',
+  GEOJSON_VECTOR = 'GEOJSON_VECTOR',
+  EMS_VECTOR_TILE = 'EMS_VECTOR_TILE',
   HEATMAP = 'HEATMAP',
   BLENDED_VECTOR = 'BLENDED_VECTOR',
-  TILED_VECTOR = 'TILED_VECTOR', // similar to a regular vector-layer, but it consumes the data as .mvt tilea iso GeoJson. It supports similar ad-hoc configurations like a regular vector layer (E.g. using IVectorStyle), although there is some loss of functionality  e.g. does not support term joining
+  MVT_VECTOR = 'MVT_VECTOR',
 }
 
 export enum SOURCE_TYPES {
@@ -85,7 +83,6 @@ export const SOURCE_DATA_REQUEST_ID = 'source';
 export const SOURCE_META_DATA_REQUEST_ID = `${SOURCE_DATA_REQUEST_ID}_${META_DATA_REQUEST_ID_SUFFIX}`;
 export const SOURCE_FORMATTERS_DATA_REQUEST_ID = `${SOURCE_DATA_REQUEST_ID}_${FORMATTERS_DATA_REQUEST_ID_SUFFIX}`;
 export const SOURCE_BOUNDS_DATA_REQUEST_ID = `${SOURCE_DATA_REQUEST_ID}_bounds`;
-export const SUPPORTS_FEATURE_EDITING_REQUEST_ID = 'SUPPORTS_FEATURE_EDITING_REQUEST_ID';
 
 export const MIN_ZOOM = 0;
 export const MAX_ZOOM = 24;
@@ -175,7 +172,6 @@ export enum GRID_RESOLUTION {
   SUPER_FINE = 'SUPER_FINE',
 }
 
-export const SUPER_FINE_ZOOM_DELTA = 7; // (2 ^ SUPER_FINE_ZOOM_DELTA) ^ 2 =  number of cells in a given tile
 export const GEOTILE_GRID_AGG_NAME = 'gridSplit';
 export const GEOCENTROID_AGG_NAME = 'gridCentroid';
 

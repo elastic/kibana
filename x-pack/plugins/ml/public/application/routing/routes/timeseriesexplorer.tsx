@@ -65,11 +65,17 @@ export const timeSeriesExplorerRouteFactory = (
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { context, results } = useResolver(undefined, undefined, deps.config, {
-    ...basicResolvers(deps),
-    jobs: mlJobService.loadJobsWrapper,
-    jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
-  });
+  const { context, results } = useResolver(
+    undefined,
+    undefined,
+    deps.config,
+    deps.dataViewsContract,
+    {
+      ...basicResolvers(deps),
+      jobs: mlJobService.loadJobsWrapper,
+      jobsWithTimeRange: () => ml.jobs.jobsWithTimerange(getDateFormatTz()),
+    }
+  );
   const annotationUpdatesService = useMemo(() => new AnnotationUpdatesService(), []);
 
   return (

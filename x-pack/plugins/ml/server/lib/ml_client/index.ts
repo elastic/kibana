@@ -7,4 +7,4 @@
 
 export { getMlClient } from './ml_client';
 export { MLJobNotFound } from './errors';
-export { MlClient } from './types';
+export type { MlClient } from './types';

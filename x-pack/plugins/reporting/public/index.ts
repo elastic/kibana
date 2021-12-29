@@ -17,7 +17,6 @@ export interface ReportingSetup {
 
 export type ReportingStart = ReportingSetup;
 
-export { constants } from '../common';
 export { ReportingAPIClient, ReportingPublicPlugin as Plugin };
 
 export function plugin(initializerContext: PluginInitializerContext) {

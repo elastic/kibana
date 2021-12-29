@@ -5,10 +5,8 @@
   // Lighten the border color for all states
   border-color: $euiBorderColor !important; // sass-lint:disable-line no-important
 
-  @include kbnThemeStyle('v8') {
-    &[class*='--text'] {
-      border-width: $euiBorderWidthThin;
-      border-style: solid;
-    }
+  &[class*='--text'] {
+    border-width: $euiBorderWidthThin;
+    border-style: solid;
   }
 }

@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import { EuiBasicTable as _EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import styled from 'styled-components';
 import { Case, SubCase } from '../../containers/types';
 import { CasesColumns } from './columns';
-import { AssociationType } from '../../../common';
+import { AssociationType } from '../../../common/api';
 
 type ExpandedRowMap = Record<string, Element> | {};
 
-const EuiBasicTable: any = _EuiBasicTable;
+// @ts-expect-error TS2769
 const BasicTable = styled(EuiBasicTable)`
   thead {
     display: none;

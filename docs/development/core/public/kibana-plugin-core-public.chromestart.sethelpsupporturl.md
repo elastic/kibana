@@ -16,9 +16,9 @@ setHelpSupportUrl(url: string): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  url | <code>string</code> |  |
+|  url | string | The updated support URL |
 
 <b>Returns:</b>
 
-`void`
+void
 

@@ -118,20 +118,6 @@
       },
       {
         "parentPluginId": "osquery",
-        "id": "def-common.DEFAULT_MAX_TABLE_QUERY_SIZE",
-        "type": "number",
-        "tags": [],
-        "label": "DEFAULT_MAX_TABLE_QUERY_SIZE",
-        "description": [],
-        "signature": [
-          "10000"
-        ],
-        "path": "x-pack/plugins/osquery/common/constants.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "osquery",
         "id": "def-common.OSQUERY_INTEGRATION_NAME",
         "type": "string",
         "tags": [],

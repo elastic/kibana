@@ -44,7 +44,9 @@ export const OptionsListComponent = ({
     actions: { replaceSelection },
   } = useReduxEmbeddableContext<OptionsListEmbeddableInput, typeof optionsListReducers>();
   const dispatch = useEmbeddableDispatch();
-  const { controlStyle, selectedOptions, singleSelect } = useEmbeddableSelector((state) => state);
+  const { controlStyle, selectedOptions, singleSelect, id } = useEmbeddableSelector(
+    (state) => state
+  );
 
   // useStateObservable to get component state from Embeddable
   const { availableOptions, loading } = useStateObservable<OptionsListComponentState>(
@@ -90,6 +92,7 @@ export const OptionsListComponent = ({
         'optionsList--filterBtnSingle': controlStyle !== 'twoLine',
         'optionsList--filterBtnPlaceholder': !selectedOptionsCount,
       })}
+      data-test-subj={`optionsList-control-${id}`}
       onClick={() => setIsPopoverOpen((openState) => !openState)}
       isSelected={isPopoverOpen}
       numActiveFilters={selectedOptionsCount}
@@ -108,8 +111,8 @@ export const OptionsListComponent = ({
       <EuiPopover
         button={button}
         isOpen={isPopoverOpen}
-        className="optionsList--popoverOverride"
-        anchorClassName="optionsList--anchorOverride"
+        className="optionsList__popoverOverride"
+        anchorClassName="optionsList__anchorOverride"
         closePopover={() => setIsPopoverOpen(false)}
         panelPaddingSize="none"
         anchorPosition="downCenter"

@@ -65,7 +65,7 @@ export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => 
       ? `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}/${pipelineHash}`
       : `../api/monitoring/v1/clusters/${clusterUuid}/logstash/pipeline/${pipelineId}`;
 
-    const response = await services.http?.fetch(url, {
+    const response = await services.http?.fetch<any>(url, {
       method: 'POST',
       body: JSON.stringify({
         ccs,

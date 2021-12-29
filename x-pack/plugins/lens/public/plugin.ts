@@ -35,7 +35,7 @@ import type { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugi
 import type { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
 import { EmbeddableStateTransfer } from '../../../../src/plugins/embeddable/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
-import { IndexPatternFieldEditorStart } from '../../../../src/plugins/index_pattern_field_editor/public';
+import { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_field_editor/public';
 import type {
   IndexPatternDatasource as IndexPatternDatasourceType,
   IndexPatternDatasourceSetupPlugins,
@@ -57,6 +57,7 @@ import type {
   PieVisualizationPluginSetupPlugins,
 } from './pie_visualization';
 import type { HeatmapVisualization as HeatmapVisualizationType } from './heatmap_visualization';
+import type { GaugeVisualization as GaugeVisualizationType } from './visualizations/gauge';
 import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 
 import { AppNavLinkStatus } from '../../../../src/core/public';
@@ -109,7 +110,7 @@ export interface LensPluginStartDependencies {
   charts: ChartsPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   presentationUtil: PresentationUtilPluginStart;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
   inspector: InspectorStartContract;
   spaces: SpacesPluginStart;
   usageCollection?: UsageCollectionStart;
@@ -169,6 +170,7 @@ export class LensPlugin {
   private metricVisualization: MetricVisualizationType | undefined;
   private pieVisualization: PieVisualizationType | undefined;
   private heatmapVisualization: HeatmapVisualizationType | undefined;
+  private gaugeVisualization: GaugeVisualizationType | undefined;
 
   private stopReportManager?: () => void;
 
@@ -201,6 +203,8 @@ export class LensPlugin {
         plugins.fieldFormats.deserialize
       );
 
+      const visualizationMap = await this.editorFrameService!.loadVisualizations();
+
       return {
         attributeService: getLensAttributeService(coreStart, plugins),
         capabilities: coreStart.application.capabilities,
@@ -208,11 +212,13 @@ export class LensPlugin {
         timefilter: plugins.data.query.timefilter.timefilter,
         expressionRenderer: plugins.expressions.ReactExpressionRenderer,
         documentToExpression: this.editorFrameService!.documentToExpression,
+        visualizationMap,
         indexPatternService: plugins.data.indexPatterns,
         uiActions: plugins.uiActions,
         usageCollection,
         inspector: plugins.inspector,
         spaces: plugins.spaces,
+        theme: core.theme,
       };
     };
 
@@ -304,6 +310,7 @@ export class LensPlugin {
       MetricVisualization,
       PieVisualization,
       HeatmapVisualization,
+      GaugeVisualization,
     } = await import('./async_services');
     this.datatableVisualization = new DatatableVisualization();
     this.editorFrameService = new EditorFrameService();
@@ -312,6 +319,7 @@ export class LensPlugin {
     this.metricVisualization = new MetricVisualization();
     this.pieVisualization = new PieVisualization();
     this.heatmapVisualization = new HeatmapVisualization();
+    this.gaugeVisualization = new GaugeVisualization();
 
     const editorFrameSetupInterface = this.editorFrameService.setup();
 
@@ -333,6 +341,7 @@ export class LensPlugin {
     this.metricVisualization.setup(core, dependencies);
     this.pieVisualization.setup(core, dependencies);
     this.heatmapVisualization.setup(core, dependencies);
+    this.gaugeVisualization.setup(core, dependencies);
   }
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies): LensPublicStart {

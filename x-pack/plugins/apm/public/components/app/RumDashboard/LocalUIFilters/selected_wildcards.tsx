@@ -9,7 +9,7 @@ import * as React from 'react';
 import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { FilterValueLabel } from '../../../../../../observability/public';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { TRANSACTION_URL } from '../../../../../common/elasticsearch_fieldnames';
 import { IndexPattern } from '../../../../../../../../src/plugins/data_views/common';
@@ -22,7 +22,7 @@ export function SelectedWildcards({ indexPattern }: Props) {
 
   const {
     urlParams: { searchTerm },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const updateSearchTerm = useCallback(
     (searchTermN: string) => {

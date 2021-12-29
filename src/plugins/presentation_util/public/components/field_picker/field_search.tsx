@@ -19,9 +19,10 @@ import {
   EuiOutsideClickDetector,
   EuiFilterButton,
   EuiSpacer,
+  EuiPopoverTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { FieldIcon } from '../../../../kibana_react/public';
+import { FieldIcon } from '@kbn/react-field';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface Props {
   onSearchChange: (value: string) => void;
@@ -73,7 +74,7 @@ export function FieldSearch({
         <EuiFlexItem>
           <EuiFieldSearch
             aria-label={searchPlaceholder}
-            data-test-subj="fieldFilterSearchInput"
+            data-test-subj="field-search-input"
             fullWidth
             onChange={(event) => onSearchChange(event.currentTarget.value)}
             placeholder={searchPlaceholder}
@@ -87,7 +88,6 @@ export function FieldSearch({
           <EuiPopover
             panelClassName="euiFilterGroup__popoverPanel"
             panelPaddingSize="none"
-            anchorPosition="rightUp"
             display="block"
             isOpen={isPopoverOpen}
             closePopover={() => {
@@ -95,6 +95,11 @@ export function FieldSearch({
             }}
             button={buttonContent}
           >
+            <EuiPopoverTitle paddingSize="s">
+              {i18n.translate('presentationUtil.fieldSearch.filterByTypeLabel', {
+                defaultMessage: 'Filter by type',
+              })}
+            </EuiPopoverTitle>
             <EuiContextMenuPanel
               watchedItemProps={['icon', 'disabled']}
               items={(availableFieldTypes as string[]).map((type) => (
@@ -110,10 +115,12 @@ export function FieldSearch({
                     }
                   }}
                 >
-                  <span>
-                    <FieldIcon type={type} label={type} />
-                    {type}
-                  </span>
+                  <EuiFlexGroup gutterSize="xs" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <FieldIcon type={type} label={type} />
+                    </EuiFlexItem>
+                    <EuiFlexItem>{type}</EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiContextMenuItem>
               ))}
             />

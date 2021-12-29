@@ -7,7 +7,7 @@
 
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiInMemoryTable, EuiButton, EuiLink, EuiBasicTableColumn } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';

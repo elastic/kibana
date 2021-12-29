@@ -8,7 +8,7 @@
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Space } from '../../../common';
 import { isReservedSpace } from '../../../common';

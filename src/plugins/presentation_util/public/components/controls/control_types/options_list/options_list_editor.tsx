@@ -70,7 +70,7 @@ export const OptionsListEditor = ({
   const { dataView, fieldName } = state;
   return (
     <>
-      <EuiFormRow fullWidth label={OptionsListStrings.editor.getIndexPatternTitle()}>
+      <EuiFormRow fullWidth label={OptionsListStrings.editor.getDataViewTitle()}>
         <DataViewPicker
           dataViews={state.dataViewListItems}
           selectedDataViewId={dataView?.id}

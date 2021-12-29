@@ -51,7 +51,7 @@ export const ProgressIndicator: FunctionComponent<ProgressIndicatorProps> = ({ o
     } catch (error) {
       const { response, body = {} } = error as IHttpFetchError;
       isAvailable = response ? response.status < 500 : undefined;
-      isPastPreboot = isKibanaPastPreboot(response, body);
+      isPastPreboot = isKibanaPastPreboot(response, body as StatusResponse);
     }
     return isAvailable === true && isPastPreboot
       ? 'complete'

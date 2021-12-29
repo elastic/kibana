@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiButton } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import { PolicySelectionItem, PoliciesSelector } from '../policies_selector';
 import { ImmutableArray, PolicyData } from '../../../../common/endpoint/types';
-import { useEndpointPrivileges } from '../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 export interface SearchExceptionsProps {
   defaultValue?: string;
@@ -34,7 +34,7 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
     defaultExcludedPolicies,
     hideRefreshButton = false,
   }) => {
-    const { isPlatinumPlus } = useEndpointPrivileges();
+    const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
     const [query, setQuery] = useState<string>(defaultValue);
     const [includedPolicies, setIncludedPolicies] = useState<string>(defaultIncludedPolicies || '');
     const [excludedPolicies, setExcludedPolicies] = useState<string>(defaultExcludedPolicies || '');
@@ -92,7 +92,7 @@ export const SearchExceptions = memo<SearchExceptionsProps>(
             data-test-subj="searchField"
           />
         </EuiFlexItem>
-        {isPlatinumPlus && hasPolicyFilter && policyList ? (
+        {canCreateArtifactsByPolicy && hasPolicyFilter && policyList ? (
           <EuiFlexItem grow={false}>
             <PoliciesSelector
               policies={policyList}

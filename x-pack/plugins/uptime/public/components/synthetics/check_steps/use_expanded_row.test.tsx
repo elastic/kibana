@@ -51,6 +51,10 @@ describe('useExpandedROw', () => {
         step: {
           name: 'load page',
           index: 1,
+          status: 'succeeded',
+          duration: {
+            us: 9999,
+          },
         },
       },
     },
@@ -73,6 +77,10 @@ describe('useExpandedROw', () => {
         step: {
           name: 'go to login',
           index: 2,
+          status: 'succeeded',
+          duration: {
+            us: 9999,
+          },
         },
       },
     },
@@ -228,6 +236,9 @@ const browserConsoleStep = {
   _id: 'IvT1oXwB5ds00bB_FVXP',
   observer: {
     hostname: '16Elastic',
+    geo: {
+      name: 'au-heartbeat',
+    },
   },
   agent: {
     name: '16Elastic',

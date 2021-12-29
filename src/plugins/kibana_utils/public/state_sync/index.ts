@@ -10,7 +10,7 @@
  * State syncing utilities are a set of helpers for syncing your application state
  * with browser URL or browser storage.
  *
- * They are designed to work together with {@link https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_containers | state containers}. But state containers are not required.
+ * They are designed to work together with {@link https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_containers | state containers}. But state containers are not required.
  *
  * State syncing utilities include:
  *
@@ -22,22 +22,19 @@
  * Listens for state updates in the URL and pushes them back to state.
  *   * {@link ISessionStorageStateStorage} - Serializes state and persists it to browser storage.
  *
- * Refer {@link https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync | here} for a complete guide and examples.
+ * Refer {@link https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_sync | here} for a complete guide and examples.
  * @packageDocumentation
  */
 
-export {
-  createSessionStorageStateStorage,
-  createKbnUrlStateStorage,
+export type {
   IKbnUrlStateStorage,
   ISessionStorageStateStorage,
   IStateStorage,
 } from './state_sync_state_storage';
-export { IStateSyncConfig, INullableBaseStateContainer } from './types';
 export {
-  syncState,
-  syncStates,
-  StopSyncStateFnType,
-  StartSyncStateFnType,
-  ISyncStateRef,
-} from './state_sync';
+  createSessionStorageStateStorage,
+  createKbnUrlStateStorage,
+} from './state_sync_state_storage';
+export type { IStateSyncConfig, INullableBaseStateContainer } from './types';
+export type { StopSyncStateFnType, StartSyncStateFnType, ISyncStateRef } from './state_sync';
+export { syncState, syncStates } from './state_sync';

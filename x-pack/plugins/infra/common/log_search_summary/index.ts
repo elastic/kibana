@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { SearchSummaryBucket } from './log_search_summary';
+export type { SearchSummaryBucket } from './log_search_summary';

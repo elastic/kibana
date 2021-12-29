@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AbstractTMSSource } from '../tms_source';
+import { AbstractSource } from '../source';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import { WmsClient } from './wms_client';
@@ -16,7 +16,7 @@ export const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {
   defaultMessage: 'Web Map Service',
 });
 
-export class WMSSource extends AbstractTMSSource {
+export class WMSSource extends AbstractSource {
   static type = SOURCE_TYPES.WMS;
 
   static createDescriptor({ serviceUrl, layers, styles }) {

@@ -22,7 +22,7 @@ export const usePacks = ({
   return useQuery(
     [PACKS_ID, { pageIndex, pageSize, sortField, sortDirection }],
     async () =>
-      http.get('/internal/osquery/packs', {
+      http.get<any>('/internal/osquery/packs', {
         query: { pageIndex, pageSize, sortField, sortDirection },
       }),
     {

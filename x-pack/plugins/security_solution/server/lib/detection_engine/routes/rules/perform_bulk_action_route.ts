@@ -89,8 +89,6 @@ export const performBulkActionRoute = (
                   await enableRule({
                     rule,
                     rulesClient,
-                    ruleStatusClient,
-                    spaceId: context.securitySolution.getSpaceId(),
                   });
                 }
               })
@@ -109,16 +107,10 @@ export const performBulkActionRoute = (
           case BulkAction.delete:
             await Promise.all(
               rules.data.map(async (rule) => {
-                const ruleStatuses = await ruleStatusClient.find({
-                  logsCount: 6,
-                  ruleId: rule.id,
-                  spaceId: context.securitySolution.getSpaceId(),
-                });
                 await deleteRules({
+                  ruleId: rule.id,
                   rulesClient,
                   ruleStatusClient,
-                  ruleStatuses,
-                  id: rule.id,
                 });
               })
             );

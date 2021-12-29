@@ -7,4 +7,5 @@
  */
 
 export { createUsageCollector } from './create_usage_collector';
-export { AUTOCOMPLETE_EVENT_TYPE, AutocompleteUsageCollector } from './types';
+export type { AutocompleteUsageCollector } from './types';
+export { AUTOCOMPLETE_EVENT_TYPE } from './types';

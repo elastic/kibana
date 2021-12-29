@@ -117,7 +117,7 @@
           "\nA HOC which supplies React.Suspense with a fallback component, and a `EuiErrorBoundary` to contain errors."
         ],
         "signature": [
-          "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<R>>"
+          "<P extends {}, R = {}>(Component: React.ComponentType<P>, fallback?: React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) => React.ForwardRefExoticComponent<React.PropsWithoutRef<P> & React.RefAttributes<R>>"
         ],
         "path": "src/plugins/custom_integrations/public/components/index.tsx",
         "deprecated": false,
@@ -148,7 +148,7 @@
               "A fallback component to render while things load; default is `EuiLoadingSpinner`"
             ],
             "signature": [
-              "React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | null"
+              "React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
             ],
             "path": "src/plugins/custom_integrations/public/components/index.tsx",
             "deprecated": false,
@@ -387,7 +387,7 @@
             "label": "categories",
             "description": [],
             "signature": [
-              "(\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"upload_file\" | \"language_client\")[]"
+              "(\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
@@ -400,7 +400,7 @@
             "label": "shipper",
             "description": [],
             "signature": [
-              "\"beats\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\""
+              "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
@@ -434,7 +434,7 @@
           "\nA category applicable to an Integration."
         ],
         "signature": [
-          "\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"upload_file\" | \"language_client\""
+          "\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -460,7 +460,7 @@
           "label": "registerCustomIntegration",
           "description": [],
           "signature": [
-            "(customIntegration: Pick<",
+            "(customIntegration: Omit<",
             {
               "pluginId": "customIntegrations",
               "scope": "common",
@@ -468,7 +468,7 @@
               "section": "def-common.CustomIntegration",
               "text": "CustomIntegration"
             },
-            ", \"shipper\" | \"id\" | \"title\" | \"description\" | \"uiInternalPath\" | \"isBeta\" | \"icons\" | \"categories\" | \"eprOverlap\">) => void"
+            ", \"type\">) => void"
           ],
           "path": "src/plugins/custom_integrations/server/types.ts",
           "deprecated": false,
@@ -481,7 +481,7 @@
               "label": "customIntegration",
               "description": [],
               "signature": [
-                "Pick<",
+                "Omit<",
                 {
                   "pluginId": "customIntegrations",
                   "scope": "common",
@@ -489,7 +489,7 @@
                   "section": "def-common.CustomIntegration",
                   "text": "CustomIntegration"
                 },
-                ", \"shipper\" | \"id\" | \"title\" | \"description\" | \"uiInternalPath\" | \"isBeta\" | \"icons\" | \"categories\" | \"eprOverlap\">"
+                ", \"type\">"
               ],
               "path": "src/plugins/custom_integrations/server/types.ts",
               "deprecated": false,
@@ -646,7 +646,7 @@
             "label": "categories",
             "description": [],
             "signature": [
-              "(\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"upload_file\" | \"language_client\")[]"
+              "(\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
@@ -659,7 +659,7 @@
             "label": "shipper",
             "description": [],
             "signature": [
-              "\"beats\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\""
+              "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
@@ -748,7 +748,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"upload_file\" | \"language_client\""
+              "\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
@@ -769,7 +769,7 @@
           "\nThe list of all available categories."
         ],
         "signature": [
-          "(\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"upload_file\" | \"language_client\")[]"
+          "(\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\")[]"
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -785,7 +785,7 @@
           "\nA category applicable to an Integration."
         ],
         "signature": [
-          "\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"upload_file\" | \"language_client\""
+          "\"custom\" | \"sample_data\" | \"aws\" | \"azure\" | \"cloud\" | \"config_management\" | \"containers\" | \"crm\" | \"datastore\" | \"elastic_stack\" | \"google_cloud\" | \"kubernetes\" | \"languages\" | \"message_queue\" | \"monitoring\" | \"network\" | \"notification\" | \"os_system\" | \"productivity\" | \"security\" | \"support\" | \"ticketing\" | \"version_control\" | \"web\" | \"communications\" | \"file_storage\" | \"language_client\" | \"upload_file\" | \"website_search\" | \"geo\""
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -851,7 +851,7 @@
           "\nThe list of all known shippers."
         ],
         "signature": [
-          "(\"beats\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\")[]"
+          "(\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\")[]"
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -867,7 +867,7 @@
           "\nA shipper-- an internal or external system capable of storing data in ES/Kibana-- applicable to an Integration."
         ],
         "signature": [
-          "\"beats\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\""
+          "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\""
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -1129,13 +1129,23 @@
           },
           {
             "parentPluginId": "customIntegrations",
-            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.upload_file",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.communications",
             "type": "string",
             "tags": [],
-            "label": "upload_file",
+            "label": "communications",
             "description": [
               "// Kibana added"
             ],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.file_storage",
+            "type": "string",
+            "tags": [],
+            "label": "file_storage",
+            "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
           },
@@ -1145,6 +1155,36 @@
             "type": "string",
             "tags": [],
             "label": "language_client",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.upload_file",
+            "type": "string",
+            "tags": [],
+            "label": "upload_file",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.website_search",
+            "type": "string",
+            "tags": [],
+            "label": "website_search",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.INTEGRATION_CATEGORY_DISPLAY.geo",
+            "type": "string",
+            "tags": [],
+            "label": "geo",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
@@ -1170,6 +1210,16 @@
             "type": "string",
             "tags": [],
             "label": "beats",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.SHIPPER_DISPLAY.enterprise_search",
+            "type": "string",
+            "tags": [],
+            "label": "enterprise_search",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false

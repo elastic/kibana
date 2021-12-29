@@ -93,8 +93,10 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     onConfig,
     context,
   }) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const variables = React.useMemo(() => this.getVariableList(context), [context]);
+    const [variables, exampleUrl] = React.useMemo(
+      () => [this.getVariableList(context), this.getExampleUrl(context)],
+      [context]
+    );
 
     return (
       <KibanaContextProvider
@@ -104,6 +106,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       >
         <UrlDrilldownCollectConfig
           variables={variables}
+          exampleUrl={exampleUrl}
           config={config}
           onConfig={onConfig}
           syntaxHelpDocsLink={this.deps.getSyntaxHelpDocsLink()}
@@ -117,7 +120,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
 
   public readonly createConfig = () => ({
     url: {
-      template: 'https://example.com/?{{event.key}}={{event.value}}',
+      template: '',
     },
     openInNewTab: true,
     encodeUrl: true,
@@ -196,5 +199,19 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     const globalVariables = getGlobalVariableList(globalScopeValues);
 
     return [...eventVariables, ...contextVariables, ...globalVariables];
+  };
+
+  public readonly getExampleUrl = (context: ActionFactoryContext): string => {
+    switch (context.triggers[0]) {
+      case SELECT_RANGE_TRIGGER:
+        return 'https://www.example.com/?from={{event.from}}&to={{event.to}}';
+      case CONTEXT_MENU_TRIGGER:
+        return 'https://www.example.com/?panel={{context.panel.title}}';
+      case ROW_CLICK_TRIGGER:
+        return 'https://www.example.com/keys={{event.keys}}&values={{event.values}}';
+      case VALUE_CLICK_TRIGGER:
+      default:
+        return 'https://www.example.com/?{{event.key}}={{event.value}}';
+    }
   };
 }

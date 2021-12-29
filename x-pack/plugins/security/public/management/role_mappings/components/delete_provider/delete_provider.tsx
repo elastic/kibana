@@ -24,10 +24,12 @@ interface Props {
 
 export type DeleteRoleMappings = (
   roleMappings: RoleMapping[],
-  onSuccess?: OnSuccessCallback
+  onSuccess?: OnSuccessCallback,
+  onCancel?: OnCancelCallback
 ) => void;
 
 type OnSuccessCallback = (deletedRoleMappings: string[]) => void;
+type OnCancelCallback = () => void;
 
 export const DeleteProvider: React.FunctionComponent<Props> = ({
   roleMappingsAPI,
@@ -39,10 +41,12 @@ export const DeleteProvider: React.FunctionComponent<Props> = ({
   const [isDeleteInProgress, setIsDeleteInProgress] = useState(false);
 
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
+  const onCancelCallback = useRef<OnCancelCallback | null>(null);
 
   const deleteRoleMappingsPrompt: DeleteRoleMappings = (
     roleMappingsToDelete,
-    onSuccess = () => undefined
+    onSuccess = () => undefined,
+    onCancel = () => undefined
   ) => {
     if (!roleMappingsToDelete || !roleMappingsToDelete.length) {
       throw new Error('No Role Mappings specified for delete');
@@ -50,11 +54,19 @@ export const DeleteProvider: React.FunctionComponent<Props> = ({
     setIsModalOpen(true);
     setRoleMappings(roleMappingsToDelete);
     onSuccessCallback.current = onSuccess;
+    onCancelCallback.current = onCancel;
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setRoleMappings([]);
+  };
+
+  const handleCancelModel = () => {
+    closeModal();
+    if (onCancelCallback.current) {
+      onCancelCallback.current();
+    }
   };
 
   const deleteRoleMappings = async () => {
@@ -161,7 +173,7 @@ export const DeleteProvider: React.FunctionComponent<Props> = ({
                 }
               )
         }
-        onCancel={closeModal}
+        onCancel={handleCancelModel}
         onConfirm={deleteRoleMappings}
         cancelButtonText={i18n.translate(
           'xpack.security.management.roleMappings.deleteRoleMapping.confirmModal.cancelButtonLabel',

@@ -18,7 +18,7 @@ import { IndexDataVisualizerPage as Page } from '../../../datavisualizer/index_b
 
 import { checkBasicLicense } from '../../../license';
 import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
-import { loadIndexPatterns } from '../../../util/index_utils';
+import { cacheDataViewsContract } from '../../../util/index_utils';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 
 export const indexBasedRouteFactory = (
@@ -43,9 +43,9 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
   const { redirectToMlAccessDeniedPage } = deps;
 
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
-  const { context } = useResolver(index, savedSearchId, deps.config, {
+  const { context } = useResolver(index, savedSearchId, deps.config, deps.dataViewsContract, {
     checkBasicLicense,
-    loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
+    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
     checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
   });
 
