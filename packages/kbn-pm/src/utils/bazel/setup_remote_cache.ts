@@ -34,7 +34,8 @@ async function isElasticCommitter() {
 }
 
 export async function setupRemoteCache(repoRootPath: string) {
-  if (!(await isElasticCommitter())) {
+  // The remote cache is only for Elastic employees working locally (CI cache settings are handled elsewhere)
+  if (process.env.CI || !(await isElasticCommitter())) {
     return;
   }
 
