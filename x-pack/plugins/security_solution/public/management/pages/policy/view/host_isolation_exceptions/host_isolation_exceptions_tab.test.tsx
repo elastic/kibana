@@ -119,7 +119,7 @@ describe('Policy details host isolation exceptions tab', () => {
     });
     render();
     expect(getHostIsolationExceptionItemsMock).toHaveBeenLastCalledWith({
-      filter: `((exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")) AND ((exception-list-agnostic.attributes.name:(*my*filter*) OR exception-list-agnostic.attributes.description:(*my*filter*) OR exception-list-agnostic.attributes.entries.value:(*my*filter*)))`,
+      filter: `((exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")) AND ((exception-list-agnostic.attributes.item_id:(*my*filter*) OR exception-list-agnostic.attributes.name:(*my*filter*) OR exception-list-agnostic.attributes.description:(*my*filter*) OR exception-list-agnostic.attributes.entries.value:(*my*filter*)))`,
       http: mockedContext.coreStart.http,
       page: 1,
       perPage: 10,
