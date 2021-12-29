@@ -8,12 +8,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ChromeStart, DocLinksStart } from 'kibana/public';
-import { Filter } from '@kbn/es-query';
+import type { ChromeStart, DocLinksStart } from 'kibana/public';
+import type { Filter } from '@kbn/es-query';
 import { redirectWhenMissing } from '../../../../kibana_utils/public';
 import { VisualizeConstants } from '../../../common/constants';
-import { VisualizeServices, VisualizeEditorVisInstance } from '../types';
 import { convertFromSerializedVis } from '../../utils/saved_visualize_utils';
+import type { VisualizeServices, VisualizeEditorVisInstance } from '../types';
 
 export const addHelpMenuToAppChrome = (chrome: ChromeStart, docLinks: DocLinksStart) => {
   chrome.setHelpExtension({

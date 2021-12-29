@@ -13,18 +13,18 @@ import {
   VisualizeEmbeddableContract,
   VisualizeInput,
 } from 'src/plugins/visualizations/public';
-import { SerializedSearchSourceFields } from 'src/plugins/data/public';
 import { cloneDeep } from 'lodash';
-import { ExpressionValueError } from 'src/plugins/expressions/public';
+import type { SerializedSearchSourceFields } from 'src/plugins/data/public';
+import type { ExpressionValueError } from 'src/plugins/expressions/public';
 import { createVisAsync } from '../../vis_async';
 import { convertToSerializedVis, getSavedVisualization } from '../../utils/saved_visualize_utils';
-import { VisualizeServices } from '../types';
 import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '../../../../kibana_utils/common';
 import {
   getSavedSearch,
   SavedSearch,
   throwErrorOnSavedSearchUrlConflict,
 } from '../../../../discover/public';
+import type { VisualizeServices } from '../types';
 
 function isErrorRelatedToRuntimeFields(error: ExpressionValueError['error']) {
   const originalError = error.original || error;

@@ -34,7 +34,9 @@ jest.mock('../../utils/saved_visualize_utils', () => {
     convertToSerializedVis: jest.fn().mockReturnValue(commonSerializedVisMock),
   };
 });
-const { getSavedVisualization } = jest.requireMock('../../utils/saved_visualize_utils');
+const { getSavedVisualization, convertToSerializedVis } = jest.requireMock(
+  '../../utils/saved_visualize_utils'
+);
 
 jest.mock('../../vis_async', () => ({
   createVisAsync: jest.fn(),
@@ -84,9 +86,11 @@ describe('getVisualizationInstance', () => {
       opts
     );
 
+    expect(getSavedVisualization.mock.calls[0][1]).toBe(opts);
     expect(savedVisMock.searchSourceFields).toEqual({
       index: opts.indexPattern,
     });
+    expect(convertToSerializedVis).toHaveBeenCalledWith(savedVisMock);
     expect(createVisAsync).toHaveBeenCalledWith(
       commonSerializedVisMock.type,
       commonSerializedVisMock
