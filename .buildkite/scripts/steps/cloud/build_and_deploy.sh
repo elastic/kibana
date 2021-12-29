@@ -47,18 +47,20 @@ jq '
   ' .buildkite/scripts/steps/cloud/deploy.json > /tmp/deploy.json
 
 CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
+JSON_FILE=$(mktemp --suffix ".json")
 if [ -z "${CLOUD_DEPLOYMENT_ID}" ];
-  ecctl deployment create --track --output json --file /tmp/deploy.json > target/cloud-create-deployment.json
-  CLOUD_DEPLOYMENT_USERNAME=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' target/cloud-create-deployment.json)
-  CLOUD_DEPLOYMENT_PASSWORD=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' target/cloud-create-deployment.json)
-  CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]' target/cloud-create-deployment.json)
+  ecctl deployment create --track --output json --file /tmp/deploy.json > "$JSON_FILE"
+  CLOUD_DEPLOYMENT_USERNAME=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' "$JSON_FILE")
+  CLOUD_DEPLOYMENT_PASSWORD=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' "$JSON_FILE")
+  CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]' "$JSON_FILE")
 
   echo "Username: $CLOUD_DEPLOYMENT_USERNAME"
   echo ""
   echo "$CLOUD_DEPLOYMENT_STATUS_MESSAGES"
 else
-  ecctl deployment update $CLOUD_DEPLOYMENT_ID --track --output json --file /tmp/deploy.json > target/cloud-update-deployment.json
+  ecctl deployment update $CLOUD_DEPLOYMENT_ID --track --output json --file /tmp/deploy.json > "$JSON_FILE"
 fi
+
 
 # TODO update the annotation to add the deployment details
 # cat << EOF | buildkite-agent annotate --style "info" --context cloud-image
