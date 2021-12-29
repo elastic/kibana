@@ -124,6 +124,25 @@ export function DevToolsSettingsModal(props: Props) {
         <EuiFormRow
           label={
             <FormattedMessage
+              id="console.settingsPage.fetchingDataLabel"
+              defaultMessage="Fetch autocomplete suggestions"
+            />
+          }
+        >
+          <EuiSwitch
+            checked={!polling}
+            label={
+              <FormattedMessage
+                defaultMessage="Fetch once on load"
+                id="console.settingsPage.fetchingOnLoadLabel"
+              />
+            }
+            onChange={() => setPolling(!polling)}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={
+            <FormattedMessage
               id="console.settingsPage.refreshingDataLabel"
               defaultMessage="Refreshing autocomplete suggestions"
             />
