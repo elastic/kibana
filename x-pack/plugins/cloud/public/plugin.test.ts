@@ -10,8 +10,9 @@ import { coreMock } from 'src/core/public/mocks';
 import { homePluginMock } from 'src/plugins/home/public/mocks';
 import { securityMock } from '../../security/public/mocks';
 import { fullStoryApiMock, initializeFullStoryMock } from './plugin.test.mocks';
-import { CloudPlugin, CloudConfigType, loadFullStoryUserId } from './plugin';
+import { CloudPlugin, CloudConfigType } from './plugin';
 import { Observable, Subject } from 'rxjs';
+import { loadUserId } from './custom_events_system';
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {
@@ -481,7 +482,7 @@ describe('Cloud Plugin', () => {
     });
   });
 
-  describe('loadFullStoryUserId', () => {
+  describe('loadUserId', () => {
     let consoleMock: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]]>;
 
     beforeEach(() => {
@@ -493,7 +494,7 @@ describe('Cloud Plugin', () => {
 
     it('returns principal ID when username specified', async () => {
       expect(
-        await loadFullStoryUserId({
+        await loadUserId({
           getCurrentUser: jest.fn().mockResolvedValue({
             username: '1234',
           }),
@@ -504,7 +505,7 @@ describe('Cloud Plugin', () => {
 
     it('returns undefined if getCurrentUser throws', async () => {
       expect(
-        await loadFullStoryUserId({
+        await loadUserId({
           getCurrentUser: jest.fn().mockRejectedValue(new Error(`Oh no!`)),
         })
       ).toBeUndefined();
@@ -512,7 +513,7 @@ describe('Cloud Plugin', () => {
 
     it('returns undefined if getCurrentUser returns undefined', async () => {
       expect(
-        await loadFullStoryUserId({
+        await loadUserId({
           getCurrentUser: jest.fn().mockResolvedValue(undefined),
         })
       ).toBeUndefined();
@@ -520,7 +521,7 @@ describe('Cloud Plugin', () => {
 
     it('returns undefined and logs if username undefined', async () => {
       expect(
-        await loadFullStoryUserId({
+        await loadUserId({
           getCurrentUser: jest.fn().mockResolvedValue({
             username: undefined,
             metadata: { foo: 'bar' },

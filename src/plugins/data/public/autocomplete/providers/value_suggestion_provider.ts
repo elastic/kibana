@@ -7,6 +7,7 @@
  */
 
 import dateMath from '@elastic/datemath';
+import { customEvents } from '@kbn/custom-events';
 import { buildQueryFromFilters } from '@kbn/es-query';
 import { memoize } from 'lodash';
 import { CoreSetup } from 'src/core/public';
@@ -56,7 +57,7 @@ export const setupValueSuggestionProvider = (
   }
 
   const requestSuggestions = memoize(
-    <T = unknown>(
+    <T>(
       index: string,
       field: IFieldType,
       query: string,
@@ -67,8 +68,14 @@ export const setupValueSuggestionProvider = (
       )
     ) => {
       usageCollector?.trackRequest();
+
+      const reportInfo = {
+        timeTookMs: new Date().getTime(),
+        resCount: 0,
+      };
+
       return core.http
-        .fetch<T>(`/api/kibana/suggestions/values/${index}`, {
+        .fetch<string[]>(`/api/kibana/suggestions/values/${index}`, {
           method: 'POST',
           body: JSON.stringify({
             query,
@@ -80,6 +87,11 @@ export const setupValueSuggestionProvider = (
           signal,
         })
         .then((r) => {
+          // need to make sure this only works on FE
+          reportInfo.timeTookMs = new Date().getTime() - reportInfo.timeTookMs;
+          reportInfo.resCount = r.length;
+          customEvents.reportCustomEvent('autocomplete-results', reportInfo);
+
           usageCollector?.trackResult();
           return r;
         });

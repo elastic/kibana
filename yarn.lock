@@ -3042,6 +3042,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/custom-events@link:bazel-bin/packages/kbn-custom-events":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dev-utils@link:bazel-bin/packages/kbn-dev-utils":
   version "0.0.0"
   uid ""
@@ -5910,6 +5914,10 @@
   uid ""
 
 "@types/kbn__crypto@link:bazel-bin/packages/kbn-crypto/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__custom-events@link:bazel-bin/packages/kbn-custom-events/npm_module_types":
   version "0.0.0"
   uid ""
 

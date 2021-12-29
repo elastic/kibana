@@ -10,6 +10,7 @@ import { History } from 'history';
 import { useParams } from 'react-router-dom';
 
 import { IndexPatternAttributes, ISearchSource, SavedObject } from 'src/plugins/data/common';
+import { customEvents } from '@kbn/custom-events';
 import {
   SavedSearch,
   getSavedSearch,
@@ -56,6 +57,15 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
   >([]);
 
   const { id } = useParams<DiscoverLandingParams>();
+
+  useEffect(() => {
+    if (id) {
+      customEvents.setCustomEventContext({ entId: id });
+    }
+    return () => {
+      customEvents.clearCustomEventContext('entId');
+    };
+  }, [id]);
 
   useEffect(() => {
     const savedSearchId = id;

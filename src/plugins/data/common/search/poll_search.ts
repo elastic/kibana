@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { customEvents } from '@kbn/custom-events';
 import { from, Observable, timer, defer, fromEvent, EMPTY } from 'rxjs';
 import { expand, map, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import type {
@@ -35,6 +36,14 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
       })
     );
 
+    const reportInfo = {
+      pollCount: 0,
+      timeTookMs: new Date().getTime(),
+      status: '',
+      resHitCount: 0,
+      resAggCount: 0,
+    };
+
     return from(search()).pipe(
       expand(() => timer(pollInterval).pipe(switchMap(search))),
       tap((response) => {
@@ -42,7 +51,19 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
           throw response ? new Error('Received partial response') : new AbortError();
         }
       }),
+      tap(() => {
+        reportInfo.pollCount++;
+      }),
       takeWhile<Response>(isPartialResponse, true),
+      tap((response) => {
+        // need to make sure this only works on FE
+        reportInfo.timeTookMs = new Date().getTime() - reportInfo.timeTookMs;
+        reportInfo.status = isErrorResponse(response) ? 'err' : 'ok';
+        const { hits, aggregations } = response.rawResponse;
+        reportInfo.resHitCount = hits?.hits?.length ?? 0;
+        reportInfo.resAggCount = aggregations ? Object.keys(aggregations).length : 0;
+        customEvents.reportCustomEvent('poll-search-done', reportInfo);
+      }),
       takeUntil<Response>(aborted$)
     );
   });

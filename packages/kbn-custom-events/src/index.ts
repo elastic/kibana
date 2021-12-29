@@ -1,0 +1,175 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { PackageInfo } from '@kbn/config';
+import { isArray, isInteger, mapKeys, snakeCase } from 'lodash';
+import { FullStoryApi } from './fullstory';
+
+export interface CustomEventConfig {
+  enabled: boolean;
+  orgId?: string;
+  basePath: any;
+  userIdPromise: Promise<string | undefined>;
+  packageInfo: PackageInfo;
+}
+
+// based on https://help.fullstory.com/hc/en-us/articles/360020623234#Custom%20Event%20Name%20Requirements
+type FULLSTORY_EVENT_TYPES = string | number | boolean | Date;
+type FullstoryEventValue = FULLSTORY_EVENT_TYPES | FULLSTORY_EVENT_TYPES[];
+
+class CustomEvents {
+  private fullStory?: FullStoryApi;
+
+  /**
+   * Field mapping is needed, because when we want to clear a context variable, we can't infer the type.
+   */
+  private fieldMapping: Record<string, string> = {};
+  private customEventContext: Record<string, FullstoryEventValue> = {};
+
+  public async initialize(config: CustomEventConfig): Promise<boolean> {
+    // Very defensive try/catch to avoid any UnhandledPromiseRejections
+    try {
+      const { enabled, orgId, basePath, userIdPromise, packageInfo } = config;
+      if (!enabled || !orgId) {
+        return false; // do not load any fullstory code in the browser if not enabled
+      }
+
+      // Keep this import async so that we do not load any FullStory code into the browser when it is disabled.
+      const fullStoryChunkPromise = import('./fullstory');
+
+      // We need to call FS.identify synchronously after FullStory is initialized, so we must load the user upfront
+      const [{ initializeFullStory }, userId] = await Promise.all([
+        fullStoryChunkPromise,
+        userIdPromise,
+      ]);
+
+      const { fullStory, sha256 } = initializeFullStory({
+        basePath,
+        orgId,
+        packageInfo,
+      });
+
+      // This needs to be called syncronously to be sure that we populate the user ID soon enough to make sessions merging
+      // across domains work
+      if (userId) {
+        // Do the hashing here to keep it at clear as possible in our source code that we do not send literal user IDs
+        const hashedId = sha256(userId.toString());
+        const kibanaVer = packageInfo.version;
+        // TODO: use semver instead
+        const parsedVer = (kibanaVer.indexOf('.') > -1 ? kibanaVer.split('.') : []).map((s) =>
+          parseInt(s, 10)
+        );
+        fullStory.identify(
+          hashedId,
+          this.formatContext({
+            version: kibanaVer,
+            versionMajor: parsedVer[0] ?? -1,
+            versionMinor: parsedVer[1] ?? -1,
+            versionPatch: parsedVer[2] ?? -1,
+          })
+        );
+        this.fullStory = fullStory;
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(`[custom events] Could not call initialize due to error: ${e.toString()}`, e);
+    }
+
+    return !!this.fullStory;
+  }
+
+  private getFullstoryType(value: FullstoryEventValue) {
+    // For arrays, make the decidion based on the first element
+    const v = isArray(value) ? value[0] : value;
+    switch (typeof v) {
+      case 'string':
+        return 'str';
+      case 'number':
+        return isInteger(value) ? 'int' : 'real';
+      case 'boolean':
+        return 'bool';
+      case 'object':
+        if (v instanceof Date) {
+          return 'date';
+        }
+    }
+  }
+
+  private getCurrentMemoryState() {
+    // Get performance information from the browser (non standard property
+    // @ts-expect-error 2339
+    const memory = window.performance.memory;
+    let memInfo = {};
+    if (memory) {
+      memInfo = {
+        jsHeapSizeLimit: memory.jsHeapSizeLimit,
+        jsHeapSizeTotal: memory.totalJSHeapSize,
+        jsHeapSizeUsed: memory.usedJSHeapSize,
+      };
+    }
+    return memInfo;
+  }
+
+  private formatContext(context: Record<string, FullstoryEventValue>) {
+    // format context keys as required for env vars, see docs: https://help.fullstory.com/hc/en-us/articles/360020623234
+    return mapKeys(context, (value, key) => {
+      const snakeCasedKey = snakeCase(key);
+      const type = this.getFullstoryType(value);
+      const res = [snakeCasedKey, type].join('_');
+      this.fieldMapping[key] = res;
+      return res;
+    });
+  }
+
+  public setUserContext(context: Record<string, FullstoryEventValue>) {
+    if (!this.fullStory) return;
+
+    try {
+      this.fullStory.setUserVars(this.formatContext(context));
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `[custom events] Could not report custom event due to error: ${e.toString()}`,
+        e
+      );
+    }
+  }
+
+  public setCustomEventContext(context: Record<string, FullstoryEventValue>) {
+    if (!this.fullStory) return;
+    this.customEventContext = {
+      ...this.customEventContext,
+      ...context,
+    };
+  }
+
+  public clearCustomEventContext(fieldName: string) {
+    if (!this.fullStory || !this.fieldMapping[fieldName]) return;
+    delete this.customEventContext[this.fieldMapping[fieldName]];
+  }
+
+  reportCustomEvent = (eventName: string, params: Record<string, FullstoryEventValue> = {}) => {
+    if (!this.fullStory) return;
+    try {
+      const context = this.formatContext({
+        ...this.getCurrentMemoryState(),
+        ...this.customEventContext,
+        ...params,
+      });
+      this.fullStory.event(eventName, context);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `[custom events] Could not report custom event due to error: ${e.toString()}`,
+        e
+      );
+    }
+  };
+}
+
+export const customEvents = new CustomEvents();

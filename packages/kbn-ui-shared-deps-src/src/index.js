@@ -33,6 +33,7 @@ exports.externals = {
   '@kbn/i18n': '__kbnSharedDeps__.KbnI18n',
   '@kbn/i18n-react': '__kbnSharedDeps__.KbnI18nReact',
   '@emotion/react': '__kbnSharedDeps__.EmotionReact',
+  '@kbn/custom-events': '__kbnSharedDeps__.CustomEvents',
   jquery: '__kbnSharedDeps__.Jquery',
   moment: '__kbnSharedDeps__.Moment',
   'moment-timezone': '__kbnSharedDeps__.MomentTimezone',
