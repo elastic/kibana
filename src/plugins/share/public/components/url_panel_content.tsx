@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import urllib from 'url';
 import React, { Component, ReactElement } from 'react';
 import { CoreStart } from 'kibana/public';
 import {
@@ -34,7 +35,7 @@ import {
   AnonymousAccessServiceContract,
   AnonymousAccessState,
 } from '../../common/anonymous_access';
-import type { UrlService } from '../../common/url_service';
+import type { BrowserUrlService } from '../types';
 import { LEGACY_SHORT_URL_LOCATOR_ID } from '../../common/url_service/locators/legacy_short_url_locator';
 
 interface Props {
@@ -47,7 +48,7 @@ interface Props {
   anonymousAccess?: AnonymousAccessServiceContract;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
   core: CoreStart;
-  urlService: UrlService;
+  urlService: BrowserUrlService;
 }
 
 export enum ExportUrlAsType {
@@ -368,25 +369,35 @@ export class UrlPanelContent extends Component<Props, State> {
 
     try {
       const snapshotUrl = this.getSnapshotUrl();
-      const { urlService } = this.props;
+      const parsedUrl = urllib.parse(snapshotUrl);
+
+      if (!parsedUrl || !parsedUrl.path) {
+        return;
+      }
+
+      const { urlService, core } = this.props;
+      const path = parsedUrl.path.replace(core.http.basePath.get(), '');
+      const hash = parsedUrl.hash ? parsedUrl.hash : '';
+      const relativeUrl = path + hash;
       const locator = urlService.locators.get(LEGACY_SHORT_URL_LOCATOR_ID)!;
-      const { data } = await urlService.shortUrls.get(null).create({
+      const shortUrl = await urlService.shortUrls.get(null).create({
         locator,
         humanReadableSlug: true,
         params: {
-          url: snapshotUrl,
+          url: relativeUrl,
         },
-      });
-      const shortUrl = this.props.core.application.getUrlForApp('short_url_redirect', {
-        path: `${data.id}`,
-        absolute: true,
       });
 
       if (!this.mounted) {
         return;
       }
 
-      this.shortUrlCache = shortUrl;
+      this.shortUrlCache = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
+
+      if (!this.mounted) {
+        return;
+      }
+
       this.setState(
         {
           isCreatingShortUrl: false,
