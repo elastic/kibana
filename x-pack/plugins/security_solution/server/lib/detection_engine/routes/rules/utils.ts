@@ -195,6 +195,8 @@ export const getTupleDuplicateErrorsAndUniqueRules = (
   return [Array.from(errors.values()), Array.from(rulesAcc.values())];
 };
 
+// functions copied from here
+// https://github.com/elastic/kibana/blob/4584a8b570402aa07832cf3e5b520e5d2cfa7166/src/core/server/saved_objects/import/lib/check_origin_conflicts.ts#L55-L57
 const createQueryTerm = (input: string) => input.replace(/\\/g, '\\\\').replace(/\"/g, '\\"');
 const createQuery = (type: string, id: string, rawIdPrefix: string) =>
   `"${createQueryTerm(`${rawIdPrefix}${type}:${id}`)}" | "${createQueryTerm(id)}"`;
@@ -221,7 +223,6 @@ export const swapActionIds = async (
     });
 
     if (foundAction.saved_objects.length === 1) {
-      // id is of the form 'action:1234-5678...' so I need to split off the 'action' prefix
       return { ...action, id: foundAction.saved_objects[0].id };
     } else if (foundAction.saved_objects.length > 1) {
       return new Error(
@@ -261,7 +262,7 @@ export const swapActionIds = async (
  * '1111-2222-3333-4444' in the example above with 'xxxx-yyyy-zzzz-0000'
  * And the rule will then import successfully.
  * @param rules
- * @param esClient
+ * @param savedObjectsClient SO client exposing hidden 'actions' SO type
  * @returns
  */
 export const migrateLegacyActionsIds = async (
