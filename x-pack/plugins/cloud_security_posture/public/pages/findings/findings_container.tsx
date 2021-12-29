@@ -21,13 +21,13 @@ import {
   useEsClientMutation,
   isNonNullable,
 } from './utils';
-import type { CSPFinding, FindingsFetchState } from './types';
+import type { CspFinding, FindingsFetchState } from './types';
 import type { DataView, IKibanaSearchResponse } from '../../../../../../src/plugins/data/common';
 import type { SearchBarProps } from '../../../../../../src/plugins/data/public';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 type FindingsEsSearchMutation = UseMutationResult<
-  IKibanaSearchResponse<SearchResponse<CSPFinding>>,
+  IKibanaSearchResponse<SearchResponse<CspFinding>>,
   unknown,
   void
 >;
@@ -66,9 +66,9 @@ export const getFetchState = <T extends FindingsEsSearchMutation>(v: T): Finding
  */
 export const FindingsTableContainer = ({ dataView }: { dataView: DataView }) => {
   const { notifications } = useKibana().services;
-  const [selectedFinding, setSelectedFinding] = useState<CSPFinding | undefined>();
+  const [selectedFinding, setSelectedFinding] = useState<CspFinding | undefined>();
   const { source: searchState, setSource: setSearchSource } = useSourceQueryParam(getDefaultQuery);
-  const mutation = useEsClientMutation<CSPFinding>({
+  const mutation = useEsClientMutation<CspFinding>({
     ...searchState,
     dataView,
   });

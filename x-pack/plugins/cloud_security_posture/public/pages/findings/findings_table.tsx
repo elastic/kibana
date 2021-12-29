@@ -19,11 +19,11 @@ import {
 } from '@elastic/eui';
 import { orderBy } from 'lodash';
 import { TEST_SUBJECTS } from './constants';
-import type { CSPFinding, FindingsFetchState } from './types';
+import type { CspFinding, FindingsFetchState } from './types';
 import { CSPEvaluationBadge } from '../../components/csp_evaluation_badge';
 
 interface BaseFindingsTableProps {
-  selectItem(v: CSPFinding | undefined): void;
+  selectItem(v: CspFinding | undefined): void;
 }
 
 type FindingsTableProps = FindingsFetchState & BaseFindingsTableProps;
@@ -32,11 +32,11 @@ export const FindingsTable = ({ data, status, error, selectItem }: FindingsTable
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
 
-  const getCellProps = (item: CSPFinding, column: EuiTableFieldDataColumnType<CSPFinding>) => ({
+  const getCellProps = (item: CspFinding, column: EuiTableFieldDataColumnType<CspFinding>) => ({
     onClick: column.field === 'rule.name' ? () => selectItem(item) : undefined,
   });
 
-  const onTableChange = ({ page }: Criteria<CSPFinding>) => {
+  const onTableChange = ({ page }: Criteria<CspFinding>) => {
     if (!page) return;
     const { index, size } = page;
 
@@ -57,7 +57,7 @@ export const FindingsTable = ({ data, status, error, selectItem }: FindingsTable
   if (!data) return null;
 
   // TODO: async pagination
-  const pagination: EuiBasicTableProps<CSPFinding>['pagination'] = {
+  const pagination: EuiBasicTableProps<CspFinding>['pagination'] = {
     pageIndex,
     pageSize,
     totalItemCount: data.length,
@@ -98,7 +98,7 @@ const resultEvaluationRenderer = (type: PropsOf<typeof CSPEvaluationBadge>['type
   <CSPEvaluationBadge type={type} />
 );
 
-const columns: Array<EuiTableFieldDataColumnType<CSPFinding>> = [
+const columns: Array<EuiTableFieldDataColumnType<CspFinding>> = [
   {
     field: 'resource.filename',
     name: 'Resource',
