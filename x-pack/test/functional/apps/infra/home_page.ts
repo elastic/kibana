@@ -17,7 +17,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'infraHome', 'infraSavedViews']);
 
-  describe('Home page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/106650
+  describe.skip('Home page', function () {
     this.tags('includeFirefox');
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
