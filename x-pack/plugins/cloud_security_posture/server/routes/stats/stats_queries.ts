@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   SearchRequest,
   CountRequest,
   QueryDslQueryContainer,
@@ -78,8 +78,7 @@ export const getBenchmarksQuery = (): SearchRequest => ({
 export const getLatestFindingQuery = (): SearchRequest => ({
   index: CSP_KUBEBEAT_INDEX_PATTERN,
   size: 1,
-  /* @ts-expect-error TS2322 - missing SearchSortContainer */
-  sort: { '@timestamp': 'desc' },
+  sort: '@timestamp: desc',
   query: {
     match_all: {},
   },

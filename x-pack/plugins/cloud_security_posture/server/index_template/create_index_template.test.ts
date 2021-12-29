@@ -8,13 +8,17 @@
 import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
 import { createFindingsIndexTemplate } from './create_index_template';
 const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
-
+afterEach(() => {
+  mockEsClient.indices.putIndexTemplate.mockClear();
+  mockEsClient.indices.existsIndexTemplate.mockClear();
+});
 describe('create index template for findings', () => {
   it('expect to find existing template', async () => {
     mockEsClient.indices.existsIndexTemplate.mockResolvedValueOnce(
       elasticsearchClientMock.createSuccessTransportRequestPromise(true)
     );
     const response = await createFindingsIndexTemplate(mockEsClient);
+    expect(mockEsClient.indices.putIndexTemplate.mock.calls.length).toEqual(0);
     expect(response).toEqual(true);
   });
 

@@ -11,14 +11,20 @@ import type {
   DictionaryResponseBase,
   AggregationsKeyedBucketKeys,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { CloudPostureStats, BenchmarkStats, EvaluationStats } from '../../../common/types';
+import type {
+  CloudPostureStats,
+  BenchmarkStats,
+  EvaluationStats,
+  Score,
+} from '../../../common/types';
 import {
   getFindingsEsQuery,
   getResourcesEvaluationEsQuery,
   getBenchmarksQuery,
   getLatestFindingQuery,
 } from './stats_queries';
-import { STATS_ROUTH_PATH, RULE_PASSED, RULE_FAILED } from '../../../common/constants';
+import { STATS_ROUTH_PATH } from '../../../common/constants';
+import { RULE_PASSED, RULE_FAILED } from '../../constants';
 interface LastCycle {
   run_id: string;
 }
@@ -33,9 +39,9 @@ interface GroupFilename {
 /**
  * @param value value is [0, 1] range
  */
-export const roundScore = (value: number) => Number((value * 100).toFixed(1));
+export const roundScore = (value: number): Score => Number((value * 100).toFixed(1));
 
-const calculatePostureScore = (total: number, passed: number, failed: number) =>
+const calculatePostureScore = (total: number, passed: number, failed: number): Score | undefined =>
   passed + failed === 0 || total === undefined ? undefined : roundScore(passed / (passed + failed));
 
 const getLatestCycleId = async (esClient: ElasticsearchClient) => {
@@ -45,20 +51,22 @@ const getLatestCycleId = async (esClient: ElasticsearchClient) => {
 };
 
 export const getBenchmarks = async (esClient: ElasticsearchClient) => {
-  const queryReult = await esClient.search(getBenchmarksQuery());
-  const bencmarksBuckets = queryReult.body.aggregations?.benchmarks as AggregationsTermsAggregate<
+  const queryResult = await esClient.search(getBenchmarksQuery());
+  const benchmarksBuckets = queryResult.body.aggregations?.benchmarks as AggregationsTermsAggregate<
     DictionaryResponseBase<string, string>
   >;
-  return bencmarksBuckets.buckets.map((e) => e.key);
+  return benchmarksBuckets.buckets.map((e) => e.key);
 };
 
 export const getAllFindingsStats = async (
   esClient: ElasticsearchClient,
   cycleId: string
 ): Promise<BenchmarkStats> => {
-  const findings = await esClient.count(getFindingsEsQuery(cycleId));
-  const passedFindings = await esClient.count(getFindingsEsQuery(cycleId, RULE_PASSED));
-  const failedFindings = await esClient.count(getFindingsEsQuery(cycleId, RULE_FAILED));
+  const [findings, passedFindings, failedFindings] = await Promise.all([
+    esClient.count(getFindingsEsQuery(cycleId)),
+    esClient.count(getFindingsEsQuery(cycleId, RULE_PASSED)),
+    esClient.count(getFindingsEsQuery(cycleId, RULE_FAILED)),
+  ]);
 
   const totalFindings = findings.body.count;
   const totalPassed = passedFindings.body.count;
@@ -104,18 +112,51 @@ export const getBenchmarksStats = async (
   return benchmarkScores;
 };
 
+export const getBenchmarksStats1 = async (
+  esClient: ElasticsearchClient,
+  cycleId: string,
+  benchmarks: string[]
+): Promise<BenchmarkStats[]> => {
+  const benchmarkPromises = benchmarks.map((benchmark) => {
+    const benchmarkFindings = esClient.count(getFindingsEsQuery(benchmark, cycleId));
+    const benchmarkPassedFindings = esClient.count(
+      getFindingsEsQuery(cycleId, RULE_PASSED, benchmark)
+    );
+    const benchmarkFailedFindings = esClient.count(
+      getFindingsEsQuery(cycleId, RULE_FAILED, benchmark)
+    );
+
+    return Promise.all([benchmarkFindings, benchmarkPassedFindings, benchmarkFailedFindings]).then(
+      ([benchmarkFindingsResult, benchmarkPassedFindingsResult, benchmarkFailedFindingsResult]) => {
+        const totalFindings = benchmarkFindingsResult.body.count;
+        const totalPassed = benchmarkPassedFindingsResult.body.count;
+        const totalFailed = benchmarkFailedFindingsResult.body.count;
+        return {
+          name: benchmark,
+          postureScore: calculatePostureScore(totalFindings, totalPassed, totalFailed),
+          totalFindings,
+          totalPassed,
+          totalFailed,
+        };
+      }
+    );
+  });
+  return Promise.all(benchmarkPromises);
+};
+
 export const getResourcesEvaluation = async (
   esClient: ElasticsearchClient,
   cycleId: string
 ): Promise<EvaluationStats[]> => {
+  const numOfResource = 5;
   const failedEvaluationsPerResourceResult = await esClient.search(
-    getResourcesEvaluationEsQuery(cycleId, RULE_FAILED, 5)
+    getResourcesEvaluationEsQuery(cycleId, RULE_FAILED, numOfResource)
   );
 
   const failedResourcesGroup = failedEvaluationsPerResourceResult.body.aggregations
     ?.group as AggregationsTermsAggregate<GroupFilename>;
   const topFailedResources = failedResourcesGroup.buckets.map((e) => e.key);
-  const failedEvaluationPerResorces = failedResourcesGroup.buckets.map((e) => {
+  const failedEvaluationPerResource = failedResourcesGroup.buckets.map((e) => {
     return {
       resource: e.key,
       value: e.doc_count,
@@ -128,7 +169,7 @@ export const getResourcesEvaluation = async (
   );
   const passedResourcesGroup = passedEvaluationsPerResourceResult.body.aggregations
     ?.group as AggregationsTermsAggregate<GroupFilename>;
-  const passedEvaluationPerResorces = passedResourcesGroup.buckets.map((e) => {
+  const passedEvaluationPerResources = passedResourcesGroup.buckets.map((e) => {
     return {
       resource: e.key,
       value: e.doc_count,
@@ -136,7 +177,7 @@ export const getResourcesEvaluation = async (
     } as const;
   });
 
-  return [...passedEvaluationPerResorces, ...failedEvaluationPerResorces];
+  return [...passedEvaluationPerResources, ...failedEvaluationPerResource];
 };
 
 export const defineGetStatsRoute = (router: IRouter): void =>
@@ -148,8 +189,11 @@ export const defineGetStatsRoute = (router: IRouter): void =>
     async (context, _, response) => {
       try {
         const esClient = context.core.elasticsearch.client.asCurrentUser;
-        const benchmarks = await getBenchmarks(esClient);
-        const latestCycleID = await getLatestCycleId(esClient);
+        const [benchmarks, latestCycleID] = await Promise.all([
+          getBenchmarks(esClient),
+          getLatestCycleId(esClient),
+        ]);
+
         if (latestCycleID === undefined) {
           throw new Error('cycle id is missing');
         }
