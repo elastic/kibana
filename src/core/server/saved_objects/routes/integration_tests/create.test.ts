@@ -7,7 +7,6 @@
  */
 
 import supertest from 'supertest';
-import { UnwrapPromise } from '@kbn/utility-types';
 import { registerCreateRoute } from '../create';
 import { savedObjectsClientMock } from '../../service/saved_objects_client.mock';
 import { CoreUsageStatsClient } from '../../../core_usage_data';
@@ -15,7 +14,7 @@ import { coreUsageStatsClientMock } from '../../../core_usage_data/core_usage_st
 import { coreUsageDataServiceMock } from '../../../core_usage_data/core_usage_data_service.mock';
 import { setupServer } from '../test_utils';
 
-type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
 describe('POST /api/saved_objects/{type}', () => {
   let server: SetupServerReturn['server'];
