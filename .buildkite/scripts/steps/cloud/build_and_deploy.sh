@@ -48,7 +48,7 @@ jq '
 
 CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
 JSON_FILE=$(mktemp --suffix ".json")
-if [ -z "${CLOUD_DEPLOYMENT_ID}" ];
+if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
   ecctl deployment create --track --output json --file /tmp/deploy.json > "$JSON_FILE"
   CLOUD_DEPLOYMENT_USERNAME=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.username' "$JSON_FILE")
   CLOUD_DEPLOYMENT_PASSWORD=$(jq --slurp '.[]|select(.resources).resources[] | select(.credentials).credentials.password' "$JSON_FILE")
@@ -59,7 +59,7 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ];
   echo ""
   echo "$CLOUD_DEPLOYMENT_STATUS_MESSAGES"
 else
-  ecctl deployment update $CLOUD_DEPLOYMENT_ID --track --output json --file /tmp/deploy.json > "$JSON_FILE"
+  ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json > "$JSON_FILE"
 fi
 
 CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
