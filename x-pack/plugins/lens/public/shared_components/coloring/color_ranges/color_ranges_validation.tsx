@@ -23,8 +23,9 @@ export const getErrorMessages = (colorRangesValidity: Record<string, ColorRangeV
   return [
     ...new Set(
       Object.values(colorRangesValidity)
-        .reduce<ColorRangeValidationErrors[]>((acc, item) => [...acc, ...item.errors], [])
+        .map((item) => item.errors)
         .flat()
+        )
     ),
   ].map((item) => {
     switch (item) {
