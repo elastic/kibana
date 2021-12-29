@@ -917,12 +917,12 @@ export class SavedObjectsRepository {
     }
 
     if (searchOptions) {
-      const hasInvalidSearchFields = searchOptions.some(
-        ({ searchFields }) => searchFields && !Array.isArray(searchFields)
+      const hasInvalidSearchFields = searchOptions.some(({ searchFields }) =>
+        searchFields !== undefined ? !Array.isArray(searchFields) : false
       );
       if (hasInvalidSearchFields) {
         throw SavedObjectsErrorHelpers.createBadRequestError(
-          'options.searchFields must be an array'
+          'options.searchOptions.searchFields must be an array'
         );
       }
     }

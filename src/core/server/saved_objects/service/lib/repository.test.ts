@@ -3413,9 +3413,13 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when searchFields is defined but not an array`, async () => {
         await expect(
-          // @ts-expect-error searchFields is an array
-          savedObjectsRepository.find({ type, searchFields: 'string' })
-        ).rejects.toThrowError('options.searchFields must be an array');
+          savedObjectsRepository.find({
+            type,
+            searchFields: 'string',
+            // @ts-expect-error searchFields is an array
+            searchOptions: [{ searchFields: '' }],
+          })
+        ).rejects.toThrowError('options.searchOptions.searchFields must be an array');
         expect(client.search).not.toHaveBeenCalled();
       });
 
@@ -3437,12 +3441,10 @@ describe('SavedObjectsRepository', () => {
       it(`throws when KQL filter syntax is invalid`, async () => {
         const findOpts: SavedObjectsFindOptions = {
           namespaces: [namespace],
-          search: 'foo*',
-          searchFields: ['foo'],
+          searchOptions: [{ search: 'foo*', searchFields: ['foo'], defaultSearchOperator: 'AND' }],
           type: ['dashboard'],
           sortField: 'name',
           sortOrder: 'desc',
-          defaultSearchOperator: 'AND',
           hasReference: {
             type: 'foo',
             id: '1',
@@ -3548,11 +3550,9 @@ describe('SavedObjectsRepository', () => {
       const commonOptions: SavedObjectsFindOptions = {
         type: [type], // cannot be used when `typeToNamespacesMap` is present
         namespaces: [namespace], // cannot be used when `typeToNamespacesMap` is present
-        search: 'foo*',
-        searchFields: ['foo'],
+        searchOptions: [{ search: 'foo*', searchFields: ['foo'], defaultSearchOperator: 'AND' }],
         sortField: 'name',
         sortOrder: 'desc',
-        defaultSearchOperator: 'AND',
         hasReference: {
           type: 'foo',
           id: '1',
@@ -3635,12 +3635,10 @@ describe('SavedObjectsRepository', () => {
       it(`accepts KQL expression filter and passes KueryNode to getSearchDsl`, async () => {
         const findOpts: SavedObjectsFindOptions = {
           namespaces: [namespace],
-          search: 'foo*',
-          searchFields: ['foo'],
+          searchOptions: [{ search: 'foo*', searchFields: ['foo'], defaultSearchOperator: 'AND' }],
           type: ['dashboard'],
           sortField: 'name',
           sortOrder: 'desc',
-          defaultSearchOperator: 'AND',
           hasReference: {
             type: 'foo',
             id: '1',
@@ -3675,12 +3673,10 @@ describe('SavedObjectsRepository', () => {
       it(`accepts KQL KueryNode filter and passes KueryNode to getSearchDsl`, async () => {
         const findOpts: SavedObjectsFindOptions = {
           namespaces: [namespace],
-          search: 'foo*',
-          searchFields: ['foo'],
+          searchOptions: [{ search: 'foo*', searchFields: ['foo'], defaultSearchOperator: 'AND' }],
           type: ['dashboard'],
           sortField: 'name',
           sortOrder: 'desc',
-          defaultSearchOperator: 'AND',
           hasReference: {
             type: 'foo',
             id: '1',
