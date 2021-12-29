@@ -209,6 +209,16 @@ describe('<IndexManagementHome />', () => {
       find('indexTableIndexNameLink').at(0).simulate('click');
     });
 
+    test('should be able to refresh index', async () => {
+      const { actions } = testBed;
+
+      await actions.clickManageContextMenuButton();
+      await actions.clickContextMenuOption('refreshIndexMenuButton');
+
+      const latestRequest = server.requests[server.requests.length - 2];
+      expect(latestRequest.url).toBe(`${API_BASE_PATH}/indices/refresh`);
+    });
+
     test('should be able to close an open index', async () => {
       const { actions } = testBed;
 
