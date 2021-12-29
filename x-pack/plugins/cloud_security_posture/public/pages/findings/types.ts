@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { MutationFetchState } from '../../common/types';
-
-export type FindingsFetchState = MutationFetchState<CspFinding[], string>;
+export type FindingsFetchState =
+  | { status: 'idle'; error: null; data: undefined }
+  | { status: 'loading'; error: null; data: undefined }
+  | { status: 'success'; error: null; data: CspFinding[] }
+  | { status: 'error'; error: string; data: undefined };
 
 export interface CspFinding {
   '@timestamp': string;

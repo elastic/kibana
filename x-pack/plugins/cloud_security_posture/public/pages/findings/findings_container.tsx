@@ -10,11 +10,12 @@ import { css } from '@emotion/react';
 import { EuiSpacer } from '@elastic/eui';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { UseMutationResult } from 'react-query';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { FindingsTable } from './findings_table';
 import { FindingsRuleFlyout } from './findings_flyout';
 import { FindingsSearchBar } from './findings_search_bar';
 import { TEST_SUBJECTS } from './constants';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import {
   extractErrorMessage,
   useSourceQueryParam,
@@ -22,9 +23,11 @@ import {
   isNonNullable,
 } from './utils';
 import type { CspFinding, FindingsFetchState } from './types';
-import type { DataView, IKibanaSearchResponse } from '../../../../../../src/plugins/data/common';
-import type { SearchBarProps } from '../../../../../../src/plugins/data/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import type {
+  DataView,
+  IKibanaSearchResponse,
+  TimeRange,
+} from '../../../../../../src/plugins/data/common';
 
 type FindingsEsSearchMutation = UseMutationResult<
   IKibanaSearchResponse<SearchResponse<CspFinding>>,
@@ -32,9 +35,11 @@ type FindingsEsSearchMutation = UseMutationResult<
   void
 >;
 
-export type URLState = Parameters<NonNullable<SearchBarProps['onQuerySubmit']>>[0] & {
+export interface URLState {
+  dateRange: TimeRange;
+  query?: Query;
   filters: Filter[];
-};
+}
 
 const getDefaultQuery = (): Required<URLState> => ({
   query: { language: 'kuery', query: '' },

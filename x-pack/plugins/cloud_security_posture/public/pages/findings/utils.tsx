@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import type { Filter, Query } from '@kbn/es-query';
 import { useMutation, useQuery } from 'react-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { encode, decode, RisonValue } from 'rison-node';
+import { encode, decode, RisonObject } from 'rison-node';
 import { useHistory } from 'react-router-dom';
 import type {
   DataView,
@@ -52,11 +52,11 @@ export const useKubebeatDataView = () => {
   return useQuery(['kubebeat_dataview'], getKubebeatDataView);
 };
 
-export const useSourceQueryParam = <T extends object>(getDefaultQuery: () => T) => {
+export const useSourceQueryParam = <T extends RisonObject>(getDefaultQuery: () => T) => {
   const history = useHistory();
   const [state, set] = useState<T>(getDefaultQuery());
 
-  const setSource = (v: RisonValue) => {
+  const setSource = (v: T) => {
     try {
       const next = `source=${encode(v)}`;
       const current = history.location.search.slice(1);
