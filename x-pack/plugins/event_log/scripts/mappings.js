@@ -91,16 +91,6 @@ exports.EcsCustomPropertyMappings = {
           jobType: {
             type: 'keyword',
           },
-          csv: {
-            properties: {
-              byteLength: {
-                type: 'long',
-              },
-              numRows: {
-                type: 'long',
-              },
-            },
-          },
         },
       },
       // array of saved object references, for "linking" via search

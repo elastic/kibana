@@ -307,16 +307,6 @@
                     "properties": {
                         "jobType": {
                             "type": "keyword"
-                        },
-                        "csv": {
-                            "properties": {
-                                "byteLength": {
-                                    "type": "long"
-                                },
-                                "numRows": {
-                                    "type": "long"
-                                }
-                            }
                         }
                     }
                 },

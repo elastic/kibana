@@ -7,13 +7,10 @@
 
 import { ActionType } from './';
 
-type ActionKind = 'event' | 'metrics' | 'error';
-type ActionOutcome = 'success' | 'failure';
-
 interface ActionBase<
   A extends ActionType,
-  K extends ActionKind,
-  O extends ActionOutcome,
+  K extends 'event' | 'error',
+  O extends 'success' | 'failure',
   EventProvider
 > {
   event: {
@@ -40,31 +37,19 @@ export interface ErrorAction {
   type?: string;
 }
 
-type ReportingActionAttributes<K> = K extends 'event'
-  ? { jobType: string }
-  : K extends 'metrics'
-  ? {
-      csv?: {
-        byteLength: number;
-        numRows: number;
-      };
-    }
-  : {};
-
 type ReportingAction<
   A extends ActionType,
-  K extends ActionKind,
-  O extends ActionOutcome = 'success'
-> = ActionBase<A, K, O, { reporting: { task?: { id: string } } & ReportingActionAttributes<K> }>;
+  K extends 'event' | 'error',
+  O extends 'success' | 'failure' = 'success'
+> = ActionBase<A, K, O, { reporting: { jobType: string; task?: { id: string } } }>;
 
 export type ScheduledTask = ReportingAction<ActionType.SCHEDULE_TASK, 'event'>;
 export type StartedExecution = ReportingAction<ActionType.EXECUTE_START, 'event'>;
-export type CompletedExecution = ReportingAction<ActionType.EXECUTE_COMPLETE, 'metrics'>;
+export type CompletedExecution = ReportingAction<ActionType.EXECUTE_COMPLETE, 'event'>;
 export type SavedReport = ReportingAction<ActionType.SAVE_REPORT, 'event'>;
 export type ClaimedTask = ReportingAction<ActionType.CLAIM_TASK, 'event'>;
 export type ScheduledRetry = ReportingAction<ActionType.RETRY, 'event'>;
 export type FailedReport = ReportingAction<ActionType.FAIL_REPORT, 'event'>;
-
 export type ExecuteError = ReportingAction<ActionType.EXECUTE_COMPLETE, 'error', 'failure'> & {
   error: ErrorAction;
 };

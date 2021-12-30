@@ -90,22 +90,25 @@ export function registerGenerateCsvFromSavedObjectImmediate(
             },
           });
 
-          const { content_type: jobOutputContentType, csv_num_rows: numRows }: TaskRunResult =
-            await runTaskFn(null, req.body, context, stream, req);
+          const { content_type: jobOutputContentType }: TaskRunResult = await runTaskFn(
+            null,
+            req.body,
+            context,
+            stream,
+            req
+          );
           stream.end();
           const jobOutputContent = buffer.toString();
           const jobOutputSize = buffer.byteLength;
 
-          logger.info(`Job output size: ${jobOutputSize} bytes / ${numRows} rows.`);
+          logger.info(`Job output size: ${jobOutputSize} bytes.`);
 
           // convert null to undefined so the value can be sent to h.response()
           if (jobOutputContent === null) {
             logger.warn('CSV Job Execution created empty content result');
           }
 
-          eventLog.logComplete('csv generation is complete', {
-            csv: { byteLength: jobOutputSize, numRows: numRows! },
-          });
+          eventLog.logComplete('csv generation is complete');
 
           return res.ok({
             body: jobOutputContent || '',

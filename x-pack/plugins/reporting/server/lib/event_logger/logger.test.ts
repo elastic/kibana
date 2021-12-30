@@ -90,7 +90,7 @@ describe('Event Logger', () => {
     const logger = new factory(mockEventObject);
     logger.logStart('starting the event');
 
-    const result = logger.logComplete('completed the event', {});
+    const result = logger.logComplete('completed the event');
     expect(result.event).toMatchInlineSnapshot(`
       Object {
         "action": "execute-complete",

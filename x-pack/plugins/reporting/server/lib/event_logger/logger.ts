@@ -86,16 +86,16 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
       return event;
     }
 
-    logComplete(
-      message: string,
-      reportingObj: Partial<CompletedExecution['kibana']['reporting']>
-    ): CompletedExecution {
+    logComplete(message: string): CompletedExecution {
       this.completionLogger.stopTiming(this.eventObj);
       const event = deepMerge(
         {
           message,
-          event: { kind: 'metrics', outcome: 'success', action: ActionType.EXECUTE_COMPLETE },
-          kibana: { reporting: reportingObj },
+          event: {
+            kind: 'event',
+            outcome: 'success',
+            action: ActionType.EXECUTE_COMPLETE,
+          },
           log: { level: 'info' },
         } as Partial<CompletedExecution>,
         this.eventObj
@@ -105,13 +105,13 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
     }
 
     logError(error: ErrorAction): ExecuteError {
-      interface CoolErrorMessage {
+      interface LoggedErrorMessage {
         message: string;
         error: ExecuteError['error'];
         event: Omit<ExecuteError['event'], 'provider' | 'id' | 'timezone'>;
         log: Omit<ExecuteError['log'], 'logger'>;
       }
-      const coolErrorMessage: CoolErrorMessage = {
+      const logErrorMessage: LoggedErrorMessage = {
         message: error.message,
         error: {
           message: error.message,
@@ -119,10 +119,14 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
           stack_trace: error.stack_trace,
           type: error.type,
         },
-        event: { kind: 'error', outcome: 'failure', action: ActionType.EXECUTE_COMPLETE },
+        event: {
+          kind: 'error',
+          outcome: 'failure',
+          action: ActionType.EXECUTE_COMPLETE,
+        },
         log: { level: 'error' },
       };
-      const event = deepMerge(coolErrorMessage, this.eventObj);
+      const event = deepMerge(logErrorMessage, this.eventObj);
       genericLogger.logEvent(event);
       return event;
     }

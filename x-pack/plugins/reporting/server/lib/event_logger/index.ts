@@ -8,9 +8,6 @@
 import { IEventLogService } from '../../../../event_log/server';
 import { PLUGIN_ID } from '../../../common/constants';
 
-/**
- * @internal
- */
 export enum ActionType {
   SCHEDULE_TASK = 'schedule-task',
   CLAIM_TASK = 'claim-task',
@@ -21,9 +18,6 @@ export enum ActionType {
   FAIL_REPORT = 'fail-report',
 }
 
-/**
- * @internal
- */
 export function registerEventLogProviderActions(eventLog: IEventLogService) {
   eventLog.registerProviderActions(PLUGIN_ID, [
     ActionType.EXECUTE_START,
