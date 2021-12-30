@@ -84,7 +84,7 @@ export function calculateStop(
   oldInterval: number,
   newInterval: number
 ) {
-  return newMin + roundValue((stopValue - oldMin) * newInterval) / oldInterval;
+  return roundValue(newMin + ((stopValue - oldMin) * newInterval) / oldInterval);
 }
 
 // Utility to remap color stops within new domain
@@ -129,12 +129,17 @@ export function getStopsFromColorRangesByNewInterval(
   });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getColorPaletteParams(params: any) {
+export function getColorPaletteParams<
+  T extends {
+    stops: number[];
+    colors: string[];
+    rangeMax?: number;
+  }
+>(params: T) {
   let stops = params.stops;
   let colorsForStops = params.colors;
 
-  if (isFinite(params.rangeMax) && stops.length > 0) {
+  if (params.rangeMax && isFinite(params.rangeMax) && stops.length > 0) {
     stops = [...params.stops, params.rangeMax];
     colorsForStops = [...colorsForStops, ''];
   }
@@ -205,7 +210,7 @@ export function getPaletteStops(
 
   const newStopsMin = mapFromMinValue ? minValue : interval / steps;
 
-  const stops = remapStopsByNewInterval(
+  return remapStopsByNewInterval(
     colorStopsFromPredefined.map((color, index) => ({ color, stop: index })),
     {
       newInterval: interval,
@@ -214,7 +219,6 @@ export function getPaletteStops(
       oldMin: 0,
     }
   );
-  return stops;
 }
 
 export function reversePalette(paletteColorRepresentation: ColorStop[] = []) {
@@ -348,11 +352,6 @@ export function getColorStops(
 }
 
 /**
- * Some name conventions here:
- * * `stops` => final steps used to table coloring. It is a rightShift of the colorStops
- * * `colorStops` => used for correct work other part of application based on `stops`.  Used to compute range min.
- * * `colorRanges` => user's color ranges inputs.  Used to compute colorStops. The main diff here we have completely range for each color.
- *
  * Both table coloring logic and EuiPaletteDisplay format implementation works differently than our current `colorStops`,
  * by having the stop values at the end of each color segment rather than at the beginning: `stops` values are computed by a rightShift of `colorStops`.
  * EuiPaletteDisplay has an additional requirement as it is always mapped against a domain [0, N]: from `stops` the `displayStops` are computed with
