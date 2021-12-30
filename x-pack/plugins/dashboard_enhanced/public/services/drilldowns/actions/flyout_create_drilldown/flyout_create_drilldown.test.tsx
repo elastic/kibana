@@ -74,6 +74,7 @@ describe('isCompatible', () => {
     uiActionsEnhanced.getActionFactories.mockImplementation(() => [
       {
         supportedTriggers: () => actionFactoriesTriggers,
+        isCompatibleLicense: () => true,
       } as unknown as UiActionsEnhancedActionFactory,
     ]);
 
