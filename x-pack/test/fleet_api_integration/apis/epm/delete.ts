@@ -48,7 +48,7 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
     });
 
-    it('should return 200 if trying to force uninstall a required package', async function () {
+    it.skip('should return 200 if trying to force uninstall a required package', async function () {
       await supertest
         .delete(`/api/fleet/epm/packages/${requiredPackage}/${pkgVersion}`)
         .set('kbn-xsrf', 'xxxx')

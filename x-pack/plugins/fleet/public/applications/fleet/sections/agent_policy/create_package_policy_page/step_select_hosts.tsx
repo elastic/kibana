@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiTabbedContent } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -15,6 +16,11 @@ import { AgentPolicyIntegrationForm } from '../components';
 import type { ValidationResults } from '../components/agent_policy_validation';
 
 import { StepSelectAgentPolicy } from './step_select_agent_policy';
+
+export enum SelectedPolicyTab {
+  NEW = 'new',
+  EXISTING = 'existing',
+}
 
 const StyledEuiTabbedContent = styled(EuiTabbedContent)`
   [role='tabpanel'] {
@@ -33,6 +39,7 @@ interface Props {
   packageInfo?: PackageInfo;
   setHasAgentPolicyError: (hasError: boolean) => void;
   defaultAgentPolicyId?: string;
+  updateSelectedTab: (tab: SelectedPolicyTab) => void;
 }
 
 export const StepSelectHosts: React.FunctionComponent<Props> = ({
@@ -46,6 +53,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
   packageInfo,
   setHasAgentPolicyError,
   defaultAgentPolicyId,
+  updateSelectedTab,
 }) => {
   let agentPolicies = [];
   const { data: agentPoliciesData, error: err } = useGetAgentPolicies({
@@ -64,9 +72,18 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
     [agentPoliciesData?.items]
   );
 
+  useEffect(() => {
+    if (agentPolicies.length > 0) {
+      updateNewAgentPolicy({
+        ...newAgentPolicy,
+        name: '',
+      });
+    }
+  }, [agentPolicies.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const tabs = [
     {
-      id: 'new',
+      id: SelectedPolicyTab.NEW,
       name: 'New hosts',
       content: (
         <AgentPolicyIntegrationForm
@@ -79,7 +96,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
       ),
     },
     {
-      id: 'existing',
+      id: SelectedPolicyTab.EXISTING,
       name: 'Existing hosts',
       content: (
         <StepSelectAgentPolicy
@@ -93,8 +110,15 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
     },
   ];
 
+  const handleOnTabClick = (tab: EuiTabbedContentTab) =>
+    updateSelectedTab(tab.id as SelectedPolicyTab);
+
   return agentPolicies.length > 0 ? (
-    <StyledEuiTabbedContent initialSelectedTab={tabs[0]} tabs={tabs} />
+    <StyledEuiTabbedContent
+      initialSelectedTab={tabs[0]}
+      tabs={tabs}
+      onTabClick={handleOnTabClick}
+    />
   ) : (
     <AgentPolicyIntegrationForm
       agentPolicy={newAgentPolicy}

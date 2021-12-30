@@ -117,7 +117,6 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const isDefaultFleetServer = request.body.is_default_fleet_server ?? false;
   const spaceId = context.fleet.spaceId;
   // TODO set first default policy to is_default
-  // TODO installing these packages might take long (about 2 mins) which causes network timeout. this results in an error, and fails next agent policy creation request. Could this be improved by bundled default packages?
   try {
     if (isDefaultFleetServer) {
       // install fleet server package if not yet installed
