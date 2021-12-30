@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const postPanelTitles = await PageObjects.dashboard.getPanelTitles();
       expect(postPanelTitles.length).to.equal(initialPanelTitles.length + 1);
       expect(postPanelTitles[postPanelTitles.length - 1]).to.equal(
-        PIE_CHART_VIS_NAME + ' (copy 1)'
+        PIE_CHART_VIS_NAME + ' (copy) (copy)'
       );
     });
   });
