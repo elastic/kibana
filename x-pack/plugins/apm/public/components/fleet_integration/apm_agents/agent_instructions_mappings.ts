@@ -19,7 +19,6 @@ import {
   createRackAgentInstructions,
 } from '../../../../common/tutorial/instructions/apm_agent_instructions';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { JavaRuntimeAttachment } from './runtime_attachment/supported_agents/java_runtime_attachment';
 import {
   NewPackagePolicy,
   PackagePolicy,
