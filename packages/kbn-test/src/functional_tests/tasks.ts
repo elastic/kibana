@@ -12,7 +12,7 @@ import { startWith, switchMap, take } from 'rxjs/operators';
 import { withProcRunner, ToolingLog, getTimeReporter } from '@kbn/dev-utils';
 import { REPO_ROOT } from '@kbn/utils';
 import dedent from 'dedent';
-
+import { exec } from 'child_process';
 import {
   runElasticsearch,
   runKibanaServer,
@@ -32,8 +32,11 @@ const makeSuccessMessage = (options: StartServerOptions) => {
     ? ''
     : configPaths
         .map((path) => relative(process.cwd(), path))
-        .map((path) => ` --config ${path}`)
+        .pmap((path) => ` --config ${path}`)
         .join('');
+
+  // eslint-disable-next-line no-console
+  exec('afplay Submarine.aiff', console.error);
 
   return (
     '\n\n' +

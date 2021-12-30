@@ -6,7 +6,6 @@
  */
 
 import { adminTestUser } from '@kbn/test';
-import { performance } from 'perf_hooks';
 import { FtrService } from '../ftr_provider_context';
 import { AuthenticatedUser, Role } from '../../../plugins/security/common/model';
 import type { UserFormValues } from '../../../plugins/security/public/management/users/edit_user/user_form';
@@ -245,17 +244,10 @@ export class SecurityPageObject extends FtrService {
       return;
     }
 
-    const startTime = performance.now();
-
     await this.retry.waitFor(
       'logout button visible',
       async () => await this.userMenu.logoutLinkExists()
     );
-
-    const endTime = performance.now();
-    // eslint-disable-next-line no-console
-    console.log(`Home page transaction took ${endTime - startTime} milliseconds`);
-    this.log.debug(`Home page transaction took ${endTime - startTime} milliseconds`);
   }
 
   async logout() {
