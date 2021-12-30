@@ -19,7 +19,8 @@ import {
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-interface Props {
+export interface ObservabilityStatusBoxProps {
+  id: string;
   dataSource: string;
   hasData: boolean;
   description: string;
@@ -28,7 +29,7 @@ interface Props {
   learnMoreLink: string;
 }
 
-export function ObservabilityStatusBox(props: Props) {
+export function ObservabilityStatusBox(props: ObservabilityStatusBoxProps) {
   if (props.hasData) {
     return <CompletedStatusBox {...props} />;
   } else {

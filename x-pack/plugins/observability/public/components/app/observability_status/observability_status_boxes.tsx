@@ -6,18 +6,10 @@
  */
 
 import React from 'react';
-import { ObservabilityStatusBox } from './observability_status_box';
+import { ObservabilityStatusBox, ObservabilityStatusBoxProps } from './observability_status_box';
 
 export interface ObservabilityStatusProps {
-  boxes: Array<{
-    id: string;
-    dataSource: string;
-    hasData: boolean;
-    description: string;
-    modules: Array<{ name: string; hasData: boolean }>;
-    integrationLink: string;
-    learnMoreLink: string;
-  }>;
+  boxes: ObservabilityStatusBoxProps[];
 }
 
 export function ObservabilityStatusBoxes({ boxes }: ObservabilityStatusProps) {
