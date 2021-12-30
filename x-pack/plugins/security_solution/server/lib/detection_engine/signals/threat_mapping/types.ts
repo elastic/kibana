@@ -23,6 +23,7 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   AlertServices,
+  IAbortableEsClient,
 } from '../../../../../../alerting/server';
 import { ElasticsearchClient, Logger } from '../../../../../../../../src/core/server';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
@@ -134,7 +135,7 @@ export interface BooleanFilter {
 
 export interface GetThreatListOptions {
   buildRuleMessage: BuildRuleMessage;
-  esClient: ElasticsearchClient;
+  esClient: IAbortableEsClient;
   exceptionItems: ExceptionListItemSchema[];
   index: string[];
   language: ThreatLanguageOrUndefined;
@@ -146,6 +147,20 @@ export interface GetThreatListOptions {
   sortField: string | undefined;
   sortOrder: SortOrderOrUndefined;
   threatFilters: unknown[];
+}
+
+export interface CreateThreatQueriesForPercolatorOptions {
+  buildRuleMessage: BuildRuleMessage;
+  esClient: IAbortableEsClient;
+  exceptionItems: ExceptionListItemSchema[];
+  listClient: ListClient;
+  logger: Logger;
+  perPage?: number;
+  threatFilters: unknown[];
+  threatIndex: ThreatIndex;
+  threatLanguage: ThreatLanguageOrUndefined;
+  threatMapping: ThreatMapping;
+  threatQuery: ThreatQuery;
 }
 
 export interface EventCountOptions {

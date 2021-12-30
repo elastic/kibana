@@ -14,10 +14,10 @@ import {
   SortWithTieBreaker,
   ThreatListDoc,
 } from './types';
-
-const ELASTICSEARCH_MAX_PER_PAGE = 10000;
-
-export const DETECTION_ENGINE_MAX_PER_PAGE = ELASTICSEARCH_MAX_PER_PAGE;
+import {
+  DETECTION_ENGINE_MAX_PER_PAGE,
+  ELASTICSEARCH_MAX_PER_PAGE,
+} from '../../../../../common/cti/constants';
 
 export const getNextIndicatorPage = async ({
   esClient,

@@ -7,6 +7,9 @@
 
 import { ENRICHMENT_DESTINATION_PATH, DEFAULT_INDICATOR_SOURCE_PATH } from '../constants';
 
+export const ELASTICSEARCH_MAX_PER_PAGE = 10000;
+export const DETECTION_ENGINE_MAX_PER_PAGE = ELASTICSEARCH_MAX_PER_PAGE;
+
 export const MATCHED_ATOMIC = 'matched.atomic';
 export const MATCHED_FIELD = 'matched.field';
 export const MATCHED_ID = 'matched.id';

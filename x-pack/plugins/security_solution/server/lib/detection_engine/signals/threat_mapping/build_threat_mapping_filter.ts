@@ -35,7 +35,6 @@ export const buildThreatMappingFilter = ({
     threatList,
     chunkSize: computedChunkSize,
   });
-  console.log('____query', query, JSON.stringify(query.bool.should[0]));
   const filterChunk: Filter = {
     meta: {
       alias: null,
@@ -124,19 +123,16 @@ export const createAndOrClauses = ({
 export const createPercolateQueries = ({
   threatMapping,
   threatList,
-}: Omit<BuildEntriesMappingFilterOptions, 'chunkSize'>) =>
-  threatList
-    .map((indicator, i) => {
-      const query = createAndOrClauses({
-        threatMapping: filterThreatMapping({
-          threatMapping,
-          threatListItem: indicator,
-        }),
+}: Omit<BuildEntriesMappingFilterOptions, 'chunkSize'>): BooleanFilter[] =>
+  threatList.map((indicator, i) =>
+    createAndOrClauses({
+      threatMapping: filterThreatMapping({
+        threatMapping,
         threatListItem: indicator,
-      });
-      return query.bool.should.length ? query.bool.should[0] : null;
+      }),
+      threatListItem: indicator,
     })
-    .filter((query) => query);
+  );
 
 export const buildEntriesMappingFilter = ({
   threatMapping,
