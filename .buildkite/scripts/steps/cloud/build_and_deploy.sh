@@ -51,11 +51,7 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
   CLOUD_DEPLOYMENT_ID=$(jq --slurp '.[0].id' "$JSON_FILE")
   CLOUD_DEPLOYMENT_STATUS_MESSAGES=$(jq --slurp '[.[]|select(.resources == null)]' "$JSON_FILE")
 
-  # retry 5 5 vault write "secret/kibana-issues/dev/$DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
-
-  echo "Username: $CLOUD_DEPLOYMENT_USERNAME"
-  echo ""
-  echo "$CLOUD_DEPLOYMENT_STATUS_MESSAGES"
+  retry 5 5 vault write "secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
 else
   ecctl deployment update "$CLOUD_DEPLOYMENT_ID" --track --output json --file /tmp/deploy.json > "$JSON_FILE"
 fi
@@ -69,6 +65,8 @@ cat << EOF | buildkite-agent annotate --style "info" --context cloud
   Kibana: $CLOUD_DEPLOYMENT_KIBANA_URL
 
   Elasticsearch: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL
+
+  Auth: `secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME`
 
   Image: $CLOUD_IMAGE
 EOF
