@@ -8,8 +8,6 @@
 import {
   ExceptionListSchema,
   FoundExceptionListSchema,
-  ImportExceptionListSchemaDecoded,
-  ImportExceptionListItemSchemaDecoded,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
@@ -32,9 +30,7 @@ export const getListFilter = ({
   objects,
   namespaceType,
 }: {
-  objects: Array<
-    (ImportExceptionListSchemaDecoded | ImportExceptionListItemSchemaDecoded) & { list_id: string }
-  >;
+  objects: ExceptionListQueryInfo[];
   namespaceType: NamespaceType;
 }): string => {
   return `${
