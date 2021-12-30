@@ -64,7 +64,7 @@ export function AggSelect(props: AggSelectUiProps) {
   } else {
     const disableSiblingAggs = (agg: AggSelectOption) => ({
       ...agg,
-      disabled: !enablePipelines || !isMetricEnabled(agg.value, uiRestrictions),
+      disabled: !enablePipelines || !isMetricEnabled(agg.value as string, uiRestrictions),
     });
 
     options = [

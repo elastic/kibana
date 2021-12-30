@@ -28,6 +28,17 @@ export interface SearchCapabilitiesOptions {
   panel?: Panel;
 }
 
+const convertAggsToRestriction = (allAvailableAggs: string[]) =>
+  allAvailableAggs.reduce(
+    (availableAggs, aggType) => ({
+      ...availableAggs,
+      [aggType]: {
+        '*': true,
+      },
+    }),
+    {}
+  );
+
 export class DefaultSearchCapabilities {
   public timezone: SearchCapabilitiesOptions['timezone'];
   public maxBucketsLimit: SearchCapabilitiesOptions['maxBucketsLimit'];
@@ -44,30 +55,35 @@ export class DefaultSearchCapabilities {
   }
 
   public get whiteListedMetrics() {
-    if (
-      this.panel &&
-      this.panel.type !== PANEL_TYPES.TIMESERIES &&
-      this.panel.time_range_mode === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE
-    ) {
+    if (this.panel) {
       const aggs = getAggsByType<string>((agg) => agg.id);
-      const allAvailableAggs = [
-        ...aggs[AGG_TYPE.METRIC],
-        ...aggs[AGG_TYPE.SIBLING_PIPELINE],
-        TSVB_METRIC_TYPES.MATH,
-        TSVB_METRIC_TYPES.CALCULATION,
-        BUCKET_TYPES.TERMS,
-        // SERIES_AGG should be blocked for table
-        ...(this.panel.type === PANEL_TYPES.TABLE ? [] : [TSVB_METRIC_TYPES.SERIES_AGG]),
-      ].reduce(
-        (availableAggs, aggType) => ({
-          ...availableAggs,
-          [aggType]: {
-            '*': true,
-          },
-        }),
-        {}
-      );
-      return this.createUiRestriction(allAvailableAggs);
+
+      if (
+        this.panel.type !== PANEL_TYPES.TIMESERIES &&
+        this.panel.time_range_mode === TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE
+      ) {
+        return this.createUiRestriction(
+          convertAggsToRestriction([
+            ...aggs[AGG_TYPE.METRIC],
+            ...aggs[AGG_TYPE.SIBLING_PIPELINE],
+            TSVB_METRIC_TYPES.MATH,
+            TSVB_METRIC_TYPES.CALCULATION,
+            BUCKET_TYPES.TERMS,
+            // SERIES_AGG should be blocked for table
+            ...(this.panel.type === PANEL_TYPES.TABLE ? [] : [TSVB_METRIC_TYPES.SERIES_AGG]),
+          ])
+        );
+      }
+
+      if (this.panel?.type === PANEL_TYPES.TABLE) {
+        return this.createUiRestriction(
+          convertAggsToRestriction(
+            [...Object.values(aggs).flat(), BUCKET_TYPES.TERMS].filter(
+              (item) => item !== TSVB_METRIC_TYPES.SERIES_AGG
+            )
+          )
+        );
+      }
     }
     return this.createUiRestriction();
   }
