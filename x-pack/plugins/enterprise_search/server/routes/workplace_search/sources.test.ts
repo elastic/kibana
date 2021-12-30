@@ -44,6 +44,8 @@ import {
   registerOrgSourceOauthConfigurationRoute,
   registerOrgSourceSynchronizeRoute,
   registerOauthConnectorParamsRoute,
+  registerAccountSourceValidateIndexingRulesRoute,
+  registerOrgSourceValidateIndexingRulesRoute,
 } from './sources';
 
 const mockConfig = {
@@ -293,6 +295,42 @@ describe('sources routes', () => {
     it('creates a request handler', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/sources/:id/settings',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = {
+          body: {
+            content_source: {
+              name: 'foo',
+            },
+          },
+        };
+        mockRouter.shouldValidate(request);
+      });
+    });
+  });
+
+  describe('POST /internal/workplace_search/account/sources/{id}/validate_rules', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/internal/workplace_search/account/sources/{id}/validate_rules',
+      });
+
+      registerAccountSourceValidateIndexingRulesRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/sources/:id/validate_rules',
       });
     });
 
@@ -811,6 +849,45 @@ describe('sources routes', () => {
             content_source: {
               name: 'foo',
             },
+          },
+        };
+        mockRouter.shouldValidate(request);
+      });
+    });
+  });
+
+  describe('POST /internal/workplace_search/org/sources/{id}/validate_rules', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/internal/workplace_search/org/sources/{id}/validate_rules',
+      });
+
+      registerOrgSourceValidateIndexingRulesRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/sources/:id/validate_rules',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = {
+          body: {
+            rules: [
+              {
+                filter_type: 'path_template',
+                exclude: '',
+              },
+            ],
           },
         };
         mockRouter.shouldValidate(request);

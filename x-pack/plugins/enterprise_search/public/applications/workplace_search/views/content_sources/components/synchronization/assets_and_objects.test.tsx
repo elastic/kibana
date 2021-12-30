@@ -16,19 +16,19 @@ import { shallow } from 'enzyme';
 
 import { EuiSwitch } from '@elastic/eui';
 
-import { ObjectsAndAssets } from './objects_and_assets';
+import { AssetsAndObjects } from './assets_and_objects';
 
-describe('ObjectsAndAssets', () => {
+describe('AssetsAndObjects', () => {
   const setThumbnailsChecked = jest.fn();
   const setContentExtractionChecked = jest.fn();
-  const updateObjectsAndAssetsSettings = jest.fn();
+  const updateAssetsAndObjectsSettings = jest.fn();
   const resetSyncSettings = jest.fn();
   const contentSource = fullContentSources[0];
 
   const mockActions = {
     setThumbnailsChecked,
     setContentExtractionChecked,
-    updateObjectsAndAssetsSettings,
+    updateAssetsAndObjectsSettings,
     resetSyncSettings,
   };
   const mockValues = {
@@ -37,7 +37,7 @@ describe('ObjectsAndAssets', () => {
     contentSource,
     thumbnailsChecked: true,
     contentExtractionChecked: true,
-    hasUnsavedObjectsAndAssetsChanges: false,
+    hasUnsavedAssetsAndObjectsChanges: false,
   };
 
   beforeEach(() => {
@@ -46,13 +46,13 @@ describe('ObjectsAndAssets', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<ObjectsAndAssets />);
+    const wrapper = shallow(<AssetsAndObjects />);
 
     expect(wrapper.find(EuiSwitch)).toHaveLength(2);
   });
 
   it('handles thumbnails switch change', () => {
-    const wrapper = shallow(<ObjectsAndAssets />);
+    const wrapper = shallow(<AssetsAndObjects />);
     wrapper
       .find('[data-test-subj="ThumbnailsToggle"]')
       .simulate('change', { target: { checked: false } });
@@ -61,7 +61,7 @@ describe('ObjectsAndAssets', () => {
   });
 
   it('handles content extraction switch change', () => {
-    const wrapper = shallow(<ObjectsAndAssets />);
+    const wrapper = shallow(<AssetsAndObjects />);
     wrapper
       .find('[data-test-subj="ContentExtractionToggle"]')
       .simulate('change', { target: { checked: false } });
@@ -77,7 +77,7 @@ describe('ObjectsAndAssets', () => {
         areThumbnailsConfigEnabled: false,
       },
     });
-    const wrapper = shallow(<ObjectsAndAssets />);
+    const wrapper = shallow(<AssetsAndObjects />);
 
     expect(wrapper.find('[data-test-subj="ThumbnailsToggle"]').prop('label')).toEqual(
       'Sync thumbnails - disabled at global configuration level'

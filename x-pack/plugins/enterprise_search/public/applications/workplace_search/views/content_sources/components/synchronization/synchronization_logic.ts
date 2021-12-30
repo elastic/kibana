@@ -14,6 +14,11 @@ export type TabId = 'source_sync_frequency' | 'blocked_time_windows';
 import { flashAPIErrors, flashSuccessToast } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
+import {
+  InlineEditableTableLogic,
+  InlineEditableTableProps,
+} from '../../../../../shared/tables/inline_editable_table/inline_editable_table_logic';
+import { ItemWithAnID } from '../../../../../shared/tables/types';
 import { AppLogic } from '../../../../app_logic';
 import {
   SYNC_FREQUENCY_PATH,
@@ -25,6 +30,7 @@ import {
   BlockedWindow,
   DayOfWeek,
   IndexingSchedule,
+  IndexingRule,
   ContentSourceFullData,
   SyncJobType,
   TimeUnit,
@@ -57,6 +63,7 @@ interface ServerSyncSettingsBody {
         permissions?: string;
         blocked_windows?: ServerBlockedWindow[];
       };
+      rules?: IndexingRule[];
     };
   };
 }
@@ -67,7 +74,7 @@ interface SynchronizationActions {
   addBlockedWindow(): void;
   removeBlockedWindow(index: number): number;
   updateFrequencySettings(): void;
-  updateObjectsAndAssetsSettings(): void;
+  updateAssetsAndObjectsSettings(): void;
   resetSyncSettings(): void;
   updateSyncEnabled(enabled: boolean): boolean;
   setThumbnailsChecked(checked: boolean): boolean;
@@ -88,16 +95,32 @@ interface SynchronizationActions {
   setContentExtractionChecked(checked: boolean): boolean;
   setServerSchedule(schedule: IndexingSchedule): IndexingSchedule;
   updateServerSettings(body: ServerSyncSettingsBody): ServerSyncSettingsBody;
+  addIndexingRule(indexingRule: EditableIndexingRuleBase): EditableIndexingRuleBase;
+  initAddIndexingRule(
+    rule: EditableIndexingRule,
+    callback: Function
+  ): { rule: EditableIndexingRule; callback: Function };
+  setIndexingRules(indexingRules: EditableIndexingRule[]): EditableIndexingRule[];
+  setIndexingRule(indexingRule: EditableIndexingRule): EditableIndexingRule;
+  initSetIndexingRule(
+    indexingRule: EditableIndexingRule,
+    callback: Function
+  ): { rule: EditableIndexingRule; callback: Function };
+  deleteIndexingRule(indexingRule: EditableIndexingRule): EditableIndexingRule;
 }
 
 interface SynchronizationValues {
   navigatingBetweenTabs: boolean;
+  hasUnsavedIndexingRulesChanges: boolean;
   hasUnsavedFrequencyChanges: boolean;
-  hasUnsavedObjectsAndAssetsChanges: boolean;
+  hasUnsavedAssetsAndObjectsChanges: boolean;
+  indexingRules: EditableIndexingRule[];
   thumbnailsChecked: boolean;
   contentExtractionChecked: boolean;
   cachedSchedule: IndexingSchedule;
   schedule: IndexingSchedule;
+  indexingRulesForAPI: IndexingRule[];
+  errors: string[];
 }
 
 export const emptyBlockedWindow: BlockedWindow = {
@@ -110,6 +133,16 @@ export const emptyBlockedWindow: BlockedWindow = {
 type BlockedWindowMap = {
   [prop in keyof BlockedWindow]: SyncJobType | DayOfWeek | 'all' | string;
 };
+
+interface EditableIndexingRuleBase {
+  filterType: 'object_type' | 'path_template' | 'file_extension';
+  valueType: 'include' | 'exclude';
+  value: string;
+}
+
+export interface EditableIndexingRule extends EditableIndexingRuleBase {
+  id: number;
+}
 
 export const SynchronizationLogic = kea<
   MakeLogicType<SynchronizationValues, SynchronizationActions>
@@ -135,11 +168,28 @@ export const SynchronizationLogic = kea<
     setServerSchedule: (schedule: IndexingSchedule) => schedule,
     removeBlockedWindow: (index: number) => index,
     updateFrequencySettings: true,
-    updateObjectsAndAssetsSettings: true,
+    updateAssetsAndObjectsSettings: true,
     resetSyncSettings: true,
     addBlockedWindow: true,
+    addIndexingRule: (rule: EditableIndexingRuleBase) => rule,
+    deleteIndexingRule: (rule: EditableIndexingRule) => rule,
+    initAddIndexingRule: (rule: EditableIndexingRule, callback: Function) => ({ rule, callback }),
+    initSetIndexingRule: (rule: EditableIndexingRule, callback: Function) => ({ rule, callback }),
+    setIndexingRules: (indexingRules: EditableIndexingRule[]) => indexingRules,
+    setIndexingRule: (rule: EditableIndexingRule) => rule,
   },
   reducers: ({ props }) => ({
+    hasUnsavedIndexingRulesChanges: [
+      false,
+      {
+        setIndexingRule: () => true,
+        setIndexingRules: () => true,
+        addIndexingRule: () => true,
+        deleteIndexingRule: () => true,
+        addIndexingRules: () => true,
+        updateServerSettings: () => false,
+      },
+    ],
     navigatingBetweenTabs: [
       false,
       {
@@ -228,15 +278,47 @@ export const SynchronizationLogic = kea<
         },
       },
     ],
+    indexingRules: [
+      (props.contentSource.indexing.rules as IndexingRule[]).map((rule, index) => ({
+        ...rule,
+        id: index,
+        valueType: rule.include ? 'include' : 'exclude',
+        value: rule.include ?? rule.exclude ?? '',
+      })),
+      {
+        addIndexingRule: (indexingRules, rule) => [
+          ...indexingRules,
+          {
+            ...rule,
+            id: indexingRules.reduce(
+              (prev, curr) => (curr.id > prev ? curr.id : prev),
+              indexingRules.length
+            ),
+          },
+        ],
+        deleteIndexingRule: (indexingRules, rule) =>
+          indexingRules.filter((currentRule) => currentRule.id !== rule.id),
+        setIndexingRules: (_, indexingRules) =>
+          indexingRules.map((val, index) => ({ ...val, id: index })),
+        setIndexingRule: (state, rule) =>
+          state.map((currentRule) => (currentRule.id === rule.id ? rule : currentRule)),
+      },
+    ],
   }),
   selectors: ({ selectors }) => ({
-    hasUnsavedObjectsAndAssetsChanges: [
+    hasUnsavedAssetsAndObjectsChanges: [
       () => [
         selectors.thumbnailsChecked,
         selectors.contentExtractionChecked,
+        selectors.hasUnsavedIndexingRulesChanges,
         (_, props) => props.contentSource,
       ],
-      (thumbnailsChecked, contentExtractionChecked, contentSource) => {
+      (
+        thumbnailsChecked,
+        contentExtractionChecked,
+        hasUnsavedIndexingRulesChanges,
+        contentSource
+      ) => {
         const {
           indexing: {
             features: {
@@ -248,13 +330,23 @@ export const SynchronizationLogic = kea<
 
         return (
           thumbnailsChecked !== thumbnailsEnabled ||
-          contentExtractionChecked !== contentExtractionEnabled
+          contentExtractionChecked !== contentExtractionEnabled ||
+          hasUnsavedIndexingRulesChanges
         );
       },
     ],
     hasUnsavedFrequencyChanges: [
       () => [selectors.cachedSchedule, selectors.schedule],
       (cachedSchedule, schedule) => !isEqual(cachedSchedule, schedule),
+    ],
+    indexingRulesForAPI: [
+      () => [selectors.indexingRules],
+      (indexingRules: EditableIndexingRule[]) =>
+        indexingRules.map(({ filterType, valueType, value }) =>
+          valueType === 'include'
+            ? { filter_type: filterType, include: value }
+            : { filter_type: filterType, exclude: value }
+        ),
     ],
   }),
   listeners: ({ actions, values, props }) => ({
@@ -277,6 +369,78 @@ export const SynchronizationLogic = kea<
       KibanaLogic.values.navigateToUrl(path);
       actions.setNavigatingBetweenTabs(false);
     },
+    initAddIndexingRule: async ({ rule, callback }) => {
+      const { id: sourceId } = props.contentSource;
+      const route = `/internal/workplace_search/org/sources/${sourceId}/validate_rules`;
+      const { filterType, valueType, value } = rule;
+      try {
+        const response = await HttpLogic.values.http.post<{
+          rules: Array<{
+            valid: boolean;
+            error?: string;
+          }>;
+        }>(route, {
+          body: JSON.stringify({
+            rules: [
+              valueType === 'exclude'
+                ? {
+                    filter_type: filterType,
+                    exclude: value,
+                  }
+                : { filter_type: filterType, include: value },
+            ],
+          }),
+        });
+        const error = response.rules[0]?.error;
+        if (error) {
+          InlineEditableTableLogic({
+            instanceId: 'IndexingRulesTable',
+          } as InlineEditableTableProps<ItemWithAnID>).actions.setRowErrors([error]);
+          callback();
+        } else {
+          actions.addIndexingRule(rule);
+          callback();
+        }
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
+    initSetIndexingRule: async ({ rule, callback }) => {
+      const { id: sourceId } = props.contentSource;
+      const route = `/internal/workplace_search/org/sources/${sourceId}/validate_rules`;
+      const { filterType, valueType, value } = rule;
+      try {
+        const response = await HttpLogic.values.http.post<{
+          rules: Array<{
+            valid: boolean;
+            error?: string;
+          }>;
+        }>(route, {
+          body: JSON.stringify({
+            rules: [
+              valueType === 'exclude'
+                ? {
+                    filter_type: filterType,
+                    exclude: value,
+                  }
+                : { filter_type: filterType, include: value },
+            ],
+          }),
+        });
+        const error = response.rules[0]?.error;
+        if (error) {
+          InlineEditableTableLogic({
+            instanceId: 'IndexingRulesTable',
+          } as InlineEditableTableProps<ItemWithAnID>).actions.setRowErrors([error]);
+          callback();
+        } else {
+          actions.setIndexingRule(rule);
+          callback();
+        }
+      } catch (e) {
+        flashAPIErrors(e);
+      }
+    },
     updateSyncEnabled: async (enabled) => {
       actions.updateServerSettings({
         content_source: {
@@ -284,7 +448,7 @@ export const SynchronizationLogic = kea<
         },
       });
     },
-    updateObjectsAndAssetsSettings: () => {
+    updateAssetsAndObjectsSettings: () => {
       actions.updateServerSettings({
         content_source: {
           indexing: {
@@ -292,6 +456,7 @@ export const SynchronizationLogic = kea<
               content_extraction: { enabled: values.contentExtractionChecked },
               thumbnails: { enabled: values.thumbnailsChecked },
             },
+            rules: values.indexingRulesForAPI,
           },
         },
       });

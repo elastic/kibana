@@ -26,7 +26,9 @@ import './inline_editable_tables.scss';
 
 export interface InlineEditableTableProps<Item extends ItemWithAnID> {
   columns: Array<InlineEditableTableColumn<Item>>;
+  errors?: string[];
   items: Item[];
+  defaultItem?: Partial<Item>;
   title: string;
   addButtonText?: string;
   canRemoveLastItem?: boolean;
@@ -43,6 +45,7 @@ export const InlineEditableTable = <Item extends ItemWithAnID>(
   props: InlineEditableTableProps<Item> & {
     instanceId: string;
     onAdd(item: Item, onSuccess: () => void): void;
+    onChangeEditingItem?(item: Item): void;
     onDelete(item: Item, onSuccess: () => void): void;
     onReorder?(items: Item[], oldItems: Item[], onSuccess: () => void): void;
     onUpdate(item: Item, onSuccess: () => void): void;
@@ -53,7 +56,9 @@ export const InlineEditableTable = <Item extends ItemWithAnID>(
   const {
     instanceId,
     columns,
+    defaultItem,
     onAdd,
+    onChangeEditingItem,
     onDelete,
     onReorder,
     onUpdate,
@@ -67,7 +72,9 @@ export const InlineEditableTable = <Item extends ItemWithAnID>(
       props={{
         instanceId,
         columns,
+        defaultItem,
         onAdd,
+        onChangeEditingItem,
         onDelete,
         onReorder,
         onUpdate,
@@ -82,6 +89,7 @@ export const InlineEditableTable = <Item extends ItemWithAnID>(
 
 export const InlineEditableTableContents = <Item extends ItemWithAnID>({
   columns,
+  errors,
   items,
   title,
   addButtonText,
@@ -90,13 +98,17 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
   description,
   isLoading,
   lastItemWarning,
+  defaultItem,
   noItemsMessage = () => null,
   uneditableItems,
   ...rest
 }: InlineEditableTableProps<Item>) => {
   const { editingItemId, isEditing, isEditingUnsavedItem, rowErrors } =
     useValues(InlineEditableTableLogic);
-  const { editNewItem, reorderItems } = useActions(InlineEditableTableLogic);
+  const { editNewItem, reorderItems, setRowErrors } = useActions(InlineEditableTableLogic);
+  if (errors) {
+    setRowErrors(errors);
+  }
 
   // TODO These two things shoud just be selectors
   const isEditingItem = (item: Item) => item.id === editingItemId;

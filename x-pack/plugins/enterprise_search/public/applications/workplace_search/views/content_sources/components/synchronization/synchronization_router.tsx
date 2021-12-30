@@ -11,13 +11,13 @@ import { Route, Switch } from 'react-router-dom';
 import {
   SYNC_FREQUENCY_PATH,
   BLOCKED_TIME_WINDOWS_PATH,
-  OBJECTS_AND_ASSETS_PATH,
+  ASSETS_AND_OBJECTS_PATH,
   SOURCE_SYNCHRONIZATION_PATH,
   getSourcesPath,
 } from '../../../../routes';
 
 import { Frequency } from './frequency';
-import { ObjectsAndAssets } from './objects_and_assets';
+import { AssetsAndObjects } from './assets_and_objects';
 import { Synchronization } from './synchronization';
 
 export const SynchronizationRouter: React.FC = () => (
@@ -31,8 +31,8 @@ export const SynchronizationRouter: React.FC = () => (
     <Route exact path={getSourcesPath(BLOCKED_TIME_WINDOWS_PATH, true)}>
       <Frequency tabId={1} />
     </Route>
-    <Route exact path={getSourcesPath(OBJECTS_AND_ASSETS_PATH, true)}>
-      <ObjectsAndAssets />
+    <Route exact path={getSourcesPath(ASSETS_AND_OBJECTS_PATH, true)}>
+      <AssetsAndObjects />
     </Route>
   </Switch>
 );

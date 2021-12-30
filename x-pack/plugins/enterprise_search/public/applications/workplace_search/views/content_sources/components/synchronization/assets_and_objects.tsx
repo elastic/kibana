@@ -18,7 +18,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiSwitch,
-  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { SAVE_BUTTON_LABEL } from '../../../../../shared/constants';
@@ -27,27 +27,29 @@ import { UnsavedChangesPrompt } from '../../../../../shared/unsaved_changes_prom
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 import { NAV, RESET_BUTTON } from '../../../../constants';
 import {
-  LEARN_MORE_LINK,
   SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL,
   SYNC_MANAGEMENT_THUMBNAILS_LABEL,
   SYNC_MANAGEMENT_THUMBNAILS_GLOBAL_CONFIG_LABEL,
-  SOURCE_OBJECTS_AND_ASSETS_DESCRIPTION,
-  SOURCE_OBJECTS_AND_ASSETS_LABEL,
+  SOURCE_ASSETS_AND_OBJECTS_DESCRIPTION,
+  SOURCE_ASSETS_AND_OBJECTS_ASSETS_LABEL,
   SYNC_UNSAVED_CHANGES_MESSAGE,
+  SOURCE_ASSETS_AND_OBJECTS_LEARN_MORE_LINK,
+  SOURCE_ASSETS_AND_OBJECTS_OBJECTS_LABEL,
 } from '../../constants';
 import { SourceLogic } from '../../source_logic';
 import { SourceLayout } from '../source_layout';
 
+import { IndexingRulesTable } from './indexing_rules_table';
 import { SynchronizationLogic } from './synchronization_logic';
 
-export const ObjectsAndAssets: React.FC = () => {
+export const AssetsAndObjects: React.FC = () => {
   const { contentSource, dataLoading } = useValues(SourceLogic);
-  const { thumbnailsChecked, contentExtractionChecked, hasUnsavedObjectsAndAssetsChanges } =
+  const { thumbnailsChecked, contentExtractionChecked, hasUnsavedAssetsAndObjectsChanges } =
     useValues(SynchronizationLogic({ contentSource }));
   const {
     setThumbnailsChecked,
     setContentExtractionChecked,
-    updateObjectsAndAssetsSettings,
+    updateAssetsAndObjectsSettings,
     resetSyncSettings,
   } = useActions(SynchronizationLogic({ contentSource }));
 
@@ -56,46 +58,41 @@ export const ObjectsAndAssets: React.FC = () => {
   const actions = (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <EuiButtonEmpty onClick={resetSyncSettings} disabled={!hasUnsavedObjectsAndAssetsChanges}>
-          {RESET_BUTTON}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem>
         <EuiButton
           fill
-          onClick={updateObjectsAndAssetsSettings}
-          disabled={!hasUnsavedObjectsAndAssetsChanges}
+          onClick={updateAssetsAndObjectsSettings}
+          disabled={!hasUnsavedAssetsAndObjectsChanges}
         >
           {SAVE_BUTTON_LABEL}
         </EuiButton>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiButtonEmpty onClick={resetSyncSettings} disabled={!hasUnsavedAssetsAndObjectsChanges}>
+          {RESET_BUTTON}
+        </EuiButtonEmpty>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 
   return (
     <SourceLayout
-      pageChrome={[NAV.SYNCHRONIZATION_OBJECTS_AND_ASSETS]}
+      pageChrome={[NAV.SYNCHRONIZATION_ASSETS_AND_OBJECTS]}
       pageViewTelemetry="source_synchronization"
       isLoading={dataLoading}
     >
       <UnsavedChangesPrompt
-        hasUnsavedChanges={hasUnsavedObjectsAndAssetsChanges}
+        hasUnsavedChanges={hasUnsavedAssetsAndObjectsChanges}
         messageText={SYNC_UNSAVED_CHANGES_MESSAGE}
       />
-      <ViewContentHeader
-        title={NAV.SYNCHRONIZATION_OBJECTS_AND_ASSETS}
-        description={
-          <>
-            {SOURCE_OBJECTS_AND_ASSETS_DESCRIPTION}{' '}
-            <EuiLink href={docLinks.workplaceSearchSynch} external>
-              {LEARN_MORE_LINK}
-            </EuiLink>
-          </>
-        }
-        action={actions}
-      />
+      <ViewContentHeader title={NAV.SYNCHRONIZATION_ASSETS_AND_OBJECTS} action={actions} />
+      {SOURCE_ASSETS_AND_OBJECTS_DESCRIPTION} <EuiSpacer />
+      <EuiLink href={docLinks.workplaceSearchSynch} external>
+        {SOURCE_ASSETS_AND_OBJECTS_LEARN_MORE_LINK}
+      </EuiLink>
       <EuiHorizontalRule />
-      <EuiText size="m">{SOURCE_OBJECTS_AND_ASSETS_LABEL}</EuiText>
+      <EuiTitle size="s">
+        <h3>{SOURCE_ASSETS_AND_OBJECTS_ASSETS_LABEL}</h3>
+      </EuiTitle>
       <EuiSpacer />
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
@@ -120,6 +117,15 @@ export const ObjectsAndAssets: React.FC = () => {
             label={SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL}
             data-test-subj="ContentExtractionToggle"
           />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiHorizontalRule />
+      <EuiTitle size="s">
+        <h3>{SOURCE_ASSETS_AND_OBJECTS_OBJECTS_LABEL}</h3>
+      </EuiTitle>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <IndexingRulesTable />
         </EuiFlexItem>
       </EuiFlexGroup>
     </SourceLayout>

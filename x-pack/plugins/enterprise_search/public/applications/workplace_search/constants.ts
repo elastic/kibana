@@ -60,10 +60,10 @@ export const NAV = {
       defaultMessage: 'Frequency',
     }
   ),
-  SYNCHRONIZATION_OBJECTS_AND_ASSETS: i18n.translate(
-    'xpack.enterpriseSearch.workplaceSearch.nav.synchronizationObjectsAndAssets',
+  SYNCHRONIZATION_ASSETS_AND_OBJECTS: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.nav.synchronizationAssetsAndObjects',
     {
-      defaultMessage: 'Objects and assets',
+      defaultMessage: 'Assets and objects',
     }
   ),
   DISPLAY_SETTINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.displaySettings', {

@@ -15,7 +15,7 @@ import { Route, Switch } from 'react-router-dom';
 import { shallow } from 'enzyme';
 
 import { Frequency } from './frequency';
-import { ObjectsAndAssets } from './objects_and_assets';
+import { AssetsAndObjects } from './assets_and_objects';
 import { Synchronization } from './synchronization';
 import { SynchronizationRouter } from './synchronization_router';
 
@@ -25,7 +25,7 @@ describe('SynchronizationRouter', () => {
     const wrapper = shallow(<SynchronizationRouter />);
 
     expect(wrapper.find(Synchronization)).toHaveLength(1);
-    expect(wrapper.find(ObjectsAndAssets)).toHaveLength(1);
+    expect(wrapper.find(AssetsAndObjects)).toHaveLength(1);
     expect(wrapper.find(Frequency)).toHaveLength(2);
     expect(wrapper.find(Switch)).toHaveLength(1);
     expect(wrapper.find(Route)).toHaveLength(4);

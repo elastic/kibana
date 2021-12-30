@@ -543,18 +543,112 @@ export const SOURCE_FREQUENCY_DESCRIPTION = i18n.translate(
   }
 );
 
-export const SOURCE_OBJECTS_AND_ASSETS_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceObjectsAndAssetsDescription',
+export const SOURCE_ASSETS_AND_OBJECTS_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsDescription',
   {
     defaultMessage:
-      'Customize the indexing rules that determine which objects and assets are synchronized from this content source to Workplace Search.',
+      'Flexibly manage the documents to be synchronized and made available for search using granular controls below.',
   }
 );
 
-export const SOURCE_OBJECTS_AND_ASSETS_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.sourceObjectsAndAssetsLabel',
+export const SOURCE_ASSETS_AND_OBJECTS_LEARN_MORE_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsLearnMoreLink',
   {
-    defaultMessage: 'Object and details to include in search results',
+    defaultMessage: 'Learn more about sync objects types.',
+  }
+);
+
+export const SOURCE_ASSETS_AND_OBJECTS_ASSETS_DESCRIPTION = (contentSourceName: string) =>
+  i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsLabel', {
+    defaultMessage: 'Select assets to synchronize from {contentSourceName}',
+    values: { contentSourceName },
+  });
+
+export const SOURCE_ASSETS_AND_OBJECTS_ASSETS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsAssetsLabel',
+  { defaultMessage: 'Assets' }
+);
+
+export const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsLabel',
+  { defaultMessage: 'Objects' }
+);
+
+export const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_DESCRIPTION = (contentSourceName: string) =>
+  i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsDescription',
+    {
+      defaultMessage:
+        'Include or exclude high level items, file types and (file or folder) paths to synchronize from {contentSourceName}. Everything is included by default. Each document is tested against the rules below and the first rule that matches will be applied.',
+      values: { contentSourceName },
+    }
+  );
+
+export const SOURCE_ASSETS_AND_OBJECTS_ADD_RULE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsAddRuleLabel',
+  { defaultMessage: 'Add indexing rule' }
+);
+
+export const SOURCE_ASSETS_AND_OBJECTS_SYNC_RULES_LEARN_MORE_LINK = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsLearnMoreLink',
+  {
+    defaultMessage: 'Learn more about sync rules.',
+  }
+);
+
+export const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_POLICY_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsTablePolicyLabel',
+  {
+    defaultMessage: 'Policy',
+  }
+);
+
+export const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_RULE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsTableRuleLabel',
+  {
+    defaultMessage: 'Rule',
+  }
+);
+
+export const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_VALUE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsTableValueLabel',
+  {
+    defaultMessage: 'Value',
+  }
+);
+
+export const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_PATH_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsTableValueLabel',
+  {
+    defaultMessage: 'Path',
+  }
+);
+
+export const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_ITEM_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsTableValueLabel',
+  {
+    defaultMessage: 'Item',
+  }
+);
+
+export const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_FILE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsTableValueLabel',
+  {
+    defaultMessage: 'File type',
+  }
+);
+
+export const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_INCLUDE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsTableValueLabel',
+  {
+    defaultMessage: 'Include',
+  }
+);
+
+export const SOURCE_ASSETS_AND_OBJECTS_OBJECTS_TABLE_EXCLUDE_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsObjectsTableValueLabel',
+  {
+    defaultMessage: 'Exclude',
   }
 );
 

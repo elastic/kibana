@@ -30,6 +30,7 @@ import {
   SynchronizationLogic,
   emptyBlockedWindow,
   stripScheduleSeconds,
+  EditableIndexingRule,
 } from './synchronization_logic';
 
 describe('SynchronizationLogic', () => {
@@ -51,10 +52,13 @@ describe('SynchronizationLogic', () => {
 
   const defaultValues = {
     navigatingBetweenTabs: false,
-    hasUnsavedObjectsAndAssetsChanges: false,
+    hasUnsavedAssetsAndObjectsChanges: false,
+    hasUnsavedIndexingRulesChanges: false,
     hasUnsavedFrequencyChanges: false,
     contentExtractionChecked: true,
     thumbnailsChecked: true,
+    indexingRules: [],
+    indexingRulesForAPI: [],
     schedule: contentSource.indexing.schedule,
     cachedSchedule: contentSource.indexing.schedule,
   };
@@ -151,37 +155,140 @@ describe('SynchronizationLogic', () => {
         expect(SynchronizationLogic.values.schedule.blockedWindows).toBeUndefined();
       });
     });
-  });
 
-  describe('setBlockedTimeWindow', () => {
-    it('sets "jobType"', () => {
-      SynchronizationLogic.actions.addBlockedWindow();
-      SynchronizationLogic.actions.setBlockedTimeWindow(0, 'jobType', 'incremental');
+    describe('setBlockedTimeWindow', () => {
+      it('sets "jobType"', () => {
+        SynchronizationLogic.actions.addBlockedWindow();
+        SynchronizationLogic.actions.setBlockedTimeWindow(0, 'jobType', 'incremental');
 
-      expect(SynchronizationLogic.values.schedule.blockedWindows![0].jobType).toEqual(
-        'incremental'
-      );
+        expect(SynchronizationLogic.values.schedule.blockedWindows![0].jobType).toEqual(
+          'incremental'
+        );
+      });
+
+      it('sets "day"', () => {
+        SynchronizationLogic.actions.addBlockedWindow();
+        SynchronizationLogic.actions.setBlockedTimeWindow(0, 'day', 'tuesday');
+
+        expect(SynchronizationLogic.values.schedule.blockedWindows![0].day).toEqual('tuesday');
+      });
+
+      it('sets "start"', () => {
+        SynchronizationLogic.actions.addBlockedWindow();
+        SynchronizationLogic.actions.setBlockedTimeWindow(0, 'start', '9:00:00Z');
+
+        expect(SynchronizationLogic.values.schedule.blockedWindows![0].start).toEqual('9:00:00Z');
+      });
+
+      it('sets "end"', () => {
+        SynchronizationLogic.actions.addBlockedWindow();
+        SynchronizationLogic.actions.setBlockedTimeWindow(0, 'end', '11:00:00Z');
+
+        expect(SynchronizationLogic.values.schedule.blockedWindows![0].end).toEqual('11:00:00Z');
+      });
     });
 
-    it('sets "day"', () => {
-      SynchronizationLogic.actions.addBlockedWindow();
-      SynchronizationLogic.actions.setBlockedTimeWindow(0, 'day', 'tuesday');
+    describe('addIndexingRule', () => {
+      const indexingRule: EditableIndexingRule = {
+        filterType: 'file_extension',
+        valueType: 'exclude',
+        value: 'value',
+        id: 10,
+      };
 
-      expect(SynchronizationLogic.values.schedule.blockedWindows![0].day).toEqual('tuesday');
+      it('adds indexing rule with id 0', () => {
+        SynchronizationLogic.actions.addIndexingRule(indexingRule);
+
+        expect(SynchronizationLogic.values.indexingRules).toEqual([{ ...indexingRule, id: 0 }]);
+        expect(SynchronizationLogic.values.hasUnsavedIndexingRulesChanges).toEqual(true);
+      });
+
+      it('adds indexing rule with id existing length + 1', () => {
+        SynchronizationLogic.actions.addIndexingRule(indexingRule);
+        SynchronizationLogic.actions.addIndexingRule(indexingRule);
+        SynchronizationLogic.actions.addIndexingRule(indexingRule);
+        SynchronizationLogic.actions.addIndexingRule(indexingRule);
+
+        expect(SynchronizationLogic.values.indexingRules).toEqual([
+          { ...indexingRule, id: 0 },
+          { ...indexingRule, id: 1 },
+          { ...indexingRule, id: 2 },
+          { ...indexingRule, id: 3 },
+        ]);
+        expect(SynchronizationLogic.values.hasUnsavedIndexingRulesChanges).toEqual(true);
+      });
     });
 
-    it('sets "start"', () => {
-      SynchronizationLogic.actions.addBlockedWindow();
-      SynchronizationLogic.actions.setBlockedTimeWindow(0, 'start', '9:00:00Z');
+    describe('setIndexingRule', () => {
+      const indexingRule: EditableIndexingRule = {
+        filterType: 'file_extension',
+        valueType: 'exclude',
+        value: 'value',
+        id: 1,
+      };
 
-      expect(SynchronizationLogic.values.schedule.blockedWindows![0].start).toEqual('9:00:00Z');
+      it('updates indexing rule', () => {
+        SynchronizationLogic.actions.addIndexingRule(indexingRule);
+        SynchronizationLogic.actions.addIndexingRule(indexingRule);
+
+        expect(SynchronizationLogic.values.indexingRules).toEqual([
+          { ...indexingRule, id: 0 },
+          { ...indexingRule, id: 1 },
+        ]);
+
+        SynchronizationLogic.actions.setIndexingRule({
+          ...indexingRule,
+          id: 1,
+          valueType: 'include',
+        });
+
+        expect(SynchronizationLogic.values.indexingRules).toEqual([
+          { ...indexingRule, id: 0 },
+          { ...indexingRule, id: 1, valueType: 'include' },
+        ]);
+        expect(SynchronizationLogic.values.hasUnsavedIndexingRulesChanges).toEqual(true);
+      });
     });
 
-    it('sets "end"', () => {
-      SynchronizationLogic.actions.addBlockedWindow();
-      SynchronizationLogic.actions.setBlockedTimeWindow(0, 'end', '11:00:00Z');
+    describe('setIndexingRules', () => {
+      const indexingRule: EditableIndexingRule = {
+        filterType: 'file_extension',
+        valueType: 'exclude',
+        value: 'value',
+        id: 1,
+      };
 
-      expect(SynchronizationLogic.values.schedule.blockedWindows![0].end).toEqual('11:00:00Z');
+      it('updates indexing rules', () => {
+        SynchronizationLogic.actions.setIndexingRules([indexingRule, indexingRule]);
+
+        expect(SynchronizationLogic.values.indexingRules).toEqual([
+          { ...indexingRule, id: 0 },
+          { ...indexingRule, id: 1 },
+        ]);
+        expect(SynchronizationLogic.values.hasUnsavedIndexingRulesChanges).toEqual(true);
+      });
+    });
+
+    describe('deleteIndexingRule', () => {
+      const indexingRule: EditableIndexingRule = {
+        filterType: 'file_extension',
+        valueType: 'exclude',
+        value: 'value',
+        id: 1,
+      };
+
+      it('updates indexing rules', () => {
+        SynchronizationLogic.actions.setIndexingRules([indexingRule, indexingRule]);
+        expect(SynchronizationLogic.values.indexingRules).toEqual([
+          { ...indexingRule, id: 0 },
+          { ...indexingRule, id: 1 },
+        ]);
+
+        SynchronizationLogic.actions.deleteIndexingRule(indexingRule);
+        expect(SynchronizationLogic.values.indexingRules).toEqual([{ ...indexingRule, id: 0 }]);
+
+        expect(SynchronizationLogic.values.hasUnsavedIndexingRulesChanges).toEqual(true);
+      });
     });
   });
 
@@ -209,6 +316,134 @@ describe('SynchronizationLogic', () => {
       });
     });
 
+    describe('initAddIndexingRule', () => {
+      const indexingRule: EditableIndexingRule = {
+        filterType: 'file_extension',
+        valueType: 'exclude',
+        value: 'value',
+        id: 1,
+      };
+      it('calls validate endpoint and continues if no errors happen', async () => {
+        const addIndexingRuleSpy = jest.spyOn(SynchronizationLogic.actions, 'addIndexingRule');
+        const promise = Promise.resolve({ rules: [] });
+        http.post.mockReturnValue(promise);
+        const callbackObject = {
+          callback: () => true,
+        };
+        const callbackSpy = jest.spyOn(callbackObject, 'callback');
+        SynchronizationLogic.actions.initAddIndexingRule(indexingRule, callbackObject.callback);
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/validate_rules',
+          {
+            body: JSON.stringify({
+              rules: [
+                {
+                  filter_type: 'file_extension',
+                  exclude: 'value',
+                },
+              ],
+            }),
+          }
+        );
+        await promise;
+        expect(addIndexingRuleSpy).toHaveBeenCalledWith(indexingRule);
+        expect(callbackSpy).toHaveBeenCalled();
+      });
+
+      it('calls validate endpoint and sets errors if there is an error', async () => {
+        const addIndexingRuleSpy = jest.spyOn(SynchronizationLogic.actions, 'addIndexingRule');
+        const promise = Promise.resolve({ rules: [{ valid: false, error: 'error' }] });
+        http.post.mockReturnValue(promise);
+        const callbackObject = {
+          callback: () => true,
+        };
+        const callbackSpy = jest.spyOn(callbackObject, 'callback');
+        SynchronizationLogic.actions.initAddIndexingRule(indexingRule, callbackObject.callback);
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/validate_rules',
+          {
+            body: JSON.stringify({
+              rules: [
+                {
+                  filter_type: 'file_extension',
+                  exclude: 'value',
+                },
+              ],
+            }),
+          }
+        );
+        await promise;
+        expect(addIndexingRuleSpy).not.toHaveBeenCalled();
+        expect(callbackSpy).toHaveBeenCalled();
+      });
+    });
+
+    describe('initSetIndexingRule', () => {
+      const indexingRule: EditableIndexingRule = {
+        filterType: 'file_extension',
+        valueType: 'exclude',
+        value: 'value',
+        id: 1,
+      };
+      it('calls validate endpoint and continues if no errors happen', async () => {
+        const setIndexingRuleSpy = jest.spyOn(SynchronizationLogic.actions, 'setIndexingRule');
+        const promise = Promise.resolve({ rules: [] });
+        http.post.mockReturnValue(promise);
+        const callbackObject = {
+          callback: () => true,
+        };
+        const callbackSpy = jest.spyOn(callbackObject, 'callback');
+        SynchronizationLogic.actions.initSetIndexingRule(indexingRule, callbackObject.callback);
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/validate_rules',
+          {
+            body: JSON.stringify({
+              rules: [
+                {
+                  filter_type: 'file_extension',
+                  exclude: 'value',
+                },
+              ],
+            }),
+          }
+        );
+        await promise;
+        expect(setIndexingRuleSpy).toHaveBeenCalledWith(indexingRule);
+        expect(callbackSpy).toHaveBeenCalled();
+      });
+
+      it('calls validate endpoint and sets errors if there is an error', async () => {
+        const setIndexingRuleSpy = jest.spyOn(SynchronizationLogic.actions, 'setIndexingRule');
+        const promise = Promise.resolve({ rules: [{ valid: false, error: 'error' }] });
+        http.post.mockReturnValue(promise);
+        const callbackObject = {
+          callback: () => true,
+        };
+        const callbackSpy = jest.spyOn(callbackObject, 'callback');
+        SynchronizationLogic.actions.initSetIndexingRule(indexingRule, callbackObject.callback);
+
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/validate_rules',
+          {
+            body: JSON.stringify({
+              rules: [
+                {
+                  filter_type: 'file_extension',
+                  exclude: 'value',
+                },
+              ],
+            }),
+          }
+        );
+        await promise;
+        expect(setIndexingRuleSpy).not.toHaveBeenCalled();
+        expect(callbackSpy).toHaveBeenCalled();
+      });
+    });
+
     describe('updateSyncEnabled', () => {
       it('calls updateServerSettings method', async () => {
         const updateServerSettingsSpy = jest.spyOn(
@@ -225,13 +460,13 @@ describe('SynchronizationLogic', () => {
       });
     });
 
-    describe('updateObjectsAndAssetsSettings', () => {
+    describe('updateAssetsAndObjectsSettings', () => {
       it('calls updateServerSettings method', async () => {
         const updateServerSettingsSpy = jest.spyOn(
           SynchronizationLogic.actions,
           'updateServerSettings'
         );
-        SynchronizationLogic.actions.updateObjectsAndAssetsSettings();
+        SynchronizationLogic.actions.updateAssetsAndObjectsSettings();
 
         expect(updateServerSettingsSpy).toHaveBeenCalledWith({
           content_source: {
@@ -240,6 +475,7 @@ describe('SynchronizationLogic', () => {
                 content_extraction: { enabled: true },
                 thumbnails: { enabled: true },
               },
+              rules: [],
             },
           },
         });

@@ -168,6 +168,12 @@ export interface BlockedWindow {
   end: string;
 }
 
+export interface IndexingRule {
+  filterType: 'object_type' | 'path_template' | 'file_extension',
+  exclude?: string,
+  include?: string,
+}
+
 export interface IndexingConfig {
   enabled: boolean;
   features: {
@@ -178,6 +184,7 @@ export interface IndexingConfig {
       enabled: boolean;
     };
   };
+  rules: IndexingRule[];
   schedule: IndexingSchedule;
 }
 
