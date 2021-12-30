@@ -55,7 +55,6 @@ export const ApmAgentInstructionsMappings: Array<{
     title: 'Java',
     variantId: 'java',
     createAgentInstructions: createJavaAgentInstructions,
-    AgentRuntimeAttachment: JavaRuntimeAttachment,
   },
   {
     agentName: 'rum-js',
