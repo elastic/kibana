@@ -15,7 +15,7 @@ import {
 describe('Event Logger', () => {
   const mockEventObject: ReportingEventLoggerOpts = {
     event: { id: '12348', timezone: 'UTC' },
-    kibana: { reporting: { jobType: 'csv', contentType: 'text/csv' } },
+    kibana: { reporting: { jobType: 'csv' } },
   };
 
   let factory: ReportingEventLogger;
@@ -35,7 +35,6 @@ describe('Event Logger', () => {
         },
         "kibana": Object {
           "reporting": Object {
-            "contentType": "text/csv",
             "jobType": "csv",
           },
         },
@@ -58,7 +57,6 @@ describe('Event Logger', () => {
         },
         "kibana": Object {
           "reporting": Object {
-            "contentType": "text/csv",
             "jobType": "csv",
           },
         },

@@ -27,9 +27,6 @@ export const ALLOWED_JOB_CONTENT_TYPES = [
   'text/plain',
 ];
 
-export const EVENT_ACTION_EXECUTE_START = 'execute-start';
-export const EVENT_ACTION_EXECUTE_COMPLETE = 'execute-complete';
-
 // See:
 // https://github.com/chromium/chromium/blob/3611052c055897e5ebbc5b73ea295092e0c20141/services/network/public/cpp/header_util_unittest.cc#L50
 // For a list of headers that chromium doesn't like

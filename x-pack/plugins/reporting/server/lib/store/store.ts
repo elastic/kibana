@@ -71,6 +71,13 @@ const jobDebugMessage = (report: Report) =>
   `[attempts: ${report.attempts}] ` +
   `[process_expiration: ${report.process_expiration}]`;
 
+const getEventLogger = (reporting: ReportingCore, report: Report) => {
+  return reporting.getEventLogger({
+    event: { id: report._id, timezone: report.payload.browserTimezone },
+    kibana: { reporting: { jobType: report.jobtype } },
+  });
+};
+
 /*
  * A class to give an interface to historical reports in the reporting.index
  * - track the state: pending, processing, completed, etc
@@ -279,18 +286,19 @@ export class ReportingStore {
       status: statuses.JOB_STATUS_PROCESSING,
     });
 
+    let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      const { body } = await client.update<ReportDocument>({
-        id: report._id,
-        index: report._index,
-        if_seq_no: report._seq_no,
-        if_primary_term: report._primary_term,
-        refresh: true,
-        body: { doc },
-      });
-
-      return body;
+      body = (
+        await client.update<ReportDocument>({
+          id: report._id,
+          index: report._index,
+          if_seq_no: report._seq_no,
+          if_primary_term: report._primary_term,
+          refresh: true,
+          body: { doc },
+        })
+      ).body;
     } catch (err) {
       this.logger.error(
         `Error in updating status to processing! Report: ` + jobDebugMessage(report)
@@ -298,6 +306,9 @@ export class ReportingStore {
       this.logger.error(err);
       throw err;
     }
+
+    getEventLogger(this.reportingCore, report).logClaimTask(`Report ${report._id} claimed.`);
+    return body;
   }
 
   public async setReportFailed(
@@ -309,22 +320,27 @@ export class ReportingStore {
       status: statuses.JOB_STATUS_FAILED,
     });
 
+    let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      const { body } = await client.update<ReportDocument>({
-        id: report._id,
-        index: report._index,
-        if_seq_no: report._seq_no,
-        if_primary_term: report._primary_term,
-        refresh: true,
-        body: { doc },
-      });
-      return body;
+      body = (
+        await client.update<ReportDocument>({
+          id: report._id,
+          index: report._index,
+          if_seq_no: report._seq_no,
+          if_primary_term: report._primary_term,
+          refresh: true,
+          body: { doc },
+        })
+      ).body;
     } catch (err) {
       this.logger.error(`Error in updating status to failed! Report: ` + jobDebugMessage(report));
       this.logger.error(err);
       throw err;
     }
+
+    getEventLogger(this.reportingCore, report).logReportFailure(`Report ${report._id} failed.`);
+    return body;
   }
 
   public async setReportCompleted(
@@ -341,22 +357,27 @@ export class ReportingStore {
       status,
     } as ReportSource);
 
+    let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      const { body } = await client.update<ReportDocument>({
-        id: report._id,
-        index: report._index,
-        if_seq_no: report._seq_no,
-        if_primary_term: report._primary_term,
-        refresh: true,
-        body: { doc },
-      });
-      return body;
+      body = (
+        await client.update<ReportDocument>({
+          id: report._id,
+          index: report._index,
+          if_seq_no: report._seq_no,
+          if_primary_term: report._primary_term,
+          refresh: true,
+          body: { doc },
+        })
+      ).body;
     } catch (err) {
       this.logger.error(`Error in updating status to complete! Report: ` + jobDebugMessage(report));
       this.logger.error(err);
       throw err;
     }
+
+    getEventLogger(this.reportingCore, report).logReportSaved(`Report ${report._id} saved.`);
+    return body;
   }
 
   public async prepareReportForRetry(report: SavedReport): Promise<UpdateResponse<ReportDocument>> {
@@ -365,17 +386,19 @@ export class ReportingStore {
       process_expiration: null,
     });
 
+    let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      const { body } = await client.update<ReportDocument>({
-        id: report._id,
-        index: report._index,
-        if_seq_no: report._seq_no,
-        if_primary_term: report._primary_term,
-        refresh: true,
-        body: { doc },
-      });
-      return body;
+      body = (
+        await client.update<ReportDocument>({
+          id: report._id,
+          index: report._index,
+          if_seq_no: report._seq_no,
+          if_primary_term: report._primary_term,
+          refresh: true,
+          body: { doc },
+        })
+      ).body;
     } catch (err) {
       this.logger.error(
         `Error in clearing expiration and status for retry! Report: ` + jobDebugMessage(report)
@@ -383,6 +406,8 @@ export class ReportingStore {
       this.logger.error(err);
       throw err;
     }
+
+    return body;
   }
 
   /*

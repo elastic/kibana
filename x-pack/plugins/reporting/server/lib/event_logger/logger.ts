@@ -7,17 +7,24 @@
 
 import deepMerge from 'deepmerge';
 import { IEventLogger, IEventLogService } from '../../../../event_log/server';
+import { PLUGIN_ID } from '../../../common/constants';
+import { ActionType } from './';
 import {
-  EVENT_ACTION_EXECUTE_COMPLETE,
-  EVENT_ACTION_EXECUTE_START,
-  PLUGIN_ID,
-} from '../../../common/constants';
-import { ErrorAction, ExecuteComplete, ExecuteError, ExecuteStart } from './types';
+  ClaimedTask,
+  ErrorAction,
+  CompletedExecution,
+  ExecuteError,
+  StartedExecution,
+  FailedReport,
+  SavedReport,
+  ScheduledTask,
+  ScheduledRetry,
+} from './types';
 
 export interface ReportingEventLoggerOpts {
-  event: Pick<ExecuteStart['event'], 'id' | 'timezone'>;
-  kibana: Pick<ExecuteStart['kibana'], 'reporting'>;
-  user?: ExecuteStart['user'];
+  event: Pick<StartedExecution['event'], 'id' | 'timezone'>;
+  kibana: Pick<StartedExecution['kibana'], 'reporting'>;
+  user?: StartedExecution['user'];
 }
 
 /** @internal */
@@ -31,7 +38,7 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
         timezone: string;
         provider: 'reporting';
       };
-      kibana: { reporting: ExecuteStart['kibana']['reporting'] };
+      kibana: { reporting: StartedExecution['kibana']['reporting'] };
       log: { logger: 'reporting' };
       user?: { name: string };
     };
@@ -50,14 +57,28 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
       this.completionLogger = eventLog.getLogger({ event: { provider: PLUGIN_ID } });
     }
 
-    logStart(message: string): ExecuteStart {
+    public logScheduleTask(message: string): ScheduledTask {
+      const event = deepMerge(
+        {
+          message,
+          event: { kind: 'event', action: ActionType.SCHEDULE_TASK },
+          log: { level: 'info' },
+        } as Partial<ScheduledTask>,
+        this.eventObj
+      );
+
+      genericLogger.logEvent(event);
+      return event;
+    }
+
+    logStart(message: string): StartedExecution {
       this.completionLogger.startTiming(this.eventObj);
       const event = deepMerge(
         {
           message,
-          event: { kind: 'event', action: EVENT_ACTION_EXECUTE_START },
+          event: { kind: 'event', action: ActionType.EXECUTE_START },
           log: { level: 'info' },
-        } as Partial<ExecuteStart>,
+        } as Partial<StartedExecution>,
         this.eventObj
       );
 
@@ -67,16 +88,16 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
 
     logComplete(
       message: string,
-      reportingObj: Partial<ExecuteComplete['kibana']['reporting']>
-    ): ExecuteComplete {
+      reportingObj: Partial<CompletedExecution['kibana']['reporting']>
+    ): CompletedExecution {
       this.completionLogger.stopTiming(this.eventObj);
       const event = deepMerge(
         {
           message,
-          event: { kind: 'metrics', outcome: 'success', action: EVENT_ACTION_EXECUTE_COMPLETE },
+          event: { kind: 'metrics', outcome: 'success', action: ActionType.EXECUTE_COMPLETE },
           kibana: { reporting: reportingObj },
           log: { level: 'info' },
-        } as Partial<ExecuteComplete>,
+        } as Partial<CompletedExecution>,
         this.eventObj
       );
       this.completionLogger.logEvent(event);
@@ -98,10 +119,63 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
           stack_trace: error.stack_trace,
           type: error.type,
         },
-        event: { kind: 'error', outcome: 'failure', action: EVENT_ACTION_EXECUTE_COMPLETE },
+        event: { kind: 'error', outcome: 'failure', action: ActionType.EXECUTE_COMPLETE },
         log: { level: 'error' },
       };
       const event = deepMerge(coolErrorMessage, this.eventObj);
+      genericLogger.logEvent(event);
+      return event;
+    }
+
+    logClaimTask(message: string): ClaimedTask {
+      const event = deepMerge(
+        {
+          message,
+          event: { kind: 'event', action: ActionType.CLAIM_TASK },
+          log: { level: 'info' },
+        } as Partial<ClaimedTask>,
+        this.eventObj
+      );
+
+      genericLogger.logEvent(event);
+      return event;
+    }
+    logReportFailure(message: string): FailedReport {
+      const event = deepMerge(
+        {
+          message,
+          event: { kind: 'event', action: ActionType.FAIL_REPORT },
+          log: { level: 'info' },
+        } as Partial<FailedReport>,
+        this.eventObj
+      );
+
+      genericLogger.logEvent(event);
+      return event;
+    }
+    logReportSaved(message: string): SavedReport {
+      const event = deepMerge(
+        {
+          message,
+          event: { kind: 'event', action: ActionType.SAVE_REPORT },
+          log: { level: 'info' },
+        } as Partial<SavedReport>,
+        this.eventObj
+      );
+
+      genericLogger.logEvent(event);
+      return event;
+    }
+    logRetry(message: string): ScheduledRetry {
+      const event = deepMerge(
+        {
+          message,
+          event: { kind: 'event', action: ActionType.RETRY },
+          log: { level: 'info' },
+        } as Partial<ScheduledRetry>,
+        this.eventObj
+      );
+
       genericLogger.logEvent(event);
       return event;
     }

@@ -141,7 +141,6 @@ export const EventSchema = schema.maybe(
         reporting: schema.maybe(
           schema.object({
             jobType: ecsString(),
-            contentType: ecsString(),
             csv: schema.maybe(
               schema.object({
                 byteLength: ecsNumber(),

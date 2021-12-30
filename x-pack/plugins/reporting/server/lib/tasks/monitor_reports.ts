@@ -152,6 +152,15 @@ export class MonitorReportsTask implements ReportingTask {
     logger.info(`Rescheduling task:${task.id} to retry.`);
 
     const newTask = await this.reporting.scheduleTask(task);
+    const { id, payload, jobtype } = task;
+
+    this.reporting
+      .getEventLogger({
+        event: { id, timezone: payload.browserTimezone },
+        kibana: { reporting: { jobType: jobtype, task: { id: newTask.id } } },
+      })
+      .logRetry(`Scheduled retry for report ${id}`);
+
     return newTask;
   }
 

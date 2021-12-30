@@ -91,9 +91,6 @@ exports.EcsCustomPropertyMappings = {
           jobType: {
             type: 'keyword',
           },
-          contentType: {
-            type: 'keyword',
-          },
           csv: {
             properties: {
               byteLength: {

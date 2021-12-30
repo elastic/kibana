@@ -71,16 +71,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
 
         const eventLog = reporting.getEventLogger({
-          event: {
-            id: uuid.v1(),
-            timezone: req.body.browserTimezone,
-          },
-          kibana: {
-            reporting: {
-              jobType: CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
-              contentType: 'text/csv',
-            },
-          },
+          event: { id: uuid.v1(), timezone: req.body.browserTimezone },
+          kibana: { reporting: { jobType: CSV_SEARCHSOURCE_IMMEDIATE_TYPE } },
           ...(user && { name: user.username }),
         });
 
