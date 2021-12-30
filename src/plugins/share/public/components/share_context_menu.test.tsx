@@ -8,23 +8,19 @@
 
 import { ShareMenuItem } from '../types';
 
-jest.mock('../lib/url_shortener', () => ({}));
-
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { ShareContextMenu } from './share_context_menu';
+import { ShareContextMenu, ShareContextMenuProps } from './share_context_menu';
 
-const defaultProps = {
+const defaultProps: ShareContextMenuProps = {
   allowEmbed: true,
   allowShortUrl: false,
   shareMenuItems: [],
   sharingData: null,
-  isDirty: false,
   onClose: () => {},
-  basePath: '',
-  post: () => Promise.resolve({} as any),
   objectType: 'dashboard',
+  urlService: {} as any,
 };
 
 test('should render context menu panel when there are more than one panel', () => {

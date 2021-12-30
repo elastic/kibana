@@ -10,9 +10,8 @@ exports[`shareContextMenuExtensions should sort ascending on sort order first an
         Object {
           "content": <UrlPanelContent
             allowShortUrl={false}
-            basePath=""
             objectType="dashboard"
-            post={[Function]}
+            urlService={Object {}}
           />,
           "id": 1,
           "title": "Permalink",
@@ -70,9 +69,8 @@ exports[`should only render permalink panel when there are no other panels 1`] =
         Object {
           "content": <UrlPanelContent
             allowShortUrl={false}
-            basePath=""
             objectType="dashboard"
-            post={[Function]}
+            urlService={Object {}}
           />,
           "id": 1,
           "title": "Permalink",
@@ -94,9 +92,8 @@ exports[`should render context menu panel when there are more than one panel 1`]
         Object {
           "content": <UrlPanelContent
             allowShortUrl={false}
-            basePath=""
             objectType="dashboard"
-            post={[Function]}
+            urlService={Object {}}
           />,
           "id": 1,
           "title": "Permalink",
@@ -104,10 +101,9 @@ exports[`should render context menu panel when there are more than one panel 1`]
         Object {
           "content": <UrlPanelContent
             allowShortUrl={false}
-            basePath=""
             isEmbedded={true}
             objectType="dashboard"
-            post={[Function]}
+            urlService={Object {}}
           />,
           "id": 2,
           "title": "Embed Code",

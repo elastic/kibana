@@ -19,7 +19,7 @@ import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 import type { BrowserUrlService } from '../types';
 
-interface Props {
+export interface ShareContextMenuProps {
   allowEmbed: boolean;
   allowShortUrl: boolean;
   objectId?: string;
@@ -34,7 +34,7 @@ interface Props {
   urlService: BrowserUrlService;
 }
 
-export class ShareContextMenu extends Component<Props> {
+export class ShareContextMenu extends Component<ShareContextMenuProps> {
   public render() {
     const { panels, initialPanelId } = this.getPanels();
     return (
