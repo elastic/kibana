@@ -195,6 +195,8 @@ async function fetchSeries(
     },
   };
 
+  metric.debug && console.log(JSON.stringify(params.body))
+
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   return await callWithRequest(req, 'search', params);
 }

@@ -13,7 +13,7 @@ import { createQuery } from '../create_query';
 // @ts-ignore
 import { calculateAvailability } from '../calculate_availability';
 // @ts-ignore
-import { KibanaMetric } from '../metrics';
+import { KibanaStat } from '../metrics';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
 
@@ -78,7 +78,7 @@ export async function getKibanas(
         start,
         end,
         clusterUuid,
-        metric: KibanaMetric.getMetricFields(),
+        metric: KibanaStat.getMetricFields(),
       }),
       collapse: {
         field: 'kibana_stats.kibana.uuid',

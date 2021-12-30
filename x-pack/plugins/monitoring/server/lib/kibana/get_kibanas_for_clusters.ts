@@ -10,6 +10,7 @@ import { LegacyRequest, Cluster, Bucket } from '../../types';
 import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query';
 import { KibanaClusterMetric } from '../metrics';
+import { getRules } from './kibana_metrics/get_rules';
 
 /*
  * Get high-level info for Kibanas in a set of clusters
@@ -36,7 +37,7 @@ export function getKibanasForClusters(
   const end = req.payload.timeRange.max;
 
   return Promise.all(
-    clusters.map((cluster) => {
+    clusters.map(async (cluster) => {
       const clusterUuid = cluster.elasticsearch?.cluster?.id ?? cluster.cluster_uuid;
       const metric = KibanaClusterMetric.getMetricFields();
       const params = {
@@ -166,53 +167,56 @@ export function getKibanasForClusters(
       };
 
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-      return callWithRequest(req, 'search', params).then((result) => {
-        const aggregations = result.aggregations ?? {};
-        const kibanaUuids = aggregations.kibana_uuids?.buckets ?? [];
-        const statusBuckets = aggregations.status?.buckets ?? [];
+      const [result, rules] = await Promise.all([
+        callWithRequest(req, 'search', params),
+        getRules(req, kbnIndexPattern, { clusterUuid }),
+      ]);
+      const aggregations = result.aggregations ?? {};
+      const kibanaUuids = aggregations.kibana_uuids?.buckets ?? [];
+      const statusBuckets = aggregations.status?.buckets ?? [];
 
-        // everything is initialized such that it won't impact any rollup
-        let status = null;
-        let requestsTotal = 0;
-        let connections = 0;
-        let responseTime = 0;
-        let memorySize = 0;
-        let memoryLimit = 0;
+      // everything is initialized such that it won't impact any rollup
+      let status = null;
+      let requestsTotal = 0;
+      let connections = 0;
+      let responseTime = 0;
+      let memorySize = 0;
+      let memoryLimit = 0;
 
-        // if the cluster has kibana instances at all
-        if (kibanaUuids.length) {
-          // get instance status by finding the latest status bucket
-          const latestTimestamp = chain(statusBuckets)
-            .map((bucket) => bucket.max_timestamp.value)
-            .max()
-            .value();
-          const latestBucket = find(
-            statusBuckets,
-            (bucket) => bucket.max_timestamp.value === latestTimestamp
-          );
-          status = latestBucket.key;
+      // if the cluster has kibana instances at all
+      if (kibanaUuids.length) {
+        // get instance status by finding the latest status bucket
+        const latestTimestamp = chain(statusBuckets)
+          .map((bucket) => bucket.max_timestamp.value)
+          .max()
+          .value();
+        const latestBucket = find(
+          statusBuckets,
+          (bucket) => bucket.max_timestamp.value === latestTimestamp
+        );
+        status = latestBucket.key;
 
-          requestsTotal = aggregations.requests_total?.value;
-          connections = aggregations.concurrent_connections?.value;
-          responseTime = aggregations.response_time_max?.value;
-          memorySize = aggregations.memory_rss?.value;
-          memoryLimit = aggregations.memory_heap_size_limit?.value;
-        }
+        requestsTotal = aggregations.requests_total?.value;
+        connections = aggregations.concurrent_connections?.value;
+        responseTime = aggregations.response_time_max?.value;
+        memorySize = aggregations.memory_rss?.value;
+        memoryLimit = aggregations.memory_heap_size_limit?.value;
+      }
 
-        return {
-          clusterUuid,
-          stats: {
-            uuids: kibanaUuids.map(({ key }: Bucket) => key),
-            status,
-            requests_total: requestsTotal,
-            concurrent_connections: connections,
-            response_time_max: responseTime,
-            memory_size: memorySize,
-            memory_limit: memoryLimit,
-            count: kibanaUuids.length,
-          },
-        };
-      });
+      return {
+        clusterUuid,
+        stats: {
+          uuids: kibanaUuids.map(({ key }: Bucket) => key),
+          status,
+          requests_total: requestsTotal,
+          concurrent_connections: connections,
+          response_time_max: responseTime,
+          memory_size: memorySize,
+          memory_limit: memoryLimit,
+          count: kibanaUuids.length,
+        },
+        rules,
+      };
     })
   );
 }

@@ -26,6 +26,14 @@ export const KibanaTemplate: React.FC<PageTemplateProps> = ({ ...props }) => {
       route: '/kibana/instances',
       testSubj: 'kibanaInstancesPage',
     },
+    {
+      id: 'rules',
+      label: i18n.translate('xpack.monitoring.kibanaNavigation.rulesLinkText', {
+        defaultMessage: 'Rules',
+      }),
+      route: '/kibana/rules',
+      testSubj: 'kibanaRulesPage',
+    },
   ];
 
   return <PageTemplate {...props} tabs={tabs} product="kibana" />;

@@ -199,6 +199,60 @@ export function KibanaPanel(props) {
             </EuiDescriptionList>
           </EuiPanel>
         </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiPanel paddingSize="m">
+            <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="s">
+                  <h3>
+                    <EuiLink
+                      href={getSafeForExternalLink('#/kibana/rules')}
+                      data-test-subj="kbnRules"
+                      aria-label={i18n.translate(
+                        'xpack.monitoring.cluster.overview.kibanaPanel.rulesCountLinkAriaLabel',
+                        {
+                          defaultMessage: 'Kibana Rules: {rulesCount}',
+                          values: { rulesCount: props.rules.count },
+                        }
+                      )}
+                    >
+                      <FormattedMessage
+                        id="xpack.monitoring.cluster.overview.kibanaPanel.rulesCountLinkLabel"
+                        defaultMessage="Rules: {rulesCount}"
+                        values={{
+                          rulesCount: (
+                            <span data-test-subj="number_of_kibana_rules">{props.rules.count}</span>
+                          ),
+                        }}
+                      />
+                    </EuiLink>
+                  </h3>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiHorizontalRule margin="m" />
+            <EuiDescriptionList type="column">
+              <EuiDescriptionListTitle className="eui-textBreakWord">
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.kibanaPanel.ruleDriftLabel"
+                  defaultMessage="Rule drift"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription data-test-subj="kbnRuleDrict">
+                {formatNumber(props.rules.averageDrift, 'int_commas')}
+              </EuiDescriptionListDescription>
+              {/* <EuiDescriptionListTitle className="eui-textBreakWord">
+                <FormattedMessage
+                  id="xpack.monitoring.cluster.overview.kibanaPanel.memoryUsageLabel"
+                  defaultMessage="Memory Usage"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription data-test-subj="kbnMemoryUsage">
+                <BytesPercentageUsage usedBytes={props.memory_size} maxBytes={props.memory_limit} />
+              </EuiDescriptionListDescription> */}
+            </EuiDescriptionList>
+          </EuiPanel>
+        </EuiFlexItem>
       </EuiFlexGrid>
     </ClusterItemContainer>
   );

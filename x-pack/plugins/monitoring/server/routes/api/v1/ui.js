@@ -27,7 +27,13 @@ export {
   setCollectionEnabledRoute,
   setCollectionIntervalRoute,
 } from './elasticsearch_settings';
-export { kibanaInstanceRoute, kibanaInstancesRoute, kibanaOverviewRoute } from './kibana';
+export {
+  kibanaInstanceRoute,
+  kibanaInstancesRoute,
+  kibanaOverviewRoute,
+  kibanaRulesRoute,
+  kibanaRuleRoute,
+} from './kibana';
 export { apmInstanceRoute, apmInstancesRoute, apmOverviewRoute } from './apm';
 export {
   logstashClusterPipelinesRoute,

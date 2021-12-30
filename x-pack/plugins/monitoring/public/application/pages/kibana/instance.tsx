@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment, useContext, useState, useCallback, useEffect } from 'react';
+import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
@@ -18,7 +18,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiHorizontalRule,
-  EuiTitle,
 } from '@elastic/eui';
 import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../contexts/global_state_context';
@@ -35,37 +34,9 @@ import { AlertsCallout } from '../../../alerts/callout';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { RULE_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
-import { Legacy } from '../../../legacy_shims';
-import { KibanaMonitoringSection } from '../../../kibana_monitoring_registry';
 
-const KibanaInstance = ({
-  data,
-  alerts,
-  sections,
-}: {
-  data: any;
-  alerts: any;
-  sections: KibanaMonitoringSection[];
-}) => {
+const KibanaInstance = ({ data, alerts }: { data: any; alerts: any }) => {
   const { zoomInfo, onBrush } = useCharts();
-
-  function renderSections(metrics: unknown) {
-    if (!sections || sections.length === 0) {
-      return null;
-    }
-
-    return sections.map((section) => {
-      return (
-        <Fragment>
-          <EuiTitle>
-            <h2>{section.title}</h2>
-          </EuiTitle>
-          <EuiHorizontalRule />
-          {section.renderApp(metrics)}
-        </Fragment>
-      );
-    });
-  }
 
   return (
     <EuiPage>
@@ -127,7 +98,6 @@ const KibanaInstance = ({
             </EuiFlexItem>
           </EuiFlexGrid>
           <EuiHorizontalRule />
-          {renderSections(data.kibanaMetrics)}
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
@@ -195,12 +165,10 @@ export const KibanaInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
     }
   }, [ccs, clusterUuid, instance, services.data?.query.timefilter.timefilter, services.http]);
 
-  const sections = Legacy.shims.kibanaMonitoringRegistry.sections;
-
   return (
     <PageTemplate title={title} pageTitle={pageTitle} getPageData={getPageData}>
       <div data-test-subj="kibanaInstancePage">
-        <KibanaInstance data={data} alerts={alerts} sections={sections} />
+        <KibanaInstance data={data} alerts={alerts} />
       </div>
     </PageTemplate>
   );

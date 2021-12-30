@@ -9,14 +9,15 @@ import React from 'react';
 import { EuiToolTip, EuiHealth } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { CommonAlertStatus, AlertState } from '../../common/types/alerts';
+import { AlertState } from '../../common/types/alerts';
 import { AlertSeverity } from '../../common/enums';
 import { AlertsBadge } from './badge';
 import { isInSetupMode } from '../lib/setup_mode';
 import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
+import { AlertsByName } from './types';
 
 interface Props {
-  alerts: { [alertTypeId: string]: CommonAlertStatus[] };
+  alerts: AlertsByName;
   showBadge: boolean;
   showOnlyCount?: boolean;
   stateFilter?: (state: AlertState) => boolean;

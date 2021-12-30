@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaEventsRateClusterMetric, KibanaMetric } from './classes';
+import { KibanaEventsRateClusterMetric, KibanaMetric, KibanaStat } from './classes';
 import { LARGE_FLOAT, SMALL_FLOAT, LARGE_BYTES } from '../../../../common/formatting';
 import { i18n } from '@kbn/i18n';
 
@@ -79,7 +79,7 @@ export const metrics = {
     format: SMALL_FLOAT,
     units: msTimeUnitLabel,
   }),
-  kibana_os_load_1m: new KibanaMetric({
+  kibana_os_load_1m: new KibanaStat({
     title: instanceSystemLoadTitle,
     field: 'kibana_stats.os.load.1m',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.systemLoad.last1MinuteLabel', {
@@ -95,7 +95,7 @@ export const metrics = {
     metricAgg: 'max',
     units: '',
   }),
-  kibana_os_load_5m: new KibanaMetric({
+  kibana_os_load_5m: new KibanaStat({
     title: instanceSystemLoadTitle,
     field: 'kibana_stats.os.load.5m',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.systemLoad.last5MinutesLabel', {
@@ -111,7 +111,7 @@ export const metrics = {
     metricAgg: 'max',
     units: '',
   }),
-  kibana_os_load_15m: new KibanaMetric({
+  kibana_os_load_15m: new KibanaStat({
     title: instanceSystemLoadTitle,
     field: 'kibana_stats.os.load.15m',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.systemLoad.last15MinutesLabel', {
@@ -127,7 +127,7 @@ export const metrics = {
     metricAgg: 'max',
     units: '',
   }),
-  kibana_memory_heap_size_limit: new KibanaMetric({
+  kibana_memory_heap_size_limit: new KibanaStat({
     title: instanceMemorySizeTitle,
     field: 'kibana_stats.process.memory.heap.size_limit',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.memorySize.heapSizeLimitLabel', {
@@ -143,7 +143,7 @@ export const metrics = {
     metricAgg: 'max',
     units: 'B',
   }),
-  kibana_memory_size: new KibanaMetric({
+  kibana_memory_size: new KibanaStat({
     title: instanceMemorySizeTitle,
     field: 'kibana_stats.process.memory.resident_set_size_in_bytes',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.memorySizeLabel', {
@@ -156,7 +156,7 @@ export const metrics = {
     metricAgg: 'max',
     units: 'B',
   }),
-  kibana_process_delay: new KibanaMetric({
+  kibana_process_delay: new KibanaStat({
     field: 'kibana_stats.process.event_loop_delay',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.eventLoopDelayLabel', {
       defaultMessage: 'Event Loop Delay',
@@ -173,7 +173,7 @@ export const metrics = {
     metricAgg: 'max',
     units: msTimeUnitLabel,
   }),
-  kibana_average_response_times: new KibanaMetric({
+  kibana_average_response_times: new KibanaStat({
     title: instanceClientResponseTimeTitle,
     field: 'kibana_stats.response_times.average',
     label: i18n.translate(
@@ -192,7 +192,7 @@ export const metrics = {
     metricAgg: 'max',
     units: msTimeUnitLabel,
   }),
-  kibana_max_response_times: new KibanaMetric({
+  kibana_max_response_times: new KibanaStat({
     title: instanceClientResponseTimeTitle,
     field: 'kibana_stats.response_times.max',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clientResponseTime.maxLabel', {
@@ -208,7 +208,7 @@ export const metrics = {
     metricAgg: 'max',
     units: msTimeUnitLabel,
   }),
-  kibana_average_concurrent_connections: new KibanaMetric({
+  kibana_average_concurrent_connections: new KibanaStat({
     field: 'kibana_stats.concurrent_connections',
     label: i18n.translate('xpack.monitoring.metrics.kibana.httpConnectionsLabel', {
       defaultMessage: 'HTTP Connections',
@@ -220,7 +220,7 @@ export const metrics = {
     metricAgg: 'max',
     units: '',
   }),
-  kibana_requests_total: new KibanaMetric({
+  kibana_requests_total: new KibanaStat({
     field: 'kibana_stats.requests.total',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.clientRequestsLabel', {
       defaultMessage: 'Client Requests',
@@ -235,7 +235,7 @@ export const metrics = {
     metricAgg: 'max',
     units: '',
   }),
-  kibana_requests_disconnects: new KibanaMetric({
+  kibana_requests_disconnects: new KibanaStat({
     field: 'kibana_stats.requests.disconnects',
     label: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.clientRequestsDisconnectsLabel',
@@ -252,5 +252,19 @@ export const metrics = {
     format: SMALL_FLOAT,
     metricAgg: 'max',
     units: '',
+  }),
+
+  kibana_rule_drift: new KibanaMetric({
+    field: 'kibana_metrics.rule.averageDrift',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.ruleDrift.label', {
+      defaultMessage: 'Rule [ruleName] Drift',
+    }),
+    description: i18n.translate('xpack.monitoring.metrics.kibanaInstance.ruleDrift.description', {
+      defaultMessage: 'TODO: fill out.',
+    }),
+    format: SMALL_FLOAT,
+    metricAgg: 'avg',
+    units: '',
+    // debug: true,
   }),
 };

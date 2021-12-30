@@ -94,6 +94,17 @@ function getKibanaBreadcrumbs(mainInstance: any) {
       )
     );
     breadcrumbs.push(createCrumb(null, mainInstance.instance));
+  } else if (mainInstance.rule) {
+    breadcrumbs.push(createCrumb('#/kibana', 'Kibana'));
+    breadcrumbs.push(
+      createCrumb(
+        '#/kibana/rules',
+        i18n.translate('xpack.monitoring.breadcrumbs.kibana.rulesLabel', {
+          defaultMessage: 'Rules',
+        })
+      )
+    );
+    breadcrumbs.push(createCrumb(null, mainInstance.rule));
   } else {
     // don't link to Overview when we're possibly on Overview or its sibling tabs
     breadcrumbs.push(createCrumb(null, 'Kibana'));

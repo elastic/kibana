@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import { getKibanaInfo } from '../../../../lib/kibana/get_kibana_info';
-import { getKibanaMetrics } from '../../../../lib/kibana/get_kibana_metrics';
 // @ts-ignore
 import { handleError } from '../../../../lib/errors';
 // @ts-ignore
@@ -52,19 +51,14 @@ export function kibanaInstanceRoute(server: LegacyServer, npRoute: RouteDependen
       const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);
 
       try {
-        const [metrics, kibanaSummary, kibanaMetrics] = await Promise.all([
+        const [metrics, kibanaSummary] = await Promise.all([
           getMetrics(req, kbnIndexPattern, metricSet),
           getKibanaInfo(req, kbnIndexPattern, { clusterUuid, kibanaUuid }),
-          getKibanaMetrics(req, kbnIndexPattern, npRoute.sections.kibana.instance.metrics.query, {
-            clusterUuid,
-            kibanaUuid,
-          }),
         ]);
 
         return {
           metrics,
           kibanaSummary,
-          kibanaMetrics,
         };
       } catch (err) {
         throw handleError(err, req);

@@ -358,8 +358,8 @@ export class AlertingPlugin {
                 id,
                 lastExecutionDuration: lastExecute?.event?.duration ?? 0,
                 lastExecutionTimeout: lastTimeout?.['@timestamp'],
-                averageDrift: metrics.drift,
-                averageDuration: metrics.duration,
+                averageDrift: metrics.drift ?? 0,
+                averageDuration: metrics.duration ?? 0,
                 totalExecutions,
               };
 

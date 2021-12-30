@@ -62,6 +62,23 @@ export class KibanaEventsRateClusterMetric extends KibanaClusterMetric {
   }
 }
 
+export class KibanaStat extends Metric {
+  constructor(opts) {
+    super({
+      ...opts,
+      app: 'kibana',
+      ...KibanaStat.getMetricFields(),
+    });
+  }
+
+  static getMetricFields() {
+    return {
+      uuidField: 'kibana_stats.kibana.uuid',
+      timestampField: 'kibana_stats.timestamp',
+    };
+  }
+}
+
 export class KibanaMetric extends Metric {
   constructor(opts) {
     super({
@@ -73,8 +90,8 @@ export class KibanaMetric extends Metric {
 
   static getMetricFields() {
     return {
-      uuidField: 'kibana_stats.kibana.uuid',
-      timestampField: 'kibana_stats.timestamp',
+      uuidField: 'kibana_metrics.kibana.uuid',
+      timestampField: 'kibana_metrics.timestamp',
     };
   }
 }

@@ -34,6 +34,8 @@ import { BeatsInstancePage } from './pages/beats/instance';
 import { ApmOverviewPage, ApmInstancesPage, ApmInstancePage } from './pages/apm';
 import { KibanaOverviewPage } from './pages/kibana/overview';
 import { KibanaInstancesPage } from './pages/kibana/instances';
+import { KibanaRulesPage } from './pages/kibana/rules';
+import { KibanaRulePage } from './pages/kibana/rule';
 import { KibanaInstancePage } from './pages/kibana/instance';
 import { ElasticsearchNodesPage } from './pages/elasticsearch/nodes_page';
 import { ElasticsearchIndicesPage } from './pages/elasticsearch/indices_page';
@@ -209,6 +211,20 @@ const MonitoringApp: React.FC<{
                     <RouteInit
                       path="/kibana/instances"
                       component={KibanaInstancesPage}
+                      codePaths={[CODE_PATH_KIBANA]}
+                      fetchAllClusters={false}
+                    />
+
+                    <RouteInit
+                      path="/kibana/rules/:rule"
+                      component={KibanaRulePage}
+                      codePaths={[CODE_PATH_KIBANA]}
+                      fetchAllClusters={false}
+                    />
+
+                    <RouteInit
+                      path="/kibana/rules"
+                      component={KibanaRulesPage}
                       codePaths={[CODE_PATH_KIBANA]}
                       fetchAllClusters={false}
                     />
