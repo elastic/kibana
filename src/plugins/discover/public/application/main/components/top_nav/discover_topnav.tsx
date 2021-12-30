@@ -80,28 +80,28 @@ export const DiscoverTopNav = ({
     ]
   );
 
-  const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
+  const updateSavedQueryId = (newSavedQueryId?: string) => {
     const { appStateContainer, setAppState } = stateContainer;
     if (newSavedQueryId) {
       setAppState({ savedQuery: newSavedQueryId });
     } else {
       // remove savedQueryId from state
-      const newState = {
+      appStateContainer.set({
         ...appStateContainer.getState(),
-      };
-      delete newState.savedQuery;
-      appStateContainer.set(newState);
+        savedQuery: undefined,
+      });
     }
   };
-  const setMenuMountPoint = useMemo(() => {
-    return getHeaderActionMenuMounter();
-  }, []);
+
+  const setMenuMountPoint = useMemo(() => getHeaderActionMenuMounter(), []);
+
+  const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
 
   return (
     <TopNavMenu
       appName="discover"
       config={topNavMenu}
-      indexPatterns={[indexPattern]}
+      indexPatterns={indexPatterns}
       onQuerySubmit={updateQuery}
       onSavedQueryIdChange={updateSavedQueryId}
       query={query}

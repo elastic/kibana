@@ -91,6 +91,7 @@ export function DiscoverLayout({
   const {
     state,
     stateContainer: { setAppState },
+    stateContainer,
   } = useDiscoverAppStateContext();
 
   const viewMode = useMemo(() => {
@@ -329,7 +330,10 @@ export function DiscoverLayout({
                       savedSearch={savedSearch}
                       services={services}
                       indexPattern={indexPattern}
+                      query={state.query}
+                      filters={state.filters}
                       columns={columns}
+                      stateContainer={stateContainer}
                       onAddFilter={onAddFilter}
                       trackUiMetric={trackUiMetric}
                       savedSearchRefetch$={savedSearchRefetch$}

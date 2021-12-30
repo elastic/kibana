@@ -92,7 +92,6 @@ export function DiscoverChart({
   );
   const panels = useChartPanels(
     state,
-    savedSearchDataChart$,
     toggleHideChart,
     (interval) => stateContainer.setAppState({ interval }),
     () => setShowChartOptionsPopover(false)

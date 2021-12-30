@@ -98,7 +98,7 @@ const GLOBAL_STATE_URL_KEY = '_g';
 const APP_STATE_URL_KEY = '_a';
 
 /**
- * Builds and returns ContextAppState and globalState containers
+ * Builds and returns contextAppState and globalState containers
  * provides helper functions to start/stop syncing with URL
  */
 export function getState({
