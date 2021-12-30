@@ -113,21 +113,19 @@ describe('SuperUser - Packs', () => {
     });
 
     // strange behaviour with modal
-    it.skip('toggle pack pack', () => {
+    it('activate and deactive pack', () => {
       cy.contains('Packs').click();
       cy.react('ActiveStateSwitchComponent', {
         props: { item: { attributes: { name: PACK_NAME } } },
       }).click();
-      cy.contains(`Successfully deactivated ${PACK_NAME} pack`).should('not.exist');
-      cy.contains(`Successfully deactivated ${PACK_NAME} pack`).should('exist');
+      cy.contains(`Successfully deactivated "${PACK_NAME}" pack`).should('not.exist');
+      cy.contains(`Successfully deactivated "${PACK_NAME}" pack`).should('exist');
       cy.react('ActiveStateSwitchComponent', {
         props: { item: { attributes: { name: PACK_NAME } } },
       }).click();
-      cy.react('EuiButtonDisplay')
-        .contains(/^Save and deploy changes$/)
-        .click();
-      cy.contains(`Successfully activated ${PACK_NAME} pack`).should('not.exist');
-      cy.contains(`Successfully activated ${PACK_NAME} pack`).should('exist');
+      cy.getBySel('confirmModalConfirmButton').click();
+      cy.contains(`Successfully activated "${PACK_NAME}" pack`).should('not.exist');
+      cy.contains(`Successfully activated "${PACK_NAME}" pack`).should('exist');
     });
 
     it('delete all queries in the pack', () => {
