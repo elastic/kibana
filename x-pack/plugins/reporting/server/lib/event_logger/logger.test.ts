@@ -95,7 +95,7 @@ describe('Event Logger', () => {
       Object {
         "action": "execute-complete",
         "id": "12348",
-        "kind": "metrics",
+        "kind": "event",
         "outcome": "success",
         "provider": "reporting",
         "timezone": "UTC",
