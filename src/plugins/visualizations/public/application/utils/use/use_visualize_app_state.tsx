@@ -126,7 +126,7 @@ export const useVisualizeAppState = (
             // if setting new vis state was failed for any reason,
             // redirect to the listing page with error message
             services.toastNotifications.addWarning({
-              title: i18n.translate('visualize.visualizationLoadingFailedErrorMessage', {
+              title: i18n.translate('visualizations.visualizationLoadingFailedErrorMessage', {
                 defaultMessage: 'Failed to load the visualization',
               }),
               text: toMountPoint(

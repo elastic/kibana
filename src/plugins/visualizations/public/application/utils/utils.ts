@@ -17,7 +17,7 @@ import type { VisualizeServices, VisualizeEditorVisInstance } from '../types';
 
 export const addHelpMenuToAppChrome = (chrome: ChromeStart, docLinks: DocLinksStart) => {
   chrome.setHelpExtension({
-    appName: i18n.translate('visualize.helpMenu.appName', {
+    appName: i18n.translate('visualizations.helpMenu.appName', {
       defaultMessage: 'Visualize Library',
     }),
     links: [
@@ -31,10 +31,10 @@ export const addHelpMenuToAppChrome = (chrome: ChromeStart, docLinks: DocLinksSt
 
 export const addBadgeToAppChrome = (chrome: ChromeStart) => {
   chrome.setBadge({
-    text: i18n.translate('visualize.badge.readOnly.text', {
+    text: i18n.translate('visualizations.badge.readOnly.text', {
       defaultMessage: 'Read only',
     }),
-    tooltip: i18n.translate('visualize.badge.readOnly.tooltip', {
+    tooltip: i18n.translate('visualizations.badge.readOnly.tooltip', {
       defaultMessage: 'Unable to save visualizations to the library',
     }),
     iconType: 'glasses',

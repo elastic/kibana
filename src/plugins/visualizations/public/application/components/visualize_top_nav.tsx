@@ -146,10 +146,10 @@ const TopNav = ({
         !services.stateTransferService.isTransferInProgress
       ) {
         return actions.confirm(
-          i18n.translate('visualize.confirmModal.confirmTextDescription', {
+          i18n.translate('visualizations.confirmModal.confirmTextDescription', {
             defaultMessage: 'Leave Visualize editor with unsaved changes?',
           }),
-          i18n.translate('visualize.confirmModal.title', {
+          i18n.translate('visualizations.confirmModal.title', {
             defaultMessage: 'Unsaved changes',
           })
         );

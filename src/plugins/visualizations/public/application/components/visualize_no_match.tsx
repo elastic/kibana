@@ -28,7 +28,7 @@ export const VisualizeNoMatch = () => {
     );
 
     if (!navigated) {
-      const bannerMessage = i18n.translate('visualize.noMatchRoute.bannerTitleText', {
+      const bannerMessage = i18n.translate('visualizations.noMatchRoute.bannerTitleText', {
         defaultMessage: 'Page not found',
       });
 
@@ -39,7 +39,7 @@ export const VisualizeNoMatch = () => {
             <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
               <p>
                 <FormattedMessage
-                  id="visualize.noMatchRoute.bannerText"
+                  id="visualizations.noMatchRoute.bannerText"
                   defaultMessage="Visualize application doesn't recognize this route: {route}."
                   values={{
                     route: (

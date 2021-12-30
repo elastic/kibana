@@ -10,14 +10,14 @@ import { i18n } from '@kbn/i18n';
 
 import { VisualizeConstants } from '../../../common/constants';
 
-const defaultEditText = i18n.translate('visualize.editor.defaultEditBreadcrumbText', {
+const defaultEditText = i18n.translate('visualizations.editor.defaultEditBreadcrumbText', {
   defaultMessage: 'Edit visualization',
 });
 
 export function getLandingBreadcrumbs() {
   return [
     {
-      text: i18n.translate('visualize.listing.breadcrumb', {
+      text: i18n.translate('visualizations.listing.breadcrumb', {
         defaultMessage: 'Visualize Library',
       }),
       href: `#${VisualizeConstants.LANDING_PAGE_PATH}`,
@@ -38,7 +38,7 @@ export function getCreateBreadcrumbs({
     ...(originatingAppName ? [{ text: originatingAppName, onClick: redirectToOrigin }] : []),
     ...(!byValue ? getLandingBreadcrumbs() : []),
     {
-      text: i18n.translate('visualize.editor.createBreadcrumb', {
+      text: i18n.translate('visualizations.editor.createBreadcrumb', {
         defaultMessage: 'Create',
       }),
     },

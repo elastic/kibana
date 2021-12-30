@@ -56,7 +56,7 @@ export const useSavedVisInstance = (
 
           if (!visType) {
             throw new Error(
-              i18n.translate('visualize.createVisualization.noVisTypeErrorMessage', {
+              i18n.translate('visualizations.createVisualization.noVisTypeErrorMessage', {
                 defaultMessage: 'You must provide a valid visualization type',
               })
             );
@@ -68,7 +68,7 @@ export const useSavedVisInstance = (
           if (shouldHaveIndex && !hasIndex) {
             throw new Error(
               i18n.translate(
-                'visualize.createVisualization.noIndexPatternOrSavedSearchIdErrorMessage',
+                'visualizations.createVisualization.noIndexPatternOrSavedSearchIdErrorMessage',
                 {
                   defaultMessage: 'You must provide either an indexPattern or a savedSearchId',
                 }
@@ -130,7 +130,7 @@ export const useSavedVisInstance = (
           redirectToSavedObjectPage(services, error, visualizationIdFromUrl);
         } catch (e) {
           toastNotifications.addWarning({
-            title: i18n.translate('visualize.createVisualization.failedToLoadErrorMessage', {
+            title: i18n.translate('visualizations.createVisualization.failedToLoadErrorMessage', {
               defaultMessage: 'Failed to load the visualization',
             }),
             text: e.message,

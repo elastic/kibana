@@ -14,7 +14,7 @@ export const InfoComponent = () => {
   const title = (
     <>
       <FormattedMessage
-        id="visualize.experimentalVisInfoText"
+        id="visualizations.experimentalVisInfoText"
         defaultMessage="This visualization is experimental and is not subject to the support SLA of official GA features.
           For feedback, please create an issue in {githubLink}."
         values={{

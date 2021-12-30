@@ -42,10 +42,10 @@ const getBadge = (item: VisualizationListItem) => {
       <EuiBetaBadge
         className="visListingTable__betaIcon"
         label="B"
-        title={i18n.translate('visualize.listing.betaTitle', {
+        title={i18n.translate('visualizations.listing.betaTitle', {
           defaultMessage: 'Beta',
         })}
-        tooltipContent={i18n.translate('visualize.listing.betaTooltip', {
+        tooltipContent={i18n.translate('visualizations.listing.betaTooltip', {
           defaultMessage:
             'This visualization is in beta and is subject to change. The design and code is less mature than official GA ' +
             'features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA ' +
@@ -58,10 +58,10 @@ const getBadge = (item: VisualizationListItem) => {
       <EuiBetaBadge
         className="visListingTable__experimentalIcon"
         label="E"
-        title={i18n.translate('visualize.listing.experimentalTitle', {
+        title={i18n.translate('visualizations.listing.experimentalTitle', {
           defaultMessage: 'Experimental',
         })}
-        tooltipContent={i18n.translate('visualize.listing.experimentalTooltip', {
+        tooltipContent={i18n.translate('visualizations.listing.experimentalTooltip', {
           defaultMessage:
             'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
         })}
@@ -98,7 +98,7 @@ export const getTableColumns = (
   [
     {
       field: 'title',
-      name: i18n.translate('visualize.listing.table.titleColumnName', {
+      name: i18n.translate('visualizations.listing.table.titleColumnName', {
         defaultMessage: 'Title',
       }),
       sortable: true,
@@ -123,7 +123,7 @@ export const getTableColumns = (
     },
     {
       field: 'typeTitle',
-      name: i18n.translate('visualize.listing.table.typeColumnName', {
+      name: i18n.translate('visualizations.listing.table.typeColumnName', {
         defaultMessage: 'Type',
       }),
       sortable: true,
@@ -142,7 +142,7 @@ export const getTableColumns = (
     },
     {
       field: 'description',
-      name: i18n.translate('visualize.listing.table.descriptionColumnName', {
+      name: i18n.translate('visualizations.listing.table.descriptionColumnName', {
         defaultMessage: 'Description',
       }),
       sortable: true,
@@ -157,7 +157,7 @@ export const getNoItemsMessage = (createItem: () => void) => (
     title={
       <h1 id="visualizeListingHeading">
         <FormattedMessage
-          id="visualize.listing.createNew.title"
+          id="visualizations.listing.createNew.title"
           defaultMessage="Create your first visualization"
         />
       </h1>
@@ -165,7 +165,7 @@ export const getNoItemsMessage = (createItem: () => void) => (
     body={
       <p>
         <FormattedMessage
-          id="visualize.listing.createNew.description"
+          id="visualizations.listing.createNew.description"
           defaultMessage="You can create different visualizations based on your data."
         />
       </p>
@@ -178,7 +178,7 @@ export const getNoItemsMessage = (createItem: () => void) => (
         data-test-subj="createVisualizationPromptButton"
       >
         <FormattedMessage
-          id="visualize.listing.createNew.createButtonLabel"
+          id="visualizations.listing.createNew.createButtonLabel"
           defaultMessage="Create new visualization"
         />
       </EuiButton>

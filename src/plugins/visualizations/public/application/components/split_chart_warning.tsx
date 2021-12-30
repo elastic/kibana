@@ -26,20 +26,20 @@ export const SplitChartWarning = () => {
       data-test-subj="vizSplitChartWarning"
       title={
         <FormattedMessage
-          id="visualize.newHeatmapChart.notificationMessage"
+          id="visualizations.newHeatmapChart.notificationMessage"
           defaultMessage="The new heatmap charts library does not yet support split chart aggregation. {conditionalMessage}"
           values={{
             conditionalMessage: (
               <>
                 {canEditAdvancedSettings && (
                   <FormattedMessage
-                    id="visualize.newHeatmapChart.conditionalMessage.newLibrary"
+                    id="visualizations.newHeatmapChart.conditionalMessage.newLibrary"
                     defaultMessage="Switch to the old library in {link}"
                     values={{
                       link: (
                         <EuiLink href={advancedSettingsLink}>
                           <FormattedMessage
-                            id="visualize.newHeatmapChart.conditionalMessage.advanced settings link"
+                            id="visualizations.newHeatmapChart.conditionalMessage.advancedSettingsLink"
                             defaultMessage="Advanced Settings."
                           />
                         </EuiLink>
@@ -49,7 +49,7 @@ export const SplitChartWarning = () => {
                 )}
                 {!canEditAdvancedSettings && (
                   <FormattedMessage
-                    id="visualize.legacyCharts.conditionalMessage.noPermissions"
+                    id="visualizations.legacyCharts.conditionalMessage.noPermissions"
                     defaultMessage="Contact your system administrator to switch to the old library."
                   />
                 )}

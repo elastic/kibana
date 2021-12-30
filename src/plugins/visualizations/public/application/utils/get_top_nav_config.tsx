@@ -147,12 +147,15 @@ export const getTopNavConfig = (
 
       if (id) {
         toastNotifications.addSuccess({
-          title: i18n.translate('visualize.topNavMenu.saveVisualization.successNotificationText', {
-            defaultMessage: `Saved '{visTitle}'`,
-            values: {
-              visTitle: savedVis.title,
-            },
-          }),
+          title: i18n.translate(
+            'visualizations.topNavMenu.saveVisualization.successNotificationText',
+            {
+              defaultMessage: `Saved '{visTitle}'`,
+              values: {
+                visTitle: savedVis.title,
+              },
+            }
+          ),
           'data-test-subj': 'saveVisualizationSuccess',
         });
 
@@ -213,12 +216,15 @@ export const getTopNavConfig = (
       // eslint-disable-next-line
       console.error(error);
       toastNotifications.addDanger({
-        title: i18n.translate('visualize.topNavMenu.saveVisualization.failureNotificationText', {
-          defaultMessage: `Error on saving '{visTitle}'`,
-          values: {
-            visTitle: savedVis.title,
-          },
-        }),
+        title: i18n.translate(
+          'visualizations.topNavMenu.saveVisualization.failureNotificationText',
+          {
+            defaultMessage: `Error on saving '{visTitle}'`,
+            values: {
+              visTitle: savedVis.title,
+            },
+          }
+        ),
         text: error.message,
         'data-test-subj': 'saveVisualizationError',
       });
@@ -251,14 +257,14 @@ export const getTopNavConfig = (
 
   const saveButtonLabel =
     !savedVis.id && originatingApp
-      ? i18n.translate('visualize.topNavMenu.saveVisualizationToLibraryButtonLabel', {
+      ? i18n.translate('visualizations.topNavMenu.saveVisualizationToLibraryButtonLabel', {
           defaultMessage: 'Save to library',
         })
       : originatingApp && savedVis.id
-      ? i18n.translate('visualize.topNavMenu.saveVisualizationAsButtonLabel', {
+      ? i18n.translate('visualizations.topNavMenu.saveVisualizationAsButtonLabel', {
           defaultMessage: 'Save as',
         })
-      : i18n.translate('visualize.topNavMenu.saveVisualizationButtonLabel', {
+      : i18n.translate('visualizations.topNavMenu.saveVisualizationButtonLabel', {
           defaultMessage: 'Save',
         });
 
@@ -268,10 +274,10 @@ export const getTopNavConfig = (
   const topNavMenu: TopNavMenuData[] = [
     {
       id: 'inspector',
-      label: i18n.translate('visualize.topNavMenu.openInspectorButtonLabel', {
+      label: i18n.translate('visualizations.topNavMenu.openInspectorButtonLabel', {
         defaultMessage: 'inspect',
       }),
-      description: i18n.translate('visualize.topNavMenu.openInspectorButtonAriaLabel', {
+      description: i18n.translate('visualizations.topNavMenu.openInspectorButtonAriaLabel', {
         defaultMessage: 'Open Inspector for visualization',
       }),
       testId: 'openInspectorButton',
@@ -281,7 +287,7 @@ export const getTopNavConfig = (
       run: openInspector,
       tooltip() {
         if (!embeddableHandler.hasInspector || !embeddableHandler.hasInspector()) {
-          return i18n.translate('visualize.topNavMenu.openInspectorDisabledButtonTooltip', {
+          return i18n.translate('visualizations.topNavMenu.openInspectorDisabledButtonTooltip', {
             defaultMessage: `This visualization doesn't support any inspectors.`,
           });
         }
@@ -289,10 +295,10 @@ export const getTopNavConfig = (
     },
     {
       id: 'share',
-      label: i18n.translate('visualize.topNavMenu.shareVisualizationButtonLabel', {
+      label: i18n.translate('visualizations.topNavMenu.shareVisualizationButtonLabel', {
         defaultMessage: 'share',
       }),
-      description: i18n.translate('visualize.topNavMenu.shareVisualizationButtonAriaLabel', {
+      description: i18n.translate('visualizations.topNavMenu.shareVisualizationButtonAriaLabel', {
         defaultMessage: 'Share Visualization',
       }),
       testId: 'shareTopNavButton',
@@ -325,7 +331,7 @@ export const getTopNavConfig = (
             sharingData: {
               title:
                 savedVis?.title ||
-                i18n.translate('visualize.reporting.defaultReportTitle', {
+                i18n.translate('visualizations.reporting.defaultReportTitle', {
                   defaultMessage: 'Visualization [{date}]',
                   values: { date: moment().toISOString(true) },
                 }),
@@ -347,17 +353,17 @@ export const getTopNavConfig = (
       ? [
           {
             id: 'cancel',
-            label: i18n.translate('visualize.topNavMenu.cancelButtonLabel', {
+            label: i18n.translate('visualizations.topNavMenu.cancelButtonLabel', {
               defaultMessage: 'Cancel',
             }),
             emphasize: false,
-            description: i18n.translate('visualize.topNavMenu.cancelButtonAriaLabel', {
+            description: i18n.translate('visualizations.topNavMenu.cancelButtonAriaLabel', {
               defaultMessage: 'Return to the last app without saving changes',
             }),
             testId: 'visualizeCancelAndReturnButton',
             tooltip() {
               if (hasUnappliedChanges || hasUnsavedChanges) {
-                return i18n.translate('visualize.topNavMenu.cancelAndReturnButtonTooltip', {
+                return i18n.translate('visualizations.topNavMenu.cancelAndReturnButtonTooltip', {
                   defaultMessage: 'Discard your changes before finishing',
                 });
               }
@@ -375,15 +381,18 @@ export const getTopNavConfig = (
             iconType: originatingApp ? undefined : 'save',
             label: saveButtonLabel,
             emphasize: !originatingApp,
-            description: i18n.translate('visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
-              defaultMessage: 'Save Visualization',
-            }),
+            description: i18n.translate(
+              'visualizations.topNavMenu.saveVisualizationButtonAriaLabel',
+              {
+                defaultMessage: 'Save Visualization',
+              }
+            ),
             testId: 'visualizeSaveButton',
             disableButton: hasUnappliedChanges,
             tooltip() {
               if (hasUnappliedChanges) {
                 return i18n.translate(
-                  'visualize.topNavMenu.saveVisualizationDisabledButtonTooltip',
+                  'visualizations.topNavMenu.saveVisualizationDisabledButtonTooltip',
                   {
                     defaultMessage: 'Apply or Discard your changes before saving',
                   }
@@ -492,14 +501,17 @@ export const getTopNavConfig = (
                     onSave={onSave}
                     options={tagOptions}
                     getAppNameFromId={stateTransfer.getAppNameFromId}
-                    objectType={i18n.translate('visualize.topNavMenu.saveVisualizationObjectType', {
-                      defaultMessage: 'visualization',
-                    })}
+                    objectType={i18n.translate(
+                      'visualizations.topNavMenu.saveVisualizationObjectType',
+                      {
+                        defaultMessage: 'visualization',
+                      }
+                    )}
                     onClose={() => {}}
                     originatingApp={originatingApp}
                     returnToOriginSwitchLabel={
                       originatingApp && embeddableId
-                        ? i18n.translate('visualize.topNavMenu.updatePanel', {
+                        ? i18n.translate('visualizations.topNavMenu.updatePanel', {
                             defaultMessage: 'Update panel on {originatingAppName}',
                             values: {
                               originatingAppName: stateTransfer.getAppNameFromId(originatingApp),
@@ -520,9 +532,12 @@ export const getTopNavConfig = (
                     canSaveByReference={Boolean(visualizeCapabilities.save)}
                     onSave={onSave}
                     tagOptions={tagOptions}
-                    objectType={i18n.translate('visualize.topNavMenu.saveVisualizationObjectType', {
-                      defaultMessage: 'visualization',
-                    })}
+                    objectType={i18n.translate(
+                      'visualizations.topNavMenu.saveVisualizationObjectType',
+                      {
+                        defaultMessage: 'visualization',
+                      }
+                    )}
                     onClose={() => {}}
                   />
                 );
@@ -541,13 +556,16 @@ export const getTopNavConfig = (
       ? [
           {
             id: 'saveAndReturn',
-            label: i18n.translate('visualize.topNavMenu.saveAndReturnVisualizationButtonLabel', {
-              defaultMessage: 'Save and return',
-            }),
+            label: i18n.translate(
+              'visualizations.topNavMenu.saveAndReturnVisualizationButtonLabel',
+              {
+                defaultMessage: 'Save and return',
+              }
+            ),
             emphasize: true,
             iconType: 'checkInCircleFilled',
             description: i18n.translate(
-              'visualize.topNavMenu.saveAndReturnVisualizationButtonAriaLabel',
+              'visualizations.topNavMenu.saveAndReturnVisualizationButtonAriaLabel',
               {
                 defaultMessage: 'Finish editing visualization and return to the last app',
               }
@@ -557,7 +575,7 @@ export const getTopNavConfig = (
             tooltip() {
               if (hasUnappliedChanges) {
                 return i18n.translate(
-                  'visualize.topNavMenu.saveAndReturnVisualizationDisabledButtonTooltip',
+                  'visualizations.topNavMenu.saveAndReturnVisualizationDisabledButtonTooltip',
                   {
                     defaultMessage: 'Apply or Discard your changes before finishing',
                   }

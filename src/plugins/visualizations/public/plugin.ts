@@ -304,7 +304,7 @@ export class VisualizationsPlugin
       home.featureCatalogue.register({
         id: 'visualize',
         title: 'Visualize Library',
-        description: i18n.translate('visualize.visualizeDescription', {
+        description: i18n.translate('visualizations.visualizeDescription', {
           defaultMessage:
             'Create visualizations and aggregate data stores in your Elasticsearch indices.',
         }),

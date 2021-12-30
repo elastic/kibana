@@ -72,7 +72,7 @@ export const VisualizeEditorCommon = ({
         const newPath = `${urlFor(newObjectId!)}${services.history.location.search}`;
         await services.spaces.ui.redirectLegacyUrl(
           newPath,
-          i18n.translate('visualize.legacyUrlConflict.objectNoun', {
+          i18n.translate('visualizations.legacyUrlConflict.objectNoun', {
             defaultMessage: '{visName} visualization',
             values: {
               visName: visInstance?.vis?.type.title,
@@ -96,7 +96,7 @@ export const VisualizeEditorCommon = ({
       const otherObjectId = sharingSavedObjectProps?.aliasTargetId!; // This is always defined if outcome === 'conflict'
       const otherObjectPath = `${urlFor(otherObjectId)}${services.history.location.search}`;
       return services.spaces.ui.components.getLegacyUrlConflict({
-        objectNoun: i18n.translate('visualize.legacyUrlConflict.objectNoun', {
+        objectNoun: i18n.translate('visualizations.legacyUrlConflict.objectNoun', {
           defaultMessage: '{visName} visualization',
           values: {
             visName: visInstance?.vis?.type.title,
@@ -144,7 +144,7 @@ export const VisualizeEditorCommon = ({
           <h1>
             {'savedVis' in visInstance && visInstance.savedVis.id ? (
               <FormattedMessage
-                id="visualize.pageHeading"
+                id="visualizations.pageHeading"
                 defaultMessage="{chartName} {chartType} visualization"
                 values={{
                   chartName: (visInstance as SavedVisInstance).savedVis.title,
@@ -153,7 +153,7 @@ export const VisualizeEditorCommon = ({
               />
             ) : (
               <FormattedMessage
-                id="visualize.byValue_pageHeading"
+                id="visualizations.byValue_pageHeading"
                 defaultMessage="Visualization of type {chartType} embedded into {originatingApp} app"
                 values={{
                   chartType: visInstance.vis.type.title,

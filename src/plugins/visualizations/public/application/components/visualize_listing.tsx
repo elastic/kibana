@@ -68,13 +68,13 @@ export const VisualizeListing = () => {
     stateTransferService.clearEditorState();
     chrome.setBreadcrumbs([
       {
-        text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
+        text: i18n.translate('visualizations.visualizeListingBreadcrumbsTitle', {
           defaultMessage: 'Visualize Library',
         }),
       },
     ]);
     chrome.docTitle.change(
-      i18n.translate('visualize.listingPageTitle', { defaultMessage: 'Visualize Library' })
+      i18n.translate('visualizations.listingPageTitle', { defaultMessage: 'Visualize Library' })
     );
   });
   useUnmount(() => closeNewVisModal.current());
@@ -133,7 +133,7 @@ export const VisualizeListing = () => {
         selectedItems.map((item: any) => savedObjects.client.delete(item.savedObjectType, item.id))
       ).catch((error) => {
         toastNotifications.addError(error, {
-          title: i18n.translate('visualize.visualizeListingDeleteErrorTitle', {
+          title: i18n.translate('visualizations.visualizeListingDeleteErrorTitle', {
             defaultMessage: 'Error deleting visualization',
           }),
         });
@@ -151,7 +151,7 @@ export const VisualizeListing = () => {
   const calloutMessage = (
     <FormattedMessage
       data-test-subj="visualize-dashboard-flow-prompt"
-      id="visualize.visualizeListingDashboardFlowDescription"
+      id="visualizations.visualizeListingDashboardFlowDescription"
       defaultMessage="Building a dashboard? Create and add your visualizations right from the {dashboardApp}."
       values={{
         dashboardApp: (
@@ -163,7 +163,7 @@ export const VisualizeListing = () => {
             }}
           >
             <FormattedMessage
-              id="visualize.visualizeListingDashboardAppName"
+              id="visualizations.visualizeListingDashboardAppName"
               defaultMessage="Dashboard application"
             />
           </EuiLink>
@@ -178,7 +178,7 @@ export const VisualizeListing = () => {
       // we allow users to create visualizations even if they can't save them
       // for data exploration purposes
       createItem={createNewVis}
-      tableCaption={i18n.translate('visualize.listing.table.listTitle', {
+      tableCaption={i18n.translate('visualizations.listing.table.listTitle', {
         defaultMessage: 'Visualize Library',
       })}
       findItems={fetchItems}
@@ -190,13 +190,13 @@ export const VisualizeListing = () => {
       initialFilter={''}
       rowHeader="title"
       emptyPrompt={noItemsFragment}
-      entityName={i18n.translate('visualize.listing.table.entityName', {
+      entityName={i18n.translate('visualizations.listing.table.entityName', {
         defaultMessage: 'visualization',
       })}
-      entityNamePlural={i18n.translate('visualize.listing.table.entityNamePlural', {
+      entityNamePlural={i18n.translate('visualizations.listing.table.entityNamePlural', {
         defaultMessage: 'visualizations',
       })}
-      tableListTitle={i18n.translate('visualize.listing.table.listTitle', {
+      tableListTitle={i18n.translate('visualizations.listing.table.listTitle', {
         defaultMessage: 'Visualize Library',
       })}
       toastNotifications={toastNotifications}
