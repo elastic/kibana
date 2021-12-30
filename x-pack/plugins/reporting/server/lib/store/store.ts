@@ -75,6 +75,7 @@ const getEventLogger = (reporting: ReportingCore, report: Report) => {
   return reporting.getEventLogger({
     event: { id: report._id, timezone: report.payload.browserTimezone },
     kibana: { reporting: { jobType: report.jobtype } },
+    ...(report.created_by && { user: { name: report.created_by } }),
   });
 };
 

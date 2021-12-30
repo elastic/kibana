@@ -158,6 +158,7 @@ export class MonitorReportsTask implements ReportingTask {
       .getEventLogger({
         event: { id, timezone: payload.browserTimezone },
         kibana: { reporting: { jobType: jobtype, task: { id: newTask.id } } },
+        ...(task.created_by && { user: { name: task.created_by } }),
       })
       .logRetry(`Scheduled retry for report ${id}`);
 

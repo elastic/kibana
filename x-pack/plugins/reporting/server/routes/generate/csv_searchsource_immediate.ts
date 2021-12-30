@@ -76,7 +76,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           ...(user && { name: user.username }),
         });
 
-        eventLog.logStart('starting csv generation');
+        eventLog.logExecutionStart('starting csv generation');
 
         try {
           let buffer = Buffer.from('');
@@ -108,7 +108,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
             logger.warn('CSV Job Execution created empty content result');
           }
 
-          eventLog.logComplete('csv generation is complete');
+          eventLog.logExecutionComplete('csv generation is complete');
 
           return res.ok({
             body: jobOutputContent || '',
