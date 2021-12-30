@@ -233,13 +233,13 @@ describe('Session view', () => {
     //Checks every alerts in that session is correctly highlighted 
       cy.wrap(genArr).each((index)=>{
         cy.get(PROCESS_TREE_NODE_ALERT+":eq("+index+")")
-        .parent()
-        .parent()
-        .then((childElement) => {
-          const childWin = childElement[0].ownerDocument.defaultView;
-          const alertHighlight = childWin && childWin.getComputedStyle(childElement[0], 'before');
-          const alertHighlightValue = alertHighlight && alertHighlight.getPropertyValue('border-left-color');
-          expect(alertHighlightValue).to.equal(ALERT_COMMAND_COLOR)
+          .parent()
+          .parent()
+          .then((childElement) => {
+            const childWin = childElement[0].ownerDocument.defaultView;
+            const alertHighlight = childWin && childWin.getComputedStyle(childElement[0], 'before');
+            const alertHighlightValue = alertHighlight && alertHighlight.getPropertyValue('border-left-color');
+            expect(alertHighlightValue).to.equal(ALERT_COMMAND_COLOR)
           });
         });
       });
