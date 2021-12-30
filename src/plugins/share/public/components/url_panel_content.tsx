@@ -35,7 +35,7 @@ import {
 } from '../../common/anonymous_access';
 import type { BrowserUrlService } from '../types';
 
-interface Props {
+export interface UrlPanelContentProps {
   allowShortUrl: boolean;
   isEmbedded?: boolean;
   objectId?: string;
@@ -70,11 +70,11 @@ interface State {
   showPublicUrlSwitch: boolean;
 }
 
-export class UrlPanelContent extends Component<Props, State> {
+export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
   private mounted?: boolean;
   private shortUrlCache?: string;
 
-  constructor(props: Props) {
+  constructor(props: UrlPanelContentProps) {
     super(props);
 
     this.shortUrlCache = undefined;
