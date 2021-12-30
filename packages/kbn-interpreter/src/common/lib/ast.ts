@@ -7,31 +7,26 @@
  */
 
 import { getType } from './get_type';
-// @ts-expect-error
-import { parse } from '../../../grammar';
+import { parse } from './parse';
 
-export type ExpressionArgAST = string | boolean | number | Ast;
+export type AstNode = Ast | AstFunction | AstArgument;
 
-export interface ExpressionFunctionAST {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type Ast = {
+  type: 'expression';
+  chain: AstFunction[];
+};
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type AstFunction = {
   type: 'function';
   function: string;
-  arguments: {
-    [key: string]: ExpressionArgAST[];
-  };
-}
+  arguments: Record<string, AstArgument[]>;
+};
 
-export interface Ast {
-  /** @internal */
-  function: any;
-  /** @internal */
-  arguments: any;
-  type: 'expression';
-  chain: ExpressionFunctionAST[];
-  /** @internal */
-  replace(regExp: RegExp, s: string): string;
-}
+export type AstArgument = string | boolean | number | Ast;
 
-function getArgumentString(arg: Ast, argKey: string | undefined, level = 0) {
+function getArgumentString(arg: AstArgument, argKey?: string, level = 0): string {
   const type = getType(arg);
 
   // eslint-disable-next-line @typescript-eslint/no-shadow
@@ -41,7 +36,7 @@ function getArgumentString(arg: Ast, argKey: string | undefined, level = 0) {
 
   if (type === 'string') {
     // correctly (re)escape double quotes
-    const escapedArg = arg.replace(/[\\"]/g, '\\$&'); // $& means the whole matched string
+    const escapedArg = (arg as string).replace(/[\\"]/g, '\\$&'); // $& means the whole matched string
     return maybeArgKey(argKey, `"${escapedArg}"`);
   }
 
@@ -52,25 +47,24 @@ function getArgumentString(arg: Ast, argKey: string | undefined, level = 0) {
 
   if (type === 'expression') {
     // build subexpressions
-    return maybeArgKey(argKey, `{${getExpression(arg.chain, level + 1)}}`);
+    return maybeArgKey(argKey, `{${getExpression((arg as Ast).chain, level + 1)}}`);
   }
 
   // unknown type, throw with type value
   throw new Error(`Invalid argument type in AST: ${type}`);
 }
 
-function getExpressionArgs(block: Ast, level = 0) {
-  const args = block.arguments;
-  const hasValidArgs = typeof args === 'object' && args != null && !Array.isArray(args);
-
-  if (!hasValidArgs) throw new Error('Arguments can only be an object');
+function getExpressionArgs({ arguments: args }: AstFunction, level = 0) {
+  if (args == null || typeof args !== 'object' || Array.isArray(args)) {
+    throw new Error('Arguments can only be an object');
+  }
 
   const argKeys = Object.keys(args);
   const MAX_LINE_LENGTH = 80; // length before wrapping arguments
   return argKeys.map((argKey) =>
-    args[argKey].reduce((acc: any, arg: any) => {
+    args[argKey].reduce((acc: string, arg) => {
       const argString = getArgumentString(arg, argKey, level);
-      const lineLength = acc.split('\n').pop().length;
+      const lineLength = acc.split('\n').pop()!.length;
 
       // if arg values are too long, move it to the next line
       if (level === 0 && lineLength + argString.length > MAX_LINE_LENGTH) {
@@ -78,7 +72,9 @@ function getExpressionArgs(block: Ast, level = 0) {
       }
 
       // append arg values to existing arg values
-      if (lineLength > 0) return `${acc} ${argString}`;
+      if (lineLength > 0) {
+        return `${acc} ${argString}`;
+      }
 
       // start the accumulator with the first arg value
       return argString;
@@ -86,30 +82,35 @@ function getExpressionArgs(block: Ast, level = 0) {
   );
 }
 
-function fnWithArgs(fnName: any, args: any[]) {
-  if (!args || args.length === 0) return fnName;
-  return `${fnName} ${args.join(' ')}`;
+function fnWithArgs(fnName: string, args: unknown[]) {
+  return `${fnName} ${args?.join(' ') ?? ''}`.trim();
 }
 
-function getExpression(chain: any[], level = 0) {
-  if (!chain) throw new Error('Expressions must contain a chain');
+function getExpression(chain: AstFunction[], level = 0) {
+  if (!chain) {
+    throw new Error('Expressions must contain a chain');
+  }
 
   // break new functions onto new lines if we're not in a nested/sub-expression
   const separator = level > 0 ? ' | ' : '\n| ';
 
   return chain
-    .map((chainObj) => {
-      const type = getType(chainObj);
+    .map((item) => {
+      const type = getType(item);
 
-      if (type === 'function') {
-        const fn = chainObj.function;
-        if (!fn || fn.length === 0) throw new Error('Functions must have a function name');
-
-        const expArgs = getExpressionArgs(chainObj, level);
-
-        return fnWithArgs(fn, expArgs);
+      if (type !== 'function') {
+        return;
       }
-    }, [])
+
+      const { function: fn } = item;
+      if (!fn) {
+        throw new Error('Functions must have a function name');
+      }
+
+      const expressionArgs = getExpressionArgs(item, level);
+
+      return fnWithArgs(fn, expressionArgs);
+    })
     .join(separator);
 }
 
@@ -139,21 +140,28 @@ Thanks for understanding,
 }
 
 // TODO: Respect the user's existing formatting
-export function toExpression(astObj: Ast, type = 'expression'): string {
+export function toExpression(ast: AstNode, type = 'expression'): string {
   if (type === 'argument') {
-    // @ts-ignore
-    return getArgumentString(astObj);
+    return getArgumentString(ast as AstArgument);
   }
 
-  const validType = ['expression', 'function'].includes(getType(astObj));
-  if (!validType) throw new Error('Expression must be an expression or argument function');
+  const nodeType = getType(ast);
 
-  if (getType(astObj) === 'expression') {
-    if (!Array.isArray(astObj.chain)) throw new Error('Expressions must contain a chain');
+  if (nodeType === 'expression') {
+    const { chain } = ast as Ast;
+    if (!Array.isArray(chain)) {
+      throw new Error('Expressions must contain a chain');
+    }
 
-    return getExpression(astObj.chain);
+    return getExpression(chain);
   }
 
-  const expArgs = getExpressionArgs(astObj);
-  return fnWithArgs(astObj.function, expArgs);
+  if (nodeType === 'function') {
+    const { function: fn } = ast as AstFunction;
+    const args = getExpressionArgs(ast as AstFunction);
+
+    return fnWithArgs(fn, args);
+  }
+
+  throw new Error('Expression must be an expression or argument function');
 }

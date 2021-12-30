@@ -7,12 +7,9 @@
  */
 
 import { uniq } from 'lodash';
-// @ts-expect-error untyped library
+import type { Ast, AstArgument, AstFunction } from '@kbn/interpreter';
 import { parse } from '@kbn/interpreter';
 import {
-  ExpressionAstExpression,
-  ExpressionAstFunction,
-  ExpressionAstArgument,
   ExpressionFunction,
   ExpressionFunctionParameter,
   getByAlias,
@@ -67,18 +64,16 @@ interface ASTMetaInformation<T> {
   node: T;
 }
 
-// Wraps ExpressionArg with meta or replace ExpressionAstExpression with ExpressionASTWithMeta
-type WrapExpressionArgWithMeta<T> = T extends ExpressionAstExpression
-  ? ExpressionASTWithMeta
-  : ASTMetaInformation<T>;
+// Wraps ExpressionArg with meta or replace Ast with ExpressionASTWithMeta
+type WrapExpressionArgWithMeta<T> = T extends Ast ? ExpressionASTWithMeta : ASTMetaInformation<T>;
 
-type ExpressionArgASTWithMeta = WrapExpressionArgWithMeta<ExpressionAstArgument>;
+type ExpressionArgASTWithMeta = WrapExpressionArgWithMeta<AstArgument>;
 
 type Modify<T, R> = Pick<T, Exclude<keyof T, keyof R>> & R;
 
 // Wrap ExpressionFunctionAST with meta and modify arguments to be wrapped with meta
 type ExpressionFunctionASTWithMeta = Modify<
-  ExpressionAstFunction,
+  AstFunction,
   {
     arguments: {
       [key: string]: ExpressionArgASTWithMeta[];
@@ -89,7 +84,7 @@ type ExpressionFunctionASTWithMeta = Modify<
 // Wrap ExpressionFunctionAST with meta and modify chain to be wrapped with meta
 type ExpressionASTWithMeta = ASTMetaInformation<
   Modify<
-    ExpressionAstExpression,
+    Ast,
     {
       chain: Array<ASTMetaInformation<ExpressionFunctionASTWithMeta>>;
     }
