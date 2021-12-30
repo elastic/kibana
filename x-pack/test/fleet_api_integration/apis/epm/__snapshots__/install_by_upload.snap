@@ -446,6 +446,7 @@ Object {
           "type": "search",
         },
       ],
+      "installed_kibana_space_id": "default",
       "name": "apache",
       "package_assets": Array [
         Object {

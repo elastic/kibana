@@ -278,7 +278,14 @@
             "label": "method",
             "description": [],
             "signature": [
-              "\"terms_enum\" | \"terms_agg\" | undefined"
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataPluginApi",
+                "section": "def-common.ValueSuggestionsMethod",
+                "text": "ValueSuggestionsMethod"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/data/public/autocomplete/providers/query_suggestion_provider.ts",
             "deprecated": false

@@ -134,7 +134,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
     chartPreviewData: series,
   } = useChartPreviewData({
     sourceId,
-    alertParams: chartAlertParams,
+    ruleParams: chartAlertParams,
     buckets,
   });
 
