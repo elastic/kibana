@@ -30,10 +30,6 @@ describe('ObservabilityStatusBox', () => {
       );
     });
 
-    // it('should have an empty icon', () => {
-
-    // });
-
     it('should have a description', () => {
       expect(screen.getByText('test description')).toBeInTheDocument();
     });
