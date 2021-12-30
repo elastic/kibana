@@ -119,17 +119,19 @@ export function ColorRanges({
         </EuiFlexItem>
       ))}
       {lastColorRange ? (
-        <ColorRangeItem
-          colorRange={lastColorRange}
-          dispatch={dispatch}
-          colorRanges={localState.colorRanges}
-          continuity={localState.continuity}
-          rangeType={localState.rangeType}
-          dataBounds={dataBounds}
-          index={localState.colorRanges.length - 1}
-          isValid={colorRangesValidity.last?.isValid}
-          accessor="end"
-        />
+        <EuiFlexItem grow={false}>
+          <ColorRangeItem
+            colorRange={lastColorRange}
+            dispatch={dispatch}
+            colorRanges={localState.colorRanges}
+            continuity={localState.continuity}
+            rangeType={localState.rangeType}
+            dataBounds={dataBounds}
+            index={localState.colorRanges.length - 1}
+            isValid={colorRangesValidity.last?.isValid}
+            accessor="end"
+          />
+        </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>
         {errors.map((error) => (

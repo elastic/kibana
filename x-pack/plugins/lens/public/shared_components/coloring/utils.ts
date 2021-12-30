@@ -84,7 +84,7 @@ export function calculateStop(
   oldInterval: number,
   newInterval: number
 ) {
-  return newMin + ((stopValue - oldMin) * 100 * newInterval) / 100 / oldInterval;
+  return newMin + roundValue((stopValue - oldMin) * newInterval) / oldInterval;
 }
 
 // Utility to remap color stops within new domain

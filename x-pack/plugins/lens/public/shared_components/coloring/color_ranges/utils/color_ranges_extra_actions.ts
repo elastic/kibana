@@ -30,7 +30,7 @@ export const distributeEqually = (
   const { min, max } = getDataMinMax(rangeType, dataBounds);
   const step = roundValue((max - min) / items);
 
-  const getValueForIndex = (index: number) => roundValue(min + (step * 100 * index) / 100);
+  const getValueForIndex = (index: number) => roundValue(min + step * index);
   const getStartValue = (index: number) => {
     if (index === 0) {
       return checkIsMinContinuity(continuity) ? Number.NEGATIVE_INFINITY : min;
