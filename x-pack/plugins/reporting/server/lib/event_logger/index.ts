@@ -17,15 +17,6 @@ export enum ActionType {
   RETRY = 'retry',
   FAIL_REPORT = 'fail-report',
 }
-
 export function registerEventLogProviderActions(eventLog: IEventLogService) {
-  eventLog.registerProviderActions(PLUGIN_ID, [
-    ActionType.EXECUTE_START,
-    ActionType.EXECUTE_COMPLETE,
-    ActionType.SCHEDULE_TASK,
-    ActionType.SAVE_REPORT,
-    ActionType.CLAIM_TASK,
-    ActionType.RETRY,
-    ActionType.FAIL_REPORT,
-  ]);
+  eventLog.registerProviderActions(PLUGIN_ID, Object.values(ActionType));
 }
