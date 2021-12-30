@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { get, omit } from 'lodash';
@@ -151,7 +150,7 @@ export class AttributeService<
     return {
       ...originalInputToPropagate,
       // by value visualizations should not have default titles and/or descriptions
-      ...{ attributes: _.omit(attributes, ['title', 'description']) },
+      ...{ attributes: omit(attributes, ['title', 'description']) },
       title: libraryTitle,
     } as unknown as ValType;
   };

@@ -93,26 +93,21 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
     panelToClone: DashboardPanelState,
     embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>
   ): Promise<Partial<PanelState>> {
-    // console.log('Panel to Clone:', panelToClone);
-
     let explicitInputCopy: Partial<EmbeddableInput>;
     if (isReferenceOrValueEmbeddable(embeddable) && embeddable.inputIsRefType) {
-      // console.log('saved to library');
       explicitInputCopy = await embeddable.getInputAsValueType();
     } else {
-      // console.log('not saved to library');
       explicitInputCopy = panelToClone.explicitInput;
     }
-    // console.log('----> Explicit Input:', explicitInputCopy);
 
     const panelState: PanelState<EmbeddableInput> = {
       type: embeddable.type,
       explicitInput: {
         ...explicitInputCopy,
         id: uuid.v4(),
+        title: embeddable.getTitle() ? embeddable.getTitle() + ' (copy)' : '',
       },
     };
-    // console.log('Panel State:', panelState);
 
     this.core.notifications.toasts.addSuccess({
       title: dashboardClonePanelAction.getSuccessMessage(),
