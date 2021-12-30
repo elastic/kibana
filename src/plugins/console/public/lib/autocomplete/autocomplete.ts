@@ -972,7 +972,7 @@ export default function ({
     lastEvaluatedToken = currentToken;
     editor.execCommand('startAutocomplete');
   },
-    100);
+  100);
 
   function editorChangeListener() {
     const position = editor.getCurrentPosition();
