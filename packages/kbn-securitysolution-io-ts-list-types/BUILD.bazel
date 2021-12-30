@@ -31,15 +31,18 @@ NPM_MODULE_EXTRA_FILES = [
 RUNTIME_DEPS = [
   "//packages/kbn-securitysolution-io-ts-types",
   "//packages/kbn-securitysolution-io-ts-utils",
+  "//packages/kbn-securitysolution-list-constants",
   "@npm//fp-ts",
   "@npm//io-ts",
 ]
 
 TYPES_DEPS = [
   "//packages/kbn-securitysolution-io-ts-types:npm_module_types",
-  "//packages/kbn-securitysolution-io-ts-utils",
+  "//packages/kbn-securitysolution-io-ts-utils:npm_module_types",
+  "//packages/kbn-securitysolution-list-constants:npm_module_types",
   "@npm//fp-ts",
   "@npm//io-ts",
+  "@npm//tslib",
   "@npm//@types/jest",
   "@npm//@types/node",
 ]

@@ -696,6 +696,7 @@ export interface DocLinksStart {
         };
         readonly securitySolution: {
             readonly trustedApps: string;
+            readonly eventFilters: string;
         };
         readonly query: {
             readonly eql: string;
@@ -1498,7 +1499,7 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     sortField?: string;
     // (undocumented)
-    sortOrder?: estypes.SearchSortOrder;
+    sortOrder?: estypes.SortOrder;
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;
