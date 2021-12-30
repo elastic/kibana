@@ -16,7 +16,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDiscoverServices } from 'src/plugins/discover/public/utils/use_discover_services';
 import { HitsCounter } from '../hits_counter';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { AppState, GetStateReturn } from '../../services/discover_state';
@@ -25,6 +24,7 @@ import { DataCharts$, DataTotalHits$ } from '../../utils/use_saved_search';
 import { useChartPanels } from './use_chart_panels';
 import { VIEW_MODE, DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { SHOW_FIELD_STATISTICS } from '../../../../../common';
+import { useDiscoverServices } from '../../../utils/use_discover_services';
 
 const DiscoverHistogramMemoized = memo(DiscoverHistogram);
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';

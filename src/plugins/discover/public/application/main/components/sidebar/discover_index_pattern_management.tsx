@@ -9,7 +9,7 @@
 import React, { useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDiscoverServices } from 'src/plugins/discover/public/utils/use_discover_services';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { IndexPattern } from '../../../../../../data/common';
 
 export interface DiscoverIndexPatternManagementProps {

@@ -25,7 +25,7 @@ import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 
 import { isEqual, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useDiscoverServices } from 'src/plugins/discover/public/utils/use_discover_services';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';

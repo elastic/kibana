@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
-import { useDiscoverServices } from 'src/plugins/discover/public/utils/use_discover_services';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { esFilters, IndexPatternField } from '../../../../../../data/public';
