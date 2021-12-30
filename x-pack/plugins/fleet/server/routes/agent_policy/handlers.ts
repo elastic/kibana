@@ -43,6 +43,7 @@ import type {
 import { defaultIngestErrorHandler } from '../../errors';
 import { incrementPackageName } from '../../services/package_policy';
 import { ensureInstalledPackage } from '../../services/epm/packages';
+import { ensureDefaultEnrollmentAPIKeysExists } from '../../services/setup';
 
 export const getAgentPoliciesHandler: RequestHandler<
   undefined,
@@ -142,33 +143,36 @@ export const createAgentPolicyHandler: FleetRequestHandler<
         esClient,
       });
     }
+
+    const packageToInstall = isDefaultFleetServer ? FLEET_SERVER_PACKAGE : FLEET_SYSTEM_PACKAGE;
+
     // eslint-disable-next-line prefer-const
-    let [agentPolicy, newSysPackagePolicy] = await Promise.all([
+    let [agentPolicy, newPackagePolicy] = await Promise.all([
       agentPolicyService.create(soClient, esClient, request.body, {
         user,
       }),
       // TODO case when both isDefaultFleetServer and withSysMonitoring is true
-      isDefaultFleetServer
+      // If needed, retrieve System package information and build a new package policy for the system package
+      // NOTE: we ignore failures in attempting to create package policy, since agent policy might have been created
+      // successfully
+      isDefaultFleetServer || withSysMonitoring
         ? packagePolicyService
-            .buildPackagePolicyFromPackage(soClient, FLEET_SERVER_PACKAGE)
-            .catch(() => undefined)
-        : // If needed, retrieve System package information and build a new package policy for the system package
-        // NOTE: we ignore failures in attempting to create package policy, since agent policy might have been created
-        // successfully
-        withSysMonitoring
-        ? packagePolicyService
-            .buildPackagePolicyFromPackage(soClient, FLEET_SYSTEM_PACKAGE)
+            .buildPackagePolicyFromPackage(soClient, packageToInstall)
             .catch(() => undefined)
         : undefined,
     ]);
 
     // Create the system monitoring package policy and add it to agent policy.
-    if (withSysMonitoring && newSysPackagePolicy !== undefined && agentPolicy !== undefined) {
-      newSysPackagePolicy.policy_id = agentPolicy.id;
-      newSysPackagePolicy.namespace = agentPolicy.namespace;
-      newSysPackagePolicy.name = await incrementPackageName(soClient, FLEET_SYSTEM_PACKAGE);
+    if (
+      (withSysMonitoring || isDefaultFleetServer) &&
+      newPackagePolicy !== undefined &&
+      agentPolicy !== undefined
+    ) {
+      newPackagePolicy.policy_id = agentPolicy.id;
+      newPackagePolicy.namespace = agentPolicy.namespace;
+      newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall);
 
-      await packagePolicyService.create(soClient, esClient, newSysPackagePolicy, {
+      await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
         spaceId,
         user,
         bumpRevision: false,
@@ -176,6 +180,8 @@ export const createAgentPolicyHandler: FleetRequestHandler<
     }
 
     await agentPolicyService.createFleetServerPolicy(soClient, agentPolicy.id);
+
+    ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
 
     const body: CreateAgentPolicyResponse = {
       item: agentPolicy,

@@ -111,7 +111,7 @@ export const AgentPolicySelectionStep = ({
       defaultMessage: 'What type of host are you adding?',
     }),
     children:
-      (agentPolicies ?? []).length > 0 ? (
+      regularAgentPolicies.length > 0 ? (
         <EnrollmentStepAgentPolicy
           agentPolicies={regularAgentPolicies}
           withKeySelection={setSelectedAPIKeyId ? true : false}
