@@ -11,7 +11,6 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiWrappingPopover } from '@elastic/eui';
 
-import { CoreStart } from 'kibana/public';
 import { ShareContextMenu } from '../components/share_context_menu';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
@@ -24,7 +23,6 @@ export class ShareMenuManager {
   private container = document.createElement('div');
 
   start(
-    core: CoreStart,
     urlService: BrowserUrlService,
     shareRegistry: ShareMenuRegistryStart,
     anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract
@@ -41,7 +39,6 @@ export class ShareMenuManager {
         this.toggleShareContextMenu({
           ...options,
           menuItems,
-          core,
           urlService,
           anonymousAccess,
         });
@@ -65,12 +62,10 @@ export class ShareMenuManager {
     shareableUrl,
     embedUrlParamExtensions,
     showPublicUrlSwitch,
-    core,
     urlService,
     anonymousAccess,
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
-    core: CoreStart;
     urlService: BrowserUrlService;
     anonymousAccess: AnonymousAccessServiceContract | undefined;
   }) {
@@ -104,7 +99,6 @@ export class ShareMenuManager {
             embedUrlParamExtensions={embedUrlParamExtensions}
             anonymousAccess={anonymousAccess}
             showPublicUrlSwitch={showPublicUrlSwitch}
-            core={core}
             urlService={urlService}
           />
         </EuiWrappingPopover>

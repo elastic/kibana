@@ -7,7 +7,6 @@
  */
 
 import React, { Component, ReactElement } from 'react';
-import { CoreStart } from 'kibana/public';
 import {
   EuiButton,
   EuiCopy,
@@ -45,7 +44,6 @@ interface Props {
   urlParamExtensions?: UrlParamExtension[];
   anonymousAccess?: AnonymousAccessServiceContract;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
-  core: CoreStart;
   urlService: BrowserUrlService;
 }
 
@@ -367,8 +365,9 @@ export class UrlPanelContent extends Component<Props, State> {
 
     try {
       const snapshotUrl = this.getSnapshotUrl();
-      const { urlService } = this.props;
-      const shortUrl = await urlService.shortUrls.get(null).createFromLongUrl(snapshotUrl);
+      const shortUrl = await this.props.urlService.shortUrls
+        .get(null)
+        .createFromLongUrl(snapshotUrl);
 
       if (!this.mounted) {
         return;

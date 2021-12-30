@@ -12,7 +12,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
-import { CoreStart } from 'kibana/public';
 import type { Capabilities } from 'src/core/public';
 
 import { UrlPanelContent } from './url_panel_content';
@@ -32,7 +31,6 @@ interface Props {
   embedUrlParamExtensions?: UrlParamExtension[];
   anonymousAccess?: AnonymousAccessServiceContract;
   showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
-  core: CoreStart;
   urlService: BrowserUrlService;
 }
 
@@ -64,7 +62,6 @@ export class ShareContextMenu extends Component<Props> {
           allowShortUrl={this.props.allowShortUrl}
           objectId={this.props.objectId}
           objectType={this.props.objectType}
-          core={this.props.core}
           shareableUrl={this.props.shareableUrl}
           anonymousAccess={this.props.anonymousAccess}
           showPublicUrlSwitch={this.props.showPublicUrlSwitch}
@@ -94,7 +91,6 @@ export class ShareContextMenu extends Component<Props> {
             isEmbedded
             objectId={this.props.objectId}
             objectType={this.props.objectType}
-            core={this.props.core}
             shareableUrl={this.props.shareableUrl}
             urlParamExtensions={this.props.embedUrlParamExtensions}
             anonymousAccess={this.props.anonymousAccess}
