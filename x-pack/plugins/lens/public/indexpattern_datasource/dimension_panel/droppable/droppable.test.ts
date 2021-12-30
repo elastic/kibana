@@ -480,6 +480,128 @@ describe('IndexPatternDimensionEditorPanel', () => {
         ).toEqual(undefined);
       });
 
+      it('returns undefined if the dragged column from different group uses the same fields as the dropTarget', () => {
+        state = getStateWithMultiFieldColumn();
+        const sourceMultiFieldColumn = {
+          ...state.layers.first.columns.col1,
+          sourceField: 'bytes',
+          params: {
+            ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+            secondaryFields: ['dest'],
+          },
+        } as TermsIndexPatternColumn;
+        // invert the fields
+        const targetMultiFieldColumn = {
+          ...state.layers.first.columns.col1,
+          sourceField: 'dest',
+          params: {
+            ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+            secondaryFields: ['bytes'],
+          },
+        } as TermsIndexPatternColumn;
+        state.layers.first = {
+          indexPatternId: 'foo',
+          columnOrder: ['col1', 'col2'],
+          columns: {
+            col1: sourceMultiFieldColumn,
+            col2: targetMultiFieldColumn,
+          },
+        };
+
+        expect(
+          getDropProps({
+            ...defaultProps,
+            state,
+            groupId,
+            dragging: {
+              ...draggingCol1,
+              groupId: 'c',
+            },
+            columnId: 'col2',
+          })
+        ).toEqual(undefined);
+      });
+
+      it('returns duplicate and replace if the dragged column from different group uses the same field as the dropTarget, but this last one is multifield, and can be swappable', () => {
+        state = getStateWithMultiFieldColumn();
+        state.layers.first = {
+          indexPatternId: 'foo',
+          columnOrder: ['col1', 'col2'],
+          columns: {
+            col1: state.layers.first.columns.col1,
+
+            col2: {
+              ...state.layers.first.columns.col1,
+              sourceField: 'bytes',
+              params: {
+                ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                secondaryFields: ['dest'],
+              },
+            } as TermsIndexPatternColumn,
+          },
+        };
+
+        expect(
+          getDropProps({
+            ...defaultProps,
+            state,
+            groupId,
+            dragging: {
+              ...draggingCol1,
+              groupId: 'c',
+            },
+            columnId: 'col2',
+          })
+        ).toEqual({
+          dropTypes: ['replace_compatible', 'replace_duplicate_compatible'],
+        });
+      });
+
+      it('returns swap, duplicate and replace if the dragged column from different group uses the same field as the dropTarget, but this last one is multifield', () => {
+        state = getStateWithMultiFieldColumn();
+        state.layers.first = {
+          indexPatternId: 'foo',
+          columnOrder: ['col1', 'col2'],
+          columns: {
+            col1: state.layers.first.columns.col1,
+
+            col2: {
+              ...state.layers.first.columns.col1,
+              sourceField: 'bytes',
+              params: {
+                ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                secondaryFields: ['dest'],
+              },
+            } as TermsIndexPatternColumn,
+          },
+        };
+
+        expect(
+          getDropProps({
+            ...defaultProps,
+            state,
+            // make it swappable
+            dimensionGroups: [
+              {
+                accessors: [{ columnId: 'col1' }],
+                filterOperations: jest.fn(() => true),
+                groupId,
+                groupLabel: '',
+                supportsMoreColumns: false,
+              },
+            ],
+            groupId,
+            dragging: {
+              ...draggingCol1,
+              groupId: 'c',
+            },
+            columnId: 'col2',
+          })
+        ).toEqual({
+          dropTypes: ['replace_compatible', 'replace_duplicate_compatible', 'swap_compatible'],
+        });
+      });
+
       it('returns reorder if drop target and droppedItem columns are from the same group and both are existing', () => {
         state.layers.first = {
           indexPatternId: 'foo',
