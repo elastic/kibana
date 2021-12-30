@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { connectAdvanced } from 'react-redux';
 import { compose, withPropsOnChange, mapProps } from 'recompose';
 import isEqual from 'react-fast-compare';
-import { getResolvedArgs, getSelectedPage } from '../../state/selectors/workpad';
+import { getResolvedArgs, getSelectedPage, getElementById } from '../../state/selectors/workpad';
 import { getState, getValue } from '../../lib/resolved_arg';
 import { createDispatchedHandlerFactory } from '../../lib/create_handlers';
 import { ElementWrapper as Component } from './element_wrapper';
@@ -24,6 +24,7 @@ function selectorFactory(dispatch) {
 
     const resolvedArg = getResolvedArgs(nextState, element.id, 'expressionRenderable');
     const selectedPage = getSelectedPage(nextState);
+    const { id, filter, expression } = getElementById(nextState, element.id, selectedPage);
 
     // build interim props object
     const nextResult = {
@@ -40,11 +41,7 @@ function selectorFactory(dispatch) {
       height,
       // pass along only the useful parts of the element object
       // so handlers object can be created
-      element: {
-        id: element.id,
-        filter: element.filter,
-        expression: element.expression,
-      },
+      element: { id, filter, expression },
     };
 
     // update props only if something actually changed
@@ -70,7 +67,7 @@ export const ElementWrapper = compose(
   mapProps((props) => {
     // remove element and createHandlers from props passed to component
     // eslint-disable-next-line no-unused-vars
-    const { element, createHandlers, selectedPage, ...restProps } = props;
+    const { createHandlers, selectedPage, ...restProps } = props;
     return restProps;
   })
 )(Component);

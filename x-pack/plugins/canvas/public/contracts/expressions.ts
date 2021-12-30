@@ -17,9 +17,5 @@ export const setupExpressionsContract = ({ expressions }: CanvasStartDeps) => {
 };
 
 export const getExpressionsContract = () => ({
-  getExpressionRenderer,
-});
-
-export const getExpressionContractHooks = () => ({
-  useExpressionRenderer: getExpressionRenderer,
+  ExpressionRenderer: getExpressionRenderer(),
 });

@@ -7,6 +7,7 @@
 
 import { CanvasStartDeps } from '../plugin';
 import { setupExpressionsContract, getExpressionsContract } from './expressions';
+import { hooksFactory } from './hooks';
 
 export const setupPluginsContracts = (startDeps: CanvasStartDeps) => {
   setupExpressionsContract(startDeps);
@@ -16,4 +17,4 @@ export const getPluginsContracts = () => ({
   expressions: getExpressionsContract(),
 });
 
-export const useExpressionsContract = () => getExpressionsContract();
+export const useExpressionsContract = hooksFactory(getExpressionsContract);

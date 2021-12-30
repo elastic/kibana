@@ -37,6 +37,7 @@ import { PresentationUtilPluginStart } from '../../../../src/plugins/presentatio
 import { getPluginApi, CanvasApi } from './plugin_api';
 import { setupExpressions } from './setup_expressions';
 import { pluginServiceRegistry } from './services/kibana';
+import { setupPluginsContracts } from './contracts';
 
 export type { CoreStart, CoreSetup };
 
@@ -121,6 +122,8 @@ export class CanvasPlugin
         const [coreStart, startPlugins] = await coreSetup.getStartServices();
 
         srcPlugin.start(coreStart, startPlugins);
+
+        setupPluginsContracts(startPlugins);
 
         const { pluginServices } = await import('./services');
         pluginServices.setRegistry(

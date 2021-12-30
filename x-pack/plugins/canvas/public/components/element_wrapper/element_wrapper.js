@@ -8,20 +8,28 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Positionable } from '../positionable';
-import { ElementContent } from '../element_content';
+// import { ElementContent } from '../element_content';
+import { ExpressionRenderer } from '../expression_renderer';
 
 export const ElementWrapper = (props) => {
-  const { renderable, transformMatrix, width, height, state, handlers } = props;
+  const {
+    // renderable, state, handlers,
+    transformMatrix,
+    width,
+    height,
+    element,
+  } = props;
 
   return (
     <Positionable transformMatrix={transformMatrix} width={width} height={height}>
-      <ElementContent
+      {/* <ElementContent
         renderable={renderable}
         state={state}
         handlers={handlers}
         width={width}
         height={height}
-      />
+      /> */}
+      <ExpressionRenderer expression={element.expression} />
     </Positionable>
   );
 };

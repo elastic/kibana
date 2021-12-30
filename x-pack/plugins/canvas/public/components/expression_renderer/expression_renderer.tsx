@@ -5,6 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC } from 'react';
+import { useSelector } from 'react-redux';
+import { State } from '../../../types';
+import { ExpressionAstExpression } from '../../../../../../src/plugins/expressions';
+import { useExpressionsContract } from '../../contracts';
+import { getWorkpadVariablesAsObject } from '../../state/selectors/workpad';
 
-export const ExpressionRenderer = () => <></>;
+interface Props {
+  expression: string | ExpressionAstExpression;
+}
+
+export const ExpressionRenderer: FC<Props> = ({ expression }) => {
+  const { ExpressionRenderer: Renderer } = useExpressionsContract();
+  const variables = useSelector((state: State) => getWorkpadVariablesAsObject(state));
+
+  return <Renderer expression={expression} variables={variables} />;
+};
