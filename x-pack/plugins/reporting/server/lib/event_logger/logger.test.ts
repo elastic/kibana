@@ -70,9 +70,9 @@ describe('Event Logger', () => {
     `);
   });
 
-  it(`logStart should create a 'start' event`, () => {
+  it(`logExecutionStart should create a 'start' event`, () => {
     const logger = new factory(mockEventObject);
-    const result = logger.logStart('starting the event');
+    const result = logger.logExecutionStart('starting the event');
     expect(result.event).toMatchInlineSnapshot(`
       Object {
         "action": "execute-start",
@@ -86,11 +86,11 @@ describe('Event Logger', () => {
     expect(logger.completionLogger.startTiming).toBeCalled();
   });
 
-  it(`logComplete should create a 'complete' event`, () => {
+  it(`logExecutionComplete should create a 'complete' event`, () => {
     const logger = new factory(mockEventObject);
-    logger.logStart('starting the event');
+    logger.logExecutionStart('starting the event');
 
-    const result = logger.logComplete('completed the event');
+    const result = logger.logExecutionComplete('completed the event');
     expect(result.event).toMatchInlineSnapshot(`
       Object {
         "action": "execute-complete",

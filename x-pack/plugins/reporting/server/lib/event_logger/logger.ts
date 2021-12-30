@@ -71,7 +71,7 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
       return event;
     }
 
-    logStart(message: string): StartedExecution {
+    logExecutionStart(message: string): StartedExecution {
       this.completionLogger.startTiming(this.eventObj);
       const event = deepMerge(
         {
@@ -86,7 +86,7 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
       return event;
     }
 
-    logComplete(message: string): CompletedExecution {
+    logExecutionComplete(message: string): CompletedExecution {
       this.completionLogger.stopTiming(this.eventObj);
       const event = deepMerge(
         {

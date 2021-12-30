@@ -333,6 +333,12 @@ export class ExecuteReportTask implements ReportingTask {
           );
           this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
 
+          const eventLog = this.reporting.getEventLogger({
+            event: { id: task.id, timezone: task.payload.browserTimezone },
+            kibana: { reporting: { jobType: task.jobtype, task: { id: context.taskInstance.id } } },
+            ...(task.created_by && { user: { name: task.created_by } }),
+          });
+
           try {
             const jobContentEncoding = this.getJobContentEncoding(jobType);
             const stream = await getContentStream(
@@ -347,7 +353,10 @@ export class ExecuteReportTask implements ReportingTask {
                 encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
               }
             );
+
+            eventLog.logExecutionStart(`starting ${task.jobtype} jobtype execution`);
             const output = await this._performJob(task, cancellationToken, stream);
+            eventLog.logExecutionComplete(`${task.jobtype} jobtype execution is complete`);
 
             stream.end();
             await promisify(finished)(stream, { readable: false });
@@ -365,6 +374,8 @@ export class ExecuteReportTask implements ReportingTask {
             // untrack the report for concurrency awareness
             this.logger.debug(`Stopping ${jobId}.`);
           } catch (failedToExecuteErr) {
+            eventLog.logError(failedToExecuteErr);
+
             cancellationToken.cancel();
 
             if (attempts < maxAttempts) {
