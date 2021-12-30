@@ -10,6 +10,7 @@ import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
 import { SavedObject, SavedObjectsClientContract, SavedObjectsImportFailure } from '../../types';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import type { ImportStateMap } from './types';
 
 interface CheckOriginConflictsParams {
   objects: Array<SavedObject<{ title?: string }>>;
@@ -17,7 +18,7 @@ interface CheckOriginConflictsParams {
   typeRegistry: ISavedObjectTypeRegistry;
   namespace?: string;
   ignoreRegularConflicts?: boolean;
-  importIdMap: Map<string, unknown>;
+  importStateMap: ImportStateMap;
 }
 
 type CheckOriginConflictParams = Omit<CheckOriginConflictsParams, 'objects'> & {
@@ -76,8 +77,8 @@ const getAmbiguousConflictSourceKey = <T>({ object }: InexactMatch<T>) =>
 const checkOriginConflict = async (
   params: CheckOriginConflictParams
 ): Promise<Either<{ title?: string }>> => {
-  const { object, savedObjectsClient, typeRegistry, namespace, importIdMap } = params;
-  const importIds = new Set(importIdMap.keys());
+  const { object, savedObjectsClient, typeRegistry, namespace, importStateMap } = params;
+  const importIds = new Set(importStateMap.keys());
   const { type, originId } = object;
 
   if (!typeRegistry.isMultiNamespace(type)) {
@@ -126,7 +127,7 @@ const checkOriginConflict = async (
  * that match this object's `originId` or `id` exist in the specified namespace:
  *  - If this is a `Right` result; return the import object and allow `createSavedObjects` to handle the conflict (if any).
  *  - If this is a `Left` "partial match" result:
- *     A. If there is a single source and destination match, add the destination to the importIdMap and return the import object, which
+ *     A. If there is a single source and destination match, add the destination to the importStateMap and return the import object, which
  *        will allow `createSavedObjects` to modify the ID before creating the object (thus ensuring a conflict during).
  *     B. Otherwise, this is an "ambiguous conflict" result; return an error.
  */
@@ -148,7 +149,7 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
     }, new Map<string, Array<SavedObject<{ title?: string }>>>());
 
   const errors: SavedObjectsImportFailure[] = [];
-  const importIdMap = new Map<string, { id: string; omitOriginId?: boolean }>();
+  const importStateMap: ImportStateMap = new Map();
   const pendingOverwrites = new Set<string>();
   checkOriginConflictResults.forEach((result) => {
     if (!isLeft(result)) {
@@ -163,7 +164,7 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
     if (sources.length === 1 && destinations.length === 1) {
       // This is a simple "inexact match" result -- a single import object has a single destination conflict.
       if (params.ignoreRegularConflicts) {
-        importIdMap.set(`${type}:${id}`, { id: destinations[0].id });
+        importStateMap.set(`${type}:${id}`, { destinationId: destinations[0].id });
         pendingOverwrites.add(`${type}:${id}`);
       } else {
         const { title } = attributes;
@@ -187,7 +188,7 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
     if (sources.length > 1) {
       // In the case of ambiguous source conflicts, don't treat them as errors; instead, regenerate the object ID and reset its origin
       // (e.g., the same outcome as if `createNewCopies` was enabled for the entire import operation).
-      importIdMap.set(`${type}:${id}`, { id: uuidv4(), omitOriginId: true });
+      importStateMap.set(`${type}:${id}`, { destinationId: uuidv4(), omitOriginId: true });
       return;
     }
     const { title } = attributes;
@@ -203,5 +204,5 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
     });
   });
 
-  return { errors, importIdMap, pendingOverwrites };
+  return { errors, importStateMap, pendingOverwrites };
 }

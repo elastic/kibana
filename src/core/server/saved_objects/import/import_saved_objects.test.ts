@@ -29,6 +29,7 @@ import { ISavedObjectTypeRegistry } from '..';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import { importSavedObjectsFromStream, ImportSavedObjectsOptions } from './import_saved_objects';
 import { SavedObjectsImportHook, SavedObjectsImportWarning } from './types';
+import type { ImportStateMap } from './lib';
 
 describe('#importSavedObjectsFromStream', () => {
   beforeEach(() => {
@@ -37,19 +38,19 @@ describe('#importSavedObjectsFromStream', () => {
     mockCollectSavedObjects.mockResolvedValue({
       errors: [],
       collectedObjects: [],
-      importIdMap: new Map(),
+      importStateMap: new Map(),
     });
     mockRegenerateIds.mockReturnValue(new Map());
     mockValidateReferences.mockResolvedValue([]);
     mockCheckConflicts.mockResolvedValue({
       errors: [],
       filteredObjects: [],
-      importIdMap: new Map(),
+      importStateMap: new Map(),
       pendingOverwrites: new Set(),
     });
     mockCheckOriginConflicts.mockResolvedValue({
       errors: [],
-      importIdMap: new Map(),
+      importStateMap: new Map(),
       pendingOverwrites: new Set(),
     });
     mockCreateSavedObjects.mockResolvedValue({ errors: [], createdObjects: [] });
@@ -141,7 +142,7 @@ describe('#importSavedObjectsFromStream', () => {
       mockCollectSavedObjects.mockResolvedValue({
         errors: [],
         collectedObjects,
-        importIdMap: new Map(),
+        importStateMap: new Map(),
       });
 
       await importSavedObjectsFromStream(options);
@@ -162,7 +163,7 @@ describe('#importSavedObjectsFromStream', () => {
       mockCollectSavedObjects.mockResolvedValue({
         errors: [],
         collectedObjects,
-        importIdMap: new Map(),
+        importStateMap: new Map(),
       });
       mockCreateSavedObjects.mockResolvedValue({
         errors: [],
@@ -184,7 +185,7 @@ describe('#importSavedObjectsFromStream', () => {
         mockCollectSavedObjects.mockResolvedValue({
           errors: [],
           collectedObjects,
-          importIdMap: new Map(),
+          importStateMap: new Map(),
         });
 
         await importSavedObjectsFromStream(options);
@@ -197,7 +198,7 @@ describe('#importSavedObjectsFromStream', () => {
         mockCollectSavedObjects.mockResolvedValue({
           errors: [],
           collectedObjects,
-          importIdMap: new Map(),
+          importStateMap: new Map(),
         });
 
         await importSavedObjectsFromStream(options);
@@ -213,11 +214,11 @@ describe('#importSavedObjectsFromStream', () => {
       test('checks origin conflicts', async () => {
         const options = setupOptions();
         const filteredObjects = [createObject()];
-        const importIdMap = new Map();
+        const importStateMap = new Map();
         mockCheckConflicts.mockResolvedValue({
           errors: [],
           filteredObjects,
-          importIdMap,
+          importStateMap,
           pendingOverwrites: new Set(),
         });
 
@@ -228,7 +229,7 @@ describe('#importSavedObjectsFromStream', () => {
           typeRegistry,
           namespace,
           ignoreRegularConflicts: overwrite,
-          importIdMap,
+          importStateMap,
         };
         expect(mockCheckOriginConflicts).toHaveBeenCalledWith(checkOriginConflictsParams);
       });
@@ -241,7 +242,7 @@ describe('#importSavedObjectsFromStream', () => {
         mockCollectSavedObjects.mockResolvedValue({
           errors: [errors[0]],
           collectedObjects,
-          importIdMap: new Map([
+          importStateMap: new Map([
             ['foo', {}],
             ['bar', {}],
             ['baz', {}],
@@ -251,26 +252,26 @@ describe('#importSavedObjectsFromStream', () => {
         mockCheckConflicts.mockResolvedValue({
           errors: [errors[2]],
           filteredObjects,
-          importIdMap: new Map([['bar', { id: 'newId1' }]]),
+          importStateMap: new Map([['bar', { destinationId: 'newId1' }]]),
           pendingOverwrites: new Set(),
         });
         mockCheckOriginConflicts.mockResolvedValue({
           errors: [errors[3]],
-          importIdMap: new Map([['baz', { id: 'newId2' }]]),
+          importStateMap: new Map([['baz', { destinationId: 'newId2' }]]),
           pendingOverwrites: new Set(),
         });
 
         await importSavedObjectsFromStream(options);
-        const importIdMap = new Map([
+        const importStateMap = new Map([
           ['foo', {}],
-          ['bar', { id: 'newId1' }],
-          ['baz', { id: 'newId2' }],
+          ['bar', { destinationId: 'newId1' }],
+          ['baz', { destinationId: 'newId2' }],
         ]);
         const createSavedObjectsParams = {
           objects: collectedObjects,
           accumulatedErrors: errors,
           savedObjectsClient,
-          importIdMap,
+          importStateMap,
           overwrite,
           namespace,
         };
@@ -285,7 +286,7 @@ describe('#importSavedObjectsFromStream', () => {
         mockCollectSavedObjects.mockResolvedValue({
           errors: [],
           collectedObjects,
-          importIdMap: new Map(), // doesn't matter
+          importStateMap: new Map(), // doesn't matter
         });
 
         await importSavedObjectsFromStream(options);
@@ -308,22 +309,22 @@ describe('#importSavedObjectsFromStream', () => {
         mockCollectSavedObjects.mockResolvedValue({
           errors: [errors[0]],
           collectedObjects,
-          importIdMap: new Map([
+          importStateMap: new Map([
             ['foo', {}],
             ['bar', {}],
           ]),
         });
         mockValidateReferences.mockResolvedValue([errors[1]]);
-        // this importIdMap is not composed with the one obtained from `collectSavedObjects`
-        const importIdMap = new Map().set(`id1`, { id: `newId1` });
-        mockRegenerateIds.mockReturnValue(importIdMap);
+        // this importStateMap is not composed with the one obtained from `collectSavedObjects`
+        const importStateMap: ImportStateMap = new Map().set(`id1`, { destinationId: `newId1` });
+        mockRegenerateIds.mockReturnValue(importStateMap);
 
         await importSavedObjectsFromStream(options);
         const createSavedObjectsParams = {
           objects: collectedObjects,
           accumulatedErrors: errors,
           savedObjectsClient,
-          importIdMap,
+          importStateMap,
           overwrite,
           namespace,
         };
@@ -345,7 +346,7 @@ describe('#importSavedObjectsFromStream', () => {
       mockCollectSavedObjects.mockResolvedValue({
         errors: [createError()],
         collectedObjects: [],
-        importIdMap: new Map(), // doesn't matter
+        importStateMap: new Map(), // doesn't matter
       });
 
       const result = await importSavedObjectsFromStream(options);
@@ -363,7 +364,7 @@ describe('#importSavedObjectsFromStream', () => {
       mockCollectSavedObjects.mockResolvedValue({
         errors: [],
         collectedObjects,
-        importIdMap: new Map(),
+        importStateMap: new Map(),
       });
       mockCreateSavedObjects.mockResolvedValue({
         errors: [],
@@ -411,7 +412,7 @@ describe('#importSavedObjectsFromStream', () => {
         mockCheckConflicts.mockResolvedValue({
           errors: [],
           filteredObjects: [],
-          importIdMap: new Map(),
+          importStateMap: new Map(),
           pendingOverwrites: new Set([
             `${success2.type}:${success2.id}`, // the success2 object was overwritten
             `${error2.type}:${error2.id}`, // an attempt was made to overwrite the error2 object
@@ -487,7 +488,7 @@ describe('#importSavedObjectsFromStream', () => {
       mockCheckConflicts.mockResolvedValue({
         errors: [],
         filteredObjects: [],
-        importIdMap: new Map(),
+        importStateMap: new Map(),
         pendingOverwrites: new Set(),
       });
       mockCreateSavedObjects.mockResolvedValue({ errors: [], createdObjects: [obj1, obj2] });
@@ -521,18 +522,18 @@ describe('#importSavedObjectsFromStream', () => {
       mockCollectSavedObjects.mockResolvedValue({
         errors: [errors[0]],
         collectedObjects: [],
-        importIdMap: new Map(), // doesn't matter
+        importStateMap: new Map(), // doesn't matter
       });
       mockValidateReferences.mockResolvedValue([errors[1]]);
       mockCheckConflicts.mockResolvedValue({
         errors: [errors[2]],
         filteredObjects: [],
-        importIdMap: new Map(), // doesn't matter
+        importStateMap: new Map(), // doesn't matter
         pendingOverwrites: new Set(),
       });
       mockCheckOriginConflicts.mockResolvedValue({
         errors: [errors[3]],
-        importIdMap: new Map(), // doesn't matter
+        importStateMap: new Map(), // doesn't matter
         pendingOverwrites: new Set(),
       });
       mockCreateSavedObjects.mockResolvedValue({ errors: [errors[4]], createdObjects: [] });

@@ -12,7 +12,7 @@ import type { collectSavedObjects } from './lib/collect_saved_objects';
 import type { regenerateIds } from './lib/regenerate_ids';
 import type { validateReferences } from './lib/validate_references';
 import type { checkConflicts } from './lib/check_conflicts';
-import type { getImportIdMapForRetries } from './lib/get_import_id_map_for_retries';
+import type { getImportStateMapForRetries } from './lib/get_import_state_map_for_retries';
 import type { splitOverwrites } from './lib/split_overwrites';
 import type { createSavedObjects } from './lib/create_saved_objects';
 import type { executeImportHooks } from './lib/execute_import_hooks';
@@ -47,11 +47,11 @@ jest.mock('./lib/check_conflicts', () => ({
   checkConflicts: mockCheckConflicts,
 }));
 
-export const mockGetImportIdMapForRetries = jest.fn() as jest.MockedFunction<
-  typeof getImportIdMapForRetries
+export const mockGetImportStateMapForRetries = jest.fn() as jest.MockedFunction<
+  typeof getImportStateMapForRetries
 >;
-jest.mock('./lib/get_import_id_map_for_retries', () => ({
-  getImportIdMapForRetries: mockGetImportIdMapForRetries,
+jest.mock('./lib/get_import_state_map_for_retries', () => ({
+  getImportStateMapForRetries: mockGetImportStateMapForRetries,
 }));
 
 export const mockSplitOverwrites = jest.fn() as jest.MockedFunction<typeof splitOverwrites>;

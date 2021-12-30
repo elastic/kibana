@@ -83,7 +83,7 @@ describe('#checkConflicts', () => {
     expect(checkConflictsResult).toEqual({
       filteredObjects: [],
       errors: [],
-      importIdMap: new Map(),
+      importStateMap: new Map(),
       pendingOverwrites: new Set(),
     });
   });
@@ -119,7 +119,7 @@ describe('#checkConflicts', () => {
           error: { ...obj4Error.error, type: 'unknown' },
         },
       ],
-      importIdMap: new Map([[`${obj3.type}:${obj3.id}`, { id: 'uuidv4' }]]),
+      importStateMap: new Map([[`${obj3.type}:${obj3.id}`, { destinationId: 'uuidv4' }]]),
       pendingOverwrites: new Set(),
     });
   });
@@ -185,12 +185,14 @@ describe('#checkConflicts', () => {
           error: { ...obj4Error.error, type: 'unknown' },
         },
       ],
-      importIdMap: new Map([[`${obj3.type}:${obj3.id}`, { id: 'uuidv4', omitOriginId: true }]]),
+      importStateMap: new Map([
+        [`${obj3.type}:${obj3.id}`, { destinationId: 'uuidv4', omitOriginId: true }],
+      ]),
       pendingOverwrites: new Set([`${obj5.type}:${obj5.id}`]),
     });
   });
 
-  it('adds `omitOriginId` field to `importIdMap` entries when createNewCopies=true', async () => {
+  it('adds `omitOriginId` field to `importStateMap` entries when createNewCopies=true', async () => {
     const namespace = 'foo-namespace';
     const params = setupParams({ objects, namespace, createNewCopies: true });
     socCheckConflicts.mockResolvedValue({ errors: [obj2Error, obj3Error, obj4Error] });
@@ -198,7 +200,9 @@ describe('#checkConflicts', () => {
     const checkConflictsResult = await checkConflicts(params);
     expect(checkConflictsResult).toEqual(
       expect.objectContaining({
-        importIdMap: new Map([[`${obj3.type}:${obj3.id}`, { id: 'uuidv4', omitOriginId: true }]]),
+        importStateMap: new Map([
+          [`${obj3.type}:${obj3.id}`, { destinationId: 'uuidv4', omitOriginId: true }],
+        ]),
       })
     );
   });

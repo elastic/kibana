@@ -7,8 +7,9 @@
  */
 
 import { SavedObject, SavedObjectsImportRetry } from '../../types';
+import type { ImportStateMap } from './types';
 
-interface GetImportIdMapForRetriesParams {
+interface GetImportStateMapForRetriesParams {
   objects: SavedObject[];
   retries: SavedObjectsImportRetry[];
   createNewCopies: boolean;
@@ -17,14 +18,14 @@ interface GetImportIdMapForRetriesParams {
 /**
  * Assume that all objects exist in the `retries` map (due to filtering at the beginning of `resolveSavedObjectsImportErrors`).
  */
-export function getImportIdMapForRetries(params: GetImportIdMapForRetriesParams) {
+export function getImportStateMapForRetries(params: GetImportStateMapForRetriesParams) {
   const { objects, retries, createNewCopies } = params;
 
   const retryMap = retries.reduce(
     (acc, cur) => acc.set(`${cur.type}:${cur.id}`, cur),
     new Map<string, SavedObjectsImportRetry>()
   );
-  const importIdMap = new Map<string, { id: string; omitOriginId?: boolean }>();
+  const importStateMap: ImportStateMap = new Map();
 
   objects.forEach(({ type, id }) => {
     const retry = retryMap.get(`${type}:${id}`);
@@ -34,9 +35,9 @@ export function getImportIdMapForRetries(params: GetImportIdMapForRetriesParams)
     const { destinationId } = retry;
     const omitOriginId = createNewCopies || Boolean(retry.createNewCopy);
     if (destinationId && destinationId !== id) {
-      importIdMap.set(`${type}:${id}`, { id: destinationId, omitOriginId });
+      importStateMap.set(`${type}:${id}`, { destinationId, omitOriginId });
     }
   });
 
-  return importIdMap;
+  return importStateMap;
 }

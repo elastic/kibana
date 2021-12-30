@@ -23,9 +23,10 @@ import {
   validateReferences,
   validateRetries,
   createSavedObjects,
-  getImportIdMapForRetries,
+  getImportStateMapForRetries,
   checkConflicts,
   executeImportHooks,
+  ImportStateMap,
 } from './lib';
 
 /**
@@ -71,7 +72,7 @@ export async function resolveSavedObjectsImportErrors({
 
   let successCount = 0;
   let errorAccumulator: SavedObjectsImportFailure[] = [];
-  let importIdMap: Map<string, { id?: string; omitOriginId?: boolean }> = new Map();
+  let importStateMap: ImportStateMap = new Map();
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
   const filter = createObjectsFilter(retries);
 
@@ -122,7 +123,7 @@ export async function resolveSavedObjectsImportErrors({
   if (createNewCopies) {
     // In case any missing reference errors were resolved, ensure that we regenerate those object IDs as well
     // This is because a retry to resolve a missing reference error may not necessarily specify a destinationId
-    importIdMap = regenerateIds(objectsToResolve);
+    importStateMap = regenerateIds(objectsToResolve);
   }
 
   // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
@@ -137,16 +138,16 @@ export async function resolveSavedObjectsImportErrors({
   errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
 
   // Check multi-namespace object types for regular conflicts and ambiguous conflicts
-  const getImportIdMapForRetriesParams = {
+  const getImportStateMapForRetriesParams = {
     objects: checkConflictsResult.filteredObjects,
     retries,
     createNewCopies,
   };
-  const importIdMapForRetries = getImportIdMapForRetries(getImportIdMapForRetriesParams);
-  importIdMap = new Map([
-    ...importIdMap,
-    ...importIdMapForRetries,
-    ...checkConflictsResult.importIdMap, // this importIdMap takes precedence over the others
+  const importStateMapForRetries = getImportStateMapForRetries(getImportStateMapForRetriesParams);
+  importStateMap = new Map([
+    ...importStateMap,
+    ...importStateMapForRetries,
+    ...checkConflictsResult.importStateMap, // this importStateMap takes precedence over the others
   ]);
 
   // Bulk create in two batches, overwrites and non-overwrites
@@ -161,7 +162,7 @@ export async function resolveSavedObjectsImportErrors({
       objects,
       accumulatedErrors,
       savedObjectsClient,
-      importIdMap,
+      importStateMap,
       namespace,
       overwrite,
     };

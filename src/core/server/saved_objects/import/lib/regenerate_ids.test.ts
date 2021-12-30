@@ -27,9 +27,9 @@ describe('#regenerateIds', () => {
   test('returns expected values', () => {
     expect(regenerateIds(objects)).toEqual(
       new Map([
-        ['foo:1', { id: 'uuidv4 #1', omitOriginId: true }],
-        ['bar:2', { id: 'uuidv4 #2', omitOriginId: true }],
-        ['baz:3', { id: 'uuidv4 #3', omitOriginId: true }],
+        ['foo:1', { destinationId: 'uuidv4 #1', omitOriginId: true }],
+        ['bar:2', { destinationId: 'uuidv4 #2', omitOriginId: true }],
+        ['baz:3', { destinationId: 'uuidv4 #3', omitOriginId: true }],
       ])
     );
   });

@@ -8,9 +8,9 @@
 
 import type { SavedObject } from '../../types';
 import type { SavedObjectsImportRetry } from '../types';
-import { getImportIdMapForRetries } from './get_import_id_map_for_retries';
+import { getImportStateMapForRetries } from './get_import_state_map_for_retries';
 
-describe('#getImportIdMapForRetries', () => {
+describe('#getImportStateMapForRetries', () => {
   const createRetry = (
     { type, id }: { type: string; id: string },
     params: { destinationId?: string; createNewCopy?: boolean } = {}
@@ -26,7 +26,7 @@ describe('#getImportIdMapForRetries', () => {
     const retries = [createRetry(obj1)];
     const params = { objects, retries, createNewCopies: false };
 
-    expect(() => getImportIdMapForRetries(params)).toThrowErrorMatchingInlineSnapshot(
+    expect(() => getImportStateMapForRetries(params)).toThrowErrorMatchingInlineSnapshot(
       `"Retry was expected for \\"type-2:id-2\\" but not found"`
     );
   });
@@ -40,29 +40,29 @@ describe('#getImportIdMapForRetries', () => {
     const retries = [
       createRetry(obj1), // retries that do not have `destinationId` specified are ignored
       createRetry(obj2, { destinationId: obj2.id }), // retries that have `id` that matches `destinationId` are ignored
-      createRetry(obj3, { destinationId: 'id-X' }), // this retry will get added to the `importIdMap`!
-      createRetry(obj4, { destinationId: 'id-Y', createNewCopy: true }), // this retry will get added to the `importIdMap`!
+      createRetry(obj3, { destinationId: 'id-X' }), // this retry will get added to the `importStateMap`!
+      createRetry(obj4, { destinationId: 'id-Y', createNewCopy: true }), // this retry will get added to the `importStateMap`!
     ];
     const params = { objects, retries, createNewCopies: false };
 
-    const result = await getImportIdMapForRetries(params);
+    const result = await getImportStateMapForRetries(params);
     expect(result).toEqual(
       new Map([
-        [`${obj3.type}:${obj3.id}`, { id: 'id-X', omitOriginId: false }],
-        [`${obj4.type}:${obj4.id}`, { id: 'id-Y', omitOriginId: true }],
+        [`${obj3.type}:${obj3.id}`, { destinationId: 'id-X', omitOriginId: false }],
+        [`${obj4.type}:${obj4.id}`, { destinationId: 'id-Y', omitOriginId: true }],
       ])
     );
   });
 
-  test('omits origin ID in `importIdMap` entries when createNewCopies=true', async () => {
+  test('omits origin ID in `importStateMap` entries when createNewCopies=true', async () => {
     const obj1 = { type: 'type-1', id: 'id-1' };
     const objects = [obj1] as SavedObject[];
     const retries = [createRetry(obj1, { destinationId: 'id-X' })];
     const params = { objects, retries, createNewCopies: true };
 
-    const result = await getImportIdMapForRetries(params);
+    const result = await getImportStateMapForRetries(params);
     expect(result).toEqual(
-      new Map([[`${obj1.type}:${obj1.id}`, { id: 'id-X', omitOriginId: true }]])
+      new Map([[`${obj1.type}:${obj1.id}`, { destinationId: 'id-X', omitOriginId: true }]])
     );
   });
 });

@@ -16,6 +16,7 @@ import { checkOriginConflicts } from './check_origin_conflicts';
 import { savedObjectsClientMock } from '../../../mocks';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import type { ImportStateMap } from './types';
 
 jest.mock('uuid', () => ({
   v4: () => 'uuidv4',
@@ -59,7 +60,7 @@ describe('#checkOriginConflicts', () => {
   const setupParams = (partial: {
     objects: SavedObjectType[];
     namespace?: string;
-    importIdMap?: Map<string, unknown>;
+    importStateMap?: ImportStateMap;
     ignoreRegularConflicts?: boolean;
   }): CheckOriginConflictsParams => {
     savedObjectsClient = savedObjectsClientMock.create();
@@ -68,7 +69,7 @@ describe('#checkOriginConflicts', () => {
     typeRegistry = typeRegistryMock.create();
     typeRegistry.isMultiNamespace.mockImplementation((type) => type === MULTI_NS_TYPE);
     return {
-      importIdMap: new Map<string, unknown>(), // empty by default
+      importStateMap: new Map(), // empty by default
       ...partial,
       savedObjectsClient,
       typeRegistry,
@@ -181,7 +182,7 @@ describe('#checkOriginConflicts', () => {
       },
     });
 
-    describe('object result without a `importIdMap` entry (no match or exact match)', () => {
+    describe('object result without a `importStateMap` entry (no match or exact match)', () => {
       test('returns object when no match is detected (0 hits)', async () => {
         // no objects exist in this space
         // try to import obj1, obj2, obj3, and obj4
@@ -196,7 +197,7 @@ describe('#checkOriginConflicts', () => {
         const checkOriginConflictsResult = await checkOriginConflicts(params);
 
         const expectedResult = {
-          importIdMap: new Map(),
+          importStateMap: new Map(),
           errors: [],
           pendingOverwrites: new Set(),
         };
@@ -213,7 +214,7 @@ describe('#checkOriginConflicts', () => {
         const objects = [obj2, obj4];
         const params = setupParams({
           objects,
-          importIdMap: new Map([
+          importStateMap: new Map([
             [`${obj1.type}:${obj1.id}`, {}],
             [`${obj2.type}:${obj2.id}`, {}],
             [`${obj3.type}:${obj3.id}`, {}],
@@ -225,7 +226,7 @@ describe('#checkOriginConflicts', () => {
 
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          importIdMap: new Map(),
+          importStateMap: new Map(),
           errors: [],
           pendingOverwrites: new Set(),
         };
@@ -241,7 +242,7 @@ describe('#checkOriginConflicts', () => {
         const objects = [obj3];
         const params = setupParams({
           objects,
-          importIdMap: new Map([
+          importStateMap: new Map([
             [`${obj1.type}:${obj1.id}`, {}],
             [`${obj2.type}:${obj2.id}`, {}],
             [`${obj3.type}:${obj3.id}`, {}],
@@ -251,7 +252,7 @@ describe('#checkOriginConflicts', () => {
 
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          importIdMap: new Map(),
+          importStateMap: new Map(),
           errors: [],
           pendingOverwrites: new Set(),
         };
@@ -259,7 +260,7 @@ describe('#checkOriginConflicts', () => {
       });
     });
 
-    describe('object result with a `importIdMap` entry (partial match with a single destination)', () => {
+    describe('object result with a `importStateMap` entry (partial match with a single destination)', () => {
       describe('when an inexact match is detected (1 hit)', () => {
         // objA and objB exist in this space
         // try to import obj1 and obj2
@@ -280,20 +281,20 @@ describe('#checkOriginConflicts', () => {
           const params = setup(false);
           const checkOriginConflictsResult = await checkOriginConflicts(params);
           const expectedResult = {
-            importIdMap: new Map(),
+            importStateMap: new Map(),
             errors: [createConflictError(obj1, objA.id), createConflictError(obj2, objB.id)],
             pendingOverwrites: new Set(),
           };
           expect(checkOriginConflictsResult).toEqual(expectedResult);
         });
 
-        test('returns object with a `importIdMap` entry when ignoreRegularConflicts=true', async () => {
+        test('returns object with a `importStateMap` entry when ignoreRegularConflicts=true', async () => {
           const params = setup(true);
           const checkOriginConflictsResult = await checkOriginConflicts(params);
           const expectedResult = {
-            importIdMap: new Map([
-              [`${obj1.type}:${obj1.id}`, { id: objA.id }],
-              [`${obj2.type}:${obj2.id}`, { id: objB.id }],
+            importStateMap: new Map([
+              [`${obj1.type}:${obj1.id}`, { destinationId: objA.id }],
+              [`${obj2.type}:${obj2.id}`, { destinationId: objB.id }],
             ]),
             errors: [],
             pendingOverwrites: new Set([`${obj1.type}:${obj1.id}`, `${obj2.type}:${obj2.id}`]),
@@ -317,7 +318,7 @@ describe('#checkOriginConflicts', () => {
           const params = setupParams({
             objects,
             ignoreRegularConflicts,
-            importIdMap: new Map([
+            importStateMap: new Map([
               [`${obj1.type}:${obj1.id}`, {}],
               [`${obj2.type}:${obj2.id}`, {}],
               [`${obj3.type}:${obj3.id}`, {}],
@@ -333,20 +334,20 @@ describe('#checkOriginConflicts', () => {
           const params = setup(false);
           const checkOriginConflictsResult = await checkOriginConflicts(params);
           const expectedResult = {
-            importIdMap: new Map(),
+            importStateMap: new Map(),
             errors: [createConflictError(obj2, objA.id), createConflictError(obj4, objB.id)],
             pendingOverwrites: new Set(),
           };
           expect(checkOriginConflictsResult).toEqual(expectedResult);
         });
 
-        test('returns object with a `importIdMap` entry when ignoreRegularConflicts=true', async () => {
+        test('returns object with a `importStateMap` entry when ignoreRegularConflicts=true', async () => {
           const params = setup(true);
           const checkOriginConflictsResult = await checkOriginConflicts(params);
           const expectedResult = {
-            importIdMap: new Map([
-              [`${obj2.type}:${obj2.id}`, { id: objA.id }],
-              [`${obj4.type}:${obj4.id}`, { id: objB.id }],
+            importStateMap: new Map([
+              [`${obj2.type}:${obj2.id}`, { destinationId: objA.id }],
+              [`${obj4.type}:${obj4.id}`, { destinationId: objB.id }],
             ]),
             errors: [],
             pendingOverwrites: new Set([`${obj2.type}:${obj2.id}`, `${obj4.type}:${obj4.id}`]),
@@ -357,7 +358,7 @@ describe('#checkOriginConflicts', () => {
     });
 
     describe('ambiguous conflicts', () => {
-      test('returns object with a `importIdMap` entry when multiple inexact matches are detected that target the same single destination', async () => {
+      test('returns object with a `importStateMap` entry when multiple inexact matches are detected that target the same single destination', async () => {
         // objA and objB exist in this space
         // try to import obj1, obj2, obj3, and obj4
         const obj1 = createObject(MULTI_NS_TYPE, 'id-1');
@@ -375,11 +376,11 @@ describe('#checkOriginConflicts', () => {
 
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          importIdMap: new Map([
-            [`${obj1.type}:${obj1.id}`, { id: 'uuidv4', omitOriginId: true }],
-            [`${obj2.type}:${obj2.id}`, { id: 'uuidv4', omitOriginId: true }],
-            [`${obj3.type}:${obj3.id}`, { id: 'uuidv4', omitOriginId: true }],
-            [`${obj4.type}:${obj4.id}`, { id: 'uuidv4', omitOriginId: true }],
+          importStateMap: new Map([
+            [`${obj1.type}:${obj1.id}`, { destinationId: 'uuidv4', omitOriginId: true }],
+            [`${obj2.type}:${obj2.id}`, { destinationId: 'uuidv4', omitOriginId: true }],
+            [`${obj3.type}:${obj3.id}`, { destinationId: 'uuidv4', omitOriginId: true }],
+            [`${obj4.type}:${obj4.id}`, { destinationId: 'uuidv4', omitOriginId: true }],
           ]),
           errors: [],
           pendingOverwrites: new Set(),
@@ -403,7 +404,7 @@ describe('#checkOriginConflicts', () => {
 
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          importIdMap: new Map(),
+          importStateMap: new Map(),
           errors: [
             createAmbiguousConflictError(obj1, [objB, objA]), // Assert that these have been sorted by updatedAt in descending order
             createAmbiguousConflictError(obj2, [objC, objD]), // Assert that these have been sorted by ID in ascending order (since their updatedAt values are the same)
@@ -413,7 +414,7 @@ describe('#checkOriginConflicts', () => {
         expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
 
-      test('returns object with a `importIdMap` entry when multiple inexact matches are detected that target the same multiple destinations', async () => {
+      test('returns object with a `importStateMap` entry when multiple inexact matches are detected that target the same multiple destinations', async () => {
         // objA, objB, objC, and objD exist in this space
         // try to import obj1, obj2, obj3, and obj4
         const obj1 = createObject(MULTI_NS_TYPE, 'id-1');
@@ -433,11 +434,11 @@ describe('#checkOriginConflicts', () => {
 
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          importIdMap: new Map([
-            [`${obj1.type}:${obj1.id}`, { id: 'uuidv4', omitOriginId: true }],
-            [`${obj2.type}:${obj2.id}`, { id: 'uuidv4', omitOriginId: true }],
-            [`${obj3.type}:${obj3.id}`, { id: 'uuidv4', omitOriginId: true }],
-            [`${obj4.type}:${obj4.id}`, { id: 'uuidv4', omitOriginId: true }],
+          importStateMap: new Map([
+            [`${obj1.type}:${obj1.id}`, { destinationId: 'uuidv4', omitOriginId: true }],
+            [`${obj2.type}:${obj2.id}`, { destinationId: 'uuidv4', omitOriginId: true }],
+            [`${obj3.type}:${obj3.id}`, { destinationId: 'uuidv4', omitOriginId: true }],
+            [`${obj4.type}:${obj4.id}`, { destinationId: 'uuidv4', omitOriginId: true }],
           ]),
           errors: [],
           pendingOverwrites: new Set(),
@@ -465,10 +466,12 @@ describe('#checkOriginConflicts', () => {
       const objE = createObject(MULTI_NS_TYPE, 'id-E', obj7.id);
       const objects = [obj1, obj2, obj4, obj5, obj6, obj7, obj8];
 
-      const importIdMap = new Map([...objects, obj3].map(({ type, id }) => [`${type}:${id}`, {}]));
+      const importStateMap = new Map(
+        [...objects, obj3].map(({ type, id }) => [`${type}:${id}`, {}])
+      );
 
       const setup = (ignoreRegularConflicts: boolean) => {
-        const params = setupParams({ objects, importIdMap, ignoreRegularConflicts });
+        const params = setupParams({ objects, importStateMap, ignoreRegularConflicts });
         // obj1 is a non-multi-namespace type, so it is skipped while searching
         mockFindResult(); // find for obj2: the result is no match
         mockFindResult(obj3); // find for obj4: the result is an inexact match with one destination that is exactly matched by obj3 so it is ignored -- accordingly, obj4 has no match
@@ -483,9 +486,9 @@ describe('#checkOriginConflicts', () => {
         const params = setup(false);
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          importIdMap: new Map([
-            [`${obj7.type}:${obj7.id}`, { id: 'uuidv4', omitOriginId: true }],
-            [`${obj8.type}:${obj8.id}`, { id: 'uuidv4', omitOriginId: true }],
+          importStateMap: new Map([
+            [`${obj7.type}:${obj7.id}`, { destinationId: 'uuidv4', omitOriginId: true }],
+            [`${obj8.type}:${obj8.id}`, { destinationId: 'uuidv4', omitOriginId: true }],
           ]),
           errors: [
             createConflictError(obj5, objA.id),
@@ -500,10 +503,10 @@ describe('#checkOriginConflicts', () => {
         const params = setup(true);
         const checkOriginConflictsResult = await checkOriginConflicts(params);
         const expectedResult = {
-          importIdMap: new Map([
-            [`${obj5.type}:${obj5.id}`, { id: objA.id }],
-            [`${obj7.type}:${obj7.id}`, { id: 'uuidv4', omitOriginId: true }],
-            [`${obj8.type}:${obj8.id}`, { id: 'uuidv4', omitOriginId: true }],
+          importStateMap: new Map([
+            [`${obj5.type}:${obj5.id}`, { destinationId: objA.id }],
+            [`${obj7.type}:${obj7.id}`, { destinationId: 'uuidv4', omitOriginId: true }],
+            [`${obj8.type}:${obj8.id}`, { destinationId: 'uuidv4', omitOriginId: true }],
           ]),
           errors: [createAmbiguousConflictError(obj6, [objB, objC])],
           pendingOverwrites: new Set([`${obj5.type}:${obj5.id}`]),

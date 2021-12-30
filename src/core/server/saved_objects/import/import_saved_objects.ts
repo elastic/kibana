@@ -73,7 +73,7 @@ export async function importSavedObjectsFromStream({
   });
   errorAccumulator = [...errorAccumulator, ...collectSavedObjectsResult.errors];
   /** Map of all IDs for objects that we are attempting to import; each value is empty by default */
-  let importIdMap = collectSavedObjectsResult.importIdMap;
+  let importStateMap = collectSavedObjectsResult.importStateMap;
   let pendingOverwrites = new Set<string>();
 
   // Validate references
@@ -85,7 +85,7 @@ export async function importSavedObjectsFromStream({
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult];
 
   if (createNewCopies) {
-    importIdMap = regenerateIds(collectSavedObjectsResult.collectedObjects);
+    importStateMap = regenerateIds(collectSavedObjectsResult.collectedObjects);
   } else {
     // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
     const checkConflictsParams = {
@@ -96,7 +96,7 @@ export async function importSavedObjectsFromStream({
     };
     const checkConflictsResult = await checkConflicts(checkConflictsParams);
     errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
-    importIdMap = new Map([...importIdMap, ...checkConflictsResult.importIdMap]);
+    importStateMap = new Map([...importStateMap, ...checkConflictsResult.importStateMap]);
     pendingOverwrites = checkConflictsResult.pendingOverwrites;
 
     // Check multi-namespace object types for origin conflicts in this namespace
@@ -106,11 +106,11 @@ export async function importSavedObjectsFromStream({
       typeRegistry,
       namespace,
       ignoreRegularConflicts: overwrite,
-      importIdMap,
+      importStateMap,
     };
     const checkOriginConflictsResult = await checkOriginConflicts(checkOriginConflictsParams);
     errorAccumulator = [...errorAccumulator, ...checkOriginConflictsResult.errors];
-    importIdMap = new Map([...importIdMap, ...checkOriginConflictsResult.importIdMap]);
+    importStateMap = new Map([...importStateMap, ...checkOriginConflictsResult.importStateMap]);
     pendingOverwrites = new Set([
       ...pendingOverwrites,
       ...checkOriginConflictsResult.pendingOverwrites,
@@ -122,7 +122,7 @@ export async function importSavedObjectsFromStream({
     objects: collectSavedObjectsResult.collectedObjects,
     accumulatedErrors: errorAccumulator,
     savedObjectsClient,
-    importIdMap,
+    importStateMap,
     overwrite,
     namespace,
   };
