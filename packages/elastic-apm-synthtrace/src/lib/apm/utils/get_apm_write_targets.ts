@@ -14,40 +14,12 @@ export async function getApmWriteTargets({
 }: {
   client: Client;
 }): Promise<ApmElasticsearchOutputWriteTargets> {
-  const [indicesResponse, datastreamsResponse] = await Promise.all([
-    client.indices.getAlias({
-      index: 'apm-*',
-    }),
-    client.indices.getDataStream({
-      name: '*apm',
-    }),
-  ]);
-
-  function getDataStreamName(filter: string) {
-    return datastreamsResponse.data_streams.find((stream) => stream.name.includes(filter))?.name;
-  }
-
-  function getAlias(filter: string) {
-    return Object.keys(indicesResponse)
-      .map((key) => {
-        return {
-          key,
-          writeIndexAlias: Object.entries(indicesResponse[key].aliases).find(
-            ([_, alias]) => alias.is_write_index
-          )?.[0],
-        };
-      })
-      .find(({ key, writeIndexAlias }) => writeIndexAlias && key.includes(filter))
-      ?.writeIndexAlias!;
-  }
-
   const targets = {
-    transaction: getDataStreamName('traces-apm') || getAlias('-transaction'),
-    span: getDataStreamName('traces-apm') || getAlias('-span'),
-    metric: getDataStreamName('metrics-apm') || getAlias('-metric'),
-    error: getDataStreamName('logs-apm') || getAlias('-error'),
-  };
-
+    transaction: "traces-apm-default",
+    span: "traces-apm-default",
+    metric: "metrics-apm.internal-default",
+    error: "logs-apm.error-default",
+  }
   if (!targets.transaction || !targets.span || !targets.metric || !targets.error) {
     throw new Error('Write targets could not be determined');
   }
