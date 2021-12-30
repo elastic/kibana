@@ -43,9 +43,19 @@ const withCore = makeDecorator({
   parameterName: 'core',
   wrapper: (storyFn, context, { options: { theme, ...options } }) => {
     unregisterAll();
-
     const KibanaReactContext = createKibanaReactContext({
-      application: { getUrlForApp: () => '' },
+      application: {
+        getUrlForApp: () => '',
+        capabilities: { navLinks: { integrations: true } },
+        currentAppId$: {
+          subscribe: () => {},
+        },
+      },
+      http: {
+        basePath: {
+          prepend: (link: string) => `http://localhost:5601${link}`,
+        },
+      },
       chrome: {
         docTitle: {
           change: () => {},
@@ -170,6 +180,13 @@ const core = {
       };
       // @ts-expect-error
       return euiSettings[key];
+    },
+  },
+  docLinks: {
+    links: {
+      observability: {
+        guide: 'alink',
+      },
     },
   },
 } as unknown as CoreStart;
