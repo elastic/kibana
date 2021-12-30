@@ -28,7 +28,7 @@ const uiMetricFromDataPluginSchema: MakeSchemaFrom<UIMetricUsage> = {
   kibana: commonSchema, // It's a forward app so we'll likely never report it
   management: commonSchema,
   short_url_redirect: commonSchema, // It's a forward app so we'll likely never report it
-  visualizations: commonSchema,
+  visualize: commonSchema,
 
   // X-Pack
   apm: commonSchema,
@@ -73,7 +73,7 @@ export const uiMetricSchema: MakeSchemaFrom<UIMetricUsage> = {
   console: commonSchema,
   DashboardPanelVersionInUrl: commonSchema,
   Kibana_home: commonSchema, // eslint-disable-line @typescript-eslint/naming-convention
-  visualizations: commonSchema,
+  visualize: commonSchema,
   canvas: commonSchema,
   cross_cluster_replication: commonSchema,
   index_lifecycle_management: commonSchema,

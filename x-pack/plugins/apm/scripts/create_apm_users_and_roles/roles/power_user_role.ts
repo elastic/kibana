@@ -49,7 +49,7 @@ export const powerUserRole: RoleType = {
         ml: ['all'],
         maps: ['all'],
         graph: ['all'],
-        visualizations: ['all'],
+        visualize: ['all'],
 
         // observability
         logs: ['all'],

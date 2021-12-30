@@ -124,7 +124,7 @@ export const applicationUsageSchema = {
   kibana: commonSchema, // It's a forward app so we'll likely never report it
   management: commonSchema,
   short_url_redirect: commonSchema, // It's a forward app so we'll likely never report it
-  visualizations: commonSchema,
+  visualize: commonSchema,
   error: commonSchema,
   status: commonSchema,
   kibanaOverview: commonSchema,

@@ -1088,7 +1088,7 @@
             }
           }
         },
-        "visualizations": {
+        "visualize": {
           "properties": {
             "appId": {
               "type": "keyword",
@@ -8053,7 +8053,7 @@
             }
           }
         },
-        "visualizations": {
+        "visualize": {
           "type": "array",
           "items": {
             "properties": {

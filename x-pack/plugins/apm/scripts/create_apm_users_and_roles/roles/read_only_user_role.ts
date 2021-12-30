@@ -51,7 +51,7 @@ export const readOnlyUserRole: RoleType = {
         ml: ['read'],
         maps: ['read'],
         graph: ['read'],
-        visualizations: ['read'],
+        visualize: ['read'],
 
         // observability
         logs: ['read'],

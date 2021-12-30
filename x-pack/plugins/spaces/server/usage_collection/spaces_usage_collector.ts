@@ -140,7 +140,7 @@ export interface UsageData extends UsageStats {
     dev_tools?: number;
     advancedSettings?: number;
     infrastructure?: number;
-    visualizations?: number;
+    visualize?: number;
     logs?: number;
     dashboard?: number;
     ml?: number;
@@ -285,7 +285,7 @@ export function getSpacesUsageCollector(
             description: 'The number of spaces which have this feature disabled.',
           },
         },
-        visualizations: {
+        visualize: {
           type: 'long',
           _meta: {
             description: 'The number of spaces which have this feature disabled.',
