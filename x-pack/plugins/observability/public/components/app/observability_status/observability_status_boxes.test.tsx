@@ -14,7 +14,7 @@ describe('ObservabilityStatusBoxes', () => {
     const boxes = [
       {
         id: 'logs',
-        dataSource: 'Logs',
+        dataSourceName: 'Logs',
         hasData: true,
         description: 'This is the description for logs',
         modules: [],
@@ -23,7 +23,7 @@ describe('ObservabilityStatusBoxes', () => {
       },
       {
         id: 'metrics',
-        dataSource: 'Metrics',
+        dataSourceName: 'Metrics',
         hasData: true,
         description: 'This is the description for metrics',
         modules: [],

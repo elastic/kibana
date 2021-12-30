@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 export interface ObservabilityStatusBoxProps {
   id: string;
-  dataSource: string;
+  dataSourceName: string;
   hasData: boolean;
   description: string;
   modules: Array<{ name: string; hasData: boolean }>;
@@ -37,7 +37,11 @@ export function ObservabilityStatusBox(props: ObservabilityStatusBoxProps) {
   }
 }
 
-export function CompletedStatusBox({ dataSource, modules, integrationLink }: Props) {
+export function CompletedStatusBox({
+  dataSourceName,
+  modules,
+  integrationLink,
+}: ObservabilityStatusBoxProps) {
   return (
     <EuiPanel color="subdued" style={{ marginBottom: 20 }}>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -50,7 +54,7 @@ export function CompletedStatusBox({ dataSource, modules, integrationLink }: Pro
               style={{ marginRight: 8 }}
             />
             <EuiTitle size="xs" className="eui-displayInline eui-alignMiddle">
-              <h2>{dataSource}</h2>
+              <h2>{dataSourceName}</h2>
             </EuiTitle>
           </div>
         </EuiFlexItem>
@@ -81,7 +85,11 @@ export function CompletedStatusBox({ dataSource, modules, integrationLink }: Pro
   );
 }
 
-export function EmptyStatusBox({ dataSource, description, learnMoreLink }: Props) {
+export function EmptyStatusBox({
+  dataSourceName,
+  description,
+  learnMoreLink,
+}: ObservabilityStatusBoxProps) {
   return (
     <EuiPanel color="subdued" style={{ marginBottom: 20 }}>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -94,7 +102,7 @@ export function EmptyStatusBox({ dataSource, description, learnMoreLink }: Props
               style={{ marginRight: 8 }}
             />
             <EuiTitle size="xs" className="eui-displayInline eui-alignMiddle">
-              <h2>{dataSource}</h2>
+              <h2>{dataSourceName}</h2>
             </EuiTitle>
           </div>
         </EuiFlexItem>

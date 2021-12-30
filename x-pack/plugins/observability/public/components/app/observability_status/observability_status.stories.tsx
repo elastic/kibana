@@ -17,7 +17,7 @@ export default {
 const testBoxes = [
   {
     id: 'logs',
-    dataSource: 'Logs',
+    dataSourceName: 'Logs',
     hasData: true,
     description: 'This is the description for logs',
     modules: [
@@ -30,7 +30,7 @@ const testBoxes = [
   },
   {
     id: 'metrics',
-    dataSource: 'Metrics',
+    dataSourceName: 'Metrics',
     hasData: true,
     description: 'This is the description for metrics',
     modules: [
@@ -43,7 +43,7 @@ const testBoxes = [
   },
   {
     id: 'apm',
-    dataSource: 'APM',
+    dataSourceName: 'APM',
     hasData: true,
     description: 'This is the description for apm',
     modules: [
@@ -56,7 +56,7 @@ const testBoxes = [
   },
   {
     id: 'uptime',
-    dataSource: 'Uptime',
+    dataSourceName: 'Uptime',
     hasData: false,
     description: 'This is the description for uptime',
     modules: [
@@ -69,7 +69,7 @@ const testBoxes = [
   },
   {
     id: 'ux',
-    dataSource: 'User experience',
+    dataSourceName: 'User experience',
     hasData: false,
     description: 'This is the description for user experience',
     modules: [
@@ -82,7 +82,7 @@ const testBoxes = [
   },
   {
     id: 'alerts',
-    dataSource: 'Alerts and rules',
+    dataSourceName: 'Alerts and rules',
     hasData: true,
     description: 'This is the description for alerts and rules',
     modules: [

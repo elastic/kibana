@@ -15,7 +15,7 @@ describe('ObservabilityStatusBox', () => {
     beforeEach(() => {
       const props = {
         id: 'logs',
-        dataSource: 'Logs',
+        dataSourceName: 'Logs',
         hasData: false,
         description: 'test description',
         modules: [],
@@ -44,7 +44,7 @@ describe('ObservabilityStatusBox', () => {
     beforeEach(() => {
       const props = {
         id: 'logs',
-        dataSource: 'Logs',
+        dataSourceName: 'Logs',
         hasData: true,
         description: 'test description',
         modules: [
