@@ -13,7 +13,7 @@ node scripts/es snapshot&
 
 esPid=$!
 
-export PERFORMANCE_PHASE=WARMUP
+export PERF_TEST_PHASE=WARMUP
 export TEST_ES_URL=http://elastic:changeme@localhost:9200
 export DONT_START_ES=true
 export DISABLE_APM=true
@@ -30,7 +30,7 @@ checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (P
     --config "test/performance/config.playwright.ts";
 
 export DISABLE_APM=false
-export PERFORMANCE_PHASE=TEST
+export PERF_TEST_PHASE=TEST
 
 checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Phase: TEST)" \
   node scripts/functional_tests \
