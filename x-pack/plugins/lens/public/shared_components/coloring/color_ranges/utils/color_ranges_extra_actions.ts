@@ -9,7 +9,11 @@ import { getDataMinMax, roundValue } from '../../utils';
 
 import type { ColorRange, DataBounds } from '../types';
 import type { CustomPaletteParamsConfig } from '../../../../../common';
-import type { PaletteContinuity } from '../../../../../../../../src/plugins/charts/common';
+import {
+  PaletteContinuity,
+  checkIsMinContinuity,
+  checkIsMaxContinuity,
+} from '../../../../../../../../src/plugins/charts/common';
 
 /**
  * Distribute equally
@@ -24,18 +28,18 @@ export const distributeEqually = (
   const items = colorRanges.length;
   const lastIndex = colorRanges.length - 1;
   const { min, max } = getDataMinMax(rangeType, dataBounds);
-  const step = roundValue((max - min) / items, 2);
+  const step = roundValue((max - min) / items);
 
   const getValueForIndex = (index: number) => roundValue(min + (step * 100 * index) / 100);
   const getStartValue = (index: number) => {
     if (index === 0) {
-      return ['all', 'below'].includes(continuity) ? -Infinity : min;
+      return checkIsMinContinuity(continuity) ? Number.NEGATIVE_INFINITY : min;
     }
     return getValueForIndex(index);
   };
   const getEndValue = (index: number) => {
     if (index === lastIndex) {
-      return ['all', 'above'].includes(continuity) ? Infinity : max;
+      return checkIsMaxContinuity(continuity) ? Number.POSITIVE_INFINITY : max;
     }
     return getValueForIndex(index + 1);
   };
@@ -51,12 +55,11 @@ export const distributeEqually = (
  * Reverse Palette
  * @internal
  */
-export const reversePalette = (colorRanges: ColorRange[]) => {
-  return colorRanges
+export const reversePalette = (colorRanges: ColorRange[]) =>
+  colorRanges
     .map(({ color }, i) => ({
       color,
       start: colorRanges[colorRanges.length - i - 1].start,
       end: colorRanges[colorRanges.length - i - 1].end,
     }))
     .reverse();
-};

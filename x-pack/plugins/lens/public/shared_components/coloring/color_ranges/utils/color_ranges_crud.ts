@@ -11,6 +11,20 @@ import type { ColorRange, DataBounds, ColorRangeAccessor } from '../types';
 import type { CustomPaletteParamsConfig } from '../../../../../common';
 
 /**
+ * Allows to update a ColorRange
+ * @private
+ */
+const updateColorRangeItem = (
+  colorRanges: ColorRange[],
+  index: number,
+  payload: Partial<ColorRange>
+): ColorRange[] => {
+  const ranges = [...colorRanges];
+  ranges[index] = { ...ranges[index], ...payload };
+  return ranges;
+};
+
+/**
  * Add new color range after the last item
  * @internal
  */
@@ -19,7 +33,7 @@ export const addColorRange = (
   rangeType: CustomPaletteParamsConfig['rangeType'],
   dataBounds: DataBounds
 ) => {
-  const newColorRanges = [...colorRanges];
+  let newColorRanges = [...colorRanges];
   const lastIndex = newColorRanges.length - 1;
   const lastStart = newColorRanges[lastIndex].start;
   const lastEnd = newColorRanges[lastIndex].end;
@@ -39,8 +53,7 @@ export const addColorRange = (
     insertEnd = 1;
   }
 
-  newColorRanges[lastIndex].end = insertEnd;
-
+  newColorRanges = updateColorRangeItem(newColorRanges, lastIndex, { end: insertEnd });
   newColorRanges.push({
     color: lastColor,
     start: insertEnd,
@@ -56,17 +69,17 @@ export const addColorRange = (
  */
 export const deleteColorRange = (index: number, colorRanges: ColorRange[]) => {
   const lastIndex = colorRanges.length - 1;
+  let ranges = colorRanges;
 
   if (index !== 0) {
     if (index !== lastIndex) {
-      colorRanges[index - 1].end = colorRanges[index + 1].start;
+      ranges = updateColorRangeItem(ranges, index - 1, { end: ranges[index + 1].start });
     }
     if (index === lastIndex) {
-      colorRanges[index - 1].end = colorRanges[index].end;
+      ranges = updateColorRangeItem(ranges, index - 1, { end: colorRanges[index].end });
     }
   }
-
-  return colorRanges.filter((item, i) => i !== index);
+  return ranges.filter((item, i) => i !== index);
 };
 
 /**
@@ -80,24 +93,22 @@ export const updateColorRangeValue = (
   colorRanges: ColorRange[]
 ) => {
   const parsedValue = value ? parseFloat(value) : Number.NaN;
+  let ranges = colorRanges;
 
   if (accessor === 'end') {
-    colorRanges[index].end = parsedValue;
+    ranges = updateColorRangeItem(ranges, index, { end: parsedValue });
   } else {
-    colorRanges[index].start = parsedValue;
+    ranges = updateColorRangeItem(ranges, index, { start: parsedValue });
     if (index > 0) {
-      colorRanges[index - 1].end = parsedValue;
+      ranges = updateColorRangeItem(ranges, index - 1, { end: parsedValue });
     }
   }
-
-  return [...colorRanges];
+  return ranges;
 };
 
 /**
  * Update ColorRange color
  * @internal
  */
-export const updateColorRangeColor = (index: number, color: string, colorRanges: ColorRange[]) => {
-  colorRanges[index].color = color;
-  return [...colorRanges];
-};
+export const updateColorRangeColor = (index: number, color: string, colorRanges: ColorRange[]) =>
+  updateColorRangeItem(colorRanges, index, { color });
