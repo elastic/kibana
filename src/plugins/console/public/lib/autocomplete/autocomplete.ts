@@ -778,7 +778,7 @@ export default function ({
               end: { ...context.rangeToReplace.end },
             };
             // add a comma at the end of the previous line, a new line and indentation
-            context.prefixToAdd = ',\n' + ' '.repeat(startColumn - 1);
+            context.prefixToAdd = (prevLineLength < 6 ? '\n' : ',\n') + ' '.repeat(startColumn - 1);
           }
         }
     }
@@ -972,7 +972,7 @@ export default function ({
     lastEvaluatedToken = currentToken;
     editor.execCommand('startAutocomplete');
   },
-  100);
+    100);
 
   function editorChangeListener() {
     const position = editor.getCurrentPosition();
