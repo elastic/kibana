@@ -8,7 +8,7 @@
 import * as Rx from 'rxjs';
 import { Writable } from 'stream';
 import { ReportingCore } from '../../';
-import { CancellationToken } from '../../../common';
+import { CancellationToken } from '../../../common/cancellation_token';
 import { LocatorParams } from '../../../common/types';
 import { cryptoFactory, LevelLogger } from '../../lib';
 import {
@@ -16,11 +16,11 @@ import {
   createMockConfigSchema,
   createMockReportingCore,
 } from '../../test_helpers';
-import { generatePngObservableFactory } from '../common';
+import { generatePngObservable } from '../common';
 import { runTaskFnFactory } from './execute_job';
 import { TaskPayloadPNGV2 } from './types';
 
-jest.mock('../common/generate_png', () => ({ generatePngObservableFactory: jest.fn() }));
+jest.mock('../common/generate_png');
 
 let content: string;
 let mockReporting: ReportingCore;
@@ -62,18 +62,15 @@ beforeEach(async () => {
 
   mockReporting = await createMockReportingCore(mockReportingConfig);
   mockReporting.setConfig(createMockConfig(mockReportingConfig));
-
-  (generatePngObservableFactory as jest.Mock).mockReturnValue(jest.fn());
 });
 
-afterEach(() => (generatePngObservableFactory as jest.Mock).mockReset());
+afterEach(() => (generatePngObservable as jest.Mock).mockReset());
 
 test(`passes browserTimezone to generatePng`, async () => {
   const encryptedHeaders = await encryptHeaders({});
-  const generatePngObservable = (await generatePngObservableFactory(mockReporting)) as jest.Mock;
-  generatePngObservable.mockReturnValue(Rx.of({ buffer: Buffer.from('') }));
+  (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('') }));
 
-  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
+  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const browserTimezone = 'UTC';
   await runTask(
     'pngJobId',
@@ -87,49 +84,29 @@ test(`passes browserTimezone to generatePng`, async () => {
     stream
   );
 
-  expect(generatePngObservable.mock.calls).toMatchInlineSnapshot(`
-    Array [
-      Array [
-        LevelLogger {
-          "_logger": Object {
-            "get": [MockFunction],
-          },
-          "_tags": Array [
-            "PNGV2",
-            "execute",
-            "pngJobId",
-          ],
-          "warning": [Function],
-        },
-        Array [
-          "localhost:80undefined/app/reportingRedirect?forceNow=test",
-          Object {
-            "id": "test",
-            "params": Object {},
-            "version": "test",
-          },
+  expect(generatePngObservable).toHaveBeenCalledWith(
+    expect.anything(),
+    expect.anything(),
+    expect.objectContaining({
+      urls: [
+        [
+          'localhost:80undefined/app/reportingRedirect?forceNow=test',
+          { id: 'test', params: {}, version: 'test' },
         ],
-        "UTC",
-        Object {
-          "conditions": Object {
-            "basePath": undefined,
-            "hostname": "localhost",
-            "port": 80,
-            "protocol": undefined,
-          },
-          "headers": Object {},
-        },
-        undefined,
       ],
-    ]
-  `);
+      browserTimezone: 'UTC',
+      conditionalHeaders: expect.objectContaining({
+        conditions: expect.any(Object),
+        headers: {},
+      }),
+    })
+  );
 });
 
 test(`returns content_type of application/png`, async () => {
-  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
+  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
 
-  const generatePngObservable = await generatePngObservableFactory(mockReporting);
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('foo') }));
 
   const { content_type: contentType } = await runTask(
@@ -146,10 +123,9 @@ test(`returns content_type of application/png`, async () => {
 
 test(`returns content of generatePng getBuffer base64 encoded`, async () => {
   const testContent = 'raw string from get_screenhots';
-  const generatePngObservable = await generatePngObservableFactory(mockReporting);
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
-  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
+  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
   await runTask(
     'pngJobId',

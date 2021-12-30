@@ -36,6 +36,7 @@ import {
   KibanaContextProvider,
   KibanaReactContext,
   KibanaReactContextValue,
+  KibanaThemeProvider,
 } from '../../services/kibana_react';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { DashboardAppCapabilities, DashboardContainerInput } from '../../types';
@@ -60,6 +61,7 @@ export interface DashboardContainerServices {
   uiSettings: IUiSettingsClient;
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
+  theme: CoreStart['theme'];
   http: CoreStart['http'];
 }
 
@@ -99,6 +101,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   private onDestroyControlGroup?: () => void;
   public controlGroup?: ControlGroupContainer;
+  private domNode?: HTMLElement;
 
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
@@ -256,12 +259,18 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   public render(dom: HTMLElement) {
+    if (this.domNode) {
+      ReactDOM.unmountComponentAtNode(this.domNode);
+    }
+    this.domNode = dom;
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
-          <this.services.presentationUtil.ContextProvider>
-            <DashboardViewport container={this} controlGroup={this.controlGroup} />
-          </this.services.presentationUtil.ContextProvider>
+          <KibanaThemeProvider theme$={this.services.theme.theme$}>
+            <this.services.presentationUtil.ContextProvider>
+              <DashboardViewport container={this} controlGroup={this.controlGroup} />
+            </this.services.presentationUtil.ContextProvider>
+          </KibanaThemeProvider>
         </KibanaContextProvider>
       </I18nProvider>,
       dom
@@ -271,6 +280,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public destroy() {
     super.destroy();
     this.onDestroyControlGroup?.();
+    if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {

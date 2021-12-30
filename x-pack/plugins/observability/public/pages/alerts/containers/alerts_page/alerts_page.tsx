@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 
-import { IndexPatternBase } from '@kbn/es-query';
+import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useRef, useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { AlertStatus } from '@kbn/rule-data-utils/alerts_as_data_status';
-import { ALERT_STATUS } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_STATUS, AlertStatus } from '@kbn/rule-data-utils';
 
+import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { loadAlertAggregations as loadRuleAggregations } from '../../../../../../../plugins/triggers_actions_ui/public';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
 import { ParsedTechnicalFields } from '../../../../../../rule_registry/common/parse_technical_fields';
+import { ParsedExperimentalFields } from '../../../../../../rule_registry/common/parse_experimental_fields';
 import { ExperimentalBadge } from '../../../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -34,16 +36,28 @@ import {
 import './styles.scss';
 import { AlertsStatusFilter, AlertsDisclaimer, AlertsSearchBar } from '../../components';
 
+interface RuleStatsState {
+  total: number;
+  disabled: number;
+  muted: number;
+  error: number;
+}
 export interface TopAlert {
-  fields: ParsedTechnicalFields;
+  fields: ParsedTechnicalFields & ParsedExperimentalFields;
   start: number;
   reason: string;
   link?: string;
   active: boolean;
 }
+
+const Divider = euiStyled.div`
+  border-right: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  height: 100%;
+`;
+
 const regExpEscape = (str: string) => str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 const NO_INDEX_NAMES: string[] = [];
-const NO_INDEX_PATTERNS: IndexPatternBase[] = [];
+const NO_INDEX_PATTERNS: DataViewBase[] = [];
 const BASE_ALERT_REGEX = new RegExp(`\\s*${regExpEscape(ALERT_STATUS)}\\s*:\\s*"(.*?|\\*?)"`);
 const ALERT_STATUS_REGEX = new RegExp(
   `\\s*and\\s*${regExpEscape(ALERT_STATUS)}\\s*:\\s*(".+?"|\\*?)|${regExpEscape(
@@ -58,8 +72,19 @@ function AlertsPage() {
   const { prepend } = core.http.basePath;
   const refetch = useRef<() => void>();
   const timefilterService = useTimefilterService();
-  const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery, workflowStatus } =
+  const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery } =
     useAlertsPageStateContainer();
+  const {
+    http,
+    notifications: { toasts },
+  } = core;
+  const [ruleStatsLoading, setRuleStatsLoading] = useState<boolean>(false);
+  const [ruleStats, setRuleStats] = useState<RuleStatsState>({
+    total: 0,
+    disabled: 0,
+    muted: 0,
+    error: 0,
+  });
 
   useEffect(() => {
     syncAlertStatusFilterStatus(kuery as string);
@@ -72,6 +97,43 @@ function AlertsPage() {
       }),
     },
   ]);
+
+  async function loadRuleStats() {
+    setRuleStatsLoading(true);
+    try {
+      const response = await loadRuleAggregations({
+        http,
+      });
+      // Note that the API uses the semantics of 'alerts' instead of 'rules'
+      const { alertExecutionStatus, ruleMutedStatus, ruleEnabledStatus } = response;
+      if (alertExecutionStatus && ruleMutedStatus && ruleEnabledStatus) {
+        const total = Object.values(alertExecutionStatus).reduce((acc, value) => acc + value, 0);
+        const { disabled } = ruleEnabledStatus;
+        const { muted } = ruleMutedStatus;
+        const { error } = alertExecutionStatus;
+        setRuleStats({
+          ...ruleStats,
+          total,
+          disabled,
+          muted,
+          error,
+        });
+      }
+      setRuleStatsLoading(false);
+    } catch (_e) {
+      toasts.addDanger({
+        title: i18n.translate('xpack.observability.alerts.ruleStats.loadError', {
+          defaultMessage: 'Unable to load rule stats',
+        }),
+      });
+      setRuleStatsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadRuleStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // In a future milestone we'll have a page dedicated to rule management in
   // observability. For now link to the settings page.
@@ -95,7 +157,7 @@ function AlertsPage() {
     });
   }, []);
 
-  const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<IndexPatternBase[]> => {
+  const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {
     if (indexNames.length === 0) {
       return [];
     }
@@ -111,15 +173,6 @@ function AlertsPage() {
       },
     ];
   }, [indexNames]);
-
-  // Keep the Workflow status code commented (no delete) as requested: https://github.com/elastic/kibana/issues/117686
-
-  // const setWorkflowStatusFilter = useCallback(
-  //   (value: AlertWorkflowStatus) => {
-  //     setWorkflowStatus(value);
-  //   },
-  //   [setWorkflowStatus]
-  // );
 
   const onQueryChange = useCallback(
     ({ dateRange, query }) => {
@@ -198,12 +251,53 @@ function AlertsPage() {
           </>
         ),
         rightSideItems: [
+          <EuiStat
+            title={ruleStats.total}
+            description={i18n.translate('xpack.observability.alerts.ruleStats.ruleCount', {
+              defaultMessage: 'Rule count',
+            })}
+            color="primary"
+            titleSize="xs"
+            isLoading={ruleStatsLoading}
+            data-test-subj="statRuleCount"
+          />,
+          <EuiStat
+            title={ruleStats.disabled}
+            description={i18n.translate('xpack.observability.alerts.ruleStats.disabled', {
+              defaultMessage: 'Disabled',
+            })}
+            color="primary"
+            titleSize="xs"
+            isLoading={ruleStatsLoading}
+            data-test-subj="statDisabled"
+          />,
+          <EuiStat
+            title={ruleStats.muted}
+            description={i18n.translate('xpack.observability.alerts.ruleStats.muted', {
+              defaultMessage: 'Muted',
+            })}
+            color="primary"
+            titleSize="xs"
+            isLoading={ruleStatsLoading}
+            data-test-subj="statMuted"
+          />,
+          <EuiStat
+            title={ruleStats.error}
+            description={i18n.translate('xpack.observability.alerts.ruleStats.errors', {
+              defaultMessage: 'Errors',
+            })}
+            color="primary"
+            titleSize="xs"
+            isLoading={ruleStatsLoading}
+            data-test-subj="statErrors"
+          />,
+          <Divider />,
           <EuiButtonEmpty href={manageRulesHref}>
             {i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
               defaultMessage: 'Manage Rules',
             })}
           </EuiButtonEmpty>,
-        ],
+        ].reverse(),
       }}
     >
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -223,8 +317,6 @@ function AlertsPage() {
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              {/* Keep the Workflow status code commented (no delete) as requested: https://github.com/elastic/kibana/issues/117686*/}
-              {/* <WorkflowStatusFilter status={workflowStatus} onChange={setWorkflowStatusFilter} /> */}
               <AlertsStatusFilter status={alertFilterStatus} onChange={setAlertStatusFilter} />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -236,7 +328,6 @@ function AlertsPage() {
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
             kuery={kuery}
-            workflowStatus={workflowStatus}
             setRefetch={setRefetch}
           />
         </EuiFlexItem>

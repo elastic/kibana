@@ -136,11 +136,13 @@ describe('Policy trusted apps layout', () => {
     mockedApis.responseProvider.trustedAppsList.mockImplementation(
       (options: HttpFetchOptionsWithPath) => {
         const hasAnyQuery =
-          'exception-list-agnostic.attributes.tags:"policy:1234" OR exception-list-agnostic.attributes.tags:"policy:all"';
+          '(exception-list-agnostic.attributes.tags:"policy:1234" OR exception-list-agnostic.attributes.tags:"policy:all")';
         if (options.query?.filter === hasAnyQuery) {
           const exceptionsGenerator = new ExceptionsListItemGenerator('seed');
           return {
-            data: Array.from({ length: 10 }, () => exceptionsGenerator.generate()),
+            data: Array.from({ length: 10 }, () =>
+              exceptionsGenerator.generate({ os_types: ['windows'] })
+            ),
             total: 10,
             page: 0,
             per_page: 10,
@@ -166,7 +168,7 @@ describe('Policy trusted apps layout', () => {
   it('should hide assign button on empty state with unassigned policies when downgraded to a gold or below license', async () => {
     mockUseEndpointPrivileges.mockReturnValue(
       getEndpointPrivilegesInitialStateMock({
-        isPlatinumPlus: false,
+        canCreateArtifactsByPolicy: false,
       })
     );
     const component = render();
@@ -184,7 +186,7 @@ describe('Policy trusted apps layout', () => {
   it('should hide the `Assign trusted applications` button when there is data and the license is downgraded to gold or below', async () => {
     mockUseEndpointPrivileges.mockReturnValue(
       getEndpointPrivilegesInitialStateMock({
-        isPlatinumPlus: false,
+        canCreateArtifactsByPolicy: false,
       })
     );
     const component = render();

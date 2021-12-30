@@ -6,25 +6,30 @@
  */
 
 import axios from 'axios';
-import { UptimeConfig } from '../../../common/config';
-import { ManifestLocation, ServiceLocations } from '../../../common/types';
+import {
+  ManifestLocation,
+  ServiceLocations,
+  ServiceLocationsApiResponse,
+} from '../../../common/runtime_types';
 
-export async function getServiceLocations({ config }: { config: UptimeConfig }) {
-  const manifestURL = config.unsafe.service.manifestUrl;
+export async function getServiceLocations({ manifestUrl }: { manifestUrl: string }) {
   const locations: ServiceLocations = [];
   try {
-    const { data } = await axios.get<Record<string, ManifestLocation>>(manifestURL);
+    const { data } = await axios.get<{ locations: Record<string, ManifestLocation> }>(manifestUrl);
 
     Object.entries(data.locations).forEach(([locationId, location]) => {
       locations.push({
         id: locationId,
         label: location.geo.name,
         geo: location.geo.location,
+        url: location.url,
       });
     });
 
-    return locations;
+    return { locations } as ServiceLocationsApiResponse;
   } catch (e) {
-    return [];
+    return {
+      locations: [],
+    } as ServiceLocationsApiResponse;
   }
 }

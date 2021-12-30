@@ -25,7 +25,6 @@ import { PluginServices } from '../../../../src/plugins/presentation_util/public
 
 import { CanvasStartDeps, CanvasSetupDeps } from './plugin';
 import { App } from './components/app';
-import { registerLanguage } from './lib/monaco_language_def';
 import { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
 import { HelpMenu } from './components/help_menu/help_menu';
@@ -125,8 +124,6 @@ export const initializeCanvas = async (
 
   // Create Store
   const canvasStore = await createStore(coreSetup);
-
-  registerLanguage(Object.values(expressions.getFunctions()));
 
   // Init Registries
   initRegistries();

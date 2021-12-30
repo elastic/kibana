@@ -6,7 +6,7 @@
  */
 import { find } from 'lodash/fp';
 
-import type { TimelineEventsDetailsItem } from '../../../../common';
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 
 export const getFieldValues = (
   {

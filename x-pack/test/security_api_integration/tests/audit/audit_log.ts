@@ -22,7 +22,14 @@ class FileWrapper {
   }
   async readJSON() {
     const content = await this.read();
-    return content.map((l) => JSON.parse(l));
+    try {
+      return content.map((l) => JSON.parse(l));
+    } catch (err) {
+      const contentString = content.join('\n');
+      throw new Error(
+        `Failed to parse audit log JSON, error: "${err.message}", audit.log contents:\n${contentString}`
+      );
+    }
   }
   // writing in a file is an async operation. we use this method to make sure logs have been written.
   async isNotEmpty() {
@@ -37,7 +44,8 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const { username, password } = getService('config').get('servers.kibana');
 
-  describe('Audit Log', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/119267
+  describe.skip('Audit Log', function () {
     const logFilePath = Path.resolve(__dirname, '../../fixtures/audit/audit.log');
     const logFile = new FileWrapper(logFilePath);
 

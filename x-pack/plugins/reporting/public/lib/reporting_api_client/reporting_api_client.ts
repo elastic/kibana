@@ -68,12 +68,21 @@ interface IReportingAPI {
   verifyScreenCapture(): Promise<DiagnoseResponse>;
 }
 
+/**
+ * Client class for interacting with Reporting APIs
+ * @implements IReportingAPI
+ * @internal
+ */
 export class ReportingAPIClient implements IReportingAPI {
+  private http: HttpSetup;
+
   constructor(
-    private http: HttpSetup,
+    http: HttpSetup,
     private uiSettings: IUiSettingsClient,
     private kibanaVersion: string
-  ) {}
+  ) {
+    this.http = http;
+  }
 
   public getKibanaAppHref(job: Job): string {
     const searchParams = stringify({ jobId: job.id });

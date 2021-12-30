@@ -9,13 +9,20 @@ import { schema } from '@kbn/config-schema';
 
 import { HostStatus } from '../../../../common/endpoint/types';
 import { EndpointAppContext } from '../../types';
-import { getLogger, getMetadataRequestHandler, getMetadataListRequestHandler } from './handlers';
+import {
+  getLogger,
+  getMetadataRequestHandler,
+  getMetadataListRequestHandler,
+  getMetadataTransformStatsHandler,
+} from './handlers';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import {
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
+  METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../common/endpoint/constants';
 import { GetMetadataListRequestSchema } from '../../../../common/endpoint/schema/metadata';
+import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /* Filters that can be applied to the endpoint fetch route */
 export const endpointFilters = schema.object({
@@ -49,7 +56,11 @@ export function registerEndpointRoutes(
       validate: GetMetadataListRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    getMetadataListRequestHandler(endpointAppContext, logger)
+    withEndpointAuthz(
+      { all: ['canAccessEndpointManagement'] },
+      logger,
+      getMetadataListRequestHandler(endpointAppContext, logger)
+    )
   );
 
   router.get(
@@ -58,6 +69,23 @@ export function registerEndpointRoutes(
       validate: GetMetadataRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    getMetadataRequestHandler(endpointAppContext, logger)
+    withEndpointAuthz(
+      { all: ['canAccessEndpointManagement'] },
+      logger,
+      getMetadataRequestHandler(endpointAppContext, logger)
+    )
+  );
+
+  router.get(
+    {
+      path: METADATA_TRANSFORMS_STATUS_ROUTE,
+      validate: false,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    withEndpointAuthz(
+      { all: ['canAccessEndpointManagement'] },
+      logger,
+      getMetadataTransformStatsHandler(logger)
+    )
   );
 }

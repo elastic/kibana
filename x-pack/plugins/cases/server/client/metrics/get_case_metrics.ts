@@ -5,10 +5,11 @@
  * 2.0.
  */
 import { merge } from 'lodash';
+import Boom from '@hapi/boom';
 
-import { CaseMetricsResponseRt, CaseMetricsResponse } from '../../../common';
+import { CaseMetricsResponseRt, CaseMetricsResponse } from '../../../common/api';
 import { Operations } from '../../authorization';
-import { createCaseError } from '../../common';
+import { createCaseError } from '../../common/error';
 import { CasesClient } from '../client';
 import { CasesClientArgs } from '../types';
 import { AlertsCount } from './alerts_count';
@@ -33,23 +34,33 @@ export const getCaseMetrics = async (
   casesClient: CasesClient,
   clientArgs: CasesClientArgs
 ): Promise<CaseMetricsResponse> => {
-  const handlers = buildHandlers(params, casesClient, clientArgs);
-  await checkAuthorization(params, clientArgs);
-  checkAndThrowIfInvalidFeatures(params, handlers, clientArgs);
+  const { logger } = clientArgs;
 
-  const computedMetrics = await Promise.all(
-    params.features.map(async (feature) => {
-      const handler = handlers.get(feature);
+  try {
+    const handlers = buildHandlers(params, casesClient, clientArgs);
+    await checkAuthorization(params, clientArgs);
+    checkAndThrowIfInvalidFeatures(params, handlers);
 
-      return handler?.compute();
-    })
-  );
+    const computedMetrics = await Promise.all(
+      params.features.map(async (feature) => {
+        const handler = handlers.get(feature);
 
-  const mergedResults = computedMetrics.reduce((acc, metric) => {
-    return merge(acc, metric);
-  }, {});
+        return handler?.compute();
+      })
+    );
 
-  return CaseMetricsResponseRt.encode(mergedResults ?? {});
+    const mergedResults = computedMetrics.reduce((acc, metric) => {
+      return merge(acc, metric);
+    }, {});
+
+    return CaseMetricsResponseRt.encode(mergedResults ?? {});
+  } catch (error) {
+    throw createCaseError({
+      logger,
+      message: `Failed to retrieve metrics within client for case id: ${params.caseId}: ${error}`,
+      error,
+    });
+  }
 };
 
 const buildHandlers = (
@@ -59,7 +70,7 @@ const buildHandlers = (
 ): Map<string, MetricsHandler> => {
   const handlers = [
     new Lifespan(params.caseId, casesClient),
-    new AlertsCount(),
+    new AlertsCount(params.caseId, casesClient, clientArgs),
     new AlertDetails(),
     new Connectors(),
   ];
@@ -75,18 +86,16 @@ const buildHandlers = (
 
 const checkAndThrowIfInvalidFeatures = (
   params: CaseMetricsParams,
-  handlers: Map<string, MetricsHandler>,
-  clientArgs: CasesClientArgs
+  handlers: Map<string, MetricsHandler>
 ) => {
   const invalidFeatures = params.features.filter((feature) => !handlers.has(feature));
   if (invalidFeatures.length > 0) {
     const invalidFeaturesAsString = invalidFeatures.join(', ');
     const validFeaturesAsString = [...handlers.keys()].join(', ');
 
-    throw createCaseError({
-      logger: clientArgs.logger,
-      message: `invalid features: [${invalidFeaturesAsString}], please only provide valid features: [${validFeaturesAsString}]`,
-    });
+    throw Boom.badRequest(
+      `invalid features: [${invalidFeaturesAsString}], please only provide valid features: [${validFeaturesAsString}]`
+    );
   }
 };
 

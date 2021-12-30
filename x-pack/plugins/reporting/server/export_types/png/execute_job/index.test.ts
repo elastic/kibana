@@ -8,18 +8,18 @@
 import { Writable } from 'stream';
 import * as Rx from 'rxjs';
 import { ReportingCore } from '../../../';
-import { CancellationToken } from '../../../../common';
+import { CancellationToken } from '../../../../common/cancellation_token';
 import { cryptoFactory, LevelLogger } from '../../../lib';
 import {
   createMockConfig,
   createMockConfigSchema,
   createMockReportingCore,
 } from '../../../test_helpers';
-import { generatePngObservableFactory } from '../../common';
+import { generatePngObservable } from '../../common';
 import { TaskPayloadPNG } from '../types';
 import { runTaskFnFactory } from './';
 
-jest.mock('../../common/generate_png', () => ({ generatePngObservableFactory: jest.fn() }));
+jest.mock('../../common/generate_png');
 
 let content: string;
 let mockReporting: ReportingCore;
@@ -61,18 +61,15 @@ beforeEach(async () => {
 
   mockReporting = await createMockReportingCore(mockReportingConfig);
   mockReporting.setConfig(createMockConfig(mockReportingConfig));
-
-  (generatePngObservableFactory as jest.Mock).mockReturnValue(jest.fn());
 });
 
-afterEach(() => (generatePngObservableFactory as jest.Mock).mockReset());
+afterEach(() => (generatePngObservable as jest.Mock).mockReset());
 
 test(`passes browserTimezone to generatePng`, async () => {
   const encryptedHeaders = await encryptHeaders({});
-  const generatePngObservable = (await generatePngObservableFactory(mockReporting)) as jest.Mock;
-  generatePngObservable.mockReturnValue(Rx.of({ buffer: Buffer.from('') }));
+  (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('') }));
 
-  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
+  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const browserTimezone = 'UTC';
   await runTask(
     'pngJobId',
@@ -85,42 +82,24 @@ test(`passes browserTimezone to generatePng`, async () => {
     stream
   );
 
-  expect(generatePngObservable.mock.calls).toMatchInlineSnapshot(`
-    Array [
-      Array [
-        LevelLogger {
-          "_logger": Object {
-            "get": [MockFunction],
-          },
-          "_tags": Array [
-            "PNG",
-            "execute",
-            "pngJobId",
-          ],
-          "warning": [Function],
-        },
-        "localhost:80undefined/app/kibana#/something",
-        "UTC",
-        Object {
-          "conditions": Object {
-            "basePath": undefined,
-            "hostname": "localhost",
-            "port": 80,
-            "protocol": undefined,
-          },
-          "headers": Object {},
-        },
-        undefined,
-      ],
-    ]
-  `);
+  expect(generatePngObservable).toHaveBeenCalledWith(
+    expect.anything(),
+    expect.anything(),
+    expect.objectContaining({
+      urls: ['localhost:80undefined/app/kibana#/something'],
+      browserTimezone: 'UTC',
+      conditionalHeaders: expect.objectContaining({
+        conditions: expect.any(Object),
+        headers: {},
+      }),
+    })
+  );
 });
 
 test(`returns content_type of application/png`, async () => {
-  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
+  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
 
-  const generatePngObservable = await generatePngObservableFactory(mockReporting);
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from('foo') }));
 
   const { content_type: contentType } = await runTask(
@@ -134,10 +113,9 @@ test(`returns content_type of application/png`, async () => {
 
 test(`returns content of generatePng`, async () => {
   const testContent = 'raw string from get_screenhots';
-  const generatePngObservable = await generatePngObservableFactory(mockReporting);
   (generatePngObservable as jest.Mock).mockReturnValue(Rx.of({ buffer: Buffer.from(testContent) }));
 
-  const runTask = await runTaskFnFactory(mockReporting, getMockLogger());
+  const runTask = runTaskFnFactory(mockReporting, getMockLogger());
   const encryptedHeaders = await encryptHeaders({});
   await runTask(
     'pngJobId',

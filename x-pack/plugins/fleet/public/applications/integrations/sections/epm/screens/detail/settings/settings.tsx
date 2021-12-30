@@ -122,7 +122,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
       try {
         setKeepPoliciesUpToDateSwitchValue((prev) => !prev);
 
-        await sendUpdatePackage(`${packageInfo.name}-${packageInfo.version}`, {
+        await sendUpdatePackage(packageInfo.name, packageInfo.version, {
           keepPoliciesUpToDate: !keepPoliciesUpToDateSwitchValue,
         });
 

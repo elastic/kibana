@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
@@ -21,7 +20,7 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   getDocumentTypeFilterForTransactions,
-  getTransactionDurationFieldForTransactions,
+  getDurationFieldForTransactions,
   getProcessorEventForTransactions,
 } from '../../../lib/helpers/transactions';
 import { Setup } from '../../../lib/helpers/setup_request';
@@ -30,8 +29,8 @@ import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../../lib/helpers/latency_aggregation_type';
-export type LatencyChartsSearchResponse = PromiseReturnType<
-  typeof searchLatency
+export type LatencyChartsSearchResponse = Awaited<
+  ReturnType<typeof searchLatency>
 >;
 
 function searchLatency({
@@ -64,7 +63,7 @@ function searchLatency({
     searchAggregatedTransactions,
   });
 
-  const transactionDurationField = getTransactionDurationFieldForTransactions(
+  const transactionDurationField = getDurationFieldForTransactions(
     searchAggregatedTransactions
   );
 

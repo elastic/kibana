@@ -19,7 +19,7 @@ import { getServiceTransactionGroupDetailedStatisticsPeriods } from '../services
 import { getTransactionBreakdown } from './breakdown';
 import { getTransactionTraceSamples } from './trace_samples';
 import { getLatencyPeriods } from './get_latency_charts';
-import { getErrorRatePeriods } from '../../lib/transaction_groups/get_error_rate';
+import { getFailedTransactionRatePeriods } from './get_failed_transaction_rate_periods';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { createApmServerRouteRepository } from '../apm_routes/create_apm_server_route_repository';
 import {
@@ -349,7 +349,7 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
       end,
     });
 
-    return getErrorRatePeriods({
+    return getFailedTransactionRatePeriods({
       environment,
       kuery,
       serviceName,

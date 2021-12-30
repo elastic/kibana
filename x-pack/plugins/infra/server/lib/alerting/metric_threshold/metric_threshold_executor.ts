@@ -12,10 +12,13 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 import {
   ActionGroupIdsOf,
   RecoveredActionGroup,
-  AlertInstanceState,
-  AlertInstanceContext,
+  AlertInstanceState as AlertState,
+  AlertInstanceContext as AlertContext,
 } from '../../../../../alerting/common';
-import { AlertTypeState, AlertInstance } from '../../../../../alerting/server';
+import {
+  AlertTypeState as RuleTypeState,
+  AlertInstance as Alert,
+} from '../../../../../alerting/server';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   buildErrorAlertReason,
@@ -28,47 +31,47 @@ import {
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 import { createFormatter } from '../../../../common/formatters';
 import { AlertStates, Comparator } from './types';
-import { evaluateAlert, EvaluatedAlertParams } from './lib/evaluate_alert';
+import { evaluateRule, EvaluatedRuleParams } from './lib/evaluate_rule';
 
-export type MetricThresholdAlertTypeParams = Record<string, any>;
-export type MetricThresholdAlertTypeState = AlertTypeState & {
+export type MetricThresholdRuleParams = Record<string, any>;
+export type MetricThresholdRuleTypeState = RuleTypeState & {
   groups: string[];
   groupBy?: string | string[];
   filterQuery?: string;
 };
-export type MetricThresholdAlertInstanceState = AlertInstanceState; // no specific instace state used
-export type MetricThresholdAlertInstanceContext = AlertInstanceContext; // no specific instace state used
+export type MetricThresholdAlertState = AlertState; // no specific instace state used
+export type MetricThresholdAlertContext = AlertContext; // no specific instace state used
 
 type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS
 >;
 
-type MetricThresholdAlertInstance = AlertInstance<
-  MetricThresholdAlertInstanceState,
-  MetricThresholdAlertInstanceContext,
+type MetricThresholdAlert = Alert<
+  MetricThresholdAlertState,
+  MetricThresholdAlertContext,
   MetricThresholdAllowedActionGroups
 >;
 
-type MetricThresholdAlertInstanceFactory = (
+type MetricThresholdAlertFactory = (
   id: string,
   reason: string,
   threshold?: number | undefined,
   value?: number | undefined
-) => MetricThresholdAlertInstance;
+) => MetricThresholdAlert;
 
 export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
   libs.metricsRules.createLifecycleRuleExecutor<
-    MetricThresholdAlertTypeParams,
-    MetricThresholdAlertTypeState,
-    MetricThresholdAlertInstanceState,
-    MetricThresholdAlertInstanceContext,
+    MetricThresholdRuleParams,
+    MetricThresholdRuleTypeState,
+    MetricThresholdAlertState,
+    MetricThresholdAlertContext,
     MetricThresholdAllowedActionGroups
   >(async function (options) {
     const { services, params, state } = options;
     const { criteria } = params;
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const { alertWithLifecycle, savedObjectsClient } = services;
-    const alertInstanceFactory: MetricThresholdAlertInstanceFactory = (id, reason) =>
+    const alertFactory: MetricThresholdAlertFactory = (id, reason) =>
       alertWithLifecycle({
         id,
         fields: {
@@ -94,8 +97,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const timestamp = moment().toISOString();
         const actionGroupId = FIRED_ACTIONS.id; // Change this to an Error action group when able
         const reason = buildInvalidQueryAlertReason(params.filterQueryText);
-        const alertInstance = alertInstanceFactory(UNGROUPED_FACTORY_KEY, reason);
-        alertInstance.scheduleActions(actionGroupId, {
+        const alert = alertFactory(UNGROUPED_FACTORY_KEY, reason);
+        alert.scheduleActions(actionGroupId, {
           group: UNGROUPED_FACTORY_KEY,
           alertState: stateToAlertMessage[AlertStates.ERROR],
           reason,
@@ -128,9 +131,9 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
           state.groups?.filter((g) => g !== UNGROUPED_FACTORY_KEY) ?? []
         : [];
 
-    const alertResults = await evaluateAlert(
+    const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
-      params as EvaluatedAlertParams,
+      params as EvaluatedRuleParams,
       config,
       prevGroups
     );
@@ -227,8 +230,8 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
             : nextState === AlertStates.WARNING
             ? WARNING_ACTIONS.id
             : FIRED_ACTIONS.id;
-        const alertInstance = alertInstanceFactory(`${group}`, reason);
-        alertInstance.scheduleActions(actionGroupId, {
+        const alert = alertFactory(`${group}`, reason);
+        alert.scheduleActions(actionGroupId, {
           group,
           alertState: stateToAlertMessage[nextState],
           reason,

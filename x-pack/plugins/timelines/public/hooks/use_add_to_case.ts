@@ -7,11 +7,11 @@
 import { get, isEmpty } from 'lodash/fp';
 import { useState, useCallback, useMemo, SyntheticEvent } from 'react';
 import { useDispatch } from 'react-redux';
-import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { Case, SubCase } from '../../../cases/common';
 import { TimelinesStartServices } from '../types';
-import { TimelineItem } from '../../common/';
+import { TimelineItem } from '../../common/search_strategy';
 import { tGridActions } from '../store/t_grid';
 import { useDeepEqualSelector } from './use_selector';
 import { createUpdateSuccessToaster } from '../components/actions/timeline/cases/helpers';

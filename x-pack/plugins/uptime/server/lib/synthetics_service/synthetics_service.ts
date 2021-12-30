@@ -7,7 +7,6 @@
 
 /* eslint-disable max-classes-per-file */
 
-import axios from 'axios';
 import {
   CoreStart,
   KibanaRequest,
@@ -23,10 +22,17 @@ import { UptimeServerSetup } from '../adapters';
 import { installSyntheticsIndexTemplates } from '../../rest_api/synthetics_service/install_index_templates';
 import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetics_service_api_key';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
 import { UptimeConfig } from '../../../common/config';
+import { ServiceAPIClient } from './service_api_client';
+import { formatMonitorConfig } from './formatters/format_configs';
+import {
+  ConfigKey,
+  MonitorFields,
+  SyntheticsMonitor,
+  SyntheticsMonitorWithId,
+} from '../../../common/runtime_types';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -35,6 +41,7 @@ const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID = 'UPTIME:SyntheticsService:sync-
 export class SyntheticsService {
   private logger: Logger;
   private readonly server: UptimeServerSetup;
+  private apiClient: ServiceAPIClient;
 
   private readonly config: UptimeConfig;
   private readonly esHosts: string[];
@@ -45,6 +52,10 @@ export class SyntheticsService {
     this.logger = logger;
     this.server = server;
     this.config = server.config;
+
+    const { manifestUrl, username, password } = this.config.unsafe.service;
+
+    this.apiClient = new ServiceAPIClient(manifestUrl, username, password, logger);
 
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
   }
@@ -101,7 +112,7 @@ export class SyntheticsService {
             async run() {
               const { state } = taskInstance;
 
-              // TODO: Push API Key and Monitor Configs to service here
+              await service.pushConfigs();
 
               return { state };
             },
@@ -120,7 +131,7 @@ export class SyntheticsService {
         id: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID,
         taskType: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE,
         schedule: {
-          interval: '5m',
+          interval: '1m',
         },
         params: {},
         state: {},
@@ -137,7 +148,7 @@ export class SyntheticsService {
       });
   }
 
-  async pushConfigs(request: KibanaRequest) {
+  async getOutput(request?: KibanaRequest) {
     if (!this.apiKey) {
       try {
         this.apiKey = await getAPIKeyForSyntheticsService({ server: this.server, request });
@@ -152,42 +163,59 @@ export class SyntheticsService {
       throw error;
     }
 
-    const monitors = await this.getMonitorConfigs();
+    return {
+      hosts: this.esHosts,
+      api_key: `${this.apiKey.id}:${this.apiKey.apiKey}`,
+    };
+  }
+
+  async pushConfigs(request?: KibanaRequest, configs?: SyntheticsMonitorWithId[]) {
+    const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
+    if (monitors.length === 0) {
+      return;
+    }
     const data = {
       monitors,
-      output: {
-        hosts: this.esHosts,
-        api_key: `${this.apiKey.id}:${this.apiKey.apiKey}`,
-      },
+      output: await this.getOutput(request),
     };
 
-    const { url, username, password } = this.config.unsafe.service;
-
     try {
-      await axios({
-        method: 'POST',
-        url: url + '/monitors',
-        data,
-        headers: {
-          Authorization: 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64'),
-        },
-      });
+      return await this.apiClient.post(data);
     } catch (e) {
       this.logger.error(e);
+      throw e;
     }
+  }
+
+  async deleteConfigs(request: KibanaRequest, configs: SyntheticsMonitorWithId[]) {
+    const data = {
+      monitors: this.formatConfigs(configs),
+      output: await this.getOutput(request),
+    };
+    return await this.apiClient.delete(data);
   }
 
   async getMonitorConfigs() {
     const savedObjectsClient = this.server.savedObjectsClient;
-    const monitorsSavedObjects = await savedObjectsClient.find<SyntheticsMonitorSavedObject>({
+
+    if (!savedObjectsClient?.find) {
+      return [] as SyntheticsMonitorWithId[];
+    }
+
+    const findResult = await savedObjectsClient.find<SyntheticsMonitor>({
       type: syntheticsMonitorType,
     });
 
-    const savedObjectsList = monitorsSavedObjects.saved_objects;
-    return savedObjectsList.map(({ attributes, id }) => ({
+    return (findResult.saved_objects ?? []).map(({ attributes, id }) => ({
       ...attributes,
       id,
-    }));
+    })) as SyntheticsMonitorWithId[];
+  }
+
+  formatConfigs(configs: SyntheticsMonitorWithId[]) {
+    return configs.map((config: Partial<MonitorFields>) =>
+      formatMonitorConfig(Object.keys(config) as ConfigKey[], config)
+    );
   }
 }
 

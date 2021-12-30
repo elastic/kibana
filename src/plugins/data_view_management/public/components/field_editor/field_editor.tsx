@@ -125,7 +125,7 @@ export interface FieldEdiorProps {
 export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState> {
   static contextType = contextType;
 
-  public readonly context!: IndexPatternManagmentContextValue;
+  public declare readonly context: IndexPatternManagmentContextValue;
 
   supportedLangs: estypes.ScriptLanguage[] = [];
   deprecatedLangs: estypes.ScriptLanguage[] = [];
@@ -185,7 +185,6 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     this.setState({
       isReady: true,
       isCreating: !indexPattern.fields.getByName(spec.name),
-      // @ts-expect-error '' is not a valid ScriptLanguage
       isDeprecatedLang: this.deprecatedLangs.includes(spec.lang || ''),
       errors: [],
       scriptingLangs,

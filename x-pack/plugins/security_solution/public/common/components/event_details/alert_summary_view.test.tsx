@@ -14,7 +14,7 @@ import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { useRuleWithFallback } from '../../../detections/containers/detection_engine/rules/use_rule_with_fallback';
 
 import { TestProviders, TestProvidersComponent } from '../../mock';
-import { TimelineId } from '../../../../common';
+import { TimelineId } from '../../../../common/types';
 import { mockBrowserFields } from '../../containers/source/mock';
 
 jest.mock('../../lib/kibana');
@@ -30,6 +30,8 @@ const props = {
   browserFields: mockBrowserFields,
   eventId: '5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31',
   timelineId: 'detections-page',
+  title: '',
+  goToTable: jest.fn(),
 };
 
 describe('AlertSummaryView', () => {

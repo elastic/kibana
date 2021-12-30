@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React from 'react';
 import {
   Embeddable,
   LensByValueInput,
@@ -15,6 +15,7 @@ import {
   LensUnwrapResult,
 } from './embeddable';
 import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
+import { spacesPluginMock } from '../../../spaces/public/mocks';
 import { Filter } from '@kbn/es-query';
 import { Query, TimeRange, IndexPatternsContract } from 'src/plugins/data/public';
 import { Document } from '../persistence';
@@ -263,6 +264,10 @@ describe('embeddable', () => {
         } as LensUnwrapResult);
       }
     );
+    const spacesPluginStart = spacesPluginMock.createStartContract();
+    spacesPluginStart.ui.components.getEmbeddableLegacyUrlConflict = jest.fn(() => (
+      <>getEmbeddableLegacyUrlConflict</>
+    ));
     const embeddable = new Embeddable(
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
@@ -271,6 +276,7 @@ describe('embeddable', () => {
         expressionRenderer,
         basePath,
         indexPatternService: {} as IndexPatternsContract,
+        spaces: spacesPluginStart,
         capabilities: {
           canSaveDashboards: true,
           canSaveVisualizations: true,
@@ -293,7 +299,9 @@ describe('embeddable', () => {
       {} as LensEmbeddableInput
     );
     await embeddable.initializeSavedVis({} as LensEmbeddableInput);
+    embeddable.render(mountpoint);
     expect(expressionRenderer).toHaveBeenCalledTimes(0);
+    expect(spacesPluginStart.ui.components.getEmbeddableLegacyUrlConflict).toHaveBeenCalled();
   });
 
   it('should initialize output with deduped list of index patterns', async () => {

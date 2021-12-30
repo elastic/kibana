@@ -140,7 +140,7 @@ describe('alert actions', () => {
             ],
             defaultColumns: defaultHeaders,
             dataProviders: [],
-            dataViewId: '',
+            dataViewId: null,
             dateRange: {
               end: '2018-11-05T19:03:25.937Z',
               start: '2018-11-05T18:58:25.937Z',

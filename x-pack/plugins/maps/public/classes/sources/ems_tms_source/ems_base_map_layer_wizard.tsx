@@ -8,10 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { LayerWizard, RenderWizardArguments } from '../../layers';
-// @ts-ignore
 import { EMSTMSSource, getSourceTitle } from './ems_tms_source';
-// @ts-ignore
-import { VectorTileLayer } from '../../layers/vector_tile_layer/vector_tile_layer';
+import { EmsVectorTileLayer } from '../../layers/ems_vector_tile_layer/ems_vector_tile_layer';
 import { EmsTmsSourceConfig } from './tile_service_select';
 import { CreateSourceEditor } from './create_source_editor';
 import { getEMSSettings } from '../../../kibana_services';
@@ -45,7 +43,7 @@ export const emsBaseMapLayerWizardConfig: LayerWizard = {
   icon: WorldMapLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: EmsTmsSourceConfig) => {
-      const layerDescriptor = VectorTileLayer.createDescriptor({
+      const layerDescriptor = EmsVectorTileLayer.createDescriptor({
         sourceDescriptor: EMSTMSSource.createDescriptor(sourceConfig),
       });
       previewLayers([layerDescriptor]);

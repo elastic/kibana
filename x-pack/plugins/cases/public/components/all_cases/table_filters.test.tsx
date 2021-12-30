@@ -8,7 +8,8 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { CaseStatuses } from '../../../common';
+import { CaseStatuses } from '../../../common/api';
+import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { TestProviders } from '../../common/mock';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
@@ -30,6 +31,7 @@ const props = {
   onFilterChanged,
   initial: DEFAULT_FILTER_OPTIONS,
   setFilterRefetch,
+  availableSolutions: [],
 };
 
 describe('CasesTableFilters ', () => {
@@ -167,5 +169,51 @@ describe('CasesTableFilters ', () => {
         modifier: '&&',
       }
     );
+  });
+
+  describe('dynamic Solution filter', () => {
+    it('shows Solution filter when provided more than 1 availableSolutions', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <CasesTableFilters
+            {...props}
+            availableSolutions={[SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]}
+          />
+        </TestProviders>
+      );
+      expect(
+        wrapper.find(`[data-test-subj="options-filter-popover-button-Solution"]`).exists()
+      ).toBeTruthy();
+    });
+
+    it('does not show Solution filter when provided less than 1 availableSolutions', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <CasesTableFilters {...props} availableSolutions={[OBSERVABILITY_OWNER]} />
+        </TestProviders>
+      );
+      expect(
+        wrapper.find(`[data-test-subj="options-filter-popover-button-Solution"]`).exists()
+      ).toBeFalsy();
+    });
+  });
+
+  it('should call onFilterChange when selected solution changes', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <CasesTableFilters
+          {...props}
+          availableSolutions={[SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER]}
+        />
+      </TestProviders>
+    );
+    wrapper
+      .find(`[data-test-subj="options-filter-popover-button-Solution"]`)
+      .last()
+      .simulate('click');
+
+    wrapper.find(`[data-test-subj="options-filter-popover-item-0"]`).last().simulate('click');
+
+    expect(onFilterChanged).toBeCalledWith({ owner: [SECURITY_SOLUTION_OWNER] });
   });
 });

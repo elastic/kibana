@@ -10,7 +10,8 @@ import Path from 'path';
 import Fs from 'fs/promises';
 
 import dedent from 'dedent';
-import { REPO_ROOT, ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import normalize from 'normalize-path';
 
 import { PROJECTS } from './projects';

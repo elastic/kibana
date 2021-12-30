@@ -61,6 +61,7 @@ function isPreconfiguredOutputDifferentFromCurrent(
         preconfiguredOutput.hosts.map(normalizeHostsForAgents)
       )) ||
     existingOutput.ca_sha256 !== preconfiguredOutput.ca_sha256 ||
+    existingOutput.ca_trusted_fingerprint !== preconfiguredOutput.ca_trusted_fingerprint ||
     existingOutput.config_yaml !== preconfiguredOutput.config_yaml
   );
 }
@@ -143,7 +144,8 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   esClient: ElasticsearchClient,
   policies: PreconfiguredAgentPolicy[] = [],
   packages: PreconfiguredPackage[] = [],
-  defaultOutput: Output
+  defaultOutput: Output,
+  spaceId: string
 ): Promise<PreconfigurationResult> {
   const logger = appContextService.getLogger();
 
@@ -178,6 +180,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       pkg.version === PRECONFIGURATION_LATEST_KEYWORD ? pkg.name : pkg
     ),
     force: true, // Always force outdated packages to be installed if a later version isn't installed
+    spaceId,
   });
 
   const fulfilledPackages = [];
@@ -404,6 +407,7 @@ async function addPreconfiguredPolicyPackages(
   agentPolicy: AgentPolicy,
   installedPackagePolicies: Array<
     Partial<Omit<NewPackagePolicy, 'inputs'>> & {
+      id?: string | number;
       name: string;
       installedPackage: Installation;
       inputs?: InputsOverride[];
@@ -413,7 +417,7 @@ async function addPreconfiguredPolicyPackages(
   bumpAgentPolicyRevison = false
 ) {
   // Add packages synchronously to avoid overwriting
-  for (const { installedPackage, name, description, inputs } of installedPackagePolicies) {
+  for (const { installedPackage, id, name, description, inputs } of installedPackagePolicies) {
     const packageInfo = await getPackageInfo({
       savedObjectsClient: soClient,
       pkgName: installedPackage.name,
@@ -427,6 +431,7 @@ async function addPreconfiguredPolicyPackages(
       agentPolicy,
       defaultOutput,
       name,
+      id,
       description,
       (policy) => preconfigurePackageInputs(policy, packageInfo, inputs),
       bumpAgentPolicyRevison

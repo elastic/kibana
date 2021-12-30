@@ -17,8 +17,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { docLinks } from '../../../../../shared/doc_links';
 import { EXPLORE_PLATINUM_FEATURES_LINK } from '../../../../constants';
-import { ENT_SEARCH_LICENSE_MANAGEMENT } from '../../../../routes';
 
 import {
   SOURCE_FEATURES_DOCUMENT_LEVEL_PERMISSIONS_FEATURE,
@@ -45,7 +45,7 @@ export const DocumentPermissionsCallout: React.FC = () => {
         </EuiText>
         <EuiSpacer size="s" />
         <EuiText size="xs">
-          <EuiLink external target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
+          <EuiLink external target="_blank" href={docLinks.licenseManagement}>
             {EXPLORE_PLATINUM_FEATURES_LINK}
           </EuiLink>
         </EuiText>

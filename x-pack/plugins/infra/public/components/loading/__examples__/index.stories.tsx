@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
+import { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
 import { InfraLoadingPanel } from '..';
+import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
 
-storiesOf('infra/InfraLoadingPanel', module).add('example', () => (
-  <InfraLoadingPanel text="test" width={200} height={200} />
-));
+export default {
+  title: 'infra/InfraLoadingPanel',
+  decorators: [
+    (wrappedStory) => <div style={{ width: 600 }}>{wrappedStory()}</div>,
+    decorateWithGlobalStorybookThemeProviders,
+  ],
+} as Meta;
+
+export const LoadingPanel: Story = () => <InfraLoadingPanel text="test" width={200} height={200} />;

@@ -14,7 +14,6 @@ import { HttpStart } from '../../../../../../../../src/core/public';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_PREPACKAGED_URL,
-  DETECTION_ENGINE_RULES_STATUS_URL,
   DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL,
   DETECTION_ENGINE_TAGS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -246,6 +245,9 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
         last_success_message: undefined,
         last_failure_at: undefined,
         last_failure_message: undefined,
+        last_gap: undefined,
+        bulk_create_time_durations: undefined,
+        search_after_time_durations: undefined,
         status: undefined,
         status_date: undefined,
       }))
@@ -309,6 +311,7 @@ export const createPrepackagedRules = async ({
 export const importRules = async ({
   fileToImport,
   overwrite = false,
+  overwriteExceptions = false,
   signal,
 }: ImportDataProps): Promise<ImportDataResponse> => {
   const formData = new FormData();
@@ -319,7 +322,7 @@ export const importRules = async ({
     {
       method: 'POST',
       headers: { 'Content-Type': undefined },
-      query: { overwrite },
+      query: { overwrite, overwrite_exceptions: overwriteExceptions },
       body: formData,
       signal,
     }
@@ -378,32 +381,6 @@ export const getRuleStatusById = async ({
     body: JSON.stringify({ ruleId: id }),
     signal,
   });
-
-/**
- * Return rule statuses given list of alert ids
- *
- * @param ids array of string of Rule ID's (not rule_id)
- * @param signal AbortSignal for cancelling request
- *
- * @throws An error if response is not OK
- */
-export const getRulesStatusByIds = async ({
-  ids,
-  signal,
-}: {
-  ids: string[];
-  signal: AbortSignal;
-}): Promise<RuleStatusResponse> => {
-  const res = await KibanaServices.get().http.fetch<RuleStatusResponse>(
-    DETECTION_ENGINE_RULES_STATUS_URL,
-    {
-      method: 'POST',
-      body: JSON.stringify({ ids }),
-      signal,
-    }
-  );
-  return res;
-};
 
 /**
  * Fetch all unique Tags used by Rules

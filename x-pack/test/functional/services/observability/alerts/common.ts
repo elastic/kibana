@@ -5,12 +5,9 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { chunk } from 'lodash';
-import {
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
-  AlertStatus,
-} from '@kbn/rule-data-utils/alerts_as_data_status';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
 
@@ -26,7 +23,7 @@ const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
 const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
 const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
 
-const ACTION_COLUMN_INDEX = 1;
+const ACTION_COLUMN_INDEX = 0;
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 
@@ -260,7 +257,7 @@ export function ObservabilityAlertsCommonProvider({
 
     const datePickerButton = await testSubjects.find('superDatePickerShowDatesButton');
     const buttonText = await datePickerButton.getVisibleText();
-    return buttonText.substring(0, buttonText.indexOf('\n'));
+    return buttonText;
   };
 
   const getActionsButtonByIndex = async (index: number) => {
@@ -268,6 +265,15 @@ export function ObservabilityAlertsCommonProvider({
       '[data-test-subj="alertsTableRowActionMore"]'
     );
     return actionsOverflowButtons[index] || null;
+  };
+
+  const getRuleStatValue = async (testSubj: string) => {
+    const stat = await testSubjects.find(testSubj);
+    const title = await stat.findByCssSelector('.euiStat__title');
+    const count = await title.getVisibleText();
+    const value = Number.parseInt(count, 10);
+    expect(Number.isNaN(value)).to.be(false);
+    return value;
   };
 
   return {
@@ -307,5 +313,6 @@ export function ObservabilityAlertsCommonProvider({
     viewRuleDetailsButtonClick,
     viewRuleDetailsLinkClick,
     getAlertsFlyoutViewRuleDetailsLinkOrFail,
+    getRuleStatValue,
   };
 }

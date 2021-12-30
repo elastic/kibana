@@ -16,8 +16,12 @@ import { EventOutcome } from '../../../common/event_outcome';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { calculateThroughput } from '../../lib/helpers/calculate_throughput';
+import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import { Setup } from '../../lib/helpers/setup_request';
+import { getBucketSize } from '../../lib/helpers/get_bucket_size';
+import { getFailedTransactionRateTimeSeries } from '../../lib/helpers/transaction_error_rate';
+import { NodeStats } from '../../../common/service_map';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 
 interface Options {
   setup: Setup;
@@ -25,6 +29,7 @@ interface Options {
   backendName: string;
   start: number;
   end: number;
+  offset?: string;
 }
 
 export function getServiceMapBackendNodeInfo({
@@ -33,9 +38,33 @@ export function getServiceMapBackendNodeInfo({
   setup,
   start,
   end,
-}: Options) {
+  offset,
+}: Options): Promise<NodeStats> {
   return withApmSpan('get_service_map_backend_node_stats', async () => {
     const { apmEventClient } = setup;
+    const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
+      start,
+      end,
+      offset,
+    });
+
+    const { intervalString } = getBucketSize({
+      start: startWithOffset,
+      end: endWithOffset,
+      numBuckets: 20,
+    });
+
+    const subAggs = {
+      latency_sum: {
+        sum: { field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM },
+      },
+      count: {
+        sum: { field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT },
+      },
+      outcomes: {
+        terms: { field: EVENT_OUTCOME, include: [EventOutcome.failure] },
+      },
+    };
 
     const response = await apmEventClient.search(
       'get_service_map_backend_node_stats',
@@ -49,24 +78,21 @@ export function getServiceMapBackendNodeInfo({
             bool: {
               filter: [
                 { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: backendName } },
-                ...rangeQuery(start, end),
+                ...rangeQuery(startWithOffset, endWithOffset),
                 ...environmentQuery(environment),
               ],
             },
           },
           aggs: {
-            latency_sum: {
-              sum: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+            ...subAggs,
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                fixed_interval: intervalString,
+                min_doc_count: 0,
+                extended_bounds: { min: startWithOffset, max: endWithOffset },
               },
-            },
-            count: {
-              sum: {
-                field: SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
-              },
-            },
-            [EVENT_OUTCOME]: {
-              terms: { field: EVENT_OUTCOME, include: [EventOutcome.failure] },
+              aggs: subAggs,
             },
           },
         },
@@ -74,33 +100,62 @@ export function getServiceMapBackendNodeInfo({
     );
 
     const count = response.aggregations?.count.value ?? 0;
-    const errorCount =
-      response.aggregations?.[EVENT_OUTCOME].buckets[0]?.doc_count ?? 0;
+    const failedTransactionsRateCount =
+      response.aggregations?.outcomes.buckets[0]?.doc_count ?? 0;
     const latencySum = response.aggregations?.latency_sum.value ?? 0;
 
-    const avgErrorRate = errorCount / count;
-    const avgTransactionDuration = latencySum / count;
-    const avgRequestsPerMinute = calculateThroughput({
-      start,
-      end,
+    const avgFailedTransactionsRate = failedTransactionsRateCount / count;
+    const latency = latencySum / count;
+    const throughput = calculateThroughputWithRange({
+      start: startWithOffset,
+      end: endWithOffset,
       value: count,
     });
 
     if (count === 0) {
       return {
-        avgErrorRate: null,
+        failedTransactionsRate: undefined,
         transactionStats: {
-          avgRequestsPerMinute: null,
-          avgTransactionDuration: null,
+          throughput: undefined,
+          latency: undefined,
         },
       };
     }
 
     return {
-      avgErrorRate,
+      failedTransactionsRate: {
+        value: avgFailedTransactionsRate,
+        timeseries: response.aggregations?.timeseries
+          ? getFailedTransactionRateTimeSeries(
+              response.aggregations.timeseries.buckets
+            ).map(({ x, y }) => ({ x: x + offsetInMs, y }))
+          : undefined,
+      },
       transactionStats: {
-        avgRequestsPerMinute,
-        avgTransactionDuration,
+        throughput: {
+          value: throughput,
+          timeseries: response.aggregations?.timeseries.buckets.map(
+            (bucket) => {
+              return {
+                x: bucket.key + offsetInMs,
+                y: calculateThroughputWithRange({
+                  start,
+                  end,
+                  value: bucket.doc_count ?? 0,
+                }),
+              };
+            }
+          ),
+        },
+        latency: {
+          value: latency,
+          timeseries: response.aggregations?.timeseries.buckets.map(
+            (bucket) => ({
+              x: bucket.key + offsetInMs,
+              y: bucket.latency_sum.value,
+            })
+          ),
+        },
       },
     };
   });

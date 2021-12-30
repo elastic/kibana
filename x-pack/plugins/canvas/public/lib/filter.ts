@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { flowRight, groupBy } from 'lodash';
+import { fromExpression } from '@kbn/interpreter';
+import { flowRight, get, groupBy } from 'lodash';
 import {
   Filter as FilterType,
   FilterField,
@@ -52,4 +53,43 @@ export const groupFiltersBy = (filters: FilterType[], groupByField: FilterField)
     name: groupedFilters[key]?.[0]?.[groupByField] ? key : null,
     filters: groupedFilters[key],
   }));
+};
+
+export const getFiltersByGroups = (
+  filters: string[],
+  groups: string[],
+  ungrouped: boolean = false
+) =>
+  filters.filter((filter: string) => {
+    const ast = fromExpression(filter);
+    const expGroups: string[] = get(ast, 'chain[0].arguments.filterGroup', []);
+    if (!groups?.length && ungrouped) {
+      return expGroups.length === 0;
+    }
+
+    return (
+      !groups.length ||
+      (expGroups.length > 0 && expGroups.every((expGroup) => groups.includes(expGroup)))
+    );
+  });
+
+export const extractGroupsFromElementsFilters = (expr: string) => {
+  const ast = fromExpression(expr);
+  const filtersFns = ast.chain.filter((expression) => expression.function === 'filters');
+  const groups = filtersFns.reduce<string[]>((foundGroups, filterFn) => {
+    const filterGroups = filterFn?.arguments.group?.map((g) => g.toString()) ?? [];
+    return [...foundGroups, ...filterGroups];
+  }, []);
+  return [...new Set(groups)];
+};
+
+export const extractUngroupedFromElementsFilters = (expr: string) => {
+  const ast = fromExpression(expr);
+  const filtersFns = ast.chain.filter((expression) => expression.function === 'filters');
+  return filtersFns.some((filterFn) => filterFn?.arguments.ungrouped?.[0]);
+};
+
+export const isExpressionWithFilters = (expr: string) => {
+  const ast = fromExpression(expr);
+  return ast.chain.some((expression) => expression.function === 'filters');
 };

@@ -24,9 +24,11 @@ import {
 } from './lib/adapters';
 import { registerUptimeSavedObjects, savedObjectsAdapter } from './lib/saved_objects/saved_objects';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
+import { experimentalRuleFieldMap } from '../../rule_registry/common/assets/field_maps/experimental_rule_field_map';
 import { Dataset } from '../../rule_registry/server';
 import { UptimeConfig } from '../common/config';
 import { SyntheticsService } from './lib/synthetics_service/synthetics_service';
+import { syntheticsServiceApiKey } from './lib/saved_objects/service_api_key';
 
 export type UptimeRuleRegistry = ReturnType<Plugin['setup']>['ruleRegistry'];
 
@@ -58,7 +60,10 @@ export class Plugin implements PluginType {
       componentTemplates: [
         {
           name: 'mappings',
-          mappings: mappingFromFieldMap(uptimeRuleFieldMap, 'strict'),
+          mappings: mappingFromFieldMap(
+            { ...uptimeRuleFieldMap, ...experimentalRuleFieldMap },
+            'strict'
+          ),
         },
       ],
     });
@@ -89,9 +94,16 @@ export class Plugin implements PluginType {
   }
 
   public start(coreStart: CoreStart, plugins: UptimeCorePluginsStart) {
-    this.savedObjectsClient = new SavedObjectsClient(
-      coreStart.savedObjects.createInternalRepository()
-    );
+    if (this.server?.config?.unsafe?.service.enabled) {
+      this.savedObjectsClient = new SavedObjectsClient(
+        coreStart.savedObjects.createInternalRepository([syntheticsServiceApiKey.name])
+      );
+    } else {
+      this.savedObjectsClient = new SavedObjectsClient(
+        coreStart.savedObjects.createInternalRepository()
+      );
+    }
+
     if (this.server) {
       this.server.security = plugins.security;
       this.server.fleet = plugins.fleet;
@@ -102,6 +114,9 @@ export class Plugin implements PluginType {
     if (this.server?.config?.unsafe?.service.enabled) {
       this.syntheticService?.init(coreStart);
       this.syntheticService?.scheduleSyncTask(plugins.taskManager);
+      if (this.server && this.syntheticService) {
+        this.server.syntheticsService = this.syntheticService;
+      }
     }
   }
 

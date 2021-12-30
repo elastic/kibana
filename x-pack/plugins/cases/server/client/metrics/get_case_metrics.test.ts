@@ -6,12 +6,12 @@
  */
 
 import { getCaseMetrics } from './get_case_metrics';
-import { CaseAttributes, CaseResponse } from '../../../common';
+import { CaseAttributes, CaseResponse } from '../../../common/api';
 import { createCasesClientMock } from '../mocks';
 import { CasesClientArgs } from '../types';
 import { createAuthorizationMock } from '../../authorization/mock';
 import { loggingSystemMock, savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
-import { createCaseServiceMock } from '../../services/mocks';
+import { createAttachmentServiceMock, createCaseServiceMock } from '../../services/mocks';
 import { SavedObject } from 'kibana/server';
 
 describe('getMetrics', () => {
@@ -28,7 +28,16 @@ describe('getMetrics', () => {
     } as unknown as CaseResponse;
   });
 
+  const attachmentService = createAttachmentServiceMock();
+  attachmentService.countAlertsAttachedToCase.mockImplementation(async () => {
+    return 5;
+  });
+
   const authorization = createAuthorizationMock();
+  authorization.getAuthorizationFilter.mockImplementation(async () => {
+    return { filter: undefined, ensureSavedObjectsAreAuthorized: () => {} };
+  });
+
   const soClient = savedObjectsClientMock.create();
   const caseService = createCaseServiceMock();
   caseService.getCase.mockImplementation(async () => {
@@ -47,6 +56,7 @@ describe('getMetrics', () => {
     unsecuredSavedObjectsClient: soClient,
     caseService,
     logger,
+    attachmentService,
   } as unknown as CasesClientArgs;
 
   beforeEach(() => {
@@ -68,9 +78,9 @@ describe('getMetrics', () => {
     });
   });
 
-  it('populates the alertHosts and alertUsers sections', async () => {
+  it('populates the alerts.hosts and alerts.users sections', async () => {
     const metrics = await getCaseMetrics(
-      { caseId: '', features: ['alertHosts'] },
+      { caseId: '', features: ['alerts.hosts', 'alerts.users'] },
       client,
       clientArgs
     );
@@ -81,7 +91,7 @@ describe('getMetrics', () => {
 
   it('populates multiple sections at a time', async () => {
     const metrics = await getCaseMetrics(
-      { caseId: '', features: ['alertsCount', 'lifespan'] },
+      { caseId: '', features: ['alerts.count', 'lifespan'] },
       client,
       clientArgs
     );
@@ -95,12 +105,12 @@ describe('getMetrics', () => {
 
   it('populates multiple alerts sections at a time', async () => {
     const metrics = await getCaseMetrics(
-      { caseId: '', features: ['alertsCount', 'alertHosts'] },
+      { caseId: '', features: ['alerts.count', 'alerts.hosts'] },
       client,
       clientArgs
     );
 
-    expect(metrics.alerts?.count).toBeDefined();
+    expect(metrics.alerts?.count).toEqual(5);
     expect(metrics.alerts?.hosts).toBeDefined();
   });
 
@@ -117,7 +127,7 @@ describe('getMetrics', () => {
 
     try {
       await getCaseMetrics(
-        { caseId: '', features: ['bananas', 'lifespan', 'alertsCount'] },
+        { caseId: '', features: ['bananas', 'lifespan', 'alerts.count'] },
         client,
         clientArgs
       );

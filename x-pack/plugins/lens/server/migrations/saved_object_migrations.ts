@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { fromExpression, toExpression, Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
+import { fromExpression, toExpression, Ast, ExpressionFunctionAST } from '@kbn/interpreter';
 import {
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
@@ -403,14 +403,16 @@ const transformTableState: SavedObjectMigrationFn<
   return newDoc;
 };
 
-const renameOperationsForFormula: SavedObjectMigrationFn<LensDocShapePre712, LensDocShapePost712> =
-  (doc) => {
-    const newDoc = cloneDeep(doc);
-    return {
-      ...newDoc,
-      attributes: commonRenameOperationsForFormula(newDoc.attributes),
-    };
+const renameOperationsForFormula: SavedObjectMigrationFn<
+  LensDocShapePre712,
+  LensDocShapePost712
+> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  return {
+    ...newDoc,
+    attributes: commonRenameOperationsForFormula(newDoc.attributes),
   };
+};
 
 const removeTimezoneDateHistogramParam: SavedObjectMigrationFn<LensDocShape713, LensDocShape714> = (
   doc

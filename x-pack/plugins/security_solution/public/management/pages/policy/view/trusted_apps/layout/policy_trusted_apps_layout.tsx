@@ -17,7 +17,6 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
-  EuiProgress,
 } from '@elastic/eui';
 import { PolicyTrustedAppsEmptyUnassigned, PolicyTrustedAppsEmptyUnexisting } from '../empty';
 import {
@@ -32,10 +31,11 @@ import {
 import { usePolicyDetailsNavigateCallback, usePolicyDetailsSelector } from '../../policy_hooks';
 import { PolicyTrustedAppsFlyout } from '../flyout';
 import { PolicyTrustedAppsList } from '../list/policy_trusted_apps_list';
-import { useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { getTrustedAppsListPath } from '../../../../../common/routing';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
+import { ManagementPageLoader } from '../../../../../components/management_page_loader';
 
 export const PolicyTrustedAppsLayout = React.memo(() => {
   const { getAppUrl } = useAppUrl();
@@ -44,7 +44,7 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
   const isDoesTrustedAppExistsLoading = usePolicyDetailsSelector(doesTrustedAppExistsLoading);
   const policyItem = usePolicyDetailsSelector(policyDetails);
   const navigateCallback = usePolicyDetailsNavigateCallback();
-  const { isPlatinumPlus } = useEndpointPrivileges();
+  const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
   const totalAssignedCount = usePolicyDetailsSelector(getTotalPolicyTrustedAppsListPagination);
   const hasTrustedApps = usePolicyDetailsSelector(getHasTrustedApps);
   const isLoadedHasTrustedApps = usePolicyDetailsSelector(getIsLoadedHasTrustedApps);
@@ -138,7 +138,9 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
               </EuiText>
             </EuiPageHeaderSection>
 
-            <EuiPageHeaderSection>{isPlatinumPlus && assignTrustedAppButton}</EuiPageHeaderSection>
+            <EuiPageHeaderSection>
+              {canCreateArtifactsByPolicy && assignTrustedAppButton}
+            </EuiPageHeaderSection>
           </EuiPageHeader>
 
           <EuiSpacer size="l" />
@@ -166,10 +168,10 @@ export const PolicyTrustedAppsLayout = React.memo(() => {
         ) : displayHeaderAndContent ? (
           <PolicyTrustedAppsList />
         ) : (
-          <EuiProgress size="xs" color="primary" />
+          <ManagementPageLoader data-test-subj="policyTrustedAppsListLoader" />
         )}
       </EuiPageContent>
-      {isPlatinumPlus && showListFlyout ? <PolicyTrustedAppsFlyout /> : null}
+      {canCreateArtifactsByPolicy && showListFlyout ? <PolicyTrustedAppsFlyout /> : null}
     </div>
   ) : null;
 });

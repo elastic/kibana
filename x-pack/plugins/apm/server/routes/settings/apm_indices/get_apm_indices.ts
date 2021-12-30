@@ -6,7 +6,6 @@
  */
 
 import { SavedObjectsClient } from 'src/core/server';
-import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   APM_INDICES_SAVED_OBJECT_TYPE,
   APM_INDICES_SAVED_OBJECT_ID,
@@ -52,7 +51,7 @@ export async function getApmIndices({
 }: {
   config: APMConfig;
   savedObjectsClient: ISavedObjectsClient;
-}) {
+}): Promise<ApmIndicesConfig> {
   try {
     const apmIndicesSavedObject = await getApmIndicesSavedObject(
       savedObjectsClient
@@ -68,7 +67,9 @@ export async function getApmIndexSettings({
   context,
   config,
 }: Pick<APMRouteHandlerResources, 'context' | 'config'>) {
-  let apmIndicesSavedObject: PromiseReturnType<typeof getApmIndicesSavedObject>;
+  let apmIndicesSavedObject: Awaited<
+    ReturnType<typeof getApmIndicesSavedObject>
+  >;
   try {
     apmIndicesSavedObject = await getApmIndicesSavedObject(
       context.core.savedObjects.client

@@ -217,4 +217,42 @@ describe('getPingHistogram', () => {
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
     expect(result).toMatchSnapshot();
   });
+
+  it('returns an empty array if agg buckets are undefined', async () => {
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+
+    mockEsClient.search.mockResolvedValueOnce({
+      body: {
+        aggregations: {
+          timeseries: {
+            buckets: undefined,
+            interval: '1m',
+          },
+        },
+      },
+    } as any);
+
+    const result = await getPingHistogram({ uptimeEsClient, dateStart: 'now-15m', dateEnd: 'now' });
+
+    expect(result.histogram).toEqual([]);
+  });
+
+  it('returns an empty array if agg buckets are empty', async () => {
+    const { esClient: mockEsClient, uptimeEsClient } = getUptimeESMockClient();
+
+    mockEsClient.search.mockResolvedValueOnce({
+      body: {
+        aggregations: {
+          timeseries: {
+            buckets: [],
+            interval: '1m',
+          },
+        },
+      },
+    } as any);
+
+    const result = await getPingHistogram({ uptimeEsClient, dateStart: 'now-15m', dateEnd: 'now' });
+
+    expect(result.histogram).toEqual([]);
+  });
 });

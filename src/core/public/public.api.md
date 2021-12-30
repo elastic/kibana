@@ -42,6 +42,7 @@ import { Request as Request_2 } from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { SchemaTypeError } from '@kbn/config-schema';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
+import { TransitionPromptHook } from 'history';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { TransportRequestParams } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
@@ -509,6 +510,9 @@ export interface DocLinksStart {
         readonly cloud: {
             readonly indexManagement: string;
         };
+        readonly console: {
+            readonly guide: string;
+        };
         readonly dashboard: {
             readonly guide: string;
             readonly drilldowns: string;
@@ -554,13 +558,11 @@ export interface DocLinksStart {
             readonly indexingDocumentsSchema: string;
             readonly logSettings: string;
             readonly metaEngines: string;
-            readonly nativeAuth: string;
             readonly precisionTuning: string;
             readonly relevanceTuning: string;
             readonly resultSettings: string;
             readonly searchUI: string;
             readonly security: string;
-            readonly standardAuth: string;
             readonly synonyms: string;
             readonly webCrawler: string;
             readonly webCrawlerEventLogs: string;
@@ -572,6 +574,7 @@ export interface DocLinksStart {
             readonly usersAccess: string;
         };
         readonly workplaceSearch: {
+            readonly apiKeys: string;
             readonly box: string;
             readonly confluenceCloud: string;
             readonly confluenceServer: string;
@@ -587,7 +590,6 @@ export interface DocLinksStart {
             readonly indexingSchedule: string;
             readonly jiraCloud: string;
             readonly jiraServer: string;
-            readonly nativeAuth: string;
             readonly oneDrive: string;
             readonly permissions: string;
             readonly salesforce: string;
@@ -595,7 +597,6 @@ export interface DocLinksStart {
             readonly serviceNow: string;
             readonly sharePoint: string;
             readonly slack: string;
-            readonly standardAuth: string;
             readonly synch: string;
             readonly zendesk: string;
         };
@@ -695,6 +696,7 @@ export interface DocLinksStart {
         };
         readonly securitySolution: {
             readonly trustedApps: string;
+            readonly eventFilters: string;
         };
         readonly query: {
             readonly eql: string;
@@ -775,7 +777,14 @@ export interface DocLinksStart {
         }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
-        readonly plugins: Record<string, string>;
+        readonly plugins: {
+            azureRepo: string;
+            gcsRepo: string;
+            hdfsRepo: string;
+            s3Repo: string;
+            snapshotRestoreRepos: string;
+            mapperSize: string;
+        };
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
@@ -1490,7 +1499,7 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     sortField?: string;
     // (undocumented)
-    sortOrder?: estypes.SearchSortOrder;
+    sortOrder?: estypes.SortOrder;
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;
@@ -1684,13 +1693,13 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> {
 
 // @public
 export class ScopedHistory<HistoryLocationState = unknown> implements History_2<HistoryLocationState> {
-    constructor(parentHistory: History_2, basePath: string);
+    constructor(parentHistory: History_2<HistoryLocationState>, basePath: string);
     get action(): Action;
-    block: (prompt?: string | boolean | History_2.TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
+    block: (prompt?: string | boolean | TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
     createHref: (location: LocationDescriptorObject<HistoryLocationState>, { prependBasePath }?: {
         prependBasePath?: boolean | undefined;
     }) => Href;
-    createSubHistory: <SubHistoryLocationState = unknown>(basePath: string) => ScopedHistory<SubHistoryLocationState>;
+    createSubHistory: (basePath: string) => ScopedHistory<HistoryLocationState>;
     go: (n: number) => void;
     goBack: () => void;
     goForward: () => void;

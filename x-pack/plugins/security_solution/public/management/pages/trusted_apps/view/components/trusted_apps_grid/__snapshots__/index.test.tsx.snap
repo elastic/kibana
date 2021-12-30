@@ -32,11 +32,23 @@ exports[`TrustedAppsGrid renders correctly initially 1`] = `
           class="body-content undefined"
         >
           <div
-            class="euiEmptyPrompt"
+            class="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
           >
-            <span>
-              No items found
-            </span>
+            <div
+              class="euiEmptyPrompt__main"
+            >
+              <div
+                class="euiEmptyPrompt__content"
+              >
+                <div
+                  class="euiEmptyPrompt__contentInner"
+                >
+                  <span>
+                    No items found
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -203,9 +215,17 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the seco
             <nav
               class="euiPagination"
             >
+              <span
+                aria-atomic="true"
+                aria-relevant="additions text"
+                class="euiScreenReaderOnly"
+                role="status"
+              >
+                Page 1 of 20
+              </span>
               <button
                 aria-label="Previous page"
-                class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
                 data-test-subj="pagination-button-previous"
                 disabled=""
                 type="button"
@@ -226,7 +246,7 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the seco
                   <button
                     aria-current="true"
                     aria-label="Page 1 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive"
                     data-test-subj="pagination-button-0"
                     disabled=""
                     type="button"
@@ -247,7 +267,7 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the seco
                 >
                   <button
                     aria-label="Page 2 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
                     data-test-subj="pagination-button-1"
                     type="button"
                   >
@@ -267,7 +287,7 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the seco
                 >
                   <button
                     aria-label="Page 3 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
                     data-test-subj="pagination-button-2"
                     type="button"
                   >
@@ -287,7 +307,7 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the seco
                 >
                   <button
                     aria-label="Page 4 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
                     data-test-subj="pagination-button-3"
                     type="button"
                   >
@@ -307,7 +327,7 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the seco
                 >
                   <button
                     aria-label="Page 5 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
                     data-test-subj="pagination-button-4"
                     type="button"
                   >
@@ -333,7 +353,7 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the seco
                 >
                   <button
                     aria-label="Page 20 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
                     data-test-subj="pagination-button-19"
                     type="button"
                   >
@@ -350,9 +370,10 @@ exports[`TrustedAppsGrid renders correctly when failed loading data for the seco
                 </li>
               </ul>
               <button
-                aria-label="Next page, 2"
-                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                aria-label="Next page"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
                 data-test-subj="pagination-button-next"
+                title="Next page"
                 type="button"
               >
                 <span
@@ -641,6 +662,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -705,6 +727,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -1021,6 +1044,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -1085,6 +1109,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -1401,6 +1426,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -1465,6 +1491,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -1781,6 +1808,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -1845,6 +1873,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -2161,6 +2190,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -2225,6 +2255,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -2541,6 +2572,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -2605,6 +2637,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -2921,6 +2954,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -2985,6 +3019,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -3301,6 +3336,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -3365,6 +3401,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -3681,6 +3718,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -3745,6 +3783,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -4061,6 +4100,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -4125,6 +4165,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -4283,9 +4324,17 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
             <nav
               class="euiPagination"
             >
+              <span
+                aria-atomic="true"
+                aria-relevant="additions text"
+                class="euiScreenReaderOnly"
+                role="status"
+              >
+                Page 1 of 20
+              </span>
               <button
                 aria-label="Previous page"
-                class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
                 data-test-subj="pagination-button-previous"
                 disabled=""
                 type="button"
@@ -4306,7 +4355,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                   <button
                     aria-current="true"
                     aria-label="Page 1 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive"
                     data-test-subj="pagination-button-0"
                     disabled=""
                     type="button"
@@ -4327,7 +4376,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-label="Page 2 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
                     data-test-subj="pagination-button-1"
                     type="button"
                   >
@@ -4347,7 +4396,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-label="Page 3 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
                     data-test-subj="pagination-button-2"
                     type="button"
                   >
@@ -4367,7 +4416,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-label="Page 4 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
                     data-test-subj="pagination-button-3"
                     type="button"
                   >
@@ -4387,7 +4436,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-label="Page 5 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
                     data-test-subj="pagination-button-4"
                     type="button"
                   >
@@ -4413,7 +4462,7 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 >
                   <button
                     aria-label="Page 20 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
                     data-test-subj="pagination-button-19"
                     type="button"
                   >
@@ -4430,9 +4479,10 @@ exports[`TrustedAppsGrid renders correctly when loaded data 1`] = `
                 </li>
               </ul>
               <button
-                aria-label="Next page, 2"
-                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                aria-label="Next page"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
                 data-test-subj="pagination-button-next"
+                title="Next page"
                 type="button"
               >
                 <span
@@ -4764,6 +4814,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -4828,6 +4879,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -5144,6 +5196,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -5208,6 +5261,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -5524,6 +5578,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -5588,6 +5643,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -5904,6 +5960,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -5968,6 +6025,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -6284,6 +6342,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -6348,6 +6407,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -6664,6 +6724,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -6728,6 +6789,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -7044,6 +7106,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -7108,6 +7171,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -7424,6 +7488,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -7488,6 +7553,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -7804,6 +7870,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -7868,6 +7935,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -8184,6 +8252,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -8248,6 +8317,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -8406,9 +8476,17 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
             <nav
               class="euiPagination"
             >
+              <span
+                aria-atomic="true"
+                aria-relevant="additions text"
+                class="euiScreenReaderOnly"
+                role="status"
+              >
+                Page 1 of 20
+              </span>
               <button
                 aria-label="Previous page"
-                class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
                 data-test-subj="pagination-button-previous"
                 disabled=""
                 type="button"
@@ -8429,7 +8507,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                   <button
                     aria-current="true"
                     aria-label="Page 1 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive"
                     data-test-subj="pagination-button-0"
                     disabled=""
                     type="button"
@@ -8450,7 +8528,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 >
                   <button
                     aria-label="Page 2 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
                     data-test-subj="pagination-button-1"
                     type="button"
                   >
@@ -8470,7 +8548,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 >
                   <button
                     aria-label="Page 3 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
                     data-test-subj="pagination-button-2"
                     type="button"
                   >
@@ -8490,7 +8568,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 >
                   <button
                     aria-label="Page 4 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
                     data-test-subj="pagination-button-3"
                     type="button"
                   >
@@ -8510,7 +8588,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 >
                   <button
                     aria-label="Page 5 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
                     data-test-subj="pagination-button-4"
                     type="button"
                   >
@@ -8536,7 +8614,7 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 >
                   <button
                     aria-label="Page 20 of 20"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
                     data-test-subj="pagination-button-19"
                     type="button"
                   >
@@ -8553,9 +8631,10 @@ exports[`TrustedAppsGrid renders correctly when loading data for the second time
                 </li>
               </ul>
               <button
-                aria-label="Next page, 2"
-                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                aria-label="Next page"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
                 data-test-subj="pagination-button-next"
+                title="Next page"
                 type="button"
               >
                 <span
@@ -8844,6 +8923,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -8908,6 +8988,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -9224,6 +9305,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -9288,6 +9370,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -9604,6 +9687,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -9668,6 +9752,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -9984,6 +10069,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -10048,6 +10134,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -10364,6 +10451,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -10428,6 +10516,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -10744,6 +10833,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -10808,6 +10898,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -11124,6 +11215,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -11188,6 +11280,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -11504,6 +11597,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -11568,6 +11662,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -11884,6 +11979,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -11948,6 +12044,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -12264,6 +12361,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-createdBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -12328,6 +12426,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                                 aria-label="someone"
                                 class="euiAvatar euiAvatar--s euiAvatar--user"
                                 data-test-subj="trustedAppCard-subHeader-touchedBy-updatedBy-avatar"
+                                role="img"
                                 style="background-color: rgb(245, 163, 92); color: rgb(0, 0, 0);"
                                 title="someone"
                               >
@@ -12486,10 +12585,19 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
             <nav
               class="euiPagination"
             >
+              <span
+                aria-atomic="true"
+                aria-relevant="additions text"
+                class="euiScreenReaderOnly"
+                role="status"
+              >
+                Page 3 of 4
+              </span>
               <button
-                aria-label="Previous page, 2"
-                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                aria-label="Previous page"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
                 data-test-subj="pagination-button-previous"
+                title="Previous page"
                 type="button"
               >
                 <span
@@ -12507,7 +12615,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-label="Page 1 of 4"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
                     data-test-subj="pagination-button-0"
                     type="button"
                   >
@@ -12527,7 +12635,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-label="Page 2 of 4"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
                     data-test-subj="pagination-button-1"
                     type="button"
                   >
@@ -12548,7 +12656,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                   <button
                     aria-current="true"
                     aria-label="Page 3 of 4"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive"
                     data-test-subj="pagination-button-2"
                     disabled=""
                     type="button"
@@ -12569,7 +12677,7 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 >
                   <button
                     aria-label="Page 4 of 4"
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton euiPaginationButton--hideOnMobile"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiPaginationButton"
                     data-test-subj="pagination-button-3"
                     type="button"
                   >
@@ -12586,9 +12694,10 @@ exports[`TrustedAppsGrid renders correctly when new page and page size set (not 
                 </li>
               </ul>
               <button
-                aria-label="Next page, 4"
-                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                aria-label="Next page"
+                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton"
                 data-test-subj="pagination-button-next"
+                title="Next page"
                 type="button"
               >
                 <span

@@ -32,9 +32,11 @@ function isHtmlPlugin(plugin: any): plugin is { options: { template: string } } 
   return !!(typeof plugin.options?.template === 'string');
 }
 
-function isBabelLoaderRule(rule: webpack.RuleSetRule): rule is webpack.RuleSetRule & {
+interface BabelLoaderRule extends webpack.RuleSetRule {
   use: webpack.RuleSetLoader[];
-} {
+}
+
+function isBabelLoaderRule(rule: webpack.RuleSetRule): rule is BabelLoaderRule {
   return !!(
     rule.use &&
     Array.isArray(rule.use) &&
@@ -115,7 +117,7 @@ export default function ({ config: storybookConfig }: { config: Configuration })
     },
     plugins: [new IgnoreNotFoundExportPlugin()],
     resolve: {
-      extensions: ['.js', '.ts', '.tsx', '.json'],
+      extensions: ['.js', '.ts', '.tsx', '.json', '.mdx'],
       mainFields: ['browser', 'main'],
       alias: {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/core_app/images'),
