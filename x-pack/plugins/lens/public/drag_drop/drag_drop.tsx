@@ -274,7 +274,7 @@ const DragInner = memo(function DragInner({
   );
   const modifierHandlers = useMemo(() => {
     const onKeyUp = (e: KeyboardEvent<HTMLButtonElement>) => {
-      if ((e.key === 'Shift' || e.key === 'Alt' || e.key === 'Control') && activeDropTarget?.id) {
+      if (activeDropTarget?.id && ['Shift', 'Alt', 'Control'].includes(e.key)) {
         if (e.altKey) {
           setTargetOfIndex(activeDropTarget.id, 1);
         } else if (e.shiftKey) {
