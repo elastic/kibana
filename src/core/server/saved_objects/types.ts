@@ -72,7 +72,29 @@ export interface SavedObjectsPitParams {
   keepAlive?: string;
 }
 
-export interface SearchOption {
+export interface SavedObjectsFindSearchOption {
+  search?: string;
+  searchFields?: string[];
+  rootSearchFields?: string[];
+  defaultSearchOperator?: 'AND' | 'OR';
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsFindOptions {
+  type: string | string[];
+  page?: number;
+  perPage?: number;
+  sortField?: string;
+  sortOrder?: estypes.SortOrder;
+  /**
+   * An array of fields to include in the results
+   * @example
+   * SavedObjects.find({type: 'dashboard', fields: ['attributes.name', 'attributes.location']})
+   */
+  fields?: string[];
   /** Search documents using the Elasticsearch Simple Query String syntax. See Elasticsearch Simple Query String `query` argument for more information */
   search?: string;
   /** The fields to perform the parsed query against. See Elasticsearch Simple Query String `fields` argument for more information */
@@ -86,33 +108,15 @@ export interface SearchOption {
    * The search operator to use with the provided filter. Defaults to `OR`
    */
   defaultSearchOperator?: 'AND' | 'OR';
-}
-
-/**
- *
- * @public
- */
-export type SavedObjectsFindOptions = SearchOption & {
-  type: string | string[];
-  page?: number;
-  perPage?: number;
-  sortField?: string;
-  sortOrder?: estypes.SortOrder;
-  /**
-   * An array of fields to include in the results
-   * @example
-   * SavedObjects.find({type: 'dashboard', fields: ['attributes.name', 'attributes.location']})
-   */
-  fields?: string[];
-  /**
-   * Use the sort values from the previous page to retrieve the next page of results.
-   */
-  searchAfter?: estypes.Id[];
   /**
    * Use this API only when multiple search clauses are required.
    * You can use the top-level `search` options otherwise.
    */
-  searchOptions?: SearchOption[];
+  searchOptions?: SavedObjectsFindSearchOption[];
+  /**
+   * Use the sort values from the previous page to retrieve the next page of results.
+   */
+  searchAfter?: estypes.Id[];
 
   /**
    * Search for documents having a reference to the specified objects.
@@ -162,7 +166,7 @@ export type SavedObjectsFindOptions = SearchOption & {
    * Search against a specific Point In Time (PIT) that you've opened with {@link SavedObjectsClient.openPointInTimeForType}.
    */
   pit?: SavedObjectsPitParams;
-};
+}
 
 /**
  *

@@ -26,6 +26,7 @@ export type {
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
+  SavedObjectsFindSearchOption,
   SavedObjectsMigrationVersion,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,

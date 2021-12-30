@@ -31,6 +31,7 @@ export type {
   SavedObjectStatusMeta,
   SavedObjectsFindOptionsReference,
   SavedObjectsFindOptions,
+  SavedObjectsFindSearchOption,
   SavedObjectsPitParams,
   SavedObjectsBaseOptions,
   MutatingOperationRefreshSetting,

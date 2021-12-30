@@ -413,6 +413,7 @@ export type {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
   SavedObjectsFindOptionsReference,
+  SavedObjectsFindSearchOption,
   SavedObjectsPitParams,
   SavedObjectsMigrationVersion,
 } from './types';

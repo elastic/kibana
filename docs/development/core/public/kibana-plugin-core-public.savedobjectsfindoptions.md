@@ -29,6 +29,7 @@ export interface SavedObjectsFindOptions
 |  [search?](./kibana-plugin-core-public.savedobjectsfindoptions.search.md) | string | <i>(Optional)</i> Search documents using the Elasticsearch Simple Query String syntax. See Elasticsearch Simple Query String <code>query</code> argument for more information |
 |  [searchAfter?](./kibana-plugin-core-public.savedobjectsfindoptions.searchafter.md) | estypes.Id\[\] | <i>(Optional)</i> Use the sort values from the previous page to retrieve the next page of results. |
 |  [searchFields?](./kibana-plugin-core-public.savedobjectsfindoptions.searchfields.md) | string\[\] | <i>(Optional)</i> The fields to perform the parsed query against. See Elasticsearch Simple Query String <code>fields</code> argument for more information |
+|  [searchOptions?](./kibana-plugin-core-public.savedobjectsfindoptions.searchoptions.md) | SavedObjectsFindSearchOption\[\] | <i>(Optional)</i> Use this API only when multiple search clauses are required. You can use the top-level <code>search</code> options otherwise. |
 |  [sortField?](./kibana-plugin-core-public.savedobjectsfindoptions.sortfield.md) | string | <i>(Optional)</i> |
 |  [sortOrder?](./kibana-plugin-core-public.savedobjectsfindoptions.sortorder.md) | estypes.SortOrder | <i>(Optional)</i> |
 |  [type](./kibana-plugin-core-public.savedobjectsfindoptions.type.md) | string \| string\[\] |  |

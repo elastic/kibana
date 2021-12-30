@@ -2372,6 +2372,7 @@ export interface SavedObjectsFindOptions {
     search?: string;
     searchAfter?: estypes.Id[];
     searchFields?: string[];
+    searchOptions?: SavedObjectsFindSearchOption[];
     // (undocumented)
     sortField?: string;
     // (undocumented)
@@ -2409,6 +2410,20 @@ export interface SavedObjectsFindResponse<T = unknown, A = unknown> {
 export interface SavedObjectsFindResult<T = unknown> extends SavedObject<T> {
     score: number;
     sort?: string[];
+}
+
+// Warning: (ae-missing-release-tag) "SavedObjectsFindSearchOption" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface SavedObjectsFindSearchOption {
+    // (undocumented)
+    defaultSearchOperator?: 'AND' | 'OR';
+    // (undocumented)
+    rootSearchFields?: string[];
+    // (undocumented)
+    search?: string;
+    // (undocumented)
+    searchFields?: string[];
 }
 
 // @public

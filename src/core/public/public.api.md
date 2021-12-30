@@ -1496,6 +1496,8 @@ export interface SavedObjectsFindOptions {
     search?: string;
     searchAfter?: estypes.Id[];
     searchFields?: string[];
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsFindSearchOption" needs to be exported by the entry point index.d.ts
+    searchOptions?: SavedObjectsFindSearchOption[];
     // (undocumented)
     sortField?: string;
     // (undocumented)

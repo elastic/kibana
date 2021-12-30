@@ -177,6 +177,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsFindOptionsReference](./kibana-plugin-core-server.savedobjectsfindoptionsreference.md) |  |
 |  [SavedObjectsFindResponse](./kibana-plugin-core-server.savedobjectsfindresponse.md) | Return type of the Saved Objects <code>find()</code> method.<!-- -->\*Note\*: this type is different between the Public and Server Saved Objects clients. |
 |  [SavedObjectsFindResult](./kibana-plugin-core-server.savedobjectsfindresult.md) |  |
+|  [SavedObjectsFindSearchOption](./kibana-plugin-core-server.savedobjectsfindsearchoption.md) |  |
 |  [SavedObjectsImportActionRequiredWarning](./kibana-plugin-core-server.savedobjectsimportactionrequiredwarning.md) | A warning meant to notify that a specific user action is required to finalize the import of some type of object. The <code>actionUrl</code> must be a path relative to the basePath, and not include it. |
 |  [SavedObjectsImportAmbiguousConflictError](./kibana-plugin-core-server.savedobjectsimportambiguousconflicterror.md) | Represents a failure to import due to a conflict, which can be resolved in different ways with an overwrite. |
 |  [SavedObjectsImportConflictError](./kibana-plugin-core-server.savedobjectsimportconflicterror.md) | Represents a failure to import due to a conflict. |

@@ -11,7 +11,7 @@ import * as esKuery from '@kbn/es-query';
 type KueryNode = any;
 
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
-import { SearchOption } from '../../../types';
+import { SavedObjectsFindSearchOption } from '../../../types';
 import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
 import { getReferencesFilter } from './references_filter';
 
@@ -133,7 +133,7 @@ interface QueryParams {
   namespaces?: string[];
   type?: string | string[];
   typeToNamespacesMap?: Map<string, string[] | undefined>;
-  searchOptions?: SearchOption[];
+  searchOptions?: SavedObjectsFindSearchOption[];
   hasReference?: HasReferenceQueryParams | HasReferenceQueryParams[];
   hasReferenceOperator?: SearchOperator;
   kueryNode?: KueryNode;
