@@ -49,6 +49,9 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const { docLinks } = useStartServices();
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
 
+  // agent monitoring checkbox group can appear multiple times in the DOM, ids have to be unique to work correctly
+  const monitoringCheckboxIdSuffix = Date.now();
+
   return (
     <>
       <EuiDescribedFormGroup
@@ -162,7 +165,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           disabled={agentPolicy.is_managed === true}
           options={[
             {
-              id: dataTypes.Logs,
+              id: `${dataTypes.Logs}_${monitoringCheckboxIdSuffix}`,
               label: (
                 <>
                   <FormattedMessage
@@ -184,7 +187,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               ),
             },
             {
-              id: dataTypes.Metrics,
+              id: `${dataTypes.Metrics}_${monitoringCheckboxIdSuffix}`,
               label: (
                 <>
                   <FormattedMessage
@@ -207,13 +210,14 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             },
           ]}
           idToSelectedMap={(agentPolicy.monitoring_enabled || []).reduce(
-            (acc: { logs: boolean; metrics: boolean }, key) => {
-              acc[key] = true;
+            (acc: { [key: string]: boolean }, key) => {
+              acc[`${key}_${monitoringCheckboxIdSuffix}`] = true;
               return acc;
             },
             { logs: false, metrics: false }
           )}
-          onChange={(id) => {
+          onChange={(longId) => {
+            const id = longId.split('_')[0];
             if (id !== dataTypes.Logs && id !== dataTypes.Metrics) {
               return;
             }
