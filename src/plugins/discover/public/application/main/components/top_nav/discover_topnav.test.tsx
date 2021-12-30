@@ -13,7 +13,6 @@ import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
 import { TopNavMenuData } from '../../../../../../navigation/public';
 import { ISearchSource, Query } from '../../../../../../data/common';
-import { GetStateReturn } from '../../services/discover_state';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 
@@ -23,7 +22,6 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
   discoverServiceMock.capabilities.discover!.save = savePermissions;
 
   return {
-    stateContainer: {} as GetStateReturn,
     indexPattern: indexPatternMock,
     savedSearch: savedSearchMock,
     navigateTo: jest.fn(),

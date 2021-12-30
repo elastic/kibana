@@ -10,7 +10,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { cloneDeep } from 'lodash';
 import { CONTEXT_DEFAULT_SIZE_SETTING } from '../../../../common';
 import { DiscoverServices } from '../../../build_services';
-import { ContextAppState, getState } from '../services/context_state';
+import { getState } from '../services/context_state';
+import type { ContextAppState } from '../services/context_state';
 
 export function useContextAppState({ services }: { services: DiscoverServices }) {
   const { uiSettings: config, history, core, filterManager } = services;

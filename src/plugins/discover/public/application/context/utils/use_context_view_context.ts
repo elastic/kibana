@@ -8,7 +8,7 @@
 
 import { useContext } from 'react';
 import { createAppContext } from '../../../utils/app_state_context';
-import { ContextAppState, ContextGetStateReturn } from '../services/context_state';
+import type { ContextAppState, ContextGetStateReturn } from '../services/context_state';
 
 export const ContextViewContext = createAppContext<ContextAppState, ContextGetStateReturn>({
   state: {} as ContextAppState,

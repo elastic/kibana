@@ -11,7 +11,7 @@ import { getTopNavLinks } from './get_top_nav_links';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { DiscoverServices } from '../../../../build_services';
-import { GetStateReturn } from '../../services/discover_state';
+import type { DiscoverGetStateReturn } from '../../services/discover_state';
 
 const services = {
   capabilities: {
@@ -24,7 +24,7 @@ const services = {
   },
 } as unknown as DiscoverServices;
 
-const state = {} as unknown as GetStateReturn;
+const state = {} as unknown as DiscoverGetStateReturn;
 
 test('getTopNavLinks result', () => {
   const topNavLinks = getTopNavLinks({

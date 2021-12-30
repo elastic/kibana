@@ -20,7 +20,6 @@ import { fetchTotalHits } from './fetch_total_hits';
 import { fetchChart } from './fetch_chart';
 import { ISearchSource } from '../../../../../data/common';
 import { Adapters } from '../../../../../inspector';
-import { AppState } from '../services/discover_state';
 import { FetchStatus } from '../../types';
 import { DataPublicPluginStart } from '../../../../../data/public';
 import {
@@ -33,10 +32,11 @@ import {
 import { DiscoverServices } from '../../../build_services';
 import { ReduxLikeStateContainer } from '../../../../../kibana_utils/common';
 import { DataViewType } from '../../../../../data_views/common';
+import type { DiscoverAppState } from '../services/discover_state';
 
 export interface FetchDeps {
   abortController: AbortController;
-  appStateContainer: ReduxLikeStateContainer<AppState>;
+  appStateContainer: ReduxLikeStateContainer<DiscoverAppState>;
   data: DataPublicPluginStart;
   initialFetchStatus: FetchStatus;
   inspectorAdapters: Adapters;

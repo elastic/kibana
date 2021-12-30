@@ -8,10 +8,8 @@
 import { useMemo, useEffect } from 'react';
 import { History } from 'history';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
-import {
-  createSearchSessionRestorationDataProvider,
-  GetStateReturn,
-} from '../services/discover_state';
+import { createSearchSessionRestorationDataProvider } from '../services/discover_state';
+import type { DiscoverGetStateReturn } from '../services/discover_state';
 import { noSearchSessionStorageCapabilityMessage } from '../../../../../data/public';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch } from '../../../services/saved_searches';
@@ -23,7 +21,7 @@ export function useSearchSession({
   savedSearch,
 }: {
   services: DiscoverServices;
-  stateContainer: GetStateReturn;
+  stateContainer: DiscoverGetStateReturn;
   history: History;
   savedSearch: SavedSearch;
 }) {

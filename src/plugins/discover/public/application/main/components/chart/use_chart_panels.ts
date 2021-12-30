@@ -11,12 +11,10 @@ import type {
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { search } from '../../../../../../data/public';
-import { AppState } from '../../services/discover_state';
-import { DataCharts$ } from '../../utils/use_saved_search';
+import type { DiscoverAppState } from '../../services/discover_state';
 
 export function useChartPanels(
-  state: AppState,
-  savedSearchDataChart$: DataCharts$,
+  state: DiscoverAppState,
   toggleHideChart: () => void,
   onChangeInterval: (value: string) => void,
   closePopover: () => void

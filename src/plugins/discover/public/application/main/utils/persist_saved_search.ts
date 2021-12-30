@@ -9,11 +9,11 @@
 import { updateSearchSource } from './update_search_source';
 import { IndexPattern } from '../../../../../data/public';
 import { SavedSearch } from '../../../services/saved_searches';
-import { AppState } from '../services/discover_state';
 import type { SortOrder } from '../../../services/saved_searches';
 import { SavedObjectSaveOpts } from '../../../../../saved_objects/public';
 import { DiscoverServices } from '../../../build_services';
 import { saveSavedSearch } from '../../../services/saved_searches';
+import type { DiscoverAppState } from '../services/discover_state';
 
 /**
  * Helper function to update and persist the given savedSearch
@@ -33,7 +33,7 @@ export async function persistSavedSearch(
     onSuccess: (id: string) => void;
     saveOptions: SavedObjectSaveOpts;
     services: DiscoverServices;
-    state: AppState;
+    state: DiscoverAppState;
   }
 ) {
   updateSearchSource(savedSearch.searchSource, true, {

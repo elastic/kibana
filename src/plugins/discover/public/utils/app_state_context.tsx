@@ -7,7 +7,7 @@
  */
 
 import { Context, createContext } from 'react';
-import { AppState, GetStateReturn } from '../application/types';
+import type { AppState, GetStateReturn } from '../application/types';
 
 export interface AppStateContext<T, S> {
   state: T;

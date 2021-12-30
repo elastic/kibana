@@ -12,7 +12,6 @@ import { SearchSource } from '../../../../../data/common';
 import { RequestAdapter } from '../../../../../inspector';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
 import { ReduxLikeStateContainer } from '../../../../../kibana_utils/common';
-import { AppState } from '../services/discover_state';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchAll } from './fetch_all';
 import {
@@ -26,6 +25,7 @@ import {
 import { fetchDocuments } from './fetch_documents';
 import { fetchChart } from './fetch_chart';
 import { fetchTotalHits } from './fetch_total_hits';
+import type { DiscoverAppState } from '../services/discover_state';
 
 jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
@@ -70,7 +70,7 @@ describe('test fetchAll', () => {
         getState: () => {
           return { interval: 'auto' };
         },
-      } as ReduxLikeStateContainer<AppState>,
+      } as ReduxLikeStateContainer<DiscoverAppState>,
       abortController: new AbortController(),
       data: discoverServiceMock.data,
       inspectorAdapters: { requests: new RequestAdapter() },

@@ -36,7 +36,7 @@ import { SavedSearch } from '../../../services/saved_searches';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../locator';
 import { VIEW_MODE } from '../../../components/view_mode_toggle';
-import { AppState, GetStateReturn } from '../../types';
+import type { AppState, GetStateReturn } from '../../types';
 
 export interface DiscoverAppState extends AppState {
   /**

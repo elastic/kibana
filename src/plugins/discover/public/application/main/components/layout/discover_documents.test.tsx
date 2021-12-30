@@ -12,7 +12,6 @@ import { mountWithIntl } from '@kbn/test/jest';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { GetStateReturn } from '../../services/discover_state';
 import { DataDocuments$ } from '../../utils/use_saved_search';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
@@ -47,8 +46,6 @@ function getProps(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {
     searchSource: documents$,
     services,
     setExpandedDoc: jest.fn(),
-    state: { columns: [] },
-    stateContainer: {} as GetStateReturn,
     navigateTo: jest.fn(),
   };
 }

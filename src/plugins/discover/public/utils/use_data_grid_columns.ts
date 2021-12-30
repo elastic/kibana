@@ -11,7 +11,7 @@ import type { IndexPattern, IndexPatternsContract } from 'src/plugins/data/commo
 
 import { Capabilities, IUiSettingsClient } from 'kibana/public';
 import { getStateColumnActions } from '../components/doc_table/actions/columns';
-import { AppState, GetStateReturn } from '../application/types';
+import type { AppState, GetStateReturn } from '../application/types';
 
 interface UseColumnsProps<T> {
   capabilities: Capabilities;

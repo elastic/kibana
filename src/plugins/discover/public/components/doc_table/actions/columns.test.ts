@@ -11,9 +11,9 @@ import { configMock } from '../../../__mocks__/config';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import { indexPatternsMock } from '../../../__mocks__/index_patterns';
 import { Capabilities } from '../../../../../../core/types';
-import { AppState } from '../../../application/main/services/discover_state';
+import type { DiscoverAppState } from '../../../application/main/services/discover_state';
 
-function getStateColumnAction(state: {}, setAppState: (state: Partial<AppState>) => void) {
+function getStateColumnAction(state: {}, setAppState: (state: Partial<DiscoverAppState>) => void) {
   return getStateColumnActions({
     capabilities: {
       discover: {

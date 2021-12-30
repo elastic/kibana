@@ -8,7 +8,7 @@
 
 import { useContext } from 'react';
 import { createAppContext } from '../../../utils/app_state_context';
-import { DiscoverAppState, DiscoverGetStateReturn } from '../services/discover_state';
+import type { DiscoverAppState, DiscoverGetStateReturn } from '../services/discover_state';
 
 export const DiscoverAppStateContext = createAppContext<DiscoverAppState, DiscoverGetStateReturn>({
   state: {},

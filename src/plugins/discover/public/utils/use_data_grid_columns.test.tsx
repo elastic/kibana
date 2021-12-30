@@ -11,8 +11,8 @@ import { useColumns } from './use_data_grid_columns';
 import { indexPatternMock } from '../__mocks__/index_pattern';
 import { configMock } from '../__mocks__/config';
 import { indexPatternsMock } from '../__mocks__/index_patterns';
-import { AppState } from '../application/context/services/context_state';
 import { Capabilities } from '../../../../core/types';
+import type { DiscoverAppState } from '../application/main/services/discover_state';
 
 describe('useColumns', () => {
   const defaultProps = {
@@ -23,7 +23,7 @@ describe('useColumns', () => {
     setAppState: () => {},
     state: {
       columns: ['Time', 'message'],
-    } as AppState,
+    } as DiscoverAppState,
     useNewFieldsApi: false,
   };
 

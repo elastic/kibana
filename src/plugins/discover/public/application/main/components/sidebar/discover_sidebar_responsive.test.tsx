@@ -101,7 +101,6 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     onRemoveField: jest.fn(),
     selectedIndexPattern: indexPattern,
     services: mockServices,
-    state: {},
     trackUiMetric: jest.fn(),
     onEditRuntimeField: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,

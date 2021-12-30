@@ -60,7 +60,6 @@ function getCompProps(): DiscoverSidebarProps {
     onRemoveField: jest.fn(),
     selectedIndexPattern: indexPattern,
     services: mockDiscoverServices,
-    state: {},
     trackUiMetric: jest.fn(),
     fieldFilter: getDefaultFieldFilter(),
     setFieldFilter: jest.fn(),

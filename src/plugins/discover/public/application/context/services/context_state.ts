@@ -18,7 +18,7 @@ import {
 } from '../../../../../kibana_utils/public';
 import { esFilters, FilterManager, Filter } from '../../../../../data/public';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
-import { AppState, GetStateReturn } from '../../types';
+import type { AppState, GetStateReturn } from '../../types';
 
 export interface ContextAppState extends AppState {
   /**

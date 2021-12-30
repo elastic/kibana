@@ -19,7 +19,7 @@ import {
   getInitialContextQueryState,
   LoadingStatus,
 } from '../services/context_query_state';
-import { ContextAppState } from '../services/context_state';
+import type { ContextAppState } from '../services/context_state';
 import { getFirstSortableField } from './sorting';
 import { EsHitRecord } from '../../types';
 

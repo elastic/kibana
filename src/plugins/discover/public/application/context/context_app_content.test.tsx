@@ -10,7 +10,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { ActionBar } from './components/action_bar/action_bar';
-import { ContextAppState, ContextGetStateReturn } from './services/context_state';
+import type { ContextAppState, ContextGetStateReturn } from './services/context_state';
 import { SortDirection } from 'src/plugins/data/common';
 import { ContextAppContent, ContextAppContentProps } from './context_app_content';
 import { getServices, setServices } from '../../kibana_services';

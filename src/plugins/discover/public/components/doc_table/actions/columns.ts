@@ -9,7 +9,7 @@ import { Capabilities, IUiSettingsClient } from 'kibana/public';
 import { SORT_DEFAULT_ORDER_SETTING } from '../../../../common';
 import { IndexPattern, IndexPatternsContract } from '../../../../../data/public';
 import { popularizeField } from '../../../utils/popularize_field';
-import { AppState, GetStateReturn } from '../../../application/types';
+import type { AppState, GetStateReturn } from '../../../application/types';
 
 /**
  * Helper function to provide a fallback to a single _source column if the given array of columns

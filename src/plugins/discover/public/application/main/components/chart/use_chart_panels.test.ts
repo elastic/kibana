@@ -9,21 +9,14 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import { useChartPanels } from './use_chart_panels';
-import { AppState } from '../../services/discover_state';
-import { BehaviorSubject } from 'rxjs';
-import { DataCharts$ } from '../../utils/use_saved_search';
-import { FetchStatus } from '../../../types';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { DiscoverAppState } from '../../services/discover_state';
 
 describe('test useChartPanels', () => {
   test('useChartsPanel when hideChart is true', async () => {
-    const charts$ = new BehaviorSubject({
-      fetchStatus: FetchStatus.COMPLETE,
-    }) as DataCharts$;
     const { result } = renderHook(() => {
       return useChartPanels(
-        { hideChart: true, interval: 'auto' } as AppState,
-        charts$,
+        { hideChart: true, interval: 'auto' } as DiscoverAppState,
         jest.fn(),
         jest.fn(),
         jest.fn()
@@ -35,13 +28,9 @@ describe('test useChartPanels', () => {
     expect(panel0!.items![0].icon).toBe('eye');
   });
   test('useChartsPanel when hideChart is false', async () => {
-    const charts$ = new BehaviorSubject({
-      fetchStatus: FetchStatus.COMPLETE,
-    }) as DataCharts$;
     const { result } = renderHook(() => {
       return useChartPanels(
-        { hideChart: false, interval: 'auto' } as AppState,
-        charts$,
+        { hideChart: false, interval: 'auto' } as DiscoverAppState,
         jest.fn(),
         jest.fn(),
         jest.fn()

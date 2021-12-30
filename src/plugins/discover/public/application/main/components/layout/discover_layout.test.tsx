@@ -18,7 +18,6 @@ import { createSearchSourceMock } from '../../../../../../data/common/search/sea
 import { IndexPattern, IndexPatternAttributes } from '../../../../../../data/common';
 import { SavedObject } from '../../../../../../../core/types';
 import { indexPatternWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
-import { GetStateReturn } from '../../services/discover_state';
 import { DiscoverLayoutProps } from './types';
 import {
   DataCharts$,
@@ -148,8 +147,6 @@ function getProps(indexPattern: IndexPattern, wasSidebarClosed?: boolean): Disco
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
     services,
-    state: { columns: [] },
-    stateContainer: {} as GetStateReturn,
     setExpandedDoc: jest.fn(),
   };
 }

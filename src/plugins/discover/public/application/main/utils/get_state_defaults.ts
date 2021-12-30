@@ -16,10 +16,10 @@ import {
 import { SavedSearch } from '../../../services/saved_searches';
 import { DataPublicPluginStart } from '../../../../../data/public';
 
-import { AppState } from '../services/discover_state';
 import { getDefaultSort, getSortArray } from '../../../components/doc_table';
 import { CHART_HIDDEN_KEY } from '../components/chart/discover_chart';
 import { Storage } from '../../../../../kibana_utils/public';
+import type { DiscoverAppState } from '../services/discover_state';
 
 function getDefaultColumns(savedSearch: SavedSearch, config: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {
@@ -63,7 +63,7 @@ export function getStateDefaults({
     viewMode: undefined,
     hideAggregatedPreview: undefined,
     savedQuery: undefined,
-  } as AppState;
+  } as DiscoverAppState;
   if (savedSearch.grid) {
     defaultState.grid = savedSearch.grid;
   }

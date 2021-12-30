@@ -9,8 +9,8 @@
 import { IUiSettingsClient } from 'kibana/public';
 import {
   getState,
-  GetStateReturn,
   createSearchSessionRestorationDataProvider,
+  DiscoverGetStateReturn,
 } from './discover_state';
 import { createBrowserHistory, History } from 'history';
 import { dataPluginMock } from '../../../../../data/public/mocks';
@@ -18,7 +18,7 @@ import type { SavedSearch } from '../../../services/saved_searches';
 import { SEARCH_FIELDS_FROM_SOURCE } from '../../../../common';
 
 let history: History;
-let state: GetStateReturn;
+let state: DiscoverGetStateReturn;
 const getCurrentUrl = () => history.createHref(history.location);
 
 const uiSettingsMock = {
