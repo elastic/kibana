@@ -25,8 +25,7 @@ import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 
 import { isEqual, sortBy } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DiscoverServices } from 'src/plugins/discover/public/build_services';
-import { useKibana } from '../../../../../../kibana_react/public';
+import { useDiscoverServices } from 'src/plugins/discover/public/utils/use_discover_services';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
@@ -110,7 +109,7 @@ export function DiscoverSidebarComponent({
 }: DiscoverSidebarProps) {
   const {
     services: { uiSettings, dataViewFieldEditor },
-  } = useKibana<DiscoverServices>();
+  } = useDiscoverServices();
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
 
   const dataViewFieldEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();

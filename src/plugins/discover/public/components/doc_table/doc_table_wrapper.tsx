@@ -18,11 +18,11 @@ import {
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '../../../common';
-import { getServices } from '../../kibana_services';
 import { SortOrder } from './components/table_header/helpers';
 import { DocTableRow, TableRow } from './components/table_row';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
+import { useDiscoverServices } from '../../utils/use_discover_services';
 
 export interface DocTableProps {
   /**
@@ -122,6 +122,7 @@ export const DocTableWrapper = forwardRef(
     }: DocTableWrapperProps,
     ref
   ) => {
+    const { services } = useDiscoverServices();
     const [
       defaultSortOrder,
       hideTimeColumn,
@@ -131,7 +132,6 @@ export const DocTableWrapper = forwardRef(
       filterManager,
       addBasePath,
     ] = useMemo(() => {
-      const services = getServices();
       return [
         services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc'),
         services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
@@ -141,7 +141,7 @@ export const DocTableWrapper = forwardRef(
         services.filterManager,
         services.addBasePath,
       ];
-    }, []);
+    }, [services.addBasePath, services.filterManager, services.uiSettings]);
 
     const onSkipBottomButtonClick = useCallback(async () => {
       // delay scrolling to after the rows have been rendered

@@ -16,13 +16,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../../../kibana_react/public';
+import { useDiscoverServices } from 'src/plugins/discover/public/utils/use_discover_services';
 import { HitsCounter } from '../hits_counter';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { DiscoverHistogram } from './histogram';
 import { DataCharts$, DataTotalHits$ } from '../../utils/use_saved_search';
-import { DiscoverServices } from '../../../../build_services';
 import { useChartPanels } from './use_chart_panels';
 import { VIEW_MODE, DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { SHOW_FIELD_STATISTICS } from '../../../../../common';
@@ -53,7 +52,7 @@ export function DiscoverChart({
 }) {
   const {
     services: { uiSettings, data, storage },
-  } = useKibana<DiscoverServices>();
+  } = useDiscoverServices();
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
 

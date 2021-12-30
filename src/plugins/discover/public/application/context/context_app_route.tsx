@@ -15,8 +15,7 @@ import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { useIndexPattern } from '../../utils/use_index_pattern';
 import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
-import { useKibana } from '../../../../kibana_react/public';
-import { DiscoverServices } from '../../build_services';
+import { useDiscoverServices } from '../../utils/use_discover_services';
 
 export interface ContextUrlParams {
   indexPatternId: string;
@@ -24,7 +23,7 @@ export interface ContextUrlParams {
 }
 
 export function ContextAppRoute() {
-  const { services } = useKibana<DiscoverServices>();
+  const { services } = useDiscoverServices();
   const { chrome } = services;
 
   const { indexPatternId, id } = useParams<ContextUrlParams>();

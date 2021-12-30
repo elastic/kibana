@@ -7,8 +7,7 @@
  */
 import React, { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { DiscoverServices } from '../../../../build_services';
-import { useKibana } from '../../../../../../kibana_react/public';
+import { useDiscoverServices } from 'src/plugins/discover/public/utils/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
 import { getTopNavLinks } from './get_top_nav_links';
 import { Query, TimeRange } from '../../../../../../data/common/query';
@@ -45,7 +44,7 @@ export const DiscoverTopNav = ({
     () => indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP,
     [indexPattern]
   );
-  const { services } = useKibana<DiscoverServices>();
+  const { services } = useDiscoverServices();
   const { TopNavMenu } = services.navigation.ui;
 
   const onOpenSavedSearch = useCallback(

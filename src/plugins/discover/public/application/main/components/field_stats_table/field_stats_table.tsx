@@ -9,9 +9,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { useKibana } from '../../../../../../kibana_react/public';
+import { useDiscoverServices } from 'src/plugins/discover/public/utils/use_discover_services';
 import { IndexPatternField, IndexPattern, DataView, Query } from '../../../../../../data/common';
-import type { DiscoverServices } from '../../../../build_services';
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -98,7 +97,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     trackUiMetric,
     savedSearchRefetch$,
   } = props;
-  const { services } = useKibana<DiscoverServices>();
+  const { services } = useDiscoverServices();
   const [embeddable, setEmbeddable] = useState<
     | ErrorEmbeddable
     | IEmbeddable<DataVisualizerGridEmbeddableInput, DataVisualizerGridEmbeddableOutput>

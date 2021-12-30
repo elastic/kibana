@@ -34,7 +34,7 @@ import {
 } from '@elastic/charts';
 import { IUiSettingsClient } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../../../../../kibana_react/public';
+import { useDiscoverServices } from 'src/plugins/discover/public/utils/use_discover_services';
 import {
   CurrentTime,
   Endzones,
@@ -43,7 +43,6 @@ import {
 } from '../../../../../../charts/public';
 import { DataCharts$, DataChartsMessage } from '../../utils/use_saved_search';
 import { FetchStatus } from '../../../types';
-import { DiscoverServices } from '../../../../build_services';
 import { useDataState } from '../../utils/use_data_state';
 import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '../../../../../../charts/common';
 
@@ -68,7 +67,7 @@ export function DiscoverHistogram({
 }: DiscoverHistogramProps) {
   const {
     services: { data, theme, uiSettings },
-  } = useKibana<DiscoverServices>();
+  } = useDiscoverServices();
   const chartTheme = theme.useChartsTheme();
   const chartBaseTheme = theme.useChartsBaseTheme();
 

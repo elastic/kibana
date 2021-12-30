@@ -9,7 +9,6 @@ import React, { useEffect, useState, memo } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 
 import { IndexPatternAttributes, ISearchSource, SavedObject } from 'src/plugins/data/common';
-import { useKibana } from '../../../../kibana_react/public';
 import {
   SavedSearch,
   getSavedSearch,
@@ -24,7 +23,7 @@ import { DataViewSavedObjectConflictError } from '../../../../data_views/common'
 import { getUrlTracker } from '../../kibana_services';
 import { LoadingIndicator } from '../../components/common/loading_indicator';
 import { DiscoverError } from '../../components/common/error_alert';
-import { DiscoverServices } from '../../build_services';
+import { useDiscoverServices } from '../../utils/use_discover_services';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -44,7 +43,7 @@ export function DiscoverMainRoute() {
       http: { basePath },
     },
     services,
-  } = useKibana<DiscoverServices>();
+  } = useDiscoverServices();
   const [error, setError] = useState<Error>();
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
   const indexPattern = savedSearch?.searchSource?.getField('index');

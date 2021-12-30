@@ -15,8 +15,7 @@ import { useIndexPattern } from '../../utils/use_index_pattern';
 import { withQueryParams } from '../../utils/with_query_params';
 import { useMainRouteBreadcrumb } from '../../utils/use_navigation_props';
 import { Doc } from './components/doc';
-import { DiscoverServices } from '../../build_services';
-import { useKibana } from '../../../../kibana_react/public';
+import { useDiscoverServices } from '../../utils/use_discover_services';
 
 export interface SingleDocRouteProps {
   /**
@@ -31,7 +30,7 @@ export interface DocUrlParams {
 }
 
 const SingleDoc = ({ id }: SingleDocRouteProps) => {
-  const { services } = useKibana<DiscoverServices>();
+  const { services } = useDiscoverServices();
   const { chrome, timefilter } = services;
 
   const { indexPatternId, index } = useParams<DocUrlParams>();

@@ -18,13 +18,12 @@ import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { AppState } from './services/context_state';
 import { SurrDocType } from './services/context';
-import { DiscoverServices } from '../../build_services';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { EsHitRecordList } from '../types';
 import { SortPairArr } from '../../components/doc_table/lib/get_sort';
 import { ElasticSearchHit } from '../../types';
-import { useKibana } from '../../../../kibana_react/public';
+import { useDiscoverServices } from '../../utils/use_discover_services';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -77,7 +76,7 @@ export function ContextAppContent({
 }: ContextAppContentProps) {
   const {
     services: { uiSettings: config },
-  } = useKibana<DiscoverServices>();
+  } = useDiscoverServices();
 
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>();
   const isAnchorLoading =

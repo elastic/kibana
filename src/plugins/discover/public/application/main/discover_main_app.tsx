@@ -7,16 +7,15 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { useKibana } from '../../../../kibana_react/public';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
 import { useDiscoverState } from './utils/use_discover_state';
 import { useUrl } from './utils/use_url';
 import { IndexPatternAttributes, SavedObject } from '../../../../data/common';
-import { DiscoverServices } from '../../build_services';
 import { SavedSearch } from '../../services/saved_searches';
 import { ElasticSearchHit } from '../../types';
+import { useDiscoverServices } from '../../utils/use_discover_services';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -36,7 +35,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   const {
     services: { chrome, docLinks, uiSettings: config, data },
     services,
-  } = useKibana<DiscoverServices>();
+  } = useDiscoverServices();
   const history = useHistory();
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const navigateTo = useCallback(

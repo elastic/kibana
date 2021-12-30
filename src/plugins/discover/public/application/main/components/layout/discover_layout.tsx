@@ -21,8 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
-import { DiscoverServices } from 'src/plugins/discover/public/build_services';
-import { useKibana } from '../../../../../../kibana_react/public';
+import { useDiscoverServices } from 'src/plugins/discover/public/utils/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
 import { esFilters, IndexPatternField } from '../../../../../../data/public';
@@ -90,7 +89,7 @@ export function DiscoverLayout({
       spaces,
       inspector,
     },
-  } = useKibana<DiscoverServices>();
+  } = useDiscoverServices();
   const { main$, charts$, totalHits$ } = savedSearchData$;
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 

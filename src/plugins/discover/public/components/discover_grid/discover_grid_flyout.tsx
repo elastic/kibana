@@ -24,12 +24,11 @@ import {
   EuiHideFor,
   keys,
 } from '@elastic/eui';
-import { useKibana } from '../../../../kibana_react/public';
 import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
-import { DiscoverServices } from '../../build_services';
 import { useNavigationProps } from '../../utils/use_navigation_props';
 import { ElasticSearchHit } from '../../types';
+import { useDiscoverServices } from '../../utils/use_discover_services';
 
 export interface DiscoverGridFlyoutProps {
   columns: string[];
@@ -69,7 +68,7 @@ export function DiscoverGridFlyout({
   onAddColumn,
   setExpandedDoc,
 }: DiscoverGridFlyoutProps) {
-  const { services } = useKibana<DiscoverServices>();
+  const { services } = useDiscoverServices();
   // Get actual hit with updated highlighted searches
   const actualHit = useMemo(() => hits?.find(({ _id }) => _id === hit?._id) || hit, [hit, hits]);
   const pageCount = useMemo<number>(() => (hits ? hits.length : 0), [hits]);

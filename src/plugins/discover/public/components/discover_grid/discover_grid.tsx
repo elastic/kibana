@@ -21,7 +21,6 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
 } from '@elastic/eui';
-import { useKibana } from '../../../../kibana_react/public';
 import { flattenHit, IndexPattern } from '../../../../data/common';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
@@ -40,7 +39,6 @@ import {
   pageSizeArr,
   toolbarVisibility as toolbarVisibilityDefaults,
 } from './constants';
-import { DiscoverServices } from '../../build_services';
 import { getDisplayedColumns } from '../../utils/columns';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -51,6 +49,7 @@ import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_docume
 import { SortPairArr } from '../doc_table/lib/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
 import { ElasticSearchHit } from '../../types';
+import { useDiscoverServices } from '../../utils/use_discover_services';
 
 interface SortObj {
   id: string;
@@ -189,7 +188,7 @@ export const DiscoverGrid = ({
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
   className,
 }: DiscoverGridProps) => {
-  const { services } = useKibana<DiscoverServices>();
+  const { services } = useDiscoverServices();
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, indexPattern);
