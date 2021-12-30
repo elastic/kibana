@@ -60,6 +60,9 @@ export interface ReportingInternalStart {
   screenshotting: ScreenshottingStart;
 }
 
+/**
+ * @internal
+ */
 export class ReportingCore {
   private packageInfo: PackageInfo;
   private pluginSetupDeps?: ReportingInternalSetup;
