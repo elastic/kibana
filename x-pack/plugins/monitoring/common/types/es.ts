@@ -75,6 +75,9 @@ export interface ElasticsearchSourceKibanaMetrics {
     id?: string;
     lastExecutionDuration?: number;
     lastExecutionTimeout?: Date;
+    totalExecutions?: number;
+    averageDrift?: number;
+    averageDuration?: number;
   };
 }
 

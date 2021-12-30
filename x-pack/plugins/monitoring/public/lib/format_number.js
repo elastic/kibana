@@ -44,6 +44,8 @@ export function formatNumber(num, which) {
     case 'ms':
       postfix = 'ms';
       break;
+    case 'duration':
+      return moment.duration(num).humanize({ ss: 3 });
     default:
       if (which) {
         format = which;

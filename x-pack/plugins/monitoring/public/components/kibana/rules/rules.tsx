@@ -14,6 +14,7 @@ import {
   EuiSpacer,
   EuiLink,
   EuiScreenReaderOnly,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -62,28 +63,40 @@ const getColumns = (alerts: AlertsByName) => {
         defaultMessage: 'Average drift',
       }),
       field: 'averageDrift',
-      render: (value: string) => <span>{formatMetric(value, '0.00')}</span>,
+      render: (value: string) => {
+        return (
+          <EuiToolTip content={formatMetric(value, 'ms')}>
+            <span>{formatMetric(value, 'duration')}</span>
+          </EuiToolTip>
+        );
+      },
     },
     {
       name: i18n.translate('xpack.monitoring.kibana.rules.averageDurationColumnTitle', {
         defaultMessage: 'Average duration',
       }),
       field: 'averageDuration',
-      render: (value: string) => <span>{formatMetric(value, '0.00')}</span>,
+      render: (value: string) => {
+        return (
+          <EuiToolTip content={formatMetric(value, 'ms')}>
+            <span>{formatMetric(value, 'duration')}</span>
+          </EuiToolTip>
+        );
+      },
     },
     {
       name: i18n.translate('xpack.monitoring.kibana.rules.totalExecutionsColumnTitle', {
         defaultMessage: 'Total executions',
       }),
       field: 'totalExecutions',
-      render: (value: string) => <span>{formatNumber(value, '0.00')}</span>,
+      render: (value: string) => <span>{formatNumber(value, 'int_commas')}</span>,
     },
     {
       name: i18n.translate('xpack.monitoring.kibana.rules.lastDurationColumnTitle', {
         defaultMessage: 'Last duration',
       }),
       field: 'lastExecutionDuration',
-      render: (value: string) => <span>{formatNumber(value, '0.00')}</span>,
+      render: (value: string) => <span>{formatNumber(value, 'duration')}</span>,
     },
   ];
 

@@ -62,12 +62,6 @@ export function kibanaRuleRoute(server: LegacyServer, npRoute: RouteDependencies
           getRule(req, kbnIndexPattern, ruleId, { clusterUuid }),
         ]);
 
-        Object.values(metrics).forEach((metric) => {
-          for (const item of metric) {
-            item.metric.label = item.metric.label.replace('[ruleName]', rule.name);
-          }
-        });
-
         return {
           metrics,
           rule,

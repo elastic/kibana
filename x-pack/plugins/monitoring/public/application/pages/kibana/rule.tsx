@@ -33,6 +33,7 @@ import { AlertsCallout } from '../../../alerts/callout';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { RULE_KIBANA_VERSION_MISMATCH } from '../../../../common/constants';
+import { RuleStatus } from '../../../components/kibana/rule_status';
 
 const KibanaRule = ({ data, alerts }: { data: any; alerts: any }) => {
   const { zoomInfo, onBrush } = useCharts();
@@ -40,7 +41,9 @@ const KibanaRule = ({ data, alerts }: { data: any; alerts: any }) => {
   return (
     <EuiPage>
       <EuiPageBody>
-        <EuiPanel>{/* <DetailStatus stats={data.kibanaSummary} /> */}</EuiPanel>
+        <EuiPanel>
+          <RuleStatus rule={data.rule} />
+        </EuiPanel>
         <EuiSpacer size="m" />
         <AlertsCallout alerts={alerts} />
         <EuiPageContent>
@@ -48,6 +51,14 @@ const KibanaRule = ({ data, alerts }: { data: any; alerts: any }) => {
             <EuiFlexItem grow={true}>
               <MonitoringTimeseriesContainer
                 series={data.metrics.kibana_rule_drift}
+                onBrush={onBrush}
+                zoomInfo={zoomInfo}
+              />
+              <EuiSpacer />
+            </EuiFlexItem>
+            <EuiFlexItem grow={true}>
+              <MonitoringTimeseriesContainer
+                series={data.metrics.kibana_rule_total_executions}
                 onBrush={onBrush}
                 zoomInfo={zoomInfo}
               />

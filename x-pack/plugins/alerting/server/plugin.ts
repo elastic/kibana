@@ -356,7 +356,8 @@ export class AlertingPlugin {
               const ruleMetric = {
                 name: rule.name,
                 id,
-                lastExecutionDuration: lastExecute?.event?.duration ?? 0,
+                // This is in nanoseconds
+                lastExecutionDuration: (lastExecute?.event?.duration ?? 0) / (1000 * 1000),
                 lastExecutionTimeout: lastTimeout?.['@timestamp'],
                 averageDrift: metrics.drift ?? 0,
                 averageDuration: metrics.duration ?? 0,

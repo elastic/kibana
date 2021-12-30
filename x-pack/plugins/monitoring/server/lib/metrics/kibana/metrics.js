@@ -257,7 +257,7 @@ export const metrics = {
   kibana_rule_drift: new KibanaMetric({
     field: 'kibana_metrics.rule.averageDrift',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.ruleDrift.label', {
-      defaultMessage: 'Rule [ruleName] Drift',
+      defaultMessage: 'Drift',
     }),
     description: i18n.translate('xpack.monitoring.metrics.kibanaInstance.ruleDrift.description', {
       defaultMessage: 'TODO: fill out.',
@@ -265,6 +265,21 @@ export const metrics = {
     format: SMALL_FLOAT,
     metricAgg: 'avg',
     units: '',
-    // debug: true,
+  }),
+  kibana_rule_total_executions: new KibanaMetric({
+    derivative: true,
+    field: 'kibana_metrics.rule.totalExecutions',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.totalExecutions.label', {
+      defaultMessage: 'Rate of Total Executions',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.totalExecutions.description',
+      {
+        defaultMessage: 'TODO: fill out.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
   }),
 };

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const metricSet = ['kibana_rule_drift'];
+export const metricSet = ['kibana_rule_drift', 'kibana_rule_total_executions'];
