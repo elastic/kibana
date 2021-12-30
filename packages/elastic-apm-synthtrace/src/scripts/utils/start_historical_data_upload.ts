@@ -8,7 +8,7 @@
 import { getCommonServices } from './get_common_services';
 import { RunOptions } from './parse_run_cli_flags';
 import { getScenario } from './get_scenario';
-import { ApmFields } from '../../lib/apm/apm_fields';
+import { apm } from '../../lib/apm';
 
 export async function startHistoricalDataUpload({
   from,
@@ -40,13 +40,9 @@ export async function startHistoricalDataUpload({
     writeTarget,
   });
 
-  const events = logger.perf('execute_scenario', () => generate({ from, to }));
+  const events = logger.perf('generate_scenario', () => generate({ from, to }));
 
-  await client.helpers.bulk<ApmFields>({
-    datasource: events[Symbol.asyncIterator](),
-    onDocument: (doc) => {
-      return { index: { _index: '' } };
-    },
-    concurrency: clientWorkers,
-  });
+  const apmClient = new apm.ApmSynthtraceEsClient(client, logger);
+  await logger.perf('index_scenario', () => apmClient.index(events, clientWorkers));
+
 }

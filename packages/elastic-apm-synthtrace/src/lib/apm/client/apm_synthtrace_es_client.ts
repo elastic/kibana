@@ -32,9 +32,13 @@ export class ApmSynthtraceEsClient {
     );
   }
 
-  async index(events: SpanIterable) {
+  async index(events: SpanIterable, concurrency?: number) {
     const writeTargets = await this.getWriteTargets();
+    // TODO logger.perf
     await this.client.helpers.bulk<ApmFields>({
+      concurrency: concurrency,
+      refresh: false,
+      refreshOnCompletion: false,
       datasource: new StreamProcessor({processors: StreamProcessor.apmProcessors})
         .streamAsync(events),
       // TODO bug in client not passing generic to BulkHelperOptions<>
