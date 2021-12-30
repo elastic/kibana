@@ -6,9 +6,10 @@
  */
 
 import React, { FC, useMemo } from 'react';
-import { EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
+import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useMlLink } from '../../../contexts/kibana';
+import { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import { useMlLink, useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
 import { getAnalysisType } from '../../../data_frame_analytics/common/analytics';
 import { DataFrameAnalyticsListRow } from '../../../data_frame_analytics/pages/analytics_management/components/analytics_list/common';
 import { getViewLinkStatus } from '../../../data_frame_analytics/pages/analytics_management/components/action_view/get_view_link_status';
@@ -41,21 +42,53 @@ export const ViewLink: FC<Props> = ({ item }) => {
   });
 
   return (
-    <EuiToolTip position="bottom" content={tooltipText}>
-      <EuiButtonEmpty
+    <EuiToolTip position="top" content={tooltipText}>
+      <EuiButtonIcon
         href={viewAnalyticsResultsLink}
-        color="text"
         size="xs"
         iconType="visTable"
         aria-label={viewJobResultsButtonText}
-        className="results-button"
         data-test-subj="mlOverviewAnalyticsJobViewButton"
         isDisabled={disabled}
-      >
-        {i18n.translate('xpack.ml.overview.analytics.viewActionName', {
-          defaultMessage: 'View',
-        })}
-      </EuiButtonEmpty>
+      />
     </EuiToolTip>
   );
 };
+
+export function useTableActions(): Array<Action<DataFrameAnalyticsListRow>> {
+  const locator = useMlLocator();
+  const navigateToPath = useNavigateToPath();
+
+  return [
+    {
+      isPrimary: false,
+      name: i18n.translate('xpack.ml.overview.analytics.viewJobActionName', {
+        defaultMessage: 'View job',
+      }),
+      description: i18n.translate('xpack.ml.overview.analytics.viewJobActionName', {
+        defaultMessage: 'View job',
+      }),
+      type: 'icon',
+      icon: 'list',
+      onClick: async (item) => {
+        const path = await locator?.getUrl({
+          page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+          pageState: {
+            jobId: item.id,
+          },
+        });
+        await navigateToPath(path);
+      },
+    },
+    {
+      isPrimary: false,
+      name: i18n.translate('xpack.ml.overview.analytics.viewResultsActionName', {
+        defaultMessage: 'View results',
+      }),
+      description: i18n.translate('xpack.ml.overview.analytics.resultActions.openJobText', {
+        defaultMessage: 'View job results',
+      }),
+      render: (item: DataFrameAnalyticsListRow) => <ViewLink item={item} />,
+    },
+  ];
+}

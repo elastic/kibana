@@ -162,7 +162,8 @@ describe('setRefreshInterval', () => {
     expect(timefilter.getRefreshInterval()).toEqual({ pause: true, value: 0 });
   });
 
-  test('should set pause to true when interval is zero', () => {
+  test('should set pause to true when interval is changed to zero from non-zero', () => {
+    timefilter.setRefreshInterval({ value: 1000, pause: false });
     timefilter.setRefreshInterval({ value: 0, pause: false });
     expect(timefilter.getRefreshInterval()).toEqual({ pause: true, value: 0 });
   });

@@ -8,7 +8,7 @@
 import React, { useEffect, useRef, useCallback, ReactPortal, useState, memo } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import deepEqual from 'react-fast-compare';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { createPortal } from 'react-dom';
 import { BaseForm, BaseFormProps } from './base_form';
 import { ExpressionFormHandlers } from '../../common/lib';

@@ -33,6 +33,13 @@ export default {
               prepend: () => '',
             },
           },
+          docLinks: {
+            links: {
+              observability: {
+                guide: 'alink',
+              },
+            },
+          },
         },
         ObservabilityPageTemplate: EuiPageTemplate,
       } as unknown as PluginContextValue;
