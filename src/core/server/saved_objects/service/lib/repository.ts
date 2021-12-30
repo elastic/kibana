@@ -874,6 +874,7 @@ export class SavedObjectsRepository {
       defaultSearchOperator = 'OR',
       searchFields,
       rootSearchFields,
+      searchOptions,
       hasReference,
       hasReferenceOperator,
       page = FIND_DEFAULT_PAGE,
@@ -970,6 +971,7 @@ export class SavedObjectsRepository {
         ...(aggsObject ? { aggs: aggsObject } : {}),
         ...getSearchDsl(this._mappings, this._registry, {
           search,
+          searchOptions,
           defaultSearchOperator,
           searchFields,
           pit,

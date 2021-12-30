@@ -11,6 +11,7 @@ import * as esKuery from '@kbn/es-query';
 type KueryNode = any;
 
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
+import { SearchOption } from '../../../types';
 import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
 import { getReferencesFilter } from './references_filter';
 
@@ -132,10 +133,7 @@ interface QueryParams {
   namespaces?: string[];
   type?: string | string[];
   typeToNamespacesMap?: Map<string, string[] | undefined>;
-  search?: string;
-  defaultSearchOperator?: SearchOperator;
-  searchFields?: string[];
-  rootSearchFields?: string[];
+  searchOptions?: SearchOption[];
   hasReference?: HasReferenceQueryParams | HasReferenceQueryParams[];
   hasReferenceOperator?: SearchOperator;
   kueryNode?: KueryNode;
@@ -153,10 +151,7 @@ export function getQueryParams({
   namespaces,
   type,
   typeToNamespacesMap,
-  search,
-  searchFields,
-  rootSearchFields,
-  defaultSearchOperator,
+  searchOptions = [],
   hasReference,
   hasReferenceOperator,
   kueryNode,
@@ -195,8 +190,17 @@ export function getQueryParams({
     ],
   };
 
-  if (search) {
-    const useMatchPhrasePrefix = shouldUseMatchPhrasePrefix(search);
+  const hasSearchOptions = searchOptions.length > 0;
+  const hasASingleSearchOption = searchOptions.length === 1;
+  const firstSearchOption = searchOptions[0];
+  const useMatchPhrasePrefix =
+    hasASingleSearchOption &&
+    !!firstSearchOption &&
+    firstSearchOption.search &&
+    shouldUseMatchPhrasePrefix(firstSearchOption.search);
+
+  if (useMatchPhrasePrefix && firstSearchOption.search) {
+    const { search, searchFields, rootSearchFields, defaultSearchOperator } = firstSearchOption;
     const simpleQueryStringClause = getSimpleQueryStringClause({
       search,
       types,
@@ -211,9 +215,21 @@ export function getQueryParams({
         ...getMatchPhrasePrefixClauses({ search, searchFields, types, registry }),
       ];
       bool.minimum_should_match = 1;
-    } else {
-      bool.must = [simpleQueryStringClause];
     }
+  } else if (hasSearchOptions) {
+    bool.must = searchOptions
+      .map(({ search, searchFields, rootSearchFields, defaultSearchOperator }) => {
+        return search
+          ? getSimpleQueryStringClause({
+              search,
+              types,
+              searchFields,
+              rootSearchFields,
+              defaultSearchOperator,
+            })
+          : null;
+      })
+      .filter(Boolean);
   }
 
   return { query: { bool } };

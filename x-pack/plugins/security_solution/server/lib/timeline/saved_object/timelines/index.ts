@@ -188,6 +188,37 @@ export const getExistingPrepackagedTimelines = async (
   return getAllSavedTimeline(request, elasticTemplateTimelineOptions);
 };
 
+function getSearchOptions({
+  request,
+  search,
+  onlyUserFavorite,
+}: {
+  request: FrameworkRequest;
+  search: string | null;
+  onlyUserFavorite: boolean | null;
+}) {
+  if (onlyUserFavorite) {
+    const username = request.user?.username ?? UNAUTHENTICATED_USER;
+    return [
+      {
+        search: search != null ? search : undefined,
+        searchFields: ['title', 'description'],
+      },
+      {
+        search: convertStringToBase64(username),
+        searchFields: ['favorite.keySearch'],
+      },
+    ];
+  } else {
+    return [
+      {
+        search: search != null ? search : undefined,
+        searchFields: ['title', 'description'],
+      },
+    ];
+  }
+}
+
 export const getAllTimeline = async (
   request: FrameworkRequest,
   onlyUserFavorite: boolean | null,
@@ -201,10 +232,7 @@ export const getAllTimeline = async (
     type: timelineSavedObjectType,
     perPage: pageInfo.pageSize,
     page: pageInfo.pageIndex,
-    search: search != null ? search : undefined,
-    searchFields: onlyUserFavorite
-      ? ['title', 'description', 'favorite.keySearch']
-      : ['title', 'description'],
+    searchOptions: getSearchOptions({ request, search, onlyUserFavorite }),
     filter: getTimelineTypeFilter(timelineType ?? null, status ?? null),
     sortField: sort != null ? sort.sortField : undefined,
     sortOrder: sort != null ? sort.sortOrder : undefined,
@@ -233,7 +261,7 @@ export const getAllTimeline = async (
 
   const favoriteTimelineOptions = {
     type: timelineSavedObjectType,
-    searchFields: ['title', 'description', 'favorite.keySearch'],
+    searchOptions: getSearchOptions({ request, search, onlyUserFavorite: true }),
     perPage: 1,
     page: 1,
     filter: getTimelineTypeFilter(timelineType ?? null, TimelineStatus.active),
@@ -623,11 +651,6 @@ const getSavedTimeline = async (request: FrameworkRequest, timelineId: string) =
 const getAllSavedTimeline = async (request: FrameworkRequest, options: SavedObjectsFindOptions) => {
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
   const savedObjectsClient = request.context.core.savedObjects.client;
-  if (options.searchFields != null && options.searchFields.includes('favorite.keySearch')) {
-    options.search = `${options.search != null ? options.search : ''} ${
-      userName != null ? convertStringToBase64(userName) : null
-    }`;
-  }
 
   const savedObjects = await savedObjectsClient.find<TimelineWithoutExternalRefs>(options);
 

@@ -174,8 +174,7 @@ describe('saved_object', () => {
         type: 'siem-ui-timeline',
         sortField: undefined,
         sortOrder: undefined,
-        search: undefined,
-        searchFields: ['title', 'description'],
+        searchOptions: [{ search: undefined, searchFields: ['title', 'description'] }],
       });
     });
 
@@ -225,8 +224,10 @@ describe('saved_object', () => {
           'not siem-ui-timeline.attributes.status: draft and not siem-ui-timeline.attributes.status: immutable',
         page: 1,
         perPage: 1,
-        search: ' dXNlcm5hbWU=',
-        searchFields: ['title', 'description', 'favorite.keySearch'],
+        searchOptions: [
+          { search: undefined, searchFields: ['title', 'description'] },
+          { search: 'dXNlcm5hbWU=', searchFields: ['favorite.keySearch'] },
+        ],
         type: 'siem-ui-timeline',
       });
     });

@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IndexMapping } from '../../../mappings';
-import { SavedObjectsPitParams } from '../../../types';
+import { SavedObjectsPitParams, SearchOption } from '../../../types';
 import { getQueryParams, HasReferenceQueryParams, SearchOperator } from './query_params';
 import { getPitParams } from './pit_params';
 import { getSortingParams } from './sorting_params';
@@ -24,6 +24,7 @@ interface GetSearchDslOptions {
   defaultSearchOperator?: SearchOperator;
   searchFields?: string[];
   rootSearchFields?: string[];
+  searchOptions?: SearchOption[];
   searchAfter?: estypes.Id[];
   sortField?: string;
   sortOrder?: estypes.SortOrder;
@@ -65,16 +66,30 @@ export function getSearchDsl(
     throw Boom.notAcceptable('sortOrder requires a sortField');
   }
 
+  if (search && options.searchOptions) {
+    throw Boom.notAcceptable('`search` and `searchOptions` cannot be used together');
+  }
+
+  let searchOptions = options.searchOptions;
+
+  if (!searchOptions && (search || searchFields || rootSearchFields || defaultSearchOperator)) {
+    searchOptions = [
+      {
+        search,
+        searchFields,
+        rootSearchFields,
+        defaultSearchOperator,
+      },
+    ];
+  }
+
   return {
     ...getQueryParams({
       registry,
       namespaces,
       type,
       typeToNamespacesMap,
-      search,
-      searchFields,
-      rootSearchFields,
-      defaultSearchOperator,
+      searchOptions,
       hasReference,
       hasReferenceOperator,
       kueryNode,

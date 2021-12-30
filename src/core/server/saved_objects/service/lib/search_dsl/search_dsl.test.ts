@@ -72,10 +72,14 @@ describe('getSearchDsl', () => {
         namespaces: opts.namespaces,
         type: opts.type,
         typeToNamespacesMap: opts.typeToNamespacesMap,
-        search: opts.search,
-        searchFields: opts.searchFields,
-        rootSearchFields: opts.rootSearchFields,
-        defaultSearchOperator: opts.defaultSearchOperator,
+        searchOptions: [
+          {
+            search: opts.search,
+            searchFields: opts.searchFields,
+            rootSearchFields: opts.rootSearchFields,
+            defaultSearchOperator: opts.defaultSearchOperator,
+          },
+        ],
         hasReference: opts.hasReference,
         hasReferenceOperator: opts.hasReferenceOperator,
       });
