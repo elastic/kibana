@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import urllib from 'url';
 import React, { Component, ReactElement } from 'react';
 import { CoreStart } from 'kibana/public';
 import {
@@ -36,7 +35,6 @@ import {
   AnonymousAccessState,
 } from '../../common/anonymous_access';
 import type { BrowserUrlService } from '../types';
-import { LEGACY_SHORT_URL_LOCATOR_ID } from '../../common/url_service/locators/legacy_short_url_locator';
 
 interface Props {
   allowShortUrl: boolean;
