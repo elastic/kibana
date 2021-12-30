@@ -43,7 +43,7 @@ export function CompletedStatusBox({
   integrationLink,
 }: ObservabilityStatusBoxProps) {
   return (
-    <EuiPanel color="subdued" style={{ marginBottom: 20 }}>
+    <EuiPanel color="subdued">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem>
           <div>

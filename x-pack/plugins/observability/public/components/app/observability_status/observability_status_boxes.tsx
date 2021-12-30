@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { ObservabilityStatusBox, ObservabilityStatusBoxProps } from './observability_status_box';
-
 export interface ObservabilityStatusProps {
   boxes: ObservabilityStatusBoxProps[];
 }
@@ -16,7 +16,10 @@ export function ObservabilityStatusBoxes({ boxes }: ObservabilityStatusProps) {
   return (
     <div>
       {boxes.map((box) => (
-        <ObservabilityStatusBox key={box.id} {...box} />
+        <>
+          <ObservabilityStatusBox key={box.id} {...box} />
+          <EuiSpacer />
+        </>
       ))}
     </div>
   );
