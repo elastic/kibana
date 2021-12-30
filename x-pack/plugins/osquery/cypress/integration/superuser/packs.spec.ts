@@ -90,16 +90,27 @@ describe('SuperUser - Packs', () => {
         `pack_${PACK_NAME}_${SAVED_QUERY_ID}`
       );
     });
-    // it('by clicking in Lens button', () => {
-    // preparePack(PACK_NAME, SAVED_QUERY_ID);
-    //   cy.react('CustomItemAction', {
-    //     props: { index: 1, item: { id: SAVED_QUERY_ID } },
-    //   }).click();
-    //   cy.getBySel('lnsWorkspace');
-    //   cy.getBySel('breadcrumbs').contains(
-    //     `Action pack_${PACK_NAME}_${SAVED_QUERY_ID} results`
-    //   );
-    // });
+    it('by clicking in Lens button', () => {
+      let lensUrl = '';
+      cy.window().then((win) => {
+        cy.stub(win, 'open')
+          .as('windowOpen')
+          .callsFake((url) => {
+            lensUrl = url;
+          });
+      });
+      preparePack(PACK_NAME, SAVED_QUERY_ID);
+      cy.react('CustomItemAction', {
+        props: { index: 1, item: { id: SAVED_QUERY_ID } },
+      }).click();
+      cy.window()
+        .its('open')
+        .then(() => {
+          cy.visit(lensUrl);
+        });
+      cy.getBySel('lnsWorkspace');
+      cy.getBySel('breadcrumbs').contains(`Action pack_${PACK_NAME}_${SAVED_QUERY_ID} results`);
+    });
 
     // strange behaviour with modal
     it.skip('toggle pack pack', () => {
