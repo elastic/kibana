@@ -92,6 +92,7 @@ import type {
   PluginInitializerContext,
 } from './plugin_contract';
 import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
+import { threatFieldMap } from '../../rule_registry/common/assets/field_maps/threat_field_map';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -228,7 +229,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       ...ruleDataServiceOptions,
       additionalPrefix: `.percolator`,
       ilmPolicy: previewIlmPolicy,
-      dataset: Dataset.events,
+      dataset: Dataset.alerts,
       componentTemplates: [
         {
           name: 'mappings',
@@ -238,6 +239,7 @@ export class Plugin implements ISecuritySolutionPlugin {
               ...alertsFieldMap,
               ...rulesFieldMap,
               ...aliasesFieldMap,
+              ...threatFieldMap,
               query: {
                 type: 'percolator',
               },

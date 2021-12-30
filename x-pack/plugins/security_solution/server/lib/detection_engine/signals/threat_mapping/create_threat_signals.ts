@@ -134,6 +134,8 @@ export const createThreatSignals = async ({
         perPage,
       });
     }
+
+    console.log('____filter0', allThreatFilters[0]);
     await percolatorRuleDataClient.getWriter().bulk({
       body: allThreatFilters.flatMap((filter) => [
         {
