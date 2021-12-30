@@ -327,6 +327,10 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
     field?: IndexPatternField;
   }) => boolean;
   /**
+   * Returns the list of current fields for a multi field operation
+   */
+  getCurrentFields?: (targetColumn: C) => string[];
+  /**
    * Operation can influence some visual default settings. This function is used to collect default values offered
    */
   getDefaultVisualSettings?: (column: C) => { truncateText?: boolean };

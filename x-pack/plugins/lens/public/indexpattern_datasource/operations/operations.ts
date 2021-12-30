@@ -17,6 +17,7 @@ import {
 } from './definitions';
 import { IndexPattern, IndexPatternField } from '../types';
 import { documentField } from '../document_field';
+import { hasField } from '../pure_utils';
 
 export { operationDefinitionMap } from './definitions';
 /**
@@ -60,6 +61,17 @@ export function getSortScoreByPriority(
   b: GenericOperationDefinition
 ) {
   return (b.priority || Number.NEGATIVE_INFINITY) - (a.priority || Number.NEGATIVE_INFINITY);
+}
+
+export function getCurrentFieldsForOperation(targetColumn: BaseIndexPatternColumn) {
+  if (!hasField(targetColumn)) {
+    return [];
+  }
+  return (
+    operationDefinitions
+      .find(({ type }) => targetColumn.operationType === type)
+      ?.getCurrentFields?.(targetColumn) ?? [targetColumn.sourceField]
+  );
 }
 
 export function getOperationHelperForMultipleFields(operationType: string) {

@@ -79,6 +79,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
   }),
   priority: 3, // Higher than any metric
   input: 'field',
+  getCurrentFields: (targetColumn) => {
+    return [targetColumn.sourceField, ...(targetColumn?.params?.secondaryFields ?? [])];
+  },
   getParamsForMultipleFields: ({ targetColumn, sourceColumn, field }) => {
     const secondaryFields = new Set<string>();
     if (targetColumn.params?.secondaryFields?.length) {
