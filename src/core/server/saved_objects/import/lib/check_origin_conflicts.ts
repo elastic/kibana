@@ -44,8 +44,10 @@ const isLeft = <T>(object: Either<T>): object is Left<T> => object.tag === 'left
 const MAX_CONCURRENT_SEARCHES = 10;
 
 const createQueryTerm = (input: string) => input.replace(/\\/g, '\\\\').replace(/\"/g, '\\"');
-const createQuery = (type: string, id: string, rawIdPrefix: string) =>
-  `"${createQueryTerm(`${rawIdPrefix}${type}:${id}`)}" | "${createQueryTerm(id)}"`;
+const createQuery = (type: string, id: string) =>
+  // 1st query term will match raw object IDs (_id), 2nd query term will match originId
+  // we intentionally do not include a namespace prefix for the raw object IDs, because this search is only for multi-namespace object types
+  `"${createQueryTerm(`${type}:${id}`)}" | "${createQueryTerm(id)}"`;
 const transformObjectsToAmbiguousConflictFields = (
   objects: Array<SavedObject<{ title?: string }>>
 ) =>
@@ -82,15 +84,15 @@ const checkOriginConflict = async (
   const { object, savedObjectsClient, typeRegistry, namespace, importStateMap, pendingOverwrites } =
     params;
   const importIds = new Set(importStateMap.keys());
-  const { type, originId } = object;
+  const { type, originId, id } = object;
 
-  if (!typeRegistry.isMultiNamespace(type) || pendingOverwrites.has(`${type}:${object.id}`)) {
+  if (!typeRegistry.isMultiNamespace(type) || pendingOverwrites.has(`${type}:${id}`)) {
     // Skip the search request for non-multi-namespace types, since by definition they cannot have inexact matches or ambiguous conflicts.
     // Also skip the search request for objects that we've already determined have an "exact match" conflict.
     return { tag: 'right', value: object };
   }
 
-  const search = createQuery(type, originId || object.id, namespace ? `${namespace}:` : '');
+  const search = createQuery(type, originId || id);
   const findOptions = {
     type,
     search,

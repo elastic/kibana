@@ -89,9 +89,9 @@ describe('#checkOriginConflicts', () => {
     // non-multi-namespace types shouldn't have origin IDs, but we include a test case to ensure it's handled gracefully
     const otherObjWithOriginId = createObject(OTHER_TYPE, 'id-4', 'originId-bar');
 
-    const expectFindArgs = (n: number, object: SavedObject, rawIdPrefix: string) => {
+    const expectFindArgs = (n: number, object: SavedObject) => {
       const { type, id, originId } = object;
-      const search = `"${rawIdPrefix}${type}:${originId || id}" | "${originId || id}"`; // this template works for our basic test cases
+      const search = `"${type}:${originId || id}" | "${originId || id}"`; // this template works for our basic test cases
       const expectedArgs = expect.objectContaining({ type, search });
       // exclude rootSearchFields, page, perPage, and fields attributes from assertion -- these are constant
       // exclude namespace from assertion -- a separate test covers that
@@ -124,15 +124,8 @@ describe('#checkOriginConflicts', () => {
 
       await checkOriginConflicts(params1);
       expect(find).toHaveBeenCalledTimes(2);
-      expectFindArgs(1, multiNsObj, '');
-      expectFindArgs(2, multiNsObjWithOriginId, '');
-
-      find.mockClear();
-      const params2 = setupParams({ objects, namespace: 'some-namespace' });
-      await checkOriginConflicts(params2);
-      expect(find).toHaveBeenCalledTimes(2);
-      expectFindArgs(1, multiNsObj, 'some-namespace:');
-      expectFindArgs(2, multiNsObjWithOriginId, 'some-namespace:');
+      expectFindArgs(1, multiNsObj);
+      expectFindArgs(2, multiNsObjWithOriginId);
     });
 
     test('searches within the current `namespace`', async () => {
