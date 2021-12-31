@@ -307,7 +307,7 @@ describe('<IndexManagementHome />', () => {
 
       const requestsCount = server.requests.length;
       expect(server.requests[requestsCount - 2].url).toBe(`${API_BASE_PATH}/indices/forcemerge`);
-      // After the index is unfrozen, we imediately do a reload. So we need to expect to see
+      // After the index is force merged, we immediately do a reload. So we need to expect to see
       // a reload server call also.
       expect(server.requests[requestsCount - 1].url).toBe(`${API_BASE_PATH}/indices/reload`);
     });
