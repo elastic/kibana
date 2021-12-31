@@ -261,7 +261,7 @@ describe('<IndexManagementHome />', () => {
 
     test("should be able to clear an index's cache", async () => {
       const { actions } = testBed;
-      actions.clickManageContextMenuButton();
+      await actions.clickManageContextMenuButton();
 
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('clearCacheIndexMenuButton');
@@ -283,6 +283,30 @@ describe('<IndexManagementHome />', () => {
 
       const requestsCount = server.requests.length;
       expect(server.requests[requestsCount - 2].url).toBe(`${API_BASE_PATH}/indices/unfreeze`);
+      // After the index is unfrozen, we imediately do a reload. So we need to expect to see
+      // a reload server call also.
+      expect(server.requests[requestsCount - 1].url).toBe(`${API_BASE_PATH}/indices/reload`);
+      // Open context menu once again, since clicking an action will close it.
+      await actions.clickManageContextMenuButton();
+      // The unfreeze action should not be present anymore
+      expect(exists('unfreezeIndexMenuButton')).toBe(false);
+    });
+
+    test('should be able to force merge an index', async () => {
+      const { actions, exists } = testBed;
+
+      httpRequestsMockHelpers.setReloadIndicesResponse([{ ...indexMockA, isFrozen: false }]);
+
+      // Open context menu
+      await actions.clickManageContextMenuButton();
+      // Check that the unfreeze action exists for the current index and unfreeze it
+      expect(exists('forcemergeIndexMenuButton')).toBe(true);
+      await actions.clickContextMenuOption('forcemergeIndexMenuButton');
+
+      await actions.clickModalConfirm();
+
+      const requestsCount = server.requests.length;
+      expect(server.requests[requestsCount - 2].url).toBe(`${API_BASE_PATH}/indices/forcemerge`);
       // After the index is unfrozen, we imediately do a reload. So we need to expect to see
       // a reload server call also.
       expect(server.requests[requestsCount - 1].url).toBe(`${API_BASE_PATH}/indices/reload`);
