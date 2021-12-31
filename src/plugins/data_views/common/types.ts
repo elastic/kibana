@@ -59,7 +59,6 @@ export interface DataViewAttributes {
   type?: string;
   typeMeta?: string;
   timeFieldName?: string;
-  intervalName?: string;
   sourceFilters?: string;
   fieldFormatMap?: string;
   fieldAttrs?: string;
@@ -249,11 +248,6 @@ export interface DataViewSpec {
    */
   version?: string;
   title?: string;
-  /**
-   * @deprecated
-   * Deprecated. Was used by time range based index patterns
-   */
-  intervalName?: string;
   timeFieldName?: string;
   sourceFilters?: SourceFilter[];
   fields?: DataViewFieldMap;
