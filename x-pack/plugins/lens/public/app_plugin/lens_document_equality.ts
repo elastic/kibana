@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
+import { isEqual, intersection, union } from 'lodash';
 import { FilterManager } from 'src/plugins/data/public';
 import { Document } from '../persistence/saved_object_store';
 import { DatasourceMap } from '../types';
@@ -41,13 +41,16 @@ export const isLensEqual = (
   }
 
   // data source equality
-  let datasourcesEqual = isEqual(
-    Object.keys(doc1.state.datasourceStates),
-    Object.keys(doc2.state.datasourceStates)
-  );
+  const availableDatasourceTypes1 = Object.keys(doc1.state.datasourceStates);
+  const availableDatasourceTypes2 = Object.keys(doc2.state.datasourceStates);
+
+  let datasourcesEqual =
+    intersection(availableDatasourceTypes1, availableDatasourceTypes2).length ===
+    union(availableDatasourceTypes1, availableDatasourceTypes2).length;
+
   if (datasourcesEqual) {
     // equal so far, so actually check
-    datasourcesEqual = Object.keys(doc1.state.datasourceStates)
+    datasourcesEqual = availableDatasourceTypes1
       .map((type) =>
         datasourceMap[type].isEqual(
           doc1.state.datasourceStates[type],

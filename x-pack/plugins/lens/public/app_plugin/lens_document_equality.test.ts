@@ -122,31 +122,63 @@ describe('lens document equality', () => {
     ).toBeFalsy();
   });
 
-  it('should compare the datasources', () => {
-    // add an extra datasource in one doc
-    expect(
-      isLensEqual(
-        defaultDoc,
-        {
-          ...defaultDoc,
-          state: {
-            ...defaultDoc.state,
-            datasourceStates: {
-              ...defaultDoc.state.datasourceStates,
-              foodatasource: {},
+  describe('comparing the datasources', () => {
+    it('checks available datasources', () => {
+      // add an extra datasource in one doc
+      expect(
+        isLensEqual(
+          defaultDoc,
+          {
+            ...defaultDoc,
+            state: {
+              ...defaultDoc.state,
+              datasourceStates: {
+                ...defaultDoc.state.datasourceStates,
+                foodatasource: {},
+              },
             },
           },
-        },
-        mockInjectFilterReferences,
-        { ...mockDatasourceMap, foodatasource: { isEqual: () => true } as unknown as Datasource }
-      )
-    ).toBeFalsy();
+          mockInjectFilterReferences,
+          { ...mockDatasourceMap, foodatasource: { isEqual: () => true } as unknown as Datasource }
+        )
+      ).toBeFalsy();
 
-    // datasource's isEqual returns false
-    (mockDatasourceMap.indexpattern.isEqual as jest.Mock).mockReturnValue(false);
-    expect(
-      isLensEqual(defaultDoc, defaultDoc, mockInjectFilterReferences, mockDatasourceMap)
-    ).toBeFalsy();
+      // ordering of the datasource states shouldn't matter
+      expect(
+        isLensEqual(
+          {
+            ...defaultDoc,
+            state: {
+              ...defaultDoc.state,
+              datasourceStates: {
+                foodatasource: {}, // first
+                ...defaultDoc.state.datasourceStates,
+              },
+            },
+          },
+          {
+            ...defaultDoc,
+            state: {
+              ...defaultDoc.state,
+              datasourceStates: {
+                ...defaultDoc.state.datasourceStates,
+                foodatasource: {}, // last
+              },
+            },
+          },
+          mockInjectFilterReferences,
+          { ...mockDatasourceMap, foodatasource: { isEqual: () => true } as unknown as Datasource }
+        )
+      ).toBeTruthy();
+    });
+
+    it('delegates internal datasource comparison', () => {
+      // datasource's isEqual returns false
+      (mockDatasourceMap.indexpattern.isEqual as jest.Mock).mockReturnValue(false);
+      expect(
+        isLensEqual(defaultDoc, defaultDoc, mockInjectFilterReferences, mockDatasourceMap)
+      ).toBeFalsy();
+    });
   });
 
   it('should ignore pinned filters', () => {
