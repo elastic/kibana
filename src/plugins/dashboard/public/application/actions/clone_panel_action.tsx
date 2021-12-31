@@ -19,7 +19,6 @@ import {
   EmbeddableInput,
   isErrorEmbeddable,
   isReferenceOrValueEmbeddable,
-  EmbeddableOutput,
 } from '../../services/embeddable';
 import {
   placePanelBeside,
