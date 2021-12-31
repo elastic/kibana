@@ -430,7 +430,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Drags field to dimension trigger
+     * Drags from a dimension to another dimension trigger
      *
      * @param from - the selector of the dimension being moved
      * @param to - the selector of the dimension being dropped to
@@ -1218,7 +1218,28 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Drags field to dimension trigger to extra drop type
+     * Drags from a dimension to another dimension trigger to extra drop type
+     *
+     * @param from - the selector of the dimension being moved
+     * @param to - the selector of the main drop type of dimension being dropped to
+     * @param type - extra drop type
+     * */
+    async dragFieldToExtraDropType(
+      field: string,
+      to: string,
+      type: 'duplicate' | 'swap' | 'combine'
+    ) {
+      const from = `lnsFieldListPanelField-${field}`;
+      await this.dragEnterDrop(
+        testSubjects.getCssSelector(from),
+        testSubjects.getCssSelector(`${to} > lnsDragDrop`),
+        testSubjects.getCssSelector(`${to} > lnsDragDrop-${type}`)
+      );
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Drags from a dimension to another dimension trigger to extra drop type
      *
      * @param from - the selector of the dimension being moved
      * @param to - the selector of the main drop type of dimension being dropped to
