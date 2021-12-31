@@ -54,3 +54,11 @@ export type AstWithMeta = WithMeta<
     }
   >
 >;
+
+export function isAstWithMeta(value: any): value is AstWithMeta {
+  return typeof value?.node === 'object';
+}
+
+export function isAst(value: any): value is Ast {
+  return typeof value === 'object' && value?.type === 'expression';
+}

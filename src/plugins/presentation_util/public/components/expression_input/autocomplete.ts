@@ -8,6 +8,7 @@
 
 import { uniq } from 'lodash';
 import type { AstWithMeta, AstArgumentWithMeta } from '@kbn/interpreter';
+import { isAstWithMeta } from '@kbn/interpreter';
 import { parse } from '@kbn/interpreter';
 import {
   ExpressionFunction,
@@ -60,11 +61,6 @@ export interface FunctionSuggestion extends BaseSuggestion {
 }
 
 export type AutocompleteSuggestion = FunctionSuggestion | ArgSuggestion | ValueSuggestion;
-
-// Typeguard for checking if ExpressionArg is a new expression
-function isExpression(maybeExpression: any): maybeExpression is AstWithMeta {
-  return typeof maybeExpression.node === 'object';
-}
 
 /**
  * Generates the AST with the given expression and then returns the function and argument definitions
@@ -178,7 +174,7 @@ function getFnArgAtPosition(ast: AstWithMeta, position: number): FnArgAtPosition
 
         // If the arg value is an expression, expand our start and end position
         // to include the opening and closing braces
-        if (value.node !== null && isExpression(value)) {
+        if (value.node !== null && isAstWithMeta(value)) {
           argStart--;
           argEnd++;
         }
@@ -189,7 +185,7 @@ function getFnArgAtPosition(ast: AstWithMeta, position: number): FnArgAtPosition
         // argument name (`font=` for example), recurse within the expression
         if (
           value.node !== null &&
-          isExpression(value) &&
+          isAstWithMeta(value) &&
           (argName === '_' || !(argStart <= position && position <= argStart + argName.length + 1))
         ) {
           const result = getFnArgAtPosition(value, position);
