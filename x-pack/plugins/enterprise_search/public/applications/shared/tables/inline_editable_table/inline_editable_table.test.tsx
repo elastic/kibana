@@ -91,11 +91,33 @@ describe('InlineEditableTable', () => {
     expect(wrapper.find('[data-test-subj="actionButton"]').children().text()).toEqual('New row');
   });
 
+  it('renders a title if one is provided', () => {
+    const wrapper = shallow(
+      <InlineEditableTableContents {...requiredParams} description={<p>Some Description</p>} />
+    );
+    expect(wrapper.find('[data-test-subj="title"]').exists()).toBe(true);
+  });
+
+  it('does not render a title if none is provided', () => {
+    const wrapper = shallow(
+      <InlineEditableTableContents
+        {...{ ...requiredParams, title: '' }}
+        description={<p>Some Description</p>}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="title"]').exists()).toBe(false);
+  });
+
   it('renders a description if one is provided', () => {
     const wrapper = shallow(
       <InlineEditableTableContents {...requiredParams} description={<p>Some Description</p>} />
     );
     expect(wrapper.find('[data-test-subj="description"]').exists()).toBe(true);
+  });
+
+  it('renders no description if none is provided', () => {
+    const wrapper = shallow(<InlineEditableTableContents {...requiredParams} />);
+    expect(wrapper.find('[data-test-subj="description"]').exists()).toBe(false);
   });
 
   it('can specify items in the table that are uneditable', () => {

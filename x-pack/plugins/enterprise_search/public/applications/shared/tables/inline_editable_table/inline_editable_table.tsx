@@ -18,7 +18,6 @@ import { ReorderableTable } from '../reorderable_table';
 
 import { ItemWithAnID } from '../types';
 
-import { EMPTY_ITEM } from './constants';
 import { getUpdatedColumns } from './get_updated_columns';
 import { InlineEditableTableLogic } from './inline_editable_table_logic';
 import { FormErrors, InlineEditableTableColumn } from './types';
@@ -103,16 +102,16 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
   const isEditingItem = (item: Item) => item.id === editingItemId;
   const isActivelyEditing = (item: Item) => isEditing && isEditingItem(item);
 
+  const emptyItem = { id: null } as Item;
   const displayedItems = isEditingUnsavedItem
     ? uneditableItems
-      ? [EMPTY_ITEM, ...items]
-      : [...items, EMPTY_ITEM]
+      ? [emptyItem, ...items]
+      : [...items, emptyItem]
     : items;
 
   const updatedColumns = getUpdatedColumns({
     columns,
-    // TODO We shouldn't need this cast here
-    displayedItems: displayedItems as Item[],
+    displayedItems,
     isActivelyEditing,
     canRemoveLastItem,
     isLoading,
@@ -124,9 +123,11 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
     <>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h3>{title}</h3>
-          </EuiTitle>
+          {!!title && (
+            <EuiTitle size="xs" data-test-subj="title">
+              <h3>{title}</h3>
+            </EuiTitle>
+          )}
           {!!description && (
             <>
               <EuiSpacer size="s" />
@@ -160,8 +161,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
       <EuiSpacer size="m" />
       <ReorderableTable
         className={classNames(className, 'editableTable')}
-        // TODO don't cast
-        items={displayedItems as Item[]}
+        items={displayedItems}
         unreorderableItems={uneditableItems}
         columns={updatedColumns}
         rowProps={(item) => ({
