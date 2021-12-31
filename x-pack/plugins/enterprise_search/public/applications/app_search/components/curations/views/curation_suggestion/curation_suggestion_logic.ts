@@ -21,7 +21,7 @@ import { ENGINE_CURATIONS_PATH, ENGINE_CURATION_PATH } from '../../../../routes'
 import { EngineLogic, generateEnginePath } from '../../../engine';
 import { CurationSuggestion, HydratedCurationSuggestion } from '../../types';
 
-interface Error {
+interface APIResponseError {
   error: string;
 }
 interface CurationSuggestionValues {
@@ -152,7 +152,11 @@ export const CurationSuggestionLogic = kea<
           );
         }
       } catch (e) {
-        flashAPIErrors(e);
+        if (e.message) {
+          setQueuedErrorMessage(e.message);
+        } else {
+          flashAPIErrors(e);
+        }
       }
     },
     acceptAndAutomateSuggestion: async () => {
@@ -194,7 +198,11 @@ export const CurationSuggestionLogic = kea<
           );
         }
       } catch (e) {
-        flashAPIErrors(e);
+        if (e.message) {
+          setQueuedErrorMessage(e.message);
+        } else {
+          flashAPIErrors(e);
+        }
       }
     },
     rejectSuggestion: async () => {
@@ -215,7 +223,11 @@ export const CurationSuggestionLogic = kea<
         );
         KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CURATIONS_PATH));
       } catch (e) {
-        flashAPIErrors(e);
+        if (e.message) {
+          setQueuedErrorMessage(e.message);
+        } else {
+          flashAPIErrors(e);
+        }
       }
     },
     rejectAndDisableSuggestion: async () => {
@@ -238,7 +250,11 @@ export const CurationSuggestionLogic = kea<
         );
         KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CURATIONS_PATH));
       } catch (e) {
-        flashAPIErrors(e);
+        if (e.message) {
+          setQueuedErrorMessage(e.message);
+        } else {
+          flashAPIErrors(e);
+        }
       }
     },
   }),
@@ -250,7 +266,7 @@ const updateSuggestion = async (
   query: string,
   status: string
 ) => {
-  const response = await http.put<{ results: Array<CurationSuggestion | Error> }>(
+  const response = await http.put<{ results: Array<CurationSuggestion | APIResponseError> }>(
     `/internal/app_search/engines/${engineName}/adaptive_relevance/suggestions`,
     {
       body: JSON.stringify([
@@ -264,7 +280,7 @@ const updateSuggestion = async (
   );
 
   if (response.results[0].hasOwnProperty('error')) {
-    throw (response.results[0] as Error).error;
+    throw new Error((response.results[0] as APIResponseError).error);
   }
 
   return response.results[0] as CurationSuggestion;
