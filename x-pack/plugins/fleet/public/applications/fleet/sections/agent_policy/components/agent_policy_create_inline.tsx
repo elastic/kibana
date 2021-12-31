@@ -155,6 +155,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
             disabled={!newAgentPolicy.name}
             onClick={() => createAgentPolicy()}
             isLoading={isLoading}
+            data-test-subj={isFleetServerPolicy ? 'createFleetServerPolicyBtn' : 'createPolicyBtn'}
           >
             <FormattedMessage
               id="xpack.fleet.agentPolicyForm.createAgentPolicyText"

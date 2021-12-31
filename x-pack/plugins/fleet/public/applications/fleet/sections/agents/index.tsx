@@ -110,7 +110,12 @@ export const AgentsApp: React.FunctionComponent = () => {
       )}
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            onClick={() => setIsEnrollmentFlyoutOpen(true)}
+            data-test-subj="addAgentBtnTop"
+          >
             <FormattedMessage id="xpack.fleet.addAgentButton" defaultMessage="Add Agent" />
           </EuiButton>
         </EuiFlexItem>

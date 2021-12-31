@@ -147,6 +147,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
                 );
               }
             }}
+            data-test-subj="createAgentPolicyFlyoutBtn"
           >
             <FormattedMessage
               id="xpack.fleet.createAgentPolicy.submitButtonLabel"

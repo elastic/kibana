@@ -50,6 +50,11 @@ async function withFleetAgent(
     process.exit(1);
   });
 
+  // TODO fleet server should be started in tests after default policy is created
+
+  await runner({});
+  return;
+
   await agentManager.setup();
   await fleetManager.setup();
   try {

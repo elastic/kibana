@@ -5,30 +5,68 @@
  * 2.0.
  */
 
-import { ADD_AGENT_BUTTON, AGENT_POLICIES_TAB, ENROLLMENT_TOKENS_TAB } from '../screens/fleet';
+import { AGENT_POLICIES_TAB, ENROLLMENT_TOKENS_TAB } from '../screens/fleet';
 import { FLEET, navigateTo } from '../tasks/navigation';
 
 describe('Fleet startup', () => {
-  before(() => {
+  beforeEach(() => {
     navigateTo(FLEET);
   });
 
-  it.skip('should display Add agent button and Healthy agent once Fleet Agent page loaded', () => {
-    cy.getBySel(ADD_AGENT_BUTTON).contains('Add agent');
-    cy.get('.euiBadge').contains('Healthy');
-  });
-
-  // TODO update assertions
-  it.skip('should display default agent policies on agent policies tab', () => {
+  function navigateToAgentPolicies() {
     cy.getBySel(AGENT_POLICIES_TAB).click();
-    cy.get('.euiLink').contains('Default policy');
-    cy.get('.euiLink').contains('Default Fleet Server policy');
+    cy.get('.euiLoadingSpinner').should('not.exist');
+  }
+
+  function navigateToAgentPolicy(name: string) {
+    cy.get('.euiLink').contains(name).click();
+    cy.get('.euiLoadingSpinner').should('not.exist');
+  }
+
+  function navigateToEnrollmentTokens() {
+    cy.getBySel(ENROLLMENT_TOKENS_TAB).click();
+    cy.get('.euiButtonIcon--danger'); // wait for trash icon
+  }
+
+  it('should create Default Fleet Server policy', () => {
+    cy.getBySel('createFleetServerPolicyBtn').click();
+    cy.getBySel('euiToastHeader');
+
+    navigateToAgentPolicies();
+
+    navigateToAgentPolicy('Default Fleet Server policy');
+    cy.get('.euiLink').contains('Fleet Server');
+
+    cy.get('.euiButtonEmpty').contains('View all agent policies').click();
+
+    navigateToEnrollmentTokens();
+
+    cy.get('.euiTableCellContent').contains('Default Fleet Server policy');
   });
 
-  it.skip('should display default tokens on enrollment tokens tab', () => {
-    cy.getBySel(ENROLLMENT_TOKENS_TAB).click();
-    cy.get('.euiTableRow').should('have.length', 2);
-    cy.get('.euiTableRowCell').contains('Default policy');
-    cy.get('.euiTableRowCell').contains('Default Fleet Server policy');
+  it('should create Default policy', () => {
+    cy.getBySel('addAgentBtnTop').click();
+    cy.getBySel('createPolicyBtn').click();
+    cy.getBySel('euiToastHeader');
+    cy.getBySel('euiFlyoutCloseButton').click();
+
+    navigateToAgentPolicies();
+
+    navigateToAgentPolicy('Default policy');
+    cy.get('.euiLink').contains('System');
+
+    cy.get('.euiButtonEmpty').contains('View all agent policies').click();
+
+    navigateToEnrollmentTokens();
+    cy.get('.euiTableCellContent').contains('Default policy');
+
+    cy.visit('/app/integrations/installed');
+    cy.getBySel('integration-card:epr:elastic_agent');
+  });
+
+  // TODO enroll fleet server agent
+
+  it.skip('should display Add agent button and Healthy agent once Fleet Agent page loaded', () => {
+    cy.get('.euiBadge').contains('Healthy');
   });
 });

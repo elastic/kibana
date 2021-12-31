@@ -35,7 +35,7 @@ declare global {
 }
 
 function getBySel(selector: string, ...args: any[]) {
-  return cy.get(`[data-test-subj=${selector}]`, ...args);
+  return cy.get(`[data-test-subj="${selector}"]`, ...args);
 }
 
 Cypress.Commands.add('getBySel', getBySel);
