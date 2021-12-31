@@ -13,7 +13,8 @@ import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plug
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '../../../../core/public';
 import { KibanaThemeProvider } from '../../../kibana_react/public';
-import { withSuspense, defaultTheme$ } from '../../../presentation_util/public';
+import { withSuspense } from '../../../presentation_util/public';
+import { defaultTheme$ } from '../../../presentation_util/common/lib';
 import { MetricRendererConfig } from '../../common/types';
 
 const strings = {

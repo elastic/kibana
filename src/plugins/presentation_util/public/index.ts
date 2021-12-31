@@ -32,7 +32,6 @@ export type { PresentationUtilPluginSetup, PresentationUtilPluginStart } from '.
 export type { SaveModalDashboardProps } from './components/types';
 export type { ProjectID, Project } from '../common/labs';
 export { projectIDs } from '../common/labs';
-export * from '../common/lib/utils';
 
 export {
   LazyExpressionInput,
