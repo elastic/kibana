@@ -8,7 +8,6 @@
 
 import { mockUuidv4 } from '../../import/lib/__mocks__';
 import supertest from 'supertest';
-import { UnwrapPromise } from '@kbn/utility-types';
 import { registerImportRoute } from '../import';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { CoreUsageStatsClient } from '../../../core_usage_data';
@@ -18,7 +17,7 @@ import { SavedObjectConfig } from '../../saved_objects_config';
 import { setupServer, createExportableType } from '../test_utils';
 import { SavedObjectsErrorHelpers, SavedObjectsImporter } from '../..';
 
-type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
 const { v4: uuidv4 } = jest.requireActual('uuid');
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];

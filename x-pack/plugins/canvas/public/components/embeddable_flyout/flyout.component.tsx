@@ -22,7 +22,7 @@ const strings = {
     }),
   getTitleText: () =>
     i18n.translate('xpack.canvas.embedObject.titleText', {
-      defaultMessage: 'Add from Kibana',
+      defaultMessage: 'Add from library',
     }),
 };
 export interface Props {
