@@ -12,7 +12,7 @@ import React from 'react';
 interface Props {
   pipelineVersions: any[];
   pipelineHash?: string;
-  onChangePipelineHash: () => void;
+  onChangePipelineHash: (hash: string) => void;
 }
 
 export const PipelineVersions = (props: Props) => {
@@ -39,7 +39,7 @@ export const PipelineVersions = (props: Props) => {
               value: option.hash,
             };
           })}
-          onChange={onChangePipelineHash}
+          onChange={({ target }) => onChangePipelineHash(target.value)}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
