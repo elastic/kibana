@@ -7,6 +7,7 @@
  */
 
 import type { Ast } from './ast';
+import type { AstWithMeta } from './ast_with_meta';
 import { parse } from '../../../grammar';
 
 interface Options {
@@ -19,7 +20,7 @@ interface OptionsWithMeta extends Options {
 
 export interface Parse {
   (input: string, options?: Options): Ast;
-  (input: string, options: OptionsWithMeta): any;
+  (input: string, options: OptionsWithMeta): AstWithMeta;
 }
 
 const typedParse = parse;

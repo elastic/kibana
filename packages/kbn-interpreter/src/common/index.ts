@@ -7,6 +7,7 @@
  */
 
 export type { Ast, AstArgument, AstFunction, AstNode } from './lib/ast';
+export type { AstWithMeta, AstArgumentWithMeta, AstFunctionWithMeta } from './lib/ast_with_meta';
 export { fromExpression, toExpression, safeElementFromExpression } from './lib/ast';
 export { Fn } from './lib/fn';
 export { getType } from './lib/get_type';
