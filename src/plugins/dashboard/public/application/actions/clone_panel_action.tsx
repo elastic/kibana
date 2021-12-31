@@ -91,10 +91,10 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
 
   private async cloneEmbeddable(
     panelToClone: DashboardPanelState,
-    embeddable: IEmbeddable<EmbeddableInput, EmbeddableOutput>
+    embeddable: IEmbeddable
   ): Promise<Partial<PanelState>> {
     let explicitInputCopy: Partial<EmbeddableInput>;
-    if (isReferenceOrValueEmbeddable(embeddable) && embeddable.inputIsRefType) {
+    if (isReferenceOrValueEmbeddable(embeddable)) {
       explicitInputCopy = await embeddable.getInputAsValueType();
     } else {
       explicitInputCopy = panelToClone.explicitInput;
@@ -108,7 +108,6 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
         title: embeddable.getTitle() ? embeddable.getTitle() + ' (copy)' : '',
       },
     };
-
     this.core.notifications.toasts.addSuccess({
       title: dashboardClonePanelAction.getSuccessMessage(),
       'data-test-subj': 'addObjectToContainerSuccess',
