@@ -29,8 +29,8 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
 
-const panelHeight = '400px';
-
+const panelHeight = '280px';
+const metricHeight = '90px';
 interface Props {
   from: string;
   to: string;
@@ -47,7 +47,6 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
     [from, to]
   );
 
-  console.log('from----', from, new Date(from).toISOString());
   const dispatch = useDispatch();
   const { observability } = useKibana<StartServices>().services;
 
@@ -78,7 +77,7 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
         <EuiFlexItem style={{ height: panelHeight }}>
           <EuiPanel color="transparent" hasBorder>
             <StyledEuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem style={{ height: '100px' }} grow={false}>
+              <EuiFlexItem style={{ height: metricHeight }} grow={false}>
                 <ExploratoryViewEmbeddable
                   alignLnsMetric="flex-start"
                   appId="security"
@@ -108,7 +107,7 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiHorizontalRule margin="s" />
+                <EuiHorizontalRule margin="xs" />
               </EuiFlexItem>
               <EuiFlexItem grow={1}>
                 <ExploratoryViewEmbeddable
@@ -154,7 +153,7 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
           >
             <EuiSplitPanel.Inner paddingSize="none">
               <StyledEuiFlexGroup direction="column" gutterSize="none">
-                <EuiFlexItem style={{ height: 100 }} grow={false}>
+                <EuiFlexItem style={{ height: metricHeight }} grow={false}>
                   <ExploratoryViewEmbeddable
                     alignLnsMetric="flex-start"
                     appId="security"
@@ -185,7 +184,7 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiHorizontalRule margin="s" />
+                  <EuiHorizontalRule margin="xs" />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <ExploratoryViewEmbeddable
@@ -221,7 +220,7 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
                       yLeft: false,
                       yRight: false,
                     }}
-                    showExploreButton={true}
+                    showExploreButton={false}
                     compressed
                     disableBorder
                     disableShadow
@@ -232,7 +231,7 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
             </EuiSplitPanel.Inner>
             <EuiSplitPanel.Inner paddingSize="none">
               <StyledEuiFlexGroup direction="column" gutterSize="none">
-                <EuiFlexItem style={{ height: 100 }} grow={false}>
+                <EuiFlexItem style={{ height: metricHeight }} grow={false}>
                   <ExploratoryViewEmbeddable
                     alignLnsMetric="flex-start"
                     appId="security"
@@ -262,7 +261,7 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiHorizontalRule margin="s" />
+                  <EuiHorizontalRule margin="xs" />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <ExploratoryViewEmbeddable

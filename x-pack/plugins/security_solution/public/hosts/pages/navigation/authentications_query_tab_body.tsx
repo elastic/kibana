@@ -105,7 +105,7 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
 
   return (
     <>
-      <EuiPanel color="transparent" hasBorder style={{ height: 400 }}>
+      <EuiPanel color="transparent" hasBorder style={{ height: 300 }}>
         <ExploratoryViewEmbeddable
           appId="security"
           title={'Authentications'}

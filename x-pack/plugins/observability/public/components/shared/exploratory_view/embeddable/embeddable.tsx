@@ -22,6 +22,7 @@ import { useKibana } from '../../../../../../../../src/plugins/kibana_react/publ
 export interface ExploratoryEmbeddableProps {
   alignLnsMetric?: string;
   appendTitle?: JSX.Element;
+  appendHeader?: JSX.Element;
   appId?: 'security' | 'observability';
   attributes: AllSeries;
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
@@ -58,6 +59,7 @@ export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddab
 export default function Embeddable({
   alignLnsMetric,
   appendTitle,
+  appendHeader,
   appId,
   attributes,
   axisTitlesVisibility,
@@ -122,7 +124,7 @@ export default function Embeddable({
 
   return (
     <Wrapper $customHeight={customHeight} $compressed={compressed}>
-      <StyledFlexGroup alignItems="center" gutterSize="none" $compressed={compressed}>
+      <StyledFlexGroup alignItems="center" $compressed={compressed}>
         {title && (
           <EuiFlexItem>
             <EuiTitle size="xs">
@@ -140,6 +142,7 @@ export default function Embeddable({
             />
           </EuiFlexItem>
         )}
+        {appendHeader}
         {showExploreButton && (
           <EuiFlexItem grow={false}>
             <EuiButtonIcon href={href} size="s" iconType="visBarVerticalStacked" />
@@ -148,6 +151,7 @@ export default function Embeddable({
         {appendTitle}
       </StyledFlexGroup>
       <LensWrapper
+        gutterSize="none"
         $alignLnsMetric={alignLnsMetric}
         $disableBorder={disableBorder}
         $disableShadow={disableShadow}

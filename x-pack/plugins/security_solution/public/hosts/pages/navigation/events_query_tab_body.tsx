@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { EuiFlexItem, EuiPanel, EuiSelect, EuiSpacer } from '@elastic/eui';
 
 import { TimelineId } from '../../../../common/types/timeline';
 import { StatefulEventsViewer } from '../../../common/components/events_viewer';
@@ -28,6 +29,13 @@ import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { defaultCellActions } from '../../../common/lib/cell_actions/default_cell_actions';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { StartServices } from '../../../types';
+import {
+  indexPatternList,
+  reportConfigMap,
+} from '../../../app/exploratory_view/security_exploratory_view';
+import { STACK_BY } from '../../../common/components/matrix_histogram/translations';
 
 const EVENTS_HISTOGRAM_ID = 'eventsHistogramQuery';
 
@@ -98,7 +106,38 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   }, [deleteQuery]);
 
   const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
+  const { observability } = useKibana<StartServices>().services;
 
+  const ExploratoryViewEmbeddable = observability.ExploratoryViewEmbeddable;
+
+  const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
+    histogramConfigs.defaultStackByOption
+  );
+
+  const setSelectedChartOptionCallback = useCallback(
+    (event: React.ChangeEvent<HTMLSelectElement>) => {
+      setSelectedStackByOption(
+        histogramConfigs.stackByOptions.find((co) => co.value === event.target.value) ??
+          histogramConfigs.defaultStackByOption
+      );
+    },
+    []
+  );
+  const appendTitle = useMemo(
+    () => (
+      <EuiFlexItem grow={false}>
+        {histogramConfigs.stackByOptions.length > 1 && (
+          <EuiSelect
+            onChange={setSelectedChartOptionCallback}
+            options={histogramConfigs.stackByOptions}
+            prepend={STACK_BY}
+            value={selectedStackByOption?.value}
+          />
+        )}
+      </EuiFlexItem>
+    ),
+    [selectedStackByOption?.value, setSelectedChartOptionCallback]
+  );
   return (
     <>
       {!globalFullScreen && (
@@ -112,6 +151,40 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
           {...histogramConfigs}
         />
       )}
+
+      <EuiPanel color="transparent" hasBorder style={{ height: 300 }}>
+        <ExploratoryViewEmbeddable
+          appId="security"
+          appendHeader={appendTitle}
+          title={'Events'}
+          reportConfigMap={reportConfigMap}
+          dataTypesIndexPatterns={indexPatternList}
+          reportType="events"
+          attributes={[
+            {
+              reportDefinitions: {
+                [selectedStackByOption.value]: ['ALL_VALUES'],
+              },
+              name: selectedStackByOption.value,
+              dataType: 'security',
+              selectedMetricField: selectedStackByOption.value,
+              time: { from: 'now-24h', to: 'now' },
+            },
+          ]}
+          legendIsVisible={true}
+          axisTitlesVisibility={{
+            x: false,
+            yLeft: false,
+            yRight: false,
+          }}
+          showExploreButton={true}
+          disableBorder
+          disableShadow
+          compressed
+          customHeight="100%"
+        />
+      </EuiPanel>
+      <EuiSpacer />
       <StatefulEventsViewer
         defaultCellActions={defaultCellActions}
         defaultModel={eventsDefaultModel}

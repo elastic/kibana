@@ -6,12 +6,15 @@
  */
 
 import * as React from 'react';
+import { EuiPanel } from '@elastic/eui';
+
 import { ExploratoryViewContextProvider, ExploratoryView } from '../../../../observability/public';
 import {
   getSecurityKPIConfig,
   getSecurityUniqueIpsKPIConfig,
   getSingleMetricConfig,
   getSecurityAuthenticationsConfig,
+  getEventsKPIConfig,
 } from './kpi_over_time_config';
 import { RenderAppProps } from '../types';
 import { getSecurityAlertsKPIConfig } from './alert_kpi_over_time_config';
@@ -22,6 +25,7 @@ export const reportConfigMap = {
     getSecurityUniqueIpsKPIConfig,
     getSingleMetricConfig,
     getSecurityAuthenticationsConfig,
+    getEventsKPIConfig,
   ],
   securityAlerts: [getSecurityAlertsKPIConfig],
 };
@@ -48,6 +52,7 @@ export const reportTypes = [
   { reportType: 'kpi-over-time', label: 'KPI over time' },
   { reportType: 'event_outcome', label: 'bar' },
   { reportType: 'unique_ip', label: 'Unique IPs' },
+  { reportType: 'events', label: 'events' },
 ];
 
 export const SecurityExploratoryView = ({
