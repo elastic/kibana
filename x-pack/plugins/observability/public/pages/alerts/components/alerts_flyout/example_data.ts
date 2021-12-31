@@ -20,6 +20,8 @@ import {
   ALERT_RULE_PRODUCER,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
+  ALERT_RULE_CONSUMER,
+  SPACE_IDS,
 } from '@kbn/rule-data-utils';
 
 export const apmAlertResponseExample = [
@@ -27,6 +29,8 @@ export const apmAlertResponseExample = [
     [ALERT_RULE_TYPE_ID]: ['apm.error_rate'],
     'service.name': ['opbeans-java'],
     [ALERT_RULE_NAME]: ['Error count threshold | opbeans-java (smith test)'],
+    [ALERT_RULE_CONSUMER]: ['apm'],
+    [SPACE_IDS]: ['default'],
     [ALERT_DURATION]: [180057000],
     [ALERT_STATUS]: [ALERT_STATUS_ACTIVE],
     [ALERT_SEVERITY]: ['warning'],
@@ -47,6 +51,8 @@ export const apmAlertResponseExample = [
     [ALERT_RULE_TYPE_ID]: ['apm.error_rate'],
     'service.name': ['opbeans-java'],
     [ALERT_RULE_NAME]: ['Error count threshold | opbeans-java (smith test)'],
+    [ALERT_RULE_CONSUMER]: ['apm'],
+    [SPACE_IDS]: ['default'],
     [ALERT_DURATION]: [2419005000],
     [ALERT_END]: ['2021-04-12T13:49:49.446Z'],
     [ALERT_STATUS]: [ALERT_STATUS_RECOVERED],
