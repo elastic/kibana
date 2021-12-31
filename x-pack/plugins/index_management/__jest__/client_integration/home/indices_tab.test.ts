@@ -299,7 +299,7 @@ describe('<IndexManagementHome />', () => {
 
       // Open context menu
       await actions.clickManageContextMenuButton();
-      // Check that the unfreeze action exists for the current index and unfreeze it
+      // Check that the force merge action exists for the current index and merge it
       expect(exists('forcemergeIndexMenuButton')).toBe(true);
       await actions.clickContextMenuOption('forcemergeIndexMenuButton');
 
