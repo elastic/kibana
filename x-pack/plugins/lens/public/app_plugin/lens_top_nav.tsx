@@ -242,7 +242,11 @@ export const LensTopNavMenu = ({
 
   // Compute the list of visible columns, per layer/datatable, once
   const tableVisibleColumnsPerLayer = useMemo(() => {
-    if (!activeData || activeDatasourceId == null) {
+    if (
+      !activeData ||
+      activeDatasourceId == null ||
+      datasourceStates[activeDatasourceId]?.state == null
+    ) {
       return {};
     }
     const datatableColumns: Record<string, Datatable['columns']> = {};
