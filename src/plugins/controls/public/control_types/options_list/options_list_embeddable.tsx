@@ -21,7 +21,11 @@ import { merge, Subject, Subscription, BehaviorSubject } from 'rxjs';
 import { tap, debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
 
 import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
-import { ReduxEmbeddableWrapper } from '../../../../presentation_util/public';
+import {
+  withSuspense,
+  LazyReduxEmbeddableWrapper,
+  ReduxEmbeddableWrapperPropsWithChildren,
+} from '../../../../presentation_util/public';
 import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
 import { ControlsDataViewsService } from '../../services/data_views';
 import { Embeddable, IContainer } from '../../../../embeddable/public';
@@ -31,6 +35,10 @@ import { OptionsListStrings } from './options_list_strings';
 import { DataView } from '../../../../data_views/public';
 import { ControlInput, ControlOutput } from '../..';
 import { pluginServices } from '../../services';
+
+const OptionsListReduxWrapper = withSuspense<
+  ReduxEmbeddableWrapperPropsWithChildren<OptionsListEmbeddableInput>
+>(LazyReduxEmbeddableWrapper);
 
 const diffDataFetchProps = (
   current?: OptionsListDataFetchProps,
@@ -222,15 +230,12 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     }
     this.node = node;
     ReactDOM.render(
-      <ReduxEmbeddableWrapper<OptionsListEmbeddableInput>
-        embeddable={this}
-        reducers={optionsListReducers}
-      >
+      <OptionsListReduxWrapper embeddable={this} reducers={optionsListReducers}>
         <OptionsListComponent
           componentStateSubject={this.componentStateSubject$}
           typeaheadSubject={this.typeaheadSubject}
         />
-      </ReduxEmbeddableWrapper>,
+      </OptionsListReduxWrapper>,
       node
     );
   };

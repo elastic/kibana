@@ -32,7 +32,7 @@ export type { PresentationUtilPluginSetup, PresentationUtilPluginStart } from '.
 export type { SaveModalDashboardProps } from './components/types';
 export type { ProjectID, Project } from '../common/labs';
 export { projectIDs } from '../common/labs';
-export * from '../common/lib';
+export * from '../common/lib/utils';
 
 export {
   LazyExpressionInput,
@@ -41,6 +41,9 @@ export {
   LazyDashboardPicker,
   LazySavedObjectSaveModalDashboard,
   withSuspense,
+  LazyDataViewPicker,
+  LazyFieldPicker,
+  LazyReduxEmbeddableWrapper,
 } from './components';
 
 export * from './components/types';
@@ -58,16 +61,12 @@ export {
 } from './components/solution_toolbar';
 
 export {
-  ReduxEmbeddableWrapper,
   ReduxEmbeddableContext,
   useReduxContainerContext,
   useReduxEmbeddableContext,
-  getManagedEmbeddablesStore,
   type ReduxContainerContextServices,
+  type ReduxEmbeddableWrapperPropsWithChildren,
 } from './components/redux_embeddables';
-
-export { DataViewPicker } from './components/data_view_picker';
-export { FieldPicker } from './components/field_picker';
 
 /**
  * Register a set of Expression Functions with the Presentation Utility ExpressionInput.  This allows

@@ -27,6 +27,11 @@ import {
   ControlPanelState,
   CONTROL_GROUP_TYPE,
 } from '../types';
+import {
+  withSuspense,
+  LazyReduxEmbeddableWrapper,
+  ReduxEmbeddableWrapperPropsWithChildren,
+} from '../../../../presentation_util/public';
 import { pluginServices } from '../../services';
 import { DataView } from '../../../../data_views/public';
 import { DEFAULT_CONTROL_WIDTH } from '../editor/editor_constants';
@@ -34,7 +39,10 @@ import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { Container, EmbeddableFactory } from '../../../../embeddable/public';
-import { ReduxEmbeddableWrapper } from '../../../../presentation_util/public';
+
+const ControlGroupReduxWrapper = withSuspense<
+  ReduxEmbeddableWrapperPropsWithChildren<ControlGroupInput>
+>(LazyReduxEmbeddableWrapper);
 
 export class ControlGroupContainer extends Container<
   ControlInput,
@@ -145,12 +153,9 @@ export class ControlGroupContainer extends Container<
     const PresentationUtilProvider = pluginServices.getContextProvider();
     ReactDOM.render(
       <PresentationUtilProvider>
-        <ReduxEmbeddableWrapper<ControlGroupInput>
-          embeddable={this}
-          reducers={controlGroupReducers}
-        >
+        <ControlGroupReduxWrapper embeddable={this} reducers={controlGroupReducers}>
           <ControlGroup />
-        </ReduxEmbeddableWrapper>
+        </ControlGroupReduxWrapper>
       </PresentationUtilProvider>,
       dom
     );

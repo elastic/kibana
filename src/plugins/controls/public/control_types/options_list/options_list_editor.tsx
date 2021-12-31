@@ -15,7 +15,11 @@ import { ControlEditorProps } from '../../types';
 import { OptionsListEmbeddableInput } from './types';
 import { OptionsListStrings } from './options_list_strings';
 import { DataViewListItem, DataView } from '../../../../data_views/common';
-import { DataViewPicker, FieldPicker } from '../../../../presentation_util/public';
+import {
+  LazyDataViewPicker,
+  LazyFieldPicker,
+  withSuspense,
+} from '../../../../presentation_util/public';
 
 interface OptionsListEditorState {
   singleSelect?: boolean;
@@ -25,6 +29,9 @@ interface OptionsListEditorState {
   dataView?: DataView;
   fieldName?: string;
 }
+
+const FieldPicker = withSuspense(LazyFieldPicker, null);
+const DataViewPicker = withSuspense(LazyDataViewPicker, null);
 
 export const OptionsListEditor = ({
   onChange,

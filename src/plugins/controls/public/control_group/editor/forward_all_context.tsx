@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Provider } from 'react-redux';
 import { ReactElement } from 'react';
 import React from 'react';
 
@@ -16,7 +15,6 @@ import { toMountPoint } from '../../../../kibana_react/public';
 import {
   ReduxContainerContextServices,
   ReduxEmbeddableContext,
-  getManagedEmbeddablesStore,
 } from '../../../../presentation_util/public';
 
 /**
@@ -28,11 +26,12 @@ export const forwardAllContext = (
   reduxContainerContext: ReduxContainerContextServices<ControlGroupInput>
 ) => {
   const PresentationUtilProvider = pluginServices.getContextProvider();
+  const StoreProvider = reduxContainerContext.ReduxEmbeddableStoreProvider;
   return toMountPoint(
-    <Provider store={getManagedEmbeddablesStore()}>
+    <StoreProvider>
       <ReduxEmbeddableContext.Provider value={reduxContainerContext}>
         <PresentationUtilProvider>{component}</PresentationUtilProvider>
       </ReduxEmbeddableContext.Provider>
-    </Provider>
+    </StoreProvider>
   );
 };
