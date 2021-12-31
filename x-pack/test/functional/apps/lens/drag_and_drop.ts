@@ -221,32 +221,6 @@ export default function ({ getPageObjects }: FtrProviderContext) {
           'Top values of clientip + 2 others'
         );
       });
-
-      it('should let swap top values dimensions with partial fields overlap', async () => {
-        await PageObjects.lens.removeLayer();
-        await PageObjects.lens.dragFieldToWorkspace('clientip');
-
-        await PageObjects.lens.dragFieldToExtraDropType(
-          '@message.raw',
-          'lnsXY_xDimensionPanel',
-          'combine'
-        );
-
-        await PageObjects.lens.dragFieldToDimensionTrigger(
-          '@message.raw',
-          'lnsXY_splitDimensionPanel > lns-dimensionTrigger'
-        );
-
-        await PageObjects.lens.dragDimensionToExtraDropType(
-          'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
-          'lnsXY_xDimensionPanel',
-          'swap'
-        );
-
-        expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_splitDimensionPanel')).to.eql(
-          'Top values of clientip + 1 other'
-        );
-      });
     });
 
     describe('keyboard drag and drop', () => {
