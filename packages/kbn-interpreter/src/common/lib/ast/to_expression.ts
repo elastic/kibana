@@ -6,25 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { getType } from './get_type';
-import { parse } from './parse';
-
-export type AstNode = Ast | AstFunction | AstArgument;
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type Ast = {
-  type: 'expression';
-  chain: AstFunction[];
-};
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type AstFunction = {
-  type: 'function';
-  function: string;
-  arguments: Record<string, AstArgument[]>;
-};
-
-export type AstArgument = string | boolean | number | Ast;
+import { getType } from '../get_type';
+import type { Ast, AstArgument, AstFunction, AstNode } from './ast';
 
 function getArgumentString(arg: AstArgument, argKey?: string, level = 0): string {
   const type = getType(arg);
@@ -112,31 +95,6 @@ function getExpression(chain: AstFunction[], level = 0) {
       return fnWithArgs(fn, expressionArgs);
     })
     .join(separator);
-}
-
-export function fromExpression(expression: string, type = 'expression'): Ast {
-  try {
-    return parse(String(expression), { startRule: type });
-  } catch (e) {
-    throw new Error(`Unable to parse expression: ${e.message}`);
-  }
-}
-
-// TODO: OMG This is so bad, we need to talk about the right way to handle bad expressions since some are element based and others not
-export function safeElementFromExpression(expression: string) {
-  try {
-    return fromExpression(expression);
-  } catch (e) {
-    return fromExpression(
-      `markdown
-"## Crud.
-Canvas could not parse this element's expression. I am so sorry this error isn't more useful. I promise it will be soon.
-
-Thanks for understanding,
-#### Management
-"`
-    );
-  }
 }
 
 // TODO: Respect the user's existing formatting

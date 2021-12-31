@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { Ast } from './ast';
-import type { AstWithMeta } from './ast_with_meta';
+import type { Ast, AstWithMeta } from './ast';
 import { parse } from '../../../grammar';
 
 interface Options {

@@ -6,8 +6,15 @@
  * Side Public License, v 1.
  */
 
-export type { Ast, AstArgument, AstFunction, AstNode } from './lib/ast';
-export type { AstWithMeta, AstArgumentWithMeta, AstFunctionWithMeta } from './lib/ast_with_meta';
+export type {
+  Ast,
+  AstArgument,
+  AstFunction,
+  AstNode,
+  AstWithMeta,
+  AstArgumentWithMeta,
+  AstFunctionWithMeta,
+} from './lib/ast';
 export { fromExpression, toExpression, safeElementFromExpression } from './lib/ast';
 export { Fn } from './lib/fn';
 export { getType } from './lib/get_type';

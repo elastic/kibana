@@ -8,7 +8,7 @@
 
 import { toExpression } from '@kbn/interpreter';
 
-describe('ast toExpression', () => {
+describe('toExpression', () => {
   describe('single expression', () => {
     it('throws if no type included', () => {
       const errMsg = 'Objects must have a type property';

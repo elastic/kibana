@@ -6,7 +6,22 @@
  * Side Public License, v 1.
  */
 
-import type { Ast, AstArgument, AstFunction } from './ast';
+export type AstNode = Ast | AstFunction | AstArgument;
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type Ast = {
+  type: 'expression';
+  chain: AstFunction[];
+};
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type AstFunction = {
+  type: 'function';
+  function: string;
+  arguments: Record<string, AstArgument[]>;
+};
+
+export type AstArgument = string | boolean | number | Ast;
 
 interface WithMeta<T> {
   start: number;
