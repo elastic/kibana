@@ -310,10 +310,6 @@ describe('<IndexManagementHome />', () => {
       // After the index is unfrozen, we imediately do a reload. So we need to expect to see
       // a reload server call also.
       expect(server.requests[requestsCount - 1].url).toBe(`${API_BASE_PATH}/indices/reload`);
-      // Open context menu once again, since clicking an action will close it.
-      await actions.clickManageContextMenuButton();
-      // The unfreeze action should not be present anymore
-      expect(exists('unfreezeIndexMenuButton')).toBe(false);
     });
   });
 
