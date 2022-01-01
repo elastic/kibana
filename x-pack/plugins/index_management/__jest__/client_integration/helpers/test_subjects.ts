@@ -21,6 +21,7 @@ export type TestSubjects =
   | 'deleteTemplatesConfirmation'
   | 'documentationLink'
   | 'emptyPrompt'
+  | 'forcemergeIndexMenuButton'
   | 'filterList.filterItem'
   | 'ilmPolicyLink'
   | 'includeStatsSwitch'

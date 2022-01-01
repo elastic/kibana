@@ -261,7 +261,7 @@ describe('<IndexManagementHome />', () => {
 
     test("should be able to clear an index's cache", async () => {
       const { actions } = testBed;
-      actions.clickManageContextMenuButton();
+      await actions.clickManageContextMenuButton();
 
       await actions.clickManageContextMenuButton();
       await actions.clickContextMenuOption('clearCacheIndexMenuButton');
@@ -290,6 +290,26 @@ describe('<IndexManagementHome />', () => {
       await actions.clickManageContextMenuButton();
       // The unfreeze action should not be present anymore
       expect(exists('unfreezeIndexMenuButton')).toBe(false);
+    });
+
+    test('should be able to force merge an index', async () => {
+      const { actions, exists } = testBed;
+
+      httpRequestsMockHelpers.setReloadIndicesResponse([{ ...indexMockA, isFrozen: false }]);
+
+      // Open context menu
+      await actions.clickManageContextMenuButton();
+      // Check that the force merge action exists for the current index and merge it
+      expect(exists('forcemergeIndexMenuButton')).toBe(true);
+      await actions.clickContextMenuOption('forcemergeIndexMenuButton');
+
+      await actions.clickModalConfirm();
+
+      const requestsCount = server.requests.length;
+      expect(server.requests[requestsCount - 2].url).toBe(`${API_BASE_PATH}/indices/forcemerge`);
+      // After the index is force merged, we immediately do a reload. So we need to expect to see
+      // a reload server call also.
+      expect(server.requests[requestsCount - 1].url).toBe(`${API_BASE_PATH}/indices/reload`);
     });
   });
 
