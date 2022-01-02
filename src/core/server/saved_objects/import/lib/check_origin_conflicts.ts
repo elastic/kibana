@@ -8,12 +8,7 @@
 
 import pMap from 'p-map';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  SavedObject,
-  SavedObjectsClientContract,
-  SavedObjectsImportFailure,
-  SavedObjectsImportRetry,
-} from '../../types';
+import { SavedObject, SavedObjectsClientContract, SavedObjectsImportFailure } from '../../types';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 
 interface CheckOriginConflictsParams {
@@ -28,12 +23,6 @@ interface CheckOriginConflictsParams {
 type CheckOriginConflictParams = Omit<CheckOriginConflictsParams, 'objects'> & {
   object: SavedObject<{ title?: string }>;
 };
-
-interface GetImportIdMapForRetriesParams {
-  objects: SavedObject[];
-  retries: SavedObjectsImportRetry[];
-  createNewCopies: boolean;
-}
 
 interface InexactMatch<T> {
   object: SavedObject<T>;
@@ -215,31 +204,4 @@ export async function checkOriginConflicts({ objects, ...params }: CheckOriginCo
   });
 
   return { errors, importIdMap, pendingOverwrites };
-}
-
-/**
- * Assume that all objects exist in the `retries` map (due to filtering at the beginning of `resolveSavedObjectsImportErrors`).
- */
-export function getImportIdMapForRetries(params: GetImportIdMapForRetriesParams) {
-  const { objects, retries, createNewCopies } = params;
-
-  const retryMap = retries.reduce(
-    (acc, cur) => acc.set(`${cur.type}:${cur.id}`, cur),
-    new Map<string, SavedObjectsImportRetry>()
-  );
-  const importIdMap = new Map<string, { id: string; omitOriginId?: boolean }>();
-
-  objects.forEach(({ type, id }) => {
-    const retry = retryMap.get(`${type}:${id}`);
-    if (!retry) {
-      throw new Error(`Retry was expected for "${type}:${id}" but not found`);
-    }
-    const { destinationId } = retry;
-    const omitOriginId = createNewCopies || Boolean(retry.createNewCopy);
-    if (destinationId && destinationId !== id) {
-      importIdMap.set(`${type}:${id}`, { id: destinationId, omitOriginId });
-    }
-  });
-
-  return importIdMap;
 }

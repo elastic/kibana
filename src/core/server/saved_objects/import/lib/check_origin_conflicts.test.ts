@@ -10,10 +10,9 @@ import {
   SavedObjectsClientContract,
   SavedObjectReference,
   SavedObject,
-  SavedObjectsImportRetry,
   SavedObjectsImportFailure,
 } from '../../types';
-import { checkOriginConflicts, getImportIdMapForRetries } from './check_origin_conflicts';
+import { checkOriginConflicts } from './check_origin_conflicts';
 import { savedObjectsClientMock } from '../../../mocks';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
@@ -512,62 +511,5 @@ describe('#checkOriginConflicts', () => {
         expect(checkOriginConflictsResult).toEqual(expectedResult);
       });
     });
-  });
-});
-
-describe('#getImportIdMapForRetries', () => {
-  const createRetry = (
-    { type, id }: { type: string; id: string },
-    params: { destinationId?: string; createNewCopy?: boolean } = {}
-  ): SavedObjectsImportRetry => {
-    const { destinationId, createNewCopy } = params;
-    return { type, id, overwrite: false, destinationId, replaceReferences: [], createNewCopy };
-  };
-
-  test('throws an error if retry is not found for an object', async () => {
-    const obj1 = createObject(MULTI_NS_TYPE, 'id-1');
-    const obj2 = createObject(MULTI_NS_TYPE, 'id-2');
-    const objects = [obj1, obj2];
-    const retries = [createRetry(obj1)];
-    const params = { objects, retries, createNewCopies: false };
-
-    expect(() => getImportIdMapForRetries(params)).toThrowErrorMatchingInlineSnapshot(
-      `"Retry was expected for \\"multi:id-2\\" but not found"`
-    );
-  });
-
-  test('returns expected results', async () => {
-    const obj1 = createObject('type-1', 'id-1');
-    const obj2 = createObject('type-2', 'id-2');
-    const obj3 = createObject('type-3', 'id-3');
-    const obj4 = createObject('type-4', 'id-4');
-    const objects = [obj1, obj2, obj3, obj4];
-    const retries = [
-      createRetry(obj1), // retries that do not have `destinationId` specified are ignored
-      createRetry(obj2, { destinationId: obj2.id }), // retries that have `id` that matches `destinationId` are ignored
-      createRetry(obj3, { destinationId: 'id-X' }), // this retry will get added to the `importIdMap`!
-      createRetry(obj4, { destinationId: 'id-Y', createNewCopy: true }), // this retry will get added to the `importIdMap`!
-    ];
-    const params = { objects, retries, createNewCopies: false };
-
-    const checkOriginConflictsResult = await getImportIdMapForRetries(params);
-    expect(checkOriginConflictsResult).toEqual(
-      new Map([
-        [`${obj3.type}:${obj3.id}`, { id: 'id-X', omitOriginId: false }],
-        [`${obj4.type}:${obj4.id}`, { id: 'id-Y', omitOriginId: true }],
-      ])
-    );
-  });
-
-  test('omits origin ID in `importIdMap` entries when createNewCopies=true', async () => {
-    const obj = createObject('type-1', 'id-1');
-    const objects = [obj];
-    const retries = [createRetry(obj, { destinationId: 'id-X' })];
-    const params = { objects, retries, createNewCopies: true };
-
-    const checkOriginConflictsResult = await getImportIdMapForRetries(params);
-    expect(checkOriginConflictsResult).toEqual(
-      new Map([[`${obj.type}:${obj.id}`, { id: 'id-X', omitOriginId: true }]])
-    );
   });
 });

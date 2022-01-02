@@ -7,12 +7,13 @@
  */
 
 export { checkConflicts } from './check_conflicts';
-export { checkOriginConflicts, getImportIdMapForRetries } from './check_origin_conflicts';
+export { checkOriginConflicts } from './check_origin_conflicts';
 export { collectSavedObjects } from './collect_saved_objects';
 export { createLimitStream } from './create_limit_stream';
 export { createObjectsFilter } from './create_objects_filter';
 export { createSavedObjects } from './create_saved_objects';
 export { extractErrors } from './extract_errors';
+export { getImportIdMapForRetries } from './get_import_id_map_for_retries';
 export { getNonUniqueEntries } from './get_non_unique_entries';
 export { regenerateIds } from './regenerate_ids';
 export { splitOverwrites } from './split_overwrites';
