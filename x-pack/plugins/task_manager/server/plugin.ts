@@ -9,6 +9,7 @@ import { combineLatest, Observable, Subject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
 import stats from 'stats-lite';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
 import {
   PluginInitializerContext,
   Plugin,
@@ -36,6 +37,7 @@ import { TASK_MANAGER_INDEX } from './constants';
 import { ErroredTask, isTaskRunEvent, TaskRun } from './task_events';
 import { RanTask } from './task_running';
 import { unwrap } from './lib/result_type';
+import { TaskStatus } from '.';
 
 export interface TaskManagerSetupContract {
   /**
@@ -74,6 +76,7 @@ export class TaskManagerPlugin
   private elasticsearchAndSOAvailability$?: Observable<boolean>;
   private monitoringStats$ = new Subject<MonitoringStats>();
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  private lastMonitoringStat?: MonitoringStats;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -85,7 +88,10 @@ export class TaskManagerPlugin
 
   public setup(
     core: CoreSetup,
-    plugins: { usageCollection?: UsageCollectionSetup }
+    plugins: {
+      usageCollection?: UsageCollectionSetup;
+      monitoringCollection?: MonitoringCollectionSetup;
+    }
   ): TaskManagerSetupContract {
     this.elasticsearchAndSOAvailability$ = getElasticsearchAndSOAvailability(core.status.core$);
 
@@ -147,6 +153,31 @@ export class TaskManagerPlugin
         this.config.ephemeral_tasks.request_capacity,
         this.config.unsafe.exclude_task_types
       );
+    }
+
+    if (plugins.monitoringCollection) {
+      plugins.monitoringCollection.registerMetric({
+        type: 'task_manager',
+        fetch: async () => {
+          // How many and which alerting tasks are pending to run? How long is each one waiting?
+          const byTaskType = this.lastMonitoringStat?.stats.workload?.value?.task_types;
+          let claiming = 0;
+          let running = 0;
+          if (byTaskType) {
+            for (const { status } of Object.values(byTaskType)) {
+              claiming += status[TaskStatus.Claiming] ?? 0;
+              running += status[TaskStatus.Running] ?? 0;
+            }
+          }
+
+          const pending = claiming + running;
+          return [
+            {
+              pending,
+            },
+          ];
+        },
+      });
     }
 
     if (this.config.unsafe.exclude_task_types.length) {
@@ -223,6 +254,7 @@ export class TaskManagerPlugin
       managedConfiguration,
       this.logger
     ).subscribe((stat) => {
+      this.lastMonitoringStat = stat;
       this.monitoringStats$.next(stat);
     });
 

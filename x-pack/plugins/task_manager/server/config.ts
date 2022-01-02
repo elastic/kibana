@@ -68,7 +68,7 @@ export const configSchema = schema.object(
     max_workers: schema.number({
       defaultValue: DEFAULT_MAX_WORKERS,
       // disable the task manager rather than trying to specify it with 0 workers
-      min: 1,
+      min: 0,
     }),
     /* The threshold percenatge for workers experiencing version conflicts for shifting the polling interval. */
     version_conflict_threshold: schema.number({

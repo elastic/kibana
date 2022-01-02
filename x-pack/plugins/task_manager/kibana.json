@@ -8,6 +8,6 @@
   },
   "kibanaVersion": "kibana",
   "configPath": ["xpack", "task_manager"],
-  "optionalPlugins": ["usageCollection"],
+  "optionalPlugins": ["usageCollection", "monitoringCollection"],
   "ui": false
 }

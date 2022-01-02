@@ -282,4 +282,20 @@ export const metrics = {
     metricAgg: 'max',
     units: '',
   }),
+
+  kibana_task_manager_pending_tasks: new KibanaMetric({
+    field: 'kibana_metrics.task_manager.pending',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.taskManagerPendingTasks.label', {
+      defaultMessage: 'Pending tasks',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.taskManagerPendingTasks.description',
+      {
+        defaultMessage: 'TODO: fill out.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+  }),
 };

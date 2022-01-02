@@ -98,6 +98,16 @@ const KibanaInstance = ({ data, alerts }: { data: any; alerts: any }) => {
             </EuiFlexItem>
           </EuiFlexGrid>
           <EuiHorizontalRule />
+          <EuiFlexGrid columns={2} gutterSize="s">
+            <EuiFlexItem grow={true}>
+              <MonitoringTimeseriesContainer
+                series={data.metrics.kibana_task_manager_pending_tasks}
+                onBrush={onBrush}
+                zoomInfo={zoomInfo}
+              />
+              <EuiSpacer />
+            </EuiFlexItem>
+          </EuiFlexGrid>
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
