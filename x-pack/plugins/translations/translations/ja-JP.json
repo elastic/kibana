@@ -7454,7 +7454,6 @@
     "xpack.canvas.workpadHeaderElementMenu.chartMenuItemLabel": "グラフ",
     "xpack.canvas.workpadHeaderElementMenu.elementMenuButtonLabel": "エレメントを追加",
     "xpack.canvas.workpadHeaderElementMenu.elementMenuLabel": "要素を追加",
-    "xpack.canvas.workpadHeaderElementMenu.embedObjectMenuItemLabel": "Kibanaから追加",
     "xpack.canvas.workpadHeaderElementMenu.filterMenuItemLabel": "フィルター",
     "xpack.canvas.workpadHeaderElementMenu.imageMenuItemLabel": "画像",
     "xpack.canvas.workpadHeaderElementMenu.manageAssetsMenuItemLabel": "アセットの管理",

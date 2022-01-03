@@ -8,8 +8,6 @@
 import {
   ExceptionListSchema,
   FoundExceptionListSchema,
-  ImportExceptionListItemSchemaDecoded,
-  ImportExceptionListSchemaDecoded,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
@@ -18,6 +16,10 @@ import { SavedObjectsClientContract } from 'kibana/server';
 import { findExceptionList } from '../../find_exception_list';
 import { CHUNK_PARSED_OBJECT_SIZE } from '../../import_exception_list_and_items';
 
+export interface ExceptionListQueryInfo {
+  listId: string;
+  namespaceType: NamespaceType;
+}
 /**
  * Helper to build out a filter using list_id
  * @param objects {array} - exception lists to add to filter
@@ -28,16 +30,14 @@ export const getListFilter = ({
   objects,
   namespaceType,
 }: {
-  objects: Array<
-    (ImportExceptionListSchemaDecoded | ImportExceptionListItemSchemaDecoded) & { list_id: string }
-  >;
+  objects: ExceptionListQueryInfo[];
   namespaceType: NamespaceType;
 }): string => {
   return `${
     getSavedObjectTypes({
       namespaceType: [namespaceType],
     })[0]
-  }.attributes.list_id:(${objects.map<string>((list) => list.list_id).join(' OR ')})`;
+  }.attributes.list_id:(${objects.map((list) => list.listId).join(' OR ')})`;
 };
 
 /**
@@ -48,8 +48,8 @@ export const getListFilter = ({
  * @returns {object} results of any found lists
  */
 export const findAllListTypes = async (
-  agnosticListItems: ImportExceptionListSchemaDecoded[] | ImportExceptionListItemSchemaDecoded[],
-  nonAgnosticListItems: ImportExceptionListSchemaDecoded[] | ImportExceptionListItemSchemaDecoded[],
+  agnosticListItems: ExceptionListQueryInfo[],
+  nonAgnosticListItems: ExceptionListQueryInfo[],
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<FoundExceptionListSchema | null> => {
   // Agnostic filter
@@ -107,8 +107,8 @@ export const findAllListTypes = async (
  * @returns {object} results of any found lists
  */
 export const getAllListTypes = async (
-  agnosticListItems: ImportExceptionListSchemaDecoded[] | ImportExceptionListItemSchemaDecoded[],
-  nonAgnosticListItems: ImportExceptionListSchemaDecoded[] | ImportExceptionListItemSchemaDecoded[],
+  agnosticListItems: ExceptionListQueryInfo[],
+  nonAgnosticListItems: ExceptionListQueryInfo[],
   savedObjectsClient: SavedObjectsClientContract
 ): Promise<Record<string, ExceptionListSchema>> => {
   // Gather lists referenced
