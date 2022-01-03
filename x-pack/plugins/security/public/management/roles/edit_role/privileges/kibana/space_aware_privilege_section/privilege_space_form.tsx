@@ -467,18 +467,24 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     const securedFeatures = this.props.kibanaPrivileges.getSecuredFeatures();
     return Object.entries(roleFeature).reduce((features, [featureId, privileges]) => {
       const securedFeature = securedFeatures.find((sf) => sf.id === featureId);
+      const primaryFeaturePrivilege = securedFeature
+        ?.getPrimaryFeaturePrivileges({ includeMinimalFeaturePrivileges: true })
+        .find((pfp) => {
+          if (
+            pfp?.disabled ||
+            (pfp?.requireAllSpaces && !this.state.selectedSpaceIds.includes(ALL_SPACES_ID))
+          ) {
+            return false;
+          }
+          return privileges.includes(pfp.id);
+        }) ?? { disabled: false, requireAllSpaces: false };
       return {
         ...features,
         [featureId]: privileges.filter((p) => {
-          const featurePriv =
-            p === 'all'
-              ? securedFeature?.privileges?.all
-              : p === 'read'
-              ? securedFeature?.privileges?.read
-              : { disabled: false, requireAllSpaces: false };
           if (
-            featurePriv?.disabled ||
-            (featurePriv?.requireAllSpaces && !this.state.selectedSpaceIds.includes(ALL_SPACES_ID))
+            primaryFeaturePrivilege?.disabled ||
+            (primaryFeaturePrivilege?.requireAllSpaces &&
+              !this.state.selectedSpaceIds.includes(ALL_SPACES_ID))
           ) {
             return false;
           }
@@ -521,22 +527,31 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     } else {
       let securedFeaturesToSet = this.props.kibanaPrivileges.getSecuredFeatures();
       if (featureId) {
-        const findSecuredFeature = securedFeaturesToSet.find((sf) => sf.id === featureId);
-        securedFeaturesToSet = findSecuredFeature ? [findSecuredFeature] : securedFeaturesToSet;
+        securedFeaturesToSet = [securedFeaturesToSet.find((sf) => sf.id === featureId)!];
       }
       securedFeaturesToSet.forEach((feature) => {
-        const nextFeaturePrivilege = feature.getPrimaryFeaturePrivileges().find((pfp) => {
-          if (
-            !pfp.disabled ||
-            (pfp.requireAllSpaces && this.state.selectedSpaceIds.includes(ALL_SPACES_ID))
-          ) {
+        const nextFeaturePrivilege = feature
+          .getPrimaryFeaturePrivileges({ includeMinimalFeaturePrivileges: true })
+          .find((pfp) => {
+            if (
+              pfp?.disabled ||
+              (pfp?.requireAllSpaces && !this.state.selectedSpaceIds.includes(ALL_SPACES_ID))
+            ) {
+              return false;
+            }
             return privileges.includes(pfp.id);
-          }
-          return false;
-        });
+          });
+        let newPrivileges = entry.feature[feature.id];
         if (nextFeaturePrivilege) {
-          entry.feature[feature.id] = [nextFeaturePrivilege.id];
+          newPrivileges = [nextFeaturePrivilege.id];
+          feature.getSubFeaturePrivileges().forEach((psf) => {
+            if (privileges.includes(psf.id)) {
+              newPrivileges.push(psf.id);
+            }
+          });
         }
+
+        entry.feature[feature.id] = newPrivileges;
       });
     }
     this.setState({
