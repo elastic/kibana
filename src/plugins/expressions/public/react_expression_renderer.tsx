@@ -40,6 +40,7 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
   reload$?: Observable<unknown>;
   onRender$?: (item: number) => void;
   debounce?: number;
+  containerStyle?: React.CSSProperties;
 }
 
 export type ReactExpressionRendererType = React.ComponentType<ReactExpressionRendererProps>;

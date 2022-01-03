@@ -89,6 +89,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   onLoad?: (isLoading: boolean) => void;
   onFilter?: (data: LensFilterEvent['data']) => void;
   onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void;
+  containerStyle?: Record<string, string>;
 }
 
 export type LensByValueInput = {
@@ -424,7 +425,7 @@ export class Embeddable
           syncColors={input.syncColors}
           hasCompatibleActions={this.hasCompatibleActions}
           className={input.className}
-          style={input.style}
+          style={{ ...input.containerStyle, ...input.style }}
           executionContext={executionContext}
           canEdit={this.getIsEditable() && input.viewMode === 'edit'}
           onRuntimeError={() => {

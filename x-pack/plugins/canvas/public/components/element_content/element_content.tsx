@@ -73,7 +73,13 @@ export const ElementContent = (props: Props) => {
           name={renderFunction.name}
           renderFn={renderFunction.render}
           reuseNode={renderFunction.reuseDomNode}
-          config={renderable.value}
+          config={{
+            ...renderable.value,
+            input: {
+              ...(renderable.value as Record<string, any>).input,
+              containerStyle: { backgroundColor, ...containerStyle },
+            },
+          }}
           css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
           width={width}
           height={height}
