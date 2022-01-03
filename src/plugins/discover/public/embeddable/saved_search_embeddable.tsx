@@ -409,6 +409,7 @@ export class SavedSearchEmbeddable
     }
     const useLegacyTable = this.services.uiSettings.get(DOC_TABLE_LEGACY);
     const props = {
+      savedSearch: this.savedSearch,
       searchProps,
       useLegacyTable,
       refs: domNode,

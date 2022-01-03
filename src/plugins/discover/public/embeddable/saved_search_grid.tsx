@@ -5,24 +5,32 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useState } from 'react';
+import React, { useMemo, useState, memo } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { getServices } from '../kibana_services';
 import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
 import { ElasticSearchHit } from '../types';
+import { useRowHeight } from '../utils/use_row_height';
+import { SavedSearch } from '..';
 
 export interface DiscoverGridEmbeddableProps extends DiscoverGridProps {
+  savedSearch: SavedSearch;
   totalHitCount: number;
 }
 
-export const DataGridMemoized = React.memo((props: DiscoverGridProps) => (
-  <DiscoverGrid {...props} />
-));
+export const DataGridMemoized = memo(DiscoverGrid);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
+
+  const services = useMemo(() => getServices(), []);
+
+  const { defaultRowHeight, onRowHeightChange } = useRowHeight({
+    savedSearchRowHeight: props.savedSearch.rowHeight,
+    storage: services.storage,
+  });
 
   return (
     <I18nProvider>
@@ -37,7 +45,9 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
             {...props}
             setExpandedDoc={setExpandedDoc}
             expandedDoc={expandedDoc}
-            services={getServices()}
+            defaultRowHeight={defaultRowHeight}
+            onRowHeightChange={onRowHeightChange}
+            services={services}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
