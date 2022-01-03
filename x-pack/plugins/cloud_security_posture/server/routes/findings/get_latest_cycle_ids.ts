@@ -15,7 +15,7 @@ const getAgentLogsEsQuery = (): SearchRequest => ({
   //   query: {
   //     bool: {
   //       filter: [
-  //         { term: { 'event_status.keyword': 'end' } }, // TODO: commment out when updateing agent to dend logs
+  //         { term: { 'event_status.keyword': 'end' } }, // TODO: comment out when updating agent to send logs
   //       ],
   //     },
   //   },

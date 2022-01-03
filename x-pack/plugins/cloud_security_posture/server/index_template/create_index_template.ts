@@ -4,27 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from 'src/core/server';
-import { CSP_KUBEBEAT_INDEX_NAME, CSP_FINDINGS_INDEX_NAME } from '../..//common/constants';
-import findingsIndexMapping from './findings_mapping.json';
+import { CSP_KUBEBEAT_INDEX_NAME, CSP_FINDINGS_INDEX_NAME } from '../../common/constants';
+import { mapping as findingsIndexMapping } from './findings_mapping';
 
 export type Status = boolean;
 
 const doesIndexTemplateExist = async (esClient: ElasticsearchClient, templateName: string) => {
   try {
-    const isExisting = await esClient.indices.existsIndexTemplate({ name: templateName });
-    return isExisting.body;
+    const response = await esClient.indices.existsIndexTemplate({ name: templateName });
+    return response.body;
   } catch (err) {
     return false;
   }
 };
 
-export const createIndexTemplate = async (
+const createIndexTemplate = async (
   esClient: ElasticsearchClient,
   indexName: string,
   indexPattern: string,
-  properties: Record<string, MappingProperty>
+  properties: MappingTypeMapping
 ): Promise<Status> => {
   try {
     const response = await esClient.indices.putIndexTemplate({
@@ -51,14 +51,14 @@ export const createFindingsIndexTemplate = async (
   esClient: ElasticsearchClient
 ): Promise<Status> => {
   try {
-    const isExisting = await doesIndexTemplateExist(esClient, CSP_FINDINGS_INDEX_NAME);
-    if (isExisting) return true;
+    const indexTemplateExists = await doesIndexTemplateExist(esClient, CSP_FINDINGS_INDEX_NAME);
+    if (indexTemplateExists) return true;
     return await createIndexTemplate(
       esClient,
       CSP_FINDINGS_INDEX_NAME,
       CSP_KUBEBEAT_INDEX_NAME,
       // TODO: check why this cast is required
-      findingsIndexMapping as Record<string, MappingProperty>
+      findingsIndexMapping
     );
   } catch (err) {
     // TODO: add logger
