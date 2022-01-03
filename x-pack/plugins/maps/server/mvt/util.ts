@@ -14,5 +14,5 @@ export async function collectStream(stream: Iterable<Buffer>): Promise<Buffer> {
 }
 
 export function isAbortError(error: Error) {
-  return error.message === 'Request aborted' || error.message === 'Aborted';
+  return error.name === 'RequestAbortedError';
 }
