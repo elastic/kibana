@@ -15,7 +15,10 @@ import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
 } from '../../../common/constants';
-import { getPolicyDetailsArtifactsListPath } from '../../../common/routing';
+import {
+  getPolicyDetailsArtifactsListPath,
+  getPolicyEventFiltersPath,
+} from '../../../common/routing';
 import {
   getCurrentArtifactsLocation,
   getUpdateArtifacts,
@@ -54,6 +57,23 @@ export function usePolicyDetailsNavigateCallback() {
     (args: Partial<PolicyDetailsArtifactsPageLocation>) =>
       history.push(
         getPolicyDetailsArtifactsListPath(policyId, {
+          ...location,
+          ...args,
+        })
+      ),
+    [history, location, policyId]
+  );
+}
+
+export function usePolicyDetailsEventFiltersNavigateCallback() {
+  const location = usePolicyDetailsSelector(getCurrentArtifactsLocation);
+  const history = useHistory();
+  const policyId = usePolicyDetailsSelector(policyIdFromParams);
+
+  return useCallback(
+    (args: Partial<PolicyDetailsArtifactsPageLocation>) =>
+      history.push(
+        getPolicyEventFiltersPath(policyId, {
           ...location,
           ...args,
         })

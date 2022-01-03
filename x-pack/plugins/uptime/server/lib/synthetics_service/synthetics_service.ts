@@ -7,8 +7,6 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { ValuesType } from 'utility-types';
-
 import {
   CoreStart,
   KibanaRequest,
@@ -24,11 +22,17 @@ import { UptimeServerSetup } from '../adapters';
 import { installSyntheticsIndexTemplates } from '../../rest_api/synthetics_service/install_index_templates';
 import { SyntheticsServiceApiKey } from '../../../common/runtime_types/synthetics_service_api_key';
 import { getAPIKeyForSyntheticsService } from './get_api_key';
-import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { syntheticsMonitorType } from '../saved_objects/synthetics_monitor';
 import { getEsHosts } from './get_es_hosts';
 import { UptimeConfig } from '../../../common/config';
-import { MonitorConfigs, ServiceAPIClient } from './service_api_client';
+import { ServiceAPIClient } from './service_api_client';
+import { formatMonitorConfig } from './formatters/format_configs';
+import {
+  ConfigKey,
+  MonitorFields,
+  SyntheticsMonitor,
+  SyntheticsMonitorWithId,
+} from '../../../common/runtime_types';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -165,8 +169,11 @@ export class SyntheticsService {
     };
   }
 
-  async pushConfigs(request?: KibanaRequest, configs?: MonitorConfigs) {
+  async pushConfigs(request?: KibanaRequest, configs?: SyntheticsMonitorWithId[]) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
+    if (monitors.length === 0) {
+      return;
+    }
     const data = {
       monitors,
       output: await this.getOutput(request),
@@ -180,9 +187,9 @@ export class SyntheticsService {
     }
   }
 
-  async deleteConfigs(request: KibanaRequest, configs: MonitorConfigs) {
+  async deleteConfigs(request: KibanaRequest, configs: SyntheticsMonitorWithId[]) {
     const data = {
-      monitors: configs,
+      monitors: this.formatConfigs(configs),
       output: await this.getOutput(request),
     };
     return await this.apiClient.delete(data);
@@ -190,60 +197,25 @@ export class SyntheticsService {
 
   async getMonitorConfigs() {
     const savedObjectsClient = this.server.savedObjectsClient;
-    const monitorsSavedObjects = await savedObjectsClient.find<
-      SyntheticsMonitorSavedObject['attributes']
-    >({
+
+    if (!savedObjectsClient?.find) {
+      return [] as SyntheticsMonitorWithId[];
+    }
+
+    const findResult = await savedObjectsClient.find<SyntheticsMonitor>({
       type: syntheticsMonitorType,
     });
 
-    const savedObjectsList = monitorsSavedObjects.saved_objects;
-    return savedObjectsList.map<ValuesType<MonitorConfigs>>(({ attributes, id }) => ({
+    return (findResult.saved_objects ?? []).map(({ attributes, id }) => ({
       ...attributes,
       id,
-    }));
+    })) as SyntheticsMonitorWithId[];
   }
 
-  formatConfigs(configs: MonitorConfigs) {
-    // TODO: Move to dedicated formatter class
-    function parseSchedule(schedule: any) {
-      if (schedule?.number) {
-        return `@every ${schedule.number}${schedule.unit}`;
-      }
-      return schedule;
-    }
-
-    function parseUrl(urls?: string | string[]) {
-      if (!urls) {
-        return undefined;
-      }
-      if (urls instanceof Array) {
-        return urls;
-      }
-      return [urls];
-    }
-
-    function parseInlineSource(monAttrs: any) {
-      if (monAttrs['source.inline.script']) {
-        return {
-          inline: {
-            script: monAttrs['source.inline.script'],
-          },
-        };
-      }
-    }
-    return configs.map((monAttrs) => {
-      const { id, schedule, type, name, locations, tags, urls } = monAttrs;
-      return {
-        id,
-        type,
-        name,
-        locations,
-        tags,
-        source: parseInlineSource(monAttrs),
-        urls: parseUrl(urls),
-        schedule: parseSchedule(schedule),
-      };
-    });
+  formatConfigs(configs: SyntheticsMonitorWithId[]) {
+    return configs.map((config: Partial<MonitorFields>) =>
+      formatMonitorConfig(Object.keys(config) as ConfigKey[], config)
+    );
   }
 }
 

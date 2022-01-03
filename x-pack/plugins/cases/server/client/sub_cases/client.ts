@@ -10,25 +10,19 @@ import Boom from '@hapi/boom';
 
 import { SavedObject } from 'kibana/server';
 import {
-  CASE_SAVED_OBJECT,
   caseStatuses,
   CommentAttributes,
-  MAX_CONCURRENT_SEARCHES,
   SubCaseResponse,
   SubCaseResponseRt,
   SubCasesFindRequest,
   SubCasesFindResponse,
   SubCasesFindResponseRt,
   SubCasesPatchRequest,
-} from '../../../common';
+} from '../../../common/api';
+import { MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { CasesClientArgs } from '..';
-import {
-  countAlertsForID,
-  createCaseError,
-  flattenSubCaseSavedObject,
-  transformSubCases,
-} from '../../common';
-import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
+import { createCaseError } from '../../common/error';
+import { countAlertsForID, flattenSubCaseSavedObject, transformSubCases } from '../../common/utils';
 import { constructQueryOptions } from '../utils';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { update } from './update';
@@ -96,8 +90,7 @@ export function createSubCasesClient(clientArgs: CasesClientArgs): SubCasesClien
 
 async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promise<void> {
   try {
-    const { unsecuredSavedObjectsClient, user, userActionService, caseService, attachmentService } =
-      clientArgs;
+    const { unsecuredSavedObjectsClient, caseService, attachmentService } = clientArgs;
 
     const [comments, subCases] = await Promise.all([
       caseService.getAllSubCaseComments({ unsecuredSavedObjectsClient, id: ids }),
@@ -114,12 +107,6 @@ async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promis
       );
     }
 
-    const subCaseIDToParentID = subCases.saved_objects.reduce((acc, subCase) => {
-      const parentID = subCase.references.find((ref) => ref.type === CASE_SAVED_OBJECT);
-      acc.set(subCase.id, parentID?.id);
-      return acc;
-    }, new Map<string, string | undefined>());
-
     const deleteCommentMapper = async (comment: SavedObject<CommentAttributes>) =>
       attachmentService.delete({ unsecuredSavedObjectsClient, attachmentId: comment.id });
 
@@ -133,25 +120,6 @@ async function deleteSubCase(ids: string[], clientArgs: CasesClientArgs): Promis
 
     await pMap(ids, deleteSubCasesMapper, {
       concurrency: MAX_CONCURRENT_SEARCHES,
-    });
-
-    const deleteDate = new Date().toISOString();
-
-    await userActionService.bulkCreate({
-      unsecuredSavedObjectsClient,
-      actions: subCases.saved_objects.map((subCase) =>
-        buildCaseUserActionItem({
-          action: 'delete',
-          actionAt: deleteDate,
-          actionBy: user,
-          // if for some reason the sub case didn't have a reference to its parent, we'll still log a user action
-          // but we won't have the case ID
-          caseId: subCaseIDToParentID.get(subCase.id) ?? '',
-          subCaseId: subCase.id,
-          fields: ['sub_case', 'comment', 'status'],
-          owner: subCase.attributes.owner,
-        })
-      ),
     });
   } catch (error) {
     throw createCaseError({

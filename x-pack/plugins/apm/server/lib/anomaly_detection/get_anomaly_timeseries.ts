@@ -46,9 +46,7 @@ export async function getAnomalyTimeseries({
     end,
   });
 
-  const { jobs: mlJobs } = await getMlJobsWithAPMGroup(
-    mlSetup.anomalyDetectors
-  );
+  const mlJobs = await getMlJobsWithAPMGroup(mlSetup.anomalyDetectors);
 
   if (!mlJobs.length) {
     return [];
@@ -148,7 +146,7 @@ export async function getAnomalyTimeseries({
     }
   );
 
-  const jobsById = keyBy(mlJobs, (job) => job.job_id);
+  const jobsById = keyBy(mlJobs, (job) => job.jobId);
 
   function divide(value: number | null, divider: number) {
     if (value === null) {
@@ -176,9 +174,9 @@ export async function getAnomalyTimeseries({
         jobId,
         type,
         serviceName: bucket.key.serviceName as string,
-        environment: job.custom_settings!.job_tags!.environment as string,
+        environment: job.environment,
         transactionType: bucket.key.transactionType as string,
-        version: Number(job.custom_settings!.job_tags!.apm_ml_version),
+        version: job.version,
         anomalies: bucket.timeseries.buckets.map((dateBucket) => ({
           x: dateBucket.key as number,
           y:

@@ -11,7 +11,7 @@ import styled, { css } from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
-import { SUPPORTED_CONNECTORS } from '../../../common';
+import { SUPPORTED_CONNECTORS } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useActionTypes } from '../../containers/configure/use_action_types';

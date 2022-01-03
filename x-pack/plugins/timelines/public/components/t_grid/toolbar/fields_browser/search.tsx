@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
-import type { BrowserFields } from '../../../../../common';
+import type { BrowserFields } from '../../../../../common/search_strategy';
 
 import { getFieldBrowserSearchInputClassName, getFieldCount } from './helpers';
 

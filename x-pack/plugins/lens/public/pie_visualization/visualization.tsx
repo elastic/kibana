@@ -41,7 +41,7 @@ function newLayerState(layerId: string): PieLayerState {
 
 const bucketedOperations = (op: OperationMetadata) => op.isBucketed;
 const numberMetricOperations = (op: OperationMetadata) =>
-  !op.isBucketed && op.dataType === 'number';
+  !op.isBucketed && op.dataType === 'number' && !op.isStaticValue;
 
 const applyPaletteToColumnConfig = (
   columns: AccessorConfig[],
@@ -282,10 +282,7 @@ export const getPieVisualization = ({
         warningMessages.push(
           <FormattedMessage
             id="xpack.lens.pie.smallValuesWarningMessage"
-            defaultMessage="The received data contains too small values that can be incorrectly visualized in the {shape} chart"
-            values={{
-              shape: <strong>{state.shape}</strong>,
-            }}
+            defaultMessage="Waffle charts are unable to effectively display small field values. To display all field values, use the Data table or Treemap."
           />
         );
       }

@@ -7,15 +7,13 @@
 
 import type { Map as MbMap, Layer as MbLayer, Style as MbStyle } from '@kbn/mapbox-gl';
 import _ from 'lodash';
+// @ts-expect-error
+import { RGBAImage } from './image_utils';
 import { AbstractLayer } from '../layer';
 import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
 import { isRetina } from '../../../util';
-import {
-  addSpriteSheetToMapFromImageData,
-  loadSpriteSheetImageData,
-} from '../../../connected_components/mb_map/utils';
 import { DataRequestContext } from '../../../actions';
 import { EMSTMSSource } from '../../sources/ems_tms_source';
 import { TileStyle } from '../../styles/tile/tile_style';
@@ -118,7 +116,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
       startLoading(SOURCE_DATA_REQUEST_ID, requestToken, nextMeta);
       const styleAndSprites = await this.getSource().getVectorStyleSheetAndSpriteMeta(isRetina());
       const spriteSheetImageData = styleAndSprites.spriteMeta
-        ? await loadSpriteSheetImageData(styleAndSprites.spriteMeta.png)
+        ? await this._loadSpriteSheetImageData(styleAndSprites.spriteMeta.png)
         : undefined;
       const data = {
         ...styleAndSprites,
@@ -210,6 +208,60 @@ export class EmsVectorTileLayer extends AbstractLayer {
     });
   }
 
+  _getImageData(img: HTMLImageElement) {
+    const canvas = window.document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    if (!context) {
+      throw new Error('failed to create canvas 2d context');
+    }
+    canvas.width = img.width;
+    canvas.height = img.height;
+    context.drawImage(img, 0, 0, img.width, img.height);
+    return context.getImageData(0, 0, img.width, img.height);
+  }
+
+  _isCrossOriginUrl(url: string) {
+    const a = window.document.createElement('a');
+    a.href = url;
+    return (
+      a.protocol !== window.document.location.protocol ||
+      a.host !== window.document.location.host ||
+      a.port !== window.document.location.port
+    );
+  }
+
+  _loadSpriteSheetImageData(imgUrl: string): Promise<ImageData> {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      if (this._isCrossOriginUrl(imgUrl)) {
+        image.crossOrigin = 'Anonymous';
+      }
+      image.onload = (event) => {
+        resolve(this._getImageData(image));
+      };
+      image.onerror = (e) => {
+        reject(e);
+      };
+      image.src = imgUrl;
+    });
+  }
+
+  _addSpriteSheetToMapFromImageData(json: EmsSpriteSheet, imgData: ImageData, mbMap: MbMap) {
+    for (const imageId in json) {
+      if (!(json.hasOwnProperty(imageId) && !mbMap.hasImage(imageId))) {
+        continue;
+      }
+      const { width, height, x, y, sdf, pixelRatio } = json[imageId];
+      if (typeof width !== 'number' || typeof height !== 'number') {
+        continue;
+      }
+
+      const data = new RGBAImage({ width, height });
+      RGBAImage.copy(imgData, data, { x, y }, { x: 0, y: 0 }, { width, height });
+      mbMap.addImage(imageId, data, { pixelRatio, sdf });
+    }
+  }
+
   syncLayerWithMB(mbMap: MbMap) {
     const vectorStyle = this._getVectorStyle();
     if (!vectorStyle) {
@@ -252,7 +304,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
       if (!imageData) {
         return;
       }
-      addSpriteSheetToMapFromImageData(newJson, imageData, mbMap);
+      this._addSpriteSheetToMapFromImageData(newJson, imageData, mbMap);
 
       // sync layers
       const layers = vectorStyle.layers ? vectorStyle.layers : [];

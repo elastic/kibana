@@ -10,7 +10,7 @@ import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
 import * as i18n from '../translations';
-import { Case } from '../../../../common';
+import { Case } from '../../../../common/ui/types';
 import { CreateCaseForm } from '../form';
 
 export interface CreateCaseFlyoutProps {
@@ -74,7 +74,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>{i18n.CREATE_TITLE}</h2>
+            <h2>{i18n.CREATE_CASE_TITLE}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <StyledEuiFlyoutBody>

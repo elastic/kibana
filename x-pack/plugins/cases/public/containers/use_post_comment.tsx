@@ -6,7 +6,7 @@
  */
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
-import { CommentRequest } from '../../common';
+import { CommentRequest } from '../../common/api';
 
 import { postComment } from './api';
 import * as i18n from './translations';

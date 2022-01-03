@@ -22,10 +22,7 @@ import {
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import {
-  DETECTION_ENGINE_RULES_STATUS_URL,
-  DETECTION_ENGINE_RULES_URL,
-} from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
@@ -110,15 +107,15 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForRuleSuccessOrStatus(supertest, log, ruleResponse.id, 'succeeded');
 
-        const { body: statusBody } = await supertest
-          .post(DETECTION_ENGINE_RULES_STATUS_URL)
+        const { body: rule } = await supertest
+          .get(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send({ ids: [ruleResponse.id] })
+          .query({ id: ruleResponse.id })
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
         expect(bodyToCompare).to.eql(getThreatMatchingSchemaPartialMock(true));
-        expect(statusBody[ruleResponse.id].current_status.status).to.eql('succeeded');
+        expect(rule.status).to.eql('succeeded');
       });
     });
 
@@ -305,13 +302,10 @@ export default ({ getService }: FtrProviderContext) => {
             false_positives: [],
             from: '1900-01-01T00:00:00.000Z',
             immutable: false,
-            index: ['auditbeat-*'],
             interval: '5m',
-            language: 'kuery',
             max_signals: 100,
             name: 'Query with a rule id',
             producer: 'siem',
-            query: '*:*',
             references: [],
             risk_score: 55,
             risk_score_mapping: [],
@@ -321,20 +315,6 @@ export default ({ getService }: FtrProviderContext) => {
             severity_mapping: [],
             tags: [],
             threat: [],
-            threat_filters: [],
-            threat_index: ['auditbeat-*'],
-            threat_mapping: [
-              {
-                entries: [
-                  {
-                    field: 'host.name',
-                    type: 'mapping',
-                    value: 'host.name',
-                  },
-                ],
-              },
-            ],
-            threat_query: 'source.ip: "188.166.120.93"',
             to: 'now',
             type: 'threat_match',
             updated_at: fullSignal[ALERT_RULE_UPDATED_AT],
@@ -495,11 +475,11 @@ export default ({ getService }: FtrProviderContext) => {
           await waitForRuleSuccessOrStatus(supertest, log, id, 'failed');
 
           const { body } = await supertest
-            .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
+            .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
-            .send({ ids: [id] })
+            .query({ id })
             .expect(200);
-          expect(body[id].current_status.last_failure_message).to.contain(
+          expect(body.last_failure_message).to.contain(
             'execution has exceeded its allotted interval'
           );
         });
@@ -555,6 +535,7 @@ export default ({ getService }: FtrProviderContext) => {
             {
               enrichments: [
                 {
+                  feed: {},
                   indicator: {
                     description: "domain should match the auditbeat hosts' data's source.ip",
                     domain: '159.89.119.67',
@@ -579,6 +560,7 @@ export default ({ getService }: FtrProviderContext) => {
             {
               enrichments: [
                 {
+                  feed: {},
                   indicator: {
                     description: "domain should match the auditbeat hosts' data's source.ip",
                     domain: '159.89.119.67',
@@ -645,6 +627,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           assertContains(threat.enrichments, [
             {
+              feed: {},
               indicator: {
                 description: 'this should match auditbeat/hosts on both port and ip',
                 first_seen: '2021-01-26T11:06:03.000Z',
@@ -662,6 +645,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             {
+              feed: {},
               indicator: {
                 description: 'this should match auditbeat/hosts on ip',
                 first_seen: '2021-01-26T11:06:03.000Z',
@@ -732,6 +716,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           assertContains(threat.enrichments, [
             {
+              feed: {},
               indicator: {
                 description: 'this should match auditbeat/hosts on both port and ip',
                 first_seen: '2021-01-26T11:06:03.000Z',
@@ -754,6 +739,7 @@ export default ({ getService }: FtrProviderContext) => {
             // threat.indicator.matched data). That's the case with the
             // first and third indicators matched, here.
             {
+              feed: {},
               indicator: {
                 description: 'this should match auditbeat/hosts on both port and ip',
                 first_seen: '2021-01-26T11:06:03.000Z',
@@ -772,6 +758,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             {
+              feed: {},
               indicator: {
                 description: 'this should match auditbeat/hosts on ip',
                 first_seen: '2021-01-26T11:06:03.000Z',
@@ -846,6 +833,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           assertContains(threats[0].enrichments, [
             {
+              feed: {},
               indicator: {
                 description: "domain should match the auditbeat hosts' data's source.ip",
                 domain: '159.89.119.67',
@@ -866,6 +854,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             {
+              feed: {},
               indicator: {
                 description: 'this should match auditbeat/hosts on both port and ip',
                 first_seen: '2021-01-26T11:06:03.000Z',
@@ -883,6 +872,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             {
+              feed: {},
               indicator: {
                 description: 'this should match auditbeat/hosts on both port and ip',
                 first_seen: '2021-01-26T11:06:03.000Z',
@@ -903,6 +893,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           assertContains(threats[1].enrichments, [
             {
+              feed: {},
               indicator: {
                 description: "domain should match the auditbeat hosts' data's source.ip",
                 domain: '159.89.119.67',

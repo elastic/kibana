@@ -61,31 +61,14 @@ export interface TestBed<T = string> {
    * @param updatedProps The updated prop object
    */
   setProps: (updatedProps: any) => void;
-  /**
-   * Helper to wait until an element appears in the DOM as hooks updates cycles are tricky.
-   * Useful when loading a component that fetches a resource from the server
-   * and we need to wait for the data to be fetched (and bypass any "loading" state).
-   */
-  waitFor: (testSubject: T, count?: number) => Promise<void>;
-  waitForFn: (predicate: () => Promise<boolean>, errMessage: string) => Promise<void>;
   form: {
     /**
      * Set the value of a form text input.
      *
-     * In some cases, changing an input value triggers an HTTP request to validate
-     * the field. Even if we return immediately the response on the mock server we
-     * still need to wait until the next tick before the DOM updates.
-     * Setting isAsync to "true" takes care of that.
-     *
      * @param input The form input. Can either be a data-test-subj or a reactWrapper (can be a nested path. e.g. "myForm.myInput").
      * @param value The value to set
-     * @param isAsync If set to true will return a Promise that resolves on the next "tick"
      */
-    setInputValue: (
-      input: T | ReactWrapper,
-      value: string,
-      isAsync?: boolean
-    ) => Promise<void> | void;
+    setInputValue: (input: T | ReactWrapper, value: string) => void;
     /**
      * Set the value of a <EuiSelect /> or a mocked <EuiSuperSelect />
      * For the <EuiSuperSelect /> you need to mock it like this
@@ -181,8 +164,3 @@ export interface MemoryRouterConfig {
   /** A callBack that will be called with the React Router instance once mounted  */
   onRouter?: (router: any) => void;
 }
-
-/**
- * Utility type: extracts returned type from a Promise.
- */
-export type UnwrapPromise<T> = T extends Promise<infer P> ? P : T;

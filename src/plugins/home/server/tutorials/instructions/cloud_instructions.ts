@@ -7,13 +7,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
 export const cloudPasswordAndResetLink = i18n.translate(
   'home.tutorials.common.cloudInstructions.passwordAndResetLink',
   {
     defaultMessage:
       'Where {passwordTemplate} is the password of the `elastic` user.' +
       `\\{#config.cloud.profileUrl\\}
-      Forgot the password? [Reset in Elastic Cloud](\\{config.cloud.baseUrl\\}\\{config.cloud.profileUrl\\}).
+      Forgot the password? [Reset in Elastic Cloud](\\{config.cloud.baseUrl\\}\\{config.cloud.deploymentUrl\\}/security).
       \\{/config.cloud.profileUrl\\}`,
     values: { passwordTemplate: '`<password>`' },
   }

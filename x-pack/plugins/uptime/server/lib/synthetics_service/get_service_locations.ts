@@ -6,12 +6,16 @@
  */
 
 import axios from 'axios';
-import { ManifestLocation, ServiceLocations } from '../../../common/types';
+import {
+  ManifestLocation,
+  ServiceLocations,
+  ServiceLocationsApiResponse,
+} from '../../../common/runtime_types';
 
 export async function getServiceLocations({ manifestUrl }: { manifestUrl: string }) {
   const locations: ServiceLocations = [];
   try {
-    const { data } = await axios.get<Record<string, ManifestLocation>>(manifestUrl);
+    const { data } = await axios.get<{ locations: Record<string, ManifestLocation> }>(manifestUrl);
 
     Object.entries(data.locations).forEach(([locationId, location]) => {
       locations.push({
@@ -22,8 +26,10 @@ export async function getServiceLocations({ manifestUrl }: { manifestUrl: string
       });
     });
 
-    return locations;
+    return { locations } as ServiceLocationsApiResponse;
   } catch (e) {
-    return [];
+    return {
+      locations: [],
+    } as ServiceLocationsApiResponse;
   }
 }

@@ -40,6 +40,7 @@ import { getScaleType } from '../to_expression';
 import { ColorPicker } from './color_picker';
 import { ReferenceLinePanel } from './reference_line_panel';
 import { PalettePicker, TooltipWrapper } from '../../shared_components';
+import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -351,6 +352,12 @@ export const XyToolbar = memo(function XyToolbar(
     }
   );
 
+  // Ask the datasource if it has a say about default truncation value
+  const defaultParamsFromDatasources = getDefaultVisualValuesForLayer(
+    state,
+    props.frame.datasourceLayers
+  ).truncateText;
+
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
       <EuiFlexItem>
@@ -421,9 +428,9 @@ export const XyToolbar = memo(function XyToolbar(
                 legend: { ...state.legend, maxLines: val },
               });
             }}
-            shouldTruncate={state?.legend.shouldTruncate ?? true}
+            shouldTruncate={state?.legend.shouldTruncate ?? defaultParamsFromDatasources}
             onTruncateLegendChange={() => {
-              const current = state?.legend.shouldTruncate ?? true;
+              const current = state?.legend.shouldTruncate ?? defaultParamsFromDatasources;
               setState({
                 ...state,
                 legend: { ...state.legend, shouldTruncate: !current },

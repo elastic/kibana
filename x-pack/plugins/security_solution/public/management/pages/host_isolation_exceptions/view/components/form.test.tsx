@@ -233,5 +233,21 @@ describe('When on the host isolation exceptions entry form', () => {
         'true'
       );
     });
+
+    it('should show the policies selector when no policy is selected', () => {
+      existingException.tags = [];
+
+      renderResult = render(existingException);
+
+      expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
+    });
+
+    it('should show the policies selector when no policy is selected and there are previous tags', () => {
+      existingException.tags = ['non-a-policy-tag'];
+
+      renderResult = render(existingException);
+
+      expect(renderResult.queryByTestId('effectedPolicies-select-policiesSelectable')).toBeTruthy();
+    });
   });
 });

@@ -20,32 +20,29 @@ import {
 import { LensServerPluginSetup } from '../../../../lens/server';
 
 import {
+  Actions,
+  ActionTypes,
   AlertCommentRequestRt,
-  CASE_COMMENT_SAVED_OBJECT,
   CaseResponse,
   CaseStatuses,
   CaseType,
   CommentRequest,
   CommentRequestRt,
   CommentType,
-  ENABLE_CASE_CONNECTOR,
-  MAX_GENERATED_ALERTS_PER_SUB_CASE,
   SubCaseAttributes,
   throwErrors,
   User,
-} from '../../../common';
+} from '../../../common/api';
 import {
-  buildCaseUserActionItem,
-  buildCommentUserActionItem,
-} from '../../services/user_actions/helpers';
+  CASE_COMMENT_SAVED_OBJECT,
+  ENABLE_CASE_CONNECTOR,
+  MAX_GENERATED_ALERTS_PER_SUB_CASE,
+} from '../../../common/constants';
 
 import { AttachmentService, CasesService, CaseUserActionService } from '../../services';
-import {
-  createCaseError,
-  CommentableCase,
-  createAlertUpdateRequest,
-  isCommentRequestTypeGenAlert,
-} from '../../common';
+import { CommentableCase } from '../../common/models';
+import { createCaseError } from '../../common/error';
+import { createAlertUpdateRequest, isCommentRequestTypeGenAlert } from '../../common/utils';
 import { CasesClientArgs, CasesClientInternal } from '..';
 
 import { decodeCommentRequest } from '../utils';
@@ -96,21 +93,7 @@ async function getSubCase({
     caseId,
     createdBy: user,
   });
-  await userActionService.bulkCreate({
-    unsecuredSavedObjectsClient,
-    actions: [
-      buildCaseUserActionItem({
-        action: 'create',
-        actionAt: createdAt,
-        actionBy: user,
-        caseId,
-        subCaseId: newSubCase.id,
-        fields: ['status', 'sub_case'],
-        newValue: { status: newSubCase.attributes.status },
-        owner: newSubCase.attributes.owner,
-      }),
-    ],
-  });
+
   return newSubCase;
 }
 
@@ -128,6 +111,7 @@ const addGeneratedAlerts = async (
     lensEmbeddableFactory,
     authorization,
     alertsService,
+    user,
   } = clientArgs;
 
   const query = pipe(
@@ -208,21 +192,18 @@ const addGeneratedAlerts = async (
       await alertsService.updateAlertsStatus(alertsToUpdate);
     }
 
-    await userActionService.bulkCreate({
+    await userActionService.createUserAction({
+      type: ActionTypes.comment,
+      action: Actions.create,
       unsecuredSavedObjectsClient,
-      actions: [
-        buildCommentUserActionItem({
-          action: 'create',
-          actionAt: createdDate,
-          actionBy: { ...userDetails },
-          caseId: updatedCase.caseId,
-          subCaseId: updatedCase.subCaseId,
-          commentId: newComment.id,
-          fields: ['comment'],
-          newValue: query,
-          owner: newComment.attributes.owner,
-        }),
-      ],
+      caseId: updatedCase.caseId,
+      subCaseId: updatedCase.subCaseId,
+      payload: {
+        attachment: query,
+      },
+      attachmentId: newComment.id,
+      user,
+      owner: newComment.attributes.owner,
     });
 
     return updatedCase.encode();
@@ -395,21 +376,18 @@ export const addComment = async (
       await alertsService.updateAlertsStatus(alertsToUpdate);
     }
 
-    await userActionService.bulkCreate({
+    await userActionService.createUserAction({
+      type: ActionTypes.comment,
+      action: Actions.create,
       unsecuredSavedObjectsClient,
-      actions: [
-        buildCommentUserActionItem({
-          action: 'create',
-          actionAt: createdDate,
-          actionBy: { username, full_name, email },
-          caseId: updatedCase.caseId,
-          subCaseId: updatedCase.subCaseId,
-          commentId: newComment.id,
-          fields: ['comment'],
-          newValue: query,
-          owner: newComment.attributes.owner,
-        }),
-      ],
+      caseId,
+      subCaseId: updatedCase.subCaseId,
+      attachmentId: newComment.id,
+      payload: {
+        attachment: query,
+      },
+      user,
+      owner: newComment.attributes.owner,
     });
 
     return updatedCase.encode();

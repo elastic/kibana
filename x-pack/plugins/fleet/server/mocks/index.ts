@@ -33,8 +33,8 @@ export interface MockedFleetAppContext extends FleetAppContext {
   data: ReturnType<typeof dataPluginMock.createStartContract>;
   encryptedSavedObjectsStart?: ReturnType<typeof encryptedSavedObjectsMock.createStart>;
   savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
-  securitySetup?: ReturnType<typeof securityMock.createSetup>;
-  securityStart?: ReturnType<typeof securityMock.createStart>;
+  securitySetup: ReturnType<typeof securityMock.createSetup>;
+  securityStart: ReturnType<typeof securityMock.createStart>;
   logger: ReturnType<ReturnType<typeof loggingSystemMock.create>['get']>;
 }
 
@@ -80,6 +80,7 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
     epm: {
       internalSoClient: savedObjectsClientMock.create(),
     },
+    spaceId: 'default',
   };
 };
 
@@ -99,6 +100,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServi
   return {
     _compilePackagePolicyInputs: jest.fn(),
     buildPackagePolicyFromPackage: jest.fn(),
+    buildPackagePolicyFromPackageWithVersion: jest.fn(),
     bulkCreate: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
@@ -112,6 +114,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServi
     upgrade: jest.fn(),
     getUpgradeDryRunDiff: jest.fn(),
     getUpgradePackagePolicyInfo: jest.fn(),
+    enrichPolicyWithDefaultsFromPackage: jest.fn(),
   };
 };
 

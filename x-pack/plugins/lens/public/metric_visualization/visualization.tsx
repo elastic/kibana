@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render } from 'react-dom';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { ThemeServiceStart } from 'kibana/public';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import { ColorMode } from '../../../../../src/plugins/charts/common';
@@ -90,7 +90,7 @@ export const getMetricVisualization = ({
         defaultMessage: 'Metric',
       }),
       groupLabel: i18n.translate('xpack.lens.metric.groupLabel', {
-        defaultMessage: 'Single value',
+        defaultMessage: 'Goal and single value',
       }),
       sortPriority: 3,
     },

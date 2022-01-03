@@ -194,11 +194,19 @@ describe('TagsClient', () => {
     it('calls `soClient.find` with the correct parameters', async () => {
       await tagsClient.getAll();
 
-      expect(soClient.find).toHaveBeenCalledTimes(1);
-      expect(soClient.find).toHaveBeenCalledWith({
+      expect(soClient.createPointInTimeFinder).toHaveBeenCalledTimes(1);
+      expect(soClient.createPointInTimeFinder).toHaveBeenCalledWith({
         type: 'tag',
-        perPage: 10000,
+        perPage: 1000,
       });
+
+      expect(soClient.find).toHaveBeenCalledTimes(1);
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'tag',
+          perPage: 1000,
+        })
+      );
     });
 
     it('converts the objects returned from the soClient to tags', async () => {

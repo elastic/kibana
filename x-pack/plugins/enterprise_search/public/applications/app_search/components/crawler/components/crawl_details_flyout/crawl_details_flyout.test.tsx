@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
+import '../../../../../__mocks__/shallow_useeffect.mock';
 import '../../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
@@ -15,21 +16,26 @@ import { EuiCodeBlock, EuiFlyout, EuiTab, EuiTabs } from '@elastic/eui';
 
 import { Loading } from '../../../../../shared/loading';
 
-import { CrawlDetailActions, CrawlDetailValues } from '../../crawl_detail_logic';
 import { CrawlRequestWithDetailsFromServer } from '../../types';
 
 import { CrawlDetailsPreview } from './crawl_details_preview';
 
 import { CrawlDetailsFlyout } from '.';
 
-const MOCK_VALUES: Partial<CrawlDetailValues> = {
+const MOCK_VALUES = {
   dataLoading: false,
   flyoutClosed: false,
   crawlRequestFromServer: {} as CrawlRequestWithDetailsFromServer,
+  logRetention: {
+    crawler: {
+      enabled: true,
+    },
+  },
 };
 
-const MOCK_ACTIONS: Partial<CrawlDetailActions> = {
+const MOCK_ACTIONS = {
   setSelectedTab: jest.fn(),
+  fetchLogRetention: jest.fn(),
 };
 
 describe('CrawlDetailsFlyout', () => {
@@ -38,6 +44,7 @@ describe('CrawlDetailsFlyout', () => {
   });
 
   it('renders a flyout ', () => {
+    setMockActions(MOCK_ACTIONS);
     setMockValues(MOCK_VALUES);
 
     const wrapper = shallow(<CrawlDetailsFlyout />);
@@ -82,7 +89,22 @@ describe('CrawlDetailsFlyout', () => {
     it('shows the human readable version of the crawl details', () => {
       const wrapper = shallow(<CrawlDetailsFlyout />);
 
-      expect(wrapper.find(CrawlDetailsPreview)).toHaveLength(1);
+      const crawlDetailsPreview = wrapper.find(CrawlDetailsPreview);
+      expect(crawlDetailsPreview).toHaveLength(1);
+      expect(crawlDetailsPreview.prop('crawlerLogsEnabled')).toEqual(true);
+    });
+
+    it('shows the preview differently if the crawler logs are disabled', () => {
+      setMockValues({
+        ...MOCK_VALUES,
+        selectedTab: 'preview',
+        logRetention: null,
+      });
+      const wrapper = shallow(<CrawlDetailsFlyout />);
+
+      const crawlDetailsPreview = wrapper.find(CrawlDetailsPreview);
+      expect(crawlDetailsPreview).toHaveLength(1);
+      expect(crawlDetailsPreview.prop('crawlerLogsEnabled')).toEqual(false);
     });
   });
 

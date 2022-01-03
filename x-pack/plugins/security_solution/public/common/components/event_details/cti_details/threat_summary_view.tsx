@@ -28,7 +28,7 @@ import {
   BrowserFields,
   TimelineEventsDetailsItem,
 } from '../../../../../common/search_strategy';
-import { HostRisk } from '../../../../overview/containers/overview_risky_host_links/use_hosts_risk_score';
+import { HostRisk } from '../../../containers/hosts_risk/use_hosts_risk_score';
 import { HostRiskSummary } from './host_risk_summary';
 import { EnrichmentSummary } from './enrichment_summary';
 
@@ -84,7 +84,7 @@ export const EnrichedDataRow: React.FC<{ field: string | undefined; value: React
     <EuiFlexItem style={{ flexShrink: 0 }} grow={false}>
       <EnrichmentFieldTitle title={field} />
     </EuiFlexItem>
-    <EuiFlexItem>{value}</EuiFlexItem>
+    <EuiFlexItem className="eui-textBreakWord">{value}</EuiFlexItem>
   </StyledEuiFlexGroup>
 );
 

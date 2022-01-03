@@ -57,6 +57,9 @@ export class DocLinksService {
         cloud: {
           indexManagement: `${ELASTIC_WEBSITE_URL}/guide/en/cloud/current/ec-configure-index-management.html`,
         },
+        console: {
+          guide: `${KIBANA_DOCS}console-kibana.html`,
+        },
         dashboard: {
           guide: `${KIBANA_DOCS}dashboard.html`,
           drilldowns: `${KIBANA_DOCS}drilldowns.html`,
@@ -113,6 +116,7 @@ export class DocLinksService {
           usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
         },
         workplaceSearch: {
+          apiKeys: `${WORKPLACE_SEARCH_DOCS}workplace-search-api-authentication.html`,
           box: `${WORKPLACE_SEARCH_DOCS}workplace-search-box-connector.html`,
           confluenceCloud: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-cloud-connector.html`,
           confluenceServer: `${WORKPLACE_SEARCH_DOCS}workplace-search-confluence-server-connector.html`,
@@ -285,6 +289,7 @@ export class DocLinksService {
           migrationApiDeprecation: `${ELASTICSEARCH_DOCS}migration-api-deprecation.html`,
           nodeRoles: `${ELASTICSEARCH_DOCS}modules-node.html#node-roles`,
           releaseHighlights: `${ELASTICSEARCH_DOCS}release-highlights.html`,
+          version8ReleaseHighlights: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/8.0/elastic-stack-highlights.html`,
           remoteClusters: `${ELASTICSEARCH_DOCS}remote-clusters.html`,
           remoteClustersProxy: `${ELASTICSEARCH_DOCS}remote-clusters.html#proxy-mode`,
           remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}remote-clusters-settings.html#remote-cluster-proxy-settings`,
@@ -307,6 +312,7 @@ export class DocLinksService {
         },
         securitySolution: {
           trustedApps: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/trusted-apps-ov.html`,
+          eventFilters: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/event-filters.html`,
         },
         query: {
           eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -485,6 +491,7 @@ export class DocLinksService {
           hdfsRepo: `${PLUGIN_DOCS}repository-hdfs.html`,
           s3Repo: `${PLUGIN_DOCS}repository-s3.html`,
           snapshotRestoreRepos: `${PLUGIN_DOCS}repository.html`,
+          mapperSize: `${PLUGIN_DOCS}mapper-size-usage.html`,
         },
         snapshotRestore: {
           guide: `${ELASTICSEARCH_DOCS}snapshot-restore.html`,
@@ -560,7 +567,7 @@ export class DocLinksService {
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
           learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
           apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
-          onPremRegistry: `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/${DOC_LINK_VERSION}/air-gapped.html`,
+          onPremRegistry: `${FLEET_DOCS}air-gapped.html`,
         },
         ecs: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
@@ -609,6 +616,9 @@ export interface DocLinksStart {
     };
     readonly cloud: {
       readonly indexManagement: string;
+    };
+    readonly console: {
+      readonly guide: string;
     };
     readonly dashboard: {
       readonly guide: string;
@@ -671,6 +681,7 @@ export interface DocLinksStart {
       readonly usersAccess: string;
     };
     readonly workplaceSearch: {
+      readonly apiKeys: string;
       readonly box: string;
       readonly confluenceCloud: string;
       readonly confluenceServer: string;
@@ -792,6 +803,7 @@ export interface DocLinksStart {
     };
     readonly securitySolution: {
       readonly trustedApps: string;
+      readonly eventFilters: string;
     };
     readonly query: {
       readonly eql: string;
@@ -872,7 +884,14 @@ export interface DocLinksStart {
     }>;
     readonly watcher: Record<string, string>;
     readonly ccs: Record<string, string>;
-    readonly plugins: Record<string, string>;
+    readonly plugins: {
+      azureRepo: string;
+      gcsRepo: string;
+      hdfsRepo: string;
+      s3Repo: string;
+      snapshotRestoreRepos: string;
+      mapperSize: string;
+    };
     readonly snapshotRestore: Record<string, string>;
     readonly ingest: Record<string, string>;
     readonly fleet: Readonly<{

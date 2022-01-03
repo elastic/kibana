@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ALERT_REASON, ALERT_SEVERITY_WARNING, ALERT_SEVERITY } from '@kbn/rule-data-utils';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import {
   generateFilterDSL,
   hasFilters,
@@ -75,7 +75,6 @@ const mockStatusAlertDocument = (
       [ALERT_REASON]: `Monitor first with url ${monitorInfo?.url?.full} is down from ${
         monitorInfo.observer?.geo?.name
       }. The latest error message is ${monitorInfo.error?.message || ''}`,
-      [ALERT_SEVERITY]: ALERT_SEVERITY_WARNING,
     },
     id: getInstanceId(
       monitorInfo,
@@ -96,7 +95,6 @@ const mockAvailabilityAlertDocument = (monitor: GetMonitorAvailabilityResult) =>
       )}% availability expected is 99.34% from ${
         monitorInfo.observer?.geo?.name
       }. The latest error message is ${monitorInfo.error?.message || ''}`,
-      [ALERT_SEVERITY]: ALERT_SEVERITY_WARNING,
     },
     id: getInstanceId(monitorInfo, `${monitorInfo?.monitor.id}-${monitorInfo.observer?.geo?.name}`),
   };

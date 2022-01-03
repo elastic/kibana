@@ -34,7 +34,6 @@ export const mapping = {
       },
     },
   },
-  browser_type: { type: 'keyword' },
   migration_version: { type: 'keyword' }, // new field (7.14) to distinguish reports that were scheduled with Task Manager
   jobtype: { type: 'keyword' },
   payload: { type: 'object', enabled: false },

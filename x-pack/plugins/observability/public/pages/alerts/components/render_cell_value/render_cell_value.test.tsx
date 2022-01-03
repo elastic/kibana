@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
-} from '@kbn/rule-data-utils/alerts_as_data_status';
-import { ALERT_STATUS } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import type { CellValueElementProps } from '../../../../../../timelines/common';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
 import * as PluginHook from '../../../../hooks/use_plugin_context';

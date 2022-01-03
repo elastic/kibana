@@ -510,6 +510,9 @@ export interface DocLinksStart {
         readonly cloud: {
             readonly indexManagement: string;
         };
+        readonly console: {
+            readonly guide: string;
+        };
         readonly dashboard: {
             readonly guide: string;
             readonly drilldowns: string;
@@ -571,6 +574,7 @@ export interface DocLinksStart {
             readonly usersAccess: string;
         };
         readonly workplaceSearch: {
+            readonly apiKeys: string;
             readonly box: string;
             readonly confluenceCloud: string;
             readonly confluenceServer: string;
@@ -692,6 +696,7 @@ export interface DocLinksStart {
         };
         readonly securitySolution: {
             readonly trustedApps: string;
+            readonly eventFilters: string;
         };
         readonly query: {
             readonly eql: string;
@@ -772,7 +777,14 @@ export interface DocLinksStart {
         }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
-        readonly plugins: Record<string, string>;
+        readonly plugins: {
+            azureRepo: string;
+            gcsRepo: string;
+            hdfsRepo: string;
+            s3Repo: string;
+            snapshotRestoreRepos: string;
+            mapperSize: string;
+        };
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
@@ -1487,7 +1499,7 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     sortField?: string;
     // (undocumented)
-    sortOrder?: estypes.SearchSortOrder;
+    sortOrder?: estypes.SortOrder;
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;

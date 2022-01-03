@@ -10,7 +10,6 @@ import { sortBy, uniqBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESSearchResponse } from '../../../../../../src/core/types/elasticsearch';
 import { MlPluginSetup } from '../../../../ml/server';
-import { PromiseReturnType } from '../../../../observability/typings/common';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getServiceHealthStatus } from '../../../common/service_health_status';
@@ -30,10 +29,9 @@ export const DEFAULT_ANOMALIES: ServiceAnomaliesResponse = {
   serviceAnomalies: [],
 };
 
-export type ServiceAnomaliesResponse = PromiseReturnType<
-  typeof getServiceAnomalies
+export type ServiceAnomaliesResponse = Awaited<
+  ReturnType<typeof getServiceAnomalies>
 >;
-
 export async function getServiceAnomalies({
   setup,
   environment,
@@ -120,7 +118,6 @@ export async function getServiceAnomalies({
     const relevantBuckets = uniqBy(
       sortBy(
         // make sure we only return data for jobs that are available in this space
-        // @ts-ignore 4.3.5 upgrade
         typedAnomalyResponse.aggregations?.services.buckets.filter((bucket) =>
           jobIds.includes(bucket.key.jobId as string)
         ) ?? [],
@@ -162,17 +159,13 @@ export async function getMLJobs(
   anomalyDetectors: ReturnType<MlPluginSetup['anomalyDetectorsProvider']>,
   environment: string
 ) {
-  const response = await getMlJobsWithAPMGroup(anomalyDetectors);
+  const jobs = await getMlJobsWithAPMGroup(anomalyDetectors);
 
   // to filter out legacy jobs we are filtering by the existence of `apm_ml_version` in `custom_settings`
   // and checking that it is compatable.
-  const mlJobs = response.jobs.filter(
-    (job) => (job.custom_settings?.job_tags?.apm_ml_version ?? 0) >= 2
-  );
+  const mlJobs = jobs.filter((job) => job.version >= 2);
   if (environment !== ENVIRONMENT_ALL.value) {
-    const matchingMLJob = mlJobs.find(
-      (job) => job.custom_settings?.job_tags?.environment === environment
-    );
+    const matchingMLJob = mlJobs.find((job) => job.environment === environment);
     if (!matchingMLJob) {
       return [];
     }
@@ -186,5 +179,5 @@ export async function getMLJobIds(
   environment: string
 ) {
   const mlJobs = await getMLJobs(anomalyDetectors, environment);
-  return mlJobs.map((job) => job.job_id);
+  return mlJobs.map((job) => job.jobId);
 }

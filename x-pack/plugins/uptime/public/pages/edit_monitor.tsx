@@ -5,101 +5,60 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import {
-  ConfigKey,
-  MonitorFields,
-  TLSFields,
-  PolicyConfig,
-  DataStream,
-} from '../components/fleet_package/types';
-import { useTrackPageview } from '../../../observability/public';
-import { SyntheticsProviders } from '../components/fleet_package/contexts';
-import { MonitorConfig } from '../components/monitor_management/monitor_config';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { useParams } from 'react-router-dom';
+import { useTrackPageview, FETCH_STATUS, useFetcher } from '../../../observability/public';
+import { MonitorFields } from '../../common/runtime_types';
+import { EditMonitorConfig } from '../components/monitor_management/edit_monitor_config';
+import { Loader } from '../components/monitor_management/loader/loader';
+import { getMonitor } from '../state/api';
+import { SyntheticsMonitorSavedObject } from '../../common/types';
+import { useLocations } from '../components/monitor_management/hooks/use_locations';
 
 export const EditMonitorPage: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'edit-monitor' });
   useTrackPageview({ app: 'uptime', path: 'edit-monitor', delay: 15000 });
+  const { monitorId } = useParams<{ monitorId: string }>();
 
-  const {
-    enableTLS: isTLSEnabled,
-    enableZipUrlTLS: isZipUrlTLSEnabled,
-    fullConfig: fullDefaultConfig,
-    monitorTypeConfig: defaultConfig,
-    monitorType,
-    tlsConfig: defaultTLSConfig,
-  } = useMemo(() => {
-    /* TODO: fetch current monitor to be edited from saved objects based on url param */
-    const monitor = {} as Record<ConfigKey, any>; // fetch
+  const { data, status } = useFetcher<Promise<SyntheticsMonitorSavedObject | undefined>>(() => {
+    return getMonitor({ id: Buffer.from(monitorId, 'base64').toString('utf8') });
+  }, [monitorId]);
 
-    let enableTLS = false;
-    let enableZipUrlTLS = false;
-    const getDefaultConfig = () => {
-      const type: DataStream = monitor[ConfigKey.MONITOR_TYPE] as DataStream;
-
-      const configKeys: ConfigKey[] = Object.values(ConfigKey) || ([] as ConfigKey[]);
-      const formattedDefaultConfigForMonitorType: MonitorFields = configKeys.reduce<MonitorFields>(
-        (acc: MonitorFields, key: ConfigKey) => {
-          return {
-            ...acc,
-            key,
-          };
-        },
-        {} as MonitorFields
-      );
-
-      const tlsConfig: TLSFields = {
-        [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]:
-          formattedDefaultConfigForMonitorType[ConfigKey.TLS_CERTIFICATE_AUTHORITIES],
-        [ConfigKey.TLS_CERTIFICATE]:
-          formattedDefaultConfigForMonitorType[ConfigKey.TLS_CERTIFICATE],
-        [ConfigKey.TLS_KEY]: formattedDefaultConfigForMonitorType[ConfigKey.TLS_KEY],
-        [ConfigKey.TLS_KEY_PASSPHRASE]:
-          formattedDefaultConfigForMonitorType[ConfigKey.TLS_KEY_PASSPHRASE],
-        [ConfigKey.TLS_VERIFICATION_MODE]:
-          formattedDefaultConfigForMonitorType[ConfigKey.TLS_VERIFICATION_MODE],
-        [ConfigKey.TLS_VERSION]: formattedDefaultConfigForMonitorType[ConfigKey.TLS_VERSION],
-      };
-
-      enableTLS = Boolean(formattedDefaultConfigForMonitorType[ConfigKey.TLS_VERIFICATION_MODE]);
-      enableZipUrlTLS = Boolean(
-        formattedDefaultConfigForMonitorType[ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]
-      );
-
-      const formattedDefaultConfig: Partial<PolicyConfig> = {
-        [type]: formattedDefaultConfigForMonitorType,
-      };
-
-      return {
-        fullConfig: formattedDefaultConfig,
-        monitorTypeConfig: formattedDefaultConfigForMonitorType,
-        tlsConfig,
-        monitorType: type,
-        enableTLS,
-        enableZipUrlTLS,
-      };
-    };
-
-    return getDefaultConfig();
-  }, []);
+  const monitor = data?.attributes as MonitorFields;
+  const { error: locationsError, loading: locationsLoading } = useLocations();
 
   return (
-    <SyntheticsProviders
-      policyDefaultValues={{
-        defaultIsTLSEnabled: isTLSEnabled,
-        defaultIsZipUrlTLSEnabled: isZipUrlTLSEnabled,
-        defaultMonitorType: monitorType,
-        defaultName: defaultConfig?.name || '', // TODO - figure out typing concerns for name
-        defaultLocations: [], // TODO - figure out locations
-        isEditable: true,
-      }}
-      httpDefaultValues={fullDefaultConfig[DataStream.HTTP]}
-      tcpDefaultValues={fullDefaultConfig[DataStream.TCP]}
-      icmpDefaultValues={fullDefaultConfig[DataStream.ICMP]}
-      browserDefaultValues={fullDefaultConfig[DataStream.BROWSER]}
-      tlsDefaultValues={defaultTLSConfig}
+    <Loader
+      loading={status === FETCH_STATUS.LOADING || locationsLoading}
+      loadingTitle={LOADING_LABEL}
+      error={status === FETCH_STATUS.FAILURE || Boolean(locationsError)}
+      errorTitle={ERROR_HEADING_LABEL}
+      errorBody={locationsError ? SERVICE_LOCATIONS_ERROR_LABEL : MONITOR_LOADING_ERROR_LABEL}
     >
-      <MonitorConfig />
-    </SyntheticsProviders>
+      {monitor && <EditMonitorConfig monitor={monitor} />}
+    </Loader>
   );
 };
+
+const LOADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.editMonitorLoadingLabel', {
+  defaultMessage: 'Loading monitor',
+});
+
+const ERROR_HEADING_LABEL = i18n.translate('xpack.uptime.monitorManagement.editMonitorError', {
+  defaultMessage: 'Error loading monitor management',
+});
+
+const SERVICE_LOCATIONS_ERROR_LABEL = i18n.translate(
+  'xpack.uptime.monitorManagement.addMonitorError',
+  {
+    defaultMessage: 'Service locations were not able to be loaded. Please try again later.',
+  }
+);
+
+const MONITOR_LOADING_ERROR_LABEL = i18n.translate(
+  'xpack.uptime.monitorManagement.editMonitorErrorBody',
+  {
+    defaultMessage: 'Monitor configuration was not able to be loaded. Please try again later.',
+  }
+);

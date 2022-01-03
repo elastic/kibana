@@ -36,14 +36,6 @@ Date.now = jest.fn(() => testTime.getTime());
 // Mock telemetry service
 jest.mock('../public/lib/ui_metric', () => ({ trackCanvasUiMetric: () => {} }));
 
-// Mock react-datepicker dep used by eui to avoid rendering the entire large component
-jest.mock('@elastic/eui/packages/react-datepicker', () => {
-  return {
-    __esModule: true,
-    default: 'ReactDatePicker',
-  };
-});
-
 // Mock React Portal for components that use modals, tooltips, etc
 // @ts-expect-error Portal mocks are notoriously difficult to type
 ReactDOM.createPortal = jest.fn((element) => element);

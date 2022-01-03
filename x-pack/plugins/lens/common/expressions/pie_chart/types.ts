@@ -17,8 +17,10 @@ export interface SharedPieLayerState {
   categoryDisplay: 'default' | 'inside' | 'hide';
   legendDisplay: 'default' | 'show' | 'hide';
   legendPosition?: 'left' | 'right' | 'top' | 'bottom';
+  showValuesInLegend?: boolean;
   nestedLegend?: boolean;
   percentDecimals?: number;
+  emptySizeRatio?: number;
   legendMaxLines?: number;
   truncateLegend?: boolean;
 }
