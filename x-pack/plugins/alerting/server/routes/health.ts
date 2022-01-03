@@ -62,7 +62,7 @@ export const healthRoute = (
 
           const frameworkHealth: AlertingFrameworkHealth = {
             ...securityHealth,
-              alertingFrameworkHealth,
+            alertingFrameworkHealth,
           };
 
           return res.ok({
