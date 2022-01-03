@@ -8,9 +8,9 @@
 import { useQuery } from 'react-query';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { CloudPostureStats } from '../../../common/types';
-import { STATS_ROUTH_PATH } from '../../../common/constants';
+import { STATS_ROUTE_PATH } from '../../../common/constants';
 
 export const useCloudPostureStatsApi = () => {
   const { http } = useKibana().services;
-  return useQuery(['csp_dashboard_stats'], () => http!.get<CloudPostureStats>(STATS_ROUTH_PATH));
+  return useQuery(['csp_dashboard_stats'], () => http!.get<CloudPostureStats>(STATS_ROUTE_PATH));
 };
