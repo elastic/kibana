@@ -6,7 +6,7 @@
  */
 
 import { merge } from '@kbn/std';
-import { isPlainObject, get, isString, isNumber } from 'lodash';
+import { isPlainObject } from 'lodash';
 import { Ecs } from '../../../../cases/common';
 
 // TODO we need to allow ->  docValueFields: [{ field: "@timestamp" }],
