@@ -58,6 +58,8 @@ export class MapServiceSettings {
   }
 
   private async initialize() {
+    this.isDarkMode = getUISettings().get('theme:darkMode');
+
     this.emsClient = await initEmsClientAsync({
       appVersion: this.appVersion,
       fileApiUrl: this.config.emsFileApiUrl,
