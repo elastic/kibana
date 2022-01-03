@@ -61,10 +61,7 @@ export async function getSeriesData(
 
   try {
     const bodiesPromises = getActiveSeries(panel).map((series) => {
-      if (isEntireTimeRangeMode(panel, series)) {
-        isAggSupported(series.metrics, capabilities);
-      }
-
+      isAggSupported(series.metrics, capabilities);
       return getSeriesRequestParams(req, panel, panelIndex, series, capabilities, services);
     });
 

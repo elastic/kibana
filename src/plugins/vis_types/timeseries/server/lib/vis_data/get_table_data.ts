@@ -79,9 +79,7 @@ export async function getTableData(
 
   try {
     panel.series.forEach((series) => {
-      if (isEntireTimeRangeMode(panel)) {
-        isAggSupported(series.metrics, capabilities);
-      }
+      isAggSupported(series.metrics, capabilities);
       if (series.filter?.query && !isConfigurationFeatureEnabled('filter', capabilities)) {
         throw new FilterCannotBeAppliedError();
       }
