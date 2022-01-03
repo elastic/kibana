@@ -8,19 +8,18 @@
 import { UnwrapPromise } from '@kbn/utility-types';
 import { setupServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
-import { ReportingCore } from '../..';
+import { ReportingCore } from '../../../';
+import { generatePngObservable } from '../../../export_types/common';
 import {
-  createMockReportingCore,
+  createMockConfigSchema,
   createMockLevelLogger,
   createMockPluginSetup,
-  createMockConfigSchema,
-} from '../../test_helpers';
-import { registerDiagnoseScreenshot } from './screenshot';
-import type { ReportingRequestHandlerContext } from '../../types';
+  createMockReportingCore,
+} from '../../../test_helpers';
+import type { ReportingRequestHandlerContext } from '../../../types';
+import { registerDiagnoseScreenshot } from '../screenshot';
 
-jest.mock('../../export_types/common/generate_png');
-
-import { generatePngObservable } from '../../export_types/common';
+jest.mock('../../../export_types/common/generate_png');
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
