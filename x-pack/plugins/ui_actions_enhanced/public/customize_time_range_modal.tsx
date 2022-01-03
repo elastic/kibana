@@ -114,7 +114,6 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
             <EuiSuperDatePicker
               start={this.state.timeRange ? this.state.timeRange.from : undefined}
               end={this.state.timeRange ? this.state.timeRange.to : undefined}
-              isPaused={false}
               onTimeChange={this.onTimeChange}
               showUpdateButton={false}
               dateFormat={this.props.dateFormat}
