@@ -36,6 +36,7 @@ describe('getStateDefaults', () => {
         "index": "index-pattern-with-timefield-id",
         "interval": "auto",
         "query": undefined,
+        "rowHeight": undefined,
         "savedQuery": undefined,
         "sort": Array [
           Array [
@@ -68,6 +69,7 @@ describe('getStateDefaults', () => {
         "index": "the-index-pattern-id",
         "interval": "auto",
         "query": undefined,
+        "rowHeight": undefined,
         "savedQuery": undefined,
         "sort": Array [],
         "viewMode": undefined,
