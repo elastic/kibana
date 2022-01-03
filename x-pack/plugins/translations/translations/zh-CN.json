@@ -4848,7 +4848,6 @@
     "visTypeTimeseries.visPicker.tableLabel": "表",
     "visTypeTimeseries.visPicker.timeSeriesLabel": "时间序列",
     "visTypeTimeseries.visPicker.topNLabel": "排名前 N",
-    "visTypeTimeseries.wrongAggregationErrorMessage": "{timeRangeMode} 模式下不支持聚合 {metricType}",
     "visTypeTimeseries.yesButtonLabel": "是",
     "visTypeVega.editor.formatError": "格式化规范时出错",
     "visTypeVega.editor.reformatAsHJSONButtonLabel": "重新格式化为 HJSON",
