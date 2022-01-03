@@ -35,7 +35,7 @@ const initEmsClientAsync = async (config: Partial<EmsClientConfig>) => {
 
 export class MapServiceSettings {
   private emsClient?: EMSClient;
-  private isDarkMode: boolean = false;
+  private isDarkMode: boolean = getUISettings().get('theme:darkMode');
 
   constructor(public config: MapsEmsConfig, private appVersion: string) {}
 
@@ -58,8 +58,6 @@ export class MapServiceSettings {
   }
 
   private async initialize() {
-    this.isDarkMode = getUISettings().get('theme:darkMode');
-
     this.emsClient = await initEmsClientAsync({
       appVersion: this.appVersion,
       fileApiUrl: this.config.emsFileApiUrl,
