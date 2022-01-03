@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-export async function collectStream(stream: Iterable<Buffer>): Promise<Buffer> {
-  const payload = [];
-  for await (const chunk of stream) {
-    payload.push(chunk);
-  }
-  return Buffer.concat(payload);
-}
-
 export function isAbortError(error: Error) {
   return error.name === 'RequestAbortedError';
 }

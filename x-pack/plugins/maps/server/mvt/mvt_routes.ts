@@ -102,7 +102,7 @@ export function initMVTRoutes({
 
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
-      const gzippedTile = await getEsGridTile({
+      const gzipTileStream = await getEsGridTile({
         logger,
         context,
         geometryFieldName: query.geometryFieldName as string,
@@ -116,19 +116,18 @@ export function initMVTRoutes({
         abortController,
       });
 
-      return sendResponse(response, gzippedTile);
+      return sendResponse(response, gzipTileStream);
     }
   );
 }
 
-function sendResponse(response: KibanaResponseFactory, gzippedTile: any) {
+function sendResponse(response: KibanaResponseFactory, gzipTileStream: Iterable<Buffer> | null) {
   const cacheControl = `public, max-age=${CACHE_TIMEOUT_SECONDS}`;
   const lastModified = `${new Date().toUTCString()}`;
-  if (gzippedTile) {
+  if (gzipTileStream) {
     return response.ok({
-      body: gzippedTile,
+      body: gzipTileStream,
       headers: {
-        'content-length': gzippedTile.length,
         'content-disposition': 'inline',
         'content-encoding': 'gzip',
         'Content-Type': 'application/x-protobuf',
