@@ -21,7 +21,7 @@ const navItems: NonNullable<KibanaPageTemplateProps['solutionNav']>['items'] = n
     id: route.name,
     ...route,
     renderItem: () => (
-      <NavLink to={route.path as string} activeStyle={activeItemStyle}>
+      <NavLink to={route.path} activeStyle={activeItemStyle}>
         {route.name}
       </NavLink>
     ),

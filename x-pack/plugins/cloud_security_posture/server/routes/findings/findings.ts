@@ -11,7 +11,7 @@ import { schema as rt, TypeOf } from '@kbn/config-schema';
 import type { ElasticsearchClient } from 'src/core/server';
 import type { IRouter } from 'src/core/server';
 import { getLatestCycleIds } from './get_latest_cycle_ids';
-import { CSP_KUBEBEAT_INDEX_PATTERN, FINDINGS_ROUTH_PATH } from '../../../common/constants';
+import { CSP_KUBEBEAT_INDEX_NAME, FINDINGS_ROUTH_PATH } from '../../../common/constants';
 export const DEFAULT_FINDINGS_PER_PAGE = 20;
 type FindingsQuerySchema = TypeOf<typeof schema>;
 
@@ -42,7 +42,7 @@ const getFindingsEsQuery = async (
 ): Promise<SearchRequest> => {
   const query = await buildQueryFilter(esClient, queryParams);
   return {
-    index: CSP_KUBEBEAT_INDEX_PATTERN,
+    index: CSP_KUBEBEAT_INDEX_NAME,
     query,
     size: queryParams.per_page,
     from:

@@ -10,7 +10,7 @@ import {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
+import { CSP_KUBEBEAT_INDEX_NAME } from '../../../common/constants';
 
 export const getFindingsEsQuery = (
   cycleId: string,
@@ -28,7 +28,7 @@ export const getFindingsEsQuery = (
   }
 
   return {
-    index: CSP_KUBEBEAT_INDEX_PATTERN,
+    index: CSP_KUBEBEAT_INDEX_NAME,
     query: {
       bool: { filter },
     },
@@ -53,7 +53,7 @@ export const getResourcesEvaluationEsQuery = (
     query.bool!.must = { terms: { 'resource.filename.keyword': resources } };
   }
   return {
-    index: CSP_KUBEBEAT_INDEX_PATTERN,
+    index: CSP_KUBEBEAT_INDEX_NAME,
     size,
     query,
     aggs: {
@@ -66,7 +66,7 @@ export const getResourcesEvaluationEsQuery = (
 };
 
 export const getBenchmarksQuery = (): SearchRequest => ({
-  index: CSP_KUBEBEAT_INDEX_PATTERN,
+  index: CSP_KUBEBEAT_INDEX_NAME,
   size: 0,
   aggs: {
     benchmarks: {
@@ -76,7 +76,7 @@ export const getBenchmarksQuery = (): SearchRequest => ({
 });
 
 export const getLatestFindingQuery = (): SearchRequest => ({
-  index: CSP_KUBEBEAT_INDEX_PATTERN,
+  index: CSP_KUBEBEAT_INDEX_NAME,
   size: 1,
   /* @ts-expect-error TS2322 - missing SearchSortContainer */
   sort: { '@timestamp': 'desc' },
