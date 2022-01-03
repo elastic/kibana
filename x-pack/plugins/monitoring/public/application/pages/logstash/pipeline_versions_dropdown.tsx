@@ -23,22 +23,24 @@ export const PipelineVersions = (props: Props) => {
       <EuiFlexItem grow={false}>
         <EuiSelect
           value={pipelineHash}
-          options={pipelineVersions.map((option) => {
-            return {
-              text: i18n.translate(
-                'xpack.monitoring.logstashNavigation.pipelineVersionDescription',
-                {
-                  defaultMessage:
-                    'Version active {relativeLastSeen} and first seen {relativeFirstSeen}',
-                  values: {
-                    relativeLastSeen: option.relativeLastSeen,
-                    relativeFirstSeen: option.relativeFirstSeen,
-                  },
-                }
-              ),
-              value: option.hash,
-            };
-          })}
+          options={pipelineVersions.map(
+            (option: { hash: string; relativeLastSeen: number; relativeFirstSeen: number }) => {
+              return {
+                text: i18n.translate(
+                  'xpack.monitoring.logstashNavigation.pipelineVersionDescription',
+                  {
+                    defaultMessage:
+                      'Version active {relativeLastSeen} and first seen {relativeFirstSeen}',
+                    values: {
+                      relativeLastSeen: option.relativeLastSeen,
+                      relativeFirstSeen: option.relativeFirstSeen,
+                    },
+                  }
+                ),
+                value: option.hash,
+              };
+            }
+          )}
           onChange={({ target }) => onChangePipelineHash(target.value)}
         />
       </EuiFlexItem>
