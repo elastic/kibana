@@ -20,6 +20,7 @@ import { indexPatternsMock } from '../../__mocks__/index_patterns';
 import { act } from 'react-dom/test-utils';
 import { uiSettingsMock } from '../../__mocks__/ui_settings';
 import { themeServiceMock } from '../../../../../core/public/mocks';
+import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
 
 const mockFilterManager = createFilterManagerMock();
 const mockNavigationPlugin = { ui: { TopNavMenu: mockTopNavMenu } };
@@ -72,6 +73,7 @@ describe('ContextApp test', () => {
       },
       filterManager: mockFilterManager,
       uiSettings: uiSettingsMock,
+      storage: new LocalStorageMock({}),
     } as unknown as DiscoverServices);
   });
 

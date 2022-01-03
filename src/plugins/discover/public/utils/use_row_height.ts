@@ -132,9 +132,12 @@ export const useRowHeight = ({ savedSearchRowHeight, storage, setAppState }: Use
 
   const onRowHeightChange = useCallback(
     (rowHeight?: EuiDataGridRowHeightOption) => {
-      const serializedRowHeight = serializeRowHeight(rowHeight);
-      setStoredRowHeight(serializedRowHeight, configRowHeight, storage);
-      setAppState?.({ rowHeight: serializedRowHeight });
+      // when it is not embeddable, update rowHeight state
+      if (!!setAppState) {
+        const serializedRowHeight = serializeRowHeight(rowHeight);
+        setStoredRowHeight(serializedRowHeight, configRowHeight, storage);
+        setAppState?.({ rowHeight: serializedRowHeight });
+      }
     },
     [setAppState, configRowHeight, storage]
   );

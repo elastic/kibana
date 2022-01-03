@@ -8,42 +8,18 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { Storage } from '../../../kibana_utils/public';
-import { ROW_HEIGHT_OPTION } from '../../common';
 import { DiscoverServices } from '../build_services';
 import { setServices } from '../kibana_services';
+import { LocalStorageMock } from '../__mocks__/local_storage_mock';
+import { uiSettingsMock } from '../__mocks__/ui_settings';
 import { useRowHeight } from './use_row_height';
 
 const CONFIG_ROW_HEIGHT = 3;
 
-class LocalStorageMock {
-  private store: Record<string, unknown>;
-  constructor(defaultStore: Record<string, unknown>) {
-    this.store = defaultStore;
-  }
-  clear() {
-    this.store = {};
-  }
-  get(key: string) {
-    return this.store[key] || null;
-  }
-  set(key: string, value: unknown) {
-    this.store[key] = String(value);
-  }
-  remove(key: string) {
-    delete this.store[key];
-  }
-}
-
 describe('useRowHeight', () => {
   beforeEach(() => {
     setServices({
-      uiSettings: {
-        get: (key: string) => {
-          if (key === ROW_HEIGHT_OPTION) {
-            return 3;
-          }
-        },
-      },
+      uiSettings: uiSettingsMock,
     } as unknown as DiscoverServices);
   });
 
@@ -64,7 +40,7 @@ describe('useRowHeight', () => {
         storage: new LocalStorageMock({
           ['discover:rowHeight']: {
             previousUsed: 5,
-            prevConfigRowHeight: CONFIG_ROW_HEIGHT,
+            prevConfigRowHeight: 3,
           },
         }) as unknown as Storage,
       });
