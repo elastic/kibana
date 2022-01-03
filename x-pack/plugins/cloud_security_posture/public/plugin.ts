@@ -15,7 +15,7 @@ export class CspPlugin implements Plugin<CspSetup, CspStart, CspPluginSetup, Csp
     // Register an application into the side navigation menu
 
     core.application.register({
-      id: 'csp_root',
+      id: 'csp',
       title: PLUGIN_NAME,
       status: AppStatus.accessible,
       navLinkStatus: AppNavLinkStatus.hidden,

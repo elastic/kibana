@@ -6,7 +6,7 @@
  */
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from 'src/core/server';
-import { CSP_KUBEBEAT_INDEX_PATTERN, CSP_KUBEBEAT_INDEX_NAME } from '../..//common/constants';
+import { CSP_KUBEBEAT_INDEX_NAME, CSP_FINDINGS_INDEX_NAME } from '../..//common/constants';
 import findingsIndexMapping from './findings_mapping.json';
 
 export type Status = boolean;
@@ -51,12 +51,12 @@ export const createFindingsIndexTemplate = async (
   esClient: ElasticsearchClient
 ): Promise<Status> => {
   try {
-    const isExisting = await doesIndexTemplateExist(esClient, CSP_KUBEBEAT_INDEX_NAME);
+    const isExisting = await doesIndexTemplateExist(esClient, CSP_FINDINGS_INDEX_NAME);
     if (isExisting) return true;
     return await createIndexTemplate(
       esClient,
+      CSP_FINDINGS_INDEX_NAME,
       CSP_KUBEBEAT_INDEX_NAME,
-      CSP_KUBEBEAT_INDEX_PATTERN,
       // TODO: check why this cast is required
       findingsIndexMapping as Record<string, MappingProperty>
     );

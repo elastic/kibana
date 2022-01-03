@@ -1,7 +1,0 @@
-{
-  "prefix": "csp",
-  "paths": {
-    "csp": "."
-  },
-  "translations": ["translations/ja-JP.json"]
-}

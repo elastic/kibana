@@ -16,7 +16,7 @@ import type {
   TimeRange,
 } from '../../../../../../src/plugins/data/common';
 import type { CspPluginSetup } from '../../types';
-import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
+import { CSP_KUBEBEAT_INDEX_NAME } from '../../../common/constants';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export const extractErrorMessage = (e: unknown): string =>
@@ -37,7 +37,7 @@ export const useKubebeatDataView = () => {
 
   const createDataView = () =>
     dataViews.createAndSave({
-      title: CSP_KUBEBEAT_INDEX_PATTERN,
+      title: CSP_KUBEBEAT_INDEX_NAME,
       allowNoIndex: false,
     });
 
@@ -45,7 +45,7 @@ export const useKubebeatDataView = () => {
   // if not, no point in creating a data view
   // const check = () => http?.get(`/kubebeat`);
 
-  const findDataView = async () => (await dataViews.find(CSP_KUBEBEAT_INDEX_PATTERN))?.[0];
+  const findDataView = async () => (await dataViews.find(CSP_KUBEBEAT_INDEX_NAME))?.[0];
 
   const getKubebeatDataView = () => findDataView().then((v) => (v ? v : createDataView()));
 
