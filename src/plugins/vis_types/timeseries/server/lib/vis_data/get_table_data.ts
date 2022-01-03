@@ -16,7 +16,6 @@ import { processBucket } from './table/process_bucket';
 import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
 import { extractFieldLabel } from '../../../common/fields_utils';
 import { isAggSupported } from './helpers/check_aggs';
-import { isEntireTimeRangeMode } from './helpers/get_timerange_mode';
 import { isConfigurationFeatureEnabled } from '../../../common/check_ui_restrictions';
 import { FilterCannotBeAppliedError, PivotNotSelectedForTableError } from '../../../common/errors';
 

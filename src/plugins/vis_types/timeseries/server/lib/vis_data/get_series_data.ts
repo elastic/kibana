@@ -14,7 +14,7 @@ import { handleResponseBody } from './series/handle_response_body';
 import { getSeriesRequestParams } from './series/get_request_params';
 import { getActiveSeries } from './helpers/get_active_series';
 import { isAggSupported } from './helpers/check_aggs';
-import { isEntireTimeRangeMode } from './helpers/get_timerange_mode';
+
 import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,

@@ -20,12 +20,11 @@ import {
  */
 const checkUIRestrictions = (
   key: string,
-  restrictions: UIRestrictions | undefined,
-  type: string
+  type: string,
+  restrictions: UIRestrictions = DEFAULT_UI_RESTRICTION
 ) => {
-  const isAllEnabled = get(restrictions ?? DEFAULT_UI_RESTRICTION, `${type}.*`, true);
-
-  return isAllEnabled || Boolean(get(restrictions ?? DEFAULT_UI_RESTRICTION, [type, key], false));
+  const isAllEnabled = get(restrictions, `${type}.*`, true);
+  return isAllEnabled || Boolean(get(restrictions, [type, key], false));
 };
 
 /**
@@ -40,7 +39,7 @@ export const isMetricEnabled = (
   key: string,
   restrictions: TimeseriesUIRestrictions | undefined
 ) => {
-  return checkUIRestrictions(key, restrictions, RESTRICTIONS_KEYS.WHITE_LISTED_METRICS);
+  return checkUIRestrictions(key, RESTRICTIONS_KEYS.WHITE_LISTED_METRICS, restrictions);
 };
 
 /**
@@ -60,8 +59,8 @@ export const isFieldEnabled = (
   if (isMetricEnabled(metricType, restrictions)) {
     return checkUIRestrictions(
       field,
-      restrictions?.[RESTRICTIONS_KEYS.WHITE_LISTED_METRICS] as UIRestrictions,
-      metricType
+      metricType,
+      restrictions?.[RESTRICTIONS_KEYS.WHITE_LISTED_METRICS]
     );
   }
   return false;
@@ -77,7 +76,7 @@ export const isFieldEnabled = (
  * @return {boolean}
  */
 export const isGroupByFieldsEnabled = (key: string, restrictions: TimeseriesUIRestrictions) => {
-  return checkUIRestrictions(key, restrictions, RESTRICTIONS_KEYS.WHITE_LISTED_GROUP_BY_FIELDS);
+  return checkUIRestrictions(key, RESTRICTIONS_KEYS.WHITE_LISTED_GROUP_BY_FIELDS, restrictions);
 };
 
 /**
@@ -90,7 +89,7 @@ export const isGroupByFieldsEnabled = (key: string, restrictions: TimeseriesUIRe
  * @return {boolean}
  */
 export const isTimerangeModeEnabled = (key: string, restrictions: TimeseriesUIRestrictions) => {
-  return checkUIRestrictions(key, restrictions, RESTRICTIONS_KEYS.WHITE_LISTED_TIMERANGE_MODES);
+  return checkUIRestrictions(key, RESTRICTIONS_KEYS.WHITE_LISTED_TIMERANGE_MODES, restrictions);
 };
 
 /**
@@ -108,7 +107,7 @@ export const isConfigurationFeatureEnabled = (
 ) => {
   return checkUIRestrictions(
     key,
-    restrictions,
-    RESTRICTIONS_KEYS.WHITE_LISTED_CONFIGURATION_FEATURES
+    RESTRICTIONS_KEYS.WHITE_LISTED_CONFIGURATION_FEATURES,
+    restrictions
   );
 };
