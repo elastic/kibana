@@ -9,13 +9,13 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { EventEmitter } from 'events';
 
-import { setTypes, setVisEditorsRegistry } from '../../../services';
+import { setTypes } from '../../../services';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { useSavedVisInstance } from './use_saved_vis_instance';
 import { redirectWhenMissing } from '../../../../../kibana_utils/public';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { VisualizeConstants } from '../../../../common/constants';
-import { createVisEditorsRegistry, VisEditorsRegistry } from '../../../vis_editors_registry';
+import { createVisEditorsRegistry } from '../../../vis_editors_registry';
 import { createEmbeddableStateTransferMock } from '../../../../../embeddable/public/mocks';
 import type { VisualizeServices } from '../../types';
 import type { TypesStart } from '../../../vis_types';
@@ -72,23 +72,19 @@ describe('useSavedVisInstance', () => {
           { name: 'area', requiresSearch: true, options: { showIndexSelection: true } },
         ]),
     } as unknown as TypesStart);
-    setVisEditorsRegistry({
-      get: jest.fn().mockImplementation(() => jest.fn()),
-    } as unknown as VisEditorsRegistry);
   });
 
   beforeEach(() => {
-    const registry = createVisEditorsRegistry();
+    const visEditorsRegistry = createVisEditorsRegistry();
 
-    registry.registerDefault(
+    visEditorsRegistry.registerDefault(
       jest.fn().mockImplementation(() => ({ destroy: mockDefaultEditorControllerDestroy }))
     );
-
-    setVisEditorsRegistry(registry);
 
     mockServices = {
       ...coreStartMock,
       toastNotifications,
+      visEditorsRegistry,
       stateTransferService: createEmbeddableStateTransferMock(),
       chrome: { setBreadcrumbs: jest.fn(), docTitle: { change: jest.fn() } },
       history: {

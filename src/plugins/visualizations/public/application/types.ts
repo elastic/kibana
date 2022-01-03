@@ -48,6 +48,7 @@ import type { SavedSearch } from '../../../discover/public';
 
 import type { SavedVisState } from '../types';
 import type { createVisEmbeddableFromObject } from '../embeddable';
+import type { VisEditorsRegistry } from '../vis_editors_registry';
 
 export interface VisualizeAppState {
   filters: Filter[];
@@ -104,6 +105,7 @@ export interface VisualizeServices extends CoreStart {
   usageCollection?: UsageCollectionStart;
   getKibanaVersion: () => string;
   spaces?: SpacesPluginStart;
+  visEditorsRegistry: VisEditorsRegistry;
 }
 
 export interface VisInstance {
