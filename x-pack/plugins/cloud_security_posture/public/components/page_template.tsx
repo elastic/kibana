@@ -12,6 +12,7 @@ import {
   KibanaPageTemplateProps,
 } from '../../../../../src/plugins/kibana_react/public';
 import { navigationLinks } from '../application/navigation';
+import { CLOUD_SECURITY_POSTURE } from '../../common/translations';
 
 const activeItemStyle = { fontWeight: 700 };
 
@@ -29,7 +30,7 @@ const navItems: NonNullable<KibanaPageTemplateProps['solutionNav']>['items'] = n
 
 const defaultProps: KibanaPageTemplateProps = {
   solutionNav: {
-    name: 'Cloud Security Posture',
+    name: CLOUD_SECURITY_POSTURE,
     items: navItems,
   },
   restrictWidth: false,
