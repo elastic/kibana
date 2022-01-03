@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-jest.mock('../../lib/content_stream', () => ({
+jest.mock('../../../lib/content_stream', () => ({
   getContentStream: jest.fn(),
 }));
 
-import { Readable } from 'stream';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { of } from 'rxjs';
 import { ElasticsearchClient } from 'kibana/server';
+import { of } from 'rxjs';
 import { setupServer } from 'src/core/server/test_utils';
+import { Readable } from 'stream';
 import supertest from 'supertest';
-import { ReportingCore } from '../..';
-import { ReportingInternalSetup } from '../../core';
-import { ContentStream, ExportTypesRegistry, getContentStream } from '../../lib';
+import { ReportingCore } from '../../../';
+import { ReportingInternalSetup } from '../../../core';
+import { ContentStream, ExportTypesRegistry, getContentStream } from '../../../lib';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
   createMockReportingCore,
-} from '../../test_helpers';
-import { ExportTypeDefinition, ReportingRequestHandlerContext } from '../../types';
-import { registerJobInfoRoutes } from './jobs';
+} from '../../../test_helpers';
+import { ExportTypeDefinition, ReportingRequestHandlerContext } from '../../../types';
+import { registerJobInfoRoutes } from '../jobs';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
