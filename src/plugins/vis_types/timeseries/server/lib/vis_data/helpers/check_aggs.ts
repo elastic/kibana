@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AggNotSupportedInMode } from '../../../../common/errors';
-import { TIME_RANGE_DATA_MODES } from '../../../../common/enums';
+import { AggNotSupportedError } from '../../../../common/errors';
 import { isMetricEnabled } from '../../../../common/check_ui_restrictions';
 
 import type { Metric } from '../../../../common/types';
@@ -19,9 +18,6 @@ export function isAggSupported(metrics: Metric[], capabilities: SearchCapabiliti
   );
 
   if (metricTypes.length) {
-    throw new AggNotSupportedInMode(
-      metricTypes.map((metric) => `"${metric.type}"`).join(', '),
-      TIME_RANGE_DATA_MODES.ENTIRE_TIME_RANGE
-    );
+    throw new AggNotSupportedError(metricTypes.map((metric) => `"${metric.type}"`).join(', '));
   }
 }

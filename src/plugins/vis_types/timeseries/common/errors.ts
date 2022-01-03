@@ -46,13 +46,13 @@ export class ValidateIntervalError extends UIError {
   }
 }
 
-export class AggNotSupportedInMode extends UIError {
-  constructor(metricType: string, timeRangeMode: string) {
+export class AggNotSupportedError extends UIError {
+  constructor(metricType: string) {
     super(
       i18n.translate('visTypeTimeseries.wrongAggregationErrorMessage', {
         defaultMessage:
           'The {metricType} aggregation is not supported for existing panel configuration.',
-        values: { metricType, timeRangeMode },
+        values: { metricType },
       })
     );
   }
