@@ -11,6 +11,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./feature_controls'));
 
     loadTestFile(require.resolve('./cluster/list'));
+    loadTestFile(require.resolve('./cluster/list_mb'));
     loadTestFile(require.resolve('./cluster/overview'));
     // loadTestFile(require.resolve('./cluster/license'));
 
