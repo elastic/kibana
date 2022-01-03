@@ -21,7 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
   const FLIGHTS_CANVAS_APPLINK_PATH =
     '/app/canvas#/workpad/workpad-a474e74b-aedc-47c3-894a-db77e62c41e0'; // includes default ID of the flights canvas applink path
 
-  describe('sample data apis', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/121051
+  describe.skip('sample data apis', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
     });
