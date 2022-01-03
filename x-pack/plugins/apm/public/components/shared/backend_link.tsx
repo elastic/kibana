@@ -13,6 +13,7 @@ import { useApmRouter } from '../../hooks/use_apm_router';
 import { truncate } from '../../utils/style';
 import { ApmRoutes } from '../routing/apm_route_config';
 import { SpanIcon } from './span_icon';
+import { TruncateWithTooltip } from './truncate_with_tooltip';
 
 const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
@@ -27,7 +28,7 @@ export function BackendLink({
   query,
   subtype,
   type,
-  onClick,
+  onClick
 }: BackendLinkProps) {
   const { link } = useApmRouter();
 
@@ -37,12 +38,14 @@ export function BackendLink({
         query,
       })}
       onClick={onClick}
-    >
+    > 
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <SpanIcon type={type} subtype={subtype} />
         </EuiFlexItem>
-        <EuiFlexItem>{query.backendName}</EuiFlexItem>
+        <EuiFlexItem>
+          <TruncateWithTooltip text={query.backendName} content={query.backendName} />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </StyledLink>
   );
