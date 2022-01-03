@@ -6,8 +6,8 @@
  */
 
 import { getFirstIndicatorPage, getNextIndicatorPage } from '../get_threat_list';
-import { createPercolateQueries } from '../build_threat_mapping_filter';
-import { BooleanFilter, CreateThreatQueriesForPercolatorOptions } from '../types';
+import { createPercolateQueriesNew } from '../build_threat_mapping_filter';
+import { BoolFilter, CreateThreatQueriesForPercolatorOptions } from '../types';
 
 export const createThreatQueriesForPercolator = async ({
   buildRuleMessage,
@@ -22,7 +22,7 @@ export const createThreatQueriesForPercolator = async ({
   threatMapping,
   threatQuery,
 }: CreateThreatQueriesForPercolatorOptions) => {
-  let threatQueriesForPercolator: BooleanFilter[] = [];
+  let threatQueriesForPercolator: BoolFilter[] = [];
 
   let indicatorPage = await getFirstIndicatorPage({
     buildRuleMessage,
@@ -39,7 +39,7 @@ export const createThreatQueriesForPercolator = async ({
 
   while (indicatorPage.hits.hits.length) {
     threatQueriesForPercolator = threatQueriesForPercolator.concat(
-      createPercolateQueries({ threatMapping, threatList: indicatorPage.hits.hits })
+      createPercolateQueriesNew({ threatMapping, threatList: indicatorPage.hits.hits })
     );
 
     indicatorPage = await getNextIndicatorPage({

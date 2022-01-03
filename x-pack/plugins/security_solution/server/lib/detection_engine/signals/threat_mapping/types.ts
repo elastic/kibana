@@ -77,7 +77,7 @@ export interface CreateThreatSignalOptions {
   bulkCreate: BulkCreate;
   completeRule: CompleteRule<ThreatRuleParams>;
   currentResult: SearchAfterAndBulkCreateReturnType;
-  currentThreatList: ThreatListItem[];
+  currentThreatList: Indicator[];
   eventsTelemetry: TelemetryEventsSender | undefined;
   exceptionItems: ExceptionListItemSchema[];
   filters: unknown[];
@@ -99,28 +99,28 @@ export interface CreateThreatSignalOptions {
 
 export interface BuildThreatMappingFilterOptions {
   chunkSize?: number;
-  threatList: ThreatListItem[];
+  threatList: Indicator[];
   threatMapping: ThreatMapping;
 }
 
 export interface FilterThreatMappingOptions {
-  threatListItem: ThreatListItem;
+  indicator: Indicator;
   threatMapping: ThreatMapping;
 }
 
 export interface CreateInnerAndClausesOptions {
-  threatListItem: ThreatListItem;
+  indicator: Indicator;
   threatMappingEntries: ThreatMappingEntries;
 }
 
 export interface CreateAndOrClausesOptions {
-  threatListItem: ThreatListItem;
+  indicator: Indicator;
   threatMapping: ThreatMapping;
 }
 
 export interface BuildEntriesMappingFilterOptions {
   chunkSize: number;
-  threatList: ThreatListItem[];
+  threatList: Indicator[];
   threatMapping: ThreatMapping;
 }
 
@@ -131,6 +131,12 @@ export interface SplitShouldClausesOptions {
 
 export interface BooleanFilter {
   bool: { should: unknown[]; minimum_should_match: number };
+}
+
+export interface BoolFilter {
+  bool: { filter?: unknown[]; should?: unknown[]; minimum_should_match: number };
+  _name?: string;
+  indicator?: Indicator;
 }
 
 export interface GetThreatListOptions {
@@ -187,7 +193,7 @@ export interface ThreatListDoc {
  * This is an ECS document being returned, but the user could return or use non-ecs based
  * documents potentially.
  */
-export type ThreatListItem = estypes.SearchHit<ThreatListDoc>;
+export type Indicator = estypes.SearchHit<ThreatListDoc>;
 
 export interface ThreatEnrichment {
   feed: Record<string, unknown>;
@@ -206,7 +212,7 @@ export interface ThreatMatchNamedQuery {
   value: string;
 }
 
-export type GetMatchedThreats = (ids: string[]) => Promise<ThreatListItem[]>;
+export type GetMatchedThreats = (ids: string[]) => Promise<Indicator[]>;
 
 export interface BuildThreatEnrichmentOptions {
   buildRuleMessage: BuildRuleMessage;

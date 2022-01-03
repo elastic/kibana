@@ -8,7 +8,7 @@
 import chunk from 'lodash/fp/chunk';
 import { getTotalEventCount, getNextIndicatorPage } from './get_threat_list';
 
-import { BooleanFilter, CreateThreatSignalsOptions } from './types';
+import { BooleanFilter, BoolFilter, CreateThreatSignalsOptions } from './types';
 import { createThreatSignal } from './create_threat_signal';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
@@ -82,22 +82,8 @@ export const createThreatSignals = async ({
   logDebugMessage(`matchable source event count from all time: ${matchableSourceEventCount}`);
   console.log('____sourceCount', matchableSourceEventCount);
 
-  // TODO: totalEventCount queries events from all time, but what we really need is just the events from the last execution
-  const matchableIndicatorEventCount = await withTimeout<number>(() =>
-    getTotalEventCount({
-      esClient: services.scopedClusterClient.asCurrentUser,
-      exceptionItems,
-      filters: threatFilters,
-      query: threatQuery,
-      language: threatLanguage,
-      index: threatIndex,
-    })
-  );
-  logDebugMessage(`matchable indicator event count from all time: ${matchableIndicatorEventCount}`);
-  console.log('____threatCount', matchableIndicatorEventCount);
-
-  if (matchableSourceEventCount && matchableIndicatorEventCount) {
-    const threatQueriesForPercolator = await withTimeout<BooleanFilter[]>(() =>
+  if (matchableSourceEventCount) {
+    const threatQueriesToPersist = await withTimeout<BoolFilter[]>(() =>
       createThreatQueriesForPercolator({
         buildRuleMessage,
         esClient: services.search.asCurrentUser,
@@ -113,7 +99,7 @@ export const createThreatSignals = async ({
       })
     );
     await withTimeout<void>(() =>
-      persistThreatQueries({ threatQueriesForPercolator, percolatorRuleDataClient })
+      persistThreatQueries({ threatQueriesToPersist, percolatorRuleDataClient })
     );
 
     // const threatEnrichment = buildThreatEnrichment({
