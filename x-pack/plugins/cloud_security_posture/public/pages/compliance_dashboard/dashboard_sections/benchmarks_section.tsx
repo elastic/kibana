@@ -54,6 +54,7 @@ export const BenchmarksSection = () => {
               <EuiDescriptionList
                 listItems={[
                   {
+                    // TODO: this shows the failed/passed ratio and not the calculated score. needs product
                     title: 'Compliance Score',
                     description: (
                       <ChartPanel
@@ -77,7 +78,8 @@ export const BenchmarksSection = () => {
                       <ChartPanel
                         hasBorder={false}
                         chart={ComplianceTrendChart}
-                        data={benchmark}
+                        // TODO: no api for this chart yet, using empty state for now. needs BE
+                        data={[]}
                         isLoading={getStats.isLoading}
                         isError={getStats.isError}
                       />

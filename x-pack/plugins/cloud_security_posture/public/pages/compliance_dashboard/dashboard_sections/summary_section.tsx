@@ -36,7 +36,7 @@ export const SummarySection = () => {
           chart={ScorePerAccountChart}
           title="Score Per Account / Cluster"
           description="Non compliant first"
-          // TODO: no api for this chart yet, using empty state for now
+          // TODO: no api for this chart yet, using empty state for now. needs BE
           data={[]}
           isLoading={getStats.isLoading}
           isError={getStats.isError}

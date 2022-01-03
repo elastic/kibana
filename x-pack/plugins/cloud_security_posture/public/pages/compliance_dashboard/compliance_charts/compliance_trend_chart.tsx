@@ -22,17 +22,7 @@ interface ComplianceTrendChartProps {
 
 export const dateValueToTuple = ({ date, value }: { date: number; value: number }) => [date, value];
 
-export const ComplianceTrendChart = ({ data: { postureScore } }: ComplianceTrendChartProps) => {
-  if (postureScore === undefined) return null;
-
-  const complianceScoreTrend = [
-    { date: Date.now(), value: postureScore },
-    { date: Date.now() - 10000, value: 53 },
-    { date: Date.now() - 30000, value: 91 },
-    { date: Date.now() - 60000, value: 34 },
-    { date: Date.now() - 90000, value: 10 },
-  ];
-
+export const ComplianceTrendChart = ({ data }: ComplianceTrendChartProps) => {
   return (
     <Chart size={{ height: 200 }}>
       <Settings
@@ -47,7 +37,8 @@ export const ComplianceTrendChart = ({ data: { postureScore } }: ComplianceTrend
       <AreaSeries
         id="compliance_score"
         name="Compliance Score"
-        data={complianceScoreTrend.map(dateValueToTuple)}
+        // TODO: no api for this chart yet, using empty state for now. needs BE
+        data={[]}
         xScaleType="time"
         xAccessor={0}
         yAccessors={[1]}
