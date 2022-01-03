@@ -321,15 +321,6 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
               policy_template: 'osquery_manager',
             });
           }
-          if (!draft.inputs[0].type) {
-            set(draft, 'inputs[0].type', 'osquery');
-          }
-          if (!draft.inputs[0].policy_template) {
-            set(draft, 'inputs[0].policy_template', 'osquery_manager');
-          }
-          if (!draft.inputs[0].enabled) {
-            set(draft, 'inputs[0].enabled', true);
-          }
           return draft;
         });
 
