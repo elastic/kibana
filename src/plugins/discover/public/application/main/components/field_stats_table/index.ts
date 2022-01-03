@@ -7,4 +7,3 @@
  */
 
 export { FieldStatisticsTable } from './field_stats_table';
-export { FieldStatsTableSavedSearchEmbeddable } from './field_stats_table_saved_search_embeddable';

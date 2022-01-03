@@ -24,7 +24,7 @@ import { DataCharts$, DataTotalHits$ } from '../../utils/use_saved_search';
 import { useChartPanels } from './use_chart_panels';
 import { VIEW_MODE, DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
 import { SHOW_FIELD_STATISTICS } from '../../../../../common';
-import { useDiscoverServices } from '../../../utils/use_discover_services';
+import { useDiscoverServices } from '../../../../utils/use_discover_services';
 
 const DiscoverHistogramMemoized = memo(DiscoverHistogram);
 export const CHART_HIDDEN_KEY = 'discover:chartHidden';
