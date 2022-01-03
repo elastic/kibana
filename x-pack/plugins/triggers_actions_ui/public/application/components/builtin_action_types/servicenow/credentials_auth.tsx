@@ -46,15 +46,12 @@ const CredentialsAuthComponent: React.FC<Props> = ({
 
   const isUsernameInvalid = isFieldInvalid(username, errors.username);
   const isPasswordInvalid = isFieldInvalid(password, errors.password);
-  const isClientIdInvalid: boolean = errors.clientId.length > 0 && clientId !== undefined;
-  const isUserIdentifierInvalid: boolean =
-    errors.userIdentifierValue.length > 0 && userIdentifierValue !== undefined;
-  const isKeyIdInvalid: boolean = errors.jwtKeyId.length > 0 && jwtKeyId !== undefined;
-  const isClientSecretInvalid: boolean =
-    errors.clientSecret.length > 0 && clientSecret !== undefined;
-  const isPrivateKeyInvalid: boolean = errors.privateKey.length > 0 && privateKey !== undefined;
-  const isPrivateKeyPasswordInvalid: boolean =
-    errors.privateKeyPassword.length > 0 && privateKeyPassword !== undefined;
+  const isClientIdInvalid = isFieldInvalid(clientId, errors.clientId);
+  const isUserIdentifierInvalid = isFieldInvalid(userIdentifierValue, errors.userIdentifierValue);
+  const isKeyIdInvalid = isFieldInvalid(jwtKeyId, errors.jwtKeyId);
+  const isClientSecretInvalid = isFieldInvalid(clientSecret, errors.clientSecret);
+  const isPrivateKeyInvalid = isFieldInvalid(privateKey, errors.privateKey);
+  const isPrivateKeyPasswordInvalid = isFieldInvalid(privateKeyPassword, errors.privateKeyPassword);
 
   const onChangeUsernameEvent = useCallback(
     (event?: React.ChangeEvent<HTMLInputElement>) =>
