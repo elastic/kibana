@@ -80,7 +80,7 @@ export function generatePdfObservable(
       let buffer: Buffer | null = null;
       try {
         tracker.startCompile();
-        logger.debug(`Compiling PDF using "${layout.id}" layout...`);
+        logger.info(`Compiling PDF using "${layout.id}" layout...`);
         pdfOutput.generate();
         tracker.endCompile();
 
