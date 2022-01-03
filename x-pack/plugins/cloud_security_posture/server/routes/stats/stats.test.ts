@@ -23,13 +23,13 @@ afterEach(() => {
 });
 
 describe('testing round score', () => {
-  it('take dcimal and expect the roundScore will return it with one digit after the dot ', async () => {
+  it('take decimal and expect the roundScore will return it with one digit after the dot ', async () => {
     const score = roundScore(0.85245);
     expect(score).toEqual(85.2);
   });
 });
 
-describe('general cloud postrure score', () => {
+describe('general cloud posture score', () => {
   it('expect to valid score from getAllFindingsStats ', async () => {
     mockCountResultOnce(mockEsClient, 10); // total findings
     mockCountResultOnce(mockEsClient, 3); // pass findings
@@ -58,7 +58,7 @@ describe('general cloud postrure score', () => {
 });
 
 describe('get benchmarks list', () => {
-  it('getBenchmarks - takes aggregated data and expect unique bencmarks array ', async () => {
+  it('getBenchmarks - takes aggregated data and expect unique benchmarks array ', async () => {
     const returnedMock = {
       aggregations: {
         benchmarks: {
@@ -143,7 +143,7 @@ describe('Evluation Per Resource', () => {
     ]);
   });
 
-  it('getResourcesEvaluation - check for mjultiple resources', async () => {
+  it('getResourcesEvaluation - check for multiple resources', async () => {
     const returnedMock1 = {
       aggregations: {
         group: {
