@@ -9,6 +9,6 @@
 import { DatatableColumn } from 'src/plugins/expressions';
 
 export function getVisibleColumns(columns: DatatableColumn[]) {
-  const columnsHaveMetaInfo = columns.some(({ meta }) => meta.dimensionName);
+  const columnsHaveMetaInfo = columns.some(({ meta }) => meta?.dimensionName);
   return columnsHaveMetaInfo ? columns.filter(({ meta }) => meta?.dimensionName) : columns;
 }
