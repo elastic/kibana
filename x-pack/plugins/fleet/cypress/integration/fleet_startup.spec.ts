@@ -15,7 +15,7 @@ describe('Fleet startup', () => {
 
   function navigateToAgentPolicies() {
     cy.getBySel(AGENT_POLICIES_TAB).click();
-    cy.get('.euiLoadingSpinner').should('not.exist');
+    cy.get('.euiBasicTable-loading').should('not.exist');
   }
 
   function navigateToAgentPolicy(name: string) {
@@ -25,10 +25,11 @@ describe('Fleet startup', () => {
 
   function navigateToEnrollmentTokens() {
     cy.getBySel(ENROLLMENT_TOKENS_TAB).click();
-    cy.get('.euiButtonIcon--danger'); // wait for trash icon
+    cy.get('.euiBasicTable-loading').should('not.exist');
   }
 
   it('should create Default Fleet Server policy', () => {
+    cy.getBySel('toastCloseButton').click();
     cy.getBySel('createFleetServerPolicyBtn').click();
     cy.getBySel('euiToastHeader');
 
@@ -46,6 +47,7 @@ describe('Fleet startup', () => {
 
   it('should create Default policy', () => {
     cy.getBySel('addAgentBtnTop').click();
+    cy.getBySel('toastCloseButton').click();
     cy.getBySel('createPolicyBtn').click();
     cy.getBySel('euiToastHeader');
     cy.getBySel('euiFlyoutCloseButton').click();
@@ -62,11 +64,5 @@ describe('Fleet startup', () => {
 
     cy.visit('/app/integrations/installed');
     cy.getBySel('integration-card:epr:elastic_agent');
-  });
-
-  // TODO enroll fleet server agent
-
-  it.skip('should display Add agent button and Healthy agent once Fleet Agent page loaded', () => {
-    cy.get('.euiBadge').contains('Healthy');
   });
 });

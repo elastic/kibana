@@ -178,8 +178,6 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       });
     }
 
-    await agentPolicyService.createFleetServerPolicy(soClient, agentPolicy.id);
-
     ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
 
     const body: CreateAgentPolicyResponse = {
