@@ -50,9 +50,12 @@ export const createThreatSignals = async ({
   logDebugMessage('Indicator matching rule starting');
   const perPage = concurrentSearches * itemsPerSearch;
   const maxSignals = completeRule.ruleParams.maxSignals;
-  const withTimeout = async <T>(func: () => Promise<T>) => {
+  const verifyExecutionCanProceed = buildExecutionIntervalValidator(
+    completeRule.ruleConfig.schedule.interval
+  );
+  const withTimeout = async <T>(func: () => Promise<T>, funcName: string) => {
     const resolved = await func();
-    buildExecutionIntervalValidator(completeRule.ruleConfig.schedule.interval);
+    verifyExecutionCanProceed(funcName);
     return resolved;
   };
 
@@ -69,37 +72,42 @@ export const createThreatSignals = async ({
   };
 
   // TODO: totalEventCount queries events from all time, but what we really need is just the events from the last execution
-  const matchableSourceEventCount = await withTimeout<number>(() =>
-    getTotalEventCount({
-      esClient: services.scopedClusterClient.asCurrentUser,
-      exceptionItems,
-      filters,
-      query,
-      language,
-      index: inputIndex,
-    })
+  const matchableSourceEventCount = await withTimeout<number>(
+    () =>
+      getTotalEventCount({
+        esClient: services.scopedClusterClient.asCurrentUser,
+        exceptionItems,
+        filters,
+        query,
+        language,
+        index: inputIndex,
+      }),
+    'getTotalEventCount'
   );
   logDebugMessage(`matchable source event count from all time: ${matchableSourceEventCount}`);
   console.log('____sourceCount', matchableSourceEventCount);
 
   if (matchableSourceEventCount) {
-    const threatQueriesToPersist = await withTimeout<BoolFilter[]>(() =>
-      createThreatQueriesForPercolator({
-        buildRuleMessage,
-        esClient: services.search.asCurrentUser,
-        exceptionItems,
-        listClient,
-        logger,
-        perPage,
-        threatFilters,
-        threatIndex,
-        threatLanguage,
-        threatMapping,
-        threatQuery,
-      })
+    const threatQueriesToPersist = await withTimeout<BoolFilter[]>(
+      () =>
+        createThreatQueriesForPercolator({
+          buildRuleMessage,
+          esClient: services.search.asCurrentUser,
+          exceptionItems,
+          listClient,
+          logger,
+          perPage,
+          threatFilters,
+          threatIndex,
+          threatLanguage,
+          threatMapping,
+          threatQuery,
+        }),
+      'createThreatQueriesForPercolator'
     );
-    await withTimeout<void>(() =>
-      persistThreatQueries({ threatQueriesToPersist, percolatorRuleDataClient })
+    await withTimeout<void>(
+      () => persistThreatQueries({ threatQueriesToPersist, percolatorRuleDataClient }),
+      'persistThreatQueries'
     );
 
     // const threatEnrichment = buildThreatEnrichment({
