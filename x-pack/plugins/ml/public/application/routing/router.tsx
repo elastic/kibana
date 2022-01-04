@@ -32,7 +32,7 @@ export interface MlRoute {
    * Route ID.
    * Used for tab IDs
    */
-  id: string;
+  id?: string;
   path: string;
   /**
    * Route name.

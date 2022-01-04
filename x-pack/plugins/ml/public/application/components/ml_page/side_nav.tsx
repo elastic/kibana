@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { EuiSideNavItemType } from '@elastic/eui';
 import { TabId } from '../navigation_menu/navigation_menu';
-import { MlLocatorParams } from '../../../../common/types/locator';
+import type { MlLocatorParams } from '../../../../common/types/locator';
 import { useUrlState } from '../../util/url_state';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { isFullLicense } from '../../license';
@@ -17,6 +18,7 @@ export interface Tab {
   name: any;
   disabled: boolean;
   betaTag?: JSX.Element;
+  items?: Tab[];
 }
 
 function getTabs(disableLinks: boolean): Tab[] {
@@ -34,6 +36,15 @@ function getTabs(disableLinks: boolean): Tab[] {
         defaultMessage: 'Anomaly Detection',
       }),
       disabled: disableLinks,
+      items: [
+        {
+          id: 'settings',
+          name: i18n.translate('xpack.ml.navMenu.settingsTabLinkText', {
+            defaultMessage: 'Settings',
+          }),
+          disabled: disableLinks,
+        },
+      ],
     },
     {
       id: 'data_frame_analytics',
@@ -55,13 +66,6 @@ function getTabs(disableLinks: boolean): Tab[] {
         defaultMessage: 'Data Visualizer',
       }),
       disabled: false,
-    },
-    {
-      id: 'settings',
-      name: i18n.translate('xpack.ml.navMenu.settingsTabLinkText', {
-        defaultMessage: 'Settings',
-      }),
-      disabled: disableLinks,
     },
   ];
 }
@@ -119,7 +123,7 @@ const TAB_DATA: Record<TabId, TabData> = {
   },
 };
 
-export function useSideNavItems(activeRouteId: string) {
+export function useSideNavItems(activeRouteId: string | undefined) {
   const mlLocator = useMlLocator();
   const navigateToPath = useNavigateToPath();
 
@@ -148,8 +152,8 @@ export function useSideNavItems(activeRouteId: string) {
 
   const tabs = getTabs(!isFullLicense());
 
-  return tabs.map((tab) => {
-    const { id, disabled } = tab;
+  function getTabItem(tab: Tab): EuiSideNavItemType<any> {
+    const { id, disabled, items } = tab;
     const testSubject = TAB_DATA[id].testSubject;
     const defaultPathId = (TAB_DATA[id].pathId || id) as MlLocatorParams['page'];
 
@@ -162,6 +166,9 @@ export function useSideNavItems(activeRouteId: string) {
         redirectToTab(defaultPathId);
       },
       'data-test-subj': testSubject + (id === activeRouteId ? ' selected' : ''),
+      items: items ? items.map(getTabItem) : undefined,
     };
-  });
+  }
+
+  return tabs.map(getTabItem);
 }
