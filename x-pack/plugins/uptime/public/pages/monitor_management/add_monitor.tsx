@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useTrackPageview } from '../../../observability/public';
-import { SyntheticsProviders } from '../components/fleet_package/contexts';
-import { Loader } from '../components/monitor_management/loader/loader';
-import { MonitorConfig } from '../components/monitor_management/monitor_config/monitor_config';
-import { useLocations } from '../components/monitor_management/hooks/use_locations';
+import { useTrackPageview } from '../../../../observability/public';
+import { SyntheticsProviders } from '../../components/fleet_package/contexts';
+import { Loader } from '../../components/monitor_management/loader/loader';
+import { MonitorConfig } from '../../components/monitor_management/monitor_config/monitor_config';
+import { useLocations } from '../../components/monitor_management/hooks/use_locations';
 
 export const AddMonitorPage: React.FC = () => {
   useTrackPageview({ app: 'uptime', path: 'add-monitor' });
