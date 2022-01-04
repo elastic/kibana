@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import path from 'path';
+import fs from 'fs/promises';
+
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { groupBy, omit, pick, isEqual } from 'lodash';
@@ -30,7 +33,7 @@ import {
 import { escapeSearchQueryPhrase } from './saved_object';
 import { pkgToPkgKey } from './epm/registry';
 import { getInstallation, getPackageInfo } from './epm/packages';
-import { ensurePackagesCompletedInstall } from './epm/packages/install';
+import { ensurePackagesCompletedInstall, installPackage } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
@@ -148,6 +151,9 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   spaceId: string
 ): Promise<PreconfigurationResult> {
   const logger = appContextService.getLogger();
+
+  // Install bundled packages first before we deal with anything from preconfiguration
+  await installBundledPackages(soClient, esClient, spaceId);
 
   // Validate configured packages to ensure there are no version conflicts
   const packageNames = groupBy(packages, (pkg) => pkg.name);
@@ -436,5 +442,43 @@ async function addPreconfiguredPolicyPackages(
       (policy) => preconfigurePackageInputs(policy, packageInfo, inputs),
       bumpAgentPolicyRevison
     );
+  }
+}
+
+/**
+ * Pulls bundled .zip archives of package from a directory and installs the packages. This facilitates
+ * "stack-aligned" packages that are bundled with a given release of Kibana.
+ */
+async function installBundledPackages(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  spaceId: string
+) {
+  const BUNDLED_PACKAGE_DIRECTORY = path.join(__dirname, '../bundled_packages');
+  const logger = appContextService.getLogger();
+
+  const dirContents = await fs.readdir(BUNDLED_PACKAGE_DIRECTORY);
+  const zipFiles = dirContents.filter((file) => file.endsWith('.zip'));
+
+  for (const zipFile of zipFiles) {
+    logger.debug(`Installing bundled package ${zipFile}`);
+
+    const file = await fs.readFile(path.join(__dirname, '../bundled_packages/', zipFile));
+
+    // try/catch bundled package installs individually to avoid stopping the whole setup process
+    // if a single package fails to install
+    try {
+      await installPackage({
+        savedObjectsClient: soClient,
+        esClient,
+        installSource: 'upload',
+        archiveBuffer: file,
+        contentType: 'application/zip',
+        spaceId,
+      });
+    } catch (error) {
+      logger.error(`Error installing bundled package`);
+      logger.error(error);
+    }
   }
 }
