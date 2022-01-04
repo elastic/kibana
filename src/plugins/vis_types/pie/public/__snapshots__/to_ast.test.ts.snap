@@ -83,7 +83,7 @@ Object {
                     true,
                   ],
                 },
-                "function": "pielabels",
+                "function": "pie_labels",
                 "type": "function",
               },
             ],

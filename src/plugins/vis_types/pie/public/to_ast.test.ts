@@ -8,7 +8,7 @@
 
 import { Vis } from '../../../visualizations/public';
 
-import { PieVisParams } from './types';
+import { PieVisParams } from '../../../chart_expressions/expression_pie/common';
 import { samplePieVis } from './sample_vis.test.mocks';
 import { toExpressionAst } from './to_ast';
 

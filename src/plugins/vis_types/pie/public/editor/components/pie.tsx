@@ -33,7 +33,13 @@ import { VisEditorOptionsProps } from '../../../../../visualizations/public';
 import { TruncateLabelsOption } from './truncate_labels';
 import { PaletteRegistry } from '../../../../../charts/public';
 import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
-import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../../types';
+import { PieTypeProps } from '../../types';
+import {
+  PieVisParams,
+  LabelPositions,
+  ValueFormats,
+} from '../../../../../chart_expressions/expression_pie/common';
+
 import { emptySizeRatioOptions, getLabelPositions, getValuesFormats } from '../collections';
 import { getLegendPositions } from '../positions';
 
