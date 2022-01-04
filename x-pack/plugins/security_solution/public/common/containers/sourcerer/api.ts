@@ -30,3 +30,15 @@ export const postSourcererDataView = async ({
     body: JSON.stringify(body),
     signal,
   });
+
+export const getSourcererDataview = async (
+  dataViewId: string,
+  signal?: AbortSignal
+): Promise<KibanaDataView> => {
+  return KibanaServices.get().http.fetch<KibanaDataView>(SOURCERER_API_URL, {
+    method: 'GET',
+    query: { dataViewId },
+    asSystemRequest: true,
+    signal,
+  });
+};

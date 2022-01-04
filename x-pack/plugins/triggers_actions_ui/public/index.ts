@@ -12,18 +12,18 @@ import { Plugin } from './plugin';
 
 export type {
   AlertAction,
-  Alert,
-  AlertTypeModel,
+  Rule,
+  RuleTypeModel,
   ActionType,
   ActionTypeRegistryContract,
   RuleTypeRegistryContract,
-  AlertTypeParamsExpressionProps,
+  RuleTypeParamsExpressionProps,
   ValidationResult,
   ActionVariables,
   ActionConnector,
   IErrorObject,
   AlertFlyoutCloseReason,
-  AlertTypeParams,
+  RuleTypeParams,
   AsApiContract,
 } from './types';
 
