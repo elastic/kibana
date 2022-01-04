@@ -16,6 +16,7 @@ import {
   CreateAndOrClausesOptions,
   CreateInnerAndClausesOptions,
   FilterThreatMappingOptions,
+  SplitShouldClausesOptions,
 } from './types';
 import { encodeThreatMatchNamedQuery } from './utils';
 
@@ -30,12 +31,11 @@ export const buildThreatMappingFilter = ({
   if (computedChunkSize > 1024) {
     throw new TypeError('chunk sizes cannot exceed 1024 in size');
   }
-  // const query = buildEntriesMappingFilter({
-  //   threatMapping,
-  //   threatList,
-  //   chunkSize: computedChunkSize,
-  // });
-  const query: BooleanFilter = { bool: { should: [], minimum_should_match: 1 } };
+  const query = buildEntriesMappingFilter({
+    threatMapping,
+    threatList,
+    chunkSize: computedChunkSize,
+  });
   const filterChunk: Filter = {
     meta: {
       alias: null,
@@ -53,19 +53,20 @@ export const buildThreatMappingFilter = ({
 export const filterThreatMapping = ({
   threatMapping,
   indicator,
-}: FilterThreatMappingOptions): ThreatMapping => {
-  const filteredThreatMapping: ThreatMapping = [];
-  return threatMapping.reduce((acc, threatMap) => {
-    const atLeastOneItemMissingInThreatList = threatMap.entries.some((entry) => {
-      const itemValue = get(entry.value, indicator.fields);
-      return itemValue == null || itemValue.length !== 1;
-    });
-    if (!atLeastOneItemMissingInThreatList) {
-      acc.push({ ...threatMap, entries: threatMap.entries });
-    }
-    return acc;
-  }, filteredThreatMapping);
-};
+}: FilterThreatMappingOptions): ThreatMapping =>
+  threatMapping
+    .map((threatMap) => {
+      const atLeastOneItemMissingInThreatList = threatMap.entries.some((entry) => {
+        const itemValue = get(entry.value, indicator.fields);
+        return itemValue == null || itemValue.length !== 1;
+      });
+      if (atLeastOneItemMissingInThreatList) {
+        return { ...threatMap, entries: [] };
+      } else {
+        return { ...threatMap, entries: threatMap.entries };
+      }
+    })
+    .filter((threatMap) => threatMap.entries.length !== 0);
 
 export const createInnerAndClauses = ({
   threatMappingEntries,
@@ -103,44 +104,69 @@ export const createInnerAndClauses = ({
 export const createAndOrClauses = ({
   threatMapping,
   indicator,
-}: CreateAndOrClausesOptions): BooleanFilter[] => {
-  const booleanFilters: BooleanFilter[] = [];
-  threatMapping.reduce<unknown[]>((accum, threatMap) => {
+}: CreateAndOrClausesOptions): BooleanFilter => {
+  const should = threatMapping.reduce<unknown[]>((accum, threatMap) => {
     const innerAndClauses = createInnerAndClauses({
       threatMappingEntries: threatMap.entries,
       indicator,
     });
-    if (innerAndClauses.length) {
+    if (innerAndClauses.length !== 0) {
       // These values could be potentially 10k+ large so mutating the array intentionally
       accum.push({
         bool: { filter: innerAndClauses },
       });
     }
     return accum;
-  }, booleanFilters);
-  return booleanFilters;
+  }, []);
+  return { bool: { should, minimum_should_match: 1 } };
+};
+
+export const buildEntriesMappingFilter = ({
+  threatMapping,
+  threatList,
+  chunkSize,
+}: BuildEntriesMappingFilterOptions): BooleanFilter => {
+  const combinedShould = threatList.reduce<BooleanFilter[]>((accum, threatListSearchItem) => {
+    const filteredEntries = filterThreatMapping({
+      threatMapping,
+      indicator: threatListSearchItem,
+    });
+    const queryWithAndOrClause = createAndOrClauses({
+      threatMapping: filteredEntries,
+      indicator: threatListSearchItem,
+    });
+    if (queryWithAndOrClause.bool.should.length !== 0) {
+      // These values can be 10k+ large, so using a push here for performance
+      accum.push(queryWithAndOrClause);
+    }
+    return accum;
+  }, []);
+  const should = splitShouldClauses({ should: combinedShould, chunkSize });
+  return { bool: { should, minimum_should_match: 1 } };
+};
+
+export const splitShouldClauses = ({
+  should,
+  chunkSize,
+}: SplitShouldClausesOptions): BooleanFilter[] => {
+  if (should.length <= chunkSize) {
+    return should;
+  } else {
+    return should.reduce<BooleanFilter[]>((accum, item, index) => {
+      const chunkIndex = Math.floor(index / chunkSize);
+      const currentChunk = accum[chunkIndex];
+      if (!currentChunk) {
+        // create a new element in the array at the correct spot
+        accum[chunkIndex] = { bool: { should: [], minimum_should_match: 1 } };
+      }
+      // Add to the existing array element. Using mutatious push here since these arrays can get very large such as 10k+ and this is going to be a hot code spot.
+      accum[chunkIndex].bool.should.push(item);
+      return accum;
+    }, []);
+  }
 };
 
 export const createPercolateQueries = ({
-  threatMapping,
-  threatList,
-}: Omit<BuildEntriesMappingFilterOptions, 'chunkSize'>): BooleanFilter[] => {
-  const booleanFilters: BooleanFilter[] = [];
-  return threatList.reduce((acc, indicator) => {
-    acc.push(
-      ...createAndOrClauses({
-        threatMapping: filterThreatMapping({
-          threatMapping,
-          indicator,
-        }),
-        indicator,
-      })
-    );
-    return acc;
-  }, booleanFilters);
-};
-
-export const createPercolateQueriesNew = ({
   threatMapping,
   threatList,
 }: Omit<BuildEntriesMappingFilterOptions, 'chunkSize'>): BoolFilter[] => {
@@ -178,7 +204,7 @@ export const createPercolateQueriesNew = ({
       } else if (filters.length > 1) {
         clauses.push({
           bool: { filter: filters, minimum_should_match: 1 },
-          _name: filters.map((filt) => filt._name).join('-'),
+          _name: filters.map(({ _name }) => _name).join('-'),
           indicator,
         });
       }
@@ -188,45 +214,3 @@ export const createPercolateQueriesNew = ({
     return queries;
   }, []);
 };
-
-//
-// export const buildEntriesMappingFilter = ({
-//   threatMapping,
-//   threatList,
-//   chunkSize,
-// }: BuildEntriesMappingFilterOptions): BooleanFilter => {
-//   const combinedShould = threatList.reduce<BooleanFilter[]>((accum, indicator) => {
-//     const filteredEntries = filterThreatMapping({
-//       threatMapping,
-//       indicator,
-//     });
-//     const queryWithAndOrClause = createAndOrClauses({
-//       threatMapping: filteredEntries,
-//       indicator,
-//     });
-//     accum.push(...queryWithAndOrClause);
-//     return accum;
-//   }, []);
-//  return combinedShould;
-// };
-//
-// export const splitShouldClauses = ({
-//   should,
-//   chunkSize,
-// }: SplitShouldClausesOptions): BooleanFilter[] => {
-//   if (should.length <= chunkSize) {
-//     return should;
-//   } else {
-//     return should.reduce<BooleanFilter[]>((accum, item, index) => {
-//       const chunkIndex = Math.floor(index / chunkSize);
-//       const currentChunk = accum[chunkIndex];
-//       if (!currentChunk) {
-//         // create a new element in the array at the correct spot
-//         accum[chunkIndex] = { bool: { should: [], minimum_should_match: 1 } };
-//       }
-//       // Add to the existing array element. Using mutatious push here since these arrays can get very large such as 10k+ and this is going to be a hot code spot.
-//       accum[chunkIndex].bool.should.push(item);
-//       return accum;
-//     }, []);
-//   }
-// };

@@ -6,7 +6,7 @@
  */
 
 import { getFirstIndicatorPage, getNextIndicatorPage } from '../get_threat_list';
-import { createPercolateQueriesNew } from '../build_threat_mapping_filter';
+import { createPercolateQueries } from '../build_threat_mapping_filter';
 import { BoolFilter, CreateThreatQueriesForPercolatorOptions } from '../types';
 
 export const createThreatQueriesForPercolator = async ({
@@ -39,7 +39,7 @@ export const createThreatQueriesForPercolator = async ({
 
   while (indicatorPage.hits.hits.length) {
     threatQueriesForPercolator = threatQueriesForPercolator.concat(
-      createPercolateQueriesNew({ threatMapping, threatList: indicatorPage.hits.hits })
+      createPercolateQueries({ threatMapping, threatList: indicatorPage.hits.hits })
     );
 
     indicatorPage = await getNextIndicatorPage({
