@@ -18,7 +18,7 @@ import { useLegacyUrlParams } from '../../../../context/url_params_context/use_u
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../breakdowns/breakdown_filter';
-import { PageViewsChart } from '../Charts/page_views_chart';
+import { PageViewsChart } from '../charts/page_views_chart';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { createExploratoryViewUrl } from '../../../../../../observability/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';

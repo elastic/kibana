@@ -18,7 +18,7 @@ import { useLegacyUrlParams } from '../../../../context/url_params_context/use_u
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../breakdowns/breakdown_filter';
-import { PageLoadDistChart } from '../Charts/page_load_dist_chart';
+import { PageLoadDistChart } from '../charts/page_load_dist_chart';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { ResetPercentileZoom } from './reset_percentile_zoom';
 import { createExploratoryViewUrl } from '../../../../../../observability/public';
