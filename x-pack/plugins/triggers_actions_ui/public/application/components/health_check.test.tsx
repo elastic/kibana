@@ -61,7 +61,7 @@ describe('health check', () => {
     useKibanaMock().services.http.get = jest.fn().mockResolvedValue({
       is_sufficiently_secure: true,
       has_permanent_encryption_key: true,
-      alerting_framework_heath: {
+      alerting_framework_health: {
         decryption_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         execution_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         read_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
@@ -85,7 +85,7 @@ describe('health check', () => {
     useKibanaMock().services.http.get = jest.fn().mockImplementation(async () => ({
       is_sufficiently_secure: false,
       has_permanent_encryption_key: true,
-      alerting_framework_heath: {
+      alerting_framework_health: {
         decryption_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         execution_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         read_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
@@ -121,7 +121,7 @@ describe('health check', () => {
     useKibanaMock().services.http.get = jest.fn().mockImplementation(async () => ({
       is_sufficiently_secure: true,
       has_permanent_encryption_key: false,
-      alerting_framework_heath: {
+      alerting_framework_health: {
         decryption_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         execution_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         read_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
@@ -157,7 +157,7 @@ describe('health check', () => {
     useKibanaMock().services.http.get = jest.fn().mockImplementation(async () => ({
       is_sufficiently_secure: false,
       has_permanent_encryption_key: false,
-      alerting_framework_heath: {
+      alerting_framework_health: {
         decryption_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         execution_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         read_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },

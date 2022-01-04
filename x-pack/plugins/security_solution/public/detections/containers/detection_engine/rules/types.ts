@@ -244,6 +244,7 @@ export interface BasicFetchProps {
 export interface ImportDataProps {
   fileToImport: File;
   overwrite?: boolean;
+  overwriteExceptions?: boolean;
   signal: AbortSignal;
 }
 
@@ -263,10 +264,23 @@ export interface ImportResponseError {
   };
 }
 
+export interface ExceptionsImportError {
+  error: {
+    status_code: number;
+    message: string;
+  };
+  id?: string | undefined;
+  list_id?: string | undefined;
+  item_id?: string | undefined;
+}
+
 export interface ImportDataResponse {
   success: boolean;
   success_count: number;
   errors: Array<ImportRulesResponseError | ImportResponseError>;
+  exceptions_success?: boolean;
+  exceptions_success_count?: number;
+  exceptions_errors?: ExceptionsImportError[];
 }
 
 export interface ExportDocumentsProps {

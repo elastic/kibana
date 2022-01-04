@@ -235,7 +235,7 @@ describe('Action Log API', () => {
         hasFleetResponses?: boolean;
         hasResponses?: boolean;
       }) => {
-        esClientMock.asCurrentUser.search = jest.fn().mockImplementationOnce(() => {
+        esClientMock.asInternalUser.search = jest.fn().mockImplementationOnce(() => {
           let actions: Results[] = [];
           let fleetActions: Results[] = [];
           let responses: Results[] = [];
@@ -281,7 +281,7 @@ describe('Action Log API', () => {
       };
 
       havingErrors = () => {
-        esClientMock.asCurrentUser.search = jest.fn().mockImplementationOnce(() =>
+        esClientMock.asInternalUser.search = jest.fn().mockImplementationOnce(() =>
           Promise.resolve(() => {
             throw new Error();
           })
