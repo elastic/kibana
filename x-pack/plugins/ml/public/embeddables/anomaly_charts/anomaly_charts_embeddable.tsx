@@ -63,14 +63,14 @@ export class AnomalyChartsEmbeddable extends Embeddable<
 
     try {
       const jobs = await anomalyExplorerService.getCombinedJobs(jobIds);
-      const indexPatternsService = this.services[1].data.indexPatterns;
+      const dataViewsService = this.services[1].data.dataViews;
 
       // First get list of unique indices from the selected jobs
       const indices = new Set(jobs.map((j) => j.datafeed_config.indices).flat());
       // Then find the data view assuming the data view title matches the index name
       const indexPatterns: Record<string, DataView> = {};
       for (const indexName of indices) {
-        const response = await indexPatternsService.find(`"${indexName}"`);
+        const response = await dataViewsService.find(`"${indexName}"`);
 
         const indexPattern = response.find(
           (obj) => obj.title.toLowerCase() === indexName.toLowerCase()

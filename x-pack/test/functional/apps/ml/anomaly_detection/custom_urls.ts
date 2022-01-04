@@ -7,31 +7,12 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
-import {
-  TimeRangeType,
-  TIME_RANGE_TYPE,
-} from '../../../../../plugins/ml/public/application/jobs/components/custom_url_editor/constants';
-
-interface DiscoverUrlConfig {
-  label: string;
-  indexPattern: string;
-  queryEntityFieldNames: string[];
-  timeRange: TimeRangeType;
-  timeRangeInterval?: string;
-}
-
-interface DashboardUrlConfig {
-  label: string;
-  dashboardName: string;
-  queryEntityFieldNames: string[];
-  timeRange: TimeRangeType;
-  timeRangeInterval?: string;
-}
-
-interface OtherUrlConfig {
-  label: string;
-  url: string;
-}
+import { TIME_RANGE_TYPE } from '../../../../../plugins/ml/public/application/jobs/components/custom_url_editor/constants';
+import type {
+  DiscoverUrlConfig,
+  DashboardUrlConfig,
+  OtherUrlConfig,
+} from '../../../services/ml/job_table';
 
 // @ts-expect-error doesn't implement the full interface
 const JOB_CONFIG: Job = {
