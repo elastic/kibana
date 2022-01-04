@@ -14,7 +14,6 @@ import type {
   KibanaRequest,
 } from 'src/core/server';
 import { Collector } from './collector';
-import { KibanaMetricsCollector, KibanaMetricsCollectorOptions } from './kibana_metrics_collector';
 import type { ICollector, CollectorOptions } from './types';
 import { UsageCollector, UsageCollectorOptions } from './usage_collector';
 
@@ -51,20 +50,6 @@ export class CollectorSet {
     options: CollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions>
   ) => {
     return new Collector<TFetchReturn, ExtraOptions>(this.logger, options);
-  };
-
-  /**
-   * Instantiates a stats collector with the definition provided in the options
-   * @param options Definition of the collector {@link CollectorOptions}
-   */
-  public makeKibanaMetricsCollector = <
-    TFetchReturn,
-    WithKibanaRequest extends boolean,
-    ExtraOptions extends object = {}
-  >(
-    options: KibanaMetricsCollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions>
-  ) => {
-    return new KibanaMetricsCollector<TFetchReturn, ExtraOptions>(this.logger, options);
   };
 
   /**
@@ -156,7 +141,7 @@ export class CollectorSet {
 
   public bulkFetch = async (
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClientContract | undefined,
+    soClient: SavedObjectsClientContract,
     kibanaRequest: KibanaRequest | undefined, // intentionally `| undefined` to enforce providing the parameter
     collectors: Map<string, AnyCollector> = this.collectors
   ) => {
@@ -205,19 +190,6 @@ export class CollectorSet {
       kibanaRequest,
       usageCollectors.collectors
     );
-  };
-
-  public bulkFetchKibanaMetrics = async (esClient: ElasticsearchClient) => {
-    const usageCollectors = this.getFilteredCollectorSet(
-      (c) => c instanceof KibanaMetricsCollector
-    );
-    const metrics = await this.bulkFetch(
-      esClient,
-      undefined,
-      undefined,
-      usageCollectors.collectors
-    );
-    return metrics;
   };
 
   /**

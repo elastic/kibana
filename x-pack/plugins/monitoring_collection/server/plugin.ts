@@ -22,7 +22,7 @@ export interface MonitoringCollectionSetup {
 const LOGGING_TAG = 'monitoring_collection';
 
 export interface MetricResult {
-  [key: string]: string | number;
+  [key: string]: string | number | undefined;
 }
 
 export interface Metric {

@@ -85,15 +85,6 @@ export interface RouteDependencies {
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   alerting?: AlertingPluginSetup;
   logger: Logger;
-  sections: {
-    kibana: {
-      instance: {
-        metrics: {
-          query?: object;
-        };
-      };
-    };
-  };
 }
 
 export interface MonitoringCore {

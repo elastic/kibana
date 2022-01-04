@@ -14,7 +14,6 @@ import {
   IClusterClient,
   IContextProvider,
 } from 'src/core/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { SpacesPluginStart } from '../../spaces/server';
 
 import type {
@@ -61,7 +60,7 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
     this.kibanaVersion = this.context.env.packageInfo.version;
   }
 
-  setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }): IEventLogService {
+  setup(core: CoreSetup): IEventLogService {
     const kibanaIndex = core.savedObjects.getKibanaIndex();
 
     this.systemLogger.debug('setting up plugin');

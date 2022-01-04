@@ -39,9 +39,6 @@ export const createUsageCollectionSetupMock = () => {
     toObject: jest.fn().mockImplementation(collectorSet.toObject),
     makeStatsCollector: jest.fn().mockImplementation(collectorSet.makeStatsCollector),
     makeUsageCollector: jest.fn().mockImplementation(collectorSet.makeUsageCollector),
-    makeKibanaMetricsCollector: jest
-      .fn()
-      .mockImplementation(collectorSet.makeKibanaMetricsCollector),
     registerCollector: jest.fn().mockImplementation(collectorSet.registerCollector),
   };
 

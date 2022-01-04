@@ -67,12 +67,6 @@ export function registerStatsRoute({
     return collectorSet.toObject(usage);
   };
 
-  const getKibanaStats = async (
-    esClient: ElasticsearchClient
-  ): Promise<Array<{ type: string; result: unknown }>> => {
-    return await collectorSet.bulkFetchKibanaMetrics(esClient);
-  };
-
   const getClusterUuid = async (asCurrentUser: ElasticsearchClient): Promise<string> => {
     const { body } = await asCurrentUser.info({ filter_path: 'cluster_uuid' });
     const { cluster_uuid: uuid } = body;
@@ -169,11 +163,9 @@ export function registerStatsRoute({
         .pipe(first())
         .toPromise();
 
-      const stats = await getKibanaStats(asCurrentUser);
       const overallStatus = await overallStatus$.pipe(first()).toPromise();
       const kibanaStats = collectorSet.toApiFieldNames({
         ...lastMetrics,
-        ...stats,
         kibana: {
           uuid: config.uuid,
           name: config.server.name,

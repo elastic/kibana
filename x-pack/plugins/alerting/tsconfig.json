@@ -22,7 +22,6 @@
     { "path": "../task_manager/tsconfig.json" },
     { "path": "../event_log/tsconfig.json" },
     { "path": "../encrypted_saved_objects/tsconfig.json" },
-    { "path": "../monitoring/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../monitoring_collection/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },

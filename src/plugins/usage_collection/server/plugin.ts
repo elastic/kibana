@@ -18,13 +18,12 @@ import type {
   KibanaRequest,
 } from 'src/core/server';
 import type { ConfigType } from './config';
-import { CollectorSet, KibanaMetricsCollectorOptions } from './collector';
+import { CollectorSet } from './collector';
 import type { Collector, CollectorOptions, UsageCollectorOptions } from './collector';
 import { setupRoutes } from './routes';
 
 import { UsageCountersService } from './usage_counters';
 import type { UsageCounter } from './usage_counters';
-import { KibanaMetricsCollector } from './collector/kibana_metrics_collector';
 
 /** Server's setup APIs exposed by the UsageCollection Service **/
 export interface UsageCollectionSetup {
@@ -76,12 +75,6 @@ export interface UsageCollectionSetup {
     collectors?: Map<string, Collector<TFetchReturn, ExtraOptions>>
   ) => Promise<Array<{ type: string; result: unknown }>>;
   /**
-   * Fetches stats from all registered stats collectors
-   */
-  bulkFetchKibanaMetrics: <TFetchReturn, ExtraOptions extends object>(
-    esClient: ElasticsearchClient
-  ) => Promise<Array<{ type: string; result: unknown }>>;
-  /**
    * Converts an array of fetched stats results into key/object
    * @internal: telemetry use
    */
@@ -107,18 +100,6 @@ export interface UsageCollectionSetup {
   >(
     options: CollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions>
   ) => Collector<TFetchReturn, ExtraOptions>;
-  /**
-   * Creates a stats collector to collect plugin telemetry data.
-   * registerCollector must be called to connect the created collector with the service.
-   * @internal: telemetry and monitoring use
-   */
-  makeKibanaMetricsCollector: <
-    TFetchReturn,
-    WithKibanaRequest extends boolean,
-    ExtraOptions extends object = {}
-  >(
-    options: KibanaMetricsCollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions>
-  ) => KibanaMetricsCollector<TFetchReturn, ExtraOptions>;
 }
 
 export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
@@ -168,10 +149,8 @@ export class UsageCollectionPlugin implements Plugin<UsageCollectionSetup> {
     return {
       areAllCollectorsReady: collectorSet.areAllCollectorsReady,
       bulkFetch: collectorSet.bulkFetch,
-      bulkFetchKibanaMetrics: collectorSet.bulkFetchKibanaMetrics,
       getCollectorByType: collectorSet.getCollectorByType,
       makeStatsCollector: collectorSet.makeStatsCollector,
-      makeKibanaMetricsCollector: collectorSet.makeKibanaMetricsCollector,
       makeUsageCollector: collectorSet.makeUsageCollector,
       registerCollector: collectorSet.registerCollector,
       toApiFieldNames: collectorSet.toApiFieldNames,

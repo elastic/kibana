@@ -21,4 +21,3 @@ export type {
   ICollector as Collector,
 } from './types';
 export type { UsageCollectorOptions } from './usage_collector';
-export type { KibanaMetricsCollectorOptions } from './kibana_metrics_collector';

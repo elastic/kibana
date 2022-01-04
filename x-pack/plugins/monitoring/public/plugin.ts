@@ -21,7 +21,6 @@ import {
 } from '../../../../src/plugins/home/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
-import { PluginSetupContract as AlertingSetupContract } from '../../alerting/public';
 import {
   RULE_DETAILS,
   RULE_THREAD_POOL_SEARCH_REJECTIONS,
@@ -45,7 +44,6 @@ interface MonitoringSetupPluginDependencies {
   cloud?: { isCloudEnabled: boolean };
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
-  alerting: AlertingSetupContract;
 }
 export class MonitoringPlugin
   implements
@@ -61,15 +59,13 @@ export class MonitoringPlugin
     core: CoreSetup<MonitoringStartPluginDependencies>,
     plugins: MonitoringSetupPluginDependencies
   ) {
-    const { home, alerting } = plugins;
+    const { home } = plugins;
     const id = 'monitoring';
     const icon = 'monitoringApp';
     const title = i18n.translate('xpack.monitoring.stackMonitoringTitle', {
       defaultMessage: 'Stack Monitoring',
     });
     const monitoring = this.initializerContext.config.get();
-
-    this.kibanaMonitoringRegistry.add(alerting.getKibanaMonitoringSection());
 
     if (!monitoring.ui.enabled) {
       return false;

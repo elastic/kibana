@@ -7,7 +7,7 @@
     "githubTeam": "kibana-alerting-services"
   },
   "configPath": ["xpack", "eventLog"],
-  "optionalPlugins": ["spaces", "usageCollection"],
+  "optionalPlugins": ["spaces"],
   "server": true,
   "ui": false
 }

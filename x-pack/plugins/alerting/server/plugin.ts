@@ -104,7 +104,6 @@ export interface PluginSetupContract {
     >
   ): void;
   getSecurityHealth: () => Promise<SecurityHealth>;
-  getKibanaMonitoringSectionQuery: () => object;
 }
 
 export interface PluginStartContract {
@@ -263,7 +262,7 @@ export class AlertingPlugin {
       averageDrift: number;
       averageDuration: number;
       totalExecutions: number;
-      lastExecutionTimeout: string;
+      lastExecutionTimeout: string | undefined;
     }
 
     if (plugins.monitoringCollection) {
@@ -336,12 +335,12 @@ export class AlertingPlugin {
                 }
               );
 
-              let totalExecutions = 0;
+              let totalExecutions: number = 0;
               if (aggResult) {
-                const executeBucket = aggResult.types.buckets.find(
-                  (bucket) => bucket.key === EVENT_LOG_ACTIONS.execute
-                );
-                totalExecutions = executeBucket?.doc_count;
+                const executeBucket = (
+                  aggResult.types as { buckets: Array<{ key: string; doc_count: number }> }
+                ).buckets.find((bucket) => bucket.key === EVENT_LOG_ACTIONS.execute);
+                totalExecutions = executeBucket?.doc_count ?? 0;
               }
 
               const lastExecute = events.data.find(
@@ -371,132 +370,6 @@ export class AlertingPlugin {
           return ruleMetrics;
         },
       });
-      // plugins.monitoringCollection.registerCollector(
-      //   plugins.usageCollection.makeKibanaMetricsCollector<RuleMetric, false>({
-      //     type: 'rule',
-      //     isReady: () => true,
-      //     schema: {
-      //       name: {
-      //         type: 'keyword',
-      //       },
-      //       id: {
-      //         type: 'keyword',
-      //       },
-      //       lastExecutionDuration: {
-      //         type: 'long',
-      //       },
-      //       averageDrift: {
-      //         type: 'long',
-      //       },
-      //       averageDuration: {
-      //         type: 'long',
-      //       },
-      //       lastExecutionTimeout: {
-      //         type: 'keyword',
-      //       },
-      //     },
-      //     fetch: async () => {
-      //       const services = await core.getStartServices();
-      //       const savedObjectClient = await services[0].savedObjects.createInternalRepository([
-      //         'alert',
-      //       ]);
-      //       const esoClient = await services[1].encryptedSavedObjects.getClient({
-      //         includedHiddenTypes: ['alert'],
-      //       });
-
-      //       // Find all rules
-      //       const response = await savedObjectClient.find<RawRule>({ type: 'alert' });
-      //       const rules = response.saved_objects;
-
-      //       const ruleMetrics: RuleMetric[] = await Promise.all(
-      //         rules.map(async ({ attributes: rule, id, namespaces }) => {
-      //           // Get the last execute event log
-      //           const {
-      //             attributes: { apiKey },
-      //           } = await esoClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
-      //             namespace: namespaces ? namespaces[0] : undefined,
-      //           });
-
-      //           // rule.
-      //           const requestHeaders: Record<string, string> = {};
-      //           if (apiKey) {
-      //             requestHeaders.authorization = `ApiKey ${apiKey}`;
-      //           }
-      //           const fakeRequest = KibanaRequest.from({
-      //             headers: requestHeaders,
-      //             path: '/',
-      //             route: { settings: {} },
-      //             url: {
-      //               href: '/',
-      //             },
-      //             raw: {
-      //               req: {
-      //                 url: '/',
-      //               },
-      //             },
-      //           } as unknown as Request);
-
-      //           const eventLogClient = services[1].eventLog.getClient(fakeRequest);
-
-      //           const events = await eventLogClient.findEventsBySavedObjectIds('alert', [id], {
-      //             page: 1,
-      //             per_page: 1000,
-      //             sort_order: 'desc',
-      //             // filter: '(event.action: "execute")',
-      //           });
-
-      //           const aggResult = await eventLogClient.getAggregatedData(
-      //             'alert',
-      //             [id],
-      //             {
-      //               types: {
-      //                 terms: {
-      //                   field: 'event.action',
-      //                   size: 100,
-      //                 },
-      //               },
-      //             },
-      //             {
-      //               sort_order: 'desc',
-      //               // filter: '(event.action: "execute")',
-      //             }
-      //           );
-
-      //           let totalExecutions = 0;
-      //           if (aggResult) {
-      //             const executeBucket = aggResult.types.buckets.find(
-      //               (bucket) => bucket.key === EVENT_LOG_ACTIONS.execute
-      //             );
-      //             totalExecutions = executeBucket?.doc_count;
-      //           }
-
-      //           const lastExecute = events.data.find(
-      //             (event) =>
-      //               event?.event?.action === EVENT_LOG_ACTIONS.execute && event?.event?.duration
-      //           );
-      //           const lastTimeout = events.data.find(
-      //             (event) => event?.event?.action === EVENT_LOG_ACTIONS.executeTimeout
-      //           );
-
-      //           const metrics = services[1].taskManager.getHealthMetrics(id);
-      //           const ruleMetric = {
-      //             name: rule.name,
-      //             id,
-      //             lastExecutionDuration: lastExecute?.event?.duration ?? 0,
-      //             lastExecutionTimeout: lastTimeout?.['@timestamp'],
-      //             averageDrift: metrics.drift,
-      //             averageDuration: metrics.duration,
-      //             totalExecutions,
-      //           };
-
-      //           return ruleMetric;
-      //         })
-      //       );
-
-      //       return ruleMetrics;
-      //     },
-      //   })
-      // );
     }
 
     // Routes
@@ -550,11 +423,6 @@ export class AlertingPlugin {
             return security?.authc.apiKeys.areAPIKeysEnabled() ?? false;
           }
         );
-      },
-      getKibanaMonitoringSectionQuery: () => {
-        return {
-          collapse: { field: 'kibana_metrics.rule.id' },
-        };
       },
     };
   }

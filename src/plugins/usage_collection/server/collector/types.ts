@@ -83,7 +83,7 @@ export type CollectorFetchContext<WithKibanaRequest extends boolean | undefined 
    * Request-scoped Saved Objects client
    * @remark Bear in mind when testing your collector that your user has the same privileges as the Kibana Internal user to ensure the expected data is sent to the remote cluster (more info: {@link CollectorFetchContext})
    */
-  soClient?: SavedObjectsClientContract;
+  soClient: SavedObjectsClientContract;
 } & (WithKibanaRequest extends true
   ? {
       /**
