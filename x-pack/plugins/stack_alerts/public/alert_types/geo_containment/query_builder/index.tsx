@@ -16,6 +16,7 @@ import { EntityByExpression } from './expressions/entity_by_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
 import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
 import { QueryStringInput } from '../../../../../../../src/plugins/data/public';
+import { RuleTypeParamsExpressionProps } from '../../../../../triggers_actions_ui/public';
 
 const DEFAULT_VALUES = {
   TRACKING_EVENT: '',
