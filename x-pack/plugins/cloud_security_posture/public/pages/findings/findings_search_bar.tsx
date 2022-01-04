@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import type { Query } from '@kbn/es-query';
 import type { Filter } from '@kbn/es-query';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
@@ -13,6 +13,7 @@ import type { DataView, TimeRange } from '../../../../../../src/plugins/data/com
 import type { FindingsFetchState } from './types';
 import type { CspPluginSetup } from '../../types';
 import type { URLState } from './findings_container';
+import { PLUGIN_NAME } from '../../../common';
 
 interface BaseFindingsSearchBarProps {
   dataView: DataView;
@@ -34,19 +35,33 @@ export const FindingsSearchBar = ({
 }: FindingsSearchBarProps) => {
   const {
     data: {
+      query: queryService,
       ui: { SearchBar },
     },
   } = useKibana<CspPluginSetup>().services;
 
+  useEffect(() => {
+    const subscription = queryService.filterManager.getUpdates$().subscribe(() =>
+      // TODO: add a condition to check if component is mounted
+      setSource({
+        filters: queryService.filterManager.getFilters(),
+        query,
+        dateRange,
+      })
+    );
+
+    return () => subscription.unsubscribe();
+  }, [dateRange, query, queryService.filterManager, setSource]);
+
   return (
     <SearchBar
-      appName="" // TODO: remove
+      appName={PLUGIN_NAME}
       dataTestSubj={TEST_SUBJECTS.FINDINGS_SEARCH_BAR}
       showFilterBar={true}
       showDatePicker={true}
       showQueryBar={true}
       showQueryInput={true}
-      showSaveQuery={true}
+      showSaveQuery={false}
       isLoading={status === 'loading'}
       indexPatterns={[dataView]}
       dateRangeFrom={dateRange?.from}
@@ -58,16 +73,6 @@ export const FindingsSearchBar = ({
           query,
           filters,
           ...v,
-        })
-      }
-      // 'onFiltersUpdated' is not on StatefulSearchBarProps
-      // TODO: use SearchBar by import and not via props?
-      // @ts-ignore
-      onFiltersUpdated={(v) =>
-        setSource({
-          filters: v,
-          query,
-          dateRange,
         })
       }
       onQuerySubmit={(v) =>
