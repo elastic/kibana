@@ -413,6 +413,9 @@ x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 # Security Asset Management
 /x-pack/plugins/osquery @elastic/security-asset-management
 
+# Cloud Posture Security
+/x-pack/plugins/cloud_security_posture/ @elastic/cloud-posture-security
+
 # Design (at the bottom for specificity of SASS files)
 **/*.scss  @elastic/kibana-design
 #CC# /packages/kbn-ui-framework/ @elastic/kibana-design
