@@ -14,13 +14,13 @@ import { dropLastBucket } from '../series/drop_last_bucket';
 import type { TableResponseProcessorsFunction } from './types';
 
 export const dropLastBucketFn: TableResponseProcessorsFunction =
-  ({ bucket, panel, series }) =>
+  ({ response, panel, series }) =>
   (next) =>
   (results) => {
     const shouldDropLastBucket = isLastValueTimerangeMode(panel);
 
     if (shouldDropLastBucket) {
-      const fn = dropLastBucket({ aggregations: bucket }, panel, series);
+      const fn = dropLastBucket(response, panel, series);
 
       return fn(next)(results);
     }
