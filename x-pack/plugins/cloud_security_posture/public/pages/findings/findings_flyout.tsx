@@ -144,7 +144,7 @@ const getResultCards = ({ result, agent, host, ...rest }: CspFinding): Card[] =>
       ['Evidence', <EuiCode>{JSON.stringify(result.evidence, null, 2)}</EuiCode>],
       ['Timestamp', rest['@timestamp']],
       result.evaluation === 'failed' && ['Remediation', rest.rule.remediation],
-    ].filter(Boolean) as Card['listItems'], // TODO: is a type guard,
+    ].filter(Boolean) as Card['listItems'],
   },
   {
     title: 'Agent',
