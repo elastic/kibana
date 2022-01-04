@@ -39,7 +39,7 @@ export function formatErrorCountReason({
   serviceName: string;
 }) {
   return i18n.translate('xpack.apm.alertTypes.errorCount.reason', {
-    defaultMessage: `Error count is greater than {threshold} (current value is {measured}) for {serviceName}`,
+    defaultMessage: `Error count is {measured} for {serviceName}. Alert when > {threshold}`,
     values: {
       threshold,
       measured,
