@@ -2,6 +2,17 @@
 
 set -uo pipefail
 
+export CODE_COVERAGE=true
+
+# TODO move this to agent set up
+curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import
+curl -Os https://uploader.codecov.io/latest/linux/codecov
+curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
+curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
+gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
+shasum -a 256 -c codecov.SHA256SUM
+chmod +x codecov
+
 JOB=$BUILDKITE_PARALLEL_JOB
 JOB_COUNT=$BUILDKITE_PARALLEL_JOB_COUNT
 
@@ -13,6 +24,7 @@ exitCode=0
 while read -r config; do
   if [ "$((i % JOB_COUNT))" -eq "$JOB" ]; then
     echo "--- $ node scripts/jest --config $config"
+    rm -f target/kibana-coverage/jest/jest.json
     node --max-old-space-size=14336 ./node_modules/.bin/jest --config="$config" --runInBand --coverage=false
     lastCode=$?
 
@@ -21,6 +33,8 @@ while read -r config; do
       echo "Jest exited with code $lastCode"
       echo "^^^ +++"
     fi
+
+    ./codecov -t "${CODECOV_TOKEN}" -f target/kibana-coverage/jest/jest.json # TODO move ./codecov
   fi
 
   ((i=i+1))

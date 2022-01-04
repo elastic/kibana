@@ -10,6 +10,9 @@
 // https://jestjs.io/docs/en/configuration.html
 
 module.exports = {
+  // Coverage should be collected if env var is present
+  collectCoverage: process.env.CODE_COVERAGE === 'true',
+
   // The directory where Jest should output its coverage files
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
 
