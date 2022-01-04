@@ -6,7 +6,6 @@
  */
 
 import * as React from 'react';
-import { EuiPanel } from '@elastic/eui';
 
 import { ExploratoryViewContextProvider, ExploratoryView } from '../../../../observability/public';
 import {
@@ -15,9 +14,12 @@ import {
   getSingleMetricConfig,
   getSecurityAuthenticationsConfig,
   getEventsKPIConfig,
+  getSecurityUniquePrivateIpsKPIConfig,
 } from './kpi_over_time_config';
 import { RenderAppProps } from '../types';
 import { getSecurityAlertsKPIConfig } from './alert_kpi_over_time_config';
+// export from obsverabillity
+import { AppDataType } from '../../../../observability/public/components/shared/exploratory_view/types';
 
 export const reportConfigMap = {
   security: [
@@ -26,6 +28,7 @@ export const reportConfigMap = {
     getSingleMetricConfig,
     getSecurityAuthenticationsConfig,
     getEventsKPIConfig,
+    getSecurityUniquePrivateIpsKPIConfig,
   ],
   securityAlerts: [getSecurityAlertsKPIConfig],
 };
@@ -37,13 +40,13 @@ export const indexPatternList = {
   securityAlerts: '.alerts-security.alerts-default-*',
 };
 
-export const dataTypes: any = [
+export const dataTypes = [
   {
-    id: 'security',
+    id: 'security' as AppDataType,
     label: 'Security',
   },
   {
-    id: 'securityAlerts',
+    id: 'securityAlerts' as AppDataType,
     label: 'Security alerts',
   },
 ];
@@ -53,6 +56,7 @@ export const reportTypes = [
   { reportType: 'event_outcome', label: 'bar' },
   { reportType: 'unique_ip', label: 'Unique IPs' },
   { reportType: 'events', label: 'events' },
+  { reportType: 'unique_private_ip', label: 'Unique IPs' },
 ];
 
 export const SecurityExploratoryView = ({

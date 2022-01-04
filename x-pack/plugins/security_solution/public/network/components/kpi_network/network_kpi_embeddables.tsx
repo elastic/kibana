@@ -7,74 +7,72 @@
 
 import React, { useCallback, useMemo } from 'react';
 import {
-  EuiFlexGroup,
   EuiFlexItem,
+  EuiFlexGroup,
+  EuiSpacer,
   EuiHorizontalRule,
-  EuiPanel,
   EuiSplitPanel,
+  EuiPanel,
 } from '@elastic/eui';
+
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { StartServices } from '../../../types';
+import { NetworkKpiEmbessablesProps } from './types';
 import {
   indexPatternList,
   reportConfigMap,
 } from '../../../app/exploratory_view/security_exploratory_view';
-import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
-import { InputsModelId } from '../../store/inputs/constants';
 import { TimeRange } from '../../../../../../../src/plugins/data/public';
+import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
+import { ReportTypes } from '../../../../../observability/public';
+import { StartServices } from '../../../types';
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
 `;
-
-const panelHeight = '280px';
+const panelHeight = '105px';
 const metricHeight = '90px';
-interface Props {
-  from: string;
-  to: string;
-  inputsModelId?: InputsModelId;
-}
 
-export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
-  const timerange = useMemo<TimeRange>(
-    () => ({
-      from: new Date(from).toISOString(),
-      to: new Date(to).toISOString(),
-      mode: 'absolute',
-    }),
-    [from, to]
-  );
+export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesProps>(
+  ({ filterQuery, from, to, inputsModelId = 'global' }) => {
+    const timerange = useMemo<TimeRange>(
+      () => ({
+        from: new Date(from).toISOString(),
+        to: new Date(to).toISOString(),
+        mode: 'absolute',
+      }),
+      [from, to]
+    );
+    const dispatch = useDispatch();
 
-  const dispatch = useDispatch();
-  const { observability } = useKibana<StartServices>().services;
+    const { observability } = useKibana<StartServices>().services;
 
-  const ExploratoryViewEmbeddable = observability.ExploratoryViewEmbeddable;
+    const ExploratoryViewEmbeddable = observability.ExploratoryViewEmbeddable;
 
-  const onBrushEnd = useCallback(
-    ({ range }: { range: number[] }) => {
-      dispatch(
-        setAbsoluteRangeDatePicker({
-          id: inputsModelId,
-          from: new Date(range[0]).toISOString(),
-          to: new Date(range[1]).toISOString(),
-        })
-      );
-    },
-    [dispatch, inputsModelId]
-  );
-  return (
-    <>
-      <EuiFlexGroup>
-        <EuiFlexItem style={{ height: panelHeight }}>
-          <EuiPanel color="transparent" hasBorder>
-            <StyledEuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem style={{ height: metricHeight }} grow={false}>
+    const onBrushEnd = useCallback(
+      ({ range }: { range: number[] }) => {
+        dispatch(
+          setAbsoluteRangeDatePicker({
+            id: inputsModelId,
+            from: new Date(range[0]).toISOString(),
+            to: new Date(range[1]).toISOString(),
+          })
+        );
+      },
+      [dispatch, inputsModelId]
+    );
+
+    return (
+      <EuiFlexGroup wrap>
+        <EuiFlexItem grow={1}>
+          <EuiFlexGroup wrap>
+            <EuiFlexItem style={{ height: panelHeight }}>
+              <EuiPanel color="transparent" hasBorder style={{ height: '100%' }}>
                 <ExploratoryViewEmbeddable
                   alignLnsMetric="flex-start"
                   appId="security"
-                  title={'Hosts'}
+                  title={'Network events'}
                   reportConfigMap={reportConfigMap}
                   dataTypesIndexPatterns={indexPatternList}
                   reportType="singleMetric"
@@ -83,10 +81,10 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
                       reportDefinitions: {
                         'host.name': ['ALL_VALUES'],
                       },
-                      name: 'hosts',
+                      name: 'Network events',
                       dataType: 'security',
-                      selectedMetricField: 'host.name',
-                      operationType: 'unique_count',
+                      selectedMetricField: 'Records_network_events',
+                      operationType: 'count',
                       time: timerange,
                     },
                   ]}
@@ -95,48 +93,106 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
                   disableBorder
                   disableShadow
                   customHeight="100%"
-                  metricIcon="storage"
                   metricIconColor="#6092c0"
                 />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiHorizontalRule margin="xs" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={1}>
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem style={{ height: panelHeight }}>
+              <EuiPanel color="transparent" hasBorder style={{ height: '100%' }}>
                 <ExploratoryViewEmbeddable
+                  alignLnsMetric="flex-start"
                   appId="security"
+                  title={'DNS queries'}
                   reportConfigMap={reportConfigMap}
                   dataTypesIndexPatterns={indexPatternList}
-                  reportType="kpi-over-time"
+                  reportType="singleMetric"
                   attributes={[
                     {
                       reportDefinitions: {
-                        'host.name': ['ALL_VALUES'],
+                        records_dns_queries: ['ALL_VALUES'],
                       },
-                      name: 'hosts',
+                      name: 'DNS queries',
                       dataType: 'security',
-                      selectedMetricField: 'host.name',
+                      selectedMetricField: 'records_dns_queries',
+                      operationType: 'count',
                       time: timerange,
                     },
                   ]}
-                  legendIsVisible={false}
-                  axisTitlesVisibility={{
-                    x: false,
-                    yLeft: false,
-                    yRight: false,
-                  }}
-                  showExploreButton={true}
+                  showExploreButton={false}
                   compressed
                   disableBorder
                   disableShadow
                   customHeight="100%"
-                  onBrushEnd={onBrushEnd}
+                  metricIconColor="#6092c0"
                 />
-              </EuiFlexItem>
-            </StyledEuiFlexGroup>
-          </EuiPanel>
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="l" />
+          <EuiFlexGroup wrap>
+            <EuiFlexItem style={{ height: panelHeight }}>
+              <EuiPanel color="transparent" hasBorder style={{ height: '100%' }}>
+                <ExploratoryViewEmbeddable
+                  alignLnsMetric="flex-start"
+                  appId="security"
+                  title={'Unique flow IDs'}
+                  reportConfigMap={reportConfigMap}
+                  dataTypesIndexPatterns={indexPatternList}
+                  reportType="singleMetric"
+                  attributes={[
+                    {
+                      reportDefinitions: {
+                        'network.community_id': ['ALL_VALUES'],
+                      },
+                      name: 'Unique flow IDs',
+                      dataType: 'security',
+                      selectedMetricField: 'network.community_id',
+                      operationType: 'count',
+                      time: timerange,
+                    },
+                  ]}
+                  showExploreButton={false}
+                  compressed
+                  disableBorder
+                  disableShadow
+                  customHeight="100%"
+                  metricIconColor="#6092c0"
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+            <EuiFlexItem style={{ height: panelHeight }}>
+              <EuiPanel color="transparent" hasBorder style={{ height: '100%' }}>
+                <ExploratoryViewEmbeddable
+                  alignLnsMetric="flex-start"
+                  appId="security"
+                  title={'TLS handshakes'}
+                  reportConfigMap={reportConfigMap}
+                  dataTypesIndexPatterns={indexPatternList}
+                  reportType="singleMetric"
+                  attributes={[
+                    {
+                      reportDefinitions: {
+                        record_tls_handshakes: ['ALL_VALUES'],
+                      },
+                      name: 'TLS handshakes',
+                      dataType: 'security',
+                      selectedMetricField: 'record_tls_handshakes',
+                      operationType: 'count',
+                      time: timerange,
+                    },
+                  ]}
+                  showExploreButton={false}
+                  compressed
+                  disableBorder
+                  disableShadow
+                  customHeight="100%"
+                  metricIconColor="#6092c0"
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem style={{ height: panelHeight }}>
+        <EuiFlexItem grow={1}>
           <EuiSplitPanel.Outer
             direction="row"
             grow={true}
@@ -150,18 +206,18 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
                   <ExploratoryViewEmbeddable
                     alignLnsMetric="flex-start"
                     appId="security"
-                    title={'Unique IPs'}
+                    title={'Unique private IPs'}
                     reportConfigMap={reportConfigMap}
                     dataTypesIndexPatterns={indexPatternList}
                     reportType="singleMetric"
                     attributes={[
                       {
                         reportDefinitions: {
-                          'host.name': ['ALL_VALUES'],
+                          records_source_private_ips: ['ALL_VALUES'],
                         },
                         name: 'Source IPs',
                         dataType: 'security', // number (?)
-                        selectedMetricField: 'Records_source_ips',
+                        selectedMetricField: 'records_source_private_ips',
                         time: timerange,
                         operationType: 'count', // unique_count(?)
                       },
@@ -184,13 +240,13 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
                     appId="security"
                     reportConfigMap={reportConfigMap}
                     dataTypesIndexPatterns={indexPatternList}
-                    reportType="unique_ip"
+                    reportType="unique_private_ip"
                     attributes={[
                       {
                         reportDefinitions: {
-                          unique_ip: ['ALL_VALUES'],
+                          source_private_ip: ['ALL_VALUES'],
                         },
-                        name: 'Unique source',
+                        name: 'Private source',
                         dataType: 'security',
                         selectedMetricField: 'source.ip',
                         time: { from: 'now-24h', to: 'now' }, // unable to read iso string
@@ -198,9 +254,9 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
                       },
                       {
                         reportDefinitions: {
-                          unique_ip: ['ALL_VALUES'],
+                          destination_private_ip: ['ALL_VALUES'],
                         },
-                        name: 'Unique Destination',
+                        name: 'Private Destination',
                         dataType: 'security',
                         selectedMetricField: 'destination.ip',
                         time: { from: 'now-24h', to: 'now' }, // unable to read iso string
@@ -234,7 +290,7 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
                     attributes={[
                       {
                         reportDefinitions: {
-                          'host.name': ['ALL_VALUES'],
+                          records_destination_private_ips: ['ALL_VALUES'],
                         },
                         name: 'Destination IPs',
                         dataType: 'security',
@@ -261,11 +317,11 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
                     appId="security"
                     reportConfigMap={reportConfigMap}
                     dataTypesIndexPatterns={indexPatternList}
-                    reportType="kpi-over-time"
+                    reportType={ReportTypes.KPI}
                     attributes={[
                       {
                         reportDefinitions: {
-                          'source.ip': ['ALL_VALUES'],
+                          source_private_ip: ['ALL_VALUES'],
                         },
                         name: 'source.ip',
                         dataType: 'security',
@@ -274,7 +330,7 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
                       },
                       {
                         reportDefinitions: {
-                          'destination.ip': ['ALL_VALUES'],
+                          destination_private_ip: ['ALL_VALUES'],
                         },
                         name: 'destination.ip',
                         dataType: 'security',
@@ -301,6 +357,8 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
           </EuiSplitPanel.Outer>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
-  );
-};
+    );
+  }
+);
+
+NetworkKpiEmbeddablesComponent.displayName = 'NetworkKpiEmbeddablesComponent';

@@ -7,6 +7,7 @@
 
 import { UpdateDateRange } from '../../../common/components/charts/common';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 
 export interface NetworkKpiProps {
   filterQuery?: string;
@@ -16,4 +17,12 @@ export interface NetworkKpiProps {
   narrowDateRange: UpdateDateRange;
   setQuery: GlobalTimeArgs['setQuery'];
   skip: boolean;
+}
+
+export interface NetworkKpiEmbessablesProps {
+  filterQuery?: string;
+  from: string;
+  indexNames: string[];
+  to: string;
+  inputsModelId?: InputsModelId;
 }

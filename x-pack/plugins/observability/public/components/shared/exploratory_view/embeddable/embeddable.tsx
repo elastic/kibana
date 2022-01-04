@@ -32,13 +32,12 @@ export interface ExploratoryEmbeddableProps {
   disableShadow?: boolean;
   dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
   legendIsVisible?: boolean;
-
   onBrushEnd?: (params: {
-    table: Datatable;
+    table: any;
     column: number;
     range: number[];
     timeFieldName?: string | undefined;
-  }) => null;
+  }) => void;
   reportConfigMap?: ReportConfigMap;
   reportType: ReportViewType;
   showCalculationMethod?: boolean;
@@ -124,7 +123,7 @@ export default function Embeddable({
 
   return (
     <Wrapper $customHeight={customHeight} $compressed={compressed}>
-      <StyledFlexGroup alignItems="center" $compressed={compressed}>
+      <StyledFlexGroup alignItems="center" $compressed={compressed} gutterSize="none">
         {title && (
           <EuiFlexItem>
             <EuiTitle size="xs">
