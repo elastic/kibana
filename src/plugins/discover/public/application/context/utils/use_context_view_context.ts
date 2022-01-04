@@ -15,6 +15,4 @@ export const ContextViewContext = createAppContext<ContextAppState, ContextGetSt
   stateContainer: {} as ContextGetStateReturn,
 });
 
-export const useContextViewContext = () => {
-  return useContext(ContextViewContext);
-};
+export const useContextViewContext = () => useContext(ContextViewContext);

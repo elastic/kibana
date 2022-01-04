@@ -19,8 +19,6 @@ export type DiscoverTopNavProps = Pick<
   'indexPattern' | 'navigateTo' | 'savedSearch' | 'services' | 'searchSource'
 > & {
   onOpenInspector: () => void;
-  query?: Query;
-  savedQuery?: string;
   updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   resetSavedSearch: () => void;
 };
@@ -28,8 +26,6 @@ export type DiscoverTopNavProps = Pick<
 export const DiscoverTopNav = ({
   indexPattern,
   onOpenInspector,
-  query,
-  savedQuery,
   updateQuery,
   searchSource,
   navigateTo,
@@ -38,7 +34,10 @@ export const DiscoverTopNav = ({
   resetSavedSearch,
 }: DiscoverTopNavProps) => {
   const history = useHistory();
-  const { stateContainer } = useDiscoverAppStateContext();
+  const {
+    state: { query, savedQuery },
+    stateContainer,
+  } = useDiscoverAppStateContext();
   const showDatePicker = useMemo(
     () => indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP,
     [indexPattern]

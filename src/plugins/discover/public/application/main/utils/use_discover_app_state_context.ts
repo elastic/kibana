@@ -15,6 +15,4 @@ export const DiscoverAppStateContext = createAppContext<DiscoverAppState, Discov
   stateContainer: {} as DiscoverGetStateReturn,
 });
 
-export const useDiscoverAppStateContext = () => {
-  return useContext(DiscoverAppStateContext);
-};
+export const useDiscoverAppStateContext = () => useContext(DiscoverAppStateContext);
