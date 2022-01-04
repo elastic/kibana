@@ -7,16 +7,17 @@
 
 import expect from '@kbn/expect';
 import overviewFixture from './fixtures/overview';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('overview mb', function () {
     // TODO: https://github.com/elastic/stack-monitoring/issues/31
     this.tags(['skipCloud']);
 
-    describe('with trial license clusters', () => {
+    describe.only('with trial license clusters', () => {
       const archive = 'x-pack/test/functional/es_archives/monitoring/singlecluster_green_gold_mb';
       const timeRange = {
         min: '2017-08-23T21:29:35Z',
@@ -25,11 +26,11 @@ export default function ({ getService }) {
       const codePaths = ['all'];
 
       before('load clusters archive', () => {
-        return esArchiver.load(archive);
+        return setup(archive);
       });
 
       after('unload clusters archive', () => {
-        return esArchiver.unload(archive);
+        return tearDown();
       });
 
       it('should load multiple clusters', async () => {
