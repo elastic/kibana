@@ -7,44 +7,31 @@
 
 import { i18n } from '@kbn/i18n';
 import { curry, isString } from 'lodash';
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
-import { nullableType } from './lib/nullable';
-import { isOk, promiseResult, Result } from './lib/result_type';
+import { isOk, Result } from './lib/result_type';
 import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
 import { Logger } from '../../../../../src/core/server';
-import { request } from './lib/axios_utils';
-import { renderMustacheString } from '../lib/mustache_renderer';
+import { postXmatters } from './lib/post_xmatters';
 
-// config definition
-export enum WebhookMethods {
-  POST = 'post',
-  PUT = 'put',
-}
-
-export type WebhookActionType = ActionType<
+export type XmattersActionType = ActionType<
   ActionTypeConfigType,
   ActionTypeSecretsType,
   ActionParamsType,
   unknown
 >;
-export type WebhookActionTypeExecutorOptions = ActionTypeExecutorOptions<
+export type XmattersActionTypeExecutorOptions = ActionTypeExecutorOptions<
   ActionTypeConfigType,
   ActionTypeSecretsType,
   ActionParamsType
 >;
 
-const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 const configSchemaProps = {
   url: schema.string(),
-  method: schema.oneOf([schema.literal(WebhookMethods.POST), schema.literal(WebhookMethods.PUT)], {
-    defaultValue: WebhookMethods.POST,
-  }),
-  headers: nullableType(HeadersSchema),
   hasAuth: schema.boolean({ defaultValue: true }),
 };
 const ConfigSchema = schema.object(configSchemaProps);
@@ -61,7 +48,7 @@ const SecretsSchema = schema.object(secretSchemaProps, {
     // user and password must be set together (or not at all)
     if (!secrets.password && !secrets.user) return;
     if (secrets.password && secrets.user) return;
-    return i18n.translate('xpack.actions.builtin.webhook.invalidUsernamePassword', {
+    return i18n.translate('xpack.actions.builtin.xmatters.invalidUsernamePassword', {
       defaultMessage: 'both user and password must be specified',
     });
   },
@@ -70,10 +57,18 @@ const SecretsSchema = schema.object(secretSchemaProps, {
 // params definition
 export type ActionParamsType = TypeOf<typeof ParamsSchema>;
 const ParamsSchema = schema.object({
-  body: schema.maybe(schema.string()),
+  alertActionGroup: schema.maybe(schema.string()),
+  alertActionGroupName: schema.maybe(schema.string()),
+  alertId: schema.maybe(schema.string()),
+  alertInstanceId: schema.maybe(schema.string()),
+  alertName: schema.maybe(schema.string()),
+  date: schema.maybe(schema.string()),
+  severity: schema.maybe(schema.string()),
+  spaceId: schema.maybe(schema.string()),
+  tags: schema.maybe(schema.string()),
 });
 
-export const ActionTypeId = '.webhook';
+export const ActionTypeId = '.xmatters';
 // action type definition
 export function getActionType({
   logger,
@@ -81,28 +76,12 @@ export function getActionType({
 }: {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
-}): WebhookActionType {
-  console.log(JSON.stringify({
-    id: ActionTypeId,
-    minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.actions.builtin.webhookTitle', {
-      defaultMessage: 'Webhook',
-    }),
-    validate: {
-      config: schema.object(configSchemaProps, {
-        validate: curry(validateActionTypeConfig)(configurationUtilities),
-      }),
-      secrets: SecretsSchema,
-      params: ParamsSchema,
-    },
-    renderParameterTemplates,
-    executor: curry(executor)({ logger, configurationUtilities }),
-  }));
+}): XmattersActionType {
   return {
     id: ActionTypeId,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.actions.builtin.webhookTitle', {
-      defaultMessage: 'Webhook',
+    name: i18n.translate('xpack.actions.builtin.xmattersTitle', {
+      defaultMessage: 'xMatters',
     }),
     validate: {
       config: schema.object(configSchemaProps, {
@@ -116,26 +95,20 @@ export function getActionType({
   };
 }
 
-function renderParameterTemplates(
-  params: ActionParamsType,
-  variables: Record<string, unknown>
-): ActionParamsType {
-  if (!params.body) return params;
-  return {
-    body: renderMustacheString(params.body, variables, 'json'),
-  };
+function renderParameterTemplates(params: ActionParamsType): ActionParamsType {
+  return params;
 }
 
 function validateActionTypeConfig(
   configurationUtilities: ActionsConfigurationUtilities,
   configObject: ActionTypeConfigType
-) {
+): string | undefined {
   const configuredUrl = configObject.url;
   try {
     new URL(configuredUrl);
   } catch (err) {
-    return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationErrorNoHostname', {
-      defaultMessage: 'error configuring webhook action: unable to parse url: {err}',
+    return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationErrorNoHostname', {
+      defaultMessage: 'error configuring xmatters action: unable to parse url: {err}',
       values: {
         err,
       },
@@ -145,8 +118,8 @@ function validateActionTypeConfig(
   try {
     configurationUtilities.ensureUriAllowed(configuredUrl);
   } catch (allowListError) {
-    return i18n.translate('xpack.actions.builtin.webhook.webhookConfigurationError', {
-      defaultMessage: 'error configuring webhook action: {message}',
+    return i18n.translate('xpack.actions.builtin.xmatters.xmattersConfigurationError', {
+      defaultMessage: 'error configuring xmatters action: {message}',
       values: {
         message: allowListError.message,
       },
@@ -160,15 +133,11 @@ export async function executor(
     logger,
     configurationUtilities,
   }: { logger: Logger; configurationUtilities: ActionsConfigurationUtilities },
-  execOptions: WebhookActionTypeExecutorOptions
+  execOptions: XmattersActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
-  const { method, url, headers = {}, hasAuth } = execOptions.config;
-  const { body: data } = execOptions.params;
-  /* eslint no-console: ["off", { allow: ["log"] }] */
-  console.log('-----------------------------------------');
-  console.log(execOptions.params);
-  console.log('-----------------------------------------');
+  const { url, hasAuth } = execOptions.config;
+  const data = getPayloadForRequest(execOptions.params);
 
   const secrets: ActionTypeSecretsType = execOptions.secrets;
   const basicAuth =
@@ -176,26 +145,27 @@ export async function executor(
       ? { auth: { username: secrets.user, password: secrets.password } }
       : {};
 
-  const axiosInstance = axios.create();
-
-  const result: Result<AxiosResponse, AxiosError> = await promiseResult(
-    request({
-      axios: axiosInstance,
-      method,
-      url,
-      logger,
-      ...basicAuth,
-      headers,
-      data,
-      configurationUtilities,
-    })
-  );
+  let result: Result<AxiosResponse, AxiosError>;
+  try {
+    result = await postXmatters({ url, data, basicAuth }, logger, configurationUtilities);
+  } catch (err) {
+    const message = i18n.translate('xpack.actions.builtin.xmatters.postingErrorMessage', {
+      defaultMessage: 'error triggering xMatters workflow',
+    });
+    logger.warn(`error thrown triggering xMatters workflow: ${err.message}`);
+    return {
+      status: 'error',
+      actionId,
+      message,
+      serviceMessage: err.message,
+    };
+  }
 
   if (isOk(result)) {
     const {
       value: { status, statusText },
     } = result;
-    logger.debug(`response from webhook action "${actionId}": [HTTP ${status}] ${statusText}`);
+    logger.debug(`response from xmatters action "${actionId}": [HTTP ${status}] ${statusText}`);
 
     return successResult(actionId, data);
   } else {
@@ -209,7 +179,7 @@ export async function executor(
       } = error.response;
       const responseMessageAsSuffix = responseMessage ? `: ${responseMessage}` : '';
       const message = `[${status}] ${statusText}${responseMessageAsSuffix}`;
-      logger.error(`error on ${actionId} webhook event: ${message}`);
+      logger.error(`error on ${actionId} xmatters event: ${message}`);
       // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
       // special handling for 5xx
@@ -228,15 +198,15 @@ export async function executor(
       return errorResultInvalid(actionId, message);
     } else if (error.code) {
       const message = `[${error.code}] ${error.message}`;
-      logger.error(`error on ${actionId} webhook event: ${message}`);
+      logger.error(`error on ${actionId} xmatters event: ${message}`);
       return errorResultRequestFailed(actionId, message);
     } else if (error.isAxiosError) {
       const message = `${error.message}`;
-      logger.error(`error on ${actionId} webhook event: ${message}`);
+      logger.error(`error on ${actionId} xmatters event: ${message}`);
       return errorResultRequestFailed(actionId, message);
     }
 
-    logger.error(`error on ${actionId} webhook action: unexpected error`);
+    logger.error(`error on ${actionId} xmatters action: unexpected error`);
     return errorResultUnexpectedError(actionId);
   }
 }
@@ -250,8 +220,8 @@ function errorResultInvalid(
   actionId: string,
   serviceMessage: string
 ): ActionTypeExecutorResult<void> {
-  const errMessage = i18n.translate('xpack.actions.builtin.webhook.invalidResponseErrorMessage', {
-    defaultMessage: 'error calling webhook, invalid response',
+  const errMessage = i18n.translate('xpack.actions.builtin.xmatters.invalidResponseErrorMessage', {
+    defaultMessage: 'error calling xmatters, invalid response',
   });
   return {
     status: 'error',
@@ -265,8 +235,8 @@ function errorResultRequestFailed(
   actionId: string,
   serviceMessage: string
 ): ActionTypeExecutorResult<unknown> {
-  const errMessage = i18n.translate('xpack.actions.builtin.webhook.requestFailedErrorMessage', {
-    defaultMessage: 'error calling webhook, request failed',
+  const errMessage = i18n.translate('xpack.actions.builtin.xmatters.requestFailedErrorMessage', {
+    defaultMessage: 'error calling xmatters, request failed',
   });
   return {
     status: 'error',
@@ -277,8 +247,8 @@ function errorResultRequestFailed(
 }
 
 function errorResultUnexpectedError(actionId: string): ActionTypeExecutorResult<void> {
-  const errMessage = i18n.translate('xpack.actions.builtin.webhook.unreachableErrorMessage', {
-    defaultMessage: 'error calling webhook, unexpected error',
+  const errMessage = i18n.translate('xpack.actions.builtin.xmatters.unreachableErrorMessage', {
+    defaultMessage: 'error calling xmatters, unexpected error',
   });
   return {
     status: 'error',
@@ -289,9 +259,9 @@ function errorResultUnexpectedError(actionId: string): ActionTypeExecutorResult<
 
 function retryResult(actionId: string, serviceMessage: string): ActionTypeExecutorResult<void> {
   const errMessage = i18n.translate(
-    'xpack.actions.builtin.webhook.invalidResponseRetryLaterErrorMessage',
+    'xpack.actions.builtin.xmatters.invalidResponseRetryLaterErrorMessage',
     {
-      defaultMessage: 'error calling webhook, retry later',
+      defaultMessage: 'error calling xmatters, retry later',
     }
   );
   return {
@@ -313,9 +283,9 @@ function retryResultSeconds(
   const retry = new Date(retryEpoch);
   const retryString = retry.toISOString();
   const errMessage = i18n.translate(
-    'xpack.actions.builtin.webhook.invalidResponseRetryDateErrorMessage',
+    'xpack.actions.builtin.xmatters.invalidResponseRetryDateErrorMessage',
     {
-      defaultMessage: 'error calling webhook, retry at {retryString}',
+      defaultMessage: 'error calling xmatters, retry at {retryString}',
       values: {
         retryString,
       },
@@ -328,4 +298,32 @@ function retryResultSeconds(
     actionId,
     serviceMessage,
   };
+}
+
+interface XmattersPayload {
+  alertActionGroup: string;
+  alertActionGroupName: string;
+  alertId: string;
+  alertInstanceId: string;
+  alertName: string;
+  date: string;
+  severity: string;
+  spaceId: string;
+  tags: string;
+}
+
+function getPayloadForRequest(params: ActionParamsType): XmattersPayload {
+  const data: XmattersPayload = {
+    alertActionGroup: params.alertActionGroup,
+    alertActionGroupName: params.alertActionGroupName,
+    alertId: params.alertId,
+    alertInstanceId: params.alertInstanceId,
+    alertName: params.alertName,
+    date: params.date,
+    severity: params.severity || 'High',
+    spaceId: params.spaceId,
+    tags: params.tags,
+  };
+
+  return data;
 }
