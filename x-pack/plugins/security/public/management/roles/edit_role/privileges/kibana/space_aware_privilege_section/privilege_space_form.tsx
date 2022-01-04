@@ -476,20 +476,22 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           ) {
             return false;
           }
-          return privileges.includes(pfp.id);
+          return Array.isArray(privileges) && privileges.includes(pfp.id);
         }) ?? { disabled: false, requireAllSpaces: false };
       return {
         ...features,
-        [featureId]: privileges.filter((p) => {
-          if (
-            primaryFeaturePrivilege?.disabled ||
-            (primaryFeaturePrivilege?.requireAllSpaces &&
-              !this.state.selectedSpaceIds.includes(ALL_SPACES_ID))
-          ) {
-            return false;
-          }
-          return true;
-        }),
+        [featureId]: Array.isArray(privileges)
+          ? privileges.filter((p) => {
+              if (
+                primaryFeaturePrivilege?.disabled ||
+                (primaryFeaturePrivilege?.requireAllSpaces &&
+                  !this.state.selectedSpaceIds.includes(ALL_SPACES_ID))
+              ) {
+                return false;
+              }
+              return true;
+            })
+          : privileges,
       };
     }, {});
   };
@@ -539,19 +541,17 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             ) {
               return false;
             }
-            return privileges.includes(pfp.id);
+            return Array.isArray(privileges) && privileges.includes(pfp.id);
           });
-        let newPrivileges = entry.feature[feature.id];
         if (nextFeaturePrivilege) {
-          newPrivileges = [nextFeaturePrivilege.id];
+          const newPrivileges = [nextFeaturePrivilege.id];
           feature.getSubFeaturePrivileges().forEach((psf) => {
-            if (privileges.includes(psf.id)) {
+            if (Array.isArray(privileges) && privileges.includes(psf.id)) {
               newPrivileges.push(psf.id);
             }
           });
+          entry.feature[feature.id] = newPrivileges;
         }
-
-        entry.feature[feature.id] = newPrivileges;
       });
     }
     this.setState({
