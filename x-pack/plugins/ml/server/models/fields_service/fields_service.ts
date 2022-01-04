@@ -16,7 +16,6 @@ import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 import { Datafeed, IndicesOptions } from '../../../common/types/anomaly_detection_jobs';
 import { RuntimeMappings } from '../../../common/types/fields';
 import { isPopulatedObject } from '../../../common/util/object_utils';
-
 /**
  * Service for carrying out queries to obtain data
  * specific to fields in Elasticsearch indices.

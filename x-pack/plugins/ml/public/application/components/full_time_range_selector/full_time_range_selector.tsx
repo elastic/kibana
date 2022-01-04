@@ -8,14 +8,14 @@
 import React, { FC } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Query } from 'src/plugins/data/public';
 import { EuiButton } from '@elastic/eui';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '../../../../../../../src/plugins/data_views/public';
 import { setFullTimeRange } from './full_time_range_selector_service';
 
 interface Props {
   dataView: DataView;
-  query: Query;
+  query: QueryDslQueryContainer;
   disabled: boolean;
   callback?: (a: any) => void;
 }
@@ -24,7 +24,7 @@ interface Props {
 // to the time range of data in the index(es) mapped to the supplied Kibana index pattern or query.
 export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, callback }) => {
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
-  async function setRange(i: DataView, q: Query) {
+  async function setRange(i: DataView, q: QueryDslQueryContainer) {
     const fullTimeRange = await setFullTimeRange(i, q);
     if (typeof callback === 'function') {
       callback(fullTimeRange);
