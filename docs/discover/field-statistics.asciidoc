@@ -8,7 +8,6 @@ You can answer questions such as:
 
 * What does the latency
 look like when one of the containers is down on a Sunday?
-* How many fields in my index are empty or redundant?
 * Is the field type and format specified in the data view appropriate
 for the data and its cardinality?
 
