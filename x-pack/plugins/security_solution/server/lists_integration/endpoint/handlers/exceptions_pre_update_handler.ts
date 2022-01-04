@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { registerListsPluginEndpointExtensionPoints } from './endpoint/register_endpoint_extension_points';
+export const getExceptionsPreUpdateItemHandler = () => {};
