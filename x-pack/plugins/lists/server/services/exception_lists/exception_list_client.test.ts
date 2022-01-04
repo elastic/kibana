@@ -56,23 +56,22 @@ describe('exception_list_client', () => {
     describe.each([
       [
         'createExceptionListItem',
-        (): ExceptionListClient['createExceptionListItem'] => {
-          return exceptionListClient.createExceptionListItem.bind(exceptionListClient);
-        },
-        (): Parameters<ExceptionListClient['createExceptionListItem']>[0] => {
-          return getCreateExceptionListItemOptionsMock();
+        (): ReturnType<ExceptionListClient['createExceptionListItem']> => {
+          return exceptionListClient.createExceptionListItem(
+            getCreateExceptionListItemOptionsMock()
+          );
         },
         (): ExtensionPointStorageContextMock['exceptionPreCreate']['callback'] => {
           return extensionPointStorageContext.exceptionPreCreate.callback;
         },
       ],
+
       [
         'updateExceptionListItem',
-        (): ExceptionListClient['updateExceptionListItem'] => {
-          return exceptionListClient.updateExceptionListItem.bind(exceptionListClient);
-        },
-        (): Parameters<ExceptionListClient['updateExceptionListItem']>[0] => {
-          return getUpdateExceptionListItemOptionsMock();
+        (): ReturnType<ExceptionListClient['updateExceptionListItem']> => {
+          return exceptionListClient.updateExceptionListItem(
+            getUpdateExceptionListItemOptionsMock()
+          );
         },
         (): ExtensionPointStorageContextMock['exceptionPreUpdate']['callback'] => {
           return extensionPointStorageContext.exceptionPreUpdate.callback;
@@ -80,7 +79,7 @@ describe('exception_list_client', () => {
       ],
     ])(
       'and calling `ExceptionListClient#%s()`',
-      (methodName, getExceptionListClientMethod, getMethodParams, getExtensionPointCallback) => {
+      (methodName, callExceptionListClientMethod, getExtensionPointCallback) => {
         describe('and server extension points are enabled', () => {
           beforeEach(() => {
             exceptionListClient = new ExceptionListClient({
@@ -93,8 +92,7 @@ describe('exception_list_client', () => {
           });
 
           it('should execute extension point callbacks', async () => {
-            // @ts-expect-error
-            await getExceptionListClientMethod()(getMethodParams());
+            await callExceptionListClientMethod();
 
             expect(getExtensionPointCallback()).toHaveBeenCalled();
           });
@@ -102,13 +100,15 @@ describe('exception_list_client', () => {
           it('should validate extension point callback returned data and throw if not valid', async () => {
             const extensionPointCallback = getExtensionPointCallback();
             // @ts-expect-error
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             extensionPointCallback.mockImplementation(({ entries, ...rest }) => {
+              // `if()` only here to avoid a ts rule error
+              if (entries) {
+                return rest;
+              }
               return rest;
             });
 
-            // @ts-expect-error
-            const methodResponsePromise = getExceptionListClientMethod()(getMethodParams());
+            const methodResponsePromise = callExceptionListClientMethod();
 
             await expect(methodResponsePromise).rejects.toBeInstanceOf(DataValidationError);
             await expect(methodResponsePromise).rejects.toEqual(
@@ -119,8 +119,7 @@ describe('exception_list_client', () => {
           });
 
           it('should use data returned from extension point callbacks when saving', async () => {
-            // @ts-expect-error
-            await expect(getExceptionListClientMethod()(getMethodParams())).resolves.toEqual(
+            await expect(callExceptionListClientMethod()).resolves.toEqual(
               expect.objectContaining({
                 name: 'some name-1',
               })
@@ -140,8 +139,7 @@ describe('exception_list_client', () => {
           });
 
           it('should NOT call server extension points', async () => {
-            // @ts-expect-error
-            await getExceptionListClientMethod()(getMethodParams());
+            await callExceptionListClientMethod();
 
             expect(getExtensionPointCallback()).not.toHaveBeenCalled();
           });
