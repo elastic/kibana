@@ -36,7 +36,6 @@ import {
   setDocLinks,
   setSpaces,
   setTheme,
-  setVisEditorsRegistry,
 } from './services';
 import {
   createVisEmbeddableFromObject,
@@ -154,7 +153,6 @@ export class VisualizationsPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private isLinkedToOriginatingApp: (() => boolean) | undefined = undefined;
-  private readonly visEditorsRegistry = createVisEditorsRegistry();
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
@@ -209,6 +207,7 @@ export class VisualizationsPlugin
     };
 
     const start = createStartServicesGetter(core.getStartServices);
+    const visEditorsRegistry = createVisEditorsRegistry();
 
     core.application.register({
       id: VisualizeConstants.APP_ID,
@@ -283,6 +282,7 @@ export class VisualizationsPlugin
           usageCollection: pluginsStart.usageCollection,
           getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
           spaces: pluginsStart.spaces,
+          visEditorsRegistry,
         };
 
         params.element.classList.add('visAppWrapper');
@@ -331,7 +331,7 @@ export class VisualizationsPlugin
 
     return {
       ...this.types.setup(),
-      visEditorsRegistry: this.visEditorsRegistry,
+      visEditorsRegistry,
     };
   }
 
@@ -363,7 +363,6 @@ export class VisualizationsPlugin
     setAggs(data.search.aggs);
     setOverlays(core.overlays);
     setChrome(core.chrome);
-    setVisEditorsRegistry(this.visEditorsRegistry);
 
     if (spaces) {
       setSpaces(spaces);

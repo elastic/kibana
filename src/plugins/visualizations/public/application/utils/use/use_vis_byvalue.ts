@@ -12,7 +12,6 @@ import { VisualizeInput } from 'src/plugins/visualizations/public';
 import { ByValueVisInstance, VisualizeServices, IEditorController } from '../../types';
 import { getVisualizationInstanceFromInput } from '../get_visualization_instance';
 import { getEditBreadcrumbs } from '../breadcrumbs';
-import { getVisEditorsRegistry } from '../../../services';
 
 export const useVisByValue = (
   services: VisualizeServices,
@@ -33,6 +32,7 @@ export const useVisByValue = (
       chrome,
       application: { navigateToApp },
       stateTransferService,
+      visEditorsRegistry,
     } = services;
     const getVisInstance = async () => {
       if (!valueInput || loaded.current || !visEditorRef.current) {
@@ -42,7 +42,7 @@ export const useVisByValue = (
       const { embeddableHandler, vis } = byValueVisInstance;
       let visEditorController;
 
-      const Editor = getVisEditorsRegistry().get(vis.type.editorConfig?.editor);
+      const Editor = visEditorsRegistry.get(vis.type.editorConfig?.editor);
 
       if (Editor) {
         visEditorController = new Editor(
