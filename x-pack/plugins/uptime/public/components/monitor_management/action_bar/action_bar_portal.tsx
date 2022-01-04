@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiPortal } from '@elastic/eui';
+import { InPortal } from 'react-reverse-portal';
+import { ActionBarPortalNode } from '../../../pages/monitor_management_action_bar_portal_node';
 
 import { SyntheticsMonitor } from '../../../../common/runtime_types';
 
@@ -19,11 +20,9 @@ interface Props {
 }
 
 export const ActionBarPortal = (props: Props) => {
-  const portalSibling = document.getElementById('uptimeUIMonitorManagementBottomBarPortalSibling');
-
-  return portalSibling ? (
-    <EuiPortal insert={{ sibling: portalSibling, position: 'after' }}>
+  return (
+    <InPortal node={ActionBarPortalNode}>
       <ActionBar {...props} />
-    </EuiPortal>
-  ) : null;
+    </InPortal>
+  );
 };

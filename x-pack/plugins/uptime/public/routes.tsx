@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useEffect } from 'react';
+import { OutPortal } from 'react-reverse-portal';
 import { EuiPageTemplateProps } from '@elastic/eui';
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,6 +32,7 @@ import {
   StepDetailPage,
   NotFoundPage,
   SettingsPage,
+  ActionBarPortalNode,
 } from './pages';
 import { CertificatesPage } from './pages/certificates';
 import { UptimePage, useUptimeTelemetry } from './hooks';
@@ -204,7 +206,11 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
                 />
               ),
             },
-            bottomBar: <div id="uptimeUIMonitorManagementBottomBarPortalSibling" />,
+            bottomBar: (
+              <div>
+                <OutPortal node={ActionBarPortalNode} />
+              </div>
+            ),
           },
           {
             title: i18n.translate('xpack.uptime.editMonitorRoute.title', {
@@ -223,7 +229,11 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
                 />
               ),
             },
-            bottomBar: <div id="uptimeUIMonitorManagementBottomBarPortalSibling" />,
+            bottomBar: (
+              <div>
+                <OutPortal node={ActionBarPortalNode} />
+              </div>
+            ),
           },
           {
             title: i18n.translate('xpack.uptime.monitorManagementRoute.title', {

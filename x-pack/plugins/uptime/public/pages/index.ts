@@ -13,3 +13,4 @@ export { NotFoundPage } from './not_found';
 export { AddMonitorPage } from './add_monitor';
 export { EditMonitorPage } from './edit_monitor';
 export { MonitorManagementPage } from './monitor_management';
+export { ActionBarPortalNode } from './monitor_management_action_bar_portal_node';
