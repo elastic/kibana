@@ -7,6 +7,7 @@
  */
 
 import { getSplits } from './get_splits';
+import { Panel, Series } from '../../../../common/types';
 
 describe('getSplits(resp, panel, series)', () => {
   test('should return a splits for everything/filter group bys', async () => {
@@ -19,7 +20,7 @@ describe('getSplits(resp, panel, series)', () => {
         },
       },
     };
-    const panel = { type: 'timeseries' };
+    const panel = { type: 'timeseries' } as Panel;
     const series = {
       id: 'SERIES',
       color: 'rgb(255, 0, 0)',
@@ -28,8 +29,9 @@ describe('getSplits(resp, panel, series)', () => {
         { id: 'AVG', type: 'avg', field: 'cpu' },
         { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' },
       ],
-    };
-    expect(await getSplits(resp, panel, series, undefined)).toEqual([
+    } as Series;
+
+    expect(await getSplits(resp, panel, series, undefined, () => {})).toEqual([
       {
         id: 'SERIES',
         label: 'Overall Average of Average of cpu',
@@ -72,9 +74,10 @@ describe('getSplits(resp, panel, series)', () => {
         { id: 'AVG', type: 'avg', field: 'cpu' },
         { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' },
       ],
-    };
-    const panel = { type: 'top_n' };
-    expect(await getSplits(resp, panel, series)).toEqual([
+    } as unknown as Series;
+    const panel = { type: 'top_n' } as Panel;
+
+    expect(await getSplits(resp, panel, series, undefined, () => [])).toEqual([
       {
         id: 'SERIES:example-01',
         key: 'example-01',
@@ -131,9 +134,9 @@ describe('getSplits(resp, panel, series)', () => {
         { id: 'AVG', type: 'avg', field: 'cpu' },
         { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' },
       ],
-    };
-    const panel = { type: 'top_n' };
-    expect(await getSplits(resp, panel, series)).toEqual([
+    } as unknown as Series;
+    const panel = { type: 'top_n' } as Panel;
+    expect(await getSplits(resp, panel, series, undefined, () => [])).toEqual([
       {
         id: 'SERIES:example-01',
         key: 'example-01',
@@ -192,10 +195,10 @@ describe('getSplits(resp, panel, series)', () => {
         { id: 'AVG', type: 'avg', field: 'cpu' },
         { id: 'SIBAGG', type: 'avg_bucket', field: 'AVG' },
       ],
-    };
-    const panel = { type: 'top_n' };
+    } as unknown as Series;
+    const panel = { type: 'top_n' } as Panel;
 
-    expect(await getSplits(resp, panel, series)).toEqual([
+    expect(await getSplits(resp, panel, series, undefined, () => [])).toEqual([
       {
         id: 'SERIES:example-01',
         key: 'example-01',
@@ -248,10 +251,10 @@ describe('getSplits(resp, panel, series)', () => {
         { id: 'filter-2', color: '#0F0', filter: 'status_code:[300 TO *]', label: '300s' },
       ],
       metrics: [{ id: 'COUNT', type: 'count' }],
-    };
-    const panel = { type: 'timeseries' };
+    } as unknown as Series;
+    const panel = { type: 'timeseries' } as Panel;
 
-    expect(await getSplits(resp, panel, series)).toEqual([
+    expect(await getSplits(resp, panel, series, undefined, () => [])).toEqual([
       {
         id: 'SERIES:filter-1',
         key: 'filter-1',
