@@ -111,7 +111,7 @@ export function newTicks(min: number, max: number, interval: number): EuiRangeTi
   return ticks;
 }
 
-const RANGE = [
+export const RANGE = [
   {
     label: i18n.translate('xpack.maps.timeslider.label1Year', { defaultMessage: '1 year' }),
     ms: moment.duration(1, 'y').asMilliseconds(),

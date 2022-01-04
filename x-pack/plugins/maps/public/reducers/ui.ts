@@ -19,6 +19,7 @@ import {
   SHOW_TOC_DETAILS,
   HIDE_TOC_DETAILS,
   SET_DRAW_MODE,
+  SET_TIMERANGE_STEP,
 } from '../actions';
 import { DRAW_MODE } from '../../common/constants';
 
@@ -37,6 +38,7 @@ export type MapUiState = {
   isLayerTOCOpen: boolean;
   isTimesliderOpen: boolean;
   openTOCDetails: string[];
+  timeRangeStep: number;
 };
 
 export const DEFAULT_IS_LAYER_TOC_OPEN = true;
@@ -51,6 +53,7 @@ export const DEFAULT_MAP_UI_STATE = {
   // storing TOC detail visibility outside of map.layerList because its UI state and not map rendering state.
   // This also makes for easy read/write access for embeddables.
   openTOCDetails: [],
+  timeRangeStep: 1,
 };
 
 // Reducer
@@ -82,6 +85,8 @@ export function ui(state: MapUiState = DEFAULT_MAP_UI_STATE, action: any) {
           return layerId !== action.layerId;
         }),
       };
+    case SET_TIMERANGE_STEP:
+      return { ...state, timeRangeStep: action.timeRangeStep };
     default:
       return state;
   }

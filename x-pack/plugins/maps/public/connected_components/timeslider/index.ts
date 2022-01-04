@@ -9,9 +9,9 @@ import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { Timeslider } from './timeslider';
-import { closeTimeslider, setQuery } from '../../actions';
+import { closeTimeslider, setQuery, setTimeRangeStep } from '../../actions';
 import { getTimeFilters } from '../../selectors/map_selectors';
-import { getIsTimesliderOpen } from '../../selectors/ui_selectors';
+import { getIsTimesliderOpen, getTimeRangeStep } from '../../selectors/ui_selectors';
 import { MapStoreState } from '../../reducers/store';
 import { Timeslice } from '../../../common/descriptor_types';
 
@@ -19,6 +19,7 @@ function mapStateToProps(state: MapStoreState) {
   return {
     isTimesliderOpen: getIsTimesliderOpen(state),
     timeRange: getTimeFilters(state),
+    timeRangeStep: getTimeRangeStep(state),
   };
 }
 
@@ -34,6 +35,9 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
           timeslice,
         })
       );
+    },
+    setTimeRangeStep: (timeRangeStep: number) => {
+      dispatch(setTimeRangeStep(timeRangeStep));
     },
   };
 }

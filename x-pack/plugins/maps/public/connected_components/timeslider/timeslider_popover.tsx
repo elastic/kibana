@@ -8,13 +8,21 @@
 import React, { useState } from 'react';
 import { EuiPopover, EuiContextMenuPanel, EuiButton, EuiContextMenuItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getTimeRanges } from './time_utils';
+import { getTimeRanges, RANGE } from './time_utils';
 
 export const TimeSliderPopover = (props: any) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [label, setLabel] = useState(
-    i18n.translate('xpack.maps.timeslider.autoPeriod', { defaultMessage: 'Auto' })
-  );
+  let result = '';
+
+  if (props.timeRangeStep === 1) {
+    result = i18n.translate('xpack.maps.timeslider.autoPeriod', { defaultMessage: 'Auto' });
+  } else {
+    result = RANGE.filter((obj) => {
+      return obj.ms === props.timeRangeStep;
+    })[0].label;
+  }
+
+  const [label, setLabel] = useState(result);
 
   const renderFilteredPeriods = () => {
     const filteredPeriods = getTimeRanges(props.timeRangeBounds).map(

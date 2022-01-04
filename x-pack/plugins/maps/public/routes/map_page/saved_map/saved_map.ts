@@ -28,8 +28,13 @@ import {
   setIsLayerTOCOpen,
   setOpenTOCDetails,
   setHiddenLayers,
+  setTimeRangeStep,
 } from '../../../actions';
-import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
+import {
+  getIsLayerTOCOpen,
+  getOpenTOCDetails,
+  getTimeRangeStep,
+} from '../../../selectors/ui_selectors';
 import { getMapAttributeService, SharingSavedObjectProps } from '../../../map_attribute_service';
 import { OnSaveProps } from '../../../../../../../src/plugins/saved_objects/public';
 import { MapByReferenceInput, MapEmbeddableInput } from '../../../embeddable/types';
@@ -144,6 +149,19 @@ export class SavedMap {
       }
     }
     this._store.dispatch(setIsLayerTOCOpen(isLayerTOCOpen));
+
+    let timeRangeStep = 1;
+    if (this._attributes?.uiStateJSON) {
+      try {
+        const uiState = JSON.parse(this._attributes.uiStateJSON) as SerializedUiState;
+        if ('timeRangeStep' in uiState) {
+          timeRangeStep = uiState.timeRangeStep;
+        }
+      } catch (e) {
+        // ignore malformed uiStateJSON, not a critical error for viewing map - map will just use defaults
+      }
+    }
+    this._store.dispatch(setTimeRangeStep(timeRangeStep));
 
     let openTOCDetails: string[] = [];
     if (this._mapEmbeddableInput && this._mapEmbeddableInput.openTOCDetails !== undefined) {
@@ -446,6 +464,7 @@ export class SavedMap {
     this._attributes!.uiStateJSON = JSON.stringify({
       isLayerTOCOpen: getIsLayerTOCOpen(state),
       openTOCDetails: getOpenTOCDetails(state),
+      timeRangeStep: getTimeRangeStep(state),
     } as SerializedUiState);
   }
 }

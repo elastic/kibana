@@ -24,6 +24,8 @@ export interface Props {
   isTimesliderOpen: boolean;
   timeRange: TimeRange;
   waitForTimesliceToLoad$: Observable<void>;
+  setTimeRangeStep: (timeRangeStep: number) => void;
+  timeRangeStep: number;
 }
 
 interface State {
@@ -75,6 +77,10 @@ class KeyedTimeslider extends Component<Props, State> {
     const max = timeRangeBounds.max.valueOf();
     const interval = getInterval(min, max);
     const timeslice: [number, number] = [min, max];
+    const ticks =
+      props.timeRangeStep > 1
+        ? newTicks(min, max, props.timeRangeStep)
+        : getTicks(min, max, interval);
 
     this.defaultRange = {
       timeRangeBounds,
@@ -92,10 +98,10 @@ class KeyedTimeslider extends Component<Props, State> {
       max,
       min,
       range: interval,
-      ticks: getTicks(min, max, interval),
+      ticks,
       timeslice,
       isPopoverOpen: false,
-      step: 1,
+      step: props.timeRangeStep,
       rangeButtonMsg: i18n.translate('xpack.maps.timeslider.rangeButtonMsg', {
         defaultMessage: 'Auto',
       }),
@@ -203,6 +209,8 @@ class KeyedTimeslider extends Component<Props, State> {
         step: data.ms,
       });
       this._onChange([updatedTicks[0].value, updatedTicks[1].value]);
+      this.props.setTimeRangeStep(data.ms);
+      // dispatch(setTimeRangeStep(data.ms));
     } else {
       this.setState({
         min: this.defaultRange.min,
@@ -211,6 +219,8 @@ class KeyedTimeslider extends Component<Props, State> {
         step: this.defaultRange.step,
       });
       this._onChange([this.defaultRange.ticks[0].value, this.defaultRange.ticks[1].value]);
+      this.props.setTimeRangeStep(this.defaultRange.step);
+      // dispatch(setTimeRangeStep(this.defaultRange.step));
     }
   };
 
@@ -234,6 +244,7 @@ class KeyedTimeslider extends Component<Props, State> {
 
           <TimeSliderPopover
             timeRangeBounds={this.defaultRange.timeRangeBounds}
+            timeRangeStep={this.props.timeRangeStep}
             handler={this._updateTimeRange}
           />
 
