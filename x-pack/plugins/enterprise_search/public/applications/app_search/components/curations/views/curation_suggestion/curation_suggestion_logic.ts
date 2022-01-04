@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   flashAPIErrors,
+  setErrorMessage,
   setQueuedErrorMessage,
   setQueuedSuccessMessage,
 } from '../../../../../shared/flash_messages';
@@ -153,7 +154,7 @@ export const CurationSuggestionLogic = kea<
         }
       } catch (e) {
         if (e.message) {
-          setQueuedErrorMessage(e.message);
+          setErrorMessage(e.message);
         } else {
           flashAPIErrors(e);
         }
@@ -199,7 +200,7 @@ export const CurationSuggestionLogic = kea<
         }
       } catch (e) {
         if (e.message) {
-          setQueuedErrorMessage(e.message);
+          setErrorMessage(e.message);
         } else {
           flashAPIErrors(e);
         }
@@ -224,7 +225,7 @@ export const CurationSuggestionLogic = kea<
         KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CURATIONS_PATH));
       } catch (e) {
         if (e.message) {
-          setQueuedErrorMessage(e.message);
+          setErrorMessage(e.message);
         } else {
           flashAPIErrors(e);
         }
@@ -251,7 +252,7 @@ export const CurationSuggestionLogic = kea<
         KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CURATIONS_PATH));
       } catch (e) {
         if (e.message) {
-          setQueuedErrorMessage(e.message);
+          setErrorMessage(e.message);
         } else {
           flashAPIErrors(e);
         }
