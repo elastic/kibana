@@ -339,10 +339,10 @@ export const DOCKER_CPU_USAGE = i18n.translate(
   }
 );
 
-export const K8_POD_CPU_USAGE = i18n.translate(
-  'xpack.observability.expView.fieldLabels.cpuUsage.k8Docker',
+export const K8S_POD_CPU_USAGE = i18n.translate(
+  'xpack.observability.expView.fieldLabels.cpuUsage.k8sDocker',
   {
-    defaultMessage: 'K8 pod CPU usage',
+    defaultMessage: 'K8s pod CPU usage',
   }
 );
 

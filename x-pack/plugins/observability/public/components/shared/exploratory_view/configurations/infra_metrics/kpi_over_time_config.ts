@@ -15,7 +15,7 @@ import {
 } from '../constants/field_names/infra_metrics';
 import {
   DOCKER_CPU_USAGE,
-  K8_POD_CPU_USAGE,
+  K8S_POD_CPU_USAGE,
   SYSTEM_CPU_USAGE,
   SYSTEM_MEMORY_USAGE,
 } from '../constants/labels';
@@ -59,7 +59,7 @@ export function getMetricsKPIConfig({ indexPattern }: ConfigProps): SeriesConfig
         columnType: OPERATION_COLUMN,
       },
       {
-        label: K8_POD_CPU_USAGE,
+        label: K8S_POD_CPU_USAGE,
         field: K8S_POD_CPU_PERCENTAGE_FIELD,
         id: K8S_POD_CPU_PERCENTAGE_FIELD,
         columnType: OPERATION_COLUMN,
