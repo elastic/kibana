@@ -347,7 +347,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                               inMemory={{ level: 'sorting' }}
                               toolbarVisibility={{
                                 showColumnSelector: true,
-                                showStyleSelector: false,
+                                showDisplaySelector: false,
                                 showFullScreenSelector: false,
                                 showSortSelector: false,
                               }}

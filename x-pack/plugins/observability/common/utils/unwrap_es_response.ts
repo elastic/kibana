@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
-import type { UnwrapPromise } from '@kbn/utility-types';
 import { inspect } from 'util';
 
 export class WrappedElasticsearchClientError extends Error {
@@ -38,7 +37,7 @@ export class WrappedElasticsearchClientError extends Error {
 
 export function unwrapEsResponse<T extends Promise<{ body: any }>>(
   responsePromise: T
-): Promise<UnwrapPromise<T>['body']> {
+): Promise<Awaited<T>['body']> {
   return responsePromise
     .then((res) => res.body)
     .catch((err) => {

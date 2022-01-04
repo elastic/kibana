@@ -69,6 +69,7 @@ export function ExpViewActionMenuContent({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            fill={true}
             iconType="save"
             fullWidth={false}
             isDisabled={!lens.canUseEditor() || lensAttributes === null}
