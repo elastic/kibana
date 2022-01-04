@@ -14,7 +14,6 @@ import * as metrics from './metrics';
 import { BUCKET_TYPES, CalculateBoundsFn } from './buckets';
 import { METRIC_TYPES } from './metrics';
 
-/** @internal */
 export interface AggTypesDependencies {
   calculateBounds: CalculateBoundsFn;
   getConfig: <T = any>(key: string) => T;

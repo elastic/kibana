@@ -16,7 +16,7 @@ import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
 import { KibanaRequest } from 'kibana/server';
 import { asSavedObjectExecutionSource } from '../../../actions/server';
 import { InjectActionParamsOpts } from './inject_action_params';
-import { NormalizedAlertType } from '../rule_type_registry';
+import { NormalizedRuleType } from '../rule_type_registry';
 import {
   AlertTypeParams,
   AlertTypeState,
@@ -28,7 +28,7 @@ jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),
 }));
 
-const alertType: NormalizedAlertType<
+const ruleType: NormalizedRuleType<
   AlertTypeParams,
   AlertTypeParams,
   AlertTypeState,
@@ -71,12 +71,12 @@ const createExecutionHandlerParams: jest.Mocked<
 > = {
   actionsPlugin: mockActionsPlugin,
   spaceId: 'test1',
-  alertId: '1',
-  alertName: 'name-of-alert',
+  ruleId: '1',
+  ruleName: 'name-of-alert',
   tags: ['tag-A', 'tag-B'],
   apiKey: 'MTIzOmFiYw==',
   kibanaBaseUrl: 'http://localhost:5601',
-  alertType,
+  ruleType,
   logger: loggingSystemMock.create().get(),
   eventLogger: mockEventLogger,
   actions: [
@@ -93,13 +93,13 @@ const createExecutionHandlerParams: jest.Mocked<
     },
   ],
   request: {} as KibanaRequest,
-  alertParams: {
+  ruleParams: {
     foo: true,
     contextVal: 'My other {{context.value}} goes here',
     stateVal: 'My other {{state.value}} goes here',
   },
   supportsEphemeralTasks: false,
-  maxEphemeralActionsPerAlert: 10,
+  maxEphemeralActionsPerRule: 10,
 };
 
 beforeEach(() => {
@@ -123,7 +123,7 @@ test('enqueues execution per selected action', async () => {
     actionGroup: 'default',
     state: {},
     context: {},
-    alertInstanceId: '2',
+    alertId: '2',
   });
   expect(mockActionsPlugin.getActionsClientWithRequest).toHaveBeenCalledWith(
     createExecutionHandlerParams.request
@@ -244,7 +244,7 @@ test(`doesn't call actionsPlugin.execute for disabled actionTypes`, async () => 
     actionGroup: 'default',
     state: {},
     context: {},
-    alertInstanceId: '2',
+    alertId: '2',
   });
   expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
   expect(actionsClient.enqueueExecution).toHaveBeenCalledWith({
@@ -296,7 +296,7 @@ test('trow error error message when action type is disabled', async () => {
     actionGroup: 'default',
     state: {},
     context: {},
-    alertInstanceId: '2',
+    alertId: '2',
   });
 
   expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(0);
@@ -310,7 +310,7 @@ test('trow error error message when action type is disabled', async () => {
     actionGroup: 'default',
     state: {},
     context: {},
-    alertInstanceId: '2',
+    alertId: '2',
   });
   expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
 });
@@ -321,7 +321,7 @@ test('limits actionsPlugin.execute per action group', async () => {
     actionGroup: 'other-group',
     state: {},
     context: {},
-    alertInstanceId: '2',
+    alertId: '2',
   });
   expect(actionsClient.enqueueExecution).not.toHaveBeenCalled();
 });
@@ -332,7 +332,7 @@ test('context attribute gets parameterized', async () => {
     actionGroup: 'default',
     context: { value: 'context-val' },
     state: {},
-    alertInstanceId: '2',
+    alertId: '2',
   });
   expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
   expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
@@ -373,7 +373,7 @@ test('state attribute gets parameterized', async () => {
     actionGroup: 'default',
     context: {},
     state: { value: 'state-val' },
-    alertInstanceId: '2',
+    alertId: '2',
   });
   expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
   expect(actionsClient.enqueueExecution.mock.calls[0]).toMatchInlineSnapshot(`
@@ -408,7 +408,7 @@ test('state attribute gets parameterized', async () => {
   `);
 });
 
-test(`logs an error when action group isn't part of actionGroups available for the alertType`, async () => {
+test(`logs an error when action group isn't part of actionGroups available for the ruleType`, async () => {
   const executionHandler = createExecutionHandler(createExecutionHandlerParams);
   const result = await executionHandler({
     // we have to trick the compiler as this is an invalid type and this test checks whether we
@@ -416,10 +416,10 @@ test(`logs an error when action group isn't part of actionGroups available for t
     actionGroup: 'invalid-group' as 'default' | 'other-group',
     context: {},
     state: {},
-    alertInstanceId: '2',
+    alertId: '2',
   });
   expect(result).toBeUndefined();
   expect(createExecutionHandlerParams.logger.error).toHaveBeenCalledWith(
-    'Invalid action group "invalid-group" for alert "test".'
+    'Invalid action group "invalid-group" for rule "test".'
   );
 });

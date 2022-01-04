@@ -282,13 +282,13 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                   setFullScreen={setTimelineFullScreen}
                 />
               )}
-              <DatePicker grow={1}>
+              <DatePicker grow={10}>
                 <SuperDatePicker id="timeline" timelineId={timelineId} />
               </DatePicker>
               <EuiFlexItem grow={false}>
                 <TimelineDatePickerLock />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={1}>
                 {activeTab === TimelineTabs.eql && (
                   <Sourcerer scope={SourcererScopeName.timeline} />
                 )}

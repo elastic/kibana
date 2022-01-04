@@ -15,7 +15,7 @@ import { useUiTracker } from '../../../../../observability/public';
 import { TimeRangeComparisonEnum } from '../../../../common/runtime_types/comparison_type_rt';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import * as urlHelpers from '../../shared/Links/url_helpers';
@@ -121,8 +121,7 @@ export function TimeComparison() {
   const { isSmall } = useBreakpoints();
   const {
     query: { rangeFrom, rangeTo },
-    // @ts-expect-error Type instantiation is excessively deep and possibly infinite.
-  } = useApmParams('/services', '/backends/*', '/services/{serviceName}');
+  } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
 
   const { exactStart, exactEnd } = useTimeRange({
     rangeFrom,

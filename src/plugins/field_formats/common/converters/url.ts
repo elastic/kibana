@@ -122,10 +122,12 @@ export class UrlFormat extends FieldFormat {
   }
 
   private generateImgHtml(url: string, imageLabel: string): string {
-    const isValidWidth = !isNaN(parseInt(this.param('width'), 10));
-    const isValidHeight = !isNaN(parseInt(this.param('height'), 10));
-    const maxWidth = isValidWidth ? `${this.param('width')}px` : 'none';
-    const maxHeight = isValidHeight ? `${this.param('height')}px` : 'none';
+    const parsedWidth = parseInt(this.param('width'), 10);
+    const parsedHeight = parseInt(this.param('height'), 10);
+    const isValidWidth = !isNaN(parsedWidth);
+    const isValidHeight = !isNaN(parsedHeight);
+    const maxWidth = isValidWidth ? `${parsedWidth}px` : 'none';
+    const maxHeight = isValidHeight ? `${parsedHeight}px` : 'none';
 
     return `<img src="${url}" alt="${imageLabel}" style="width:auto; height:auto; max-width:${maxWidth}; max-height:${maxHeight};">`;
   }

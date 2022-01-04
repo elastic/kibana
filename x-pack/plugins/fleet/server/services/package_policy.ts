@@ -7,7 +7,7 @@
 
 import { omit, partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import semverLte from 'semver/functions/lte';
+import semverLt from 'semver/functions/lt';
 import { getFlattenedObject } from '@kbn/std';
 import type { KibanaRequest } from 'src/core/server';
 import type {
@@ -18,6 +18,8 @@ import type {
 import uuid from 'uuid';
 import { safeLoad } from 'js-yaml';
 
+import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
+
 import type { AuthenticatedUser } from '../../../security/server';
 import {
   packageToPackagePolicy,
@@ -26,6 +28,7 @@ import {
   doesAgentPolicyAlreadyIncludePackage,
   validatePackagePolicy,
   validationHasErrors,
+  SO_SEARCH_LIMIT,
 } from '../../common';
 import type {
   DeletePackagePoliciesResponse,
@@ -91,6 +94,7 @@ class PackagePolicyService {
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
     options?: {
+      spaceId?: string;
       id?: string;
       user?: AuthenticatedUser;
       bumpRevision?: boolean;
@@ -133,6 +137,7 @@ class PackagePolicyService {
         const [, packageInfo] = await Promise.all([
           ensureInstalledPackage({
             esClient,
+            spaceId: options?.spaceId || DEFAULT_SPACE_ID,
             savedObjectsClient: soClient,
             pkgName: packagePolicy.package.name,
             pkgVersion: packagePolicy.package.version,
@@ -497,11 +502,7 @@ class PackagePolicyService {
     return result;
   }
 
-  public async getUpgradePackagePolicyInfo(
-    soClient: SavedObjectsClientContract,
-    id: string,
-    packageVersion?: string
-  ) {
+  public async getUpgradePackagePolicyInfo(soClient: SavedObjectsClientContract, id: string) {
     const packagePolicy = await this.get(soClient, id);
     if (!packagePolicy) {
       throw new IngestManagerError(
@@ -521,48 +522,38 @@ class PackagePolicyService {
       );
     }
 
-    let packageInfo: PackageInfo;
+    const installedPackage = await getInstallation({
+      savedObjectsClient: soClient,
+      pkgName: packagePolicy.package.name,
+    });
 
-    if (packageVersion) {
-      packageInfo = await getPackageInfo({
-        savedObjectsClient: soClient,
-        pkgName: packagePolicy.package.name,
-        pkgVersion: packageVersion,
-      });
-    } else {
-      const installedPackage = await getInstallation({
-        savedObjectsClient: soClient,
-        pkgName: packagePolicy.package.name,
-      });
-
-      if (!installedPackage) {
-        throw new IngestManagerError(
-          i18n.translate('xpack.fleet.packagePolicy.packageNotInstalledError', {
-            defaultMessage: 'Package {name} is not installed',
-            values: {
-              name: packagePolicy.package.name,
-            },
-          })
-        );
-      }
-
-      packageInfo = await getPackageInfo({
-        savedObjectsClient: soClient,
-        pkgName: packagePolicy.package.name,
-        pkgVersion: installedPackage?.version ?? '',
-      });
+    if (!installedPackage) {
+      throw new IngestManagerError(
+        i18n.translate('xpack.fleet.packagePolicy.packageNotInstalledError', {
+          defaultMessage: 'Package {name} is not installed',
+          values: {
+            name: packagePolicy.package.name,
+          },
+        })
+      );
     }
 
-    const isInstalledVersionLessThanOrEqualToPolicyVersion = semverLte(
+    const packageInfo = await getPackageInfo({
+      savedObjectsClient: soClient,
+      pkgName: packagePolicy.package.name,
+      pkgVersion: installedPackage?.version ?? '',
+    });
+
+    const isInstalledVersionLessThanPolicyVersion = semverLt(
       packageInfo?.version ?? '',
       packagePolicy.package.version
     );
 
-    if (isInstalledVersionLessThanOrEqualToPolicyVersion) {
+    if (isInstalledVersionLessThanPolicyVersion) {
       throw new PackagePolicyIneligibleForUpgradeError(
         i18n.translate('xpack.fleet.packagePolicy.ineligibleForUpgradeError', {
           defaultMessage:
-            "Package policy {id}'s package version {version} of package {name} is up to date with the installed package. Please install the latest version of {name}.",
+            "Package policy {id}'s package version {version} of package {name} is newer than the installed package version. Please install the latest version of {name}.",
           values: {
             id: packagePolicy.id,
             name: packagePolicy.package.name,
@@ -638,15 +629,10 @@ class PackagePolicyService {
 
   public async getUpgradeDryRunDiff(
     soClient: SavedObjectsClientContract,
-    id: string,
-    packageVersion?: string
+    id: string
   ): Promise<UpgradePackagePolicyDryRunResponseItem> {
     try {
-      const { packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(
-        soClient,
-        id,
-        packageVersion
-      );
+      const { packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soClient, id);
 
       const updatedPackagePolicy = updatePackageInputs(
         {
@@ -1389,7 +1375,7 @@ export async function incrementPackageName(
 ) {
   // Fetch all packagePolicies having the package name
   const packagePolicyData = await packagePolicyService.list(soClient, {
-    perPage: 1,
+    perPage: SO_SEARCH_LIMIT,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${packageName}"`,
   });
 
@@ -1400,7 +1386,7 @@ export async function incrementPackageName(
     ? packagePolicyData.items
         .filter((ds) => Boolean(ds.name.match(pkgPoliciesNamePattern)))
         .map((ds) => parseInt(ds.name.match(pkgPoliciesNamePattern)![1], 10))
-        .sort()
+        .sort((a, b) => a - b)
     : [];
 
   return `${packageName}-${

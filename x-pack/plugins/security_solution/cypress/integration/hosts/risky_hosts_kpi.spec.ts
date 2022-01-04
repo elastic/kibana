@@ -8,14 +8,9 @@
 import { loginAndWaitForPage } from '../../tasks/login';
 
 import { HOSTS_URL } from '../../urls/navigation';
-import { cleanKibana } from '../../tasks/common';
 
 describe('RiskyHosts KPI', () => {
-  before(() => {
-    cleanKibana();
-  });
-
-  it('it renders', () => {
+  it('renders', () => {
     loginAndWaitForPage(HOSTS_URL);
 
     cy.get('[data-test-subj="riskyHostsTotal"]').should('have.text', '0 Risky Hosts');

@@ -10,7 +10,6 @@
 import { get, flow } from 'lodash';
 import moment from 'moment';
 import rison, { RisonObject, RisonValue } from 'rison-node';
-
 import { parseInterval } from '../../../common/util/parse_interval';
 import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
 import {
@@ -128,7 +127,7 @@ function isKibanaUrl(urlConfig: UrlConfig) {
 /**
  * Escape any double quotes in the value for correct use in KQL.
  */
-function escapeForKQL(value: string | number): string {
+export function escapeForKQL(value: string | number): string {
   return String(value).replace(/\"/g, '\\"');
 }
 
@@ -138,25 +137,63 @@ export const isRisonObject = (value: RisonValue): value is RisonObject => {
   return value !== null && typeof value === 'object';
 };
 
+/**
+ * Helper to grab field value from the string containing field value & name
+ * which also handle special characters like colons and spaces
+ * `odd:field$name&:"$odd:field$name&$"` => 'odd:field$name&'
+ */
+export const getQueryField = (str: string): string => {
+  let fieldName = '';
+  // Find the first valid '$' anchor which is the start of the field value
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === '$') {
+      let foundIdxToSplit = i;
+      // Then back track to find the nearest colon on the left
+      // the rest of string to the left of found colon
+      // would be the field name
+      for (let idx = foundIdxToSplit; idx > -1; idx--) {
+        if (str[idx] === ':') {
+          foundIdxToSplit = idx;
+          break;
+        }
+      }
+
+      // As the field name may contain both : and $,
+      // we need to keep searching until the two sides match
+      fieldName = str.slice(0, foundIdxToSplit).trim();
+      let fieldValue = str.slice(foundIdxToSplit, str.length);
+      const fieldValueStart = fieldValue.indexOf('$');
+      const fieldValueEnd = fieldValue.lastIndexOf('$');
+      fieldValue = fieldValue.slice(fieldValueStart, fieldValueEnd + 1);
+      if (fieldValue === `$${fieldName}$`) {
+        break;
+      }
+    }
+  }
+  return fieldName;
+};
 const getQueryStringResultProvider =
   (record: CustomUrlAnomalyRecordDoc, getResultTokenValue: GetResultTokenValue) =>
-  (resultPrefix: string, queryString: string, resultPostfix: string): string => {
+  (resultPrefix: string, queryString: string, resultPostfix: string, isKuery: boolean): string => {
     const URL_LENGTH_LIMIT = 2000;
 
     let availableCharactersLeft = URL_LENGTH_LIMIT - resultPrefix.length - resultPostfix.length;
 
+    const testStr = queryString;
     // URL template might contain encoded characters
-    const queryFields = queryString
+    const queryFields = testStr
       // Split query string by AND operator.
       .split(/\sand\s/i)
       // Get property name from `influencerField:$influencerField$` string.
-      .map((v) => String(v.split(/:(.+)?\$/)[0]).trim());
+      .map((v) => getQueryField(String(v).replace(/\\/g, '')));
 
     const queryParts: string[] = [];
     const joinOperator = ' AND ';
 
     fieldsLoop: for (let i = 0; i < queryFields.length; i++) {
       const field = queryFields[i];
+      const fieldName = isKuery ? `"${queryFields[i]}"` : escapeForElasticsearchQuery(field);
+
       // Use lodash get to allow nested JSON fields to be retrieved.
       let tokenValues: string[] | string | null = get(record, field) || null;
       if (tokenValues === null) {
@@ -169,7 +206,7 @@ const getQueryStringResultProvider =
       // combine values with OR operator e.g. `(influencerField:value or influencerField:another_value)`.
       let result = '';
       for (let j = 0; j < tokenValues.length; j++) {
-        const part = `${j > 0 ? ' OR ' : ''}${field}:"${getResultTokenValue(tokenValues[j])}"`;
+        const part = `${j > 0 ? ' OR ' : ''}${fieldName}:"${getResultTokenValue(tokenValues[j])}"`;
 
         // Build up a URL string which is not longer than the allowed length and isn't corrupted by invalid query.
         if (availableCharactersLeft < part.length) {
@@ -225,9 +262,9 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
   };
 
   return flow(
+    decodeURIComponent,
     (str: string) => str.replace('$earliest$', record.earliest).replace('$latest$', record.latest),
     // Process query string content of the URL
-    decodeURIComponent,
     (str: string) => {
       const getResultTokenValue: GetResultTokenValue = flow(
         queryLanguageEscapeCallback,
@@ -241,11 +278,18 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
       if (match !== null && match[2] !== undefined) {
         const [, prefix, queryDef, postfix] = match;
 
+        const isKuery = queryDef.indexOf('language:kuery') > -1;
+
         const q = rison.decode(queryDef);
 
         if (isRisonObject(q) && q.hasOwnProperty('query')) {
           const [resultPrefix, resultPostfix] = [prefix, postfix].map(replaceSingleTokenValues);
-          const resultQuery = getQueryStringResult(resultPrefix, q.query as string, resultPostfix);
+          const resultQuery = getQueryStringResult(
+            resultPrefix,
+            q.query as string,
+            resultPostfix,
+            isKuery
+          );
           return `${resultPrefix}${rison.encode({ ...q, query: resultQuery })}${resultPostfix}`;
         }
       }
@@ -254,7 +298,12 @@ function buildKibanaUrl(urlConfig: UrlConfig, record: CustomUrlAnomalyRecordDoc)
         /(.+&kuery=)(.*?)[^!](&.+)/,
         (fullMatch, prefix: string, queryString: string, postfix: string) => {
           const [resultPrefix, resultPostfix] = [prefix, postfix].map(replaceSingleTokenValues);
-          const resultQuery = getQueryStringResult(resultPrefix, queryString, resultPostfix);
+          const resultQuery = getQueryStringResult(
+            resultPrefix,
+            queryString,
+            resultPostfix,
+            str.indexOf('language:kuery') > -1
+          );
           return `${resultPrefix}${resultQuery}${resultPostfix}`;
         }
       );

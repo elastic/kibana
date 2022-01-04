@@ -10,7 +10,6 @@ import { sortBy, uniqBy } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ESSearchResponse } from '../../../../../../src/core/types/elasticsearch';
 import { MlPluginSetup } from '../../../../ml/server';
-import { PromiseReturnType } from '../../../../observability/typings/common';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getServiceHealthStatus } from '../../../common/service_health_status';
@@ -30,10 +29,9 @@ export const DEFAULT_ANOMALIES: ServiceAnomaliesResponse = {
   serviceAnomalies: [],
 };
 
-export type ServiceAnomaliesResponse = PromiseReturnType<
-  typeof getServiceAnomalies
+export type ServiceAnomaliesResponse = Awaited<
+  ReturnType<typeof getServiceAnomalies>
 >;
-
 export async function getServiceAnomalies({
   setup,
   environment,
@@ -120,7 +118,6 @@ export async function getServiceAnomalies({
     const relevantBuckets = uniqBy(
       sortBy(
         // make sure we only return data for jobs that are available in this space
-        // @ts-ignore 4.3.5 upgrade
         typedAnomalyResponse.aggregations?.services.buckets.filter((bucket) =>
           jobIds.includes(bucket.key.jobId as string)
         ) ?? [],

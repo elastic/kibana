@@ -27,7 +27,6 @@ import {
 } from '../../../../src/plugins/home/public';
 import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
-import { constants } from '../common';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';
 import { ReportingSetup, ReportingStart } from './';
@@ -45,6 +44,7 @@ import type {
 import { AppNavLinkStatus } from './shared_imports';
 import { ReportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
+import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../common/constants';
 
 export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
@@ -52,7 +52,7 @@ export interface ClientConfigType {
 }
 
 function getStored(): JobId[] {
-  const sessionValue = sessionStorage.getItem(constants.JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
+  const sessionValue = sessionStorage.getItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
   return sessionValue ? JSON.parse(sessionValue) : [];
 }
 
@@ -87,6 +87,10 @@ export interface ReportingPublicPluginStartDendencies {
   share: SharePluginStart;
 }
 
+/**
+ * @internal
+ * @implements Plugin
+ */
 export class ReportingPublicPlugin
   implements
     Plugin<
