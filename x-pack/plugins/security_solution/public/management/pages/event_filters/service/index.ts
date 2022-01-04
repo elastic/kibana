@@ -90,8 +90,22 @@ export class EventFiltersHttpService implements EventFiltersService {
   async updateOne(
     exception: Immutable<UpdateExceptionListItemSchema>
   ): Promise<ExceptionListItemSchema> {
+    const exceptionToUpdateCleaned = { ...exception };
+    // Clean unnecessary fields for update action
+    [
+      'created_at',
+      'created_by',
+      'created_at',
+      'created_by',
+      'list_id',
+      'tie_breaker_id',
+      'updated_at',
+      'updated_by',
+    ].forEach((field) => {
+      delete exceptionToUpdateCleaned[field as keyof UpdateExceptionListItemSchema];
+    });
     return (await this.httpWrapper()).put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-      body: JSON.stringify(exception),
+      body: JSON.stringify(exceptionToUpdateCleaned),
     });
   }
 

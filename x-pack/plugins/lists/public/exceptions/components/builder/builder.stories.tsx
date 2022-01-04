@@ -110,7 +110,7 @@ export default {
     },
     indexPatterns: {
       description:
-        '`IndexPatternBase` - index patterns used to populate field options and value autocomplete.',
+        '`DataViewBase` - index patterns used to populate field options and value autocomplete.',
       type: {
         required: true,
       },
@@ -192,7 +192,7 @@ export default {
     },
     listTypeSpecificIndexPatternFilter: {
       description:
-        '`(pattern: IndexPatternBase, type: ExceptionListType) => IndexPatternBase` - callback invoked when index patterns filtered. Optional to be used if you would only like certain fields displayed.',
+        '`(pattern: DataViewBase, type: ExceptionListType) => DataViewBase` - callback invoked when index patterns filtered. Optional to be used if you would only like certain fields displayed.',
       type: {
         required: false,
       },
