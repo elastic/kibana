@@ -363,7 +363,7 @@ export const sendAlertToTimelineAction = async ({
    * but we still want to determine the filter for each alerts
    */
   const ecsData: Ecs = Array.isArray(ecs) && ecs.length > 0 ? ecs[0] : (ecs as Ecs);
-  const alertIds = Array.isArray(ecs) ? ecs.map((d) => d._id) : [ecs._id];
+  const alertIds = Array.isArray(ecs) ? ecs.map((d) => d._id) : [];
   const ruleNote = getField(ecsData, ALERT_RULE_NOTE);
   const noteContent = Array.isArray(ruleNote) && ruleNote.length > 0 ? ruleNote[0] : '';
   const ruleTimelineId = getField(ecsData, ALERT_RULE_TIMELINE_ID);

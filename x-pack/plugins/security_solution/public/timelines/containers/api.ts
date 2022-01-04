@@ -130,19 +130,7 @@ const patchTimeline = async ({
   let response = null;
   let requestBody = null;
   try {
-    requestBody = JSON.stringify({
-      timeline: {
-        ...timeline,
-        created: null,
-        createdBy: null,
-        indexNames: ['*'],
-        favorite: [],
-        updated: null,
-        updatedBy: null,
-      },
-      timelineId,
-      version,
-    });
+    requestBody = JSON.stringify({ timeline, timelineId, version });
   } catch (err) {
     return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
