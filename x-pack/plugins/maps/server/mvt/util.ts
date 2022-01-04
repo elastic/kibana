@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { CaseMetricsResponse } from '../../../common/api';
+import { errors } from '@elastic/elasticsearch';
 
-export interface MetricsHandler {
-  getFeatures(): Set<string>;
-  compute(): Promise<CaseMetricsResponse>;
-  setupFeature?(feature: string): void;
+export function isAbortError(error: Error) {
+  return error instanceof errors.RequestAbortedError;
 }
