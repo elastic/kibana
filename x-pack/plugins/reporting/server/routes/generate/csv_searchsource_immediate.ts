@@ -108,7 +108,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
             logger.warn('CSV Job Execution created empty content result');
           }
 
-          eventLog.logExecutionComplete('csv generation is complete');
+          eventLog.logExecutionComplete('csv generation is complete', jobOutputSize);
 
           return res.ok({
             body: jobOutputContent || '',

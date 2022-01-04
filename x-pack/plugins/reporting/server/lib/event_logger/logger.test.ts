@@ -82,7 +82,7 @@ describe('Event Logger', () => {
         "timezone": "UTC",
       }
     `);
-    expect(result.message).toMatchInlineSnapshot(`"starting the event"`);
+    expect(result.message).toBe(`starting the event`);
     expect(logger.completionLogger.startTiming).toBeCalled();
   });
 
@@ -90,18 +90,24 @@ describe('Event Logger', () => {
     const logger = new factory(mockEventObject);
     logger.logExecutionStart('starting the event');
 
-    const result = logger.logExecutionComplete('completed the event');
+    const result = logger.logExecutionComplete('completed the event', 444);
     expect(result.event).toMatchInlineSnapshot(`
       Object {
         "action": "execute-complete",
         "id": "12348",
-        "kind": "event",
+        "kind": "metrics",
         "outcome": "success",
         "provider": "reporting",
         "timezone": "UTC",
       }
     `);
-    expect(result.message).toMatchInlineSnapshot(`"completed the event"`);
+    expect(result.kibana.reporting).toMatchInlineSnapshot(`
+      Object {
+        "byteSize": 444,
+        "jobType": "csv",
+      }
+    `);
+    expect(result.message).toBe(`completed the event`);
     expect(logger.completionLogger.startTiming).toBeCalled();
     expect(logger.completionLogger.stopTiming).toBeCalled();
   });
@@ -119,6 +125,6 @@ describe('Event Logger', () => {
         "timezone": "UTC",
       }
     `);
-    expect(result.message).toMatchInlineSnapshot(`"an error occurred"`);
+    expect(result.message).toBe(`an error occurred`);
   });
 });

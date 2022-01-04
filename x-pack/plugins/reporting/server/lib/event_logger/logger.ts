@@ -57,7 +57,7 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
       this.completionLogger = eventLog.getLogger({ event: { provider: PLUGIN_ID } });
     }
 
-    public logScheduleTask(message: string): ScheduledTask {
+    logScheduleTask(message: string): ScheduledTask {
       const event = deepMerge(
         {
           message,
@@ -86,16 +86,17 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
       return event;
     }
 
-    logExecutionComplete(message: string): CompletedExecution {
+    logExecutionComplete(message: string, byteSize: number): CompletedExecution {
       this.completionLogger.stopTiming(this.eventObj);
       const event = deepMerge(
         {
           message,
           event: {
-            kind: 'event',
+            kind: 'metrics',
             outcome: 'success',
             action: ActionType.EXECUTE_COMPLETE,
           },
+          kibana: { reporting: { byteSize } },
           log: { level: 'info' },
         } as Partial<CompletedExecution>,
         this.eventObj
@@ -144,6 +145,7 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
       genericLogger.logEvent(event);
       return event;
     }
+
     logReportFailure(message: string): FailedReport {
       const event = deepMerge(
         {
@@ -157,6 +159,7 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
       genericLogger.logEvent(event);
       return event;
     }
+
     logReportSaved(message: string): SavedReport {
       const event = deepMerge(
         {
@@ -170,6 +173,7 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
       genericLogger.logEvent(event);
       return event;
     }
+
     logRetry(message: string): ScheduledRetry {
       const event = deepMerge(
         {

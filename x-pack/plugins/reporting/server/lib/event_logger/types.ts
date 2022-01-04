@@ -7,10 +7,13 @@
 
 import { ActionType } from './';
 
+type ActionKind = 'event' | 'error' | 'metrics';
+type ActionOutcome = 'success' | 'failure';
+
 interface ActionBase<
   A extends ActionType,
-  K extends 'event' | 'error',
-  O extends 'success' | 'failure',
+  K extends ActionKind,
+  O extends ActionOutcome,
   EventProvider
 > {
   event: {
@@ -39,13 +42,13 @@ export interface ErrorAction {
 
 type ReportingAction<
   A extends ActionType,
-  K extends 'event' | 'error',
+  K extends ActionKind,
   O extends 'success' | 'failure' = 'success'
-> = ActionBase<A, K, O, { reporting: { jobType: string } }>;
+> = ActionBase<A, K, O, { reporting: { jobType: string; byteSize?: number } }>;
 
 export type ScheduledTask = ReportingAction<ActionType.SCHEDULE_TASK, 'event'>;
 export type StartedExecution = ReportingAction<ActionType.EXECUTE_START, 'event'>;
-export type CompletedExecution = ReportingAction<ActionType.EXECUTE_COMPLETE, 'event'>;
+export type CompletedExecution = ReportingAction<ActionType.EXECUTE_COMPLETE, 'metrics'>;
 export type SavedReport = ReportingAction<ActionType.SAVE_REPORT, 'event'>;
 export type ClaimedTask = ReportingAction<ActionType.CLAIM_TASK, 'event'>;
 export type ScheduledRetry = ReportingAction<ActionType.RETRY, 'event'>;

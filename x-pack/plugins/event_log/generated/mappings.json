@@ -310,6 +310,9 @@
                     "properties": {
                         "jobType": {
                             "type": "keyword"
+                        },
+                        "byteSize": {
+                            "type": "long"
                         }
                     }
                 },

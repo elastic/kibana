@@ -94,6 +94,9 @@ exports.EcsCustomPropertyMappings = {
           jobType: {
             type: 'keyword',
           },
+          byteSize: {
+            type: 'long',
+          },
         },
       },
       // array of saved object references, for "linking" via search

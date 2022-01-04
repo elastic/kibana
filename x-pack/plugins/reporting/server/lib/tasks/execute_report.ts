@@ -355,10 +355,16 @@ export class ExecuteReportTask implements ReportingTask {
             );
 
             eventLog.logExecutionStart(`starting ${task.jobtype} jobtype execution`);
+
             const output = await this._performJob(task, cancellationToken, stream);
-            eventLog.logExecutionComplete(`${task.jobtype} jobtype execution is complete`);
 
             stream.end();
+
+            eventLog.logExecutionComplete(
+              `${task.jobtype} jobtype execution is complete`,
+              stream.bytesWritten
+            );
+
             await promisify(finished)(stream, { readable: false });
 
             report._seq_no = stream.getSeqNo()!;
