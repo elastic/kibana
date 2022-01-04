@@ -17,7 +17,7 @@ import {
 } from '../../../common/utils/markdown_plugins/utils';
 
 import { savedObjectsServiceMock } from '../../../../../../src/core/server/mocks';
-import { lensEmbeddableFactoryFactory } from '../../../../lens/server/embeddable/lens_embeddable_factory_factory';
+import { makeLensEmbeddableFactory } from '../../../../lens/server/embeddable/make_lens_embeddable_factory';
 import { LensDocShape715 } from '../../../../lens/server';
 import {
   SavedObjectReference,
@@ -32,7 +32,7 @@ import { SerializableRecord } from '@kbn/utility-types';
 
 describe('comments migrations', () => {
   const migrations = createCommentsMigrations({
-    lensEmbeddableFactory: lensEmbeddableFactoryFactory({}),
+    lensEmbeddableFactory: makeLensEmbeddableFactory({}),
   });
 
   const contextMock = savedObjectsServiceMock.createMigrationContext();

@@ -23,7 +23,7 @@ import {
 import { setupSavedObjects } from './saved_objects';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
 import { setupExpressions } from './expressions';
-import { lensEmbeddableFactoryFactory } from './embeddable/lens_embeddable_factory_factory';
+import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
 
 export interface PluginSetupContract {
   usageCollection?: UsageCollectionSetup;
@@ -40,7 +40,7 @@ export interface PluginStartContract {
 }
 
 export interface LensServerPluginSetup {
-  lensEmbeddableFactory: ReturnType<typeof lensEmbeddableFactoryFactory>;
+  lensEmbeddableFactory: ReturnType<typeof makeLensEmbeddableFactory>;
 }
 
 export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {}> {
@@ -66,7 +66,7 @@ export class LensServerPlugin implements Plugin<LensServerPluginSetup, {}, {}, {
       initializeLensTelemetry(this.telemetryLogger, core, plugins.taskManager);
     }
 
-    const lensEmbeddableFactory = lensEmbeddableFactoryFactory(filterMigrations);
+    const lensEmbeddableFactory = makeLensEmbeddableFactory(filterMigrations);
     plugins.embeddable.registerEmbeddableFactory(lensEmbeddableFactory());
     return {
       lensEmbeddableFactory,

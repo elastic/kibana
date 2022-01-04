@@ -6,7 +6,7 @@
  */
 
 import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
-import { lensEmbeddableFactoryFactory } from '../../../lens/server/embeddable/lens_embeddable_factory_factory';
+import { makeLensEmbeddableFactory } from '../../../lens/server/embeddable/make_lens_embeddable_factory';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import {
   AssociationType,
@@ -879,7 +879,7 @@ describe('common utils', () => {
       ].join('\n\n');
 
       const extractedReferences = extractLensReferencesFromCommentString(
-        lensEmbeddableFactoryFactory({}),
+        makeLensEmbeddableFactory({}),
         commentString
       );
 
@@ -978,7 +978,7 @@ describe('common utils', () => {
       ].join('\n\n');
 
       const updatedReferences = getOrUpdateLensReferences(
-        lensEmbeddableFactoryFactory({}),
+        makeLensEmbeddableFactory({}),
         newCommentString,
         {
           references: currentCommentReferences,

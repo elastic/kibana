@@ -28,7 +28,7 @@ import {
 } from '../migrations/types';
 import { extract, inject } from '../../common/embeddable_factory';
 
-export const lensEmbeddableFactoryFactory =
+export const makeLensEmbeddableFactory =
   (filterMigrations: MigrateFunctionsObject) => (): EmbeddableRegistryDefinition => {
     return {
       id: DOC_TYPE,
