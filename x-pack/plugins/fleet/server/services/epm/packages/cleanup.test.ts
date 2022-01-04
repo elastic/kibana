@@ -63,7 +63,7 @@ describe(' Cleanup old assets', () => {
     await removeOldAssets({ soRepo, pkgName: 'apache', currentVersion: '1.0.0' });
 
     expect(removeArchiveEntriesMock).toHaveBeenCalledWith({
-      savedObjectsClient: soRepo,
+      savedObjectsRepo: soRepo,
       refs: [
         { id: '1', type: 'epm-packages-assets' },
         { id: '2', type: 'epm-packages-assets' },
@@ -95,14 +95,14 @@ describe(' Cleanup old assets', () => {
     await removeOldAssets({ soRepo, pkgName: 'apache', currentVersion: '1.0.0' });
 
     expect(removeArchiveEntriesMock).toHaveBeenCalledWith({
-      savedObjectsClient: soRepo,
+      savedObjectsRepo: soRepo,
       refs: [
         { id: '1', type: 'epm-packages-assets' },
         { id: '2', type: 'epm-packages-assets' },
       ],
     });
     expect(removeArchiveEntriesMock).toHaveBeenCalledWith({
-      savedObjectsClient: soRepo,
+      savedObjectsRepo: soRepo,
       refs: [{ id: '3', type: 'epm-packages-assets' }],
     });
     expect(removeArchiveEntriesMock).toHaveBeenCalledTimes(2);
