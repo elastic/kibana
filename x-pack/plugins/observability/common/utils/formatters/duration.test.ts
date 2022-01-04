@@ -69,6 +69,7 @@ describe('duration formatters', () => {
       [10, '10.0 tpm'],
       [100, '100.0 tpm'],
       [1000, '1,000.0 tpm'],
+      [1000000, '1,000,000.0 tpm'],
     ])(
       'displays the correct label when the number is integer and has zero decimals',
       (value, formattedValue) => {
@@ -81,10 +82,10 @@ describe('duration formatters', () => {
       [12.34, '12.3 tpm'],
       [123.45, '123.5 tpm'],
       [1234.56, '1,234.6 tpm'],
+      [1234567.89, '1,234,567.9 tpm'],
     ])(
       'displays the correct label when the number is positive and has decimal part',
       (value, formattedValue) => {
-        // Decimal numbers are correctly rounded
         expect(asTransactionRate(value)).toBe(formattedValue);
       }
     );
