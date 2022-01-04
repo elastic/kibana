@@ -277,8 +277,10 @@ export const migrateLegacyActionsIds = async (
       if (isImportRule(rule)) {
         // can we swap the pre 8.0 action connector(s) id with the new,
         // post-8.0 action id (swap the originId for the new _id?)
-        const newActions: Array<Action | Error> = await Promise.all(
-          rule.actions.map((action: Action) => swapActionIds(action, savedObjectsClient))
+        const newActions: Array<Action | Error> = await pMap(
+          rule.actions,
+          (action: Action) => swapActionIds(action, savedObjectsClient),
+          { concurrency: MAX_CONCURRENT_SEARCHES }
         );
 
         // were there any errors discovered while trying to migrate and swap the action connector ids?
