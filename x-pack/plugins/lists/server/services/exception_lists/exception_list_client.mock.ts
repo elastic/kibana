@@ -11,6 +11,7 @@ import {
   EXCEPTION_LIST_NAMESPACE,
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
 } from '@kbn/securitysolution-list-constants';
+import type { SavedObjectsUpdateResponse } from 'kibana/server';
 
 import { getFoundExceptionListSchemaMock } from '../../../common/schemas/response/found_exception_list_schema.mock';
 import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
@@ -204,7 +205,6 @@ export const getExceptionListSavedObjectClientMock = (
 ): ReturnType<typeof savedObjectsClientMock.create> => {
   // mock `.create()`
   const origCreateMock = soClient.create.getMockImplementation();
-  // @ts-expect-error
   soClient.create.mockImplementation(async (...args) => {
     const [type, attributes] = args;
 
@@ -212,31 +212,35 @@ export const getExceptionListSavedObjectClientMock = (
       return getExceptionListItemSavedObject(attributes as ExceptionListSoSchema, { type });
     }
 
-    return origCreateMock ? origCreateMock(...args) : undefined;
+    if (origCreateMock) {
+      return origCreateMock(...args);
+    }
+
+    return undefined as unknown as SavedObject;
   });
 
   // Mock `.update()`
   const origUpdateMock = soClient.update.getMockImplementation();
-  soClient.update.mockImplementation(
-    // @ts-expect-error
-    async (...args) => {
-      const [type, id, attributes, { version } = { version: undefined }] = args;
+  soClient.update.mockImplementation(async (...args) => {
+    const [type, id, attributes, { version } = { version: undefined }] = args;
 
-      if (isExceptionsListSavedObjectType(type)) {
-        return getExceptionListItemSavedObject(attributes as ExceptionListSoSchema, {
-          id,
-          type,
-          version: version ?? _VERSION,
-        });
-      }
-
-      return origUpdateMock ? origUpdateMock(...args) : undefined;
+    if (isExceptionsListSavedObjectType(type)) {
+      return getExceptionListItemSavedObject(attributes as ExceptionListSoSchema, {
+        id,
+        type,
+        version: version ?? _VERSION,
+      });
     }
-  );
+
+    if (origUpdateMock) {
+      return origUpdateMock(...args);
+    }
+
+    return undefined as unknown as SavedObjectsUpdateResponse;
+  });
 
   // Mock `.get()`
   const origGetMock = soClient.get.getMockImplementation();
-  // @ts-expect-error
   soClient.get.mockImplementation(async (...args) => {
     const [type, id] = args;
 
@@ -244,7 +248,11 @@ export const getExceptionListSavedObjectClientMock = (
       return getExceptionListItemSavedObject({}, { id });
     }
 
-    return origGetMock ? origGetMock(...args) : undefined;
+    if (origGetMock) {
+      return origGetMock(...args);
+    }
+
+    return undefined as unknown as SavedObject;
   });
 
   return soClient;
