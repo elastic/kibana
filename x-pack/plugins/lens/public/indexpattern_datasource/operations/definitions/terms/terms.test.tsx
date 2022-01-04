@@ -39,16 +39,6 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-// mocking random id generator function
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-
-  return {
-    ...original,
-    htmlIdGenerator: () => () => '',
-  };
-});
-
 const uiSettingsMock = {} as IUiSettingsClient;
 
 const defaultProps = {
@@ -1528,8 +1518,7 @@ describe('terms', () => {
       );
 
       const selection = instance.find(EuiButtonGroup);
-
-      expect(selection.prop('idSelected')).toEqual('asc');
+      expect(selection.prop('idSelected')).toContain('asc');
       expect(selection.prop('options').map(({ value }) => value)).toEqual(['asc', 'desc']);
     });
 
