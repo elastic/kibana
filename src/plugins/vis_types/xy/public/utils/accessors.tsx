@@ -79,8 +79,13 @@ export const getSplitSeriesAccessorFnMap = (
 };
 
 // For percentile, the aggregation id is coming in the form %s.%d, where %s is agg_id and %d - percents
-export const isPercentileIdEqualToSeriesId = (columnId: number | string, seriesColumnId: string) =>
-  columnId.toString().split('.')[0] === seriesColumnId;
+export const getSafeId = (columnId?: number | string | null) =>
+  (columnId || '').toString().split('.')[0];
+
+export const isPercentileIdEqualToSeriesId = (
+  columnId: number | string | null | undefined,
+  seriesColumnId: string
+) => getSafeId(columnId) === seriesColumnId;
 
 export const isValidSeriesForDimension = (seriesColumnId: string, { aggId, accessor }: Aspect) =>
   (aggId === seriesColumnId || isPercentileIdEqualToSeriesId(aggId ?? '', seriesColumnId)) &&
