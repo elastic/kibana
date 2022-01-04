@@ -7,8 +7,9 @@
  */
 
 import React from 'react';
-import { EuiProvider } from '@elastic/eui';
-import createCache from '@emotion/cache';
+// import { EuiProvider } from '@elastic/eui';
+// import createCache from '@emotion/cache';
+import { EuiThemeProvider } from '@elastic/eui';
 import type { DecoratorFn } from '@storybook/react';
 
 /**
@@ -17,16 +18,18 @@ import type { DecoratorFn } from '@storybook/react';
  */
 const EuiProviderDecorator: DecoratorFn = (storyFn, { globals }) => {
   const colorMode = globals.euiTheme === 'v8.dark' ? 'dark' : 'light';
-  const emotionCache = createCache({
-    key: 'eui-styles',
-    container: document.querySelector(`meta[name="eui-styles-global"]`) as HTMLElement,
-  });
+  // const emotionCache = createCache({
+  //   key: 'eui-styles',
+  //   container: document.querySelector(`meta[name="eui-styles-global"]`) as HTMLElement,
+  // });
 
-  return (
-    <EuiProvider colorMode={colorMode} cache={emotionCache}>
-      {storyFn()}
-    </EuiProvider>
-  );
+  // return (
+  //   <EuiProvider colorMode={colorMode} cache={emotionCache}>
+  //     {storyFn()}
+  //   </EuiProvider>
+  // );
+
+  return <EuiThemeProvider colorMode={colorMode}>{storyFn()}</EuiThemeProvider>;
 };
 
 export const decorators = [EuiProviderDecorator];
