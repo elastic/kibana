@@ -45,7 +45,7 @@ export const getFleetStatusHandler: FleetRequestHandler = async (context, reques
 
 export const fleetSetupHandler: FleetRequestHandler = async (context, request, response) => {
   try {
-    const soRepo = context.fleet.epm.internalSoRepo;
+    const soRepo = context.fleet.epm.savedObjectsRepo;
     const esClient = context.core.elasticsearch.client.asInternalUser;
     const setupStatus = await setupFleet(soRepo, esClient);
     const body: PostFleetSetupResponse = {

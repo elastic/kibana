@@ -192,8 +192,7 @@ export class FleetPlugin
   private readonly fleetStatus$: BehaviorSubject<ServiceStatus>;
 
   private agentService?: AgentService;
-  private packageService?: PackageService;
-  private internalSoRepository?: ISavedObjectsRepository;
+  private savedObjectsRepo?: ISavedObjectsRepository;
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config$ = this.initializerContext.config.create<FleetConfigType>();
     this.isProductionMode = this.initializerContext.env.mode.prod;
@@ -292,8 +291,8 @@ export class FleetPlugin
           },
           authz: await getAuthzFromRequest(request),
           epm: {
-            get internalSoRepo(): ISavedObjectsRepository {
-              return plugin.internalSoRepository!;
+            get savedObjectsRepo(): ISavedObjectsRepository {
+              return plugin.savedObjectsRepo!;
             },
           },
           get spaceId() {
@@ -361,7 +360,7 @@ export class FleetPlugin
     licenseService.start(this.licensing$);
 
     this.telemetryEventsSender.start(plugins.telemetry, core);
-    this.internalSoRepository = core.savedObjects.createInternalRepository();
+    this.savedObjectsRepo = core.savedObjects.createInternalRepository();
     const logger = appContextService.getLogger();
 
     const fleetSetupPromise = (async () => {
@@ -373,7 +372,7 @@ export class FleetPlugin
           summary: 'Fleet is setting up',
         });
 
-        await setupFleet(this.internalSoRepository!, core.elasticsearch.client.asInternalUser);
+        await setupFleet(this.savedObjectsRepo!, core.elasticsearch.client.asInternalUser);
 
         this.fleetStatus$.next({
           level: ServiceStatusLevels.available,

@@ -43,7 +43,7 @@ describe('FleetSetupHandler', () => {
         },
         authz: createFleetAuthzMock(),
         epm: {
-          internalSoRepo: savedObjectsRepositoryMock.create(),
+          savedObjectsRepo: savedObjectsRepositoryMock.create(),
         },
         spaceId: 'default',
       },

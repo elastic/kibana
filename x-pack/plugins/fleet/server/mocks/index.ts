@@ -79,7 +79,7 @@ export const createFleetRequestHandlerContextMock = (): jest.Mocked<
       asInternalUser: agentServiceMock.createClient(),
     },
     epm: {
-      internalSoRepo: savedObjectsRepositoryMock.create(),
+      savedObjectsRepo: savedObjectsRepositoryMock.create(),
     },
     spaceId: 'default',
   };

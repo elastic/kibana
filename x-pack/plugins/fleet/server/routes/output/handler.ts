@@ -24,7 +24,7 @@ import { defaultIngestErrorHandler } from '../../errors';
 import { agentPolicyService } from '../../services';
 
 export const getOutputsHandler: FleetRequestHandler = async (context, request, response) => {
-  const soRepo = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.savedObjectsRepo;
   try {
     const outputs = await outputService.list(soRepo);
 
@@ -44,7 +44,7 @@ export const getOutputsHandler: FleetRequestHandler = async (context, request, r
 export const getOneOuputHandler: FleetRequestHandler<
   TypeOf<typeof GetOneOutputRequestSchema.params>
 > = async (context, request, response) => {
-  const soRepo = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.savedObjectsRepo;
   try {
     const output = await outputService.get(soRepo, request.params.outputId);
 
@@ -69,7 +69,7 @@ export const putOuputHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PutOutputRequestSchema.body>
 > = async (context, request, response) => {
-  const soRepo = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.savedObjectsRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     await outputService.update(soRepo, request.params.outputId, request.body);
@@ -101,7 +101,7 @@ export const postOuputHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PostOutputRequestSchema.body>
 > = async (context, request, response) => {
-  const soRepo = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.savedObjectsRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     const { id, ...data } = request.body;
@@ -123,7 +123,7 @@ export const postOuputHandler: FleetRequestHandler<
 export const deleteOutputHandler: FleetRequestHandler<
   TypeOf<typeof DeleteOutputRequestSchema.params>
 > = async (context, request, response) => {
-  const soRepo = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.savedObjectsRepo;
   try {
     await outputService.delete(soRepo, request.params.outputId);
 
