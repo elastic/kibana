@@ -106,11 +106,16 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       };
     }
 
-    const totalFeaturesCount: number = tileMetaFeatures.reduce((acc: number, tileMeta: Feature) => {
+    let totalFeaturesCount = 0;
+    let tilesWithFeatures = 0;
+    tileMetaFeatures.forEach((tileMeta: Feature) => {
       const count =
         tileMeta && tileMeta.properties ? tileMeta.properties[ES_MVT_HITS_TOTAL_VALUE] : 0;
-      return count + acc;
-    }, 0);
+      if (count > 0) {
+        totalFeaturesCount += count;
+        tilesWithFeatures++;
+      }
+    });
 
     if (totalFeaturesCount === 0) {
       return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
@@ -124,21 +129,35 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       }
     });
 
+    // Documents may be counted multiple times if geometry crosses tile boundaries.
+    const canMultiCountShapes =
+      !this.getStyle().getIsPointsOnly() && totalFeaturesCount > 1 && tilesWithFeatures > 1;
+    const countPrefix = canMultiCountShapes ? '~' : '';
+    const countMsg = areResultsTrimmed
+      ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
+          defaultMessage: `Results limited to {countPrefix}{count} documents.`,
+          values: {
+            count: totalFeaturesCount.toLocaleString(),
+            countPrefix,
+          },
+        })
+      : i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
+          defaultMessage: `Found {countPrefix}{count} documents.`,
+          values: {
+            count: totalFeaturesCount.toLocaleString(),
+            countPrefix,
+          },
+        });
+    const tooltipContent = canMultiCountShapes
+      ? countMsg +
+        i18n.translate('xpack.maps.tiles.shapeCountMsg', {
+          defaultMessage: ' This count is approximate.',
+        })
+      : countMsg;
+
     return {
       icon: this.getCurrentStyle().getIcon(isTocIcon && areResultsTrimmed),
-      tooltipContent: areResultsTrimmed
-        ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
-            defaultMessage: `Results limited to {count} documents.`,
-            values: {
-              count: totalFeaturesCount.toLocaleString(),
-            },
-          })
-        : i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
-            defaultMessage: `Found {count} documents.`,
-            values: {
-              count: totalFeaturesCount.toLocaleString(),
-            },
-          }),
+      tooltipContent,
       areResultsTrimmed,
     };
   }

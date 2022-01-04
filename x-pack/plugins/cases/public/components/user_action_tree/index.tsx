@@ -28,14 +28,13 @@ import { AddComment, AddCommentRefObject } from '../add_comment';
 import { Case, CaseUserActions, Ecs } from '../../../common/ui/types';
 import {
   ActionConnector,
+  Actions,
   ActionsCommentRequestRt,
   AlertCommentRequestRt,
   CommentType,
   ContextTypeUserRt,
 } from '../../../common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { parseStringAsExternalService } from '../../common/user_actions';
-import type { OnUpdateFields } from '../case_view/types';
 import {
   getConnectorLabelTitle,
   getLabelTitle,
@@ -56,6 +55,8 @@ import { UserActionContentToolbar } from './user_action_content_toolbar';
 import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
 import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 import { useCaseViewParams } from '../../common/navigation';
+import { isConnectorUserAction, isPushedUserAction } from '../../../common/utils/user_actions';
+import type { OnUpdateFields } from '../case_view/types';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;
@@ -341,7 +342,7 @@ export const UserActionTree = React.memo(
           // eslint-disable-next-line complexity
           (comments, action, index) => {
             // Comment creation
-            if (action.commentId != null && action.action === 'create') {
+            if (action.commentId != null && action.action === Actions.create) {
               const comment = caseData.comments.find((c) => c.id === action.commentId);
               if (
                 comment != null &&
@@ -501,7 +502,7 @@ export const UserActionTree = React.memo(
             }
 
             // Connectors
-            if (action.actionField.length === 1 && action.actionField[0] === 'connector') {
+            if (isConnectorUserAction(action)) {
               const label = getConnectorLabelTitle({ action, connectors });
               return [
                 ...comments,
@@ -514,11 +515,8 @@ export const UserActionTree = React.memo(
             }
 
             // Pushed information
-            if (action.actionField.length === 1 && action.actionField[0] === 'pushed') {
-              const parsedExternalService = parseStringAsExternalService(
-                action.newValConnectorId,
-                action.newValue
-              );
+            if (isPushedUserAction<'camelCase'>(action)) {
+              const parsedExternalService = action.payload.externalService;
 
               const { firstPush, parsedConnectorId, parsedConnectorName } = getPushInfo(
                 caseServices,
@@ -529,11 +527,11 @@ export const UserActionTree = React.memo(
               const label = getPushedServiceLabelTitle(action, firstPush);
 
               const showTopFooter =
-                action.action === 'push-to-service' &&
+                action.action === Actions.push_to_service &&
                 index === caseServices[parsedConnectorId]?.lastPushIndex;
 
               const showBottomFooter =
-                action.action === 'push-to-service' &&
+                action.action === Actions.push_to_service &&
                 index === caseServices[parsedConnectorId]?.lastPushIndex &&
                 caseServices[parsedConnectorId].hasDataToPush;
 
@@ -577,14 +575,9 @@ export const UserActionTree = React.memo(
             }
 
             // title, description, comment updates, tags
-            if (
-              action.actionField.length === 1 &&
-              ['title', 'description', 'comment', 'tags', 'status'].includes(action.actionField[0])
-            ) {
-              const myField = action.actionField[0];
+            if (['title', 'description', 'comment', 'tags', 'status'].includes(action.type)) {
               const label: string | JSX.Element = getLabelTitle({
                 action,
-                field: myField,
               });
 
               return [
