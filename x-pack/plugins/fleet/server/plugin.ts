@@ -259,7 +259,6 @@ export class FleetPlugin
               read: [],
             },
             ui: ['show', 'read', 'write'],
-            requireAllSpaces: true,
           },
           read: {
             api: [`${PLUGIN_ID}-read`, `integrations-read`],
@@ -270,7 +269,6 @@ export class FleetPlugin
               read: allSavedObjectTypes,
             },
             ui: ['show', 'read'],
-            disabled: true,
           },
         },
       });
