@@ -18,7 +18,6 @@ import { pieVisType } from './vis_type';
 /** @internal */
 export interface VisTypePieSetupDependencies {
   visualizations: VisualizationsSetup;
-  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   charts: ChartsPluginSetup;
   usageCollection: UsageCollectionSetup;
 }

@@ -31,7 +31,7 @@ export interface VisTypePiePluginStartDependencies {
 export class ExpressionPiePlugin {
   public setup(
     core: CoreSetup<VisTypePiePluginStartDependencies>,
-    { expressions, visualizations, charts, usageCollection }: SetupDeps
+    { expressions, charts }: SetupDeps
   ): ExpressionPiePluginSetup {
     expressions.registerFunction(pieLabelsFunction);
     expressions.registerFunction(pieVisFunction);
