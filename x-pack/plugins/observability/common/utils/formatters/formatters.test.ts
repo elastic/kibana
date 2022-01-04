@@ -39,10 +39,12 @@ describe('formatters', () => {
     it('formats as integer when number equals to 0 ', () => {
       expect(asDecimalOrInteger(0)).toEqual('0');
     });
+
     it('formats as integer when number is above or equals 10 ', () => {
       expect(asDecimalOrInteger(10.123)).toEqual('10');
       expect(asDecimalOrInteger(15.123)).toEqual('15');
     });
+
     it('formats as decimal when number is below 10 ', () => {
       expect(asDecimalOrInteger(0.25435632645)).toEqual('0.3');
       expect(asDecimalOrInteger(1)).toEqual('1.0');
@@ -50,5 +52,29 @@ describe('formatters', () => {
       expect(asDecimalOrInteger(5)).toEqual('5.0');
       expect(asDecimalOrInteger(9)).toEqual('9.0');
     });
+
+    it.each([
+      [-0.123, '-0.1'],
+      [-1.234, '-1.2'],
+      [-9.876, '-9.9'],
+    ])(
+      'formats as decimal when number is negative and below 10 in absolute value',
+      (value, formattedValue) => {
+        expect(asDecimalOrInteger(value)).toEqual(formattedValue);
+      }
+    );
+
+    it.each([
+      [-12.34, '-12'],
+      [-123.45, '-123'],
+      [-1234.56, '-1,235'],
+      [-12345.67, '-12,346'],
+      [-12345678.9, '-12,345,679'],
+    ])(
+      'formats as integer when number is negative and above or equals 10 in absolute value',
+      (value, formattedValue) => {
+        expect(asDecimalOrInteger(value)).toEqual(formattedValue);
+      }
+    );
   });
 });

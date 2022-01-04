@@ -51,7 +51,7 @@ export type AsPercent = typeof asPercent;
 
 export function asDecimalOrInteger(value: number) {
   // exact 0 or above 10 should not have decimal
-  if (value === 0 || value >= 10) {
+  if (value === 0 || Math.abs(value) >= 10) {
     return asInteger(value);
   }
   return asDecimal(value);
