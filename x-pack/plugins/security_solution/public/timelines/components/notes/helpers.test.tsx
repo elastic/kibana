@@ -9,10 +9,10 @@ import { createNote } from './helpers';
 
 describe('createNote', () => {
   it(`does not trim the note's text content`, () => {
-    // A note with two todo items.
+    // A note with two empty todo items.
     // Notice the required trailing whitespace which is required otherwise
     // markdown renderers will not render the list correctly
-    const note = '- [ ] todo item \n\n- [ ] todo item ';
+    const note = '- [ ] \n\n- [ ] ';
     expect(createNote({ newNote: note })).toEqual(
       expect.objectContaining({
         note,
