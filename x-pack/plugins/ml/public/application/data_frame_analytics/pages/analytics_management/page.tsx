@@ -7,15 +7,11 @@
 
 import React, { FC, useMemo, useState } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiPageHeaderSection } from '@elastic/eui';
-
 import { useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUrlState } from '../../../util/url_state';
-import { DatePickerWrapper } from '../../../components/navigation_menu/date_picker_wrapper';
 import { DataFrameAnalyticsList } from './components/analytics_list';
 import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
-import { RefreshAnalyticsListButton } from './components/refresh_analytics_list_button';
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
@@ -66,22 +62,6 @@ export const Page: FC = () => {
           defaultMessage="Data frame analytics"
         />
       </MlPageHeader>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            {selectedTabId !== 'map' && (
-              <>
-                <EuiFlexItem grow={false}>
-                  <RefreshAnalyticsListButton />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <DatePickerWrapper />
-                </EuiFlexItem>
-              </>
-            )}
-          </EuiFlexGroup>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
 
       <NodeAvailableWarning />
 

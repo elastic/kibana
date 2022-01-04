@@ -8,8 +8,15 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
 import { debounce } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiSuperDatePicker, OnRefreshProps } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperDatePicker,
+  OnRefreshProps,
+} from '@elastic/eui';
 import { TimeHistoryContract, TimeRange } from 'src/plugins/data/public';
 import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
 
@@ -46,8 +53,8 @@ function getRecentlyUsedRangesFactory(timeHistory: TimeHistoryContract) {
   };
 }
 
-function updateLastRefresh(timeRange: OnRefreshProps) {
-  mlTimefilterRefresh$.next({ lastRefresh: Date.now(), timeRange });
+function updateLastRefresh(timeRange?: OnRefreshProps) {
+  mlTimefilterRefresh$.next({ lastRefresh: Date.now(), ...(timeRange ? { timeRange } : {}) });
 }
 
 export const DatePickerWrapper: FC = () => {
@@ -149,20 +156,34 @@ export const DatePickerWrapper: FC = () => {
   const isPaused = refreshInterval.pause || (!refreshInterval.pause && !refreshInterval.value);
 
   return isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled ? (
-    <div className="mlNavigationMenu__datePickerWrapper">
-      <EuiSuperDatePicker
-        start={time.from}
-        end={time.to}
-        isPaused={isPaused}
-        isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
-        refreshInterval={refreshInterval.value}
-        onTimeChange={updateFilter}
-        onRefresh={updateLastRefresh}
-        onRefreshChange={updateInterval}
-        recentlyUsedRanges={recentlyUsedRanges}
-        dateFormat={dateFormat}
-        commonlyUsedRanges={commonlyUsedRanges}
-      />
-    </div>
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      className="mlNavigationMenu__datePickerWrapper"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiSuperDatePicker
+          start={time.from}
+          end={time.to}
+          isPaused={isPaused}
+          isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
+          refreshInterval={refreshInterval.value}
+          onTimeChange={updateFilter}
+          onRefresh={updateLastRefresh}
+          onRefreshChange={updateInterval}
+          recentlyUsedRanges={recentlyUsedRanges}
+          dateFormat={dateFormat}
+          commonlyUsedRanges={commonlyUsedRanges}
+        />
+      </EuiFlexItem>
+
+      {isTimeRangeSelectorEnabled ? null : (
+        <EuiFlexItem grow={false}>
+          <EuiButton fill color="primary" iconType={'refresh'} onClick={() => updateLastRefresh()}>
+            <FormattedMessage id="xpack.ml.pageRefreshButton" defaultMessage="Refresh" />
+          </EuiButton>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   ) : null;
 };
