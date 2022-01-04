@@ -28,6 +28,7 @@ export async function writeDataToIndex(
     }
     const settings: WriteSettings = { index, body: data, refresh: true };
     const { body: resp } = await asCurrentUser.index(settings);
+    // @ts-expect-error always false
     if (resp.result === 'Error') {
       throw resp;
     } else {
