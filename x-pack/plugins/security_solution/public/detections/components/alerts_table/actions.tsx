@@ -14,7 +14,12 @@ import dateMath from '@elastic/datemath';
 
 import { FilterStateStore, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { ALERT_RULE_FROM, ALERT_RULE_TYPE, ALERT_RULE_NOTE } from '@kbn/rule-data-utils';
+import {
+  ALERT_RULE_FROM,
+  ALERT_RULE_TYPE,
+  ALERT_RULE_NOTE,
+  ALERT_RULE_PARAMETERS,
+} from '@kbn/rule-data-utils';
 
 import {
   ALERT_ORIGINAL_TIME,
@@ -23,7 +28,6 @@ import {
   ALERT_THRESHOLD_RESULT,
 } from '../../../../common/field_maps/field_names';
 import {
-  KueryFilterQueryKind,
   TimelineId,
   TimelineResult,
   TimelineStatus,
@@ -157,59 +161,33 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
   const thresholdEcsData: Ecs[] = Array.isArray(ecsData) ? ecsData : [ecsData];
   return thresholdEcsData.reduce<ThresholdAggregationData>(
     (outerAcc, thresholdData) => {
-      const threshold = thresholdData.signal?.rule?.threshold as string[];
+      const threshold =
+        getField(thresholdData, ALERT_RULE_PARAMETERS).threshold ??
+        thresholdData.signal?.rule?.threshold;
 
-      let aggField: string[] = [];
-      let thresholdResult: {
-        terms?: Array<{
-          field?: string;
+      const thresholdResult: {
+        terms: Array<{
+          field: string;
           value: string;
         }>;
         count: number;
         from: string;
-      };
+      } = getField(thresholdData, ALERT_THRESHOLD_RESULT);
 
-      try {
-        thresholdResult = JSON.parse(
-          (getField(thresholdData, ALERT_THRESHOLD_RESULT) as string[])[0]
-        );
-        aggField = JSON.parse(threshold[0]).field;
-      } catch (err) {
-        // Legacy support
-        thresholdResult = {
-          terms: [
-            {
-              field: (thresholdData.rule?.threshold as { field: string }).field,
-              value: (thresholdData.signal?.threshold_result as { value: string }).value,
-            },
-          ],
-          count: (thresholdData.signal?.threshold_result as { count: number }).count,
-          from: (thresholdData.signal?.threshold_result as { from: string }).from,
-        };
-      }
-
-      // Legacy support
-      const ruleFromStr = getField(thresholdData, ALERT_RULE_FROM)[0];
-      const ruleFrom = dateMath.parse(ruleFromStr) ?? moment(); // The fallback here will essentially ensure 0 results
-      const originalTimeStr = getField(thresholdData, ALERT_ORIGINAL_TIME)[0];
-      const originalTime = originalTimeStr != null ? moment(originalTimeStr) : ruleFrom;
-      const ruleInterval = moment.duration(moment().diff(ruleFrom));
-      const fromOriginalTime = originalTime.clone().subtract(ruleInterval); // This is the default... can overshoot
-      // End legacy support
-
-      const aggregationFields = Array.isArray(aggField) ? aggField : [aggField];
+      const originalTimeStr = getField(thresholdData, ALERT_ORIGINAL_TIME);
+      const originalTime = moment(originalTimeStr);
+      const aggregationFields: string[] = Array.isArray(threshold.field)
+        ? threshold.field
+        : [threshold.field];
 
       return {
-        // Use `threshold_result.from` if available (it will always be available for new signals). Otherwise, use a calculated
-        // lower bound, which could result in the timeline showing a superset of the events that made up the threshold set.
-        thresholdFrom: thresholdResult.from ?? fromOriginalTime.toISOString(),
+        thresholdFrom: thresholdResult.from,
         thresholdTo: originalTime.toISOString(),
         dataProviders: [
           ...outerAcc.dataProviders,
           ...aggregationFields.reduce<DataProvider[]>((acc, aggregationField, i) => {
-            const aggregationValue = (thresholdResult.terms ?? []).filter(
-              (term: { field?: string | undefined; value: string }) =>
-                term.field === aggregationField
+            const aggregationValue = thresholdResult.terms.filter(
+              (term) => term.field === aggregationField
             )[0].value;
             const dataProviderValue = Array.isArray(aggregationValue)
               ? aggregationValue[0]
@@ -261,7 +239,10 @@ export const isEqlRuleWithGroupId = (ecsData: Ecs) => {
 
 export const isThresholdRule = (ecsData: Ecs) => {
   const ruleType = getField(ecsData, ALERT_RULE_TYPE);
-  return Array.isArray(ruleType) && ruleType.length && ruleType[0] === 'threshold';
+  return (
+    ruleType === 'threshold' ||
+    (Array.isArray(ruleType) && ruleType.length && ruleType[0] === 'threshold')
+  );
 };
 
 export const buildAlertsKqlFilter = (
@@ -472,13 +453,18 @@ export const sendAlertToTimelineAction = async ({
   if (isThresholdRule(ecsData)) {
     const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(ecsData);
 
+    const params = getField(ecsData, ALERT_RULE_PARAMETERS);
+    const filters = getFiltersFromRule(params.filters) ?? [];
+    const language = params.language ?? 'kuery';
+    const query = params.query ?? '';
+
     return createTimeline({
       from: thresholdFrom,
       notes: null,
       timeline: {
         ...timelineDefaults,
         description: `_id: ${ecsData._id}`,
-        filters: getFiltersFromRule(ecsData.signal?.rule?.filters as string[]),
+        filters,
         dataProviders,
         id: TimelineId.active,
         indexNames: [],
@@ -490,14 +476,10 @@ export const sendAlertToTimelineAction = async ({
         kqlQuery: {
           filterQuery: {
             kuery: {
-              kind: ecsData.signal?.rule?.language?.length
-                ? (ecsData.signal?.rule?.language[0] as KueryFilterQueryKind)
-                : 'kuery',
-              expression: ecsData.signal?.rule?.query?.length ? ecsData.signal?.rule?.query[0] : '',
+              kind: language,
+              expression: query,
             },
-            serializedQuery: ecsData.signal?.rule?.query?.length
-              ? ecsData.signal?.rule?.query[0]
-              : '',
+            serializedQuery: query,
           },
         },
       },
