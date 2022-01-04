@@ -130,8 +130,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     use_output: 'default',
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/116980
-  describe.skip('When on the Synthetics Integration Policy Create Page', function () {
+  describe('When on the Synthetics Integration Policy Create Page', function () {
     this.tags(['ciGroup10']);
     const basicConfig = {
       name: monitorName,
@@ -172,8 +171,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/103390
-    describe.skip('create new policy', () => {
+    describe('create new policy', () => {
       let version: string;
 
       beforeEach(async () => {
