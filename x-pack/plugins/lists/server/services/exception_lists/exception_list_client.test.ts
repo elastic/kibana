@@ -62,8 +62,8 @@ describe('exception_list_client', () => {
         (): Parameters<ExceptionListClient['createExceptionListItem']>[0] => {
           return getCreateExceptionListItemOptionsMock();
         },
-        (): ExtensionPointStorageContextMock['exceptionPreCreateCallback'] => {
-          return extensionPointStorageContext.exceptionPreCreateCallback;
+        (): ExtensionPointStorageContextMock['exceptionPreCreate']['callback'] => {
+          return extensionPointStorageContext.exceptionPreCreate.callback;
         },
       ],
       [
@@ -74,8 +74,8 @@ describe('exception_list_client', () => {
         (): Parameters<ExceptionListClient['updateExceptionListItem']>[0] => {
           return getUpdateExceptionListItemOptionsMock();
         },
-        (): ExtensionPointStorageContextMock['exceptionPreUpdateCallback'] => {
-          return extensionPointStorageContext.exceptionPreUpdateCallback;
+        (): ExtensionPointStorageContextMock['exceptionPreUpdate']['callback'] => {
+          return extensionPointStorageContext.exceptionPreUpdate.callback;
         },
       ],
     ])(
