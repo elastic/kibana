@@ -26,7 +26,7 @@ import { forceStartDatafeeds } from '../utils';
 
 import { TimeRangeSelector } from './time_range_selector';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export class StartDatafeedModal extends Component {
   constructor(props) {

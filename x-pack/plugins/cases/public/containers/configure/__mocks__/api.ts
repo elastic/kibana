@@ -10,7 +10,7 @@ import {
   CasesConfigureRequest,
   ActionConnector,
   ActionTypeConnector,
-} from '../../../../common';
+} from '../../../../common/api';
 
 import { ApiProps } from '../../types';
 import { CaseConfigure } from '../types';

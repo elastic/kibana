@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -76,14 +75,6 @@ export default ({ getService }: FtrProviderContext) => {
           getRuleWithWebHookAction(hookAction.id, true)
         );
         await waitForRuleSuccessOrStatus(supertest, log, rule.id);
-
-        // expected result for status should be 'succeeded'
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
-          .set('kbn-xsrf', 'true')
-          .send({ ids: [rule.id] })
-          .expect(200);
-        expect(body[rule.id].current_status.status).to.eql('succeeded');
       });
 
       it('should be able to create a new webhook action and attach it to a rule with a meta field and run it correctly', async () => {
@@ -102,14 +93,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         const rule = await createRule(supertest, log, ruleWithAction);
         await waitForRuleSuccessOrStatus(supertest, log, rule.id);
-
-        // expected result for status should be 'succeeded'
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
-          .set('kbn-xsrf', 'true')
-          .send({ ids: [rule.id] })
-          .expect(200);
-        expect(body[rule.id].current_status.status).to.eql('succeeded');
       });
     });
   });

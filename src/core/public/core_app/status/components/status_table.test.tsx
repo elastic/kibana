@@ -8,22 +8,31 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { ServiceStatus } from '../../../../types/status';
 import { StatusTable } from './status_table';
 
 const state = {
   id: 'available' as const,
-  uiColor: 'secondary',
+  uiColor: 'success',
   message: 'Ready',
   title: 'green',
 };
 
+const createServiceStatus = (parts: Partial<ServiceStatus> = {}): ServiceStatus => ({
+  level: 'available',
+  summary: 'Ready',
+  ...parts,
+});
+
 describe('StatusTable', () => {
   it('renders when statuses is provided', () => {
-    const component = shallow(<StatusTable statuses={[{ id: 'plugin:1', state }]} />);
+    const component = shallow(
+      <StatusTable statuses={[{ id: 'plugin:1', state, original: createServiceStatus() }]} />
+    );
     expect(component).toMatchSnapshot();
   });
 
-  it('renders when statuses is not provided', () => {
+  it('renders empty when statuses is not provided', () => {
     const component = shallow(<StatusTable />);
     expect(component.isEmptyRender()).toBe(true);
   });

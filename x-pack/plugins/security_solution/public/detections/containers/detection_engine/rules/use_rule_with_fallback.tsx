@@ -6,8 +6,10 @@
  */
 
 import { useCallback, useEffect, useMemo } from 'react';
-import { isNotFoundError } from '@kbn/securitysolution-t-grid';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
+import { isNotFoundError } from '@kbn/securitysolution-t-grid';
+
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useQueryAlerts } from '../alerts/use_query';
 import { fetchRuleById } from './api';
@@ -28,8 +30,13 @@ interface AlertHit {
   _index: string;
   _source: {
     '@timestamp': string;
-    signal: {
-      rule: Rule;
+    signal?: {
+      rule?: Rule;
+    };
+    kibana?: {
+      alert?: {
+        rule?: Rule;
+      };
     };
   };
 }
@@ -41,7 +48,17 @@ const useFetchRule = () => useAsync(fetchWithOptionslSignal);
 const buildLastAlertQuery = (ruleId: string) => ({
   query: {
     bool: {
-      filter: [{ match: { 'signal.rule.id': ruleId } }],
+      filter: [
+        {
+          bool: {
+            should: [
+              { match: { 'signal.rule.id': ruleId } },
+              { match: { [ALERT_RULE_UUID]: ruleId } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      ],
     },
   },
   size: 1,
@@ -77,7 +94,10 @@ export const useRuleWithFallback = (ruleId: string): UseRuleWithFallback => {
   }, [addError, error]);
 
   const rule = useMemo<Rule | undefined>(() => {
-    const result = isExistingRule ? ruleData : alertsData?.hits.hits[0]?._source.signal.rule;
+    const hit = alertsData?.hits.hits[0];
+    const result = isExistingRule
+      ? ruleData
+      : hit?._source.signal?.rule ?? hit?._source.kibana?.alert?.rule;
     if (result) {
       return transformInput(result);
     }

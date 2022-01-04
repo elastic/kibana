@@ -20,11 +20,21 @@ export interface AlertsUsage {
   avg_execution_time_per_day: number;
   avg_execution_time_by_type_per_day: Record<string, number>;
   throttle_time: {
+    min: string;
+    avg: string;
+    max: string;
+  };
+  schedule_time: {
+    min: string;
+    avg: string;
+    max: string;
+  };
+  throttle_time_number_s: {
     min: number;
     avg: number;
     max: number;
   };
-  schedule_time: {
+  schedule_time_number_s: {
     min: number;
     avg: number;
     max: number;

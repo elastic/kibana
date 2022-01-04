@@ -544,14 +544,15 @@ export const DELETE = i18n.translate(
 export const IMPORT_RULE_BTN_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.importRuleTitle',
   {
-    defaultMessage: 'Import rule',
+    defaultMessage: 'Import',
   }
 );
 
 export const SELECT_RULE = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.selectRuleDescription',
   {
-    defaultMessage: 'Select Security rules (as exported from the Detection Rules page) to import',
+    defaultMessage:
+      'Select rules to import. Associated rule actions and exceptions can be included.',
   }
 );
 
@@ -565,7 +566,7 @@ export const INITIAL_PROMPT_TEXT = i18n.translate(
 export const OVERWRITE_WITH_SAME_NAME = i18n.translate(
   'xpack.securitySolution.detectionEngine.components.importRuleModal.overwriteDescription',
   {
-    defaultMessage: 'Overwrite existing detection rules with conflicting Rule ID',
+    defaultMessage: 'Overwrite existing detection rules with conflicting "rule_id"',
   }
 );
 

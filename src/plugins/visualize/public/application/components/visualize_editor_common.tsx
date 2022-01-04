@@ -8,7 +8,7 @@
 
 import './visualize_editor.scss';
 import React, { RefObject, useCallback, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { AppMountParameters } from 'kibana/public';
@@ -16,6 +16,8 @@ import { VisualizeTopNav } from './visualize_top_nav';
 import { ExperimentalVisInfo } from './experimental_vis_info';
 import { useKibana } from '../../../../kibana_react/public';
 import { urlFor } from '../../../../visualizations/public';
+import { getUISettings } from '../../services';
+import { SplitChartWarning, NEW_HEATMAP_CHARTS_LIBRARY } from './split_chart_warning';
 import {
   SavedVisInstance,
   VisualizeAppState,
@@ -37,6 +39,7 @@ interface VisualizeEditorCommonProps {
   visEditorRef: RefObject<HTMLDivElement>;
   originatingApp?: string;
   setOriginatingApp?: (originatingApp: string | undefined) => void;
+  originatingPath?: string;
   visualizationIdFromUrl?: string;
   embeddableId?: string;
 }
@@ -52,6 +55,7 @@ export const VisualizeEditorCommon = ({
   isEmbeddableRendered,
   onAppLeave,
   originatingApp,
+  originatingPath,
   setOriginatingApp,
   visualizationIdFromUrl,
   embeddableId,
@@ -105,6 +109,9 @@ export const VisualizeEditorCommon = ({
     }
     return null;
   }, [visInstance?.savedVis, services, visInstance?.vis?.type.title]);
+  // Adds a notification for split chart on the new implementation as it is not supported yet
+  const isSplitChart = visInstance?.vis?.data?.aggs?.aggs.some((agg) => agg.schema === 'split');
+  const hasHeatmapLegacyhartsEnabled = getUISettings().get(NEW_HEATMAP_CHARTS_LIBRARY);
 
   return (
     <div className={`app-container visEditor visEditor--${visInstance?.vis.type.name}`}>
@@ -117,6 +124,7 @@ export const VisualizeEditorCommon = ({
           isEmbeddableRendered={isEmbeddableRendered}
           hasUnappliedChanges={hasUnappliedChanges}
           originatingApp={originatingApp}
+          originatingPath={originatingPath}
           setOriginatingApp={setOriginatingApp}
           visInstance={visInstance}
           stateContainer={appState}
@@ -126,6 +134,9 @@ export const VisualizeEditorCommon = ({
         />
       )}
       {visInstance?.vis?.type?.stage === 'experimental' && <ExperimentalVisInfo />}
+      {!hasHeatmapLegacyhartsEnabled &&
+        isSplitChart &&
+        visInstance?.vis.type.name === 'heatmap' && <SplitChartWarning />}
       {visInstance?.vis?.type?.getInfoMessage?.(visInstance.vis)}
       {getLegacyUrlConflictCallout()}
       {visInstance && (

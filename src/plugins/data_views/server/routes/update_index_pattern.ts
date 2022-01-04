@@ -21,7 +21,6 @@ const indexPatternUpdateSchema = schema.object({
   type: schema.maybe(schema.string()),
   typeMeta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   timeFieldName: schema.maybe(schema.string()),
-  intervalName: schema.maybe(schema.string()),
   sourceFilters: schema.maybe(
     schema.arrayOf(
       schema.object({
@@ -68,7 +67,8 @@ export const registerUpdateIndexPatternRoute = (
         const [, , { indexPatternsServiceFactory }] = await getStartServices();
         const indexPatternsService = await indexPatternsServiceFactory(
           savedObjectsClient,
-          elasticsearchClient
+          elasticsearchClient,
+          req
         );
         const id = req.params.id;
 
@@ -80,7 +80,6 @@ export const registerUpdateIndexPatternRoute = (
           index_pattern: {
             title,
             timeFieldName,
-            intervalName,
             sourceFilters,
             fieldFormats,
             type,
@@ -101,11 +100,6 @@ export const registerUpdateIndexPatternRoute = (
         if (timeFieldName !== undefined && timeFieldName !== indexPattern.timeFieldName) {
           changeCount++;
           indexPattern.timeFieldName = timeFieldName;
-        }
-
-        if (intervalName !== undefined && intervalName !== indexPattern.intervalName) {
-          changeCount++;
-          indexPattern.intervalName = intervalName;
         }
 
         if (sourceFilters !== undefined) {

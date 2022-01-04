@@ -51,7 +51,7 @@ export async function setDeprecationLogging(
 }
 
 export function isDeprecationLogIndexingEnabled(settings: any) {
-  const clusterDeprecationLoggingEnabled = ['default', 'persistent', 'transient'].reduce(
+  const clusterDeprecationLoggingEnabled = ['defaults', 'persistent', 'transient'].reduce(
     (currentLogLevel, settingsTier) =>
       get(settings, [settingsTier, 'cluster', 'deprecation_indexing', 'enabled'], currentLogLevel),
     'false'
@@ -61,7 +61,7 @@ export function isDeprecationLogIndexingEnabled(settings: any) {
 }
 
 export function isDeprecationLoggingEnabled(settings: any) {
-  const deprecationLogLevel = ['default', 'persistent', 'transient'].reduce(
+  const deprecationLogLevel = ['defaults', 'persistent', 'transient'].reduce(
     (currentLogLevel, settingsTier) =>
       get(settings, [settingsTier, 'logger', 'deprecation'], currentLogLevel),
     'WARN'

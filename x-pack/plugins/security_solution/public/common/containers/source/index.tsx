@@ -8,7 +8,7 @@
 import { isEmpty, isEqual, isUndefined, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import { Subscription } from 'rxjs';
 
 import { useKibana } from '../../lib/kibana';
@@ -78,8 +78,7 @@ export const getBrowserFields = memoizeOne(
       return accumulator;
     }, {});
   },
-  // Update the value only if _title has changed
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
 );
 
 export const getDocValueFields = memoizeOne(
@@ -97,8 +96,7 @@ export const getDocValueFields = memoizeOne(
           return accumulator;
         }, [])
       : [],
-  // Update the value only if _title has changed
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0]
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
 );
 
 export const indicesExistOrDataTemporarilyUnavailable = (

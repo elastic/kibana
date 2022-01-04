@@ -6,14 +6,15 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { fromExpression, toExpression, Ast, ExpressionFunctionAST } from '@kbn/interpreter/common';
+import { fromExpression, toExpression, Ast, ExpressionFunctionAST } from '@kbn/interpreter';
 import {
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
   SavedObjectReference,
   SavedObjectUnsanitizedDoc,
 } from 'src/core/server';
-import { Query, Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { Query } from 'src/plugins/data/public';
 import { PersistableFilter } from '../../common';
 import {
   LensDocShapePost712,
@@ -402,14 +403,16 @@ const transformTableState: SavedObjectMigrationFn<
   return newDoc;
 };
 
-const renameOperationsForFormula: SavedObjectMigrationFn<LensDocShapePre712, LensDocShapePost712> =
-  (doc) => {
-    const newDoc = cloneDeep(doc);
-    return {
-      ...newDoc,
-      attributes: commonRenameOperationsForFormula(newDoc.attributes),
-    };
+const renameOperationsForFormula: SavedObjectMigrationFn<
+  LensDocShapePre712,
+  LensDocShapePost712
+> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  return {
+    ...newDoc,
+    attributes: commonRenameOperationsForFormula(newDoc.attributes),
   };
+};
 
 const removeTimezoneDateHistogramParam: SavedObjectMigrationFn<LensDocShape713, LensDocShape714> = (
   doc

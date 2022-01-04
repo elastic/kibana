@@ -64,5 +64,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.getDatatableHeaderText(0)).to.eql('Filters of ip');
     });
+
+    it('should show an error if multi terms is used and provide a fix action', async () => {
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_rows > lns-empty-dimension',
+        operation: 'terms',
+        field: 'ip',
+        keepOpen: true,
+      });
+
+      await PageObjects.lens.addTermToAgg('geo.src');
+
+      await PageObjects.lens.closeDimensionEditor();
+
+      expect(await PageObjects.lens.hasFixAction()).to.be(true);
+      await PageObjects.lens.useFixAction();
+
+      expect(await PageObjects.lens.getDatatableHeaderText(1)).to.eql('Filters of ip › geo.src');
+    });
   });
 }

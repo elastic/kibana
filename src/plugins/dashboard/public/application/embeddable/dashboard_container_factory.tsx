@@ -43,10 +43,16 @@ export class DashboardContainerFactoryDefinition
   public readonly isContainerType = true;
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
+  public inject: EmbeddablePersistableStateService['inject'];
+  public extract: EmbeddablePersistableStateService['extract'];
+
   constructor(
     private readonly getStartServices: () => Promise<DashboardContainerServices>,
     private readonly persistableStateService: EmbeddablePersistableStateService
-  ) {}
+  ) {
+    this.inject = createInject(this.persistableStateService);
+    this.extract = createExtract(this.persistableStateService);
+  }
 
   public isEditable = async () => {
     // Currently unused for dashboards
@@ -91,8 +97,4 @@ export class DashboardContainerFactoryDefinition
 
     return new DashboardContainerEmbeddable(initialInput, services, parent, controlGroup);
   };
-
-  public inject = createInject(this.persistableStateService);
-
-  public extract = createExtract(this.persistableStateService);
 }

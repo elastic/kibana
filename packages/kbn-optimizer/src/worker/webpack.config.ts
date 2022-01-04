@@ -28,6 +28,14 @@ const IS_CODE_COVERAGE = !!process.env.CODE_COVERAGE;
 const ISTANBUL_PRESET_PATH = require.resolve('@kbn/babel-preset/istanbul_preset');
 const BABEL_PRESET_PATH = require.resolve('@kbn/babel-preset/webpack_preset');
 
+const nodeModulesButNotKbnPackages = (path: string) => {
+  if (!path.includes('node_modules')) {
+    return false;
+  }
+
+  return !path.includes(`node_modules${Path.sep}@kbn${Path.sep}`);
+};
+
 export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker: WorkerConfig) {
   const ENTRY_CREATOR = require.resolve('./entry_point_creator');
 
@@ -138,7 +146,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
         },
         {
           test: /\.scss$/,
-          exclude: /node_modules/,
+          exclude: nodeModulesButNotKbnPackages,
           oneOf: [
             ...worker.themeTags.map((theme) => ({
               resourceQuery: `?${theme}`,

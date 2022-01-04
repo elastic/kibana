@@ -17,7 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import semverLt from 'semver/functions/lt';
 import { SUPPORTED_APM_PACKAGE_VERSION } from '../../../../../common/fleet';
@@ -146,7 +146,7 @@ export function SchemaOverview({
               'xpack.apm.settings.schema.migrate.dataStreams.description',
               {
                 defaultMessage:
-                  'Starting in version 8.0, Elastic Agent must manage APM Server. Elastic Agent can run on our hosted Elasticsearch Service, ECE, or be self-managed. Then, add the Elastic APM integration to continue ingesting APM data.',
+                  'Starting in version 8.0, APM Server is recommended to be managed by Elastic Agent. Elastic Agent can run on our hosted Elasticsearch Service, ECE, or be self-managed. Then, add the Elastic APM integration to continue ingesting APM data.',
               }
             )}
             footer={

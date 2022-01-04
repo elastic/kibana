@@ -30,6 +30,8 @@ export enum AlertExecutionStatusErrorReasons {
   Execute = 'execute',
   Unknown = 'unknown',
   License = 'license',
+  Timeout = 'timeout',
+  Disabled = 'disabled',
 }
 
 export interface AlertExecutionStatus {
@@ -54,6 +56,8 @@ export interface AlertAction {
 
 export interface AlertAggregations {
   alertExecutionStatus: { [status: string]: number };
+  ruleEnabledStatus: { enabled: number; disabled: number };
+  ruleMutedStatus: { muted: number; unmuted: number };
 }
 
 export interface Alert<Params extends AlertTypeParams = never> {

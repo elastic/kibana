@@ -6,7 +6,7 @@
  */
 
 import { Logger } from 'kibana/server';
-import { SearchRequest } from 'src/plugins/data/public';
+import type { SearchRequest } from 'src/plugins/data/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TransportResult } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../../fleet/common';
@@ -191,7 +191,7 @@ export const getActionRequestsResult = async ({
 
   let actionRequests: TransportResult<estypes.SearchResponse<unknown>, unknown>;
   try {
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
+    const esClient = context.core.elasticsearch.client.asInternalUser;
     actionRequests = await esClient.search(actionsSearchQuery, queryOptions);
     const actionIds = actionRequests?.body?.hits?.hits?.map((e) => {
       return logsEndpointActionsRegex.test(e._index)
@@ -248,7 +248,7 @@ export const getActionResponsesResult = async ({
 
   let actionResponses: TransportResult<estypes.SearchResponse<unknown>, unknown>;
   try {
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
+    const esClient = context.core.elasticsearch.client.asInternalUser;
     actionResponses = await esClient.search(responsesSearchQuery, queryOptions);
   } catch (error) {
     logger.error(error);

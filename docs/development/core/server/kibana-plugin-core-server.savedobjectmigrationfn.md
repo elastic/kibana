@@ -39,6 +39,5 @@ const migrateToV2: SavedObjectMigrationFn<TypeV1Attributes, TypeV2Attributes> = 
     },
   };
 };
-
 ```
 

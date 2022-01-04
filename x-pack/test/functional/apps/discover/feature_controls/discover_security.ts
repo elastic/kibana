@@ -31,7 +31,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
   }
 
-  describe('discover feature controls security', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/106631
+  describe.skip('discover feature controls security', () => {
     before(async () => {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
@@ -43,12 +44,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      // logout, so the other tests don't accidentally run as the custom users we're testing below
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+      await PageObjects.security.forceLogout();
+
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/discover/feature_controls/security'
       );
-
-      // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.forceLogout();
     });
 
     describe('global discover all privileges', () => {

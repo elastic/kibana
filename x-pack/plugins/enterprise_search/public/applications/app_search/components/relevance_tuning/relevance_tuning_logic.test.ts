@@ -14,6 +14,8 @@ import { mockEngineValues, mockEngineActions } from '../../__mocks__';
 
 import { nextTick } from '@kbn/test/jest';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
+
 import { Boost, BoostOperation, BoostType, FunctionalBoostFunction } from './types';
 
 import { RelevanceTuningLogic } from './';
@@ -319,14 +321,9 @@ describe('RelevanceTuningLogic', () => {
         });
       });
 
-      it('handles errors', async () => {
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         mount();
-        http.get.mockReturnValueOnce(Promise.reject('error'));
-
         RelevanceTuningLogic.actions.initializeRelevanceTuning();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 

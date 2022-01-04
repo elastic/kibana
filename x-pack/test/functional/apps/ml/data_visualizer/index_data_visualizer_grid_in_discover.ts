@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { TestData, MetricFieldVisConfig } from './types';
 
@@ -22,39 +21,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings']);
   const ml = getService('ml');
-  const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const toasts = getService('toasts');
 
-  const selectIndexPattern = async (indexPattern: string) => {
-    await retry.tryForTime(2 * 1000, async () => {
-      await PageObjects.discover.selectIndexPattern(indexPattern);
-      const indexPatternTitle = await testSubjects.getVisibleText('indexPattern-switch-link');
-      expect(indexPatternTitle).to.be(indexPattern);
-    });
-  };
-
-  const clearAdvancedSetting = async (propertyName: string) => {
-    await retry.tryForTime(2 * 1000, async () => {
-      await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
-        shouldUseHashForSubUrl: false,
-      });
-      if ((await PageObjects.settings.getAdvancedSettingCheckbox(propertyName)) === 'true') {
-        await PageObjects.settings.clearAdvancedSettings(propertyName);
-      }
-    });
-  };
-
-  const setAdvancedSettingCheckbox = async (propertyName: string, checkedState: boolean) => {
-    await retry.tryForTime(2 * 1000, async () => {
-      await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
-        shouldUseHashForSubUrl: false,
-      });
-      await testSubjects.click('settings');
-      await toasts.dismissAllToasts();
-      await PageObjects.settings.toggleAdvancedSettingCheckbox(propertyName, checkedState);
-    });
-  };
+  const startTime = 'Jan 1, 2016 @ 00:00:00.000';
+  const endTime = 'Nov 1, 2020 @ 00:00:00.000';
 
   function runTestsWhenDisabled(testData: TestData) {
     it('should not show view mode toggle or Field stats table', async function () {
@@ -64,13 +34,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.discover.loadSavedSearch(testData.sourceIndexOrSavedSearch);
         });
       } else {
-        await selectIndexPattern(testData.sourceIndexOrSavedSearch);
+        await ml.dashboardEmbeddables.selectDiscoverIndexPattern(testData.sourceIndexOrSavedSearch);
       }
 
-      await PageObjects.timePicker.setAbsoluteRange(
-        'Jan 1, 2016 @ 00:00:00.000',
-        'Nov 1, 2020 @ 00:00:00.000'
-      );
+      await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
 
       await PageObjects.discover.assertViewModeToggleNotExists();
       await PageObjects.discover.assertFieldStatsTableNotExists();
@@ -86,12 +53,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.discover.loadSavedSearch(testData.sourceIndexOrSavedSearch);
           });
         } else {
-          await selectIndexPattern(testData.sourceIndexOrSavedSearch);
+          await ml.dashboardEmbeddables.selectDiscoverIndexPattern(
+            testData.sourceIndexOrSavedSearch
+          );
         }
-        await PageObjects.timePicker.setAbsoluteRange(
-          'Jan 1, 2016 @ 00:00:00.000',
-          'Nov 1, 2020 @ 00:00:00.000'
-        );
+        await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
 
         await PageObjects.discover.assertHitCount(testData.expected.totalDocCountFormatted);
         await PageObjects.discover.assertViewModeToggleExists();
@@ -140,16 +106,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async function () {
-      await clearAdvancedSetting(SHOW_FIELD_STATISTICS);
+      await ml.testResources.clearAdvancedSettingProperty(SHOW_FIELD_STATISTICS);
     });
 
     describe('when enabled', function () {
       before(async function () {
-        await setAdvancedSettingCheckbox(SHOW_FIELD_STATISTICS, true);
+        await ml.testResources.setAdvancedSettingProperty(SHOW_FIELD_STATISTICS, true);
       });
 
       after(async function () {
-        await clearAdvancedSetting(SHOW_FIELD_STATISTICS);
+        await ml.testResources.clearAdvancedSettingProperty(SHOW_FIELD_STATISTICS);
       });
 
       runTests(farequoteDataViewTestData);
@@ -163,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('when disabled', function () {
       before(async function () {
         // Ensure that the setting is set to default state which is false
-        await setAdvancedSettingCheckbox(SHOW_FIELD_STATISTICS, false);
+        await ml.testResources.setAdvancedSettingProperty(SHOW_FIELD_STATISTICS, false);
       });
 
       runTestsWhenDisabled(farequoteDataViewTestData);

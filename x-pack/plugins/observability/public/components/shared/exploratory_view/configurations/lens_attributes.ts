@@ -732,7 +732,19 @@ export class LensAttributes {
         seriesType: layerConfig.seriesType || layerConfig.seriesConfig.defaultSeriesType,
         palette: layerConfig.seriesConfig.palette,
         yConfig: layerConfig.seriesConfig.yConfig || [
-          { forAccessor: `y-axis-column-layer${index}`, color: layerConfig.color },
+          {
+            forAccessor: `y-axis-column-layer${index}`,
+            color: layerConfig.color,
+            /* if the fields format matches the field format of the first layer, use the default y axis (right)
+             * if not, use the secondary y axis (left) */
+            axisMode:
+              layerConfig.indexPattern.fieldFormatMap[layerConfig.selectedMetricField]?.id ===
+              this.layerConfigs[0].indexPattern.fieldFormatMap[
+                this.layerConfigs[0].selectedMetricField
+              ]?.id
+                ? 'left'
+                : 'right',
+          },
         ],
         xAccessor: `x-axis-column-layer${index}`,
         ...(layerConfig.breakdown &&

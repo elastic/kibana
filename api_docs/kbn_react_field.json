@@ -1,0 +1,387 @@
+{
+  "id": "@kbn/react-field",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/react-field",
+        "id": "def-common.FieldButton",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldButton",
+        "description": [],
+        "signature": [
+          "({\n  size = 'm',\n  isActive = false,\n  fieldIcon,\n  fieldName,\n  fieldInfoIcon,\n  fieldAction,\n  className,\n  isDraggable = false,\n  onClick,\n  dataTestSubj,\n  buttonProps,\n  ...rest\n}: ",
+          {
+            "pluginId": "@kbn/react-field",
+            "scope": "common",
+            "docId": "kibKbnReactFieldPluginApi",
+            "section": "def-common.FieldButtonProps",
+            "text": "FieldButtonProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldButton.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  size = 'm',\n  isActive = false,\n  fieldIcon,\n  fieldName,\n  fieldInfoIcon,\n  fieldAction,\n  className,\n  isDraggable = false,\n  onClick,\n  dataTestSubj,\n  buttonProps,\n  ...rest\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/react-field",
+                "scope": "common",
+                "docId": "kibKbnReactFieldPluginApi",
+                "section": "def-common.FieldButtonProps",
+                "text": "FieldButtonProps"
+              }
+            ],
+            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-field",
+        "id": "def-common.FieldIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldIcon",
+        "description": [
+          "\nField token icon used across the app"
+        ],
+        "signature": [
+          "({\n  type,\n  label,\n  size = 's',\n  scripted,\n  className,\n  ...rest\n}: ",
+          {
+            "pluginId": "@kbn/react-field",
+            "scope": "common",
+            "docId": "kibKbnReactFieldPluginApi",
+            "section": "def-common.FieldIconProps",
+            "text": "FieldIconProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldIcon.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  type,\n  label,\n  size = 's',\n  scripted,\n  className,\n  ...rest\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/react-field",
+                "scope": "common",
+                "docId": "kibKbnReactFieldPluginApi",
+                "section": "def-common.FieldIconProps",
+                "text": "FieldIconProps"
+              }
+            ],
+            "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/react-field",
+        "id": "def-common.FieldButtonProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldButtonProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/react-field",
+            "scope": "common",
+            "docId": "kibKbnReactFieldPluginApi",
+            "section": "def-common.FieldButtonProps",
+            "text": "FieldButtonProps"
+          },
+          " extends React.HTMLAttributes<HTMLDivElement>"
+        ],
+        "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldButtonProps.fieldName",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fieldName",
+            "description": [
+              "\nLabel for the button"
+            ],
+            "signature": [
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+            ],
+            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldButtonProps.fieldIcon",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fieldIcon",
+            "description": [
+              "\nIcon representing the field type.\nRecommend using FieldIcon"
+            ],
+            "signature": [
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+            ],
+            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldButtonProps.fieldInfoIcon",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fieldInfoIcon",
+            "description": [
+              "\nAn optional node to place inside and at the end of the <button>"
+            ],
+            "signature": [
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+            ],
+            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldButtonProps.fieldAction",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fieldAction",
+            "description": [
+              "\nAn optional node to place outside of and to the right of the <button>"
+            ],
+            "signature": [
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+            ],
+            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldButtonProps.isActive",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isActive",
+            "description": [
+              "\nAdds a forced focus ring to the whole component"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldButtonProps.isDraggable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDraggable",
+            "description": [
+              "\nStyles the component differently to indicate it is draggable"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldButtonProps.size",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "size",
+            "description": [
+              "\nUse the small size in condensed areas"
+            ],
+            "signature": [
+              "\"m\" | \"s\" | undefined"
+            ],
+            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldButtonProps.className",
+            "type": "string",
+            "tags": [],
+            "label": "className",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldButtonProps.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [
+              "\nThe component will render a `<button>` when provided an `onClick`"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldButtonProps.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [
+              "\nApplies to the inner `<button>`  or `<div>`"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldButtonProps.buttonProps",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "buttonProps",
+            "description": [
+              "\nPass more button props to the `<button>` element"
+            ],
+            "signature": [
+              "(React.ButtonHTMLAttributes<HTMLButtonElement> & ",
+              "CommonProps",
+              ") | undefined"
+            ],
+            "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-field",
+        "id": "def-common.FieldIconProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldIconProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/react-field",
+            "scope": "common",
+            "docId": "kibKbnReactFieldPluginApi",
+            "section": "def-common.FieldIconProps",
+            "text": "FieldIconProps"
+          },
+          " extends Omit<",
+          "EuiTokenProps",
+          ", \"iconType\">"
+        ],
+        "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldIconProps.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldIconProps.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/react-field",
+            "id": "def-common.FieldIconProps.scripted",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "scripted",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-react-field/src/field_icon/field_icon.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/react-field",
+        "id": "def-common.ButtonSize",
+        "type": "Type",
+        "tags": [],
+        "label": "ButtonSize",
+        "description": [],
+        "signature": [
+          "\"m\" | \"s\""
+        ],
+        "path": "packages/kbn-react-field/src/field_button/field_button.tsx",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

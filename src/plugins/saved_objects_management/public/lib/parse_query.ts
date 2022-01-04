@@ -7,6 +7,7 @@
  */
 
 import { Query } from '@elastic/eui';
+import type { SavedObjectManagementTypeInfo } from '../../common';
 
 interface ParsedQuery {
   queryText?: string;
@@ -14,7 +15,7 @@ interface ParsedQuery {
   selectedTags?: string[];
 }
 
-export function parseQuery(query: Query): ParsedQuery {
+export function parseQuery(query: Query, types: SavedObjectManagementTypeInfo[]): ParsedQuery {
   let queryText: string | undefined;
   let visibleTypes: string[] | undefined;
   let selectedTags: string[] | undefined;
@@ -27,7 +28,14 @@ export function parseQuery(query: Query): ParsedQuery {
         .join(' ');
     }
     if (query.ast.getFieldClauses('type')) {
-      visibleTypes = query.ast.getFieldClauses('type')[0].value as string[];
+      const displayedTypes = query.ast.getFieldClauses('type')[0].value as string[];
+      const displayNameToNameMap = types.reduce((map, type) => {
+        map.set(type.displayName, type.name);
+        return map;
+      }, new Map<string, string>());
+      visibleTypes = displayedTypes.map((type) => {
+        return displayNameToNameMap.get(type) ?? type;
+      });
     }
     if (query.ast.getFieldClauses('tag')) {
       selectedTags = query.ast.getFieldClauses('tag')[0].value as string[];

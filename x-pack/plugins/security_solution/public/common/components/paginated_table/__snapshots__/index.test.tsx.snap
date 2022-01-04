@@ -22,28 +22,36 @@ exports[`Paginated Table Component rendering it renders the default load more ta
         Array [
           Object {
             "field": "node.host.name",
-            "hideForMobile": false,
+            "mobileOptions": Object {
+              "show": true,
+            },
             "name": "Host",
             "render": [Function],
             "truncateText": false,
           },
           Object {
             "field": "node.host.firstSeen",
-            "hideForMobile": false,
+            "mobileOptions": Object {
+              "show": true,
+            },
             "name": "First seen",
             "render": [Function],
             "truncateText": false,
           },
           Object {
             "field": "node.host.os",
-            "hideForMobile": false,
+            "mobileOptions": Object {
+              "show": true,
+            },
             "name": "OS",
             "render": [Function],
             "truncateText": false,
           },
           Object {
             "field": "node.host.version",
-            "hideForMobile": false,
+            "mobileOptions": Object {
+              "show": true,
+            },
             "name": "Version",
             "render": [Function],
             "truncateText": false,

@@ -15,7 +15,7 @@ export interface ElasticsearchStatusMeta
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [incompatibleNodes](./kibana-plugin-core-server.elasticsearchstatusmeta.incompatiblenodes.md) | <code>NodesVersionCompatibility['incompatibleNodes']</code> |  |
-|  [nodesInfoRequestError](./kibana-plugin-core-server.elasticsearchstatusmeta.nodesinforequesterror.md) | <code>NodesVersionCompatibility['nodesInfoRequestError']</code> |  |
-|  [warningNodes](./kibana-plugin-core-server.elasticsearchstatusmeta.warningnodes.md) | <code>NodesVersionCompatibility['warningNodes']</code> |  |
+|  [incompatibleNodes](./kibana-plugin-core-server.elasticsearchstatusmeta.incompatiblenodes.md) | NodesVersionCompatibility\['incompatibleNodes'\] |  |
+|  [nodesInfoRequestError?](./kibana-plugin-core-server.elasticsearchstatusmeta.nodesinforequesterror.md) | NodesVersionCompatibility\['nodesInfoRequestError'\] | <i>(Optional)</i> |
+|  [warningNodes](./kibana-plugin-core-server.elasticsearchstatusmeta.warningnodes.md) | NodesVersionCompatibility\['warningNodes'\] |  |
 

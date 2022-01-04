@@ -42,19 +42,19 @@ export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>
   dataBounds: { min: number; max: number }
 ) {
   // make a copy of it as they have to be manipulated later on
-  let displayStops = getPaletteStops(palettes, activePalette?.params || {}, {
+  const displayStops = getPaletteStops(palettes, activePalette?.params || {}, {
     dataBounds,
     defaultPaletteName: activePalette?.name,
   });
 
   if (activePalette?.params?.reverse && activePalette?.params?.name !== CUSTOM_PALETTE) {
-    displayStops = reversePalette(displayStops);
+    return reversePalette(displayStops);
   }
   return displayStops;
 }
 
 // Need to shift the Custom palette in order to correctly visualize it when in display mode
-function shiftPalette(stops: ColorStop[], max: number) {
+export function shiftPalette(stops: ColorStop[], max: number) {
   // shift everything right and add an additional stop at the end
   const result = stops.map((entry, i, array) => ({
     ...entry,
@@ -136,14 +136,16 @@ export function getPaletteStops(
     // need to generate the palette from the existing controlStops
     return shiftPalette(activePaletteParams.colorStops, maxValue);
   }
+
+  const steps = activePaletteParams?.steps || defaultPaletteParams.steps;
   // generate a palette from predefined ones and customize the domain
   const colorStopsFromPredefined = palettes
     .get(
       prevPalette || activePaletteParams?.name || defaultPaletteName || defaultPaletteParams.name
     )
-    .getCategoricalColors(defaultPaletteParams.steps, otherParams);
+    .getCategoricalColors(steps, otherParams);
 
-  const newStopsMin = mapFromMinValue ? minValue : interval / defaultPaletteParams.steps;
+  const newStopsMin = mapFromMinValue ? minValue : interval / steps;
 
   const stops = remapStopsByNewInterval(
     colorStopsFromPredefined.map((color, index) => ({ color, stop: index })),
@@ -198,7 +200,8 @@ export function isValidColor(colorString: string) {
 
 export function roundStopValues(colorStops: ColorStop[]) {
   return colorStops.map(({ color, stop }) => {
-    const roundedStop = Number(stop.toFixed(2));
+    // when rounding mind to not go in excess, rather use the floor function
+    const roundedStop = Number((Math.floor(stop * 100) / 100).toFixed(2));
     return { color, stop: roundedStop };
   });
 }

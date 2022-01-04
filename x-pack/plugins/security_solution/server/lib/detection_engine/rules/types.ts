@@ -268,7 +268,6 @@ export interface UpdateRulesOptions {
   rulesClient: RulesClient;
   defaultOutputIndex: string;
   existingRule: SanitizedAlert<RuleParams> | null | undefined;
-  migratedRule: SanitizedAlert<RuleParams> | null | undefined;
   ruleUpdate: UpdateRulesSchema;
 }
 
@@ -311,6 +310,7 @@ export interface PatchRulesOptions {
   threshold: ThresholdOrUndefined;
   threatFilters: ThreatFiltersOrUndefined;
   threatIndex: ThreatIndexOrUndefined;
+  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatQuery: ThreatQueryOrUndefined;
   threatMapping: ThreatMappingOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;

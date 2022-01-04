@@ -20,14 +20,14 @@ The constructor for this class is marked as internal. Third-party code should no
 
 |  Property | Modifiers | Type | Description |
 |  --- | --- | --- | --- |
-|  [bulkCreate](./kibana-plugin-core-public.savedobjectsclient.bulkcreate.md) |  | <code>(objects?: SavedObjectsBulkCreateObject[], options?: SavedObjectsBulkCreateOptions) =&gt; Promise&lt;SavedObjectsBatchResponse&lt;unknown&gt;&gt;</code> | Creates multiple documents at once |
-|  [bulkGet](./kibana-plugin-core-public.savedobjectsclient.bulkget.md) |  | <code>(objects?: Array&lt;{</code><br/><code>        id: string;</code><br/><code>        type: string;</code><br/><code>    }&gt;) =&gt; Promise&lt;SavedObjectsBatchResponse&lt;unknown&gt;&gt;</code> | Returns an array of objects by id |
-|  [bulkResolve](./kibana-plugin-core-public.savedobjectsclient.bulkresolve.md) |  | <code>&lt;T = unknown&gt;(objects?: Array&lt;{</code><br/><code>        id: string;</code><br/><code>        type: string;</code><br/><code>    }&gt;) =&gt; Promise&lt;{</code><br/><code>        resolved_objects: ResolvedSimpleSavedObject&lt;T&gt;[];</code><br/><code>    }&gt;</code> | Resolves an array of objects by id, using any legacy URL aliases if they exist |
-|  [create](./kibana-plugin-core-public.savedobjectsclient.create.md) |  | <code>&lt;T = unknown&gt;(type: string, attributes: T, options?: SavedObjectsCreateOptions) =&gt; Promise&lt;SimpleSavedObject&lt;T&gt;&gt;</code> | Persists an object |
-|  [delete](./kibana-plugin-core-public.savedobjectsclient.delete.md) |  | <code>(type: string, id: string, options?: SavedObjectsDeleteOptions &#124; undefined) =&gt; ReturnType&lt;SavedObjectsApi['delete']&gt;</code> | Deletes an object |
-|  [find](./kibana-plugin-core-public.savedobjectsclient.find.md) |  | <code>&lt;T = unknown, A = unknown&gt;(options: SavedObjectsFindOptions) =&gt; Promise&lt;SavedObjectsFindResponsePublic&lt;T, unknown&gt;&gt;</code> | Search for objects |
-|  [get](./kibana-plugin-core-public.savedobjectsclient.get.md) |  | <code>&lt;T = unknown&gt;(type: string, id: string) =&gt; Promise&lt;SimpleSavedObject&lt;T&gt;&gt;</code> | Fetches a single object |
-|  [resolve](./kibana-plugin-core-public.savedobjectsclient.resolve.md) |  | <code>&lt;T = unknown&gt;(type: string, id: string) =&gt; Promise&lt;ResolvedSimpleSavedObject&lt;T&gt;&gt;</code> | Resolves a single object |
+|  [bulkCreate](./kibana-plugin-core-public.savedobjectsclient.bulkcreate.md) |  | (objects?: SavedObjectsBulkCreateObject\[\], options?: SavedObjectsBulkCreateOptions) =&gt; Promise&lt;SavedObjectsBatchResponse&lt;unknown&gt;&gt; | Creates multiple documents at once |
+|  [bulkGet](./kibana-plugin-core-public.savedobjectsclient.bulkget.md) |  | (objects?: Array&lt;{ id: string; type: string; }&gt;) =&gt; Promise&lt;SavedObjectsBatchResponse&lt;unknown&gt;&gt; | Returns an array of objects by id |
+|  [bulkResolve](./kibana-plugin-core-public.savedobjectsclient.bulkresolve.md) |  | &lt;T = unknown&gt;(objects?: Array&lt;{ id: string; type: string; }&gt;) =&gt; Promise&lt;{ resolved\_objects: ResolvedSimpleSavedObject&lt;T&gt;\[\]; }&gt; | Resolves an array of objects by id, using any legacy URL aliases if they exist |
+|  [create](./kibana-plugin-core-public.savedobjectsclient.create.md) |  | &lt;T = unknown&gt;(type: string, attributes: T, options?: SavedObjectsCreateOptions) =&gt; Promise&lt;SimpleSavedObject&lt;T&gt;&gt; | Persists an object |
+|  [delete](./kibana-plugin-core-public.savedobjectsclient.delete.md) |  | (type: string, id: string, options?: SavedObjectsDeleteOptions \| undefined) =&gt; ReturnType&lt;SavedObjectsApi\['delete'\]&gt; | Deletes an object |
+|  [find](./kibana-plugin-core-public.savedobjectsclient.find.md) |  | &lt;T = unknown, A = unknown&gt;(options: SavedObjectsFindOptions) =&gt; Promise&lt;SavedObjectsFindResponsePublic&lt;T, unknown&gt;&gt; | Search for objects |
+|  [get](./kibana-plugin-core-public.savedobjectsclient.get.md) |  | &lt;T = unknown&gt;(type: string, id: string) =&gt; Promise&lt;SimpleSavedObject&lt;T&gt;&gt; | Fetches a single object |
+|  [resolve](./kibana-plugin-core-public.savedobjectsclient.resolve.md) |  | &lt;T = unknown&gt;(type: string, id: string) =&gt; Promise&lt;ResolvedSimpleSavedObject&lt;T&gt;&gt; | Resolves a single object |
 
 ## Methods
 

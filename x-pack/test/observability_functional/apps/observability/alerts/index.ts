@@ -7,19 +7,15 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-
-async function asyncForEach<T>(array: T[], callback: (item: T, index: number) => void) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index);
-  }
-}
+import { asyncForEach } from '../helpers';
 
 const ACTIVE_ALERTS_CELL_COUNT = 78;
-const RECOVERED_ALERTS_CELL_COUNT = 120;
-const TOTAL_ALERTS_CELL_COUNT = 198;
+const RECOVERED_ALERTS_CELL_COUNT = 150;
+const TOTAL_ALERTS_CELL_COUNT = 200;
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const find = getService('find');
 
   describe('Observability alerts', function () {
     this.tags('includeFirefox');
@@ -162,7 +158,7 @@ export default ({ getService }: FtrProviderContext) => {
               'Oct 19, 2021 @ 15:00:41.555',
               '20 minutes',
               '5',
-              '30.73',
+              '30.727896995708154',
               'Failed transaction rate threshold',
             ];
 
@@ -178,10 +174,14 @@ export default ({ getService }: FtrProviderContext) => {
           it('Displays a View in App button', async () => {
             await observability.alerts.common.getAlertsFlyoutViewInAppButtonOrFail();
           });
+
+          it('Displays a View rule details link', async () => {
+            await observability.alerts.common.getAlertsFlyoutViewRuleDetailsLinkOrFail();
+          });
         });
       });
 
-      describe('Cell actions', () => {
+      describe.skip('Cell actions', () => {
         beforeEach(async () => {
           await retry.try(async () => {
             const cells = await observability.alerts.common.getTableCells();
@@ -200,7 +200,7 @@ export default ({ getService }: FtrProviderContext) => {
           await observability.alerts.common.submitQuery('');
         });
 
-        it('Filter for value works', async () => {
+        it.skip('Filter for value works', async () => {
           await (await observability.alerts.common.getFilterForValueButton()).click();
           const queryBarValue = await (
             await observability.alerts.common.getQueryBar()
@@ -213,28 +213,23 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
       });
-    });
 
-    describe('Actions Button', () => {
-      before(async () => {
-        await observability.users.setTestUserRole(
-          observability.users.defineBasicObservabilityRole({
-            observabilityCases: ['read'],
-            logs: ['read'],
-          })
-        );
-        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-        await observability.alerts.common.navigateToTimeWithData();
-      });
+      describe('Actions Button', () => {
+        before(async () => {
+          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+          await observability.alerts.common.navigateToTimeWithData();
+        });
 
-      after(async () => {
-        await observability.users.restoreDefaultTestUserRole();
-        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
-      });
+        after(async () => {
+          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        });
 
-      it('Is disabled when a user has only read privilages', async () => {
-        const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
-        expect(await actionsButton.getAttribute('disabled')).to.be('true');
+        it('Opens rule details page when click on "View Rule Details"', async () => {
+          const actionsButton = await observability.alerts.common.getActionsButtonByIndex(0);
+          await actionsButton.click();
+          await observability.alerts.common.viewRuleDetailsButtonClick();
+          expect(await find.existsByCssSelector('[title="Rules and Connectors"]')).to.eql(true);
+        });
       });
     });
   });

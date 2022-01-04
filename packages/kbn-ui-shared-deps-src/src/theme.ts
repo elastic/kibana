@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { default as v8Light } from '@elastic/eui/dist/eui_theme_amsterdam_light.json';
-import { default as v8Dark } from '@elastic/eui/dist/eui_theme_amsterdam_dark.json';
+/* eslint-disable-next-line @kbn/eslint/module_migration */
+import { default as v8Light } from '@elastic/eui/dist/eui_theme_light.json';
+/* eslint-disable-next-line @kbn/eslint/module_migration */
+import { default as v8Dark } from '@elastic/eui/dist/eui_theme_dark.json';
 
 const globals: any = typeof window === 'undefined' ? {} : window;
 

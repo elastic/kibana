@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { AlertConsumers as AlertConsumersTyped } from '@kbn/rule-data-utils';
-// @ts-expect-error
-import { AlertConsumers as AlertConsumersNonTyped } from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -23,6 +21,7 @@ import type { CoreStart } from '../../../../../../../src/core/public';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
   BulkActionsProp,
+  CreateFieldComponentType,
   TGridCellAction,
   TimelineId,
   TimelineTabs,
@@ -36,7 +35,9 @@ import type {
   RowRenderer,
   AlertStatus,
 } from '../../../../common/types/timeline';
-import { esQuery, DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+
+import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
@@ -48,8 +49,6 @@ import { Sort } from '../body/sort';
 import { InspectButton, InspectButtonContainer } from '../../inspect';
 import { SummaryViewSelector, ViewSelection } from '../event_rendered_view/selector';
 import { TGridLoading, TGridEmpty, TimelineContext } from '../shared';
-
-const AlertConsumers: typeof AlertConsumersTyped = AlertConsumersNonTyped;
 
 const TitleText = styled.span`
   margin-right: 12px;
@@ -95,13 +94,16 @@ const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
 export interface TGridIntegratedProps {
   additionalFilters: React.ReactNode;
+  appId: string;
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
   columns: ColumnHeaderOptions[];
+  createFieldComponent?: CreateFieldComponentType;
   data?: DataPublicPluginStart;
   dataProviders: DataProvider[];
   defaultCellActions?: TGridCellAction[];
   deletedEventIds: Readonly<string[]>;
+  disabledCellActions: string[];
   docValueFields: DocValueFields[];
   end: string;
   entityType: EntityType;
@@ -137,6 +139,7 @@ export interface TGridIntegratedProps {
 
 const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   additionalFilters,
+  appId,
   browserFields,
   bulkActions = true,
   columns,
@@ -144,6 +147,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   dataProviders,
   defaultCellActions,
   deletedEventIds,
+  disabledCellActions,
   docValueFields,
   end,
   entityType,
@@ -152,6 +156,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   globalFullScreen,
   graphEventId,
   graphOverlay = null,
+  createFieldComponent,
   hasAlertsCrud,
   id,
   indexNames,
@@ -191,7 +196,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const justTitle = useMemo(() => <TitleText data-test-subj="title">{title}</TitleText>, [title]);
 
   const combinedQueries = buildCombinedQuery({
-    config: esQuery.getEsQueryConfig(uiSettings),
+    config: getEsQueryConfig(uiSettings),
     dataProviders,
     indexPattern,
     browserFields,
@@ -248,7 +253,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   const filterQuery = useMemo(
     () =>
       getCombinedFilterQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         browserFields,
         dataProviders,
         filters,
@@ -347,10 +352,13 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                       <ScrollableFlexItem grow={1}>
                         <StatefulBody
                           activePage={pageInfo.activePage}
+                          appId={appId}
                           browserFields={browserFields}
                           bulkActions={bulkActions}
+                          createFieldComponent={createFieldComponent}
                           data={nonDeletedEvents}
                           defaultCellActions={defaultCellActions}
+                          disabledCellActions={disabledCellActions}
                           filterQuery={filterQuery}
                           filters={filters}
                           filterStatus={filterStatus}

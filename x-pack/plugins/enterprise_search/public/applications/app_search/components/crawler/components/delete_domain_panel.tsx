@@ -12,7 +12,7 @@ import { useActions, useValues } from 'kea';
 import { EuiButton, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CrawlerSingleDomainLogic } from '../crawler_single_domain_logic';
 import { getDeleteDomainConfirmationMessage } from '../utils';

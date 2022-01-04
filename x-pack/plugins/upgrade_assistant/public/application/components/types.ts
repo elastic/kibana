@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResponseError } from '../lib/api';
+import { ResponseError } from '../../../common/types';
 
 export enum LoadingState {
   Loading,
@@ -13,12 +13,11 @@ export enum LoadingState {
   Error,
 }
 
-export type LevelFilterOption = 'all' | 'critical';
-
-export enum GroupByOption {
-  message = 'message',
-  index = 'index',
-  node = 'node',
+export enum CancelLoadingState {
+  Requested,
+  Loading,
+  Success,
+  Error,
 }
 
 export type DeprecationTableColumns =
@@ -38,4 +37,9 @@ export interface DeprecationLoggingPreviewProps {
   updateError: ResponseError | undefined;
   resendRequest: () => void;
   toggleLogging: () => void;
+}
+
+export interface OverviewStepProps {
+  isComplete: boolean;
+  setIsComplete: (isComplete: boolean) => void;
 }

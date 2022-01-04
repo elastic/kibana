@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ResilientFieldsType } from '../../../common';
+import { ResilientFieldsType } from '../../../common/api';
 import { ICasesConnector } from '../types';
 
 export type ResilientCaseConnector = ICasesConnector<ResilientFieldsType>;

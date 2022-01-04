@@ -16,6 +16,6 @@ export interface FatalErrorInfo
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [message](./kibana-plugin-core-public.fatalerrorinfo.message.md) | <code>string</code> |  |
-|  [stack](./kibana-plugin-core-public.fatalerrorinfo.stack.md) | <code>string &#124; undefined</code> |  |
+|  [message](./kibana-plugin-core-public.fatalerrorinfo.message.md) | string |  |
+|  [stack](./kibana-plugin-core-public.fatalerrorinfo.stack.md) | string \| undefined |  |
 

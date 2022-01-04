@@ -26,7 +26,16 @@ const template: string = `module.exports = {
 };
 `;
 
-const roots: string[] = ['x-pack/plugins', 'packages', 'src/plugins', 'test', 'src'];
+const roots: string[] = [
+  'x-pack/plugins/security_solution/public',
+  'x-pack/plugins/security_solution/server',
+  'x-pack/plugins/security_solution',
+  'x-pack/plugins',
+  'packages',
+  'src/plugins',
+  'test',
+  'src',
+];
 
 export async function runCheckJestConfigsCli() {
   run(
@@ -76,7 +85,9 @@ export async function runCheckJestConfigsCli() {
               modulePath,
             });
 
-            writeFileSync(resolve(root, name, 'jest.config.js'), content);
+            const configPath = resolve(root, name, 'jest.config.js');
+            log.info('created %s', configPath);
+            writeFileSync(configPath, content);
           } else {
             log.warning(`Unable to determind where to place jest.config.js for ${file}`);
           }

@@ -28,11 +28,10 @@ import { EndpointNotice } from '../components/endpoint_notice';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { Sourcerer } from '../../common/components/sourcerer';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
-import { useIsThreatIntelModuleEnabled } from '../containers/overview_cti_links/use_is_threat_intel_module_enabled';
+import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
+import { useTiIntegrations } from '../containers/overview_cti_links/use_ti_integrations';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { RiskyHostLinks } from '../components/overview_risky_host_links';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -77,7 +76,10 @@ const OverviewComponent = () => {
     endpointPrivileges: { canAccessFleet },
   } = useUserPrivileges();
   const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
-  const isThreatIntelModuleEnabled = useIsThreatIntelModuleEnabled();
+  const { tiDataSources: allTiDataSources, isInitiallyLoaded: allTiDataSourcesLoaded } =
+    useAllTiDataSources();
+  const tiIntegrationStatus = useTiIntegrations();
+  const isTiLoaded = tiIntegrationStatus && allTiDataSourcesLoaded;
 
   const riskyHostsEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
 
@@ -96,7 +98,6 @@ const OverviewComponent = () => {
                 <EuiSpacer size="l" />
               </>
             )}
-            <Sourcerer scope={SourcererScopeName.default} />
             <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
               <SidebarFlexItem grow={false}>
                 <StatefulSidebar />
@@ -153,13 +154,16 @@ const OverviewComponent = () => {
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup direction="row">
                       <EuiFlexItem grow={1}>
-                        <ThreatIntelLinkPanel
-                          isThreatIntelModuleEnabled={isThreatIntelModuleEnabled}
-                          deleteQuery={deleteQuery}
-                          from={from}
-                          setQuery={setQuery}
-                          to={to}
-                        />
+                        {isTiLoaded && (
+                          <ThreatIntelLinkPanel
+                            allIntegrationsInstalled={tiIntegrationStatus?.allIntegrationsInstalled}
+                            allTiDataSources={allTiDataSources}
+                            deleteQuery={deleteQuery}
+                            from={from}
+                            setQuery={setQuery}
+                            to={to}
+                          />
+                        )}
                       </EuiFlexItem>
                       <EuiFlexItem grow={1}>
                         {riskyHostsEnabled && (

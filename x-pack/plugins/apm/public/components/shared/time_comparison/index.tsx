@@ -14,10 +14,12 @@ import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common'
 import { useUiTracker } from '../../../../../observability/public';
 import { TimeRangeComparisonEnum } from '../../../../common/runtime_types/comparison_type_rt';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import * as urlHelpers from '../../shared/Links/url_helpers';
+import { getComparisonEnabled } from './get_comparison_enabled';
 import { getComparisonTypes } from './get_comparison_types';
 import { getTimeRangeComparison } from './get_time_range_comparison';
 
@@ -113,12 +115,13 @@ export function getSelectOptions({
 }
 
 export function TimeComparison() {
+  const { core } = useApmPluginContext();
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const history = useHistory();
   const { isSmall } = useBreakpoints();
   const {
     query: { rangeFrom, rangeTo },
-  } = useApmParams('/services', '/backends/*', '/services/{serviceName}');
+  } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
 
   const { exactStart, exactEnd } = useTimeRange({
     rangeFrom,
@@ -138,7 +141,13 @@ export function TimeComparison() {
   if (comparisonEnabled === undefined || comparisonType === undefined) {
     urlHelpers.replace(history, {
       query: {
-        comparisonEnabled: comparisonEnabled === false ? 'false' : 'true',
+        comparisonEnabled:
+          getComparisonEnabled({
+            core,
+            urlComparisonEnabled: comparisonEnabled,
+          }) === false
+            ? 'false'
+            : 'true',
         comparisonType: comparisonType ? comparisonType : comparisonTypes[0],
       },
     });

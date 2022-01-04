@@ -27,13 +27,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return text;
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/116537
-  describe.skip('Search session client side cache', () => {
+  describe('Search session client side cache', () => {
     const appId = 'searchExamples';
 
     before(async function () {
       await PageObjects.common.navigateToApp(appId, { insertTimestamp: false });
-      await comboBox.set('indexPatternSelector', 'logstash-*');
+      await comboBox.setCustom('dataViewSelector', 'logstash-*');
       await comboBox.set('searchBucketField', 'extension.raw');
       await comboBox.set('searchMetricField', 'phpmemory');
     });

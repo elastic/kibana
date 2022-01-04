@@ -13,19 +13,19 @@ import { AlertParamType } from '../../../common/enums';
 import { AlertParamPercentage } from '../flyout_expressions/alert_param_percentage';
 
 export interface Props {
-  alertParams: { [property: string]: any };
-  setAlertParams: (property: string, value: any) => void;
-  setAlertProperty: (property: string, value: any) => void;
+  ruleParams: { [property: string]: any };
+  setRuleParams: (property: string, value: any) => void;
+  setRuleProperty: (property: string, value: any) => void;
   errors: { [key: string]: string[] };
   paramDetails: CommonAlertParamDetails;
 }
 
 export const Expression: React.FC<Props> = (props) => {
-  const { alertParams, paramDetails, setAlertParams, errors } = props;
+  const { ruleParams, paramDetails, setRuleParams, errors } = props;
 
-  const alertParamsUi = Object.keys(alertParams).map((alertParamName) => {
+  const alertParamsUi = Object.keys(ruleParams).map((alertParamName) => {
     const details = paramDetails[alertParamName];
-    const value = alertParams[alertParamName];
+    const value = ruleParams[alertParamName];
 
     switch (details?.type) {
       case AlertParamType.Duration:
@@ -36,7 +36,7 @@ export const Expression: React.FC<Props> = (props) => {
             duration={value}
             label={details.label}
             errors={errors[alertParamName]}
-            setAlertParams={setAlertParams}
+            setRuleParams={setRuleParams}
           />
         );
       case AlertParamType.Percentage:
@@ -47,7 +47,7 @@ export const Expression: React.FC<Props> = (props) => {
             label={details.label}
             percentage={value}
             errors={errors[alertParamName]}
-            setAlertParams={setAlertParams}
+            setRuleParams={setRuleParams}
           />
         );
     }
@@ -60,3 +60,7 @@ export const Expression: React.FC<Props> = (props) => {
     </Fragment>
   );
 };
+
+// for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default Expression;

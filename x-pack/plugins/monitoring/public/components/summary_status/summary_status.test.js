@@ -8,7 +8,6 @@
 import React from 'react';
 import { renderWithIntl } from '@kbn/test/jest';
 import { SummaryStatus } from './summary_status';
-jest.mock(`@elastic/eui/lib/components/form/form_row/make_id`, () => () => `generated-id`);
 
 describe('Summary Status Component', () => {
   it('should render metrics in a summary bar', () => {

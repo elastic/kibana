@@ -15,6 +15,6 @@ export interface ChromeNavControl
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [mount](./kibana-plugin-core-public.chromenavcontrol.mount.md) | <code>MountPoint</code> |  |
-|  [order](./kibana-plugin-core-public.chromenavcontrol.order.md) | <code>number</code> |  |
+|  [mount](./kibana-plugin-core-public.chromenavcontrol.mount.md) | MountPoint |  |
+|  [order?](./kibana-plugin-core-public.chromenavcontrol.order.md) | number | <i>(Optional)</i> |
 

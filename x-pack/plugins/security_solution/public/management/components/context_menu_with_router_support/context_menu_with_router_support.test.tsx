@@ -118,6 +118,17 @@ describe('When using the ContextMenuWithRouterSupport component', () => {
     expect(renderResult.getByTestId('testMenu-item-2-truncateWrapper')).not.toBeNull();
   });
 
+  it('should render popup menu with a fixed width that matches the `maxWidth` value', () => {
+    render({ maxWidth: '300px', fixedWidth: true });
+    clickMenuTriggerButton();
+    const contextMenuPanelStyles = getContextMenuPanel()!
+      .querySelector('.euiContextMenuPanel')!
+      .getAttribute('style');
+
+    expect(contextMenuPanelStyles).toMatch(/width:\W*300px/);
+    expect(contextMenuPanelStyles).not.toMatch(/max-width:\W*300px/);
+  });
+
   it('should navigate using the router when item is clicked', () => {
     render();
     clickMenuTriggerButton();

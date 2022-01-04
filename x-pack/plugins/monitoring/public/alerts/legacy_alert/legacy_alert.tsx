@@ -6,18 +6,16 @@
  */
 
 import React from 'react';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
+import type { RuleTypeModel } from '../../../../triggers_actions_ui/public';
 import {
   LEGACY_RULES,
   LEGACY_RULE_DETAILS,
   RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
-import { MonitoringConfig } from '../../types';
-import { Expression } from './expression';
-import { Props } from '../components/param_details_form/expression';
+import type { MonitoringConfig } from '../../types';
+import { LazyExpression, LazyExpressionProps } from './lazy_expression';
 
-export function createLegacyAlertTypes(config: MonitoringConfig): AlertTypeModel[] {
+export function createLegacyAlertTypes(config: MonitoringConfig): RuleTypeModel[] {
   return LEGACY_RULES.map((legacyAlert) => {
     return {
       id: legacyAlert,
@@ -26,7 +24,9 @@ export function createLegacyAlertTypes(config: MonitoringConfig): AlertTypeModel
       documentationUrl(docLinks) {
         return `${docLinks.links.monitoring.alertsKibanaClusterAlerts}`;
       },
-      alertParamsExpression: (props: Props) => <Expression {...props} config={config} />,
+      ruleParamsExpression: (props: LazyExpressionProps) => (
+        <LazyExpression {...props} config={config} />
+      ),
       defaultActionMessage: '{{context.internalFullMessage}}',
       validate: () => ({ errors: {} }),
       requiresAppContext: RULE_REQUIRES_APP_CONTEXT,

@@ -731,7 +731,7 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async checkPreviewIsDisabled(): Promise<void> {
     this.log.debug(`Check no data message is present`);
-    await this.testSubjects.existOrFail('timeseriesVis > visNoResult', { timeout: 5000 });
+    await this.testSubjects.existOrFail('visualization-error', { timeout: 5000 });
   }
 
   public async cloneSeries(nth: number = 0): Promise<void> {
@@ -876,6 +876,10 @@ export class VisualBuilderPageObject extends FtrService {
   public async setFilterRatioOption(optionType: 'Numerator' | 'Denominator', query: string) {
     const optionInput = await this.testSubjects.find(`filterRatio${optionType}Input`);
     await optionInput.type(query);
+  }
+
+  public async clickSeriesLegendItem(name: string) {
+    await this.find.clickByCssSelector(`[data-ech-series-name="${name}"] .echLegendItem__label`);
   }
 
   public async toggleNewChartsLibraryWithDebug(enabled: boolean) {

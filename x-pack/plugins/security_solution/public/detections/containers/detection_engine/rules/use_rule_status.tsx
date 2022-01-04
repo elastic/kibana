@@ -9,17 +9,12 @@ import { useEffect, useRef, useState } from 'react';
 import { isNotFoundError } from '@kbn/securitysolution-t-grid';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
-import { RuleStatusRowItemType } from '../../../pages/detection_engine/rules/all/columns';
-import { getRuleStatusById, getRulesStatusByIds } from './api';
+import { getRuleStatusById } from './api';
 import * as i18n from './translations';
-import { RuleStatus, Rules } from './types';
+import { RuleStatus } from './types';
 
 type Func = (ruleId: string) => void;
 export type ReturnRuleStatus = [boolean, RuleStatus | null, Func | null];
-export interface ReturnRulesStatuses {
-  loading: boolean;
-  rulesStatuses: RuleStatusRowItemType[];
-}
 
 /**
  * Hook for using to get a Rule from the Detection Engine API
@@ -69,61 +64,4 @@ export const useRuleStatus = (id: string | undefined | null): ReturnRuleStatus =
   }, [id, addError]);
 
   return [loading, ruleStatus, fetchRuleStatus.current];
-};
-
-/**
- * Hook for using to get all the statuses for all given rule ids
- *
- * @param ids desired Rule ID's (not rule_id)
- *
- */
-export const useRulesStatuses = (rules: Rules): ReturnRulesStatuses => {
-  const [rulesStatuses, setRuleStatuses] = useState<RuleStatusRowItemType[]>([]);
-  const [loading, setLoading] = useState(false);
-  const { addError } = useAppToasts();
-
-  useEffect(() => {
-    let isSubscribed = true;
-    const abortCtrl = new AbortController();
-
-    const fetchData = async (ids: string[]) => {
-      try {
-        setLoading(true);
-        const ruleStatusesResponse = await getRulesStatusByIds({
-          ids,
-          signal: abortCtrl.signal,
-        });
-
-        if (isSubscribed) {
-          setRuleStatuses(
-            rules.map((rule) => ({
-              id: rule.id,
-              activate: rule.enabled,
-              name: rule.name,
-              ...ruleStatusesResponse[rule.id],
-            }))
-          );
-        }
-      } catch (error) {
-        if (isSubscribed) {
-          setRuleStatuses([]);
-          addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE });
-        }
-      }
-      if (isSubscribed) {
-        setLoading(false);
-      }
-    };
-
-    if (rules.length > 0) {
-      fetchData(rules.map((r) => r.id));
-    }
-
-    return () => {
-      isSubscribed = false;
-      abortCtrl.abort();
-    };
-  }, [rules, addError]);
-
-  return { loading, rulesStatuses };
 };

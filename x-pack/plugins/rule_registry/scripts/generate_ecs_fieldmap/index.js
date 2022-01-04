@@ -19,7 +19,7 @@ const exec = util.promisify(execCb);
 const ecsDir = path.resolve(__dirname, '../../../../../../ecs');
 const ecsYamlFilename = path.join(ecsDir, 'generated/ecs/ecs_flat.yml');
 
-const outputDir = path.join(__dirname, '../../common/field_map');
+const outputDir = path.join(__dirname, '../../common/assets/field_maps');
 
 const outputFieldMapFilename = path.join(outputDir, 'ecs_field_map.ts');
 

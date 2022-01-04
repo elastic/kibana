@@ -20,7 +20,7 @@ export function WebApplicationSelect() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi({
-          endpoint: 'GET /api/apm/rum-client/services',
+          endpoint: 'GET /internal/apm/ux/services',
           params: {
             query: {
               start,

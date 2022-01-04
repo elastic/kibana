@@ -6,8 +6,11 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+
+// Used to spin up a docker container with package registry service that will be used by fleet
+export const packageRegistryPort = 1234;
+
 async function config({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
     require.resolve('../../../../test/common/config.js')
@@ -38,6 +41,11 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.warnLegacyBrowsers=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
+
+        // Fleet config
+        `--xpack.fleet.packages.0.name=endpoint`,
+        `--xpack.fleet.packages.0.version=latest`,
+        `--xpack.fleet.registryUrl=http://localhost:${packageRegistryPort}`,
       ],
     },
   };

@@ -18,7 +18,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
-  describe('Listing of Reports', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/75044
+  describe.skip('Listing of Reports', function () {
     before(async () => {
       await security.testUser.setRoles([
         'kibana_admin', // to access stack management
@@ -83,63 +84,63 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         Array [
           Object {
             "actions": "",
-            "createdAt": "2021-07-19 @ 10:29 PMtest_user",
-            "report": "Automated reportsearch",
-            "status": "Completed at 2021-07-19 @ 10:29 PM See report info for warnings. This is a deprecated export type. Automation of this report will need to be re-created for compatibility with future versions of Kibana.",
+            "createdAt": "2021-07-19 @ 10:29 PM",
+            "report": "Automated report",
+            "status": "Done, warnings detected",
           },
           Object {
             "actions": "",
-            "createdAt": "2021-07-19 @ 06:47 PMtest_user",
-            "report": "Discover search [2021-07-19T11:47:35.995-07:00]search",
-            "status": "Completed at 2021-07-19 @ 06:47 PM",
+            "createdAt": "2021-07-19 @ 06:47 PM",
+            "report": "Discover search [2021-07-19T11:47:35.995-07:00]",
+            "status": "Done",
           },
           Object {
             "actions": "",
-            "createdAt": "2021-07-19 @ 06:46 PMtest_user",
-            "report": "Discover search [2021-07-19T11:46:00.132-07:00]search",
-            "status": "Completed at 2021-07-19 @ 06:46 PM See report info for warnings.",
+            "createdAt": "2021-07-19 @ 06:46 PM",
+            "report": "Discover search [2021-07-19T11:46:00.132-07:00]",
+            "status": "Done, warnings detected",
           },
           Object {
             "actions": "",
-            "createdAt": "2021-07-19 @ 06:44 PMtest_user",
-            "report": "Discover search [2021-07-19T11:44:48.670-07:00]search",
-            "status": "Completed at 2021-07-19 @ 06:44 PM See report info for warnings.",
+            "createdAt": "2021-07-19 @ 06:44 PM",
+            "report": "Discover search [2021-07-19T11:44:48.670-07:00]",
+            "status": "Done, warnings detected",
           },
           Object {
             "actions": "",
-            "createdAt": "2021-07-19 @ 06:41 PMtest_user",
-            "report": "[Flights] Global Flight Dashboarddashboard",
-            "status": "Pending at 2021-07-19 @ 06:41 PM Waiting for job to process.",
+            "createdAt": "2021-07-19 @ 06:41 PM",
+            "report": "[Flights] Global Flight Dashboard",
+            "status": "Pending",
           },
           Object {
             "actions": "",
-            "createdAt": "2021-07-19 @ 06:41 PMtest_user",
-            "report": "[Flights] Global Flight Dashboarddashboard",
-            "status": "Failed at 2021-07-19 @ 06:43 PM See report info for error details.",
+            "createdAt": "2021-07-19 @ 06:41 PM",
+            "report": "[Flights] Global Flight Dashboard",
+            "status": "Failed",
           },
           Object {
             "actions": "",
-            "createdAt": "2021-07-19 @ 06:41 PMtest_user",
-            "report": "[Flights] Global Flight Dashboarddashboard",
-            "status": "Completed at 2021-07-19 @ 06:41 PM See report info for warnings.",
+            "createdAt": "2021-07-19 @ 06:41 PM",
+            "report": "[Flights] Global Flight Dashboard",
+            "status": "Done, warnings detected",
           },
           Object {
             "actions": "",
-            "createdAt": "2021-07-19 @ 06:38 PMtest_user",
-            "report": "[Flights] Global Flight Dashboarddashboard",
-            "status": "Completed at 2021-07-19 @ 06:39 PM See report info for warnings.",
+            "createdAt": "2021-07-19 @ 06:38 PM",
+            "report": "[Flights] Global Flight Dashboard",
+            "status": "Done, warnings detected",
           },
           Object {
             "actions": "",
-            "createdAt": "2021-07-19 @ 06:38 PMtest_user",
-            "report": "[Flights] Global Flight Dashboarddashboard",
-            "status": "Completed at 2021-07-19 @ 06:39 PM",
+            "createdAt": "2021-07-19 @ 06:38 PM",
+            "report": "[Flights] Global Flight Dashboard",
+            "status": "Done",
           },
           Object {
             "actions": "",
-            "createdAt": "2021-07-19 @ 06:38 PMtest_user",
-            "report": "[Flights] Global Flight Dashboarddashboard",
-            "status": "Completed at 2021-07-19 @ 06:38 PM",
+            "createdAt": "2021-07-19 @ 06:38 PM",
+            "report": "[Flights] Global Flight Dashboard",
+            "status": "Done",
           },
         ]
       `);

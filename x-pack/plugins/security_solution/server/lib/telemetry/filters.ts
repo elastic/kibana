@@ -67,6 +67,7 @@ const allowlistBaseEventFields: AllowlistFields = {
     hash: true,
     Ext: {
       code_signature: true,
+      header_bytes: true,
       header_data: true,
       malware_classification: true,
       malware_signature: true,

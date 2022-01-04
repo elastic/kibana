@@ -6,8 +6,10 @@
  */
 
 import { EuiHorizontalRule } from '@elastic/eui';
-import darkTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import {
+  euiLightVars as lightTheme,
+  euiDarkVars as darkTheme,
+} from '@kbn/ui-shared-deps-src/theme';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 

@@ -16,11 +16,11 @@ create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOpt
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> |  |
-|  attributes | <code>T</code> |  |
-|  options | <code>SavedObjectsCreateOptions</code> |  |
+|  type | string |  |
+|  attributes | T |  |
+|  options | SavedObjectsCreateOptions |  |
 
 <b>Returns:</b>
 
-`Promise<SavedObject<T>>`
+Promise&lt;SavedObject&lt;T&gt;&gt;
 

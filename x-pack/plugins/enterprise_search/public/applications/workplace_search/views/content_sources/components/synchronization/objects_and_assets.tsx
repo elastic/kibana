@@ -22,10 +22,10 @@ import {
 } from '@elastic/eui';
 
 import { SAVE_BUTTON_LABEL } from '../../../../../shared/constants';
+import { docLinks } from '../../../../../shared/doc_links';
 import { UnsavedChangesPrompt } from '../../../../../shared/unsaved_changes_prompt';
 import { ViewContentHeader } from '../../../../components/shared/view_content_header';
 import { NAV, RESET_BUTTON } from '../../../../constants';
-import { OBJECTS_AND_ASSETS_DOCS_URL } from '../../../../routes';
 import {
   LEARN_MORE_LINK,
   SYNC_MANAGEMENT_CONTENT_EXTRACTION_LABEL,
@@ -87,7 +87,7 @@ export const ObjectsAndAssets: React.FC = () => {
         description={
           <>
             {SOURCE_OBJECTS_AND_ASSETS_DESCRIPTION}{' '}
-            <EuiLink href={OBJECTS_AND_ASSETS_DOCS_URL} external>
+            <EuiLink href={docLinks.workplaceSearchSynch} external>
               {LEARN_MORE_LINK}
             </EuiLink>
           </>

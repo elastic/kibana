@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useReducer } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ListItemComponent } from './list_item';
 import { AndOrBadge } from '../and_or_badge';

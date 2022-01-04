@@ -59,7 +59,7 @@ describe('captureURLApp', () => {
     captureURLApp.create(coreSetupMock);
 
     const [[{ mount }]] = coreSetupMock.application.register.mock.calls;
-    await mount(coreMock.createAppMountParamters());
+    await mount(coreMock.createAppMountParameters());
 
     expect(mockLocationReplace).toHaveBeenCalledTimes(1);
     expect(mockLocationReplace).toHaveBeenCalledWith(
@@ -77,7 +77,7 @@ describe('captureURLApp', () => {
     captureURLApp.create(coreSetupMock);
 
     const [[{ mount }]] = coreSetupMock.application.register.mock.calls;
-    await mount(coreMock.createAppMountParamters());
+    await mount(coreMock.createAppMountParameters());
 
     expect(mockLocationReplace).toHaveBeenCalledTimes(1);
     expect(mockLocationReplace).toHaveBeenCalledWith(

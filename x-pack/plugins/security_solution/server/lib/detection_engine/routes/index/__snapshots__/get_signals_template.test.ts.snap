@@ -195,18 +195,6 @@ Object {
       "path": "signal.rule.references",
       "type": "alias",
     },
-    "kibana.alert.rule.risk_score_mapping.field": Object {
-      "path": "signal.rule.risk_score_mapping.field",
-      "type": "alias",
-    },
-    "kibana.alert.rule.risk_score_mapping.operator": Object {
-      "path": "signal.rule.risk_score_mapping.operator",
-      "type": "alias",
-    },
-    "kibana.alert.rule.risk_score_mapping.value": Object {
-      "path": "signal.rule.risk_score_mapping.value",
-      "type": "alias",
-    },
     "kibana.alert.rule.rule_id": Object {
       "path": "signal.rule.rule_id",
       "type": "alias",
@@ -217,22 +205,6 @@ Object {
     },
     "kibana.alert.rule.saved_id": Object {
       "path": "signal.rule.saved_id",
-      "type": "alias",
-    },
-    "kibana.alert.rule.severity_mapping.field": Object {
-      "path": "signal.rule.severity_mapping.field",
-      "type": "alias",
-    },
-    "kibana.alert.rule.severity_mapping.operator": Object {
-      "path": "signal.rule.severity_mapping.operator",
-      "type": "alias",
-    },
-    "kibana.alert.rule.severity_mapping.severity": Object {
-      "path": "signal.rule.severity_mapping.severity",
-      "type": "alias",
-    },
-    "kibana.alert.rule.severity_mapping.value": Object {
-      "path": "signal.rule.severity_mapping.value",
       "type": "alias",
     },
     "kibana.alert.rule.tags": Object {
@@ -610,10 +582,15 @@ Object {
     "test-index-*",
   ],
   "template": Object {
+    "aliases": Object {
+      ".alerts-security.alerts-space-id": Object {
+        "is_write_index": false,
+      },
+    },
     "mappings": Object {
       "_meta": Object {
         "aliases_version": 1,
-        "version": 57,
+        "version": 67,
       },
       "dynamic": false,
       "properties": Object {
@@ -2478,18 +2455,6 @@ Object {
           "path": "signal.rule.references",
           "type": "alias",
         },
-        "kibana.alert.rule.risk_score_mapping.field": Object {
-          "path": "signal.rule.risk_score_mapping.field",
-          "type": "alias",
-        },
-        "kibana.alert.rule.risk_score_mapping.operator": Object {
-          "path": "signal.rule.risk_score_mapping.operator",
-          "type": "alias",
-        },
-        "kibana.alert.rule.risk_score_mapping.value": Object {
-          "path": "signal.rule.risk_score_mapping.value",
-          "type": "alias",
-        },
         "kibana.alert.rule.rule_id": Object {
           "path": "signal.rule.rule_id",
           "type": "alias",
@@ -2500,22 +2465,6 @@ Object {
         },
         "kibana.alert.rule.saved_id": Object {
           "path": "signal.rule.saved_id",
-          "type": "alias",
-        },
-        "kibana.alert.rule.severity_mapping.field": Object {
-          "path": "signal.rule.severity_mapping.field",
-          "type": "alias",
-        },
-        "kibana.alert.rule.severity_mapping.operator": Object {
-          "path": "signal.rule.severity_mapping.operator",
-          "type": "alias",
-        },
-        "kibana.alert.rule.severity_mapping.severity": Object {
-          "path": "signal.rule.severity_mapping.severity",
-          "type": "alias",
-        },
-        "kibana.alert.rule.severity_mapping.value": Object {
-          "path": "signal.rule.severity_mapping.value",
           "type": "alias",
         },
         "kibana.alert.rule.tags": Object {
@@ -6348,6 +6297,6 @@ Object {
       },
     },
   },
-  "version": 57,
+  "version": 67,
 }
 `;

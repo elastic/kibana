@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy, PackageInfo } from '../../../../types';
 

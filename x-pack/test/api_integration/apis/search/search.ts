@@ -250,7 +250,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('delete', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/119272
+    describe.skip('delete', () => {
       it('should return 404 when no search id provided', async () => {
         await supertest.delete(`/internal/search/ese`).set('kbn-xsrf', 'foo').send().expect(404);
       });

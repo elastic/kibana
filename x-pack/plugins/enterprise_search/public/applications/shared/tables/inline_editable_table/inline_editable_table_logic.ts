@@ -20,7 +20,8 @@ interface InlineEditableTableActions<Item extends ItemWithAnID> {
   saveExistingItem(): void;
   saveNewItem(): void;
   setEditingItemValue(newValue: Item): { item: Item };
-  setFormErrors(formErrors: FormErrors): { formErrors: FormErrors };
+  setFieldErrors(fieldErrors: FormErrors): { fieldErrors: FormErrors };
+  setRowErrors(rowErrors: string[]): { rowErrors: string[] };
 }
 
 const generateEmptyItem = <Item extends ItemWithAnID>(
@@ -39,12 +40,13 @@ interface InlineEditableTableValues<Item extends ItemWithAnID> {
   // TODO we should editingItemValue have editingItemValue and editingItemId should be a selector
   editingItemId: Item['id'] | null; // editingItem is null when the user is editing a new but not saved item
   editingItemValue: Item | null;
-  formErrors: FormErrors;
+  fieldErrors: FormErrors;
+  rowErrors: string[];
   isEditingUnsavedItem: boolean;
   doesEditingItemValueContainEmptyProperty: boolean;
 }
 
-interface InlineEditableTableProps<Item extends ItemWithAnID> {
+export interface InlineEditableTableProps<Item extends ItemWithAnID> {
   columns: Array<InlineEditableTableColumn<Item>>;
   instanceId: string;
   // TODO Because these callbacks are params, they are only set on the logic once (i.e., they are cached)
@@ -75,7 +77,8 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
     saveExistingItem: true,
     saveNewItem: true,
     setEditingItemValue: (newValue) => ({ item: newValue }),
-    setFormErrors: (formErrors) => ({ formErrors }),
+    setFieldErrors: (fieldErrors) => ({ fieldErrors }),
+    setRowErrors: (rowErrors) => ({ rowErrors }),
   }),
   reducers: ({ props: { columns } }) => ({
     isEditing: [
@@ -103,12 +106,20 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
         setEditingItemValue: (_, { item }) => item,
       },
     ],
-    formErrors: [
+    fieldErrors: [
       {},
       {
         doneEditing: () => ({}),
         setEditingItemValue: () => ({}),
-        setFormErrors: (_, { formErrors }) => formErrors,
+        setFieldErrors: (_, { fieldErrors }) => fieldErrors,
+      },
+    ],
+    rowErrors: [
+      [],
+      {
+        doneEditing: () => [],
+        setEditingItemValue: () => [],
+        setRowErrors: (_, { rowErrors }) => rowErrors,
       },
     ],
   }),
@@ -144,7 +155,7 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
       const errors: FormErrors =
         typeof validateItem === 'undefined' ? {} : validateItem(itemToSave);
       if (Object.keys(errors).length) {
-        actions.setFormErrors(errors);
+        actions.setFieldErrors(errors);
       } else {
         onAdd(itemToSave, actions.doneEditing);
       }
@@ -161,7 +172,7 @@ export const InlineEditableTableLogic = kea<InlineEditableTableLogicType<ItemWit
       const errors: FormErrors =
         typeof validateItem === 'undefined' ? {} : validateItem(itemToSave);
       if (Object.keys(errors).length) {
-        actions.setFormErrors(errors);
+        actions.setFieldErrors(errors);
       } else {
         onUpdate(itemToSave, actions.doneEditing);
       }

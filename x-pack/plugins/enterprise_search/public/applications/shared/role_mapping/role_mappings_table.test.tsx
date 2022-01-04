@@ -39,33 +39,15 @@ describe('RoleMappingsTable', () => {
     accessHeader: 'access',
     roleMappings,
     addMappingButton: <button />,
-    shouldShowAuthProvider: true,
     initializeRoleMapping,
     handleDeleteMapping,
   };
 
-  it('renders with "shouldShowAuthProvider" true', () => {
+  it('renders', () => {
     const wrapper = mount(<RoleMappingsTable {...props} />);
 
     expect(wrapper.find(EuiInMemoryTable)).toHaveLength(1);
-    expect(wrapper.find(EuiTableHeaderCell)).toHaveLength(6);
-  });
-
-  it('renders with "shouldShowAuthProvider" false', () => {
-    const wrapper = mount(<RoleMappingsTable {...props} shouldShowAuthProvider={false} />);
-
-    expect(wrapper.find(EuiInMemoryTable)).toHaveLength(1);
     expect(wrapper.find(EuiTableHeaderCell)).toHaveLength(5);
-  });
-
-  it('renders auth provider display names', () => {
-    const roleMappingWithAuths = {
-      ...wsRoleMapping,
-      authProvider: ['saml', 'native'],
-    };
-    const wrapper = mount(<RoleMappingsTable {...props} roleMappings={[roleMappingWithAuths]} />);
-
-    expect(wrapper.find('[data-test-subj="ProviderSpecificList"]')).toHaveLength(1);
   });
 
   it('handles manage click', () => {

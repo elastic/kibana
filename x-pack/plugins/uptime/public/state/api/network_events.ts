@@ -11,12 +11,13 @@ import {
   SyntheticsNetworkEventsApiResponse,
   SyntheticsNetworkEventsApiResponseType,
 } from '../../../common/runtime_types';
+import { API_URLS } from '../../../common/constants';
 
 export async function fetchNetworkEvents(
   params: FetchNetworkEventsParams
 ): Promise<SyntheticsNetworkEventsApiResponse> {
   return (await apiService.get(
-    `/api/uptime/network_events`,
+    API_URLS.NETWORK_EVENTS,
     {
       checkGroup: params.checkGroup,
       stepIndex: params.stepIndex,
