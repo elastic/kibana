@@ -37,6 +37,7 @@ export const MonitorConfig = () => {
   return (
     <>
       <MonitorFields />
+
       <ActionBarPortal monitor={policyConfig[monitorType]} isValid={isValid} />
     </>
   );

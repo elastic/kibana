@@ -72,7 +72,7 @@ export const ActionBar = ({ monitor, isValid, onSave }: Props) => {
       notifications.toasts.success({
         title: (
           <p data-test-subj="uptimeAddMonitorSuccess">
-            {monitorId ? MONITOR_EDITED_SUCCESS_LABEL : MONITOR_SUCCESS_LABEL}
+            {monitorId ? MONITOR_UPDATED_SUCCESS_LABEL : MONITOR_SUCCESS_LABEL}
           </p>
         ),
         toastLifeTimeMs: 3000,
@@ -92,7 +92,7 @@ export const ActionBar = ({ monitor, isValid, onSave }: Props) => {
               color="ghost"
               size="s"
               iconType="cross"
-              href={`${basePath}/app/uptime/manage-monitors`}
+              href={`${basePath}/app/uptime/${MONITOR_MANAGEMENT}`}
             >
               {DISCARD_LABEL}
             </EuiButtonEmpty>
@@ -139,10 +139,10 @@ const MONITOR_SUCCESS_LABEL = i18n.translate(
   }
 );
 
-const MONITOR_EDITED_SUCCESS_LABEL = i18n.translate(
+const MONITOR_UPDATED_SUCCESS_LABEL = i18n.translate(
   'xpack.uptime.monitorManagement.monitorEditedSuccessMessage',
   {
-    defaultMessage: 'Monitor edited successfully.',
+    defaultMessage: 'Monitor updated successfully.',
   }
 );
 
