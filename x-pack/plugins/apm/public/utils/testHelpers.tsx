@@ -20,7 +20,6 @@ import {
   ESSearchRequest,
   ESSearchResponse,
 } from '../../../../../src/core/types/elasticsearch';
-import { PromiseReturnType } from '../../../observability/typings/common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMConfig } from '../../server';
 import { UxUIFilters } from '../../typings/ui_filters';
@@ -202,7 +201,7 @@ export async function inspectSearchParams(
   };
 }
 
-export type SearchParamsMock = PromiseReturnType<typeof inspectSearchParams>;
+export type SearchParamsMock = Awaited<ReturnType<typeof inspectSearchParams>>;
 
 export function renderWithTheme(
   component: React.ReactNode,
