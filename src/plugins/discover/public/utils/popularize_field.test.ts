@@ -7,7 +7,7 @@
  */
 
 import { Capabilities } from 'kibana/public';
-import { IndexPattern, IndexPatternsService } from '../../../data/public';
+import { DataView, DataViewsService } from '../../../data/public';
 import { popularizeField } from './popularize_field';
 
 const capabilities = {
@@ -18,13 +18,13 @@ const capabilities = {
 
 describe('Popularize field', () => {
   test('returns undefined if index pattern lacks id', async () => {
-    const indexPattern = {} as unknown as IndexPattern;
+    const indexPattern = {} as unknown as DataView;
     const fieldName = '@timestamp';
-    const indexPatternsService = {} as unknown as IndexPatternsService;
+    const DataViewsService = {} as unknown as DataViewsService;
     const result = await popularizeField(
       indexPattern,
       fieldName,
-      indexPatternsService,
+      DataViewsService,
       capabilities
     );
     expect(result).toBeUndefined();
@@ -35,13 +35,13 @@ describe('Popularize field', () => {
       fields: {
         getByName: () => {},
       },
-    } as unknown as IndexPattern;
+    } as unknown as DataView;
     const fieldName = '@timestamp';
-    const indexPatternsService = {} as unknown as IndexPatternsService;
+    const DataViewsService = {} as unknown as DataViewsService;
     const result = await popularizeField(
       indexPattern,
       fieldName,
-      indexPatternsService,
+      DataViewsService,
       capabilities
     );
     expect(result).toBeUndefined();
@@ -56,15 +56,15 @@ describe('Popularize field', () => {
       fields: {
         getByName: () => field,
       },
-    } as unknown as IndexPattern;
+    } as unknown as DataView;
     const fieldName = '@timestamp';
-    const indexPatternsService = {
+    const DataViewsService = {
       updateSavedObject: async () => {},
-    } as unknown as IndexPatternsService;
+    } as unknown as DataViewsService;
     const result = await popularizeField(
       indexPattern,
       fieldName,
-      indexPatternsService,
+      DataViewsService,
       capabilities
     );
     expect(result).toBeUndefined();
@@ -80,17 +80,17 @@ describe('Popularize field', () => {
       fields: {
         getByName: () => field,
       },
-    } as unknown as IndexPattern;
+    } as unknown as DataView;
     const fieldName = '@timestamp';
-    const indexPatternsService = {
+    const DataViewsService = {
       updateSavedObject: async () => {
         throw new Error('unknown error');
       },
-    } as unknown as IndexPatternsService;
+    } as unknown as DataViewsService;
     const result = await popularizeField(
       indexPattern,
       fieldName,
-      indexPatternsService,
+      DataViewsService,
       capabilities
     );
     expect(result).toBeUndefined();
@@ -105,16 +105,16 @@ describe('Popularize field', () => {
       fields: {
         getByName: () => field,
       },
-    } as unknown as IndexPattern;
+    } as unknown as DataView;
     const fieldName = '@timestamp';
-    const indexPatternsService = {
+    const DataViewsService = {
       updateSavedObject: jest.fn(),
-    } as unknown as IndexPatternsService;
-    const result = await popularizeField(indexPattern, fieldName, indexPatternsService, {
+    } as unknown as DataViewsService;
+    const result = await popularizeField(indexPattern, fieldName, DataViewsService, {
       indexPatterns: { save: false },
     } as unknown as Capabilities);
     expect(result).toBeUndefined();
-    expect(indexPatternsService.updateSavedObject).not.toHaveBeenCalled();
+    expect(DataViewsService.updateSavedObject).not.toHaveBeenCalled();
     expect(field.count).toEqual(0);
   });
 });

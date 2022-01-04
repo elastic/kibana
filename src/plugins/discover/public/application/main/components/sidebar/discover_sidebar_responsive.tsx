@@ -29,7 +29,7 @@ import {
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { IndexPatternAttributes } from '../../../../../../data/common';
 import { SavedObject } from '../../../../../../../core/types';
-import { IndexPatternField, IndexPattern } from '../../../../../../data/public';
+import { DataViewField, DataView } from '../../../../../../data/public';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { DiscoverServices } from '../../../../build_services';
@@ -67,7 +67,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Callback function when adding a filter from sidebar
    */
-  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   /**
    * Callback function when changing an index pattern
    */
@@ -80,7 +80,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Currently selected index pattern
    */
-  selectedIndexPattern?: IndexPattern;
+  selectedIndexPattern?: DataView;
   /**
    * Discover plugin services;
    */

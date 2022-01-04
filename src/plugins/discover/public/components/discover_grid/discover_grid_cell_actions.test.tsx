@@ -15,12 +15,12 @@ import { DiscoverGridContext } from './discover_grid_context';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { esHits } from '../../__mocks__/es_hits';
 import { EuiButton } from '@elastic/eui';
-import { IndexPatternField } from 'src/plugins/data/common';
+import { DataViewField } from 'src/plugins/data/common';
 
 describe('Discover cell actions ', function () {
   it('should not show cell actions for unfilterable fields', async () => {
     expect(
-      buildCellActions({ name: 'foo', filterable: false } as IndexPatternField)
+      buildCellActions({ name: 'foo', filterable: false } as DataViewField)
     ).toBeUndefined();
   });
 
