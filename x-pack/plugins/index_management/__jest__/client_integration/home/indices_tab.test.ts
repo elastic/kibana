@@ -208,6 +208,7 @@ describe('<IndexManagementHome />', () => {
 
       find('indexTableIndexNameLink').at(0).simulate('click');
     });
+
     test('should be able to close an open index', async () => {
       const { actions } = testBed;
 
