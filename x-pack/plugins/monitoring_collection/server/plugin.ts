@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
-import { configSchema, createConfig, MonitoringCollectionConfig } from './config';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/server';
 import { registerMetricsRoute } from './routes';
 
 export interface MonitoringCollectionSetup {
@@ -18,8 +16,6 @@ export interface MonitoringCollectionSetup {
 // interface PluginDependencySetup {}
 
 // interface PluginDependencyStart {}
-
-const LOGGING_TAG = 'monitoring_collection';
 
 export interface MetricResult {
   [key: string]: string | number | undefined;
@@ -32,17 +28,11 @@ export interface Metric {
 
 export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSetup, void, {}, {}> {
   private readonly initializerContext: PluginInitializerContext;
-  private readonly log: Logger;
-  private readonly getLogger: (...scopes: string[]) => Logger;
-  private readonly config: MonitoringCollectionConfig;
 
   private metrics: Metric[] = [];
 
   constructor(initializerContext: PluginInitializerContext) {
     this.initializerContext = initializerContext;
-    this.log = initializerContext.logger.get(LOGGING_TAG);
-    this.getLogger = (...scopes: string[]) => initializerContext.logger.get(LOGGING_TAG, ...scopes);
-    this.config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
   }
 
   async getMetrics() {

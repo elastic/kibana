@@ -6,11 +6,11 @@
  */
 
 import { isInSetupMode } from '../../lib/setup_mode';
-import { CommonAlertStatus } from '../../../common/types/alerts';
 import { ISetupModeContext } from '../../components/setup_mode/setup_mode_context';
+import { AlertsByName } from '../types';
 
 export function shouldShowAlertBadge(
-  alerts: { [alertTypeId: string]: CommonAlertStatus[] },
+  alerts: AlertsByName,
   alertTypeIds: string[],
   context?: ISetupModeContext
 ) {

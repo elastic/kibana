@@ -32,15 +32,15 @@ import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link'
 // @ts-ignore
 import { SetupModeBadge } from '../../setup_mode/badge';
 import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
-import { CommonAlertStatus } from '../../../../common/types/alerts';
 import { ElasticsearchSourceKibanaStats } from '../../../../common/types/es';
 // @ts-ignore
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { AlertsStatus } from '../../../alerts/status';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
+import { AlertsByName } from '../../../alerts/types';
 
-const getColumns = (setupMode: any, alerts: { [alertTypeId: string]: CommonAlertStatus[] }) => {
+const getColumns = (setupMode: any, alerts: AlertsByName) => {
   const columns = [
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.nameColumnTitle', {
@@ -172,7 +172,7 @@ const getColumns = (setupMode: any, alerts: { [alertTypeId: string]: CommonAlert
 
 interface Props {
   clusterStatus: any;
-  alerts: { [alertTypeId: string]: CommonAlertStatus[] };
+  alerts: AlertsByName;
   setupMode: any;
   sorting: any;
   pagination: any;

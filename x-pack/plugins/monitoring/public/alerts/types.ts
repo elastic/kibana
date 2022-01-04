@@ -9,7 +9,7 @@ import React from 'react';
 import { CommonAlertStatus } from '../../common/types/alerts';
 
 export interface AlertsByName {
-  [name: string]: CommonAlertStatus;
+  [name: string]: CommonAlertStatus[];
 }
 
 export interface PanelItem {

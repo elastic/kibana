@@ -7,6 +7,7 @@
 // @ts-ignore
 import { checkParam, MissingRequiredError } from '../../error_missing_required';
 import { LegacyRequest } from '../../../types';
+import { ElasticsearchResponse } from '../../../../common/types/es';
 
 export async function getRules(
   req: LegacyRequest,
@@ -15,7 +16,7 @@ export async function getRules(
 ) {
   checkParam(kbnIndexPattern, 'kbnIndexPattern in getKibanaInfo');
 
-  const filter = [{ term: { cluster_uuid: clusterUuid } }];
+  const filter: Array<{ [key: string]: unknown }> = [{ term: { cluster_uuid: clusterUuid } }];
   if (kibanaUuid) {
     filter.push({ term: { 'kibana_metrics.kibana.uuid': kibanaUuid } });
   }
@@ -51,7 +52,7 @@ export async function getRules(
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
-  return response.aggregations?.rules?.buckets?.map((bucket) => {
+  return response.aggregations?.rules?.buckets?.map((bucket: { first?: ElasticsearchResponse }) => {
     return bucket?.first?.hits?.hits[0]._source?.kibana_metrics?.rule;
   });
 }
