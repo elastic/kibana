@@ -41,27 +41,53 @@ describe('duration formatters', () => {
   });
 
   describe('asTransactionRate', () => {
-    it('displays the not available label when the number is not finite', () => {
-      expect(asTransactionRate(Infinity)).toBe('N/A');
-      expect(asTransactionRate(-Infinity)).toBe('N/A');
-      expect(asTransactionRate(null)).toBe('N/A');
-      expect(asTransactionRate(undefined)).toBe('N/A');
-    });
+    it.each([
+      [Infinity, 'N/A'],
+      [-Infinity, 'N/A'],
+      [null, 'N/A'],
+      [undefined, 'N/A'],
+      [NaN, 'N/A'],
+    ])(
+      'displays the not available label when the number is not finite',
+      (value, formattedValue) => {
+        expect(asTransactionRate(value)).toBe(formattedValue);
+      }
+    );
 
-    it('displays the correct label when the number is finite', () => {
-      expect(asTransactionRate(0)).toBe('0 tpm');
-      expect(asTransactionRate(0.005)).toBe('< 0.1 tpm');
-      // Integer numbers get zero decimals
-      expect(asTransactionRate(1)).toBe('1.0 tpm');
-      expect(asTransactionRate(10)).toBe('10.0 tpm');
-      expect(asTransactionRate(100)).toBe('100.0 tpm');
-      expect(asTransactionRate(1000)).toBe('1,000.0 tpm');
-      // Decimal numbers are correctly rounded
-      expect(asTransactionRate(1.23)).toBe('1.2 tpm');
-      expect(asTransactionRate(12.34)).toBe('12.3 tpm');
-      expect(asTransactionRate(123.45)).toBe('123.5 tpm');
-      expect(asTransactionRate(1234.56)).toBe('1,234.6 tpm');
-    });
+    it.each([
+      [0, '0 tpm'],
+      [0.005, '< 0.1 tpm'],
+    ])(
+      'displays the correct label when the number is positive and less than 1',
+      (value, formattedValue) => {
+        expect(asTransactionRate(value)).toBe(formattedValue);
+      }
+    );
+
+    it.each([
+      [1, '1.0 tpm'],
+      [10, '10.0 tpm'],
+      [100, '100.0 tpm'],
+      [1000, '1,000.0 tpm'],
+    ])(
+      'displays the correct label when the number is integer and has zero decimals',
+      (value, formattedValue) => {
+        expect(asTransactionRate(value)).toBe(formattedValue);
+      }
+    );
+
+    it.each([
+      [1.23, '1.2 tpm'],
+      [12.34, '12.3 tpm'],
+      [123.45, '123.5 tpm'],
+      [1234.56, '1,234.6 tpm'],
+    ])(
+      'displays the correct label when the number is positive and has decimal part',
+      (value, formattedValue) => {
+        // Decimal numbers are correctly rounded
+        expect(asTransactionRate(value)).toBe(formattedValue);
+      }
+    );
   });
 
   describe('asMilliseconds', () => {
