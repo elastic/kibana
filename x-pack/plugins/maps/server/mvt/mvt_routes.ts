@@ -6,6 +6,7 @@
  */
 
 import rison from 'rison-node';
+import { Stream } from 'stream';
 import { schema } from '@kbn/config-schema';
 import { KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
 import { IRouter } from 'src/core/server';
@@ -121,7 +122,7 @@ export function initMVTRoutes({
   );
 }
 
-function sendResponse(response: KibanaResponseFactory, gzipTileStream: Iterable<Buffer> | null) {
+function sendResponse(response: KibanaResponseFactory, gzipTileStream: Stream | null) {
   const cacheControl = `public, max-age=${CACHE_TIMEOUT_SECONDS}`;
   const lastModified = `${new Date().toUTCString()}`;
   if (gzipTileStream) {

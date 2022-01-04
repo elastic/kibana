@@ -7,6 +7,7 @@
 
 import { Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
+import { Stream } from 'stream';
 import { RENDER_AS } from '../../common/constants';
 import { isAbortError } from './util';
 
@@ -34,7 +35,7 @@ export async function getEsGridTile({
   requestType: RENDER_AS.GRID | RENDER_AS.POINT;
   gridPrecision: number;
   abortController: AbortController;
-}): Promise<Iterable<Buffer> | null> {
+}): Promise<Stream | null> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
     const body = {
@@ -62,7 +63,7 @@ export async function getEsGridTile({
         asStream: true,
       }
     );
-    return tile.body as Iterable<Buffer>;
+    return tile.body as Stream;
   } catch (e) {
     if (!isAbortError(e)) {
       // These are often circuit breaking exceptions

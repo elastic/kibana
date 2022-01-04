@@ -8,6 +8,7 @@
 import _ from 'lodash';
 import { Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
+import { Stream } from 'stream';
 import { isAbortError } from './util';
 
 export async function getEsTile({
@@ -30,7 +31,7 @@ export async function getEsTile({
   logger: Logger;
   requestBody: any;
   abortController: AbortController;
-}): Promise<Iterable<Buffer> | null> {
+}): Promise<Stream | null> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
     let fields = _.uniq(requestBody.docvalue_fields.concat(requestBody.stored_fields));
@@ -59,7 +60,7 @@ export async function getEsTile({
       }
     );
 
-    return tile.body as Iterable<Buffer>;
+    return tile.body as Stream;
   } catch (e) {
     if (!isAbortError(e)) {
       // These are often circuit breaking exceptions
