@@ -79,7 +79,7 @@ export const createNote = ({ newNote }: { newNote: string }): Note => ({
   created: moment.utc().toDate(),
   id: uuid.v4(),
   lastEdit: null,
-  note: newNote.trim(),
+  note: newNote,
   saveObjectId: null,
   user: 'elastic', // TODO: get the logged-in Kibana user
   version: null,
