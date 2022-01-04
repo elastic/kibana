@@ -34,7 +34,7 @@ while read -r config; do
       echo "^^^ +++"
     fi
 
-    ./codecov -t "${CODECOV_TOKEN}" -f target/kibana-coverage/jest/jest.json # TODO move ./codecov
+    ./codecov -f target/kibana-coverage/jest/jest.json # TODO move ./codecov
   fi
 
   ((i=i+1))
