@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import mergePipelineVersions from './merge_pipeline_versions';
+import { mergePipelineVersions } from './merge_pipeline_versions';
 
 describe('merge_pipeline_versions', () => {
   it('merges duplicates', () => {

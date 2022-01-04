@@ -7,7 +7,7 @@
 
 import { PipelineVersion } from '../../types';
 
-export default (versions: PipelineVersion[]): PipelineVersion[] => {
+export const mergePipelineVersions = (versions: PipelineVersion[]): PipelineVersion[] => {
   const versionsByHash = versions.reduce(
     (acc: { [key: string]: PipelineVersion }, pipeline: PipelineVersion) => {
       const existing = acc[pipeline.hash];

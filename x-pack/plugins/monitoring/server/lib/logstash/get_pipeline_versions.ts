@@ -10,7 +10,7 @@ import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 import { checkParam } from '../error_missing_required';
 import { LegacyRequest, PipelineVersion } from '../../types';
-import mergePipelineVersions from './merge_pipeline_versions';
+import { mergePipelineVersions } from './merge_pipeline_versions';
 
 const createScopedAgg = (pipelineId: string, maxBucketSize: number) => {
   return (statsPath: string) => {
@@ -150,8 +150,8 @@ export function _handleResponse(response: any) {
     })
   );
 
- // we could have continuous data about a pipeline version spread across legacy and
- // metricbeat indices, make sure to join the start and end dates for these occurrences
+  // we could have continuous data about a pipeline version spread across legacy and
+  // metricbeat indices, make sure to join the start and end dates for these occurrences
   const uniqVersions = mergePipelineVersions(versions);
 
   return orderBy(uniqVersions, 'firstSeen', 'desc');
