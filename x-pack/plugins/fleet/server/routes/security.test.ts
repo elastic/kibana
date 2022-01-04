@@ -153,7 +153,7 @@ describe('RouterWrappers', () => {
       expect(
         await runTest({
           wrapper: RouterWrappers.require.fleetSetupPrivilege,
-          security: { pluginEnabled: false },
+          security: { pluginEnabled: false, licenseEnabled: false },
         })
       ).toEqual('forbidden');
     });
