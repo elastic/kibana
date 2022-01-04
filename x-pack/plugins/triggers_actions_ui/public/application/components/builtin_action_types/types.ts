@@ -132,6 +132,35 @@ export interface WebhookSecrets {
 
 export type WebhookActionConnector = UserConfiguredActionConnector<WebhookConfig, WebhookSecrets>;
 
+export interface XmattersActionParams {
+  alertActionGroup: string;
+  alertActionGroupName: string;
+  alertId: string;
+  alertInstanceId: string;
+  alertName: string;
+  date: string;
+  severity: string;
+  spaceId: string;
+  tags: string;
+}
+
+export interface XmattersConfig {
+  method: string;
+  url: string;
+  headers: Record<string, string>;
+  hasAuth: boolean;
+}
+
+export interface XmattersSecrets {
+  user: string;
+  password: string;
+}
+
+export type XmattersActionConnector = UserConfiguredActionConnector<
+  XmattersConfig,
+  XmattersSecrets
+>;
+
 export interface TeamsSecrets {
   webhookUrl: string;
 }

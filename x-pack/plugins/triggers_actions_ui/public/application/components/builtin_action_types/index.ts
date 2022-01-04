@@ -12,6 +12,7 @@ import { getIndexActionType } from './es_index';
 import { getPagerDutyActionType } from './pagerduty';
 import { getSwimlaneActionType } from './swimlane';
 import { getWebhookActionType } from './webhook';
+import { getXmattersActionType } from './xmatters';
 import { TypeRegistry } from '../../type_registry';
 import { ActionTypeModel } from '../../../types';
 import {
@@ -35,6 +36,7 @@ export function registerBuiltInActionTypes({
   actionTypeRegistry.register(getPagerDutyActionType());
   actionTypeRegistry.register(getSwimlaneActionType());
   actionTypeRegistry.register(getWebhookActionType());
+  actionTypeRegistry.register(getXmattersActionType());
   actionTypeRegistry.register(getServiceNowITSMActionType());
   actionTypeRegistry.register(getServiceNowITOMActionType());
   actionTypeRegistry.register(getServiceNowSIRActionType());
