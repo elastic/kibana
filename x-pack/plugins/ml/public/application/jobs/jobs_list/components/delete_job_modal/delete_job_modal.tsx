@@ -79,21 +79,21 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
   }
 
   if (canDelete) {
-    const title = (
-      <FormattedMessage
-        id="xpack.ml.jobsList.deleteJobModal.deleteJobsTitle"
-        defaultMessage="Delete {jobsCount, plural, one {{jobId}} other {# jobs}}?"
-        values={{
-          jobsCount: jobIds.length,
-          jobId: jobIds[0],
-        }}
-      />
-    );
-
     return (
       <EuiModal data-test-subj="mlDeleteJobConfirmModal" onClose={closeModal}>
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>
+            {
+              <FormattedMessage
+                id="xpack.ml.jobsList.deleteJobModal.deleteJobsTitle"
+                defaultMessage="Delete {jobsCount, plural, one {{jobId}} other {# jobs}}?"
+                values={{
+                  jobsCount: jobIds.length,
+                  jobId: jobIds[0],
+                }}
+              />
+            }
+          </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <p>
@@ -110,8 +110,8 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
               </div>
             ) : (
               <>
-                <EuiText>
-                  {hasManagedJob ? (
+                {hasManagedJob ? (
+                  <EuiText>
                     <FormattedMessage
                       id="xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription"
                       defaultMessage="{jobsCount, plural, one {This job was} other {At least one of these jobs was}} deployed as part of a module; deleting {jobsCount, plural, one {it} other {them}} might impact other parts of the product.
@@ -121,18 +121,8 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
                         jobsCount: jobIds.length,
                       }}
                     />
-                  ) : null}
-                  {/*  &nbsp;*/}
-                  {/*  <FormattedMessage*/}
-                  {/*    id="xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription"*/}
-                  {/*    defaultMessage="Deleting {jobsCount, plural, one {a job} other {multiple jobs}} can be time consuming.*/}
-                  {/* {jobsCount, plural, one {It} other {They}} will be deleted in the background*/}
-                  {/* and may not disappear from the jobs list instantly."*/}
-                  {/*    values={{*/}
-                  {/*      jobsCount: jobIds.length,*/}
-                  {/*    }}*/}
-                  {/*  />*/}
-                </EuiText>
+                  </EuiText>
+                ) : null}
               </>
             )}
           </p>

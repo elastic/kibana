@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EUI_MODAL_CONFIRM_BUTTON,
@@ -14,9 +14,12 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiSwitch,
+  EuiText,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DeleteAction } from './use_delete_action';
+import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 
 export const DeleteActionModal: FC<DeleteAction> = ({
   closeModal,
@@ -31,6 +34,7 @@ export const DeleteActionModal: FC<DeleteAction> = ({
   userCanDeleteIndex,
   userCanDeleteDataView,
 }) => {
+  const hasManagedTransforms = useMemo(() => items.some((t) => isManagedTransform(t)), [items]);
   const isBulkAction = items.length > 1;
 
   const bulkDeleteModalTitle = i18n.translate(
@@ -47,6 +51,19 @@ export const DeleteActionModal: FC<DeleteAction> = ({
   const bulkDeleteModalContent = (
     <>
       <EuiFlexGroup direction="column" gutterSize="none">
+        {hasManagedTransforms ? (
+          <p>
+            <>
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.transform.transformList.deleteManagedBulkTransformsDescription"
+                  defaultMessage="At least one of these transforms was deployed as part of a module; deleting them might impact other parts of the product."
+                />
+              </EuiText>
+            </>
+          </p>
+        ) : null}
+
         <EuiFlexItem>
           {
             <EuiSwitch
@@ -86,6 +103,19 @@ export const DeleteActionModal: FC<DeleteAction> = ({
   const deleteModalContent = (
     <>
       <EuiFlexGroup direction="column" gutterSize="none">
+        {hasManagedTransforms ? (
+          <p>
+            <>
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.transform.transformList.deleteManagedTransformDescription"
+                  defaultMessage="This transform was deployed as part of a module; deleting it might impact other parts of the product."
+                />
+              </EuiText>
+            </>
+          </p>
+        ) : null}
+
         <EuiFlexItem>
           {userCanDeleteIndex && (
             <EuiSwitch

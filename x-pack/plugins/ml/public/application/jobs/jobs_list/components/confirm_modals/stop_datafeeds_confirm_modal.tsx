@@ -37,7 +37,6 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
   unsetShowFunction,
   refreshJobs,
 }) => {
-  const [editing, setEditing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [isManaged, setHasManaged] = useState(true);
   const [jobsToStop, setJobsToStop] = useState<MlSummaryJob[]>([]);
@@ -60,7 +59,6 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
 
     if (jobs.some((j) => isManagedJob(j))) {
       setModalVisible(true);
-      setEditing(false);
       setHasManaged(true);
     }
   }, []);
@@ -77,7 +75,7 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
   if (isManaged) {
     const title = (
       <FormattedMessage
-        id="xpack.ml.jobsList.stopDatafeedsModal.stopdDatafeedsTitle"
+        id="xpack.ml.jobsList.stopDatafeedsModal.stopDatafeedsTitle"
         defaultMessage="Stop datafeed for {jobsCount, plural, one {{jobId}} other {# jobs}}?"
         values={{
           jobsCount: jobIds.length,
@@ -87,7 +85,7 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
     );
 
     return (
-      <EuiModal data-test-subj="mlStopDatafeedsConfirmConfirmModal" onClose={closeModal}>
+      <EuiModal data-test-subj="mlStopDatafeedsConfirmModal" onClose={closeModal}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -109,7 +107,7 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
         <>
           <EuiSpacer />
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={closeModal} disabled={editing}>
+            <EuiButtonEmpty onClick={closeModal}>
               <FormattedMessage
                 id="xpack.ml.jobsList.stopDatafeedsConfirmModal.cancelButtonLabel"
                 defaultMessage="Cancel"
@@ -122,12 +120,11 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
                 closeModal();
               }}
               fill
-              disabled={editing}
               color="danger"
-              data-test-subj="mlStopDatafeedsConfirmConfirmModalButton"
+              data-test-subj="mlStopDatafeedsConfirmModalButton"
             >
               <FormattedMessage
-                id="xpack.ml.jobsList.stopDatafeedsConfirmModal.editButtonLabel"
+                id="xpack.ml.jobsList.stopDatafeedsConfirmModal.stopButtonLabel"
                 defaultMessage="Stop {jobsCount, plural, one {datafeed} other {datafeeds}}"
                 values={{
                   jobsCount: jobIds.length,

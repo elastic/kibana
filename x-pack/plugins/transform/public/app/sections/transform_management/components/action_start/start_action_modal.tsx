@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { StartAction } from './use_start_action';
+import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 
 export const StartActionModal: FC<StartAction> = ({ closeModal, items, startAndCloseModal }) => {
+  const hasManagedTransforms = useMemo(() => items.some((t) => isManagedTransform(t)), [items]);
+
   const isBulkAction = items.length > 1;
 
   const bulkStartModalTitle = i18n.translate('xpack.transform.transformList.bulkStartModalTitle', {
@@ -39,6 +43,19 @@ export const StartActionModal: FC<StartAction> = ({ closeModal, items, startAndC
       buttonColor="primary"
     >
       <p>
+        {hasManagedTransforms ? (
+          <>
+            <FormattedMessage
+              id="xpack.transform.transformList.startManagedTransformsDescription"
+              defaultMessage="{transformsCount, plural, one {This transform was} other {At least one of these transforms was}} deployed as part of a module; starting {transformsCount, plural, one {it} other {them}} might impact other parts of the product."
+              values={{
+                transformsCount: items.length,
+              }}
+            />
+            &nbsp;
+          </>
+        ) : null}
+
         {i18n.translate('xpack.transform.transformList.startModalBody', {
           defaultMessage:
             'A transform increases search and indexing load in your cluster. If excessive load is experienced, stop the transform.',

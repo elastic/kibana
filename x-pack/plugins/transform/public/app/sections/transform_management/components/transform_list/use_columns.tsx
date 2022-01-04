@@ -34,6 +34,7 @@ import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
 import { getTransformProgress, TransformListRow, TRANSFORM_LIST_COLUMN } from '../../../../common';
 import { useActions } from './use_actions';
+import { isManagedTransform } from '../../../../common/managed_transforms_utils';
 
 // reflects https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/transforms/TransformStats.java#L250
 const STATE_COLOR = {
@@ -145,7 +146,7 @@ export const useColumns = (
       truncateText: true,
       scope: 'row',
       render: (transformId, item) => {
-        if (item.config?._meta?.managed !== true) return transformId;
+        if (!isManagedTransform(item)) return transformId;
         return (
           <>
             {transformId}
