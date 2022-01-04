@@ -74,10 +74,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
                 .toMatchInline(`
                 Array [
-                  0.694,
-                  0.413,
-                  0.5,
-                  0.239555555555556,
+                  0.714,
+                  0.3877,
+                  0.75,
+                  0.2543,
                 ]
               `);
             });
@@ -107,7 +107,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .toMatchInline(`
                 Array [
                   0.722093920925555,
-                  0.71860469458748,
+                  0.718173546796348,
                 ]
               `);
             });
@@ -377,7 +377,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .toMatchInline(`
                 Array [
                   0,
-                  6,
+                  3,
                 ]
               `);
             });
@@ -406,7 +406,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .toMatchInline(`
                 Array [
                   0,
-                  66000,
+                  37500,
                 ]
               `);
             });
