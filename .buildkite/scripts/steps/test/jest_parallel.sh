@@ -24,8 +24,8 @@ exitCode=0
 while read -r config; do
   if [ "$((i % JOB_COUNT))" -eq "$JOB" ]; then
     echo "--- $ node scripts/jest --config $config"
-    rm -f target/kibana-coverage/jest/jest.json
-    node --max-old-space-size=14336 ./node_modules/.bin/jest --config="$config" --runInBand
+    rm -f target/kibana-coverage/jest/coverage-final.json
+    node --max-old-space-size=14336 ./node_modules/.bin/jest --config="$config" --runInBand --coverageReporters json
     lastCode=$?
 
     if [ $lastCode -ne 0 ]; then
@@ -36,7 +36,7 @@ while read -r config; do
 
     echo "Uploading to codecov"
     # codecov exits with an error if max-old-space-size is set, see https://github.com/codecov/uploader/issues/475
-    NODE_OPTIONS="" ./codecov -d -v -f target/kibana-coverage/jest/jest.json # TODO move ./codecov
+    NODE_OPTIONS="" ./codecov -d -v -f target/kibana-coverage/jest/coverage-final.json # TODO move ./codecov
   fi
 
   ((i=i+1))
