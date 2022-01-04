@@ -133,7 +133,7 @@ export function MachineLearningAnomalyExplorerProvider({
         const dashboardRows = await testSubjects.findAll('~mlDashboardSelectionTableRow', 2000);
         expect(dashboardRows.length).to.eql(
           expectedRowCount,
-          `Dashboadr table should have ${expectedRowCount} rows, got ${dashboardRows.length}`
+          `Dashboard table should have ${expectedRowCount} rows, got ${dashboardRows.length}`
         );
       });
     },
