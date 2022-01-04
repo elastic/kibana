@@ -13,9 +13,6 @@ gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
 shasum -a 256 -c codecov.SHA256SUM
 chmod +x codecov
 
-./codecov --help
-./codecov -d -v -f target/kibana-coverage/jest/jest.json
-
 JOB=$BUILDKITE_PARALLEL_JOB
 JOB_COUNT=$BUILDKITE_PARALLEL_JOB_COUNT
 
@@ -38,7 +35,8 @@ while read -r config; do
     fi
 
     echo "Uploading to codecov"
-    ./codecov -d -v -f target/kibana-coverage/jest/jest.json # TODO move ./codecov
+    # codecov exits with an error if max-old-space-size is set, see https://github.com/codecov/uploader/issues/475
+    NODE_OPTIONS="" ./codecov -d -v -f target/kibana-coverage/jest/jest.json # TODO move ./codecov
   fi
 
   ((i=i+1))
