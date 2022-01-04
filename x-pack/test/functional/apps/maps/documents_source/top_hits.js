@@ -59,7 +59,6 @@ export default function ({ getPageObjects, getService }) {
             }
           });
 
-          
           await PageObjects.maps.waitForLayersToLoad();
         });
 
