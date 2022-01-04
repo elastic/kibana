@@ -146,7 +146,7 @@ export async function getPipelineVertex(
   checkParam(lsIndexPattern, 'lsIndexPattern in getPipeline');
 
   // Determine metrics' timeseries interval based on version's timespan
-  const minIntervalSeconds = config.get('monitoring.ui.min_interval_seconds');
+  const minIntervalSeconds = Math.max(Number(config.get('monitoring.ui.min_interval_seconds')), 30);
   const timeseriesInterval = calculateTimeseriesInterval(
     Number(version.firstSeen),
     Number(version.lastSeen),

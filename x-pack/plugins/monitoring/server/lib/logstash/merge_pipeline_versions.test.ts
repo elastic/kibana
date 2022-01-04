@@ -30,4 +30,25 @@ describe('merge_pipeline_versions', () => {
       lastSeen: 10,
     });
   });
+
+  it('is a noop when no duplicates', () => {
+    const versions = [
+      { hash: 'foo', firstSeen: 1, lastSeen: 2 },
+      { hash: 'bar', firstSeen: 5, lastSeen: 10 },
+    ];
+
+    const result = mergePipelineVersions(versions);
+
+    expect(result.length).toEqual(2);
+    expect(result.find((v) => v.hash === 'foo')).toEqual({
+      hash: 'foo',
+      firstSeen: 1,
+      lastSeen: 2,
+    });
+    expect(result.find((v) => v.hash === 'bar')).toEqual({
+      hash: 'bar',
+      firstSeen: 5,
+      lastSeen: 10,
+    });
+  });
 });
