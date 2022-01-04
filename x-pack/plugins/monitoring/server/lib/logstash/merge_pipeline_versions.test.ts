@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ElasticsearchSourceLogstashPipelineVertex } from '../../../common/types/es';
 import mergePipelineVersions from './merge_pipeline_versions';
 
 describe('merge_pipeline_versions', () => {
