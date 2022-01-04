@@ -58,7 +58,8 @@ export const evaluateCondition = async ({
   const timerange = {
     to: Date.now(),
     from: moment().subtract(condition.timeSize, condition.timeUnit).toDate().getTime(),
-    interval: condition.timeUnit,
+    interval: `${condition.timeSize}${condition.timeUnit}`,
+    forceInterval: true,
   } as InfraTimerangeInput;
   if (lookbackSize) {
     timerange.lookbackSize = lookbackSize;
