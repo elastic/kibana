@@ -17,7 +17,7 @@ export default function ({ getService }) {
     // TODO: https://github.com/elastic/stack-monitoring/issues/31
     this.tags(['skipCloud']);
 
-    describe.only('with trial license clusters', () => {
+    describe('with trial license clusters', () => {
       const archive = 'x-pack/test/functional/es_archives/monitoring/singlecluster_green_gold_mb';
       const timeRange = {
         min: '2017-08-23T21:29:35Z',
