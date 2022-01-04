@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isLeft } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
 
 const LocationGeoCodec = t.interface({
@@ -30,6 +31,14 @@ export const ServiceLocationCodec = t.interface({
 
 export const ServiceLocationsCodec = t.array(ServiceLocationCodec);
 
+export const isServiceLocationInvalid = (location: ServiceLocation) =>
+  isLeft(ServiceLocationCodec.decode(location));
+
+export const ServiceLocationsApiResponseCodec = t.interface({
+  locations: ServiceLocationsCodec,
+});
+
+export type ManifestLocation = t.TypeOf<typeof ManifestLocationCodec>;
 export type ServiceLocation = t.TypeOf<typeof ServiceLocationCodec>;
 export type ServiceLocations = t.TypeOf<typeof ServiceLocationsCodec>;
-export type ManifestLocation = t.TypeOf<typeof ManifestLocationCodec>;
+export type ServiceLocationsApiResponse = t.TypeOf<typeof ServiceLocationsApiResponseCodec>;

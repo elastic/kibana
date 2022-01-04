@@ -135,7 +135,6 @@ describe('alertType', () => {
 
     const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
     alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      // @ts-expect-error not compatible agregations type
       elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult)
     );
 
@@ -215,7 +214,6 @@ describe('alertType', () => {
       },
     ]);
     alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      // @ts-expect-error not compatible response type
       elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult)
     );
 
@@ -289,7 +287,6 @@ describe('alertType', () => {
     const newestDocumentTimestamp = previousTimestamp + 1000;
 
     alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      // @ts-expect-error not compatible response type
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         generateResults([
           {
@@ -360,7 +357,6 @@ describe('alertType', () => {
     const oldestDocumentTimestamp = Date.now();
 
     alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      // @ts-expect-error not compatible response type
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         generateResults([
           {
@@ -442,7 +438,6 @@ describe('alertType', () => {
     const oldestDocumentTimestamp = Date.now();
 
     alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      // @ts-expect-error not compatible response type
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         generateResults([
           {
@@ -506,7 +501,6 @@ describe('alertType', () => {
 
     const newestDocumentTimestamp = oldestDocumentTimestamp + 5000;
     alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      // @ts-expect-error not compatible response type
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         generateResults([
           {
@@ -552,7 +546,6 @@ describe('alertType', () => {
     const oldestDocumentTimestamp = Date.now();
 
     alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      // @ts-expect-error not compatible response type
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         generateResults(
           [
@@ -636,7 +629,6 @@ describe('alertType', () => {
     const oldestDocumentTimestamp = Date.now();
 
     alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
-      // @ts-expect-error not compatible response type
       elasticsearchClientMock.createSuccessTransportRequestPromise(
         generateResults(
           [

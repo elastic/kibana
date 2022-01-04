@@ -84,6 +84,12 @@ export class RollupSearchCapabilities extends DefaultSearchCapabilities {
     });
   }
 
+  public get whiteListedConfigurationFeatures() {
+    return this.createUiRestriction({
+      filter: false,
+    });
+  }
+
   getValidTimeInterval(userIntervalString: string) {
     const parsedRollupJobInterval = this.parseInterval(this.defaultTimeInterval);
     const inRollupJobUnit = this.convertIntervalToUnit(

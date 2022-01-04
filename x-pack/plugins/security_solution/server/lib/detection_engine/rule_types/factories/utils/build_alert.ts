@@ -160,8 +160,6 @@ export const buildAlert = (
       updated_by: updatedBy ?? '',
       type: completeRule.ruleParams.type,
       ...commonRuleParams,
-      severity: overrides?.severityOverride ?? completeRule.ruleParams.severity,
-      risk_score: overrides?.riskScoreOverride ?? completeRule.ruleParams.riskScore,
     }),
   } as unknown as RACAlert;
 };

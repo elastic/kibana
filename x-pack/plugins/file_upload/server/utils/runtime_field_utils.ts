@@ -7,21 +7,9 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RUNTIME_FIELD_TYPES } from '../../../../../src/plugins/data/common';
+import { isPopulatedObject } from '../../common/utils';
 
 type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
-
-export const isPopulatedObject = <U extends string = string>(
-  arg: unknown,
-  requiredAttributes: U[] = []
-): arg is Record<U, unknown> => {
-  return (
-    typeof arg === 'object' &&
-    arg !== null &&
-    Object.keys(arg).length > 0 &&
-    (requiredAttributes.length === 0 ||
-      requiredAttributes.every((d) => ({}.hasOwnProperty.call(arg, d))))
-  );
-};
 
 export function isRuntimeField(arg: unknown): arg is estypes.MappingRuntimeField {
   return (

@@ -53,7 +53,7 @@ interface ExpressionRowProps {
   canDelete: boolean;
   addExpression(): void;
   remove(id: number): void;
-  setAlertParams(id: number, params: MetricExpression): void;
+  setRuleParams(id: number, params: MetricExpression): void;
 }
 
 const StyledExpressionRow = euiStyled(EuiFlexGroup)`
@@ -74,7 +74,7 @@ const StyledHealth = euiStyled(EuiHealth)`
 export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   const [isExpanded, setRowState] = useState(true);
   const toggleRowState = useCallback(() => setRowState(!isExpanded), [isExpanded]);
-  const { children, setAlertParams, expression, errors, expressionId, remove, fields, canDelete } =
+  const { children, setRuleParams, expression, errors, expressionId, remove, fields, canDelete } =
     props;
   const {
     aggType = AGGREGATION_TYPES.MAX,
@@ -92,34 +92,34 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
 
   const updateAggType = useCallback(
     (at: string) => {
-      setAlertParams(expressionId, {
+      setRuleParams(expressionId, {
         ...expression,
         aggType: at as MetricExpression['aggType'],
         metric: at === 'count' ? undefined : expression.metric,
       });
     },
-    [expressionId, expression, setAlertParams]
+    [expressionId, expression, setRuleParams]
   );
 
   const updateMetric = useCallback(
     (m?: MetricExpression['metric']) => {
-      setAlertParams(expressionId, { ...expression, metric: m });
+      setRuleParams(expressionId, { ...expression, metric: m });
     },
-    [expressionId, expression, setAlertParams]
+    [expressionId, expression, setRuleParams]
   );
 
   const updateComparator = useCallback(
     (c?: string) => {
-      setAlertParams(expressionId, { ...expression, comparator: c as Comparator });
+      setRuleParams(expressionId, { ...expression, comparator: c as Comparator });
     },
-    [expressionId, expression, setAlertParams]
+    [expressionId, expression, setRuleParams]
   );
 
   const updateWarningComparator = useCallback(
     (c?: string) => {
-      setAlertParams(expressionId, { ...expression, warningComparator: c as Comparator });
+      setRuleParams(expressionId, { ...expression, warningComparator: c as Comparator });
     },
-    [expressionId, expression, setAlertParams]
+    [expressionId, expression, setRuleParams]
   );
 
   const convertThreshold = useCallback(
@@ -132,38 +132,38 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     (enteredThreshold) => {
       const t = convertThreshold(enteredThreshold);
       if (t.join() !== expression.threshold.join()) {
-        setAlertParams(expressionId, { ...expression, threshold: t });
+        setRuleParams(expressionId, { ...expression, threshold: t });
       }
     },
-    [expressionId, expression, convertThreshold, setAlertParams]
+    [expressionId, expression, convertThreshold, setRuleParams]
   );
 
   const updateWarningThreshold = useCallback(
     (enteredThreshold) => {
       const t = convertThreshold(enteredThreshold);
       if (t.join() !== expression.warningThreshold?.join()) {
-        setAlertParams(expressionId, { ...expression, warningThreshold: t });
+        setRuleParams(expressionId, { ...expression, warningThreshold: t });
       }
     },
-    [expressionId, expression, convertThreshold, setAlertParams]
+    [expressionId, expression, convertThreshold, setRuleParams]
   );
 
   const toggleWarningThreshold = useCallback(() => {
     if (!displayWarningThreshold) {
       setDisplayWarningThreshold(true);
-      setAlertParams(expressionId, {
+      setRuleParams(expressionId, {
         ...expression,
         warningComparator: comparator,
         warningThreshold: [],
       });
     } else {
       setDisplayWarningThreshold(false);
-      setAlertParams(expressionId, omit(expression, 'warningComparator', 'warningThreshold'));
+      setRuleParams(expressionId, omit(expression, 'warningComparator', 'warningThreshold'));
     }
   }, [
     displayWarningThreshold,
     setDisplayWarningThreshold,
-    setAlertParams,
+    setRuleParams,
     comparator,
     expression,
     expressionId,

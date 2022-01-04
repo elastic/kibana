@@ -49,7 +49,7 @@ describe.skip('useQueryBar', () => {
     );
     useUrlParamsSpy = jest.spyOn(URL, 'useUrlParams');
     useGetUrlParamsSpy = jest.spyOn(URL, 'useGetUrlParams');
-    useUpdateKueryStringSpy = jest.spyOn(ES_FILTERS, 'useUpdateKueryString');
+    useUpdateKueryStringSpy = jest.spyOn(ES_FILTERS, 'generateUpdatedKueryString');
     updateUrlParamsMock = jest.fn();
 
     useUrlParamsSpy.mockImplementation(() => [jest.fn(), updateUrlParamsMock]);

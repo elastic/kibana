@@ -102,15 +102,15 @@
                 "section": "def-common.IIndexPatternFieldList",
                 "text": "IIndexPatternFieldList"
               },
-              " & { toSpec: () => Record<string, ",
+              " & { toSpec: () => ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
+                "section": "def-common.DataViewFieldMap",
+                "text": "DataViewFieldMap"
               },
-              ">; }"
+              "; }"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false
@@ -753,7 +753,15 @@
             "label": "getAggregationRestrictions",
             "description": [],
             "signature": [
-              "() => Record<string, Record<string, { agg?: string | undefined; interval?: number | undefined; fixed_interval?: string | undefined; calendar_interval?: string | undefined; delay?: string | undefined; time_zone?: string | undefined; }>> | undefined"
+              "() => Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AggregationRestrictions",
+                "text": "AggregationRestrictions"
+              },
+              "> | undefined"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
@@ -1135,7 +1143,15 @@
             "label": "setFieldAttrs",
             "description": [],
             "signature": [
-              "<K extends \"customLabel\" | \"count\">(fieldName: string, attrName: K, value: ",
+              "<K extends keyof ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldAttrSet",
+                "text": "FieldAttrSet"
+              },
+              ">(fieldName: string, attrName: K, value: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1578,7 +1594,8 @@
               "\nScript field language"
             ],
             "signature": [
-              "\"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined"
+              "ScriptLanguage",
+              " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -1591,7 +1608,8 @@
             "label": "lang",
             "description": [],
             "signature": [
-              "\"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined"
+              "ScriptLanguage",
+              " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -1741,9 +1759,7 @@
             "label": "subType",
             "description": [],
             "signature": [
-              "IFieldSubTypeMultiOptional",
-              " | ",
-              "IFieldSubTypeNestedOptional",
+              "IFieldSubType",
               " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
@@ -1833,13 +1849,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.IFieldSubTypeNested",
-                "text": "IFieldSubTypeNested"
-              },
+              "IFieldSubTypeNested",
               " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
@@ -1856,13 +1866,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.IFieldSubTypeMulti",
-                "text": "IFieldSubTypeMulti"
-              },
+              "IFieldSubTypeMulti",
               " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
@@ -1893,10 +1897,10 @@
             "label": "toJSON",
             "description": [],
             "signature": [
-              "() => { count: number; script: string | undefined; lang: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; conflictDescriptions: Record<string, string[]> | undefined; name: string; type: string; esTypes: string[] | undefined; scripted: boolean; searchable: boolean; aggregatable: boolean; readFromDocValues: boolean; subType: ",
-              "IFieldSubTypeMultiOptional",
-              " | ",
-              "IFieldSubTypeNestedOptional",
+              "() => { count: number; script: string | undefined; lang: ",
+              "ScriptLanguage",
+              " | undefined; conflictDescriptions: Record<string, string[]> | undefined; name: string; type: string; esTypes: string[] | undefined; scripted: boolean; searchable: boolean; aggregatable: boolean; readFromDocValues: boolean; subType: ",
+              "IFieldSubType",
               " | undefined; customLabel: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
@@ -2134,7 +2138,7 @@
             "label": "getFieldsForWildcard",
             "description": [],
             "signature": [
-              "({ pattern, metaFields, type, rollupIndex, allowNoIndex }: ",
+              "({ pattern, metaFields, type, rollupIndex, allowNoIndex, filter, }: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2152,7 +2156,7 @@
                 "id": "def-public.DataViewsApiClient.getFieldsForWildcard.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ pattern, metaFields, type, rollupIndex, allowNoIndex }",
+                "label": "{\n    pattern,\n    metaFields,\n    type,\n    rollupIndex,\n    allowNoIndex,\n    filter,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -2219,15 +2223,15 @@
             "section": "def-public.DataViewsPublicPluginSetup",
             "text": "DataViewsPublicPluginSetup"
           },
-          ", Pick<",
+          ", ",
           {
             "pluginId": "dataViews",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataViewsService",
-            "text": "DataViewsService"
+            "section": "def-public.DataViewsPublicPluginStart",
+            "text": "DataViewsPublicPluginStart"
           },
-          ", \"create\" | \"delete\" | \"find\" | \"get\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\" | \"getDefaultDataView\">, ",
+          ", ",
           "DataViewsPublicSetupDependencies",
           ", ",
           "DataViewsPublicStartDependencies",
@@ -2254,15 +2258,15 @@
               },
               "<",
               "DataViewsPublicStartDependencies",
-              ", Pick<",
+              ", ",
               {
                 "pluginId": "dataViews",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewsService",
-                "text": "DataViewsService"
+                "section": "def-public.DataViewsPublicPluginStart",
+                "text": "DataViewsPublicPluginStart"
               },
-              ", \"create\" | \"delete\" | \"find\" | \"get\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\" | \"getDefaultDataView\">>, { expressions }: ",
+              ">, { expressions }: ",
               "DataViewsPublicSetupDependencies",
               ") => ",
               {
@@ -2293,15 +2297,15 @@
                   },
                   "<",
                   "DataViewsPublicStartDependencies",
-                  ", Pick<",
+                  ", ",
                   {
                     "pluginId": "dataViews",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewsService",
-                    "text": "DataViewsService"
+                    "section": "def-public.DataViewsPublicPluginStart",
+                    "text": "DataViewsPublicPluginStart"
                   },
-                  ", \"create\" | \"delete\" | \"find\" | \"get\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\" | \"getDefaultDataView\">>"
+                  ">"
                 ],
                 "path": "src/plugins/data_views/public/plugin.ts",
                 "deprecated": false,
@@ -2342,15 +2346,14 @@
               },
               ", { fieldFormats }: ",
               "DataViewsPublicStartDependencies",
-              ") => Pick<",
+              ") => ",
               {
                 "pluginId": "dataViews",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewsService",
-                "text": "DataViewsService"
-              },
-              ", \"create\" | \"delete\" | \"find\" | \"get\" | \"ensureDefaultDataView\" | \"getIds\" | \"getTitles\" | \"getIdsWithTitle\" | \"clearCache\" | \"getCache\" | \"getDefault\" | \"getDefaultId\" | \"setDefault\" | \"hasUserDataView\" | \"getFieldsForWildcard\" | \"getFieldsForIndexPattern\" | \"refreshFields\" | \"fieldArrayToMap\" | \"savedObjectToSpec\" | \"createAndSave\" | \"createSavedObject\" | \"updateSavedObject\" | \"getDefaultDataView\">"
+                "section": "def-public.DataViewsPublicPluginStart",
+                "text": "DataViewsPublicPluginStart"
+              }
             ],
             "path": "src/plugins/data_views/public/plugin.ts",
             "deprecated": false,
@@ -2473,7 +2476,7 @@
                 "id": "def-public.DataViewsService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onRedirectNoIndexPattern = () => {},\n  }",
+                "label": "{\n    uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onRedirectNoIndexPattern = () => {},\n    getCanSave = () => Promise.resolve(false),\n  }",
                 "description": [],
                 "signature": [
                   "IndexPatternsServiceDeps"
@@ -2695,15 +2698,9 @@
             "signature": [
               "() => Promise<",
               "SavedObject",
-              "<Pick<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ", \"title\" | \"type\" | \"typeMeta\">>[] | null | undefined>"
+              "<",
+              "IndexPatternSavedObjectAttrs",
+              ">[] | null | undefined>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -2833,7 +2830,15 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ") => Promise<any>"
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[]>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -2897,7 +2902,15 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              " | undefined) => Promise<any>"
+              " | undefined) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[]>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -3028,15 +3041,14 @@
                 "section": "def-common.FieldAttrs",
                 "text": "FieldAttrs"
               },
-              " | undefined) => Record<string, ",
+              " | undefined) => ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
-              },
-              ">"
+                "section": "def-common.DataViewFieldMap",
+                "text": "DataViewFieldMap"
+              }
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -3586,6 +3598,26 @@
         "deprecated": true,
         "references": [
           {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/target/types/public/application/lib/load_saved_dashboard_state.d.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/target/types/public/vis_types/base_vis_type.d.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/target/types/public/vis_types/base_vis_type.d.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/target/types/public/application/hooks/use_dashboard_app_state.d.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/application/main/utils/use_discover_state.d.ts"
+          },
+          {
             "plugin": "data",
             "path": "src/plugins/data/common/index.ts"
           },
@@ -3742,14 +3774,6 @@
             "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
           },
           {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
-          },
-          {
             "plugin": "discover",
             "path": "src/plugins/discover/public/components/doc_table/components/table_header/helpers.tsx"
           },
@@ -4147,30 +4171,6 @@
           },
           {
             "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/lens_utils.ts"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/lens_utils.ts"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/lens_utils.ts"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/lens_utils.ts"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/actions.ts"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/actions.ts"
-          },
-          {
-            "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/expanded_row/geo_point_content_with_map/geo_point_content_with_map.tsx"
           },
           {
@@ -4223,6 +4223,30 @@
           },
           {
             "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/lens_utils.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/lens_utils.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/lens_utils.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/lens_utils.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/actions.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/actions.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
           },
           {
@@ -4244,6 +4268,14 @@
           {
             "plugin": "apm",
             "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/SelectedFilters.tsx"
+          },
+          {
+            "plugin": "reporting",
+            "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
+          },
+          {
+            "plugin": "reporting",
+            "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
           },
           {
             "plugin": "lens",
@@ -4608,6 +4640,18 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/common/search/aggs/buckets/_terms_other_bucket_helper.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
           },
           {
             "plugin": "data",
@@ -4839,6 +4883,10 @@
           },
           {
             "plugin": "data",
+            "path": "src/plugins/data/target/types/common/search/aggs/agg_config.d.ts"
+          },
+          {
+            "plugin": "data",
             "path": "src/plugins/data/public/search/errors/painless_error.tsx"
           },
           {
@@ -5227,6 +5275,22 @@
           },
           {
             "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
           },
           {
@@ -5272,22 +5336,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_agg_source/es_agg_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
           },
           {
             "plugin": "maps",
@@ -5456,6 +5504,14 @@
           {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
           },
           {
             "plugin": "graph",
@@ -6420,6 +6476,22 @@
         "references": [
           {
             "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
+          },
+          {
+            "plugin": "data",
             "path": "src/plugins/data/common/index.ts"
           },
           {
@@ -6657,6 +6729,18 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/common/search/aggs/buckets/_terms_other_bucket_helper.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
           },
           {
             "plugin": "data",
@@ -6988,6 +7072,130 @@
           },
           {
             "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
+          },
+          {
+            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
           },
           {
@@ -7001,130 +7209,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/fields/es_doc_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
           },
           {
             "plugin": "maps",
@@ -7851,22 +7935,6 @@
             "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/lib/group_fields.d.ts"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
-          },
-          {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/top_values/top_values.tsx"
           },
@@ -7970,14 +8038,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/server/index.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/server/kibana_server_services.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/server/kibana_server_services.ts"
           },
           {
             "plugin": "maps",
@@ -8143,15 +8203,7 @@
                 "label": "savedObjectClient",
                 "description": [],
                 "signature": [
-                  "Pick<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsClient",
-                    "text": "SavedObjectsClient"
-                  },
-                  ", \"create\" | \"delete\" | \"find\" | \"resolve\" | \"update\">"
+                  "SOClient"
                 ],
                 "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts",
                 "deprecated": false,
@@ -8534,9 +8586,9 @@
             "label": "getAll",
             "description": [],
             "signature": [
-              "<T = any>() => Promise<Record<string, Pick<",
-              "UiSettingsParams",
-              "<unknown>, \"name\" | \"type\" | \"description\" | \"options\" | \"order\" | \"value\" | \"category\" | \"optionLabels\" | \"requiresPageReload\" | \"readonly\" | \"sensitive\" | \"deprecation\" | \"metric\"> & ",
+              "<T = any>() => Promise<Record<string, ",
+              "PublicUiSettingsParams",
+              " & ",
               "UserProvidedValues",
               "<T>>>"
             ],
@@ -9105,15 +9157,14 @@
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
-              ") | undefined; } | undefined) => Record<string, ",
+              ") | undefined; } | undefined) => ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
-              },
-              ">"
+                "section": "def-common.DataViewFieldMap",
+                "text": "DataViewFieldMap"
+              }
             ],
             "path": "src/plugins/data_views/common/fields/field_list.ts",
             "deprecated": false,
@@ -9199,7 +9250,15 @@
             "label": "aggs",
             "description": [],
             "signature": [
-              "Record<string, Record<string, { agg?: string | undefined; interval?: number | undefined; fixed_interval?: string | undefined; calendar_interval?: string | undefined; delay?: string | undefined; time_zone?: string | undefined; }>> | undefined"
+              "Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AggregationRestrictions",
+                "text": "AggregationRestrictions"
+              },
+              "> | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
@@ -9234,6 +9293,220 @@
           "\"CONTAINS_SPACES\""
         ],
         "path": "src/plugins/data_views/common/lib/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-public.DataViewsContract",
+        "type": "Type",
+        "tags": [],
+        "label": "DataViewsContract",
+        "description": [],
+        "signature": [
+          "{ create: (spec: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          ", skipFetchFields?: boolean) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ">; delete: (indexPatternId: string) => Promise<{}>; find: (search: string, size?: number) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          "[]>; get: (id: string) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ">; ensureDefaultDataView: ",
+          "EnsureDefaultDataView",
+          "; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; getIdsWithTitle: (refresh?: boolean) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewListItem",
+            "text": "DataViewListItem"
+          },
+          "[]>; clearCache: (id?: string | undefined) => void; getCache: () => Promise<",
+          "SavedObject",
+          "<",
+          "IndexPatternSavedObjectAttrs",
+          ">[] | null | undefined>; getDefault: () => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; hasUserDataView: () => Promise<boolean>; getFieldsForWildcard: (options: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.GetFieldsOptions",
+            "text": "GetFieldsOptions"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; getFieldsForIndexPattern: (indexPattern: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          ", options?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.GetFieldsOptions",
+            "text": "GetFieldsOptions"
+          },
+          " | undefined) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; refreshFields: (indexPattern: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ") => Promise<void>; fieldArrayToMap: (fields: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[], fieldAttrs?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldAttrs",
+            "text": "FieldAttrs"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewFieldMap",
+            "text": "DataViewFieldMap"
+          },
+          "; savedObjectToSpec: (savedObject: ",
+          "SavedObject",
+          "<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewAttributes",
+            "text": "DataViewAttributes"
+          },
+          ">) => ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "; createAndSave: (spec: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          ", override?: boolean, skipFetchFields?: boolean) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ">; createSavedObject: (indexPattern: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ", override?: boolean) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ">; updateSavedObject: (indexPattern: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>; getDefaultDataView: () => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined>; }"
+        ],
+        "path": "src/plugins/data_views/common/data_views/data_views.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -9278,9 +9551,766 @@
         "path": "src/plugins/data_views/common/lib/types.ts",
         "deprecated": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-public.IndexPatternsContract",
+        "type": "Type",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "IndexPatternsContract",
+        "description": [],
+        "signature": [
+          "{ create: (spec: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          ", skipFetchFields?: boolean) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ">; delete: (indexPatternId: string) => Promise<{}>; find: (search: string, size?: number) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          "[]>; get: (id: string) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ">; ensureDefaultDataView: ",
+          "EnsureDefaultDataView",
+          "; getIds: (refresh?: boolean) => Promise<string[]>; getTitles: (refresh?: boolean) => Promise<string[]>; getIdsWithTitle: (refresh?: boolean) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewListItem",
+            "text": "DataViewListItem"
+          },
+          "[]>; clearCache: (id?: string | undefined) => void; getCache: () => Promise<",
+          "SavedObject",
+          "<",
+          "IndexPatternSavedObjectAttrs",
+          ">[] | null | undefined>; getDefault: () => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | null>; getDefaultId: () => Promise<string | null>; setDefault: (id: string | null, force?: boolean) => Promise<void>; hasUserDataView: () => Promise<boolean>; getFieldsForWildcard: (options: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.GetFieldsOptions",
+            "text": "GetFieldsOptions"
+          },
+          ") => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; getFieldsForIndexPattern: (indexPattern: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          ", options?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.GetFieldsOptions",
+            "text": "GetFieldsOptions"
+          },
+          " | undefined) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; refreshFields: (indexPattern: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ") => Promise<void>; fieldArrayToMap: (fields: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[], fieldAttrs?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldAttrs",
+            "text": "FieldAttrs"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewFieldMap",
+            "text": "DataViewFieldMap"
+          },
+          "; savedObjectToSpec: (savedObject: ",
+          "SavedObject",
+          "<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewAttributes",
+            "text": "DataViewAttributes"
+          },
+          ">) => ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "; createAndSave: (spec: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          ", override?: boolean, skipFetchFields?: boolean) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ">; createSavedObject: (indexPattern: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ", override?: boolean) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ">; updateSavedObject: (indexPattern: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ", saveAttempts?: number, ignoreErrors?: boolean) => Promise<void | Error>; getDefaultDataView: () => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined>; }"
+        ],
+        "path": "src/plugins/data_views/common/data_views/data_views.ts",
+        "deprecated": true,
+        "references": [
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/index.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/create_search_source.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/create_search_source.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/search_source_service.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/search_source_service.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/expressions/esaggs/esaggs_fn.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/expressions/esaggs/esaggs_fn.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/types.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/types.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/utils/use_data_grid_columns.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/utils/use_data_grid_columns.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/utils/use_index_pattern.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/utils/use_index_pattern.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/main/utils/resolve_index_pattern.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/application/main/utils/resolve_index_pattern.ts"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/rtl_helpers.tsx"
+          },
+          {
+            "plugin": "observability",
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/rtl_helpers.tsx"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/create_search_source.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/create_search_source.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/create_search_source.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/search_source_service.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/search_source_service.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/expressions/esaggs.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/expressions/esaggs.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/server/search/expressions/esaggs.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/server/search/expressions/esaggs.test.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/utils/use_data_grid_columns.d.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/utils/use_data_grid_columns.d.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/application/main/utils/resolve_index_pattern.d.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/application/main/utils/resolve_index_pattern.d.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/services.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/services.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/index.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/ui/index_pattern_select/index_pattern_select.tsx"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/ui/index_pattern_select/index_pattern_select.tsx"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/ui/index_pattern_select/create_index_pattern_select.tsx"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/ui/index_pattern_select/create_index_pattern_select.tsx"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/aggs/aggs_service.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/aggs/aggs_service.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/ui/query_string_input/fetch_index_patterns.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/ui/query_string_input/fetch_index_patterns.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/search_service.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/search/search_service.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/types.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/hydrate_index_pattern.ts"
+          },
+          {
+            "plugin": "savedObjects",
+            "path": "src/plugins/saved_objects/public/saved_object/helpers/hydrate_index_pattern.ts"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/roles/edit_role/edit_role_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/roles/edit_role/edit_role_page.tsx"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/public/management/roles/edit_role/edit_role_page.tsx"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/build_services.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/build_services.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/utils/popularize_field.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/utils/popularize_field.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/components/doc_table/actions/columns.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/public/components/doc_table/actions/columns.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/types.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/types.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/application/test_helpers/make_default_services.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/public/application/test_helpers/make_default_services.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/utils.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/utils.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/indexpattern_datasource/loader.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/indexpattern_datasource/loader.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable_factory.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable_factory.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/lazy_load_bundle/index.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/lazy_load_bundle/index.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/application.tsx"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/application.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/util_components/geo_index_pattern_select.tsx"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/util_components/geo_index_pattern_select.tsx"
+          },
+          {
+            "plugin": "transform",
+            "path": "x-pack/plugins/transform/public/app/hooks/use_search_items/common.ts"
+          },
+          {
+            "plugin": "transform",
+            "path": "x-pack/plugins/transform/public/app/hooks/use_search_items/common.ts"
+          },
+          {
+            "plugin": "transform",
+            "path": "x-pack/plugins/transform/public/app/hooks/use_search_items/common.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/indexpattern_datasource/loader.test.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/indexpattern_datasource/loader.test.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/indexpattern_datasource/loader.test.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/indexpattern_datasource/loader.test.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/indexpattern_datasource/loader.test.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/indexpattern_datasource/loader.test.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/utils.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/utils.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/lazy_load_bundle/index.d.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/target/types/public/lazy_load_bundle/index.d.ts"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/target/types/public/management/roles/edit_role/edit_role_page.d.ts"
+          },
+          {
+            "plugin": "security",
+            "path": "x-pack/plugins/security/target/types/public/management/roles/edit_role/edit_role_page.d.ts"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/target/types/public/alert_types/geo_containment/query_builder/util_components/geo_index_pattern_select.d.ts"
+          },
+          {
+            "plugin": "stackAlerts",
+            "path": "x-pack/plugins/stack_alerts/target/types/public/alert_types/geo_containment/query_builder/util_components/geo_index_pattern_select.d.ts"
+          },
+          {
+            "plugin": "dataViewManagement",
+            "path": "src/plugins/data_view_management/public/components/utils.ts"
+          },
+          {
+            "plugin": "dataViewManagement",
+            "path": "src/plugins/data_view_management/public/components/utils.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.ts"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
+          },
+          {
+            "plugin": "savedObjectsManagement",
+            "path": "src/plugins/saved_objects_management/public/management_section/objects_table/saved_objects_table.tsx"
+          },
+          {
+            "plugin": "dataViewManagement",
+            "path": "src/plugins/data_view_management/public/components/utils.test.ts"
+          },
+          {
+            "plugin": "dataViewManagement",
+            "path": "src/plugins/data_view_management/public/components/utils.test.ts"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_types/timelion/public/helpers/plugin_services.ts"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_types/timelion/public/helpers/plugin_services.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/actions/filters/create_filters_from_range_select.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/actions/filters/create_filters_from_range_select.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/actions/filters/create_filters_from_value_click.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/public/actions/filters/create_filters_from_value_click.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/target/types/public/ui/index_pattern_select/index_pattern_select.d.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/target/types/public/ui/index_pattern_select/index_pattern_select.d.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/target/types/public/ui/index_pattern_select/create_index_pattern_select.d.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/target/types/public/ui/index_pattern_select/create_index_pattern_select.d.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/build_services.d.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/build_services.d.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/phrase_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
+          },
+          {
+            "plugin": "inputControlVis",
+            "path": "src/plugins/input_control_vis/public/control/filter_manager/range_filter_manager.test.ts"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_types/timelion/public/components/timelion_expression_input_helpers.test.ts"
+          },
+          {
+            "plugin": "visTypeTimelion",
+            "path": "src/plugins/vis_types/timelion/public/components/timelion_expression_input_helpers.test.ts"
+          },
+          {
+            "plugin": "dataViewManagement",
+            "path": "src/plugins/data_view_management/target/types/public/components/utils.d.ts"
+          },
+          {
+            "plugin": "dataViewManagement",
+            "path": "src/plugins/data_view_management/target/types/public/components/utils.d.ts"
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "objects": [],
+    "setup": {
+      "parentPluginId": "dataViews",
+      "id": "def-public.DataViewsPublicPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "DataViewsPublicPluginSetup",
+      "description": [
+        "\nData plugin public Setup contract"
+      ],
+      "path": "src/plugins/data_views/public/types.ts",
+      "deprecated": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
     "start": {
       "parentPluginId": "dataViews",
       "id": "def-public.DataViewsPublicPluginStart",
@@ -9335,15 +10365,9 @@
         },
         "[]>; clearCache: (id?: string | undefined) => void; getCache: () => Promise<",
         "SavedObject",
-        "<Pick<",
-        {
-          "pluginId": "dataViews",
-          "scope": "common",
-          "docId": "kibDataViewsPluginApi",
-          "section": "def-common.DataViewAttributes",
-          "text": "DataViewAttributes"
-        },
-        ", \"title\" | \"type\" | \"typeMeta\">>[] | null | undefined>; getDefault: () => Promise<",
+        "<",
+        "IndexPatternSavedObjectAttrs",
+        ">[] | null | undefined>; getDefault: () => Promise<",
         {
           "pluginId": "dataViews",
           "scope": "common",
@@ -9359,7 +10383,15 @@
           "section": "def-common.GetFieldsOptions",
           "text": "GetFieldsOptions"
         },
-        ") => Promise<any>; getFieldsForIndexPattern: (indexPattern: ",
+        ") => Promise<",
+        {
+          "pluginId": "dataViews",
+          "scope": "common",
+          "docId": "kibDataViewsPluginApi",
+          "section": "def-common.FieldSpec",
+          "text": "FieldSpec"
+        },
+        "[]>; getFieldsForIndexPattern: (indexPattern: ",
         {
           "pluginId": "dataViews",
           "scope": "common",
@@ -9383,7 +10415,15 @@
           "section": "def-common.GetFieldsOptions",
           "text": "GetFieldsOptions"
         },
-        " | undefined) => Promise<any>; refreshFields: (indexPattern: ",
+        " | undefined) => Promise<",
+        {
+          "pluginId": "dataViews",
+          "scope": "common",
+          "docId": "kibDataViewsPluginApi",
+          "section": "def-common.FieldSpec",
+          "text": "FieldSpec"
+        },
+        "[]>; refreshFields: (indexPattern: ",
         {
           "pluginId": "dataViews",
           "scope": "common",
@@ -9407,15 +10447,15 @@
           "section": "def-common.FieldAttrs",
           "text": "FieldAttrs"
         },
-        " | undefined) => Record<string, ",
+        " | undefined) => ",
         {
           "pluginId": "dataViews",
           "scope": "common",
           "docId": "kibDataViewsPluginApi",
-          "section": "def-common.FieldSpec",
-          "text": "FieldSpec"
+          "section": "def-common.DataViewFieldMap",
+          "text": "DataViewFieldMap"
         },
-        ">; savedObjectToSpec: (savedObject: ",
+        "; savedObjectToSpec: (savedObject: ",
         "SavedObject",
         "<",
         {
@@ -9486,21 +10526,6 @@
       "path": "src/plugins/data_views/public/types.ts",
       "deprecated": false,
       "lifecycle": "start",
-      "initialIsOpen": true
-    },
-    "setup": {
-      "parentPluginId": "dataViews",
-      "id": "def-public.DataViewsPublicPluginSetup",
-      "type": "Interface",
-      "tags": [],
-      "label": "DataViewsPublicPluginSetup",
-      "description": [
-        "\nData plugin public Setup contract"
-      ],
-      "path": "src/plugins/data_views/public/types.ts",
-      "deprecated": false,
-      "children": [],
-      "lifecycle": "setup",
       "initialIsOpen": true
     }
   },
@@ -9680,7 +10705,7 @@
             "label": "start",
             "description": [],
             "signature": [
-              "({ uiSettings }: ",
+              "({ uiSettings, capabilities }: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -9690,15 +10715,15 @@
               },
               ", { fieldFormats }: ",
               "DataViewsServerPluginStartDependencies",
-              ") => { indexPatternsServiceFactory: (savedObjectsClient: Pick<",
+              ") => { indexPatternsServiceFactory: (savedObjectsClient: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClient",
-                "text": "SavedObjectsClient"
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
               },
-              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, elasticsearchClient: ",
+              ", elasticsearchClient: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -9706,7 +10731,15 @@
                 "section": "def-server.ElasticsearchClient",
                 "text": "ElasticsearchClient"
               },
-              ") => Promise<",
+              ", request?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -9714,15 +10747,15 @@
                 "section": "def-common.DataViewsService",
                 "text": "DataViewsService"
               },
-              ">; dataViewsServiceFactory: (savedObjectsClient: Pick<",
+              ">; dataViewsServiceFactory: (savedObjectsClient: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClient",
-                "text": "SavedObjectsClient"
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
               },
-              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, elasticsearchClient: ",
+              ", elasticsearchClient: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -9730,7 +10763,15 @@
                 "section": "def-server.ElasticsearchClient",
                 "text": "ElasticsearchClient"
               },
-              ") => Promise<",
+              ", request?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any> | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -9748,7 +10789,7 @@
                 "id": "def-server.DataViewsServerPlugin.start.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ uiSettings }",
+                "label": "{ uiSettings, capabilities }",
                 "description": [],
                 "signature": [
                   {
@@ -9872,7 +10913,9 @@
               "\n Get a list of field objects for an index pattern that may contain wildcards\n"
             ],
             "signature": [
-              "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; }) => Promise<",
+              "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; filter?: ",
+              "QueryDslQueryContainer",
+              " | undefined; }) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "server",
@@ -9956,6 +10999,20 @@
                     "description": [],
                     "signature": [
                       "string | undefined"
+                    ],
+                    "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.filter",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "filter",
+                    "description": [],
+                    "signature": [
+                      "QueryDslQueryContainer",
+                      " | undefined"
                     ],
                     "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
                     "deprecated": false
@@ -10100,7 +11157,7 @@
         "label": "dataViewsServiceFactory",
         "description": [],
         "signature": [
-          "({ logger, uiSettings, fieldFormats, }: { logger: ",
+          "({ logger, uiSettings, fieldFormats, capabilities, }: { logger: ",
           {
             "pluginId": "@kbn/logging",
             "scope": "server",
@@ -10124,15 +11181,23 @@
             "section": "def-server.FieldFormatsStart",
             "text": "FieldFormatsStart"
           },
-          "; }) => (savedObjectsClient: Pick<",
+          "; capabilities: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCorePluginApi",
+            "section": "def-server.CapabilitiesStart",
+            "text": "CapabilitiesStart"
+          },
+          "; }) => (savedObjectsClient: ",
           {
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsClient",
-            "text": "SavedObjectsClient"
+            "section": "def-server.SavedObjectsClientContract",
+            "text": "SavedObjectsClientContract"
           },
-          ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, elasticsearchClient: ",
+          ", elasticsearchClient: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -10140,7 +11205,15 @@
             "section": "def-server.ElasticsearchClient",
             "text": "ElasticsearchClient"
           },
-          ") => Promise<",
+          ", request?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.KibanaRequest",
+            "text": "KibanaRequest"
+          },
+          "<unknown, unknown, unknown, any> | undefined) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -10158,7 +11231,7 @@
             "id": "def-server.dataViewsServiceFactory.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    logger,\n    uiSettings,\n    fieldFormats,\n  }",
+            "label": "{\n    logger,\n    uiSettings,\n    fieldFormats,\n    capabilities,\n  }",
             "description": [],
             "path": "src/plugins/data_views/server/data_views_service_factory.ts",
             "deprecated": false,
@@ -10219,6 +11292,25 @@
                 ],
                 "path": "src/plugins/data_views/server/data_views_service_factory.ts",
                 "deprecated": false
+              },
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-server.dataViewsServiceFactory.$1.capabilities",
+                "type": "Object",
+                "tags": [],
+                "label": "capabilities",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.CapabilitiesStart",
+                    "text": "CapabilitiesStart"
+                  }
+                ],
+                "path": "src/plugins/data_views/server/data_views_service_factory.ts",
+                "deprecated": false
               }
             ]
           }
@@ -10234,15 +11326,15 @@
         "label": "findIndexPatternById",
         "description": [],
         "signature": [
-          "(savedObjectsClient: Pick<",
+          "(savedObjectsClient: ",
           {
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsClient",
-            "text": "SavedObjectsClient"
+            "section": "def-server.SavedObjectsClientContract",
+            "text": "SavedObjectsClientContract"
           },
-          ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, index: string) => Promise<",
+          ", index: string) => Promise<",
           "SavedObject",
           "<",
           {
@@ -10265,15 +11357,13 @@
             "label": "savedObjectsClient",
             "description": [],
             "signature": [
-              "Pick<",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClient",
-                "text": "SavedObjectsClient"
-              },
-              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
             ],
             "path": "src/plugins/data_views/server/utils.ts",
             "deprecated": false,
@@ -10680,15 +11770,15 @@
           "label": "dataViewsServiceFactory",
           "description": [],
           "signature": [
-            "(savedObjectsClient: Pick<",
+            "(savedObjectsClient: ",
             {
               "pluginId": "core",
               "scope": "server",
               "docId": "kibCoreSavedObjectsPluginApi",
-              "section": "def-server.SavedObjectsClient",
-              "text": "SavedObjectsClient"
+              "section": "def-server.SavedObjectsClientContract",
+              "text": "SavedObjectsClientContract"
             },
-            ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, elasticsearchClient: ",
+            ", elasticsearchClient: ",
             {
               "pluginId": "core",
               "scope": "server",
@@ -10696,7 +11786,15 @@
               "section": "def-server.ElasticsearchClient",
               "text": "ElasticsearchClient"
             },
-            ") => Promise<",
+            ", request?: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
+            "<unknown, unknown, unknown, any> | undefined) => Promise<",
             {
               "pluginId": "dataViews",
               "scope": "common",
@@ -11010,15 +12108,15 @@
                   "section": "def-server.SavedObjectsClosePointInTimeResponse",
                   "text": "SavedObjectsClosePointInTimeResponse"
                 },
-                ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
+                ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: ",
                 {
                   "pluginId": "core",
                   "scope": "server",
                   "docId": "kibCoreSavedObjectsPluginApi",
-                  "section": "def-server.SavedObjectsFindOptions",
-                  "text": "SavedObjectsFindOptions"
+                  "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+                  "text": "SavedObjectsCreatePointInTimeFinderOptions"
                 },
-                ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: ",
+                ", dependencies?: ",
                 {
                   "pluginId": "core",
                   "scope": "server",
@@ -11055,15 +12153,35 @@
               "label": "elasticsearchClient",
               "description": [],
               "signature": [
-                "Pick<",
+                "Omit<",
                 "KibanaClient",
-                ", \"name\" | \"create\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"knnSearch\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchMvt\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request<TResponse = unknown>(params: ",
+                ", \"extend\" | \"connectionPool\" | \"transport\" | \"serializer\" | \"child\" | \"close\" | \"diagnostic\"> & { transport: { request<TResponse = unknown>(params: ",
                 "TransportRequestParams",
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "TransportResult",
                 "<TResponse, unknown>>; }; }"
+              ],
+              "path": "src/plugins/data_views/server/types.ts",
+              "deprecated": false
+            },
+            {
+              "parentPluginId": "dataViews",
+              "id": "def-server.DataViewsServerPluginStart.dataViewsServiceFactory.$3",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreHttpPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
+                "<unknown, unknown, unknown, any> | undefined"
               ],
               "path": "src/plugins/data_views/server/types.ts",
               "deprecated": false
@@ -11080,15 +12198,15 @@
           "label": "indexPatternsServiceFactory",
           "description": [],
           "signature": [
-            "(savedObjectsClient: Pick<",
+            "(savedObjectsClient: ",
             {
               "pluginId": "core",
               "scope": "server",
               "docId": "kibCoreSavedObjectsPluginApi",
-              "section": "def-server.SavedObjectsClient",
-              "text": "SavedObjectsClient"
+              "section": "def-server.SavedObjectsClientContract",
+              "text": "SavedObjectsClientContract"
             },
-            ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, elasticsearchClient: ",
+            ", elasticsearchClient: ",
             {
               "pluginId": "core",
               "scope": "server",
@@ -11096,7 +12214,15 @@
               "section": "def-server.ElasticsearchClient",
               "text": "ElasticsearchClient"
             },
-            ") => Promise<",
+            ", request?: ",
+            {
+              "pluginId": "core",
+              "scope": "server",
+              "docId": "kibCoreHttpPluginApi",
+              "section": "def-server.KibanaRequest",
+              "text": "KibanaRequest"
+            },
+            "<unknown, unknown, unknown, any> | undefined) => Promise<",
             {
               "pluginId": "dataViews",
               "scope": "common",
@@ -11148,10 +12274,6 @@
             {
               "plugin": "maps",
               "path": "x-pack/plugins/maps/server/kibana_server_services.ts"
-            },
-            {
-              "plugin": "maps",
-              "path": "x-pack/plugins/maps/server/plugin.ts"
             },
             {
               "plugin": "securitySolution",
@@ -11472,15 +12594,15 @@
                   "section": "def-server.SavedObjectsClosePointInTimeResponse",
                   "text": "SavedObjectsClosePointInTimeResponse"
                 },
-                ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
+                ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: ",
                 {
                   "pluginId": "core",
                   "scope": "server",
                   "docId": "kibCoreSavedObjectsPluginApi",
-                  "section": "def-server.SavedObjectsFindOptions",
-                  "text": "SavedObjectsFindOptions"
+                  "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+                  "text": "SavedObjectsCreatePointInTimeFinderOptions"
                 },
-                ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: ",
+                ", dependencies?: ",
                 {
                   "pluginId": "core",
                   "scope": "server",
@@ -11517,15 +12639,35 @@
               "label": "elasticsearchClient",
               "description": [],
               "signature": [
-                "Pick<",
+                "Omit<",
                 "KibanaClient",
-                ", \"name\" | \"create\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"knnSearch\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchMvt\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request<TResponse = unknown>(params: ",
+                ", \"extend\" | \"connectionPool\" | \"transport\" | \"serializer\" | \"child\" | \"close\" | \"diagnostic\"> & { transport: { request<TResponse = unknown>(params: ",
                 "TransportRequestParams",
                 ", options?: ",
                 "TransportRequestOptions",
                 " | undefined): Promise<",
                 "TransportResult",
                 "<TResponse, unknown>>; }; }"
+              ],
+              "path": "src/plugins/data_views/server/types.ts",
+              "deprecated": false
+            },
+            {
+              "parentPluginId": "dataViews",
+              "id": "def-server.DataViewsServerPluginStart.indexPatternsServiceFactory.$3",
+              "type": "Object",
+              "tags": [],
+              "label": "request",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "core",
+                  "scope": "server",
+                  "docId": "kibCoreHttpPluginApi",
+                  "section": "def-server.KibanaRequest",
+                  "text": "KibanaRequest"
+                },
+                "<unknown, unknown, unknown, any> | undefined"
               ],
               "path": "src/plugins/data_views/server/types.ts",
               "deprecated": false
@@ -11652,15 +12794,15 @@
                 "section": "def-common.IIndexPatternFieldList",
                 "text": "IIndexPatternFieldList"
               },
-              " & { toSpec: () => Record<string, ",
+              " & { toSpec: () => ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
+                "section": "def-common.DataViewFieldMap",
+                "text": "DataViewFieldMap"
               },
-              ">; }"
+              "; }"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false
@@ -12303,7 +13445,15 @@
             "label": "getAggregationRestrictions",
             "description": [],
             "signature": [
-              "() => Record<string, Record<string, { agg?: string | undefined; interval?: number | undefined; fixed_interval?: string | undefined; calendar_interval?: string | undefined; delay?: string | undefined; time_zone?: string | undefined; }>> | undefined"
+              "() => Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AggregationRestrictions",
+                "text": "AggregationRestrictions"
+              },
+              "> | undefined"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
@@ -12685,7 +13835,15 @@
             "label": "setFieldAttrs",
             "description": [],
             "signature": [
-              "<K extends \"customLabel\" | \"count\">(fieldName: string, attrName: K, value: ",
+              "<K extends keyof ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldAttrSet",
+                "text": "FieldAttrSet"
+              },
+              ">(fieldName: string, attrName: K, value: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -13128,7 +14286,8 @@
               "\nScript field language"
             ],
             "signature": [
-              "\"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined"
+              "ScriptLanguage",
+              " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -13141,7 +14300,8 @@
             "label": "lang",
             "description": [],
             "signature": [
-              "\"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined"
+              "ScriptLanguage",
+              " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -13291,9 +14451,7 @@
             "label": "subType",
             "description": [],
             "signature": [
-              "IFieldSubTypeMultiOptional",
-              " | ",
-              "IFieldSubTypeNestedOptional",
+              "IFieldSubType",
               " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
@@ -13383,13 +14541,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.IFieldSubTypeNested",
-                "text": "IFieldSubTypeNested"
-              },
+              "IFieldSubTypeNested",
               " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
@@ -13406,13 +14558,7 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.IFieldSubTypeMulti",
-                "text": "IFieldSubTypeMulti"
-              },
+              "IFieldSubTypeMulti",
               " | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
@@ -13443,10 +14589,10 @@
             "label": "toJSON",
             "description": [],
             "signature": [
-              "() => { count: number; script: string | undefined; lang: \"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined; conflictDescriptions: Record<string, string[]> | undefined; name: string; type: string; esTypes: string[] | undefined; scripted: boolean; searchable: boolean; aggregatable: boolean; readFromDocValues: boolean; subType: ",
-              "IFieldSubTypeMultiOptional",
-              " | ",
-              "IFieldSubTypeNestedOptional",
+              "() => { count: number; script: string | undefined; lang: ",
+              "ScriptLanguage",
+              " | undefined; conflictDescriptions: Record<string, string[]> | undefined; name: string; type: string; esTypes: string[] | undefined; scripted: boolean; searchable: boolean; aggregatable: boolean; readFromDocValues: boolean; subType: ",
+              "IFieldSubType",
               " | undefined; customLabel: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
@@ -13685,7 +14831,7 @@
                 "id": "def-common.DataViewsService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onRedirectNoIndexPattern = () => {},\n  }",
+                "label": "{\n    uiSettings,\n    savedObjectsClient,\n    apiClient,\n    fieldFormats,\n    onNotification,\n    onError,\n    onRedirectNoIndexPattern = () => {},\n    getCanSave = () => Promise.resolve(false),\n  }",
                 "description": [],
                 "signature": [
                   "IndexPatternsServiceDeps"
@@ -13907,15 +15053,9 @@
             "signature": [
               "() => Promise<",
               "SavedObject",
-              "<Pick<",
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewAttributes",
-                "text": "DataViewAttributes"
-              },
-              ", \"title\" | \"type\" | \"typeMeta\">>[] | null | undefined>"
+              "<",
+              "IndexPatternSavedObjectAttrs",
+              ">[] | null | undefined>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -14045,7 +15185,15 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ") => Promise<any>"
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[]>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -14109,7 +15257,15 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              " | undefined) => Promise<any>"
+              " | undefined) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[]>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -14240,15 +15396,14 @@
                 "section": "def-common.FieldAttrs",
                 "text": "FieldAttrs"
               },
-              " | undefined) => Record<string, ",
+              " | undefined) => ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
-              },
-              ">"
+                "section": "def-common.DataViewFieldMap",
+                "text": "DataViewFieldMap"
+              }
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -14851,6 +16006,26 @@
         "deprecated": true,
         "references": [
           {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/target/types/public/application/lib/load_saved_dashboard_state.d.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/target/types/public/vis_types/base_vis_type.d.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/target/types/public/vis_types/base_vis_type.d.ts"
+          },
+          {
+            "plugin": "dashboard",
+            "path": "src/plugins/dashboard/target/types/public/application/hooks/use_dashboard_app_state.d.ts"
+          },
+          {
+            "plugin": "discover",
+            "path": "src/plugins/discover/target/types/public/application/main/utils/use_discover_state.d.ts"
+          },
+          {
             "plugin": "data",
             "path": "src/plugins/data/common/index.ts"
           },
@@ -15007,14 +16182,6 @@
             "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
           },
           {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
-          },
-          {
-            "plugin": "reporting",
-            "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
-          },
-          {
             "plugin": "discover",
             "path": "src/plugins/discover/public/components/doc_table/components/table_header/helpers.tsx"
           },
@@ -15412,30 +16579,6 @@
           },
           {
             "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/lens_utils.ts"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/lens_utils.ts"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/lens_utils.ts"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/lens_utils.ts"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/actions.ts"
-          },
-          {
-            "plugin": "dataVisualizer",
-            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/actions.ts"
-          },
-          {
-            "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/expanded_row/geo_point_content_with_map/geo_point_content_with_map.tsx"
           },
           {
@@ -15488,6 +16631,30 @@
           },
           {
             "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/lens_utils.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/lens_utils.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/lens_utils.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/lens_utils.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/actions.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
+            "path": "x-pack/plugins/data_visualizer/public/application/common/components/field_data_row/action_menu/actions.ts"
+          },
+          {
+            "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/embeddables/grid_embeddable/grid_embeddable.tsx"
           },
           {
@@ -15509,6 +16676,14 @@
           {
             "plugin": "apm",
             "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/SelectedFilters.tsx"
+          },
+          {
+            "plugin": "reporting",
+            "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
+          },
+          {
+            "plugin": "reporting",
+            "path": "x-pack/plugins/reporting/server/export_types/csv_searchsource/generate_csv/generate_csv.ts"
           },
           {
             "plugin": "lens",
@@ -15873,6 +17048,18 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/common/search/aggs/buckets/_terms_other_bucket_helper.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
           },
           {
             "plugin": "data",
@@ -16104,6 +17291,10 @@
           },
           {
             "plugin": "data",
+            "path": "src/plugins/data/target/types/common/search/aggs/agg_config.d.ts"
+          },
+          {
+            "plugin": "data",
             "path": "src/plugins/data/public/search/errors/painless_error.tsx"
           },
           {
@@ -16492,6 +17683,22 @@
           },
           {
             "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
           },
           {
@@ -16537,22 +17744,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/sources/es_agg_source/es_agg_source.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
           },
           {
             "plugin": "maps",
@@ -16721,6 +17912,14 @@
           {
             "plugin": "graph",
             "path": "x-pack/plugins/graph/public/state_management/datasource.sagas.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
+          },
+          {
+            "plugin": "graph",
+            "path": "x-pack/plugins/graph/public/state_management/persistence.ts"
           },
           {
             "plugin": "graph",
@@ -17685,6 +18884,22 @@
         "references": [
           {
             "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
+          },
+          {
+            "plugin": "data",
             "path": "src/plugins/data/common/index.ts"
           },
           {
@@ -17922,6 +19137,18 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/common/search/aggs/buckets/_terms_other_bucket_helper.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/multi_terms.test.ts"
           },
           {
             "plugin": "data",
@@ -18253,6 +19480,130 @@
           },
           {
             "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
+          },
+          {
+            "plugin": "maps",
+            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
+          },
+          {
+            "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/tooltips/es_tooltip_property.ts"
           },
           {
@@ -18266,130 +19617,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/classes/fields/es_doc_field.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/index_pattern_util.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/public/components/metrics_editor/metric_editor.tsx"
           },
           {
             "plugin": "maps",
@@ -19116,22 +20343,6 @@
             "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/lib/group_fields.d.ts"
           },
           {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/param_types/field.ts"
-          },
-          {
             "plugin": "dataVisualizer",
             "path": "x-pack/plugins/data_visualizer/public/application/common/components/top_values/top_values.tsx"
           },
@@ -19235,14 +20446,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/server/index.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/server/kibana_server_services.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/server/kibana_server_services.ts"
           },
           {
             "plugin": "maps",
@@ -19437,22 +20640,8 @@
         "label": "getFieldSubtypeMulti",
         "description": [],
         "signature": [
-          "(field: Pick<",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.DataViewFieldBase",
-            "text": "DataViewFieldBase"
-          },
-          ", \"subType\">) => ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.IFieldSubTypeMulti",
-            "text": "IFieldSubTypeMulti"
-          },
+          "(field: HasSubtype) => ",
+          "IFieldSubTypeMulti",
           " | undefined"
         ],
         "path": "src/plugins/data_views/common/fields/utils.ts",
@@ -19468,9 +20657,7 @@
             "description": [],
             "signature": [
               "{ subType?: ",
-              "IFieldSubTypeMultiOptional",
-              " | ",
-              "IFieldSubTypeNestedOptional",
+              "IFieldSubType",
               " | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/utils.ts",
@@ -19487,22 +20674,8 @@
         "label": "getFieldSubtypeNested",
         "description": [],
         "signature": [
-          "(field: Pick<",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.DataViewFieldBase",
-            "text": "DataViewFieldBase"
-          },
-          ", \"subType\">) => ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.IFieldSubTypeNested",
-            "text": "IFieldSubTypeNested"
-          },
+          "(field: HasSubtype) => ",
+          "IFieldSubTypeNested",
           " | undefined"
         ],
         "path": "src/plugins/data_views/common/fields/utils.ts",
@@ -19518,9 +20691,7 @@
             "description": [],
             "signature": [
               "{ subType?: ",
-              "IFieldSubTypeMultiOptional",
-              " | ",
-              "IFieldSubTypeNestedOptional",
+              "IFieldSubType",
               " | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/utils.ts",
@@ -19537,7 +20708,7 @@
         "label": "getIndexPatternLoadMeta",
         "description": [],
         "signature": [
-          "() => Pick<",
+          "() => Omit<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -19545,7 +20716,7 @@
             "section": "def-common.IndexPatternLoadExpressionFunctionDefinition",
             "text": "IndexPatternLoadExpressionFunctionDefinition"
           },
-          ", \"name\" | \"type\" | \"telemetry\" | \"inject\" | \"extract\" | \"migrations\" | \"disabled\" | \"help\" | \"inputTypes\" | \"args\" | \"aliases\" | \"context\">"
+          ", \"fn\">"
         ],
         "path": "src/plugins/data_views/common/expressions/load_index_pattern.ts",
         "deprecated": false,
@@ -19606,15 +20777,7 @@
         "label": "isMultiField",
         "description": [],
         "signature": [
-          "(field: Pick<",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.DataViewFieldBase",
-            "text": "DataViewFieldBase"
-          },
-          ", \"subType\">) => boolean"
+          "(field: HasSubtype) => boolean"
         ],
         "path": "src/plugins/data_views/common/fields/utils.ts",
         "deprecated": false,
@@ -19629,9 +20792,7 @@
             "description": [],
             "signature": [
               "{ subType?: ",
-              "IFieldSubTypeMultiOptional",
-              " | ",
-              "IFieldSubTypeNestedOptional",
+              "IFieldSubType",
               " | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/utils.ts",
@@ -19648,15 +20809,7 @@
         "label": "isNestedField",
         "description": [],
         "signature": [
-          "(field: Pick<",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.DataViewFieldBase",
-            "text": "DataViewFieldBase"
-          },
-          ", \"subType\">) => boolean"
+          "(field: HasSubtype) => boolean"
         ],
         "path": "src/plugins/data_views/common/fields/utils.ts",
         "deprecated": false,
@@ -19671,9 +20824,7 @@
             "description": [],
             "signature": [
               "{ subType?: ",
-              "IFieldSubTypeMultiOptional",
-              " | ",
-              "IFieldSubTypeNestedOptional",
+              "IFieldSubType",
               " | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/utils.ts",
@@ -20016,15 +21167,14 @@
             "label": "fields",
             "description": [],
             "signature": [
-              "Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
+                "section": "def-common.DataViewFieldMap",
+                "text": "DataViewFieldMap"
               },
-              "> | undefined"
+              " | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
@@ -20238,13 +21388,7 @@
             "text": "FieldSpec"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.DataViewFieldBase",
-            "text": "DataViewFieldBase"
-          }
+          "DataViewFieldBase"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -20470,7 +21614,8 @@
             "label": "lang",
             "description": [],
             "signature": [
-              "\"painless\" | \"expression\" | \"mustache\" | \"java\" | undefined"
+              "ScriptLanguage",
+              " | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
@@ -20483,7 +21628,14 @@
             "label": "conflictDescriptions",
             "description": [],
             "signature": [
-              "Record<string, string[]> | undefined"
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpecConflictDescriptions",
+                "text": "FieldSpecConflictDescriptions"
+              },
+              " | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
@@ -20506,13 +21658,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.KBN_FIELD_TYPES",
-                "text": "KBN_FIELD_TYPES"
-              }
+              "KBN_FIELD_TYPES"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
@@ -20581,9 +21727,7 @@
             "label": "subType",
             "description": [],
             "signature": [
-              "IFieldSubTypeMultiOptional",
-              " | ",
-              "IFieldSubTypeNestedOptional",
+              "IFieldSubType",
               " | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
@@ -20714,6 +21858,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.GetFieldsOptions.filter",
+            "type": "Object",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "QueryDslQueryContainer",
+              " | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
@@ -20911,13 +22069,7 @@
             "text": "IFieldType"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.DataViewFieldBase",
-            "text": "DataViewFieldBase"
-          }
+          "DataViewFieldBase"
         ],
         "path": "src/plugins/data_views/common/fields/types.ts",
         "deprecated": true,
@@ -20929,6 +22081,14 @@
           },
           {
             "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts"
+          },
+          {
+            "plugin": "data",
             "path": "src/plugins/data/public/ui/filter_bar/filter_editor/lib/filter_editor_utils.ts"
           },
           {
@@ -20978,14 +22138,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/public/autocomplete/providers/value_suggestion_provider.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/aggs/buckets/date_histogram.ts"
           },
           {
             "plugin": "data",
@@ -21068,126 +22220,6 @@
             "path": "x-pack/plugins/fleet/public/applications/fleet/components/search_bar.tsx"
           },
           {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/inventory_view/components/waffle/metric_control/custom_metric_form.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/inventory_view/components/waffle/metric_control/custom_metric_form.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/inventory_view/components/waffle/metric_control/index.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/inventory_view/components/waffle/metric_control/index.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/inventory_view/components/waffle/custom_field_panel.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/inventory_view/components/waffle/custom_field_panel.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/inventory_view/components/waffle/waffle_group_by_controls.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/inventory_view/components/waffle/waffle_group_by_controls.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/inventory/components/metric.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/inventory/components/metric.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/inventory/components/expression.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/inventory/components/expression.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/common/group_by_expression/selector.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/common/group_by_expression/selector.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/common/group_by_expression/group_by_expression.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/common/group_by_expression/group_by_expression.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/log_threshold/components/expression_editor/criterion.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/log_threshold/components/expression_editor/criterion.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/log_threshold/components/expression_editor/criterion.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/log_threshold/components/expression_editor/criterion.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/log_threshold/components/expression_editor/criterion.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/log_threshold/components/expression_editor/criterion.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/log_threshold/components/expression_editor/criteria.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/log_threshold/components/expression_editor/criteria.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/components/group_by.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/components/group_by.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/metric_threshold/components/expression_row.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/alerting/metric_threshold/components/expression_row.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/components/metrics.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/pages/metrics/metrics_explorer/components/metrics.tsx"
-          },
-          {
             "plugin": "fleet",
             "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
           },
@@ -21240,116 +22272,12 @@
             "path": "x-pack/plugins/stack_alerts/public/alert_types/geo_containment/query_builder/util_components/single_field_select.tsx"
           },
           {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/alerting/common/group_by_expression/group_by_expression.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/alerting/common/group_by_expression/group_by_expression.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/alerting/common/group_by_expression/selector.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/alerting/common/group_by_expression/selector.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/alerting/inventory/components/expression.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/alerting/inventory/components/expression.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/alerting/inventory/components/metric.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/alerting/inventory/components/metric.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/alerting/metric_threshold/components/expression_row.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/alerting/metric_threshold/components/expression_row.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/alerting/log_threshold/components/expression_editor/criteria.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/alerting/log_threshold/components/expression_editor/criteria.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/alerting/log_threshold/components/expression_editor/criterion.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/alerting/log_threshold/components/expression_editor/criterion.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/pages/metrics/metrics_explorer/components/group_by.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/pages/metrics/metrics_explorer/components/group_by.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/pages/metrics/metrics_explorer/components/metrics.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/pages/metrics/metrics_explorer/components/metrics.d.ts"
-          },
-          {
             "plugin": "stackAlerts",
             "path": "x-pack/plugins/stack_alerts/target/types/public/alert_types/geo_containment/query_builder/util_components/single_field_select.d.ts"
           },
           {
             "plugin": "stackAlerts",
             "path": "x-pack/plugins/stack_alerts/target/types/public/alert_types/geo_containment/query_builder/util_components/single_field_select.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/pages/metrics/inventory_view/components/waffle/custom_field_panel.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/pages/metrics/inventory_view/components/waffle/custom_field_panel.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/pages/metrics/inventory_view/components/waffle/waffle_group_by_controls.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/pages/metrics/inventory_view/components/waffle/waffle_group_by_controls.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/pages/metrics/inventory_view/components/waffle/metric_control/custom_metric_form.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/pages/metrics/inventory_view/components/waffle/metric_control/custom_metric_form.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/pages/metrics/inventory_view/components/waffle/metric_control/index.d.ts"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/target/types/public/pages/metrics/inventory_view/components/waffle/metric_control/index.d.ts"
           },
           {
             "plugin": "dataViewManagement",
@@ -21762,13 +22690,7 @@
             "text": "IIndexPattern"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.DataViewBase",
-            "text": "DataViewBase"
-          }
+          "DataViewBase"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": true,
@@ -21795,6 +22717,26 @@
           },
           {
             "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/normalize_sort_request.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/normalize_sort_request.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/normalize_sort_request.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/search_source.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/plugins/data/common/search/search_source/search_source.ts"
+          },
+          {
+            "plugin": "data",
             "path": "src/plugins/data/public/ui/filter_bar/filter_editor/lib/filter_editor_utils.ts"
           },
           {
@@ -21876,26 +22818,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/public/autocomplete/providers/value_suggestion_provider.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/normalize_sort_request.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/normalize_sort_request.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/normalize_sort_request.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/search_source.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/plugins/data/common/search/search_source/search_source.ts"
           },
           {
             "plugin": "data",
@@ -22761,15 +23683,14 @@
                 "section": "def-common.FieldFormat",
                 "text": "FieldFormat"
               },
-              ") | undefined; } | undefined) => Record<string, ",
+              ") | undefined; } | undefined) => ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
-              },
-              ">"
+                "section": "def-common.DataViewFieldMap",
+                "text": "DataViewFieldMap"
+              }
             ],
             "path": "src/plugins/data_views/common/fields/field_list.ts",
             "deprecated": false,
@@ -22900,7 +23821,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"boolean\" | \"date\" | \"geo_point\" | \"ip\" | \"keyword\" | \"long\" | \"double\""
+              "\"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"geo_point\" | \"long\" | \"double\""
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
@@ -23564,7 +24485,15 @@
             "label": "aggs",
             "description": [],
             "signature": [
-              "Record<string, Record<string, { agg?: string | undefined; interval?: number | undefined; fixed_interval?: string | undefined; calendar_interval?: string | undefined; delay?: string | undefined; time_zone?: string | undefined; }>> | undefined"
+              "Record<string, ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AggregationRestrictions",
+                "text": "AggregationRestrictions"
+              },
+              "> | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
@@ -23857,15 +24786,9 @@
           },
           "[]>; clearCache: (id?: string | undefined) => void; getCache: () => Promise<",
           "SavedObject",
-          "<Pick<",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataViewAttributes",
-            "text": "DataViewAttributes"
-          },
-          ", \"title\" | \"type\" | \"typeMeta\">>[] | null | undefined>; getDefault: () => Promise<",
+          "<",
+          "IndexPatternSavedObjectAttrs",
+          ">[] | null | undefined>; getDefault: () => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23881,7 +24804,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          ") => Promise<any>; getFieldsForIndexPattern: (indexPattern: ",
+          ") => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; getFieldsForIndexPattern: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23905,7 +24836,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          " | undefined) => Promise<any>; refreshFields: (indexPattern: ",
+          " | undefined) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; refreshFields: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23929,15 +24868,15 @@
             "section": "def-common.FieldAttrs",
             "text": "FieldAttrs"
           },
-          " | undefined) => Record<string, ",
+          " | undefined) => ",
           {
             "pluginId": "dataViews",
             "scope": "common",
             "docId": "kibDataViewsPluginApi",
-            "section": "def-common.FieldSpec",
-            "text": "FieldSpec"
+            "section": "def-common.DataViewFieldMap",
+            "text": "DataViewFieldMap"
           },
-          ">; savedObjectToSpec: (savedObject: ",
+          "; savedObjectToSpec: (savedObject: ",
           "SavedObject",
           "<",
           {
@@ -24460,15 +25399,9 @@
           },
           "[]>; clearCache: (id?: string | undefined) => void; getCache: () => Promise<",
           "SavedObject",
-          "<Pick<",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataViewAttributes",
-            "text": "DataViewAttributes"
-          },
-          ", \"title\" | \"type\" | \"typeMeta\">>[] | null | undefined>; getDefault: () => Promise<",
+          "<",
+          "IndexPatternSavedObjectAttrs",
+          ">[] | null | undefined>; getDefault: () => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -24484,7 +25417,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          ") => Promise<any>; getFieldsForIndexPattern: (indexPattern: ",
+          ") => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; getFieldsForIndexPattern: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -24508,7 +25449,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          " | undefined) => Promise<any>; refreshFields: (indexPattern: ",
+          " | undefined) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; refreshFields: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -24532,15 +25481,15 @@
             "section": "def-common.FieldAttrs",
             "text": "FieldAttrs"
           },
-          " | undefined) => Record<string, ",
+          " | undefined) => ",
           {
             "pluginId": "dataViews",
             "scope": "common",
             "docId": "kibDataViewsPluginApi",
-            "section": "def-common.FieldSpec",
-            "text": "FieldSpec"
+            "section": "def-common.DataViewFieldMap",
+            "text": "DataViewFieldMap"
           },
-          ">; savedObjectToSpec: (savedObject: ",
+          "; savedObjectToSpec: (savedObject: ",
           "SavedObject",
           "<",
           {
@@ -24901,11 +25850,11 @@
           },
           {
             "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.ts"
+            "path": "x-pack/plugins/graph/public/application.tsx"
           },
           {
             "plugin": "graph",
-            "path": "x-pack/plugins/graph/public/application.ts"
+            "path": "x-pack/plugins/graph/public/application.tsx"
           },
           {
             "plugin": "stackAlerts",
@@ -25305,7 +26254,7 @@
             "signature": [
               "Pick<",
               "Toast",
-              ", \"onChange\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"className\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"color\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"security\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"children\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDown\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClick\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"iconType\" | \"toastLifeTimeMs\" | \"onClose\"> & { title?: string | ",
+              ", \"children\" | \"onClick\" | \"onChange\" | \"color\" | \"onKeyDown\" | \"security\" | \"className\" | \"defaultChecked\" | \"defaultValue\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"hidden\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"data-test-subj\" | \"iconType\" | \"toastLifeTimeMs\" | \"onClose\"> & { title?: string | ",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -25337,7 +26286,7 @@
         "label": "RuntimeType",
         "description": [],
         "signature": [
-          "\"boolean\" | \"date\" | \"geo_point\" | \"ip\" | \"keyword\" | \"long\" | \"double\""
+          "\"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"geo_point\" | \"long\" | \"double\""
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
