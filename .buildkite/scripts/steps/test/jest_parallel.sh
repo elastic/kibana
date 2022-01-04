@@ -13,6 +13,9 @@ gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
 shasum -a 256 -c codecov.SHA256SUM
 chmod +x codecov
 
+./codecov --help
+./codecov -d -v -f target/kibana-coverage/jest/jest.json
+
 JOB=$BUILDKITE_PARALLEL_JOB
 JOB_COUNT=$BUILDKITE_PARALLEL_JOB_COUNT
 
