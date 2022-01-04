@@ -64,15 +64,15 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
     const getTestId = useTestIdGenerator(otherProps['data-test-subj']);
 
     const pageHeader = useMemo(
-      () => (
-        <>
-          {hideHeader ? (
-            <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
-              <EuiFlexItem grow={false}>
-                {headerBackComponent && <>{headerBackComponent}</>}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : (
+      () =>
+        hideHeader ? (
+          <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
+            <EuiFlexItem grow={false}>
+              {headerBackComponent && <>{headerBackComponent}</>}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          <>
             <EuiPageHeader
               pageTitle={header}
               description={description}
@@ -81,10 +81,9 @@ export const AdministrationListPage: FC<AdministrationListPageProps & CommonProp
               restrictWidth={restrictWidth}
               data-test-subj={getTestId('header')}
             />
-          )}
-          <EuiSpacer size="l" />
-        </>
-      ),
+            <EuiSpacer size="l" />
+          </>
+        ),
       [
         actions,
         description,
