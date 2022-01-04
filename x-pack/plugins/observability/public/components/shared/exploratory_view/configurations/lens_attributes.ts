@@ -102,6 +102,7 @@ export class LensAttributes {
   visualization: XYState;
   layerConfigs: LayerConfig[];
   isMultiSeries: boolean;
+  globalFilter?: string;
 
   constructor(layerConfigs: LayerConfig[]) {
     this.layers = {};
@@ -119,8 +120,25 @@ export class LensAttributes {
 
     this.layerConfigs = layerConfigs;
     this.isMultiSeries = layerConfigs.length > 1;
+    this.globalFilter = this.getGlobalFilter(this.isMultiSeries);
     this.layers = this.getLayers();
     this.visualization = this.getXyState();
+  }
+
+  getGlobalFilter(isMultiSeries: boolean) {
+    if (isMultiSeries) {
+      return undefined;
+    }
+    const defaultLayerFilter = this.layerConfigs[0].seriesConfig.query
+      ? ` and ${this.layerConfigs[0].seriesConfig.query.query}`
+      : '';
+    return {
+      query: `${this.getLayerFilters(
+        this.layerConfigs[0],
+        this.layerConfigs.length
+      )}${defaultLayerFilter}`,
+      language: 'kuery',
+    };
   }
 
   getBreakdownColumn({
@@ -764,7 +782,7 @@ export class LensAttributes {
       new Set([...this.layerConfigs.map(({ indexPattern }) => indexPattern.id)])
     );
 
-    const query = this.layerConfigs[0].seriesConfig.query;
+    const query = this.globalFilter || this.layerConfigs[0].seriesConfig.query;
 
     return {
       title: 'Prefilled from exploratory view app',
