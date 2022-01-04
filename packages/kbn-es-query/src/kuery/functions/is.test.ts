@@ -321,6 +321,26 @@ describe('kuery functions', () => {
 
         expect(result).toEqual(expected);
       });
+
+      test('should create a regexp query', () => {
+        const expected = {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                query_string: {
+                  fields: ['foo'],
+                  query: '\\/bar\\.*\\/',
+                },
+              },
+            ],
+          },
+        };
+        const node = buildNode('foo', '/bar.*/');
+        const result = toElasticsearchQuery(node, indexPattern);
+
+        expect(result).toEqual(expected);
+      });
     });
   });
 });
