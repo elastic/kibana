@@ -28,7 +28,7 @@ export const deleteIlms = async (esClient: ElasticsearchClient, ilmPolicyIds: st
 };
 
 export const deleteIlmRefs = async (
-  savedObjectsClient: ISavedObjectsRepository,
+  savedObjectsRepo: ISavedObjectsRepository,
   installedEsAssets: EsAssetReference[],
   pkgName: string,
   installedEsIdToRemove: string[],
@@ -43,7 +43,7 @@ export const deleteIlmRefs = async (
     seen.add(id);
     return add;
   });
-  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+  return savedObjectsRepo.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     installed_es: filteredAssets,
   });
 };

@@ -36,10 +36,10 @@ export const installIlmForDataStream = async (
   registryPackage: InstallablePackage,
   paths: string[],
   esClient: ElasticsearchClient,
-  savedObjectsClient: ISavedObjectsRepository,
+  savedObjectsRepo: ISavedObjectsRepository,
   logger: Logger
 ) => {
-  const installation = await getInstallation({ savedObjectsClient, pkgName: registryPackage.name });
+  const installation = await getInstallation({ savedObjectsRepo, pkgName: registryPackage.name });
   let previousInstalledIlmEsAssets: EsAssetReference[] = [];
   if (installation) {
     previousInstalledIlmEsAssets = installation.installed_es.filter(
@@ -77,7 +77,7 @@ export const installIlmForDataStream = async (
       return acc;
     }, []);
 
-    await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, ilmRefs);
+    await saveInstalledEsRefs(savedObjectsRepo, registryPackage.name, ilmRefs);
 
     const ilmInstallations: IlmInstallation[] = ilmPathDatasets.map(
       (ilmPathDataset: IlmPathDataset) => {
@@ -100,13 +100,13 @@ export const installIlmForDataStream = async (
 
   if (previousInstalledIlmEsAssets.length > 0) {
     const currentInstallation = await getInstallation({
-      savedObjectsClient,
+      savedObjectsRepo,
       pkgName: registryPackage.name,
     });
 
     // remove the saved object reference
     await deleteIlmRefs(
-      savedObjectsClient,
+      savedObjectsRepo,
       currentInstallation?.installed_es || [],
       registryPackage.name,
       previousInstalledIlmEsAssets.map((asset) => asset.id),

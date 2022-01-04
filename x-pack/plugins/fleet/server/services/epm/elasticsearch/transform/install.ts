@@ -30,11 +30,11 @@ export const installTransform = async (
   installablePackage: InstallablePackage,
   paths: string[],
   esClient: ElasticsearchClient,
-  savedObjectsClient: ISavedObjectsRepository,
+  savedObjectsRepo: ISavedObjectsRepository,
   logger: Logger
 ) => {
   const installation = await getInstallation({
-    savedObjectsClient,
+    savedObjectsRepo,
     pkgName: installablePackage.name,
   });
   let previousInstalledTransformEsAssets: EsAssetReference[] = [];
@@ -71,7 +71,7 @@ export const installTransform = async (
     }, []);
 
     // get and save transform refs before installing transforms
-    await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, transformRefs);
+    await saveInstalledEsRefs(savedObjectsRepo, installablePackage.name, transformRefs);
 
     const transforms: TransformInstallation[] = transformPaths.map((path: string) => {
       const content = JSON.parse(getAsset(path).toString('utf-8'));
@@ -96,13 +96,13 @@ export const installTransform = async (
 
   if (previousInstalledTransformEsAssets.length > 0) {
     const currentInstallation = await getInstallation({
-      savedObjectsClient,
+      savedObjectsRepo,
       pkgName: installablePackage.name,
     });
 
     // remove the saved object reference
     await deleteTransformRefs(
-      savedObjectsClient,
+      savedObjectsRepo,
       currentInstallation?.installed_es || [],
       installablePackage.name,
       previousInstalledTransformEsAssets.map((asset) => asset.id),

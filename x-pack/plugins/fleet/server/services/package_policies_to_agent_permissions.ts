@@ -35,7 +35,7 @@ export async function storedPackagePoliciesToAgentPermissions(
       }
 
       const pkg = await getPackageInfo({
-        savedObjectsClient: soClient,
+        savedObjectsRepo: soClient,
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
       });

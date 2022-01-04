@@ -34,7 +34,7 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetPackagePoliciesRequestSchema.query>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
+  const soClient = context.fleet.epm.internalSoRepo;
   try {
     const { items, total, page, perPage } = await packagePolicyService.list(
       soClient,
@@ -56,7 +56,7 @@ export const getPackagePoliciesHandler: FleetRequestHandler<
 export const getOnePackagePolicyHandler: FleetRequestHandler<
   TypeOf<typeof GetOnePackagePolicyRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
+  const soClient = context.fleet.epm.internalSoRepo;
   const { packagePolicyId } = request.params;
   const notFoundResponse = () =>
     response.notFound({ body: { message: `Package policy ${packagePolicyId} not found` } });
@@ -86,7 +86,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof CreatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
+  const soClient = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const { force, ...newPolicy } = request.body;
@@ -130,7 +130,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
   unknown,
   TypeOf<typeof UpdatePackagePolicyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
+  const soClient = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const packagePolicy = await packagePolicyService.get(soClient, request.params.packagePolicyId);
@@ -196,7 +196,7 @@ export const deletePackagePolicyHandler: FleetRequestHandler<
   unknown,
   TypeOf<typeof DeletePackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
+  const soClient = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   try {
@@ -231,7 +231,7 @@ export const upgradePackagePolicyHandler: FleetRequestHandler<
   unknown,
   TypeOf<typeof UpgradePackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
+  const soClient = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   try {
@@ -263,7 +263,7 @@ export const dryRunUpgradePackagePolicyHandler: FleetRequestHandler<
   unknown,
   TypeOf<typeof DryRunPackagePoliciesRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
+  const soClient = context.fleet.epm.internalSoRepo;
   try {
     const body: UpgradePackagePolicyDryRunResponse = [];
     const { packagePolicyIds } = request.body;

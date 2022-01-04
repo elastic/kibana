@@ -810,7 +810,7 @@ class AgentPolicyService {
 export const agentPolicyService = new AgentPolicyService();
 
 export async function addPackageToAgentPolicy(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   packageToInstall: Installation,
   agentPolicy: AgentPolicy,
@@ -822,7 +822,7 @@ export async function addPackageToAgentPolicy(
   bumpAgentPolicyRevison = false
 ) {
   const packageInfo = await getPackageInfo({
-    savedObjectsClient: soClient,
+    savedObjectsRepo: soRepo,
     pkgName: packageToInstall.name,
     pkgVersion: packageToInstall.version,
   });
@@ -846,7 +846,7 @@ export async function addPackageToAgentPolicy(
     ? String(packagePolicyId)
     : uuidv5(`${agentPolicy.id}-${packagePolicyName}`, UUID_V5_NAMESPACE);
 
-  await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
+  await packagePolicyService.create(soRepo, esClient, newPackagePolicy, {
     id,
     bumpRevision: bumpAgentPolicyRevison,
     skipEnsureInstalled: true,

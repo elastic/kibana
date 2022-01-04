@@ -83,9 +83,9 @@ export const getListHandler: FleetRequestHandler<
   TypeOf<typeof GetPackagesRequestSchema.query>
 > = async (context, request, response) => {
   try {
-    const savedObjectsClient = context.fleet.epm.internalSoClient;
+    const savedObjectsRepo = context.fleet.epm.internalSoRepo;
     const res = await getPackages({
-      savedObjectsClient,
+      savedObjectsRepo,
       ...request.query,
     });
     const body: GetPackagesResponse = {
@@ -102,8 +102,8 @@ export const getListHandler: FleetRequestHandler<
 
 export const getLimitedListHandler: FleetRequestHandler = async (context, request, response) => {
   try {
-    const savedObjectsClient = context.fleet.epm.internalSoClient;
-    const res = await getLimitedPackages({ savedObjectsClient });
+    const savedObjectsRepo = context.fleet.epm.internalSoRepo;
+    const res = await getLimitedPackages({ savedObjectsRepo });
     const body: GetLimitedPackagesResponse = {
       items: res,
       response: res,
@@ -121,15 +121,15 @@ export const getFileHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   try {
     const { pkgName, pkgVersion, filePath } = request.params;
-    const savedObjectsClient = context.fleet.epm.internalSoClient;
-    const installation = await getInstallation({ savedObjectsClient, pkgName });
+    const savedObjectsRepo = context.fleet.epm.internalSoRepo;
+    const installation = await getInstallation({ savedObjectsRepo, pkgName });
     const useLocalFile = pkgVersion === installation?.version;
 
     if (useLocalFile) {
       const assetPath = `${pkgName}-${pkgVersion}/${filePath}`;
       const fileBuffer = getArchiveEntry(assetPath);
       // only pull local installation if we don't have it cached
-      const storedAsset = !fileBuffer && (await getAsset({ savedObjectsClient, path: assetPath }));
+      const storedAsset = !fileBuffer && (await getAsset({ savedObjectsRepo, path: assetPath }));
 
       // error, if neither is available
       if (!fileBuffer && !storedAsset) {
@@ -194,13 +194,13 @@ export const getInfoHandler: FleetRequestHandler<
   TypeOf<typeof GetInfoRequestSchema.params>
 > = async (context, request, response) => {
   try {
-    const savedObjectsClient = context.fleet.epm.internalSoClient;
+    const savedObjectsRepo = context.fleet.epm.internalSoRepo;
     const { pkgName, pkgVersion } = request.params;
     if (pkgVersion && !semverValid(pkgVersion)) {
       throw new IngestManagerError('Package version is not a valid semver');
     }
     const res = await getPackageInfo({
-      savedObjectsClient,
+      savedObjectsRepo,
       pkgName,
       pkgVersion: pkgVersion || '',
     });
@@ -219,10 +219,10 @@ export const updatePackageHandler: FleetRequestHandler<
   TypeOf<typeof UpdatePackageRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const savedObjectsClient = context.fleet.epm.internalSoClient;
+    const savedObjectsRepo = context.fleet.epm.internalSoRepo;
     const { pkgName } = request.params;
 
-    const res = await updatePackage({ savedObjectsClient, pkgName, ...request.body });
+    const res = await updatePackage({ savedObjectsRepo, pkgName, ...request.body });
     const body: UpdatePackageResponse = {
       item: res,
     };
@@ -238,9 +238,9 @@ export const getStatsHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   try {
     const { pkgName } = request.params;
-    const savedObjectsClient = context.fleet.epm.internalSoClient;
+    const savedObjectsRepo = context.fleet.epm.internalSoRepo;
     const body: GetStatsResponse = {
-      response: await getPackageUsageStats({ savedObjectsClient, pkgName }),
+      response: await getPackageUsageStats({ savedObjectsRepo, pkgName }),
     };
     return response.ok({ body });
   } catch (error) {
@@ -253,14 +253,14 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
-  const savedObjectsClient = context.fleet.epm.internalSoClient;
+  const savedObjectsRepo = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const { pkgName, pkgVersion } = request.params;
 
   const spaceId = context.fleet.spaceId;
   const res = await installPackage({
     installSource: 'registry',
-    savedObjectsClient,
+    savedObjectsRepo,
     pkgkey: pkgVersion ? `${pkgName}-${pkgVersion}` : pkgName,
     esClient,
     spaceId,
@@ -296,11 +296,11 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof BulkUpgradePackagesFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
-  const savedObjectsClient = context.fleet.epm.internalSoClient;
+  const savedObjectsRepo = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const spaceId = context.fleet.spaceId;
   const bulkInstalledResponses = await bulkInstallPackages({
-    savedObjectsClient,
+    savedObjectsRepo,
     esClient,
     packagesToInstall: request.body.packages,
     spaceId,
@@ -324,14 +324,14 @@ export const installPackageByUploadHandler: FleetRequestHandler<
       body: { message: 'Requires Enterprise license' },
     });
   }
-  const savedObjectsClient = context.fleet.epm.internalSoClient;
+  const savedObjectsRepo = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
   const spaceId = context.fleet.spaceId;
   const res = await installPackage({
     installSource: 'upload',
-    savedObjectsClient,
+    savedObjectsRepo,
     esClient,
     archiveBuffer,
     spaceId,
@@ -355,10 +355,10 @@ export const deletePackageHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   try {
     const { pkgName, pkgVersion } = request.params;
-    const savedObjectsClient = context.fleet.epm.internalSoClient;
+    const savedObjectsRepo = context.fleet.epm.internalSoRepo;
     const esClient = context.core.elasticsearch.client.asInternalUser;
     const res = await removeInstallation({
-      savedObjectsClient,
+      savedObjectsRepo,
       pkgName,
       pkgVersion,
       esClient,

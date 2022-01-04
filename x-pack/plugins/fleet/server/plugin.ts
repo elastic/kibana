@@ -292,7 +292,7 @@ export class FleetPlugin
           },
           authz: await getAuthzFromRequest(request),
           epm: {
-            get internalSoClient(): ISavedObjectsRepository {
+            get internalSoRepo(): ISavedObjectsRepository {
               return plugin.internalSoRepository!;
             },
           },

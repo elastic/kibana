@@ -63,7 +63,7 @@ export const getListHandler: FleetRequestHandler = async (context, request, resp
     ] = await Promise.all([
       esClient.indices.getDataStream({ name: DATA_STREAM_INDEX_PATTERN }),
       esClient.indices.dataStreamsStats({ name: DATA_STREAM_INDEX_PATTERN }),
-      getPackageSavedObjects(context.fleet.epm.internalSoClient),
+      getPackageSavedObjects(context.fleet.epm.internalSoRepo),
     ]);
 
     const dataStreamsInfoByName = keyBy<ESDataStreamInfo>(dataStreamsInfo, 'name');
@@ -90,7 +90,7 @@ export const getListHandler: FleetRequestHandler = async (context, request, resp
       allDashboards[pkgSavedObject.id] = dashboards;
       return allDashboards;
     }, {});
-    const allDashboardSavedObjectsResponse = await context.fleet.epm.internalSoClient.bulkGet<{
+    const allDashboardSavedObjectsResponse = await context.fleet.epm.internalSoRepo.bulkGet<{
       title?: string;
     }>(
       Object.values(dashboardIdsByPackageName).flatMap((dashboardIds) =>

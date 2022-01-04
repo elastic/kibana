@@ -96,24 +96,24 @@ export async function archiveEntryToESDocument(opts: {
 }
 
 export async function removeArchiveEntries(opts: {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
   refs?: PackageAssetReference[];
 }) {
-  const { savedObjectsClient, refs } = opts;
+  const { savedObjectsRepo, refs } = opts;
   if (!refs) return;
   const results = await Promise.all(
-    refs.map((ref) => savedObjectsClient.delete(ASSETS_SAVED_OBJECT_TYPE, ref.id))
+    refs.map((ref) => savedObjectsRepo.delete(ASSETS_SAVED_OBJECT_TYPE, ref.id))
   );
   return results;
 }
 
 export async function saveArchiveEntries(opts: {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
   paths: string[];
   packageInfo: InstallablePackage;
   installSource: InstallSource;
 }) {
-  const { savedObjectsClient, paths, packageInfo, installSource } = opts;
+  const { savedObjectsRepo, paths, packageInfo, installSource } = opts;
   const bulkBody = await Promise.all(
     paths.map((path) => {
       const buffer = getArchiveEntry(path);
@@ -123,7 +123,7 @@ export async function saveArchiveEntries(opts: {
     })
   );
 
-  const results = await savedObjectsClient.bulkCreate<PackageAsset>(bulkBody);
+  const results = await savedObjectsRepo.bulkCreate<PackageAsset>(bulkBody);
   return results;
 }
 
@@ -152,12 +152,9 @@ export function packageAssetToArchiveEntry(asset: PackageAsset): ArchiveEntry {
   };
 }
 
-export async function getAsset(opts: {
-  savedObjectsClient: ISavedObjectsRepository;
-  path: string;
-}) {
-  const { savedObjectsClient, path } = opts;
-  const assetSavedObject = await savedObjectsClient.get<PackageAsset>(
+export async function getAsset(opts: { savedObjectsRepo: ISavedObjectsRepository; path: string }) {
+  const { savedObjectsRepo, path } = opts;
+  const assetSavedObject = await savedObjectsRepo.get<PackageAsset>(
     ASSETS_SAVED_OBJECT_TYPE,
     assetPathToObjectId(path)
   );
@@ -173,11 +170,11 @@ export const getEsPackage = async (
   pkgName: string,
   pkgVersion: string,
   references: PackageAssetReference[],
-  savedObjectsClient: ISavedObjectsRepository
+  savedObjectsRepo: ISavedObjectsRepository
 ) => {
   const logger = appContextService.getLogger();
   const pkgKey = pkgToPkgKey({ name: pkgName, version: pkgVersion });
-  const bulkRes = await savedObjectsClient.bulkGet<PackageAsset>(
+  const bulkRes = await savedObjectsRepo.bulkGet<PackageAsset>(
     references.map((reference) => ({
       ...reference,
       fields: ['asset_path', 'data_utf8', 'data_base64'],
@@ -217,7 +214,7 @@ export const getEsPackage = async (
   // TODO: this is mostly copied from validtion.ts, needed in case package does not exist in storage yet or is missing from cache
   // we don't want to reach out to the registry again so recreate it here.  should check whether it exists in packageInfoCache first
   const manifestPath = `${pkgName}-${pkgVersion}/manifest.yml`;
-  const soResManifest = await savedObjectsClient.get<PackageAsset>(
+  const soResManifest = await savedObjectsRepo.get<PackageAsset>(
     ASSETS_SAVED_OBJECT_TYPE,
     assetPathToObjectId(manifestPath)
   );
@@ -225,7 +222,7 @@ export const getEsPackage = async (
 
   try {
     const readmePath = `docs/README.md`;
-    await savedObjectsClient.get<PackageAsset>(
+    await savedObjectsRepo.get<PackageAsset>(
       ASSETS_SAVED_OBJECT_TYPE,
       assetPathToObjectId(`${pkgName}-${pkgVersion}/${readmePath}`)
     );
@@ -248,7 +245,7 @@ export const getEsPackage = async (
   await Promise.all(
     dataStreamPaths.map(async (dataStreamPath) => {
       const dataStreamManifestPath = `${pkgKey}/data_stream/${dataStreamPath}/manifest.yml`;
-      const soResDataStreamManifest = await savedObjectsClient.get<PackageAsset>(
+      const soResDataStreamManifest = await savedObjectsRepo.get<PackageAsset>(
         ASSETS_SAVED_OBJECT_TYPE,
         assetPathToObjectId(dataStreamManifestPath)
       );

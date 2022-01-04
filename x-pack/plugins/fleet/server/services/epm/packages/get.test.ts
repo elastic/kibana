@@ -25,10 +25,10 @@ const MockRegistry = Registry as jest.Mocked<typeof Registry>;
 
 describe('When using EPM `get` services', () => {
   describe('and invoking getPackageUsageStats()', () => {
-    let soClient: jest.Mocked<ISavedObjectsRepository>;
+    let soRepo: jest.Mocked<ISavedObjectsRepository>;
 
     beforeEach(() => {
-      soClient = savedObjectsRepositoryMock.create();
+      soRepo = savedObjectsRepositoryMock.create();
       const savedObjects: Array<SavedObjectsFindResult<PackagePolicySOAttributes>> = [
         {
           type: 'ingest-package-policies',
@@ -126,7 +126,7 @@ describe('When using EPM `get` services', () => {
           score: 0,
         },
       ];
-      soClient.find.mockImplementation(async ({ page = 1, perPage = 20 }) => {
+      soRepo.find.mockImplementation(async ({ page = 1, perPage = 20 }) => {
         let savedObjectsResponse: typeof savedObjects;
 
         switch (page) {
@@ -150,20 +150,20 @@ describe('When using EPM `get` services', () => {
     });
 
     it('should query and paginate SO using package name as filter', async () => {
-      await getPackageUsageStats({ savedObjectsClient: soClient, pkgName: 'system' });
-      expect(soClient.find).toHaveBeenNthCalledWith(1, {
+      await getPackageUsageStats({ savedObjectsRepo: soRepo, pkgName: 'system' });
+      expect(soRepo.find).toHaveBeenNthCalledWith(1, {
         type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
         perPage: 1000,
         page: 1,
         filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name: system`,
       });
-      expect(soClient.find).toHaveBeenNthCalledWith(2, {
+      expect(soRepo.find).toHaveBeenNthCalledWith(2, {
         type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
         perPage: 1000,
         page: 2,
         filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name: system`,
       });
-      expect(soClient.find).toHaveBeenNthCalledWith(3, {
+      expect(soRepo.find).toHaveBeenNthCalledWith(3, {
         type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
         perPage: 1000,
         page: 3,
@@ -172,9 +172,7 @@ describe('When using EPM `get` services', () => {
     });
 
     it('should return count of unique agent policies', async () => {
-      expect(
-        await getPackageUsageStats({ savedObjectsClient: soClient, pkgName: 'system' })
-      ).toEqual({
+      expect(await getPackageUsageStats({ savedObjectsRepo: soRepo, pkgName: 'system' })).toEqual({
         agent_policy_count: 3,
       });
     });
@@ -199,12 +197,12 @@ describe('When using EPM `get` services', () => {
 
     describe('installation status', () => {
       it('should be not_installed when no package SO exists', async () => {
-        const soClient = savedObjectsRepositoryMock.create();
-        soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+        const soRepo = savedObjectsRepositoryMock.create();
+        soRepo.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
 
         expect(
           await getPackageInfo({
-            savedObjectsClient: soClient,
+            savedObjectsRepo: soRepo,
             pkgName: 'my-package',
             pkgVersion: '1.0.0',
           })
@@ -214,8 +212,8 @@ describe('When using EPM `get` services', () => {
       });
 
       it('should be installing when package SO install_status is installing', async () => {
-        const soClient = savedObjectsRepositoryMock.create();
-        soClient.get.mockResolvedValue({
+        const soRepo = savedObjectsRepositoryMock.create();
+        soRepo.get.mockResolvedValue({
           id: 'my-package',
           type: PACKAGES_SAVED_OBJECT_TYPE,
           references: [],
@@ -226,7 +224,7 @@ describe('When using EPM `get` services', () => {
 
         expect(
           await getPackageInfo({
-            savedObjectsClient: soClient,
+            savedObjectsRepo: soRepo,
             pkgName: 'my-package',
             pkgVersion: '1.0.0',
           })
@@ -236,8 +234,8 @@ describe('When using EPM `get` services', () => {
       });
 
       it('should be installed when package SO install_status is installed', async () => {
-        const soClient = savedObjectsRepositoryMock.create();
-        soClient.get.mockResolvedValue({
+        const soRepo = savedObjectsRepositoryMock.create();
+        soRepo.get.mockResolvedValue({
           id: 'my-package',
           type: PACKAGES_SAVED_OBJECT_TYPE,
           references: [],
@@ -248,7 +246,7 @@ describe('When using EPM `get` services', () => {
 
         expect(
           await getPackageInfo({
-            savedObjectsClient: soClient,
+            savedObjectsRepo: soRepo,
             pkgName: 'my-package',
             pkgVersion: '1.0.0',
           })
@@ -258,8 +256,8 @@ describe('When using EPM `get` services', () => {
       });
 
       it('should be install_failed when package SO install_status is install_failed', async () => {
-        const soClient = savedObjectsRepositoryMock.create();
-        soClient.get.mockResolvedValue({
+        const soRepo = savedObjectsRepositoryMock.create();
+        soRepo.get.mockResolvedValue({
           id: 'my-package',
           type: PACKAGES_SAVED_OBJECT_TYPE,
           references: [],
@@ -270,7 +268,7 @@ describe('When using EPM `get` services', () => {
 
         expect(
           await getPackageInfo({
-            savedObjectsClient: soClient,
+            savedObjectsRepo: soRepo,
             pkgName: 'my-package',
             pkgVersion: '1.0.0',
           })

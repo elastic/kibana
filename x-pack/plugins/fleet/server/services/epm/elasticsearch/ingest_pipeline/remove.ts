@@ -16,12 +16,12 @@ import type { EsAssetReference } from '../../../../../common';
 
 export const deletePreviousPipelines = async (
   esClient: ElasticsearchClient,
-  savedObjectsClient: ISavedObjectsRepository,
+  savedObjectsRepo: ISavedObjectsRepository,
   pkgName: string,
   previousPkgVersion: string
 ) => {
   const logger = appContextService.getLogger();
-  const installation = await getInstallation({ savedObjectsClient, pkgName });
+  const installation = await getInstallation({ savedObjectsRepo, pkgName });
   if (!installation) return;
   const installedEsAssets = installation.installed_es;
   const installedPipelines = installedEsAssets.filter(
@@ -37,14 +37,14 @@ export const deletePreviousPipelines = async (
     logger.error(e);
   }
   try {
-    await deletePipelineRefs(savedObjectsClient, installedEsAssets, pkgName, previousPkgVersion);
+    await deletePipelineRefs(savedObjectsRepo, installedEsAssets, pkgName, previousPkgVersion);
   } catch (e) {
     logger.error(e);
   }
 };
 
 export const deletePipelineRefs = async (
-  savedObjectsClient: ISavedObjectsRepository,
+  savedObjectsRepo: ISavedObjectsRepository,
   installedEsAssets: EsAssetReference[],
   pkgName: string,
   pkgVersion: string
@@ -54,7 +54,7 @@ export const deletePipelineRefs = async (
     if (!id.includes(pkgVersion)) return true;
     return false;
   });
-  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+  return savedObjectsRepo.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     installed_es: filteredAssets,
   });
 };

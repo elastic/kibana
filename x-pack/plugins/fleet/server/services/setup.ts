@@ -42,14 +42,14 @@ export interface SetupStatus {
 }
 
 export async function setupFleet(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
-  return awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
+  return awaitIfPending(async () => createSetupSideEffects(soRepo, esClient));
 }
 
 async function createSetupSideEffects(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
   const logger = appContextService.getLogger();
@@ -66,15 +66,15 @@ async function createSetupSideEffects(
 
   logger.debug('Setting up Fleet outputs');
   await Promise.all([
-    ensurePreconfiguredOutputs(soClient, esClient, outputsOrUndefined ?? []),
-    settingsService.settingsSetup(soClient),
+    ensurePreconfiguredOutputs(soRepo, esClient, outputsOrUndefined ?? []),
+    settingsService.settingsSetup(soRepo),
   ]);
 
-  const defaultOutput = await outputService.ensureDefaultOutput(soClient);
+  const defaultOutput = await outputService.ensureDefaultOutput(soRepo);
 
   if (appContextService.getConfig()?.agentIdVerificationEnabled) {
     logger.debug('Setting up Fleet Elasticsearch assets');
-    await ensureFleetGlobalEsAssets(soClient, esClient);
+    await ensureFleetGlobalEsAssets(soRepo, esClient);
   }
 
   // Ensure that required packages are always installed even if they're left out of the config
@@ -84,7 +84,7 @@ async function createSetupSideEffects(
     await Promise.all(
       AUTO_UPDATE_PACKAGES.map((pkg) =>
         isPackageInstalled({
-          savedObjectsClient: soClient,
+          savedObjectsRepo: soRepo,
           pkgName: pkg.name,
         }).then((installed) => (installed ? pkg : undefined))
       )
@@ -100,7 +100,7 @@ async function createSetupSideEffects(
   logger.debug('Setting up initial Fleet packages');
 
   const { nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
-    soClient,
+    soRepo,
     esClient,
     policies,
     packages,
@@ -109,13 +109,13 @@ async function createSetupSideEffects(
   );
 
   logger.debug('Cleaning up Fleet outputs');
-  await cleanPreconfiguredOutputs(soClient, outputsOrUndefined ?? []);
+  await cleanPreconfiguredOutputs(soRepo, outputsOrUndefined ?? []);
 
   logger.debug('Setting up Fleet enrollment keys');
-  await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
+  await ensureDefaultEnrollmentAPIKeysExists(soRepo, esClient);
 
   logger.debug('Setting up Fleet Server agent policies');
-  await ensureFleetServerAgentPoliciesExists(soClient, esClient);
+  await ensureFleetServerAgentPoliciesExists(soRepo, esClient);
 
   if (nonFatalErrors.length > 0) {
     logger.info('Encountered non fatal errors during Fleet setup');
@@ -134,7 +134,7 @@ async function createSetupSideEffects(
  * Ensure ES assets shared by all Fleet index template are installed
  */
 export async function ensureFleetGlobalEsAssets(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient
 ) {
   const logger = appContextService.getLogger();
@@ -147,7 +147,7 @@ export async function ensureFleetGlobalEsAssets(
 
   if (globalAssetsRes.some((asset) => asset.isCreated)) {
     // Update existing index template
-    const packages = await getInstallations(soClient);
+    const packages = await getInstallations(soRepo);
 
     await Promise.all(
       packages.saved_objects.map(async ({ attributes: installation }) => {
@@ -159,7 +159,7 @@ export async function ensureFleetGlobalEsAssets(
         }
         await installPackage({
           installSource: installation.install_source,
-          savedObjectsClient: soClient,
+          savedObjectsRepo: soRepo,
           pkgkey: pkgToPkgKey({ name: installation.name, version: installation.version }),
           esClient,
           spaceId: DEFAULT_SPACE_ID,
@@ -176,7 +176,7 @@ export async function ensureFleetGlobalEsAssets(
 }
 
 export async function ensureDefaultEnrollmentAPIKeysExists(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   options?: { forceRecreate?: boolean }
 ) {
@@ -189,7 +189,7 @@ export async function ensureDefaultEnrollmentAPIKeysExists(
     return;
   }
 
-  const { items: agentPolicies } = await agentPolicyService.list(soClient, {
+  const { items: agentPolicies } = await agentPolicyService.list(soRepo, {
     perPage: SO_SEARCH_LIMIT,
   });
 
@@ -201,7 +201,7 @@ export async function ensureDefaultEnrollmentAPIKeysExists(
         return;
       }
 
-      return generateEnrollmentAPIKey(soClient, esClient, {
+      return generateEnrollmentAPIKey(soRepo, esClient, {
         name: `Default`,
         agentPolicyId: agentPolicy.id,
         forceRecreate: true, // Always generate a new enrollment key when Fleet is being set up

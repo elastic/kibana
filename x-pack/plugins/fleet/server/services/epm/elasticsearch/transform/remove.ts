@@ -71,7 +71,7 @@ export const deleteTransforms = async (esClient: ElasticsearchClient, transformI
 };
 
 export const deleteTransformRefs = async (
-  savedObjectsClient: ISavedObjectsRepository,
+  savedObjectsRepo: ISavedObjectsRepository,
   installedEsAssets: EsAssetReference[],
   pkgName: string,
   installedEsIdToRemove: string[],
@@ -86,7 +86,7 @@ export const deleteTransformRefs = async (
     seen.add(id);
     return add;
   });
-  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+  return savedObjectsRepo.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     installed_es: filteredAssets,
   });
 };

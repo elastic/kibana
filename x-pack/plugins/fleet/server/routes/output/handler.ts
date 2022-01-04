@@ -24,7 +24,7 @@ import { defaultIngestErrorHandler } from '../../errors';
 import { agentPolicyService } from '../../services';
 
 export const getOutputsHandler: FleetRequestHandler = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
+  const soClient = context.fleet.epm.internalSoRepo;
   try {
     const outputs = await outputService.list(soClient);
 
@@ -44,7 +44,7 @@ export const getOutputsHandler: FleetRequestHandler = async (context, request, r
 export const getOneOuputHandler: FleetRequestHandler<
   TypeOf<typeof GetOneOutputRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
+  const soClient = context.fleet.epm.internalSoRepo;
   try {
     const output = await outputService.get(soClient, request.params.outputId);
 
@@ -69,7 +69,7 @@ export const putOuputHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PutOutputRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
+  const soClient = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     await outputService.update(soClient, request.params.outputId, request.body);
@@ -101,7 +101,7 @@ export const postOuputHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PostOutputRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
+  const soClient = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     const { id, ...data } = request.body;
@@ -123,7 +123,7 @@ export const postOuputHandler: FleetRequestHandler<
 export const deleteOutputHandler: FleetRequestHandler<
   TypeOf<typeof DeleteOutputRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
+  const soClient = context.fleet.epm.internalSoRepo;
   try {
     await outputService.delete(soClient, request.params.outputId);
 

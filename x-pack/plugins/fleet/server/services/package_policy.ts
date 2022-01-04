@@ -90,7 +90,7 @@ export const DATA_STREAM_ALLOWED_INDEX_PRIVILEGES = new Set([
 
 class PackagePolicyService {
   public async create(
-    soClient: ISavedObjectsRepository,
+    soRepo: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     packagePolicy: NewPackagePolicy,
     options?: {
@@ -105,7 +105,7 @@ class PackagePolicyService {
     }
   ): Promise<PackagePolicy> {
     if (!options?.skipUniqueNameVerification) {
-      const existingPoliciesWithName = await this.list(soClient, {
+      const existingPoliciesWithName = await this.list(soRepo, {
         perPage: 1,
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
       });
@@ -126,7 +126,7 @@ class PackagePolicyService {
     // Make sure the associated package is installed
     if (packagePolicy.package?.name) {
       const pkgInfoPromise = getPackageInfo({
-        savedObjectsClient: soClient,
+        savedObjectsRepo: soRepo,
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
       });
@@ -138,7 +138,7 @@ class PackagePolicyService {
           ensureInstalledPackage({
             esClient,
             spaceId: options?.spaceId || DEFAULT_SPACE_ID,
-            savedObjectsClient: soClient,
+            savedObjectsRepo: soRepo,
             pkgName: packagePolicy.package.name,
             pkgVersion: packagePolicy.package.version,
           }),
@@ -150,7 +150,7 @@ class PackagePolicyService {
       // Check if it is a limited package, and if so, check that the corresponding agent policy does not
       // already contain a package policy for this package
       if (isPackageLimited(pkgInfo)) {
-        const agentPolicy = await agentPolicyService.get(soClient, packagePolicy.policy_id, true);
+        const agentPolicy = await agentPolicyService.get(soRepo, packagePolicy.policy_id, true);
         if (agentPolicy && doesAgentPolicyAlreadyIncludePackage(agentPolicy, pkgInfo.name)) {
           throw new IngestManagerError(
             `Unable to create package policy. Package '${pkgInfo.name}' already exists on this agent policy.`
@@ -172,7 +172,7 @@ class PackagePolicyService {
     }
 
     const isoDate = new Date().toISOString();
-    const newSo = await soClient.create<PackagePolicySOAttributes>(
+    const newSo = await soRepo.create<PackagePolicySOAttributes>(
       SAVED_OBJECT_TYPE,
       {
         ...packagePolicy,
@@ -190,7 +190,7 @@ class PackagePolicyService {
 
     // Assign it to the given agent policy
     await agentPolicyService.assignPackagePolicies(
-      soClient,
+      soRepo,
       esClient,
       packagePolicy.policy_id,
       [newSo.id],
@@ -209,7 +209,7 @@ class PackagePolicyService {
   }
 
   public async bulkCreate(
-    soClient: ISavedObjectsRepository,
+    soRepo: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     packagePolicies: NewPackagePolicy[],
     agentPolicyId: string,
@@ -217,7 +217,7 @@ class PackagePolicyService {
   ): Promise<PackagePolicy[]> {
     const isoDate = new Date().toISOString();
     // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { saved_objects } = await soClient.bulkCreate<PackagePolicySOAttributes>(
+    const { saved_objects } = await soRepo.bulkCreate<PackagePolicySOAttributes>(
       packagePolicies.map((packagePolicy) => {
         const packagePolicyId = uuid.v4();
 
@@ -247,7 +247,7 @@ class PackagePolicyService {
 
     // Assign it to the given agent policy
     await agentPolicyService.assignPackagePolicies(
-      soClient,
+      soRepo,
       esClient,
       agentPolicyId,
       newSos.map((newSo) => newSo.id),
@@ -264,8 +264,8 @@ class PackagePolicyService {
     }));
   }
 
-  public async get(soClient: ISavedObjectsRepository, id: string): Promise<PackagePolicy | null> {
-    const packagePolicySO = await soClient.get<PackagePolicySOAttributes>(SAVED_OBJECT_TYPE, id);
+  public async get(soRepo: ISavedObjectsRepository, id: string): Promise<PackagePolicy | null> {
+    const packagePolicySO = await soRepo.get<PackagePolicySOAttributes>(SAVED_OBJECT_TYPE, id);
     if (!packagePolicySO) {
       return null;
     }
@@ -282,10 +282,10 @@ class PackagePolicyService {
   }
 
   public async getByIDs(
-    soClient: ISavedObjectsRepository,
+    soRepo: ISavedObjectsRepository,
     ids: string[]
   ): Promise<PackagePolicy[] | null> {
-    const packagePolicySO = await soClient.bulkGet<PackagePolicySOAttributes>(
+    const packagePolicySO = await soRepo.bulkGet<PackagePolicySOAttributes>(
       ids.map((id) => ({
         id,
         type: SAVED_OBJECT_TYPE,
@@ -303,12 +303,12 @@ class PackagePolicyService {
   }
 
   public async list(
-    soClient: ISavedObjectsRepository,
+    soRepo: ISavedObjectsRepository,
     options: ListWithKuery
   ): Promise<ListResult<PackagePolicy>> {
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
 
-    const packagePolicies = await soClient.find<PackagePolicySOAttributes>({
+    const packagePolicies = await soRepo.find<PackagePolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
       sortField,
       sortOrder,
@@ -330,12 +330,12 @@ class PackagePolicyService {
   }
 
   public async listIds(
-    soClient: ISavedObjectsRepository,
+    soRepo: ISavedObjectsRepository,
     options: ListWithKuery
   ): Promise<ListResult<string>> {
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
 
-    const packagePolicies = await soClient.find<{}>({
+    const packagePolicies = await soRepo.find<{}>({
       type: SAVED_OBJECT_TYPE,
       sortField,
       sortOrder,
@@ -354,21 +354,21 @@ class PackagePolicyService {
   }
 
   public async update(
-    soClient: ISavedObjectsRepository,
+    soRepo: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     id: string,
     packagePolicy: UpdatePackagePolicy,
     options?: { user?: AuthenticatedUser },
     currentVersion?: string
   ): Promise<PackagePolicy> {
-    const oldPackagePolicy = await this.get(soClient, id);
+    const oldPackagePolicy = await this.get(soRepo, id);
     const { version, ...restOfPackagePolicy } = packagePolicy;
 
     if (!oldPackagePolicy) {
       throw new Error('Package policy not found');
     }
     // Check that the name does not exist already but exclude the current package policy
-    const existingPoliciesWithName = await this.list(soClient, {
+    const existingPoliciesWithName = await this.list(soRepo, {
       perPage: 1,
       kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.name: "${packagePolicy.name}"`,
     });
@@ -386,7 +386,7 @@ class PackagePolicyService {
     let elasticsearch: PackagePolicy['elasticsearch'];
     if (packagePolicy.package?.name) {
       const pkgInfo = await getPackageInfo({
-        savedObjectsClient: soClient,
+        savedObjectsRepo: soRepo,
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
       });
@@ -403,7 +403,7 @@ class PackagePolicyService {
       elasticsearch = registryPkgInfo.elasticsearch;
     }
 
-    await soClient.update<PackagePolicySOAttributes>(
+    await soRepo.update<PackagePolicySOAttributes>(
       SAVED_OBJECT_TYPE,
       id,
       {
@@ -420,15 +420,15 @@ class PackagePolicyService {
     );
 
     // Bump revision of associated agent policy
-    await agentPolicyService.bumpRevision(soClient, esClient, packagePolicy.policy_id, {
+    await agentPolicyService.bumpRevision(soRepo, esClient, packagePolicy.policy_id, {
       user: options?.user,
     });
 
-    const newPolicy = (await this.get(soClient, id)) as PackagePolicy;
+    const newPolicy = (await this.get(soRepo, id)) as PackagePolicy;
 
     if (packagePolicy.package) {
       await removeOldAssets({
-        soClient,
+        soRepo,
         pkgName: packagePolicy.package.name,
         currentVersion: packagePolicy.package.version,
       });
@@ -455,7 +455,7 @@ class PackagePolicyService {
   }
 
   public async delete(
-    soClient: ISavedObjectsRepository,
+    soRepo: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     ids: string[],
     options?: { user?: AuthenticatedUser; skipUnassignFromAgentPolicies?: boolean; force?: boolean }
@@ -464,13 +464,13 @@ class PackagePolicyService {
 
     for (const id of ids) {
       try {
-        const packagePolicy = await this.get(soClient, id);
+        const packagePolicy = await this.get(soRepo, id);
         if (!packagePolicy) {
           throw new Error('Package policy not found');
         }
         if (!options?.skipUnassignFromAgentPolicies) {
           await agentPolicyService.unassignPackagePolicies(
-            soClient,
+            soRepo,
             esClient,
             packagePolicy.policy_id,
             [packagePolicy.id],
@@ -480,7 +480,7 @@ class PackagePolicyService {
             }
           );
         }
-        await soClient.delete(SAVED_OBJECT_TYPE, id);
+        await soRepo.delete(SAVED_OBJECT_TYPE, id);
         result.push({
           id,
           name: packagePolicy.name,
@@ -504,8 +504,8 @@ class PackagePolicyService {
     return result;
   }
 
-  public async getUpgradePackagePolicyInfo(soClient: ISavedObjectsRepository, id: string) {
-    const packagePolicy = await this.get(soClient, id);
+  public async getUpgradePackagePolicyInfo(soRepo: ISavedObjectsRepository, id: string) {
+    const packagePolicy = await this.get(soRepo, id);
     if (!packagePolicy) {
       throw new IngestManagerError(
         i18n.translate('xpack.fleet.packagePolicy.policyNotFoundError', {
@@ -525,7 +525,7 @@ class PackagePolicyService {
     }
 
     const installedPackage = await getInstallation({
-      savedObjectsClient: soClient,
+      savedObjectsRepo: soRepo,
       pkgName: packagePolicy.package.name,
     });
 
@@ -541,7 +541,7 @@ class PackagePolicyService {
     }
 
     const packageInfo = await getPackageInfo({
-      savedObjectsClient: soClient,
+      savedObjectsRepo: soRepo,
       pkgName: packagePolicy.package.name,
       pkgVersion: installedPackage?.version ?? '',
     });
@@ -572,7 +572,7 @@ class PackagePolicyService {
   }
 
   public async upgrade(
-    soClient: ISavedObjectsRepository,
+    soRepo: ISavedObjectsRepository,
     esClient: ElasticsearchClient,
     ids: string[],
     options?: { user?: AuthenticatedUser }
@@ -581,7 +581,7 @@ class PackagePolicyService {
 
     for (const id of ids) {
       try {
-        const { packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soClient, id);
+        const { packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soRepo, id);
 
         const updatePackagePolicy = updatePackageInputs(
           {
@@ -605,7 +605,7 @@ class PackagePolicyService {
         updatePackagePolicy.elasticsearch = registryPkgInfo.elasticsearch;
 
         await this.update(
-          soClient,
+          soRepo,
           esClient,
           id,
           updatePackagePolicy,
@@ -630,11 +630,11 @@ class PackagePolicyService {
   }
 
   public async getUpgradeDryRunDiff(
-    soClient: ISavedObjectsRepository,
+    soRepo: ISavedObjectsRepository,
     id: string
   ): Promise<UpgradePackagePolicyDryRunResponseItem> {
     try {
-      const { packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soClient, id);
+      const { packagePolicy, packageInfo } = await this.getUpgradePackagePolicyInfo(soRepo, id);
 
       const updatedPackagePolicy = updatePackageInputs(
         {
@@ -699,13 +699,13 @@ class PackagePolicyService {
   }
 
   public async enrichPolicyWithDefaultsFromPackage(
-    soClient: ISavedObjectsRepository,
+    soRepo: ISavedObjectsRepository,
     newPolicy: NewPackagePolicy
   ): Promise<NewPackagePolicy> {
     let newPackagePolicy: NewPackagePolicy = newPolicy;
     if (newPolicy.package) {
       const newPP = await this.buildPackagePolicyFromPackageWithVersion(
-        soClient,
+        soRepo,
         newPolicy.package.name,
         newPolicy.package.version
       );
@@ -734,7 +734,7 @@ class PackagePolicyService {
           description: newPolicy.description ?? '',
           enabled: newPolicy.enabled ?? true,
           policy_id:
-            newPolicy.policy_id ?? (await agentPolicyService.getDefaultAgentPolicyId(soClient)),
+            newPolicy.policy_id ?? (await agentPolicyService.getDefaultAgentPolicyId(soRepo)),
           output_id: newPolicy.output_id ?? '',
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,
@@ -745,12 +745,12 @@ class PackagePolicyService {
   }
 
   public async buildPackagePolicyFromPackageWithVersion(
-    soClient: ISavedObjectsRepository,
+    soRepo: ISavedObjectsRepository,
     pkgName: string,
     pkgVersion: string
   ): Promise<NewPackagePolicy | undefined> {
     const packageInfo = await getPackageInfo({
-      savedObjectsClient: soClient,
+      savedObjectsRepo: soRepo,
       pkgName,
       pkgVersion,
     });
@@ -760,18 +760,18 @@ class PackagePolicyService {
   }
 
   public async buildPackagePolicyFromPackage(
-    soClient: ISavedObjectsRepository,
+    soRepo: ISavedObjectsRepository,
     pkgName: string
   ): Promise<NewPackagePolicy | undefined> {
-    const pkgInstall = await getInstallation({ savedObjectsClient: soClient, pkgName });
+    const pkgInstall = await getInstallation({ savedObjectsRepo: soRepo, pkgName });
     if (pkgInstall) {
       const [packageInfo, defaultOutputId] = await Promise.all([
         getPackageInfo({
-          savedObjectsClient: soClient,
+          savedObjectsRepo: soRepo,
           pkgName: pkgInstall.name,
           pkgVersion: pkgInstall.version,
         }),
-        outputService.getDefaultDataOutputId(soClient),
+        outputService.getDefaultDataOutputId(soRepo),
       ]);
       if (packageInfo) {
         if (!defaultOutputId) {
@@ -1374,9 +1374,9 @@ function deepMergeVars(original: any, override: any, keepOriginalValue = false):
   return result;
 }
 
-export async function incrementPackageName(soClient: ISavedObjectsRepository, packageName: string) {
+export async function incrementPackageName(soRepo: ISavedObjectsRepository, packageName: string) {
   // Fetch all packagePolicies having the package name
-  const packagePolicyData = await packagePolicyService.list(soClient, {
+  const packagePolicyData = await packagePolicyService.list(soRepo, {
     perPage: SO_SEARCH_LIMIT,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: "${packageName}"`,
   });

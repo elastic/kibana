@@ -31,7 +31,7 @@ export interface FleetRequestHandlerContext extends RequestHandlerContext {
        * Saved Objects client configured to use kibana_system privileges instead of end-user privileges. Should only be
        * used by routes that have additional privilege checks for authorization (such as requiring superuser).
        */
-      readonly internalSoClient: ISavedObjectsRepository;
+      readonly internalSoRepo: ISavedObjectsRepository;
     };
     spaceId: string;
   };

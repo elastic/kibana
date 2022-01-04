@@ -68,7 +68,7 @@ function isPreconfiguredOutputDifferentFromCurrent(
 }
 
 export async function ensurePreconfiguredOutputs(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   outputs: PreconfiguredOutput[]
 ) {
@@ -79,7 +79,7 @@ export async function ensurePreconfiguredOutputs(
   }
 
   const existingOutputs = await outputService.bulkGet(
-    soClient,
+    soRepo,
     outputs.map(({ id }) => id),
     { ignoreNotFound: true }
   );
@@ -108,15 +108,15 @@ export async function ensurePreconfiguredOutputs(
 
       if (isCreate) {
         logger.debug(`Creating output ${output.id}`);
-        await outputService.create(soClient, data, { id, fromPreconfiguration: true });
+        await outputService.create(soRepo, data, { id, fromPreconfiguration: true });
       } else if (isUpdateWithNewData) {
         logger.debug(`Updating output ${output.id}`);
-        await outputService.update(soClient, id, data, { fromPreconfiguration: true });
+        await outputService.update(soRepo, id, data, { fromPreconfiguration: true });
         // Bump revision of all policies using that output
         if (outputData.is_default || outputData.is_default_monitoring) {
-          await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+          await agentPolicyService.bumpAllAgentPolicies(soRepo, esClient);
         } else {
-          await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, id);
+          await agentPolicyService.bumpAllAgentPoliciesForOutput(soRepo, esClient, id);
         }
       }
     })
@@ -124,10 +124,10 @@ export async function ensurePreconfiguredOutputs(
 }
 
 export async function cleanPreconfiguredOutputs(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   outputs: PreconfiguredOutput[]
 ) {
-  const existingPreconfiguredOutput = (await outputService.list(soClient)).items.filter(
+  const existingPreconfiguredOutput = (await outputService.list(soRepo)).items.filter(
     (o) => o.is_preconfigured === true
   );
   const logger = appContextService.getLogger();
@@ -135,13 +135,13 @@ export async function cleanPreconfiguredOutputs(
   for (const output of existingPreconfiguredOutput) {
     if (!outputs.find(({ id }) => output.id === id)) {
       logger.info(`Deleting preconfigured output ${output.id}`);
-      await outputService.delete(soClient, output.id, { fromPreconfiguration: true });
+      await outputService.delete(soRepo, output.id, { fromPreconfiguration: true });
     }
   }
 }
 
 export async function ensurePreconfiguredPackagesAndPolicies(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   policies: PreconfiguredAgentPolicy[] = [],
   packages: PreconfiguredPackage[] = [],
@@ -175,7 +175,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await bulkInstallPackages({
-    savedObjectsClient: soClient,
+    savedObjectsRepo: soRepo,
     esClient,
     packagesToInstall: packages.map((pkg) =>
       pkg.version === PRECONFIGURATION_LATEST_KEYWORD ? pkg.name : pkg
@@ -207,7 +207,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   // will occur between upgrading the package and reinstalling the previously failed package.
   // By moving this outside of the Promise.all, the upgrade will occur first, and then we'll attempt to reinstall any
   // packages that are stuck in the installing state.
-  await ensurePackagesCompletedInstall(soClient, esClient);
+  await ensurePackagesCompletedInstall(soRepo, esClient);
 
   // Create policies specified in Kibana config
   const preconfiguredPolicies = await Promise.allSettled(
@@ -219,7 +219,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           searchFields: ['id'],
           search: escapeSearchQueryPhrase(preconfigurationId),
         };
-        const deletionRecords = await soClient.find({
+        const deletionRecords = await soRepo.find({
           type: PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
           ...searchParams,
         });
@@ -241,7 +241,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       }
 
       const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
-        soClient,
+        soRepo,
         esClient,
         omit(preconfiguredAgentPolicy, 'is_managed') // Don't add `is_managed` until the policy has been fully configured
       );
@@ -254,7 +254,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         );
         if (hasChanged) {
           const updatedPolicy = await agentPolicyService.update(
-            soClient,
+            soRepo,
             esClient,
             String(preconfiguredAgentPolicy.id),
             fields
@@ -289,15 +289,11 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       const preconfiguredAgentPolicy = policies[i];
       const { package_policies: packagePolicies } = preconfiguredAgentPolicy;
 
-      const agentPolicyWithPackagePolicies = await agentPolicyService.get(
-        soClient,
-        policy!.id,
-        true
-      );
+      const agentPolicyWithPackagePolicies = await agentPolicyService.get(soRepo, policy!.id, true);
       const installedPackagePolicies = await Promise.all(
         packagePolicies.map(async ({ package: pkg, name, ...newPackagePolicy }) => {
           const installedPackage = await getInstallation({
-            savedObjectsClient: soClient,
+            savedObjectsRepo: soRepo,
             pkgName: pkg.name,
           });
           if (!installedPackage) {
@@ -340,7 +336,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       });
 
       await addPreconfiguredPolicyPackages(
-        soClient,
+        soRepo,
         esClient,
         policy!,
         packagePoliciesToAdd!,
@@ -350,19 +346,19 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
       // Add the is_managed flag after configuring package policies to avoid errors
       if (shouldAddIsManagedFlag) {
-        await agentPolicyService.update(soClient, esClient, policy!.id, { is_managed: true });
+        await agentPolicyService.update(soRepo, esClient, policy!.id, { is_managed: true });
       }
     }
   }
 
   // Handle automatic package policy upgrades for managed packages and package with
   // the `keep_policies_up_to_date` setting enabled
-  const allPackagePolicyIds = await packagePolicyService.listIds(soClient, {
+  const allPackagePolicyIds = await packagePolicyService.listIds(soRepo, {
     page: 1,
     perPage: SO_SEARCH_LIMIT,
   });
   const packagePolicyUpgradeResults = await upgradeManagedPackagePolicies(
-    soClient,
+    soRepo,
     esClient,
     allPackagePolicyIds.items
   );
@@ -403,7 +399,7 @@ export function comparePreconfiguredPolicyToCurrent(
 }
 
 async function addPreconfiguredPolicyPackages(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   agentPolicy: AgentPolicy,
   installedPackagePolicies: Array<
@@ -420,13 +416,13 @@ async function addPreconfiguredPolicyPackages(
   // Add packages synchronously to avoid overwriting
   for (const { installedPackage, id, name, description, inputs } of installedPackagePolicies) {
     const packageInfo = await getPackageInfo({
-      savedObjectsClient: soClient,
+      savedObjectsRepo: soRepo,
       pkgName: installedPackage.name,
       pkgVersion: installedPackage.version,
     });
 
     await addPackageToAgentPolicy(
-      soClient,
+      soRepo,
       esClient,
       installedPackage,
       agentPolicy,

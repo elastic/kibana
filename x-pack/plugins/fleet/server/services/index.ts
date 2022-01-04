@@ -18,7 +18,7 @@ export { getRegistryUrl } from './epm/registry/registry_url';
  */
 export interface ESIndexPatternService {
   getESIndexPattern(
-    savedObjectsClient: ISavedObjectsRepository,
+    savedObjectsRepo: ISavedObjectsRepository,
     pkgName: string,
     datasetPath: string
   ): Promise<string | undefined>;

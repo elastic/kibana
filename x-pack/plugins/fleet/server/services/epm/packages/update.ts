@@ -16,24 +16,24 @@ import { getInstallationObject, getPackageInfo } from './get';
 
 export async function updatePackage(
   options: {
-    savedObjectsClient: ISavedObjectsRepository;
+    savedObjectsRepo: ISavedObjectsRepository;
     pkgName: string;
     keepPoliciesUpToDate?: boolean;
   } & TypeOf<typeof UpdatePackageRequestSchema.body>
 ) {
-  const { savedObjectsClient, pkgName, keepPoliciesUpToDate } = options;
-  const installedPackage = await getInstallationObject({ savedObjectsClient, pkgName });
+  const { savedObjectsRepo, pkgName, keepPoliciesUpToDate } = options;
+  const installedPackage = await getInstallationObject({ savedObjectsRepo, pkgName });
 
   if (!installedPackage) {
     throw new IngestManagerError(`package ${pkgName} is not installed`);
   }
 
-  await savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, installedPackage.id, {
+  await savedObjectsRepo.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, installedPackage.id, {
     keep_policies_up_to_date: keepPoliciesUpToDate ?? false,
   });
 
   const packageInfo = await getPackageInfo({
-    savedObjectsClient,
+    savedObjectsRepo,
     pkgName,
     pkgVersion: installedPackage.attributes.version,
   });

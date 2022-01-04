@@ -43,12 +43,12 @@ function buildDefault(enabled: { logs: boolean; metrics: boolean }, namespace: s
 }
 
 export async function getMonitoringPermissions(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   enabled: { logs: boolean; metrics: boolean },
   namespace: string
 ): Promise<FullAgentPolicyOutputPermissions> {
   const installation = await getInstallation({
-    savedObjectsClient: soClient,
+    savedObjectsRepo: soRepo,
     pkgName: FLEET_ELASTIC_AGENT_PACKAGE,
   });
 
@@ -57,7 +57,7 @@ export async function getMonitoringPermissions(
   }
 
   const pkg = await getPackageInfo({
-    savedObjectsClient: soClient,
+    savedObjectsRepo: soRepo,
     pkgName: installation.name,
     pkgVersion: installation.version,
   });

@@ -25,7 +25,7 @@ export const postAgentUpgradeHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PostAgentUpgradeRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
+  const soClient = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const { version, source_uri: sourceUri, force } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
@@ -80,7 +80,7 @@ export const postBulkAgentsUpgradeHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PostBulkAgentUpgradeRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
+  const soClient = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const { version, source_uri: sourceUri, agents, force } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();

@@ -29,27 +29,27 @@ export interface UpgradeManagedPackagePoliciesResult {
  * or have the `keep_policies_up_to_date` flag set to `true`
  */
 export const upgradeManagedPackagePolicies = async (
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   packagePolicyIds: string[]
 ): Promise<UpgradeManagedPackagePoliciesResult[]> => {
   const results: UpgradeManagedPackagePoliciesResult[] = [];
 
   for (const packagePolicyId of packagePolicyIds) {
-    const packagePolicy = await packagePolicyService.get(soClient, packagePolicyId);
+    const packagePolicy = await packagePolicyService.get(soRepo, packagePolicyId);
 
     if (!packagePolicy || !packagePolicy.package) {
       continue;
     }
 
     const packageInfo = await getPackageInfo({
-      savedObjectsClient: soClient,
+      savedObjectsRepo: soRepo,
       pkgName: packagePolicy.package.name,
       pkgVersion: packagePolicy.package.version,
     });
 
     const installedPackage = await getInstallation({
-      savedObjectsClient: soClient,
+      savedObjectsRepo: soRepo,
       pkgName: packagePolicy.package.name,
     });
 
@@ -67,7 +67,7 @@ export const upgradeManagedPackagePolicies = async (
       // to notify the user of any granular policy upgrade errors that occur during Fleet's
       // preconfiguration check
       const dryRunResults = await packagePolicyService.getUpgradeDryRunDiff(
-        soClient,
+        soRepo,
         packagePolicyId
       );
 
@@ -89,7 +89,7 @@ export const upgradeManagedPackagePolicies = async (
       }
 
       try {
-        await packagePolicyService.upgrade(soClient, esClient, [packagePolicyId]);
+        await packagePolicyService.upgrade(soRepo, esClient, [packagePolicyId]);
         results.push({ packagePolicyId, diff: dryRunResults.diff, errors: [] });
       } catch (error) {
         results.push({ packagePolicyId, diff: dryRunResults.diff, errors: [error] });

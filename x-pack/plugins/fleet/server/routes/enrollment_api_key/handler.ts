@@ -54,7 +54,7 @@ export const postEnrollmentApiKeyHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PostEnrollmentAPIKeyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoClient;
+  const soClient = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     // validate policy id

@@ -43,17 +43,17 @@ export async function getCategories(options: GetCategoriesRequest['query']) {
 
 export async function getPackages(
   options: {
-    savedObjectsClient: ISavedObjectsRepository;
+    savedObjectsRepo: ISavedObjectsRepository;
   } & Registry.SearchParams
 ) {
-  const { savedObjectsClient, experimental, category } = options;
+  const { savedObjectsRepo, experimental, category } = options;
   const registryItems = await Registry.fetchList({ category, experimental }).then((items) => {
     return items.map((item) =>
       Object.assign({}, item, { title: item.title || nameAsTitle(item.name) }, { id: item.name })
     );
   });
   // get the installed packages
-  const packageSavedObjects = await getPackageSavedObjects(savedObjectsClient);
+  const packageSavedObjects = await getPackageSavedObjects(savedObjectsRepo);
   const packageList = registryItems
     .map((item) =>
       createInstallableFrom(
@@ -67,17 +67,17 @@ export async function getPackages(
 
 // Get package names for packages which cannot have more than one package policy on an agent policy
 export async function getLimitedPackages(options: {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
 }): Promise<string[]> {
-  const { savedObjectsClient } = options;
-  const allPackages = await getPackages({ savedObjectsClient, experimental: true });
+  const { savedObjectsRepo } = options;
+  const allPackages = await getPackages({ savedObjectsRepo, experimental: true });
   const installedPackages = allPackages.filter(
     (pkg) => pkg.status === installationStatuses.Installed
   );
   const installedPackagesInfo = await Promise.all(
     installedPackages.map((pkgInstall) => {
       return getPackageInfo({
-        savedObjectsClient,
+        savedObjectsRepo,
         pkgName: pkgInstall.name,
         pkgVersion: pkgInstall.version,
       });
@@ -87,10 +87,10 @@ export async function getLimitedPackages(options: {
 }
 
 export async function getPackageSavedObjects(
-  savedObjectsClient: ISavedObjectsRepository,
+  savedObjectsRepo: ISavedObjectsRepository,
   options?: Omit<SavedObjectsFindOptions, 'type'>
 ) {
-  return savedObjectsClient.find<Installation>({
+  return savedObjectsRepo.find<Installation>({
     ...(options || {}),
     type: PACKAGES_SAVED_OBJECT_TYPE,
   });
@@ -99,13 +99,13 @@ export async function getPackageSavedObjects(
 export const getInstallations = getPackageSavedObjects;
 
 export async function getPackageInfo(options: {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
   pkgName: string;
   pkgVersion: string;
 }): Promise<PackageInfo> {
-  const { savedObjectsClient, pkgName, pkgVersion } = options;
+  const { savedObjectsRepo, pkgName, pkgVersion } = options;
   const [savedObject, latestPackage] = await Promise.all([
-    getInstallationObject({ savedObjectsClient, pkgName }),
+    getInstallationObject({ savedObjectsRepo, pkgName }),
     Registry.fetchFindLatestPackage(pkgName),
   ]);
 
@@ -120,7 +120,7 @@ export async function getPackageInfo(options: {
   const getPackageRes = await getPackageFromSource({
     pkgName,
     pkgVersion: responsePkgVersion,
-    savedObjectsClient,
+    savedObjectsRepo,
     installedPkg: savedObject?.attributes,
   });
   const { paths, packageInfo } = getPackageRes;
@@ -140,10 +140,10 @@ export async function getPackageInfo(options: {
 }
 
 export const getPackageUsageStats = async ({
-  savedObjectsClient,
+  savedObjectsRepo,
   pkgName,
 }: {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
   pkgName: string;
 }): Promise<PackageUsageStats> => {
   const filter = normalizeKuery(
@@ -157,7 +157,7 @@ export const getPackageUsageStats = async ({
   while (hasMore) {
     // using saved Objects client directly, instead of the `list()` method of `package_policy` service
     // in order to not cause a circular dependency (package policy service imports from this module)
-    const packagePolicies = await savedObjectsClient.find<PackagePolicySOAttributes>({
+    const packagePolicies = await savedObjectsRepo.find<PackagePolicySOAttributes>({
       type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       perPage: 1000,
       page: page++,
@@ -187,10 +187,10 @@ export async function getPackageFromSource(options: {
   pkgName: string;
   pkgVersion: string;
   installedPkg?: Installation;
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
 }): Promise<PackageResponse> {
   const logger = appContextService.getLogger();
-  const { pkgName, pkgVersion, installedPkg, savedObjectsClient } = options;
+  const { pkgName, pkgVersion, installedPkg, savedObjectsRepo } = options;
   let res: GetPackageResponse;
 
   // If the package is installed
@@ -207,12 +207,7 @@ export async function getPackageFromSource(options: {
     }
 
     if (!res && installedPkg.package_assets) {
-      res = await getEsPackage(
-        pkgName,
-        pkgVersion,
-        installedPkg.package_assets,
-        savedObjectsClient
-      );
+      res = await getEsPackage(pkgName, pkgVersion, installedPkg.package_assets, savedObjectsRepo);
 
       if (res) {
         logger.debug(`retrieved installed package ${pkgName}-${pkgVersion} from ES`);
@@ -244,17 +239,17 @@ export async function getPackageFromSource(options: {
 }
 
 export async function getInstallationObject(options: {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
   pkgName: string;
 }) {
-  const { savedObjectsClient, pkgName } = options;
-  return savedObjectsClient
+  const { savedObjectsRepo, pkgName } = options;
+  return savedObjectsRepo
     .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
     .catch((e) => undefined);
 }
 
 export async function getInstallation(options: {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
   pkgName: string;
 }) {
   const savedObject = await getInstallationObject(options);

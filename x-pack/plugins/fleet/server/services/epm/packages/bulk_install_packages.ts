@@ -16,7 +16,7 @@ import { installPackage, isPackageVersionOrLaterInstalled } from './install';
 import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 
 interface BulkInstallPackagesParams {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
   packagesToInstall: Array<string | { name: string; version: string }>;
   esClient: ElasticsearchClient;
   force?: boolean;
@@ -24,7 +24,7 @@ interface BulkInstallPackagesParams {
 }
 
 export async function bulkInstallPackages({
-  savedObjectsClient,
+  savedObjectsRepo,
   packagesToInstall,
   esClient,
   spaceId,
@@ -46,7 +46,7 @@ export async function bulkInstallPackages({
       if (result.status === 'fulfilled') {
         const pkgKeyProps = result.value;
         const installedPackageResult = await isPackageVersionOrLaterInstalled({
-          savedObjectsClient,
+          savedObjectsRepo,
           pkgName: pkgKeyProps.name,
           pkgVersion: pkgKeyProps.version,
         });
@@ -68,7 +68,7 @@ export async function bulkInstallPackages({
           };
         }
         const installResult = await installPackage({
-          savedObjectsClient,
+          savedObjectsRepo,
           esClient,
           pkgkey: Registry.pkgToPkgKey(pkgKeyProps),
           installSource,

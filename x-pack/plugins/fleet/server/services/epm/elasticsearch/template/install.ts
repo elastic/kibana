@@ -45,7 +45,7 @@ export const installTemplates = async (
   esClient: ElasticsearchClient,
   logger: Logger,
   paths: string[],
-  savedObjectsClient: ISavedObjectsRepository
+  savedObjectsRepo: ISavedObjectsRepository
 ): Promise<IndexTemplateEntry[]> => {
   // install any pre-built index template assets,
   // atm, this is only the base package's global index templates
@@ -54,7 +54,7 @@ export const installTemplates = async (
   await installPreBuiltTemplates(paths, esClient, logger);
 
   // remove package installation's references to index templates
-  await removeAssetTypesFromInstalledEs(savedObjectsClient, installablePackage.name, [
+  await removeAssetTypesFromInstalledEs(savedObjectsRepo, installablePackage.name, [
     ElasticsearchAssetType.indexTemplate,
     ElasticsearchAssetType.componentTemplate,
   ]);
@@ -78,11 +78,7 @@ export const installTemplates = async (
   const installedIndexTemplateRefs = getAllTemplateRefs(installedTemplates);
 
   // add package installation's references to index templates
-  await saveInstalledEsRefs(
-    savedObjectsClient,
-    installablePackage.name,
-    installedIndexTemplateRefs
-  );
+  await saveInstalledEsRefs(savedObjectsRepo, installablePackage.name, installedIndexTemplateRefs);
 
   return installedTemplates;
 };

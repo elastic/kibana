@@ -26,10 +26,10 @@ export function getIndexPatternSavedObjects() {
   }));
 }
 
-export async function removeUnusedIndexPatterns(savedObjectsClient: ISavedObjectsRepository) {
+export async function removeUnusedIndexPatterns(savedObjectsRepo: ISavedObjectsRepository) {
   const logger = appContextService.getLogger();
   // get all user installed packages
-  const installedPackagesRes = await getPackageSavedObjects(savedObjectsClient);
+  const installedPackagesRes = await getPackageSavedObjects(savedObjectsRepo);
   const installedPackagesSavedObjects = installedPackagesRes.saved_objects.filter(
     (so) => so.attributes.install_status === installationStatuses.Installed
   );
@@ -40,7 +40,7 @@ export async function removeUnusedIndexPatterns(savedObjectsClient: ISavedObject
 
   const patternsToDelete = indexPatternTypes.map((indexPatternType) => `${indexPatternType}-*`);
 
-  const { resolved_objects: resolvedObjects } = await savedObjectsClient.bulkResolve(
+  const { resolved_objects: resolvedObjects } = await savedObjectsRepo.bulkResolve(
     patternsToDelete.map((pattern) => ({ id: pattern, type: INDEX_PATTERN_SAVED_OBJECT_TYPE }))
   );
 
@@ -51,7 +51,7 @@ export async function removeUnusedIndexPatterns(savedObjectsClient: ISavedObject
     idsToDelete.map(async (id) => {
       try {
         logger.debug(`deleting index pattern ${id}`);
-        await savedObjectsClient.delete(INDEX_PATTERN_SAVED_OBJECT_TYPE, id);
+        await savedObjectsRepo.delete(INDEX_PATTERN_SAVED_OBJECT_TYPE, id);
       } catch (err) {
         // index pattern was probably deleted by the user already
         logger.debug(`Non fatal error encountered deleting index pattern ${id} : ${err}`);

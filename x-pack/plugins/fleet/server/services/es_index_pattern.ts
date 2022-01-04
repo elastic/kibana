@@ -13,11 +13,11 @@ import { getInstallation } from './epm/packages';
 
 export class ESIndexPatternSavedObjectService implements ESIndexPatternService {
   public async getESIndexPattern(
-    savedObjectsClient: ISavedObjectsRepository,
+    savedObjectsRepo: ISavedObjectsRepository,
     pkgName: string,
     datasetPath: string
   ): Promise<string | undefined> {
-    const installation = await getInstallation({ savedObjectsClient, pkgName });
+    const installation = await getInstallation({ savedObjectsRepo, pkgName });
     return installation?.es_index_patterns[datasetPath];
   }
 }

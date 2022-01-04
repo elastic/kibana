@@ -122,7 +122,7 @@ export async function installKibanaAssets(options: {
   return installedAssets;
 }
 export const deleteKibanaInstalledRefs = async (
-  savedObjectsClient: ISavedObjectsRepository,
+  savedObjectsRepo: ISavedObjectsRepository,
   pkgName: string,
   installedKibanaRefs: AssetReference[]
 ) => {
@@ -131,7 +131,7 @@ export const deleteKibanaInstalledRefs = async (
     return !savedObjectTypes.includes(assetType);
   });
 
-  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+  return savedObjectsRepo.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     installed_kibana: installedAssetsToSave,
   });
 };

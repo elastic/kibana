@@ -57,7 +57,7 @@ import { _installPackage } from './_install_package';
 import { removeOldAssets } from './cleanup';
 
 export async function isPackageInstalled(options: {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
   pkgName: string;
 }): Promise<boolean> {
   const installedPackage = await getInstallation(options);
@@ -65,12 +65,12 @@ export async function isPackageInstalled(options: {
 }
 
 export async function isPackageVersionOrLaterInstalled(options: {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
   pkgName: string;
   pkgVersion: string;
 }): Promise<{ package: Installation; installType: InstallType } | false> {
-  const { savedObjectsClient, pkgName, pkgVersion } = options;
-  const installedPackageObject = await getInstallationObject({ savedObjectsClient, pkgName });
+  const { savedObjectsRepo, pkgName, pkgVersion } = options;
+  const installedPackageObject = await getInstallationObject({ savedObjectsRepo, pkgName });
   const installedPackage = installedPackageObject?.attributes;
   if (
     installedPackage &&
@@ -88,13 +88,13 @@ export async function isPackageVersionOrLaterInstalled(options: {
 }
 
 export async function ensureInstalledPackage(options: {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
   pkgName: string;
   esClient: ElasticsearchClient;
   pkgVersion?: string;
   spaceId?: string;
 }): Promise<Installation> {
-  const { savedObjectsClient, pkgName, esClient, pkgVersion, spaceId = DEFAULT_SPACE_ID } = options;
+  const { savedObjectsRepo, pkgName, esClient, pkgVersion, spaceId = DEFAULT_SPACE_ID } = options;
 
   // If pkgVersion isn't specified, find the latest package version
   const pkgKeyProps = pkgVersion
@@ -102,7 +102,7 @@ export async function ensureInstalledPackage(options: {
     : await Registry.fetchFindLatestPackage(pkgName);
 
   const installedPackageResult = await isPackageVersionOrLaterInstalled({
-    savedObjectsClient,
+    savedObjectsRepo,
     pkgName: pkgKeyProps.name,
     pkgVersion: pkgKeyProps.version,
   });
@@ -112,7 +112,7 @@ export async function ensureInstalledPackage(options: {
   const pkgkey = Registry.pkgToPkgKey(pkgKeyProps);
   const installResult = await installPackage({
     installSource: 'registry',
-    savedObjectsClient,
+    savedObjectsRepo,
     pkgkey,
     spaceId,
     esClient,
@@ -139,13 +139,13 @@ export async function ensureInstalledPackage(options: {
     throw new Error(`${errorPrefix}: ${installResult.error.message}`);
   }
 
-  const installation = await getInstallation({ savedObjectsClient, pkgName });
+  const installation = await getInstallation({ savedObjectsRepo, pkgName });
   if (!installation) throw new Error(`could not get installation ${pkgName}`);
   return installation;
 }
 
 export async function handleInstallPackageFailure({
-  savedObjectsClient,
+  savedObjectsRepo,
   error,
   pkgName,
   pkgVersion,
@@ -153,7 +153,7 @@ export async function handleInstallPackageFailure({
   esClient,
   spaceId,
 }: {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
   error: IngestManagerError | Boom.Boom | Error;
   pkgName: string;
   pkgVersion: string;
@@ -175,10 +175,10 @@ export async function handleInstallPackageFailure({
     const installType = getInstallType({ pkgVersion, installedPkg });
     if (installType === 'install' || installType === 'reinstall') {
       logger.error(`uninstalling ${pkgkey} after error installing: [${error.toString()}]`);
-      await removeInstallation({ savedObjectsClient, pkgName, pkgVersion, esClient });
+      await removeInstallation({ savedObjectsRepo, pkgName, pkgVersion, esClient });
     }
 
-    await updateInstallStatus({ savedObjectsClient, pkgName, status: 'install_failed' });
+    await updateInstallStatus({ savedObjectsRepo, pkgName, status: 'install_failed' });
 
     if (installType === 'update') {
       if (!installedPkg) {
@@ -191,7 +191,7 @@ export async function handleInstallPackageFailure({
       logger.error(`rolling back to ${prevVersion} after error installing ${pkgkey}`);
       await installPackage({
         installSource: 'registry',
-        savedObjectsClient,
+        savedObjectsRepo,
         pkgkey: prevVersion,
         esClient,
         spaceId,
@@ -211,7 +211,7 @@ export interface IBulkInstallPackageError {
 export type BulkInstallResponse = BulkInstallPackageInfo | IBulkInstallPackageError;
 
 interface InstallRegistryPackageParams {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
   pkgkey: string;
   esClient: ElasticsearchClient;
   spaceId: string;
@@ -239,7 +239,7 @@ function sendEvent(telemetryEvent: PackageUpdateEvent) {
 }
 
 async function installPackageFromRegistry({
-  savedObjectsClient,
+  savedObjectsRepo,
   pkgkey,
   esClient,
   spaceId,
@@ -256,7 +256,7 @@ async function installPackageFromRegistry({
 
   try {
     // get the currently installed package
-    const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+    const installedPkg = await getInstallationObject({ savedObjectsRepo, pkgName });
     installType = getInstallType({ pkgVersion, installedPkg });
 
     // get latest package version
@@ -318,12 +318,12 @@ async function installPackageFromRegistry({
 
     const savedObjectsImporter = appContextService
       .getSavedObjects()
-      .createImporter(new SavedObjectsClient(savedObjectsClient));
+      .createImporter(new SavedObjectsClient(savedObjectsRepo));
 
     // try installing the package, if there was an error, call error handler and rethrow
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return _installPackage({
-      savedObjectsClient,
+      savedObjectsRepo,
       savedObjectsImporter,
       esClient,
       logger,
@@ -336,7 +336,7 @@ async function installPackageFromRegistry({
     })
       .then(async (assets) => {
         await removeOldAssets({
-          soClient: savedObjectsClient,
+          soRepo: savedObjectsRepo,
           pkgName: packageInfo.name,
           currentVersion: packageInfo.version,
         });
@@ -349,7 +349,7 @@ async function installPackageFromRegistry({
       .catch(async (err: Error) => {
         logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`);
         await handleInstallPackageFailure({
-          savedObjectsClient,
+          savedObjectsRepo,
           error: err,
           pkgName,
           pkgVersion,
@@ -376,7 +376,7 @@ async function installPackageFromRegistry({
 }
 
 interface InstallUploadedArchiveParams {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
   esClient: ElasticsearchClient;
   archiveBuffer: Buffer;
   contentType: string;
@@ -384,7 +384,7 @@ interface InstallUploadedArchiveParams {
 }
 
 async function installPackageByUpload({
-  savedObjectsClient,
+  savedObjectsRepo,
   esClient,
   archiveBuffer,
   contentType,
@@ -398,7 +398,7 @@ async function installPackageByUpload({
     const { packageInfo } = await parseAndVerifyArchiveEntries(archiveBuffer, contentType);
 
     const installedPkg = await getInstallationObject({
-      savedObjectsClient,
+      savedObjectsRepo,
       pkgName: packageInfo.name,
     });
 
@@ -432,11 +432,11 @@ async function installPackageByUpload({
 
     const savedObjectsImporter = appContextService
       .getSavedObjects()
-      .createImporter(new SavedObjectsClient(savedObjectsClient));
+      .createImporter(new SavedObjectsClient(savedObjectsRepo));
 
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
     return _installPackage({
-      savedObjectsClient,
+      savedObjectsRepo,
       savedObjectsImporter,
       esClient,
       logger,
@@ -480,13 +480,13 @@ export async function installPackage(args: InstallPackageParams) {
     throw new Error('installSource is required');
   }
   const logger = appContextService.getLogger();
-  const { savedObjectsClient, esClient } = args;
+  const { savedObjectsRepo, esClient } = args;
 
   if (args.installSource === 'registry') {
     const { pkgkey, force, spaceId } = args;
     logger.debug(`kicking off install of ${pkgkey} from registry`);
     const response = installPackageFromRegistry({
-      savedObjectsClient,
+      savedObjectsRepo,
       pkgkey,
       esClient,
       spaceId,
@@ -497,7 +497,7 @@ export async function installPackage(args: InstallPackageParams) {
     const { archiveBuffer, contentType, spaceId } = args;
     logger.debug(`kicking off install of uploaded package`);
     const response = installPackageByUpload({
-      savedObjectsClient,
+      savedObjectsRepo,
       esClient,
       archiveBuffer,
       contentType,
@@ -510,36 +510,36 @@ export async function installPackage(args: InstallPackageParams) {
 }
 
 export const updateVersion = async (
-  savedObjectsClient: ISavedObjectsRepository,
+  savedObjectsRepo: ISavedObjectsRepository,
   pkgName: string,
   pkgVersion: string
 ) => {
-  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+  return savedObjectsRepo.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     version: pkgVersion,
   });
 };
 
 export const updateInstallStatus = async ({
-  savedObjectsClient,
+  savedObjectsRepo,
   pkgName,
   status,
 }: {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
   pkgName: string;
   status: EpmPackageInstallStatus;
 }) => {
-  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+  return savedObjectsRepo.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     install_status: status,
   });
 };
 
 export async function createInstallation(options: {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
   packageInfo: InstallablePackage;
   installSource: InstallSource;
   spaceId: string;
 }) {
-  const { savedObjectsClient, packageInfo, installSource } = options;
+  const { savedObjectsRepo, packageInfo, installSource } = options;
   const { name: pkgName, version: pkgVersion } = packageInfo;
   const removable = !isUnremovablePackage(pkgName);
   const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
@@ -553,7 +553,7 @@ export async function createInstallation(options: {
     ? true
     : undefined;
 
-  const created = await savedObjectsClient.create<Installation>(
+  const created = await savedObjectsRepo.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     {
       installed_kibana: [],
@@ -577,23 +577,23 @@ export async function createInstallation(options: {
 }
 
 export const saveKibanaAssetsRefs = async (
-  savedObjectsClient: ISavedObjectsRepository,
+  savedObjectsRepo: ISavedObjectsRepository,
   pkgName: string,
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>
 ) => {
   const assetRefs = Object.values(kibanaAssets).flat().map(toAssetReference);
-  await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+  await savedObjectsRepo.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     installed_kibana: assetRefs,
   });
   return assetRefs;
 };
 
 export const saveInstalledEsRefs = async (
-  savedObjectsClient: ISavedObjectsRepository,
+  savedObjectsRepo: ISavedObjectsRepository,
   pkgName: string,
   installedAssets: EsAssetReference[]
 ) => {
-  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+  const installedPkg = await getInstallationObject({ savedObjectsRepo, pkgName });
   const installedAssetsToSave = installedPkg?.attributes.installed_es.concat(installedAssets);
 
   const deduplicatedAssets =
@@ -606,34 +606,34 @@ export const saveInstalledEsRefs = async (
       }
     }, [] as EsAssetReference[]) || [];
 
-  await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+  await savedObjectsRepo.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     installed_es: deduplicatedAssets,
   });
   return installedAssets;
 };
 
 export const removeAssetTypesFromInstalledEs = async (
-  savedObjectsClient: ISavedObjectsRepository,
+  savedObjectsRepo: ISavedObjectsRepository,
   pkgName: string,
   assetTypes: AssetType[]
 ) => {
-  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
+  const installedPkg = await getInstallationObject({ savedObjectsRepo, pkgName });
   const installedAssets = installedPkg?.attributes.installed_es;
   if (!installedAssets?.length) return;
   const installedAssetsToSave = installedAssets?.filter(
     (asset) => !assetTypes.includes(asset.type)
   );
 
-  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+  return savedObjectsRepo.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     installed_es: installedAssetsToSave,
   });
 };
 
 export async function ensurePackagesCompletedInstall(
-  savedObjectsClient: ISavedObjectsRepository,
+  savedObjectsRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient
 ) {
-  const installingPackages = await getPackageSavedObjects(savedObjectsClient, {
+  const installingPackages = await getPackageSavedObjects(savedObjectsRepo, {
     searchFields: ['install_status'],
     search: 'installing',
   });
@@ -648,7 +648,7 @@ export async function ensurePackagesCompletedInstall(
         acc.push(
           installPackage({
             installSource: 'registry',
-            savedObjectsClient,
+            savedObjectsRepo,
             pkgkey,
             esClient,
             spaceId: pkg.attributes.installed_kibana_space_id || DEFAULT_SPACE_ID,

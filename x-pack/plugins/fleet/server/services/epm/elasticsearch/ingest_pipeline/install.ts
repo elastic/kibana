@@ -43,7 +43,7 @@ export const installPipelines = async (
   installablePackage: InstallablePackage,
   paths: string[],
   esClient: ElasticsearchClient,
-  savedObjectsClient: ISavedObjectsRepository,
+  savedObjectsRepo: ISavedObjectsRepository,
   logger: Logger
 ) => {
   // unlike other ES assets, pipeline names are versioned so after a template is updated
@@ -89,18 +89,18 @@ export const installPipelines = async (
 
   // check that we don't duplicate the pipeline refs if the user is reinstalling
   const installedPkg = await getInstallationObject({
-    savedObjectsClient,
+    savedObjectsRepo,
     pkgName,
   });
   if (!installedPkg) throw new Error("integration wasn't found while installing pipelines");
   // remove the current pipeline refs, if any exist, associated with this version before saving new ones so no duplicates occur
   await deletePipelineRefs(
-    savedObjectsClient,
+    savedObjectsRepo,
     installedPkg.attributes.installed_es,
     pkgName,
     pkgVersion
   );
-  await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, pipelineRefs);
+  await saveInstalledEsRefs(savedObjectsRepo, installablePackage.name, pipelineRefs);
   const pipelines = dataStreams
     ? dataStreams.reduce<Array<Promise<EsAssetReference[]>>>((acc, dataStream) => {
         if (dataStream.ingest_pipeline) {

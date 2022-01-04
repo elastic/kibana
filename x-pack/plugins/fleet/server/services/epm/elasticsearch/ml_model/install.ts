@@ -26,7 +26,7 @@ export const installMlModel = async (
   installablePackage: InstallablePackage,
   paths: string[],
   esClient: ElasticsearchClient,
-  savedObjectsClient: ISavedObjectsRepository,
+  savedObjectsRepo: ISavedObjectsRepository,
   logger: Logger
 ) => {
   const mlModelPath = paths.find((path) => isMlModel(path));
@@ -43,7 +43,7 @@ export const installMlModel = async (
     };
 
     // get and save ml model refs before installing ml model
-    await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, [mlModelRef]);
+    await saveInstalledEsRefs(savedObjectsRepo, installablePackage.name, [mlModelRef]);
 
     const mlModel: MlModelInstallation = {
       installationName: modelId,

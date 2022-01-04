@@ -49,7 +49,7 @@ import { deleteKibanaSavedObjectsAssets } from './remove';
 // only the more explicit `installPackage*` functions should be used
 
 export async function _installPackage({
-  savedObjectsClient,
+  savedObjectsRepo,
   savedObjectsImporter,
   esClient,
   logger,
@@ -60,7 +60,7 @@ export async function _installPackage({
   installSource,
   spaceId,
 }: {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
   savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -91,7 +91,7 @@ export async function _installPackage({
       } else {
         // if no installation is running, or the installation has been running longer than MAX_TIME_COMPLETE_INSTALL
         // (it might be stuck) update the saved object and proceed
-        await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+        await savedObjectsRepo.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
           install_version: pkgVersion,
           install_status: 'installing',
           install_started_at: new Date().toISOString(),
@@ -100,7 +100,7 @@ export async function _installPackage({
       }
     } else {
       await createInstallation({
-        savedObjectsClient,
+        savedObjectsRepo,
         packageInfo,
         installSource,
         spaceId,
@@ -108,10 +108,10 @@ export async function _installPackage({
     }
 
     const kibanaAssets = await getKibanaAssets(paths);
-    if (installedPkg) await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg });
+    if (installedPkg) await deleteKibanaSavedObjectsAssets({ savedObjectsRepo, installedPkg });
     // save new kibana refs before installing the assets
     const installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
-      savedObjectsClient,
+      savedObjectsRepo,
       pkgName,
       kibanaAssets
     );
@@ -134,7 +134,7 @@ export async function _installPackage({
       packageInfo,
       paths,
       esClient,
-      savedObjectsClient,
+      savedObjectsRepo,
       logger
     );
 
@@ -143,7 +143,7 @@ export async function _installPackage({
       packageInfo,
       paths,
       esClient,
-      savedObjectsClient,
+      savedObjectsRepo,
       logger
     );
 
@@ -152,7 +152,7 @@ export async function _installPackage({
       packageInfo,
       paths,
       esClient,
-      savedObjectsClient,
+      savedObjectsRepo,
       logger
     );
     // install or update the templates referencing the newly installed pipelines
@@ -161,7 +161,7 @@ export async function _installPackage({
       esClient,
       logger,
       paths,
-      savedObjectsClient
+      savedObjectsRepo
     );
 
     // update current backing indices of each data stream
@@ -171,7 +171,7 @@ export async function _installPackage({
       packageInfo,
       paths,
       esClient,
-      savedObjectsClient,
+      savedObjectsRepo,
       logger
     );
 
@@ -185,7 +185,7 @@ export async function _installPackage({
     ) {
       await deletePreviousPipelines(
         esClient,
-        savedObjectsClient,
+        savedObjectsRepo,
         pkgName,
         installedPkg.attributes.version
       );
@@ -194,7 +194,7 @@ export async function _installPackage({
     if (installType === 'rollback' && installedPkg) {
       await deletePreviousPipelines(
         esClient,
-        savedObjectsClient,
+        savedObjectsRepo,
         pkgName,
         installedPkg.attributes.install_version
       );
@@ -202,7 +202,7 @@ export async function _installPackage({
     const installedTemplateRefs = getAllTemplateRefs(installedTemplates);
 
     const packageAssetResults = await saveArchiveEntries({
-      savedObjectsClient,
+      savedObjectsRepo,
       paths,
       packageInfo,
       installSource,
@@ -215,9 +215,9 @@ export async function _installPackage({
     );
 
     // update to newly installed version when all assets are successfully installed
-    if (installedPkg) await updateVersion(savedObjectsClient, pkgName, pkgVersion);
+    if (installedPkg) await updateVersion(savedObjectsRepo, pkgName, pkgVersion);
 
-    const updatedPackage = await savedObjectsClient.update<Installation>(
+    const updatedPackage = await savedObjectsRepo.update<Installation>(
       PACKAGES_SAVED_OBJECT_TYPE,
       pkgName,
       {
@@ -230,13 +230,13 @@ export async function _installPackage({
     // If the package is flagged with the `keep_policies_up_to_date` flag, upgrade its
     // associated package policies after installation
     if (updatedPackage.attributes.keep_policies_up_to_date) {
-      const policyIdsToUpgrade = await packagePolicyService.listIds(savedObjectsClient, {
+      const policyIdsToUpgrade = await packagePolicyService.listIds(savedObjectsRepo, {
         page: 1,
         perPage: SO_SEARCH_LIMIT,
         kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
       });
 
-      await packagePolicyService.upgrade(savedObjectsClient, esClient, policyIdsToUpgrade.items);
+      await packagePolicyService.upgrade(savedObjectsRepo, esClient, policyIdsToUpgrade.items);
     }
 
     return [

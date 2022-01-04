@@ -7,11 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import {
-  SavedObjectsErrorHelpers,
-  SavedObjectsClient,
-  SavedObjectsUtils,
-} from '../../../../../../../src/core/server';
+import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '../../../../../../../src/core/server';
 import type {
   ElasticsearchClient,
   ISavedObjectsRepository,
@@ -40,19 +36,19 @@ import { removeArchiveEntries } from '../archive/storage';
 import { getInstallation, kibanaSavedObjectTypes } from './index';
 
 export async function removeInstallation(options: {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
   pkgName: string;
   pkgVersion: string;
   esClient: ElasticsearchClient;
   force?: boolean;
 }): Promise<AssetReference[]> {
-  const { savedObjectsClient, pkgName, pkgVersion, esClient, force } = options;
-  const installation = await getInstallation({ savedObjectsClient, pkgName });
+  const { savedObjectsRepo, pkgName, pkgVersion, esClient, force } = options;
+  const installation = await getInstallation({ savedObjectsRepo, pkgName });
   if (!installation) throw Boom.badRequest(`${pkgName} is not installed`);
   if (installation.removable === false && !force)
     throw Boom.badRequest(`${pkgName} is installed by default and cannot be removed`);
 
-  const { total } = await packagePolicyService.list(savedObjectsClient, {
+  const { total } = await packagePolicyService.list(savedObjectsRepo, {
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkgName}`,
     page: 0,
     perPage: 0,
@@ -65,16 +61,16 @@ export async function removeInstallation(options: {
 
   // Delete the installed assets. Don't include installation.package_assets. Those are irrelevant to users
   const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
-  await deleteAssets(installation, savedObjectsClient, esClient);
+  await deleteAssets(installation, savedObjectsRepo, esClient);
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
-  await savedObjectsClient.delete(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
+  await savedObjectsRepo.delete(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
 
   // delete the index patterns if no packages are installed
   // this must be done after deleting the saved object for the current package otherwise it will retrieve the package
   // from the registry again and keep the index patterns
-  await removeUnusedIndexPatterns(savedObjectsClient);
+  await removeUnusedIndexPatterns(savedObjectsRepo);
 
   // remove the package archive and its contents from the cache so that a reinstall fetches
   // a fresh copy from the registry
@@ -83,21 +79,19 @@ export async function removeInstallation(options: {
     version: pkgVersion,
   });
 
-  await removeArchiveEntries({ savedObjectsClient, refs: installation.package_assets });
+  await removeArchiveEntries({ savedObjectsRepo, refs: installation.package_assets });
 
   // successful delete's in SO client return {}. return something more useful
   return installedAssets;
 }
 
 async function deleteKibanaAssets(
+  savedObjectsRepo: ISavedObjectsRepository,
   installedObjects: KibanaAssetReference[],
   spaceId: string = DEFAULT_SPACE_ID
 ) {
-  const savedObjectsClient = new SavedObjectsClient(
-    appContextService.getSavedObjects().createInternalRepository()
-  );
   const namespace = SavedObjectsUtils.namespaceStringToId(spaceId);
-  const { resolved_objects: resolvedObjects } = await savedObjectsClient.bulkResolve(
+  const { resolved_objects: resolvedObjects } = await savedObjectsRepo.bulkResolve(
     installedObjects,
     { namespace }
   );
@@ -110,7 +104,7 @@ async function deleteKibanaAssets(
   // we filter these out before calling delete
   const assetsToDelete = foundObjects.map(({ saved_object: { id, type } }) => ({ id, type }));
   const promises = assetsToDelete.map(async ({ id, type }) => {
-    return savedObjectsClient.delete(type, id, { namespace });
+    return savedObjectsRepo.delete(type, id, { namespace });
   });
 
   return Promise.all(promises);
@@ -144,7 +138,7 @@ async function deleteAssets(
     installed_kibana: installedKibana,
     installed_kibana_space_id: spaceId = DEFAULT_SPACE_ID,
   }: Installation,
-  savedObjectsClient: ISavedObjectsRepository,
+  savedObjectsRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient
 ) {
   const logger = appContextService.getLogger();
@@ -174,7 +168,7 @@ async function deleteAssets(
     // then the other asset types
     await Promise.all([
       ...deleteESAssets(otherAssets, esClient),
-      deleteKibanaAssets(installedKibana, spaceId),
+      deleteKibanaAssets(savedObjectsRepo, installedKibana, spaceId),
     ]);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
@@ -207,10 +201,10 @@ async function deleteComponentTemplate(esClient: ElasticsearchClient, name: stri
 }
 
 export async function deleteKibanaSavedObjectsAssets({
-  savedObjectsClient,
+  savedObjectsRepo,
   installedPkg,
 }: {
-  savedObjectsClient: ISavedObjectsRepository;
+  savedObjectsRepo: ISavedObjectsRepository;
   installedPkg: SavedObject<Installation>;
 }) {
   const { installed_kibana: installedRefs, installed_kibana_space_id: spaceId } =
@@ -223,7 +217,7 @@ export async function deleteKibanaSavedObjectsAssets({
     .map(({ id, type }) => ({ id, type } as KibanaAssetReference));
 
   try {
-    await deleteKibanaAssets(assetsToDelete, spaceId);
+    await deleteKibanaAssets(savedObjectsRepo, assetsToDelete, spaceId);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error
     if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
