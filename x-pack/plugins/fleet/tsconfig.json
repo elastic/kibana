@@ -8,13 +8,13 @@
   },
   "include": [
     // add all the folders containg files to be compiled
+    ".storybook/**/*",
     "common/**/*",
     "public/**/*",
     "server/**/*",
     "server/**/*.json",
     "scripts/**/*",
     "package.json",
-    "storybook/**/*",
     "../../../typings/**/*"
   ],
   "references": [
