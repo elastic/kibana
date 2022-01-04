@@ -26,7 +26,7 @@ describe('RouterWrappers', () => {
     } = {},
   }: {
     wrapper: RouterWrapper;
-    security?: {
+    security: {
       roles?: string[];
       pluginEnabled?: boolean;
       licenseEnabled?: boolean;
@@ -40,27 +40,22 @@ describe('RouterWrappers', () => {
 
     const mockContext = createAppContextStartContractMock();
     // @ts-expect-error type doesn't properly respect deeply mocked keys
-    mockContext.securityStart?.authz.actions.api.get.mockImplementation((priv) => `api:${priv}`);
+    mockContext.securityStart.authz.actions.api.get.mockImplementation((priv) => `api:${priv}`);
 
-    if (!pluginEnabled) {
-      mockContext.securitySetup = undefined;
-      mockContext.securityStart = undefined;
-    } else {
-      mockContext.securityStart?.authc.getCurrentUser.mockReturnValue({
-        username: 'foo',
-        roles,
-      } as unknown as AuthenticatedUser);
+    mockContext.securityStart.authc.getCurrentUser.mockReturnValue({
+      username: 'foo',
+      roles,
+    } as unknown as AuthenticatedUser);
 
-      mockContext.securitySetup?.license.isEnabled.mockReturnValue(licenseEnabled);
-      if (licenseEnabled) {
-        mockContext.securityStart?.authz.mode.useRbacForRequest.mockReturnValue(true);
-      }
+    mockContext.securitySetup.license.isEnabled.mockReturnValue(licenseEnabled);
+    if (licenseEnabled) {
+      mockContext.securityStart.authz.mode.useRbacForRequest.mockReturnValue(true);
+    }
 
-      if (checkPrivilegesDynamically) {
-        mockContext.securityStart?.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
-          checkPrivilegesDynamically
-        );
-      }
+    if (checkPrivilegesDynamically) {
+      mockContext.securityStart.authz.checkPrivilegesDynamicallyWithRequest.mockReturnValue(
+        checkPrivilegesDynamically
+      );
     }
 
     appContextService.start(mockContext);
@@ -158,7 +153,7 @@ describe('RouterWrappers', () => {
       expect(
         await runTest({
           wrapper: RouterWrappers.require.fleetSetupPrivilege,
-          security: { pluginEnabled: false },
+          security: { pluginEnabled: false, licenseEnabled: false },
         })
       ).toEqual('forbidden');
     });
