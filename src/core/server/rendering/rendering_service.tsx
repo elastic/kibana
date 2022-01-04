@@ -124,6 +124,10 @@ export class RenderingService {
         i18n: {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
         },
+        theme: {
+          darkMode,
+          version: themeVersion,
+        },
         csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
         externalUrl: http.externalUrl,
         vars: vars ?? {},

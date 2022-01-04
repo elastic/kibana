@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiLink,
   EuiButton,
@@ -119,6 +119,7 @@ export const DashboardListing = ({
     } else {
       confirmCreateWithUnsaved(
         core.overlays,
+        core.theme,
         () => {
           dashboardSessionStorage.clearState();
           redirectTo({ destination: 'dashboard' });
@@ -126,7 +127,7 @@ export const DashboardListing = ({
         () => redirectTo({ destination: 'dashboard' })
       );
     }
-  }, [dashboardSessionStorage, redirectTo, core.overlays]);
+  }, [dashboardSessionStorage, redirectTo, core.overlays, core.theme]);
 
   const emptyPrompt = useMemo(() => {
     if (!showWriteControls) {

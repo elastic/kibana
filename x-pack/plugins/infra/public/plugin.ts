@@ -10,9 +10,6 @@ import { AppMountParameters, PluginInitializerContext } from 'kibana/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import { createInventoryMetricAlertType } from './alerting/inventory';
-import { createLogThresholdAlertType } from './alerting/log_threshold';
-import { createMetricThresholdAlertType } from './alerting/metric_threshold';
 import { LOG_STREAM_EMBEDDABLE } from './components/log_stream/log_stream_embeddable';
 import { LogStreamEmbeddableFactoryDefinition } from './components/log_stream/log_stream_embeddable_factory';
 import { createMetricsFetchData, createMetricsHasData } from './metrics_overview_fetchers';
@@ -29,20 +26,22 @@ import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './utils/logs_
 export class Plugin implements InfraClientPluginClass {
   constructor(_context: PluginInitializerContext) {}
 
-  setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
+  async setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
     if (pluginsSetup.home) {
       registerFeatures(pluginsSetup.home);
     }
 
-    pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createInventoryMetricAlertType()
-    );
+    const { createInventoryMetricRuleType } = await import('./alerting/inventory');
+    const { createLogThresholdRuleType } = await import('./alerting/log_threshold');
+    const { createMetricThresholdRuleType } = await import('./alerting/metric_threshold');
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createLogThresholdAlertType()
+      createInventoryMetricRuleType()
     );
+
+    pluginsSetup.observability.observabilityRuleTypeRegistry.register(createLogThresholdRuleType());
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createMetricThresholdAlertType()
+      createMetricThresholdRuleType()
     );
     pluginsSetup.observability.dashboard.register({
       appName: 'infra_logs',

@@ -15,6 +15,7 @@ import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
+
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
@@ -43,6 +44,7 @@ import {
 } from '../components/fleet_package';
 import { LazySyntheticsCustomAssetsExtension } from '../components/fleet_package/lazy_synthetics_custom_assets_extension';
 import { Start as InspectorPluginStart } from '../../../../../src/plugins/inspector/public';
+import { UptimeUiConfig } from '../../common/config';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
@@ -73,9 +75,10 @@ export type ClientStart = void;
 export class UptimePlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
 {
-  constructor(_context: PluginInitializerContext) {}
+  constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
+    const config = this.initContext.config.get<UptimeUiConfig>();
     if (plugins.home) {
       plugins.home.featureCatalogue.register({
         id: PLUGIN.ID,
@@ -203,7 +206,7 @@ export class UptimePlugin
         const [coreStart, corePlugins] = await core.getStartServices();
 
         const { renderApp } = await import('./render_app');
-        return renderApp(coreStart, plugins, corePlugins, params);
+        return renderApp(coreStart, plugins, corePlugins, params, config);
       },
     });
   }

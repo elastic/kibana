@@ -41,7 +41,7 @@ export default function (providerContext: FtrProviderContext) {
           return response.body;
         };
         const listResponse = await fetchPackageList();
-        expect(listResponse.response.length).not.to.be(0);
+        expect(listResponse.items.length).not.to.be(0);
       });
 
       it('lists all limited packages from the registry', async function () {
@@ -54,7 +54,7 @@ export default function (providerContext: FtrProviderContext) {
         };
         const listResponse = await fetchLimitedPackageList();
 
-        expect(listResponse.response).to.eql(['endpoint']);
+        expect(listResponse.items).to.eql(['endpoint']);
       });
 
       it('allows user with only read permission to access', async () => {

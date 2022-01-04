@@ -19,6 +19,7 @@ import {
   commonAddEmptyValueColorRule,
   commonMigrateTagCloud,
   commonAddDropLastBucketIntoTSVBModel,
+  commonAddDropLastBucketIntoTSVBModel714Above,
   commonRemoveMarkdownLessFromTSVB,
 } from './visualization_common_migrations';
 
@@ -867,6 +868,20 @@ const decorateAxes = <T extends { labels: { filter?: boolean } }>(
     },
   }));
 
+/**
+ * Defaults circlesRadius to 1 if it is not configured
+ */
+const addCirclesRadius = <T extends { circlesRadius: number }>(axes: T[]): T[] =>
+  axes.map((axis) => {
+    const hasCircleRadiusAttribute = Number.isFinite(axis?.circlesRadius);
+    return {
+      ...axis,
+      ...(!hasCircleRadiusAttribute && {
+        circlesRadius: 1,
+      }),
+    };
+  });
+
 // Inlined from vis_type_xy
 const CHART_TYPE_AREA = 'area';
 const CHART_TYPE_LINE = 'line';
@@ -913,10 +928,12 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
               valueAxes:
                 visState.params.valueAxes &&
                 decorateAxes(visState.params.valueAxes, isHorizontalBar),
+              seriesParams:
+                visState.params.seriesParams && addCirclesRadius(visState.params.seriesParams),
               isVislibVis: true,
               detailedTooltip: true,
               ...(isLineOrArea && {
-                fittingFunction: 'zero',
+                fittingFunction: 'linear',
               }),
             },
           }),
@@ -951,6 +968,23 @@ const addDropLastBucketIntoTSVBModel: SavedObjectMigrationFn<any, any> = (doc) =
   try {
     const visState = JSON.parse(doc.attributes.visState);
     const newVisState = commonAddDropLastBucketIntoTSVBModel(visState);
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        visState: JSON.stringify(newVisState),
+      },
+    };
+  } catch (e) {
+    // Let it go, the data is invalid and we'll leave it as is
+  }
+  return doc;
+};
+
+const addDropLastBucketIntoTSVBModel714Above: SavedObjectMigrationFn<any, any> = (doc) => {
+  try {
+    const visState = JSON.parse(doc.attributes.visState);
+    const newVisState = commonAddDropLastBucketIntoTSVBModel714Above(visState);
     return {
       ...doc,
       attributes: {
@@ -1145,5 +1179,6 @@ export const visualizationSavedObjectTypeMigrations = {
     replaceIndexPatternReference,
     addDropLastBucketIntoTSVBModel
   ),
+  '7.17.0': flow(addDropLastBucketIntoTSVBModel714Above),
   '8.0.0': flow(removeMarkdownLessFromTSVB),
 };

@@ -3,6 +3,7 @@
 @import 'components/field_data_row/index';
 
 $panelWidthS:     #{'max(20%, 225px)'};
+$panelWidthM:     #{'max(30%, 300px)'};
 $panelWidthL:     #{'max(40%, 450px)'};
 
 .dvExpandedRow {
@@ -52,9 +53,6 @@ $panelWidthL:     #{'max(40%, 450px)'};
     }
 
     .dvSummaryTable {
-      .euiTableRow > .euiTableRowCell {
-        border-bottom: 0;
-      }
       .euiTableHeaderCell {
         display: none;
       }
@@ -63,6 +61,11 @@ $panelWidthL:     #{'max(40%, 450px)'};
     .dvSummaryTable__wrapper {
       min-width: $panelWidthS;
       max-width: $panelWidthS;
+
+      &.dvPanel__dateSummary {
+        min-width: $panelWidthM;
+        max-width: $panelWidthM;
+      }
     }
 
     .dvTopValues__wrapper {

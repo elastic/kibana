@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { capitalize, sortBy } from 'lodash';
 import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import {
   EuiBasicTable,
@@ -40,9 +40,9 @@ import { useHistory } from 'react-router-dom';
 import { isEmpty } from 'lodash';
 import {
   ActionType,
-  Alert,
+  Rule,
   AlertTableItem,
-  AlertType,
+  RuleType,
   RuleTypeIndex,
   Pagination,
 } from '../../../../types';
@@ -95,7 +95,7 @@ interface AlertTypeState {
 }
 interface AlertState {
   isLoading: boolean;
-  data: Alert[];
+  data: Rule[];
   totalItemCount: number;
 }
 
@@ -111,6 +111,8 @@ export const AlertsList: React.FunctionComponent = () => {
   } = useKibana().services;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
 
+  const [initialLoad, setInitialLoad] = useState<boolean>(true);
+  const [noData, setNoData] = useState<boolean>(true);
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
@@ -220,7 +222,8 @@ export const AlertsList: React.FunctionComponent = () => {
   }, []);
 
   async function loadAlertsData() {
-    const hasAnyAuthorizedAlertType = alertTypesState.data.size > 0;
+    const hasAnyAuthorizedAlertType =
+      alertTypesState.isInitialized && alertTypesState.data.size > 0;
     if (hasAnyAuthorizedAlertType) {
       setAlertsState({ ...alertsState, isLoading: true });
       try {
@@ -243,6 +246,15 @@ export const AlertsList: React.FunctionComponent = () => {
         if (!alertsResponse.data?.length && page.index > 0) {
           setPage({ ...page, index: 0 });
         }
+
+        const isFilterApplied = !(
+          isEmpty(searchText) &&
+          isEmpty(typesFilter) &&
+          isEmpty(actionTypesFilter) &&
+          isEmpty(alertStatusesFilter)
+        );
+
+        setNoData(alertsResponse.data.length === 0 && !isFilterApplied);
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
@@ -254,6 +266,7 @@ export const AlertsList: React.FunctionComponent = () => {
         });
         setAlertsState({ ...alertsState, isLoading: false });
       }
+      setInitialLoad(false);
     }
   }
 
@@ -438,6 +451,7 @@ export const AlertsList: React.FunctionComponent = () => {
                 color="hollow"
                 iconType="tag"
                 iconSide="left"
+                tabIndex={-1}
                 onClick={() => setTagPopoverOpenIndex(item.index)}
                 onClickAriaLabel="Tags"
                 iconOnClick={() => setTagPopoverOpenIndex(item.index)}
@@ -469,7 +483,22 @@ export const AlertsList: React.FunctionComponent = () => {
     },
     {
       field: 'executionStatus.lastExecutionDate',
-      name: 'Last run',
+      name: (
+        <EuiToolTip
+          data-test-subj="alertsTableCell-lastExecutionDateTooltip"
+          content={i18n.translate(
+            'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.lastExecutionDateTitle',
+            {
+              defaultMessage: 'Start time of the last execution.',
+            }
+          )}
+        >
+          <span>
+            Last run{' '}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
       sortable: true,
       width: '15%',
       'data-test-subj': 'alertsTableCell-lastExecutionDate',
@@ -509,6 +538,7 @@ export const AlertsList: React.FunctionComponent = () => {
       width: '12%',
       name: (
         <EuiToolTip
+          data-test-subj="alertsTableCell-durationTooltip"
           content={i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.durationTitle',
             {
@@ -945,18 +975,22 @@ export const AlertsList: React.FunctionComponent = () => {
     </>
   );
 
-  const loadedItems = convertAlertsToTableItems(
-    alertsState.data,
-    alertTypesState.data,
-    canExecuteActions
-  );
+  // if initial load, show spinner
+  const getRulesList = () => {
+    if (noData && !alertsState.isLoading && !alertTypesState.isLoading) {
+      return authorizedToCreateAnyAlerts ? (
+        <EmptyPrompt onCTAClicked={() => setAlertFlyoutVisibility(true)} />
+      ) : (
+        noPermissionPrompt
+      );
+    }
 
-  const isFilterApplied = !(
-    isEmpty(searchText) &&
-    isEmpty(typesFilter) &&
-    isEmpty(actionTypesFilter) &&
-    isEmpty(alertStatusesFilter)
-  );
+    if (initialLoad) {
+      return <CenterJustifiedSpinner />;
+    }
+
+    return table;
+  };
 
   return (
     <section data-test-subj="alertsList">
@@ -987,15 +1021,7 @@ export const AlertsList: React.FunctionComponent = () => {
         }}
       />
       <EuiSpacer size="xs" />
-      {loadedItems.length || isFilterApplied ? (
-        table
-      ) : alertTypesState.isLoading || alertsState.isLoading ? (
-        <CenterJustifiedSpinner />
-      ) : authorizedToCreateAnyAlerts ? (
-        <EmptyPrompt onCTAClicked={() => setAlertFlyoutVisibility(true)} />
-      ) : (
-        noPermissionPrompt
-      )}
+      {getRulesList()}
       {alertFlyoutVisible && (
         <AlertAdd
           consumer={ALERTS_FEATURE_ID}
@@ -1017,7 +1043,7 @@ export const AlertsList: React.FunctionComponent = () => {
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
           ruleType={
-            alertTypesState.data.get(currentRuleToEdit.alertTypeId) as AlertType<string, string>
+            alertTypesState.data.get(currentRuleToEdit.alertTypeId) as RuleType<string, string>
           }
           onSave={loadAlertsData}
         />
@@ -1051,12 +1077,12 @@ const noPermissionPrompt = (
   />
 );
 
-function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
+function filterAlertsById(alerts: Rule[], ids: string[]): Rule[] {
   return alerts.filter((alert) => ids.includes(alert.id));
 }
 
 function convertAlertsToTableItems(
-  alerts: Alert[],
+  alerts: Rule[],
   ruleTypeIndex: RuleTypeIndex,
   canExecuteActions: boolean
 ) {

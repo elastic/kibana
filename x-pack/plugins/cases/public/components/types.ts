@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { CaseActionConnector } from '../../common';
+export type { CaseActionConnector } from '../../common/ui/types';

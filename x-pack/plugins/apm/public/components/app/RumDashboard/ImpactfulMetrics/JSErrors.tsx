@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
@@ -41,7 +41,7 @@ export function JSErrors() {
     (callApmApi) => {
       if (start && end && serviceName) {
         return callApmApi({
-          endpoint: 'GET /api/apm/rum-client/js-errors',
+          endpoint: 'GET /internal/apm/ux/js-errors',
           params: {
             query: {
               start,

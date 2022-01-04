@@ -11,10 +11,10 @@ import {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
 } from '../../../../../../src/core/server';
-import { ConnectorTypes } from '../../../common';
+import { ConnectorTypes } from '../../../common/api';
 import { addOwnerToSO, SanitizedCaseOwner } from '.';
-import { transformConnectorIdToReference } from '../../services/user_actions/transform';
-import { CONNECTOR_ID_REFERENCE_NAME } from '../../common';
+import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
+import { transformConnectorIdToReference } from './user_actions/connector_id';
 
 interface UnsanitizedConfigureConnector {
   connector_id: string;

@@ -7,6 +7,7 @@
 
 import { expectFixtureEql } from './helper/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('monitor duration query', () => {
@@ -18,9 +19,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       const monitorId = '0002-up';
 
-      const apiResponse = await supertest.get(
-        `/api/uptime/monitor/duration?monitorId=${monitorId}&dateStart=${dateStart}&dateEnd=${dateEnd}`
-      );
+      const apiResponse = await supertest.get(API_URLS.MONITOR_DURATION).query({
+        monitorId,
+        dateStart,
+        dateEnd,
+      });
       const data = apiResponse.body;
       expectFixtureEql(data, 'monitor_charts');
     });
@@ -31,9 +34,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       const monitorId = '0002-up';
 
-      const apiResponse = await supertest.get(
-        `/api/uptime/monitor/duration?monitorId=${monitorId}&dateStart=${dateStart}&dateEnd=${dateEnd}`
-      );
+      const apiResponse = await supertest.get(API_URLS.MONITOR_DURATION).query({
+        monitorId,
+        dateStart,
+        dateEnd,
+      });
       const data = apiResponse.body;
 
       expectFixtureEql(data, 'monitor_charts_empty_sets');

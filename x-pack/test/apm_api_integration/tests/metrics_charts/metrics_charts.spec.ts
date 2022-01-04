@@ -7,35 +7,39 @@
 
 import expect from '@kbn/expect';
 import { first } from 'lodash';
-import { MetricsChartsByAgentAPIResponse } from '../../../../plugins/apm/server/lib/metrics/get_metrics_chart_data_by_agent';
-import { GenericMetricsChart } from '../../../../plugins/apm/server/lib/metrics/transform_metrics_chart';
+import { GenericMetricsChart } from '../../../../plugins/apm/server/routes/metrics/fetch_and_transform_metrics';
+import { SupertestReturnType } from '../../common/apm_api_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
-interface ChartResponse {
-  body: MetricsChartsByAgentAPIResponse;
-  status: number;
-}
+type ChartResponse = SupertestReturnType<'GET /internal/apm/services/{serviceName}/metrics/charts'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const supertest = getService('legacySupertestAsApmReadUser');
+  const apmApiClient = getService('apmApiClient');
 
   registry.when(
     'Metrics charts when data is loaded',
     { config: 'basic', archives: ['metrics_8.0.0'] },
     () => {
       describe('for opbeans-node', () => {
-        const start = encodeURIComponent('2020-09-08T14:50:00.000Z');
-        const end = encodeURIComponent('2020-09-08T14:55:00.000Z');
-        const agentName = 'nodejs';
-
         describe('returns metrics data', () => {
           let chartsResponse: ChartResponse;
           before(async () => {
-            chartsResponse = await supertest.get(
-              `/internal/apm/services/opbeans-node/metrics/charts?start=${start}&end=${end}&agentName=${agentName}&kuery=&environment=ENVIRONMENT_ALL`
-            );
+            chartsResponse = await apmApiClient.readUser({
+              endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
+              params: {
+                path: { serviceName: 'opbeans-node' },
+                query: {
+                  start: '2020-09-08T14:50:00.000Z',
+                  end: '2020-09-08T14:55:00.000Z',
+                  agentName: 'nodejs',
+                  environment: 'ENVIRONMENT_ALL',
+                  kuery: ``,
+                },
+              },
+            });
           });
+
           it('contains CPU usage and System memory usage chart data', async () => {
             expect(chartsResponse.status).to.be(200);
             expectSnapshot(chartsResponse.body.charts.map((chart) => chart.title)).toMatchInline(`
@@ -112,17 +116,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       describe('for opbeans-java', () => {
-        const agentName = 'java';
-
         describe('returns metrics data', () => {
-          const start = encodeURIComponent('2020-09-08T14:55:30.000Z');
-          const end = encodeURIComponent('2020-09-08T15:00:00.000Z');
-
           let chartsResponse: ChartResponse;
           before(async () => {
-            chartsResponse = await supertest.get(
-              `/internal/apm/services/opbeans-java/metrics/charts?start=${start}&end=${end}&agentName=${agentName}&environment=ENVIRONMENT_ALL&kuery=`
-            );
+            chartsResponse = await apmApiClient.readUser({
+              endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
+              params: {
+                path: { serviceName: 'opbeans-java' },
+                query: {
+                  start: '2020-09-08T14:55:30.000Z',
+                  end: '2020-09-08T15:00:00.000Z',
+                  agentName: 'java',
+                  environment: 'ENVIRONMENT_ALL',
+                  kuery: ``,
+                },
+              },
+            });
           });
 
           it('has correct chart data', async () => {
@@ -406,12 +415,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         // 9223372036854771712 = memory limit for a c-group when no memory limit is specified
         it('calculates system memory usage using system total field when cgroup limit is equal to 9223372036854771712', async () => {
-          const start = encodeURIComponent('2020-09-08T15:00:30.000Z');
-          const end = encodeURIComponent('2020-09-08T15:05:00.000Z');
-
-          const chartsResponse: ChartResponse = await supertest.get(
-            `/internal/apm/services/opbeans-java/metrics/charts?start=${start}&end=${end}&agentName=${agentName}&environment=ENVIRONMENT_ALL&kuery=`
-          );
+          const chartsResponse = await apmApiClient.readUser({
+            endpoint: 'GET /internal/apm/services/{serviceName}/metrics/charts',
+            params: {
+              path: { serviceName: 'opbeans-java' },
+              query: {
+                start: '2020-09-08T15:00:30.000Z',
+                end: '2020-09-08T15:05:00.000Z',
+                agentName: 'java',
+                environment: 'ENVIRONMENT_ALL',
+                kuery: ``,
+              },
+            },
+          });
 
           const systemMemoryUsageChart = chartsResponse.body.charts.find(
             ({ key }) => key === 'memory_usage_chart'

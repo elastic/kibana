@@ -32,14 +32,17 @@ import { Storage } from '../../kibana_utils/public';
 
 import { DiscoverStartPlugins } from './plugin';
 import { getHistory } from './kibana_services';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
 import { UrlForwardingStart } from '../../url_forwarding/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
-import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
+import { IndexPatternFieldEditorStart } from '../../data_view_field_editor/public';
 import { FieldFormatsStart } from '../../field_formats/public';
 import { EmbeddableStart } from '../../embeddable/public';
 
 import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
+
+export interface HistoryLocationState {
+  referrer: string;
+}
 
 export interface DiscoverServices {
   addBasePath: (path: string) => string;
@@ -49,7 +52,7 @@ export interface DiscoverServices {
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
   embeddable: EmbeddableStart;
-  history: () => History;
+  history: () => History<HistoryLocationState>;
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
@@ -58,13 +61,12 @@ export interface DiscoverServices {
   metadata: { branch: string };
   navigation: NavigationPublicPluginStart;
   share?: SharePluginStart;
-  kibanaLegacy: KibanaLegacyStart;
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
   http: HttpStart;
   storage: Storage;
   spaces?: SpacesApi;
@@ -97,14 +99,13 @@ export function buildServices(
     },
     navigation: plugins.navigation,
     share: plugins.share,
-    kibanaLegacy: plugins.kibanaLegacy,
     urlForwarding: plugins.urlForwarding,
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
     storage,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
-    indexPatternFieldEditor: plugins.indexPatternFieldEditor,
+    dataViewFieldEditor: plugins.dataViewFieldEditor,
     http: core.http,
     spaces: plugins.spaces,
   };

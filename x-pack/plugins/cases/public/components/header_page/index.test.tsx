@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
 import { shallow } from 'enzyme';
 import React from 'react';
 
@@ -14,16 +14,7 @@ import { TestProviders } from '../../common/mock';
 import { HeaderPage } from './index';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
-
-  return {
-    ...original,
-    useHistory: () => ({
-      useHistory: jest.fn(),
-    }),
-  };
-});
+jest.mock('../../common/navigation/hooks');
 
 describe('HeaderPage', () => {
   const mount = useMountAppended();
@@ -47,10 +38,7 @@ describe('HeaderPage', () => {
   test('it renders the back link when provided', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderPage
-          backOptions={{ href: '#', text: 'Test link', onClick: jest.fn() }}
-          title="Test title"
-        />
+        <HeaderPage showBackButton title="Test title" />
       </TestProviders>
     );
 

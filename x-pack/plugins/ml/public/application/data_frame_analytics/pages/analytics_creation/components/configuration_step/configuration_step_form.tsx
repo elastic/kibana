@@ -667,6 +667,17 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           </EuiFormRow>
         </Fragment>
       )}
+      <AnalysisFieldsTable
+        dependentVariable={dependentVariable}
+        includes={includes}
+        isJobTypeWithDepVar={isJobTypeWithDepVar}
+        minimumFieldsRequiredMessage={minimumFieldsRequiredMessage}
+        setMinimumFieldsRequiredMessage={setMinimumFieldsRequiredMessage}
+        tableItems={firstUpdate.current ? includesTableItems : tableItems}
+        unsupportedFieldsError={unsupportedFieldsError}
+        setUnsupportedFieldsError={setUnsupportedFieldsError}
+        setFormState={setFormState}
+      />
       <EuiFormRow
         fullWidth
         isInvalid={requiredFieldsError !== undefined}
@@ -677,17 +688,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       >
         <Fragment />
       </EuiFormRow>
-
-      <AnalysisFieldsTable
-        dependentVariable={dependentVariable}
-        includes={includes}
-        minimumFieldsRequiredMessage={minimumFieldsRequiredMessage}
-        setMinimumFieldsRequiredMessage={setMinimumFieldsRequiredMessage}
-        tableItems={firstUpdate.current ? includesTableItems : tableItems}
-        unsupportedFieldsError={unsupportedFieldsError}
-        setUnsupportedFieldsError={setUnsupportedFieldsError}
-        setFormState={setFormState}
-      />
+      <EuiSpacer />
       {showScatterplotMatrix && (
         <>
           <EuiFormRow

@@ -16,13 +16,13 @@ delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> |  |
-|  id | <code>string</code> |  |
-|  options | <code>SavedObjectsDeleteOptions</code> |  |
+|  type | string |  |
+|  id | string |  |
+|  options | SavedObjectsDeleteOptions |  {<!-- -->string<!-- -->} \[options.namespace\] |
 
 <b>Returns:</b>
 
-`Promise<{}>`
+Promise&lt;{}&gt;
 
 {<!-- -->promise<!-- -->}
 

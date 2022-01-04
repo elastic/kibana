@@ -16,7 +16,6 @@ import {
   SavedObjectsClientContract,
   SavedObjectsClient,
   CoreStart,
-  ICustomClusterClient,
 } from '../../../core/server';
 import {
   getTelemetryChannelEndpoint,
@@ -53,7 +52,6 @@ export class FetcherTask {
   private isSending = false;
   private internalRepository?: SavedObjectsClientContract;
   private telemetryCollectionManager?: TelemetryCollectionManagerPluginStart;
-  private elasticsearchClient?: ICustomClusterClient;
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
     this.config$ = initializerContext.config.create();
@@ -67,7 +65,6 @@ export class FetcherTask {
   ) {
     this.internalRepository = new SavedObjectsClient(savedObjects.createInternalRepository());
     this.telemetryCollectionManager = telemetryCollectionManager;
-    this.elasticsearchClient = elasticsearch.createClient('telemetry-fetcher');
 
     this.intervalId = timer(this.initialCheckDelayMs, this.checkIntervalMs).subscribe(() =>
       this.sendIfDue()
@@ -78,13 +75,6 @@ export class FetcherTask {
     if (this.intervalId) {
       this.intervalId.unsubscribe();
     }
-    if (this.elasticsearchClient) {
-      this.elasticsearchClient.close();
-    }
-  }
-
-  private async areAllCollectorsReady() {
-    return (await this.telemetryCollectionManager?.areAllCollectorsReady()) ?? false;
   }
 
   private async sendIfDue() {
@@ -108,10 +98,6 @@ export class FetcherTask {
     this.isSending = true;
 
     try {
-      const allCollectorsReady = await this.areAllCollectorsReady();
-      if (!allCollectorsReady) {
-        throw new Error('Not all collectors are ready.');
-      }
       clusters = await this.fetchTelemetry();
     } catch (err) {
       this.logger.warn(`Error fetching usage. (${err})`);

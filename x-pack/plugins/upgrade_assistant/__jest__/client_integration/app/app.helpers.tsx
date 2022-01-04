@@ -6,12 +6,12 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { registerTestBed, TestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test/jest';
 
 import { App } from '../../../public/application/app';
 import { WithAppDependencies } from '../helpers';
 
-const testBedConfig: TestBedConfig = {
+const testBedConfig: AsyncTestBedConfig = {
   memoryRouter: {
     initialEntries: [`/overview`],
     componentRoutePath: '/overview',

@@ -8,10 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../lib/lib';
 import { UMRestApiRouteFactory } from '../types';
+import { API_URLS } from '../../../common/constants';
 
 export const createNetworkEventsRoute: UMRestApiRouteFactory = (libs: UMServerLibs) => ({
   method: 'GET',
-  path: '/api/uptime/network_events',
+  path: API_URLS.NETWORK_EVENTS,
   validate: {
     query: schema.object({
       checkGroup: schema.string(),

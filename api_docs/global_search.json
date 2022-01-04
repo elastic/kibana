@@ -453,9 +453,9 @@
           "\nRepresentation of a result returned by the {@link GlobalSearchPluginStart.find | `find` API}"
         ],
         "signature": [
-          "Pick<",
+          "Omit<",
           "GlobalSearchProviderResult",
-          ", \"type\" | \"id\" | \"title\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
+          ", \"url\"> & { url: string; }"
         ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,
@@ -617,23 +617,23 @@
             "label": "core",
             "description": [],
             "signature": [
-              "{ savedObjects: { client: Pick<",
+              "{ savedObjects: { client: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClient",
-                "text": "SavedObjectsClient"
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
               },
-              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">; typeRegistry: Pick<",
+              "; typeRegistry: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectTypeRegistry",
-                "text": "SavedObjectTypeRegistry"
+                "section": "def-server.ISavedObjectTypeRegistry",
+                "text": "ISavedObjectTypeRegistry"
               },
-              ", \"getType\" | \"getVisibleTypes\" | \"getAllTypes\" | \"getImportableAndExportableTypes\" | \"isNamespaceAgnostic\" | \"isSingleNamespace\" | \"isMultiNamespace\" | \"isShareable\" | \"isHidden\" | \"getIndex\" | \"isImportableAndExportable\">; }; uiSettings: { client: ",
+              "; }; uiSettings: { client: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -1106,9 +1106,9 @@
           "\nRepresentation of a result returned by the {@link GlobalSearchPluginStart.find | `find` API}"
         ],
         "signature": [
-          "Pick<",
+          "Omit<",
           "GlobalSearchProviderResult",
-          ", \"type\" | \"id\" | \"title\" | \"meta\" | \"icon\" | \"score\"> & { url: string; }"
+          ", \"url\"> & { url: string; }"
         ],
         "path": "x-pack/plugins/global_search/common/types.ts",
         "deprecated": false,

@@ -33,7 +33,11 @@ export function getSignature(
   log: ToolingLog
 ): Array<string | Reference> | undefined {
   let signature = '';
-  if (Node.isFunctionDeclaration(node)) {
+  if (Node.isIndexSignatureDeclaration(node)) {
+    signature = `[${node.getKeyName()}: ${node.getKeyType().getText()}]:  ${node
+      .getReturnType()
+      .getText()}`;
+  } else if (Node.isFunctionDeclaration(node)) {
     // See https://github.com/dsherret/ts-morph/issues/907#issue-770284331.
     // Unfortunately this has to be manually pieced together, or it comes up as "typeof TheFunction"
     const params = node

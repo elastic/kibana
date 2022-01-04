@@ -8,7 +8,6 @@ import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import {
-  ALERT_SEVERITY,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_REASON,
@@ -19,7 +18,7 @@ import { DURATION_ANOMALY } from '../../../common/constants/alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
 import { AnomaliesTableRecord } from '../../../../ml/common/types/anomalies';
 import { getSeverityType } from '../../../../ml/common/util/anomaly_utils';
-import { UptimeCorePlugins } from '../adapters/framework';
+import { UptimeCorePluginsSetup } from '../adapters/framework';
 import { UptimeAlertTypeFactory } from './types';
 import { Ping } from '../../../common/runtime_types/ping';
 import { getMLJobId } from '../../../common/lib';
@@ -45,7 +44,7 @@ export const getAnomalySummary = (anomaly: AnomaliesTableRecord, monitorInfo: Pi
 };
 
 const getAnomalies = async (
-  plugins: UptimeCorePlugins,
+  plugins: UptimeCorePluginsSetup,
   savedObjectsClient: SavedObjectsClientContract,
   params: Record<any, any>,
   lastCheckedAt: string
@@ -134,7 +133,6 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds>
             'anomaly.bucket_span.minutes': summary.bucketSpan,
             [ALERT_EVALUATION_VALUE]: anomaly.actualSort,
             [ALERT_EVALUATION_THRESHOLD]: anomaly.typicalSort,
-            [ALERT_SEVERITY]: summary.severity,
             [ALERT_REASON]: generateAlertMessage(
               CommonDurationAnomalyTranslations.defaultActionMessage,
               summary

@@ -69,6 +69,7 @@ export const visualizationTypes: VisualizationType[] = [
       defaultMessage: 'Bar vertical',
     }),
     groupLabel: groupLabelForBar,
+    sortPriority: 4,
   },
   {
     id: 'bar_horizontal',
@@ -153,5 +154,6 @@ export const visualizationTypes: VisualizationType[] = [
       defaultMessage: 'Line',
     }),
     groupLabel: groupLabelForLineAndArea,
+    sortPriority: 2,
   },
 ];

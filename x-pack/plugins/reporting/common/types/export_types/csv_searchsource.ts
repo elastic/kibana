@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { SearchSourceFields } from 'src/plugins/data/common';
+import type { SerializedSearchSourceFields } from 'src/plugins/data/common';
 import type { BaseParams, BasePayload } from '../base';
 
 interface BaseParamsCSV {
-  searchSource: SearchSourceFields;
+  searchSource: SerializedSearchSourceFields;
   columns?: string[];
 }
 

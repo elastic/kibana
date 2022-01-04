@@ -64,6 +64,8 @@ export const RULE_NAME_OVERRIDE_DETAILS = 'Rule name override';
 
 export const RISK_SCORE_DETAILS = 'Risk score';
 
+export const INDICATOR_PREFIX_OVERRIDE = 'Indicator prefix override';
+
 export const RISK_SCORE_OVERRIDE_DETAILS = 'Risk score override';
 
 export const REFERENCE_URLS_DETAILS = 'Reference URLs';

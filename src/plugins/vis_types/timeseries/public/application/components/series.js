@@ -16,7 +16,7 @@ import { TopNSeries as topN } from './vis_types/top_n/series';
 import { TableSeries as table } from './vis_types/table/series';
 import { GaugeSeries as gauge } from './vis_types/gauge/series';
 import { MarkdownSeries as markdown } from './vis_types/markdown/series';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { VisDataContext } from '../contexts/vis_data_context';
 
 const lookup = {

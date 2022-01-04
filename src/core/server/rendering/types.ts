@@ -27,34 +27,41 @@ export interface RenderingMetadata {
   darkMode: boolean;
   themeVersion: ThemeVersion;
   stylesheetPaths: string[];
-  injectedMetadata: {
-    version: string;
-    buildNumber: number;
-    branch: string;
-    basePath: string;
-    serverBasePath: string;
-    publicBaseUrl?: string;
-    env: {
-      mode: EnvironmentMode;
-      packageInfo: PackageInfo;
-    };
-    anonymousStatusPage: boolean;
-    i18n: {
-      translationsUrl: string;
-    };
-    csp: Pick<ICspConfig, 'warnLegacyBrowsers'>;
-    externalUrl: { policy: IExternalUrlPolicy[] };
-    vars: Record<string, any>;
-    uiPlugins: Array<{
-      id: string;
-      plugin: DiscoveredPlugin;
-      config?: Record<string, unknown>;
-    }>;
-    legacyMetadata: {
-      uiSettings: {
-        defaults: Record<string, any>;
-        user: Record<string, UserProvidedValues<any>>;
-      };
+  injectedMetadata: InjectedMetadata;
+}
+
+/** @internal */
+export interface InjectedMetadata {
+  version: string;
+  buildNumber: number;
+  branch: string;
+  basePath: string;
+  serverBasePath: string;
+  publicBaseUrl?: string;
+  env: {
+    mode: EnvironmentMode;
+    packageInfo: PackageInfo;
+  };
+  anonymousStatusPage: boolean;
+  i18n: {
+    translationsUrl: string;
+  };
+  theme: {
+    darkMode: boolean;
+    version: ThemeVersion;
+  };
+  csp: Pick<ICspConfig, 'warnLegacyBrowsers'>;
+  externalUrl: { policy: IExternalUrlPolicy[] };
+  vars: Record<string, any>;
+  uiPlugins: Array<{
+    id: string;
+    plugin: DiscoveredPlugin;
+    config?: Record<string, unknown>;
+  }>;
+  legacyMetadata: {
+    uiSettings: {
+      defaults: Record<string, any>;
+      user: Record<string, UserProvidedValues<any>>;
     };
   };
 }

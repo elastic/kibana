@@ -309,8 +309,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('should show the supported Endpoint version', async () => {
-        const supportedVersion = await testSubjects.find('policySupportedVersions');
-        expect(supportedVersion).to.be('Agent version ' + popupVersionsMap.get('malware'));
+        expect(await testSubjects.getVisibleText('policySupportedVersions')).to.equal(
+          'Agent version ' + popupVersionsMap.get('malware')
+        );
       });
 
       it('should show the custom message text area when the Notify User checkbox is checked', async () => {
@@ -365,7 +366,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
-        await pageObjects.common.closeToast();
+        await testSubjects.waitForHidden('toastCloseButton');
         await pageObjects.endpoint.navigateToEndpointList();
         await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
 
@@ -393,6 +394,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
+        await testSubjects.waitForHidden('toastCloseButton');
 
         const agentFullPolicy = await policyTestResources.getFullAgentPolicy(
           policyInfo.agentPolicy.id
@@ -401,6 +403,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(agentFullPolicy.inputs).to.eql([
           getExpectedAgentPolicyEndpointInput({
             id: policyInfo.packagePolicy.id,
+            name: policyInfo.packagePolicy.name,
             meta: {
               package: {
                 version: policyInfo.packageInfo.version,
@@ -439,6 +442,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
+        await testSubjects.waitForHidden('toastCloseButton');
 
         const agentFullPolicy = await policyTestResources.getFullAgentPolicy(
           policyInfo.agentPolicy.id
@@ -447,6 +451,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(agentFullPolicy.inputs).to.eql([
           getExpectedAgentPolicyEndpointInput({
             id: policyInfo.packagePolicy.id,
+            name: policyInfo.packagePolicy.name,
             meta: {
               package: {
                 version: policyInfo.packageInfo.version,
@@ -472,7 +477,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await advancedPolicyField.clearValueWithKeyboard();
 
         // Make sure the toast button closes so the save button on the sticky footer is visible
-        await (await testSubjects.find('toastCloseButton')).click();
         await testSubjects.waitForHidden('toastCloseButton');
         await pageObjects.policy.confirmAndSave();
 
@@ -485,7 +489,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(agentFullPolicyUpdated.inputs).to.eql([
           getExpectedAgentPolicyEndpointInput({
             id: policyInfo.packagePolicy.id,
-            revision: 3,
+            name: policyInfo.packagePolicy.name,
+            revision: agentFullPolicyUpdated.inputs[0].revision,
             meta: {
               package: {
                 version: policyInfo.packageInfo.version,
@@ -536,12 +541,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // Fleet has its  own form inputs, like description. When those are updated, the changes
         // are also dispatched to the embedded endpoint Policy form. Update to the Endpoint Policy
         // form after that should preserve the changes done on the Fleet form
+        // NOTE: A few delays were added below due to sporadic failures of this test case (see #100236)
+        const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
 
         // Wait for the endpoint form to load and then update the policy description
         await testSubjects.existOrFail('endpointIntegrationPolicyForm');
+        await sleep(); // Allow forms to sync
         await pageObjects.ingestManagerCreatePackagePolicy.setPackagePolicyDescription(
           'protect everything'
         );
+        await sleep(); // Allow forms to sync
 
         const winDnsEventingCheckbox = await testSubjects.find('policyWindowsEvent_dns');
         await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(

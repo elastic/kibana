@@ -17,7 +17,7 @@ import type { LayerArgs, YConfig } from '../../common/expressions';
 import type { LensMultiTable } from '../../common/types';
 import { hasIcon } from './xy_config_panel/reference_line_panel';
 
-const REFERENCE_LINE_MARKER_SIZE = 20;
+export const REFERENCE_LINE_MARKER_SIZE = 20;
 
 export const computeChartMargins = (
   referenceLinePaddings: Partial<Record<Position, number>>,
@@ -180,6 +180,17 @@ function getMarkerToShow(
   }
 }
 
+export interface ReferenceLineAnnotationsProps {
+  layers: LayerArgs[];
+  data: LensMultiTable;
+  formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
+  paletteService: PaletteRegistry;
+  syncColors: boolean;
+  axesMap: Record<'left' | 'right', boolean>;
+  isHorizontal: boolean;
+  paddingMap: Partial<Record<Position, number>>;
+}
+
 export const ReferenceLineAnnotations = ({
   layers,
   data,
@@ -189,16 +200,7 @@ export const ReferenceLineAnnotations = ({
   axesMap,
   isHorizontal,
   paddingMap,
-}: {
-  layers: LayerArgs[];
-  data: LensMultiTable;
-  formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
-  paletteService: PaletteRegistry;
-  syncColors: boolean;
-  axesMap: Record<'left' | 'right', boolean>;
-  isHorizontal: boolean;
-  paddingMap: Partial<Record<Position, number>>;
-}) => {
+}: ReferenceLineAnnotationsProps) => {
   return (
     <>
       {layers.flatMap((layer) => {
@@ -317,10 +319,9 @@ export const ReferenceLineAnnotations = ({
                 id={`${layerId}-${yConfig.forAccessor}-rect`}
                 key={`${layerId}-${yConfig.forAccessor}-rect`}
                 dataValues={table.rows.map(() => {
-                  const nextValue =
-                    !isFillAbove && shouldCheckNextReferenceLine
-                      ? row[groupedByDirection[yConfig.fill!][indexFromSameType + 1].forAccessor]
-                      : undefined;
+                  const nextValue = shouldCheckNextReferenceLine
+                    ? row[groupedByDirection[yConfig.fill!][indexFromSameType + 1].forAccessor]
+                    : undefined;
                   if (yConfig.axisMode === 'bottom') {
                     return {
                       coordinates: {

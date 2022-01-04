@@ -8,7 +8,7 @@
 import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Rule, RuleGroup } from '../../model';
 import { AllRule, FieldRule } from '../../model';

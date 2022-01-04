@@ -306,13 +306,5 @@ describe('ServiceNowSIRParamsFields renders', () => {
       expect(comments.simulate('change', changeEvent));
       expect(editAction.mock.calls[0][1].comments.length).toEqual(1);
     });
-
-    test('An empty comment does not trigger editAction', () => {
-      const wrapper = mountWithIntl(<ServiceNowSIRParamsFields {...defaultProps} />);
-      const emptyComment = { target: { value: '' } };
-      const comments = wrapper.find('[data-test-subj="commentsTextArea"] textarea');
-      expect(comments.simulate('change', emptyComment));
-      expect(editAction.mock.calls.length).toEqual(0);
-    });
   });
 });

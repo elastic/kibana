@@ -16,9 +16,9 @@ static invalidTransformError(objectKeys: string[]): SavedObjectsExportError;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  objectKeys | <code>string[]</code> |  |
+|  objectKeys | string\[\] |  |
 
 <b>Returns:</b>
 
-`SavedObjectsExportError`
+SavedObjectsExportError
 

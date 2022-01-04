@@ -296,7 +296,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should show all rule types on click euiFormControlLayoutClearButton', async () => {
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
       await testSubjects.setValue('alertNameInput', 'alertName');
-      const ruleTypeSearchBox = await find.byCssSelector('.alertSearchField');
+      const ruleTypeSearchBox = await find.byCssSelector('[data-test-subj="alertSearchField"]');
       await ruleTypeSearchBox.type('notexisting rule type');
       await ruleTypeSearchBox.pressKeys(browser.keys.ENTER);
 

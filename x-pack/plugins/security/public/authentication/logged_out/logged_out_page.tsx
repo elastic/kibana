@@ -9,9 +9,10 @@ import { EuiButton } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { CoreStart, IBasePath } from 'src/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { AppMountParameters, CoreStart, IBasePath } from 'src/core/public';
 
+import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { parseNext } from '../../../common/parse_next';
 import { AuthenticationStatePage } from '../components';
 
@@ -36,10 +37,16 @@ export function LoggedOutPage({ basePath }: Props) {
   );
 }
 
-export function renderLoggedOutPage(i18nStart: CoreStart['i18n'], element: Element, props: Props) {
+export function renderLoggedOutPage(
+  i18nStart: CoreStart['i18n'],
+  { element, theme$ }: Pick<AppMountParameters, 'element' | 'theme$'>,
+  props: Props
+) {
   ReactDOM.render(
     <i18nStart.Context>
-      <LoggedOutPage {...props} />
+      <KibanaThemeProvider theme$={theme$}>
+        <LoggedOutPage {...props} />
+      </KibanaThemeProvider>
     </i18nStart.Context>,
     element
   );

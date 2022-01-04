@@ -29,10 +29,15 @@ export interface SourcererScope {
   id: SourcererScopeName;
   /** is an update being made to the sourcerer data view */
   loading: boolean;
-  /** selected data view id */
-  selectedDataViewId: string;
+  /** selected data view id, null if it is legacy index patterns*/
+  selectedDataViewId: string | null;
   /** selected patterns within the data view */
   selectedPatterns: string[];
+  /** if has length,
+   * id === SourcererScopeName.timeline
+   * selectedDataViewId === null OR defaultDataView.id
+   * saved timeline has pattern that is not in the default */
+  missingPatterns: string[];
 }
 
 export type SourcererScopeById = Record<SourcererScopeName, SourcererScope>;
@@ -54,6 +59,7 @@ export interface KibanaDataView {
  * DataView from Kibana + timelines/index_fields enhanced field data
  */
 export interface SourcererDataView extends KibanaDataView {
+  id: string;
   /** we need this for @timestamp data */
   browserFields: BrowserFields;
   /** we need this for @timestamp data */
@@ -75,7 +81,7 @@ export interface SourcererDataView extends KibanaDataView {
  */
 export interface SelectedDataView {
   browserFields: SourcererDataView['browserFields'];
-  dataViewId: SourcererDataView['id'];
+  dataViewId: string | null; // null if legacy pre-8.0 timeline
   docValueFields: SourcererDataView['docValueFields'];
   /**
    * DataViewBase with enhanced index fields used in timelines
@@ -88,8 +94,10 @@ export interface SelectedDataView {
   /** all active & inactive patterns from SourcererDataView['title']  */
   patternList: string[];
   runtimeMappings: SourcererDataView['runtimeMappings'];
-  /** all selected patterns from SourcererScope['selectedPatterns']  */
-  selectedPatterns: string[];
+  /** all selected patterns from SourcererScope['selectedPatterns'] */
+  selectedPatterns: SourcererScope['selectedPatterns'];
+  // active patterns when dataViewId == null
+  activePatterns?: string[];
 }
 
 /**
@@ -97,7 +105,7 @@ export interface SelectedDataView {
  */
 export interface SourcererModel {
   /** default security-solution data view */
-  defaultDataView: SourcererDataView & { error?: unknown };
+  defaultDataView: SourcererDataView & { id: string; error?: unknown };
   /** all Kibana data views, including security-solution */
   kibanaDataViews: SourcererDataView[];
   /** security solution signals index name */
@@ -115,8 +123,9 @@ export type SourcererUrlState = Partial<{
 
 export const initSourcererScope: Omit<SourcererScope, 'id'> = {
   loading: false,
-  selectedDataViewId: '',
+  selectedDataViewId: null,
   selectedPatterns: [],
+  missingPatterns: [],
 };
 export const initDataView = {
   browserFields: EMPTY_BROWSER_FIELDS,

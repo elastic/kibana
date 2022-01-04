@@ -9,11 +9,11 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 // @ts-ignore
 import { CreateSourceEditor } from './create_source_editor';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
+import { LayerWizard, RenderWizardArguments } from '../../layers';
 import { ESSearchSource, sourceTitle } from './es_search_source';
 import { BlendedVectorLayer, GeoJsonVectorLayer, MvtVectorLayer } from '../../layers/vector_layer';
 import { LAYER_WIZARD_CATEGORY, SCALING_TYPES } from '../../../../common/constants';
-import { DocumentsLayerIcon } from '../../layers/icons/documents_layer_icon';
+import { DocumentsLayerIcon } from '../../layers/wizards/icons/documents_layer_icon';
 import {
   ESSearchSourceDescriptor,
   VectorLayerDescriptor,

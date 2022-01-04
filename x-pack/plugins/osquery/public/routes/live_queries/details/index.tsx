@@ -14,7 +14,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 

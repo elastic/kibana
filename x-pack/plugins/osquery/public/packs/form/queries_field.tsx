@@ -9,7 +9,7 @@ import { isEmpty, findIndex, forEach, pullAt, pullAllBy, pickBy } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiSpacer } from '@elastic/eui';
 import { produce } from 'immer';
 import React, { useCallback, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { OsqueryManagerPackagePolicyInputStream } from '../../../common/types';
 import { FieldHook } from '../../shared_imports';

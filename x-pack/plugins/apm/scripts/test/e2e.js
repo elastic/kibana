@@ -7,6 +7,7 @@
 
 /* eslint-disable no-console */
 
+const { times } = require('lodash');
 const path = require('path');
 const yargs = require('yargs');
 const childProcess = require('child_process');
@@ -45,6 +46,11 @@ const { argv } = yargs(process.argv.slice(2))
     type: 'boolean',
     description: 'stop tests after the first failure',
   })
+  .option('times', {
+    default: 1,
+    type: 'number',
+    description: 'Repeat the test n number of times',
+  })
   .help();
 
 const { server, runner, open, grep, bail, kibanaInstallDir } = argv;
@@ -63,5 +69,23 @@ const grepArg = grep ? `--grep "${grep}"` : '';
 const bailArg = bail ? `--bail` : '';
 const cmd = `node ../../../../scripts/${ftrScript} --config ${config} ${grepArg} ${bailArg} --kibana-install-dir '${kibanaInstallDir}'`;
 
-console.log(`Running ${cmd}`);
-childProcess.execSync(cmd, { cwd: e2eDir, stdio: 'inherit' });
+console.log(`Running "${cmd}"`);
+
+if (argv.times > 1) {
+  console.log(`The command will be executed ${argv.times} times`);
+}
+
+const runCounter = { succeeded: 0, failed: 0, remaining: argv.times };
+times(argv.times, () => {
+  try {
+    childProcess.execSync(cmd, { cwd: e2eDir, stdio: 'inherit' });
+    runCounter.succeeded++;
+  } catch (e) {
+    runCounter.failed++;
+  }
+  runCounter.remaining--;
+
+  if (argv.times > 1) {
+    console.log(runCounter);
+  }
+});

@@ -7,7 +7,7 @@
 
 import React, { memo, useEffect } from 'react';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { PackagePolicyCreateExtensionComponentProps } from '../../../../../../../fleet/public';
 
 /**

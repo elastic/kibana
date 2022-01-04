@@ -25,7 +25,7 @@ export const IpContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) => {
         <TopValues
           stats={stats}
           fieldFormat={fieldFormat}
-          barColor="secondary"
+          barColor="success"
           onAddFilter={onAddFilter}
         />
       )}

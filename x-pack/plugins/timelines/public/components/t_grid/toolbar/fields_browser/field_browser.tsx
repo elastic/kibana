@@ -21,12 +21,13 @@ import React, { useEffect, useCallback, useRef, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 
-import type {
-  BrowserFields,
-  ColumnHeaderOptions,
-  CreateFieldComponentType,
-} from '../../../../../common';
-import { isEscape, isTab, stopPropagationAndPreventDefault } from '../../../../../common';
+import type { BrowserFields } from '../../../../../common/search_strategy';
+import type { ColumnHeaderOptions, CreateFieldComponentType } from '../../../../../common/types';
+import {
+  isEscape,
+  isTab,
+  stopPropagationAndPreventDefault,
+} from '../../../../../common/utils/accessibility';
 import { CategoriesPane } from './categories_pane';
 import { FieldsPane } from './fields_pane';
 import { Search } from './search';
@@ -135,7 +136,9 @@ const FieldsBrowserComponent: React.FC<Props> = ({
   }, [onHide, restoreFocusTo]);
 
   const getManageTimeline = useMemo(() => tGridSelectors.getManageTimelineById(), []);
-  const { defaultColumns } = useDeepEqualSelector((state) => getManageTimeline(state, timelineId));
+  const { dataViewId, defaultColumns } = useDeepEqualSelector((state) =>
+    getManageTimeline(state, timelineId)
+  );
 
   const onResetColumns = useCallback(() => {
     onUpdateColumns(defaultColumns);
@@ -208,7 +211,9 @@ const FieldsBrowserComponent: React.FC<Props> = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {CreateField && <CreateField onClick={onHide} />}
+              {CreateField && dataViewId != null && dataViewId.length > 0 && (
+                <CreateField onClick={onHide} />
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
 

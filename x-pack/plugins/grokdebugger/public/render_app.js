@@ -7,23 +7,27 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { I18nProvider } from '@kbn/i18n-react';
 
+import { KibanaContextProvider, KibanaThemeProvider } from './shared_imports';
 import { GrokDebugger } from './components/grok_debugger';
 import { GrokdebuggerService } from './services/grokdebugger/grokdebugger_service';
-import { I18nProvider } from '@kbn/i18n/react';
-import { KibanaContextProvider } from '../../../../src/plugins/kibana_react/public';
 import { InactiveLicenseSlate } from './components/inactive_license';
 
-export function renderApp(license, element, coreStart) {
+export function renderApp(license, element, coreStart, theme$) {
   const content = license.isActive ? (
     <KibanaContextProvider services={{ ...coreStart }}>
       <I18nProvider>
-        <GrokDebugger grokdebuggerService={new GrokdebuggerService(coreStart.http)} />
+        <KibanaThemeProvider theme$={theme$}>
+          <GrokDebugger grokdebuggerService={new GrokdebuggerService(coreStart.http)} />
+        </KibanaThemeProvider>
       </I18nProvider>
     </KibanaContextProvider>
   ) : (
     <I18nProvider>
-      <InactiveLicenseSlate license={license} />
+      <KibanaThemeProvider theme$={theme$}>
+        <InactiveLicenseSlate license={license} />
+      </KibanaThemeProvider>
     </I18nProvider>
   );
 

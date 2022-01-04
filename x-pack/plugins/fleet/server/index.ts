@@ -17,9 +17,9 @@ import {
 
 import { FleetPlugin } from './plugin';
 
-export { default as apm } from 'elastic-apm-node';
 export type {
   AgentService,
+  AgentClient,
   ESIndexPatternService,
   PackageService,
   AgentPolicyServiceInterface,
@@ -35,8 +35,9 @@ export type {
   PutPackagePolicyUpdateCallback,
   PostPackagePolicyDeleteCallback,
   PostPackagePolicyCreateCallback,
+  FleetRequestHandlerContext,
 } from './types';
-export { AgentNotFoundError } from './errors';
+export { AgentNotFoundError, FleetUnauthorizedError } from './errors';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
@@ -44,52 +45,6 @@ export const config: PluginConfigDescriptor = {
     agents: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
-    // Fleet plugin was named ingestManager before
-    renameFromRoot('xpack.ingestManager.enabled', 'xpack.fleet.enabled', { level: 'critical' }),
-    renameFromRoot('xpack.ingestManager.registryUrl', 'xpack.fleet.registryUrl', {
-      level: 'critical',
-    }),
-    renameFromRoot('xpack.ingestManager.registryProxyUrl', 'xpack.fleet.registryProxyUrl', {
-      level: 'critical',
-    }),
-    renameFromRoot('xpack.ingestManager.fleet', 'xpack.ingestManager.agents', {
-      level: 'critical',
-    }),
-    renameFromRoot('xpack.ingestManager.agents.enabled', 'xpack.fleet.agents.enabled', {
-      level: 'critical',
-    }),
-    renameFromRoot('xpack.ingestManager.agents.elasticsearch', 'xpack.fleet.agents.elasticsearch', {
-      level: 'critical',
-    }),
-    renameFromRoot(
-      'xpack.ingestManager.agents.tlsCheckDisabled',
-      'xpack.fleet.agents.tlsCheckDisabled',
-      { level: 'critical' }
-    ),
-    renameFromRoot(
-      'xpack.ingestManager.agents.pollingRequestTimeout',
-      'xpack.fleet.agents.pollingRequestTimeout',
-      { level: 'critical' }
-    ),
-    renameFromRoot(
-      'xpack.ingestManager.agents.maxConcurrentConnections',
-      'xpack.fleet.agents.maxConcurrentConnections',
-      { level: 'critical' }
-    ),
-    renameFromRoot('xpack.ingestManager.agents.kibana', 'xpack.fleet.agents.kibana', {
-      level: 'critical',
-    }),
-    renameFromRoot(
-      'xpack.ingestManager.agents.agentPolicyRolloutRateLimitIntervalMs',
-      'xpack.fleet.agents.agentPolicyRolloutRateLimitIntervalMs',
-      { level: 'critical' }
-    ),
-    renameFromRoot(
-      'xpack.ingestManager.agents.agentPolicyRolloutRateLimitRequestPerInterval',
-      'xpack.fleet.agents.agentPolicyRolloutRateLimitRequestPerInterval',
-      { level: 'critical' }
-    ),
-    unusedFromRoot('xpack.ingestManager', { level: 'critical' }),
     // Unused settings before Fleet server exists
     unused('agents.kibana', { level: 'critical' }),
     unused('agents.maxConcurrentConnections', { level: 'critical' }),
@@ -139,8 +94,7 @@ export const config: PluginConfigDescriptor = {
     outputs: PreconfiguredOutputsSchema,
     agentIdVerificationEnabled: schema.boolean({ defaultValue: true }),
     developer: schema.object({
-      // TODO: change default to false as soon as EPR issue fixed. Blocker for 8.0.
-      disableRegistryVersionCheck: schema.boolean({ defaultValue: true }),
+      disableRegistryVersionCheck: schema.boolean({ defaultValue: false }),
     }),
   }),
 };

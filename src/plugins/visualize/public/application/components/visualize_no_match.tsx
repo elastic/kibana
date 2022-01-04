@@ -8,10 +8,10 @@
 
 import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
-import { useKibana, toMountPoint } from '../../../../kibana_react/public';
+import { useKibana, toMountPoint, KibanaThemeProvider } from '../../../../kibana_react/public';
 import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 
@@ -35,21 +35,23 @@ export const VisualizeNoMatch = () => {
       bannerId = services.overlays.banners.replace(
         bannerId,
         toMountPoint(
-          <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
-            <p>
-              <FormattedMessage
-                id="visualize.noMatchRoute.bannerText"
-                defaultMessage="Visualize application doesn't recognize this route: {route}."
-                values={{
-                  route: (
-                    <EuiLink href={window.location.href}>
-                      {services.history.location.pathname}
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-          </EuiCallOut>
+          <KibanaThemeProvider theme$={services.theme.theme$}>
+            <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
+              <p>
+                <FormattedMessage
+                  id="visualize.noMatchRoute.bannerText"
+                  defaultMessage="Visualize application doesn't recognize this route: {route}."
+                  values={{
+                    route: (
+                      <EuiLink href={window.location.href}>
+                        {services.history.location.pathname}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiCallOut>
+          </KibanaThemeProvider>
         )
       );
 

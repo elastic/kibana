@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';

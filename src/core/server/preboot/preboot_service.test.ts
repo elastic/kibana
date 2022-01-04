@@ -7,7 +7,7 @@
  */
 
 import { nextTick } from '@kbn/test/jest';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { LoggerFactory } from '@kbn/logging';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '../config/mocks';

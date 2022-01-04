@@ -152,7 +152,7 @@ export function getRegisteredLocales() {
   return Object.keys(translationsForLocale);
 }
 
-interface TranslateArguments {
+export interface TranslateArguments {
   values?: Record<string, string | number | boolean | Date | null | undefined>;
   defaultMessage: string;
   description?: string;

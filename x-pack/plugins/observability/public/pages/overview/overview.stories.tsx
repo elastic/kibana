@@ -41,14 +41,30 @@ const sampleAPMIndices = { transaction: 'apm-*' } as ApmIndicesConfig;
 const withCore = makeDecorator({
   name: 'withCore',
   parameterName: 'core',
-  wrapper: (storyFn, context, { options }) => {
+  wrapper: (storyFn, context, { options: { theme, ...options } }) => {
     unregisterAll();
-
     const KibanaReactContext = createKibanaReactContext({
-      application: { getUrlForApp: () => '' },
-      chrome: { docTitle: { change: () => {} } },
+      application: {
+        getUrlForApp: () => '',
+        capabilities: { navLinks: { integrations: true } },
+        currentAppId$: {
+          subscribe: () => {},
+        },
+      },
+      http: {
+        basePath: {
+          prepend: (link: string) => `http://localhost:5601${link}`,
+        },
+      },
+      chrome: {
+        docTitle: {
+          change: () => {},
+        },
+      },
       uiSettings: { get: () => [] },
-      usageCollection: { reportUiCounter: () => {} },
+      usageCollection: {
+        reportUiCounter: () => {},
+      },
     } as unknown as Partial<CoreStart>);
 
     return (
@@ -60,13 +76,22 @@ const withCore = makeDecorator({
                 setHeaderActionMenu: () => {},
               } as unknown as AppMountParameters,
               config: {
-                unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
+                unsafe: {
+                  alertingExperience: { enabled: true },
+                  cases: { enabled: true },
+                  overviewNext: { enabled: false },
+                },
               },
               core: options as CoreStart,
               plugins: {
                 data: {
                   query: {
-                    timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
+                    timefilter: {
+                      timefilter: {
+                        setTime: () => {},
+                        getTime: () => ({}),
+                      },
+                    },
                   },
                 },
               } as unknown as ObservabilityPublicPluginsStart,
@@ -155,6 +180,13 @@ const core = {
       };
       // @ts-expect-error
       return euiSettings[key];
+    },
+  },
+  docLinks: {
+    links: {
+      observability: {
+        guide: 'alink',
+      },
     },
   },
 } as unknown as CoreStart;

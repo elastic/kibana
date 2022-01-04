@@ -91,7 +91,7 @@ export const ElasticAgentCard: FunctionComponent<ElasticAgentCardProps> = ({
         description={i18n.translate('kibana-react.noDataPage.elasticAgentCard.description', {
           defaultMessage: `Use Elastic Agent for a simple, unified way to collect data from your machines.`,
         })}
-        betaBadgeLabel={recommended ? NO_DATA_RECOMMENDED : undefined}
+        betaBadgeProps={{ label: recommended ? NO_DATA_RECOMMENDED : undefined }}
         footer={footer}
         layout={layout as 'vertical' | undefined}
         {...cardRest}

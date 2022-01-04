@@ -8,7 +8,7 @@
 import createContainer from 'constate';
 import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { NotificationsStart } from 'src/core/public';
 
 import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
@@ -61,9 +61,8 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
       const currStatus = getPackageInstallStatus(name);
       const newStatus = { ...currStatus, name, status: InstallStatus.installing };
       setPackageInstallStatus(newStatus);
-      const pkgkey = `${name}-${version}`;
 
-      const res = await sendInstallPackage(pkgkey);
+      const res = await sendInstallPackage(name, version);
       if (res.error) {
         if (fromUpdate) {
           // if there is an error during update, set it back to the previous version
@@ -126,9 +125,8 @@ function usePackageInstall({ notifications }: { notifications: NotificationsStar
       redirectToVersion,
     }: Pick<PackageInfo, 'name' | 'version' | 'title'> & { redirectToVersion: string }) => {
       setPackageInstallStatus({ name, status: InstallStatus.uninstalling, version });
-      const pkgkey = `${name}-${version}`;
 
-      const res = await sendRemovePackage(pkgkey);
+      const res = await sendRemovePackage(name, version);
       if (res.error) {
         setPackageInstallStatus({ name, status: InstallStatus.installed, version });
         notifications.toasts.addWarning({

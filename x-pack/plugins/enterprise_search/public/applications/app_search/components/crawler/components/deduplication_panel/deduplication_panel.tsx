@@ -25,9 +25,9 @@ import {
 
 import { EuiSelectableLIOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DOCS_PREFIX } from '../../../../routes';
+import { DUPLICATE_DOCS_URL } from '../../../../routes';
 import { DataPanel } from '../../../data_panel';
 import { CrawlerSingleDomainLogic } from '../../crawler_single_domain_logic';
 
@@ -84,11 +84,7 @@ export const DeduplicationPanel: React.FC = () => {
           documents on this domain. {documentationLink}."
           values={{
             documentationLink: (
-              <EuiLink
-                href={`${DOCS_PREFIX}/web-crawler-reference.html#web-crawler-reference-content-deduplication`}
-                target="_blank"
-                external
-              >
+              <EuiLink href={DUPLICATE_DOCS_URL} target="_blank" external>
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.crawler.deduplicationPanel.learnMoreMessage',
                   {

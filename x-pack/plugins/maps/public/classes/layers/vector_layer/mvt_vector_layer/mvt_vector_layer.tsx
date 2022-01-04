@@ -13,31 +13,25 @@ import type {
 } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
 import { i18n } from '@kbn/i18n';
-import uuid from 'uuid/v4';
-import { parse as parseUrl } from 'url';
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
-import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
-import { LAYER_TYPE, SOURCE_DATA_REQUEST_ID, SOURCE_TYPES } from '../../../../../common/constants';
+import { VectorStyle } from '../../../styles/vector/vector_style';
+import { LAYER_TYPE, SOURCE_TYPES } from '../../../../../common/constants';
 import {
   NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
   AbstractVectorLayer,
   VectorLayerArguments,
 } from '../vector_layer';
-import { ITiledSingleLayerVectorSource } from '../../../sources/tiled_single_layer_vector_source';
+import { IMvtVectorSource } from '../../../sources/vector_source';
 import { DataRequestContext } from '../../../../actions';
 import {
   StyleMetaDescriptor,
   TileMetaFeature,
-  Timeslice,
   VectorLayerDescriptor,
-  VectorSourceRequestMeta,
 } from '../../../../../common/descriptor_types';
-import { MVTSingleLayerVectorSourceConfig } from '../../../sources/mvt_single_layer_vector_source/types';
 import { ESSearchSource } from '../../../sources/es_search_source';
-import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
-import { CustomIconAndTooltipContent } from '../../layer';
+import { LayerIcon } from '../../layer';
+import { MvtSourceData, syncMvtSourceData } from './mvt_source_data';
 
-const ES_MVT_META_LAYER_NAME = 'meta';
+export const ES_MVT_META_LAYER_NAME = 'meta';
 const ES_MVT_HITS_TOTAL_RELATION = 'hits.total.relation';
 const ES_MVT_HITS_TOTAL_VALUE = 'hits.total.value';
 const MAX_RESULT_WINDOW_DATA_REQUEST_ID = 'maxResultWindow';
@@ -48,7 +42,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     mapColors?: string[]
   ): VectorLayerDescriptor {
     const layerDescriptor = super.createDescriptor(descriptor, mapColors);
-    layerDescriptor.type = LAYER_TYPE.TILED_VECTOR;
+    layerDescriptor.type = LAYER_TYPE.MVT_VECTOR;
 
     if (!layerDescriptor.style) {
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors ? mapColors : []);
@@ -58,11 +52,11 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     return layerDescriptor;
   }
 
-  readonly _source: ITiledSingleLayerVectorSource; // downcast to the more specific type
+  readonly _source: IMvtVectorSource;
 
   constructor({ layerDescriptor, source }: VectorLayerArguments) {
     super({ layerDescriptor, source });
-    this._source = source as ITiledSingleLayerVectorSource;
+    this._source = source as IMvtVectorSource;
   }
 
   getFeatureId(feature: Feature): string | number | undefined {
@@ -75,16 +69,11 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       : feature.properties?._key;
   }
 
-  _getMetaFromTiles(): TileMetaFeature[] {
-    return this._descriptor.__metaFromTiles || [];
-  }
-
-  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
-    const icon = this.getCurrentStyle().getIcon();
+  getLayerIcon(isTocIcon: boolean): LayerIcon {
     if (!this.getSource().isESSource()) {
       // Only ES-sources can have a special meta-tile, not 3rd party vector tile sources
       return {
-        icon,
+        icon: this.getCurrentStyle().getIcon(false),
         tooltipContent: null,
         areResultsTrimmed: false,
       };
@@ -102,7 +91,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     if (this.getSource().getType() !== SOURCE_TYPES.ES_SEARCH) {
       // aggregation ES sources are never trimmed
       return {
-        icon,
+        icon: this.getCurrentStyle().getIcon(false),
         tooltipContent: null,
         areResultsTrimmed: false,
       };
@@ -111,23 +100,28 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     const maxResultWindow = this._getMaxResultWindow();
     if (maxResultWindow === undefined) {
       return {
-        icon,
+        icon: this.getCurrentStyle().getIcon(false),
         tooltipContent: null,
         areResultsTrimmed: false,
       };
     }
 
-    const totalFeaturesCount: number = tileMetaFeatures.reduce((acc: number, tileMeta: Feature) => {
+    let totalFeaturesCount = 0;
+    let tilesWithFeatures = 0;
+    tileMetaFeatures.forEach((tileMeta: Feature) => {
       const count =
         tileMeta && tileMeta.properties ? tileMeta.properties[ES_MVT_HITS_TOTAL_VALUE] : 0;
-      return count + acc;
-    }, 0);
+      if (count > 0) {
+        totalFeaturesCount += count;
+        tilesWithFeatures++;
+      }
+    });
 
     if (totalFeaturesCount === 0) {
       return NO_RESULTS_ICON_AND_TOOLTIPCONTENT;
     }
 
-    const isIncomplete: boolean = tileMetaFeatures.some((tileMeta: TileMetaFeature) => {
+    const areResultsTrimmed: boolean = tileMetaFeatures.some((tileMeta: TileMetaFeature) => {
       if (tileMeta?.properties?.[ES_MVT_HITS_TOTAL_RELATION] === 'gte') {
         return tileMeta?.properties?.[ES_MVT_HITS_TOTAL_VALUE] >= maxResultWindow + 1;
       } else {
@@ -135,22 +129,36 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       }
     });
 
+    // Documents may be counted multiple times if geometry crosses tile boundaries.
+    const canMultiCountShapes =
+      !this.getStyle().getIsPointsOnly() && totalFeaturesCount > 1 && tilesWithFeatures > 1;
+    const countPrefix = canMultiCountShapes ? '~' : '';
+    const countMsg = areResultsTrimmed
+      ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
+          defaultMessage: `Results limited to {countPrefix}{count} documents.`,
+          values: {
+            count: totalFeaturesCount.toLocaleString(),
+            countPrefix,
+          },
+        })
+      : i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
+          defaultMessage: `Found {countPrefix}{count} documents.`,
+          values: {
+            count: totalFeaturesCount.toLocaleString(),
+            countPrefix,
+          },
+        });
+    const tooltipContent = canMultiCountShapes
+      ? countMsg +
+        i18n.translate('xpack.maps.tiles.shapeCountMsg', {
+          defaultMessage: ' This count is approximate.',
+        })
+      : countMsg;
+
     return {
-      icon,
-      tooltipContent: isIncomplete
-        ? i18n.translate('xpack.maps.tiles.resultsTrimmedMsg', {
-            defaultMessage: `Results limited to {count} documents.`,
-            values: {
-              count: totalFeaturesCount.toLocaleString(),
-            },
-          })
-        : i18n.translate('xpack.maps.tiles.resultsCompleteMsg', {
-            defaultMessage: `Found {count} documents.`,
-            values: {
-              count: totalFeaturesCount.toLocaleString(),
-            },
-          }),
-      areResultsTrimmed: isIncomplete,
+      icon: this.getCurrentStyle().getIcon(isTocIcon && areResultsTrimmed),
+      tooltipContent,
+      areResultsTrimmed,
     };
   }
 
@@ -175,90 +183,29 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     stopLoading(MAX_RESULT_WINDOW_DATA_REQUEST_ID, requestToken, { maxResultWindow });
   }
 
-  async _syncMVTUrlTemplate({
-    startLoading,
-    stopLoading,
-    onLoadError,
-    dataFilters,
-    isForceRefresh,
-  }: DataRequestContext) {
-    const requestToken: symbol = Symbol(`layer-${this.getId()}-${SOURCE_DATA_REQUEST_ID}`);
-    const requestMeta: VectorSourceRequestMeta = await this._getVectorSourceRequestMeta(
-      isForceRefresh,
-      dataFilters,
-      this.getSource(),
-      this._style as IVectorStyle
-    );
-    const prevDataRequest = this.getSourceDataRequest();
-    if (prevDataRequest) {
-      const data: MVTSingleLayerVectorSourceConfig =
-        prevDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
-      if (data) {
-        const noChangesInSourceState: boolean =
-          data.layerName === this._source.getLayerName() &&
-          data.minSourceZoom === this._source.getMinZoom() &&
-          data.maxSourceZoom === this._source.getMaxZoom();
-        const noChangesInSearchState: boolean = await canSkipSourceUpdate({
-          extentAware: false, // spatial extent knowledge is already fully automated by tile-loading based on pan-zooming
-          source: this.getSource(),
-          prevDataRequest,
-          nextRequestMeta: requestMeta,
-          getUpdateDueToTimeslice: (timeslice?: Timeslice) => {
-            // TODO use meta features to determine if tiles already contain features for timeslice.
-            return true;
-          },
-        });
-        const canSkip = noChangesInSourceState && noChangesInSearchState;
-
-        if (canSkip) {
-          return null;
-        }
-      }
-    }
-
-    startLoading(SOURCE_DATA_REQUEST_ID, requestToken, requestMeta);
-    try {
-      const prevData = prevDataRequest
-        ? (prevDataRequest.getData() as MVTSingleLayerVectorSourceConfig)
-        : undefined;
-      const urlToken =
-        !prevData || (requestMeta.isForceRefresh && requestMeta.applyForceRefresh)
-          ? uuid()
-          : prevData.urlToken;
-
-      const newUrlTemplateAndMeta = await this._source.getUrlTemplateWithMeta(requestMeta);
-
-      let urlTemplate;
-      if (newUrlTemplateAndMeta.refreshTokenParamName) {
-        const parsedUrl = parseUrl(newUrlTemplateAndMeta.urlTemplate, true);
-        const separator = !parsedUrl.query || Object.keys(parsedUrl.query).length === 0 ? '?' : '&';
-        urlTemplate = `${newUrlTemplateAndMeta.urlTemplate}${separator}${newUrlTemplateAndMeta.refreshTokenParamName}=${urlToken}`;
-      } else {
-        urlTemplate = newUrlTemplateAndMeta.urlTemplate;
-      }
-
-      const urlTemplateAndMetaWithToken = {
-        ...newUrlTemplateAndMeta,
-        urlToken,
-        urlTemplate,
-      };
-      stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, urlTemplateAndMetaWithToken, {});
-    } catch (error) {
-      onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
-    }
-  }
-
   async syncData(syncContext: DataRequestContext) {
     if (this.getSource().getType() === SOURCE_TYPES.ES_SEARCH) {
       await this._syncMaxResultWindow(syncContext);
     }
-    await this._syncSourceStyleMeta(syncContext, this._source, this._style as IVectorStyle);
-    await this._syncSourceFormatters(syncContext, this._source, this._style as IVectorStyle);
-    await this._syncMVTUrlTemplate(syncContext);
+    await this._syncSourceStyleMeta(syncContext, this.getSource(), this.getCurrentStyle());
+    await this._syncSourceFormatters(syncContext, this.getSource(), this.getCurrentStyle());
+
+    await syncMvtSourceData({
+      layerId: this.getId(),
+      prevDataRequest: this.getSourceDataRequest(),
+      requestMeta: await this._getVectorSourceRequestMeta(
+        syncContext.isForceRefresh,
+        syncContext.dataFilters,
+        this.getSource(),
+        this.getCurrentStyle()
+      ),
+      source: this.getSource() as IMvtVectorSource,
+      syncContext,
+    });
   }
 
   _syncSourceBindingWithMb(mbMap: MbMap) {
-    const mbSource = mbMap.getSource(this._getMbSourceId());
+    const mbSource = mbMap.getSource(this.getMbSourceId());
     if (mbSource) {
       return;
     }
@@ -270,18 +217,17 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       return;
     }
 
-    const sourceMeta: MVTSingleLayerVectorSourceConfig | null =
-      sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
-    if (!sourceMeta) {
+    const sourceData = sourceDataRequest.getData() as MvtSourceData | undefined;
+    if (!sourceData) {
       return;
     }
 
-    const mbSourceId = this._getMbSourceId();
+    const mbSourceId = this.getMbSourceId();
     mbMap.addSource(mbSourceId, {
       type: 'vector',
-      tiles: [sourceMeta.urlTemplate],
-      minzoom: sourceMeta.minSourceZoom,
-      maxzoom: sourceMeta.maxSourceZoom,
+      tiles: [sourceData.tileUrl],
+      minzoom: sourceData.tileMinZoom,
+      maxzoom: sourceData.tileMaxZoom,
     });
   }
 
@@ -290,7 +236,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   ownsMbSourceId(mbSourceId: string): boolean {
-    return this._getMbSourceId() === mbSourceId;
+    return this.getMbSourceId() === mbSourceId;
   }
 
   _getMbTooManyFeaturesLayerId() {
@@ -299,7 +245,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
 
   _syncStylePropertiesWithMb(mbMap: MbMap) {
     // @ts-ignore
-    const mbSource = mbMap.getSource(this._getMbSourceId());
+    const mbSource = mbMap.getSource(this.getMbSourceId());
     if (!mbSource) {
       return;
     }
@@ -308,15 +254,14 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     if (!sourceDataRequest) {
       return;
     }
-    const sourceMeta: MVTSingleLayerVectorSourceConfig =
-      sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
-    if (sourceMeta.layerName === '') {
+    const sourceData = sourceDataRequest.getData() as MvtSourceData | undefined;
+    if (!sourceData || sourceData.tileSourceLayer === '') {
       return;
     }
 
-    this._setMbLabelProperties(mbMap, sourceMeta.layerName);
-    this._setMbPointsProperties(mbMap, sourceMeta.layerName);
-    this._setMbLinePolygonProperties(mbMap, sourceMeta.layerName);
+    this._setMbLabelProperties(mbMap, sourceData.tileSourceLayer);
+    this._setMbPointsProperties(mbMap, sourceData.tileSourceLayer);
+    this._setMbLinePolygonProperties(mbMap, sourceData.tileSourceLayer);
     this._syncTooManyFeaturesProperties(mbMap);
   }
 
@@ -347,7 +292,11 @@ export class MvtVectorLayer extends AbstractVectorLayer {
         ['==', ['get', ES_MVT_HITS_TOTAL_RELATION], 'gte'],
         ['>=', ['get', ES_MVT_HITS_TOTAL_VALUE], maxResultWindow + 1],
       ]);
-      mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-color', euiThemeVars.euiColorWarning);
+      mbMap.setPaintProperty(
+        tooManyFeaturesLayerId,
+        'line-color',
+        this.getCurrentStyle().getPrimaryColor()
+      );
       mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-width', 3);
       mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-dasharray', [2, 1]);
       mbMap.setPaintProperty(tooManyFeaturesLayerId, 'line-opacity', this.getAlpha());
@@ -357,66 +306,8 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     mbMap.setLayerZoomRange(tooManyFeaturesLayerId, this.getMinZoom(), this.getMaxZoom());
   }
 
-  queryTileMetaFeatures(mbMap: MbMap): TileMetaFeature[] | null {
-    if (!this.getSource().isESSource()) {
-      return null;
-    }
-
-    // @ts-ignore
-    const mbSource = mbMap.getSource(this._getMbSourceId());
-    if (!mbSource) {
-      return null;
-    }
-
-    const sourceDataRequest = this.getSourceDataRequest();
-    if (!sourceDataRequest) {
-      return null;
-    }
-    const sourceMeta: MVTSingleLayerVectorSourceConfig =
-      sourceDataRequest.getData() as MVTSingleLayerVectorSourceConfig;
-    if (sourceMeta.layerName === '') {
-      return null;
-    }
-
-    // querySourceFeatures can return duplicated features when features cross tile boundaries.
-    // Tile meta will never have duplicated features since by there nature, tile meta is a feature contained within a single tile
-    const mbFeatures = mbMap.querySourceFeatures(this._getMbSourceId(), {
-      sourceLayer: ES_MVT_META_LAYER_NAME,
-    });
-
-    const metaFeatures: Array<TileMetaFeature | null> = (
-      mbFeatures as unknown as TileMetaFeature[]
-    ).map((mbFeature: TileMetaFeature | null) => {
-      const parsedProperties: Record<string, unknown> = {};
-      for (const key in mbFeature?.properties) {
-        if (mbFeature?.properties.hasOwnProperty(key)) {
-          parsedProperties[key] =
-            typeof mbFeature.properties[key] === 'string' ||
-            typeof mbFeature.properties[key] === 'number' ||
-            typeof mbFeature.properties[key] === 'boolean'
-              ? mbFeature.properties[key]
-              : JSON.parse(mbFeature.properties[key]); // mvt properties cannot be nested geojson
-        }
-      }
-
-      try {
-        return {
-          type: 'Feature',
-          id: mbFeature?.id,
-          geometry: mbFeature?.geometry, // this getter might throw with non-conforming geometries
-          properties: parsedProperties,
-        } as TileMetaFeature;
-      } catch (e) {
-        return null;
-      }
-    });
-
-    const filtered = metaFeatures.filter((f) => f !== null);
-    return filtered as TileMetaFeature[];
-  }
-
   _requiresPrevSourceCleanup(mbMap: MbMap): boolean {
-    const mbSource = mbMap.getSource(this._getMbSourceId()) as MbVectorSource | MbGeoJSONSource;
+    const mbSource = mbMap.getSource(this.getMbSourceId()) as MbVectorSource | MbGeoJSONSource;
     if (!mbSource) {
       return false;
     }
@@ -426,21 +317,19 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     }
     const mbTileSource = mbSource as MbVectorSource;
 
-    const dataRequest = this.getSourceDataRequest();
-    if (!dataRequest) {
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (!sourceDataRequest) {
       return false;
     }
-    const tiledSourceMeta: MVTSingleLayerVectorSourceConfig | null =
-      dataRequest.getData() as MVTSingleLayerVectorSourceConfig;
-
-    if (!tiledSourceMeta) {
+    const sourceData = sourceDataRequest.getData() as MvtSourceData | undefined;
+    if (!sourceData) {
       return false;
     }
 
     const isSourceDifferent =
-      mbTileSource.tiles?.[0] !== tiledSourceMeta.urlTemplate ||
-      mbTileSource.minzoom !== tiledSourceMeta.minSourceZoom ||
-      mbTileSource.maxzoom !== tiledSourceMeta.maxSourceZoom;
+      mbTileSource.tiles?.[0] !== sourceData.tileUrl ||
+      mbTileSource.minzoom !== sourceData.tileMinZoom ||
+      mbTileSource.maxzoom !== sourceData.tileMaxZoom;
 
     if (isSourceDifferent) {
       return true;
@@ -454,7 +343,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
       if (
         mbLayer &&
         // @ts-expect-error
-        mbLayer.sourceLayer !== tiledSourceMeta.layerName &&
+        mbLayer.sourceLayer !== sourceData.tileSourceLayer &&
         // @ts-expect-error
         mbLayer.sourceLayer !== ES_MVT_META_LAYER_NAME
       ) {
@@ -487,12 +376,6 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
-    const style = this.getCurrentStyle();
-    if (!style) {
-      return null;
-    }
-
-    const metaFromTiles = this._getMetaFromTiles();
-    return await style.pluckStyleMetaFromTileMeta(metaFromTiles);
+    return await this.getCurrentStyle().pluckStyleMetaFromTileMeta(this._getMetaFromTiles());
   }
 }

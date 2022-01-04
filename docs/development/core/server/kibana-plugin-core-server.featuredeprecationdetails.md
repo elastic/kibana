@@ -10,10 +10,11 @@
 ```typescript
 export interface FeatureDeprecationDetails extends BaseDeprecationDetails 
 ```
+<b>Extends:</b> BaseDeprecationDetails
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [deprecationType](./kibana-plugin-core-server.featuredeprecationdetails.deprecationtype.md) | <code>'feature' &#124; undefined</code> |  |
+|  [deprecationType?](./kibana-plugin-core-server.featuredeprecationdetails.deprecationtype.md) | 'feature' \| undefined | <i>(Optional)</i> |
 

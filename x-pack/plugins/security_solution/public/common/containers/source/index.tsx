@@ -8,7 +8,7 @@
 import { isEmpty, isEqual, isUndefined, keyBy, pick } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { DataViewBase } from '@kbn/es-query';
+import type { DataViewBase } from '@kbn/es-query';
 import { Subscription } from 'rxjs';
 
 import { useKibana } from '../../lib/kibana';

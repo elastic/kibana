@@ -123,6 +123,7 @@ export const defaultSearchResultConfig = {
 export const DisplaySettingsLogic = kea<
   MakeLogicType<DisplaySettingsValues, DisplaySettingsActions>
 >({
+  path: ['enterprise_search', 'workplace_search', 'display_settings_logic'],
   actions: {
     onInitializeDisplaySettings: (displaySettingsProps: DisplaySettingsInitialData) =>
       displaySettingsProps,

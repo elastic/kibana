@@ -13,7 +13,7 @@ import {
   EuiScreenReaderOnly,
   EuiText,
 } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n/react';
+import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
@@ -66,7 +66,7 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
     <EuiButtonIcon
       title={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
       aria-label={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
-      color="subdued"
+      color="text"
       iconType="arrowRight"
       onClick={handleClick}
     />

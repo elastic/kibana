@@ -18,7 +18,9 @@
     "embeddable",
     "share",
     "presentationUtil",
-    "indexPatternFieldEditor"
+    "dataViewFieldEditor",
+    "expressionGauge",
+    "expressionHeatmap"
   ],
   "optionalPlugins": [
     "usageCollection",

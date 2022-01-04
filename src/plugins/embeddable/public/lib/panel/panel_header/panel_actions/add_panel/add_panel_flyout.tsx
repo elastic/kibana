@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { ReactElement } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { CoreSetup, SavedObjectAttributes, SimpleSavedObject, Toast } from 'src/core/public';
@@ -130,6 +130,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
   private getCreateMenuItems(): ReactElement[] {
     return [...this.props.getAllFactories()]
       .filter(
+        // @ts-expect-error ts 4.5 upgrade
         (factory) => factory.isEditable() && !factory.isContainerType && factory.canCreateNew()
       )
       .map((factory) => (

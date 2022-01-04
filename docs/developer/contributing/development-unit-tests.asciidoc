@@ -75,7 +75,7 @@ In order to ease the pain specialized tasks provide alternate methods
 for running the tests.
 
 You could also add the `--debug` option so that `node` is run using
-the `--debug-brk` flag. You’ll need to connect a remote debugger such
+the `--inspect-brk` flag. You’ll need to connect a remote debugger such
 as https://github.com/node-inspector/node-inspector[`node-inspector`]
 to proceed in this mode.
 

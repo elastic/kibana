@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { buildEsQuery } from '@kbn/es-query';
 import { getTimerange, overwrite } from '../../helpers';
-import { esQuery } from '../../../../../../../data/server';
 import type { TableRequestProcessorsFunction } from './types';
 
 export const query: TableRequestProcessorsFunction =
@@ -22,7 +22,7 @@ export const query: TableRequestProcessorsFunction =
 
     const queries = !panel.ignore_global_filter ? req.body.query : [];
     const filters = !panel.ignore_global_filter ? req.body.filters : [];
-    doc.query = esQuery.buildEsQuery(indexPattern, queries, filters, esQueryConfig);
+    doc.query = buildEsQuery(indexPattern, queries, filters, esQueryConfig);
 
     const boolFilters: unknown[] = [];
 
@@ -40,7 +40,7 @@ export const query: TableRequestProcessorsFunction =
       boolFilters.push(timerange);
     }
     if (panel.filter) {
-      boolFilters.push(esQuery.buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig));
+      boolFilters.push(buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig));
     }
 
     overwrite(doc, 'query.bool.must', boolFilters);

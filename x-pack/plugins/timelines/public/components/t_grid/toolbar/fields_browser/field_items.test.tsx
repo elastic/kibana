@@ -16,7 +16,7 @@ import { Category } from './category';
 import { getFieldColumns, getFieldItems } from './field_items';
 import { FIELDS_PANE_WIDTH } from './helpers';
 import { useMountAppended } from '../../../utils/use_mount_appended';
-import { ColumnHeaderOptions } from '../../../../../common';
+import { ColumnHeaderOptions } from '../../../../../common/types';
 
 const selectedCategoryId = 'base';
 const selectedCategoryFields = mockBrowserFields[selectedCategoryId].fields;

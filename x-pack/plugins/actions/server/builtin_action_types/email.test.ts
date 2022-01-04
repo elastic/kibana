@@ -469,6 +469,7 @@ describe('execute()', () => {
           "isHostnameAllowed": [MockFunction],
           "isUriAllowed": [MockFunction],
         },
+        "connectorId": "some-id",
         "content": Object {
           "message": "a message to you
 
@@ -531,6 +532,7 @@ describe('execute()', () => {
           "isHostnameAllowed": [MockFunction],
           "isUriAllowed": [MockFunction],
         },
+        "connectorId": "some-id",
         "content": Object {
           "message": "a message to you
 
@@ -593,6 +595,7 @@ describe('execute()', () => {
           "isHostnameAllowed": [MockFunction],
           "isUriAllowed": [MockFunction],
         },
+        "connectorId": "some-id",
         "content": Object {
           "message": "a message to you
 

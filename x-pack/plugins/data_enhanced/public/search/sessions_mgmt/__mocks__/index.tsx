@@ -6,7 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 export function LocaleWrapper({ children }: { children?: ReactNode }) {
   return <IntlProvider locale="en">{children}</IntlProvider>;

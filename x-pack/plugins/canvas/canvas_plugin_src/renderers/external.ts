@@ -5,25 +5,28 @@
  * 2.0.
  */
 
-import { imageRenderer } from '../../../../../src/plugins/expression_image/public';
-import { metricRenderer } from '../../../../../src/plugins/expression_metric/public';
-import { errorRenderer, debugRenderer } from '../../../../../src/plugins/expression_error/public';
-import { repeatImageRenderer } from '../../../../../src/plugins/expression_repeat_image/public';
-import { revealImageRenderer } from '../../../../../src/plugins/expression_reveal_image/public';
+import { imageRendererFactory } from '../../../../../src/plugins/expression_image/public';
+import { metricRendererFactory } from '../../../../../src/plugins/expression_metric/public';
 import {
-  shapeRenderer,
-  progressRenderer,
+  errorRendererFactory,
+  debugRendererFactory,
+} from '../../../../../src/plugins/expression_error/public';
+import { revealImageRendererFactory } from '../../../../../src/plugins/expression_reveal_image/public';
+import { repeatImageRendererFactory } from '../../../../../src/plugins/expression_repeat_image/public';
+import {
+  shapeRendererFactory,
+  progressRendererFactory,
 } from '../../../../../src/plugins/expression_shape/public';
 
-export const renderFunctions = [
-  debugRenderer,
-  errorRenderer,
-  imageRenderer,
-  metricRenderer,
-  revealImageRenderer,
-  shapeRenderer,
-  repeatImageRenderer,
-  progressRenderer,
-];
+export const renderFunctions = [];
 
-export const renderFunctionFactories = [];
+export const renderFunctionFactories = [
+  debugRendererFactory,
+  errorRendererFactory,
+  imageRendererFactory,
+  shapeRendererFactory,
+  progressRendererFactory,
+  revealImageRendererFactory,
+  repeatImageRendererFactory,
+  metricRendererFactory,
+];

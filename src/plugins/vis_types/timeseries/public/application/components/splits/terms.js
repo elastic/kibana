@@ -24,12 +24,20 @@ import {
   EuiComboBox,
   EuiFieldText,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { KBN_FIELD_TYPES } from '../../../../../../data/public';
 import { STACKED_OPTIONS } from '../../visualizations/constants';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 const DEFAULTS = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
+const RESET_STATE = {
+  terms_field: undefined,
+  terms_include: undefined,
+  terms_exclude: undefined,
+  terms_direction: undefined,
+  terms_size: undefined,
+  terms_order_by: undefined,
+};
 
 export const SplitByTermsUI = ({
   onChange,
@@ -106,7 +114,12 @@ export const SplitByTermsUI = ({
           >
             <GroupBySelect
               value={model.split_mode}
-              onChange={handleSelectChange('split_mode')}
+              onChange={([{ value: newSplitMode = null }]) => {
+                onChange({
+                  split_mode: newSplitMode,
+                  ...RESET_STATE,
+                });
+              }}
               uiRestrictions={uiRestrictions}
             />
           </EuiFormRow>

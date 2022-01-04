@@ -27,6 +27,7 @@ export type {
   SearchRequest,
   SearchSourceDependencies,
   SearchSourceFields,
+  SerializedSearchSourceFields,
 } from '../../common/search';
 export {
   ES_SEARCH_STRATEGY,
@@ -36,6 +37,7 @@ export {
   parseSearchSourceJSON,
   SearchSource,
   SortDirection,
+  checkColumnForPrecisionError,
 } from '../../common/search';
 export type {
   ISessionService,
