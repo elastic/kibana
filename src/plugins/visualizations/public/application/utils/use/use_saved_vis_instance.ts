@@ -15,7 +15,7 @@ import { getVisualizationInstance } from '../get_visualization_instance';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 import { SavedVisInstance, VisualizeServices, IEditorController } from '../../types';
 import { VisualizeConstants } from '../../../../common/constants';
-import { getTypes } from '../../../services';
+import { getTypes, getVisEditorsRegistry } from '../../../services';
 import { redirectToSavedObjectPage } from '../utils';
 
 /**
@@ -43,7 +43,6 @@ export const useSavedVisInstance = (
       history,
       toastNotifications,
       stateTransferService,
-      visEditorsRegistry,
       application: { navigateToApp },
     } = services;
     const getSavedVisInstance = async () => {
@@ -108,7 +107,7 @@ export const useSavedVisInstance = (
         // do not create editor in embeded mode
         if (visEditorRef.current) {
           if (isChromeVisible) {
-            const Editor = visEditorsRegistry.get(vis.type.editorConfig?.editor);
+            const Editor = getVisEditorsRegistry().get(vis.type.editorConfig?.editor);
 
             if (Editor) {
               visEditorController = new Editor(

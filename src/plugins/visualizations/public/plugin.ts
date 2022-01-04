@@ -36,6 +36,7 @@ import {
   setDocLinks,
   setSpaces,
   setTheme,
+  setVisEditorsRegistry,
 } from './services';
 import {
   createVisEmbeddableFromObject,
@@ -56,7 +57,7 @@ import {
 } from '../../kibana_utils/public';
 import { VisualizeLocatorDefinition } from '../common/locator';
 import { showNewVisModal } from './wizard';
-import { createVisEditorsRegistry } from './vis_editors_registry';
+import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
 import { esFilters } from '../../../plugins/data/public';
 import { FeatureCatalogueCategory } from '../../home/public';
 
@@ -95,7 +96,7 @@ import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public
  * @public
  */
 
-export type VisualizationsSetup = TypesSetup;
+export type VisualizationsSetup = TypesSetup & { visEditorsRegistry: VisEditorsRegistry };
 
 export interface VisualizationsStart extends TypesStart {
   showNewVisModal: typeof showNewVisModal;
@@ -153,6 +154,7 @@ export class VisualizationsPlugin
   private stopUrlTracking: (() => void) | undefined = undefined;
   private currentHistory: ScopedHistory | undefined = undefined;
   private isLinkedToOriginatingApp: (() => boolean) | undefined = undefined;
+  private readonly visEditorsRegistry = createVisEditorsRegistry();
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
@@ -281,7 +283,6 @@ export class VisualizationsPlugin
           usageCollection: pluginsStart.usageCollection,
           getKibanaVersion: () => this.initializerContext.env.packageInfo.version,
           spaces: pluginsStart.spaces,
-          visEditorsRegistry: createVisEditorsRegistry(),
         };
 
         params.element.classList.add('visAppWrapper');
@@ -330,6 +331,7 @@ export class VisualizationsPlugin
 
     return {
       ...this.types.setup(),
+      visEditorsRegistry: this.visEditorsRegistry,
     };
   }
 
@@ -361,6 +363,7 @@ export class VisualizationsPlugin
     setAggs(data.search.aggs);
     setOverlays(core.overlays);
     setChrome(core.chrome);
+    setVisEditorsRegistry(this.visEditorsRegistry);
 
     if (spaces) {
       setSpaces(spaces);
