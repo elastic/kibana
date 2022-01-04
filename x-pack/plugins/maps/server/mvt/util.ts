@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
+
 export function isAbortError(error: Error) {
-  return error.name === 'RequestAbortedError';
+  return error instanceof errors.RequestAbortedError;
 }
