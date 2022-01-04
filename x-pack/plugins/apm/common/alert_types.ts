@@ -94,19 +94,25 @@ export function formatTransactionDurationAnomalyReason({
   serviceName,
   severityLevel,
   measured,
+  windowSize,
+  windowUnit,
 }: {
   serviceName: string;
   severityLevel: string;
   measured: number;
+  windowSize: number;
+  windowUnit: string;
 }) {
   return i18n.translate(
     'xpack.apm.alertTypes.transactionDurationAnomaly.reason',
     {
-      defaultMessage: `{severityLevel} anomaly detected for {serviceName} (score was {measured})`,
+      defaultMessage: `{severityLevel} anomaly with a score of {measured} was detected in the last ({windowSize} {windowUnit}) for {serviceName}.`,
       values: {
         serviceName,
         severityLevel,
         measured,
+        windowSize,
+        windowUnit,
       },
     }
   );
