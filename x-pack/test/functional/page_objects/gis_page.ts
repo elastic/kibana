@@ -294,12 +294,26 @@ export class GisPageObject extends FtrService {
     await this.testSubjects.click('layerVisibilityToggleButton');
   }
 
+  async openLegend() {
+    const isOpen = await this.testSubjects.exists('mapLayerTOC');
+    if (isOpen === false) {
+      await this.testSubjects.click('mapExpandLayerControlButton');
+      await this.testSubjects.existOrFail('mapLayerTOC');
+    }
+  }
+
   async closeLegend() {
     const isOpen = await this.testSubjects.exists('mapLayerTOC');
     if (isOpen) {
       await this.testSubjects.click('mapToggleLegendButton');
       await this.testSubjects.waitForDeleted('mapLayerTOC');
     }
+  }
+
+  async clickFitToData() {
+    this.log.debug('Fit to data');
+    await this.testSubjects.click('fitToData');
+    await this.waitForMapPanAndZoom();
   }
 
   async clickFitToBounds(layerName: string) {
@@ -316,6 +330,18 @@ export class GisPageObject extends FtrService {
     if (!isOpen) {
       await this.testSubjects.click(`layerTocActionsPanelToggleButton${escapedDisplayName}`);
     }
+  }
+
+  async getLayerTocTooltipMsg(layerName: string) {
+    const escapedDisplayName = escapeLayerName(layerName);
+    await this.retry.try(async () => {
+      await this.testSubjects.moveMouseTo(`layerTocActionsPanelToggleButton${escapedDisplayName}`);
+      const isOpen = await this.testSubjects.exists(`layerTocTooltip`, { timeout: 5000 });
+      if (!isOpen) {
+        throw new Error('layer TOC tooltip not open');
+      }
+    });
+    return await this.testSubjects.getVisibleText('layerTocTooltip');
   }
 
   async openLayerPanel(layerName: string) {

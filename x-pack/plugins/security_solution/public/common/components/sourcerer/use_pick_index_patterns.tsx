@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { EuiComboBoxOptionOption, EuiSuperSelectOption } from '@elastic/eui';
+import { useDispatch } from 'react-redux';
+
+import { getSourcererDataview } from '../../containers/sourcerer/api';
 import { getScopePatternListSelection } from '../../store/sourcerer/helpers';
-import { sourcererModel } from '../../store/sourcerer';
+import { sourcererActions, sourcererModel } from '../../store/sourcerer';
 import { getDataViewSelectOptions, getPatternListWithoutSignals } from './helpers';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
@@ -19,6 +22,7 @@ interface UsePickIndexPatternsProps {
   kibanaDataViews: sourcererModel.SourcererModel['kibanaDataViews'];
   missingPatterns: string[];
   scopeId: sourcererModel.SourcererScopeName;
+  selectedDataViewId: string | null;
   selectedPatterns: string[];
   signalIndexName: string | null;
 }
@@ -28,6 +32,8 @@ export type ModifiedTypes = 'modified' | 'alerts' | 'deprecated' | 'missingPatte
 interface UsePickIndexPatterns {
   allOptions: Array<EuiComboBoxOptionOption<string>>;
   dataViewSelectOptions: Array<EuiSuperSelectOption<string>>;
+  loadingIndexPatterns: boolean;
+  handleOutsideClick: () => void;
   isModified: ModifiedTypes;
   onChangeCombo: (newSelectedDataViewId: Array<EuiComboBoxOptionOption<string>>) => void;
   renderOption: ({ value }: EuiComboBoxOptionOption<string>) => React.ReactElement;
@@ -49,12 +55,22 @@ export const usePickIndexPatterns = ({
   kibanaDataViews,
   missingPatterns,
   scopeId,
+  selectedDataViewId,
   selectedPatterns,
   signalIndexName,
 }: UsePickIndexPatternsProps): UsePickIndexPatterns => {
+  const dispatch = useDispatch();
+  const isHookAlive = useRef(true);
+  const [loadingIndexPatterns, setLoadingIndexPatterns] = useState(false);
   const alertsOptions = useMemo(
     () => (signalIndexName ? patternListToOptions([signalIndexName]) : []),
     [signalIndexName]
+  );
+  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
+    isOnlyDetectionAlerts ? alertsOptions : patternListToOptions(selectedPatterns)
+  );
+  const [isModified, setIsModified] = useState<ModifiedTypes>(
+    dataViewId == null ? 'deprecated' : missingPatterns.length > 0 ? 'missingPatterns' : ''
   );
 
   const { allPatterns, selectablePatterns } = useMemo<{
@@ -96,9 +112,6 @@ export const usePickIndexPatterns = ({
     () => patternListToOptions(allPatterns, selectablePatterns),
     [allPatterns, selectablePatterns]
   );
-  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
-    isOnlyDetectionAlerts ? alertsOptions : patternListToOptions(selectedPatterns)
-  );
 
   const getDefaultSelectedOptionsByDataView = useCallback(
     (id: string, isAlerts: boolean = false): Array<EuiComboBoxOptionOption<string>> =>
@@ -120,9 +133,6 @@ export const usePickIndexPatterns = ({
     [dataViewId, getDefaultSelectedOptionsByDataView]
   );
 
-  const [isModified, setIsModified] = useState<ModifiedTypes>(
-    dataViewId == null ? 'deprecated' : missingPatterns.length > 0 ? 'missingPatterns' : ''
-  );
   const onSetIsModified = useCallback(
     (patterns: string[], id: string | null) => {
       if (id == null) {
@@ -155,11 +165,11 @@ export const usePickIndexPatterns = ({
   // when scope updates, check modified to set/remove alerts label
   useEffect(() => {
     onSetIsModified(
-      selectedOptions.map(({ label }) => label),
-      dataViewId
+      selectedPatterns.map((pattern) => pattern),
+      selectedDataViewId
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataViewId, missingPatterns, scopeId, selectedOptions]);
+  }, [isOnlyDetectionAlerts, selectedDataViewId, missingPatterns, scopeId, selectedPatterns]);
 
   const onChangeCombo = useCallback((newSelectedOptions) => {
     setSelectedOptions(newSelectedOptions);
@@ -170,9 +180,47 @@ export const usePickIndexPatterns = ({
     []
   );
 
-  const setIndexPatternsByDataView = (newSelectedDataViewId: string, isAlerts?: boolean) => {
-    setSelectedOptions(getDefaultSelectedOptionsByDataView(newSelectedDataViewId, isAlerts));
-  };
+  const setIndexPatternsByDataView = useCallback(
+    async (newSelectedDataViewId: string, isAlerts?: boolean) => {
+      if (
+        kibanaDataViews.some(
+          (kdv) => kdv.id === newSelectedDataViewId && kdv.indexFields.length === 0
+        )
+      ) {
+        try {
+          setLoadingIndexPatterns(true);
+          setSelectedOptions([]);
+          // TODO We will need to figure out how to pass an abortController, but as right now this hook is
+          // constantly getting destroy and re-init
+          const pickedDataViewData = await getSourcererDataview(newSelectedDataViewId);
+          if (isHookAlive.current) {
+            dispatch(
+              sourcererActions.updateSourcererDataViews({
+                dataView: pickedDataViewData,
+              })
+            );
+            setSelectedOptions(
+              isOnlyDetectionAlerts
+                ? alertsOptions
+                : patternListToOptions(pickedDataViewData.patternList)
+            );
+          }
+        } catch (err) {
+          // Nothing to do
+        }
+        setLoadingIndexPatterns(false);
+      } else {
+        setSelectedOptions(getDefaultSelectedOptionsByDataView(newSelectedDataViewId, isAlerts));
+      }
+    },
+    [
+      alertsOptions,
+      dispatch,
+      getDefaultSelectedOptionsByDataView,
+      isOnlyDetectionAlerts,
+      kibanaDataViews,
+    ]
+  );
 
   const dataViewSelectOptions = useMemo(
     () =>
@@ -188,9 +236,22 @@ export const usePickIndexPatterns = ({
     [dataViewId, defaultDataViewId, isModified, isOnlyDetectionAlerts, kibanaDataViews]
   );
 
+  useEffect(() => {
+    isHookAlive.current = true;
+    return () => {
+      isHookAlive.current = false;
+    };
+  }, []);
+
+  const handleOutsideClick = useCallback(() => {
+    setSelectedOptions(patternListToOptions(selectedPatterns));
+  }, [selectedPatterns]);
+
   return {
     allOptions,
     dataViewSelectOptions,
+    loadingIndexPatterns,
+    handleOutsideClick,
     isModified,
     onChangeCombo,
     renderOption,

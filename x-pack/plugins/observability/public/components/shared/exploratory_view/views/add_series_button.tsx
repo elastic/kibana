@@ -14,7 +14,7 @@ import { getSeriesToEdit } from '../series_editor/series_editor';
 import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
 import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
 import { DEFAULT_TIME, ReportTypes } from '../configurations/constants';
-import { useExploratoryView } from '../contexts/exploatory_view_config';
+import { useExploratoryView } from '../contexts/exploratory_view_config';
 
 export function AddSeriesButton() {
   const [editorItems, setEditorItems] = useState<BuilderItem[]>([]);
