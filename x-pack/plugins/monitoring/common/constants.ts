@@ -123,16 +123,18 @@ export const CLUSTER_ALERTS_ADDRESS_CONFIG_KEY = 'cluster_alerts.email_notificat
 
 export const STANDALONE_CLUSTER_CLUSTER_UUID = '__standalone_cluster__';
 
-export const INDEX_PATTERN = '.monitoring-*-6-*,.monitoring-*-7-*';
-export const INDEX_PATTERN_KIBANA = '.monitoring-kibana-6-*,.monitoring-kibana-7-*';
-export const INDEX_PATTERN_LOGSTASH = '.monitoring-logstash-6-*,.monitoring-logstash-7-*';
-export const INDEX_PATTERN_BEATS = '.monitoring-beats-6-*,.monitoring-beats-7-*';
-export const INDEX_ALERTS = '.monitoring-alerts-6*,.monitoring-alerts-7*';
-export const INDEX_PATTERN_ELASTICSEARCH = '.monitoring-es-6-*,.monitoring-es-7-*';
+export const INDEX_PATTERN = '.monitoring-*';
+export const INDEX_PATTERN_KIBANA = '.monitoring-kibana-*';
+export const INDEX_PATTERN_LOGSTASH = '.monitoring-logstash-*';
+export const INDEX_PATTERN_BEATS = '.monitoring-beats-*';
+export const INDEX_ALERTS = '.monitoring-alerts-*';
+export const INDEX_PATTERN_ELASTICSEARCH = '.monitoring-es-*';
+// ECS-compliant patterns (metricbeat >8 and agent)
+export const INDEX_PATTERN_ELASTICSEARCH_ECS = '.monitoring-es-8-*';
+export const INDEX_PATTERN_ENTERPRISE_SEARCH = '.monitoring-ent-search-*';
 export const DS_INDEX_PATTERN_METRICS = 'metrics';
 export const DS_INDEX_PATTERN_LOGS = 'logs';
 export const DS_INDEX_PATTERN_ES = 'elasticsearch';
-export const INDEX_PATTERN_ENTERPRISE_SEARCH = '.monitoring-ent-search-*';
 
 // This is the unique token that exists in monitoring indices collected by metricbeat
 export const METRICBEAT_INDEX_NAME_UNIQUE_TOKEN = '-mb-';

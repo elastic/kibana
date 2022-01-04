@@ -48,7 +48,12 @@ export async function hasStandaloneClusters(req: LegacyRequest, ccs: string) {
           },
           {
             terms: {
-              'data_stream.dataset': ['logstash.node_stats', 'logstash.node'],
+              'metricset.name': ['node', 'node_stats', 'stats', 'state'],
+            },
+          },
+          {
+            terms: {
+              'data_stream.dataset': ['node', 'node_stats', 'stats', 'state'],
             },
           },
         ],

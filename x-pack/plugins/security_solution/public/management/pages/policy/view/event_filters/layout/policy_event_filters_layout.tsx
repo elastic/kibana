@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiLink,
+  EuiPageContent,
 } from '@elastic/eui';
 import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
@@ -23,6 +24,7 @@ import { getEventFiltersListPath } from '../../../../../common/routing';
 import { useGetAllAssignedEventFilters, useGetAllEventFilters } from '../hooks';
 import { ManagementPageLoader } from '../../../../../components/management_page_loader';
 import { PolicyEventFiltersEmptyUnassigned, PolicyEventFiltersEmptyUnexisting } from '../empty';
+import { PolicyEventFiltersList } from '../list';
 
 interface PolicyEventFiltersLayoutProps {
   policyItem?: ImmutableObject<PolicyData> | undefined;
@@ -118,6 +120,16 @@ export const PolicyEventFiltersLayout = React.memo<PolicyEventFiltersLayoutProps
             </EuiText>
           </EuiPageHeaderSection>
         </EuiPageHeader>
+        <EuiSpacer size="l" />
+        <EuiPageContent
+          hasBorder={false}
+          hasShadow={false}
+          paddingSize="none"
+          color="transparent"
+          borderRadius="none"
+        >
+          <PolicyEventFiltersList policy={policyItem} />
+        </EuiPageContent>
       </div>
     );
   }

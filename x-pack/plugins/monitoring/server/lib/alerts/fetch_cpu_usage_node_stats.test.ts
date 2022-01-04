@@ -217,7 +217,7 @@ describe('fetchCpuUsageNodeStats', () => {
     await fetchCpuUsageNodeStats(esClient, clusters, startMs, endMs, size, filterQuery);
     expect(params).toStrictEqual({
       index:
-        '*:.monitoring-es-6-*,*:.monitoring-es-7-*,.monitoring-es-6-*,.monitoring-es-7-*,*:metrics-elasticsearch.node_stats-*,metrics-elasticsearch.node_stats-*',
+        '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.node_stats-*,metrics-elasticsearch.node_stats-*',
       filter_path: ['aggregations'],
       body: {
         size: 0,

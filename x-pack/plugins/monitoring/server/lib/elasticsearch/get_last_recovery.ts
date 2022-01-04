@@ -121,8 +121,15 @@ export async function getLastRecovery(req: LegacyRequest, size: number) {
     },
   };
 
-  const mbParams = {
-    index: indexPattern,
+  const indexPatternEcs = getNewIndexPatterns({
+    config: Globals.app.config,
+    moduleType,
+    dataset,
+    ccs: req.payload.ccs,
+    ecsLegacyOnly: true,
+  });
+  const ecsParams = {
+    index: indexPatternEcs,
     size,
     ignore_unavailable: true,
     body: {
@@ -149,7 +156,7 @@ export async function getLastRecovery(req: LegacyRequest, size: number) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const [legacyResp, mbResp] = await Promise.all([
     callWithRequest(req, 'search', legacyParams),
-    callWithRequest(req, 'search', mbParams),
+    callWithRequest(req, 'search', ecsParams),
   ]);
   const legacyResult = handleLegacyLastRecoveries(legacyResp, start);
   const mbResult = handleMbLastRecoveries(mbResp, start);

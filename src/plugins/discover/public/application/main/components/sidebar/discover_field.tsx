@@ -24,8 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
-import { FieldIcon } from '@kbn/react-field/field_icon';
-import { FieldButton } from '@kbn/react-field/field_button';
+import { FieldButton, FieldIcon } from '@kbn/react-field';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../../data/public';
