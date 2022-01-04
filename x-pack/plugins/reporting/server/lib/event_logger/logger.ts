@@ -23,7 +23,7 @@ import {
 
 export interface ReportingEventLoggerOpts {
   event: Pick<StartedExecution['event'], 'id' | 'timezone'>;
-  kibana: Pick<StartedExecution['kibana'], 'reporting'>;
+  kibana: Pick<StartedExecution['kibana'], 'reporting' | 'task'>;
   user?: StartedExecution['user'];
 }
 

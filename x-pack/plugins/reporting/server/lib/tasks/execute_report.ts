@@ -335,7 +335,7 @@ export class ExecuteReportTask implements ReportingTask {
 
           const eventLog = this.reporting.getEventLogger({
             event: { id: task.id, timezone: task.payload.browserTimezone },
-            kibana: { reporting: { jobType: task.jobtype, task: { id: context.taskInstance.id } } },
+            kibana: { reporting: { jobType: task.jobtype }, task: { id: context.taskInstance.id } },
             ...(task.created_by && { user: { name: task.created_by } }),
           });
 

@@ -100,7 +100,7 @@ export class RequestHandler {
     reporting
       .getEventLogger({
         event: { id: report._id, timezone: job.browserTimezone },
-        kibana: { reporting: { jobType: exportType.jobType, task: { id: task.id } } },
+        kibana: { reporting: { jobType: exportType.jobType }, task: { id: task.id } },
         ...(report.created_by && { user: { name: report.created_by } }),
       })
       .logScheduleTask(

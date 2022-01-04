@@ -239,6 +239,9 @@
                 },
                 "task": {
                     "properties": {
+                        "id": {
+                            "type": "keyword"
+                        },
                         "scheduled": {
                             "type": "date"
                         },

@@ -21,7 +21,7 @@ interface ActionBase<
     id: string;
     timezone: string;
   };
-  kibana: EventProvider;
+  kibana: EventProvider & { task?: { id: string } };
   user?: { name: string };
   log: {
     logger: 'reporting';
@@ -41,7 +41,7 @@ type ReportingAction<
   A extends ActionType,
   K extends 'event' | 'error',
   O extends 'success' | 'failure' = 'success'
-> = ActionBase<A, K, O, { reporting: { jobType: string; task?: { id: string } } }>;
+> = ActionBase<A, K, O, { reporting: { jobType: string } }>;
 
 export type ScheduledTask = ReportingAction<ActionType.SCHEDULE_TASK, 'event'>;
 export type StartedExecution = ReportingAction<ActionType.EXECUTE_START, 'event'>;

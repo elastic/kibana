@@ -20,6 +20,9 @@ exports.EcsCustomPropertyMappings = {
       // task specific fields
       task: {
         properties: {
+          id: {
+            type: 'keyword',
+          },
           scheduled: {
             type: 'date',
           },
