@@ -257,7 +257,7 @@ export function ObservabilityAlertsCommonProvider({
 
     const datePickerButton = await testSubjects.find('superDatePickerShowDatesButton');
     const buttonText = await datePickerButton.getVisibleText();
-    return buttonText;
+    return buttonText.substring(0, buttonText.indexOf('\n'));
   };
 
   const getActionsButtonByIndex = async (index: number) => {

@@ -9,9 +9,7 @@
 import React, { FC, useMemo } from 'react';
 import { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
-import createCache from '@emotion/cache';
-import { EuiProvider } from '@elastic/eui';
-import { EUI_STYLES_GLOBAL } from '../../utils';
+import { EuiThemeProvider } from '@elastic/eui';
 import { CoreTheme } from './types';
 import { convertCoreTheme } from './convert_core_theme';
 
@@ -23,25 +21,16 @@ interface CoreThemeProviderProps {
   theme$: Observable<CoreTheme>;
 }
 
-const emotionCache = createCache({
-  key: 'eui-styles',
-  container: document.querySelector(`meta[name="${EUI_STYLES_GLOBAL}"]`) as HTMLElement,
-});
-
 /**
- * Wrapper around `EuiProvider` converting (and exposing) core's theme to EUI theme.
+ * Wrapper around `EuiThemeProvider` converting (and exposing) core's theme to EUI theme.
  * @internal Only meant to be used within core for internal usages of EUI/React
  */
 export const CoreThemeProvider: FC<CoreThemeProviderProps> = ({ theme$, children }) => {
   const coreTheme = useObservable(theme$, defaultTheme);
   const euiTheme = useMemo(() => convertCoreTheme(coreTheme), [coreTheme]);
   return (
-    <EuiProvider
-      colorMode={euiTheme.colorMode}
-      theme={euiTheme.euiThemeSystem}
-      cache={emotionCache}
-    >
+    <EuiThemeProvider colorMode={euiTheme.colorMode} theme={euiTheme.euiThemeSystem}>
       {children}
-    </EuiProvider>
+    </EuiThemeProvider>
   );
 };

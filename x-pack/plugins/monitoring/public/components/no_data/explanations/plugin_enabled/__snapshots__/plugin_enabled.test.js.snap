@@ -26,17 +26,23 @@ Array [
   >
     <p>
       We checked the cluster settings and found that 
-      <code>
-        xpack.monitoring.enabled
-      </code>
+      <span>
+        <code>
+          xpack.monitoring.enabled
+        </code>
+      </span>
        is set to 
-      <code>
-        false
-      </code>
+      <span>
+        <code>
+          false
+        </code>
+      </span>
        set, which disables monitoring. Removing the 
-      <code>
-        xpack.monitoring.enabled: false
-      </code>
+      <span>
+        <code>
+          xpack.monitoring.enabled: false
+        </code>
+      </span>
        setting from your configuration will put the default into effect and enable Monitoring.
     </p>
   </div>,

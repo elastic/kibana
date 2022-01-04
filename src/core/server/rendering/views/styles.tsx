@@ -50,10 +50,6 @@ const InlineStyles: FC<{ darkMode: boolean }> = ({ darkMode }) => {
             display: block;
           }
 
-          html {
-            background-color: ${darkMode ? '#141519' : '#F8FAFD'}
-          }
-
           .kbnWelcomeView {
             line-height: 1.5;
             height: 100%;

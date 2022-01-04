@@ -11,13 +11,12 @@ import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
 import { of, BehaviorSubject } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test/jest';
 import type { CoreTheme } from 'src/core/public';
 import { KibanaThemeProvider } from './kibana_theme_provider';
 
 describe('KibanaThemeProvider', () => {
-  let euiTheme: UseEuiTheme | undefined;
+  let euiTheme: ReturnType<typeof useEuiTheme> | undefined;
 
   beforeEach(() => {
     euiTheme = undefined;

@@ -506,7 +506,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               showSortSelector: true,
               showFullScreenSelector: true,
             }),
-        showDisplaySelector: false,
+        showStyleSelector: false,
       }),
       [
         alertCountText,

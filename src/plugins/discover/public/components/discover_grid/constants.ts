@@ -23,7 +23,7 @@ export const toolbarVisibility = {
     allowHide: false,
     allowReorder: true,
   },
-  showDisplaySelector: false,
+  showStyleSelector: false,
 };
 
 export const defaultMonacoEditorWidth = 370;

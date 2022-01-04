@@ -136,7 +136,7 @@ export const TableVisBasic = memo(
               showColumnSelector: false,
               showFullScreenSelector: false,
               showSortSelector: false,
-              showDisplaySelector: false,
+              showStyleSelector: false,
               additionalControls: (
                 <TableVisControls
                   dataGridAriaLabel={dataGridAriaLabel}
