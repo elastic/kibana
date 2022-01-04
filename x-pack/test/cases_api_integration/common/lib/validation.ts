@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { some } from 'lodash';
 
 import { CaseResponse, CasesByAlertId } from '../../../../plugins/cases/common/api';
 
@@ -36,11 +35,6 @@ export function arraysToEqual(array1?: object[], array2?: object[]) {
     return false;
   }
 
-  for (const item of array1) {
-    if (!some(array2, item)) {
-      return false;
-    }
-  }
-
-  return true;
+  const array1AsSet = new Set(array1);
+  return array2.every((item) => array1AsSet.has(item));
 }
