@@ -154,7 +154,7 @@ In this case, try increasing the memory for the {kib} instance to 2GB.
 [[reporting-troubleshooting-arm-systems]]
 === ARM systems
 
-Chromium is not compatible with ARM RHEL/CentOS.
+Chromium is not compatible with ARM RHEL.
 
 [float]
 [[reporting-troubleshooting-maps-ems]]

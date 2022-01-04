@@ -26,14 +26,26 @@ describe('ExpressionRow', () => {
       <ExpressionRow
         canDelete={false}
         fields={[
-          { name: 'system.cpu.user.pct', type: 'test' },
-          { name: 'system.load.1', type: 'test' },
+          {
+            name: 'system.cpu.user.pct',
+            type: 'test',
+            searchable: true,
+            aggregatable: true,
+            displayable: true,
+          },
+          {
+            name: 'system.load.1',
+            type: 'test',
+            searchable: true,
+            aggregatable: true,
+            displayable: true,
+          },
         ]}
         remove={() => {}}
         addExpression={() => {}}
         key={1}
         expressionId={1}
-        setAlertParams={() => {}}
+        setRuleParams={() => {}}
         errors={{
           aggField: [],
           timeSizeUnit: [],

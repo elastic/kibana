@@ -101,6 +101,10 @@ export const pie: ExpressionFunctionDefinition<
       help: '',
       types: ['palette'],
     },
+    emptySizeRatio: {
+      types: ['number'],
+      help: '',
+    },
   },
   inputTypes: ['lens_multitable'],
   fn(data: LensMultiTable, args: PieExpressionArgs) {
