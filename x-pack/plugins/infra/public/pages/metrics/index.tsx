@@ -110,7 +110,7 @@ export const InfrastructurePage = ({ match }: RouteComponentProps) => {
                           <RedirectAppLinks application={kibana.services.application!}>
                             <EuiHeaderLink
                               aria-label={i18n.translate(
-                                'xpack.infra.metrics.page_header.analyzeData.label',
+                                'xpack.infra.metrics.pageHeader.analyzeData.label',
                                 {
                                   defaultMessage:
                                     'Navigate to the "Explore Data" view to visualize infra metrics data',

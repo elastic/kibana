@@ -33,7 +33,7 @@ export function SeriesFilter({ series, seriesConfig, seriesId }: Props) {
     .filter((field) => field !== TRANSACTION_URL)
     .map((field) => {
       if (typeof field === 'string') {
-        return { label: (seriesConfig.labels?.[field] ?? FieldLabels[field]) || field, field };
+        return { label: seriesConfig.labels?.[field] ?? FieldLabels[field] ?? field, field };
       }
 
       return {

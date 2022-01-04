@@ -10,7 +10,7 @@ import { FieldLabels, OPERATION_COLUMN, REPORT_METRIC_FIELD, ReportTypes } from 
 import {
   SYSTEM_CPU_PERCENTAGE_FIELD,
   DOCKER_CPU_PERCENTAGE_FIELD,
-  K8_POD_CPU_PERCENTAGE_FIELD,
+  K8S_POD_CPU_PERCENTAGE_FIELD,
   SYSTEM_MEMORY_PERCENTAGE_FIELD,
 } from '../constants/field_names/infra_metrics';
 import {
@@ -60,8 +60,8 @@ export function getMetricsKPIConfig({ indexPattern }: ConfigProps): SeriesConfig
       },
       {
         label: K8_POD_CPU_USAGE,
-        field: K8_POD_CPU_PERCENTAGE_FIELD,
-        id: K8_POD_CPU_PERCENTAGE_FIELD,
+        field: K8S_POD_CPU_PERCENTAGE_FIELD,
+        id: K8S_POD_CPU_PERCENTAGE_FIELD,
         columnType: OPERATION_COLUMN,
       },
     ],

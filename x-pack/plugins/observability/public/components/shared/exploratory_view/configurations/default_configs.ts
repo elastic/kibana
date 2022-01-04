@@ -33,6 +33,7 @@ export const getDefaultConfigs = ({
   });
 
   if (!configResult) {
+    // not a user facing error, more of a dev focused error
     throw new Error(
       `No report config provided for dataType: ${dataType} and reportType: ${reportType}`
     );
