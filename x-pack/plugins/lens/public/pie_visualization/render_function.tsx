@@ -81,6 +81,7 @@ export function PieComponent(
     legendPosition,
     nestedLegend,
     percentDecimals,
+    emptySizeRatio,
     legendMaxLines,
     truncateLegend,
     hideLabels,
@@ -235,7 +236,7 @@ export function PieComponent(
       themeOverrides.partition.fillLabel = { textColor: 'rgba(0,0,0,0)' };
     }
   } else {
-    themeOverrides.partition.emptySizeRatio = shape === 'donut' ? 0.3 : 0;
+    themeOverrides.partition.emptySizeRatio = shape === 'donut' ? emptySizeRatio : 0;
 
     if (hideLabels || categoryDisplay === 'hide') {
       // Force all labels to be linked, then prevent links from showing
