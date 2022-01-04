@@ -8,7 +8,6 @@
 
 import { CoreSetup, DocLinksStart, ThemeServiceStart } from 'src/core/public';
 import { VisualizationsSetup } from '../../../visualizations/public';
-import { Plugin as ExpressionsPublicPlugin } from '../../../expressions/public';
 import { ChartsPluginSetup } from '../../../charts/public';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { DataPublicPluginStart } from '../../../data/public';
