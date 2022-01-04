@@ -699,7 +699,7 @@ describe.each([
       const result = await swapActionIds(mockAction, soClient);
       expect(result instanceof Error).toBeTruthy();
       expect((result as unknown as Error).message).toEqual(
-        'action connector with originId: some-7.x-id had conflicts. Please resolve these conflicts either in the file you are attempting to upload or resolve the conflicting action connector in Kibana.'
+        'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details'
       );
     });
 
@@ -808,7 +808,7 @@ describe.each([
           error: {
             status_code: 409,
             message:
-              'action connector with originId: some-7.x-id had conflicts. Please resolve these conflicts either in the file you are attempting to upload or resolve the conflicting action connector in Kibana.',
+              'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details',
           },
         })
       );
@@ -850,7 +850,7 @@ describe.each([
           error: {
             status_code: 409,
             message:
-              'action connector with originId: some-7.x-id had conflicts. Please resolve these conflicts either in the file you are attempting to upload or resolve the conflicting action connector in Kibana.',
+              'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details',
           },
         })
       );
