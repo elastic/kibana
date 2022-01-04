@@ -15,7 +15,6 @@ import { TypeRegistry } from '../../triggers_actions_ui/public/application/type_
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ActionTypeModel, AlertTypeModel } from '../../triggers_actions_ui/public/types';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
-import { KibanaMonitoringRegistry } from './kibana_monitoring_registry';
 
 interface BreadcrumbItem {
   ['data-test-subj']?: string;
@@ -64,7 +63,6 @@ export interface IShims {
   usageCollection: UsageCollectionSetup;
   kibanaServices: CoreStart & { usageCollection: UsageCollectionSetup };
   appMountParameters: AppMountParameters;
-  kibanaMonitoringRegistry: KibanaMonitoringRegistry;
 }
 
 export class Legacy {
@@ -77,7 +75,6 @@ export class Legacy {
     triggersActionsUi,
     usageCollection,
     appMountParameters,
-    kibanaMonitoringRegistry,
   }: MonitoringStartPluginDependencies) {
     this._shims = {
       toastNotifications: core.notifications.toasts,
@@ -136,7 +133,6 @@ export class Legacy {
         usageCollection,
       },
       appMountParameters,
-      kibanaMonitoringRegistry,
     };
   }
 

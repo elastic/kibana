@@ -11,5 +11,3 @@ import { MonitoringPlugin } from './plugin';
 export function plugin(ctx: PluginInitializerContext) {
   return new MonitoringPlugin(ctx);
 }
-
-export { KibanaMonitoringSection } from './kibana_monitoring_registry';

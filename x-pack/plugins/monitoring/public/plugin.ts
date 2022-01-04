@@ -35,7 +35,6 @@ import { createMemoryUsageAlertType } from './alerts/memory_usage_alert';
 import { createMissingMonitoringDataAlertType } from './alerts/missing_monitoring_data_alert';
 import { createThreadPoolRejectionsAlertType } from './alerts/thread_pool_rejections_alert';
 import { setConfig } from './external_config';
-import { KibanaMonitoringRegistry } from './kibana_monitoring_registry';
 import { Legacy } from './legacy_shims';
 import { MonitoringConfig, MonitoringStartPluginDependencies } from './types';
 
@@ -49,11 +48,7 @@ export class MonitoringPlugin
   implements
     Plugin<void, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies>
 {
-  private kibanaMonitoringRegistry: KibanaMonitoringRegistry;
-
-  constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {
-    this.kibanaMonitoringRegistry = new KibanaMonitoringRegistry();
-  }
+  constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
 
   public setup(
     core: CoreSetup<MonitoringStartPluginDependencies>,
@@ -110,7 +105,6 @@ export class MonitoringPlugin
           triggersActionsUi: pluginsStart.triggersActionsUi,
           usageCollection: plugins.usageCollection,
           appMountParameters: params,
-          kibanaMonitoringRegistry: this.kibanaMonitoringRegistry,
         };
 
         Legacy.init({
@@ -124,7 +118,6 @@ export class MonitoringPlugin
           triggersActionsUi: deps.triggersActionsUi,
           usageCollection: deps.usageCollection,
           appMountParameters: deps.appMountParameters,
-          kibanaMonitoringRegistry: deps.kibanaMonitoringRegistry,
         });
 
         const config = Object.fromEntries(externalConfig);

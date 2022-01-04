@@ -95,11 +95,11 @@ export function registerStatsRoute({
       const isLegacy = req.query.legacy === '' || req.query.legacy;
       const shouldGetUsage = req.query.exclude_usage === false;
 
-      const { asCurrentUser } = context.core.elasticsearch.client;
-      const savedObjectsClient = context.core.savedObjects.client;
-
       let extended;
       if (isExtended) {
+        const { asCurrentUser } = context.core.elasticsearch.client;
+        const savedObjectsClient = context.core.savedObjects.client;
+
         if (shouldGetUsage) {
           const collectorsReady = await collectorSet.areAllCollectorsReady();
           if (!collectorsReady) {

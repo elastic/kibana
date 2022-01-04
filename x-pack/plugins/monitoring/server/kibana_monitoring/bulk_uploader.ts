@@ -78,9 +78,7 @@ export class BulkUploader implements IBulkUploader {
   private _timer: NodeJS.Timer | null;
   private readonly _interval: number;
   private readonly config: MonitoringConfig;
-  private readonly usageCollection?: UsageCollectionSetup;
   private readonly monitoringCollection?: MonitoringCollectionSetup;
-  private esClient!: ElasticsearchClient;
 
   constructor({
     log,
@@ -108,7 +106,6 @@ export class BulkUploader implements IBulkUploader {
     this.kibanaStatus = null;
     this.kibanaStatusGetter$ = statusGetter$;
 
-    this.usageCollection = usageCollection;
     this.monitoringCollection = monitoringCollection;
   }
 
@@ -119,8 +116,6 @@ export class BulkUploader implements IBulkUploader {
    */
   public start(esClient: ElasticsearchClient) {
     this._log.info('Starting monitoring stats collection');
-
-    this.esClient = esClient;
 
     this.kibanaStatusSubscription = this.kibanaStatusGetter$.subscribe((nextStatus) => {
       this.kibanaStatus = nextStatus.level;

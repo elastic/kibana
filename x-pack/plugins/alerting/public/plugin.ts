@@ -9,7 +9,6 @@ import { CoreSetup, Plugin, CoreStart } from 'src/core/public';
 import { AlertNavigationRegistry, AlertNavigationHandler } from './alert_navigation_registry';
 import { loadAlert, loadAlertType } from './alert_api';
 import { Alert, AlertNavigation } from '../common';
-import { KibanaMonitoringSection } from '../../monitoring/public';
 
 export interface PluginSetupContract {
   /**
