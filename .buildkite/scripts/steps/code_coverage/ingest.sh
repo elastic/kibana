@@ -23,8 +23,8 @@ echo "--- Upload new git sha"
 .buildkite/scripts/bootstrap.sh
  
 echo "--- Download coverage arctifacts"
-buildkite-agent artifact download target/kibana-coverage/jest/* . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
-buildkite-agent artifact download target/kibana-coverage/functional/* . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+buildkite-agent artifact download target/kibana-coverage/jest/* .
+buildkite-agent artifact download target/kibana-coverage/functional/* .
 
 echo "--- process HTML Links"
 .buildkite/scripts/steps/code_coverage/reporting/prokLinks.sh
