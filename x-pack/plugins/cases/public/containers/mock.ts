@@ -187,8 +187,8 @@ export const basicCaseMetrics: CaseMetrics = {
     hosts: {
       total: 2,
       values: [
-        { name: 'foo', count: 2 },
-        { name: 'bar', count: 10 },
+        { name: 'foo', count: 2, id: 'foo' },
+        { name: 'bar', count: 10, id: 'bar' },
       ],
     },
     users: {

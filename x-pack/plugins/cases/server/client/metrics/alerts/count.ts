@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CaseMetricsResponse } from '../../../common/api';
-import { Operations } from '../../authorization';
-import { createCaseError } from '../../common/error';
-import { CasesClient } from '../client';
-import { CasesClientArgs } from '../types';
-import { MetricsHandler } from './types';
+import { CaseMetricsResponse } from '../../../../common/api';
+import { Operations } from '../../../authorization';
+import { createCaseError } from '../../../common/error';
+import { CasesClient } from '../../client';
+import { CasesClientArgs } from '../../types';
+import { MetricsHandler } from '../types';
 
 export class AlertsCount implements MetricsHandler {
   constructor(
