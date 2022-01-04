@@ -63,8 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const elasticChart = getService('elasticChart');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/118584
-  describe.skip('anomaly explorer', function () {
+  describe('anomaly explorer', function () {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -143,7 +142,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.anomaliesTable.assertTableNotEmpty();
         });
 
-        it('renders Overall swim lane', async () => {
+        it.skip('renders Overall swim lane', async () => {
           await ml.testExecution.logTestStep('has correct axes labels');
           await ml.swimLane.assertAxisLabels(overallSwimLaneTestSubj, 'x', [
             '2016-02-07 00:00',
@@ -156,7 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.swimLane.assertAxisLabels(overallSwimLaneTestSubj, 'y', ['Overall']);
         });
 
-        it('renders View By swim lane', async () => {
+        it.skip('renders View By swim lane', async () => {
           await ml.testExecution.logTestStep('has correct axes labels');
           await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'x', [
             '2016-02-07 00:00',
@@ -180,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
           ]);
         });
 
-        it('supports cell selection by click on Overall swim lane', async () => {
+        it.skip('supports cell selection by click on Overall swim lane', async () => {
           await ml.testExecution.logTestStep('checking page state before the cell selection');
           await ml.anomalyExplorer.assertClearSelectionButtonVisible(false);
           await ml.anomaliesTable.assertTableRowsCount(25);
@@ -231,7 +230,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(0);
         });
 
-        it('allows to change the swim lane pagination', async () => {
+        it.skip('allows to change the swim lane pagination', async () => {
           await ml.testExecution.logTestStep('checks default pagination');
           await ml.swimLane.assertPageSize(viewBySwimLaneTestSubj, 10);
           await ml.swimLane.assertActivePage(viewBySwimLaneTestSubj, 1);
@@ -248,7 +247,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.swimLane.assertActivePage(viewBySwimLaneTestSubj, 1);
         });
 
-        it('supports cell selection by click on View By swim lane', async () => {
+        it.skip('supports cell selection by click on View By swim lane', async () => {
           await ml.testExecution.logTestStep('checking page state before the cell selection');
           await ml.anomalyExplorer.assertClearSelectionButtonVisible(false);
           await ml.anomaliesTable.assertTableRowsCount(25);
@@ -289,7 +288,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(0);
         });
 
-        it('supports cell selection by brush action', async () => {
+        it.skip('supports cell selection by brush action', async () => {
           await ml.testExecution.logTestStep('checking page state before the cell selection');
           await ml.anomalyExplorer.assertClearSelectionButtonVisible(false);
           await ml.anomaliesTable.assertTableRowsCount(25);
@@ -329,7 +328,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.anomalyExplorer.assertAnomalyExplorerChartsCount(0);
         });
 
-        it('allows to change the anomalies table pagination', async () => {
+        it.skip('allows to change the anomalies table pagination', async () => {
           await ml.testExecution.logTestStep('displays the anomalies table with default config');
           await ml.anomaliesTable.assertTableExists();
           await ml.anomaliesTable.assertRowsNumberPerPage(25);
