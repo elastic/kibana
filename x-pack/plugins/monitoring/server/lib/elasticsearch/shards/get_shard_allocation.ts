@@ -77,7 +77,7 @@ export function getShardAllocation(
           },
           {
             term: {
-              'elasticsearch.cluster.state.id': stateUuid,
+              'elasticsearch.cluster.stats.state.state_uuid': stateUuid,
             },
           },
         ],
