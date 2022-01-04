@@ -77,6 +77,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
       updateNewAgentPolicy({
         ...newAgentPolicy,
         name: '',
+        is_default: false,
       });
     }
   }, [agentPolicies.length]); // eslint-disable-line react-hooks/exhaustive-deps

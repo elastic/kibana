@@ -70,13 +70,29 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     before(async () => {
-      // Get FleetServer policy id
-      const { body: apiResponse } = await supertest.get(`/api/fleet/agent_policies`).expect(200);
-      const defaultFleetServerPolicy = apiResponse.items.find(
-        (item: any) => item.is_default_fleet_server
-      );
+      // create default policies
+      let { body: apiResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'kibana')
+        .send({
+          name: 'Default Fleet Server policy',
+          namespace: 'default',
+          is_default_fleet_server: true,
+        })
+        .expect(200);
+      const defaultFleetServerPolicy = apiResponse.item;
 
-      const defaultServerPolicy = apiResponse.items.find((item: any) => item.is_default);
+      ({ body: apiResponse } = await supertest
+        .post(`/api/fleet/agent_policies`)
+        .set('kbn-xsrf', 'kibana')
+        .send({
+          name: 'Default policy',
+          namespace: 'default',
+          is_default: true,
+        })
+        .expect(200));
+
+      const defaultServerPolicy = apiResponse.item;
 
       if (!defaultFleetServerPolicy) {
         throw new Error('No default Fleet server policy');

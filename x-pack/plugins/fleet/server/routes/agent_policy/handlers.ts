@@ -117,7 +117,6 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const withSysMonitoring = request.query.sys_monitoring ?? false;
   const isDefaultFleetServer = request.body.is_default_fleet_server ?? false;
   const spaceId = context.fleet.spaceId;
-  // TODO set first default policy to is_default
   try {
     if (isDefaultFleetServer) {
       // install fleet server package if not yet installed

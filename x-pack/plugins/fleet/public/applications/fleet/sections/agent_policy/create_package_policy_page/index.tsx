@@ -123,6 +123,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     description: '',
     namespace: 'default',
     monitoring_enabled: Object.values(dataTypes),
+    is_default: true,
   };
 
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>({
