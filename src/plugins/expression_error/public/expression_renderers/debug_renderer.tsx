@@ -14,8 +14,7 @@ import { ExpressionRenderDefinition } from 'src/plugins/expressions/common';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '../../../../core/public';
 import { KibanaThemeProvider } from '../../../kibana_react/public';
-import { withSuspense } from '../../../../../src/plugins/presentation_util/public';
-import { defaultTheme$ } from '../../../presentation_util/common/lib';
+import { withSuspense, defaultTheme$ } from '../../../../../src/plugins/presentation_util/public';
 import { LazyDebugRenderComponent } from '../components';
 import { JSON } from '../../common';
 

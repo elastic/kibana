@@ -26,3 +26,5 @@ const createStartContract = (coreStart: CoreStart): PresentationUtilPluginStart 
 export const presentationUtilPluginMock = {
   createStartContract,
 };
+
+export * from './__stories__/fixtures/flights';

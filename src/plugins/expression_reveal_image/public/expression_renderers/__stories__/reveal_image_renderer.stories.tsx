@@ -9,7 +9,7 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { getRevealImageRenderer } from '../';
-import { getElasticOutline, getElasticLogo } from '../../../../presentation_util/common/lib';
+import { getElasticOutline, getElasticLogo } from '../../../../presentation_util/public';
 import { Render, waitFor } from '../../../../presentation_util/public/__stories__';
 import { Origin } from '../../../common/types/expression_functions';
 

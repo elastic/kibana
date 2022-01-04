@@ -8,7 +8,7 @@
 
 import { map, uniq } from 'lodash';
 import { flights } from './flights_data';
-import { DataView, DataViewField, IIndexPatternFieldList } from '../../../../../data_views/common';
+import { DataView, DataViewField, IIndexPatternFieldList } from '../../../../data_views/public';
 
 export type Flight = typeof flights[number];
 export type FlightField = keyof Flight;

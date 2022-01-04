@@ -14,12 +14,12 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { CoreSetup } from '../../../../core/public';
-import { withSuspense } from '../../../presentation_util/public';
 import {
   defaultTheme$,
   getElasticOutline,
   isValidUrl,
-} from '../../../presentation_util/common/lib';
+  withSuspense,
+} from '../../../presentation_util/public';
 import { RepeatImageRendererConfig } from '../../common/types';
 
 const strings = {

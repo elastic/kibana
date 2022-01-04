@@ -16,8 +16,7 @@ import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { CoreSetup } from '../../../../core/public';
 import { ProgressRendererConfig } from '../../common/types';
 import { LazyProgressComponent } from '../components/progress';
-import { withSuspense } from '../../../presentation_util/public';
-import { defaultTheme$ } from '../../../presentation_util/common/lib';
+import { withSuspense, defaultTheme$ } from '../../../presentation_util/public';
 
 const ProgressComponent = withSuspense(LazyProgressComponent);
 

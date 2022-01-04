@@ -14,7 +14,7 @@ import uuid from 'uuid';
 import {
   getFlightOptionsAsync,
   storybookFlightsDataView,
-} from '../../../presentation_util/common/lib';
+} from '../../../presentation_util/public/mocks';
 import {
   ControlGroupContainerFactory,
   OptionsListEmbeddableInput,
