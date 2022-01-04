@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { mockLayerList } from './__mocks__/regions_layer.mock';
-import { useLayerList } from './useLayerList';
+import { useLayerList } from './use_layer_list';
 
 describe('useLayerList', () => {
   test('it returns the region layer', () => {

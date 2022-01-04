@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FilterValueLabel } from '../../../../../../observability/public';
-import { FiltersUIHook } from '../hooks/useLocalUIFilters';
+import { FiltersUIHook } from '../hooks/use_local_ui_filters';
 import { UxLocalUIFilterName } from '../../../../../common/ux_ui_filter';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { SelectedWildcards } from './selected_wildcards';

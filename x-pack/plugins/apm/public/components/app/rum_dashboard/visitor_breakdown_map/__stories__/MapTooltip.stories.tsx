@@ -7,8 +7,8 @@
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { MapToolTip } from '../MapToolTip';
-import { COUNTRY_NAME, TRANSACTION_DURATION_COUNTRY } from '../useLayerList';
+import { MapToolTip } from '../map_tooltip';
+import { COUNTRY_NAME, TRANSACTION_DURATION_COUNTRY } from '../use_layer_list';
 
 storiesOf('app/rum_dashboard/VisitorsRegionMap', module).add(
   'Tooltip',

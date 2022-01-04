@@ -18,8 +18,8 @@ import {
 } from '@elastic/eui';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
-import { useUxQuery } from '../hooks/useUxQuery';
-import { formatToSec } from '../ux_metrics/KeyUXMetrics';
+import { useUxQuery } from '../hooks/use_ux_query';
+import { formatToSec } from '../ux_metrics/key_ux_metrics';
 import { CsmSharedContext } from '../csm_shared_context';
 
 const ClFlexGroup = styled(EuiFlexGroup)`

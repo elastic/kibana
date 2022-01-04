@@ -28,13 +28,13 @@ import {
   EUI_CHARTS_THEME_LIGHT,
 } from '@elastic/eui/dist/eui_charts_theme';
 import styled from 'styled-components';
-import { PercentileAnnotations } from '../page_load_distribution/PercentileAnnotations';
+import { PercentileAnnotations } from '../page_load_distribution/percentile_annotations';
 import { I18LABELS } from '../translations';
 import { ChartWrapper } from '../chart_wrapper';
 import { PercentileRange } from '../page_load_distribution';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
-import { BreakdownSeries } from '../page_load_distribution/BreakdownSeries';
+import { BreakdownSeries } from '../page_load_distribution/breakdown_series';
 
 interface PageLoadData {
   pageLoadDistribution: Array<{ x: number; y: number }>;

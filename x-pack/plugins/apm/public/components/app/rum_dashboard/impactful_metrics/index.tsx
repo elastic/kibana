@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import { JSErrors } from './JSErrors';
+import { JSErrors } from './js_errors';
 
 export function ImpactfulMetrics() {
   return (

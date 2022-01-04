@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
-import { EmbeddedMap } from './EmbeddedMap';
+import { EmbeddedMap } from './embedded_map';
 import { I18LABELS } from '../translations';
 
 export function VisitorBreakdownMap() {

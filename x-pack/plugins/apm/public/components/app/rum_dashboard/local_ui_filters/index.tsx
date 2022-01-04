@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ESFilter } from 'src/core/types/elasticsearch';
-import { useLocalUIFilters } from '../hooks/useLocalUIFilters';
+import { useLocalUIFilters } from '../hooks/use_local_ui_filters';
 import {
   uxFiltersByName,
   UxLocalUIFilterName,
@@ -25,7 +25,7 @@ import {
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { FieldValueSuggestions } from '../../../../../../observability/public';
 import { URLFilter } from '../url_filter';
-import { SelectedFilters } from './SelectedFilters';
+import { SelectedFilters } from './selected_filters';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,

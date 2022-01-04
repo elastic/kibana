@@ -8,7 +8,7 @@
 import { render, shallow } from 'enzyme';
 import React from 'react';
 
-import { MapToolTip } from './MapToolTip';
+import { MapToolTip } from './map_tooltip';
 
 describe('Map Tooltip', () => {
   test('it shallow renders', () => {

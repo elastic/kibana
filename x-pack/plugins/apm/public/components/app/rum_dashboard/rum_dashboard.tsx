@@ -9,8 +9,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { UXMetrics } from './ux_metrics';
 import { ImpactfulMetrics } from './impactful_metrics';
-import { PageLoadAndViews } from './panels/PageLoadAndViews';
-import { VisitorBreakdownsPanel } from './panels/VisitorBreakdowns';
+import { PageLoadAndViews } from './panels/page_load_and_views';
+import { VisitorBreakdownsPanel } from './panels/visitor_breakdowns';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { ClientMetrics } from './client_metrics';
 

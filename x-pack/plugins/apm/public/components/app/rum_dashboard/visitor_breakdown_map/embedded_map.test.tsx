@@ -8,7 +8,7 @@
 import { render } from 'enzyme';
 import React from 'react';
 
-import { EmbeddedMap } from './EmbeddedMap';
+import { EmbeddedMap } from './embedded_map';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 import { embeddablePluginMock } from '../../../../../../../../src/plugins/embeddable/public/mocks';
 

@@ -10,7 +10,7 @@ import { isEqual, map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { I18LABELS } from '../../translations';
-import { formatToSec } from '../../ux_metrics/KeyUXMetrics';
+import { formatToSec } from '../../ux_metrics/key_ux_metrics';
 import { getPercentileLabel } from '../../ux_metrics/translations';
 import { SelectableUrlList } from '../../../../../../../observability/public';
 import { selectableRenderOptions, UrlOption } from './render_option';

@@ -8,7 +8,7 @@
 import useDebounce from 'react-use/lib/useDebounce';
 import { useState } from 'react';
 import { useFetcher } from '../../../../../hooks/use_fetcher';
-import { useUxQuery } from '../../hooks/useUxQuery';
+import { useUxQuery } from '../../hooks/use_ux_query';
 import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
 
 interface Props {

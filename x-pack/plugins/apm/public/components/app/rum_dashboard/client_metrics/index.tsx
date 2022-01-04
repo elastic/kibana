@@ -16,7 +16,7 @@ import {
 import { I18LABELS } from '../translations';
 import { getPercentileLabel } from '../ux_metrics/translations';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { Metrics } from './Metrics';
+import { Metrics } from './metrics';
 
 export function ClientMetrics() {
   const {

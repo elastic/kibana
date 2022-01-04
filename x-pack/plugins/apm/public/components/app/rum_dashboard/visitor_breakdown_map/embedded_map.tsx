@@ -20,12 +20,12 @@ import {
   ViewMode,
   isErrorEmbeddable,
 } from '../../../../../../../../src/plugins/embeddable/public';
-import { useLayerList } from './useLayerList';
+import { useLayerList } from './use_layer_list';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import type { RenderTooltipContentParams } from '../../../../../../maps/public';
-import { MapToolTip } from './MapToolTip';
-import { useMapFilters } from './useMapFilters';
+import { MapToolTip } from './map_tooltip';
+import { useMapFilters } from './use_map_filters';
 import { EmbeddableStart } from '../../../../../../../../src/plugins/embeddable/public';
 
 const EmbeddedPanel = styled.div`
