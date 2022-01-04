@@ -57,7 +57,7 @@ export const PolicyDetails = React.memo(() => {
       backButtonLabel: i18n.translate(
         'xpack.securitySolution.endpoint.policy.details.backToListTitle',
         {
-          defaultMessage: 'Back to endpoint hosts',
+          defaultMessage: 'View all endpoints',
         }
       ),
       backButtonUrl: getAppUrl({ path: endpointListPath }),

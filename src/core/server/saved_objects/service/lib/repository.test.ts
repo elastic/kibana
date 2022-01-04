@@ -1326,7 +1326,7 @@ describe('SavedObjectsRepository', () => {
     describe('returns', () => {
       const expectSuccessResult = (
         { type, id }: TypeIdTuple,
-        doc: estypes.MgetHit<SavedObjectsRawDocSource>
+        doc: estypes.GetGetResult<SavedObjectsRawDocSource>
       ) => ({
         type,
         id,
@@ -1354,8 +1354,14 @@ describe('SavedObjectsRepository', () => {
         expect(client.mget).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
           saved_objects: [
-            expectSuccessResult(obj1, response.docs[0]),
-            expectSuccessResult(obj2, response.docs[1]),
+            expectSuccessResult(
+              obj1,
+              response.docs[0] as estypes.GetGetResult<SavedObjectsRawDocSource>
+            ),
+            expectSuccessResult(
+              obj2,
+              response.docs[1] as estypes.GetGetResult<SavedObjectsRawDocSource>
+            ),
           ],
         });
       });
@@ -1375,9 +1381,15 @@ describe('SavedObjectsRepository', () => {
         expect(client.mget).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
           saved_objects: [
-            expectSuccessResult(obj1, response.docs[0]),
+            expectSuccessResult(
+              obj1,
+              response.docs[0] as estypes.GetGetResult<SavedObjectsRawDocSource>
+            ),
             expectError(obj),
-            expectSuccessResult(obj2, response.docs[1]),
+            expectSuccessResult(
+              obj2,
+              response.docs[1] as estypes.GetGetResult<SavedObjectsRawDocSource>
+            ),
           ],
         });
       });

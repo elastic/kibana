@@ -6,6 +6,7 @@
  */
 
 import { PARTITION_FIELDS, ANOMALY_RESULT_TYPE } from '../constants/anomalies';
+import type { KibanaUrlConfig } from './custom_urls';
 
 export interface Influencer {
   influencer_field_name: string;
@@ -69,6 +70,8 @@ export interface AnomaliesTableRecord {
   typical?: number[];
   typicalSort?: any;
   metricDescriptionSort?: number;
+  customUrls?: KibanaUrlConfig[];
+  isTimeSeriesViewRecord?: boolean;
 }
 
 export type PartitionFieldsType = typeof PARTITION_FIELDS[number];

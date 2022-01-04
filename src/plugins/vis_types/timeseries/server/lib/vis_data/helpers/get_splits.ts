@@ -42,7 +42,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
   resp: TRawResponse,
   panel: Panel,
   series: Series,
-  meta: TMeta,
+  meta: TMeta | undefined,
   extractFields: Function
 ): Promise<Array<SplittedData<TMeta>>> {
   if (!meta) {
@@ -52,12 +52,20 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
   const color = new Color(series.color);
   const metric = getLastMetric(series);
   const buckets = get(resp, `aggregations.${series.id}.buckets`);
-  const fieldsForSeries = meta.index ? await extractFields({ id: meta.index }) : [];
+
+  const fieldsForSeries = meta?.index ? await extractFields({ id: meta.index }) : [];
   const splitByLabel = calculateLabel(metric, series.metrics, fieldsForSeries);
 
   if (buckets) {
     if (Array.isArray(buckets)) {
       return buckets.map((bucket) => {
+        if (bucket.column_filter) {
+          bucket = {
+            ...bucket,
+            ...bucket.column_filter,
+          };
+        }
+
         bucket.id = `${series.id}:${bucket.key}`;
         bucket.splitByLabel = splitByLabel;
         bucket.label = formatKey(bucket.key, series);
@@ -101,7 +109,7 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
       label: series.label || splitByLabel,
       color: color.string(),
       ...mergeObj,
-      meta,
+      meta: meta!,
     },
   ];
 }

@@ -9,15 +9,15 @@ import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useEffect } from 'react';
 
 interface Props {
-  setAlertParams: (key: string, value: any) => void;
-  setAlertProperty: (key: string, value: any) => void;
+  setRuleParams: (key: string, value: any) => void;
+  setRuleProperty: (key: string, value: any) => void;
   defaults: Record<string, any>;
   fields: React.ReactNode[];
   chartPreview?: React.ReactNode;
 }
 
 export function ServiceAlertTrigger(props: Props) {
-  const { fields, setAlertParams, defaults, chartPreview } = props;
+  const { fields, setRuleParams, defaults, chartPreview } = props;
 
   const params: Record<string, any> = {
     ...defaults,
@@ -26,7 +26,7 @@ export function ServiceAlertTrigger(props: Props) {
   useEffect(() => {
     // we only want to run this on mount to set default values
     Object.keys(params).forEach((key) => {
-      setAlertParams(key, params[key]);
+      setRuleParams(key, params[key]);
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

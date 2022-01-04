@@ -267,13 +267,16 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       this.createRouteHandlerContext(core, this.kibanaIndex)
     );
     if (usageCollection) {
+      const eventLogIndex = this.eventLogService.getIndexPattern();
+      const kibanaIndex = this.kibanaIndex;
+
       initializeActionsTelemetry(
         this.telemetryLogger,
         plugins.taskManager,
         core,
-        this.kibanaIndex,
+        kibanaIndex,
         this.preconfiguredActions,
-        this.eventLogService
+        eventLogIndex
       );
     }
 
@@ -433,7 +436,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         this.getUnsecuredSavedObjectsClient(core.savedObjects, request),
     });
 
-    scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
+    this.eventLogService!.isEsContextReady().then(() => {
+      scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
+    });
 
     if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
       createAlertHistoryIndexTemplate({

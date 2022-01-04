@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
@@ -146,15 +146,18 @@ export default ({ getService }: FtrProviderContext): void => {
         const commentUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
 
         expect(commentUserAction).to.eql({
-          action_field: ['comment'],
+          type: 'comment',
           action: 'create',
-          action_by: defaultUser,
-          new_value: `{"comment":"${postCommentUserReq.comment}","type":"${postCommentUserReq.type}","owner":"securitySolutionFixture"}`,
-          new_val_connector_id: null,
-          old_value: null,
-          old_val_connector_id: null,
-          case_id: `${postedCase.id}`,
-          comment_id: `${patchedCase.comments![0].id}`,
+          created_by: defaultUser,
+          payload: {
+            comment: {
+              comment: postCommentUserReq.comment,
+              type: postCommentUserReq.type,
+              owner: 'securitySolutionFixture',
+            },
+          },
+          case_id: postedCase.id,
+          comment_id: patchedCase.comments![0].id,
           sub_case_id: '',
           owner: 'securitySolutionFixture',
         });

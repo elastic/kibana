@@ -36,7 +36,7 @@ export function registerStatsRoute({ router, lib: { handleEsError } }: RouteDepe
       const { client } = context.core.elasticsearch;
       const { indexName } = request.params as typeof paramsSchema.type;
       const params = {
-        expand_wildcards: 'none',
+        expand_wildcards: 'none' as const,
         index: indexName,
       };
 

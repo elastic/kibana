@@ -6,7 +6,7 @@
  */
 
 import { uniq } from 'lodash';
-import type { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsClientContract } from 'src/core/server';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { OsqueryAppContext } from './osquery_app_context_services';
@@ -34,7 +34,6 @@ const aggregateResults = async (
 };
 
 export const parseAgentSelection = async (
-  request: KibanaRequest,
   soClient: SavedObjectsClientContract,
   context: OsqueryAppContext,
   agentSelection: AgentSelection
@@ -42,7 +41,7 @@ export const parseAgentSelection = async (
   const selectedAgents: Set<string> = new Set();
   const addAgent = selectedAgents.add.bind(selectedAgents);
   const { allAgentsSelected, platformsSelected, policiesSelected, agents } = agentSelection;
-  const agentService = context.service.getAgentService()?.asScoped(request);
+  const agentService = context.service.getAgentService()?.asInternalUser;
   const packagePolicyService = context.service.getPackagePolicyService();
   const kueryFragments = [];
 

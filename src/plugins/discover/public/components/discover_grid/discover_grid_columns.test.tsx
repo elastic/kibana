@@ -10,7 +10,7 @@ import { indexPatternMock } from '../../__mocks__/index_pattern';
 import { getEuiGridColumns } from './discover_grid_columns';
 import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_with_timefield';
 
-describe('Discover grid columns ', function () {
+describe('Discover grid columns', function () {
   it('returns eui grid columns without time column', async () => {
     const actual = getEuiGridColumns(
       ['extension', 'message'],
@@ -123,6 +123,11 @@ describe('Discover grid columns ', function () {
             <EuiIconTip
               aria-label="Primary time field."
               content="This field represents the time that events occurred."
+              iconProps={
+                Object {
+                  "tabIndex": -1,
+                }
+              }
               type="clock"
             />
           </React.Fragment>,
