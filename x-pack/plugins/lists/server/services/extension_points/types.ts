@@ -54,3 +54,6 @@ export type ExtensionPoint =
  * Registration function for server-side extension points
  */
 export type ListsServerExtensionRegistrar = (extension: ExtensionPoint) => void;
+export type NarrowExtensionPointToType<T extends ExtensionPoint['type']> = {
+  type: T;
+} & ExtensionPoint;

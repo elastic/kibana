@@ -11,11 +11,7 @@ import { getCreateExceptionListItemOptionsMock } from '../exception_lists/except
 import { CreateExceptionListItemOptions } from '../exception_lists/exception_list_client_types';
 import { DataValidationError } from '../exception_lists/utils/errors';
 
-import {
-  ExtensionPointStorageClient,
-  ExtensionPointStorageClientInterface,
-  ExtensionPointStorageInterface,
-} from './extension_point_storage';
+import { ExtensionPointStorageInterface } from './extension_point_storage';
 import {
   ExceptionListPreUpdateItemServerExtension,
   ExceptionsListPreCreateItemServerExtension,
@@ -23,6 +19,10 @@ import {
 } from './types';
 import { ExtensionPointError } from './errors';
 import { createExtensionPointStorageMock } from './extension_point_storage.mock';
+import {
+  ExtensionPointStorageClient,
+  ExtensionPointStorageClientInterface,
+} from './extension_point_storage_client';
 
 describe('When using ExtensionPointStorage', () => {
   let logger: ReturnType<typeof loggerMock.create>;
