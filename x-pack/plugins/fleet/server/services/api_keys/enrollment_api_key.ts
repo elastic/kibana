@@ -151,7 +151,7 @@ export async function deleteEnrollmentApiKeyForAgentPolicyId(
 }
 
 export async function generateEnrollmentAPIKey(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   data: {
     name?: string;
@@ -163,10 +163,10 @@ export async function generateEnrollmentAPIKey(
   const id = uuid.v4();
   const { name: providedKeyName, forceRecreate } = data;
   if (data.agentPolicyId) {
-    await validateAgentPolicyId(soClient, data.agentPolicyId);
+    await validateAgentPolicyId(soRepo, data.agentPolicyId);
   }
   const agentPolicyId =
-    data.agentPolicyId ?? (await agentPolicyService.getDefaultAgentPolicyId(soClient));
+    data.agentPolicyId ?? (await agentPolicyService.getDefaultAgentPolicyId(soRepo));
 
   if (providedKeyName && !forceRecreate) {
     let hasMore = true;
@@ -314,9 +314,9 @@ export async function getEnrollmentAPIKeyById(esClient: ElasticsearchClient, api
   return enrollmentAPIKey;
 }
 
-async function validateAgentPolicyId(soClient: ISavedObjectsRepository, agentPolicyId: string) {
+async function validateAgentPolicyId(soRepo: ISavedObjectsRepository, agentPolicyId: string) {
   try {
-    await agentPolicyService.get(soClient, agentPolicyId);
+    await agentPolicyService.get(soRepo, agentPolicyId);
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
       throw Boom.badRequest(

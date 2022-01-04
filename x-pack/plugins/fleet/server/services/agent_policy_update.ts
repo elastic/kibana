@@ -13,25 +13,25 @@ import { unenrollForAgentPolicyId } from './agents';
 import { agentPolicyService } from './agent_policy';
 
 export async function agentPolicyUpdateEventHandler(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   action: string,
   agentPolicyId: string
 ) {
   if (action === 'created') {
-    await generateEnrollmentAPIKey(soClient, esClient, {
+    await generateEnrollmentAPIKey(soRepo, esClient, {
       name: 'Default',
       agentPolicyId,
     });
-    await agentPolicyService.createFleetServerPolicy(soClient, agentPolicyId);
+    await agentPolicyService.createFleetServerPolicy(soRepo, agentPolicyId);
   }
 
   if (action === 'updated') {
-    await agentPolicyService.createFleetServerPolicy(soClient, agentPolicyId);
+    await agentPolicyService.createFleetServerPolicy(soRepo, agentPolicyId);
   }
 
   if (action === 'deleted') {
-    await unenrollForAgentPolicyId(soClient, esClient, agentPolicyId);
+    await unenrollForAgentPolicyId(soRepo, esClient, agentPolicyId);
     await deleteEnrollmentApiKeyForAgentPolicyId(esClient, agentPolicyId);
   }
 }

@@ -18,8 +18,8 @@ import type { SettingsSOAttributes, Settings, BaseSettings } from '../../common'
 
 import { appContextService } from './app_context';
 
-export async function getSettings(soClient: ISavedObjectsRepository): Promise<Settings> {
-  const res = await soClient.find<SettingsSOAttributes>({
+export async function getSettings(soRepo: ISavedObjectsRepository): Promise<Settings> {
+  const res = await soRepo.find<SettingsSOAttributes>({
     type: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   });
 
@@ -34,14 +34,14 @@ export async function getSettings(soClient: ISavedObjectsRepository): Promise<Se
   };
 }
 
-export async function settingsSetup(soClient: ISavedObjectsRepository) {
+export async function settingsSetup(soRepo: ISavedObjectsRepository) {
   try {
-    const settings = await getSettings(soClient);
+    const settings = await getSettings(soRepo);
     // Migration for < 7.13 Kibana
     if (!settings.fleet_server_hosts || settings.fleet_server_hosts.length === 0) {
       const defaultSettings = createDefaultSettings();
       if (defaultSettings.fleet_server_hosts.length > 0) {
-        return saveSettings(soClient, {
+        return saveSettings(soRepo, {
           fleet_server_hosts: defaultSettings.fleet_server_hosts,
         });
       }
@@ -49,7 +49,7 @@ export async function settingsSetup(soClient: ISavedObjectsRepository) {
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
       const defaultSettings = createDefaultSettings();
-      return saveSettings(soClient, defaultSettings);
+      return saveSettings(soRepo, defaultSettings);
     }
 
     throw e;
@@ -57,7 +57,7 @@ export async function settingsSetup(soClient: ISavedObjectsRepository) {
 }
 
 export async function saveSettings(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   newData: Partial<Omit<Settings, 'id'>>
 ): Promise<Partial<Settings> & Pick<Settings, 'id'>> {
   const data = { ...newData };
@@ -66,9 +66,9 @@ export async function saveSettings(
   }
 
   try {
-    const settings = await getSettings(soClient);
+    const settings = await getSettings(soRepo);
 
-    const res = await soClient.update<SettingsSOAttributes>(
+    const res = await soRepo.update<SettingsSOAttributes>(
       GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
       settings.id,
       data
@@ -81,7 +81,7 @@ export async function saveSettings(
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
       const defaultSettings = createDefaultSettings();
-      const res = await soClient.create<SettingsSOAttributes>(
+      const res = await soRepo.create<SettingsSOAttributes>(
         GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
         {
           ...defaultSettings,

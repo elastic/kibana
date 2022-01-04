@@ -33,13 +33,13 @@ function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetG
 }
 
 export async function sendUpgradeAgentAction({
-  soClient,
+  soRepo,
   esClient,
   agentId,
   version,
   sourceUri,
 }: {
-  soClient: ISavedObjectsRepository;
+  soRepo: ISavedObjectsRepository;
   esClient: ElasticsearchClient;
   agentId: string;
   version: string;
@@ -51,7 +51,7 @@ export async function sendUpgradeAgentAction({
     source_uri: sourceUri,
   };
 
-  const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
+  const agentPolicy = await getAgentPolicyForAgent(soRepo, esClient, agentId);
   if (agentPolicy?.is_managed) {
     throw new HostedAgentPolicyRestrictionRelatedError(
       `Cannot upgrade agent ${agentId} in hosted agent policy ${agentPolicy.id}`
@@ -72,7 +72,7 @@ export async function sendUpgradeAgentAction({
 }
 
 export async function sendUpgradeAgentsActions(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   options: ({ agents: Agent[] } | GetAgentsOptions) & {
     sourceUri: string | undefined;
@@ -106,7 +106,7 @@ export async function sendUpgradeAgentsActions(
   );
 
   // get the agent policies for those ids
-  const agentPolicies = await agentPolicyService.getByIDs(soClient, Array.from(policyIdsToGet), {
+  const agentPolicies = await agentPolicyService.getByIDs(soRepo, Array.from(policyIdsToGet), {
     fields: ['is_managed'],
   });
   const hostedPolicies = agentPolicies.reduce<Record<string, boolean>>((acc, policy) => {

@@ -25,10 +25,10 @@ export const postAgentUnenrollHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PostAgentUnenrollRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
-    await AgentService.unenrollAgent(soClient, esClient, request.params.agentId, {
+    await AgentService.unenrollAgent(soRepo, esClient, request.params.agentId, {
       force: request.body?.force,
       revoke: request.body?.revoke,
     });
@@ -52,14 +52,14 @@ export const postBulkAgentsUnenrollHandler: FleetRequestHandler<
     });
   }
 
-  const soClient = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const agentOptions = Array.isArray(request.body.agents)
     ? { agentIds: request.body.agents }
     : { kuery: request.body.agents };
 
   try {
-    const results = await AgentService.unenrollAgents(soClient, esClient, {
+    const results = await AgentService.unenrollAgents(soRepo, esClient, {
       ...agentOptions,
       revoke: request.body?.revoke,
       force: request.body?.force,

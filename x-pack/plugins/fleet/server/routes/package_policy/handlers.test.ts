@@ -47,7 +47,7 @@ jest.mock(
         ),
         buildPackagePolicyFromPackage: jest.fn(),
         bulkCreate: jest.fn(),
-        create: jest.fn((soClient, esClient, newData) =>
+        create: jest.fn((soRepo, esClient, newData) =>
           Promise.resolve({
             ...newData,
             inputs: newData.inputs.map((input) => ({
@@ -81,7 +81,7 @@ jest.mock(
         getUpgradeDryRunDiff: jest.fn(),
         enrichPolicyWithDefaultsFromPackage: jest
           .fn()
-          .mockImplementation((soClient, newPolicy) => newPolicy),
+          .mockImplementation((soRepo, newPolicy) => newPolicy),
       },
     };
   }
@@ -329,7 +329,7 @@ describe('When calling package policy', () => {
     });
 
     beforeEach(() => {
-      packagePolicyServiceMock.update.mockImplementation((soClient, esClient, policyId, newData) =>
+      packagePolicyServiceMock.update.mockImplementation((soRepo, esClient, policyId, newData) =>
         Promise.resolve(newData as PackagePolicy)
       );
       packagePolicyServiceMock.get.mockResolvedValue({

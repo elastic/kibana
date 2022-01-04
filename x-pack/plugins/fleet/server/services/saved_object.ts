@@ -36,7 +36,7 @@ export const normalizeKuery = (savedObjectType: string, kuery: string): string =
 // due to SO client limitations (see comments below), so is a placeholder for when SO
 // client is improved.
 export const findAllSOs = async <T = unknown>(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   options: Omit<ListWithKuery, 'page' | 'perPage'> & {
     type: string;
   }
@@ -53,7 +53,7 @@ export const findAllSOs = async <T = unknown>(
     perPage: SO_SEARCH_LIMIT,
   };
 
-  const { saved_objects: initialSOs, total } = await soClient.find<T>(query);
+  const { saved_objects: initialSOs, total } = await soRepo.find<T>(query);
 
   savedObjectResults = initialSOs;
 
@@ -64,7 +64,7 @@ export const findAllSOs = async <T = unknown>(
   // if (total > searchLimit) {
   //   const remainingPages = Math.ceil((total - searchLimit) / searchLimit);
   //   for (let currentPage = 2; currentPage <= remainingPages + 1; currentPage++) {
-  //     const { saved_objects: currentPageSavedObjects } = await soClient.find<T>({
+  //     const { saved_objects: currentPageSavedObjects } = await soRepo.find<T>({
   //       ...query,
   //       page: currentPage,
   //     });

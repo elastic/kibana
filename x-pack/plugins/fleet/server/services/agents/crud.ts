@@ -362,7 +362,7 @@ export async function deleteAgent(esClient: ElasticsearchClient, agentId: string
 }
 
 export async function getAgentPolicyForAgent(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   agentId: string
 ) {
@@ -371,7 +371,7 @@ export async function getAgentPolicyForAgent(
     return;
   }
 
-  const agentPolicy = await agentPolicyService.get(soClient, agent.policy_id, false);
+  const agentPolicy = await agentPolicyService.get(soRepo, agent.policy_id, false);
   if (agentPolicy) {
     return agentPolicy;
   }

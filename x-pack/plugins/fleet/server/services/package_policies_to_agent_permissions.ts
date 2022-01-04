@@ -14,7 +14,7 @@ import type { PackagePolicy } from '../types';
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
 export async function storedPackagePoliciesToAgentPermissions(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   packagePolicies: string[] | PackagePolicy[]
 ): Promise<FullAgentPolicyOutputPermissions | undefined> {
   if (packagePolicies.length === 0) {
@@ -35,7 +35,7 @@ export async function storedPackagePoliciesToAgentPermissions(
       }
 
       const pkg = await getPackageInfo({
-        savedObjectsRepo: soClient,
+        savedObjectsRepo: soRepo,
         pkgName: packagePolicy.package.name,
         pkgVersion: packagePolicy.package.version,
       });

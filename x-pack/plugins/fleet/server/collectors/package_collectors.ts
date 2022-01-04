@@ -19,13 +19,13 @@ export interface PackageUsage {
 }
 
 export const getPackageUsage = async (
-  soClient?: ISavedObjectsRepository
+  soRepo?: ISavedObjectsRepository
 ): Promise<PackageUsage[]> => {
-  if (!soClient) {
+  if (!soRepo) {
     return [];
   }
-  const packagesSavedObjects = await getPackageSavedObjects(soClient);
-  const agentPolicies = await agentPolicyService.list(soClient, {
+  const packagesSavedObjects = await getPackageSavedObjects(soRepo);
+  const agentPolicies = await agentPolicyService.list(soRepo, {
     perPage: 1000, // avoiding pagination
     withPackagePolicies: true,
   });

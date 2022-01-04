@@ -48,12 +48,12 @@ function mockOutputSO(id: string, attributes: any = {}) {
   };
 }
 
-function getMockedSoClient(
+function getMockedsoRepo(
   options: { defaultOutputId?: string; defaultOutputMonitoringId?: string } = {}
 ) {
-  const soClient = savedObjectsRepositoryMock.create();
+  const soRepo = savedObjectsRepositoryMock.create();
 
-  soClient.get.mockImplementation(async (type: string, id: string) => {
+  soRepo.get.mockImplementation(async (type: string, id: string) => {
     switch (id) {
       case outputIdToUuid('output-test'): {
         return mockOutputSO('output-test');
@@ -75,7 +75,7 @@ function getMockedSoClient(
         throw new Error('not found: ' + id);
     }
   });
-  soClient.update.mockImplementation(async (type, id, data) => {
+  soRepo.update.mockImplementation(async (type, id, data) => {
     return {
       id,
       type,
@@ -83,7 +83,7 @@ function getMockedSoClient(
       references: [],
     };
   });
-  soClient.create.mockImplementation(async (type, data, createOptions) => {
+  soRepo.create.mockImplementation(async (type, data, createOptions) => {
     return {
       id: createOptions?.id || 'generated-id',
       type,
@@ -91,7 +91,7 @@ function getMockedSoClient(
       references: [],
     };
   });
-  soClient.find.mockImplementation(async (findOptions) => {
+  soRepo.find.mockImplementation(async (findOptions) => {
     if (
       options?.defaultOutputMonitoringId &&
       findOptions.searchFields &&
@@ -104,7 +104,7 @@ function getMockedSoClient(
         saved_objects: [
           {
             score: 0,
-            ...(await soClient.get(
+            ...(await soRepo.get(
               'ingest-outputs',
               outputIdToUuid(options.defaultOutputMonitoringId)
             )),
@@ -126,7 +126,7 @@ function getMockedSoClient(
         saved_objects: [
           {
             score: 0,
-            ...(await soClient.get('ingest-outputs', outputIdToUuid(options.defaultOutputId))),
+            ...(await soRepo.get('ingest-outputs', outputIdToUuid(options.defaultOutputId))),
           },
         ],
         total: 1,
@@ -141,16 +141,16 @@ function getMockedSoClient(
     };
   });
 
-  return soClient;
+  return soRepo;
 }
 
 describe('Output Service', () => {
   describe('create', () => {
     it('work with a predefined id', async () => {
-      const soClient = getMockedSoClient();
+      const soRepo = getMockedsoRepo();
 
       await outputService.create(
-        soClient,
+        soRepo,
         {
           is_default: false,
           is_default_monitoring: false,
@@ -160,20 +160,20 @@ describe('Output Service', () => {
         { id: 'output-test' }
       );
 
-      expect(soClient.create).toBeCalled();
+      expect(soRepo.create).toBeCalled();
 
       // ID should always be the same for a predefined id
-      expect(soClient.create.mock.calls[0][2]?.id).toEqual(outputIdToUuid('output-test'));
-      expect((soClient.create.mock.calls[0][1] as OutputSOAttributes).output_id).toEqual(
+      expect(soRepo.create.mock.calls[0][2]?.id).toEqual(outputIdToUuid('output-test'));
+      expect((soRepo.create.mock.calls[0][1] as OutputSOAttributes).output_id).toEqual(
         'output-test'
       );
     });
 
     it('should create a new default output if none exists before', async () => {
-      const soClient = getMockedSoClient();
+      const soRepo = getMockedsoRepo();
 
       await outputService.create(
-        soClient,
+        soRepo,
         {
           is_default: true,
           is_default_monitoring: false,
@@ -183,16 +183,16 @@ describe('Output Service', () => {
         { id: 'output-test' }
       );
 
-      expect(soClient.update).not.toBeCalled();
+      expect(soRepo.update).not.toBeCalled();
     });
 
     it('should update existing default output when creating a new default output', async () => {
-      const soClient = getMockedSoClient({
+      const soRepo = getMockedsoRepo({
         defaultOutputId: 'existing-default-output',
       });
 
       await outputService.create(
-        soClient,
+        soRepo,
         {
           is_default: true,
           is_default_monitoring: false,
@@ -202,8 +202,8 @@ describe('Output Service', () => {
         { id: 'output-test' }
       );
 
-      expect(soClient.update).toBeCalledTimes(1);
-      expect(soClient.update).toBeCalledWith(
+      expect(soRepo.update).toBeCalledTimes(1);
+      expect(soRepo.update).toBeCalledWith(
         expect.anything(),
         outputIdToUuid('existing-default-output'),
         { is_default: false }
@@ -211,10 +211,10 @@ describe('Output Service', () => {
     });
 
     it('should create a new default monitoring output if none exists before', async () => {
-      const soClient = getMockedSoClient();
+      const soRepo = getMockedsoRepo();
 
       await outputService.create(
-        soClient,
+        soRepo,
         {
           is_default: false,
           is_default_monitoring: true,
@@ -224,16 +224,16 @@ describe('Output Service', () => {
         { id: 'output-test' }
       );
 
-      expect(soClient.update).not.toBeCalled();
+      expect(soRepo.update).not.toBeCalled();
     });
 
     it('should update existing default monitoring output when creating a new default output', async () => {
-      const soClient = getMockedSoClient({
+      const soRepo = getMockedsoRepo({
         defaultOutputMonitoringId: 'existing-default-monitoring-output',
       });
 
       await outputService.create(
-        soClient,
+        soRepo,
         {
           is_default: true,
           is_default_monitoring: true,
@@ -243,8 +243,8 @@ describe('Output Service', () => {
         { id: 'output-test' }
       );
 
-      expect(soClient.update).toBeCalledTimes(1);
-      expect(soClient.update).toBeCalledWith(
+      expect(soRepo.update).toBeCalledTimes(1);
+      expect(soRepo.update).toBeCalledWith(
         expect.anything(),
         outputIdToUuid('existing-default-monitoring-output'),
         { is_default_monitoring: false }
@@ -253,13 +253,13 @@ describe('Output Service', () => {
 
     // With preconfigured outputs
     it('should throw when an existing preconfigured default output and creating a new default output outside of preconfiguration', async () => {
-      const soClient = getMockedSoClient({
+      const soRepo = getMockedsoRepo({
         defaultOutputId: 'existing-preconfigured-default-output',
       });
 
       await expect(
         outputService.create(
-          soClient,
+          soRepo,
           {
             is_default: true,
             is_default_monitoring: false,
@@ -274,12 +274,12 @@ describe('Output Service', () => {
     });
 
     it('should update existing default preconfigured monitoring output when creating a new default output from preconfiguration', async () => {
-      const soClient = getMockedSoClient({
+      const soRepo = getMockedsoRepo({
         defaultOutputId: 'existing-preconfigured-default-output',
       });
 
       await outputService.create(
-        soClient,
+        soRepo,
         {
           is_default: true,
           is_default_monitoring: true,
@@ -289,8 +289,8 @@ describe('Output Service', () => {
         { id: 'output-test', fromPreconfiguration: true }
       );
 
-      expect(soClient.update).toBeCalledTimes(1);
-      expect(soClient.update).toBeCalledWith(
+      expect(soRepo.update).toBeCalledTimes(1);
+      expect(soRepo.update).toBeCalledWith(
         expect.anything(),
         outputIdToUuid('existing-preconfigured-default-output'),
         { is_default: false }
@@ -300,19 +300,19 @@ describe('Output Service', () => {
 
   describe('update', () => {
     it('should update existing default output when updating an output to become the default output', async () => {
-      const soClient = getMockedSoClient({
+      const soRepo = getMockedsoRepo({
         defaultOutputId: 'existing-default-output',
       });
 
-      await outputService.update(soClient, 'output-test', {
+      await outputService.update(soRepo, 'output-test', {
         is_default: true,
       });
 
-      expect(soClient.update).toBeCalledTimes(2);
-      expect(soClient.update).toBeCalledWith(expect.anything(), outputIdToUuid('output-test'), {
+      expect(soRepo.update).toBeCalledTimes(2);
+      expect(soRepo.update).toBeCalledWith(expect.anything(), outputIdToUuid('output-test'), {
         is_default: true,
       });
-      expect(soClient.update).toBeCalledWith(
+      expect(soRepo.update).toBeCalledWith(
         expect.anything(),
         outputIdToUuid('existing-default-output'),
         { is_default: false }
@@ -320,17 +320,17 @@ describe('Output Service', () => {
     });
 
     it('should not update existing default output when the output is already the default one', async () => {
-      const soClient = getMockedSoClient({
+      const soRepo = getMockedsoRepo({
         defaultOutputId: 'existing-default-output',
       });
 
-      await outputService.update(soClient, 'existing-default-output', {
+      await outputService.update(soRepo, 'existing-default-output', {
         is_default: true,
         name: 'Test',
       });
 
-      expect(soClient.update).toBeCalledTimes(1);
-      expect(soClient.update).toBeCalledWith(
+      expect(soRepo.update).toBeCalledTimes(1);
+      expect(soRepo.update).toBeCalledWith(
         expect.anything(),
         outputIdToUuid('existing-default-output'),
         { is_default: true, name: 'Test' }
@@ -338,19 +338,19 @@ describe('Output Service', () => {
     });
 
     it('should update existing default monitoring output when updating an output to become the default monitoring output', async () => {
-      const soClient = getMockedSoClient({
+      const soRepo = getMockedsoRepo({
         defaultOutputMonitoringId: 'existing-default-monitoring-output',
       });
 
-      await outputService.update(soClient, 'output-test', {
+      await outputService.update(soRepo, 'output-test', {
         is_default_monitoring: true,
       });
 
-      expect(soClient.update).toBeCalledTimes(2);
-      expect(soClient.update).toBeCalledWith(expect.anything(), outputIdToUuid('output-test'), {
+      expect(soRepo.update).toBeCalledTimes(2);
+      expect(soRepo.update).toBeCalledWith(expect.anything(), outputIdToUuid('output-test'), {
         is_default_monitoring: true,
       });
-      expect(soClient.update).toBeCalledWith(
+      expect(soRepo.update).toBeCalledWith(
         expect.anything(),
         outputIdToUuid('existing-default-monitoring-output'),
         { is_default_monitoring: false }
@@ -359,9 +359,9 @@ describe('Output Service', () => {
 
     // With preconfigured outputs
     it('Do not allow to update a preconfigured output outisde from preconfiguration', async () => {
-      const soClient = getMockedSoClient();
+      const soRepo = getMockedsoRepo();
       await expect(
-        outputService.update(soClient, 'existing-preconfigured-default-output', {
+        outputService.update(soRepo, 'existing-preconfigured-default-output', {
           config_yaml: '',
         })
       ).rejects.toThrow(
@@ -370,9 +370,9 @@ describe('Output Service', () => {
     });
 
     it('Allow to update a preconfigured output from preconfiguration', async () => {
-      const soClient = getMockedSoClient();
+      const soRepo = getMockedsoRepo();
       await outputService.update(
-        soClient,
+        soRepo,
         'existing-preconfigured-default-output',
         {
           config_yaml: '',
@@ -382,16 +382,16 @@ describe('Output Service', () => {
         }
       );
 
-      expect(soClient.update).toBeCalled();
+      expect(soRepo.update).toBeCalled();
     });
 
     it('Should throw when an existing preconfigured default output and updating an output to become the default one outside of preconfiguration', async () => {
-      const soClient = getMockedSoClient({
+      const soRepo = getMockedsoRepo({
         defaultOutputId: 'existing-preconfigured-default-output',
       });
 
       await expect(
-        outputService.update(soClient, 'output-test', {
+        outputService.update(soRepo, 'output-test', {
           is_default: true,
           is_default_monitoring: false,
           name: 'Test',
@@ -403,12 +403,12 @@ describe('Output Service', () => {
     });
 
     it('Should update existing default preconfigured monitoring output when updating an output to become the default one from preconfiguration', async () => {
-      const soClient = getMockedSoClient({
+      const soRepo = getMockedsoRepo({
         defaultOutputId: 'existing-default-output',
       });
 
       await outputService.update(
-        soClient,
+        soRepo,
         'output-test',
         {
           is_default: true,
@@ -419,8 +419,8 @@ describe('Output Service', () => {
         { fromPreconfiguration: true }
       );
 
-      expect(soClient.update).toBeCalledTimes(2);
-      expect(soClient.update).toBeCalledWith(
+      expect(soRepo.update).toBeCalledTimes(2);
+      expect(soRepo.update).toBeCalledWith(
         expect.anything(),
         outputIdToUuid('existing-default-output'),
         { is_default: false }
@@ -431,30 +431,30 @@ describe('Output Service', () => {
   describe('delete', () => {
     // Preconfigured output
     it('Do not allow to delete a preconfigured output outisde from preconfiguration', async () => {
-      const soClient = getMockedSoClient();
+      const soRepo = getMockedsoRepo();
       await expect(
-        outputService.delete(soClient, 'existing-preconfigured-default-output')
+        outputService.delete(soRepo, 'existing-preconfigured-default-output')
       ).rejects.toThrow(
         'Preconfigured output existing-preconfigured-default-output cannot be deleted outside of kibana config file.'
       );
     });
 
     it('Allow to delete a preconfigured output from preconfiguration', async () => {
-      const soClient = getMockedSoClient();
-      await outputService.delete(soClient, 'existing-preconfigured-default-output', {
+      const soRepo = getMockedsoRepo();
+      await outputService.delete(soRepo, 'existing-preconfigured-default-output', {
         fromPreconfiguration: true,
       });
 
-      expect(soClient.delete).toBeCalled();
+      expect(soRepo.delete).toBeCalled();
     });
   });
 
   describe('get', () => {
     it('work with a predefined id', async () => {
-      const soClient = getMockedSoClient();
-      const output = await outputService.get(soClient, 'output-test');
+      const soRepo = getMockedsoRepo();
+      const output = await outputService.get(soRepo, 'output-test');
 
-      expect(soClient.get).toHaveBeenCalledWith('ingest-outputs', outputIdToUuid('output-test'));
+      expect(soRepo.get).toHaveBeenCalledWith('ingest-outputs', outputIdToUuid('output-test'));
 
       expect(output.id).toEqual('output-test');
     });
@@ -462,12 +462,12 @@ describe('Output Service', () => {
 
   describe('getDefaultDataOutputId', () => {
     it('work with a predefined id', async () => {
-      const soClient = getMockedSoClient({
+      const soRepo = getMockedsoRepo({
         defaultOutputId: 'output-test',
       });
-      const defaultId = await outputService.getDefaultDataOutputId(soClient);
+      const defaultId = await outputService.getDefaultDataOutputId(soRepo);
 
-      expect(soClient.find).toHaveBeenCalled();
+      expect(soRepo.find).toHaveBeenCalled();
 
       expect(defaultId).toEqual('output-test');
     });
@@ -475,12 +475,12 @@ describe('Output Service', () => {
 
   describe('getDefaultMonitoringOutputOd', () => {
     it('work with a predefined id', async () => {
-      const soClient = getMockedSoClient({
+      const soRepo = getMockedsoRepo({
         defaultOutputMonitoringId: 'output-test',
       });
-      const defaultId = await outputService.getDefaultMonitoringOutputId(soClient);
+      const defaultId = await outputService.getDefaultMonitoringOutputId(soRepo);
 
-      expect(soClient.find).toHaveBeenCalled();
+      expect(soRepo.find).toHaveBeenCalled();
 
       expect(defaultId).toEqual('output-test');
     });

@@ -47,24 +47,24 @@ function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>) {
 }
 
 class OutputService {
-  private async _getDefaultDataOutputsSO(soClient: ISavedObjectsRepository) {
-    return await soClient.find<OutputSOAttributes>({
+  private async _getDefaultDataOutputsSO(soRepo: ISavedObjectsRepository) {
+    return await soRepo.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
       search: 'true',
     });
   }
 
-  private async _getDefaultMonitoringOutputsSO(soClient: ISavedObjectsRepository) {
-    return await soClient.find<OutputSOAttributes>({
+  private async _getDefaultMonitoringOutputsSO(soRepo: ISavedObjectsRepository) {
+    return await soRepo.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default_monitoring'],
       search: 'true',
     });
   }
 
-  public async ensureDefaultOutput(soClient: ISavedObjectsRepository) {
-    const outputs = await this.list(soClient);
+  public async ensureDefaultOutput(soRepo: ISavedObjectsRepository) {
+    const outputs = await this.list(soRepo);
 
     const defaultOutput = outputs.items.find((o) => o.is_default);
     const defaultMonitoringOutput = outputs.items.find((o) => o.is_default_monitoring);
@@ -77,7 +77,7 @@ class OutputService {
         is_default_monitoring: !defaultMonitoringOutput,
       } as NewOutput;
 
-      return await this.create(soClient, newDefaultOutput, {
+      return await this.create(soRepo, newDefaultOutput, {
         id: DEFAULT_OUTPUT_ID,
         overwrite: true,
       });
@@ -100,8 +100,8 @@ class OutputService {
     return cloudHosts || flagHosts || DEFAULT_ES_HOSTS;
   }
 
-  public async getDefaultDataOutputId(soClient: ISavedObjectsRepository) {
-    const outputs = await this._getDefaultDataOutputsSO(soClient);
+  public async getDefaultDataOutputId(soRepo: ISavedObjectsRepository) {
+    const outputs = await this._getDefaultDataOutputsSO(soRepo);
 
     if (!outputs.saved_objects.length) {
       return null;
@@ -110,8 +110,8 @@ class OutputService {
     return outputSavedObjectToOutput(outputs.saved_objects[0]).id;
   }
 
-  public async getDefaultMonitoringOutputId(soClient: ISavedObjectsRepository) {
-    const outputs = await this._getDefaultMonitoringOutputsSO(soClient);
+  public async getDefaultMonitoringOutputId(soRepo: ISavedObjectsRepository) {
+    const outputs = await this._getDefaultMonitoringOutputsSO(soRepo);
 
     if (!outputs.saved_objects.length) {
       return null;
@@ -121,7 +121,7 @@ class OutputService {
   }
 
   public async create(
-    soClient: ISavedObjectsRepository,
+    soRepo: ISavedObjectsRepository,
     output: NewOutput,
     options?: { id?: string; fromPreconfiguration?: boolean; overwrite?: boolean }
   ): Promise<Output> {
@@ -129,10 +129,10 @@ class OutputService {
 
     // ensure only default output exists
     if (data.is_default) {
-      const defaultDataOuputId = await this.getDefaultDataOutputId(soClient);
+      const defaultDataOuputId = await this.getDefaultDataOutputId(soRepo);
       if (defaultDataOuputId) {
         await this.update(
-          soClient,
+          soRepo,
           defaultDataOuputId,
           { is_default: false },
           { fromPreconfiguration: options?.fromPreconfiguration ?? false }
@@ -140,10 +140,10 @@ class OutputService {
       }
     }
     if (data.is_default_monitoring) {
-      const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
+      const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soRepo);
       if (defaultMonitoringOutputId) {
         await this.update(
-          soClient,
+          soRepo,
           defaultMonitoringOutputId,
           { is_default_monitoring: false },
           { fromPreconfiguration: options?.fromPreconfiguration ?? false }
@@ -159,7 +159,7 @@ class OutputService {
       data.output_id = options?.id;
     }
 
-    const newSo = await soClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
+    const newSo = await soRepo.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
       overwrite: options?.overwrite || options?.fromPreconfiguration,
       id: options?.id ? outputIdToUuid(options.id) : undefined,
     });
@@ -171,11 +171,11 @@ class OutputService {
   }
 
   public async bulkGet(
-    soClient: ISavedObjectsRepository,
+    soRepo: ISavedObjectsRepository,
     ids: string[],
     { ignoreNotFound = false } = { ignoreNotFound: true }
   ) {
-    const res = await soClient.bulkGet<OutputSOAttributes>(
+    const res = await soRepo.bulkGet<OutputSOAttributes>(
       ids.map((id) => ({ id: outputIdToUuid(id), type: SAVED_OBJECT_TYPE }))
     );
 
@@ -193,8 +193,8 @@ class OutputService {
       .filter((output): output is Output => typeof output !== 'undefined');
   }
 
-  public async list(soClient: ISavedObjectsRepository) {
-    const outputs = await soClient.find<OutputSOAttributes>({
+  public async list(soRepo: ISavedObjectsRepository) {
+    const outputs = await soRepo.find<OutputSOAttributes>({
       type: SAVED_OBJECT_TYPE,
       page: 1,
       perPage: SO_SEARCH_LIMIT,
@@ -210,8 +210,8 @@ class OutputService {
     };
   }
 
-  public async get(soClient: ISavedObjectsRepository, id: string): Promise<Output> {
-    const outputSO = await soClient.get<OutputSOAttributes>(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+  public async get(soRepo: ISavedObjectsRepository, id: string): Promise<Output> {
+    const outputSO = await soRepo.get<OutputSOAttributes>(SAVED_OBJECT_TYPE, outputIdToUuid(id));
 
     if (outputSO.error) {
       throw new Error(outputSO.error.message);
@@ -221,13 +221,13 @@ class OutputService {
   }
 
   public async delete(
-    soClient: ISavedObjectsRepository,
+    soRepo: ISavedObjectsRepository,
     id: string,
     { fromPreconfiguration = false }: { fromPreconfiguration?: boolean } = {
       fromPreconfiguration: false,
     }
   ) {
-    const originalOutput = await this.get(soClient, id);
+    const originalOutput = await this.get(soRepo, id);
 
     if (originalOutput.is_preconfigured && !fromPreconfiguration) {
       throw new OutputUnauthorizedError(
@@ -243,18 +243,18 @@ class OutputService {
       throw new OutputUnauthorizedError(`Default monitoring output ${id} cannot be deleted.`);
     }
 
-    return soClient.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
+    return soRepo.delete(SAVED_OBJECT_TYPE, outputIdToUuid(id));
   }
 
   public async update(
-    soClient: ISavedObjectsRepository,
+    soRepo: ISavedObjectsRepository,
     id: string,
     data: Partial<Output>,
     { fromPreconfiguration = false }: { fromPreconfiguration: boolean } = {
       fromPreconfiguration: false,
     }
   ) {
-    const originalOutput = await this.get(soClient, id);
+    const originalOutput = await this.get(soRepo, id);
 
     if (originalOutput.is_preconfigured && !fromPreconfiguration) {
       throw new OutputUnauthorizedError(
@@ -266,10 +266,10 @@ class OutputService {
 
     // ensure only default output exists
     if (data.is_default) {
-      const defaultDataOuputId = await this.getDefaultDataOutputId(soClient);
+      const defaultDataOuputId = await this.getDefaultDataOutputId(soRepo);
       if (defaultDataOuputId && defaultDataOuputId !== id) {
         await this.update(
-          soClient,
+          soRepo,
           defaultDataOuputId,
           { is_default: false },
           { fromPreconfiguration }
@@ -277,11 +277,11 @@ class OutputService {
       }
     }
     if (data.is_default_monitoring) {
-      const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soClient);
+      const defaultMonitoringOutputId = await this.getDefaultMonitoringOutputId(soRepo);
 
       if (defaultMonitoringOutputId && defaultMonitoringOutputId !== id) {
         await this.update(
-          soClient,
+          soRepo,
           defaultMonitoringOutputId,
           { is_default_monitoring: false },
           { fromPreconfiguration }
@@ -292,7 +292,7 @@ class OutputService {
     if (updateData.hosts) {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
-    const outputSO = await soClient.update<OutputSOAttributes>(
+    const outputSO = await soRepo.update<OutputSOAttributes>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id),
       updateData

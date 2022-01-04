@@ -53,7 +53,7 @@ jest.mock('../output', () => {
     outputService: {
       getDefaultDataOutputId: async () => 'test-id',
       getDefaultMonitoringOutputId: async () => 'test-id',
-      get: (soClient: any, id: string): Output => {
+      get: (soRepo: any, id: string): Output => {
         switch (id) {
           case 'data-output-id':
             return {
@@ -109,7 +109,7 @@ describe('getFullAgentPolicy', () => {
     mockedAgentPolicyService.get.mockReset();
     mockedGetElasticAgentMonitoringPermissions.mockReset();
     mockedGetElasticAgentMonitoringPermissions.mockImplementation(
-      async (soClient, { logs, metrics }, namespace) => {
+      async (soRepo, { logs, metrics }, namespace) => {
         const names: string[] = [];
         if (logs) {
           names.push(`logs-${namespace}`);

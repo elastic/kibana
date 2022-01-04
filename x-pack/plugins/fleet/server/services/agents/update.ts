@@ -14,7 +14,7 @@ import { getAgentsByKuery } from './crud';
 import { unenrollAgent } from './unenroll';
 
 export async function unenrollForAgentPolicyId(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   policyId: string
 ) {
@@ -32,7 +32,7 @@ export async function unenrollForAgentPolicyId(
       hasMore = false;
     }
     for (const agent of agents) {
-      await unenrollAgent(soClient, esClient, agent.id);
+      await unenrollAgent(soRepo, esClient, agent.id);
     }
   }
 }

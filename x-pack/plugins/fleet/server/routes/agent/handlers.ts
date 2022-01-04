@@ -143,11 +143,11 @@ export const putAgentsReassignHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PutAgentReassignRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     await AgentService.reassignAgent(
-      soClient,
+      soRepo,
       esClient,
       request.params.agentId,
       request.body.policy_id
@@ -172,7 +172,7 @@ export const postBulkAgentsReassignHandler: FleetRequestHandler<
     });
   }
 
-  const soClient = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const agentOptions = Array.isArray(request.body.agents)
     ? { agentIds: request.body.agents }
@@ -180,7 +180,7 @@ export const postBulkAgentsReassignHandler: FleetRequestHandler<
 
   try {
     const results = await AgentService.reassignAgents(
-      soClient,
+      soRepo,
       esClient,
       agentOptions,
       request.body.policy_id

@@ -24,9 +24,9 @@ import { defaultIngestErrorHandler } from '../../errors';
 import { agentPolicyService } from '../../services';
 
 export const getOutputsHandler: FleetRequestHandler = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.internalSoRepo;
   try {
-    const outputs = await outputService.list(soClient);
+    const outputs = await outputService.list(soRepo);
 
     const body: GetOutputsResponse = {
       items: outputs.items,
@@ -44,9 +44,9 @@ export const getOutputsHandler: FleetRequestHandler = async (context, request, r
 export const getOneOuputHandler: FleetRequestHandler<
   TypeOf<typeof GetOneOutputRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.internalSoRepo;
   try {
-    const output = await outputService.get(soClient, request.params.outputId);
+    const output = await outputService.get(soRepo, request.params.outputId);
 
     const body: GetOneOutputResponse = {
       item: output,
@@ -69,15 +69,15 @@ export const putOuputHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PutOutputRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
-    await outputService.update(soClient, request.params.outputId, request.body);
-    const output = await outputService.get(soClient, request.params.outputId);
+    await outputService.update(soRepo, request.params.outputId, request.body);
+    const output = await outputService.get(soRepo, request.params.outputId);
     if (output.is_default || output.is_default_monitoring) {
-      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+      await agentPolicyService.bumpAllAgentPolicies(soRepo, esClient);
     } else {
-      await agentPolicyService.bumpAllAgentPoliciesForOutput(soClient, esClient, output.id);
+      await agentPolicyService.bumpAllAgentPoliciesForOutput(soRepo, esClient, output.id);
     }
 
     const body: GetOneOutputResponse = {
@@ -101,13 +101,13 @@ export const postOuputHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PostOutputRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     const { id, ...data } = request.body;
-    const output = await outputService.create(soClient, data, { id });
+    const output = await outputService.create(soRepo, data, { id });
     if (output.is_default || output.is_default_monitoring) {
-      await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
+      await agentPolicyService.bumpAllAgentPolicies(soRepo, esClient);
     }
 
     const body: GetOneOutputResponse = {
@@ -123,9 +123,9 @@ export const postOuputHandler: FleetRequestHandler<
 export const deleteOutputHandler: FleetRequestHandler<
   TypeOf<typeof DeleteOutputRequestSchema.params>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.internalSoRepo;
   try {
-    await outputService.delete(soClient, request.params.outputId);
+    await outputService.delete(soRepo, request.params.outputId);
 
     const body: DeleteOutputResponse = {
       id: request.params.outputId,

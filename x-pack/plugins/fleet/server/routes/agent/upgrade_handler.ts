@@ -25,7 +25,7 @@ export const postAgentUpgradeHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PostAgentUpgradeRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const { version, source_uri: sourceUri, force } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
@@ -61,7 +61,7 @@ export const postAgentUpgradeHandler: FleetRequestHandler<
 
   try {
     await AgentService.sendUpgradeAgentAction({
-      soClient,
+      soRepo,
       esClient,
       agentId: request.params.agentId,
       version,
@@ -80,7 +80,7 @@ export const postBulkAgentsUpgradeHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PostBulkAgentUpgradeRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const { version, source_uri: sourceUri, agents, force } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
@@ -104,7 +104,7 @@ export const postBulkAgentsUpgradeHandler: FleetRequestHandler<
       version,
       force,
     };
-    const results = await AgentService.sendUpgradeAgentsActions(soClient, esClient, upgradeOptions);
+    const results = await AgentService.sendUpgradeAgentsActions(soRepo, esClient, upgradeOptions);
     const body = results.items.reduce<PostBulkAgentUpgradeResponse>((acc, so) => {
       acc[so.id] = {
         success: !so.error,

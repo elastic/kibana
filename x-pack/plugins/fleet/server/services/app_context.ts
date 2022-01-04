@@ -130,8 +130,8 @@ class AppContextService {
     return this.savedObjects;
   }
 
-  public getInternalUserSOClient(request: KibanaRequest) {
-    // soClient as kibana internal users, be careful on how you use it, security is not enabled
+  public getInternalUsersoRepo(request: KibanaRequest) {
+    // soRepo as kibana internal users, be careful on how you use it, security is not enabled
     return appContextService.getSavedObjects().getScopedClient(request, {
       excludedWrappers: ['security'],
     });
@@ -141,7 +141,7 @@ class AppContextService {
     if (!this.esClient) {
       throw new Error('Elasticsearch start service not set.');
     }
-    // soClient as kibana internal users, be careful on how you use it, security is not enabled
+    // soRepo as kibana internal users, be careful on how you use it, security is not enabled
     return this.esClient;
   }
 

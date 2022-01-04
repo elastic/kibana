@@ -140,8 +140,8 @@ jest.mock('./epm/registry');
 jest.mock('./agent_policy', () => {
   return {
     agentPolicyService: {
-      get: async (soClient: SavedObjectsClient, id: string) => {
-        const agentPolicySO = await soClient.get<AgentPolicySOAttributes>(
+      get: async (soRepo: SavedObjectsClient, id: string) => {
+        const agentPolicySO = await soRepo.get<AgentPolicySOAttributes>(
           'ingest-agent-policies',
           id
         );

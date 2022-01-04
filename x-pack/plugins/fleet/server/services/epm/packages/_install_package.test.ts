@@ -37,11 +37,11 @@ function sleep(millis: number) {
 }
 
 describe('_installPackage', () => {
-  let soClient: jest.Mocked<ISavedObjectsRepository>;
+  let soRepo: jest.Mocked<ISavedObjectsRepository>;
   let esClient: jest.Mocked<ElasticsearchClient>;
 
   beforeEach(async () => {
-    soClient = savedObjectsRepositoryMock.create();
+    soRepo = savedObjectsRepositoryMock.create();
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     appContextService.start(createAppContextStartContractMock());
   });
@@ -60,7 +60,7 @@ describe('_installPackage', () => {
     mockedUpdateCurrentWriteIndices.mockImplementation(async () => await sleep(1000));
 
     const installationPromise = _installPackage({
-      savedObjectsClient: soClient,
+      savedObjectsClient: soRepo,
       // @ts-ignore
       savedObjectsImporter: jest.fn(),
       esClient,

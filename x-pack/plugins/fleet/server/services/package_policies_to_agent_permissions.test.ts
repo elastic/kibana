@@ -20,25 +20,25 @@ import {
 const getPackageInfoMock = getPackageInfo as jest.MockedFunction<typeof getPackageInfo>;
 
 describe('storedPackagePoliciesToAgentPermissions()', () => {
-  let soClient: jest.Mocked<ISavedObjectsRepository>;
+  let soRepo: jest.Mocked<ISavedObjectsRepository>;
   beforeEach(() => {
-    soClient = savedObjectsRepositoryMock.create();
+    soRepo = savedObjectsRepositoryMock.create();
   });
 
   it('Returns `undefined` if there are no package policies', async () => {
-    const permissions = await storedPackagePoliciesToAgentPermissions(soClient, []);
+    const permissions = await storedPackagePoliciesToAgentPermissions(soRepo, []);
     expect(permissions).toBeUndefined();
   });
 
   it('Throw an error for string package policies', async () => {
-    await expect(() => storedPackagePoliciesToAgentPermissions(soClient, ['foo'])).rejects.toThrow(
+    await expect(() => storedPackagePoliciesToAgentPermissions(soRepo, ['foo'])).rejects.toThrow(
       /storedPackagePoliciesToAgentPermissions should be called with a PackagePolicy/
     );
   });
 
   it('Returns the default permissions if a package policy does not have a package', async () => {
     await expect(() =>
-      storedPackagePoliciesToAgentPermissions(soClient, [
+      storedPackagePoliciesToAgentPermissions(soRepo, [
         { name: 'foo', package: undefined } as PackagePolicy,
       ])
     ).rejects.toThrow(/No package for package policy foo/);
@@ -143,7 +143,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       },
     ];
 
-    const permissions = await storedPackagePoliciesToAgentPermissions(soClient, packagePolicies);
+    const permissions = await storedPackagePoliciesToAgentPermissions(soRepo, packagePolicies);
     expect(permissions).toMatchObject({
       'test-policy': {
         indices: [
@@ -235,7 +235,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       },
     ];
 
-    const permissions = await storedPackagePoliciesToAgentPermissions(soClient, packagePolicies);
+    const permissions = await storedPackagePoliciesToAgentPermissions(soRepo, packagePolicies);
     expect(permissions).toMatchObject({
       'test-policy': {
         indices: [
@@ -332,7 +332,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       },
     ];
 
-    const permissions = await storedPackagePoliciesToAgentPermissions(soClient, packagePolicies);
+    const permissions = await storedPackagePoliciesToAgentPermissions(soRepo, packagePolicies);
     expect(permissions).toMatchObject({
       'test-policy': {
         indices: [
@@ -439,7 +439,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       },
     ];
 
-    const permissions = await storedPackagePoliciesToAgentPermissions(soClient, packagePolicies);
+    const permissions = await storedPackagePoliciesToAgentPermissions(soRepo, packagePolicies);
     expect(permissions).toMatchObject({
       'test-policy': {
         indices: [

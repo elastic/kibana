@@ -39,27 +39,27 @@ describe('setupFleet', () => {
 
   describe('should reject with any error thrown underneath', () => {
     it('SO client throws plain Error', async () => {
-      const soClient = savedObjectsRepositoryMock.create();
-      soClient.create = mockedMethodThrowsError();
-      soClient.find = mockedMethodThrowsError();
-      soClient.get = mockedMethodThrowsError();
-      soClient.update = mockedMethodThrowsError();
+      const soRepo = savedObjectsRepositoryMock.create();
+      soRepo.create = mockedMethodThrowsError();
+      soRepo.find = mockedMethodThrowsError();
+      soRepo.get = mockedMethodThrowsError();
+      soRepo.update = mockedMethodThrowsError();
       const esClient = context.core.elasticsearch.client.asInternalUser;
 
-      const setupPromise = setupFleet(soClient, esClient);
+      const setupPromise = setupFleet(soRepo, esClient);
       await expect(setupPromise).rejects.toThrow('SO method mocked to throw');
       await expect(setupPromise).rejects.toThrow(Error);
     });
 
     it('SO client throws other error', async () => {
-      const soClient = savedObjectsRepositoryMock.create();
-      soClient.create = mockedMethodThrowsCustom();
-      soClient.find = mockedMethodThrowsCustom();
-      soClient.get = mockedMethodThrowsCustom();
-      soClient.update = mockedMethodThrowsCustom();
+      const soRepo = savedObjectsRepositoryMock.create();
+      soRepo.create = mockedMethodThrowsCustom();
+      soRepo.find = mockedMethodThrowsCustom();
+      soRepo.get = mockedMethodThrowsCustom();
+      soRepo.update = mockedMethodThrowsCustom();
       const esClient = context.core.elasticsearch.client.asInternalUser;
 
-      const setupPromise = setupFleet(soClient, esClient);
+      const setupPromise = setupFleet(soRepo, esClient);
       await expect(setupPromise).rejects.toThrow('method mocked to throw');
       await expect(setupPromise).rejects.toThrow(CustomTestError);
     });

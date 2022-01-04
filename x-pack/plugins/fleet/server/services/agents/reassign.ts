@@ -24,17 +24,17 @@ import { createAgentAction, bulkCreateAgentActions } from './actions';
 import { searchHitToAgent } from './helpers';
 
 export async function reassignAgent(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   agentId: string,
   newAgentPolicyId: string
 ) {
-  const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
+  const newAgentPolicy = await agentPolicyService.get(soRepo, newAgentPolicyId);
   if (!newAgentPolicy) {
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
   }
 
-  await reassignAgentIsAllowed(soClient, esClient, agentId, newAgentPolicyId);
+  await reassignAgentIsAllowed(soRepo, esClient, agentId, newAgentPolicyId);
 
   await updateAgent(esClient, agentId, {
     policy_id: newAgentPolicyId,
@@ -49,19 +49,19 @@ export async function reassignAgent(
 }
 
 export async function reassignAgentIsAllowed(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   agentId: string,
   newAgentPolicyId: string
 ) {
-  const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
+  const agentPolicy = await getAgentPolicyForAgent(soRepo, esClient, agentId);
   if (agentPolicy?.is_managed) {
     throw new HostedAgentPolicyRestrictionRelatedError(
       `Cannot reassign an agent from hosted agent policy ${agentPolicy.id}`
     );
   }
 
-  const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
+  const newAgentPolicy = await agentPolicyService.get(soRepo, newAgentPolicyId);
   if (newAgentPolicy?.is_managed) {
     throw new HostedAgentPolicyRestrictionRelatedError(
       `Cannot reassign an agent to hosted agent policy ${newAgentPolicy.id}`
@@ -75,12 +75,12 @@ function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetG
   return Boolean(doc && 'found' in doc);
 }
 export async function reassignAgents(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   options: ({ agents: Agent[] } | GetAgentsOptions) & { force?: boolean },
   newAgentPolicyId: string
 ): Promise<{ items: BulkActionResult[] }> {
-  const agentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
+  const agentPolicy = await agentPolicyService.get(soRepo, newAgentPolicyId);
   if (!agentPolicy) {
     throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
   }
@@ -113,12 +113,7 @@ export async function reassignAgents(
         throw new AgentReassignmentError(`${agent.id} is already assigned to ${newAgentPolicyId}`);
       }
 
-      const isAllowed = await reassignAgentIsAllowed(
-        soClient,
-        esClient,
-        agent.id,
-        newAgentPolicyId
-      );
+      const isAllowed = await reassignAgentIsAllowed(soRepo, esClient, agent.id, newAgentPolicyId);
       if (isAllowed) {
         return agent;
       }

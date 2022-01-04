@@ -22,11 +22,11 @@ import {
 } from './crud';
 
 async function unenrollAgentIsAllowed(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   agentId: string
 ) {
-  const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
+  const agentPolicy = await getAgentPolicyForAgent(soRepo, esClient, agentId);
   if (agentPolicy?.is_managed) {
     throw new HostedAgentPolicyRestrictionRelatedError(
       `Cannot unenroll ${agentId} from a hosted agent policy ${agentPolicy.id}`
@@ -37,7 +37,7 @@ async function unenrollAgentIsAllowed(
 }
 
 export async function unenrollAgent(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   agentId: string,
   options?: {
@@ -46,10 +46,10 @@ export async function unenrollAgent(
   }
 ) {
   if (!options?.force) {
-    await unenrollAgentIsAllowed(soClient, esClient, agentId);
+    await unenrollAgentIsAllowed(soRepo, esClient, agentId);
   }
   if (options?.revoke) {
-    return forceUnenrollAgent(soClient, esClient, agentId);
+    return forceUnenrollAgent(soRepo, esClient, agentId);
   }
   const now = new Date().toISOString();
   await createAgentAction(esClient, {
@@ -63,7 +63,7 @@ export async function unenrollAgent(
 }
 
 export async function unenrollAgents(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   options: GetAgentsOptions & {
     force?: boolean;
@@ -83,7 +83,7 @@ export async function unenrollAgents(
   // And which are allowed to unenroll
   const agentResults = await Promise.allSettled(
     agentsEnrolled.map((agent) =>
-      unenrollAgentIsAllowed(soClient, esClient, agent.id).then((_) => agent)
+      unenrollAgentIsAllowed(soRepo, esClient, agent.id).then((_) => agent)
     )
   );
   const outgoingErrors: Record<Agent['id'], Error> = {};
@@ -160,7 +160,7 @@ export async function invalidateAPIKeysForAgents(agents: Agent[]) {
 }
 
 export async function forceUnenrollAgent(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient,
   agentIdOrAgent: string | Agent
 ) {

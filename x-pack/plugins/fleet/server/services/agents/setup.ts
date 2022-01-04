@@ -14,10 +14,10 @@ import { agentPolicyService } from '../agent_policy';
  * Ensure a .fleet-policy document exist for each agent policy so Fleet server can retrieve it
  */
 export async function ensureFleetServerAgentPoliciesExists(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   esClient: ElasticsearchClient
 ) {
-  const { items: agentPolicies } = await agentPolicyService.list(soClient, {
+  const { items: agentPolicies } = await agentPolicyService.list(soRepo, {
     perPage: SO_SEARCH_LIMIT,
   });
 
@@ -29,7 +29,7 @@ export async function ensureFleetServerAgentPoliciesExists(
       ));
 
       if (!policyChangeActionExist) {
-        return agentPolicyService.createFleetServerPolicy(soClient, agentPolicy.id);
+        return agentPolicyService.createFleetServerPolicy(soRepo, agentPolicy.id);
       }
     })
   );

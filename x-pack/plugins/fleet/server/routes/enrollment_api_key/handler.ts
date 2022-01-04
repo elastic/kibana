@@ -54,19 +54,19 @@ export const postEnrollmentApiKeyHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof PostEnrollmentAPIKeyRequestSchema.body>
 > = async (context, request, response) => {
-  const soClient = context.fleet.epm.internalSoRepo;
+  const soRepo = context.fleet.epm.internalSoRepo;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     // validate policy id
-    await agentPolicyService.get(soClient, request.body.policy_id).catch((err) => {
-      if (soClient.errors.isNotFoundError(err)) {
+    await agentPolicyService.get(soRepo, request.body.policy_id).catch((err) => {
+      if (soRepo.errors.isNotFoundError(err)) {
         throw new AgentPolicyNotFoundError(`Agent policy "${request.body.policy_id}" not found`);
       }
 
       throw err;
     });
 
-    const apiKey = await APIKeyService.generateEnrollmentAPIKey(soClient, esClient, {
+    const apiKey = await APIKeyService.generateEnrollmentAPIKey(soRepo, esClient, {
       name: request.body.name,
       expiration: request.body.expiration,
       agentPolicyId: request.body.policy_id,

@@ -41,8 +41,8 @@ const hostedAgentPolicySO = {
 
 describe('reassignAgent (singular)', () => {
   it('can reassign from regular agent policy to regular', async () => {
-    const { soClient, esClient } = createClientsMock();
-    await reassignAgent(soClient, esClient, agentInRegularDoc._id, regularAgentPolicySO.id);
+    const { soRepo, esClient } = createClientsMock();
+    await reassignAgent(soRepo, esClient, agentInRegularDoc._id, regularAgentPolicySO.id);
 
     // calls ES update with correct values
     expect(esClient.update).toBeCalledTimes(1);
@@ -55,9 +55,9 @@ describe('reassignAgent (singular)', () => {
   });
 
   it('cannot reassign from regular agent policy to hosted', async () => {
-    const { soClient, esClient } = createClientsMock();
+    const { soRepo, esClient } = createClientsMock();
     await expect(
-      reassignAgent(soClient, esClient, agentInRegularDoc._id, hostedAgentPolicySO.id)
+      reassignAgent(soRepo, esClient, agentInRegularDoc._id, hostedAgentPolicySO.id)
     ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
 
     // does not call ES update
@@ -65,15 +65,15 @@ describe('reassignAgent (singular)', () => {
   });
 
   it('cannot reassign from hosted agent policy', async () => {
-    const { soClient, esClient } = createClientsMock();
+    const { soRepo, esClient } = createClientsMock();
     await expect(
-      reassignAgent(soClient, esClient, agentInHostedDoc._id, regularAgentPolicySO.id)
+      reassignAgent(soRepo, esClient, agentInHostedDoc._id, regularAgentPolicySO.id)
     ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
     // does not call ES update
     expect(esClient.update).toBeCalledTimes(0);
 
     await expect(
-      reassignAgent(soClient, esClient, agentInHostedDoc._id, hostedAgentPolicySO.id)
+      reassignAgent(soRepo, esClient, agentInHostedDoc._id, hostedAgentPolicySO.id)
     ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
     // does not call ES update
     expect(esClient.update).toBeCalledTimes(0);
@@ -82,9 +82,9 @@ describe('reassignAgent (singular)', () => {
 
 describe('reassignAgents (plural)', () => {
   it('agents in hosted policies are not updated', async () => {
-    const { soClient, esClient } = createClientsMock();
+    const { soRepo, esClient } = createClientsMock();
     const idsToReassign = [agentInRegularDoc._id, agentInHostedDoc._id, agentInHostedDoc2._id];
-    await reassignAgents(soClient, esClient, { agentIds: idsToReassign }, regularAgentPolicySO2.id);
+    await reassignAgents(soRepo, esClient, { agentIds: idsToReassign }, regularAgentPolicySO2.id);
 
     // calls ES update with correct values
     const calledWith = esClient.bulk.mock.calls[0][0];
@@ -96,20 +96,20 @@ describe('reassignAgents (plural)', () => {
 });
 
 function createClientsMock() {
-  const soClientMock = savedObjectsRepositoryMock.create();
+  const soRepoMock = savedObjectsRepositoryMock.create();
 
   // need to mock .create & bulkCreate due to (bulk)createAgentAction(s) in reassignAgent(s)
   // @ts-expect-error
-  soClientMock.create.mockResolvedValue({ attributes: { agent_id: 'test' } });
-  soClientMock.bulkCreate.mockImplementation(async ([{ type, attributes }]) => {
+  soRepoMock.create.mockResolvedValue({ attributes: { agent_id: 'test' } });
+  soRepoMock.bulkCreate.mockImplementation(async ([{ type, attributes }]) => {
     return {
-      saved_objects: [await soClientMock.create(type, attributes)],
+      saved_objects: [await soRepoMock.create(type, attributes)],
     };
   });
-  soClientMock.bulkUpdate.mockResolvedValue({
+  soRepoMock.bulkUpdate.mockResolvedValue({
     saved_objects: [],
   });
-  soClientMock.get.mockImplementation(async (_, id) => {
+  soRepoMock.get.mockImplementation(async (_, id) => {
     switch (id) {
       case regularAgentPolicySO.id:
         return regularAgentPolicySO;
@@ -121,9 +121,9 @@ function createClientsMock() {
         throw new Error(`${id} not found`);
     }
   });
-  soClientMock.bulkGet.mockImplementation(async (options) => {
+  soRepoMock.bulkGet.mockImplementation(async (options) => {
     return {
-      saved_objects: await Promise.all(options!.map(({ type, id }) => soClientMock.get(type, id))),
+      saved_objects: await Promise.all(options!.map(({ type, id }) => soRepoMock.get(type, id))),
     };
   });
 
@@ -152,5 +152,5 @@ function createClientsMock() {
     body: { items: [] },
   });
 
-  return { soClient: soClientMock, esClient: esClientMock };
+  return { soRepo: soRepoMock, esClient: esClientMock };
 }

@@ -32,15 +32,15 @@ export interface FleetServerUsage {
 }
 
 export const getFleetServerUsage = async (
-  soClient?: ISavedObjectsRepository,
+  soRepo?: ISavedObjectsRepository,
   esClient?: ElasticsearchClient
 ): Promise<any> => {
-  if (!soClient || !esClient) {
+  if (!soRepo || !esClient) {
     return DEFAULT_USAGE;
   }
 
   const numHostsUrls = await settingsService
-    .getSettings(soClient)
+    .getSettings(soRepo)
     .then((settings) => settings.fleet_server_hosts?.length ?? 0)
     .catch((err) => {
       if (isBoom(err) && err.output.statusCode === 404) {
@@ -55,7 +55,7 @@ export const getFleetServerUsage = async (
   const policyIds = new Set<string>();
   let page = 1;
   while (hasMore) {
-    const res = await packagePolicyService.list(soClient, {
+    const res = await packagePolicyService.list(soRepo, {
       page: page++,
       perPage: 20,
       kuery: 'ingest-package-policies.package.name:fleet_server',

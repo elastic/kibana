@@ -36,8 +36,8 @@ const hostedAgentPolicySO = {
 
 describe('unenrollAgent (singular)', () => {
   it('can unenroll from regular agent policy', async () => {
-    const { soClient, esClient } = createClientMock();
-    await unenrollAgent(soClient, esClient, agentInRegularDoc._id);
+    const { soRepo, esClient } = createClientMock();
+    await unenrollAgent(soRepo, esClient, agentInRegularDoc._id);
 
     // calls ES update with correct values
     expect(esClient.update).toBeCalledTimes(1);
@@ -49,8 +49,8 @@ describe('unenrollAgent (singular)', () => {
   });
 
   it('cannot unenroll from hosted agent policy by default', async () => {
-    const { soClient, esClient } = createClientMock();
-    await expect(unenrollAgent(soClient, esClient, agentInHostedDoc._id)).rejects.toThrowError(
+    const { soRepo, esClient } = createClientMock();
+    await expect(unenrollAgent(soRepo, esClient, agentInHostedDoc._id)).rejects.toThrowError(
       HostedAgentPolicyRestrictionRelatedError
     );
     // does not call ES update
@@ -58,17 +58,17 @@ describe('unenrollAgent (singular)', () => {
   });
 
   it('cannot unenroll from hosted agent policy with revoke=true', async () => {
-    const { soClient, esClient } = createClientMock();
+    const { soRepo, esClient } = createClientMock();
     await expect(
-      unenrollAgent(soClient, esClient, agentInHostedDoc._id, { revoke: true })
+      unenrollAgent(soRepo, esClient, agentInHostedDoc._id, { revoke: true })
     ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
     // does not call ES update
     expect(esClient.update).toBeCalledTimes(0);
   });
 
   it('can unenroll from hosted agent policy with force=true', async () => {
-    const { soClient, esClient } = createClientMock();
-    await unenrollAgent(soClient, esClient, agentInHostedDoc._id, { force: true });
+    const { soRepo, esClient } = createClientMock();
+    await unenrollAgent(soRepo, esClient, agentInHostedDoc._id, { force: true });
     // calls ES update with correct values
     expect(esClient.update).toBeCalledTimes(1);
     const calledWith = esClient.update.mock.calls[0];
@@ -79,8 +79,8 @@ describe('unenrollAgent (singular)', () => {
   });
 
   it('can unenroll from hosted agent policy with force=true and revoke=true', async () => {
-    const { soClient, esClient } = createClientMock();
-    await unenrollAgent(soClient, esClient, agentInHostedDoc._id, { force: true, revoke: true });
+    const { soRepo, esClient } = createClientMock();
+    await unenrollAgent(soRepo, esClient, agentInHostedDoc._id, { force: true, revoke: true });
     // calls ES update with correct values
     expect(esClient.update).toBeCalledTimes(1);
     const calledWith = esClient.update.mock.calls[0];
@@ -91,9 +91,9 @@ describe('unenrollAgent (singular)', () => {
 
 describe('unenrollAgents (plural)', () => {
   it('can unenroll from an regular agent policy', async () => {
-    const { soClient, esClient } = createClientMock();
+    const { soRepo, esClient } = createClientMock();
     const idsToUnenroll = [agentInRegularDoc._id, agentInRegularDoc2._id];
-    await unenrollAgents(soClient, esClient, { agentIds: idsToUnenroll });
+    await unenrollAgents(soRepo, esClient, { agentIds: idsToUnenroll });
 
     // calls ES update with correct values
     const calledWith = esClient.bulk.mock.calls[1][0];
@@ -109,10 +109,10 @@ describe('unenrollAgents (plural)', () => {
     }
   });
   it('cannot unenroll from a hosted agent policy by default', async () => {
-    const { soClient, esClient } = createClientMock();
+    const { soRepo, esClient } = createClientMock();
 
     const idsToUnenroll = [agentInRegularDoc._id, agentInHostedDoc._id, agentInRegularDoc2._id];
-    await unenrollAgents(soClient, esClient, { agentIds: idsToUnenroll });
+    await unenrollAgents(soRepo, esClient, { agentIds: idsToUnenroll });
 
     // calls ES update with correct values
     const onlyRegular = [agentInRegularDoc._id, agentInRegularDoc2._id];
@@ -130,11 +130,11 @@ describe('unenrollAgents (plural)', () => {
   });
 
   it('cannot unenroll from a hosted agent policy with revoke=true', async () => {
-    const { soClient, esClient } = createClientMock();
+    const { soRepo, esClient } = createClientMock();
 
     const idsToUnenroll = [agentInRegularDoc._id, agentInHostedDoc._id, agentInRegularDoc2._id];
 
-    const unenrolledResponse = await unenrollAgents(soClient, esClient, {
+    const unenrolledResponse = await unenrollAgents(soRepo, esClient, {
       agentIds: idsToUnenroll,
       revoke: true,
     });
@@ -170,9 +170,9 @@ describe('unenrollAgents (plural)', () => {
   });
 
   it('can unenroll from hosted agent policy with force=true', async () => {
-    const { soClient, esClient } = createClientMock();
+    const { soRepo, esClient } = createClientMock();
     const idsToUnenroll = [agentInRegularDoc._id, agentInHostedDoc._id, agentInRegularDoc2._id];
-    await unenrollAgents(soClient, esClient, { agentIds: idsToUnenroll, force: true });
+    await unenrollAgents(soRepo, esClient, { agentIds: idsToUnenroll, force: true });
 
     // calls ES update with correct values
     const calledWith = esClient.bulk.mock.calls[1][0];
@@ -189,11 +189,11 @@ describe('unenrollAgents (plural)', () => {
   });
 
   it('can unenroll from hosted agent policy with force=true and revoke=true', async () => {
-    const { soClient, esClient } = createClientMock();
+    const { soRepo, esClient } = createClientMock();
 
     const idsToUnenroll = [agentInRegularDoc._id, agentInHostedDoc._id, agentInRegularDoc2._id];
 
-    const unenrolledResponse = await unenrollAgents(soClient, esClient, {
+    const unenrolledResponse = await unenrollAgents(soRepo, esClient, {
       agentIds: idsToUnenroll,
       revoke: true,
       force: true,
@@ -230,21 +230,21 @@ describe('unenrollAgents (plural)', () => {
 });
 
 function createClientMock() {
-  const soClientMock = savedObjectsRepositoryMock.create();
+  const soRepoMock = savedObjectsRepositoryMock.create();
 
   // need to mock .create & bulkCreate due to (bulk)createAgentAction(s) in unenrollAgent(s)
   // @ts-expect-error
-  soClientMock.create.mockResolvedValue({ attributes: { agent_id: 'tata' } });
-  soClientMock.bulkCreate.mockImplementation(async ([{ type, attributes }]) => {
+  soRepoMock.create.mockResolvedValue({ attributes: { agent_id: 'tata' } });
+  soRepoMock.bulkCreate.mockImplementation(async ([{ type, attributes }]) => {
     return {
-      saved_objects: [await soClientMock.create(type, attributes)],
+      saved_objects: [await soRepoMock.create(type, attributes)],
     };
   });
-  soClientMock.bulkUpdate.mockResolvedValue({
+  soRepoMock.bulkUpdate.mockResolvedValue({
     saved_objects: [],
   });
 
-  soClientMock.get.mockImplementation(async (_, id) => {
+  soRepoMock.get.mockImplementation(async (_, id) => {
     switch (id) {
       case regularAgentPolicySO.id:
         return regularAgentPolicySO;
@@ -255,9 +255,9 @@ function createClientMock() {
     }
   });
 
-  soClientMock.bulkGet.mockImplementation(async (options) => {
+  soRepoMock.bulkGet.mockImplementation(async (options) => {
     return {
-      saved_objects: await Promise.all(options!.map(({ type, id }) => soClientMock.get(type, id))),
+      saved_objects: await Promise.all(options!.map(({ type, id }) => soRepoMock.get(type, id))),
     };
   });
 
@@ -302,5 +302,5 @@ function createClientMock() {
     };
   });
 
-  return { soClient: soClientMock, esClient: esClientMock };
+  return { soRepo: soRepoMock, esClient: esClientMock };
 }

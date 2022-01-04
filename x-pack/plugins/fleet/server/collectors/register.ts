@@ -42,12 +42,12 @@ export function registerFleetUsageCollector(
     type: 'fleet',
     isReady: () => true,
     fetch: async () => {
-      const [soClient, esClient] = await getInternalClients(core);
+      const [soRepo, esClient] = await getInternalClients(core);
       return {
         agents_enabled: getIsAgentsEnabled(config),
-        agents: await getAgentUsage(config, soClient, esClient),
-        fleet_server: await getFleetServerUsage(soClient, esClient),
-        packages: await getPackageUsage(soClient),
+        agents: await getAgentUsage(config, soRepo, esClient),
+        fleet_server: await getFleetServerUsage(soRepo, esClient),
+        packages: await getPackageUsage(soRepo),
       };
     },
     schema: {

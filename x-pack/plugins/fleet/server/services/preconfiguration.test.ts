@@ -53,8 +53,8 @@ const mockDefaultOutput: Output = {
 };
 
 function getPutPreconfiguredPackagesMock() {
-  const soClient = savedObjectsRepositoryMock.create();
-  soClient.find.mockImplementation(async ({ type, search }) => {
+  const soRepo = savedObjectsRepositoryMock.create();
+  soRepo.find.mockImplementation(async ({ type, search }) => {
     if (type === AGENT_POLICY_SAVED_OBJECT_TYPE) {
       const id = search!.replace(/"/g, '');
       const attributes = mockConfiguredPolicies.get(id);
@@ -82,7 +82,7 @@ function getPutPreconfiguredPackagesMock() {
       per_page: 0,
     };
   });
-  soClient.get.mockImplementation(async (type, id) => {
+  soRepo.get.mockImplementation(async (type, id) => {
     const attributes = mockConfiguredPolicies.get(id);
     if (!attributes) throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
 
@@ -93,7 +93,7 @@ function getPutPreconfiguredPackagesMock() {
       references: [],
     };
   });
-  soClient.create.mockImplementation(async (type, policy, options) => {
+  soRepo.create.mockImplementation(async (type, policy, options) => {
     const attributes = policy as AgentPolicy;
     const { id } = options!;
     mockConfiguredPolicies.set(id, attributes);
@@ -105,9 +105,9 @@ function getPutPreconfiguredPackagesMock() {
     };
   });
 
-  soClient.delete.mockResolvedValue({});
+  soRepo.delete.mockResolvedValue({});
 
-  return soClient;
+  return soRepo;
 }
 
 jest.mock('./epm/packages/install', () => ({
@@ -171,14 +171,14 @@ jest.mock('./package_policy', () => ({
     listIds: jest.fn().mockReturnValue({ items: [] }),
     create: jest
       .fn()
-      .mockImplementation((soClient: any, esClient: any, newPackagePolicy: NewPackagePolicy) => {
+      .mockImplementation((soRepo: any, esClient: any, newPackagePolicy: NewPackagePolicy) => {
         return {
           id: 'mocked',
           version: 'mocked',
           ...newPackagePolicy,
         };
       }),
-    get(soClient: any, id: string) {
+    get(soRepo: any, id: string) {
       return {
         id: 'mocked',
         version: 'mocked',
@@ -218,11 +218,11 @@ describe('policy preconfiguration', () => {
   });
 
   it('should perform a no-op when passed no policies or packages', async () => {
-    const soClient = getPutPreconfiguredPackagesMock();
+    const soRepo = getPutPreconfiguredPackagesMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
     const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
-      soClient,
+      soRepo,
       esClient,
       [],
       [],
@@ -236,11 +236,11 @@ describe('policy preconfiguration', () => {
   });
 
   it('should install packages successfully', async () => {
-    const soClient = getPutPreconfiguredPackagesMock();
+    const soRepo = getPutPreconfiguredPackagesMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
     const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
-      soClient,
+      soRepo,
       esClient,
       [],
       [{ name: 'test_package', version: '3.0.0' }],
@@ -254,11 +254,11 @@ describe('policy preconfiguration', () => {
   });
 
   it('should install packages and configure agent policies successfully', async () => {
-    const soClient = getPutPreconfiguredPackagesMock();
+    const soRepo = getPutPreconfiguredPackagesMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
     const { policies, packages, nonFatalErrors } = await ensurePreconfiguredPackagesAndPolicies(
-      soClient,
+      soRepo,
       esClient,
       [
         {
@@ -285,7 +285,7 @@ describe('policy preconfiguration', () => {
   });
 
   it('should not add new package policy to existing non managed policies', async () => {
-    const soClient = getPutPreconfiguredPackagesMock();
+    const soRepo = getPutPreconfiguredPackagesMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockedPackagePolicyService.getByIDs.mockResolvedValue([
       { name: 'test_package1' } as PackagePolicy,
@@ -305,7 +305,7 @@ describe('policy preconfiguration', () => {
     } as PreconfiguredAgentPolicy);
 
     await ensurePreconfiguredPackagesAndPolicies(
-      soClient,
+      soRepo,
       esClient,
       [
         {
@@ -334,7 +334,7 @@ describe('policy preconfiguration', () => {
   });
 
   it('should add new package policy to existing managed policies', async () => {
-    const soClient = getPutPreconfiguredPackagesMock();
+    const soRepo = getPutPreconfiguredPackagesMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockedPackagePolicyService.getByIDs.mockResolvedValue([
       { name: 'test_package1' } as PackagePolicy,
@@ -355,7 +355,7 @@ describe('policy preconfiguration', () => {
     } as PreconfiguredAgentPolicy);
 
     await ensurePreconfiguredPackagesAndPolicies(
-      soClient,
+      soRepo,
       esClient,
       [
         {
@@ -392,12 +392,12 @@ describe('policy preconfiguration', () => {
   });
 
   it('should throw an error when trying to install duplicate packages', async () => {
-    const soClient = getPutPreconfiguredPackagesMock();
+    const soRepo = getPutPreconfiguredPackagesMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
     await expect(
       ensurePreconfiguredPackagesAndPolicies(
-        soClient,
+        soRepo,
         esClient,
         [],
         [
@@ -413,7 +413,7 @@ describe('policy preconfiguration', () => {
   });
 
   it('should not create a policy and throw an error if install fails for required package', async () => {
-    const soClient = getPutPreconfiguredPackagesMock();
+    const soRepo = getPutPreconfiguredPackagesMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const policies: PreconfiguredAgentPolicy[] = [
       {
@@ -432,7 +432,7 @@ describe('policy preconfiguration', () => {
 
     await expect(
       ensurePreconfiguredPackagesAndPolicies(
-        soClient,
+        soRepo,
         esClient,
         policies,
         [{ name: 'test_package', version: '3.0.0' }],
@@ -445,7 +445,7 @@ describe('policy preconfiguration', () => {
   });
 
   it('should not create a policy and throw an error if package is not installed for an unknown reason', async () => {
-    const soClient = getPutPreconfiguredPackagesMock();
+    const soRepo = getPutPreconfiguredPackagesMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const policies: PreconfiguredAgentPolicy[] = [
       {
@@ -464,7 +464,7 @@ describe('policy preconfiguration', () => {
 
     await expect(
       ensurePreconfiguredPackagesAndPolicies(
-        soClient,
+        soRepo,
         esClient,
         policies,
         [{ name: 'CANNOT_MATCH', version: 'x.y.z' }],
@@ -477,12 +477,12 @@ describe('policy preconfiguration', () => {
   });
 
   it('should not attempt to recreate or modify an agent policy if its ID is unchanged', async () => {
-    const soClient = getPutPreconfiguredPackagesMock();
+    const soRepo = getPutPreconfiguredPackagesMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
     const { policies: policiesA, nonFatalErrors: nonFatalErrorsA } =
       await ensurePreconfiguredPackagesAndPolicies(
-        soClient,
+        soRepo,
         esClient,
         [
           {
@@ -503,7 +503,7 @@ describe('policy preconfiguration', () => {
 
     const { policies: policiesB, nonFatalErrors: nonFatalErrorsB } =
       await ensurePreconfiguredPackagesAndPolicies(
-        soClient,
+        soRepo,
         esClient,
         [
           {
@@ -530,7 +530,7 @@ describe('policy preconfiguration', () => {
   });
 
   it('should update a managed policy if top level fields are changed', async () => {
-    const soClient = getPutPreconfiguredPackagesMock();
+    const soRepo = getPutPreconfiguredPackagesMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
     mockConfiguredPolicies.set('test-id', {
@@ -545,7 +545,7 @@ describe('policy preconfiguration', () => {
 
     const { policies, nonFatalErrors: nonFatalErrorsB } =
       await ensurePreconfiguredPackagesAndPolicies(
-        soClient,
+        soRepo,
         esClient,
         [
           {
@@ -564,7 +564,7 @@ describe('policy preconfiguration', () => {
       );
     expect(spyAgentPolicyServiceUpdate).toBeCalled();
     expect(spyAgentPolicyServiceUpdate).toBeCalledWith(
-      expect.anything(), // soClient
+      expect.anything(), // soRepo
       expect.anything(), // esClient
       'test-id',
       expect.objectContaining({
@@ -579,7 +579,7 @@ describe('policy preconfiguration', () => {
   });
 
   it('should not update a managed policy if a top level field has not changed', async () => {
-    const soClient = getPutPreconfiguredPackagesMock();
+    const soRepo = getPutPreconfiguredPackagesMock();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     const policy: PreconfiguredAgentPolicy = {
       name: 'Test policy',
@@ -592,7 +592,7 @@ describe('policy preconfiguration', () => {
 
     const { policies, nonFatalErrors: nonFatalErrorsB } =
       await ensurePreconfiguredPackagesAndPolicies(
-        soClient,
+        soRepo,
         esClient,
         [policy],
         [],
@@ -685,7 +685,7 @@ describe('output preconfiguration', () => {
     mockedOutputService.delete.mockReset();
     mockedOutputService.getDefaultDataOutputId.mockReset();
     mockedOutputService.getDefaultESHosts.mockReturnValue(['http://default-es:9200']);
-    mockedOutputService.bulkGet.mockImplementation(async (soClient, id): Promise<Output[]> => {
+    mockedOutputService.bulkGet.mockImplementation(async (soRepo, id): Promise<Output[]> => {
       return [
         {
           id: 'existing-output-1',
@@ -702,9 +702,9 @@ describe('output preconfiguration', () => {
   });
 
   it('should create preconfigured output that does not exists', async () => {
-    const soClient = savedObjectsRepositoryMock.create();
+    const soRepo = savedObjectsRepositoryMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    await ensurePreconfiguredOutputs(soClient, esClient, [
+    await ensurePreconfiguredOutputs(soRepo, esClient, [
       {
         id: 'non-existing-output-1',
         name: 'Output 1',
@@ -721,9 +721,9 @@ describe('output preconfiguration', () => {
   });
 
   it('should set default hosts if hosts is not set output that does not exists', async () => {
-    const soClient = savedObjectsRepositoryMock.create();
+    const soRepo = savedObjectsRepositoryMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    await ensurePreconfiguredOutputs(soClient, esClient, [
+    await ensurePreconfiguredOutputs(soRepo, esClient, [
       {
         id: 'non-existing-output-1',
         name: 'Output 1',
@@ -738,10 +738,10 @@ describe('output preconfiguration', () => {
   });
 
   it('should update output if preconfigured output exists and changed', async () => {
-    const soClient = savedObjectsRepositoryMock.create();
+    const soRepo = savedObjectsRepositoryMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    soClient.find.mockResolvedValue({ saved_objects: [], page: 0, per_page: 0, total: 0 });
-    await ensurePreconfiguredOutputs(soClient, esClient, [
+    soRepo.find.mockResolvedValue({ saved_objects: [], page: 0, per_page: 0, total: 0 });
+    await ensurePreconfiguredOutputs(soRepo, esClient, [
       {
         id: 'existing-output-1',
         is_default: false,
@@ -758,11 +758,11 @@ describe('output preconfiguration', () => {
   });
 
   it('should not delete default output if preconfigured default output exists and changed', async () => {
-    const soClient = savedObjectsRepositoryMock.create();
+    const soRepo = savedObjectsRepositoryMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    soClient.find.mockResolvedValue({ saved_objects: [], page: 0, per_page: 0, total: 0 });
+    soRepo.find.mockResolvedValue({ saved_objects: [], page: 0, per_page: 0, total: 0 });
     mockedOutputService.getDefaultDataOutputId.mockResolvedValue('existing-output-1');
-    await ensurePreconfiguredOutputs(soClient, esClient, [
+    await ensurePreconfiguredOutputs(soRepo, esClient, [
       {
         id: 'existing-output-1',
         is_default: true,
@@ -806,9 +806,9 @@ describe('output preconfiguration', () => {
   SCENARIOS.forEach((scenario) => {
     const { data, name } = scenario;
     it(`should do nothing if preconfigured output exists and did not changed (${name})`, async () => {
-      const soClient = savedObjectsRepositoryMock.create();
+      const soRepo = savedObjectsRepositoryMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      await ensurePreconfiguredOutputs(soClient, esClient, [data]);
+      await ensurePreconfiguredOutputs(soRepo, esClient, [data]);
 
       expect(mockedOutputService.create).not.toBeCalled();
       expect(mockedOutputService.update).not.toBeCalled();
@@ -816,7 +816,7 @@ describe('output preconfiguration', () => {
   });
 
   it('should not delete non deleted preconfigured output', async () => {
-    const soClient = savedObjectsRepositoryMock.create();
+    const soRepo = savedObjectsRepositoryMock.create();
     mockedOutputService.list.mockResolvedValue({
       items: [
         { id: 'output1', is_preconfigured: true } as Output,
@@ -826,7 +826,7 @@ describe('output preconfiguration', () => {
       perPage: 10000,
       total: 1,
     });
-    await cleanPreconfiguredOutputs(soClient, [
+    await cleanPreconfiguredOutputs(soRepo, [
       {
         id: 'output1',
         is_default: false,
@@ -849,7 +849,7 @@ describe('output preconfiguration', () => {
   });
 
   it('should delete deleted preconfigured output', async () => {
-    const soClient = savedObjectsRepositoryMock.create();
+    const soRepo = savedObjectsRepositoryMock.create();
     mockedOutputService.list.mockResolvedValue({
       items: [
         { id: 'output1', is_preconfigured: true } as Output,
@@ -859,7 +859,7 @@ describe('output preconfiguration', () => {
       perPage: 10000,
       total: 1,
     });
-    await cleanPreconfiguredOutputs(soClient, [
+    await cleanPreconfiguredOutputs(soRepo, [
       {
         id: 'output1',
         is_default: false,

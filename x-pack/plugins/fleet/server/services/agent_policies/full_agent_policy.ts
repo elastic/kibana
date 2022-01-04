@@ -29,7 +29,7 @@ import { DEFAULT_OUTPUT } from '../../constants';
 import { getMonitoringPermissions } from './monitoring_permissions';
 
 export async function getFullAgentPolicy(
-  soClient: ISavedObjectsRepository,
+  soRepo: ISavedObjectsRepository,
   id: string,
   options?: { standalone: boolean }
 ): Promise<FullAgentPolicy | null> {
@@ -37,7 +37,7 @@ export async function getFullAgentPolicy(
   const standalone = options?.standalone;
 
   try {
-    agentPolicy = await agentPolicyService.get(soClient, id);
+    agentPolicy = await agentPolicyService.get(soRepo, id);
   } catch (err) {
     if (!err.isBoom || err.output.statusCode !== 404) {
       throw err;
@@ -48,7 +48,7 @@ export async function getFullAgentPolicy(
     return null;
   }
 
-  const defaultDataOutputId = await outputService.getDefaultDataOutputId(soClient);
+  const defaultDataOutputId = await outputService.getDefaultDataOutputId(soRepo);
 
   if (!defaultDataOutputId) {
     throw new Error('Default output is not setup');
@@ -57,12 +57,12 @@ export async function getFullAgentPolicy(
   const dataOutputId: string = agentPolicy.data_output_id || defaultDataOutputId;
   const monitoringOutputId: string =
     agentPolicy.monitoring_output_id ||
-    (await outputService.getDefaultMonitoringOutputId(soClient)) ||
+    (await outputService.getDefaultMonitoringOutputId(soRepo)) ||
     dataOutputId;
 
   const outputs = await Promise.all(
     Array.from(new Set([dataOutputId, monitoringOutputId])).map((outputId) =>
-      outputService.get(soClient, outputId)
+      outputService.get(soRepo, outputId)
     )
   );
 
@@ -111,14 +111,14 @@ export async function getFullAgentPolicy(
   };
 
   const dataPermissions =
-    (await storedPackagePoliciesToAgentPermissions(soClient, agentPolicy.package_policies)) || {};
+    (await storedPackagePoliciesToAgentPermissions(soRepo, agentPolicy.package_policies)) || {};
 
   dataPermissions._elastic_agent_checks = {
     cluster: DEFAULT_CLUSTER_PERMISSIONS,
   };
 
   const monitoringPermissions = await getMonitoringPermissions(
-    soClient,
+    soRepo,
     {
       logs: agentPolicy.monitoring_enabled?.includes(dataTypes.Logs) ?? false,
       metrics: agentPolicy.monitoring_enabled?.includes(dataTypes.Metrics) ?? false,
@@ -153,7 +153,7 @@ export async function getFullAgentPolicy(
   if (!standalone) {
     let settings: Settings;
     try {
-      settings = await getSettings(soClient);
+      settings = await getSettings(soRepo);
     } catch (error) {
       throw new Error('Default settings is not setup');
     }

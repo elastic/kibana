@@ -60,31 +60,31 @@ describe('settingsSetup', () => {
     mockedAppContextService.getCloud.mockReset();
   });
   it('should create settings if there is no settings', async () => {
-    const soClientMock = savedObjectsRepositoryMock.create();
+    const soRepoMock = savedObjectsRepositoryMock.create();
 
-    soClientMock.find.mockResolvedValue({
+    soRepoMock.find.mockResolvedValue({
       total: 0,
       page: 0,
       per_page: 10,
       saved_objects: [],
     });
 
-    soClientMock.create.mockResolvedValue({
+    soRepoMock.create.mockResolvedValue({
       id: 'created',
       attributes: {},
       references: [],
       type: 'so_type',
     });
 
-    await settingsSetup(soClientMock);
+    await settingsSetup(soRepoMock);
 
-    expect(soClientMock.create).toBeCalled();
+    expect(soRepoMock.create).toBeCalled();
   });
 
   it('should do nothing if there is settings and no default fleet server hosts', async () => {
-    const soClientMock = savedObjectsRepositoryMock.create();
+    const soRepoMock = savedObjectsRepositoryMock.create();
 
-    soClientMock.find.mockResolvedValue({
+    soRepoMock.find.mockResolvedValue({
       total: 1,
       page: 0,
       per_page: 10,
@@ -99,20 +99,20 @@ describe('settingsSetup', () => {
       ],
     });
 
-    soClientMock.create.mockResolvedValue({
+    soRepoMock.create.mockResolvedValue({
       id: 'created',
       attributes: {},
       references: [],
       type: 'so_type',
     });
 
-    await settingsSetup(soClientMock);
+    await settingsSetup(soRepoMock);
 
-    expect(soClientMock.create).not.toBeCalled();
+    expect(soRepoMock.create).not.toBeCalled();
   });
 
   it('should update settings if there is settings without fleet server hosts and default fleet server hosts', async () => {
-    const soClientMock = savedObjectsRepositoryMock.create();
+    const soRepoMock = savedObjectsRepositoryMock.create();
     mockedAppContextService.getCloud.mockReturnValue({
       cloudId:
         'test:dGVzdC5mcjo5MjQzJGRhM2I2YjNkYWY5ZDRjODE4ZjI4ZmEzNDdjMzgzODViJDgxMmY4NWMxZjNjZTQ2YTliYjgxZjFjMWIxMzRjNmRl',
@@ -121,7 +121,7 @@ describe('settingsSetup', () => {
       apm: {},
     });
 
-    soClientMock.find.mockResolvedValue({
+    soRepoMock.find.mockResolvedValue({
       total: 1,
       page: 0,
       per_page: 10,
@@ -136,30 +136,30 @@ describe('settingsSetup', () => {
       ],
     });
 
-    soClientMock.update.mockResolvedValue({
+    soRepoMock.update.mockResolvedValue({
       id: 'updated',
       attributes: {},
       references: [],
       type: 'so_type',
     });
 
-    soClientMock.create.mockResolvedValue({
+    soRepoMock.create.mockResolvedValue({
       id: 'created',
       attributes: {},
       references: [],
       type: 'so_type',
     });
 
-    await settingsSetup(soClientMock);
+    await settingsSetup(soRepoMock);
 
-    expect(soClientMock.create).not.toBeCalled();
-    expect(soClientMock.update).toBeCalledWith('ingest_manager_settings', 'defaultsettings', {
+    expect(soRepoMock.create).not.toBeCalled();
+    expect(soRepoMock.update).toBeCalledWith('ingest_manager_settings', 'defaultsettings', {
       fleet_server_hosts: ['https://deployment-id-1.fleet.test.fr:9243'],
     });
   });
 
   it('should not update settings if there is settings with fleet server hosts and default fleet server hosts', async () => {
-    const soClientMock = savedObjectsRepositoryMock.create();
+    const soRepoMock = savedObjectsRepositoryMock.create();
     mockedAppContextService.getCloud.mockReturnValue({
       cloudId:
         'test:dGVzdC5mcjo5MjQzJGRhM2I2YjNkYWY5ZDRjODE4ZjI4ZmEzNDdjMzgzODViJDgxMmY4NWMxZjNjZTQ2YTliYjgxZjFjMWIxMzRjNmRl',
@@ -168,7 +168,7 @@ describe('settingsSetup', () => {
       apm: {},
     });
 
-    soClientMock.find.mockResolvedValue({
+    soRepoMock.find.mockResolvedValue({
       total: 1,
       page: 0,
       per_page: 10,
@@ -185,23 +185,23 @@ describe('settingsSetup', () => {
       ],
     });
 
-    soClientMock.update.mockResolvedValue({
+    soRepoMock.update.mockResolvedValue({
       id: 'updated',
       attributes: {},
       references: [],
       type: 'so_type',
     });
 
-    soClientMock.create.mockResolvedValue({
+    soRepoMock.create.mockResolvedValue({
       id: 'created',
       attributes: {},
       references: [],
       type: 'so_type',
     });
 
-    await settingsSetup(soClientMock);
+    await settingsSetup(soRepoMock);
 
-    expect(soClientMock.create).not.toBeCalled();
-    expect(soClientMock.update).not.toBeCalled();
+    expect(soRepoMock.create).not.toBeCalled();
+    expect(soRepoMock.update).not.toBeCalled();
   });
 });

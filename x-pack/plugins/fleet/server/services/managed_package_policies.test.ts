@@ -37,7 +37,7 @@ describe('upgradeManagedPackagePolicies', () => {
 
   it('should not upgrade policies for non-managed package', async () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    const soClient = savedObjectsRepositoryMock.create();
+    const soRepo = savedObjectsRepositoryMock.create();
 
     (packagePolicyService.get as jest.Mock).mockImplementationOnce(
       (savedObjectsClient: any, id: string) => {
@@ -82,14 +82,14 @@ describe('upgradeManagedPackagePolicies', () => {
       version: '0.0.1',
     });
 
-    await upgradeManagedPackagePolicies(soClient, esClient, ['non-managed-package-id']);
+    await upgradeManagedPackagePolicies(soRepo, esClient, ['non-managed-package-id']);
 
     expect(packagePolicyService.upgrade).not.toBeCalled();
   });
 
   it('should upgrade policies for managed package', async () => {
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    const soClient = savedObjectsRepositoryMock.create();
+    const soRepo = savedObjectsRepositoryMock.create();
 
     (packagePolicyService.get as jest.Mock).mockImplementationOnce(
       (savedObjectsClient: any, id: string) => {
@@ -134,15 +134,15 @@ describe('upgradeManagedPackagePolicies', () => {
       version: '1.0.0',
     });
 
-    await upgradeManagedPackagePolicies(soClient, esClient, ['managed-package-id']);
+    await upgradeManagedPackagePolicies(soRepo, esClient, ['managed-package-id']);
 
-    expect(packagePolicyService.upgrade).toBeCalledWith(soClient, esClient, ['managed-package-id']);
+    expect(packagePolicyService.upgrade).toBeCalledWith(soRepo, esClient, ['managed-package-id']);
   });
 
   describe('when dry run reports conflicts', () => {
     it('should return errors + diff without performing upgrade', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      const soClient = savedObjectsRepositoryMock.create();
+      const soRepo = savedObjectsRepositoryMock.create();
 
       (packagePolicyService.get as jest.Mock).mockImplementationOnce(
         (savedObjectsClient: any, id: string) => {
@@ -190,7 +190,7 @@ describe('upgradeManagedPackagePolicies', () => {
         version: '1.0.0',
       });
 
-      const result = await upgradeManagedPackagePolicies(soClient, esClient, [
+      const result = await upgradeManagedPackagePolicies(soRepo, esClient, [
         'conflicting-package-policy',
       ]);
 
