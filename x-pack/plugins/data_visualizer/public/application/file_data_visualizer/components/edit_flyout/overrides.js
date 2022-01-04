@@ -32,6 +32,10 @@ import {
 } from './options';
 import { isTimestampFormatValid } from './overrides_validation';
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import {
+  getFieldsFromGrokPattern,
+  replaceFieldInGrokPattern,
+} from '../../../common/util/grok_pattern';
 
 import { TIMESTAMP_OPTIONS, CUSTOM_DROPDOWN_OPTION } from './options/option_lists';
 
@@ -93,11 +97,17 @@ class OverridesUI extends Component {
 
     const { newColumnNames, originalColumnNames } = getColumnNames(columnNames, originalSettings);
 
+    const { newGrokFieldNames, originalGrokFieldNames } = getGrokFieldNames(
+      grokPattern,
+      originalSettings.grokPattern
+    );
+
     const overrides = {
       charset: charset === undefined ? originalSettings.charset : charset,
       format: format === undefined ? originalSettings.format : format,
       hasHeaderRow: hasHeaderRow === undefined ? originalSettings.hasHeaderRow : hasHeaderRow,
       columnNames: newColumnNames,
+      grokFieldNames: newGrokFieldNames,
       delimiter: d,
       quote: quote === undefined ? originalSettings.quote : quote,
       shouldTrimFields:
@@ -112,6 +122,7 @@ class OverridesUI extends Component {
 
     return {
       originalColumnNames,
+      originalGrokFieldNames,
       customDelimiter: customD === undefined ? '' : customD,
       customTimestampFormat: '',
       linesToSampleValid: true,
@@ -224,8 +235,23 @@ class OverridesUI extends Component {
     this.setOverride({ columnNames });
   };
 
+  onGrokPatternFieldChange = (e, i) => {
+    const name = e.target.value;
+    const newGrokPattern = replaceFieldInGrokPattern(this.state.overrides.grokPattern, name, i);
+    const { newGrokFieldNames } = getGrokFieldNames(
+      newGrokPattern,
+      this.state.overrides.grokPattern
+    );
+    this.setOverride({ grokPattern: newGrokPattern, grokFieldNames: newGrokFieldNames });
+  };
+
   grokPatternChange = (e) => {
-    this.setOverride({ grokPattern: e.target.value });
+    const newGrokPattern = e.target.value;
+    const { newGrokFieldNames } = getGrokFieldNames(
+      newGrokPattern,
+      this.state.overrides.grokPattern
+    );
+    this.setOverride({ grokPattern: newGrokPattern, grokFieldNames: newGrokFieldNames });
   };
 
   onLinesToSampleChange = (e) => {
@@ -247,6 +273,7 @@ class OverridesUI extends Component {
       customDelimiter,
       customTimestampFormat,
       originalColumnNames,
+      originalGrokFieldNames,
       linesToSampleValid,
       timestampFormatError,
       timestampFormatValid,
@@ -263,6 +290,7 @@ class OverridesUI extends Component {
       shouldTrimFields,
       // charset,
       columnNames,
+      grokFieldNames,
       grokPattern,
       linesToSample,
     } = overrides;
@@ -499,6 +527,29 @@ class OverridesUI extends Component {
             ))}
           </React.Fragment>
         )}
+
+        {format === 'semi_structured_text' && originalGrokFieldNames.length > 0 && (
+          <React.Fragment>
+            <EuiSpacer />
+            <EuiTitle size="s">
+              <h3>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.editFlyout.overrides.editFieldNamesTitle"
+                  defaultMessage="Edit field names"
+                />
+              </h3>
+            </EuiTitle>
+
+            {originalGrokFieldNames.map((f, i) => (
+              <EuiFormRow label={f} key={f}>
+                <EuiFieldText
+                  value={grokFieldNames[i]}
+                  onChange={(e) => this.onGrokPatternFieldChange(e, i, grokPattern)}
+                />
+              </EuiFormRow>
+            ))}
+          </React.Fragment>
+        )}
       </EuiForm>
     );
   }
@@ -583,6 +634,30 @@ function getColumnNames(columnNames, originalSettings) {
   return {
     newColumnNames,
     originalColumnNames,
+  };
+}
+
+function getGrokFieldNames(grokPattern, originalGrokPattern) {
+  if (originalGrokPattern === undefined) {
+    return {
+      newGrokFieldNames: [],
+      originalGrokFieldNames: [],
+    };
+  }
+
+  if (grokPattern === undefined) {
+    const originalGrokFieldNames = getFieldsFromGrokPattern(originalGrokPattern).map((f) => f.name);
+    return {
+      newGrokFieldNames: originalGrokFieldNames,
+      originalGrokFieldNames,
+    };
+  }
+
+  const newGrokFieldNames = getFieldsFromGrokPattern(grokPattern).map((f) => f.name);
+
+  return {
+    newGrokFieldNames,
+    originalGrokFieldNames: newGrokFieldNames,
   };
 }
 
