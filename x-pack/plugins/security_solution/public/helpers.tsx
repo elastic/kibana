@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_PARAMETERS, ALERT_RULE_UUID } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_RULE_UUID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { get, isEmpty } from 'lodash/fp';
 import React from 'react';
 import { matchPath, RouteProps, Redirect } from 'react-router-dom';

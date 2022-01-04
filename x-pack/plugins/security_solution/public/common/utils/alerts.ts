@@ -72,13 +72,10 @@ const formatAlertItem = (item: unknown): Ecs => {
       }),
       {} as Ecs
     );
-    // return { ...accumulator, [key]: formatAlertItem(item) };
   } else if (Array.isArray(item)) {
     return item.map((arrayItem): Ecs => formatAlertItem(arrayItem)) as unknown as Ecs;
-    // return { ...accumulator, [key]: item.map((arrayItem) => formatAlertItem(arrayItem)) };
   }
   return item as Ecs;
-  // return { ...accumulator, [key]: item };
 };
 
 const expandDottedField = (dottedFieldName: string, val: unknown): object => {

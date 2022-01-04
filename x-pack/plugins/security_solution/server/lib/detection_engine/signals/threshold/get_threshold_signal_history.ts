@@ -43,11 +43,12 @@ export const getThresholdSignalHistory = async ({
   signalHistory: ThresholdSignalHistory;
   searchErrors: string[];
 }> => {
-  // TODO: use ruleDataClient.getReader()
+  /*
   return {
     signalHistory: {},
     searchErrors: [],
   };
+  */
 
   const { searchResult, searchErrors } = await findPreviousThresholdSignals({
     indexPattern,
