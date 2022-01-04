@@ -90,6 +90,7 @@ export class EventFiltersHttpService implements EventFiltersService {
   async updateOne(
     exception: Immutable<UpdateExceptionListItemSchema>
   ): Promise<ExceptionListItemSchema> {
+    const exceptionToUpdateCleaned = { ...exception };
     // Clean unnecessary fields for update action
     [
       'created_at',
@@ -101,10 +102,10 @@ export class EventFiltersHttpService implements EventFiltersService {
       'updated_at',
       'updated_by',
     ].forEach((field) => {
-      delete exception[field as keyof UpdateExceptionListItemSchema];
+      delete exceptionToUpdateCleaned[field as keyof UpdateExceptionListItemSchema];
     });
     return (await this.httpWrapper()).put<ExceptionListItemSchema>(EXCEPTION_LIST_ITEM_URL, {
-      body: JSON.stringify(exception),
+      body: JSON.stringify(exceptionToUpdateCleaned),
     });
   }
 
