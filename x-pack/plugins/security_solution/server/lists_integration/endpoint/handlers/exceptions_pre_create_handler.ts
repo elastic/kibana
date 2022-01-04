@@ -5,4 +5,15 @@
  * 2.0.
  */
 
-export const getExceptionsPreCreateItemHandler = () => {};
+export const getExceptionsPreCreateItemHandler = () => {
+  return async () => {
+    // If Trusted app - validate
+    //
+    // if Event Filters - validate
+    //
+    // if Host Isolation Exceptions - validate
+    //
+    //
+    // --- else, just return
+  };
+};
