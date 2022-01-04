@@ -24,7 +24,6 @@ steps:
     agents:
       queue: c2-16
     depends_on: build
-    if: build.env('PERF_TEST_RUNNER') == "PLAYWRIGHT"
 
   - wait: ~
     continue_on_failure: true

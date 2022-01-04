@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('Go to Kibana login page', async () => {
-      await page?.goto(`${kibanaUrl}`, { timeout: 180 * 1000 });
+      await page?.goto(`${kibanaUrl}`);
     });
 
     it('Login to Kibana', async () => {
@@ -40,23 +40,16 @@ export default function ({ getService }: FtrProviderContext) {
       const passwordLocator = page?.locator('[data-test-subj=loginPassword]');
       const submitButtonLocator = page?.locator('[data-test-subj=loginSubmit]');
 
-      await usernameLocator?.isEditable();
       await usernameLocator?.type('elastic', { delay: 500 });
-      await passwordLocator?.isEditable();
       await passwordLocator?.type('changeme', { delay: 500 });
-      await submitButtonLocator?.click({ delay: 500 });
+      await submitButtonLocator?.click({ delay: 1000 });
     });
 
-    it('Dismiss Synthetics Notice', async () => {
+    it('Dismiss Welcome Screen', async () => {
       await page?.waitForLoadState();
       const skipButtonLocator = page?.locator('[data-test-subj=skipWelcomeScreen]');
-      await skipButtonLocator?.click();
-    });
-
-    it('Navigate to welcome screen', async () => {
+      await skipButtonLocator?.click({ delay: 1000 });
       await page?.waitForLoadState('networkidle');
-      const toggleNavButton = page?.locator('[data-test-subj=toggleNavButton]');
-      await toggleNavButton?.click();
     });
   });
 }

@@ -315,10 +315,12 @@ async function attemptToCreateCommand(
       `NETWORK THROTTLED with profile ${profile}: ${downloadThroughput} B/s down, ${uploadThroughput} B/s up, ${latency} ms latency.`
     );
 
-    // @ts-expect-error
-    await session.sendDevToolsCommand('Network.setCacheDisabled', {
-      cacheDisabled: true,
-    });
+    if (noCache) {
+      // @ts-expect-error
+      await session.sendDevToolsCommand('Network.setCacheDisabled', {
+        cacheDisabled: true,
+      });
+    }
 
     // @ts-expect-error
     session.setNetworkConditions({

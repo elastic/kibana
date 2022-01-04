@@ -41,9 +41,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ELASTIC_APM_SECRET_TOKEN: APM_PUBLIC_TOKEN,
         ELASTIC_APM_GLOBAL_LABELS: Object.entries({
           ftrConfig: `x-pack/test/performance/tests/config.playwright`,
-          testRunner: process.env.PERF_TEST_RUNNER,
           performancePhase: process.env.PERF_TEST_PHASE,
-          networkThrottlingProfile: process.env.KBN_NETWORK_TEST_PROFILE,
         })
           .filter(([, v]) => !!v)
           .reduce((acc, [k, v]) => (acc ? `${acc},${k}=${v}` : `${k}=${v}`), ''),
