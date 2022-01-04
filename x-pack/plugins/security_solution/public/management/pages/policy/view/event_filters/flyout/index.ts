@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import { CaseMetricsResponse } from '../../../common/api';
-
-export interface MetricsHandler {
-  getFeatures(): Set<string>;
-  compute(): Promise<CaseMetricsResponse>;
-  setupFeature?(feature: string): void;
-}
+export { PolicyEventFiltersFlyout } from './policy_event_filters_flyout';
