@@ -1740,14 +1740,14 @@
     "@elastic/react-search-ui-views" "1.6.0"
     "@elastic/search-ui" "1.6.0"
 
-"@elastic/request-crypto@1.1.4":
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/@elastic/request-crypto/-/request-crypto-1.1.4.tgz#2189d5fea65f7afe1de9f5fa3d0dd420e93e3124"
-  integrity sha512-D5CzSGKkM6BdrVB/HRRTheMsNQOcd2FMUup0O/1hIGUBE8zHh2AYbmSNSpD6LyQAgY39mGkARUi/x+SO0ccVvg==
+"@elastic/request-crypto@2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/request-crypto/-/request-crypto-2.0.0.tgz#a3988be98ed63398c3d0177948c7ac2a857835bb"
+  integrity sha512-jIReBeHzgUKNsYwdhnTyLFSGHyLsJgQIIw+AMEnq1lcONA/uKG7hhFUK2Z8XxjJ86/oXt1TwJ4BIagZR3mzq7w==
   dependencies:
     "@elastic/node-crypto" "1.1.1"
-    "@types/node-jose" "1.1.0"
-    node-jose "1.1.0"
+    "@types/node-jose" "1.1.8"
+    node-jose "2.0.0"
 
 "@elastic/safer-lodash-set@link:bazel-bin/packages/elastic-safer-lodash-set":
   version "0.0.0"
@@ -6267,10 +6267,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node-jose@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@types/node-jose/-/node-jose-1.1.0.tgz#26e1d234b41a39035482443ef35414bf34ba5d8b"
-  integrity sha512-ws1RJCQmIDww6/OEW1WcLCqDXZmNMWLoGgW5TEIR7pqJDaGrOkgH8hVw96Wx4rmu65r3/ZiDsb9LjpoizAnlww==
+"@types/node-jose@1.1.8":
+  version "1.1.8"
+  resolved "https://registry.yarnpkg.com/@types/node-jose/-/node-jose-1.1.8.tgz#26b7ae96e3309acb426ea5393ff5d6a0c1c38625"
+  integrity sha512-AFcArbplUaO+DqGVEPaiz/guw3uUA+dRHjaj26EEDF0DmTEPUd3dEdfdJMUx4kD65EAR3TnI1iHIcb31+Ko87Q==
   dependencies:
     "@types/node" "*"
 
@@ -20440,7 +20440,7 @@ node-fetch@2.6.1, node-fetch@^1.0.1, node-fetch@^2.3.0, node-fetch@^2.6.1:
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.1.tgz#045bd323631f76ed2e2b55573394416b639a0052"
   integrity sha512-V4aYg89jEoVRxRb2fJdAg8FHvI7cEyYdVAh94HH0UIK8oJxUfkjlDQN9RbMx+bEjP7+ggMiFRprSti032Oipxw==
 
-node-forge@^0.10.0, node-forge@^0.8.5:
+node-forge@^0.10.0:
   version "0.10.0"
   resolved "https://registry.yarnpkg.com/node-forge/-/node-forge-0.10.0.tgz#32dea2afb3e9926f02ee5ce8794902691a676bf3"
   integrity sha512-PPmu8eEeG9saEUvI97fm4OYxXVB6bFvyNTyiUOBichBpFG8A1Ljw3bY62+5oOjDEMHRnd0Y7HQ+x7uzxOzC6JA==
@@ -20487,20 +20487,19 @@ node-int64@^0.4.0:
   resolved "https://registry.yarnpkg.com/node-int64/-/node-int64-0.4.0.tgz#87a9065cdb355d3182d8f94ce11188b825c68a3b"
   integrity sha1-h6kGXNs1XTGC2PlM4RGIuCXGijs=
 
-node-jose@1.1.0, node-jose@^1.1.4:
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/node-jose/-/node-jose-1.1.4.tgz#af3f44a392e586d26b123b0e12dc09bef1e9863b"
-  integrity sha512-L31IFwL3pWWcMHxxidCY51ezqrDXMkvlT/5pLTfNw5sXmmOLJuN6ug7txzF/iuZN55cRpyOmoJrotwBQIoo5Lw==
+node-jose@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/node-jose/-/node-jose-2.0.0.tgz#541c6b52c387a3f18fc06cd502baad759af9c470"
+  integrity sha512-j8zoFze1gijl8+DK/dSXXqX7+o2lMYv1XS+ptnXgGV/eloQaqq1YjNtieepbKs9jBS4WTnMOqyKSaQuunJzx0A==
   dependencies:
     base64url "^3.0.1"
-    browserify-zlib "^0.2.0"
     buffer "^5.5.0"
     es6-promise "^4.2.8"
     lodash "^4.17.15"
     long "^4.0.0"
-    node-forge "^0.8.5"
+    node-forge "^0.10.0"
+    pako "^1.0.11"
     process "^0.11.10"
-    react-zlib-js "^1.0.4"
     uuid "^3.3.3"
 
 node-libs-browser@^2.2.1:
@@ -21411,15 +21410,10 @@ pako@^0.2.5:
   resolved "https://registry.yarnpkg.com/pako/-/pako-0.2.9.tgz#f3f7522f4ef782348da8161bad9ecfd51bf83a75"
   integrity sha1-8/dSL073gjSNqBYbrZ7P1Rv4OnU=
 
-pako@^1.0.3:
+pako@^1.0.11, pako@^1.0.3, pako@^1.0.5, pako@~1.0.2, pako@~1.0.5:
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/pako/-/pako-1.0.11.tgz#6c9599d340d54dfd3946380252a35705a6b992bf"
   integrity sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==
-
-pako@^1.0.5, pako@~1.0.2, pako@~1.0.5:
-  version "1.0.10"
-  resolved "https://registry.yarnpkg.com/pako/-/pako-1.0.10.tgz#4328badb5086a426aa90f541977d4955da5c9732"
-  integrity sha512-0DTvPVU3ed8+HNXOu5Bs+o//Mbdj9VNQMUOe9oKCwh8l0GNwpTDMKCWbRjgtD291AWnkAgkqA/LOnQS8AmS1tw==
 
 papaparse@^5.2.0:
   version "5.2.0"
@@ -23872,11 +23866,6 @@ react-window@^1.8.5:
   dependencies:
     "@babel/runtime" "^7.0.0"
     memoize-one ">=3.1.1 <6"
-
-react-zlib-js@^1.0.4:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/react-zlib-js/-/react-zlib-js-1.0.5.tgz#7bb433e1a4ae53a8e6f361b3d36166baf5bbc60f"
-  integrity sha512-TLcPdmqhIl+ylwOwlfm1WUuI7NVvhAv3L74d1AabhjyaAbmLOROTA/Q4EQ/UMCFCOjIkVim9fT3UZOQSFk/mlA==
 
 react@^16.12.0:
   version "16.12.0"
