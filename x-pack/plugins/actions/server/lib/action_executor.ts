@@ -126,7 +126,7 @@ export class ActionExecutor {
         const spaceId = spaces && spaces.getSpaceId(request);
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
-        if (!this.actionInfo) {
+        if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
           this.actionInfo = await getActionInfoInternal(
             await getActionsClientWithRequest(request, source),
             encryptedSavedObjectsClient,
@@ -299,7 +299,7 @@ export class ActionExecutor {
 
     const spaceId = spaces && spaces.getSpaceId(request);
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
-    if (!this.actionInfo) {
+    if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
       this.actionInfo = await getActionInfoInternal(
         await getActionsClientWithRequest(request, source),
         encryptedSavedObjectsClient,
@@ -353,6 +353,7 @@ interface ActionInfo {
   name: string;
   config: unknown;
   secrets: unknown;
+  actionId: string;
 }
 
 async function getActionInfoInternal(
@@ -372,6 +373,7 @@ async function getActionInfoInternal(
       name: pcAction.name,
       config: pcAction.config,
       secrets: pcAction.secrets,
+      actionId,
     };
   }
 
@@ -390,6 +392,7 @@ async function getActionInfoInternal(
     name,
     config,
     secrets,
+    actionId,
   };
 }
 
