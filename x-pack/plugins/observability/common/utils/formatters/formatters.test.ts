@@ -9,38 +9,56 @@ import { asDecimal, asInteger, asPercent, asDecimalOrInteger } from './formatter
 
 describe('formatters', () => {
   describe('asDecimal', () => {
-    it('displays the not available label when the number is not finite', () => {
-      expect(asDecimal(Infinity)).toBe('N/A');
-      expect(asDecimal(-Infinity)).toBe('N/A');
-      expect(asDecimal(null)).toBe('N/A');
-      expect(asDecimal(undefined)).toBe('N/A');
-    });
+    it.each([
+      [Infinity, 'N/A'],
+      [-Infinity, 'N/A'],
+      [null, 'N/A'],
+      [undefined, 'N/A'],
+      [NaN, 'N/A'],
+    ])(
+      'displays the not available label when the number is not finite',
+      (value, formattedValue) => {
+        expect(asDecimal(value)).toBe(formattedValue);
+      }
+    );
 
-    it('displays the correct label when the number is finite', () => {
-      expect(asDecimal(0)).toBe('0.0');
-      expect(asDecimal(0.005)).toBe('0.0');
-      expect(asDecimal(1.23)).toBe('1.2');
-      expect(asDecimal(12.34)).toBe('12.3');
-      expect(asDecimal(123.45)).toBe('123.5');
-      expect(asDecimal(1234.56)).toBe('1,234.6');
+    it.each([
+      [0, '0.0'],
+      [0.005, '0.0'],
+      [1.23, '1.2'],
+      [12.34, '12.3'],
+      [123.45, '123.5'],
+      [1234.56, '1,234.6'],
+      [1234567.89, '1,234,567.9'],
+    ])('displays the correct label when the number is finite', (value, formattedValue) => {
+      expect(asDecimal(value)).toBe(formattedValue);
     });
   });
 
   describe('asInteger', () => {
-    it('displays the not available label when the number is not finite', () => {
-      expect(asInteger(Infinity)).toBe('N/A');
-      expect(asInteger(-Infinity)).toBe('N/A');
-      expect(asInteger(null)).toBe('N/A');
-      expect(asInteger(undefined)).toBe('N/A');
-    });
+    it.each([
+      [Infinity, 'N/A'],
+      [-Infinity, 'N/A'],
+      [null, 'N/A'],
+      [undefined, 'N/A'],
+      [NaN, 'N/A'],
+    ])(
+      'displays the not available label when the number is not finite',
+      (value, formattedValue) => {
+        expect(asInteger(value)).toBe(formattedValue);
+      }
+    );
 
-    it('displays the correct label when the number is finite', () => {
-      expect(asInteger(0)).toBe('0');
-      expect(asInteger(0.005)).toBe('0');
-      expect(asInteger(1.23)).toBe('1');
-      expect(asInteger(12.34)).toBe('12');
-      expect(asInteger(123.45)).toBe('123');
-      expect(asInteger(1234.56)).toBe('1,235');
+    it.each([
+      [0, '0'],
+      [0.005, '0'],
+      [1.23, '1'],
+      [12.34, '12'],
+      [123.45, '123'],
+      [1234.56, '1,235'],
+      [1234567.89, '1,234,568'],
+    ])('displays the correct label when the number is finite', (value, formattedValue) => {
+      expect(asInteger(value)).toBe(formattedValue);
     });
   });
 
@@ -75,16 +93,20 @@ describe('formatters', () => {
     it('formats as integer when number equals to 0 ', () => {
       expect(asDecimalOrInteger(0)).toEqual('0');
     });
+
     it('formats as integer when number is above or equals 10 ', () => {
       expect(asDecimalOrInteger(10.123)).toEqual('10');
       expect(asDecimalOrInteger(15.123)).toEqual('15');
     });
-    it('formats as decimal when number is below 10 ', () => {
-      expect(asDecimalOrInteger(0.25435632645)).toEqual('0.3');
-      expect(asDecimalOrInteger(1)).toEqual('1.0');
-      expect(asDecimalOrInteger(3.374329704990765)).toEqual('3.4');
-      expect(asDecimalOrInteger(5)).toEqual('5.0');
-      expect(asDecimalOrInteger(9)).toEqual('9.0');
+
+    it.each([
+      [0.25435632645, '0.3'],
+      [1, '1.0'],
+      [3.374329704990765, '3.4'],
+      [5, '5.0'],
+      [9, '9.0'],
+    ])('formats as decimal when number is below 10 ', (value, formattedValue) => {
+      expect(asDecimalOrInteger(value)).toBe(formattedValue);
     });
   });
 });
