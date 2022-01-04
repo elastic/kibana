@@ -11,7 +11,6 @@ import React, { useContext } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink, EuiToolTip } from '@elastic/eui';
-import { DataViewBase } from '@kbn/es-query';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
 import { DocumentTitle } from '../../components/document_title';
 import { HelpCenterContent } from '../../components/help_center_content';
