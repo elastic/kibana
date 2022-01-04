@@ -32,7 +32,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PANEL_TYPES, TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/enums';
 import { AUTO_INTERVAL } from '../../../common/constants';
-import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
+import { isTimerangeModeEnabled } from '../../../common/check_ui_restrictions';
 import { VisDataContext } from '../contexts/vis_data_context';
 import { PanelModelContext } from '../contexts/panel_model_context';
 import { FormValidationContext } from '../contexts/form_validation_context';

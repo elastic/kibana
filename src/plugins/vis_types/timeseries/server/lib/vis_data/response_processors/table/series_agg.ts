@@ -44,5 +44,6 @@ export const seriesAgg: TableResponseProcessorsFunction =
         data: data[0],
       });
     }
+
     return next(results);
   };
