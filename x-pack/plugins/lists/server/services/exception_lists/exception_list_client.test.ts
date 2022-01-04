@@ -100,7 +100,7 @@ describe('exception_list_client', () => {
           it('should validate extension point callback returned data and throw if not valid', async () => {
             const extensionPointCallback = getExtensionPointCallback();
             // @ts-expect-error
-            extensionPointCallback.mockImplementation(({ entries, ...rest }) => {
+            extensionPointCallback.mockImplementation(async ({ entries, ...rest }) => {
               // `if()` only here to avoid a ts rule error
               if (entries) {
                 return rest;
