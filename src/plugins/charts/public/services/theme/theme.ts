@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Observable, BehaviorSubject } from 'rxjs';
 
 import { CoreSetup } from 'kibana/public';
+import { merge } from '@kbn/std';
 import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 
@@ -89,9 +90,12 @@ export class ThemeService {
   public init(uiSettings: CoreSetup['uiSettings']) {
     this._uiSettingsDarkMode$ = uiSettings.get$<boolean>('theme:darkMode');
     this._uiSettingsDarkMode$.subscribe((darkMode) => {
-      this._chartsTheme$.next(
-        darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme
-      );
+      const theme = darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme;
+      // TODO: Remove partition when deprecated in next eui release
+      const partition = darkMode
+        ? EUI_CHARTS_THEME_DARK.partition
+        : EUI_CHARTS_THEME_LIGHT.partition;
+      this._chartsTheme$.next(merge(theme, { partition }));
       this._chartsBaseTheme$.next(darkMode ? DARK_THEME : LIGHT_THEME);
     });
   }
