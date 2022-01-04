@@ -26,7 +26,14 @@ describe('Fleet startup', () => {
   function navigateToEnrollmentTokens() {
     cy.getBySel(ENROLLMENT_TOKENS_TAB).click();
     cy.get('.euiBasicTable-loading').should('not.exist');
+    cy.get('.euiButtonIcon--danger'); // wait for trash icon
   }
+
+  it('should have no agent policies by default', () => {
+    cy.request('/api/fleet/agent_policies?full=true').then((response: any) => {
+      expect(response.body.items.length).to.equal(0);
+    });
+  });
 
   it('should create Default Fleet Server policy', () => {
     cy.getBySel('toastCloseButton').click();
@@ -50,6 +57,7 @@ describe('Fleet startup', () => {
     cy.getBySel('toastCloseButton').click();
     cy.getBySel('createPolicyBtn').click();
     cy.getBySel('euiToastHeader');
+    cy.get('.euiLoadingSpinner').should('not.exist');
     cy.getBySel('euiFlyoutCloseButton').click();
 
     navigateToAgentPolicies();
