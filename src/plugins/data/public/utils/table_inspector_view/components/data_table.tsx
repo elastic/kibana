@@ -20,6 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import { getVisibleColumns } from '../../../../common/exports/table_filter';
 import { DataViewRow, DataViewColumn } from '../types';
 import { IUiSettingsClient } from '../../../../../../core/public';
 import { Datatable, DatatableColumn } from '../../../../../expressions/public';
@@ -156,7 +157,7 @@ export class DataTableFormat extends Component<DataTableFormatProps, DataTableFo
       };
     }
 
-    const columns = data.columns.map((dataColumn: any, index: number) => {
+    const columns = getVisibleColumns(data.columns).map((dataColumn: any, index: number) => {
       const formatParams = { id: 'string', ...dataColumn.meta.params };
       const fieldFormatter = fieldFormats.deserialize(formatParams);
       const filterable = isFilterable(dataColumn);

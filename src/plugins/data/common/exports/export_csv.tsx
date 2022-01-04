@@ -11,6 +11,7 @@
 import { Datatable } from 'src/plugins/expressions';
 import { FormatFactory } from '../../../field_formats/common';
 import { createEscapeValue } from './escape_value';
+import { getVisibleColumns } from './table_filter';
 
 export const LINE_FEED_CHARACTER = '\r\n';
 export const CSV_MIME_TYPE = 'text/plain;charset=utf-8';
@@ -28,10 +29,14 @@ export function datatableToCSV(
   { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }: CSVOptions
 ) {
   const escapeValues = createEscapeValue(quoteValues, escapeFormulaValues);
-  // Build the header row by its names
-  const header = columns.map((col) => escapeValues(col.name));
 
-  const formatters = columns.reduce<Record<string, ReturnType<FormatFactory>>>(
+  // If columns have some meta information, use them to filter out hidden columns
+  const filteredColumns = getVisibleColumns(columns);
+  // const filteredColumns = columns;
+  // Build the header row by its names
+  const header = filteredColumns.map((col) => escapeValues(col.name));
+
+  const formatters = filteredColumns.reduce<Record<string, ReturnType<FormatFactory>>>(
     (memo, { id, meta }) => {
       memo[id] = formatFactory(meta?.params);
       return memo;
@@ -41,7 +46,7 @@ export function datatableToCSV(
 
   // Convert the array of row objects to an array of row arrays
   const csvRows = rows.map((row) => {
-    return columns.map((column) =>
+    return filteredColumns.map((column) =>
       escapeValues(raw ? row[column.id] : formatters[column.id].convert(row[column.id]))
     );
   });
