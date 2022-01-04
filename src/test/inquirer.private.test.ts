@@ -28,39 +28,43 @@ describe('inquirer cli', () => {
 
   it('should return error when branch is missing', async () => {
     const res = await runBackportAsync([
-      '--force-local-config',
-      '--upstream',
-      'backport-org/backport-e2e',
-      '--username',
+      '--skip-remote-config',
+      '--repo-owner',
+      'backport-org',
+      '--repo-name',
+      'backport-e2e',
+      '--author',
       'sqren',
       '--accessToken',
       devAccessToken,
     ]);
     expect(res).toMatchInlineSnapshot(`
-      "You must specify a target branch
-      You can specify it via either:
-       - Config file (recommended): \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/e119d71d6dc03cd061f6ad9b9a8b1cd995f98961/docs/configuration.md#project-config-backportrcjson
-       - CLI: \\"--branch 6.1\\""
+      "Please specify a target branch: \\"--branch 6.1\\".
+       Read more: https://github.com/sqren/backport/blob/main/docs/configuration.md#project-config-backportrcjson"
     `);
   });
 
-  it('should return error when upstream is missing', async () => {
+  it('should list commits based on .git/config when `repoOwner`/`repoName` is missing', async () => {
     const res = await runBackportAsync([
-      '--force-local-config',
+      '--skip-remote-config',
       '--branch',
       'foo',
-      '--upstream',
-      '',
-      '--username',
-      'sqren',
       '--accessToken',
       devAccessToken,
     ]);
     expect(res).toMatchInlineSnapshot(`
-      "You must specify a valid Github repository
-      You can specify it via either:
-       - Config file (recommended): \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/e119d71d6dc03cd061f6ad9b9a8b1cd995f98961/docs/configuration.md#project-config-backportrcjson
-       - CLI: \\"--upstream elastic/kibana\\""
+      "? Select commit (Use arrow keys)
+      ❯ 1. v6.0.0
+        2. Bump dependencies
+        3. Add support for historical branch label mappings (#282)
+        4. Add status comment (#281)
+        5. Add \`--reviewer\` option (#280)
+        6. By default append \\"(cherry picked from commit...)\\" to commit message. Disab
+      le with \`--no-cherrypick-ref\` (#279)
+        7. Improve git unit tests (#278)
+        8. Add tests for \`getCommitsWithoutBackports\`
+        9. Add Details View and \`--details\` flag (#277)
+        10.Feature: Show hint about missing backports (#276)"
     `);
   });
 
@@ -68,9 +72,11 @@ describe('inquirer cli', () => {
     const res = await runBackportAsync([
       '--branch',
       'foo',
-      '--upstream',
-      'foo/bar',
-      '--username',
+      '--repo-owner',
+      'foo',
+      '--repo-name',
+      'bar',
+      '--author',
       'some-user',
       '--accessToken',
       'some-token',
@@ -84,9 +90,11 @@ describe('inquirer cli', () => {
     const res = await runBackportAsync([
       '--branch',
       'foo',
-      '--upstream',
-      'foo/bar',
-      '--username',
+      '--repo-owner',
+      'foo',
+      '--repo-name',
+      'bar',
+      '--author',
       'sqren',
       '--accessToken',
       devAccessToken,
@@ -102,14 +110,14 @@ describe('inquirer cli', () => {
       [
         '--branch',
         'foo',
-        '--upstream',
-        'backport-org/backport-e2e',
-        '--username',
+        '--repo-owner',
+        'backport-org',
+        '--repo-name',
+        'backport-e2e',
+        '--author',
         'sqren',
         '--accessToken',
         devAccessToken,
-        '--author',
-        'sqren',
         '--max-number',
         '6',
       ],
@@ -132,14 +140,14 @@ describe('inquirer cli', () => {
       [
         '--branch',
         'foo',
-        '--upstream',
-        'backport-org/backport-e2e',
-        '--username',
+        '--repo-owner',
+        'backport-org',
+        '--repo-name',
+        'backport-e2e',
+        '--author',
         'sqren',
         '--accessToken',
         devAccessToken,
-        '--author',
-        'sqren',
         '--max-number',
         '6',
         '--source-branch',

@@ -37,10 +37,11 @@ export async function maybeSetupRepo(options: ValidConfigOptions) {
   await deleteRemote(options, 'origin');
 
   // ensure remote are setup with latest accessToken
-  await deleteRemote(options, options.username);
-  await addRemote(options, options.username);
+  await deleteRemote(options, options.authenticatedUsername);
+  await addRemote(options, options.authenticatedUsername);
 
-  if (options.username !== options.repoOwner) {
+  // update remote for origin (if the above is a fork)
+  if (options.authenticatedUsername !== options.repoOwner) {
     await deleteRemote(options, options.repoOwner);
     await addRemote(options, options.repoOwner);
   }

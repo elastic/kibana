@@ -1,19 +1,25 @@
-import { ValidConfigOptions } from '../../../options/options';
 import { apiRequestV4 } from './apiRequestV4';
 
 export interface AuthorIdResponse {
   user: { id: string };
 }
 
-export async function fetchAuthorId(options: ValidConfigOptions) {
-  const { all, author, accessToken, githubApiBaseUrlV4 } = options;
-  if (all) {
+export async function fetchAuthorId({
+  accessToken,
+  author,
+  githubApiBaseUrlV4 = 'https://api.github.com/graphql',
+}: {
+  accessToken: string;
+  author: string | null;
+  githubApiBaseUrlV4?: string;
+}) {
+  if (author === null) {
     return null;
   }
 
   const query = /* GraphQL */ `
-    query AuthorId($login: String!) {
-      user(login: $login) {
+    query AuthorId($author: String!) {
+      user(login: $author) {
         id
       }
     }
@@ -23,7 +29,7 @@ export async function fetchAuthorId(options: ValidConfigOptions) {
     githubApiBaseUrlV4,
     accessToken,
     query,
-    variables: { login: author },
+    variables: { author },
   });
 
   return res.user.id;

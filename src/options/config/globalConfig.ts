@@ -57,9 +57,6 @@ function getConfigTemplate() {
   return `{
     // Github personal access token. Must be created here: https://github.com/settings/tokens/new
     // Must have "Repo: Full control of private repositories"
-    "accessToken": "",
-
-    // Github username, eg. kimchy
-    "username": ""
+    "accessToken": ""
   }`;
 }

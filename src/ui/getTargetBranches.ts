@@ -1,4 +1,8 @@
-import { isEmpty } from 'lodash';
+import { isEmpty, isString } from 'lodash';
+import {
+  TargetBranchChoice,
+  TargetBranchChoiceOrString,
+} from '../options/ConfigOptions';
 import { ValidConfigOptions } from '../options/options';
 import { HandledError } from '../services/HandledError';
 import { promptForTargetBranches } from '../services/prompts';
@@ -53,9 +57,9 @@ export function getTargetBranchChoices(
   sourceBranch: string
 ) {
   // exclude sourceBranch from targetBranchChoices
-  const targetBranchesChoices = options.targetBranchChoices.filter(
-    (choice) => choice.name !== sourceBranch
-  );
+  const targetBranchesChoices = getTargetBranchChoicesAsObject(
+    options.targetBranchChoices
+  ).filter((choice) => choice.name !== sourceBranch);
 
   if (isEmpty(targetBranchesChoices)) {
     throw new HandledError('Missing target branch choices');
@@ -69,5 +73,26 @@ export function getTargetBranchChoices(
   return targetBranchesChoices.map((choice) => {
     const isChecked = missingTargetBranches.includes(choice.name);
     return { ...choice, checked: isChecked };
+  });
+}
+
+// `targetBranchChoices` can either be a string or an object.
+// It must be transformed so it is always treated as an object troughout the application
+function getTargetBranchChoicesAsObject(
+  targetBranchChoices?: TargetBranchChoiceOrString[]
+): TargetBranchChoice[] {
+  if (!targetBranchChoices) {
+    return [];
+  }
+
+  return targetBranchChoices.map((choice) => {
+    if (isString(choice)) {
+      return {
+        name: choice,
+        checked: false,
+      };
+    }
+
+    return choice;
   });
 }

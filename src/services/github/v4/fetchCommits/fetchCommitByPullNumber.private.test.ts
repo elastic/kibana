@@ -1,4 +1,3 @@
-import { ValidConfigOptions } from '../../../../options/options';
 import { getDevAccessToken } from '../../../../test/private/getDevAccessToken';
 import { fetchCommitByPullNumber } from './fetchCommitByPullNumber';
 
@@ -13,11 +12,12 @@ describe('fetchCommitByPullNumber', () => {
     it('is returned', async () => {
       const options = {
         accessToken: devAccessToken,
-        githubApiBaseUrlV4: 'https://api.github.com/graphql',
         pullNumber: 5,
         repoName: 'backport-e2e',
         repoOwner: 'backport-org',
-      } as ValidConfigOptions & { pullNumber: number };
+        sourceBranch: 'main',
+        historicalBranchLabelMappings: [],
+      };
 
       expect(await fetchCommitByPullNumber(options)).toEqual({
         committedDate: '2020-08-15T12:40:19Z',
@@ -48,11 +48,12 @@ describe('fetchCommitByPullNumber', () => {
     it('throws an error', async () => {
       const options = {
         accessToken: devAccessToken,
-        githubApiBaseUrlV4: 'https://api.github.com/graphql',
         pullNumber: 11,
         repoName: 'backport-e2e',
         repoOwner: 'backport-org',
-      } as ValidConfigOptions & { pullNumber: number };
+        sourceBranch: 'main',
+        historicalBranchLabelMappings: [],
+      };
 
       await expect(fetchCommitByPullNumber(options)).rejects.toThrowError(
         `The PR #11 is not merged`
@@ -64,11 +65,12 @@ describe('fetchCommitByPullNumber', () => {
     it('throws an error', async () => {
       const options = {
         accessToken: devAccessToken,
-        githubApiBaseUrlV4: 'https://api.github.com/graphql',
         pullNumber: 9999999999999,
         repoName: 'backport-e2e',
         repoOwner: 'backport-org',
-      } as ValidConfigOptions & { pullNumber: number };
+        sourceBranch: 'main',
+        historicalBranchLabelMappings: [],
+      };
 
       await expect(fetchCommitByPullNumber(options)).rejects.toThrowError(
         `Could not resolve to a PullRequest with the number of 9999999999999. (Unhandled Github v4 error)`

@@ -14,14 +14,13 @@ export async function fetchPullRequestBySearchQuery(
 ): Promise<Commit[]> {
   const {
     accessToken,
-    all,
-    author,
     githubApiBaseUrlV4,
-    maxNumber,
+    maxNumber = 10,
     prFilter,
     repoName,
     repoOwner,
     sourceBranch,
+    author,
   } = options;
 
   const query = /* GraphQL */ `
@@ -40,7 +39,7 @@ export async function fetchPullRequestBySearchQuery(
     ${sourceCommitWithTargetPullRequestFragment.source}
   `;
 
-  const authorFilter = all ? '' : `author:${author}`;
+  const authorFilter = author ? `author:${author}` : '';
   const searchQuery = `type:pr is:merged sort:updated-desc repo:${repoOwner}/${repoName} ${authorFilter} ${prFilter} base:${sourceBranch}`;
   const res = await apiRequestV4<PullRequestBySearchQueryResponse>({
     githubApiBaseUrlV4,
@@ -59,9 +58,9 @@ export async function fetchPullRequestBySearchQuery(
 
   // terminate if not commits were found
   if (isEmpty(commits)) {
-    const errorText = options.all
-      ? `There are no pull requests matching the filter "${prFilter}"`
-      : `There are no commits by "${options.author}" matching the filter "${prFilter}". Try with \`--all\` for commits by all users or \`--author=<username>\` for commits from a specific user`;
+    const errorText = options.author
+      ? `There are no commits by "${options.author}" matching the filter "${prFilter}". Try with \`--all\` for commits by all users or \`--author=<username>\` for commits from a specific user`
+      : `There are no pull requests matching the filter "${prFilter}"`;
 
     throw new HandledError(errorText);
   }

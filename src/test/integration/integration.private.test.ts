@@ -7,6 +7,7 @@ import nock from 'nock';
 import { getOptions } from '../../options/options';
 import { runSequentially } from '../../runSequentially';
 import { getCommits } from '../../ui/getCommits';
+import { mockConfigFiles } from '../mockConfigFiles';
 import { listenForCallsToNockScope } from '../nockHelpers';
 import { getDevAccessToken } from '../private/getDevAccessToken';
 
@@ -21,7 +22,7 @@ const HOMEDIR_PATH = resolve('./src/test/integration/mock-environment/homedir');
 const REPO_OWNER = 'backport-org';
 const REPO_NAME = 'integration-test';
 const BRANCH_NAME = 'backport/7.x/commit-5bf29b7d';
-const USERNAME = 'sqren';
+const AUHTOR = 'sqren';
 
 describe('integration', () => {
   afterAll(() => {
@@ -31,6 +32,11 @@ describe('integration', () => {
   beforeAll(() => {
     // set alternative homedir
     jest.spyOn(os, 'homedir').mockReturnValue(HOMEDIR_PATH);
+
+    mockConfigFiles({
+      globalConfig: {},
+      projectConfig: {},
+    });
   });
 
   describe('when a single commit is backported', () => {
@@ -51,9 +57,10 @@ describe('integration', () => {
         githubApiBaseUrlV3: 'https://api.foo.com',
         ci: true,
         sha: '5bf29b7d847ea3dbde9280448f0f62ad0f22d3ad',
-        username: USERNAME,
+        author: AUHTOR,
         accessToken,
-        upstream: 'backport-org/integration-test',
+        repoOwner: 'backport-org',
+        repoName: 'integration-test',
       });
       const commits = await getCommits(options);
       const targetBranches: string[] = ['7.x'];
@@ -78,9 +85,14 @@ describe('integration', () => {
         Array [
           Object {
             "base": "7.x",
-            "body": "This is an automatic backport of commit 5bf29b7d847ea3dbde9280448f0f62ad0f22d3ad to 7.x.
+            "body": "# Backport
 
-        Please refer to the [Backport tool documentation](https://github.com/sqren/backport) for additional information",
+        This is an automatic backport to 7.x of:
+         - Add ❤️ emoji (5bf29b7d)
+
+        ### Questions ?
+        Please refer to the [Backport tool documentation](https://github.com/sqren/backport)
+        ",
             "head": "sqren:backport/7.x/commit-5bf29b7d",
             "title": "[7.x] Add ❤️ emoji",
           },
@@ -100,7 +112,7 @@ describe('integration', () => {
     it('should create branch in the fork (sqren/integration-test)', async () => {
       const branches = await getBranches({
         accessToken,
-        repoOwner: USERNAME,
+        repoOwner: AUHTOR,
         repoName: REPO_NAME,
       });
       expect(branches.map((b) => b.name)).toEqual([
@@ -113,7 +125,7 @@ describe('integration', () => {
     it('should have cherry picked the correct commit', async () => {
       const branches = await getBranches({
         accessToken,
-        repoOwner: USERNAME,
+        repoOwner: AUHTOR,
         repoName: REPO_NAME,
       });
 
@@ -140,9 +152,10 @@ describe('integration', () => {
   //       githubApiBaseUrlV3: 'https://api.foo.com',
   //       ci: true,
   //       sha: '5bf29b7d847ea3dbde9280448f0f62ad0f22d3ad',
-  //       username: USERNAME,
+  //       author: AUHTOR,
   //       accessToken,
-  //       upstream: 'backport-org/integration-test',
+  //       repoOwner: 'backport-org',
+  //       reponame: 'integration-test',
   //     } as ValidConfigOptions;
   //     const commits = await getCommits(options);
   //     const targetBranches: string[] = ['7.x'];
@@ -172,7 +185,7 @@ describe('integration', () => {
   //   it('should create branch in the fork (sqren/integration-test)', async () => {
   //     const branches = await getBranches({
   //       accessToken,
-  //       repoOwner: USERNAME,
+  //       repoOwner: AUHTOR,
   //       repoName: REPO_NAME,
   //     });
   //     expect(branches.map((b) => b.name)).toEqual([
@@ -185,7 +198,7 @@ describe('integration', () => {
   //   it('should have cherry picked the correct commit', async () => {
   //     const branches = await getBranches({
   //       accessToken,
-  //       repoOwner: USERNAME,
+  //       repoOwner: AUHTOR,
   //       repoName: REPO_NAME,
   //     });
 
@@ -210,12 +223,13 @@ describe('integration', () => {
       });
 
       const options = await getOptions([], {
+        author: AUHTOR,
         githubApiBaseUrlV3: 'https://api.foo.com',
         ci: true,
         sha: '5bf29b7d847ea3dbde9280448f0f62ad0f22d3ad',
-        username: USERNAME,
         accessToken,
-        upstream: 'backport-org/integration-test',
+        repoOwner: 'backport-org',
+        repoName: 'integration-test',
         fork: false,
       });
       const commits = await getCommits(options);
@@ -229,9 +243,14 @@ describe('integration', () => {
         Array [
           Object {
             "base": "7.x",
-            "body": "This is an automatic backport of commit 5bf29b7d847ea3dbde9280448f0f62ad0f22d3ad to 7.x.
+            "body": "# Backport
 
-        Please refer to the [Backport tool documentation](https://github.com/sqren/backport) for additional information",
+        This is an automatic backport to 7.x of:
+         - Add ❤️ emoji (5bf29b7d)
+
+        ### Questions ?
+        Please refer to the [Backport tool documentation](https://github.com/sqren/backport)
+        ",
             "head": "backport-org:backport/7.x/commit-5bf29b7d",
             "title": "[7.x] Add ❤️ emoji",
           },
@@ -267,7 +286,7 @@ describe('integration', () => {
     it('should NOT create branch in the fork (sqren/integration-test)', async () => {
       const branches = await getBranches({
         accessToken,
-        repoOwner: USERNAME,
+        repoOwner: AUHTOR,
         repoName: REPO_NAME,
       });
       expect(branches.map((b) => b.name)).toEqual(['7.x', 'master']);
@@ -365,7 +384,7 @@ async function resetState(accessToken: string) {
 
   await deleteBranch({
     accessToken,
-    repoOwner: USERNAME,
+    repoOwner: AUHTOR,
     repoName: REPO_NAME,
     branchName: BRANCH_NAME,
   });

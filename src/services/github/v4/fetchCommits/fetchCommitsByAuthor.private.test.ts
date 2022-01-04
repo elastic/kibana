@@ -1,4 +1,3 @@
-import { ValidConfigOptions } from '../../../../options/options';
 import { getDevAccessToken } from '../../../../test/private/getDevAccessToken';
 import { Commit } from '../../../sourceCommit/parseSourceCommit';
 import { fetchCommitsByAuthor } from './fetchCommitsByAuthor';
@@ -11,17 +10,15 @@ describe('fetchCommitsByAuthor', () => {
   });
 
   describe('commitPaths', () => {
-    const getOptions = () =>
-      ({
-        repoOwner: 'backport-org',
-        repoName: 'repo-with-different-commit-paths',
-        sourceBranch: 'main',
-        accessToken: devAccessToken,
-        username: 'sqren',
-        author: 'sqren',
-        maxNumber: 10,
-        githubApiBaseUrlV4: 'https://api.github.com/graphql',
-      } as ValidConfigOptions);
+    const getOptions = () => ({
+      accessToken: devAccessToken,
+      author: 'sqren',
+      historicalBranchLabelMappings: [],
+      maxNumber: 10,
+      repoName: 'repo-with-different-commit-paths',
+      repoOwner: 'backport-org',
+      sourceBranch: 'main',
+    });
 
     const getCommitMessages = (commits: Commit[]) => {
       return commits.map((c) =>
@@ -99,16 +96,15 @@ describe('fetchCommitsByAuthor', () => {
     let res: Awaited<ReturnType<typeof fetchCommitsByAuthor>>;
     beforeEach(async () => {
       res = await fetchCommitsByAuthor({
-        repoOwner: 'backport-org',
-        repoName: 'backport-e2e',
-        sourceBranch: 'master',
         accessToken: devAccessToken,
-        username: 'sqren',
-        author: 'sqren',
+        commitPaths: [],
+        historicalBranchLabelMappings: [],
         maxNumber: 10,
-        githubApiBaseUrlV4: 'https://api.github.com/graphql',
-        commitPaths: [] as Array<string>,
-      } as ValidConfigOptions);
+        repoName: 'backport-e2e',
+        repoOwner: 'backport-org',
+        sourceBranch: 'master',
+        author: null,
+      });
     });
 
     it('returns related OPEN PRs', async () => {

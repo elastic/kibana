@@ -10,7 +10,11 @@
       "name": "Start backport",
       "program": "${workspaceRoot}/src/entrypoint.cli.ts",
       "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
-      "args": ["--branch=6.3", "--upstream=backport-org/backport-demo"],
+      "args": [
+        "--branch=6.3",
+        "--repo-owner=backport-org",
+        "--repo-name=backport-demo"
+      ],
       "console": "integratedTerminal"
     },
     {

@@ -18,6 +18,6 @@ export async function getDevAccessToken(): Promise<string> {
 
     return accessToken.trim();
   } catch (e) {
-    throw new Error(`Missing username or accessToken in "${accessTokenFile}"`);
+    throw new Error(`Missing accessToken in "${accessTokenFile}"`);
   }
 }

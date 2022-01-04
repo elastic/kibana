@@ -13,14 +13,12 @@ describe('fetchPullRequestBySearchQuery', () => {
     it('throws an error', async () => {
       const options = {
         accessToken: devAccessToken,
-        all: false,
-        author: 'sqren',
-        githubApiBaseUrlV4: 'https://api.github.com/graphql',
         maxNumber: 10,
         prFilter: 'label:non-existing',
         repoName: 'backport-e2e',
         repoOwner: 'backport-org',
         sourceBranch: 'master',
+        author: 'sqren',
       } as ValidConfigOptions;
 
       await expect(fetchPullRequestBySearchQuery(options)).rejects.toThrowError(
@@ -33,14 +31,12 @@ describe('fetchPullRequestBySearchQuery', () => {
     it('returns the merge commits for those PRs', async () => {
       const options = {
         accessToken: devAccessToken,
-        all: false,
-        author: 'sqren',
-        githubApiBaseUrlV4: 'https://api.github.com/graphql',
         maxNumber: 10,
         prFilter: 'label:v7.8.0',
         repoName: 'backport-e2e',
         repoOwner: 'backport-org',
         sourceBranch: 'master',
+        author: 'sqren',
       } as ValidConfigOptions;
 
       expect(await fetchPullRequestBySearchQuery(options)).toEqual([

@@ -1,9 +1,7 @@
 import { AxiosError } from 'axios';
 import ora from 'ora';
 import { ConfigFileOptions } from '../../../../options/ConfigOptions';
-import { OptionsFromCliArgs } from '../../../../options/cliArgs';
-import { OptionsFromConfigFiles } from '../../../../options/config/config';
-import { getRequiredOptions } from '../../../../options/parseRequiredOptions';
+import { withConfigMigrations } from '../../../../options/config/readConfigFile';
 import { filterNil } from '../../../../utils/filterEmpty';
 import { HandledError } from '../../../HandledError';
 import {
@@ -28,17 +26,14 @@ import { GithubConfigOptionsResponse, query, RemoteConfig } from './query';
 export type OptionsFromGithub = Awaited<
   ReturnType<typeof getOptionsFromGithub>
 >;
-export async function getOptionsFromGithub(
-  optionsFromConfigFiles: ConfigFileOptions,
-  optionsFromCliArgs: OptionsFromCliArgs
-) {
-  const options = {
-    ...optionsFromConfigFiles,
-    ...optionsFromCliArgs,
-  } as OptionsFromCliArgs & OptionsFromConfigFiles;
-
-  const { githubApiBaseUrlV4 } = options;
-  const { accessToken, repoName, repoOwner } = getRequiredOptions(options);
+export async function getOptionsFromGithub(options: {
+  accessToken: string;
+  githubApiBaseUrlV4?: string;
+  repoName: string;
+  repoOwner: string;
+  skipRemoteConfig?: boolean;
+}) {
+  const { accessToken, githubApiBaseUrlV4, repoName, repoOwner } = options;
 
   let res: GithubConfigOptionsResponse;
   const spinner = ora().start('Initializing...');
@@ -63,20 +58,7 @@ export async function getOptionsFromGithub(
       repoOwner,
     });
 
-    const configFileNotFound = error.response?.data.errors?.some(
-      (error) =>
-        error.type === 'NOT_FOUND' &&
-        error.path.join('.') ===
-          'repository.defaultBranchRef.target.history.edges.0.remoteConfig.file'
-    );
-
-    if (configFileNotFound && error.response?.data.data) {
-      // swallow error if caused by missing config file on Github
-      res = error.response.data.data;
-    } else {
-      // throw generic Github error
-      throw handleGithubV4Error(error);
-    }
+    res = handleMissingConfigFile(error);
   }
 
   // get the original repo (not the fork)
@@ -92,18 +74,13 @@ export async function getOptionsFromGithub(
   const historicalRemoteConfigs = repo.defaultBranchRef.target.history.edges;
   const latestRemoteConfig = historicalRemoteConfigs[0]?.remoteConfig;
   const skipRemoteConfig = await getSkipRemoteConfigFile(
-    options,
+    options.skipRemoteConfig,
     latestRemoteConfig
   );
-  const defaultBranch = repo.defaultBranchRef.name;
-
-  // if no sourceBranch is given, use the `defaultBranch` (normally "master")
-  const sourceBranch = options.sourceBranch
-    ? options.sourceBranch
-    : defaultBranch;
 
   return {
-    sourceBranch,
+    authenticatedUsername: res.viewer.login,
+    sourceBranch: repo.defaultBranchRef.name,
     ...(skipRemoteConfig ? {} : parseRemoteConfig(latestRemoteConfig)),
     historicalBranchLabelMappings: skipRemoteConfig
       ? []
@@ -112,12 +89,12 @@ export async function getOptionsFromGithub(
 }
 
 async function getSkipRemoteConfigFile(
-  options: OptionsFromCliArgs,
+  skipRemoteConfig?: boolean,
   remoteConfig?: RemoteConfig
 ) {
-  if (options.forceLocalConfig) {
+  if (skipRemoteConfig) {
     logger.info(
-      'Skipping remote config: `--force-local-config` specified via config file or cli'
+      'Skipping remote config: `--skip-remote-config` specified via config file or cli'
     );
     return true;
   }
@@ -166,7 +143,9 @@ function parseRemoteConfig(remoteConfig?: RemoteConfig) {
 
   try {
     logger.info('Using remote config');
-    return JSON.parse(remoteConfig.file.object.text) as ConfigFileOptions;
+    return withConfigMigrations(
+      JSON.parse(remoteConfig.file.object.text)
+    ) as ConfigFileOptions;
   } catch (e) {
     logger.info('Parsing remote config failed', e);
     return;
@@ -197,4 +176,21 @@ function getHistoricalBranchLabelMappings(
       }
     })
     .filter(filterNil);
+}
+function handleMissingConfigFile(
+  error: AxiosError<GithubV4Response<GithubConfigOptionsResponse | null>>
+) {
+  const wasMissingConfigError = error.response?.data.errors?.some(
+    (error) =>
+      error.type === 'NOT_FOUND' &&
+      error.path.join('.') ===
+        'repository.defaultBranchRef.target.history.edges.0.remoteConfig.file'
+  );
+
+  // Throw unexpected error
+  if (!wasMissingConfigError || !error.response?.data.data) {
+    throw handleGithubV4Error(error);
+  }
+
+  return error.response.data.data;
 }

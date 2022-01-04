@@ -75,7 +75,6 @@ describe.skip('enablePullRequestAutoMerge', () => {
 
     options = {
       accessToken,
-      githubApiBaseUrlV4: 'https://api.github.com/graphql',
       repoOwner: TEST_REPO_OWNER,
       repoName: TEST_REPO_NAME,
     } as ValidConfigOptions;

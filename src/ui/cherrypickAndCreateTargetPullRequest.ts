@@ -71,11 +71,15 @@ export async function cherrypickAndCreateTargetPullRequest({
   });
 
   // add assignees to target pull request
+  const assignees = options.autoAssign
+    ? [options.authenticatedUsername]
+    : options.assignees;
+
   if (options.assignees.length > 0) {
     await addAssigneesToPullRequest(
       options,
       targetPullRequest.number,
-      options.assignees
+      assignees
     );
   }
 
@@ -143,7 +147,7 @@ async function backportViaFilesystem({
   );
 
   if (options.resetAuthor) {
-    await setCommitAuthor(options, options.username);
+    await setCommitAuthor(options, options.authenticatedUsername);
   }
 
   await pushBackportBranch({ options, backportBranch });
@@ -166,7 +170,7 @@ export async function getCommitsWithoutBackports({
 }) {
   const commitsInConflictingPaths = await fetchCommitsByAuthor({
     ...options,
-    all: true,
+    author: null, // retrieve commits across all authors
     commitPaths: conflictingFiles,
   });
 

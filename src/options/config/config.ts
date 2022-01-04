@@ -3,32 +3,6 @@ import { getOptionsFromGit } from './getOptionsFromGit';
 import { getGlobalConfig } from './globalConfig';
 import { getProjectConfig } from './projectConfig';
 
-export const defaultConfigOptions = {
-  all: false,
-  assignees: [] as Array<string>,
-  autoAssign: false,
-  autoMerge: false,
-  autoMergeMethod: 'merge',
-  ci: false,
-  cherrypickRef: true,
-  details: false,
-  fork: true,
-  gitHostname: 'github.com',
-  githubApiBaseUrlV3: 'https://api.github.com',
-  githubApiBaseUrlV4: 'https://api.github.com/graphql',
-  maxNumber: 10,
-  multipleBranches: true,
-  multipleCommits: false,
-  noVerify: true,
-  prTitle: '[{targetBranch}] {commitMessages}',
-  resetAuthor: false,
-  sourcePRLabels: [],
-  targetBranchChoices: [],
-  targetBranches: [],
-  targetPRLabels: [],
-  verbose: false,
-};
-
 export type OptionsFromConfigFiles = Awaited<
   ReturnType<typeof getOptionsFromConfigFiles>
 >;
@@ -41,24 +15,10 @@ export async function getOptionsFromConfigFiles(
     getGlobalConfig(optionsFromModule?.ci),
   ]);
 
-  // global and project config combined
-  const combinedConfig = {
+  return {
     ...gitConfig,
     ...globalConfig,
     ...projectConfig,
     ...optionsFromModule,
-  };
-
-  return {
-    ...defaultConfigOptions,
-    ...combinedConfig,
-
-    // backwards-compatability: `labels` was renamed `targetPRLabels`
-    targetPRLabels:
-      combinedConfig.targetPRLabels ?? combinedConfig.labels ?? [],
-
-    // backwards-compatability: `branches` was renamed `targetBranchChoices`
-    targetBranchChoices:
-      combinedConfig.targetBranchChoices ?? combinedConfig.branches ?? [],
   };
 }

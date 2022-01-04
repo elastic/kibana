@@ -1,5 +1,4 @@
 import nock from 'nock';
-import { ValidConfigOptions } from '../../../../options/options';
 import { mockGqlRequest } from '../../../../test/nockHelpers';
 import { Commit } from '../../../sourceCommit/parseSourceCommit';
 import { AuthorIdResponse } from '../fetchAuthorId';
@@ -10,17 +9,15 @@ import {
 } from './fetchCommitsByAuthor';
 
 const defaultOptions = {
-  repoOwner: 'elastic',
-  repoName: 'kibana',
-  sourceBranch: 'source-branch-from-options',
   accessToken: 'myAccessToken',
-  username: 'sqren',
   author: 'sqren',
-  maxNumber: 10,
-  githubApiBaseUrlV3: 'https://api.github.com',
   githubApiBaseUrlV4: 'http://localhost/graphql',
-  commitPaths: [] as Array<string>,
-} as ValidConfigOptions;
+  historicalBranchLabelMappings: [],
+  maxNumber: 10,
+  repoName: 'kibana',
+  repoOwner: 'elastic',
+  sourceBranch: 'source-branch-from-options',
+};
 
 const authorIdMockData = { user: { id: 'myUserId' } } as const;
 

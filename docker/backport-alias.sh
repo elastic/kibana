@@ -2,7 +2,7 @@
 # With .backport/config.json mounted:
     # - `backport`
 # Without .backport/config.json mounted:
-    # `backport --username sqren --accessToken myGithubAccessToken --upstream elastic/kibana`
+    # `backport --accessToken myGithubAccessToken --repo-owner backport-org --repo-name backport-demo`
 backport() {
     BACKPORT_FOLDER=~/.backport
     GITCONFIG=~/.gitconfig

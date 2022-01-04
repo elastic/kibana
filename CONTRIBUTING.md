@@ -3,7 +3,7 @@
 ### Run
 
 ```
-yarn start --branch 6.1 --upstream backport-org/backport-demo --all
+yarn start --branch 6.1 --repo-owner backport-org --repo-name backport-demo --all
 ```
 
 or
@@ -13,7 +13,7 @@ or
 yarn tsc
 
 # Run
-node dist/entrypoint.cli.js --branch 6.1 --upstream backport-org/backport-demo --all
+node dist/entrypoint.cli.js --branch 6.1 --repo-owner backport-org --repo-name backport-demo --all
 ```
 
 **Run `backport` CLI globally**

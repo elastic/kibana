@@ -9,14 +9,13 @@ All config options can additionally be overriden via CLI options.
 
 ## Global config (`.backport/config.json`)
 
-During installation `backport` will create an empty configuration file in `~/.backport/config.json`. You must update this file with your Github username and a [Github Access Token](https://github.com/settings/tokens/new)
+During installation `backport` will create an empty configuration file in `~/.backport/config.json`. You must update this file with a [Github Access Token](https://github.com/settings/tokens/new)
 
 Example:
 
 ```json
 {
-  "accessToken": "b4914600112ba18af7798b6c1a1363728ae1d96f",
-  "username": "sqren"
+  "accessToken": "very-secret-token"
 }
 ```
 
@@ -34,12 +33,6 @@ Please select the necessary access scopes:
 ![image](https://user-images.githubusercontent.com/209966/67081207-018ec400-f197-11e9-86aa-4ae4a003fcbd.png)
 
 CLI: `--accessToken myAccessToken`
-
-#### `username` **required**
-
-Github username
-
-CLI: `--username sqren`
 
 #### `editor`
 
@@ -63,29 +56,38 @@ Example:
 
 ```json
 {
-  "upstream": "elastic/kibana",
-  "targetBranchChoices": [
-    { "name": "6.x", "checked": true },
-    "6.3",
-    "6.2",
-    "6.1",
-    "6.0"
-  ],
+  "repoOwner": "elastic",
+  "repoName": "kibana",
+  "targetBranchChoices": ["6.x", "6.3", "6.2", "6.1", "6.0"],
   "targetPRLabels": ["backport"]
 }
 ```
 
-#### `upstream` **required**
+#### `repoName` **required**
 
-Github organization/user and repository name separated with forward slash.
+Name of repository
 
-CLI: `--upstream elastic/kibana`
+CLI: `--repo-name kibana`
 
 Config:
 
 ```json
 {
-  "upsteam": "elastic/kibana"
+  "repoName": "kibana"
+}
+```
+
+#### `repoOwner` **required**
+
+Owner of repository (Github organization or Github username)
+
+CLI: `--repo-owner elastic`
+
+Config:
+
+```json
+{
+  "repoOwner": "elastic"
 }
 ```
 
@@ -93,7 +95,7 @@ Config:
 
 List of target branches the user can select interactively. The array can contain branch names as strings or objects that also contains the field `checked` which indicates whether the branch should be pre-selected. It is useful to pre-select branches you often backport to.
 
-CLI: `target-branch-choice <branch>`
+CLI: `--target-branch-choice <branch>`
 
 Config:
 
@@ -113,16 +115,6 @@ Config:
 
 The following options can be used in both the global config, project config, and passed in through CLI.
 
-#### `all`
-
-`true`: list all commits
-
-`false`: list commits by you only
-
-Default: `false`
-
-CLI: `--all`, `-a`
-
 #### `assignees`
 
 Add assignees to the target pull request
@@ -134,6 +126,28 @@ Config:
 ```json
 {
   "assignees": ["sqren"]
+}
+```
+
+#### `author`
+
+By default only commits from the authenticated user are displayed. To see commits from another user use `--author john.doe`. To see commits from any user use `--all` (cli-only flag).
+
+CLI: `--author sqren`
+
+Config:
+
+```json
+{
+  "author": "sqren"
+}
+```
+
+To view commits form all users (equivalent to `backport --all`):
+
+```json
+{
+  "author": null
 }
 ```
 
@@ -153,7 +167,7 @@ Config:
 
 #### `branchLabelMapping`
 
-Pre-select target branch choices based on the source PR labels.
+Automatically detech which branches a pull request should be backported to, based on the pull request labels.
 
 CLI: N/A
 

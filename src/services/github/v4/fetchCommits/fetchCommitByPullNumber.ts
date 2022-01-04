@@ -8,11 +8,23 @@ import {
 } from '../../../sourceCommit/parseSourceCommit';
 import { apiRequestV4 } from '../apiRequestV4';
 
-export async function fetchCommitByPullNumber(
-  options: ValidConfigOptions & { pullNumber: number }
-): Promise<Commit> {
-  const { accessToken, githubApiBaseUrlV4, pullNumber, repoName, repoOwner } =
-    options;
+export async function fetchCommitByPullNumber(options: {
+  accessToken: string;
+  branchLabelMapping?: ValidConfigOptions['branchLabelMapping'];
+  githubApiBaseUrlV4?: string;
+  historicalBranchLabelMappings: ValidConfigOptions['historicalBranchLabelMappings'];
+  pullNumber: number;
+  repoName: string;
+  repoOwner: string;
+  sourceBranch: string;
+}): Promise<Commit> {
+  const {
+    accessToken,
+    githubApiBaseUrlV4 = 'https://api.github.com/graphql',
+    pullNumber,
+    repoName,
+    repoOwner,
+  } = options;
 
   const query = /* GraphQL */ `
     query CommitByPullNumber(

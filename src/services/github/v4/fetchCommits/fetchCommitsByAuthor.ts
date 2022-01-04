@@ -16,14 +16,21 @@ function fetchByCommitPath({
   authorId,
   commitPath,
 }: {
-  options: ValidConfigOptions;
+  options: {
+    accessToken: string;
+    githubApiBaseUrlV4?: string;
+    maxNumber?: number;
+    repoName: string;
+    repoOwner: string;
+    sourceBranch: string;
+  };
   authorId: string | null;
   commitPath: string | null;
 }) {
   const {
     accessToken,
-    githubApiBaseUrlV4,
-    maxNumber,
+    githubApiBaseUrlV4 = 'https://api.github.com/graphql',
+    maxNumber = 10,
     repoName,
     repoOwner,
     sourceBranch,
@@ -77,10 +84,19 @@ function fetchByCommitPath({
   });
 }
 
-export async function fetchCommitsByAuthor(
-  options: ValidConfigOptions
-): Promise<Commit[]> {
-  const { sourceBranch, commitPaths } = options;
+export async function fetchCommitsByAuthor(options: {
+  accessToken: string;
+  author: string | null;
+  branchLabelMapping?: ValidConfigOptions['branchLabelMapping'];
+  commitPaths?: string[];
+  githubApiBaseUrlV4?: string;
+  historicalBranchLabelMappings: ValidConfigOptions['historicalBranchLabelMappings'];
+  maxNumber?: number;
+  repoName: string;
+  repoOwner: string;
+  sourceBranch: string;
+}): Promise<Commit[]> {
+  const { sourceBranch, commitPaths = [] } = options;
 
   const authorId = await fetchAuthorId(options);
   const responses = await Promise.all(
@@ -110,13 +126,11 @@ export async function fetchCommitsByAuthor(
   // terminate if not commits were found
   if (isEmpty(commits)) {
     const pathText =
-      options.commitPaths.length > 0
-        ? ` touching files in path: "${options.commitPaths}"`
-        : '';
+      commitPaths.length > 0 ? ` touching files in path: "${commitPaths}"` : '';
 
-    const errorText = options.all
-      ? `There are no commits in this repository${pathText}`
-      : `There are no commits by "${options.author}" in this repository${pathText}. Try with \`--all\` for commits by all users or \`--author=<username>\` for commits from a specific user`;
+    const errorText = options.author
+      ? `There are no commits by "${options.author}" in this repository${pathText}. Try with \`--all\` for commits by all users or \`--author=<username>\` for commits from a specific user`
+      : `There are no commits in this repository${pathText}`;
 
     throw new HandledError(errorText);
   }

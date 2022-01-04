@@ -41,9 +41,8 @@ describe('runSequentially', () => {
 
     const options: ValidConfigOptions = {
       accessToken: 'myAccessToken',
-      all: false,
+      authenticatedUsername: 'sqren_authenticated',
       assignees: [],
-      author: 'sqren',
       autoAssign: false,
       autoFixConflicts: undefined,
       autoMerge: false,
@@ -55,7 +54,7 @@ describe('runSequentially', () => {
       commitPaths: [],
       details: false,
       editor: 'code',
-      forceLocalConfig: undefined,
+      skipRemoteConfig: undefined,
       fork: true,
       gitHostname: 'github.com',
       githubApiBaseUrlV3: 'https://api.github.com',
@@ -77,7 +76,6 @@ describe('runSequentially', () => {
       sourceBranch: 'my-source-branch-from-options',
       sourcePRLabels: [],
       targetBranches: [],
-      upstream: 'elastic/kibana',
       targetBranchChoices: [
         { name: '6.x' },
         { name: '6.0' },
@@ -86,7 +84,7 @@ describe('runSequentially', () => {
         { name: '5.4' },
       ],
       targetPRLabels: [],
-      username: 'sqren',
+      author: 'sqren',
       verbose: false,
     };
 
@@ -137,84 +135,46 @@ describe('runSequentially', () => {
       Array [
         Object {
           "base": "7.x",
-          "body": "This is an automatic backport of pull request #55 to 7.x.
+          "body": "# Backport
 
-      Please refer to the [Backport tool documentation](https://github.com/sqren/backport) for additional information
+      This is an automatic backport to 7.x of:
+       - #55
+
+      ### Questions ?
+      Please refer to the [Backport tool documentation](https://github.com/sqren/backport)
 
       myPrDescription",
-          "head": "sqren:backport/7.x/pr-55",
+          "head": "sqren_authenticated:backport/7.x/pr-55",
           "title": "myPrTitle 7.x My commit message",
         },
       ]
     `);
   });
 
+  it('should run all commands in the correct directory', () => {
+    expect(
+      rpcExecMock.mock.calls.every(
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        ([cmd, opts]) =>
+          opts.cwd === '/myHomeDir/.backport/repositories/elastic/kibana'
+      )
+    ).toBe(true);
+  });
+
   it('exec should be called with correct args', () => {
     expect(rpcExecMock).toHaveBeenCalledTimes(10);
-    expect(rpcExecMock.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "git remote rm origin",
-          Object {
-            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
-          },
-        ],
-        Array [
-          "git remote rm sqren",
-          Object {
-            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
-          },
-        ],
-        Array [
-          "git remote add sqren https://x-access-token:myAccessToken@github.com/sqren/kibana.git",
-          Object {
-            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
-          },
-        ],
-        Array [
-          "git remote rm elastic",
-          Object {
-            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
-          },
-        ],
-        Array [
-          "git remote add elastic https://x-access-token:myAccessToken@github.com/elastic/kibana.git",
-          Object {
-            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
-          },
-        ],
-        Array [
-          "git reset --hard && git clean -d --force && git fetch elastic 7.x && git checkout -B backport/7.x/pr-55 elastic/7.x --no-track",
-          Object {
-            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
-          },
-        ],
-        Array [
-          "git fetch elastic master:master --force",
-          Object {
-            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
-          },
-        ],
-        Array [
-          "git cherry-pick -x abcd",
-          Object {
-            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
-          },
-        ],
-        Array [
-          "git push sqren backport/7.x/pr-55:backport/7.x/pr-55 --force",
-          Object {
-            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
-          },
-        ],
-        Array [
-          "git reset --hard && git checkout my-source-branch-from-options && git branch -D backport/7.x/pr-55",
-          Object {
-            "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
-          },
-        ],
-      ]
-    `);
+    expect(rpcExecMock.mock.calls.map(([cmd]) => cmd)).toEqual([
+      'git remote rm origin',
+      'git remote rm sqren_authenticated',
+      'git remote add sqren_authenticated https://x-access-token:myAccessToken@github.com/sqren_authenticated/kibana.git',
+      'git remote rm elastic',
+      'git remote add elastic https://x-access-token:myAccessToken@github.com/elastic/kibana.git',
+      'git reset --hard && git clean -d --force && git fetch elastic 7.x && git checkout -B backport/7.x/pr-55 elastic/7.x --no-track',
+      'git fetch elastic master:master --force',
+      'git cherry-pick -x abcd',
+      'git push sqren_authenticated backport/7.x/pr-55:backport/7.x/pr-55 --force',
+      'git reset --hard && git checkout my-source-branch-from-options && git branch -D backport/7.x/pr-55',
+    ]);
   });
 
   it('git clone should be called with correct args', () => {

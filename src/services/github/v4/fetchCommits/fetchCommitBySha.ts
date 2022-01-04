@@ -8,12 +8,19 @@ import {
 } from '../../../sourceCommit/parseSourceCommit';
 import { apiRequestV4 } from '../apiRequestV4';
 
-export async function fetchCommitBySha(
-  options: ValidConfigOptions & { sha: string }
-): Promise<Commit> {
+export async function fetchCommitBySha(options: {
+  accessToken: string;
+  branchLabelMapping?: ValidConfigOptions['branchLabelMapping'];
+  githubApiBaseUrlV4?: string;
+  historicalBranchLabelMappings: ValidConfigOptions['historicalBranchLabelMappings'];
+  repoName: string;
+  repoOwner: string;
+  sha: string;
+  sourceBranch: string;
+}): Promise<Commit> {
   const {
     accessToken,
-    githubApiBaseUrlV4,
+    githubApiBaseUrlV4 = 'https://api.github.com/graphql',
     repoName,
     repoOwner,
     sha,

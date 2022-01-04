@@ -34,7 +34,7 @@ export function deleteRepo(options: ValidConfigOptions) {
 }
 
 export function getRemoteUrl(
-  { repoName, accessToken, gitHostname }: ValidConfigOptions,
+  { repoName, accessToken, gitHostname = 'github.com' }: ValidConfigOptions,
   repoOwner: string
 ) {
   return `https://x-access-token:${accessToken}@${gitHostname}/${repoOwner}/${repoName}.git`;
@@ -116,12 +116,13 @@ export async function isLocalConfigFileModified() {
   }
 }
 
-export async function getUpstreamFromGitRemote() {
+export async function getRepoOwnerAndNameFromGitRemote() {
   try {
     const { stdout } = await exec('git remote --verbose', {});
     const matches = stdout.match(/github.com[:/]{1}(.*).git/);
     if (matches !== null) {
-      return matches[1];
+      const [repoOwner, repoName] = matches[1].split('/');
+      return { repoOwner, repoName };
     }
   } catch (e) {
     return;
@@ -198,7 +199,7 @@ export async function cherrypick(
   const mainlinArg =
     options.mainline != undefined ? ` --mainline ${options.mainline}` : '';
 
-  const cherrypickRefArg = options.cherrypickRef ? ' -x' : '';
+  const cherrypickRefArg = options.cherrypickRef === false ? '' : ' -x';
   const cmd = `git cherry-pick${cherrypickRefArg}${mainlinArg} ${sha}`;
   try {
     await exec(cmd, { cwd: getRepoPath(options) });
@@ -332,12 +333,12 @@ export async function getUnstagedFiles(options: ValidConfigOptions) {
 
 export async function setCommitAuthor(
   options: ValidConfigOptions,
-  username: string
+  author: string
 ) {
-  const spinner = ora(`Changing author to "${username}"`).start();
+  const spinner = ora(`Changing author to "${author}"`).start();
   try {
     const res = await exec(
-      `git commit --amend --no-edit --author "${username} <${username}@users.noreply.github.com>"`,
+      `git commit --amend --no-edit --author "${author} <${author}@users.noreply.github.com>"`,
       { cwd: getRepoPath(options) }
     );
     spinner.succeed();
@@ -407,7 +408,7 @@ export async function deleteBackportBranch({
  * Returns the repo owner of the forked repo or the source repo
  */
 export function getRepoForkOwner(options: ValidConfigOptions) {
-  return options.fork ? options.username : options.repoOwner;
+  return options.fork ? options.authenticatedUsername : options.repoOwner;
 }
 
 export async function pushBackportBranch({

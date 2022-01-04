@@ -5,7 +5,7 @@ import { runSequentially, Result } from './runSequentially';
 import { HandledError } from './services/HandledError';
 import { getLogfilePath } from './services/env';
 import { createStatusComment } from './services/github/v3/createStatusComment';
-import { initLogger, consoleLog } from './services/logger';
+import { consoleLog, logger } from './services/logger';
 import { Commit } from './services/sourceCommit/parseSourceCommit';
 import { getCommits } from './ui/getCommits';
 import { getTargetBranches } from './ui/getTargetBranches';
@@ -27,7 +27,6 @@ export async function main(
   argv: string[],
   optionsFromModule?: ConfigFileOptions
 ): Promise<BackportResponse> {
-  const logger = initLogger();
   let options: ValidConfigOptions | null = null;
   let commits: Commit[] = [];
 

@@ -12,7 +12,11 @@ export async function enablePullRequestAutoMerge(
   options: ValidConfigOptions,
   targetPullRequestNumber: number
 ) {
-  const { accessToken, githubApiBaseUrlV4, autoMergeMethod } = options;
+  const {
+    accessToken,
+    githubApiBaseUrlV4,
+    autoMergeMethod = 'merge',
+  } = options;
   const text = `Enabling auto merging via ${options.autoMergeMethod}`;
   logger.info(text);
   const spinner = ora(text).start();

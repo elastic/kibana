@@ -1,40 +1,24 @@
+import { mockConfigFiles } from '../../test/mockConfigFiles';
 import { getOptionsFromConfigFiles } from './config';
 
 describe('getOptionsFromConfigFiles', () => {
   let res: Awaited<ReturnType<typeof getOptionsFromConfigFiles>>;
 
   beforeEach(async () => {
+    mockConfigFiles({
+      globalConfig: { accessToken: 'abc', editor: 'vim' },
+      projectConfig: { repoName: 'kibana', repoOwner: 'elastic' },
+    });
+
     res = await getOptionsFromConfigFiles();
   });
 
-  it('should return values from (mock) config files incl. default values', () => {
+  it('should return values from config files', () => {
     expect(res).toEqual({
-      accessToken: 'myAccessToken',
-      all: false,
-      assignees: [],
-      autoAssign: false,
-      autoMerge: false,
-      autoMergeMethod: 'merge',
-      ci: false,
-      cherrypickRef: true,
-      details: false,
-      fork: true,
-      gitHostname: 'github.com',
-      githubApiBaseUrlV3: 'https://api.github.com',
-      githubApiBaseUrlV4: 'https://api.github.com/graphql',
-      maxNumber: 10,
-      multipleBranches: true,
-      multipleCommits: false,
-      noVerify: true,
-      prTitle: '[{targetBranch}] {commitMessages}',
-      resetAuthor: false,
-      sourcePRLabels: [],
-      targetBranchChoices: ['6.0', '5.9'],
-      targetBranches: [],
-      targetPRLabels: [],
-      upstream: 'backport-org/backport-demo',
-      username: 'sqren',
-      verbose: false,
+      accessToken: 'abc',
+      editor: 'vim',
+      repoName: 'kibana',
+      repoOwner: 'elastic',
     });
   });
 });

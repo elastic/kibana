@@ -16,13 +16,13 @@ export interface GithubV4Response<DataResponse> {
 }
 
 export async function apiRequestV4<DataResponse>({
-  githubApiBaseUrlV4,
+  githubApiBaseUrlV4 = 'https://api.github.com/graphql',
   accessToken,
   query,
   variables,
   handleError = true,
 }: {
-  githubApiBaseUrlV4: string;
+  githubApiBaseUrlV4?: string;
   accessToken: string;
   query: string;
   variables?: {

@@ -15,7 +15,7 @@ import {
   getLocalConfigFileCommitDate,
   isLocalConfigFileUntracked,
   isLocalConfigFileModified,
-  getUpstreamFromGitRemote,
+  getRepoOwnerAndNameFromGitRemote,
 } from './git';
 import { Commit } from './sourceCommit/parseSourceCommit';
 
@@ -150,21 +150,24 @@ describe('isLocalConfigFileModified', () => {
   });
 });
 
-describe('getUpstreamFromGitRemote', () => {
-  it('returns first upstream matching pattern', async () => {
+describe('getRepoOwnerAndNameFromGitRemote', () => {
+  it('returns first matching pattern', async () => {
     const res = {
       stdout:
         'origin\tgit@github.com:elastic/kibana.git (fetch)\norigin\tgit@github.com:elastic/kibana.git (push)\nsqren\tgit@github.com:sqren/kibana.git (fetch)\nsqren\tgit@github.com:sqren/kibana.git (push)\n',
       stderr: '',
     };
     jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
-    expect(await getUpstreamFromGitRemote()).toEqual('elastic/kibana');
+    expect(await getRepoOwnerAndNameFromGitRemote()).toEqual({
+      repoOwner: 'elastic',
+      repoName: 'kibana',
+    });
   });
 
   it('returns undefined when no remotes exist', async () => {
     const res = { stdout: '', stderr: '' };
     jest.spyOn(childProcess, 'exec').mockResolvedValue(res);
-    expect(await getUpstreamFromGitRemote()).toEqual(undefined);
+    expect(await getRepoOwnerAndNameFromGitRemote()).toEqual(undefined);
   });
 
   it('handles errors', async () => {
@@ -178,7 +181,7 @@ describe('getUpstreamFromGitRemote', () => {
         'fatal: not a git repository (or any of the parent directories): .git\n',
     };
     jest.spyOn(childProcess, 'exec').mockRejectedValueOnce(err);
-    expect(await getUpstreamFromGitRemote()).toEqual(undefined);
+    expect(await getRepoOwnerAndNameFromGitRemote()).toEqual(undefined);
   });
 });
 
@@ -332,7 +335,9 @@ describe('cherrypick', () => {
 
     await cherrypick({ ...options, mainline: 1 }, 'abcd');
 
-    expect(execSpy.mock.calls[0][0]).toBe('git cherry-pick --mainline 1 abcd');
+    expect(execSpy.mock.calls[0][0]).toBe(
+      'git cherry-pick -x --mainline 1 abcd'
+    );
   });
 
   it('should return `needsResolving: true` upon cherrypick error', async () => {
@@ -344,7 +349,7 @@ describe('cherrypick', () => {
         new ExecError({
           killed: false,
           code: 128,
-          cmd: 'git cherry-pick abcd',
+          cmd: 'git cherry-pick -x abcd',
           stdout: '',
           stderr: '',
         })
@@ -617,8 +622,8 @@ describe('addRemote', () => {
 
 describe('pushBackportBranch', () => {
   const options = {
+    authenticatedUsername: 'sqren_authenticated',
     fork: true,
-    username: 'sqren',
     repoOwner: 'elastic',
     repoName: 'kibana',
   } as ValidConfigOptions;
@@ -639,7 +644,7 @@ describe('pushBackportBranch', () => {
     await expect(
       pushBackportBranch({ options, backportBranch })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Error pushing to https://github.com/sqren/kibana. Repository does not exist. Either fork the source repository (https://github.com/elastic/kibana) or disable fork mode \\"--no-fork\\".  Read more about \\"fork mode\\" in the docs: https://github.com/sqren/backport/blob/3a182b17e0e7237c12915895aea9d71f49eb2886/docs/configuration.md#fork"`
+      `"Error pushing to https://github.com/sqren_authenticated/kibana. Repository does not exist. Either fork the source repository (https://github.com/elastic/kibana) or disable fork mode \\"--no-fork\\".  Read more about \\"fork mode\\" in the docs: https://github.com/sqren/backport/blob/3a182b17e0e7237c12915895aea9d71f49eb2886/docs/configuration.md#fork"`
     );
   });
 });

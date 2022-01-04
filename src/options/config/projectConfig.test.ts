@@ -5,26 +5,75 @@ import { getProjectConfig } from './projectConfig';
 describe('getProjectConfig', () => {
   afterEach(() => jest.clearAllMocks());
 
-  describe('when projectConfig is valid', () => {
-    let projectConfig: Awaited<ReturnType<typeof getProjectConfig>>;
-    beforeEach(async () => {
-      jest
-        .spyOn(fs, 'readFile')
-        .mockResolvedValueOnce(
-          JSON.stringify({ upstream: 'elastic/kibana', branches: ['6.x'] })
+  describe('deprecations', () => {
+    describe('when specifying deprecated `branches`', () => {
+      it('is returned as `targetBranchChoices`', async () => {
+        jest.spyOn(fs, 'readFile').mockResolvedValueOnce(
+          JSON.stringify({
+            repoName: 'kibana',
+            repoOwner: 'elastic',
+            branches: ['6.x'],
+          })
         );
 
-      projectConfig = await getProjectConfig();
+        const projectConfig = await getProjectConfig();
+        expect(projectConfig?.targetBranchChoices).toEqual(['6.x']);
+      });
     });
 
-    it('should call findUp', () => {
-      expect(findUp).toHaveBeenCalledWith('.backportrc.json');
+    describe('when specifying deprecated `labels`', () => {
+      it('is returned as `targetPRLabels`', async () => {
+        jest.spyOn(fs, 'readFile').mockResolvedValueOnce(
+          JSON.stringify({
+            labels: ['backport'],
+          })
+        );
+
+        const projectConfig = await getProjectConfig();
+        expect(projectConfig?.targetPRLabels).toEqual(['backport']);
+      });
     });
 
-    it('should return config with branches', () => {
-      expect(projectConfig).toEqual({
-        branches: ['6.x'],
-        upstream: 'elastic/kibana',
+    describe('when specifying deprecated `upstream`', () => {
+      it('is split into `repoOwner` and `repoName`', async () => {
+        jest.spyOn(fs, 'readFile').mockResolvedValueOnce(
+          JSON.stringify({
+            upstream: 'elastic/kibana',
+          })
+        );
+
+        const projectConfig = await getProjectConfig();
+        expect(projectConfig?.repoOwner).toEqual('elastic');
+        expect(projectConfig?.repoName).toEqual('kibana');
+      });
+    });
+
+    describe('when projectConfig is valid', () => {
+      let projectConfig: Awaited<ReturnType<typeof getProjectConfig>>;
+      beforeEach(async () => {
+        jest.spyOn(fs, 'readFile').mockResolvedValueOnce(
+          JSON.stringify({
+            repoName: 'kibana',
+            repoOwner: 'elastic',
+            targetBranchChoices: ['6.x'],
+            targetPRLabels: ['backport'],
+          })
+        );
+
+        projectConfig = await getProjectConfig();
+      });
+
+      it('should call findUp', () => {
+        expect(findUp).toHaveBeenCalledWith('.backportrc.json');
+      });
+
+      it('should return config', () => {
+        expect(projectConfig).toEqual({
+          repoName: 'kibana',
+          repoOwner: 'elastic',
+          targetBranchChoices: ['6.x'],
+          targetPRLabels: ['backport'],
+        });
       });
     });
   });
@@ -33,7 +82,7 @@ describe('getProjectConfig', () => {
     it('should return empty config', async () => {
       jest.spyOn(fs, 'readFile').mockResolvedValueOnce('{}');
       const projectConfig = await getProjectConfig();
-      expect(projectConfig).toEqual({ targetBranchChoices: undefined });
+      expect(projectConfig).toEqual({});
     });
   });
 

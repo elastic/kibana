@@ -330,6 +330,30 @@ describe('getExpectedTargetPullRequests', () => {
     ]);
   });
 
+  it(`should support "backport-to" format`, () => {
+    const branchLabelMapping = {
+      '^backport-to-(.+)$': '$1',
+    };
+
+    const mockSourceCommit = getMockSourceCommit({
+      sourceCommit: { message: 'identical messages (#1234)' },
+      sourcePullRequest: {
+        number: 1234,
+        labels: ['backport-to-dev', 'backport-to-v3.1.0'],
+      },
+    });
+
+    const expectedTargetPullRequests = getExpectedTargetPullRequests(
+      mockSourceCommit,
+      branchLabelMapping
+    );
+
+    expect(expectedTargetPullRequests).toEqual([
+      { branch: 'dev', state: 'MISSING' },
+      { branch: 'v3.1.0', state: 'MISSING' },
+    ]);
+  });
+
   it('should only get first match', () => {
     const branchLabelMapping = {
       'label-2': 'branch-b',

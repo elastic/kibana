@@ -9,14 +9,12 @@ export async function addAssigneesToPullRequest(
     repoName,
     repoOwner,
     accessToken,
-    username,
+    autoAssign,
   }: ValidConfigOptions,
   pullNumber: number,
   assignees: string[]
 ) {
-  const isSelfAssigning = assignees.length === 1 && assignees[0] === username;
-
-  const text = isSelfAssigning
+  const text = autoAssign
     ? `Self-assigning to #${pullNumber}`
     : `Adding assignees to #${pullNumber}: ${assignees.join(', ')}`;
   logger.info(text);

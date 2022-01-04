@@ -14,6 +14,9 @@ export type Repository = {
 };
 
 export interface GithubConfigOptionsResponse {
+  viewer: {
+    login: string;
+  };
   repository:
     | {
         isFork: true;
@@ -28,6 +31,9 @@ export interface GithubConfigOptionsResponse {
 
 export const query = /* GraphQL */ `
   query GithubConfigOptions($repoOwner: String!, $repoName: String!) {
+    viewer {
+      login
+    }
     repository(owner: $repoOwner, name: $repoName) {
       isFork
       ...Repo

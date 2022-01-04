@@ -4,14 +4,14 @@ exports[`fetchCommitsByAuthor when commit has an associated pull request should 
 Array [
   Object {
     "query": "
-    query AuthorId($login: String!) {
-      user(login: $login) {
+    query AuthorId($author: String!) {
+      user(login: $author) {
         id
       }
     }
   ",
     "variables": Object {
-      "login": "sqren",
+      "author": "sqren",
     },
   },
 ]

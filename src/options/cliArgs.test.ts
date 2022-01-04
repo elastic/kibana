@@ -21,16 +21,19 @@ describe('getOptionsFromCliArgs', () => {
       const argv = [
         '--access-token',
         'my access token',
-        '--username',
+        '--author',
         'sqren',
-        '--upstream',
-        'elastic/kibana',
+        '--repo-owner',
+        'elastic',
+        '--repo-name',
+        'kibana',
       ];
       const res = getOptionsFromCliArgs(argv);
       expect(res).toEqual({
         accessToken: 'my access token',
-        upstream: 'elastic/kibana',
-        username: 'sqren',
+        repoOwner: 'elastic',
+        repoName: 'kibana',
+        author: 'sqren',
         mainline: 1,
         reviewers: [],
         assignees: [],

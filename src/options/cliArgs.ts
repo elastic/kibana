@@ -1,4 +1,5 @@
 import yargs from 'yargs';
+import { excludeUndefined } from '../utils/excludeUndefined';
 
 export type OptionsFromCliArgs = ReturnType<typeof getOptionsFromCliArgs>;
 export function getOptionsFromCliArgs(
@@ -25,6 +26,7 @@ export function getOptionsFromCliArgs(
       description: 'List all commits',
       alias: 'a',
       type: 'boolean',
+      conflicts: 'author',
     })
 
     .option('assignee', {
@@ -33,11 +35,6 @@ export function getOptionsFromCliArgs(
       type: 'array',
       string: true,
       conflicts: ['autoAssign'],
-    })
-
-    .option('author', {
-      description: 'Show commits by specific author',
-      type: 'string',
     })
 
     .option('autoAssign', {
@@ -79,13 +76,13 @@ export function getOptionsFromCliArgs(
       type: 'string',
     })
 
-    .option('forceLocalConfig', {
+    .option('skipRemoteConfig', {
       description:
         'Use local .backportrc.json config instead of loading from Github',
       type: 'boolean',
     })
 
-    // push target branch to {username}/{repoName}
+    // push target branch to {authenticatedUsername}/{repoName}
     .option('fork', {
       description: 'Create backports in fork or origin repo',
       type: 'boolean',
@@ -219,6 +216,16 @@ export function getOptionsFromCliArgs(
       string: true,
     })
 
+    .option('repoOwner', {
+      description: 'Repository owner',
+      type: 'string',
+    })
+
+    .option('repoName', {
+      description: 'Repository name',
+      type: 'string',
+    })
+
     .option('sha', {
       conflicts: ['pullNumber', 'prFilter'],
       description: 'Commit sha to backport',
@@ -258,15 +265,11 @@ export function getOptionsFromCliArgs(
       string: true,
     })
 
-    .option('upstream', {
-      description: 'Name of repository',
-      alias: 'up',
+    .option('author', {
+      description: 'Show commits by a specific user',
+      alias: 'author',
       type: 'string',
-    })
-
-    .option('username', {
-      description: 'Github username',
-      type: 'string',
+      conflicts: 'all',
     })
 
     .option('verbose', {
@@ -309,6 +312,8 @@ export function getOptionsFromCliArgs(
     multiple,
     multipleBranches,
     multipleCommits,
+    all,
+    author,
 
     // negations
     verify,
@@ -331,6 +336,8 @@ export function getOptionsFromCliArgs(
   return excludeUndefined({
     ...restOptions,
 
+    author: all ? null : author,
+
     // `multiple` is a cli-only flag to override `multipleBranches` and `multipleCommits`
     multipleBranches: multiple ?? multipleBranches,
     multipleCommits: multiple ?? multipleCommits,
@@ -349,9 +356,4 @@ export function getOptionsFromCliArgs(
     fork: noFork === true ? false : restOptions.fork,
     noVerify: verify ?? noVerify,
   });
-}
-
-function excludeUndefined<T extends Record<string, unknown>>(obj: T): T {
-  Object.keys(obj).forEach((key) => obj[key] === undefined && delete obj[key]);
-  return obj;
 }

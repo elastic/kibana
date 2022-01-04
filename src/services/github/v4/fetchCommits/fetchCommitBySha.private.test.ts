@@ -1,8 +1,5 @@
-import { ValidConfigOptions } from '../../../../options/options';
 import { getDevAccessToken } from '../../../../test/private/getDevAccessToken';
 import { fetchCommitBySha } from './fetchCommitBySha';
-
-type BackportOptionsWithSha = ValidConfigOptions & { sha: string };
 
 describe('fetchCommitBySha', () => {
   let devAccessToken: string;
@@ -18,9 +15,9 @@ describe('fetchCommitBySha', () => {
         repoName: 'kibana',
         accessToken: devAccessToken,
         sha: 'cb6fbc0',
-        githubApiBaseUrlV4: 'https://api.github.com/graphql',
         sourceBranch: 'master',
-      } as BackportOptionsWithSha)
+        historicalBranchLabelMappings: [],
+      })
     ).toEqual({
       committedDate: '2020-07-07T20:40:28Z',
       originalMessage: '[APM] Add API tests (#70740)',
@@ -46,9 +43,9 @@ describe('fetchCommitBySha', () => {
         repoName: 'kibana',
         accessToken: devAccessToken,
         sha: 'fc22f59',
-        githubApiBaseUrlV4: 'https://api.github.com/graphql',
         sourceBranch: 'main',
-      } as BackportOptionsWithSha)
+        historicalBranchLabelMappings: [],
+      })
     ).rejects.toThrowError(
       'No commit found on branch "main" with sha "fc22f59"'
     );
@@ -61,9 +58,9 @@ describe('fetchCommitBySha', () => {
         repoName: 'kibana',
         accessToken: devAccessToken,
         sha: 'myCommitSha',
-        githubApiBaseUrlV4: 'https://api.github.com/graphql',
         sourceBranch: 'main',
-      } as ValidConfigOptions & { sha: string })
+        historicalBranchLabelMappings: [],
+      })
     ).rejects.toThrowError(
       'No commit found on branch "main" with sha "myCommitSha"'
     );

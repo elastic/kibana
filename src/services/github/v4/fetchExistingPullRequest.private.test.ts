@@ -13,7 +13,6 @@ describe('fetchExistingPullRequest', () => {
     it('returns undefined', async () => {
       const options = {
         accessToken: devAccessToken,
-        githubApiBaseUrlV4: 'https://api.github.com/graphql',
       } as ValidConfigOptions;
 
       const prPayload = {
@@ -35,7 +34,6 @@ describe('fetchExistingPullRequest', () => {
     it('returns the PR number and url', async () => {
       const options = {
         accessToken: devAccessToken,
-        githubApiBaseUrlV4: 'https://api.github.com/graphql',
       } as ValidConfigOptions;
 
       const prPayload = {

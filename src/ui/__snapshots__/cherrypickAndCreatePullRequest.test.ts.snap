@@ -15,7 +15,7 @@ Array [
     },
   ],
   Array [
-    "git cherry-pick mySha",
+    "git cherry-pick -x mySha",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
@@ -117,7 +117,7 @@ Array [
     },
   ],
   Array [
-    "git push sqren backport/6.x/commit-mySha:backport/6.x/commit-mySha --force",
+    "git push sqren_authenticated backport/6.x/commit-mySha:backport/6.x/commit-mySha --force",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
@@ -146,7 +146,7 @@ Array [
     },
   ],
   Array [
-    "git cherry-pick mySha",
+    "git cherry-pick -x mySha",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
@@ -158,13 +158,13 @@ Array [
     },
   ],
   Array [
-    "git cherry-pick mySha2",
+    "git cherry-pick -x mySha2",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
-    "git push sqren backport/6.x/pr-1000_pr-2000:backport/6.x/pr-1000_pr-2000 --force",
+    "git push sqren_authenticated backport/6.x/pr-1000_pr-2000:backport/6.x/pr-1000_pr-2000 --force",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
     },

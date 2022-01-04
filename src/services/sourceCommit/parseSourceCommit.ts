@@ -75,7 +75,11 @@ export function parseSourceCommit({
   options,
 }: {
   sourceCommit: SourceCommitWithTargetPullRequest;
-  options: ValidConfigOptions;
+  options: {
+    branchLabelMapping?: ValidConfigOptions['branchLabelMapping'];
+    historicalBranchLabelMappings: ValidConfigOptions['historicalBranchLabelMappings'];
+    sourceBranch: string;
+  };
 }): Commit {
   const sourcePullRequest =
     sourceCommit.associatedPullRequests.edges?.[0]?.node;
@@ -172,8 +176,8 @@ export const sourceCommitWithTargetPullRequestFragment = {
 
 function getBranchLabelMappingForCommit(
   sourceCommit: SourceCommitWithTargetPullRequest,
-  branchLabelMapping: ValidConfigOptions['branchLabelMapping'],
-  historicalBranchLabelMappings: ValidConfigOptions['historicalBranchLabelMappings']
+  branchLabelMapping?: ValidConfigOptions['branchLabelMapping'],
+  historicalBranchLabelMappings: ValidConfigOptions['historicalBranchLabelMappings'] = []
 ): Record<string, string> | undefined {
   if (isEmpty(historicalBranchLabelMappings)) {
     return branchLabelMapping;
@@ -186,6 +190,6 @@ function getBranchLabelMappingForCommit(
 
   return (
     match?.branchLabelMapping ??
-    historicalBranchLabelMappings[0]?.branchLabelMapping
+    historicalBranchLabelMappings[0].branchLabelMapping
   );
 }
