@@ -12,13 +12,13 @@ import {
   ConfigKey,
   ContentType,
   DataStream,
-  MonitorFields,
   Mode,
   ThrottlingConfigKey,
   ThrottlingSuffix,
   ThrottlingSuffixType,
 } from '../../../common/runtime_types';
 export * from '../../../common/runtime_types/monitor_management';
+export * from '../../../common/types/monitor_validation';
 
 export interface PolicyConfig {
   [DataStream.HTTP]: HTTPFields;
@@ -26,10 +26,6 @@ export interface PolicyConfig {
   [DataStream.ICMP]: ICMPFields;
   [DataStream.BROWSER]: BrowserFields;
 }
-
-export type Validator = (config: Partial<MonitorFields>) => boolean;
-
-export type Validation = Partial<Record<ConfigKey, Validator>>;
 
 export const contentTypesToMode = {
   [ContentType.FORM]: Mode.FORM,
