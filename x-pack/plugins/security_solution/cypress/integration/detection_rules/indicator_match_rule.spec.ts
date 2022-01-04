@@ -540,7 +540,8 @@ describe('indicator match', () => {
             getNewThreatIndicatorRule().indicatorMappingField
           }${accessibilityText}matched${getNewThreatIndicatorRule().indicatorMappingField}${
             getNewThreatIndicatorRule().atomic
-          }${accessibilityText}threat.enrichments.matched.typeindicator_match_rule${accessibilityText}`
+          }${accessibilityText}threat.enrichments.matched.typeindicator_match_rule${accessibilityText}provided
+            by feed.nameAbuseCH malware${accessibilityText}`
         );
       });
     });
