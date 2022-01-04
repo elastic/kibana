@@ -347,7 +347,7 @@ const PieComponent = (props: PieComponentProps) => {
               showLegend={showLegend}
               legendPosition={legendPosition}
               legendMaxDepth={visParams.nestedLegend ? undefined : 1}
-              legendColorPicker={legendColorPicker}
+              legendColorPicker={props.uiState ? legendColorPicker : undefined}
               flatLegend={Boolean(splitChartDimension)}
               tooltip={tooltip}
               onElementClick={(args) => {
