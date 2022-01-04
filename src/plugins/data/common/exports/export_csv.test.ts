@@ -84,4 +84,28 @@ describe('CSV exporter', () => {
       })
     ).toMatch('columnOne\r\n"\'=1"\r\n');
   });
+
+  test('should filter out columns when there are meta information', () => {
+    const datatable = getDataTable({ multipleColumns: true });
+    // Make only the first column visible
+    datatable.columns[0].meta.dimensionName = 'First column';
+    expect(
+      datatableToCSV(datatable, {
+        ...getDefaultOptions(),
+        escapeFormulaValues: true,
+        formatFactory: () => ({ convert: (v: unknown) => v } as FieldFormat),
+      })
+    ).toMatch('columnOne\r\nvalue\r\n');
+  });
+
+  test('should not filter out columns if no meta information are found', () => {
+    const datatable = getDataTable({ multipleColumns: true });
+    expect(
+      datatableToCSV(datatable, {
+        ...getDefaultOptions(),
+        escapeFormulaValues: true,
+        formatFactory: () => ({ convert: (v: unknown) => v } as FieldFormat),
+      })
+    ).toMatch('columnOne,columnTwo\r\nvalue,5\r\n');
+  });
 });

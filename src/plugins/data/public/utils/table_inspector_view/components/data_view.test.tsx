@@ -106,5 +106,43 @@ describe('Inspector Data View', () => {
 
       expect(component).toMatchSnapshot();
     });
+
+    it('should filter out hidden column if only part of the columns have meta information', () => {
+      const multitableAdapter = { tables: new TablesAdapter() };
+
+      const component = mountWithIntl(
+        // eslint-disable-next-line react/jsx-pascal-case
+        <DataView.component title="Test Data" adapters={multitableAdapter} />
+      );
+      multitableAdapter.tables.logDatatable('table1', {
+        columns: [
+          { id: '1', name: 'column1', meta: { type: 'number', dimensionName: 'accessor' } },
+          { id: '2', name: 'column2', meta: { type: 'number' } },
+        ],
+        rows: [{ '1': 123, '2': 5 }],
+        type: 'datatable',
+      });
+
+      expect(component).toMatchSnapshot();
+    });
+
+    it('should render all column if no column has meta information', () => {
+      const multitableAdapter = { tables: new TablesAdapter() };
+
+      const component = mountWithIntl(
+        // eslint-disable-next-line react/jsx-pascal-case
+        <DataView.component title="Test Data" adapters={multitableAdapter} />
+      );
+      multitableAdapter.tables.logDatatable('table1', {
+        columns: [
+          { id: '1', name: 'column1', meta: { type: 'number' } },
+          { id: '2', name: 'column2', meta: { type: 'number' } },
+        ],
+        rows: [{ '1': 123, '2': 5 }],
+        type: 'datatable',
+      });
+
+      expect(component).toMatchSnapshot();
+    });
   });
 });
