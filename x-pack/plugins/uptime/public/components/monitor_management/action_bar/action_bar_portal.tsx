@@ -6,19 +6,14 @@
  */
 
 import React from 'react';
-import { Redirect } from 'react-router-dom';
 import { EuiPortal } from '@elastic/eui';
 
-import { FETCH_STATUS } from '../../../../../observability/public';
-
-import { MONITOR_MANAGEMENT } from '../../../../common/constants';
-
-import { Monitor } from '../../fleet_package/types';
+import { SyntheticsMonitor } from '../../../../common/runtime_types';
 
 import { ActionBar } from './action_bar';
 
 interface Props {
-  monitor: Monitor;
+  monitor: SyntheticsMonitor;
   isValid: boolean;
   onSave?: () => void;
 }
@@ -26,9 +21,7 @@ interface Props {
 export const ActionBarPortal = (props: Props) => {
   const portalSibling = document.getElementById('uptimeUIMonitorManagementBottomBarPortalSibling');
 
-  return status === FETCH_STATUS.SUCCESS ? (
-    <Redirect to={MONITOR_MANAGEMENT} />
-  ) : portalSibling ? (
+  return portalSibling ? (
     <EuiPortal insert={{ sibling: portalSibling, position: 'after' }}>
       <ActionBar {...props} />
     </EuiPortal>
