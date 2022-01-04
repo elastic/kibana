@@ -22,7 +22,10 @@ import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_ut
 import { PolicyEventFiltersFlyout } from './policy_event_filters_flyout';
 import { parseQueryFilterToKQL, parsePoliciesAndFilterToKql } from '../../../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../../../../event_filters/constants';
-import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import {
+  FoundExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 const endpointGenerator = new EndpointDocGenerator('seed');
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
@@ -42,6 +45,31 @@ const emptyList = {
   page: 1,
   per_page: 10,
   total: 0,
+};
+
+const getCleanedExceptionWithNewTags = (
+  exception: UpdateExceptionListItemSchema,
+  testTags: string[],
+  policy: PolicyData
+) => {
+  const exceptionToUpdateCleaned = {
+    ...exception,
+    tags: [...testTags, `policy:${policy.id}`],
+  };
+  // Clean unnecessary fields for update action
+  [
+    'created_at',
+    'created_by',
+    'created_at',
+    'created_by',
+    'list_id',
+    'tie_breaker_id',
+    'updated_at',
+    'updated_by',
+  ].forEach((field) => {
+    delete exceptionToUpdateCleaned[field as keyof UpdateExceptionListItemSchema];
+  });
+  return exceptionToUpdateCleaned;
 };
 
 describe('Policy details event filters flyout', () => {
@@ -198,10 +226,9 @@ describe('Policy details event filters flyout', () => {
       // verify the request with the new tag
       await waitFor(() => {
         expect(mockedApi.responseProvider.eventFiltersUpdateOne).toHaveBeenCalledWith({
-          body: JSON.stringify({
-            ...exceptions.data[0],
-            tags: [...testTags, `policy:${policy.id}`],
-          }),
+          body: JSON.stringify(
+            getCleanedExceptionWithNewTags(exceptions.data[0], testTags, policy)
+          ),
           path: '/api/exception_lists/items',
         });
       });
@@ -226,18 +253,16 @@ describe('Policy details event filters flyout', () => {
       await waitFor(() => {
         // first exception
         expect(mockedApi.responseProvider.eventFiltersUpdateOne).toHaveBeenCalledWith({
-          body: JSON.stringify({
-            ...exceptions.data[0],
-            tags: [...testTags, `policy:${policy.id}`],
-          }),
+          body: JSON.stringify(
+            getCleanedExceptionWithNewTags(exceptions.data[0], testTags, policy)
+          ),
           path: '/api/exception_lists/items',
         });
         // second exception
         expect(mockedApi.responseProvider.eventFiltersUpdateOne).toHaveBeenCalledWith({
-          body: JSON.stringify({
-            ...exceptions.data[0],
-            tags: [...testTags, `policy:${policy.id}`],
-          }),
+          body: JSON.stringify(
+            getCleanedExceptionWithNewTags(exceptions.data[0], testTags, policy)
+          ),
           path: '/api/exception_lists/items',
         });
       });
