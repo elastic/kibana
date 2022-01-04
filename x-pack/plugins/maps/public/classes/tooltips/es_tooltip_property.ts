@@ -6,11 +6,11 @@
  */
 
 import _ from 'lodash';
+import { Filter } from '@kbn/es-query';
 import { ITooltipProperty } from './tooltip_property';
 import { IField } from '../fields/field';
 import {
   esFilters,
-  Filter,
   IndexPattern,
   IndexPatternField,
 } from '../../../../../../src/plugins/data/public';

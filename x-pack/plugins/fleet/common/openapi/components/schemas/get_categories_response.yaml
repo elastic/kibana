@@ -1,0 +1,36 @@
+title: Get categories response
+type: object
+properties:
+  response:
+    type: array
+    items:
+      type: object
+      deprecated: true
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        count:
+          type: number
+      required:
+        - id
+        - title
+        - count
+  items:
+    type: array
+    items:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        count:
+          type: number
+      required:
+        - id
+        - title
+        - count
+required:
+  - items

@@ -44,8 +44,13 @@ interface GithubViaAppProps {
 
 export const GitHubViaApp: React.FC<GithubViaAppProps> = ({ isGithubEnterpriseServer }) => {
   const { isOrganization } = useValues(AppLogic);
-  const { githubAppId, githubEnterpriseServerUrl, isSubmitButtonLoading, indexPermissionsValue } =
-    useValues(GithubViaAppLogic);
+  const {
+    githubAppId,
+    githubEnterpriseServerUrl,
+    stagedPrivateKey,
+    isSubmitButtonLoading,
+    indexPermissionsValue,
+  } = useValues(GithubViaAppLogic);
   const {
     setGithubAppId,
     setGithubEnterpriseServerUrl,
@@ -118,7 +123,12 @@ export const GitHubViaApp: React.FC<GithubViaAppProps> = ({ isGithubEnterpriseSe
           fill
           type="submit"
           isLoading={isSubmitButtonLoading}
-          isDisabled={!githubAppId || (isGithubEnterpriseServer && !githubEnterpriseServerUrl)}
+          isDisabled={
+            // disable submit button if any required fields are empty
+            !githubAppId ||
+            (isGithubEnterpriseServer && !githubEnterpriseServerUrl) ||
+            !stagedPrivateKey
+          }
         >
           {isSubmitButtonLoading ? 'Connecting…' : `Connect ${name}`}
         </EuiButton>

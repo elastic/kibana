@@ -27,6 +27,10 @@ function getIndexNamesFromAliasesResponse(json: Record<string, any>) {
   );
 }
 
+interface IndicesAggs extends estypes.AggregationsMultiBucketAggregateBase {
+  buckets: Array<{ key: unknown }>;
+}
+
 async function getIndices(dataClient: IScopedClusterClient, pattern: string, limit = 10) {
   const aliasResult = await dataClient.asCurrentUser.indices.getAlias(
     {
@@ -42,7 +46,7 @@ async function getIndices(dataClient: IScopedClusterClient, pattern: string, lim
     return indicesFromAliasResponse.slice(0, limit);
   }
 
-  const response = await dataClient.asCurrentUser.search(
+  const response = await dataClient.asCurrentUser.search<unknown, { indices: IndicesAggs }>(
     {
       index: pattern,
       body: {
@@ -64,9 +68,7 @@ async function getIndices(dataClient: IScopedClusterClient, pattern: string, lim
   if (response.statusCode === 404 || !response.body.aggregations) {
     return [];
   }
-  const indices = response.body.aggregations.indices as estypes.AggregationsMultiBucketAggregate<{
-    key: unknown;
-  }>;
+  const indices = response.body.aggregations.indices;
 
   return indices.buckets ? indices.buckets.map((bucket) => bucket.key) : [];
 }

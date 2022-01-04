@@ -7,16 +7,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { UnwrapPromise } from '@kbn/utility-types';
 import type { StatusResponse, ServiceStatus, ServiceStatusLevel } from '../../../../types/status';
 import type { HttpSetup } from '../../../http';
 import type { NotificationsSetup } from '../../../notifications';
 import type { DataType } from '../lib';
 
+interface MetricMeta {
+  title: string;
+  description: string;
+  value?: number[];
+  type?: DataType;
+}
 export interface Metric {
   name: string;
   value: number | number[];
   type?: DataType;
+  meta?: MetricMeta;
 }
 
 export interface FormattedStatus {
@@ -61,11 +67,46 @@ function formatMetrics({ metrics }: StatusResponse): Metric[] {
       type: 'byte',
     },
     {
+      name: i18n.translate('core.statusPage.metricsTiles.columns.requestsPerSecHeader', {
+        defaultMessage: 'Requests per second',
+      }),
+      value: (metrics.requests.total * 1000) / metrics.collection_interval_in_millis,
+      type: 'float',
+    },
+    {
       name: i18n.translate('core.statusPage.metricsTiles.columns.loadHeader', {
         defaultMessage: 'Load',
       }),
       value: [metrics.os.load['1m'], metrics.os.load['5m'], metrics.os.load['15m']],
       type: 'float',
+      meta: {
+        description: i18n.translate('core.statusPage.metricsTiles.columns.load.metaHeader', {
+          defaultMessage: 'Load interval',
+        }),
+        title: Object.keys(metrics.os.load).join('; '),
+      },
+    },
+    {
+      name: i18n.translate('core.statusPage.metricsTiles.columns.processDelayHeader', {
+        defaultMessage: 'Delay',
+      }),
+      value: metrics.process.event_loop_delay,
+      type: 'time',
+      meta: {
+        description: i18n.translate(
+          'core.statusPage.metricsTiles.columns.processDelayDetailsHeader',
+          {
+            defaultMessage: 'Percentiles',
+          }
+        ),
+        title: '',
+        value: [
+          metrics.process.event_loop_delay_histogram?.percentiles['50'],
+          metrics.process.event_loop_delay_histogram?.percentiles['95'],
+          metrics.process.event_loop_delay_histogram?.percentiles['99'],
+        ],
+        type: 'time',
+      },
     },
     {
       name: i18n.translate('core.statusPage.metricsTiles.columns.resTimeAvgHeader', {
@@ -73,20 +114,14 @@ function formatMetrics({ metrics }: StatusResponse): Metric[] {
       }),
       value: metrics.response_times.avg_in_millis,
       type: 'time',
-    },
-    {
-      name: i18n.translate('core.statusPage.metricsTiles.columns.resTimeMaxHeader', {
-        defaultMessage: 'Response time max',
-      }),
-      value: metrics.response_times.max_in_millis,
-      type: 'time',
-    },
-    {
-      name: i18n.translate('core.statusPage.metricsTiles.columns.requestsPerSecHeader', {
-        defaultMessage: 'Requests per second',
-      }),
-      value: (metrics.requests.total * 1000) / metrics.collection_interval_in_millis,
-      type: 'float',
+      meta: {
+        description: i18n.translate('core.statusPage.metricsTiles.columns.resTimeMaxHeader', {
+          defaultMessage: 'Response time max',
+        }),
+        title: '',
+        value: [metrics.response_times.max_in_millis],
+        type: 'time',
+      },
     },
   ];
 }
@@ -194,4 +229,4 @@ export async function loadStatus({
   };
 }
 
-export type ProcessedServerResponse = UnwrapPromise<ReturnType<typeof loadStatus>>;
+export type ProcessedServerResponse = Awaited<ReturnType<typeof loadStatus>>;

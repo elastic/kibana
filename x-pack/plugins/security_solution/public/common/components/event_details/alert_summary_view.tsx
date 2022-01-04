@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTableColumn } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -47,6 +47,7 @@ const getDescription = ({
         linkValue={linkValue}
         timelineId={timelineId}
         values={values}
+        applyWidthAndPadding={false}
       />
     )}
   </>
@@ -60,18 +61,21 @@ const AlertSummaryViewComponent: React.FC<{
   eventId: string;
   isDraggable?: boolean;
   timelineId: string;
-  title?: string;
-}> = ({ browserFields, data, eventId, isDraggable, timelineId, title }) => {
+  title: string;
+  goToTable: () => void;
+}> = ({ browserFields, data, eventId, isDraggable, timelineId, title, goToTable }) => {
   const summaryRows = useMemo(
     () => getSummaryRows({ browserFields, data, eventId, isDraggable, timelineId }),
     [browserFields, data, eventId, isDraggable, timelineId]
   );
 
   return (
-    <>
-      <EuiSpacer size="s" />
-      <SummaryView summaryColumns={summaryColumns} summaryRows={summaryRows} title={title} />
-    </>
+    <SummaryView
+      summaryColumns={summaryColumns}
+      summaryRows={summaryRows}
+      title={title}
+      goToTable={goToTable}
+    />
   );
 };
 

@@ -40,6 +40,7 @@ import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/
 import type { FleetConfigType, FleetAuthz } from '../common';
 import { INTEGRATIONS_PLUGIN_ID } from '../common';
 import type { CloudSetup } from '../../cloud/server';
+import type { SpacesPluginStart } from '../../spaces/server';
 
 import {
   PLUGIN_ID,
@@ -82,7 +83,7 @@ import {
 } from './services';
 import { registerFleetUsageCollector } from './collectors/register';
 import { getInstallation, ensureInstalledPackage } from './services/epm/packages';
-import { getAuthzFromRequest, RouterWrappers } from './routes/security';
+import { getAuthzFromRequest, makeRouterWithFleetAuthz } from './routes/security';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
 import { TelemetryEventsSender } from './telemetry/sender';
@@ -91,18 +92,19 @@ import { fetchFindLatestPackage } from './services/epm/registry';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
-  security?: SecurityPluginSetup;
+  security: SecurityPluginSetup;
   features?: FeaturesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
+  spaces: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
 }
 
 export interface FleetStartDeps {
   data: DataPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-  security?: SecurityPluginStart;
+  security: SecurityPluginStart;
   telemetry?: TelemetryPluginStart;
 }
 
@@ -111,8 +113,8 @@ export interface FleetAppContext {
   data: DataPluginStart;
   encryptedSavedObjectsStart?: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
-  securitySetup?: SecurityPluginSetup;
-  securityStart?: SecurityPluginStart;
+  securitySetup: SecurityPluginSetup;
+  securityStart: SecurityPluginStart;
   config$?: Observable<FleetConfigType>;
   configInitialValue: FleetConfigType;
   savedObjects: SavedObjectsServiceStart;
@@ -185,7 +187,7 @@ export class FleetPlugin
   private kibanaVersion: FleetAppContext['kibanaVersion'];
   private kibanaBranch: FleetAppContext['kibanaBranch'];
   private httpSetup?: HttpServiceSetup;
-  private securitySetup?: SecurityPluginSetup;
+  private securitySetup!: SecurityPluginSetup;
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private readonly fleetStatus$: BehaviorSubject<ServiceStatus>;
@@ -297,48 +299,44 @@ export class FleetPlugin
                 .getScopedClient(request, { excludedWrappers: ['security'] });
             },
           },
+          get spaceId() {
+            return deps.spaces.spacesService.getSpaceId(request);
+          },
         };
       }
     );
 
-    const router: FleetRouter = core.http.createRouter<FleetRequestHandlerContext>();
-
     // Register usage collection
     registerFleetUsageCollector(core, config, deps.usageCollection);
 
-    // Always register app routes for permissions checking
-    registerAppRoutes(router);
+    const router: FleetRouter = core.http.createRouter<FleetRequestHandlerContext>();
     // Allow read-only users access to endpoints necessary for Integrations UI
     // Only some endpoints require superuser so we pass a raw IRouter here
 
     // For all the routes we enforce the user to have role superuser
-    const superuserRouter = RouterWrappers.require.superuser(router);
-    const fleetSetupRouter = RouterWrappers.require.fleetSetupPrivilege(router);
+    const { router: fleetAuthzRouter, onPostAuthHandler: fleetAuthzOnPostAuthHandler } =
+      makeRouterWithFleetAuthz(router);
 
-    // Some EPM routes use regular rbac to support integrations app
-    registerEPMRoutes({ rbac: router, superuser: superuserRouter });
+    core.http.registerOnPostAuth(fleetAuthzOnPostAuthHandler);
 
-    // Register rest of routes only if security is enabled
-    if (deps.security) {
-      registerSetupRoutes(fleetSetupRouter, config);
-      registerAgentPolicyRoutes({
-        fleetSetup: fleetSetupRouter,
-        superuser: superuserRouter,
-      });
-      registerPackagePolicyRoutes(superuserRouter);
-      registerOutputRoutes(superuserRouter);
-      registerSettingsRoutes(superuserRouter);
-      registerDataStreamRoutes(superuserRouter);
-      registerPreconfigurationRoutes(superuserRouter);
+    // Always register app routes for permissions checking
+    registerAppRoutes(fleetAuthzRouter);
 
-      // Conditional config routes
-      if (config.agents.enabled) {
-        registerAgentAPIRoutes(superuserRouter, config);
-        registerEnrollmentApiKeyRoutes({
-          fleetSetup: fleetSetupRouter,
-          superuser: superuserRouter,
-        });
-      }
+    // The upload package route is only authorized for the superuser
+    registerEPMRoutes(fleetAuthzRouter);
+
+    registerSetupRoutes(fleetAuthzRouter, config);
+    registerAgentPolicyRoutes(fleetAuthzRouter);
+    registerPackagePolicyRoutes(fleetAuthzRouter);
+    registerOutputRoutes(fleetAuthzRouter);
+    registerSettingsRoutes(fleetAuthzRouter);
+    registerDataStreamRoutes(fleetAuthzRouter);
+    registerPreconfigurationRoutes(fleetAuthzRouter);
+
+    // Conditional config routes
+    if (config.agents.enabled) {
+      registerAgentAPIRoutes(fleetAuthzRouter, config);
+      registerEnrollmentApiKeyRoutes(fleetAuthzRouter);
     }
 
     this.telemetryEventsSender.setup(deps.telemetry);

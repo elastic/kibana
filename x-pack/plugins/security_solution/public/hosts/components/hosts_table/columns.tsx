@@ -17,109 +17,142 @@ import { HostDetailsLink } from '../../../common/components/links';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
-import {
-  AddFilterToGlobalSearchBar,
-  createFilter,
-} from '../../../common/components/add_filter_to_global_search_bar';
+import { DefaultDraggable } from '../../../common/components/draggables';
 import { HostsTableColumns } from './';
 
 import * as i18n from './translations';
-import { Maybe } from '../../../../common/search_strategy';
+import { HostRiskSeverity, Maybe } from '../../../../common/search_strategy';
+import { HostRiskScore } from '../common/host_risk_score';
 
-export const getHostsColumns = (): HostsTableColumns => [
-  {
-    field: 'node.host.name',
-    name: i18n.NAME,
-    truncateText: false,
-    mobileOptions: { show: true },
-    sortable: true,
-    render: (hostName) => {
-      if (hostName != null && hostName.length > 0) {
-        const id = escapeDataProviderId(`hosts-table-hostName-${hostName[0]}`);
-        return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              excluded: false,
-              id,
-              name: hostName[0],
-              kqlQuery: '',
-              queryMatch: { field: 'host.name', value: hostName[0], operator: IS_OPERATOR },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <HostDetailsLink hostName={hostName[0]} />
-              )
-            }
-          />
-        );
-      }
-      return getEmptyTagValue();
+export const getHostsColumns = (showRiskColumn: boolean): HostsTableColumns => {
+  const columns: HostsTableColumns = [
+    {
+      field: 'node.host.name',
+      name: i18n.NAME,
+      truncateText: false,
+      mobileOptions: { show: true },
+      sortable: true,
+      render: (hostName) => {
+        if (hostName != null && hostName.length > 0) {
+          const id = escapeDataProviderId(`hosts-table-hostName-${hostName[0]}`);
+          return (
+            <DraggableWrapper
+              key={id}
+              dataProvider={{
+                and: [],
+                enabled: true,
+                excluded: false,
+                id,
+                name: hostName[0],
+                kqlQuery: '',
+                queryMatch: { field: 'host.name', value: hostName[0], operator: IS_OPERATOR },
+              }}
+              render={(dataProvider, _, snapshot) =>
+                snapshot.isDragging ? (
+                  <DragEffects>
+                    <Provider dataProvider={dataProvider} />
+                  </DragEffects>
+                ) : (
+                  <HostDetailsLink hostName={hostName[0]} />
+                )
+              }
+            />
+          );
+        }
+        return getEmptyTagValue();
+      },
+      width: '35%',
     },
-    width: '35%',
-  },
-  {
-    field: 'node.lastSeen',
-    name: (
-      <EuiToolTip content={i18n.FIRST_LAST_SEEN_TOOLTIP}>
-        <>
-          {i18n.LAST_SEEN}{' '}
-          <EuiIcon size="s" color="subdued" type="iInCircle" className="eui-alignTop" />
-        </>
-      </EuiToolTip>
-    ),
-    truncateText: false,
-    mobileOptions: { show: true },
-    sortable: true,
-    render: (lastSeen: Maybe<string | string[]> | undefined) => {
-      if (lastSeen != null && lastSeen.length > 0) {
-        return (
-          <FormattedRelativePreferenceDate
-            value={Array.isArray(lastSeen) ? lastSeen[0] : lastSeen}
-          />
-        );
-      }
-      return getEmptyTagValue();
+    {
+      field: 'node.lastSeen',
+      name: (
+        <EuiToolTip content={i18n.FIRST_LAST_SEEN_TOOLTIP}>
+          <>
+            {i18n.LAST_SEEN} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
+      truncateText: false,
+      mobileOptions: { show: true },
+      sortable: true,
+      render: (lastSeen: Maybe<string | string[]> | undefined) => {
+        if (lastSeen != null && lastSeen.length > 0) {
+          return (
+            <FormattedRelativePreferenceDate
+              value={Array.isArray(lastSeen) ? lastSeen[0] : lastSeen}
+            />
+          );
+        }
+        return getEmptyTagValue();
+      },
     },
-  },
-  {
-    field: 'node.host.os.name',
-    name: i18n.OS,
-    truncateText: false,
-    mobileOptions: { show: true },
-    sortable: false,
-    render: (hostOsName) => {
-      if (hostOsName != null) {
-        return (
-          <AddFilterToGlobalSearchBar filter={createFilter('host.os.name', hostOsName)}>
-            <>{hostOsName}</>
-          </AddFilterToGlobalSearchBar>
-        );
-      }
-      return getEmptyTagValue();
+    {
+      field: 'node.host.os.name',
+      name: i18n.OS,
+      truncateText: false,
+      mobileOptions: { show: true },
+      sortable: false,
+      render: (hostOsName) => {
+        if (hostOsName != null) {
+          return (
+            <DefaultDraggable
+              id={`host-page-draggable-host.os.name-${hostOsName[0]}`}
+              field={'host.os.name'}
+              value={hostOsName[0]}
+              isDraggable={false}
+              hideTopN={true}
+              tooltipContent={null}
+            />
+          );
+        }
+        return getEmptyTagValue();
+      },
     },
-  },
-  {
-    field: 'node.host.os.version',
-    name: i18n.VERSION,
-    truncateText: false,
-    mobileOptions: { show: true },
-    sortable: false,
-    render: (hostOsVersion) => {
-      if (hostOsVersion != null) {
-        return (
-          <AddFilterToGlobalSearchBar filter={createFilter('host.os.version', hostOsVersion)}>
-            <>{hostOsVersion}</>
-          </AddFilterToGlobalSearchBar>
-        );
-      }
-      return getEmptyTagValue();
+    {
+      field: 'node.host.os.version',
+      name: i18n.VERSION,
+      truncateText: false,
+      mobileOptions: { show: true },
+      sortable: false,
+      render: (hostOsVersion) => {
+        if (hostOsVersion != null) {
+          return (
+            <DefaultDraggable
+              id={`host-page-draggable-host.os.version-${hostOsVersion[0]}`}
+              field={'host.os.version'}
+              value={hostOsVersion[0]}
+              isDraggable={false}
+              hideTopN={true}
+              tooltipContent={null}
+            />
+          );
+        }
+        return getEmptyTagValue();
+      },
     },
-  },
-];
+  ];
+
+  if (showRiskColumn) {
+    columns.push({
+      field: 'node.risk',
+      name: (
+        <EuiToolTip content={i18n.HOST_RISK_TOOLTIP}>
+          <>
+            {i18n.HOST_RISK} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
+          </>
+        </EuiToolTip>
+      ),
+      truncateText: false,
+      mobileOptions: { show: true },
+      sortable: false,
+      render: (riskScore: HostRiskSeverity) => {
+        if (riskScore != null) {
+          return <HostRiskScore severity={riskScore} />;
+        }
+        return getEmptyTagValue();
+      },
+    });
+  }
+
+  return columns;
+};

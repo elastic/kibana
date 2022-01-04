@@ -8,8 +8,13 @@
 
 import { getVisSchemas, VisToExpressionAst, SchemaConfig } from '../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import { PieVisParams, LabelsParams } from './types';
-import { vislibPieName, VisTypePieExpressionFunctionDefinition } from './pie_fn';
+import {
+  PIE_VIS_EXPRESSION_NAME,
+  PIE_LABELS_FUNCTION,
+  PieVisExpressionFunctionDefinition,
+  PieVisParams,
+  LabelsParams,
+} from '../../../chart_expressions/expression_pie/common';
 import { getEsaggsFn } from './to_ast_esaggs';
 
 const prepareDimension = (params: SchemaConfig) => {
@@ -24,7 +29,7 @@ const prepareDimension = (params: SchemaConfig) => {
 };
 
 const prepareLabels = (params: LabelsParams) => {
-  const pieLabels = buildExpressionFunction('pielabels', {
+  const pieLabels = buildExpressionFunction(PIE_LABELS_FUNCTION, {
     show: params.show,
     lastLevel: params.last_level,
     values: params.values,
@@ -54,6 +59,7 @@ export const toExpressionAst: VisToExpressionAst<PieVisParams> = async (vis, par
     maxLegendLines: vis.params.maxLegendLines,
     distinctColors: vis.params?.distinctColors,
     isDonut: vis.params.isDonut,
+    emptySizeRatio: vis.params.emptySizeRatio,
     palette: vis.params?.palette?.name,
     labels: prepareLabels(vis.params.labels),
     metric: schemas.metric.map(prepareDimension),
@@ -62,8 +68,8 @@ export const toExpressionAst: VisToExpressionAst<PieVisParams> = async (vis, par
     splitRow: schemas.split_row?.map(prepareDimension),
   };
 
-  const visTypePie = buildExpressionFunction<VisTypePieExpressionFunctionDefinition>(
-    vislibPieName,
+  const visTypePie = buildExpressionFunction<PieVisExpressionFunctionDefinition>(
+    PIE_VIS_EXPRESSION_NAME,
     args
   );
 

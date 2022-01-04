@@ -120,7 +120,7 @@ export const useDeleteIndexAndTargetIndex = (items: TransformListRow[]) => {
 type SuccessCountField = keyof Omit<DeleteTransformStatus, 'destinationIndex'>;
 
 export const useDeleteTransforms = () => {
-  const { overlays } = useAppDependencies();
+  const { overlays, theme } = useAppDependencies();
   const toastNotifications = useToastNotifications();
   const api = useApi();
 
@@ -136,8 +136,10 @@ export const useDeleteTransforms = () => {
           <ToastNotificationText
             previewTextLength={50}
             overlays={overlays}
+            theme={theme}
             text={getErrorMessage(results)}
-          />
+          />,
+          { theme$: theme.theme$ }
         ),
       });
       return;
@@ -203,7 +205,13 @@ export const useDeleteTransforms = () => {
               values: { transformId },
             }),
             text: toMountPoint(
-              <ToastNotificationText previewTextLength={50} overlays={overlays} text={error} />
+              <ToastNotificationText
+                previewTextLength={50}
+                overlays={overlays}
+                theme={theme}
+                text={error}
+              />,
+              { theme$: theme.theme$ }
             ),
           });
         }
@@ -219,7 +227,13 @@ export const useDeleteTransforms = () => {
               }
             ),
             text: toMountPoint(
-              <ToastNotificationText previewTextLength={50} overlays={overlays} text={error} />
+              <ToastNotificationText
+                previewTextLength={50}
+                overlays={overlays}
+                theme={theme}
+                text={error}
+              />,
+              { theme$: theme.theme$ }
             ),
           });
         }
@@ -235,7 +249,13 @@ export const useDeleteTransforms = () => {
               }
             ),
             text: toMountPoint(
-              <ToastNotificationText previewTextLength={50} overlays={overlays} text={error} />
+              <ToastNotificationText
+                previewTextLength={50}
+                overlays={overlays}
+                theme={theme}
+                text={error}
+              />,
+              { theme$: theme.theme$ }
             ),
           });
         }

@@ -636,6 +636,117 @@ describe('xy_expression', () => {
         `);
       });
 
+      describe('axis time', () => {
+        const defaultTimeLayer: LayerArgs = {
+          layerId: 'first',
+          layerType: layerTypes.DATA,
+          seriesType: 'line',
+          xAccessor: 'c',
+          accessors: ['a', 'b'],
+          splitAccessor: 'd',
+          columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+          xScaleType: 'time',
+          yScaleType: 'linear',
+          isHistogram: true,
+          palette: mockPaletteOutput,
+        };
+        test('it should disable the new time axis for a line time layer when isHistogram is set to false', () => {
+          const { data } = sampleArgs();
+
+          const instance = shallow(
+            <XYChart
+              {...defaultProps}
+              data={{
+                ...data,
+                dateRange: {
+                  fromDate: new Date('2019-01-02T05:00:00.000Z'),
+                  toDate: new Date('2019-01-03T05:00:00.000Z'),
+                },
+              }}
+              args={multiLayerArgs}
+            />
+          );
+
+          const axisStyle = instance.find(Axis).first().prop('timeAxisLayerCount');
+
+          expect(axisStyle).toBe(0);
+        });
+        test('it should enable the new time axis for a line time layer when isHistogram is set to true', () => {
+          const { data } = sampleArgs();
+          const timeLayerArgs = createArgsWithLayers([defaultTimeLayer]);
+
+          const instance = shallow(
+            <XYChart
+              {...defaultProps}
+              data={{
+                ...data,
+                dateRange: {
+                  fromDate: new Date('2019-01-02T05:00:00.000Z'),
+                  toDate: new Date('2019-01-03T05:00:00.000Z'),
+                },
+              }}
+              args={timeLayerArgs}
+            />
+          );
+
+          const axisStyle = instance.find(Axis).first().prop('timeAxisLayerCount');
+
+          expect(axisStyle).toBe(3);
+        });
+        test('it should disable the new time axis for a vertical bar with break down dimension', () => {
+          const { data } = sampleArgs();
+          const timeLayer: LayerArgs = {
+            ...defaultTimeLayer,
+            seriesType: 'bar',
+          };
+          const timeLayerArgs = createArgsWithLayers([timeLayer]);
+
+          const instance = shallow(
+            <XYChart
+              {...defaultProps}
+              data={{
+                ...data,
+                dateRange: {
+                  fromDate: new Date('2019-01-02T05:00:00.000Z'),
+                  toDate: new Date('2019-01-03T05:00:00.000Z'),
+                },
+              }}
+              args={timeLayerArgs}
+            />
+          );
+
+          const axisStyle = instance.find(Axis).first().prop('timeAxisLayerCount');
+
+          expect(axisStyle).toBe(0);
+        });
+
+        test('it should enable the new time axis for a stacked vertical bar with break down dimension', () => {
+          const { data } = sampleArgs();
+          const timeLayer: LayerArgs = {
+            ...defaultTimeLayer,
+            seriesType: 'bar_stacked',
+          };
+          const timeLayerArgs = createArgsWithLayers([timeLayer]);
+
+          const instance = shallow(
+            <XYChart
+              {...defaultProps}
+              data={{
+                ...data,
+                dateRange: {
+                  fromDate: new Date('2019-01-02T05:00:00.000Z'),
+                  toDate: new Date('2019-01-03T05:00:00.000Z'),
+                },
+              }}
+              args={timeLayerArgs}
+            />
+          );
+
+          const axisStyle = instance.find(Axis).first().prop('timeAxisLayerCount');
+
+          expect(axisStyle).toBe(3);
+        });
+      });
       describe('endzones', () => {
         const { args } = sampleArgs();
         const data: LensMultiTable = {

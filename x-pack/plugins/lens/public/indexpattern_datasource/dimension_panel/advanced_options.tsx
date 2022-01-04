@@ -26,7 +26,6 @@ export function AdvancedOptions(props: {
     <>
       {popoverOptions.length > 0 && (
         <EuiText textAlign="right">
-          <EuiSpacer size="s" />
           <EuiPopover
             ownFocus
             button={
@@ -69,17 +68,12 @@ export function AdvancedOptions(props: {
           </EuiPopover>
         </EuiText>
       )}
-      {inlineOptions.length > 0 && (
-        <>
+      {inlineOptions.map((option) => (
+        <React.Fragment key={option.dataTestSubj}>
           <EuiSpacer size="s" />
-          {inlineOptions.map((option, index) => (
-            <React.Fragment key={option.dataTestSubj}>
-              {option.inlineElement}
-              {index !== inlineOptions.length - 1 && <EuiSpacer size="s" />}
-            </React.Fragment>
-          ))}
-        </>
-      )}
+          {option.inlineElement}
+        </React.Fragment>
+      ))}
     </>
   );
 }
