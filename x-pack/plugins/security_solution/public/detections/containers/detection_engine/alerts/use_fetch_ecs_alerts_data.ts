@@ -66,8 +66,7 @@ export const useFetchEcsAlertsData = ({
       }
     };
 
-    // if (!isEmpty(alertIds) && !skip) {
-    if (!isEmpty(alertIds)) {
+    if (!isEmpty(alertIds) && !skip) {
       fetchAlert();
     }
 

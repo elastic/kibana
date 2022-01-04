@@ -78,7 +78,7 @@ export const useInvestigateInTimeline = ({
   const showInvestigateInTimelineAction = alertIds != null;
   const { isLoading: isFetchingAlertEcs, alertsEcsData } = useFetchEcsAlertsData({
     alertIds,
-    skip: ecsRowData != null || alertIds == null,
+    skip: alertIds == null,
   });
 
   const investigateInTimelineAlertClick = useCallback(async () => {
