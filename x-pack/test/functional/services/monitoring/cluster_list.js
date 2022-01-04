@@ -81,5 +81,8 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
         `${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > clusterLicense`
       );
     }
+    hasCluster(clusterUuid) {
+      return testSubjects.exists(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid}`);
+    }
   })();
 }
