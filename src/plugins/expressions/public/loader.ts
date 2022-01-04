@@ -57,6 +57,7 @@ export class ExpressionLoader {
       onRenderError: params && params.onRenderError,
       renderMode: params?.renderMode,
       syncColors: params?.syncColors,
+      containerStyle: params?.containerStyle,
       hasCompatibleActions: params?.hasCompatibleActions,
     });
     this.render$ = this.renderHandler.render$;

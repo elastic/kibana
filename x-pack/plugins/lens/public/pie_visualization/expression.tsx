@@ -51,6 +51,7 @@ export const getPieRenderer = (dependencies: {
             onClickValue={onClickValue}
             renderMode={handlers.getRenderMode()}
             syncColors={handlers.isSyncColorsEnabled()}
+            containerStyle={handlers.getContainerStyle()}
           />
         </I18nProvider>
       </KibanaThemeProvider>,

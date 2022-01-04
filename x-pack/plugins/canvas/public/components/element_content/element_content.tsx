@@ -77,7 +77,7 @@ export const ElementContent = (props: Props) => {
             ...renderable.value,
             input: {
               ...(renderable.value as Record<string, any>).input,
-              containerStyle: { backgroundColor, ...containerStyle },
+              containerStyle: { backgroundColor: backgroundColor ?? '#fff', ...containerStyle },
             },
           }}
           css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement

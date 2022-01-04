@@ -139,7 +139,9 @@ export function ExpressionWrapper({
             renderMode={renderMode}
             syncColors={syncColors}
             executionContext={executionContext}
-            containerStyle={style}
+            containerStyle={
+              style?.backgroundColor ? { backgroundColor: style.backgroundColor } : undefined
+            }
             renderError={(errorMessage, error) => {
               onRuntimeError();
               return (

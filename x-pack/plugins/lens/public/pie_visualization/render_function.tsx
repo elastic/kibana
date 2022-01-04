@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import chroma from 'chroma-js';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
 import { uniq } from 'lodash';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiText } from '@elastic/eui';
+import { EuiText, isColorDark } from '@elastic/eui';
 import {
   Chart,
   Datum,
@@ -57,6 +59,24 @@ declare global {
 
 const EMPTY_SLICE = Symbol('empty_slice');
 
+function getThemeBackground(isDark: boolean) {
+  return isDark ? euiDarkVars.euiPageBackgroundColor : euiLightVars.euiPageBackgroundColor;
+}
+
+function getTextColor(isDark: boolean) {
+  const darkColor = isDark ? euiDarkVars.euiColorInk : euiLightVars.euiColorInk;
+  const lightColor = isDark ? euiDarkVars.euiColorGhost : euiLightVars.euiColorGhost;
+  return isDark ? lightColor : darkColor;
+}
+
+function isContrastEnough(color: string, backgroundColor: string) {
+  const finalColor =
+    chroma(color).alpha() < 1
+      ? chroma.blend(backgroundColor, color, 'overlay')
+      : chroma(backgroundColor);
+  return isColorDark(...finalColor.rgb());
+}
+
 export function PieComponent(
   props: PieExpressionProps & {
     formatFactory: FormatFactory;
@@ -66,12 +86,13 @@ export function PieComponent(
     onClickValue: (data: LensFilterEvent['data']) => void;
     renderMode: RenderMode;
     syncColors: boolean;
+    containerStyle?: Record<string, string>;
   }
 ) {
   const [firstTable] = Object.values(props.data.tables);
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
-  const { chartsThemeService, paletteService, syncColors, onClickValue } = props;
+  const { chartsThemeService, paletteService, syncColors, onClickValue, containerStyle } = props;
   const {
     shape,
     groups,
@@ -219,7 +240,12 @@ export function PieComponent(
       // to account for in outer labels
       // This does not handle non-dashboard embeddables, which are allowed to
       // have different backgrounds.
-      textColor: chartTheme.axes?.axisTitle?.fill,
+      textColor: getTextColor(
+        isContrastEnough(
+          getTextColor(isDarkMode),
+          containerStyle?.backgroundColor ?? getThemeBackground(isDarkMode)
+        )
+      ),
     },
     sectorLineStroke: chartTheme.lineSeriesStyle?.point?.fill,
     sectorLineWidth: 1.5,

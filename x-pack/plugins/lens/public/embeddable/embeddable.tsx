@@ -232,8 +232,16 @@ export class Embeddable
         .pipe(
           distinctUntilChanged((a, b) =>
             fastIsEqual(
-              ['attributes' in a && a.attributes, 'savedObjectId' in a && a.savedObjectId],
-              ['attributes' in b && b.attributes, 'savedObjectId' in b && b.savedObjectId]
+              [
+                'attributes' in a && a.attributes,
+                'savedObjectId' in a && a.savedObjectId,
+                'containerStyle' in a && a.containerStyle,
+              ],
+              [
+                'attributes' in b && b.attributes,
+                'savedObjectId' in b && b.savedObjectId,
+                'containerStyle' in b && b.containerStyle,
+              ]
             )
           ),
           skip(1)

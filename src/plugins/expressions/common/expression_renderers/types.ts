@@ -90,6 +90,7 @@ export interface IInterpreterRenderHandlers {
   isInteractive(): boolean;
 
   isSyncColorsEnabled(): boolean;
+  getContainerStyle(): Record<string, string>;
   /**
    * This uiState interface is actually `PersistedState` from the visualizations plugin,
    * but expressions cannot know about vis or it creates a mess of circular dependencies.

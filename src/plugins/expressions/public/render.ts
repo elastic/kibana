@@ -29,6 +29,7 @@ export interface ExpressionRenderHandlerParams {
   renderMode?: RenderMode;
   syncColors?: boolean;
   interactive?: boolean;
+  containerStyle?: { backgroundColor: string };
   hasCompatibleActions?: (event: ExpressionRendererEvent) => Promise<boolean>;
 }
 
@@ -55,6 +56,7 @@ export class ExpressionRenderHandler {
       renderMode,
       syncColors,
       interactive,
+      containerStyle,
       hasCompatibleActions = async () => false,
     }: ExpressionRenderHandlerParams = {}
   ) {
@@ -87,6 +89,9 @@ export class ExpressionRenderHandler {
       },
       event: (data) => {
         this.eventsSubject.next(data);
+      },
+      getContainerStyle: () => {
+        return containerStyle || {};
       },
       getRenderMode: () => {
         return renderMode || 'view';

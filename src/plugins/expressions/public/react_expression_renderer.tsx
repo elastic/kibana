@@ -40,7 +40,7 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
   reload$?: Observable<unknown>;
   onRender$?: (item: number) => void;
   debounce?: number;
-  containerStyle?: React.CSSProperties;
+  containerStyle?: { backgroundColor: string };
 }
 
 export type ReactExpressionRendererType = React.ComponentType<ReactExpressionRendererProps>;
@@ -177,6 +177,7 @@ export default function ReactExpressionRenderer({
     expressionLoaderOptions.interactive,
     expressionLoaderOptions.renderMode,
     expressionLoaderOptions.syncColors,
+    expressionLoaderOptions.containerStyle,
   ]);
 
   useEffect(() => {
