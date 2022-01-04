@@ -55,8 +55,20 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
 
   setup(core: CoreSetup, plugins: {}) {
     const router = core.http.createRouter();
+    const kibanaIndex = core.savedObjects.getKibanaIndex();
 
-    registerMetricsRoute({ router, getMetrics: async () => await this.getMetrics() });
+    registerMetricsRoute({
+      router,
+      config: {
+        allowAnonymous: core.status.isStatusPageAnonymous(),
+        kibanaIndex,
+        kibanaVersion: this.initializerContext.env.packageInfo.version,
+        server: core.http.getServerInfo(),
+        uuid: this.initializerContext.env.instanceUuid,
+      },
+      overallStatus$: core.status.overall$,
+      getMetrics: async () => await this.getMetrics(),
+    });
 
     return {
       registerMetric: (metric: Metric) => {
