@@ -18,9 +18,9 @@ export interface ExtensionPointStorageContextMock {
   /** Mocked logger instance used in initializing the ExtensionPointStorage instance  */
   logger: MockedLogger;
   /** An Exception List Item pre-create extension point added to the storage. Appends `-1` to the data's `name` attribute */
-  exceptionPreCreateCallback: jest.Mocked<ExceptionsListPreCreateItemServerExtension['callback']>;
+  exceptionPreCreate: jest.Mocked<ExceptionsListPreCreateItemServerExtension>;
   /** An Exception List Item pre-update extension point added to the storage. Appends `-2` to the data's `name` attribute */
-  exceptionPreUpdateCallback: jest.Mocked<ExceptionListPreUpdateItemServerExtension['callback']>;
+  exceptionPreUpdate: jest.Mocked<ExceptionListPreUpdateItemServerExtension>;
 }
 
 export const createExtensionPointStorageMock = (
@@ -28,34 +28,32 @@ export const createExtensionPointStorageMock = (
 ): ExtensionPointStorageContextMock => {
   const extensionPointStorage = new ExtensionPointStorage(logger);
 
-  const exceptionPreCreateCallback: ExtensionPointStorageContextMock['exceptionPreCreateCallback'] =
-    jest.fn(async (data) => {
+  const exceptionPreCreate: ExtensionPointStorageContextMock['exceptionPreCreate'] = {
+    callback: jest.fn(async (data) => {
       return {
         ...data,
         name: `${data.name}-1`,
       };
-    });
-
-  const exceptionPreUpdateCallback: ExtensionPointStorageContextMock['exceptionPreUpdateCallback'] =
-    jest.fn(async (data) => {
-      return {
-        ...data,
-        name: `${data.name}-1`,
-      };
-    });
-
-  extensionPointStorage.add({
-    callback: exceptionPreCreateCallback,
+    }),
     type: 'exceptionsListPreCreateItem',
-  });
-  extensionPointStorage.add({
-    callback: exceptionPreUpdateCallback,
+  };
+
+  const exceptionPreUpdate: ExtensionPointStorageContextMock['exceptionPreUpdate'] = {
+    callback: jest.fn(async (data) => {
+      return {
+        ...data,
+        name: `${data.name}-1`,
+      };
+    }),
     type: 'exceptionsListPreUpdateItem',
-  });
+  };
+
+  extensionPointStorage.add(exceptionPreCreate);
+  extensionPointStorage.add(exceptionPreUpdate);
 
   return {
-    exceptionPreCreateCallback,
-    exceptionPreUpdateCallback,
+    exceptionPreCreate,
+    exceptionPreUpdate,
     extensionPointStorage,
     logger,
   };
