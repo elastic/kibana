@@ -11,27 +11,6 @@ const MOCK_EMS_SETTINGS = {
   isEMSEnabled: () => true,
 };
 
-describe('default ems-client creation', () => {
-  beforeEach(() => {
-    require('./kibana_services').getEmsTileLayerId = () => '123';
-    require('./kibana_services').getEMSSettings = () => {
-      return MOCK_EMS_SETTINGS;
-    };
-    require('./kibana_services').getMapsEmsSetup = () => {
-      return {
-        createEMSClient() {
-          return {
-            addQueryParams: () => {},
-          };
-        },
-      };
-    };
-    require('./licensed_features').getLicenseId = () => {
-      return 'foobarlicenseid';
-    };
-  });
-});
-
 describe('getGlyphUrl', () => {
   describe('EMS enabled', () => {
     beforeAll(() => {
