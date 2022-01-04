@@ -23,6 +23,12 @@ export const defaultConfig: StorybookConfig = {
   features: {
     postcss: false,
   },
+  // @ts-expect-error StorybookConfig type is incomplete
+  // https://storybook.js.org/docs/react/configure/babel#custom-configuration
+  babel: async (options) => {
+    options.presets.push('@emotion/babel-preset-css-prop');
+    return options;
+  },
   webpackFinal: (config, options) => {
     if (process.env.CI) {
       config.parallelism = 4;
