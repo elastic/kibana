@@ -43,13 +43,6 @@ export const getThresholdSignalHistory = async ({
   signalHistory: ThresholdSignalHistory;
   searchErrors: string[];
 }> => {
-  /*
-  return {
-    signalHistory: {},
-    searchErrors: [],
-  };
-  */
-
   const { searchResult, searchErrors } = await findPreviousThresholdSignals({
     indexPattern,
     from,
