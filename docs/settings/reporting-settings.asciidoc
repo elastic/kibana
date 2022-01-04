@@ -50,7 +50,7 @@ xpack.reporting.encryptionKey: "something_secret"
 [[reporting-kibana-server-settings]]
 ==== {kib} server settings
 
-Reporting opens the {kib} web interface in a server process to generate
+For PNG and PDF reports, Reporting opens the {kib} web interface in a headless server process to generate
 screenshots of {kib} visualizations. In most cases, the default settings
 work and you don't need to configure the {report-features} to communicate with {kib}.
 
