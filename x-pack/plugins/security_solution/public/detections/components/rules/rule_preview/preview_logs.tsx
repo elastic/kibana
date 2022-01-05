@@ -25,7 +25,7 @@ interface LogAccordionProps {
   isError?: boolean;
 }
 
-const addLogs = (startedAt: string, logs: string[], allLogs: SortedLogs[]) =>
+const addLogs = (startedAt: string | undefined, logs: string[], allLogs: SortedLogs[]) =>
   logs.length ? [{ startedAt, logs }, ...allLogs] : allLogs;
 
 export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = ({
