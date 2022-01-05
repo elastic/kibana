@@ -98,7 +98,7 @@ function validateParams(paramsObject: unknown): string | void {
   const validatedTimestamp = validateTimestamp(timestamp);
   if (validatedTimestamp != null) {
     try {
-      const date = moment(validatedTimestamp, moment.ISO_8601);
+      const date = moment(validatedTimestamp);
       if (!date.isValid()) {
         return i18n.translate('xpack.actions.builtin.pagerduty.invalidTimestampErrorMessage', {
           defaultMessage: `error parsing timestamp "{timestamp}"`,
@@ -294,7 +294,7 @@ function getBodyForEventAction(actionId: string, params: ActionParamsType): Page
     summary: params.summary || 'No summary provided.',
     source: params.source || `Kibana Action ${actionId}`,
     severity: params.severity || 'info',
-    ...(validatedTimestamp ? { timestamp: validatedTimestamp } : {}),
+    ...(validatedTimestamp ? { timestamp: moment(validatedTimestamp).toISOString() } : {}),
     ...omitBy(pick(params, ['component', 'group', 'class']), isUndefined),
   };
 

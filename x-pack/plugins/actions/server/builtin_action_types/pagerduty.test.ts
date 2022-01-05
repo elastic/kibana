@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import moment from 'moment';
+
 jest.mock('./lib/post_pagerduty', () => ({
   postPagerduty: jest.fn(),
 }));
@@ -171,15 +173,6 @@ describe('validateParams()', () => {
     expect(validateParams(actionType, { timestamp: date1 })).toEqual({ timestamp: date1 });
     expect(validateParams(actionType, { timestamp: date2 })).toEqual({ timestamp: date2 });
     expect(validateParams(actionType, { timestamp: date3 })).toEqual({ timestamp: date3 });
-  });
-
-  test('should validate and throw error when timestamp is a non-ISO-8601 date', () => {
-    const timestamp = `01-01-2021 10:00:00`;
-    expect(() => {
-      validateParams(actionType, {
-        timestamp,
-      });
-    }).toThrowError(`error validating action params: error parsing timestamp "${timestamp}"`);
   });
 
   test('should validate and throw error when timestamp is invalid', () => {
@@ -598,7 +591,7 @@ describe('execute()', () => {
   });
 
   test('should succeed when timestamp contains valid date and extraneous spaces', async () => {
-    const randoDate = new Date('1963-09-23T01:23:45Z').toISOString();
+    const randoDate = '1963-09-23 01:23:45';
     const secrets = {
       routingKey: 'super-secret',
     };
@@ -644,7 +637,7 @@ describe('execute()', () => {
             "severity": "critical",
             "source": "the-source",
             "summary": "the summary",
-            "timestamp": "1963-09-23T01:23:45.000Z",
+            "timestamp": "${moment(randoDate).toISOString()}",
           },
         },
         "headers": Object {
