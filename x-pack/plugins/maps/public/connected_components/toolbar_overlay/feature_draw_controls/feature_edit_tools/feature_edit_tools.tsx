@@ -37,9 +37,10 @@ export function FeatureEditTools(props: Props) {
   const deleteSelected = props.drawShape === DRAW_SHAPE.DELETE;
 
   function toggleDrawShape(mode: DRAW_SHAPE) {
-    props.setDrawShape(mode);
     if (mode && props.drawShape === mode) {
       props.setDrawShape(null);
+    } else {
+      props.setDrawShape(mode);
     }
   }
 
