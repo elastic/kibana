@@ -11,6 +11,7 @@ import {
   ExtensionPointStorageContextMock,
   createExtensionPointStorageMock,
 } from '../extension_points/extension_point_storage.mock';
+import type { ExtensionPointCallbackArgument } from '../extension_points';
 
 import {
   getCreateExceptionListItemOptionsMock,
@@ -20,10 +21,6 @@ import {
 } from './exception_list_client.mock';
 import { ExceptionListClient } from './exception_list_client';
 import { DataValidationError } from './utils/errors';
-import {
-  CreateExceptionListItemOptions,
-  UpdateExceptionListItemOptions,
-} from './exception_list_client_types';
 
 describe('exception_list_client', () => {
   describe('Mock client sanity checks', () => {
@@ -104,11 +101,10 @@ describe('exception_list_client', () => {
           it('should validate extension point callback returned data and throw if not valid', async () => {
             const extensionPointCallback = getExtensionPointCallback();
             extensionPointCallback.mockImplementation(async (args) => {
-              const { entries, ...rest } = args as CreateExceptionListItemOptions &
-                UpdateExceptionListItemOptions;
+              const { entries, ...rest } = args as ExtensionPointCallbackArgument;
 
               expect(entries).toBeTruthy(); // Test entries to exist since we exclude it.
-              return rest as CreateExceptionListItemOptions & UpdateExceptionListItemOptions;
+              return rest as ExtensionPointCallbackArgument;
             });
 
             const methodResponsePromise = callExceptionListClientMethod();

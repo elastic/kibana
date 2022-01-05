@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { PromiseType } from 'utility-types';
+import { UnionToIntersection } from '@kbn/utility-types';
+
 import {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
@@ -57,3 +60,11 @@ export type ListsServerExtensionRegistrar = (extension: ExtensionPoint) => void;
 export type NarrowExtensionPointToType<T extends ExtensionPoint['type']> = {
   type: T;
 } & ExtensionPoint;
+
+/**
+ * An intersection of all callback arguments for use internally when
+ * casting (ex. in `ExtensionPointStorageClient#pipeRun()`
+ */
+export type ExtensionPointCallbackArgument = UnionToIntersection<
+  PromiseType<ReturnType<ExtensionPoint['callback']>>
+>;

@@ -7,7 +7,11 @@
 
 import { Logger } from 'kibana/server';
 
-import { ExtensionPoint, NarrowExtensionPointToType } from './types';
+import type {
+  ExtensionPoint,
+  ExtensionPointCallbackArgument,
+  NarrowExtensionPointToType,
+} from './types';
 import { ExtensionPointError } from './errors';
 import { ExtensionPointStorageInterface } from './extension_point_storage';
 
@@ -44,7 +48,7 @@ export class ExtensionPointStorageClient {
     initialCallbackInput: P[0],
     callbackResponseValidator?: (data: P[0]) => Error | undefined
   ): Promise<P[0]> {
-    let inputArgument: P[0] = initialCallbackInput;
+    let inputArgument = initialCallbackInput;
     const externalExtensions = this.get(extensionType);
 
     if (!externalExtensions || externalExtensions.size === 0) {
@@ -56,9 +60,9 @@ export class ExtensionPointStorageClient {
         this.storage.getExtensionRegistrationSource(externalExtension);
 
       try {
-        // FIXME:PT investigate if we can avoid the TS ignore below?
-        // @ts-expect-error
-        inputArgument = await externalExtension.callback(inputArgument);
+        inputArgument = await externalExtension.callback(
+          inputArgument as ExtensionPointCallbackArgument
+        );
       } catch (error) {
         // Log the error that the external callback threw and keep going with the running of others
         this.logger?.error(
