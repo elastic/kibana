@@ -13,14 +13,16 @@ import { ErrorStatePrompt } from '../../../shared/error_state';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 
-export const ErrorConnecting: React.FC = () => {
+export const ErrorConnecting: React.FC<{ errorConnectingMessage?: string }> = ({
+  errorConnectingMessage,
+}) => {
   return (
     <>
       <SetPageChrome />
       <SendTelemetry action="error" metric="cannot_connect" />
 
       <KibanaPageTemplate isEmptyState>
-        <ErrorStatePrompt />
+        <ErrorStatePrompt errorConnectingMessage={errorConnectingMessage} />
       </KibanaPageTemplate>
     </>
   );

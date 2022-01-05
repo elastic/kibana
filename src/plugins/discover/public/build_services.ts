@@ -21,7 +21,7 @@ import {
 import {
   FilterManager,
   TimefilterContract,
-  IndexPatternsContract,
+  DataViewsContract,
   DataPublicPluginStart,
 } from 'src/plugins/data/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
@@ -56,7 +56,7 @@ export interface DiscoverServices {
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: DataViewsContract;
   inspector: InspectorPublicPluginStart;
   metadata: { branch: string };
   navigation: NavigationPublicPluginStart;
@@ -66,7 +66,7 @@ export interface DiscoverServices {
   toastNotifications: ToastsStart;
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
   http: HttpStart;
   storage: Storage;
   spaces?: SpacesApi;
@@ -105,7 +105,7 @@ export function buildServices(
     uiSettings: core.uiSettings,
     storage,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
-    indexPatternFieldEditor: plugins.dataViewFieldEditor,
+    dataViewFieldEditor: plugins.dataViewFieldEditor,
     http: core.http,
     spaces: plugins.spaces,
   };

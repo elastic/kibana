@@ -15,11 +15,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ALERT_REASON,
-  ALERT_RULE_NAME,
-  ALERT_RULE_UUID,
-} from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_REASON, ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import moment from 'moment';
 import React, { ComponentType, useCallback, useMemo } from 'react';
@@ -65,6 +61,7 @@ const StyledEuiBasicTable = styled(EuiBasicTable as BasicTableType)`
 
 export interface EventRenderedViewProps {
   alertToolbar: React.ReactNode;
+  appId: string;
   browserFields: BrowserFields;
   events: TimelineItem[];
   leadingControlColumns: EuiDataGridControlColumn[];
@@ -87,6 +84,7 @@ export const PreferenceFormattedDate = React.memo(PreferenceFormattedDateCompone
 
 const EventRenderedViewComponent = ({
   alertToolbar,
+  appId,
   browserFields,
   events,
   leadingControlColumns,
@@ -168,7 +166,7 @@ const EventRenderedViewComponent = ({
         render: (name: unknown, item: TimelineItem) => {
           const ruleName = get(item, `ecs.signal.rule.name`) ?? get(item, `ecs.${ALERT_RULE_NAME}`);
           const ruleId = get(item, `ecs.signal.rule.id`) ?? get(item, `ecs.${ALERT_RULE_UUID}`);
-          return <RuleName name={ruleName} id={ruleId} />;
+          return <RuleName name={ruleName} id={ruleId} appId={appId} />;
         },
       },
       {
@@ -209,7 +207,7 @@ const EventRenderedViewComponent = ({
         width: '60%',
       },
     ],
-    [ActionTitle, browserFields, events, leadingControlColumns, rowRenderers]
+    [ActionTitle, browserFields, events, leadingControlColumns, rowRenderers, appId]
   );
 
   const handleTableChange = useCallback(

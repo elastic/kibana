@@ -5,25 +5,30 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
-import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import React, { useCallback, useContext, useState, useEffect } from 'react';
+import { useParams, Redirect } from 'react-router-dom';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FETCH_STATUS, useFetcher } from '../../../../../observability/public';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
+import { MONITOR_MANAGEMENT } from '../../../../common/constants';
+import { UptimeSettingsContext } from '../../../contexts';
 import { setMonitor } from '../../../state/api';
 
-import { Monitor } from '../../fleet_package/types';
+import { SyntheticsMonitor } from '../../../../common/runtime_types';
 
 interface Props {
-  id?: string;
-  monitor: Monitor;
+  monitor: SyntheticsMonitor;
   isValid: boolean;
   onSave?: () => void;
 }
 
-export const ActionBar = ({ id, monitor, isValid, onSave }: Props) => {
+export const ActionBar = ({ monitor, isValid, onSave }: Props) => {
+  const { monitorId } = useParams<{ monitorId: string }>();
+  const { basePath } = useContext(UptimeSettingsContext);
+
   const [hasBeenSubmitted, setHasBeenSubmitted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -33,8 +38,11 @@ export const ActionBar = ({ id, monitor, isValid, onSave }: Props) => {
     if (!isSaving || !isValid) {
       return;
     }
-    return setMonitor({ monitor, id });
-  }, [monitor, id, isValid, isSaving]);
+    return setMonitor({
+      monitor,
+      id: monitorId ? Buffer.from(monitorId, 'base64').toString('utf8') : undefined,
+    });
+  }, [monitor, monitorId, isValid, isSaving]);
 
   const handleOnSave = useCallback(() => {
     if (onSave) {
@@ -62,40 +70,49 @@ export const ActionBar = ({ id, monitor, isValid, onSave }: Props) => {
       });
     } else if (status === FETCH_STATUS.SUCCESS) {
       notifications.toasts.success({
-        title: <p data-test-subj="uptimeAddMonitorSuccess">{MONITOR_SUCCESS_LABEL}</p>,
+        title: (
+          <p data-test-subj="uptimeAddMonitorSuccess">
+            {monitorId ? MONITOR_UPDATED_SUCCESS_LABEL : MONITOR_SUCCESS_LABEL}
+          </p>
+        ),
         toastLifeTimeMs: 3000,
       });
     }
-  }, [data, status, notifications.toasts, isSaving, isValid]);
+  }, [data, status, notifications.toasts, isSaving, isValid, monitorId]);
 
-  return (
-    <EuiBottomBar>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem>{!isValid && hasBeenSubmitted && VALIDATION_ERROR_LABEL}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty color="ghost" size="s" iconType="cross">
-                {DISCARD_LABEL}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                color="primary"
-                fill
-                size="s"
-                iconType="check"
-                onClick={handleOnSave}
-                isLoading={isSaving}
-                disabled={hasBeenSubmitted && !isValid}
-              >
-                {id ? EDIT_MONITOR_LABEL : SAVE_MONITOR_LABEL}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiBottomBar>
+  return status === FETCH_STATUS.SUCCESS ? (
+    <Redirect to={MONITOR_MANAGEMENT} />
+  ) : (
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+      <EuiFlexItem>{!isValid && hasBeenSubmitted && VALIDATION_ERROR_LABEL}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              color="ghost"
+              size="s"
+              iconType="cross"
+              href={`${basePath}/app/uptime/${MONITOR_MANAGEMENT}`}
+            >
+              {DISCARD_LABEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="primary"
+              fill
+              size="s"
+              iconType="check"
+              onClick={handleOnSave}
+              isLoading={isSaving}
+              disabled={hasBeenSubmitted && !isValid}
+            >
+              {monitorId ? UPDATE_MONITOR_LABEL : SAVE_MONITOR_LABEL}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -107,8 +124,8 @@ const SAVE_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.saveMo
   defaultMessage: 'Save monitor',
 });
 
-const EDIT_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.editMonitorLabel', {
-  defaultMessage: 'Edit monitor',
+const UPDATE_MONITOR_LABEL = i18n.translate('xpack.uptime.monitorManagement.updateMonitorLabel', {
+  defaultMessage: 'Update monitor',
 });
 
 const VALIDATION_ERROR_LABEL = i18n.translate('xpack.uptime.monitorManagement.validationError', {
@@ -116,9 +133,16 @@ const VALIDATION_ERROR_LABEL = i18n.translate('xpack.uptime.monitorManagement.va
 });
 
 const MONITOR_SUCCESS_LABEL = i18n.translate(
-  'xpack.uptime.monitorManagement.monitorSuccessMessage',
+  'xpack.uptime.monitorManagement.monitorAddedSuccessMessage',
   {
     defaultMessage: 'Monitor added successfully.',
+  }
+);
+
+const MONITOR_UPDATED_SUCCESS_LABEL = i18n.translate(
+  'xpack.uptime.monitorManagement.monitorEditedSuccessMessage',
+  {
+    defaultMessage: 'Monitor updated successfully.',
   }
 );
 

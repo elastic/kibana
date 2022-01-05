@@ -39,7 +39,7 @@ const mockServices = {
       }
     },
   },
-  indexPatternFieldEditor: {
+  dataViewFieldEditor: {
     openEditor: jest.fn(),
     userPermissions: {
       editIndexPattern: () => {
@@ -49,7 +49,7 @@ const mockServices = {
   },
 } as unknown as DiscoverServices;
 
-describe('Discover IndexPattern Management', () => {
+describe('Discover DataView Management', () => {
   const indexPattern = stubLogstashIndexPattern;
 
   const editField = jest.fn();

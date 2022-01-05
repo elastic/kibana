@@ -19,6 +19,7 @@ export async function invalidateAgentKey({
     {
       body: {
         ids: [id],
+        owner: true,
       },
     }
   );

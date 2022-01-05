@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { buildEsQuery } from '@kbn/es-query';
 import { SavedObjectsClientContract, SimpleSavedObject, IUiSettingsClient } from 'src/core/public';
 import {
   IndexPattern,
-  esQuery,
+  getEsQueryConfig,
   IndexPatternsContract,
   IndexPatternAttributes,
 } from '../../../../../../../src/plugins/data/public';
@@ -111,8 +112,8 @@ export function createSearchItems(
 
     const filters = fs.length ? fs : [];
 
-    const esQueryConfigs = esQuery.getEsQueryConfig(config);
-    combinedQuery = esQuery.buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
+    const esQueryConfigs = getEsQueryConfig(config);
+    combinedQuery = buildEsQuery(indexPattern, [query], filters, esQueryConfigs);
   }
 
   if (!isIndexPattern(indexPattern)) {

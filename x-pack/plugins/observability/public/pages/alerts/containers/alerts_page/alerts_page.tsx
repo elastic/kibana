@@ -7,17 +7,17 @@
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 
-import { IndexPatternBase } from '@kbn/es-query';
+import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { AlertStatus } from '@kbn/rule-data-utils/alerts_as_data_status';
-import { ALERT_STATUS } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_STATUS, AlertStatus } from '@kbn/rule-data-utils';
 
 import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
 import { loadAlertAggregations as loadRuleAggregations } from '../../../../../../../plugins/triggers_actions_ui/public';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
 import { ParsedTechnicalFields } from '../../../../../../rule_registry/common/parse_technical_fields';
+import { ParsedExperimentalFields } from '../../../../../../rule_registry/common/parse_experimental_fields';
 import { ExperimentalBadge } from '../../../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -43,7 +43,7 @@ interface RuleStatsState {
   error: number;
 }
 export interface TopAlert {
-  fields: ParsedTechnicalFields;
+  fields: ParsedTechnicalFields & ParsedExperimentalFields;
   start: number;
   reason: string;
   link?: string;
@@ -57,7 +57,7 @@ const Divider = euiStyled.div`
 
 const regExpEscape = (str: string) => str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
 const NO_INDEX_NAMES: string[] = [];
-const NO_INDEX_PATTERNS: IndexPatternBase[] = [];
+const NO_INDEX_PATTERNS: DataViewBase[] = [];
 const BASE_ALERT_REGEX = new RegExp(`\\s*${regExpEscape(ALERT_STATUS)}\\s*:\\s*"(.*?|\\*?)"`);
 const ALERT_STATUS_REGEX = new RegExp(
   `\\s*and\\s*${regExpEscape(ALERT_STATUS)}\\s*:\\s*(".+?"|\\*?)|${regExpEscape(
@@ -72,7 +72,7 @@ function AlertsPage() {
   const { prepend } = core.http.basePath;
   const refetch = useRef<() => void>();
   const timefilterService = useTimefilterService();
-  const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery, workflowStatus } =
+  const { rangeFrom, setRangeFrom, rangeTo, setRangeTo, kuery, setKuery } =
     useAlertsPageStateContainer();
   const {
     http,
@@ -157,7 +157,7 @@ function AlertsPage() {
     });
   }, []);
 
-  const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<IndexPatternBase[]> => {
+  const dynamicIndexPatternsAsyncState = useAsync(async (): Promise<DataViewBase[]> => {
     if (indexNames.length === 0) {
       return [];
     }
@@ -173,15 +173,6 @@ function AlertsPage() {
       },
     ];
   }, [indexNames]);
-
-  // Keep the Workflow status code commented (no delete) as requested: https://github.com/elastic/kibana/issues/117686
-
-  // const setWorkflowStatusFilter = useCallback(
-  //   (value: AlertWorkflowStatus) => {
-  //     setWorkflowStatus(value);
-  //   },
-  //   [setWorkflowStatus]
-  // );
 
   const onQueryChange = useCallback(
     ({ dateRange, query }) => {
@@ -326,8 +317,6 @@ function AlertsPage() {
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              {/* Keep the Workflow status code commented (no delete) as requested: https://github.com/elastic/kibana/issues/117686*/}
-              {/* <WorkflowStatusFilter status={workflowStatus} onChange={setWorkflowStatusFilter} /> */}
               <AlertsStatusFilter status={alertFilterStatus} onChange={setAlertStatusFilter} />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -339,7 +328,6 @@ function AlertsPage() {
             rangeFrom={rangeFrom}
             rangeTo={rangeTo}
             kuery={kuery}
-            workflowStatus={workflowStatus}
             setRefetch={setRefetch}
           />
         </EuiFlexItem>

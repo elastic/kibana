@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternFieldBase } from '../..';
+import { DataViewFieldBase } from '../..';
 
 /**
  * Base index pattern fields for testing
  */
-export const fields: IndexPatternFieldBase[] = [
+export const fields: DataViewFieldBase[] = [
   {
     name: 'bytes',
     type: 'number',

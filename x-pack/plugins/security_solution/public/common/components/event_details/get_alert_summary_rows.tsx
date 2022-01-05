@@ -5,53 +5,31 @@
  * 2.0.
  */
 
-import { get, getOr, find, isEmpty } from 'lodash/fp';
+import { getOr, find, isEmpty } from 'lodash/fp';
 
 import * as i18n from './translations';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
-  ALERTS_HEADERS_RISK_SCORE,
-  ALERTS_HEADERS_RULE,
-  ALERTS_HEADERS_SEVERITY,
   ALERTS_HEADERS_THRESHOLD_CARDINALITY,
   ALERTS_HEADERS_THRESHOLD_COUNT,
   ALERTS_HEADERS_THRESHOLD_TERMS,
   ALERTS_HEADERS_RULE_NAME,
-  SIGNAL_STATUS,
   ALERTS_HEADERS_TARGET_IMPORT_HASH,
-  TIMESTAMP,
   ALERTS_HEADERS_RULE_DESCRIPTION,
 } from '../../../detections/components/alerts_table/translations';
 import {
   AGENT_STATUS_FIELD_NAME,
   IP_FIELD_TYPE,
-  SIGNAL_RULE_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../../../network/components/ip';
-import { SummaryRow } from './helpers';
+import { getEnrichedFieldInfo, SummaryRow } from './helpers';
+import { EventSummaryField } from './types';
 import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 
 import { isAlertFromEndpointEvent } from '../../utils/endpoint_alert_check';
 import { EventCode } from '../../../../common/ecs/event';
 
-interface EventSummaryField {
-  id: string;
-  label?: string;
-  linkField?: string;
-  fieldType?: string;
-  overrideField?: string;
-}
-
 const defaultDisplayFields: EventSummaryField[] = [
-  { id: 'kibana.alert.workflow_status', label: SIGNAL_STATUS },
-  { id: '@timestamp', label: TIMESTAMP },
-  {
-    id: SIGNAL_RULE_NAME_FIELD_NAME,
-    linkField: 'kibana.alert.rule.uuid',
-    label: ALERTS_HEADERS_RULE,
-  },
-  { id: 'kibana.alert.rule.severity', label: ALERTS_HEADERS_SEVERITY },
-  { id: 'kibana.alert.rule.risk_score', label: ALERTS_HEADERS_RISK_SCORE },
   { id: 'host.name' },
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },
@@ -151,50 +129,34 @@ export const getSummaryRows = ({
   const tableFields = getEventFieldsToDisplay({ eventCategory, eventCode });
 
   return data != null
-    ? tableFields.reduce<SummaryRow[]>((acc, item) => {
-        const initialDescription = {
-          contextId: timelineId,
-          eventId,
-          isDraggable,
-          value: null,
-          fieldType: 'string',
-          linkValue: undefined,
-          timelineId,
-        };
-        const field = data.find((d) => d.field === item.id);
-        if (!field || isEmpty(field?.values)) {
+    ? tableFields.reduce<SummaryRow[]>((acc, field) => {
+        const item = data.find((d) => d.field === field.id);
+        if (!item || isEmpty(item?.values)) {
           return acc;
         }
 
         const linkValueField =
-          item.linkField != null && data.find((d) => d.field === item.linkField);
-        const linkValue = getOr(null, 'originalValue.0', linkValueField);
-        const value = getOr(null, 'originalValue.0', field);
-        const category = field.category ?? '';
-        const fieldName = field.field ?? '';
-
-        const browserField = get([category, 'fields', fieldName], browserFields);
+          field.linkField != null && data.find((d) => d.field === field.linkField);
         const description = {
-          ...initialDescription,
-          data: {
-            field: field.field,
-            format: browserField?.format ?? '',
-            type: browserField?.type ?? '',
-            isObjectArray: field.isObjectArray,
-            ...(item.overrideField ? { field: item.overrideField } : {}),
-          },
-          values: field.values,
-          linkValue: linkValue ?? undefined,
-          fieldFromBrowserField: browserField,
+          ...getEnrichedFieldInfo({
+            item,
+            linkValueField: linkValueField || undefined,
+            contextId: timelineId,
+            timelineId,
+            browserFields,
+            eventId,
+            field,
+          }),
+          isDraggable,
         };
 
-        if (item.id === 'agent.id' && !isAlertFromEndpointEvent({ data })) {
+        if (field.id === 'agent.id' && !isAlertFromEndpointEvent({ data })) {
           return acc;
         }
 
-        if (item.id === 'kibana.alert.threshold_result.terms') {
+        if (field.id === 'kibana.alert.threshold_result.terms') {
           try {
-            const terms = getOr(null, 'originalValue', field);
+            const terms = getOr(null, 'originalValue', item);
             const parsedValue = terms.map((term: string) => JSON.parse(term));
             const thresholdTerms = (parsedValue ?? []).map(
               (entry: { field: string; value: string }) => {
@@ -213,8 +175,9 @@ export const getSummaryRows = ({
           }
         }
 
-        if (item.id === 'kibana.alert.threshold_result.cardinality') {
+        if (field.id === 'kibana.alert.threshold_result.cardinality') {
           try {
+            const value = getOr(null, 'originalValue.0', field);
             const parsedValue = JSON.parse(value);
             return [
               ...acc,
@@ -234,7 +197,7 @@ export const getSummaryRows = ({
         return [
           ...acc,
           {
-            title: item.label ?? item.id,
+            title: field.label ?? field.id,
             description,
           },
         ];
