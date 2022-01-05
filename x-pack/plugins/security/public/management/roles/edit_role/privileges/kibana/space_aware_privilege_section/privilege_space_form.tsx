@@ -544,15 +544,16 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             }
             return Array.isArray(privileges) && privileges.includes(pfp.id);
           });
+        let newPrivileges: string[] = [];
         if (nextFeaturePrivilege) {
-          const newPrivileges = [nextFeaturePrivilege.id];
+          newPrivileges = [nextFeaturePrivilege.id];
           feature.getSubFeaturePrivileges().forEach((psf) => {
             if (Array.isArray(privileges) && privileges.includes(psf.id)) {
               newPrivileges.push(psf.id);
             }
           });
-          entry.feature[feature.id] = newPrivileges;
         }
+        entry.feature[feature.id] = newPrivileges;
       });
     }
     this.setState({
