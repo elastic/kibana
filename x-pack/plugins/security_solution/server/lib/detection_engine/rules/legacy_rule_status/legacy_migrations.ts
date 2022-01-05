@@ -13,7 +13,7 @@ import {
 } from 'kibana/server';
 import { isString } from 'lodash/fp';
 import { truncateMessage } from '../../rule_execution_log';
-import { IRuleSavedAttributesSavedObjectAttributes } from '../types';
+import { IRuleStatusSOAttributes } from '../types';
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetRuleReference } from './legacy_utils';
 
@@ -45,8 +45,8 @@ export const truncateMessageFields: SavedObjectMigrationFn<Record<string, unknow
  * @returns The document migrated with saved object references
  */
 export const legacyMigrateRuleAlertIdSOReferences = (
-  doc: SavedObjectUnsanitizedDoc<IRuleSavedAttributesSavedObjectAttributes>
-): SavedObjectSanitizedDoc<IRuleSavedAttributesSavedObjectAttributes> => {
+  doc: SavedObjectUnsanitizedDoc<IRuleStatusSOAttributes>
+): SavedObjectSanitizedDoc<IRuleStatusSOAttributes> => {
   const { alertId, ...otherAttributes } = doc.attributes;
   const existingReferences = doc.references ?? [];
 

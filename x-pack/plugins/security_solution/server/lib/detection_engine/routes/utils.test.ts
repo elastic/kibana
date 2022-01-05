@@ -8,7 +8,7 @@
 import { SavedObjectsFindResponse } from 'kibana/server';
 
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
-import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusSOAttributes } from '../rules/types';
+import { IRuleStatusSOAttributes } from '../rules/types';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import {
   transformBulkError,
@@ -94,7 +94,7 @@ describe.each([
       // Array accessors can result in undefined but
       // this is not represented in typescript for some reason,
       // https://github.com/Microsoft/TypeScript/issues/11122
-      const values: SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> = {
+      const values: SavedObjectsFindResponse<IRuleStatusSOAttributes> = {
         page: 0,
         per_page: 5,
         total: 0,
