@@ -299,7 +299,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           <>
             <p>
               {i18n.translate('xpack.lens.editorFrame.emptyWorkspaceHeading', {
-                defaultMessage: 'Lens is a new tool for creating visualization',
+                defaultMessage: 'Lens is the recommended editor for creating visualizations',
               })}
             </p>
             <p>
