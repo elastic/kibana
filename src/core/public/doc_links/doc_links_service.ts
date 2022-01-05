@@ -69,6 +69,7 @@ export class DocLinksService {
         },
         discover: {
           guide: `${KIBANA_DOCS}discover.html`,
+          fieldStatistics: `${KIBANA_DOCS}show-field-statistics.html`,
         },
         filebeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}`,
