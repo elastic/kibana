@@ -9,7 +9,7 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { cloneDeep } from 'lodash';
 import { isPopulatedObject } from './object_utils';
 
-export const getQueryExcludingFrozen = (originalQuery: QueryDslQueryContainer | undefined) => {
+export const addExcludeFrozenToQuery = (originalQuery: QueryDslQueryContainer | undefined) => {
   const FROZEN_TIER_TERM = {
     term: {
       _tier: {

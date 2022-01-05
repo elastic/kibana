@@ -15,7 +15,7 @@ import { ml, GetTimeFieldRangeResponse } from '../../services/ml_api_service';
 import type { DataView } from '../../../../../../../src/plugins/data_views/public';
 import { isPopulatedObject } from '../../../../common/util/object_utils';
 import type { RuntimeMappings } from '../../../../common/types/fields';
-import { getQueryExcludingFrozen } from '../../../../common/util/query_utils';
+import { addExcludeFrozenToQuery } from '../../../../common/util/query_utils';
 
 export interface TimeRange {
   from: number;
@@ -33,7 +33,7 @@ export async function setFullTimeRange(
       index: indexPattern.title,
       timeFieldName: indexPattern.timeFieldName,
       // By default we want to use full non-frozen time range
-      query: getQueryExcludingFrozen(query),
+      query: addExcludeFrozenToQuery(query),
       ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
     });
     timefilter.setTime({

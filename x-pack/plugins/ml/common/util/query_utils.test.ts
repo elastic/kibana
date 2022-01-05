@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { getQueryExcludingFrozen } from './query_utils';
+import { addExcludeFrozenToQuery } from './query_utils';
 
-describe('Util: getQueryExcludingFrozen()', () => {
+describe('Util: addExcludeFrozenToQuery()', () => {
   test('Validation checks.', () => {
     expect(
-      getQueryExcludingFrozen({
+      addExcludeFrozenToQuery({
         bool: {
           must: [
             {
@@ -27,7 +27,7 @@ describe('Util: getQueryExcludingFrozen()', () => {
     });
 
     expect(
-      getQueryExcludingFrozen({
+      addExcludeFrozenToQuery({
         bool: {
           must: [],
           must_not: {
@@ -50,7 +50,7 @@ describe('Util: getQueryExcludingFrozen()', () => {
     });
 
     expect(
-      getQueryExcludingFrozen({
+      addExcludeFrozenToQuery({
         bool: {
           must: [],
           must_not: [{ term: { category: { value: 'clothing' } } }],
@@ -66,7 +66,7 @@ describe('Util: getQueryExcludingFrozen()', () => {
       },
     });
 
-    expect(getQueryExcludingFrozen(undefined)).toMatchObject({
+    expect(addExcludeFrozenToQuery(undefined)).toMatchObject({
       bool: {
         must_not: [{ term: { _tier: { value: 'data_frozen' } } }],
       },
