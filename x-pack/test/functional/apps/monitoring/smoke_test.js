@@ -6,25 +6,36 @@
  */
 
 import expect from '@kbn/expect';
-import { getLifecycleMethods } from './_get_lifecycle_methods';
 
 export default function ({ getService, getPageObjects }) {
+  const log = getService('log');
   const overview = getService('monitoringClusterOverview');
+  const PageObjects = getPageObjects(['common']);
+
+  const pauseForInspection = (component = 'page') => {
+    log.debug(`=== PAUSE for inspection of ${component}, press enter when ready ===`);
+    return new Promise((resolve) => process.stdin.once('data', resolve));
+  };
 
   // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('smoke test', () => {
-    const { tearDown } = getLifecycleMethods(getService, getPageObjects);
-
     before(async () => {
+      await PageObjects.common.navigateToApp('monitoring');
       await overview.closeAlertsModal();
     });
 
-    after(async () => {
-      await tearDown();
+    it('shows elasticsearch panel with data', async () => {
+      expect(await overview.getEsStatus()).to.be('Healthy');
+      expect(await overview.getEsNumberOfNodes()).to.match(/Nodes: \d+/);
+
+      await pauseForInspection();
     });
 
-    it('shows beats panel with data', async () => {
-      expect(await overview.getBeatsTotalEventsRate()).to.be('699.9k');
+    it('shows kibana panel', async () => {
+      expect(await overview.getKbnStatus()).to.be('Healthy');
+      expect(await overview.getKbnInstances()).to.match(/Instances: \d+/);
+
+      await pauseForInspection();
     });
   });
 }
