@@ -98,21 +98,18 @@ const ExplorerPage = ({
     </MlPageHeader>
     <EuiPageHeader>
       <EuiPageHeaderSection style={{ width: '100%' }}>
-        <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
-          {noInfluencersConfigured === false && influencers !== undefined && (
-            <EuiFlexItem>
-              <div className="mlAnomalyExplorer__filterBar">
-                <ExplorerQueryBar
-                  filterActive={filterActive}
-                  filterPlaceHolder={filterPlaceHolder}
-                  indexPattern={indexPattern}
-                  queryString={queryString}
-                  updateLanguage={updateLanguage}
-                />
-              </div>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        {noInfluencersConfigured === false && influencers !== undefined ? (
+          <>
+            <ExplorerQueryBar
+              filterActive={filterActive}
+              filterPlaceHolder={filterPlaceHolder}
+              indexPattern={indexPattern}
+              queryString={queryString}
+              updateLanguage={updateLanguage}
+            />
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
       </EuiPageHeaderSection>
     </EuiPageHeader>
     <EuiHorizontalRule margin="none" />
@@ -403,7 +400,11 @@ export class ExplorerUI extends React.Component {
             ) : null}
             {annotationsCnt > 0 && (
               <>
-                <EuiPanel data-test-subj="mlAnomalyExplorerAnnotationsPanel loaded">
+                <EuiPanel
+                  data-test-subj="mlAnomalyExplorerAnnotationsPanel loaded"
+                  hasBorder
+                  hasShadow={false}
+                >
                   <EuiAccordion
                     id={this.htmlIdGen()}
                     buttonContent={
@@ -438,7 +439,7 @@ export class ExplorerUI extends React.Component {
               </>
             )}
             {loading === false && (
-              <EuiPanel>
+              <EuiPanel hasBorder hasShadow={false}>
                 <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiTitle className="panel-title">
