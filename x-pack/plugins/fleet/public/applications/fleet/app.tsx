@@ -14,6 +14,7 @@ import { Router, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import useObservable from 'react-use/lib/useObservable';
 
 import type { TopNavMenuData } from 'src/plugins/navigation/public';
 
@@ -24,6 +25,7 @@ import {
   KibanaContextProvider,
   RedirectAppLinks,
 } from '../../../../../../src/plugins/kibana_react/public';
+import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 
 import { PackageInstallProvider } from '../integrations/hooks';
 
@@ -223,6 +225,8 @@ export const FleetAppContext: React.FC<{
     routerHistory,
     theme$,
   }) => {
+    const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
+
     return (
       <RedirectAppLinks application={startServices.application}>
         <startServices.i18n.Context>
@@ -231,15 +235,17 @@ export const FleetAppContext: React.FC<{
               <ConfigContext.Provider value={config}>
                 <KibanaVersionContext.Provider value={kibanaVersion}>
                   <KibanaThemeProvider theme$={theme$}>
-                    <UIExtensionsContext.Provider value={extensions}>
-                      <FleetStatusProvider>
-                        <Router history={history}>
-                          <PackageInstallProvider notifications={startServices.notifications}>
-                            {children}
-                          </PackageInstallProvider>
-                        </Router>
-                      </FleetStatusProvider>
-                    </UIExtensionsContext.Provider>
+                    <EuiThemeProvider darkMode={isDarkMode}>
+                      <UIExtensionsContext.Provider value={extensions}>
+                        <FleetStatusProvider>
+                          <Router history={history}>
+                            <PackageInstallProvider notifications={startServices.notifications}>
+                              {children}
+                            </PackageInstallProvider>
+                          </Router>
+                        </FleetStatusProvider>
+                      </UIExtensionsContext.Provider>
+                    </EuiThemeProvider>
                   </KibanaThemeProvider>
                 </KibanaVersionContext.Provider>
               </ConfigContext.Provider>
