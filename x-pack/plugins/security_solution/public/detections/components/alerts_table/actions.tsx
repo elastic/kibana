@@ -157,7 +157,7 @@ const getFiltersFromRule = (filters: string[]): Filter[] =>
     }
   }, [] as Filter[]);
 
-const calculateFromTimeFallback = (thresholdData: any, originalTime: moment.Moment) => {
+const calculateFromTimeFallback = (thresholdData: Ecs, originalTime: moment.Moment) => {
   // relative time that the rule's time range starts at (e.g. now-1h)
   const ruleFrom = dateMath.parse(getField(thresholdData, ALERT_RULE_FROM));
 
