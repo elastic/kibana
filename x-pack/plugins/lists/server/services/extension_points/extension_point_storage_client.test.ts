@@ -24,23 +24,21 @@ import { createExtensionPointStorageMock } from './extension_point_storage.mock'
 describe('When using the ExtensionPointStorageClient', () => {
   let storageClient: ExtensionPointStorageClientInterface;
   let logger: ReturnType<typeof loggerMock.create>;
-  let storageService: ExtensionPointStorageInterface;
+  let extensionPointStorage: ExtensionPointStorageInterface;
   let preCreateExtensionPointMock1: jest.Mocked<ExceptionsListPreCreateItemServerExtension>;
   let extensionPointsMocks: Array<jest.Mocked<ExtensionPoint>>;
   let callbackRunLog: string;
 
   const addAllExtensionPoints = (): void => {
-    extensionPointsMocks.forEach((extensionPoint) => storageService.add(extensionPoint));
+    extensionPointsMocks.forEach((extensionPoint) => extensionPointStorage.add(extensionPoint));
   };
 
   beforeEach(() => {
     const storageContext = createExtensionPointStorageMock();
 
     callbackRunLog = '';
-    // eslint-disable-next-line prefer-destructuring
-    logger = storageContext.logger;
-    storageService = storageContext.extensionPointStorage;
-    storageService.clear();
+    ({ logger, extensionPointStorage } = storageContext);
+    extensionPointStorage.clear();
 
     // Generic callback function that also logs to the `callbackRunLog` its id, so we know the order in which they ran.
     // Each callback also appends its `id` to the item's name property, so that we know the value from one callback is
@@ -91,11 +89,11 @@ describe('When using the ExtensionPointStorageClient', () => {
         type: 'exceptionsListPreCreateItem',
       },
     ];
-    storageClient = storageService.getClient();
+    storageClient = extensionPointStorage.getClient();
   });
 
   it('should get() a Set of extension points by type', () => {
-    storageService.add(preCreateExtensionPointMock1);
+    extensionPointStorage.add(preCreateExtensionPointMock1);
     const extensionPointSet = storageClient.get('exceptionsListPreCreateItem');
 
     expect(extensionPointSet?.size).toBe(1);

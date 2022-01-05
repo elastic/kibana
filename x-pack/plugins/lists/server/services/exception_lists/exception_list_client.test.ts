@@ -20,6 +20,10 @@ import {
 } from './exception_list_client.mock';
 import { ExceptionListClient } from './exception_list_client';
 import { DataValidationError } from './utils/errors';
+import {
+  CreateExceptionListItemOptions,
+  UpdateExceptionListItemOptions,
+} from './exception_list_client_types';
 
 describe('exception_list_client', () => {
   describe('Mock client sanity checks', () => {
@@ -99,13 +103,12 @@ describe('exception_list_client', () => {
 
           it('should validate extension point callback returned data and throw if not valid', async () => {
             const extensionPointCallback = getExtensionPointCallback();
-            // @ts-expect-error
-            extensionPointCallback.mockImplementation(async ({ entries, ...rest }) => {
-              // `if()` only here to avoid a ts rule error
-              if (entries) {
-                return rest;
-              }
-              return rest;
+            extensionPointCallback.mockImplementation(async (args) => {
+              const { entries, ...rest } = args as CreateExceptionListItemOptions &
+                UpdateExceptionListItemOptions;
+
+              expect(entries).toBeTruthy(); // Test entries to exist since we exclude it.
+              return rest as CreateExceptionListItemOptions & UpdateExceptionListItemOptions;
             });
 
             const methodResponsePromise = callExceptionListClientMethod();
