@@ -94,6 +94,7 @@ export const samplePieVis = {
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             editor: false,
             params: [],
@@ -112,6 +113,7 @@ export const samplePieVis = {
               '!sampler',
               '!diversified_sampler',
               '!multi_terms',
+              '!significant_text',
             ],
             params: [
               {

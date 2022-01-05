@@ -105,6 +105,7 @@ export const getHeatmapVisTypeDefinition = ({
           '!sampler',
           '!diversified_sampler',
           '!multi_terms',
+          '!significant_text',
         ],
       },
       {
@@ -120,6 +121,7 @@ export const getHeatmapVisTypeDefinition = ({
           '!sampler',
           '!diversified_sampler',
           '!multi_terms',
+          '!significant_text',
         ],
       },
       {
@@ -142,6 +144,7 @@ export const getHeatmapVisTypeDefinition = ({
           '!sampler',
           '!diversified_sampler',
           '!multi_terms',
+          '!significant_text',
         ],
       },
     ],

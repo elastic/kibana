@@ -164,6 +164,7 @@ export const areaVisTypeDefinition = {
           '!sampler',
           '!diversified_sampler',
           '!multi_terms',
+          '!significant_text',
         ],
       },
       {
@@ -181,6 +182,7 @@ export const areaVisTypeDefinition = {
           '!sampler',
           '!diversified_sampler',
           '!multi_terms',
+          '!significant_text',
         ],
       },
       {
@@ -198,6 +200,7 @@ export const areaVisTypeDefinition = {
           '!sampler',
           '!diversified_sampler',
           '!multi_terms',
+          '!significant_text',
         ],
       },
     ],

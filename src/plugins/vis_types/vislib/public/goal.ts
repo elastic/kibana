@@ -103,6 +103,7 @@ export const goalVisTypeDefinition: VisTypeDefinition<GaugeVisParams> = {
           '!sampler',
           '!diversified_sampler',
           '!multi_terms',
+          '!significant_text',
         ],
       },
     ],
