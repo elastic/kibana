@@ -17,7 +17,7 @@ export class ExtensionPointStorage {
   private readonly store = new Map<ExtensionPoint['type'], Set<ExtensionPoint>>();
   private readonly registeredFrom = new Map<ExtensionPoint, string>();
 
-  constructor(private readonly logger?: Logger) {}
+  constructor(private readonly logger: Logger) {}
 
   add(extension: ExtensionPoint): void {
     if (!this.store.has(extension.type)) {

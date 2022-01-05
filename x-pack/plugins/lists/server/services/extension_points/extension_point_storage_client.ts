@@ -14,7 +14,7 @@ import { ExtensionPointStorageInterface } from './extension_point_storage';
 export class ExtensionPointStorageClient {
   constructor(
     private readonly storage: ExtensionPointStorageInterface,
-    private readonly logger?: Logger
+    private readonly logger: Logger
   ) {}
 
   /**

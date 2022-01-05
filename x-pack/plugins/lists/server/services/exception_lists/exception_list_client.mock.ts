@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { loggingSystemMock, savedObjectsClientMock } from 'src/core/server/mocks';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import {
   EXCEPTION_LIST_NAMESPACE,
@@ -65,7 +65,9 @@ export class ExceptionListClientMock extends ExceptionListClient {
 
 export const getExceptionListClientMock = (
   savedObject?: ReturnType<typeof savedObjectsClientMock.create>,
-  serverExtensionsClient: ExtensionPointStorageClientInterface = new ExtensionPointStorage().getClient()
+  serverExtensionsClient: ExtensionPointStorageClientInterface = new ExtensionPointStorage(
+    loggingSystemMock.createLogger()
+  ).getClient()
 ): ExceptionListClient => {
   const mock = new ExceptionListClientMock({
     savedObjectsClient: savedObject ? savedObject : savedObjectsClientMock.create(),
