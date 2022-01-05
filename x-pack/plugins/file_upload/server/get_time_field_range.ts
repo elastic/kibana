@@ -6,7 +6,7 @@
  */
 import { IScopedClusterClient } from 'kibana/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { isPopulatedObject } from './utils/runtime_field_utils';
+import { isPopulatedObject } from '../common/utils';
 
 export async function getTimeFieldRange(
   client: IScopedClusterClient,
