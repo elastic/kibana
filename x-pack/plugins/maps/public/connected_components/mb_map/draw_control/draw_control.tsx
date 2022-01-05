@@ -113,11 +113,6 @@ export class DrawControl extends Component<Props> {
   }
 
   _updateDrawControl() {
-    if (!this.props.drawShape) {
-      this._removeDrawControl();
-      return;
-    }
-
     if (!this._mbDrawControlAdded) {
       this.props.mbMap.addControl(this._mbDrawControl);
       this.props.mbMap.addLayer({
@@ -147,7 +142,9 @@ export class DrawControl extends Component<Props> {
         this.props.mbMap.on('click', this._onClick);
       }
     }
-    this.props.mbMap.getCanvas().style.cursor = 'crosshair';
+
+    this.props.mbMap.getCanvas().style.cursor =
+      !this.props.drawShape || this.props.drawShape === DRAW_SHAPE.SIMPLE_SELECT ? '' : 'crosshair';
 
     const { DRAW_LINE_STRING, DRAW_POLYGON, DRAW_POINT, SIMPLE_SELECT } = this._mbDrawControl.modes;
     const drawMode = this._mbDrawControl.getMode();
@@ -166,7 +163,6 @@ export class DrawControl extends Component<Props> {
       this._mbDrawControl.changeMode(SIMPLE_SELECT);
     } else {
       this._mbDrawControl.changeMode(SIMPLE_SELECT);
-      this.props.mbMap.getCanvas().style.cursor = '';
     }
   }
 
