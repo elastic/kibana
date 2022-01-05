@@ -1,10 +1,16 @@
-# backport
+<div align="center">
+	<img src="https://user-images.githubusercontent.com/209966/148229483-9f867a20-da7d-4cff-8c52-fcb27d482b89.png" height="200">
+	<p>
+    <b>A CLI tool that automates the process of backporting commits.</b>
+	</p>
+	<br>
+</div>
 
-[![Build Status](https://travis-ci.com/sqren/backport.svg?branch=master)](https://app.travis-ci.com/github/sqren/backport)
-[![NPM version](https://img.shields.io/npm/v/backport.svg)](https://www.npmjs.com/package/backport)
-[![Coverage Status](https://coveralls.io/repos/github/sqren/backport/badge.svg?branch=master)](https://coveralls.io/github/sqren/backport?branch=master)
+## How it works
 
-A simple CLI tool that automates the process of backporting commits on a GitHub repo.
+1. Select a commit to backport
+2. Select a branch to backport to
+3. The commit will be cherrypicked, pushed and a pull request created.
 
 ![backport-demo](https://user-images.githubusercontent.com/209966/80993576-95766380-8e3b-11ea-9efd-b35eb2e6a9ec.gif)
 
@@ -100,9 +106,9 @@ See [configuration.md](https://github.com/sqren/backport/blob/master/docs/config
 
 The CLI options will override the [configuration options](https://github.com/sqren/backport/blob/master/docs/configuration.md).
 
-### Node module
+## Backport Module API
 
-`backport` can be imported as a Node module and interacted with programatically.
+`backport` can be imported as a Node module and interacted with programatically. This can be useful when creating automation around the Backport tool. See for example the [Backport Github Action](https://github.com/elastic/kibana-github-actions/blob/f5c58195840b8b0cf6036cfeba6e0b497306fb39/backport/index.ts)
 
 #### `backportRun`
 
@@ -210,9 +216,9 @@ console.log(commits);
 */
 ```
 
-## Github Action (beta)
+## The Backport Tool as a Github Action
 
-A [Github Action](https://github.com/elastic/kibana-github-actions/tree/main/backport) for automatically backporting pull requests.
+A [Github Action](https://github.com/elastic/kibana-github-actions/tree/main/backport) around The Backport Tool for automatically creating backports when pull requests are merged.
 
 ## What is backporting?
 
@@ -224,20 +230,21 @@ Source: [https://en.wikipedia.org/wiki/Backporting](https://en.wikipedia.org/wik
 
 This tools is for anybody who is working on a codebase where they have to maintain multiple versions. If you manually cherry-pick commits from master and apply them to one or more branches, this tool might save you a lot of time.
 
-`backport` is a CLI tool that will let you backport commit(s) interactively and then cherry-pick and create pull requests automatically. `backport` will always perform the git operation in a temporary folder (`~/.backport/repositories/`) separate from your working directory, thereby never interfering with any unstages changes your might have.
+`backport` is a CLI tool that will let you backport commit(s) interactively and then cherry-pick and create pull requests automatically. `backport` will perform all git operations in a temporary folder (`~/.backport/repositories/`) separate from your working directory, thereby never interfering with any unstages changes your might have.
 
 **Features:**
 
 - interactively backport one or more commits to one or more branches with an intuitive UI
-- will never run `git reset --hard` or other git commands in your working directory - all git operations are handled in a separate directory
+- ability to see which commits have been backported and to which branches
+- ability to customize the title, description and labels of the created backport PRs
+- all git operations are handled in a separate directory to not interfere with unstaged files
+- Conflicts are handled gracefully, and hints are provided to help the user understand the source of the conflict 
 - backport a commit by specifying a PR: `backport --pr 1337`
 - list and backport commits by a particular user: `backport --author john`
 - list and backport commits by a particular path: `backport --path src/plugins/chatbot`
 - list PRs filtered by a query: `backport --pr-filter label:backport-v2` (will list commits from PRs with the label "backport-v2")
-- forward port commits: `backport --sourceBranch 7.x --branch master` (will forwardport from 7.x to master)
+- forward port commits: `backport --source-branch 7.x --branch master` (will forwardport from 7.x to master)
 - backport merge commits: `backport --mainline`
-- ability to see which commits have been backported and to which branches
-- customize the title, description and labels of the created backport PRs
 
 ## Contributing
 
@@ -245,3 +252,7 @@ See [CONTRIBUTING.md](https://github.com/sqren/backport/blob/master/CONTRIBUTING
 
 [1]: https://git-scm.com/docs/git-cherry-pick#Documentation/git-cherry-pick.txt--x
 [2]: https://docs.github.com/en/search-github/getting-started-with-searching-on-github/understanding-the-search-syntax
+
+[![Build Status](https://travis-ci.com/sqren/backport.svg?branch=master)](https://app.travis-ci.com/github/sqren/backport)
+[![NPM version](https://img.shields.io/npm/v/backport.svg)](https://www.npmjs.com/package/backport)
+[![Coverage Status](https://coveralls.io/repos/github/sqren/backport/badge.svg?branch=master)](https://coveralls.io/github/sqren/backport?branch=master)
