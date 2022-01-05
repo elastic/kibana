@@ -7,6 +7,7 @@
  */
 
 import { KqlNode } from './types';
+import { escapeQueryString } from './wildcard';
 
 export const KQL_NODE_TYPE_REGEXP = 'regexp';
 
@@ -20,7 +21,7 @@ export function isNode(node: KqlNode): node is KqlRegexpNode {
   return node.type === KQL_NODE_TYPE_REGEXP;
 }
 
-export function buildNode(value: string, flags: string): KqlRegexpNode {
+export function buildNode(value: string, flags: string = ''): KqlRegexpNode {
   return {
     type: KQL_NODE_TYPE_REGEXP,
     value,
@@ -29,7 +30,7 @@ export function buildNode(value: string, flags: string): KqlRegexpNode {
 }
 
 export function toQueryStringQuery({ value, flags }: KqlRegexpNode) {
-  return `/${value}/${flags}`;
+  return `/${escapeQueryString(value)}/${flags}`;
 }
 
 export function toElasticsearchQuery({ value, flags }: KqlRegexpNode) {
