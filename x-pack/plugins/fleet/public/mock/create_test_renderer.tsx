@@ -140,6 +140,7 @@ export const createIntegrationsTestRendererMock = (): TestRenderer => {
           kibanaVersion={testRendererMocks.kibanaVersion}
           extensions={extensions}
           routerHistory={testRendererMocks.history}
+          theme$={themeServiceMock.createTheme$()}
           setHeaderActionMenu={() => {}}
         >
           {children}

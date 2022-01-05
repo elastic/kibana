@@ -10,7 +10,6 @@ import type { AppMountParameters } from 'kibana/public';
 import { EuiErrorBoundary } from '@elastic/eui';
 import type { History } from 'history';
 import { Router, Redirect, Route, Switch } from 'react-router-dom';
-import useObservable from 'react-use/lib/useObservable';
 
 import { ConfigContext, FleetStatusProvider, KibanaVersionContext } from '../../hooks';
 
@@ -20,7 +19,7 @@ import {
   KibanaContextProvider,
   RedirectAppLinks,
 } from '../../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
+import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 import { AgentPolicyContextProvider } from './hooks';
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
@@ -43,6 +42,7 @@ export const IntegrationsAppContext: React.FC<{
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  theme$: AppMountParameters['theme$'];
   /** For testing purposes only */
   routerHistory?: History<any>; // TODO remove
 }> = memo(
@@ -54,9 +54,8 @@ export const IntegrationsAppContext: React.FC<{
     kibanaVersion,
     extensions,
     setHeaderActionMenu,
+    theme$,
   }) => {
-    const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
-
     return (
       <RedirectAppLinks application={startServices.application}>
         <startServices.i18n.Context>
@@ -64,7 +63,7 @@ export const IntegrationsAppContext: React.FC<{
             <EuiErrorBoundary>
               <ConfigContext.Provider value={config}>
                 <KibanaVersionContext.Provider value={kibanaVersion}>
-                  <EuiThemeProvider darkMode={isDarkMode}>
+                  <KibanaThemeProvider theme$={theme$}>
                     <UIExtensionsContext.Provider value={extensions}>
                       <FleetStatusProvider>
                         <startServices.customIntegrations.ContextProvider>
@@ -79,7 +78,7 @@ export const IntegrationsAppContext: React.FC<{
                         </startServices.customIntegrations.ContextProvider>
                       </FleetStatusProvider>
                     </UIExtensionsContext.Provider>
-                  </EuiThemeProvider>
+                  </KibanaThemeProvider>
                 </KibanaVersionContext.Provider>
               </ConfigContext.Provider>
             </EuiErrorBoundary>
