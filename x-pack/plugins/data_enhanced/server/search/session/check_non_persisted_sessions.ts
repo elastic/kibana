@@ -9,8 +9,8 @@ import { SavedObjectsFindResult } from 'kibana/server';
 import moment from 'moment';
 import { EMPTY } from 'rxjs';
 import { catchError, concatMap } from 'rxjs/operators';
+import { nodeBuilder } from '@kbn/es-query';
 import {
-  nodeBuilder,
   ENHANCED_ES_SEARCH_STRATEGY,
   SEARCH_SESSION_TYPE,
   SearchSessionSavedObjectAttributes,

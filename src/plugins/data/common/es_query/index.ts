@@ -22,7 +22,6 @@ import {
   getPhraseFilterField as oldgetPhraseFilterField,
   getPhraseFilterValue as oldgetPhraseFilterValue,
   isFilterPinned as oldIsFilterPinned,
-  nodeBuilder as oldNodeBuilder,
   isFilters as oldIsFilters,
   isExistsFilter as oldIsExistsFilter,
   isMatchAllFilter as oldIsMatchAllFilter,
@@ -115,12 +114,6 @@ const getPhraseFilterValue = oldgetPhraseFilterValue;
  * @removeBy 8.1
  */
 const isFilterPinned = oldIsFilterPinned;
-
-/**
- * @deprecated Import from the "@kbn/es-query" package directly instead.
- * @removeBy 8.1
- */
-const nodeBuilder = oldNodeBuilder;
 
 /**
  * @deprecated Import from the "@kbn/es-query" package directly instead.
@@ -384,7 +377,6 @@ export {
   getPhraseFilterField,
   getPhraseFilterValue,
   isFilterPinned,
-  nodeBuilder,
   isFilters,
   isExistsFilter,
   isMatchAllFilter,

@@ -7,8 +7,8 @@
 
 import { EMPTY, Observable } from 'rxjs';
 import { catchError, concatMap } from 'rxjs/operators';
+import { nodeBuilder } from '@kbn/es-query';
 import {
-  nodeBuilder,
   SEARCH_SESSION_TYPE,
   SearchSessionStatus,
   KueryNode,

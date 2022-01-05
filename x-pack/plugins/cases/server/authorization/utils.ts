@@ -29,7 +29,7 @@ export const getOwnersFilter = (
 export const combineFilterWithAuthorizationFilter = (
   filter?: KqlFunctionNode,
   authorizationFilter?: KqlFunctionNode
-) => {
+): KqlFunctionNode | undefined => {
   if (!filter && !authorizationFilter) {
     return;
   }

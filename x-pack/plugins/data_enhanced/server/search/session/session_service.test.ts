@@ -18,8 +18,8 @@ import { coreMock } from '../../../../../../src/core/server/mocks';
 import { ConfigSchema } from '../../../config';
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { AuthenticatedUser } from '../../../../security/common/model';
+import { nodeBuilder } from '@kbn/es-query';
 import {
-  nodeBuilder,
   SEARCH_SESSION_TYPE,
   SearchSessionStatus,
 } from '../../../../../../src/plugins/data/common';
