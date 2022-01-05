@@ -98,10 +98,6 @@ export const useSourceQueryParam = <T extends RisonObject>(getDefaultQuery: () =
   };
 };
 
-/**
- * Temp elastic search query hook
- * TODO: find known alternative
- */
 export const useEsClientMutation = <T extends unknown>({
   dataView,
   dateRange,
