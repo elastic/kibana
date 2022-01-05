@@ -3,7 +3,7 @@
 
 // tag::notable-highlights[]
 
-Improvements in this release are listed in the <<{kibana-ref}/release-notes.html, release notes>>.
+Improvements in this release are listed in the {kibana-ref}/release-notes.html[release notes].
 
 // end::notable-highlights[]
 
