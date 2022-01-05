@@ -29,6 +29,8 @@ import {
   UpdateExceptionListItemOptions,
 } from '../exception_list_client_types';
 
+export { validateData } from './validate_data';
+
 export const transformSavedObjectToExceptionList = ({
   savedObject,
 }: {

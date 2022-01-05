@@ -17,10 +17,6 @@ import {
   updateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { pipe } from 'fp-ts/pipeable';
-import { fold } from 'fp-ts/Either';
-import * as t from 'io-ts';
-import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 import type { ExtensionPointStorageClientInterface } from '../extension_points';
 
@@ -74,10 +70,10 @@ import {
   importExceptionsAsArray,
   importExceptionsAsStream,
 } from './import_exception_list_and_items';
-import { DataValidationError } from './utils/errors';
 import {
   transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema,
   transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSchema,
+  validateData,
 } from './utils';
 
 export class ExceptionListClient {
@@ -96,30 +92,6 @@ export class ExceptionListClient {
     this.savedObjectsClient = savedObjectsClient;
     this.serverExtensionsClient = serverExtensionsClient;
     this.enableServerExtensionPoints = enableServerExtensionPoints;
-  }
-
-  /**
-   * Validates some data with a given validator (`io-ts` schema) and if validation errors exist, then an
-   * Error instance will be returned.
-   *
-   * @param data
-   * @param validator A `io-ts` codec that will be used to `.decode()` the data and then check it for validation errors
-   *
-   * @private
-   */
-  private validateData<D>(validator: t.Type<D>, data: D): undefined | DataValidationError {
-    return pipe(
-      validator.decode(data),
-      (decoded) => exactCheck(data, decoded),
-      fold(
-        (errors: t.Errors) => {
-          const errorStrings = formatErrors(errors);
-
-          return new DataValidationError(errorStrings, 400);
-        },
-        () => undefined
-      )
-    );
   }
 
   /**
@@ -433,7 +405,7 @@ export class ExceptionListClient {
         'exceptionsListPreCreateItem',
         itemData,
         (data) => {
-          return this.validateData(
+          return validateData(
             createExceptionListItemSchema,
             transformCreateExceptionListItemOptionsToCreateExceptionListItemSchema(data)
           );
@@ -499,7 +471,7 @@ export class ExceptionListClient {
         'exceptionsListPreUpdateItem',
         updatedItem,
         (data) => {
-          return this.validateData(
+          return validateData(
             updateExceptionListItemSchema,
             transformUpdateExceptionListItemOptionsToUpdateExceptionListItemSchema(data)
           );
