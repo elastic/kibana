@@ -69,7 +69,7 @@ import {
 } from '../../../../src/plugins/ui_actions/public';
 import { APP_ID, getEditPath, NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common/constants';
 import type { FormatFactory } from '../common/types';
-import type { VisualizationType } from './types';
+import type { Visualization, VisualizationType } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 
@@ -114,6 +114,23 @@ export interface LensPluginStartDependencies {
   inspector: InspectorStartContract;
   spaces: SpacesPluginStart;
   usageCollection?: UsageCollectionStart;
+}
+
+export interface LensPublicSetup {
+  /**
+   * Register 3rd party visualization type
+   * See `x-pack/examples/3rd_party_lens_vis` for exemplary usage.
+   *
+   * In case the visualization is a function returning a promise, it will only be called once Lens is actually requiring it.
+   * This can be used to lazy-load parts of the code to keep the initial bundle as small as possible.
+   *
+   * This API might undergo breaking changes even in minor versions.
+   *
+   * @experimental
+   */
+  registerVisualization: <T>(
+    visualization: Visualization<T> | (() => Promise<Visualization<T>>)
+  ) => void;
 }
 
 export interface LensPublicStart {
@@ -342,6 +359,11 @@ export class LensPlugin {
     this.pieVisualization.setup(core, dependencies);
     this.heatmapVisualization.setup(core, dependencies);
     this.gaugeVisualization.setup(core, dependencies);
+
+    return {
+      registerVisualization:
+        editorFrameSetupInterface.registerVisualization.bind(editorFrameSetupInterface),
+    };
   }
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies): LensPublicStart {

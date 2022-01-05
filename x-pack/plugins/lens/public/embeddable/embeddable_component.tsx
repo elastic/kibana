@@ -48,7 +48,8 @@ export type TypedLensByValueInput = Omit<LensByValueInput, 'attributes'> & {
     | LensAttributes<'lnsXY', XYState>
     | LensAttributes<'lnsPie', PieVisualizationState>
     | LensAttributes<'lnsDatatable', DatatableVisualizationState>
-    | LensAttributes<'lnsMetric', MetricState>;
+    | LensAttributes<'lnsMetric', MetricState>
+    | LensAttributes<string, unknown>;
 };
 
 export type EmbeddableComponentProps = (TypedLensByValueInput | LensByReferenceInput) & {

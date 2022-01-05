@@ -1,0 +1,20 @@
+{
+  "id": "3rdPartyVisLensExample",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["3rd_part_vis_lens_example"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [
+    "lens",
+    "dataViews",
+    "embeddable",
+    "developerExamples"
+  ],
+  "optionalPlugins": [],
+  "requiredBundles": [],
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  }
+}
