@@ -9,7 +9,9 @@
   "include": [
     "common/**/*",
     "public/**/*",
-    "server/**/*"
+    "server/**/*",
+    ".storybook/**/*",
+    "../../../typings/**/*"
   ],
   "references": [
     {

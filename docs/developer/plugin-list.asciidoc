@@ -237,7 +237,7 @@ generating deep links to other apps, and creating short URLs.
 
 
 |{kib-repo}blob/{branch}/src/plugins/shared_ux/README.md[sharedUX]
-|The sharedUX plugin contains common components, services and utilities for making a consistent user experience among plugins.
+|Our mission is to make consistency in our user experience a product.
 
 
 |{kib-repo}blob/{branch}/src/plugins/telemetry/README.md[telemetry]

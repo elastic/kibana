@@ -13,4 +13,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new SharedUXPlugin(initializerContext);
 }
 
-export { SharedUXPluginSetup, SharedUXPluginStart } from './types';
+export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';

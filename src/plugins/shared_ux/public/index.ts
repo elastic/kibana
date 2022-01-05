@@ -12,4 +12,4 @@ export function plugin() {
   return new SharedUXPlugin();
 }
 
-export { SharedUXPluginSetup, SharedUXPluginStart } from './types';
+export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
