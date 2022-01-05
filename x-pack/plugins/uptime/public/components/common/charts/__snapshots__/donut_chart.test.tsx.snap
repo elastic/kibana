@@ -153,6 +153,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
           },
           "background": Object {
             "color": "transparent",
+            "fallbackColor": "white",
           },
           "barSeriesStyle": Object {
             "displayValue": Object {
@@ -266,6 +267,83 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "stroke": "darkgrey",
             },
           },
+          "heatmap": Object {
+            "brushArea": Object {
+              "stroke": "#69707D",
+              "strokeWidth": 2,
+              "visible": true,
+            },
+            "brushMask": Object {
+              "fill": "#73737380",
+              "visible": true,
+            },
+            "brushTool": Object {
+              "fill": "gray",
+              "visible": false,
+            },
+            "cell": Object {
+              "align": "center",
+              "border": Object {
+                "stroke": "gray",
+                "strokeWidth": 1,
+              },
+              "label": Object {
+                "fontFamily": "Sans-Serif",
+                "fontStyle": "normal",
+                "fontVariant": "normal",
+                "fontWeight": "normal",
+                "maxFontSize": 12,
+                "maxWidth": "fill",
+                "minFontSize": 8,
+                "textColor": "black",
+                "useGlobalMinFontSize": true,
+                "visible": true,
+              },
+              "maxHeight": "fill",
+              "maxWidth": "fill",
+            },
+            "grid": Object {
+              "cellHeight": Object {
+                "max": 30,
+                "min": 12,
+              },
+              "cellWidth": Object {
+                "max": 30,
+                "min": 0,
+              },
+              "stroke": Object {
+                "color": "gray",
+                "width": 1,
+              },
+            },
+            "maxColumnWidth": 30,
+            "maxRowHeight": 30,
+            "xAxisLabel": Object {
+              "align": "center",
+              "baseline": "middle",
+              "fontFamily": "Sans-Serif",
+              "fontSize": 12,
+              "fontStyle": "normal",
+              "fontVariant": "normal",
+              "fontWeight": "normal",
+              "padding": 6,
+              "textColor": "black",
+              "visible": true,
+              "width": "auto",
+            },
+            "yAxisLabel": Object {
+              "baseline": "middle",
+              "fontFamily": "Sans-Serif",
+              "fontSize": 12,
+              "fontStyle": "normal",
+              "fontVariant": "normal",
+              "fontWeight": "normal",
+              "padding": 5,
+              "textColor": "black",
+              "visible": true,
+              "width": "auto",
+            },
+          },
           "legend": Object {
             "horizontalHeight": 64,
             "labelOptions": Object {
@@ -299,6 +377,59 @@ exports[`DonutChart component passes correct props without errors for valid prop
               "strokeWidth": 1,
               "visible": true,
             },
+          },
+          "partition": Object {
+            "circlePadding": 2,
+            "emptySizeRatio": 0,
+            "fillLabel": Object {
+              "clipText": false,
+              "fontFamily": "Sans-Serif",
+              "fontStyle": "normal",
+              "fontVariant": "normal",
+              "fontWeight": 400,
+              "padding": 2,
+              "textColor": "__use__adaptive__color__",
+              "valueFont": Object {
+                "fontStyle": "normal",
+                "fontVariant": "normal",
+                "fontWeight": 400,
+              },
+            },
+            "fontFamily": "Sans-Serif",
+            "horizontalTextAngleThreshold": 0.5235987755982988,
+            "horizontalTextEnforcer": 1,
+            "idealFontSizeJump": 1.05,
+            "linkLabel": Object {
+              "fontFamily": "Sans-Serif",
+              "fontSize": 12,
+              "fontStyle": "normal",
+              "fontVariant": "normal",
+              "fontWeight": 400,
+              "gap": 10,
+              "horizontalStemLength": 10,
+              "lineWidth": 1,
+              "maxCount": 36,
+              "maxTextLength": 100,
+              "maximumSection": 10,
+              "minimumStemLength": 0,
+              "padding": 0,
+              "radiusPadding": 10,
+              "spacing": 2,
+              "stemAngle": 0.7853981633974483,
+              "textColor": "__use__adaptive__color__",
+              "valueFont": Object {
+                "fontStyle": "normal",
+                "fontVariant": "normal",
+                "fontWeight": 400,
+              },
+            },
+            "maxFontSize": 64,
+            "maximizeFontSize": false,
+            "minFontSize": 8,
+            "outerSizeRatio": 0.6180469715698392,
+            "radialPadding": 0.017453292519943295,
+            "sectorLineStroke": "white",
+            "sectorLineWidth": 1,
           },
           "scales": Object {
             "barsPadding": 0.25,
@@ -499,26 +630,28 @@ exports[`DonutChart component passes correct props without errors for valid prop
         }
       }
     >
-      <Connect(SpecInstance) />
       <Connect(SpecInstance)
-        config={
+        theme={
           Object {
-            "circlePadding": 4,
-            "emptySizeRatio": 0.4,
-            "idealFontSizeJump": 1.1,
-            "linkLabel": Object {
-              "maximumSection": Infinity,
-            },
-            "margin": Object {
+            "chartMargins": Object {
               "bottom": 0,
               "left": 0,
               "right": 0,
               "top": 0,
             },
-            "outerSizeRatio": 0.9,
-            "partitionLayout": "sunburst",
+            "partition": Object {
+              "circlePadding": 4,
+              "emptySizeRatio": 0.4,
+              "idealFontSizeJump": 1.1,
+              "linkLabel": Object {
+                "maximumSection": Infinity,
+              },
+              "outerSizeRatio": 0.9,
+            },
           }
         }
+      />
+      <Connect(SpecInstance)
         data={
           Array [
             Object {
@@ -543,6 +676,7 @@ exports[`DonutChart component passes correct props without errors for valid prop
             },
           ]
         }
+        layout="sunburst"
         valueAccessor={[Function]}
       />
     </Chart>

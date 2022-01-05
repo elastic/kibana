@@ -111,7 +111,7 @@ describe('PieVisualization component', () => {
 
     test('it sets the correct lines per legend item', () => {
       const component = shallow(<PieComponent args={args} {...getDefaultArgs()} />);
-      expect(component.find(Settings).prop('theme')).toEqual({
+      expect(component.find(Settings).prop<PartialTheme[]>('theme')[0]).toMatchObject({
         background: {
           color: undefined,
         },
