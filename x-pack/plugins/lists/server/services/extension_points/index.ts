@@ -7,5 +7,4 @@
 
 export * from './types';
 export { ExtensionPointStorage } from './extension_point_storage';
-export { ExtensionPointStorageInterface } from './types';
-export { ExtensionPointStorageClientInterface } from './types';
+export type { ExtensionPointStorageInterface, ExtensionPointStorageClientInterface } from './types';
