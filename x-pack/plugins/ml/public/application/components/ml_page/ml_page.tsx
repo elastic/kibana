@@ -14,7 +14,7 @@ import { useSideNavItems } from './side_nav';
 import * as routes from '../../routing/routes';
 import { MlPageWrapper } from '../../routing/ml_page_wrapper';
 import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
-import { PageDependencies } from '../../routing/router';
+import { MlRoute, PageDependencies } from '../../routing/router';
 import { DatePickerWrapper } from '../navigation_menu/date_picker_wrapper';
 import { useActiveRoute } from '../../routing/use_active_route';
 import { KibanaPageTemplate } from '../../../../../../../src/plugins/kibana_react/public';
@@ -96,6 +96,20 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         'data-test-subj': activeRoute?.['data-test-subj'],
       }}
     >
+      <CommonPageWrapper setPageTitle={setPageTitle} pageDeps={pageDeps} routeList={routeList} />
+    </KibanaPageTemplate>
+  );
+});
+
+interface CommonPageWrapperProps {
+  setPageTitle: (title?: React.ReactNode | undefined) => void;
+  pageDeps: PageDependencies;
+  routeList: MlRoute[];
+}
+
+const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(
+  ({ setPageTitle, pageDeps, routeList }) => {
+    return (
       <MlPageControlsContext.Provider
         value={{ setPageTitle, setHeaderActionMenu: pageDeps.setHeaderActionMenu }}
       >
@@ -119,6 +133,6 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
           })}
         </EuiPageContentBody>
       </MlPageControlsContext.Provider>
-    </KibanaPageTemplate>
-  );
-});
+    );
+  }
+);
