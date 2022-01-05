@@ -206,7 +206,9 @@ class AgentPolicyService {
     if (agentPolicies.total === 0) {
       return {
         created: true,
-        policy: await this.create(soClient, esClient, newAgentPolicy, { id: String(id) }),
+        policy: await this.create(soClient, esClient, newAgentPolicy, {
+          id: id ? String(id) : uuidv5(newAgentPolicy.name, UUID_V5_NAMESPACE),
+        }),
       };
     }
 
