@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DataViewField } from 'src/plugins/data/public';
 import { FieldFilterState, isFieldFiltered } from './field_filter';
-import { getFieldSubtypeMulti } from '../../../../../../../data/common';
+import { getFieldSubtypeMulti, DataViewField } from '../../../../../../../data/common';
 
 interface GroupedFields {
   selected: DataViewField[];

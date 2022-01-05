@@ -11,7 +11,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { mountWithIntl } from '@kbn/test/jest';
 
 import { DiscoverField } from './discover_field';
-import { DataViewField } from '../../../../../../data/public';
+import { DataViewField } from '../../../../../../data/common';
 import { stubIndexPattern } from '../../../../../../data/common/stubs';
 
 jest.mock('../../../../kibana_services', () => ({

@@ -27,7 +27,7 @@ import classNames from 'classnames';
 import { FieldButton, FieldIcon } from '@kbn/react-field';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldDetails } from './types';
-import { DataViewField, DataView } from '../../../../../../data/public';
+import { DataViewField, DataView } from '../../../../../../data/common';
 import { getFieldTypeName } from './lib/get_field_type_name';
 import { DiscoverFieldVisualize } from './discover_field_visualize';
 

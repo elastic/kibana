@@ -30,10 +30,7 @@ import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING } from '../../../../../common';
 import { groupFields } from './lib/group_fields';
-import {
-  DataViewField,
-  indexPatterns as indexPatternUtils,
-} from '../../../../../../data/public';
+import { indexPatterns as indexPatternUtils } from '../../../../../../data/public';
 import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
@@ -41,6 +38,7 @@ import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
+import { DataViewField } from '../../../../../../data_views/common';
 
 /**
  * Default number of available fields displayed and added on scroll

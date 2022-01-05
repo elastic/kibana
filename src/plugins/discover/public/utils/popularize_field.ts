@@ -7,7 +7,8 @@
  */
 
 import type { Capabilities } from 'kibana/public';
-import { DataView, DataViewsContract } from '../../../data/public';
+import { DataViewsContract } from '../../../data/public';
+import { DataView } from '../../../data/common';
 
 async function popularizeField(
   indexPattern: DataView,

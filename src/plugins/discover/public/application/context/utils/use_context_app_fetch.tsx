@@ -12,7 +12,7 @@ import { DiscoverServices } from '../../../build_services';
 import { fetchAnchor } from '../services/anchor';
 import { fetchSurroundingDocs, SurrDocType } from '../services/context';
 import { MarkdownSimple, toMountPoint, wrapWithTheme } from '../../../../../kibana_react/public';
-import { DataView, SortDirection } from '../../../../../data/public';
+import { DataView, SortDirection } from '../../../../../data/common';
 import {
   ContextFetchState,
   FailureReason,

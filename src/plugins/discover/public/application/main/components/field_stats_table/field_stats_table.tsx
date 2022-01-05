@@ -9,7 +9,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import { DataViewField, DataView, DataView, Query } from '../../../../../../data/common';
+import { DataViewField, DataView, Query } from '../../../../../../data/common';
 import type { DiscoverServices } from '../../../../build_services';
 import {
   EmbeddableInput,

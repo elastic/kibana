@@ -27,9 +27,8 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { DiscoverIndexPattern } from './discover_index_pattern';
-import { IndexPatternAttributes } from '../../../../../../data/common';
+import { DataViewField, DataView, DataViewAttributes } from '../../../../../../data/common';
 import { SavedObject } from '../../../../../../../core/types';
-import { DataViewField, DataView } from '../../../../../../data/public';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { DiscoverServices } from '../../../../build_services';
@@ -55,7 +54,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * List of available index patterns
    */
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  indexPatternList: Array<SavedObject<DataViewAttributes>>;
   /**
    * Has been toggled closed
    */

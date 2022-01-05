@@ -7,7 +7,7 @@
  */
 
 import { isPlainObject } from 'lodash';
-import { DataView } from '../../../../../data/public';
+import { DataView } from '../../../../../data/common';
 
 export type SortPairObj = Record<string, string>;
 export type SortPairArr = [string, string];
@@ -19,10 +19,7 @@ export function isSortable(fieldName: string, indexPattern: DataView): boolean {
   return !!(field && field.sortable);
 }
 
-function createSortObject(
-  sortPair: SortInput,
-  indexPattern: DataView
-): SortPairObj | undefined {
+function createSortObject(sortPair: SortInput, indexPattern: DataView): SortPairObj | undefined {
   if (
     Array.isArray(sortPair) &&
     sortPair.length === 2 &&

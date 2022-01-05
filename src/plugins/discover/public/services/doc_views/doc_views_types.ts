@@ -7,7 +7,7 @@
  */
 
 import { ComponentType } from 'react';
-import { DataView, DataViewField } from '../../../../data/public';
+import { DataView, DataViewField } from '../../../../data/common';
 import { ElasticSearchHit } from '../../types';
 import { IgnoredReason } from '../../utils/get_ignored_reason';
 

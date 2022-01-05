@@ -10,7 +10,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewerLegacyTable } from './table';
-import { DataView } from '../../../../../../../data/public';
+import { DataView } from '../../../../../../../data/common';
 import { DocViewRenderProps } from '../../../doc_views_types';
 
 jest.mock('../../../../../kibana_services', () => ({

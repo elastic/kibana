@@ -9,7 +9,7 @@
 import React, { useCallback, useState } from 'react';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DataViewField } from '../../../../../../data/public';
+import { DataViewField } from '../../../../../../data/common';
 import { DocViewFilterFn } from '../../doc_views_types';
 
 interface TableActionsProps {
