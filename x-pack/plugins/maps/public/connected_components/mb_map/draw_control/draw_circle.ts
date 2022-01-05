@@ -15,7 +15,26 @@ import { Feature, GeoJSON, Position } from 'geojson';
 
 const DRAW_CIRCLE_RADIUS = 'draw-circle-radius';
 
-export const DRAW_CIRCLE_RADIUS_MB_FILTER = ['==', 'meta', DRAW_CIRCLE_RADIUS];
+const DRAW_CIRCLE_RADIUS_MB_FILTER = ['==', 'meta', DRAW_CIRCLE_RADIUS];
+
+export const DRAW_CIRCLE_RADIUS_LABEL_STYLE = {
+  id: 'gl-draw-radius-label',
+  type: 'symbol',
+  filter: DRAW_CIRCLE_RADIUS_MB_FILTER,
+  layout: {
+    'text-anchor': 'right',
+    'text-field': '{radiusLabel}',
+    'text-size': 16,
+    'text-offset': [-1, 0],
+    'text-ignore-placement': true,
+    'text-allow-overlap': true,
+  },
+  paint: {
+    'text-color': '#fbb03b',
+    'text-halo-color': 'rgba(0, 0, 0, 1)',
+    'text-halo-width': 2,
+  },
+};
 
 export interface DrawCircleProperties {
   center: Position;

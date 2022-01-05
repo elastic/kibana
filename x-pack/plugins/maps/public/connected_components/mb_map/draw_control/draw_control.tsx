@@ -17,7 +17,7 @@ import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { Feature } from 'geojson';
 import { MapMouseEvent } from '@kbn/mapbox-gl';
 import { DRAW_SHAPE } from '../../../../common/constants';
-import { DrawCircle, DRAW_CIRCLE_RADIUS_MB_FILTER } from './draw_circle';
+import { DrawCircle, DRAW_CIRCLE_RADIUS_LABEL_STYLE } from './draw_circle';
 import { DrawTooltip } from './draw_tooltip';
 
 const mbModeEquivalencies = new Map<string, DRAW_SHAPE>([
@@ -50,27 +50,7 @@ export class DrawControl extends Component<Props> {
   private _mbDrawControl = new MapboxDraw({
     displayControlsDefault: false,
     modes: mbDrawModes,
-    styles: [
-      ...mapboxDrawStyles,
-      {
-        id: 'gl-draw-radius-label',
-        type: 'symbol',
-        filter: DRAW_CIRCLE_RADIUS_MB_FILTER,
-        layout: {
-          'text-anchor': 'right',
-          'text-field': '{radiusLabel}',
-          'text-size': 16,
-          'text-offset': [-1, 0],
-          'text-ignore-placement': true,
-          'text-allow-overlap': true,
-        },
-        paint: {
-          'text-color': '#fbb03b',
-          'text-halo-color': 'rgba(0, 0, 0, 1)',
-          'text-halo-width': 2,
-        },
-      },
-    ],
+    styles: [...mapboxDrawStyles, DRAW_CIRCLE_RADIUS_LABEL_STYLE],
   });
 
   componentDidUpdate() {
