@@ -48,7 +48,7 @@ export async function findAndCleanupTasks({
         actionTypeRegistry
           .list()
           .map((actionType) =>
-            nodeBuilder.is('task.attributes.taskType', `actions:${actionType.id}`)
+            nodeBuilder.is('task.attributes.taskType', `"actions:${actionType.id}"`)
           )
       ),
     ]),

@@ -9,8 +9,8 @@
 import type { DataViewBase, DslQuery, KueryQueryOptions } from '../..';
 import type { KqlFunctionNode } from '../node_types/function';
 import type { KqlContext } from '../types';
-import * as ast from '../ast';
 import { KQL_NODE_TYPE_FUNCTION } from '../node_types/function';
+import { nodeTypes } from '../..';
 
 export const KQL_FUNCTION_NAME_AND = 'and';
 
@@ -39,8 +39,12 @@ export function toElasticsearchQuery(
 ): DslQuery {
   const key = config.filtersInMustClause ? 'must' : 'filter';
   const clause = nodes.map((node) => {
-    return ast.toElasticsearchQuery(node, indexPattern, config, context);
+    return nodeTypes.function.toElasticsearchQuery(node, indexPattern, config, context);
   });
+
+  // If we have only one query, no need to wrap it in a bool clause
+  if (clause.length === 1) return clause[0];
+
   return {
     bool: {
       [key]: clause,
