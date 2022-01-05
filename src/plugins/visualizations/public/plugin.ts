@@ -60,7 +60,7 @@ import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_regi
 import { esFilters } from '../../../plugins/data/public';
 import { FeatureCatalogueCategory } from '../../home/public';
 
-import type { VisualizeServices } from './application/types';
+import type { VisualizeServices } from './visualize_app/types';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -286,7 +286,7 @@ export class VisualizationsPlugin
         };
 
         params.element.classList.add('visAppWrapper');
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./visualize_app');
         const unmount = renderApp(params, services);
         return () => {
           data.search.session.clear();

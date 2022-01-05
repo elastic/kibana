@@ -17,7 +17,7 @@ import {
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
-import { APP_NAME } from '../../../common/constants';
+import { VISUALIZE_APP_NAME } from '../../../common/constants';
 import { getTopNavConfig } from '../utils';
 import type { IndexPattern } from '../../../../data/public';
 
@@ -216,7 +216,7 @@ const TopNav = ({
      * it is enabled by default in the TopNavMenu component.
      */
     <TopNavMenu
-      appName={APP_NAME}
+      appName={VISUALIZE_APP_NAME}
       config={config}
       setMenuMountPoint={setHeaderActionMenu}
       onQuerySubmit={handleRefresh}
@@ -238,7 +238,7 @@ const TopNav = ({
      * we show the filter bar on its own here if the chrome is not visible.
      */
     <TopNavMenu
-      appName={APP_NAME}
+      appName={VISUALIZE_APP_NAME}
       setMenuMountPoint={setHeaderActionMenu}
       indexPatterns={indexPatterns}
       showSearchBar

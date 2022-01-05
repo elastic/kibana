@@ -37,7 +37,7 @@ import {
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
-import { APP_NAME, VisualizeConstants } from '../../../common/constants';
+import { VISUALIZE_APP_NAME, VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
 import { EmbeddableStateTransfer } from '../../../../embeddable/public';
 import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
@@ -115,7 +115,7 @@ export const getTopNavConfig = (
   const doTelemetryForSaveEvent = (visType: string) => {
     if (usageCollection) {
       usageCollection.reportUiCounter(
-        originatingApp ?? APP_NAME,
+        originatingApp ?? VISUALIZE_APP_NAME,
         METRIC_TYPE.CLICK,
         `${visType}:save`
       );

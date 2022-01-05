@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { VisEditorConstructor } from './application/types';
+import { VisEditorConstructor } from './visualize_app/types';
 
 const DEFAULT_NAME = 'default';
 

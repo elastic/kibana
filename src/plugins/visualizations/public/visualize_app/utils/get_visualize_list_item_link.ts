@@ -11,7 +11,7 @@ import { IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
 import { QueryState } from '../../../../data/public';
 import { setStateToKbnUrl } from '../../../../kibana_utils/public';
 import { getUISettings } from '../../services';
-import { GLOBAL_STATE_STORAGE_KEY, APP_NAME } from '../../../common/constants';
+import { GLOBAL_STATE_STORAGE_KEY, VISUALIZE_APP_NAME } from '../../../common/constants';
 
 export const getVisualizeListItemLink = (
   application: ApplicationStart,
@@ -20,7 +20,7 @@ export const getVisualizeListItemLink = (
   editUrl: string
 ) => {
   // for visualizations the editApp is undefined
-  let url = application.getUrlForApp(editApp ?? APP_NAME, {
+  let url = application.getUrlForApp(editApp ?? VISUALIZE_APP_NAME, {
     path: editApp ? editUrl : `#${editUrl}`,
   });
   const useHash = getUISettings().get('state:storeInSessionStorage');

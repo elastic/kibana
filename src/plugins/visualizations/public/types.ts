@@ -7,38 +7,18 @@
  */
 
 import type { SavedObjectsMigrationVersion } from 'kibana/public';
-
-import {
-  AppMountParameters,
-  ChromeStart,
-  CoreStart,
-  PluginInitializerContext,
-  ScopedHistory,
-  ToastsStart,
-} from 'kibana/public';
-import type { Storage, IKbnUrlStateStorage } from 'src/plugins/kibana_utils/public';
-import type { History } from 'history';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type { SharePluginStart } from 'src/plugins/share/public';
-import type { SavedObjectsStart } from 'src/plugins/saved_objects/public';
-import type { EmbeddableStart, EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
-import type { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
-import type { PresentationUtilPluginStart } from 'src/plugins/presentation_util/public';
-import type { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
-import type { SpacesPluginStart } from '../../../../x-pack/plugins/spaces/public';
-import type { UsageCollectionStart } from '../../usage_collection/public';
-import type { SavedObjectsTaggingApi } from '../../saved_objects_tagging_oss/public';
-import type { VisParams } from '../common';
-import type { PersistedState } from './persisted_state';
-import type { SerializedVis, Vis } from './vis';
-import type { ExpressionAstExpression } from '../../expressions/public';
-import type { ISearchSource } from '../../data/common';
 import {
   IAggConfigs,
   SerializedSearchSourceFields,
   TimefilterContract,
   AggConfigSerialized,
 } from '../../../plugins/data/public';
+import type { ISearchSource } from '../../data/common';
+import { ExpressionAstExpression } from '../../expressions/public';
+
+import type { SerializedVis, Vis } from './vis';
+import type { PersistedState } from './persisted_state';
+import type { VisParams } from '../common';
 
 export type { Vis, SerializedVis, VisParams };
 export interface SavedVisState {
@@ -112,31 +92,4 @@ export interface VisEditorOptionsProps<VisParamType = unknown> {
   setValue<T extends keyof VisParamType>(paramName: T, value: VisParamType[T]): void;
   setValidity(isValid: boolean): void;
   setTouched(isTouched: boolean): void;
-}
-
-export interface VisualizationServices extends CoreStart {
-  stateTransferService: EmbeddableStateTransfer;
-  embeddable: EmbeddableStart;
-  history: History;
-  kbnUrlStateStorage: IKbnUrlStateStorage;
-  urlForwarding: UrlForwardingStart;
-  pluginInitializerContext: PluginInitializerContext;
-  chrome: ChromeStart;
-  data: DataPublicPluginStart;
-  localStorage: Storage;
-  navigation: NavigationStart;
-  toastNotifications: ToastsStart;
-  share?: SharePluginStart;
-  visualizeCapabilities: Record<string, boolean | Record<string, boolean>>;
-  dashboardCapabilities: Record<string, boolean | Record<string, boolean>>;
-  savedObjectsPublic: SavedObjectsStart;
-  setActiveUrl: (newUrl: string) => void;
-  restorePreviousUrl: () => void;
-  scopedHistory: ScopedHistory;
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
-  savedObjectsTagging?: SavedObjectsTaggingApi;
-  presentationUtil: PresentationUtilPluginStart;
-  usageCollection?: UsageCollectionStart;
-  getKibanaVersion: () => string;
-  spaces?: SpacesPluginStart;
 }

@@ -26,13 +26,13 @@ import type { SavedObjectsTaggingApi } from 'src/plugins/saved_objects_tagging_o
 import { RedirectAppLinks } from '../../../../kibana_react/public';
 import { getVisualizeListItemLink } from './get_visualize_list_item_link';
 import { getUsageCollector } from '../../services';
-import { APP_NAME } from '../../../common/constants';
+import { VISUALIZE_APP_NAME } from '../../../common/constants';
 
 const doTelemetryForAddEvent = (visType?: string) => {
   const usageCollection = getUsageCollector();
 
   if (usageCollection && visType) {
-    usageCollection.reportUiCounter(APP_NAME, METRIC_TYPE.CLICK, `${visType}:add`);
+    usageCollection.reportUiCounter(VISUALIZE_APP_NAME, METRIC_TYPE.CLICK, `${visType}:add`);
   }
 };
 

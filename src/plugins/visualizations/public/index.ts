@@ -56,4 +56,4 @@ export type {
 } from '../common/expression_functions/xy_dimension';
 export { urlFor, getFullPath } from './utils/saved_visualize_utils';
 
-export type { IEditorController, EditorRenderProps } from './application/types';
+export type { IEditorController, EditorRenderProps } from './visualize_app/types';

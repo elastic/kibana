@@ -12,7 +12,7 @@ export const VISUALIZE_EMBEDDABLE_TYPE = 'visualization';
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
 
-export const APP_NAME = 'visualize';
+export const VISUALIZE_APP_NAME = 'visualize';
 
 export const VisualizeConstants = {
   VISUALIZE_BASE_PATH: '/app/visualize',
