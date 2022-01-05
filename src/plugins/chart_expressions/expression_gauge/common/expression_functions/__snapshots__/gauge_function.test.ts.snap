@@ -6,6 +6,7 @@ Object {
   "type": "render",
   "value": Object {
     "args": Object {
+      "ariaLabel": undefined,
       "colorMode": "none",
       "goalAccessor": undefined,
       "labelMajor": "title",

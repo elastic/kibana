@@ -152,7 +152,7 @@ export const xyChart: ExpressionFunctionDefinition<
   fn(data: LensMultiTable, args: XYArgs, handlers) {
     args.ariaLabel =
       (handlers.variables?.embeddableTitle as string) ||
-      handlers.getExecutionContext()?.description;
+      handlers.getExecutionContext?.()?.description;
     return {
       type: 'render',
       as: 'lens_xy_chart_renderer',

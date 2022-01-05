@@ -110,7 +110,7 @@ export const pie: ExpressionFunctionDefinition<
   fn(data: LensMultiTable, args: PieExpressionArgs, handlers) {
     args.ariaLabel =
       (handlers.variables?.embeddableTitle as string) ||
-      handlers.getExecutionContext()?.description;
+      handlers.getExecutionContext?.()?.description;
     return {
       type: 'render',
       as: 'lens_pie_renderer',

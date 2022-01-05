@@ -97,7 +97,7 @@ export const gaugeFunction = (): GaugeExpressionFunctionDefinition => ({
   fn(data, args, handlers) {
     args.ariaLabel =
       (handlers.variables?.embeddableTitle as string) ||
-      handlers.getExecutionContext()?.description;
+      handlers.getExecutionContext?.()?.description;
     return {
       type: 'render',
       as: EXPRESSION_GAUGE_NAME,

@@ -139,7 +139,7 @@ export const heatmapFunction = (): HeatmapExpressionFunctionDefinition => ({
   fn(data, args, handlers) {
     args.ariaLabel =
       (handlers.variables?.embeddableTitle as string) ||
-      handlers.getExecutionContext()?.description;
+      handlers.getExecutionContext?.()?.description;
     if (handlers?.inspectorAdapters?.tables) {
       const argsTable: Dimension[] = [];
       if (args.valueAccessor) {
