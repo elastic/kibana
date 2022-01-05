@@ -15,14 +15,9 @@ import {
   AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
-import { updateOneHostIsolationExceptionItem } from '../../../../host_isolation_exceptions/service';
 import { PolicyEventFiltersDeleteModal } from './policy_event_filters_delete_modal';
 import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_utils';
 import { EventFiltersHttpService } from '../../../../event_filters/service';
-
-jest.mock('../../../../host_isolation_exceptions/service');
-
-const updateOneHostIsolationExceptionItemMock = updateOneHostIsolationExceptionItem as jest.Mock;
 
 describe('Policy details event filter delete modal', () => {
   let policyId: string;
@@ -39,7 +34,6 @@ describe('Policy details event filter delete modal', () => {
     exception = getExceptionListItemSchemaMock();
     onCancel = jest.fn();
     mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
-    updateOneHostIsolationExceptionItemMock.mockClear();
     render = async () => {
       await act(async () => {
         renderResult = mockedContext.render(
