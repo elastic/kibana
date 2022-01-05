@@ -8,7 +8,7 @@
 import {
   ADD_TO_TIMELINE,
   COPY,
-  EXPAND_OVERFLOW_ITEMS,
+  DESTINATION_DOMAIN,
   FILTER_IN,
   FILTER_OUT,
   SHOW_TOP_FIELD,
@@ -16,27 +16,30 @@ import {
 import { cleanKibana } from '../../tasks/common';
 
 import { loginAndWaitForPage } from '../../tasks/login';
+import { openHoverActions } from '../../tasks/network/flows';
 
 import { NETWORK_URL } from '../../urls/navigation';
 
 const testDomainOne = 'endpoint-dev-es.app.elstc.co';
 const testDomainTwo = 'endpoint2-dev-es.app.elstc.co';
 
-describe('Overfow items', () => {
+describe('Overflow items', () => {
   context('Network stats and tables', () => {
-    beforeEach(() => {
+    before(() => {
       cleanKibana();
+    });
+    beforeEach(() => {
       loginAndWaitForPage(NETWORK_URL);
     });
 
     it('Shows more items in the popover', () => {
-      cy.get(`[data-test-subj="destination.domain-${testDomainOne}"]`).should('not.exist');
-      cy.get(`[data-test-subj="destination.domain-${testDomainTwo}"]`).should('not.exist');
+      cy.get(DESTINATION_DOMAIN(testDomainOne)).should('not.exist');
+      cy.get(DESTINATION_DOMAIN(testDomainTwo)).should('not.exist');
 
-      cy.get(EXPAND_OVERFLOW_ITEMS).click();
+      openHoverActions();
 
-      cy.get(`[data-test-subj="destination.domain-${testDomainOne}"]`).should('exist');
-      cy.get(`[data-test-subj="destination.domain-${testDomainTwo}"]`).should('exist');
+      cy.get(DESTINATION_DOMAIN(testDomainOne)).should('exist');
+      cy.get(DESTINATION_DOMAIN(testDomainTwo)).should('exist');
     });
 
     it('Shows Hover actions for more items in the popover', () => {
@@ -46,7 +49,7 @@ describe('Overfow items', () => {
       cy.get(SHOW_TOP_FIELD).should('not.exist');
       cy.get(COPY).should('not.exist');
 
-      cy.get(EXPAND_OVERFLOW_ITEMS).click();
+      openHoverActions();
 
       cy.get(FILTER_IN).should('exist');
       cy.get(FILTER_OUT).should('exist');
