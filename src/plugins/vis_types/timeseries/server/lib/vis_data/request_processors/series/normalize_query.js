@@ -25,8 +25,12 @@ function removeEmptyTopLevelAggregation(doc, series) {
 
   if (isEmptyFilter(filter) && !hasSiblingPipelineAggregation(doc.aggs[series.id].aggs)) {
     const meta = _.get(doc, `aggs.${series.id}.meta`);
+
     overwrite(doc, `aggs`, doc.aggs[series.id].aggs);
-    overwrite(doc, `aggs.timeseries.meta`, meta);
+    overwrite(doc, `aggs.timeseries.meta`, {
+      ...meta,
+      normalized: true,
+    });
   }
 
   return doc;
