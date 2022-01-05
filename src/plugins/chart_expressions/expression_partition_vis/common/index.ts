@@ -10,14 +10,14 @@ export {
   PLUGIN_ID,
   PLUGIN_NAME,
   PIE_VIS_EXPRESSION_NAME,
-  PIE_LABELS_VALUE,
-  PIE_LABELS_FUNCTION,
+  PARTITION_LABELS_VALUE,
+  PARTITION_LABELS_FUNCTION,
 } from './constants';
 
-export { pieVisFunction, pieLabelsFunction } from './expression_functions';
+export { pieVisFunction, partitionLabelsFunction } from './expression_functions';
 
 export type {
-  ExpressionValuePieLabels,
+  ExpressionValuePartitionLabels,
   PieVisExpressionFunctionDefinition,
 } from './types/expression_functions';
 

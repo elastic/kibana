@@ -8,20 +8,23 @@
 
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, Datatable } from '../../../../expressions/common';
-import { PIE_LABELS_FUNCTION, PIE_LABELS_VALUE } from '../constants';
-import { ExpressionValuePieLabels, PieLabelsArguments } from '../types/expression_functions';
+import { PARTITION_LABELS_FUNCTION, PARTITION_LABELS_VALUE } from '../constants';
+import {
+  ExpressionValuePartitionLabels,
+  PartitionLabelsArguments,
+} from '../types/expression_functions';
 
-export const pieLabelsFunction = (): ExpressionFunctionDefinition<
-  typeof PIE_LABELS_FUNCTION,
+export const partitionLabelsFunction = (): ExpressionFunctionDefinition<
+  typeof PARTITION_LABELS_FUNCTION,
   Datatable | null,
-  PieLabelsArguments,
-  ExpressionValuePieLabels
+  PartitionLabelsArguments,
+  ExpressionValuePartitionLabels
 > => ({
-  name: PIE_LABELS_FUNCTION,
+  name: PARTITION_LABELS_FUNCTION,
   help: i18n.translate('expressionPartitionVis.pieLabels.function.help', {
     defaultMessage: 'Generates the pie labels object',
   }),
-  type: PIE_LABELS_VALUE,
+  type: PARTITION_LABELS_VALUE,
   args: {
     show: {
       types: ['boolean'],
@@ -75,7 +78,7 @@ export const pieLabelsFunction = (): ExpressionFunctionDefinition<
   },
   fn: (context, args) => {
     return {
-      type: PIE_LABELS_VALUE,
+      type: PARTITION_LABELS_VALUE,
       show: args.show,
       position: args.position,
       percentDecimals: args.percentDecimals,

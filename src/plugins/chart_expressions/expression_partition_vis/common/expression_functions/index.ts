@@ -7,4 +7,4 @@
  */
 
 export { pieVisFunction } from './pie_vis_function';
-export { pieLabelsFunction } from './pie_labels_function';
+export { partitionLabelsFunction } from './partition_labels_function';

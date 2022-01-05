@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PIE_LABELS_VALUE, PIE_VIS_EXPRESSION_NAME } from '../constants';
+import { PARTITION_LABELS_VALUE, PIE_VIS_EXPRESSION_NAME } from '../constants';
 import {
   ExpressionFunctionDefinition,
   Datatable,
@@ -15,7 +15,7 @@ import {
 } from '../../../../expressions/common';
 import { RenderValue, PieVisConfig, LabelPositions, ValueFormats } from './expression_renderers';
 
-export interface PieLabelsArguments {
+export interface PartitionLabelsArguments {
   show: boolean;
   position: LabelPositions;
   values: boolean;
@@ -25,8 +25,8 @@ export interface PieLabelsArguments {
   percentDecimals: number;
 }
 
-export type ExpressionValuePieLabels = ExpressionValueBoxed<
-  typeof PIE_LABELS_VALUE,
+export type ExpressionValuePartitionLabels = ExpressionValueBoxed<
+  typeof PARTITION_LABELS_VALUE,
   {
     show: boolean;
     position: LabelPositions;

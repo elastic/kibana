@@ -15,7 +15,7 @@ import type { Datatable } from '../../../../expressions/public';
 import { shallow, mount } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
-import PieComponent, { PieComponentProps } from './pie_vis_component';
+import PartitionVisComponent, { PartitionVisComponentProps } from './partition_vis_component';
 import { createMockPieParams, createMockVisData } from '../mocks';
 
 jest.mock('@elastic/charts', () => {
@@ -42,8 +42,8 @@ const uiState = {
   setSilent: jest.fn(),
 } as any;
 
-describe('PieComponent', function () {
-  let wrapperProps: PieComponentProps;
+describe('PartitionVisComponent', function () {
+  let wrapperProps: PartitionVisComponentProps;
 
   beforeAll(() => {
     wrapperProps = {
@@ -63,19 +63,19 @@ describe('PieComponent', function () {
   });
 
   it('renders the legend on the correct position', () => {
-    const component = shallow(<PieComponent {...wrapperProps} />);
+    const component = shallow(<PartitionVisComponent {...wrapperProps} />);
     expect(component.find(Settings).prop('legendPosition')).toEqual('right');
   });
 
   it('renders the legend toggle component', async () => {
-    const component = mount(<PieComponent {...wrapperProps} />);
+    const component = mount(<PartitionVisComponent {...wrapperProps} />);
     await act(async () => {
       expect(findTestSubject(component, 'vislibToggleLegend').length).toBe(1);
     });
   });
 
   it('hides the legend if the legend toggle is clicked', async () => {
-    const component = mount(<PieComponent {...wrapperProps} />);
+    const component = mount(<PartitionVisComponent {...wrapperProps} />);
     findTestSubject(component, 'vislibToggleLegend').simulate('click');
     await act(async () => {
       expect(component.find(Settings).prop('showLegend')).toEqual(false);
@@ -83,31 +83,31 @@ describe('PieComponent', function () {
   });
 
   it('defaults on showing the legend for the inner cicle', () => {
-    const component = shallow(<PieComponent {...wrapperProps} />);
+    const component = shallow(<PartitionVisComponent {...wrapperProps} />);
     expect(component.find(Settings).prop('legendMaxDepth')).toBe(1);
   });
 
   it('shows the nested legend when the user requests it', () => {
     const newParams = { ...visParams, nestedLegend: true };
     const newProps = { ...wrapperProps, visParams: newParams };
-    const component = shallow(<PieComponent {...newProps} />);
+    const component = shallow(<PartitionVisComponent {...newProps} />);
     expect(component.find(Settings).prop('legendMaxDepth')).toBeUndefined();
   });
 
   it('defaults on displaying the tooltip', () => {
-    const component = shallow(<PieComponent {...wrapperProps} />);
+    const component = shallow(<PartitionVisComponent {...wrapperProps} />);
     expect(component.find(Settings).prop('tooltip')).toStrictEqual({ type: TooltipType.Follow });
   });
 
   it('doesnt show the tooltip when the user requests it', () => {
     const newParams = { ...visParams, addTooltip: false };
     const newProps = { ...wrapperProps, visParams: newParams };
-    const component = shallow(<PieComponent {...newProps} />);
+    const component = shallow(<PartitionVisComponent {...newProps} />);
     expect(component.find(Settings).prop('tooltip')).toStrictEqual({ type: TooltipType.None });
   });
 
   it('calls filter callback', () => {
-    const component = shallow(<PieComponent {...wrapperProps} />);
+    const component = shallow(<PartitionVisComponent {...wrapperProps} />);
     component.find(Settings).first().prop('onElementClick')!([
       [
         [
@@ -151,7 +151,7 @@ describe('PieComponent', function () {
       ],
     } as unknown as Datatable;
     const newProps = { ...wrapperProps, visData: newVisData };
-    const component = mount(<PieComponent {...newProps} />);
+    const component = mount(<PartitionVisComponent {...newProps} />);
     expect(findTestSubject(component, 'pieVisualizationError').text()).toEqual('No results found');
   });
 
@@ -180,7 +180,7 @@ describe('PieComponent', function () {
       ],
     } as unknown as Datatable;
     const newProps = { ...wrapperProps, visData: newVisData };
-    const component = mount(<PieComponent {...newProps} />);
+    const component = mount(<PartitionVisComponent {...newProps} />);
     expect(findTestSubject(component, 'pieVisualizationError').text()).toEqual(
       "Pie/donut charts can't render with negative values."
     );

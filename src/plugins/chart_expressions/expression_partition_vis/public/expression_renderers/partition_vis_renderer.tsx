@@ -15,7 +15,7 @@ import { VisualizationContainer } from '../../../../visualizations/public';
 import type { PersistedState } from '../../../../visualizations/public';
 import { KibanaThemeProvider } from '../../../../kibana_react/public';
 
-import { PIE_VIS_EXPRESSION_NAME } from '../../common/constants';
+import { PARTITION_VIS_RENDERER_NAME } from '../../common/constants';
 import { RenderValue } from '../../common/types';
 
 import { VisTypePieDependencies } from '../plugin';
@@ -31,7 +31,7 @@ export const strings = {
     }),
 };
 
-const PieComponent = lazy(() => import('../components/pie_vis_component'));
+const PartitionVisComponent = lazy(() => import('../components/partition_vis_component'));
 
 function shouldShowNoResultsMessage(visData: Datatable | undefined): boolean {
   const rows: object[] | undefined = visData?.rows;
@@ -40,10 +40,10 @@ function shouldShowNoResultsMessage(visData: Datatable | undefined): boolean {
   return Boolean(isZeroHits);
 }
 
-export const getPieVisRenderer: (
+export const getPartitionVisRenderer: (
   deps: VisTypePieDependencies
 ) => ExpressionRenderDefinition<RenderValue> = ({ theme, palettes, getStartDeps }) => ({
-  name: PIE_VIS_EXPRESSION_NAME,
+  name: PARTITION_VIS_RENDERER_NAME,
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,
@@ -61,7 +61,7 @@ export const getPieVisRenderer: (
       <I18nProvider>
         <KibanaThemeProvider theme$={services.kibanaTheme.theme$}>
           <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
-            <PieComponent
+            <PartitionVisComponent
               chartsThemeService={theme}
               palettesRegistry={palettesRegistry}
               visParams={visConfig}

@@ -55,7 +55,10 @@ import {
 import { ChartSplit, SMALL_MULTIPLES_ID } from './chart_split';
 import { VisualizationNoResults } from './visualization_noresults';
 import { VisTypePiePluginStartDependencies } from '../plugin';
-import { pieChartWrapperStyle, pieChartContainerStyleFactory } from './pie_vis_component.styles';
+import {
+  partitionVisWrapperStyle,
+  partitionVisContainerStyleFactory,
+} from './partition_vis_component.styles';
 
 declare global {
   interface Window {
@@ -65,7 +68,7 @@ declare global {
     _echDebugStateFlag?: boolean;
   }
 }
-export interface PieComponentProps {
+export interface PartitionVisComponentProps {
   visParams: PieVisParams;
   visData: Datatable;
   uiState: PersistedState;
@@ -77,7 +80,7 @@ export interface PieComponentProps {
   syncColors: boolean;
 }
 
-const PieComponent = (props: PieComponentProps) => {
+const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const theme = useEuiTheme();
   const chartTheme = props.chartsThemeService.useChartsTheme();
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
@@ -326,11 +329,11 @@ const PieComponent = (props: PieComponentProps) => {
   const canShowPieChart = !isAllZeros && !hasNegative;
 
   return (
-    <div css={pieChartContainerStyleFactory(theme.euiTheme)} data-test-subj="visTypePieChart">
+    <div css={partitionVisContainerStyleFactory(theme.euiTheme)} data-test-subj="visTypePieChart">
       {!canShowPieChart ? (
         <VisualizationNoResults hasNegativeValues={hasNegative} />
       ) : (
-        <div css={pieChartWrapperStyle} ref={parentRef}>
+        <div css={partitionVisWrapperStyle} ref={parentRef}>
           <LegendToggle
             onClick={toggleLegend}
             showLegend={showLegend}
@@ -411,4 +414,4 @@ const PieComponent = (props: PieComponentProps) => {
 };
 
 // eslint-disable-next-line import/no-default-export
-export default memo(PieComponent);
+export default memo(PartitionVisComponent);

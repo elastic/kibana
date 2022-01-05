@@ -15,6 +15,7 @@ import {
 } from '../types/expression_renderers';
 import { pieVisFunction } from './pie_vis_function';
 import { Datatable } from '../../../../expressions/common/expression_types/specs';
+import { PARTITION_LABELS_VALUE } from '../constants';
 
 describe('interpreter/functions#pie', () => {
   const fn = functionWrapper(pieVisFunction());
@@ -39,7 +40,7 @@ describe('interpreter/functions#pie', () => {
       name: 'kibana_palette',
     },
     labels: {
-      type: 'pie_labels_value',
+      type: PARTITION_LABELS_VALUE,
       show: false,
       values: true,
       position: LabelPositions.DEFAULT,

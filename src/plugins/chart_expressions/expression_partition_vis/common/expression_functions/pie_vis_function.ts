@@ -10,7 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { EmptySizeRatios, PieVisParams } from '../types/expression_renderers';
 import { prepareLogTable } from '../../../../visualizations/common/prepare_log_table';
 import { PieVisExpressionFunctionDefinition } from '../types/expression_functions';
-import { PIE_LABELS_FUNCTION, PIE_LABELS_VALUE, PIE_VIS_EXPRESSION_NAME } from '../constants';
+import {
+  PARTITION_LABELS_FUNCTION,
+  PARTITION_LABELS_VALUE,
+  PIE_VIS_EXPRESSION_NAME,
+  PARTITION_VIS_RENDERER_NAME,
+} from '../constants';
 
 export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
   name: PIE_VIS_EXPRESSION_NAME,
@@ -117,11 +122,11 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       default: '{palette}',
     },
     labels: {
-      types: [PIE_LABELS_VALUE],
+      types: [PARTITION_LABELS_VALUE],
       help: i18n.translate('expressionPartitionVis.pieVis.function.args.labelsHelpText', {
         defaultMessage: 'Pie labels config',
       }),
-      default: `{${PIE_LABELS_FUNCTION}}`,
+      default: `{${PARTITION_LABELS_FUNCTION}}`,
     },
   },
   fn(context, args, handlers) {
@@ -168,7 +173,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
 
     return {
       type: 'render',
-      as: PIE_VIS_EXPRESSION_NAME,
+      as: PARTITION_VIS_RENDERER_NAME,
       value: {
         visData: context,
         visConfig,

@@ -10,7 +10,7 @@ import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { Datatable } from '../../../../expressions';
 import { Render } from '../../../../presentation_util/public/__stories__';
-import { getPieVisRenderer } from '../expression_renderers';
+import { getPartitionVisRenderer } from '../expression_renderers';
 import { LabelPositions, RenderValue, ValueFormats } from '../../common/types';
 import { palettes, theme, getStartDeps } from '../__mocks__';
 
@@ -108,8 +108,8 @@ const containerSize = {
   height: '700px',
 };
 
-const pieRenderer = getPieVisRenderer({ palettes, theme, getStartDeps });
+const partitionVisRenderer = getPartitionVisRenderer({ palettes, theme, getStartDeps });
 
 storiesOf('renderers/pieVis', module).add('Default', () => {
-  return <Render renderer={() => pieRenderer} config={config} {...containerSize} />;
+  return <Render renderer={() => partitionVisRenderer} config={config} {...containerSize} />;
 });

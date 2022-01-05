@@ -11,7 +11,7 @@ import { Datatable, DatatableColumn } from '../../../../expressions/common';
 import { SerializedFieldFormat } from '../../../../field_formats/common';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
 import { PaletteOutput } from '../../../../charts/common';
-import { ExpressionValuePieLabels } from './expression_functions';
+import { ExpressionValuePartitionLabels } from './expression_functions';
 
 export enum EmptySizeRatios {
   SMALL = 0.3,
@@ -67,7 +67,7 @@ export interface PieVisConfig extends PieCommonParams {
   metric: ExpressionValueVisDimension;
   splitColumn?: ExpressionValueVisDimension[];
   splitRow?: ExpressionValueVisDimension[];
-  labels: ExpressionValuePieLabels;
+  labels: ExpressionValuePartitionLabels;
   palette: PaletteOutput;
 }
 

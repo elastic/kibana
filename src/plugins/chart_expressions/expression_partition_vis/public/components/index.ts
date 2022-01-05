@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './pie_vis_component';
+export * from './partition_vis_component';

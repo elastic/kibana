@@ -10,8 +10,8 @@ import { FieldFormatsStart } from '../../../field_formats/public';
 import { CoreSetup, CoreStart, ThemeServiceStart } from '../../../../core/public';
 import { ChartsPluginSetup } from '../../../charts/public';
 import { DataPublicPluginStart } from '../../../data/public';
-import { pieLabelsFunction, pieVisFunction } from '../common';
-import { getPieVisRenderer } from './expression_renderers';
+import { partitionLabelsFunction, pieVisFunction } from '../common';
+import { getPartitionVisRenderer } from './expression_renderers';
 import {
   ExpressionPartitionVisPluginSetup,
   ExpressionPartitionVisPluginStart,
@@ -40,7 +40,7 @@ export class ExpressionPartitionVisPlugin {
     core: CoreSetup<VisTypePiePluginStartDependencies>,
     { expressions, charts }: SetupDeps
   ): ExpressionPartitionVisPluginSetup {
-    expressions.registerFunction(pieLabelsFunction);
+    expressions.registerFunction(partitionLabelsFunction);
     expressions.registerFunction(pieVisFunction);
 
     const getStartDeps = async () => {
@@ -51,7 +51,7 @@ export class ExpressionPartitionVisPlugin {
     };
 
     expressions.registerRenderer(
-      getPieVisRenderer({ theme: charts.theme, palettes: charts.palettes, getStartDeps })
+      getPartitionVisRenderer({ theme: charts.theme, palettes: charts.palettes, getStartDeps })
     );
   }
 

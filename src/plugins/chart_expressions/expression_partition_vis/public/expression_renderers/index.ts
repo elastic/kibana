@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { getPieVisRenderer } from './pie_vis_renderer';
+export { getPartitionVisRenderer } from './partition_vis_renderer';

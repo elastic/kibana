@@ -9,15 +9,15 @@
 import { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-export const pieChartWrapperStyle = css({
+export const partitionVisWrapperStyle = css({
   display: 'flex',
   flex: '1 1 auto',
   minHeight: 0,
   minWidth: 0,
 });
 
-export const pieChartContainerStyleFactory = (theme: EuiThemeComputed) => css`
-  ${pieChartWrapperStyle};
+export const partitionVisContainerStyleFactory = (theme: EuiThemeComputed) => css`
+  ${partitionVisWrapperStyle};
 
   position: absolute;
   top: 0;

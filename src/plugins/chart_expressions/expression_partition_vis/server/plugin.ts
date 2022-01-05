@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/server';
-import { pieLabelsFunction, pieVisFunction } from '../common';
+import { partitionLabelsFunction, pieVisFunction } from '../common';
 import {
   ExpressionPartitionVisPluginSetup,
   ExpressionPartitionVisPluginStart,
@@ -24,7 +24,7 @@ export class ExpressionPartitionVisPlugin
     >
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps) {
-    expressions.registerFunction(pieLabelsFunction);
+    expressions.registerFunction(partitionLabelsFunction);
     expressions.registerFunction(pieVisFunction);
   }
 

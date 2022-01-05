@@ -10,7 +10,8 @@ export const PLUGIN_ID = 'expressionPartitionVis';
 export const PLUGIN_NAME = 'expressionPartitionVis';
 
 export const PIE_VIS_EXPRESSION_NAME = 'pie_vis';
-export const PIE_LABELS_VALUE = 'pie_labels_value';
-export const PIE_LABELS_FUNCTION = 'pie_labels';
+export const PARTITION_VIS_RENDERER_NAME = 'partition_vis';
+export const PARTITION_LABELS_VALUE = 'partition_labels_value';
+export const PARTITION_LABELS_FUNCTION = 'partition_labels';
 
 export const DEFAULT_PERCENT_DECIMALS = 2;
