@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiPageHeaderProps } from '@elastic/eui';
+import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
 import { CERTIFICATES_ROUTE, OVERVIEW_ROUTE } from '../../common/constants';
 import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { ClientPluginsStart } from './plugin';
@@ -22,7 +22,12 @@ interface Props {
   pageHeader?: EuiPageHeaderProps;
 }
 
-export const UptimePageTemplateComponent: React.FC<Props> = ({ path, pageHeader, children }) => {
+export const UptimePageTemplateComponent: React.FC<Props & EuiPageTemplateProps> = ({
+  path,
+  pageHeader,
+  children,
+  ...pageTemplateProps
+}) => {
   const {
     services: { observability },
   } = useKibana<ClientPluginsStart>();
@@ -60,6 +65,7 @@ export const UptimePageTemplateComponent: React.FC<Props> = ({ path, pageHeader,
         pageHeader={pageHeader}
         data-test-subj={noDataConfig ? 'data-missing' : undefined}
         noDataConfig={isMainRoute && !loading ? noDataConfig : undefined}
+        {...pageTemplateProps}
       >
         {showLoading && <EmptyStateLoading />}
         <div
