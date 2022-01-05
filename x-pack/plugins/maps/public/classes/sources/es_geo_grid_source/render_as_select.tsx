@@ -40,7 +40,9 @@ export function RenderAsSelect(props: {
 
   function onChange(id: string) {
     const data = options.find((option) => option.id === id);
-    props.onChange(data?.value as RENDER_AS);
+    if (data) {
+      props.onChange(data.value as RENDER_AS);
+    }
   }
 
   return (
