@@ -96,6 +96,7 @@ export const DatavisualizerSelector: FC = () => {
         <EuiFlexGroup justifyContent="spaceAround" gutterSize="xl">
           <EuiFlexItem>
             <EuiCard
+              hasBorder
               icon={<EuiIcon size="xxl" type="addDataApp" />}
               title={
                 <FormattedMessage
@@ -127,6 +128,7 @@ export const DatavisualizerSelector: FC = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiCard
+              hasBorder
               icon={<EuiIcon size="xxl" type="dataVisualizer" />}
               title={
                 <FormattedMessage
@@ -163,6 +165,7 @@ export const DatavisualizerSelector: FC = () => {
             <EuiFlexGroup justifyContent="spaceAround" gutterSize="xl">
               <EuiFlexItem grow={false} style={{ width: '600px' }}>
                 <EuiCard
+                  hasBorder
                   title={
                     <FormattedMessage
                       id="xpack.ml.datavisualizer.selector.startTrialTitle"

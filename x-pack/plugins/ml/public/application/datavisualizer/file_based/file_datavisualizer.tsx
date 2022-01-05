@@ -7,6 +7,7 @@
 
 import React, { FC, Fragment, useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { useMlKibana, useMlLocator } from '../../contexts/kibana';
@@ -16,6 +17,7 @@ import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import type { ResultLink, FileDataVisualizerSpec } from '../../../../../data_visualizer/public';
+import { MlPageHeader } from '../../components/page_header';
 
 interface GetUrlParams {
   indexPatternId: string;
@@ -106,6 +108,12 @@ export const FileDataVisualizerPage: FC = () => {
     <Fragment>
       {FileDataVisualizer !== null ? (
         <>
+          <MlPageHeader>
+            <FormattedMessage
+              id="xpack.ml.dataVisualizer.pageHeader"
+              defaultMessage="Data Visualizer"
+            />
+          </MlPageHeader>
           <FileDataVisualizer additionalLinks={links} />
         </>
       ) : null}
