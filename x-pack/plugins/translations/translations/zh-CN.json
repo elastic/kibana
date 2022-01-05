@@ -10729,7 +10729,6 @@
     "xpack.fleet.policyForm.deletePolicyGroupTitle": "删除策略",
     "xpack.fleet.policyForm.generalSettingsGroupDescription": "为您的代理策略选择名称和描述。",
     "xpack.fleet.policyForm.generalSettingsGroupTitle": "常规设置",
-    "xpack.fleet.policyForm.unableToDeleteDefaultPolicyText": "默认策略无法删除",
     "xpack.fleet.preconfiguration.duplicatePackageError": "配置中指定的软件包重复：{duplicateList}",
     "xpack.fleet.preconfiguration.missingIDError": "{agentPolicyName} 缺失 `id` 字段。`id` 是必需的，但标记为 is_default 或 is_default_fleet_server 的策略除外。",
     "xpack.fleet.preconfiguration.packageMissingError": "无法添加 [{agentPolicyName}]。[{pkgName}] 未安装，请将 [{pkgName}] 添加到 [{packagesConfigValue}] 或将其从 [{packagePolicyName}] 中移除。",

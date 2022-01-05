@@ -355,9 +355,6 @@
           "enabled": false,
           "type": "object"
         },
-        "default_fleet_server": {
-          "type": "boolean"
-        },
         "policy_id": {
           "type": "keyword"
         },

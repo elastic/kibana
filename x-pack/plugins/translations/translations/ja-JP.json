@@ -10623,7 +10623,6 @@
     "xpack.fleet.policyForm.deletePolicyGroupTitle": "ポリシーを削除",
     "xpack.fleet.policyForm.generalSettingsGroupDescription": "エージェントポリシーの名前と説明を選択してください。",
     "xpack.fleet.policyForm.generalSettingsGroupTitle": "一般設定",
-    "xpack.fleet.policyForm.unableToDeleteDefaultPolicyText": "デフォルトポリシーは削除できません",
     "xpack.fleet.preconfiguration.duplicatePackageError": "構成で重複するパッケージが指定されています。{duplicateList}",
     "xpack.fleet.preconfiguration.missingIDError": "{agentPolicyName}には「id」フィールドがありません。ポリシーのis_defaultまたはis_default_fleet_serverに設定されている場合をのぞき、「id」は必須です。",
     "xpack.fleet.preconfiguration.packageMissingError": "[{agentPolicyName}]を追加できませんでした。[{pkgName}]がインストールされていません。[{pkgName}]を[{packagesConfigValue}]に追加するか、[{packagePolicyName}]から削除してください。",

@@ -153,7 +153,7 @@ export async function generateEnrollmentAPIKey(
   if (data.agentPolicyId) {
     await validateAgentPolicyId(soClient, data.agentPolicyId);
   }
-  const agentPolicyId = data.agentPolicyId; // TODO agentPolicyId should be required, BWC?
+  const agentPolicyId = data.agentPolicyId;
 
   if (providedKeyName && !forceRecreate) {
     let hasMore = true;
