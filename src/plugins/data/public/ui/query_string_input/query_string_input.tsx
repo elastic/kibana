@@ -326,8 +326,8 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
         this.onQueryStringChange(query);
 
         if (
-          (newSelectionStart !== null && this.inputRef?.selectionStart !== newSelectionStart) ||
-          (newSelectionEnd !== null && this.inputRef?.selectionEnd !== newSelectionEnd)
+          this.inputRef?.selectionStart !== newSelectionStart ||
+          this.inputRef?.selectionEnd !== newSelectionEnd
         ) {
           this.setState({
             selectionStart: newSelectionStart,
