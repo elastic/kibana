@@ -40,8 +40,8 @@ as uiSettings within the code.
 |Console provides the user with tools for storing and executing requests against Elasticsearch.
 
 
-|{kib-repo}blob/{branch}/src/plugins/controls/readme.mdx[controls]
-|undefined
+|{kib-repo}blob/{branch}/src/plugins/controls/README.mdx[controls]
+|The Controls plugin contains Embeddables which can be used to add user-friendly interactivity to apps.
 
 
 |{kib-repo}blob/{branch}/src/plugins/custom_integrations/README.md[customIntegrations]
