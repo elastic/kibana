@@ -60,6 +60,9 @@ function updateLastRefresh(timeRange?: OnRefreshProps) {
 export const DatePickerWrapper: FC = () => {
   const { services } = useMlKibana();
   const config = services.uiSettings;
+
+  const { httpService } = services.mlServices;
+
   const { timefilter, history } = services.data.query.timefilter;
 
   const [globalState, setGlobalState] = useUrlState('_g');
@@ -75,6 +78,7 @@ export const DatePickerWrapper: FC = () => {
     [setGlobalState]
   );
 
+  const [isLoading, setIsLoading] = useState(false);
   const [time, setTime] = useState(timefilter.getTime());
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges());
   const [isAutoRefreshSelectorEnabled, setIsAutoRefreshSelectorEnabled] = useState(
@@ -102,6 +106,13 @@ export const DatePickerWrapper: FC = () => {
   useEffect(() => {
     const subscriptions = new Subscription();
     const refreshIntervalUpdate$ = timefilter.getRefreshIntervalUpdate$();
+
+    subscriptions.add(
+      httpService.getLoadingCount$.subscribe((v) => {
+        setIsLoading(v !== 0);
+      })
+    );
+
     if (refreshIntervalUpdate$ !== undefined) {
       subscriptions.add(
         refreshIntervalUpdate$.subscribe((r) => {
@@ -163,6 +174,7 @@ export const DatePickerWrapper: FC = () => {
     >
       <EuiFlexItem grow={false}>
         <EuiSuperDatePicker
+          isLoading={isLoading}
           start={time.from}
           end={time.to}
           isPaused={isPaused}
@@ -179,7 +191,14 @@ export const DatePickerWrapper: FC = () => {
 
       {isTimeRangeSelectorEnabled ? null : (
         <EuiFlexItem grow={false}>
-          <EuiButton fill color="primary" iconType={'refresh'} onClick={() => updateLastRefresh()}>
+          <EuiButton
+            fill
+            color="primary"
+            iconType={'refresh'}
+            onClick={() => updateLastRefresh()}
+            data-test-subj={`mlRefreshPageButton${isLoading ? ' loading' : ' loaded'}`}
+            isLoading={isLoading}
+          >
             <FormattedMessage id="xpack.ml.pageRefreshButton" defaultMessage="Refresh" />
           </EuiButton>
         </EuiFlexItem>

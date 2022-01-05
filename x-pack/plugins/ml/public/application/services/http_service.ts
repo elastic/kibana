@@ -113,7 +113,11 @@ function fromHttpHandler<T>(input: string, init?: RequestInit): Observable<T> {
  * ML Http Service
  */
 export class HttpService {
-  constructor(private httpStart: HttpStart) {}
+  public getLoadingCount$: Observable<number>;
+
+  constructor(private httpStart: HttpStart) {
+    this.getLoadingCount$ = httpStart.getLoadingCount$();
+  }
 
   private getResultHeaders(headers: HeadersInit): HeadersInit {
     return {
