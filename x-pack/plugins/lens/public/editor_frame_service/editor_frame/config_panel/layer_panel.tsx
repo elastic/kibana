@@ -64,6 +64,7 @@ export function LayerPanel(
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
     initialActiveDimensionState
   );
+  const [hideTooltip, setHideTooltip] = useState<boolean>(false);
 
   const {
     framePublicAPI,
@@ -459,6 +460,8 @@ export function LayerPanel(
                             layerDatasource={layerDatasource}
                             layerIndex={layerIndex}
                             layerId={layerId}
+                            onDragStart={() => setHideTooltip(true)}
+                            onDragEnd={() => setHideTooltip(false)}
                             onDrop={onDrop}
                           >
                             <div className="lnsLayerPanel__dimension">
@@ -506,6 +509,7 @@ export function LayerPanel(
                                     columnId: accessorConfig.columnId,
                                     groupId: group.groupId,
                                     filterOperations: group.filterOperations,
+                                    hideTooltip,
                                     invalid: group.invalid,
                                     invalidMessage: group.invalidMessage,
                                   }}

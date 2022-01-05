@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n-react';
-import { isGroupByFieldsEnabled } from '../../lib/check_ui_restrictions';
+import { isGroupByFieldsEnabled } from '../../../../common/check_ui_restrictions';
 
 function GroupBySelectUi(props) {
   const { intl, uiRestrictions } = props;
