@@ -317,7 +317,7 @@ export function ServiceProfilingFlamegraph({
       <EuiFlexItem grow>
         <Chart size={chartSize}>
           <Settings
-            theme={[themeOverrides, chartTheme]}
+            theme={[themeOverrides, ...chartTheme]}
             tooltip={{
               customTooltip: (info) => (
                 <CustomTooltip

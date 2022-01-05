@@ -10,11 +10,11 @@ import {
   Chart,
   CurveType,
   LineSeries,
+  PartialTheme,
   ScaleType,
   Settings,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import { merge } from 'lodash';
 import React from 'react';
 import { useChartTheme } from '../../../../../../observability/public';
 import { Coordinate } from '../../../../../typings/timeseries';
@@ -60,7 +60,7 @@ export function SparkPlot({
   const comparisonChartTheme = getComparisonChartTheme(theme);
   const hasComparisonSeries = !!comparisonSeries?.length;
 
-  const sparkplotChartTheme = merge({}, defaultChartTheme, {
+  const sparkplotChartTheme: PartialTheme = {
     chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
     lineSeriesStyle: {
       point: { opacity: 0 },
@@ -69,7 +69,7 @@ export function SparkPlot({
       point: { opacity: 0 },
     },
     ...(hasComparisonSeries ? comparisonChartTheme : {}),
-  });
+  };
 
   const colorValue = theme.eui[color];
 
@@ -95,7 +95,7 @@ export function SparkPlot({
         {hasValidTimeseries(series) ? (
           <Chart size={chartSize}>
             <Settings
-              theme={sparkplotChartTheme}
+              theme={[sparkplotChartTheme, ...defaultChartTheme]}
               showLegend={false}
               tooltip="none"
             />
