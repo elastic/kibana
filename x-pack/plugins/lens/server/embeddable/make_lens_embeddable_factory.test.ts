@@ -21,4 +21,53 @@ describe('saved object migrations and embeddable migrations', () => {
       );
     }
   });
+
+  test('should properly apply a filter migration within a lens visualization', () => {
+    const migrationVersion = 'some-version';
+
+    const lensVisualizationDoc = {
+      attributes: {
+        state: {
+          filters: [
+            {
+              filter: 1,
+              migrated: false,
+            },
+            {
+              filter: 2,
+              migrated: false,
+            },
+          ],
+        },
+      },
+    };
+
+    const embeddableMigrationVersions = makeLensEmbeddableFactory({
+      [migrationVersion]: (filterState) => {
+        return {
+          ...filterState,
+          migrated: true,
+        };
+      },
+    })()?.migrations;
+
+    const migratedLensDoc = embeddableMigrationVersions?.[migrationVersion](lensVisualizationDoc);
+
+    expect(migratedLensDoc).toEqual({
+      attributes: {
+        state: {
+          filters: [
+            {
+              filter: 1,
+              migrated: true,
+            },
+            {
+              filter: 2,
+              migrated: true,
+            },
+          ],
+        },
+      },
+    });
+  });
 });

@@ -18,6 +18,7 @@ import {
   commonRenameFilterReferences,
   commonRenameOperationsForFormula,
   commonUpdateVisLayerType,
+  getLensFilterMigrations,
 } from '../migrations/common_migrations';
 import {
   LensDocShape713,
@@ -32,7 +33,7 @@ export const makeLensEmbeddableFactory =
   (filterMigrations: MigrateFunctionsObject) => (): EmbeddableRegistryDefinition => {
     return {
       id: DOC_TYPE,
-      migrations: mergeMigrationFunctionMaps(filterMigrations, {
+      migrations: mergeMigrationFunctionMaps(getLensFilterMigrations(filterMigrations), {
         // This migration is run in 7.13.1 for `by value` panels because the 7.13 release window was missed.
         '7.13.1': (state) => {
           const lensState = state as unknown as { attributes: LensDocShapePre712 };
