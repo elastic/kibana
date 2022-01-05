@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, get, omit, has, flow, forOwn, mergeWith } from 'lodash';
+import { cloneDeep, get, omit, has, flow, forOwn, mergeWith, set, PropertyPath } from 'lodash';
 
 import type {
   SavedObjectMigrationContext,
@@ -16,6 +16,7 @@ import type {
 } from 'kibana/server';
 
 import { MigrateFunction, MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
+import { SerializableRecord } from '@kbn/utility-types';
 import {
   DEFAULT_QUERY_LANGUAGE,
   INDEX_PATTERN_SAVED_OBJECT_TYPE,
@@ -1193,27 +1194,38 @@ const visualizationSavedObjectTypeMigrations = {
   '8.0.0': flow(removeMarkdownLessFromTSVB),
 };
 
-const getApplySearchSourceMigrationToVisualization = (
-  migrateSearchSource: MigrateFunction<SerializedSearchSourceFields>
+const getApplyMigrationWithinObject = <
+  T extends SerializableRecord = SerializableRecord,
+  V extends SerializableRecord = SerializableRecord
+>(
+  migrate: MigrateFunction<V>,
+  path: PropertyPath,
+  {
+    serialize,
+    deserialize,
+  }: { serialize: (obj: any) => string; deserialize: (serialized: any) => any } = {
+    serialize: (obj) => obj,
+    deserialize: (obj) => obj,
+  }
 ) => {
-  return (doc: SavedObjectUnsanitizedDoc<any>) => {
-    const serializedSearchSourceFields = doc.attributes.kibanaSavedObjectMeta?.searchSourceJSON;
+  return (obj: T) => {
+    const cloned = cloneDeep(obj);
+    const subObjBefore = get(cloned, path);
 
-    if (!serializedSearchSourceFields) return doc;
+    if (!subObjBefore) return cloned;
 
-    const searchSourceFields = JSON.parse(serializedSearchSourceFields);
+    const migrateWithSerialization = (sub: any) => serialize(migrate(deserialize(sub)));
 
-    const migrated = migrateSearchSource(searchSourceFields);
+    let subObjAfter;
+    if (Array.isArray(subObjBefore)) {
+      subObjAfter = subObjBefore.map((element) => migrateWithSerialization(element));
+    } else {
+      subObjAfter = migrateWithSerialization(subObjBefore);
+    }
 
-    return {
-      ...doc,
-      attributes: {
-        ...doc.attributes,
-        kibanaSavedObjectMeta: {
-          searchSourceJSON: JSON.stringify(migrated),
-        },
-      },
-    };
+    set(cloned, path, subObjAfter);
+
+    return cloned;
   };
 };
 
@@ -1233,18 +1245,33 @@ const mergeSavedObjectMigrationMaps = (
 };
 
 /**
- * This creates a migration map that applies search source migrations within visualization documents
+ * Returns a MigrateFunctionsObject with migrate functions that are set up to
+ * apply the original migrations _within_ a larger object.
  */
-const getVisualizationSearchSourceMigrations = (searchSourceMigrations: MigrateFunctionsObject) => {
-  const migrationMap: MigrateFunctionsObject = {};
-  for (const version in searchSourceMigrations) {
-    if (searchSourceMigrations.hasOwnProperty(version)) {
-      migrationMap[version] = getApplySearchSourceMigrationToVisualization(
-        searchSourceMigrations[version]
-      );
+const getIntraObjectMigrationMap = (
+  objectMigrationMap: MigrateFunctionsObject,
+  getApplyIntraObjectMigration: (migration: MigrateFunction) => MigrateFunction
+) => {
+  const intraObjectMigrationMap: MigrateFunctionsObject = {};
+  for (const version in objectMigrationMap) {
+    if (objectMigrationMap.hasOwnProperty(version)) {
+      intraObjectMigrationMap[version] = getApplyIntraObjectMigration(objectMigrationMap[version]);
     }
   }
-  return migrationMap;
+  return intraObjectMigrationMap;
+};
+
+const getApplySearchSourceMigrationWithinVisualization = (
+  migrateSearchSource: MigrateFunction<SerializedSearchSourceFields>
+) => {
+  return getApplyMigrationWithinObject(
+    migrateSearchSource,
+    'attributes.kibanaSavedObjectMeta.searchSourceJSON',
+    {
+      serialize: JSON.stringify,
+      deserialize: JSON.parse,
+    }
+  );
 };
 
 export const getAllMigrations = (
@@ -1252,5 +1279,8 @@ export const getAllMigrations = (
 ): SavedObjectMigrationMap =>
   mergeSavedObjectMigrationMaps(
     visualizationSavedObjectTypeMigrations,
-    getVisualizationSearchSourceMigrations(searchSourceMigrations)
+    getIntraObjectMigrationMap(
+      searchSourceMigrations,
+      getApplySearchSourceMigrationWithinVisualization
+    )
   );
