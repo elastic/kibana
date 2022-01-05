@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Bluebird from 'bluebird';
 import { get } from 'lodash';
 import { LegacyRequest, Cluster, Bucket } from '../../types';
 import { LOGSTASH } from '../../../common/constants';
