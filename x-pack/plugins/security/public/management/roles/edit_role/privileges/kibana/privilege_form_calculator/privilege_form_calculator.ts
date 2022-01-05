@@ -93,6 +93,7 @@ export class PrivilegeFormCalculator {
    *
    * @param featureId the feature id
    * @param privilegeIndex the index of the kibana privileges role component
+   * @param allSpacesSelected indicates if the privilege form is configured to grant access to all spaces.
    */
   public getEffectivePrimaryFeaturePrivilege(
     featureId: string,
