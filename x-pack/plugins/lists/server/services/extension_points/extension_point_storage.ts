@@ -9,13 +9,11 @@ import type { Logger } from 'kibana/server';
 
 import {
   ExtensionPoint,
+  ExtensionPointStorageClientInterface,
   ExtensionPointStorageInterface,
   NarrowExtensionPointToType,
 } from './types';
-import {
-  ExtensionPointStorageClient,
-  ExtensionPointStorageClientInterface,
-} from './extension_point_storage_client';
+import { ExtensionPointStorageClient } from './extension_point_storage_client';
 
 export class ExtensionPointStorage implements ExtensionPointStorageInterface {
   private readonly store = new Map<ExtensionPoint['type'], Set<ExtensionPoint>>();

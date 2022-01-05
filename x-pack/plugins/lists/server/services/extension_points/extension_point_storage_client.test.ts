@@ -11,12 +11,12 @@ import { CreateExceptionListItemOptions } from '../exception_lists/exception_lis
 import { getCreateExceptionListItemOptionsMock } from '../exception_lists/exception_list_client.mock';
 import { DataValidationError } from '../exception_lists/utils/errors';
 
-import { ExtensionPointStorageClientInterface } from './extension_point_storage_client';
 import { ExtensionPointError } from './errors';
 import {
   ExceptionListPreUpdateItemServerExtension,
   ExceptionsListPreCreateItemServerExtension,
   ExtensionPoint,
+  ExtensionPointStorageClientInterface,
   ExtensionPointStorageInterface,
 } from './types';
 import { createExtensionPointStorageMock } from './extension_point_storage.mock';

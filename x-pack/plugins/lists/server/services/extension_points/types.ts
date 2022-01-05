@@ -13,8 +13,6 @@ import {
   UpdateExceptionListItemOptions,
 } from '../exception_lists/exception_list_client_types';
 
-import { ExtensionPointStorageClientInterface } from './extension_point_storage_client';
-
 export type ServerExtensionCallback<A extends object | void = void, R = unknown> = (
   args: A
 ) => Promise<R>;
@@ -70,6 +68,22 @@ export type NarrowExtensionPointToType<T extends ExtensionPoint['type']> = {
 export type ExtensionPointCallbackArgument = UnionToIntersection<
   PromiseType<ReturnType<ExtensionPoint['callback']>>
 >;
+
+export interface ExtensionPointStorageClientInterface {
+  get<T extends ExtensionPoint['type']>(
+    extensionType: T
+  ): Set<NarrowExtensionPointToType<T>> | undefined;
+
+  pipeRun<
+    T extends ExtensionPoint['type'],
+    D extends NarrowExtensionPointToType<T> = NarrowExtensionPointToType<T>,
+    P extends Parameters<D['callback']> = Parameters<D['callback']>
+  >(
+    extensionType: T,
+    initialCallbackInput: P[0],
+    callbackResponseValidator?: (data: P[0]) => Error | undefined
+  ): Promise<P[0]>;
+}
 
 export interface ExtensionPointStorageInterface {
   add(extension: ExtensionPoint): void;
