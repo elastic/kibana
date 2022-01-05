@@ -6,72 +6,79 @@
  */
 
 import React from 'react';
-import uuid from 'uuid';
-import { waitFor } from '@testing-library/react';
+import { waitFor, act } from '@testing-library/react';
 import * as reactTestingLibrary from '@testing-library/react';
-import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
-import { EventFiltersHttpService } from '../../../../../event_filters/service';
+import {
+  AppContextTestRender,
+  createAppRootMockRenderer,
+} from '../../../../../../../common/mock/endpoint';
+
+import { eventFiltersListQueryHttpMock } from '../../../../../event_filters/test_utils';
 import { FleetIntegrationEventFiltersCard } from './fleet_integration_event_filters_card';
+import { EndpointDocGenerator } from '../../../../../../../../common/endpoint/generate_data';
+import { getPolicyEventFiltersPath } from '../../../../../../common/routing';
+import { PolicyData } from '../../../../../../../../common/endpoint/types';
+import { getFoundExceptionListItemSchemaMock } from '../../../../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 
-jest.mock('../../../../../event_filters/service');
-
-const EventFiltersHttpServiceMock = EventFiltersHttpService as jest.Mock;
+const endpointGenerator = new EndpointDocGenerator('seed');
 
 describe('Fleet integration policy endpoint security event filters card', () => {
-  const policyId = uuid.v4();
-  const mockedContext = createAppRootMockRenderer();
-  const renderComponent = () => {
-    return mockedContext.render(<FleetIntegrationEventFiltersCard policyId={policyId} />);
-  };
+  let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
+  let renderResult: ReturnType<AppContextTestRender['render']>;
+  let history: AppContextTestRender['history'];
+  let mockedContext: AppContextTestRender;
+  let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
+  let policy: PolicyData;
+
+  beforeEach(() => {
+    policy = endpointGenerator.generatePolicyPackagePolicy();
+    mockedContext = createAppRootMockRenderer();
+    mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
+    ({ history } = mockedContext);
+    render = async () => {
+      await act(async () => {
+        renderResult = mockedContext.render(
+          <FleetIntegrationEventFiltersCard policyId={policy.id} />
+        );
+        await waitFor(mockedApi.responseProvider.eventFiltersList);
+      });
+      return renderResult;
+    };
+
+    history.push(getPolicyEventFiltersPath(policy.id));
+  });
+
   afterEach(() => reactTestingLibrary.cleanup());
 
   it('should call the API and render the card correctly', async () => {
-    EventFiltersHttpServiceMock.mockImplementation(() => {
-      return {
-        getList: () => ({
-          total: 3,
-        }),
-      };
-    });
-    const renderResult = renderComponent();
+    mockedApi.responseProvider.eventFiltersList.mockReturnValue(
+      getFoundExceptionListItemSchemaMock(3)
+    );
 
-    await waitFor(() => {
-      expect(EventFiltersHttpServiceMock).toHaveBeenCalled();
-    });
+    await render();
     expect(renderResult.getByTestId('eventFilters-fleet-integration-card')).toHaveTextContent(
       'Event filters3'
     );
   });
 
   it('should show the card even when no event filters associated with the policy', async () => {
-    EventFiltersHttpServiceMock.mockImplementation(() => {
-      return {
-        getList: () => ({
-          total: 0,
-        }),
-      };
-    });
-    const renderResult = renderComponent();
+    mockedApi.responseProvider.eventFiltersList.mockReturnValue(
+      getFoundExceptionListItemSchemaMock(0)
+    );
 
-    await waitFor(() => {
-      expect(EventFiltersHttpServiceMock).toHaveBeenCalled();
-    });
+    await render();
     expect(renderResult.getByTestId('eventFilters-fleet-integration-card')).toBeTruthy();
   });
 
   it('should have the correct manage event filters link', async () => {
-    EventFiltersHttpServiceMock.mockImplementation(() => {
-      return {
-        getList: () => ({
-          total: 1,
-        }),
-      };
-    });
-    const renderResult = renderComponent();
+    mockedApi.responseProvider.eventFiltersList.mockReturnValue(
+      getFoundExceptionListItemSchemaMock(1)
+    );
 
+    await render();
     expect(renderResult.getByTestId('eventFilters-link-to-exceptions')).toHaveAttribute(
       'href',
-      `/app/security/administration/policy/${policyId}/eventFilters`
+      `/app/security/administration/policy/${policy.id}/eventFilters`
     );
   });
 });
