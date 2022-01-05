@@ -16,7 +16,7 @@ import type {
   TimeRange,
 } from '../../../../../../src/plugins/data/common';
 import type { CspPluginSetup } from '../../types';
-import { CSP_KUBEBEAT_INDEX_NAME } from '../../../common/translations';
+import { CSP_KUBEBEAT_INDEX_NAME } from '../../../common/constants';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
 export const extractErrorMessage = (e: unknown): string =>
