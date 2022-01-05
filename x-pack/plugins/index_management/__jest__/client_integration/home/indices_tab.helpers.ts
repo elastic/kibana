@@ -28,7 +28,6 @@ export interface IndicesTestBed extends TestBed<TestSubjects> {
     getIncludeHiddenIndicesToggleStatus: () => boolean;
     clickIncludeHiddenIndicesToggle: () => void;
     clickDataStreamAt: (index: number) => void;
-    clickContextMenuOption: (subj: string) => void;
     clickManageContextMenuButton: () => void;
     clickContextMenuOption: (optionDataTestSubject: string) => void;
     clickModalConfirm: () => void;
