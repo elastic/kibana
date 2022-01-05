@@ -10,7 +10,6 @@ import React, { useCallback } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 
-import type { FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { KqlMode } from '../../../../timelines/store/timeline/model';
 import { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { KueryFilterQuery } from '../../../../../common/types/timeline';
@@ -42,7 +41,6 @@ const SearchOrFilterGlobalStyle = createGlobalStyle`
 
 interface Props {
   dataProviders: DataProvider[];
-  filterManager: FilterManager;
   filterQuery: KueryFilterQuery;
   from: string;
   fromStr: string;
@@ -89,7 +87,6 @@ export const SearchOrFilter = React.memo<Props>(
     dataProviders,
     isRefreshPaused,
     filters,
-    filterManager,
     filterQuery,
     from,
     fromStr,
@@ -131,7 +128,6 @@ export const SearchOrFilter = React.memo<Props>(
               <QueryBarTimeline
                 dataProviders={dataProviders}
                 filters={filters}
-                filterManager={filterManager}
                 filterQuery={filterQuery}
                 from={from}
                 fromStr={fromStr}

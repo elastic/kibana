@@ -17,8 +17,6 @@ import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell
 import * as i18n from './translations';
 import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
 import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import type { EntityType } from '../../../../../timelines/common';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 
@@ -80,28 +78,18 @@ const AlertsTableComponent: React.FC<Props> = ({
   const alertsFilter = useMemo(() => [...defaultAlertsFilters, ...pageFilters], [pageFilters]);
   const ACTION_BUTTON_COUNT = 4;
 
-  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
-
   useEffect(() => {
     dispatch(
       timelineActions.initializeTGridSettings({
         id: timelineId,
         documentType: i18n.ALERTS_DOCUMENT_TYPE,
-        defaultColumns: alertsDefaultModel.columns.map((c) =>
-          !tGridEnabled && c.initialWidth == null
-            ? {
-                ...c,
-                initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
-              }
-            : c
-        ),
+        defaultColumns: alertsDefaultModel.columns,
         excludedRowRendererIds: alertsDefaultModel.excludedRowRendererIds,
         footerText: i18n.TOTAL_COUNT_OF_ALERTS,
         title: i18n.ALERTS_TABLE_TITLE,
-        // TODO: avoid passing this through the store
       })
     );
-  }, [dispatch, tGridEnabled, timelineId]);
+  }, [dispatch, timelineId]);
 
   const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
 

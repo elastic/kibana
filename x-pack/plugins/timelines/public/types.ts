@@ -8,8 +8,13 @@
 import { ReactElement } from 'react';
 import type { SensorAPI } from 'react-beautiful-dnd';
 import { Store } from 'redux';
+import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { Filter } from '@kbn/es-query';
+import type { FilterManager, DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { Ecs } from '../common/ecs';
+import { BrowserFields, TimelineNonEcsData } from '../common/search_strategy';
+import { ColumnHeaderOptions } from '../common/types/timeline/columns';
 import { CoreStart } from '../../../../src/core/public';
-import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { CasesUiStart } from '../../cases/public';
 import type {
   LastUpdatedAtProps,
@@ -24,7 +29,7 @@ import type { TGridStandaloneProps } from './components/t_grid/standalone';
 import type { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';
 import { HoverActionsConfig } from './components/hover_actions/index';
 import type { AddToCaseActionProps } from './components/actions/timeline/cases/add_to_case_action';
-import { TimelineTabs } from '../common/types';
+import { TimelineTabs, RowRenderer } from '../common/types';
 export * from './store/t_grid';
 export interface TimelinesUIStart {
   getHoverActions: () => HoverActionsConfig;
@@ -74,3 +79,23 @@ export interface StatefulEventContextType {
   enableHostDetailsFlyout: boolean;
   enableIpDetailsFlyout: boolean;
 }
+
+/** The following props are provided to the function called by `renderCellValue` */
+export type CellValueElementProps = EuiDataGridCellValueElementProps & {
+  asPlainText?: boolean;
+  browserFields?: BrowserFields;
+  data: TimelineNonEcsData[];
+  ecsData?: Ecs;
+  eventId: string; // _id
+  globalFilters?: Filter[];
+  filterManager?: FilterManager;
+  header: ColumnHeaderOptions;
+  isDraggable: boolean;
+  isTimeline?: boolean; // Default cell renderer is used for both the alert table and timeline. This allows us to cheaply separate concerns
+  linkValues: string[] | undefined;
+  rowRenderers?: RowRenderer[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setFlyoutAlert?: (data: any) => void;
+  timelineId: string;
+  truncate?: boolean;
+};

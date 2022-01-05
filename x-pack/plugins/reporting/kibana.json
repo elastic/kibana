@@ -24,6 +24,6 @@
     "features"
   ],
   "server": true,
-  "ui": true,
+  "ui": false,
   "requiredBundles": ["kibanaReact", "discover"]
 }

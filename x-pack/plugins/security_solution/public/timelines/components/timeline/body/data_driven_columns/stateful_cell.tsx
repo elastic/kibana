@@ -8,11 +8,8 @@
 import React, { HTMLAttributes, useState } from 'react';
 
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import {
-  ColumnHeaderOptions,
-  CellValueElementProps,
-  TimelineTabs,
-} from '../../../../../../common/types/timeline';
+import type { ColumnHeaderOptions, TimelineTabs } from '../../../../../../common/types/timeline';
+import type { CellValueElementProps } from '../../cell_rendering';
 
 export interface CommonProps {
   className?: string;
@@ -29,7 +26,6 @@ const StatefulCellComponent = ({
   renderCellValue,
   tabType,
   timelineId,
-  filterManager,
 }: {
   ariaRowindex: number;
   data: TimelineNonEcsData[];
@@ -48,7 +44,6 @@ const StatefulCellComponent = ({
         eventId,
         data,
         header,
-        filterManager,
         isDraggable: true,
         isExpandable: true,
         isExpanded: false,

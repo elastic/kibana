@@ -15,12 +15,12 @@ import { TimelineNonEcsData } from '../../../../../../common/search_strategy/tim
 import type { SetEventsLoading, SetEventsDeleted } from '../../../../../../../timelines/common';
 import {
   ColumnHeaderOptions,
-  CellValueElementProps,
   ActionProps,
   ControlColumnProps,
   TimelineTabs,
   RowCellRender,
 } from '../../../../../../common/types/timeline';
+import type { CellValueElementProps } from '../../cell_rendering';
 import { ARIA_COLUMN_INDEX_OFFSET } from '../../helpers';
 import { OnRowSelected } from '../../events';
 import { inputsModel } from '../../../../../common/store';
@@ -234,7 +234,6 @@ const TgridTdCell = ({
   header,
   data,
   ecsData,
-  filterManager,
   hasRowRenderers,
   notesCount,
   renderCellValue,
@@ -264,7 +263,6 @@ const TgridTdCell = ({
             renderCellValue={renderCellValue}
             tabType={tabType}
             timelineId={timelineId}
-            filterManager={filterManager}
           />
         </>
       </EventsTdContent>
@@ -292,7 +290,6 @@ export const DataDrivenColumns = React.memo<DataDrivenColumnProps>(
     data,
     ecsData,
     eventIdToNoteIds,
-    filterManager,
     isEventPinned,
     isEventViewer,
     id: _id,
@@ -406,7 +403,6 @@ export const DataDrivenColumns = React.memo<DataDrivenColumnProps>(
             key={tabType != null ? `${header.id}_${tabType}` : `${header.id}`}
             ariaRowindex={ariaRowindex}
             data={data}
-            filterManager={filterManager}
             ecsData={ecsData}
             hasRowRenderers={hasRowRenderers}
             notesCount={notesCount}
@@ -421,7 +417,6 @@ export const DataDrivenColumns = React.memo<DataDrivenColumnProps>(
         columnHeaders,
         data,
         ecsData,
-        filterManager,
         hasRowRenderers,
         notesCount,
         renderCellValue,

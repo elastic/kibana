@@ -14,7 +14,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useMemo, useEffect, useCallback, useState } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import { Dispatch } from 'redux';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
@@ -33,7 +33,6 @@ import { Footer, footerHeight } from '../footer';
 import { TimelineHeader } from '../header';
 import { calculateTotalPages, combineQueries } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
-import { FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
 import {
   ControlColumnProps,
@@ -202,8 +201,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const { uiSettings } = useKibana().services;
   const ACTION_BUTTON_COUNT = 5;
 
-  const [filterManager] = useState<FilterManager>(new FilterManager(uiSettings));
-
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const kqlQuery: {
     query: string;
@@ -369,7 +366,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             </EuiFlexGroup>
             <TimelineHeaderContainer data-test-subj="timelineHeader">
               <TimelineHeader
-                filterManager={filterManager}
                 show={show && activeTab === TimelineTabs.query}
                 showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
                 status={status}
@@ -387,7 +383,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 activePage={pageInfo.activePage}
                 browserFields={browserFields}
                 data={isBlankTimeline ? EMPTY_EVENTS : events}
-                filterManager={filterManager}
                 id={timelineId}
                 refetch={refetch}
                 renderCellValue={renderCellValue}

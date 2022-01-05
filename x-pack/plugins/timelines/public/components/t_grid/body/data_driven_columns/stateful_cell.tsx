@@ -9,10 +9,8 @@ import React, { HTMLAttributes, useState } from 'react';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 
 import { TimelineTabs } from '../../../../../common/types/timeline';
-import type {
-  CellValueElementProps,
-  ColumnHeaderOptions,
-} from '../../../../../common/types/timeline';
+import type { ColumnHeaderOptions } from '../../../../../common/types/timeline';
+import type { CellValueElementProps } from '../../../../types';
 
 export interface CommonProps {
   className?: string;

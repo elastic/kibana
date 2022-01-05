@@ -40,7 +40,6 @@ import { Filter } from '@kbn/es-query';
 import {
   TGridCellAction,
   BulkActionsProp,
-  CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   RowRenderer,
@@ -66,6 +65,7 @@ import {
 
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import type { OnRowSelected, OnSelectAll } from '../types';
+import type { CellValueElementProps } from '../../../types';
 import type { Refetch } from '../../../store/t_grid/inputs';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
 import { StatefulEventContext } from '../../../components/stateful_event_context';

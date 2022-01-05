@@ -96,7 +96,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     sort,
     tabType,
     totalPages,
-    filterManager,
     leadingControlColumns = [],
     trailingControlColumns = [],
   }) => {
@@ -247,7 +246,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               columnHeaders={columnHeaders}
               data={data}
               eventIdToNoteIds={eventIdToNoteIds}
-              filterManager={filterManager}
               id={id}
               isEventViewer={isEventViewer}
               lastFocusedAriaColindex={lastFocusedAriaColindex}

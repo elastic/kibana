@@ -16,11 +16,11 @@ import { DataDrivenColumns, getMappedNonEcsValue } from '../data_driven_columns'
 import { inputsModel } from '../../../../../common/store';
 import {
   ColumnHeaderOptions,
-  CellValueElementProps,
   ControlColumnProps,
   RowCellRender,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
+import type { CellValueElementProps } from '../../cell_rendering';
 
 interface Props {
   id: string;
@@ -61,7 +61,6 @@ export const EventColumnView = React.memo<Props>(
     data,
     ecsData,
     eventIdToNoteIds,
-    filterManager,
     isEventPinned = false,
     isEventViewer = false,
     loadingEventIds,
@@ -189,7 +188,6 @@ export const EventColumnView = React.memo<Props>(
           columnHeaders={columnHeaders}
           data={data}
           ecsData={ecsData}
-          filterManager={filterManager}
           hasRowRenderers={hasRowRenderers}
           notesCount={notesCount}
           renderCellValue={renderCellValue}

@@ -7,15 +7,17 @@
 
 import { pick } from 'lodash/fp';
 import { EuiProgress } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { FilterManager } from '../../../../../../../src/plugins/data/public';
 import { isTab } from '../../../../../timelines/public';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
 import { CellValueElementProps } from './cell_rendering';
+import { useKibana } from '../../../common/lib/kibana';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { FlyoutHeader, FlyoutHeaderPanel } from '../flyout/header';
 import { TimelineType, TimelineId, RowRenderer } from '../../../../common/types/timeline';
@@ -53,6 +55,10 @@ const TimelineSavingProgressComponent: React.FC<{ timelineId: TimelineId }> = ({
 };
 
 const TimelineSavingProgress = React.memo(TimelineSavingProgressComponent);
+
+export const TimelineFilterContext = React.createContext<{ filterManager?: FilterManager }>({
+  filterManager: undefined,
+});
 
 const StatefulTimelineComponent: React.FC<Props> = ({
   renderCellValue,
@@ -153,6 +159,8 @@ const StatefulTimelineComponent: React.FC<Props> = ({
       ?.querySelector<HTMLButtonElement>(`.${EVENTS_COUNT_BUTTON_CLASS_NAME}`)
       ?.focus();
   }, [containerElement]);
+  const { uiSettings } = useKibana().services;
+  const [filterManager] = useState<FilterManager>(new FilterManager(uiSettings));
 
   const onKeyDown = useCallback(
     (keyboardEvent: React.KeyboardEvent) => {
@@ -170,35 +178,37 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const resolveConflictComponent = useResolveConflict();
 
   return (
-    <TimelineContainer
-      data-test-subj="timeline"
-      data-timeline-id={timelineId}
-      onKeyDown={onKeyDown}
-      ref={containerElement}
-    >
-      <TimelineSavingProgress timelineId={timelineId} />
-      {timelineType === TimelineType.template && (
-        <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
-      )}
-      {resolveConflictComponent}
-      <HideShowContainer
-        $isVisible={!timelineFullScreen}
-        data-test-subj="timeline-hide-show-container"
+    <TimelineFilterContext.Provider value={{ filterManager }}>
+      <TimelineContainer
+        data-test-subj="timeline"
+        data-timeline-id={timelineId}
+        onKeyDown={onKeyDown}
+        ref={containerElement}
       >
-        <FlyoutHeaderPanel timelineId={timelineId} />
-        <FlyoutHeader timelineId={timelineId} />
-      </HideShowContainer>
+        <TimelineSavingProgress timelineId={timelineId} />
+        {timelineType === TimelineType.template && (
+          <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
+        )}
+        {resolveConflictComponent}
+        <HideShowContainer
+          $isVisible={!timelineFullScreen}
+          data-test-subj="timeline-hide-show-container"
+        >
+          <FlyoutHeaderPanel timelineId={timelineId} />
+          <FlyoutHeader timelineId={timelineId} />
+        </HideShowContainer>
 
-      <TabsContent
-        graphEventId={graphEventId}
-        renderCellValue={renderCellValue}
-        rowRenderers={rowRenderers}
-        timelineId={timelineId}
-        timelineType={timelineType}
-        timelineDescription={description}
-        timelineFullScreen={timelineFullScreen}
-      />
-    </TimelineContainer>
+        <TabsContent
+          graphEventId={graphEventId}
+          renderCellValue={renderCellValue}
+          rowRenderers={rowRenderers}
+          timelineId={timelineId}
+          timelineType={timelineType}
+          timelineDescription={description}
+          timelineFullScreen={timelineFullScreen}
+        />
+      </TimelineContainer>
+    </TimelineFilterContext.Provider>
   );
 };
 

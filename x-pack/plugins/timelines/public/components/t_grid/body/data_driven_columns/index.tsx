@@ -11,6 +11,7 @@ import { getOr } from 'lodash/fp';
 
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { OnRowSelected } from '../../types';
+import type { CellValueElementProps } from '../../../../types';
 
 import {
   EventsTd,
@@ -29,7 +30,6 @@ import {
 } from '../../../../../common/types/timeline';
 import type {
   ActionProps,
-  CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   RowCellRender,

@@ -19,6 +19,7 @@ import { Columns } from '../../../common/components/paginated_table';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { PreferenceFormattedBytes } from '../../../common/components/formatted_bytes';
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
+import { TimelineId } from '../../../../common/types/timeline';
 
 import * as i18n from './translations';
 export type NetworkDnsColumns = [
@@ -55,6 +56,7 @@ export const getNetworkDnsColumns = (): NetworkDnsColumns => [
                 operator: IS_OPERATOR,
               },
             }}
+            timelineId={TimelineId.networkPageExternalAlerts}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
                 <DragEffects>

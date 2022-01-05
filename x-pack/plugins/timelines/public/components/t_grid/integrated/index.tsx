@@ -26,9 +26,8 @@ import {
   TimelineId,
   TimelineTabs,
 } from '../../../../common/types/timeline';
-
+import type { CellValueElementProps } from '../../../types';
 import type {
-  CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   DataProvider,

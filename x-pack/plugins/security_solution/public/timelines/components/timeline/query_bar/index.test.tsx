@@ -8,14 +8,12 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../../common/constants';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/keury';
 import { mockIndexPattern, TestProviders } from '../../../../common/mock';
 import { QueryBar } from '../../../../common/components/query_bar';
 import { FilterStateStore } from '@kbn/es-query';
-import { FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { buildGlobalQuery } from '../helpers';
 
@@ -26,8 +24,6 @@ import {
   TIMELINE_FILTER_DROP_AREA,
 } from './index';
 import { waitFor } from '@testing-library/dom';
-
-const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -78,7 +74,6 @@ describe('Timeline QueryBar ', () => {
         <QueryBarTimeline
           dataProviders={mockDataProviders}
           filters={filters}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
@@ -117,7 +112,6 @@ describe('Timeline QueryBar ', () => {
         <Proxy
           dataProviders={mockDataProviders}
           filters={[]}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
@@ -155,7 +149,6 @@ describe('Timeline QueryBar ', () => {
         <Proxy
           dataProviders={mockDataProviders}
           filters={[]}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
@@ -195,7 +188,6 @@ describe('Timeline QueryBar ', () => {
         <Proxy
           dataProviders={mockDataProviders}
           filters={[]}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
@@ -233,7 +225,6 @@ describe('Timeline QueryBar ', () => {
         <Proxy
           dataProviders={mockDataProviders}
           filters={[]}
-          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}

@@ -11,7 +11,6 @@ import { useDispatch } from 'react-redux';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import {
   ColumnHeaderOptions,
-  CellValueElementProps,
   ControlColumnProps,
   RowRenderer,
   TimelineExpandedDetailType,
@@ -19,6 +18,7 @@ import {
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
 import type { SetEventsDeleted, SetEventsLoading } from '../../../../../../../timelines/common';
+import type { CellValueElementProps } from '../../../../../../../timelines/public';
 import { BrowserFields } from '../../../../../common/containers/source';
 import {
   TimelineItem,
@@ -83,7 +83,6 @@ const StatefulEventComponent: React.FC<Props> = ({
   columnHeaders,
   event,
   eventIdToNoteIds,
-  filterManager,
   isEventViewer = false,
   isEventPinned = false,
   lastFocusedAriaColindex,
@@ -281,7 +280,6 @@ const StatefulEventComponent: React.FC<Props> = ({
           data={event.data}
           ecsData={event.ecs}
           eventIdToNoteIds={eventIdToNoteIds}
-          filterManager={filterManager}
           hasRowRenderers={hasRowRenderers}
           isEventPinned={isEventPinned}
           isEventViewer={isEventViewer}

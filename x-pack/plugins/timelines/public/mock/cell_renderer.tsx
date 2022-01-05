@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { getMappedNonEcsValue } from '../components/t_grid/body/data_driven_columns';
-import type { CellValueElementProps } from '../../common/types/timeline';
+import type { CellValueElementProps } from '../types';
 
 export const TestCellRenderer: React.FC<CellValueElementProps> = ({ columnId, data }) => (
   <>

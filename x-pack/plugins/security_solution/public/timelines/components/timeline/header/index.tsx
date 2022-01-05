@@ -7,7 +7,6 @@
 
 import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
-import type { FilterManager } from 'src/plugins/data/public';
 
 import { DataProviders } from '../data_providers';
 import { StatefulSearchOrFilter } from '../search_or_filter';
@@ -19,7 +18,6 @@ import {
 } from '../../../../../common/types/timeline';
 
 interface Props {
-  filterManager: FilterManager;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
   status: TimelineStatusLiteralWithNull;
@@ -27,7 +25,6 @@ interface Props {
 }
 
 const TimelineHeaderComponent: React.FC<Props> = ({
-  filterManager,
   show,
   showCallOutUnauthorizedMsg,
   status,
@@ -54,7 +51,7 @@ const TimelineHeaderComponent: React.FC<Props> = ({
     )}
     {show && <DataProviders timelineId={timelineId} />}
 
-    <StatefulSearchOrFilter filterManager={filterManager} timelineId={timelineId} />
+    <StatefulSearchOrFilter timelineId={timelineId} />
   </>
 );
 

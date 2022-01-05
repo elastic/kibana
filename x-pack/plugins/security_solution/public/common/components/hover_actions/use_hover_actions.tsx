@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useMemo, useState, useRef, useContext } from 'react';
 import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import { HoverActions } from '.';
 
 import { DataProvider } from '../../../../common/types';
+import { useKibana } from '../../lib/kibana';
 import { ProviderContentWrapper } from '../drag_and_drop/draggable_wrapper';
 import { getDraggableId } from '../drag_and_drop/helpers';
+import { TimelineFilterContext } from '../../../timelines/components/timeline';
+import { TimelineId } from '../../../../common/types/timeline';
 
 const draggableContainsLinks = (draggableElement: HTMLDivElement | null) => {
   const links = draggableElement?.querySelectorAll('.euiLink') ?? [];
@@ -43,14 +46,17 @@ export const useHoverActions = ({
   onFilterAdded,
   render,
   timelineId,
-  filterManager,
 }: Props) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const keyboardHandlerRef = useRef<HTMLDivElement | null>(null);
   const [closePopOverTrigger, setClosePopOverTrigger] = useState(false);
   const [showTopN, setShowTopN] = useState<boolean>(false);
   const [hoverActionsOwnFocus, setHoverActionsOwnFocus] = useState<boolean>(false);
-
+  const { data } = useKibana().services;
+  const { filterManager: timelineFilterManager } = useContext(TimelineFilterContext);
+  const filterManager = useMemo(() => {
+    return timelineId === TimelineId.active ? timelineFilterManager : data.query.filterManager;
+  }, [timelineId, data.query.filterManager, timelineFilterManager]);
   const handleClosePopOverTrigger = useCallback(() => {
     setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger);
     setHoverActionsOwnFocus((prevHoverActionsOwnFocus) => {

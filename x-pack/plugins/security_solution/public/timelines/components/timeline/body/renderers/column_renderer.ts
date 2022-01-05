@@ -8,6 +8,7 @@
 import type React from 'react';
 import type { Filter } from '@kbn/es-query';
 import { BrowserFields } from '../../../../../../../timelines/common/search_strategy';
+import type { FilterManager } from '../../../../../../../../../src/plugins/data/public';
 
 import { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
 import { Ecs } from '../../../../../../common/ecs';
@@ -21,6 +22,7 @@ export interface ColumnRenderer {
     columnName,
     eventId,
     field,
+    filterManager,
     globalFilters,
     isDetails,
     isDraggable,
@@ -37,6 +39,7 @@ export interface ColumnRenderer {
     ecsData?: Ecs;
     eventId: string;
     field: ColumnHeaderOptions;
+    filterManager?: FilterManager;
     globalFilters?: Filter[];
     isDetails?: boolean;
     isDraggable?: boolean;

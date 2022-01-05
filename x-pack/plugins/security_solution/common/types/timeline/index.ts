@@ -24,7 +24,6 @@ import { errorSchema } from '../../detection_engine/schemas/response/error_schem
 import { Direction, Maybe } from '../../search_strategy';
 
 export * from './actions';
-export * from './cells';
 export * from './columns';
 export * from './data_provider';
 export * from './rows';

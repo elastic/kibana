@@ -17,7 +17,8 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
 } from '@kbn/rule-data-utils/alerts_as_data_status';
-import type { CellValueElementProps, TimelineNonEcsData } from '../../../../../../timelines/common';
+import type { TimelineNonEcsData } from '../../../../../../timelines/common';
+import type { CellValueElementProps } from '../../../../../../timelines/public';
 import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';
 import { TimestampTooltip } from '../../../../components/shared/timestamp_tooltip';
 import { asDuration } from '../../../../../common/utils/formatters';

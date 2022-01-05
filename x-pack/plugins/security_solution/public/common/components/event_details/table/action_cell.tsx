@@ -7,6 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { HoverActions } from '../../hover_actions';
+import { useKibana } from '../../../lib/kibana';
 import { useActionCellDataProvider } from './use_action_cell_data_provider';
 import { EnrichedFieldInfo } from '../types';
 import { ColumnHeaderOptions } from '../../../../../common/types/timeline';
@@ -59,6 +60,7 @@ export const ActionCell: React.FC<Props> = React.memo(
     const closeTopN = useCallback(() => {
       setShowTopN(false);
     }, []);
+    const { filterManager } = useKibana().services.data.query;
 
     return (
       <HoverActions

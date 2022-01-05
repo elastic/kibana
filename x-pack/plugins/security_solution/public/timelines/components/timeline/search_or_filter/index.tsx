@@ -12,7 +12,6 @@ import { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
 import type { Filter } from '@kbn/es-query';
 
-import type { FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { State, inputsModel, inputsSelectors } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { KqlMode, TimelineModel } from '../../../../timelines/store/timeline/model';
@@ -22,7 +21,6 @@ import { SearchOrFilter } from './search_or_filter';
 import { SerializedFilterQuery } from '../../../../../common/types/timeline';
 
 interface OwnProps {
-  filterManager: FilterManager;
   timelineId: string;
 }
 
@@ -32,7 +30,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
   ({
     dataProviders,
     filters,
-    filterManager,
     filterQuery,
     from,
     fromStr,
@@ -70,7 +67,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       <SearchOrFilter
         dataProviders={dataProviders}
         filters={filters}
-        filterManager={filterManager}
         filterQuery={filterQuery}
         from={from}
         fromStr={fromStr}
@@ -90,7 +86,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
   },
   (prevProps, nextProps) => {
     return (
-      prevProps.filterManager === nextProps.filterManager &&
       prevProps.from === nextProps.from &&
       prevProps.fromStr === nextProps.fromStr &&
       prevProps.to === nextProps.to &&

@@ -28,7 +28,7 @@ export interface QueryBarComponentProps {
   isLoading?: boolean;
   isRefreshPaused?: boolean;
   filterQuery: Query;
-  filterManager: FilterManager;
+  filterManager?: FilterManager;
   filters: Filter[];
   onChangedQuery?: (query: Query) => void;
   onSubmitQuery: (query: Query, timefilter?: SavedQueryTimeFilter) => void;
@@ -77,7 +77,9 @@ export const QueryBar = memo<QueryBarComponentProps>(
       (savedQueryUpdated: SavedQuery) => {
         const { query: newQuery, filters: newFilters, timefilter } = savedQueryUpdated.attributes;
         onSubmitQuery(newQuery, timefilter);
-        filterManager.setFilters(newFilters || []);
+        if (filterManager) {
+          filterManager.setFilters(newFilters || []);
+        }
         onSavedQuery(savedQueryUpdated);
       },
       [filterManager, onSubmitQuery, onSavedQuery]
@@ -89,14 +91,18 @@ export const QueryBar = memo<QueryBarComponentProps>(
           query: '',
           language: savedQuery.attributes.query.language,
         });
-        filterManager.setFilters([]);
+        if (filterManager) {
+          filterManager.setFilters([]);
+        }
         onSavedQuery(undefined);
       }
     }, [filterManager, onSubmitQuery, onSavedQuery, savedQuery]);
 
     const onFiltersUpdated = useCallback(
       (newFilters: Filter[]) => {
-        filterManager.setFilters(newFilters);
+        if (filterManager) {
+          filterManager.setFilters(newFilters);
+        }
       },
       [filterManager]
     );

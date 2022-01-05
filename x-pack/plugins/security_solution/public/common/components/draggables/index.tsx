@@ -109,7 +109,6 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
     tooltipContent,
     tooltipPosition,
     queryValue,
-    filterManager,
   }) => {
     const dataProviderProp: DataProvider = useMemo(
       () => ({
@@ -156,7 +155,6 @@ export const DefaultDraggable = React.memo<DefaultDraggableType>(
         isDraggable={isDraggable}
         render={renderCallback}
         timelineId={timelineId}
-        filterManager={filterManager}
       />
     );
   }

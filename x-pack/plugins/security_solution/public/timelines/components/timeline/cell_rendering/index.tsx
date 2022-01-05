@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { CellValueElementProps } from '../../../../../common/types/timeline';
+export type { CellValueElementProps } from '../../../../../../timelines/public';

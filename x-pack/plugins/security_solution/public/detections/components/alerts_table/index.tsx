@@ -342,7 +342,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
         ),
         documentType: i18n.ALERTS_DOCUMENT_TYPE,
         excludedRowRendererIds: alertsDefaultModel.excludedRowRendererIds as RowRendererId[],
-        filterManager,
         footerText: i18n.TOTAL_COUNT_OF_ALERTS,
         id: timelineId,
         loadingText: i18n.LOADING_ALERTS,

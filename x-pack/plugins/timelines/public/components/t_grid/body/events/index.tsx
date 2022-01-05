@@ -12,8 +12,8 @@ import { EventsTbody } from '../../styles';
 import { StatefulEvent } from './stateful_event';
 import type { BrowserFields } from '../../../../../common/search_strategy/index_fields';
 import { TimelineTabs } from '../../../../../common/types/timeline';
+import type { CellValueElementProps } from '../../../../types';
 import type {
-  CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   OnRowSelected,

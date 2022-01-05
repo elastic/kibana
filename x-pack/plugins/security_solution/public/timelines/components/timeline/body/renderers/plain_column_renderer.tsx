@@ -32,7 +32,6 @@ export const plainColumnRenderer: ColumnRenderer = {
     truncate,
     values,
     linkValues,
-    filterManager,
   }: {
     asPlainText?: boolean;
     columnName: string;
@@ -59,7 +58,6 @@ export const plainColumnRenderer: ColumnRenderer = {
             linkValue={head(linkValues)}
             truncate={truncate}
             value={parseValue(value)}
-            filterManager={filterManager}
           />
         ))
       : getEmptyTagValue(),

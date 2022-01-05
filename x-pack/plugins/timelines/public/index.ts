@@ -41,8 +41,16 @@ export {
 export { getManageTimelineById } from './store/t_grid/selectors';
 
 export { tGridReducer } from './store/t_grid/reducer';
-export type { TimelinesUIStart, TGridModelForTimeline, TimelineState } from './types';
-export type { TGridType, SortDirection, State as TGridState, TGridModel } from './types';
+export type {
+  TGridType,
+  SortDirection,
+  State as TGridState,
+  TGridModel,
+  TimelinesUIStart,
+  TGridModelForTimeline,
+  TimelineState,
+  CellValueElementProps,
+} from './types';
 export type { OnColumnFocused } from '../common/utils/accessibility';
 
 export {
@@ -85,4 +93,3 @@ export function plugin() {
 }
 
 export { StatefulEventContext } from './components/stateful_event_context';
-export { TimelineContext } from './components/t_grid/shared';

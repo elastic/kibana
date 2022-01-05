@@ -21,6 +21,7 @@ import { ExplorerLink } from '../links/create_explorer_link';
 import { HostsType } from '../../../../hosts/store/model';
 import { escapeDataProviderId } from '../../drag_and_drop/helpers';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
+import { TimelineId } from '../../../../../common/types/timeline';
 
 export const getAnomaliesHostTableColumns = (
   startDate: string,
@@ -86,6 +87,7 @@ export const getAnomaliesHostTableColumns = (
         )}-entity`}
         entityName={anomaliesByHost.anomaly.entityName}
         entityValue={entityValue}
+        timelineId={TimelineId.hostsPageEvents}
       />
     ),
   },
@@ -112,6 +114,7 @@ export const getAnomaliesHostTableColumns = (
                       )}`}
                       entityName={entityName}
                       entityValue={entityValue}
+                      timelineId={TimelineId.hostsPageEvents}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>

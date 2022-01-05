@@ -11,8 +11,8 @@ import type { OnRowSelected } from '../../types';
 import { EventsTrData, EventsTdGroupActions } from '../../styles';
 import { DataDrivenColumns, getMappedNonEcsValue } from '../data_driven_columns';
 import { TimelineTabs } from '../../../../../common/types/timeline';
+import type { CellValueElementProps } from '../../../../types';
 import type {
-  CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   RowCellRender,

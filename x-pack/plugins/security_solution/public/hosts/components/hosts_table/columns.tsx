@@ -25,6 +25,7 @@ import { HostsTableColumns } from './';
 
 import * as i18n from './translations';
 import { HostRiskSeverity, Maybe } from '../../../../common/search_strategy';
+import { TimelineId } from '../../../../common/types/timeline';
 import { HostRiskScore } from '../common/host_risk_score';
 
 export const getHostsColumns = (showRiskColumn: boolean): HostsTableColumns => {
@@ -50,6 +51,7 @@ export const getHostsColumns = (showRiskColumn: boolean): HostsTableColumns => {
                 kqlQuery: '',
                 queryMatch: { field: 'host.name', value: hostName[0], operator: IS_OPERATOR },
               }}
+              timelineId={TimelineId.hostsPageEvents}
               render={(dataProvider, _, snapshot) =>
                 snapshot.isDragging ? (
                   <DragEffects>

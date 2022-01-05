@@ -17,7 +17,6 @@ import type { CoreStart } from '../../../../../../../src/core/public';
 import { TGridCellAction, TimelineTabs } from '../../../../common/types/timeline';
 
 import type {
-  CellValueElementProps,
   ColumnHeaderOptions,
   ControlColumnProps,
   DataProvider,
@@ -26,6 +25,7 @@ import type {
   BulkActionsProp,
   AlertStatus,
 } from '../../../../common/types/timeline';
+import type { CellValueElementProps } from '../../../types';
 import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
 import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';

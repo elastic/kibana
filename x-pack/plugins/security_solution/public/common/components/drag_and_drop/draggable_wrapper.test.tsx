@@ -16,6 +16,7 @@ import { mockDataProviders } from '../../../timelines/components/timeline/data_p
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
 import { ConditionalPortal, DraggableWrapper, getStyle } from './draggable_wrapper';
 import { useMountAppended } from '../../utils/use_mount_appended';
+import { TimelineId } from '../../../../common/types/timeline';
 
 jest.mock('../../lib/kibana');
 
@@ -45,6 +46,7 @@ describe('DraggableWrapper', () => {
               dataProvider={dataProvider}
               isDraggable={true}
               render={() => message}
+              timelineId={TimelineId.test}
             />
           </DragDropContextWrapper>
         </TestProviders>
@@ -61,6 +63,7 @@ describe('DraggableWrapper', () => {
               dataProvider={dataProvider}
               isDraggable={true}
               render={() => message}
+              timelineId={TimelineId.test}
             />
           </DragDropContextWrapper>
         </TestProviders>
@@ -77,6 +80,7 @@ describe('DraggableWrapper', () => {
               dataProvider={dataProvider}
               isDraggable={true}
               render={() => message}
+              timelineId={TimelineId.test}
             />
           </DragDropContextWrapper>
         </TestProviders>
@@ -93,6 +97,7 @@ describe('DraggableWrapper', () => {
               dataProvider={dataProvider}
               isDraggable={true}
               render={() => message}
+              timelineId={TimelineId.test}
             />
           </DragDropContextWrapper>
         </TestProviders>
@@ -117,6 +122,7 @@ describe('DraggableWrapper', () => {
               dataProvider={dataProvider}
               isDraggable={true}
               render={() => message}
+              timelineId={TimelineId.test}
               truncate
             />
           </DragDropContextWrapper>
@@ -136,6 +142,7 @@ describe('DraggableWrapper', () => {
               dataProvider={dataProvider}
               isDraggable={true}
               render={() => message}
+              timelineId={TimelineId.test}
             />
           </DragDropContextWrapper>
         </TestProviders>

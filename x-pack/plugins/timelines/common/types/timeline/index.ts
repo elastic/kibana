@@ -18,7 +18,6 @@ import { Direction, Maybe } from '../../search_strategy';
 import { Ecs } from '../../ecs';
 
 export * from './actions';
-export * from './cells';
 export * from './columns';
 export * from './data_provider';
 export * from './rows';

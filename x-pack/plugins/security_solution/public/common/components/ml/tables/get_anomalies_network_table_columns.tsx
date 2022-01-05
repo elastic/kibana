@@ -23,6 +23,7 @@ import { FormattedRelativePreferenceDate } from '../../formatted_date';
 import { NetworkType } from '../../../../network/store/model';
 import { escapeDataProviderId } from '../../drag_and_drop/helpers';
 import { FlowTarget } from '../../../../../common/search_strategy';
+import { TimelineId } from '../../../../../common/types/timeline';
 
 export const getAnomaliesNetworkTableColumns = (
   startDate: string,
@@ -85,6 +86,7 @@ export const getAnomaliesNetworkTableColumns = (
         )}`}
         entityName={anomaliesByNetwork.anomaly.entityName}
         entityValue={entityValue}
+        timelineId={TimelineId.networkPageExternalAlerts}
       />
     ),
   },
@@ -109,6 +111,7 @@ export const getAnomaliesNetworkTableColumns = (
                   )}`}
                   entityName={entityName}
                   entityValue={entityValue}
+                  timelineId={TimelineId.networkPageExternalAlerts}
                 />
               </EuiFlexItem>
             );

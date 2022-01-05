@@ -18,12 +18,14 @@ interface Props {
   idPrefix: string;
   entityName: string;
   entityValue: string;
+  timelineId: string;
 }
 
 export const EntityDraggableComponent: React.FC<Props> = ({
   idPrefix,
   entityName,
   entityValue,
+  timelineId,
 }) => {
   const id = escapeDataProviderId(`entity-draggable-${idPrefix}-${entityName}-${entityValue}`);
 
@@ -56,7 +58,14 @@ export const EntityDraggableComponent: React.FC<Props> = ({
     [entityName, entityValue]
   );
 
-  return <DraggableWrapper key={id} dataProvider={dataProviderProp} render={render} />;
+  return (
+    <DraggableWrapper
+      key={id}
+      dataProvider={dataProviderProp}
+      render={render}
+      timelineId={timelineId}
+    />
+  );
 };
 
 EntityDraggableComponent.displayName = 'EntityDraggableComponent';

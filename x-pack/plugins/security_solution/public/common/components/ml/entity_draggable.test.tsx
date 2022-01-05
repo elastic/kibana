@@ -12,6 +12,7 @@ import '../../mock/match_media';
 import { EntityDraggableComponent } from './entity_draggable';
 import { TestProviders } from '../../mock/test_providers';
 import { useMountAppended } from '../../utils/use_mount_appended';
+import { TimelineId } from '../../../../common/types/timeline';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -32,6 +33,7 @@ describe('entity_draggable', () => {
         idPrefix="id-prefix"
         entityName="entity-name"
         entityValue="entity-value"
+        timelineId={TimelineId.test}
       />
     );
     expect(wrapper).toMatchSnapshot();
@@ -44,6 +46,7 @@ describe('entity_draggable', () => {
           idPrefix="id-prefix"
           entityName="entity-name"
           entityValue="entity-value"
+          timelineId={TimelineId.test}
         />
       </TestProviders>
     );

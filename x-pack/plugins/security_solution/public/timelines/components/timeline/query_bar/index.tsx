@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import React, { memo, useCallback, useState, useEffect } from 'react';
+import React, { memo, useCallback, useState, useEffect, useContext } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
@@ -16,7 +16,6 @@ import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 import type {
-  FilterManager,
   SavedQuery,
   SavedQueryTimeFilter,
 } from '../../../../../../../../src/plugins/data/public';
@@ -29,11 +28,11 @@ import { DataProvider } from '../data_providers/data_provider';
 import { buildGlobalQuery } from '../helpers';
 import { timelineActions } from '../../../store/timeline';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../../../common/types/timeline';
+import { TimelineFilterContext } from '../';
 
 export interface QueryBarTimelineComponentProps {
   dataProviders: DataProvider[];
   filters: Filter[];
-  filterManager: FilterManager;
   filterQuery: KueryFilterQuery;
   from: string;
   fromStr: string;
@@ -58,7 +57,6 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
   ({
     dataProviders,
     filters,
-    filterManager,
     filterQuery,
     from,
     fromStr,
@@ -93,7 +91,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
       convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders, browserFields), indexPattern)
     );
     const savedQueryServices = useSavedQueryServices();
-
+    const { filterManager } = useContext(TimelineFilterContext);
     const applyKqlFilterQuery = useCallback(
       (expression: string, kind) =>
         dispatch(
@@ -114,20 +112,20 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     useEffect(() => {
       let isSubscribed = true;
       const subscriptions = new Subscription();
-      filterManager.setFilters(filters);
-      console.log('effect');
-      subscriptions.add(
-        filterManager.getUpdates$().subscribe({
-          next: () => {
-            console.log({isSubscribed});
-            if (isSubscribed) {
-              const filterWithoutDropArea = getNonDropAreaFilters(filterManager.getFilters());
-              setFilters(filterWithoutDropArea);
-              setQueryBarFilters(filterWithoutDropArea);
-            }
-          },
-        })
-      );
+      if (filterManager) {
+        filterManager.setFilters(filters);
+        subscriptions.add(
+          filterManager.getUpdates$().subscribe({
+            next: () => {
+              if (isSubscribed) {
+                const filterWithoutDropArea = getNonDropAreaFilters(filterManager.getFilters());
+                setFilters(filterWithoutDropArea);
+                setQueryBarFilters(filterWithoutDropArea);
+              }
+            },
+          })
+        );
+      }
 
       return () => {
         isSubscribed = false;
@@ -136,9 +134,11 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     }, [filterManager, filters, setFilters]);
 
     useEffect(() => {
-      const filterWithoutDropArea = getNonDropAreaFilters(filterManager.getFilters());
-      if (!deepEqual(filters, filterWithoutDropArea)) {
-        filterManager.setFilters(filters);
+      if (filterManager) {
+        const filterWithoutDropArea = getNonDropAreaFilters(filterManager.getFilters());
+        if (!deepEqual(filters, filterWithoutDropArea)) {
+          filterManager.setFilters(filters);
+        }
       }
     }, [filters, filterManager]);
 

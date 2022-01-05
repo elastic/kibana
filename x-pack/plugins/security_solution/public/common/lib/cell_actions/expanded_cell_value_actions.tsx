@@ -43,9 +43,13 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
   onFilterAdded,
   timelineId,
   value,
-  filterManager,
 }) => {
-  const { timelines } = useKibana().services;
+  const {
+    timelines,
+    data: {
+      query: { filterManager },
+    },
+  } = useKibana().services;
   const showButton = useMemo(
     () =>
       allowTopN({
@@ -55,7 +59,6 @@ const ExpandedCellValueActionsComponent: React.FC<Props> = ({
       }),
     [browserFields, field]
   );
-
   const [showTopN, setShowTopN] = useState(false);
   const onClick = useCallback(() => setShowTopN(!showTopN), [showTopN]);
 

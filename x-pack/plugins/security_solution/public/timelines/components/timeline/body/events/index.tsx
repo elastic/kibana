@@ -16,11 +16,11 @@ import {
 } from '../../../../../../common/search_strategy/timeline';
 import {
   ColumnHeaderOptions,
-  CellValueElementProps,
   ControlColumnProps,
   RowRenderer,
   TimelineTabs,
 } from '../../../../../../common/types/timeline';
+import type { CellValueElementProps } from '../../cell_rendering';
 import { OnRowSelected } from '../../events';
 import { EventsTbody } from '../../styles';
 import { StatefulEvent } from './stateful_event';
@@ -60,7 +60,6 @@ const EventsComponent: React.FC<Props> = ({
   containerRef,
   data,
   eventIdToNoteIds,
-  filterManager,
   id,
   isEventViewer = false,
   lastFocusedAriaColindex,
@@ -87,7 +86,6 @@ const EventsComponent: React.FC<Props> = ({
         containerRef={containerRef}
         event={event}
         eventIdToNoteIds={eventIdToNoteIds}
-        filterManager={filterManager}
         isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
         isEventViewer={isEventViewer}
         key={`${id}_${tabType}_${event._id}_${event._index}_${

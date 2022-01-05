@@ -11,6 +11,7 @@ import { DraggableId } from 'react-beautiful-dnd';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 
+import type { FilterManager } from '../../../../../../../src/plugins/data/public';
 import { ColumnHeaderOptions, DataProvider, TimelineId } from '../../../../common/types/timeline';
 import { stopPropagationAndPreventDefault } from '../../../../../timelines/public';
 import { SHOW_TOP_N_KEYBOARD_SHORTCUT } from './keyboard_shortcut_constants';
@@ -38,7 +39,6 @@ const StyledHoverActionsContainer = styled.div<{
   $isActive: boolean;
 }>`
   display: flex;
-
   ${(props) =>
     props.$isActive
       ? `
@@ -50,7 +50,6 @@ const StyledHoverActionsContainer = styled.div<{
     }
   `
       : ''}
-
   ${(props) =>
     props.$showOwnFocus
       ? `
@@ -60,18 +59,15 @@ const StyledHoverActionsContainer = styled.div<{
         opacity: 1;
       }
     }
-
     &:hover {
       .timelines__hoverActionButton,
       .securitySolution__hoverActionButton {
         opacity: 1;
       }
     }
-
   .timelines__hoverActionButton,
   .securitySolution__hoverActionButton {
     opacity: ${props.$showTopN ? 1 : 0};
-
       &:focus {
         opacity: 1;
       }
@@ -95,6 +91,7 @@ interface Props {
   draggableId?: DraggableId;
   enableOverflowButton?: boolean;
   field: string;
+  filterManager?: FilterManager;
   hideTopN?: boolean;
   isObjectArray: boolean;
   onFilterAdded?: () => void;
@@ -130,10 +127,10 @@ export const HoverActions: React.FC<Props> = React.memo(
     dataProvider,
     dataType,
     draggableId,
-    filterManager,
     enableOverflowButton = false,
     applyWidthAndPadding = true,
     field,
+    filterManager,
     isObjectArray,
     hideTopN = false,
     onFilterAdded,
@@ -206,8 +203,8 @@ export const HoverActions: React.FC<Props> = React.memo(
       defaultFocusedButtonRef,
       draggableId,
       enableOverflowButton: enableOverflowButton && !isCaseView,
-      filterManager,
       field,
+      filterManager,
       handleHoverActionClicked,
       hideTopN,
       isCaseView,
