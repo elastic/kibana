@@ -81,4 +81,17 @@ describe('Fleet integration policy endpoint security event filters card', () => 
       `/app/security/administration/policy/${policy.id}/eventFilters`
     );
   });
+
+  it('should show an error toast when API request fails', async () => {
+    const errorMessage = 'Uh oh! API error!';
+    mockedApi.responseProvider.eventFiltersList.mockImplementation(() => {
+      throw new Error(errorMessage);
+    });
+
+    await waitFor(() => {
+      expect(mockedContext.coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
+        `There was an error trying to fetch event filters stats: ${errorMessage}`
+      );
+    });
+  });
 });
