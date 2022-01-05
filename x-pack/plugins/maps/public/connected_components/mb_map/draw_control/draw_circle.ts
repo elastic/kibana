@@ -15,12 +15,10 @@ import { Feature, GeoJSON, Position } from 'geojson';
 
 const DRAW_CIRCLE_RADIUS = 'draw-circle-radius';
 
-const DRAW_CIRCLE_RADIUS_MB_FILTER = ['==', 'meta', DRAW_CIRCLE_RADIUS];
-
 export const DRAW_CIRCLE_RADIUS_LABEL_STYLE = {
   id: 'gl-draw-radius-label',
   type: 'symbol',
-  filter: DRAW_CIRCLE_RADIUS_MB_FILTER,
+  filter: ['==', 'meta', DRAW_CIRCLE_RADIUS],
   layout: {
     'text-anchor': 'right',
     'text-field': '{radiusLabel}',
@@ -167,7 +165,7 @@ export const DrawCircle = {
       radiusLabel = `${Math.round(state.circle.properties.radiusKm)} km`;
     }
 
-    // display radius label, requires custom 'symbol' style with DRAW_CIRCLE_RADIUS_MB_FILTER filter
+    // display radius label, requires custom style: DRAW_CIRCLE_RADIUS_LABEL_STYLE
     display({
       type: 'Feature',
       properties: {
