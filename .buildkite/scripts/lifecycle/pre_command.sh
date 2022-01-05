@@ -21,7 +21,7 @@ install_deps() {
 
 retry 5 15 install_deps
 
-cd "$KIBANA_DIR"
+cd ..
 
 node .buildkite/scripts/lifecycle/print_agent_links.js || true
 
