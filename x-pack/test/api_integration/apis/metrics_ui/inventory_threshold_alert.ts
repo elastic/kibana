@@ -79,8 +79,13 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Inventory Threshold Rule Executor', () => {
-    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
-    after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
+    before(
+      async () => await esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only')
+    );
+    after(
+      async () =>
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only')
+    );
     it('should work FOR LAST 1 minute', async () => {
       const results = await evaluateCondition(baseOptions);
       expect(results).to.eql({
