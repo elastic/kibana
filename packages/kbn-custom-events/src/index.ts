@@ -25,11 +25,6 @@ type FullstoryEventValue = FULLSTORY_EVENT_TYPES | FULLSTORY_EVENT_TYPES[] | und
 
 class CustomEvents {
   private fullStory?: FullStoryApi;
-
-  /**
-   * Field mapping is needed, because when we want to clear a context variable, we can't infer the type.
-   */
-  private fieldMapping: Record<string, string> = {};
   private customEventContext: Record<string, FullstoryEventValue> = {};
 
   public async initialize(config: CustomEventConfig): Promise<boolean> {
@@ -123,9 +118,7 @@ class CustomEvents {
     return mapKeys(context, (value, key) => {
       const snakeCasedKey = snakeCase(key);
       const type = this.getFullstoryType(value);
-      const res = [snakeCasedKey, type].join('_');
-      this.fieldMapping[key] = res;
-      return res;
+      return [snakeCasedKey, type].join('_');
     });
   }
 
@@ -159,8 +152,8 @@ class CustomEvents {
     if (!this.fullStory) return;
     const fields = typeof fieldName === 'string' ? [fieldName] : fieldName;
     fields.forEach((field) => {
-      if (this.customEventContext[this.fieldMapping[field]]) {
-        delete this.customEventContext[this.fieldMapping[field]];
+      if (this.customEventContext.hasOwnProperty(field)) {
+        delete this.customEventContext[field];
       }
     });
   }
