@@ -9,8 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
+import { PluginSetup as DataPluginSetup } from 'src/plugins/data/server';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
-import { visualizationSavedObjectType } from './saved_objects';
 import { registerVisualizationsCollector } from './usage_collector';
 
 import type { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
@@ -24,6 +24,7 @@ import type {
 import type { UsageCollectionSetup } from '../../usage_collection/server';
 import type { EmbeddableSetup } from '../../embeddable/server';
 import { visualizeEmbeddableFactory } from './embeddable/visualize_embeddable_factory';
+import { getVisualizationSavedObjectType } from './saved_objects';
 
 export class VisualizationsPlugin
   implements Plugin<VisualizationsPluginSetup, VisualizationsPluginStart>
@@ -36,11 +37,16 @@ export class VisualizationsPlugin
 
   public setup(
     core: CoreSetup,
-    plugins: { usageCollection?: UsageCollectionSetup; embeddable: EmbeddableSetup }
+    plugins: {
+      usageCollection?: UsageCollectionSetup;
+      embeddable: EmbeddableSetup;
+      data: DataPluginSetup;
+    }
   ) {
     this.logger.debug('visualizations: Setup');
 
-    core.savedObjects.registerType(visualizationSavedObjectType);
+    const searchSourceMigrations = plugins.data.search.searchSource.getAllMigrations();
+    core.savedObjects.registerType(getVisualizationSavedObjectType(searchSourceMigrations));
 
     core.uiSettings.register({
       [VISUALIZE_ENABLE_LABS_SETTING]: {

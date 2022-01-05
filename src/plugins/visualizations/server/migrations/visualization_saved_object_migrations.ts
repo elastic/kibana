@@ -6,11 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, get, omit, has, flow, forOwn } from 'lodash';
+import { cloneDeep, get, omit, has, flow, forOwn, mergeWith } from 'lodash';
 
-import type { SavedObjectMigrationFn } from 'kibana/server';
+import type {
+  SavedObjectMigrationContext,
+  SavedObjectMigrationFn,
+  SavedObjectMigrationMap,
+  SavedObjectUnsanitizedDoc,
+} from 'kibana/server';
 
-import { DEFAULT_QUERY_LANGUAGE, INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../data/common';
+import { MigrateFunction, MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
+import {
+  DEFAULT_QUERY_LANGUAGE,
+  INDEX_PATTERN_SAVED_OBJECT_TYPE,
+  SerializedSearchSourceFields,
+} from '../../../data/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
   commonHideTSVBLastValueIndicator,
@@ -1126,7 +1136,7 @@ export const removeMarkdownLessFromTSVB: SavedObjectMigrationFn<any, any> = (doc
   return doc;
 };
 
-export const visualizationSavedObjectTypeMigrations = {
+const visualizationSavedObjectTypeMigrations = {
   /**
    * We need to have this migration twice, once with a version prior to 7.0.0 once with a version
    * after it. The reason for that is, that this migration has been introduced once 7.0.0 was already
@@ -1182,3 +1192,65 @@ export const visualizationSavedObjectTypeMigrations = {
   '7.17.0': flow(addDropLastBucketIntoTSVBModel714Above),
   '8.0.0': flow(removeMarkdownLessFromTSVB),
 };
+
+const getApplySearchSourceMigrationToVisualization = (
+  migrateSearchSource: MigrateFunction<SerializedSearchSourceFields>
+) => {
+  return (doc: SavedObjectUnsanitizedDoc<any>) => {
+    const serializedSearchSourceFields = doc.attributes.kibanaSavedObjectMeta?.searchSourceJSON;
+
+    if (!serializedSearchSourceFields) return doc;
+
+    const searchSourceFields = JSON.parse(serializedSearchSourceFields);
+
+    const migrated = migrateSearchSource(searchSourceFields);
+
+    return {
+      ...doc,
+      attributes: {
+        ...doc.attributes,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: JSON.stringify(migrated),
+        },
+      },
+    };
+  };
+};
+
+const mergeSavedObjectMigrationMaps = (
+  obj1: SavedObjectMigrationMap,
+  obj2: SavedObjectMigrationMap
+): SavedObjectMigrationMap => {
+  const customizer = (objValue: SavedObjectMigrationFn, srcValue: SavedObjectMigrationFn) => {
+    if (!srcValue || !objValue) {
+      return srcValue || objValue;
+    }
+    return (state: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) =>
+      objValue(srcValue(state, context), context);
+  };
+
+  return mergeWith({ ...obj1 }, obj2, customizer);
+};
+
+/**
+ * This creates a migration map that applies search source migrations within visualization documents
+ */
+const getVisualizationSearchSourceMigrations = (searchSourceMigrations: MigrateFunctionsObject) => {
+  const migrationMap: MigrateFunctionsObject = {};
+  for (const version in searchSourceMigrations) {
+    if (searchSourceMigrations.hasOwnProperty(version)) {
+      migrationMap[version] = getApplySearchSourceMigrationToVisualization(
+        searchSourceMigrations[version]
+      );
+    }
+  }
+  return migrationMap;
+};
+
+export const getAllMigrations = (
+  searchSourceMigrations: MigrateFunctionsObject
+): SavedObjectMigrationMap =>
+  mergeSavedObjectMigrationMaps(
+    visualizationSavedObjectTypeMigrations,
+    getVisualizationSearchSourceMigrations(searchSourceMigrations)
+  );

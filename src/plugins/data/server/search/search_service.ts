@@ -233,6 +233,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       aggs,
       registerSearchStrategy: this.registerSearchStrategy,
       usage,
+      searchSource: this.searchSourceService.setup(),
     };
   }
 
