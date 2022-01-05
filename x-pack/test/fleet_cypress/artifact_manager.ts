@@ -10,5 +10,5 @@ import { last } from 'lodash';
 
 export async function getLatestVersion(): Promise<string> {
   const response: any = await axios('https://artifacts-api.elastic.co/v1/versions');
-  return last(response.data.versions as string[]) || '8.0.0-SNAPSHOT';
+  return last(response.data.versions as string[]) || '8.1.0-SNAPSHOT';
 }

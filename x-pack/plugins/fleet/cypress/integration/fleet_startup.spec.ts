@@ -14,70 +14,82 @@ describe('Fleet startup', () => {
     navigateTo(FLEET);
   });
 
-  after(() => {
-    cleanupAgentPolicies();
-  });
+  describe.skip('Fleet Server', () => {
+    it('should display Add agent button and Healthy agent once Fleet Agent page loaded', () => {
+      cy.get('.euiBadge').contains('Healthy');
+    });
 
-  function navigateToAgentPolicies() {
-    cy.getBySel(AGENT_POLICIES_TAB).click();
-    cy.get('.euiBasicTable-loading').should('not.exist');
-  }
-
-  function navigateToAgentPolicy(name: string) {
-    cy.get('.euiLink').contains(name).click();
-    cy.get('.euiLoadingSpinner').should('not.exist');
-  }
-
-  function navigateToEnrollmentTokens() {
-    cy.getBySel(ENROLLMENT_TOKENS_TAB).click();
-    cy.get('.euiBasicTable-loading').should('not.exist');
-    cy.get('.euiButtonIcon--danger'); // wait for trash icon
-  }
-
-  it('should have no agent policies by default', () => {
-    cy.request('/api/fleet/agent_policies?full=true').then((response: any) => {
-      expect(response.body.items.length).to.equal(0);
+    after(() => {
+      cleanupAgentPolicies();
     });
   });
 
-  it('should create Fleet Server policy', () => {
-    cy.getBySel('toastCloseButton').click();
-    cy.getBySel('createFleetServerPolicyBtn').click();
-    cy.getBySel('euiToastHeader');
+  describe('Create policies', () => {
+    after(() => {
+      cleanupAgentPolicies();
+    });
 
-    navigateToAgentPolicies();
+    function navigateToAgentPolicies() {
+      cy.getBySel(AGENT_POLICIES_TAB).click();
+      cy.get('.euiBasicTable-loading').should('not.exist');
+    }
 
-    navigateToAgentPolicy('Fleet Server policy 1');
-    cy.get('.euiLink').contains('Fleet Server');
+    function navigateToAgentPolicy(name: string) {
+      cy.get('.euiLink').contains(name).click();
+      cy.get('.euiLoadingSpinner').should('not.exist');
+    }
 
-    cy.get('.euiButtonEmpty').contains('View all agent policies').click();
+    function navigateToEnrollmentTokens() {
+      cy.getBySel(ENROLLMENT_TOKENS_TAB).click();
+      cy.get('.euiBasicTable-loading').should('not.exist');
+      cy.get('.euiButtonIcon--danger'); // wait for trash icon
+    }
 
-    navigateToEnrollmentTokens();
+    it('should have no agent policies by default', () => {
+      cy.request('/api/fleet/agent_policies?full=true').then((response: any) => {
+        expect(response.body.items.length).to.equal(0);
+      });
+    });
 
-    cy.get('.euiTableCellContent').contains('Fleet Server policy 1');
-  });
+    it('should create Fleet Server policy', () => {
+      cy.getBySel('toastCloseButton').click();
+      cy.getBySel('createFleetServerPolicyBtn').click();
+      cy.getBySel('euiToastHeader');
 
-  it('should create agent policy', () => {
-    cy.getBySel('addAgentBtnTop').click();
-    cy.getBySel('toastCloseButton').click();
-    cy.getBySel('createPolicyBtn').click();
-    cy.getBySel('euiToastHeader');
-    cy.get('.euiLoadingSpinner').should('not.exist');
-    cy.getBySel('euiFlyoutCloseButton').click();
+      navigateToAgentPolicies();
 
-    navigateToAgentPolicies();
+      navigateToAgentPolicy('Fleet Server policy 1');
+      cy.get('.euiLink').contains('Fleet Server');
 
-    navigateToAgentPolicy('Agent policy 1');
-    cy.get('.euiLink').contains('System');
+      cy.get('.euiButtonEmpty').contains('View all agent policies').click();
 
-    cy.get('.euiButtonEmpty').contains('View all agent policies').click();
+      navigateToEnrollmentTokens();
 
-    navigateToEnrollmentTokens();
-    cy.get('.euiTableCellContent').contains('Agent policy 1');
+      cy.get('.euiTableCellContent').contains('Fleet Server policy 1');
+    });
 
-    // TODO might take longer to install elastic agent async
+    it('should create agent policy', () => {
+      cy.getBySel('addAgentBtnTop').click();
+      cy.getBySel('toastCloseButton').click();
+      cy.getBySel('createPolicyBtn').click();
+      cy.getBySel('euiToastHeader');
+      cy.get('.euiLoadingSpinner').should('not.exist');
+      cy.getBySel('euiFlyoutCloseButton').click();
 
-    cy.visit('/app/integrations/installed');
-    cy.getBySel('integration-card:epr:elastic_agent');
+      navigateToAgentPolicies();
+
+      navigateToAgentPolicy('Agent policy 1');
+      cy.get('.euiLink').contains('System');
+
+      cy.get('.euiButtonEmpty').contains('View all agent policies').click();
+
+      navigateToEnrollmentTokens();
+      cy.get('.euiTableCellContent').contains('Agent policy 1');
+
+      // TODO might take longer to install elastic agent async
+
+      cy.visit('/app/integrations/installed');
+      cy.getBySel('integration-card:epr:elastic_agent');
+    });
   });
 });
