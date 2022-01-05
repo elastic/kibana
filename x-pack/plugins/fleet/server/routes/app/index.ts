@@ -33,11 +33,12 @@ export const getCheckPermissionsHandler: RequestHandler = async (context, reques
       });
     }
 
+    // replace this check?
     if (!user?.roles.includes('superuser')) {
       return response.ok({
         body: {
           success: false,
-          error: 'MISSING_SUPERUSER_ROLE',
+          error: 'MISSING_PRIVILEGE',
         } as CheckPermissionsResponse,
       });
     }

@@ -6,7 +6,7 @@
  */
 
 export interface CheckPermissionsResponse {
-  error?: 'MISSING_SECURITY' | 'MISSING_SUPERUSER_ROLE';
+  error?: 'MISSING_SECURITY' | 'MISSING_PRIVILEGE';
   success: boolean;
 }
 
