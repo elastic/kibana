@@ -11,7 +11,7 @@ import { defaultConfig, usePolicyConfigContext } from '../../fleet_package/conte
 
 import { usePolicy } from '../../fleet_package/hooks/use_policy';
 import { validate } from '../validation';
-import { ActionBar } from '../action_bar/action_bar';
+import { ActionBarPortal } from '../action_bar/action_bar_portal';
 import { useFormatMonitor } from '../hooks/use_format_monitor';
 import { MonitorFields } from './monitor_fields';
 
@@ -37,7 +37,8 @@ export const MonitorConfig = () => {
   return (
     <>
       <MonitorFields />
-      <ActionBar monitor={policyConfig[monitorType]} isValid={isValid} />
+
+      <ActionBarPortal monitor={policyConfig[monitorType]} isValid={isValid} />
     </>
   );
 };

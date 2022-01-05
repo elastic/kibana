@@ -23,7 +23,7 @@ export async function getPipelineStateDocument({
   pipelineId: string;
   version: PipelineVersion;
 }) {
-  const dataset = 'node_stats';
+  const dataset = 'node';
   const type = 'logstash_state';
   const moduleType = 'logstash';
   const indexPatterns = getNewIndexPatterns({

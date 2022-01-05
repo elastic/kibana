@@ -145,7 +145,7 @@ async function getPaginatedThroughputData(
                   bool: {
                     should: [
                       { term: { 'data_stream.dataset': `${moduleType}.${dataset}` } },
-                      { term: { 'metricset.name': 'stats' } },
+                      { term: { 'metricset.name': dataset } },
                       {
                         term: {
                           type: 'logstash_stats',
@@ -205,7 +205,7 @@ async function getPaginatedNodesData(
         bool: {
           should: [
             { term: { 'data_stream.dataset': `${moduleType}.${dataset}` } },
-            { term: { 'metricset.name': 'stats' } },
+            { term: { 'metricset.name': dataset } },
             { term: { type: 'logstash_stats' } },
           ],
         },
@@ -278,7 +278,7 @@ async function getThroughputPipelines(
                 bool: {
                   should: [
                     { term: { 'data_stream.dataset': `${moduleType}.${dataset}` } },
-                    { term: { 'metricset.name': 'stats' } },
+                    { term: { 'metricset.name': dataset } },
                     {
                       term: {
                         type: 'logstash_stats',
@@ -318,7 +318,7 @@ async function getNodePipelines(
         bool: {
           should: [
             { term: { 'data_stream.dataset': `${moduleType}.${dataset}` } },
-            { term: { 'metricset.name': 'stats' } },
+            { term: { 'metricset.name': dataset } },
             { term: { type: 'logstash_stats' } },
           ],
         },
