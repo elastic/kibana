@@ -39,8 +39,8 @@ export function calculateCoordinates(innerRef, resizeRef, state) {
   const translateY = (newHeight - inner.clientHeight) / 2;
 
   // Center up and down
-  const top = Math.floor((resize.clientHeight - newHeight) / 2);
-  const left = Math.floor((resize.clientWidth - newWidth) / 2);
+  const top = (resize.clientHeight - newHeight) / 2;
+  const left = (resize.clientWidth - newWidth) / 2;
 
   return { scale, top, left, translateY, translateX };
 }

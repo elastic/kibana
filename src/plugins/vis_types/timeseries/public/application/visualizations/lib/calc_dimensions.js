@@ -7,7 +7,7 @@
  */
 
 export function calcDimensions(el, scale) {
-  const newWidth = Math.floor(el.clientWidth * scale);
-  const newHeight = Math.floor(el.clientHeight * scale);
+  const newWidth = el.clientWidth * scale;
+  const newHeight = el.clientHeight * scale;
   return [newWidth, newHeight];
 }
