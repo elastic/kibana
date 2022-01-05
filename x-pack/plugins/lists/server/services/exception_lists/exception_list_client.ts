@@ -84,18 +84,18 @@ export class ExceptionListClient {
   private readonly user: string;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly serverExtensionsClient: ExtensionPointStorageClientInterface;
-  private readonly disableServerExtensionPoints: boolean;
+  private readonly enableServerExtensionPoints: boolean;
 
   constructor({
     user,
     savedObjectsClient,
     serverExtensionsClient,
-    disableServerExtensionPoints = false,
+    enableServerExtensionPoints = false,
   }: ConstructorOptions) {
     this.user = user;
     this.savedObjectsClient = savedObjectsClient;
     this.serverExtensionsClient = serverExtensionsClient;
-    this.disableServerExtensionPoints = disableServerExtensionPoints;
+    this.enableServerExtensionPoints = enableServerExtensionPoints;
   }
 
   /**
@@ -428,7 +428,7 @@ export class ExceptionListClient {
       type,
     };
 
-    if (!this.disableServerExtensionPoints) {
+    if (this.enableServerExtensionPoints) {
       itemData = await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreCreateItem',
         itemData,
@@ -494,7 +494,7 @@ export class ExceptionListClient {
       type,
     };
 
-    if (!this.disableServerExtensionPoints) {
+    if (this.enableServerExtensionPoints) {
       updatedItem = await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreUpdateItem',
         updatedItem,

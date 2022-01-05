@@ -56,8 +56,8 @@ export interface ConstructorOptions {
   user: string;
   savedObjectsClient: SavedObjectsClientContract;
   serverExtensionsClient: ExtensionPointStorageClientInterface;
-  /** Set to `true` if wanting to disable executing registered server extension points */
-  disableServerExtensionPoints?: boolean;
+  /** Set to `false` if wanting to disable executing registered server extension points. Default is true. */
+  enableServerExtensionPoints?: boolean;
 }
 
 export interface GetExceptionListOptions {

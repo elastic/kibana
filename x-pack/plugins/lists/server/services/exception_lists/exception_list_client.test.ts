@@ -83,7 +83,7 @@ describe('exception_list_client', () => {
         describe('and server extension points are enabled', () => {
           beforeEach(() => {
             exceptionListClient = new ExceptionListClient({
-              disableServerExtensionPoints: false,
+              enableServerExtensionPoints: false,
               savedObjectsClient: getExceptionListSavedObjectClientMock(),
               serverExtensionsClient:
                 extensionPointStorageContext.extensionPointStorage.getClient(),
@@ -130,7 +130,7 @@ describe('exception_list_client', () => {
         describe('and server extension points are DISABLED', () => {
           beforeEach(() => {
             exceptionListClient = new ExceptionListClient({
-              disableServerExtensionPoints: true,
+              enableServerExtensionPoints: true,
               savedObjectsClient: getExceptionListSavedObjectClientMock(),
               serverExtensionsClient:
                 extensionPointStorageContext.extensionPointStorage.getClient(),

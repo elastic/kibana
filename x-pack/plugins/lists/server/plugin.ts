@@ -61,10 +61,10 @@ export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {},
       getExceptionListClient: (
         savedObjectsClient,
         user,
-        disableServerExtensionPoints = false
+        enableServerExtensionPoints = true
       ): ExceptionListClient => {
         return new ExceptionListClient({
-          disableServerExtensionPoints,
+          enableServerExtensionPoints,
           savedObjectsClient,
           serverExtensionsClient: this.extensionPoints.getClient(),
           user,
