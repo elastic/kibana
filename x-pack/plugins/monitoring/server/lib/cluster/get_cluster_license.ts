@@ -37,6 +37,7 @@ export function getClusterLicense(req: LegacyRequest, clusterUuid: string) {
       query: createQuery({
         type: dataset,
         dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         clusterUuid,
         metric: ElasticsearchMetric.getMetricFields(),
       }),

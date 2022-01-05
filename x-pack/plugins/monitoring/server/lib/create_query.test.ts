@@ -136,7 +136,7 @@ describe('Create Query', () => {
 
   it('Uses `dsType` option to add filter with all other option fields', () => {
     const options = {
-      dsDataset: 'cluster_stats',
+      dsDataset: 'elasticsearch.cluster_stats',
       clusterUuid: 'cuid123',
       uuid: 'abc123',
       start: 1456826400000,
@@ -148,7 +148,7 @@ describe('Create Query', () => {
         filter: [
           {
             bool: {
-              should: [{ term: { 'data_stream.dataset': 'cluster_stats' } }],
+              should: [{ term: { 'data_stream.dataset': 'elasticsearch.cluster_stats' } }],
             },
           },
           { term: { cluster_uuid: 'cuid123' } },
@@ -163,9 +163,10 @@ describe('Create Query', () => {
     });
   });
 
-  it('Uses legacy `type` and `dsDataset` option to add type filters and data stream filters with minimal fields that defaults to `metrics` data_stream', () => {
+  it('Uses legacy `type`, `dsDataset`, `metricset` options to add type filters and data stream filters with minimal fields that defaults to `metrics` data_stream', () => {
     const options = {
       type: 'cluster_stats',
+      metricset: 'cluster_stats',
       dsDataset: 'elasticsearch.cluster_stats',
       clusterUuid: 'cuid123',
       metric,
@@ -181,6 +182,11 @@ describe('Create Query', () => {
                     'data_stream.dataset': 'elasticsearch.cluster_stats',
                   },
                 },
+                {
+                  term: {
+                    'metricset.name': 'cluster_stats',
+                  },
+                },
                 { term: { type: 'cluster_stats' } },
               ],
             },
@@ -191,9 +197,10 @@ describe('Create Query', () => {
     });
   });
 
-  it('Uses legacy `type`, `dsDataset`, and `filters` options', () => {
+  it('Uses legacy `type`, `metricset`, `dsDataset`, and `filters` options', () => {
     const options = {
       type: 'cluster_stats',
+      metricset: 'cluster_stats',
       dsDataset: 'elasticsearch.cluster_stats',
       clusterUuid: 'cuid123',
       metric,
@@ -210,6 +217,7 @@ describe('Create Query', () => {
             bool: {
               should: [
                 { term: { 'data_stream.dataset': 'elasticsearch.cluster_stats' } },
+                { term: { 'metricset.name': 'cluster_stats' } },
                 { term: { type: 'cluster_stats' } },
               ],
             },

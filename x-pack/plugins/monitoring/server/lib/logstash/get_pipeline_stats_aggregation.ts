@@ -185,6 +185,7 @@ export function getPipelineStatsAggregation({
   const query = createQuery({
     type,
     dsDataset: `${moduleType}.${dataset}`,
+    metricset: dataset,
     start,
     end,
     metric: LogstashMetric.getMetricFields(),

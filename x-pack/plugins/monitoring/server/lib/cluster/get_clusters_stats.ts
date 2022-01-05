@@ -91,6 +91,7 @@ function fetchClusterStats(req: LegacyRequest, clusterUuid: string, ccs?: string
       query: createQuery({
         type: dataset,
         dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         start,
         end,
         metric,

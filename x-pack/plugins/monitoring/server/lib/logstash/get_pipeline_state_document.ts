@@ -46,6 +46,7 @@ export async function getPipelineStateDocument({
     // Use the logstash_stats documents to determine whether the instance is up/down
     type,
     dsDataset: `${moduleType}.${dataset}`,
+    metricset: dataset,
     metric: LogstashMetric.getMetricFields(),
     clusterUuid,
     filters,

@@ -41,6 +41,7 @@ export async function checkCcrEnabled(req: LegacyRequest, ccs: string) {
       query: createQuery({
         type: dataset,
         dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         start,
         end,
         clusterUuid,

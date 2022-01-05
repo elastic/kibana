@@ -103,7 +103,8 @@ export function getIndexSummary(
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
         type,
-        dsDataset: dataset,
+        dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         start,
         end,
         clusterUuid,

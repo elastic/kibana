@@ -26,6 +26,8 @@ export function createApmQuery(options: {
     filters: [] as any[],
     metric: ApmMetric.getMetricFields(),
     type: 'beats_stats',
+    metricset: 'stats',
+    dsDataset: 'beats.stats',
     ...(options ?? {}),
   };
 

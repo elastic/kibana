@@ -158,6 +158,7 @@ export function buildGetIndicesQuery(
       query: createQuery({
         type,
         dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         start,
         end,
         clusterUuid,

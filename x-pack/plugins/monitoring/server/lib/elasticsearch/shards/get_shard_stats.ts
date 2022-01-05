@@ -112,6 +112,7 @@ export function getShardStats(
       query: createQuery({
         type,
         dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
         metric,
         filters,

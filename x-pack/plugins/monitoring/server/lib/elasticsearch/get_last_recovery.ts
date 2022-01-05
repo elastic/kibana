@@ -113,6 +113,7 @@ export async function getLastRecovery(req: LegacyRequest, size: number) {
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
         type: dataset,
+        metricset: dataset,
         start,
         end,
         clusterUuid,
@@ -138,6 +139,7 @@ export async function getLastRecovery(req: LegacyRequest, size: number) {
       query: createQuery({
         type: dataset,
         dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         start,
         end,
         clusterUuid,

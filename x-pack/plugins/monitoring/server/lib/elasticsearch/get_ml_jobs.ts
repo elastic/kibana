@@ -83,6 +83,7 @@ export function getMlJobs(req: LegacyRequest) {
       query: createQuery({
         type,
         dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         start,
         end,
         clusterUuid,
@@ -128,6 +129,7 @@ export function getMlJobsForCluster(req: LegacyRequest, cluster: ElasticsearchSo
         query: createQuery({
           type,
           dsDataset: `${moduleType}.${dataset}`,
+          metricset: dataset,
           start,
           end,
           clusterUuid,

@@ -136,6 +136,7 @@ export function getNodeSummary(
       query: createQuery({
         type: dataset,
         dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         start,
         end,
         clusterUuid,

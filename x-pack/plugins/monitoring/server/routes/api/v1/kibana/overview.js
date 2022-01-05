@@ -45,6 +45,7 @@ export function kibanaOverviewRoute(server) {
               bool: {
                 should: [
                   { term: { 'data_stream.dataset': `${moduleType}.${dsDataset}` } },
+                  { term: { 'metricset.name': dsDataset } },
                   { term: { type: 'kibana_stats' } },
                 ],
               },

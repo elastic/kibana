@@ -39,6 +39,7 @@ export async function getNodeIds(
       query: createQuery({
         type: dataset,
         dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         start,
         end,
         metric: ElasticsearchMetric.getMetricFields(),

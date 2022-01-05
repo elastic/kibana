@@ -52,6 +52,7 @@ export function getKibanasForClusters(req: LegacyRequest, clusters: Cluster[], c
           query: createQuery({
             type,
             dsDataset: `${moduleType}.${dataset}`,
+            metricset: dataset,
             start,
             end,
             clusterUuid,

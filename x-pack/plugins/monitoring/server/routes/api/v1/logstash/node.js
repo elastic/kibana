@@ -75,6 +75,7 @@ export function logstashNodeRoute(server) {
               bool: {
                 should: [
                   { term: { 'data_stream.dataset': `${moduleType}.${dsDataset}` } },
+                  { term: { 'metricset.name': 'stats' } },
                   { term: { type: 'logstash_stats' } },
                 ],
               },

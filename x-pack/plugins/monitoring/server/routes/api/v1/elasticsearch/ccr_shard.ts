@@ -114,7 +114,14 @@ export function ccrShardRoute(server: { route: (p: any) => void; config: () => {
         {
           bool: {
             should: [
-              { term: { 'data_stream.dataset': `${moduleType}.${dataset}` } },
+              { term: { 'data_stream.dataset': { value: `${moduleType}.${dataset}` } } },
+              {
+                term: {
+                  'metricset.name': {
+                    value: dataset,
+                  },
+                },
+              },
               {
                 term: {
                   type: {

@@ -54,6 +54,7 @@ export function logstashOverviewRoute(server) {
               bool: {
                 should: [
                   { term: { 'data_stream.dataset': `${moduleType}.${dsDataset}` } },
+                  { term: { 'metricset.name': 'stats' } },
                   { term: { type: 'logstash_stats' } },
                 ],
               },

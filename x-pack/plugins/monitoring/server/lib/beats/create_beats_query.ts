@@ -30,6 +30,8 @@ export function createBeatsQuery(options: {
     filters: [] as any[],
     metric: BeatsMetric.getMetricFields(),
     type: 'beats_stats',
+    metricset: 'stats',
+    dsDataset: 'beats.stats',
     ...(options ?? {}),
   };
 

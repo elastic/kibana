@@ -75,6 +75,7 @@ export async function getKibanas(req: LegacyRequest, { clusterUuid }: { clusterU
       query: createQuery({
         type,
         dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         start,
         end,
         clusterUuid,

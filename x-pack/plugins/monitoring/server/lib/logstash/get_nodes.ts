@@ -89,6 +89,7 @@ export async function getNodes(req: LegacyRequest, { clusterUuid }: { clusterUui
       query: createQuery({
         type,
         dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         start,
         end,
         clusterUuid,

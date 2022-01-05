@@ -48,6 +48,7 @@ function fetchPipelineVersions({
   const query = createQuery({
     type,
     dsDataset: `${moduleType}.${dataset}`,
+    metricset: dataset,
     metric: LogstashMetric.getMetricFields(),
     clusterUuid,
     filters,

@@ -119,6 +119,7 @@ export function getShardAllocation(
       query: createQuery({
         type,
         dsDataset: `${moduleType}.${dataset}`,
+        metricset: dataset,
         clusterUuid,
         metric,
         filters,
