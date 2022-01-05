@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { DashboardPanelState } from '../embeddable';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 
@@ -113,4 +114,55 @@ test('Clone adds a new embeddable', async () => {
   // now wait for the full embeddable to replace it
   const loadedPanel = await dashboard.untilEmbeddableLoaded(newPanelId!);
   expect(loadedPanel.type).toEqual(embeddable.type);
+});
+
+test('Clones an embeddable without a saved object ID', async () => {
+  const dashboard = embeddable.getRoot() as IContainer;
+  const panel = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
+  const action = new ClonePanelAction(coreStart);
+  // @ts-ignore
+  const newPanel = await action.cloneEmbeddable(panel, embeddable);
+  expect(newPanel.type).toEqual(embeddable.type);
+});
+
+test('Clones an embeddable with a saved object ID', async () => {
+  const dashboard = embeddable.getRoot() as IContainer;
+  const panel = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
+  panel.explicitInput.savedObjectId = 'holySavedObjectBatman';
+  const action = new ClonePanelAction(coreStart);
+  // @ts-ignore
+  const newPanel = await action.cloneEmbeddable(panel, embeddable);
+  expect(coreStart.savedObjects.client.get).toHaveBeenCalledTimes(1);
+  expect(coreStart.savedObjects.client.find).toHaveBeenCalledTimes(1);
+  expect(coreStart.savedObjects.client.create).toHaveBeenCalledTimes(1);
+  expect(newPanel.type).toEqual(embeddable.type);
+});
+
+test('Gets a unique title ', async () => {
+  coreStart.savedObjects.client.find = jest.fn().mockImplementation(({ search }) => {
+    if (search === '"testFirstTitle"') return { total: 1 };
+    else if (search === '"testSecondTitle"') return { total: 41 };
+    else if (search === '"testThirdTitle"') return { total: 90 };
+  });
+  const action = new ClonePanelAction(coreStart);
+  // @ts-ignore
+  expect(await action.getUniqueTitle('testFirstTitle', embeddable.type)).toEqual(
+    'testFirstTitle (copy)'
+  );
+  // @ts-ignore
+  expect(await action.getUniqueTitle('testSecondTitle (copy 39)', embeddable.type)).toEqual(
+    'testSecondTitle (copy 40)'
+  );
+  // @ts-ignore
+  expect(await action.getUniqueTitle('testSecondTitle (copy 20)', embeddable.type)).toEqual(
+    'testSecondTitle (copy 40)'
+  );
+  // @ts-ignore
+  expect(await action.getUniqueTitle('testThirdTitle', embeddable.type)).toEqual(
+    'testThirdTitle (copy 89)'
+  );
+  // @ts-ignore
+  expect(await action.getUniqueTitle('testThirdTitle (copy 10000)', embeddable.type)).toEqual(
+    'testThirdTitle (copy 89)'
+  );
 });
