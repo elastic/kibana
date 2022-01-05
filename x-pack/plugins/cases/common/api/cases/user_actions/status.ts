@@ -6,9 +6,10 @@
  */
 
 import * as rt from 'io-ts';
+import { CaseStatusRt } from '../status';
 import { ActionTypes, UserActionWithAttributes } from './common';
 
-export const StatusUserActionPayloadRt = rt.type({ status: rt.string });
+export const StatusUserActionPayloadRt = rt.type({ status: CaseStatusRt });
 
 export const StatusUserActionRt = rt.type({
   type: rt.literal(ActionTypes.status),
