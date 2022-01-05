@@ -83,7 +83,7 @@ export function getActionType(): ActionTypeModel<
         errors.summary.push(translations.SUMMARY_REQUIRED);
       }
       if (actionParams.timestamp && !hasMustacheTokens(actionParams.timestamp)) {
-        if (isNaN(Date.parse(actionParams.timestamp))) {
+        if (!moment(actionParams.timestamp).isValid()) {
           const { nowShortFormat, nowLongFormat } = getValidTimestampExamples();
           errors.timestamp.push(
             i18n.translate(
