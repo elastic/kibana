@@ -13,7 +13,7 @@ import {
   PluginConfigDescriptor,
 } from 'src/core/server';
 import { MapConfig, mapConfigSchema } from '../config';
-import { EMSSettings, MAPS_EMS_APP_ID } from '../common';
+import { EMSSettings, LICENSE_CHECK_ID } from '../common';
 import { LicensingPluginSetup } from '../../../../x-pack/plugins/licensing/server';
 import { ILicense } from '../../../../x-pack/plugins/licensing/common/types';
 export type { EMSSettings } from '../common';
@@ -54,7 +54,7 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginServerSetup> {
     let isEnterprisePlus = false;
     if (plugins.licensing) {
       function updateLicenseState(license: ILicense) {
-        const enterprise = license.check(MAPS_EMS_APP_ID, 'enterprise');
+        const enterprise = license.check(LICENSE_CHECK_ID, 'enterprise');
         isEnterprisePlus = enterprise.state === 'valid';
       }
 

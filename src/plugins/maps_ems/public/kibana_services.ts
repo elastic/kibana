@@ -9,7 +9,7 @@
 import type { MapConfig } from '../config';
 import { LicensingPluginStart } from '../../../../x-pack/plugins/licensing/public';
 import { ILicense } from '../../../../x-pack/plugins/licensing/common/types';
-import { MAPS_EMS_APP_ID } from '../common';
+import { LICENSE_CHECK_ID } from '../common';
 
 let kibanaVersion: string;
 export const setKibanaVersion = (version: string) => (kibanaVersion = version);
@@ -23,7 +23,7 @@ export const getMapConfig = () => mapsEmsConfig;
 
 let isEnterprisePlus: boolean = false;
 function updateLicenseState(license: ILicense) {
-  const enterprise = license.check(MAPS_EMS_APP_ID, 'enterprise');
+  const enterprise = license.check(LICENSE_CHECK_ID, 'enterprise');
   isEnterprisePlus = enterprise.state === 'valid';
 }
 export function getIsEnterprisePlus() {
