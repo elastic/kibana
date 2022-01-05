@@ -24,7 +24,8 @@ export interface TimeRange {
 
 export async function setFullTimeRange(
   indexPattern: DataView,
-  query: QueryDslQueryContainer
+  query: QueryDslQueryContainer,
+  excludeFrozenData: boolean
 ): Promise<GetTimeFieldRangeResponse> {
   try {
     const timefilter = getTimefilter();
@@ -33,7 +34,7 @@ export async function setFullTimeRange(
       index: indexPattern.title,
       timeFieldName: indexPattern.timeFieldName,
       // By default we want to use full non-frozen time range
-      query: addExcludeFrozenToQuery(query),
+      query: excludeFrozenData ? addExcludeFrozenToQuery(query) : query,
       ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
     });
     timefilter.setTime({

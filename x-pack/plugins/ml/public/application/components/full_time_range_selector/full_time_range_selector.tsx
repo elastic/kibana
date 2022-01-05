@@ -5,10 +5,19 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiButton,
+  EuiFlexItem,
+  EuiButtonIcon,
+  useGeneratedHtmlId,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiPopover,
+} from '@elastic/eui';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DataView } from '../../../../../../../src/plugins/data_views/public';
 import { setFullTimeRange } from './full_time_range_selector_service';
@@ -24,25 +33,91 @@ interface Props {
 // to the time range of data in the index(es) mapped to the supplied Kibana index pattern or query.
 export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, callback }) => {
   // wrapper around setFullTimeRange to allow for the calling of the optional callBack prop
-  async function setRange(i: DataView, q: QueryDslQueryContainer) {
-    const fullTimeRange = await setFullTimeRange(i, q);
+  async function setRange(i: DataView, q: QueryDslQueryContainer, excludeFrozenData = true) {
+    const fullTimeRange = await setFullTimeRange(i, q, excludeFrozenData);
     if (typeof callback === 'function') {
       callback(fullTimeRange);
     }
   }
-  return (
-    <EuiButton
-      isDisabled={disabled}
-      onClick={() => setRange(dataView, query)}
-      data-test-subj="mlButtonUseFullData"
+
+  const [isPopoverOpen, setPopover] = useState(false);
+  const splitButtonPopoverId = useGeneratedHtmlId({
+    prefix: 'splitButtonPopover',
+  });
+
+  const onButtonClick = () => {
+    setPopover(!isPopoverOpen);
+  };
+
+  const closePopover = () => {
+    setPopover(false);
+  };
+
+  const items = [
+    <EuiContextMenuItem
+      key="include-frozen"
+      onClick={() => {
+        setRange(dataView, query, false);
+        closePopover();
+      }}
     >
       <FormattedMessage
-        id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
-        defaultMessage="Use full {dataViewTitle} data"
+        id="xpack.ml.fullTimeRangeSelector.useFullDataMenuLabel"
+        defaultMessage="Use full data"
         values={{
           dataViewTitle: dataView.title,
         }}
       />
-    </EuiButton>
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="exclude-frozen"
+      onClick={() => {
+        setRange(dataView, query, true);
+        closePopover();
+      }}
+    >
+      <FormattedMessage
+        id="xpack.ml.fullTimeRangeSelector.useFullNonFrozenDataMenuLabel"
+        defaultMessage="Use full non-frozen data"
+      />
+    </EuiContextMenuItem>,
+  ];
+
+  return (
+    <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+      <EuiButton
+        isDisabled={disabled}
+        onClick={() => setRange(dataView, query, true)}
+        data-test-subj="mlButtonUseFullData"
+      >
+        <FormattedMessage
+          id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
+          defaultMessage="Use full non-frozen {dataViewTitle} data"
+          values={{
+            dataViewTitle: dataView.title,
+          }}
+        />
+      </EuiButton>
+      <EuiFlexItem grow={false}>
+        <EuiPopover
+          id={splitButtonPopoverId}
+          button={
+            <EuiButtonIcon
+              display="base"
+              size="m"
+              iconType="boxesVertical"
+              aria-label="More"
+              onClick={onButtonClick}
+            />
+          }
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          panelPaddingSize="none"
+          anchorPosition="downLeft"
+        >
+          <EuiContextMenuPanel size="s" items={items} />
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
