@@ -107,7 +107,7 @@ export function getDateHistogramInterval(
     (colId) => layer.columns[colId].operationType === 'date_histogram'
   );
   if (!dateHistogramColumn && !indexPattern.timeFieldName) {
-    return { canShift: false };
+    return { canShift: false, hasDateHistogram: false };
   }
   if (dateHistogramColumn && activeData && activeData[layerId] && activeData[layerId]) {
     const column = activeData[layerId].columns.find((col) => col.id === dateHistogramColumn);
@@ -118,14 +118,16 @@ export function getDateHistogramInterval(
         interval: search.aggs.parseInterval(expression),
         expression,
         canShift: true,
+        hasDateHistogram: true,
       };
     }
   }
-  return { canShift: true };
+  return { canShift: true, hasDateHistogram: Boolean(dateHistogramColumn) };
 }
 
 export function getLayerTimeShiftChecks({
   interval: dateHistogramInterval,
+  hasDateHistogram,
   canShift,
 }: ReturnType<typeof getDateHistogramInterval>) {
   return {
@@ -144,6 +146,11 @@ export function getLayerTimeShiftChecks({
         parsedValue &&
         typeof parsedValue === 'object' &&
         !Number.isInteger(parsedValue.asMilliseconds() / dateHistogramInterval.asMilliseconds())
+      );
+    },
+    isInvalid: (parsedValue: ReturnType<typeof parseTimeShift>) => {
+      return Boolean(
+        parsedValue === 'invalid' || (hasDateHistogram && parsedValue && parsedValue === 'previous')
       );
     },
   };

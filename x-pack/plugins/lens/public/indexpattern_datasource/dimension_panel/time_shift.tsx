@@ -90,7 +90,7 @@ export function TimeShift({
   }
 
   const dateHistogramInterval = getDateHistogramInterval(layer, indexPattern, activeData, layerId);
-  const { isValueTooSmall, isValueNotMultiple, canShift } =
+  const { isValueTooSmall, isValueNotMultiple, isInvalid, canShift } =
     getLayerTimeShiftChecks(dateHistogramInterval);
 
   if (!canShift) {
@@ -98,7 +98,7 @@ export function TimeShift({
   }
 
   const parsedLocalValue = localValue && parseTimeShift(localValue);
-  const isLocalValueInvalid = Boolean(parsedLocalValue === 'invalid');
+  const isLocalValueInvalid = Boolean(parsedLocalValue && isInvalid(parsedLocalValue));
   const localValueTooSmall = parsedLocalValue && isValueTooSmall(parsedLocalValue);
   const localValueNotMultiple = parsedLocalValue && isValueNotMultiple(parsedLocalValue);
 
@@ -178,7 +178,7 @@ export function TimeShift({
               isInvalid={isLocalValueInvalid}
               onCreateOption={(val) => {
                 const parsedVal = parseTimeShift(val);
-                if (parsedVal !== 'invalid') {
+                if (!isInvalid(parsedVal)) {
                   updateLayer(setTimeShift(columnId, layer, val));
                 } else {
                   setLocalValue(val);
@@ -193,7 +193,7 @@ export function TimeShift({
 
                 const choice = choices[0].value as string;
                 const parsedVal = parseTimeShift(choice);
-                if (parsedVal !== 'invalid') {
+                if (!isInvalid(parsedVal)) {
                   updateLayer(setTimeShift(columnId, layer, choice));
                 } else {
                   setLocalValue(choice);
