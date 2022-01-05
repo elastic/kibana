@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, get, omit, has, flow, forOwn, mergeWith, set, PropertyPath } from 'lodash';
+import { cloneDeep, get, omit, has, flow, forOwn, mergeWith } from 'lodash';
 
 import type {
   SavedObjectMigrationContext,
@@ -15,13 +15,12 @@ import type {
   SavedObjectUnsanitizedDoc,
 } from 'kibana/server';
 
-import { MigrateFunction, MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
-import { SerializableRecord } from '@kbn/utility-types';
+import { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
 import {
-  DEFAULT_QUERY_LANGUAGE,
-  INDEX_PATTERN_SAVED_OBJECT_TYPE,
-  SerializedSearchSourceFields,
-} from '../../../data/common';
+  getIntraObjectMigrationMap,
+  getApplyMigrationWithinObject,
+} from 'src/plugins/kibana_utils/common/persistable_state';
+import { DEFAULT_QUERY_LANGUAGE, INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../data/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
   commonHideTSVBLastValueIndicator,
@@ -1194,41 +1193,6 @@ const visualizationSavedObjectTypeMigrations = {
   '8.0.0': flow(removeMarkdownLessFromTSVB),
 };
 
-const getApplyMigrationWithinObject = <
-  T extends SerializableRecord = SerializableRecord,
-  V extends SerializableRecord = SerializableRecord
->(
-  migrate: MigrateFunction<V>,
-  path: PropertyPath,
-  {
-    serialize,
-    deserialize,
-  }: { serialize: (obj: any) => string; deserialize: (serialized: any) => any } = {
-    serialize: (obj) => obj,
-    deserialize: (obj) => obj,
-  }
-) => {
-  return (obj: T) => {
-    const cloned = cloneDeep(obj);
-    const subObjBefore = get(cloned, path);
-
-    if (!subObjBefore) return cloned;
-
-    const migrateWithSerialization = (sub: any) => serialize(migrate(deserialize(sub)));
-
-    let subObjAfter;
-    if (Array.isArray(subObjBefore)) {
-      subObjAfter = subObjBefore.map((element) => migrateWithSerialization(element));
-    } else {
-      subObjAfter = migrateWithSerialization(subObjBefore);
-    }
-
-    set(cloned, path, subObjAfter);
-
-    return cloned;
-  };
-};
-
 const mergeSavedObjectMigrationMaps = (
   obj1: SavedObjectMigrationMap,
   obj2: SavedObjectMigrationMap
@@ -1245,42 +1209,22 @@ const mergeSavedObjectMigrationMaps = (
 };
 
 /**
- * Returns a MigrateFunctionsObject with migrate functions that are set up to
- * apply the original migrations _within_ a larger object.
+ * This creates a migration map that applies search source migrations to legacy visualizations
  */
-const getIntraObjectMigrationMap = (
-  objectMigrationMap: MigrateFunctionsObject,
-  getApplyIntraObjectMigration: (migration: MigrateFunction) => MigrateFunction
-) => {
-  const intraObjectMigrationMap: MigrateFunctionsObject = {};
-  for (const version in objectMigrationMap) {
-    if (objectMigrationMap.hasOwnProperty(version)) {
-      intraObjectMigrationMap[version] = getApplyIntraObjectMigration(objectMigrationMap[version]);
-    }
-  }
-  return intraObjectMigrationMap;
-};
-
-const getApplySearchSourceMigrationWithinVisualization = (
-  migrateSearchSource: MigrateFunction<SerializedSearchSourceFields>
-) => {
-  return getApplyMigrationWithinObject(
-    migrateSearchSource,
-    'attributes.kibanaSavedObjectMeta.searchSourceJSON',
-    {
+export const getVisualizationSearchSourceMigrations = (
+  searchSourceMigrations: MigrateFunctionsObject
+) =>
+  getIntraObjectMigrationMap(searchSourceMigrations, (migrate) =>
+    getApplyMigrationWithinObject(migrate, 'attributes.kibanaSavedObjectMeta.searchSourceJSON', {
       serialize: JSON.stringify,
       deserialize: JSON.parse,
-    }
+    })
   );
-};
 
 export const getAllMigrations = (
   searchSourceMigrations: MigrateFunctionsObject
 ): SavedObjectMigrationMap =>
   mergeSavedObjectMigrationMaps(
     visualizationSavedObjectTypeMigrations,
-    getIntraObjectMigrationMap(
-      searchSourceMigrations,
-      getApplySearchSourceMigrationWithinVisualization
-    )
+    getVisualizationSearchSourceMigrations(searchSourceMigrations)
   );

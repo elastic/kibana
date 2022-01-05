@@ -7,11 +7,11 @@
 
 import { cloneDeep } from 'lodash';
 import { PaletteOutput } from 'src/plugins/charts/common';
-import { Filter } from '@kbn/es-query';
 import {
-  MigrateFunction,
-  MigrateFunctionsObject,
-} from '../../../../../src/plugins/kibana_utils/common';
+  getApplyMigrationWithinObject,
+  getIntraObjectMigrationMap,
+} from 'src/plugins/kibana_utils/common/persistable_state';
+import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
 import {
   LensDocShapePre712,
   OperationTypePre712,
@@ -24,7 +24,6 @@ import {
   VisState716,
 } from './types';
 import { CustomPaletteParams, layerTypes } from '../../common';
-import { LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (
   attributes: LensDocShapePre712
@@ -171,30 +170,10 @@ export const commonRenameFilterReferences = (attributes: LensDocShape715<VisStat
   return newAttributes;
 };
 
-const getApplyFilterMigrationToLens = (filterMigration: MigrateFunction<Filter>) => {
-  return (savedObject: { attributes: LensDocShape }) => {
-    return {
-      ...savedObject,
-      attributes: {
-        ...savedObject.attributes,
-        state: {
-          ...savedObject.attributes.state,
-          filters: savedObject.attributes.state.filters.map((filter) => filterMigration(filter)),
-        },
-      },
-    };
-  };
-};
-
 /**
  * This creates a migration map that applies filter migrations to Lens visualizations
  */
-export const getLensFilterMigrations = (filterMigrations: MigrateFunctionsObject) => {
-  const migrationMap: MigrateFunctionsObject = {};
-  for (const version in filterMigrations) {
-    if (filterMigrations.hasOwnProperty(version)) {
-      migrationMap[version] = getApplyFilterMigrationToLens(filterMigrations[version]);
-    }
-  }
-  return migrationMap;
-};
+export const getLensFilterMigrations = (filterMigrations: MigrateFunctionsObject) =>
+  getIntraObjectMigrationMap(filterMigrations, (migrate) =>
+    getApplyMigrationWithinObject(migrate, 'attributes.state.filters')
+  );
