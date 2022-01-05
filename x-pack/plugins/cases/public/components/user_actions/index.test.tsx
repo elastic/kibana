@@ -53,41 +53,42 @@ const defaultProps = {
   alerts: {},
   onShowAlertDetails,
 };
-const useUpdateCommentMock = useUpdateComment as jest.Mock;
+
 jest.mock('../../containers/use_update_comment');
 jest.mock('./timestamp');
 jest.mock('../../common/lib/kibana');
 
+const useUpdateCommentMock = useUpdateComment as jest.Mock;
 const patchComment = jest.fn();
 
 describe(`UserActions`, () => {
   const sampleData = {
     content: 'what a great comment update',
   };
+
   beforeEach(() => {
     jest.clearAllMocks();
-    useUpdateCommentMock.mockImplementation(() => ({
-      loadingCommentIds: [],
+    useUpdateCommentMock.mockReturnValue({
+      isLoadingIds: [],
       patchComment,
-    }));
+    });
 
     jest
       .spyOn(routeData, 'useParams')
       .mockReturnValue({ detailName: 'case-id', subCaseId: 'sub-case-id' });
   });
 
-  it('Loading spinner when user actions loading and displays fullName/username', () => {
+  it('Loading spinner when user actions loading and displays fullName/username', async () => {
     const wrapper = mount(
       <TestProviders>
         <UserActions {...{ ...defaultProps, isLoadingUserActions: true }} />
       </TestProviders>
     );
-    expect(wrapper.find(`[data-test-subj="user-actions-loading"]`).exists()).toEqual(true);
 
+    expect(wrapper.find(`[data-test-subj="user-actions-loading"]`).exists()).toEqual(true);
     expect(wrapper.find(`[data-test-subj="user-action-avatar"]`).first().prop('name')).toEqual(
       defaultProps.data.createdBy.fullName
     );
-
     expect(
       wrapper.find(`[data-test-subj="description-action"] figcaption strong`).first().text()
     ).toEqual(defaultProps.data.createdBy.username);

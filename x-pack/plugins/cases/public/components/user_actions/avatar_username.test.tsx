@@ -25,19 +25,15 @@ describe('UserActionUsernameWithAvatar ', () => {
     expect(
       wrapper.find('[data-test-subj="user-action-username-with-avatar"]').first().exists()
     ).toBeTruthy();
-    expect(
-      wrapper.find('[data-test-subj="user-action-username-avatar"]').first().exists()
-    ).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="user-action-avatar"]').first().exists()).toBeTruthy();
   });
 
   it('it shows the avatar', async () => {
-    expect(wrapper.find('[data-test-subj="user-action-username-avatar"]').first().text()).toBe('E');
+    expect(wrapper.find('[data-test-subj="user-action-avatar"]').first().text()).toBe('E');
   });
 
   it('it shows the avatar without fullName', async () => {
     const newWrapper = mount(<UserActionUsernameWithAvatar username="elastic" />);
-    expect(newWrapper.find('[data-test-subj="user-action-username-avatar"]').first().text()).toBe(
-      'e'
-    );
+    expect(newWrapper.find('[data-test-subj="user-action-avatar"]').first().text()).toBe('e');
   });
 });

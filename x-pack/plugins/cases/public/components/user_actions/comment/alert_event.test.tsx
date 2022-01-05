@@ -23,7 +23,7 @@ const props = {
   commentType: CommentType.alert,
 };
 
-jest.mock('../../common/lib/kibana');
+jest.mock('../../../common/lib/kibana');
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('UserActionAvatar ', () => {
