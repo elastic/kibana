@@ -67,7 +67,7 @@ describe(`UserActions`, () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useUpdateCommentMock.mockImplementation(() => ({
-      isLoadingIds: [],
+      loadingCommentIds: [],
       patchComment,
     }));
 

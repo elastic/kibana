@@ -30,92 +30,97 @@ export interface UserActionMarkdownRefObject {
   setComment: (newComment: string) => void;
 }
 
-export const UserActionMarkdown = forwardRef<UserActionMarkdownRefObject, UserActionMarkdownProps>(
-  ({ id, content, isEditable, onChangeEditable, onSaveContent }, ref) => {
-    const editorRef = useRef();
-    const initialState = { content };
-    const { form } = useForm<Content>({
-      defaultValue: initialState,
-      options: { stripEmptyFields: false },
-      schema,
-    });
+const UserActionMarkdownComponent = forwardRef<
+  UserActionMarkdownRefObject,
+  UserActionMarkdownProps
+>(({ id, content, isEditable, onChangeEditable, onSaveContent }, ref) => {
+  const editorRef = useRef();
+  const initialState = { content };
+  const { form } = useForm<Content>({
+    defaultValue: initialState,
+    options: { stripEmptyFields: false },
+    schema,
+  });
 
-    const fieldName = 'content';
-    const { setFieldValue, submit } = form;
+  const fieldName = 'content';
+  const { setFieldValue, submit } = form;
 
-    const handleCancelAction = useCallback(() => {
-      onChangeEditable(id);
-    }, [id, onChangeEditable]);
+  const handleCancelAction = useCallback(() => {
+    onChangeEditable(id);
+  }, [id, onChangeEditable]);
 
-    const handleSaveAction = useCallback(async () => {
-      const { isValid, data } = await submit();
+  const handleSaveAction = useCallback(async () => {
+    const { isValid, data } = await submit();
 
-      if (isValid && data.content !== content) {
-        onSaveContent(data.content);
-      }
-      onChangeEditable(id);
-    }, [content, id, onChangeEditable, onSaveContent, submit]);
+    if (isValid && data.content !== content) {
+      onSaveContent(data.content);
+    }
+    onChangeEditable(id);
+  }, [content, id, onChangeEditable, onSaveContent, submit]);
 
-    const setComment = useCallback(
-      (newComment) => {
-        setFieldValue(fieldName, newComment);
-      },
-      [setFieldValue]
-    );
+  const setComment = useCallback(
+    (newComment) => {
+      setFieldValue(fieldName, newComment);
+    },
+    [setFieldValue]
+  );
 
-    const EditorButtons = useMemo(
-      () => (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="user-action-cancel-markdown"
-              size="s"
-              onClick={handleCancelAction}
-              iconType="cross"
-            >
-              {i18n.CANCEL}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="user-action-save-markdown"
-              color="success"
-              fill
-              iconType="save"
-              onClick={handleSaveAction}
-              size="s"
-            >
-              {i18n.SAVE}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      [handleCancelAction, handleSaveAction]
-    );
+  const EditorButtons = useMemo(
+    () => (
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            data-test-subj="user-action-cancel-markdown"
+            size="s"
+            onClick={handleCancelAction}
+            iconType="cross"
+          >
+            {i18n.CANCEL}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="user-action-save-markdown"
+            color="success"
+            fill
+            iconType="save"
+            onClick={handleSaveAction}
+            size="s"
+          >
+            {i18n.SAVE}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
+    [handleCancelAction, handleSaveAction]
+  );
 
-    useImperativeHandle(ref, () => ({
-      setComment,
-      editor: editorRef.current,
-    }));
+  useImperativeHandle(ref, () => ({
+    setComment,
+    editor: editorRef.current,
+  }));
 
-    return isEditable ? (
-      <Form form={form} data-test-subj="user-action-markdown-form">
-        <UseField
-          path={fieldName}
-          component={MarkdownEditorForm}
-          componentProps={{
-            ref: editorRef,
-            'aria-label': 'Cases markdown editor',
-            value: content,
-            id,
-            bottomRightContent: EditorButtons,
-          }}
-        />
-      </Form>
-    ) : (
-      <ContentWrapper data-test-subj="user-action-markdown">
-        <MarkdownRenderer>{content}</MarkdownRenderer>
-      </ContentWrapper>
-    );
-  }
-);
+  return isEditable ? (
+    <Form form={form} data-test-subj="user-action-markdown-form">
+      <UseField
+        path={fieldName}
+        component={MarkdownEditorForm}
+        componentProps={{
+          ref: editorRef,
+          'aria-label': 'Cases markdown editor',
+          value: content,
+          id,
+          bottomRightContent: EditorButtons,
+        }}
+      />
+    </Form>
+  ) : (
+    <ContentWrapper data-test-subj="user-action-markdown">
+      <MarkdownRenderer>{content}</MarkdownRenderer>
+    </ContentWrapper>
+  );
+});
+
+UserActionMarkdownComponent.displayName = 'UserActionMarkdownComponent';
+
+export const UserActionMarkdown = React.memo(UserActionMarkdownComponent);

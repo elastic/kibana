@@ -15,3 +15,5 @@ export const UNSUPPORTED_ACTION_TYPES = ['create_case', 'delete_case', 'settings
 export const SUPPORTED_ACTION_TYPES: SupportedUserActionTypes[] = Object.keys(
   omit(ActionTypes, UNSUPPORTED_ACTION_TYPES)
 ) as SupportedUserActionTypes[];
+
+export const NEW_COMMENT_ID = 'newComment';

@@ -14,6 +14,26 @@ import { AddCommentRefObject } from '../add_comment';
 import { UserActionMarkdownRefObject } from './markdown_form';
 import { CasesNavigation } from '../links';
 import { UNSUPPORTED_ACTION_TYPES } from './constants';
+import type { OnUpdateFields } from '../case_view/types';
+
+export interface UserActionTreeProps {
+  caseServices: CaseServices;
+  caseUserActions: CaseUserActions[];
+  data: Case;
+  fetchUserActions: () => void;
+  getRuleDetailsHref?: RuleDetailsNavigation['href'];
+  actionsNavigation?: ActionsNavigation;
+  isLoadingDescription: boolean;
+  isLoadingUserActions: boolean;
+  onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
+  onShowAlertDetails: (alertId: string, index: string) => void;
+  onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
+  renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
+  statusActionButton: JSX.Element | null;
+  updateCase: (newCase: Case) => void;
+  useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
+  userCanCrud: boolean;
+}
 
 type UnsupportedUserActionTypes = typeof UNSUPPORTED_ACTION_TYPES[number];
 export type SupportedUserActionTypes = keyof Omit<typeof ActionTypes, UnsupportedUserActionTypes>;
@@ -30,7 +50,7 @@ export interface UserActionBuilderArgs {
   >;
   manageMarkdownEditIds: string[];
   selectedOutlineCommentId: string;
-  isLoadingIds: string[];
+  loadingCommentIds: string[];
   loadingAlertData: boolean;
   alertData: Record<string, Ecs>;
   handleOutlineComment: (id: string) => void;

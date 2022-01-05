@@ -13,49 +13,20 @@ import {
   EuiCommentProps,
 } from '@elastic/eui';
 
-import classNames from 'classnames';
-import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 
-import { useUpdateComment } from '../../containers/use_update_comment';
 import { useCurrentUser } from '../../common/lib/kibana';
-import { AddComment, AddCommentRefObject } from '../add_comment';
-import { Case, CaseUserActions, Ecs } from '../../../common/ui/types';
-import { ActionConnector } from '../../../common/api';
-import { CaseServices } from '../../containers/use_get_case_user_actions';
+import { AddComment } from '../add_comment';
 import { UserActionAvatar } from './avatar';
-import { UserActionMarkdown, UserActionMarkdownRefObject } from './markdown_form';
-import { UserActionTimestamp } from './timestamp';
 import { UserActionUsername } from './username';
-import { UserActionContentToolbar } from './content_toolbar';
-import { getManualAlertIdsWithNoRuleId } from '../case_view/helpers';
-import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_draft_comment';
 import { useCaseViewParams } from '../../common/navigation';
-import type { OnUpdateFields } from '../case_view/types';
 import { builderMap } from './builder';
-import { ActionsNavigation, RuleDetailsNavigation } from './types';
-import * as i18n from './translations';
-import { isUserActionTypeSupported } from './helpers';
-
-export interface UserActionTreeProps {
-  caseServices: CaseServices;
-  caseUserActions: CaseUserActions[];
-  connectors: ActionConnector[];
-  data: Case;
-  fetchUserActions: () => void;
-  getRuleDetailsHref?: RuleDetailsNavigation['href'];
-  actionsNavigation?: ActionsNavigation;
-  isLoadingDescription: boolean;
-  isLoadingUserActions: boolean;
-  onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
-  onShowAlertDetails: (alertId: string, index: string) => void;
-  onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
-  renderInvestigateInTimelineActionComponent?: (alertIds: string[]) => JSX.Element;
-  statusActionButton: JSX.Element | null;
-  updateCase: (newCase: Case) => void;
-  useFetchAlertData: (alertIds: string[]) => [boolean, Record<string, Ecs>];
-  userCanCrud: boolean;
-}
+import { isUserActionTypeSupported, getManualAlertIdsWithNoRuleId } from './helpers';
+import type { UserActionTreeProps } from './types';
+import { getDescriptionUserAction } from './description';
+import { useUserActionsHandler } from './use_user_actions_handler';
+import { NEW_COMMENT_ID } from './constants';
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
   margin-bottom: 8px;
@@ -105,25 +76,10 @@ const MyEuiCommentList = styled(EuiCommentList)`
   `}
 `;
 
-const DESCRIPTION_ID = 'description';
-const NEW_ID = 'newComment';
-
-const isAddCommentRef = (
-  ref: AddCommentRefObject | UserActionMarkdownRefObject | null | undefined
-): ref is AddCommentRefObject => {
-  const commentRef = ref as AddCommentRefObject;
-  if (commentRef?.addQuote != null) {
-    return true;
-  }
-
-  return false;
-};
-
 export const UserActions = React.memo(
   ({
     caseServices,
     caseUserActions,
-    connectors,
     data: caseData,
     fetchUserActions,
     getRuleDetailsHref,
@@ -140,177 +96,80 @@ export const UserActions = React.memo(
     userCanCrud,
   }: UserActionTreeProps) => {
     const { detailName: caseId, subCaseId, commentId } = useCaseViewParams();
-    const handlerTimeoutId = useRef(0);
     const [initLoading, setInitLoading] = useState(true);
-    const [selectedOutlineCommentId, setSelectedOutlineCommentId] = useState('');
-    const { isLoadingIds, patchComment } = useUpdateComment();
     const currentUser = useCurrentUser();
-    const [manageMarkdownEditIds, setManageMarkdownEditIds] = useState<string[]>([]);
-    const commentRefs = useRef<
-      Record<string, AddCommentRefObject | UserActionMarkdownRefObject | undefined | null>
-    >({});
-    const { clearDraftComment, draftComment, hasIncomingLensState, openLensModal } =
-      useLensDraftComment();
 
     const [loadingAlertData, manualAlertsData] = useFetchAlertData(
       getManualAlertIdsWithNoRuleId(caseData.comments)
     );
 
-    const handleManageMarkdownEditId = useCallback(
-      (id: string) => {
-        clearDraftComment();
-        setManageMarkdownEditIds((prevManageMarkdownEditIds) =>
-          !prevManageMarkdownEditIds.includes(id)
-            ? prevManageMarkdownEditIds.concat(id)
-            : prevManageMarkdownEditIds.filter((myId) => id !== myId)
-        );
-      },
-      [clearDraftComment]
-    );
-
-    const handleSaveComment = useCallback(
-      ({ id, version }: { id: string; version: string }, content: string) => {
-        patchComment({
-          caseId,
-          commentId: id,
-          commentUpdate: content,
-          fetchUserActions,
-          version,
-          updateCase,
-          subCaseId,
-        });
-      },
-      [caseId, fetchUserActions, patchComment, subCaseId, updateCase]
-    );
-
-    const handleOutlineComment = useCallback(
-      (id: string) => {
-        const moveToTarget = document.getElementById(`${id}-permLink`);
-        if (moveToTarget != null) {
-          const yOffset = -60;
-          const y = moveToTarget.getBoundingClientRect().top + window.pageYOffset + yOffset;
-          window.scrollTo({
-            top: y,
-            behavior: 'smooth',
-          });
-          if (id === 'add-comment') {
-            moveToTarget.getElementsByTagName('textarea')[0].focus();
-          }
-        }
-        window.clearTimeout(handlerTimeoutId.current);
-        setSelectedOutlineCommentId(id);
-        handlerTimeoutId.current = window.setTimeout(() => {
-          setSelectedOutlineCommentId('');
-          window.clearTimeout(handlerTimeoutId.current);
-        }, 2400);
-      },
-      [handlerTimeoutId]
-    );
-
-    const handleManageQuote = useCallback(
-      (quote: string) => {
-        const ref = commentRefs?.current[NEW_ID];
-        if (isAddCommentRef(ref)) {
-          ref.addQuote(quote);
-        }
-
-        handleOutlineComment('add-comment');
-      },
-      [handleOutlineComment]
-    );
-
-    const handleUpdate = useCallback(
-      (newCase: Case) => {
-        updateCase(newCase);
-        fetchUserActions();
-      },
-      [fetchUserActions, updateCase]
-    );
-
-    const MarkdownDescription = useMemo(
-      () => (
-        <UserActionMarkdown
-          ref={(element) => (commentRefs.current[DESCRIPTION_ID] = element)}
-          id={DESCRIPTION_ID}
-          content={caseData.description}
-          isEditable={manageMarkdownEditIds.includes(DESCRIPTION_ID)}
-          onSaveContent={(content: string) => {
-            onUpdateField({ key: DESCRIPTION_ID, value: content });
-          }}
-          onChangeEditable={handleManageMarkdownEditId}
-        />
-      ),
-      [caseData.description, handleManageMarkdownEditId, manageMarkdownEditIds, onUpdateField]
-    );
+    const {
+      loadingCommentIds,
+      commentRefs,
+      selectedOutlineCommentId,
+      manageMarkdownEditIds,
+      handleManageMarkdownEditId,
+      handleOutlineComment,
+      handleSaveComment,
+      handleManageQuote,
+      handleUpdate,
+    } = useUserActionsHandler({ fetchUserActions, updateCase });
 
     const MarkdownNewComment = useMemo(
       () => (
         <AddComment
-          id={NEW_ID}
+          id={NEW_COMMENT_ID}
           caseId={caseId}
           userCanCrud={userCanCrud}
-          ref={(element) => (commentRefs.current[NEW_ID] = element)}
+          ref={(element) => (commentRefs.current[NEW_COMMENT_ID] = element)}
           onCommentPosted={handleUpdate}
-          onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_ID)}
+          onCommentSaving={handleManageMarkdownEditId.bind(null, NEW_COMMENT_ID)}
           showLoading={false}
           statusActionButton={statusActionButton}
           subCaseId={subCaseId}
         />
       ),
-      [caseId, userCanCrud, handleUpdate, handleManageMarkdownEditId, statusActionButton, subCaseId]
+      [
+        caseId,
+        userCanCrud,
+        handleUpdate,
+        handleManageMarkdownEditId,
+        statusActionButton,
+        subCaseId,
+        commentRefs,
+      ]
     );
 
     useEffect(() => {
-      if (initLoading && !isLoadingUserActions && isLoadingIds.length === 0) {
+      if (initLoading && !isLoadingUserActions && loadingCommentIds.length === 0) {
         setInitLoading(false);
         if (commentId != null) {
           handleOutlineComment(commentId);
         }
       }
-    }, [commentId, initLoading, isLoadingUserActions, isLoadingIds, handleOutlineComment]);
+    }, [commentId, initLoading, isLoadingUserActions, loadingCommentIds, handleOutlineComment]);
 
     const descriptionCommentListObj: EuiCommentProps = useMemo(
-      () => ({
-        username: (
-          <UserActionUsername
-            username={caseData.createdBy.username}
-            fullName={caseData.createdBy.fullName}
-          />
-        ),
-        event: i18n.ADDED_DESCRIPTION,
-        'data-test-subj': 'description-action',
-        timestamp: <UserActionTimestamp createdAt={caseData.createdAt} />,
-        children: MarkdownDescription,
-        timelineIcon: (
-          <UserActionAvatar
-            username={caseData.createdBy.username}
-            fullName={caseData.createdBy.fullName}
-          />
-        ),
-        className: classNames({
-          isEdit: manageMarkdownEditIds.includes(DESCRIPTION_ID),
+      () =>
+        getDescriptionUserAction({
+          caseData,
+          commentRefs,
+          manageMarkdownEditIds,
+          isLoadingDescription,
+          userCanCrud,
+          onUpdateField,
+          handleManageMarkdownEditId,
+          handleManageQuote,
         }),
-        actions: (
-          <UserActionContentToolbar
-            commentMarkdown={caseData.description}
-            id={DESCRIPTION_ID}
-            editLabel={i18n.EDIT_DESCRIPTION}
-            quoteLabel={i18n.QUOTE}
-            isLoading={isLoadingDescription}
-            onEdit={handleManageMarkdownEditId.bind(null, DESCRIPTION_ID)}
-            onQuote={handleManageQuote.bind(null, caseData.description)}
-            userCanCrud={userCanCrud}
-          />
-        ),
-      }),
       [
-        MarkdownDescription,
         caseData,
-        handleManageMarkdownEditId,
-        handleManageQuote,
+        commentRefs,
+        manageMarkdownEditIds,
         isLoadingDescription,
         userCanCrud,
-        manageMarkdownEditIds,
+        onUpdateField,
+        handleManageMarkdownEditId,
+        handleManageQuote,
       ]
     );
 
@@ -330,7 +189,7 @@ export const UserActions = React.memo(
                 commentRefs,
                 manageMarkdownEditIds,
                 selectedOutlineCommentId,
-                isLoadingIds,
+                loadingCommentIds,
                 loadingAlertData,
                 alertData: manualAlertsData,
                 handleOutlineComment,
@@ -354,9 +213,10 @@ export const UserActions = React.memo(
         caseData,
         caseServices,
         userCanCrud,
+        commentRefs,
         manageMarkdownEditIds,
         selectedOutlineCommentId,
-        isLoadingIds,
+        loadingCommentIds,
         loadingAlertData,
         manualAlertsData,
         handleOutlineComment,
@@ -391,42 +251,10 @@ export const UserActions = React.memo(
 
     const comments = [...userActions, ...bottomActions];
 
-    useEffect(() => {
-      if (draftComment?.commentId) {
-        setManageMarkdownEditIds((prevManageMarkdownEditIds) => {
-          if (
-            ![NEW_ID].includes(draftComment?.commentId) &&
-            !prevManageMarkdownEditIds.includes(draftComment?.commentId)
-          ) {
-            return [draftComment?.commentId];
-          }
-          return prevManageMarkdownEditIds;
-        });
-
-        const ref = commentRefs?.current?.[draftComment.commentId];
-
-        if (isAddCommentRef(ref) && ref.editor?.textarea) {
-          ref.setComment(draftComment.comment);
-          if (hasIncomingLensState) {
-            openLensModal({ editorRef: ref.editor });
-          } else {
-            clearDraftComment();
-          }
-        }
-      }
-    }, [
-      draftComment,
-      openLensModal,
-      commentRefs,
-      hasIncomingLensState,
-      clearDraftComment,
-      manageMarkdownEditIds,
-    ]);
-
     return (
       <>
         <MyEuiCommentList comments={comments} data-test-subj="user-actions" />
-        {(isLoadingUserActions || isLoadingIds.includes(NEW_ID)) && (
+        {(isLoadingUserActions || loadingCommentIds.includes(NEW_COMMENT_ID)) && (
           <MyEuiFlexGroup justifyContent="center" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiLoadingSpinner data-test-subj="user-actions-loading" size="l" />

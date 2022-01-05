@@ -368,7 +368,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                         onRuleDetailsClick={ruleDetailsNavigation?.onClick}
                         caseServices={caseServices}
                         caseUserActions={caseUserActions}
-                        connectors={connectors}
                         data={caseData}
                         actionsNavigation={actionsNavigation}
                         fetchUserActions={refetchCaseUserActions}
