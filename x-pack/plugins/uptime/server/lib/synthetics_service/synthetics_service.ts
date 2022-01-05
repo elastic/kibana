@@ -37,6 +37,7 @@ import {
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID = 'UPTIME:SyntheticsService:sync-task';
+const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '5m';
 
 export class SyntheticsService {
   private logger: Logger;
@@ -126,19 +127,23 @@ export class SyntheticsService {
   }
 
   public scheduleSyncTask(taskManager: TaskManagerStartContract) {
+    const interval =
+      this.config.unsafe.service.syncInterval ?? SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT;
     taskManager
       .ensureScheduled({
         id: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID,
         taskType: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE,
         schedule: {
-          interval: '1m',
+          interval,
         },
         params: {},
         state: {},
         scope: ['uptime'],
       })
       .then((_result) => {
-        this.logger?.info(`Task ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID} scheduled. `);
+        this.logger?.info(
+          `Task ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID} scheduled with interval ${interval}.`
+        );
       })
       .catch((e) => {
         this.logger?.error(
