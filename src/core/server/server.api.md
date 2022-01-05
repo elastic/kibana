@@ -2747,7 +2747,7 @@ export class SavedObjectsSerializer {
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
     getKibanaIndex: () => string;
-    registerType: <Attributes = any>(type: SavedObjectsType<Attributes>) => void;
+    registerType: <Attributes extends SavedObjectAttributes = any>(type: SavedObjectsType<Attributes>) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }
 
@@ -2784,6 +2784,7 @@ export interface SavedObjectsType<Attributes = any> {
     migrations?: SavedObjectMigrationMap | (() => SavedObjectMigrationMap);
     name: string;
     namespaceType: SavedObjectsNamespaceType;
+    schemas?: SavedObjectsValidationMap | (() => SavedObjectsValidationMap);
 }
 
 // @public
@@ -2865,6 +2866,15 @@ export class SavedObjectsUtils {
     static namespaceIdToString: (namespace?: string | undefined) => string;
     static namespaceStringToId: (namespace: string) => string | undefined;
 }
+
+// @public
+export interface SavedObjectsValidationMap {
+    // (undocumented)
+    [version: string]: SavedObjectsValidationSpec;
+}
+
+// @public
+export type SavedObjectsValidationSpec = ObjectType;
 
 // Warning: (ae-extra-release-tag) The doc comment should not contain more than one release tag
 //

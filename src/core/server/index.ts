@@ -363,6 +363,8 @@ export type {
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportWarning,
+  SavedObjectsValidationMap,
+  SavedObjectsValidationSpec,
 } from './saved_objects';
 
 export type {

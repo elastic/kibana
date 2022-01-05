@@ -93,6 +93,8 @@ export type {
   SavedObjectTypeExcludeFromUpgradeFilterHook,
 } from './types';
 
+export type { SavedObjectsValidationMap, SavedObjectsValidationSpec } from './validation';
+
 export { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects_config';
 export { SavedObjectTypeRegistry } from './saved_objects_type_registry';
 export type { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
