@@ -14,7 +14,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import { FindingsTable } from './findings_table';
 import { FindingsRuleFlyout } from './findings_flyout';
 import { FindingsSearchBar } from './findings_search_bar';
-import { TEST_SUBJECTS } from './constants';
+import * as TEST_SUBJECTS from './test_subjects';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import {
   extractErrorMessage,
@@ -85,7 +85,7 @@ export const FindingsTableContainer = ({ dataView }: { dataView: DataView }) => 
     mutation.mutate(undefined, {
       onError: (e) => {
         notifications?.toasts.addError(e instanceof Error ? e : new Error(), {
-          title: 'Search failed',
+          title: SEARCH_FAILED,
         });
       },
     });

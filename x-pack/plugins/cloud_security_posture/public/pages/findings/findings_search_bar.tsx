@@ -8,7 +8,7 @@ import React, { useEffect } from 'react';
 import type { Query } from '@kbn/es-query';
 import type { Filter } from '@kbn/es-query';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { TEST_SUBJECTS } from './constants';
+import * as TEST_SUBJECTS from './test_subjects';
 import type { DataView, TimeRange } from '../../../../../../src/plugins/data/common';
 import type { FindingsFetchState } from './types';
 import type { CspPluginSetup } from '../../types';

@@ -25,6 +25,7 @@ import {
 import { assertNever } from '@kbn/std';
 import type { CspFinding } from './types';
 import { CSPEvaluationBadge } from '../../components/csp_evaluation_badge';
+import * as TEXT from './translations';
 
 const tabs = ['result', 'rule', 'resource'] as const;
 
@@ -49,7 +50,7 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
       <EuiFlyoutHeader>
         <EuiTitle size="l">
           <EuiTextColor color="primary">
-            <h2>{'Findings'}</h2>
+            <h2>{TEXT.FINDINGS}</h2>
           </EuiTextColor>
         </EuiTitle>
         <EuiSpacer />
@@ -104,28 +105,28 @@ const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab
 
 const getResourceCards = ({ resource }: CspFinding): Card[] => [
   {
-    title: 'Resource',
+    title: TEXT.RESOURCE,
     listItems: [
-      ['Filename', <EuiCode>{resource.filename}</EuiCode>],
-      ['Mode', resource.mode],
-      ['Path', <EuiCode>{resource.path}</EuiCode>],
-      ['Type', resource.type],
-      ['UID', resource.uid],
-      ['GID', resource.gid],
+      [TEXT.FILENAME, <EuiCode>{resource.filename}</EuiCode>],
+      [TEXT.MODE, resource.mode],
+      [TEXT.PATH, <EuiCode>{resource.path}</EuiCode>],
+      [TEXT.TYPE, resource.type],
+      [TEXT.UID, resource.uid],
+      [TEXT.GID, resource.gid],
     ],
   },
 ];
 
 const getRuleCards = ({ rule }: CspFinding): Card[] => [
   {
-    title: 'Rule',
+    title: TEXT.RULE,
     listItems: [
-      ['Benchmark', rule.benchmark],
-      ['Name', rule.name],
-      ['Description', rule.description],
-      ['Remediation', <EuiCode>{rule.remediation}</EuiCode>],
+      [TEXT.BENCHMARK, rule.benchmark],
+      [TEXT.NAME, rule.name],
+      [TEXT.DESCRIPTION, rule.description],
+      [TEXT.REMEDIATION, <EuiCode>{rule.remediation}</EuiCode>],
       [
-        'Tags',
+        TEXT.TAGS,
         rule.tags.map((t) => (
           <EuiBadge key={t} color="default">
             {t}
@@ -138,45 +139,45 @@ const getRuleCards = ({ rule }: CspFinding): Card[] => [
 
 const getResultCards = ({ result, agent, host, ...rest }: CspFinding): Card[] => [
   {
-    title: 'Result',
+    title: TEXT.RESULT,
     listItems: [
-      ['Evaluation', <CSPEvaluationBadge type={result.evaluation} />],
-      ['Evidence', <EuiCode>{JSON.stringify(result.evidence, null, 2)}</EuiCode>],
-      ['Timestamp', rest['@timestamp']],
-      result.evaluation === 'failed' && ['Remediation', rest.rule.remediation],
+      [TEXT.EVALUATION, <CSPEvaluationBadge type={result.evaluation} />],
+      [TEXT.EVIDENCE, <EuiCode>{JSON.stringify(result.evidence, null, 2)}</EuiCode>],
+      [TEXT.TIMESTAMP, rest['@timestamp']],
+      result.evaluation === 'failed' && [TEXT.REMEDIATION, rest.rule.remediation],
     ].filter(Boolean) as Card['listItems'],
   },
   {
-    title: 'Agent',
+    title: TEXT.AGENT,
     listItems: [
-      ['Name', agent.name],
-      ['ID', agent.id],
-      ['Type', agent.type],
-      ['Version', agent.version],
+      [TEXT.NAME, agent.name],
+      [TEXT.ID, agent.id],
+      [TEXT.TYPE, agent.type],
+      [TEXT.VERSION, agent.version],
     ],
   },
   {
-    title: 'Host',
+    title: TEXT.HOST,
     listItems: [
-      ['Architecture', host.architecture],
-      ['Containerized', host.containerized ? 'true' : 'false'],
-      ['Hostname', host.hostname],
-      ['ID', host.id],
-      ['IP', host.ip.join(',')],
-      ['Mac', host.mac.join(',')],
-      ['Name', host.name],
+      [TEXT.ARCHITECTURE, host.architecture],
+      [TEXT.CONTAINERIZED, host.containerized ? 'true' : 'false'],
+      [TEXT.HOSTNAME, host.hostname],
+      [TEXT.ID, host.id],
+      [TEXT.IP, host.ip.join(',')],
+      [TEXT.MAC, host.mac.join(',')],
+      [TEXT.NAME, host.name],
     ],
   },
   {
-    title: 'OS',
+    title: TEXT.OS,
     listItems: [
-      ['Codename', host.os.codename],
-      ['Family', host.os.family],
-      ['Kernel', host.os.kernel],
-      ['Name', host.os.name],
-      ['Platform', host.os.platform],
-      ['Type', host.os.type],
-      ['Version', host.os.version],
+      [TEXT.CODENAME, host.os.codename],
+      [TEXT.FAMILY, host.os.family],
+      [TEXT.KERNEL, host.os.kernel],
+      [TEXT.NAME, host.os.name],
+      [TEXT.PLATFORM, host.os.platform],
+      [TEXT.TYPE, host.os.type],
+      [TEXT.VERSION, host.os.version],
     ],
   },
 ];
