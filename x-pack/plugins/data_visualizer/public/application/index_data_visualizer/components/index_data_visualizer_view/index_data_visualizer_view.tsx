@@ -418,7 +418,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                     <EuiFlexItem grow={false}>
                       <FullTimeRangeSelector
                         indexPattern={currentIndexPattern}
-                        query={undefined}
+                        query={searchQuery}
                         disabled={false}
                         timefilter={timefilter}
                       />

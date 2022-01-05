@@ -41,9 +41,6 @@ export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, ca
   }
 
   const [isPopoverOpen, setPopover] = useState(false);
-  const splitButtonPopoverId = useGeneratedHtmlId({
-    prefix: 'splitButtonPopover',
-  });
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -100,7 +97,7 @@ export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, ca
       </EuiButton>
       <EuiFlexItem grow={false}>
         <EuiPopover
-          id={splitButtonPopoverId}
+          id={'mlFullTimeRangeSelectorOption'}
           button={
             <EuiButtonIcon
               display="base"
@@ -113,7 +110,7 @@ export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, ca
           isOpen={isPopoverOpen}
           closePopover={closePopover}
           panelPaddingSize="none"
-          anchorPosition="downLeft"
+          anchorPosition="downRight"
         >
           <EuiContextMenuPanel size="s" items={items} />
         </EuiPopover>
