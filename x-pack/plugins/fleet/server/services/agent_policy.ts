@@ -228,6 +228,7 @@ class AgentPolicyService {
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
     await this.requireUniqueName(soClient, agentPolicy);
+
     const newSo = await soClient.create<AgentPolicySOAttributes>(
       SAVED_OBJECT_TYPE,
       {
