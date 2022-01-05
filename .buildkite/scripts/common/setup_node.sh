@@ -64,6 +64,7 @@ npm root -g
 ls -alh "$(npm root -g)"
 rm -rf "$(npm root -g)/yarn" # TODO remove me
 mkdir -p "$(npm root -g)/yarn/test" # TODO remove me after testing
+which yarn || true
 
 if [[ ! $(which yarn) || $(yarn --version) != "$YARN_VERSION" ]]; then
   if [[ ! $(npm install -g "yarn@^${YARN_VERSION}") ]]; then
