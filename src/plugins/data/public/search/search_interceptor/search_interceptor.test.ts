@@ -141,7 +141,6 @@ describe('SearchInterceptor', () => {
         new PainlessError({
           statusCode: 400,
           message: 'search_phase_execution_exception',
-          // @ts-expect-error searchPhaseException is not properly typed json
           attributes: searchPhaseException.error,
         })
       );
