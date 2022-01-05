@@ -60,8 +60,16 @@ echo "--- Setup Yarn"
 YARN_VERSION=$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")
 export YARN_VERSION
 
+mkdir -p "$(npm root -g)/yarn/test" # TODO remove me after testing
+
 if [[ ! $(which yarn) || $(yarn --version) != "$YARN_VERSION" ]]; then
-  npm install -g "yarn@^${YARN_VERSION}"
+  if [[ ! $(npm install -g "yarn@^${YARN_VERSION}") ]]; then
+    # Installing yarn fails once in a while
+    # if it fails at a bad time, a yarn directory is left behind that causes all subsequent installs to fail
+    rm -rf "$(npm root -g)/yarn"
+    echo "Trying again to install yarn..."
+    npm install -g "yarn@^${YARN_VERSION}"
+  fi
 fi
 
 yarn config set yarn-offline-mirror "$YARN_OFFLINE_CACHE"

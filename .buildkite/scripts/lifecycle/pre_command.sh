@@ -9,8 +9,19 @@ export BUILDKITE_TOKEN
 
 echo '--- Install buildkite dependencies'
 cd '.buildkite'
-retry 5 15 yarn install --production --pure-lockfile
-cd -
+
+install_deps() {
+  yarn install --production --pure-lockfile
+  EXIT=$?
+  if [[ "$EXIT" != "0" ]]; then
+    yarn cache clean
+  fi
+  return $EXIT
+}
+
+retry 5 15 install_deps
+
+cd "$KIBANA_DIR"
 
 node .buildkite/scripts/lifecycle/print_agent_links.js || true
 
