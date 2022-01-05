@@ -7,7 +7,7 @@
  */
 
 import { ComponentType } from 'react';
-import { IndexPattern, IndexPatternField } from '../../../../data/public';
+import { DataView, DataViewField } from '../../../../data/common';
 import { ElasticSearchHit } from '../../types';
 import { IgnoredReason } from '../../utils/get_ignored_reason';
 
@@ -28,7 +28,7 @@ export type DocViewFilterFn = (
 
 export interface DocViewRenderProps {
   hit: ElasticSearchHit;
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   columns?: string[];
   filter?: DocViewFilterFn;
   onAddColumn?: (columnName: string) => void;
@@ -78,7 +78,7 @@ export interface FieldRecordLegacy {
     field: string;
     scripted: boolean;
     fieldType?: string;
-    fieldMapping?: IndexPatternField;
+    fieldMapping?: DataViewField;
   };
   value: {
     formattedValue: string;

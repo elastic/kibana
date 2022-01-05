@@ -8,7 +8,7 @@
 
 import ReactDOM from 'react-dom/server';
 import { formatRow, formatTopLevelObject } from './row_formatter';
-import { IndexPattern } from '../../../../../data/common';
+import { DataView } from '../../../../../data/common';
 import { fieldFormatsMock } from '../../../../../field_formats/common/mocks';
 import { setServices } from '../../../kibana_services';
 import { DiscoverServices } from '../../../build_services';
@@ -36,7 +36,7 @@ describe('Row formatter', () => {
       attributes: { timeFieldName, fields, title },
     } = stubbedSavedObjectIndexPattern(id);
 
-    return new IndexPattern({
+    return new DataView({
       spec: { id, type, version, timeFieldName, fields: JSON.parse(fields), title },
       fieldFormats: fieldFormatsMock,
       shortDotsEnable: false,

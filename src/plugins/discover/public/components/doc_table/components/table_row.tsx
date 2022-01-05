@@ -11,9 +11,9 @@ import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
 import { formatFieldValue } from '../../../utils/format_value';
-import { flattenHit } from '../../../../../data/common';
+import { flattenHit, DataView } from '../../../../../data/common';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer/doc_viewer';
-import { FilterManager, IndexPattern } from '../../../../../data/public';
+import { FilterManager } from '../../../../../data/public';
 import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../lib/row_formatter';
 import { useNavigationProps } from '../../../utils/use_navigation_props';
@@ -28,7 +28,7 @@ export type DocTableRow = ElasticSearchHit & {
 export interface TableRowProps {
   columns: string[];
   filter: DocViewFilterFn;
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   row: DocTableRow;
   onAddColumn?: (column: string) => void;
   onRemoveColumn?: (column: string) => void;

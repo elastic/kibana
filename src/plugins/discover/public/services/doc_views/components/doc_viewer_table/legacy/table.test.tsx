@@ -10,7 +10,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocViewerLegacyTable } from './table';
-import { IndexPattern } from '../../../../../../../data/public';
+import { DataView } from '../../../../../../../data/common';
 import { DocViewRenderProps } from '../../../doc_views_types';
 
 jest.mock('../../../../../kibana_services', () => ({
@@ -71,7 +71,7 @@ const indexPattern = {
   },
   metaFields: ['_index', '_score'],
   getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-} as unknown as IndexPattern;
+} as unknown as DataView;
 
 indexPattern.fields.getByName = (name: string) => {
   return indexPattern.fields.getAll().find((field) => field.name === name);
@@ -364,7 +364,7 @@ describe('DocViewTable at Discover Doc with Fields API', () => {
     },
     metaFields: ['_index', '_type', '_score', '_id'],
     getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-  } as unknown as IndexPattern;
+  } as unknown as DataView;
 
   indexPatterneCommerce.fields.getByName = (name: string) => {
     return indexPatterneCommerce.fields.getAll().find((field) => field.name === name);

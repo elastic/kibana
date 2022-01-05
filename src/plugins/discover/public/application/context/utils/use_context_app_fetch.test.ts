@@ -20,7 +20,7 @@ import {
 } from '../__mocks__/use_context_app_fetch';
 import { indexPatternWithTimefieldMock } from '../../../__mocks__/index_pattern_with_timefield';
 import { createContextSearchSourceStub } from '../services/_stubs';
-import { IndexPattern } from '../../../../../data_views/common';
+import { DataView } from '../../../../../data_views/common';
 import { themeServiceMock } from '../../../../../../core/public/mocks';
 
 const mockFilterManager = createFilterManagerMock();
@@ -30,7 +30,7 @@ jest.mock('../services/context', () => {
   return {
     ...originalModule,
 
-    fetchSurroundingDocs: (type: string, indexPattern: IndexPattern) => {
+    fetchSurroundingDocs: (type: string, indexPattern: DataView) => {
       if (!indexPattern || !indexPattern.id) {
         throw new Error();
       }
@@ -40,7 +40,7 @@ jest.mock('../services/context', () => {
 });
 
 jest.mock('../services/anchor', () => ({
-  fetchAnchor: (anchorId: string, indexPattern: IndexPattern) => {
+  fetchAnchor: (anchorId: string, indexPattern: DataView) => {
     if (!indexPattern.id || !anchorId) {
       throw new Error();
     }

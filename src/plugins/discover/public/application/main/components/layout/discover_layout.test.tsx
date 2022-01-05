@@ -15,7 +15,7 @@ import { esHits } from '../../../../__mocks__/es_hits';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { createSearchSourceMock } from '../../../../../../data/common/search/search_source/mocks';
-import { IndexPattern, IndexPatternAttributes } from '../../../../../../data/common';
+import { DataView, IndexPatternAttributes } from '../../../../../../data/common';
 import { SavedObject } from '../../../../../../../core/types';
 import { indexPatternWithTimefieldMock } from '../../../../__mocks__/index_pattern_with_timefield';
 import { GetStateReturn } from '../../services/discover_state';
@@ -48,7 +48,7 @@ jest.mock('../../../../kibana_services', () => ({
 
 setHeaderActionMenuMounter(jest.fn());
 
-function getProps(indexPattern: IndexPattern, wasSidebarClosed?: boolean): DiscoverLayoutProps {
+function getProps(indexPattern: DataView, wasSidebarClosed?: boolean): DiscoverLayoutProps {
   const searchSourceMock = createSearchSourceMock({});
   const services = discoverServiceMock;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {

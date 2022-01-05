@@ -8,7 +8,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IndexPattern } from '../../../data/common';
+import { DataView } from '../../../data/common';
 import { DocProps } from '../application/doc/components/doc';
 import { ElasticRequestState } from '../application/doc/types';
 import { getServices } from '../kibana_services';
@@ -23,7 +23,7 @@ type RequestBody = Pick<estypes.SearchRequest, 'body'>;
  */
 export function buildSearchBody(
   id: string,
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   useNewFieldsApi: boolean,
   requestAllFields?: boolean
 ): RequestBody | undefined {
