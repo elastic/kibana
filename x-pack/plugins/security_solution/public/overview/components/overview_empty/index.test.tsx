@@ -10,14 +10,16 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import { OverviewEmpty } from '.';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
-const endpointPackageVersion = '0.19.1';
+const mockEndpointPackageVersion = '0.19.1';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../management/pages/endpoint_hosts/view/hooks', () => ({
   useIngestUrl: jest
     .fn()
     .mockReturnValue({ appId: 'ingestAppId', appPath: 'ingestPath', url: 'ingestUrl' }),
-  useEndpointSelector: jest.fn().mockReturnValue({ endpointPackageVersion }),
+  useEndpointSelector: jest
+    .fn()
+    .mockReturnValue({ endpointPackageVersion: mockEndpointPackageVersion }),
 }));
 
 jest.mock('../../../common/components/user_privileges', () => ({
