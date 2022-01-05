@@ -19,7 +19,7 @@ import { InventoryItemType } from '../../../../plugins/infra/common/inventory_mo
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const esClient = convertToKibanaClient(getService('es'));
+  const esClient = getService('es');
 
   const baseCondition: InventoryMetricConditions = {
     metric: 'cpu',
@@ -73,7 +73,6 @@ export default function ({ getService }: FtrProviderContext) {
     nodeType: 'host' as InventoryItemType,
     source,
     logQueryFields: void 0,
-    esClient,
     compositeSize: 10000,
     startTime: DATES['8.0.0'].hosts_only.max,
   };
@@ -82,7 +81,10 @@ export default function ({ getService }: FtrProviderContext) {
     before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
     it('should work FOR LAST 1 minute', async () => {
-      const results = await evaluateCondition(baseOptions);
+      const results = await evaluateCondition({
+        ...baseOptions,
+        esClient: convertToKibanaClient(esClient),
+      });
       expect(results).to.eql({
         'host-01': {
           metric: 'cpu',
@@ -100,7 +102,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
     it('should work FOR LAST 5 minute', async () => {
-      const options = { ...baseOptions, condition: { ...baseCondition, timeSize: 5 } };
+      const options = {
+        ...baseOptions,
+        condition: { ...baseCondition, timeSize: 5 },
+        esClient: convertToKibanaClient(esClient),
+      };
       const results = await evaluateCondition(options);
       expect(results).to.eql({
         'host-01': {
