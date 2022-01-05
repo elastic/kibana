@@ -553,7 +553,11 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
             }
           });
         }
-        entry.feature[feature.id] = newPrivileges;
+        if (newPrivileges.length === 0) {
+          delete entry.feature[feature.id];
+        } else {
+          entry.feature[feature.id] = newPrivileges;
+        }
       });
     }
     this.setState({

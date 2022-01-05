@@ -438,7 +438,10 @@ describe('PrivilegeSpaceForm', () => {
       findTestSubject(wrapper, 'changeAllPrivilegesButton').simulate('click');
       findTestSubject(wrapper, 'changeAllPrivileges-read').simulate('click');
       findTestSubject(wrapper, 'createSpacePrivilegeButton').simulate('click');
-      expect(onChange.mock.calls[0][0].kibana[0].feature.no_sub_features_disabled_read).toEqual([]);
+
+      expect(Object.keys(onChange.mock.calls[0][0].kibana[0].feature)).not.toContain(
+        'no_sub_features_disabled_read'
+      );
       expect(onChange).toHaveBeenCalledWith(
         createRole([
           {
@@ -598,8 +601,8 @@ describe('PrivilegeSpaceForm', () => {
       findTestSubject(wrapper, 'changeAllPrivileges-all').simulate('click');
       findTestSubject(wrapper, 'createSpacePrivilegeButton').simulate('click');
 
-      expect(onChange.mock.calls[0][0].kibana[0].feature.no_sub_features_require_all_space).toEqual(
-        []
+      expect(Object.keys(onChange.mock.calls[0][0].kibana[0].feature)).not.toContain(
+        'no_sub_features_require_all_space'
       );
       expect(onChange).toHaveBeenCalledWith(
         createRole([
