@@ -47,7 +47,6 @@ import {
   ALERT_ORIGINAL_EVENT_KIND,
   ALERT_ORIGINAL_EVENT_MODULE,
 } from '../../../../common/field_maps/field_names';
-import { Ecs } from '../../../../common/ecs';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
