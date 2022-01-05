@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
 import type { HomePublicPluginSetup } from 'src/plugins/home/public';
 import type { ManagementSetup, ManagementStart } from 'src/plugins/management/public';
 
@@ -39,7 +39,7 @@ export interface PluginSetupDependencies {
 }
 
 export interface PluginStartDependencies {
-  data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   features: FeaturesPluginStart;
   management?: ManagementStart;
   spaces?: SpacesPluginStart;

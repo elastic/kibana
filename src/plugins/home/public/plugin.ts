@@ -28,7 +28,7 @@ import {
 } from './services';
 import { ConfigSchema } from '../config';
 import { setServices } from './application/kibana_services';
-import { DataPublicPluginStart } from '../../data/public';
+import { DataViewsPublicPluginStart } from '../../data_views/public';
 import { TelemetryPluginStart } from '../../telemetry/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
@@ -37,7 +37,7 @@ import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { SharePluginSetup } from '../../share/public';
 
 export interface HomePluginStartDependencies {
-  data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   telemetry?: TelemetryPluginStart;
   urlForwarding: UrlForwardingStart;
 }
@@ -76,7 +76,7 @@ export class HomePublicPlugin
         const trackUiMetric = usageCollection
           ? usageCollection.reportUiCounter.bind(usageCollection, 'Kibana_home')
           : () => {};
-        const [coreStart, { telemetry, data, urlForwarding: urlForwardingStart }] =
+        const [coreStart, { telemetry, dataViews, urlForwarding: urlForwardingStart }] =
           await core.getStartServices();
         setServices({
           share,
@@ -93,7 +93,7 @@ export class HomePublicPlugin
           uiSettings: core.uiSettings,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
-          indexPatternService: data.indexPatterns,
+          indexPatternService: dataViews,
           environmentService: this.environmentService,
           urlForwarding: urlForwardingStart,
           homeConfig: this.initializerContext.config.get(),
