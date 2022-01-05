@@ -107,9 +107,13 @@
                 "label": "embeddableHandler",
                 "description": [],
                 "signature": [
-                  "Pick<",
-                  "VisualizeEmbeddable",
-                  ", \"type\" | \"destroy\" | \"parent\" | \"id\" | \"getDescription\" | \"render\" | \"getInspectorAdapters\" | \"openInspector\" | \"transferCustomizationsToUiState\" | \"hasInspector\" | \"onContainerLoading\" | \"onContainerRender\" | \"onContainerError\" | \"reload\" | \"supportedTriggers\" | \"inputIsRefType\" | \"getInputAsValueType\" | \"getInputAsRefType\" | \"runtimeId\" | \"isContainer\" | \"deferEmbeddableLoad\" | \"fatalError\" | \"getIsContainer\" | \"getUpdated$\" | \"getInput$\" | \"getOutput$\" | \"getOutput\" | \"getInput\" | \"getTitle\" | \"getRoot\" | \"updateInput\">"
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "public",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-public.VisualizeEmbeddableContract",
+                    "text": "VisualizeEmbeddableContract"
+                  }
                 ],
                 "path": "src/plugins/vis_default_editor/public/default_editor_controller.tsx",
                 "deprecated": false,
@@ -306,7 +310,7 @@
             "section": "def-public.DefaultEditorSize",
             "text": "DefaultEditorSize"
           },
-          ") => 15 | 30 | 50"
+          ") => 50 | 15 | 30"
         ],
         "path": "src/plugins/vis_default_editor/public/editor_size.ts",
         "deprecated": false,
@@ -534,7 +538,7 @@
         "label": "PercentageModeOption",
         "description": [],
         "signature": [
-          "({\n  'data-test-subj': dataTestSubj,\n  setValue,\n  percentageMode,\n  formatPattern,\n}: ",
+          "({\n  'data-test-subj': dataTestSubj,\n  setValue,\n  percentageMode,\n  formatPattern,\n  disabled,\n}: ",
           "PercentageModeOptionProps",
           ") => JSX.Element"
         ],
@@ -546,7 +550,7 @@
             "id": "def-public.PercentageModeOption.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  'data-test-subj': dataTestSubj,\n  setValue,\n  percentageMode,\n  formatPattern,\n}",
+            "label": "{\n  'data-test-subj': dataTestSubj,\n  setValue,\n  percentageMode,\n  formatPattern,\n  disabled,\n}",
             "description": [],
             "signature": [
               "PercentageModeOptionProps"
@@ -940,7 +944,15 @@
         "label": "SetColorSchemaOptionsValue",
         "description": [],
         "signature": [
-          "<T extends \"colorSchema\" | \"invertColors\">(paramName: T, value: ",
+          "<T extends keyof ",
+          {
+            "pluginId": "charts",
+            "scope": "common",
+            "docId": "kibChartsPluginApi",
+            "section": "def-common.ColorSchemaParams",
+            "text": "ColorSchemaParams"
+          },
+          ">(paramName: T, value: ",
           {
             "pluginId": "charts",
             "scope": "common",

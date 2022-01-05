@@ -3,17 +3,17 @@
 [[fleet]]
 = {fleet}
 
-{fleet} in {kib} enables you to add and manage integrations for popular
-services and platforms, as well as manage {elastic-agent} installations in
+{fleet} in {kib} enables you to manage {elastic-agent} installations in
 standalone or {fleet} mode.
 
 Standalone mode requires you to manually configure and manage the agent locally.
+It is recommended for advanced users only.
 
 {fleet} mode offers several advantages:
 
 * A central place to configure and monitor your {agent}s.
+* Ability to trigger {agent} binary and policy upgrades remotely.
 * An overview of the data ingest in your {es} cluster.
-* Multiple integrations to collect and transform data.
 
 [role="screenshot"]
 image::fleet/images/fleet-start.png[{fleet} app in {kib}]

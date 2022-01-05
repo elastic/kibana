@@ -45,8 +45,8 @@ export function LensEmbeddable(props: Props) {
 
       setChartTimeRangeContext({
         lastUpdated: timeLoaded,
-        to: parseRelativeDate(timeRange?.to || '').valueOf(),
-        from: parseRelativeDate(timeRange?.from || '').valueOf(),
+        to: parseRelativeDate(timeRange?.to || '')?.valueOf(),
+        from: parseRelativeDate(timeRange?.from || '')?.valueOf(),
       });
 
       if (!isLoading) {

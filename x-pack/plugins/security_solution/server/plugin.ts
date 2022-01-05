@@ -185,6 +185,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       experimentalFeatures,
       logger: this.logger,
       ml: plugins.ml,
+      eventsTelemetry: this.telemetryEventsSender,
       version: pluginContext.env.packageInfo.version,
     };
 
@@ -324,8 +325,10 @@ export class Plugin implements ISecuritySolutionPlugin {
 
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,
-        endpointContext
+        endpointContext,
+        depsStart.spaces?.spacesService?.getSpaceId
       );
+
       plugins.data.search.registerSearchStrategy(
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy

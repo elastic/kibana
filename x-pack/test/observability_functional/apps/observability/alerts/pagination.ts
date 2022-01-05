@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils/alerts_as_data_status';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const ROWS_NEEDED_FOR_PAGINATION = 10;
@@ -89,7 +89,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Pagination controls', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/120440
+      describe.skip('Pagination controls', () => {
         before(async () => {
           await (await observability.alerts.pagination.getPageSizeSelector()).click();
           await (await observability.alerts.pagination.getTenRowsPageSelector()).click();

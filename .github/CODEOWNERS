@@ -39,6 +39,8 @@
 /src/plugins/chart_expressions/expression_tagcloud/ @elastic/kibana-vis-editors
 /src/plugins/chart_expressions/expression_metric/ @elastic/kibana-vis-editors
 /src/plugins/chart_expressions/expression_heatmap/ @elastic/kibana-vis-editors
+/src/plugins/chart_expressions/expression_gauge/ @elastic/kibana-vis-editors
+/src/plugins/chart_expressions/expression_pie/ @elastic/kibana-vis-editors
 /src/plugins/url_forwarding/ @elastic/kibana-vis-editors
 /packages/kbn-tinymath/ @elastic/kibana-vis-editors
 /x-pack/test/functional/apps/lens @elastic/kibana-vis-editors
@@ -62,6 +64,8 @@
 /packages/elastic-datemath/ @elastic/kibana-app-services
 /packages/kbn-interpreter/ @elastic/kibana-app-services
 /packages/kbn-react-field/ @elastic/kibana-app-services
+/packages/kbn-es-query/ @elastic/kibana-app-services
+/packages/kbn-field-types/ @elastic/kibana-app-services
 /src/plugins/bfetch/ @elastic/kibana-app-services
 /src/plugins/data/ @elastic/kibana-app-services
 /src/plugins/data_views/ @elastic/kibana-app-services
@@ -361,28 +365,28 @@
 /x-pack/plugins/enterprise_search/server/collectors/workplace_search/ @elastic/workplace-search-frontend
 /x-pack/plugins/enterprise_search/server/saved_objects/workplace_search/ @elastic/workplace-search-frontend
 
-# Stack Management
-/src/plugins/dev_tools/ @elastic/kibana-stack-management
-/src/plugins/console/  @elastic/kibana-stack-management
-/src/plugins/es_ui_shared/  @elastic/kibana-stack-management
-/src/plugins/management/ @elastic/kibana-stack-management
-/x-pack/plugins/cross_cluster_replication/  @elastic/kibana-stack-management
-/x-pack/plugins/index_lifecycle_management/  @elastic/kibana-stack-management
-/x-pack/plugins/grokdebugger/  @elastic/kibana-stack-management
-/x-pack/plugins/index_management/  @elastic/kibana-stack-management
-/x-pack/plugins/license_api_guard/  @elastic/kibana-stack-management
-/x-pack/plugins/license_management/  @elastic/kibana-stack-management
-/x-pack/plugins/painless_lab/  @elastic/kibana-stack-management
-/x-pack/plugins/remote_clusters/  @elastic/kibana-stack-management
-/x-pack/plugins/rollup/  @elastic/kibana-stack-management
-/x-pack/plugins/searchprofiler/  @elastic/kibana-stack-management
-/x-pack/plugins/snapshot_restore/  @elastic/kibana-stack-management
-/x-pack/plugins/upgrade_assistant/  @elastic/kibana-stack-management
-/x-pack/plugins/watcher/  @elastic/kibana-stack-management
-/x-pack/plugins/ingest_pipelines/  @elastic/kibana-stack-management
-/packages/kbn-ace/ @elastic/kibana-stack-management
-/packages/kbn-monaco/ @elastic/kibana-stack-management
-#CC# /x-pack/plugins/cross_cluster_replication/ @elastic/kibana-stack-management
+# Management Experience - Deployment Management
+/src/plugins/dev_tools/ @elastic/platform-deployment-management
+/src/plugins/console/  @elastic/platform-deployment-management
+/src/plugins/es_ui_shared/  @elastic/platform-deployment-management
+/src/plugins/management/ @elastic/platform-deployment-management
+/x-pack/plugins/cross_cluster_replication/  @elastic/platform-deployment-management
+/x-pack/plugins/index_lifecycle_management/  @elastic/platform-deployment-management
+/x-pack/plugins/grokdebugger/  @elastic/platform-deployment-management
+/x-pack/plugins/index_management/  @elastic/platform-deployment-management
+/x-pack/plugins/license_api_guard/  @elastic/platform-deployment-management
+/x-pack/plugins/license_management/  @elastic/platform-deployment-management
+/x-pack/plugins/painless_lab/  @elastic/platform-deployment-management
+/x-pack/plugins/remote_clusters/  @elastic/platform-deployment-management
+/x-pack/plugins/rollup/  @elastic/platform-deployment-management
+/x-pack/plugins/searchprofiler/  @elastic/platform-deployment-management
+/x-pack/plugins/snapshot_restore/  @elastic/platform-deployment-management
+/x-pack/plugins/upgrade_assistant/  @elastic/platform-deployment-management
+/x-pack/plugins/watcher/  @elastic/platform-deployment-management
+/x-pack/plugins/ingest_pipelines/  @elastic/platform-deployment-management
+/packages/kbn-ace/ @elastic/platform-deployment-management
+/packages/kbn-monaco/ @elastic/platform-deployment-management
+#CC# /x-pack/plugins/cross_cluster_replication/ @elastic/platform-deployment-management
 
 # Security Solution
 /x-pack/test/endpoint_api_integration_no_ingest/ @elastic/security-solution
@@ -408,15 +412,13 @@
 /x-pack/plugins/security_solution/public/common/lib/endpoint*/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/plugins/security_solution/public/common/components/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/plugins/security_solution/common/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
-/x-pack/plugins/security_solution/server/endpoint/routes/trusted_apps/ @elastic/security-onboarding-and-lifecycle-mgt
-/x-pack/plugins/security_solution/server/endpoint/routes/actions/ @elastic/security-onboarding-and-lifecycle-mgt
-/x-pack/plugins/security_solution/server/endpoint/routes/metadata/ @elastic/security-onboarding-and-lifecycle-mgt
-/x-pack/plugins/security_solution/server/endpoint/lib/policy/ @elastic/security-onboarding-and-lifecycle-mgt
+/x-pack/plugins/security_solution/server/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/plugins/security_solution/server/lib/license/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/plugins/security_solution/server/fleet_integration/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/plugins/security_solution/scripts/endpoint/event_filters/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/plugins/security_solution/scripts/endpoint/trusted_apps/ @elastic/security-onboarding-and-lifecycle-mgt
 /x-pack/test/security_solution_endpoint/apps/endpoint/ @elastic/security-onboarding-and-lifecycle-mgt
+/x-pack/test/security_solution_endpoint_api_int/ @elastic/security-onboarding-and-lifecycle-mgt
 
 ## Security Solution sub teams - security-telemetry (Data Engineering)
 x-pack/plugins/security_solution/server/usage/ @elastic/security-telemetry

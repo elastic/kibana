@@ -1726,7 +1726,7 @@
                 "label": "'threat.enrichments'",
                 "description": [],
                 "signature": [
-                  "({ 'matched.field': string[]; 'indicator.first_seen': string[]; 'indicator.provider': string[]; 'indicator.type': string[]; 'matched.atomic': string[]; lazer: { 'great.field': string[]; }[]; } | { 'matched.field': string[]; 'indicator.first_seen': string[]; 'indicator.provider': string[]; 'indicator.type': string[]; 'matched.atomic': string[]; lazer: { 'great.field': { wowoe: { fooooo: string[]; }[]; astring: string; aNumber: number; anObject: { neat: boolean; }; }[]; }[]; })[]"
+                  "({ 'matched.field': string[]; 'indicator.first_seen': string[]; 'indicator.provider': string[]; 'indicator.type': string[]; 'matched.atomic': string[]; lazer: { 'great.field': string[]; }[]; } | { 'matched.field': string[]; 'indicator.first_seen': string[]; 'indicator.provider': string[]; 'indicator.type': string[]; 'matched.atomic': string[]; lazer: { 'great.field': { wowoe: { fooooo: string[]; }[]; astring: string; aNumber: number; neat: boolean; }[]; }[]; })[]"
                 ],
                 "path": "packages/kbn-securitysolution-t-grid/src/mock/mock_event_details.ts",
                 "deprecated": false
