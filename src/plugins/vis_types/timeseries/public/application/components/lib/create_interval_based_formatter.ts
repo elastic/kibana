@@ -28,9 +28,9 @@ export function createIntervalBasedFormatter(
   const fixedOffset = moment(JANUARY_MOMENT_CONFIG).utcOffset();
   return (val: moment.MomentInput) => {
     const momentVal = moment(val);
-    if (ignoreDaylightTime) {
-      momentVal.utcOffset(fixedOffset);
-    }
+    // if (ignoreDaylightTime) {
+    //   momentVal.utcOffset(fixedOffset);
+    // }
     return momentVal.format(getFormat(interval, rules) ?? dateFormat);
   };
 }

@@ -50,6 +50,7 @@ export function handleResponseBody(
     const series = panel.series.find((s) => s.id === (meta.seriesId || seriesId));
 
     const extractFields = createFieldsFetcher(req, services);
+    const timezone = req.body.timerange.timezone;
 
     const processor = _legacyBuildProcessorFunction(
       processors,
@@ -58,6 +59,7 @@ export function handleResponseBody(
       series,
       meta,
       extractFields,
+      timezone,
       fieldFormatService,
       services.cachedIndexPatternFetcher
     );

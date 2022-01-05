@@ -9,11 +9,12 @@
 import { startsWith } from 'lodash';
 import moment from 'moment';
 
-export function timeShift(resp, panel, series) {
+export function timeShift(resp, panel, series, meta, extractFields, timezone) {
+  const defaultTimezone = moment().zoneName();
   return (next) => (results) => {
     if (/^([+-]?[\d]+)([shmdwMy]|ms)$/.test(series.offset_time)) {
+      moment.tz.setDefault(timezone);
       const matches = series.offset_time.match(/^([+-]?[\d]+)([shmdwMy]|ms)$/);
-
       if (matches) {
         const offsetValue = matches[1];
         const offsetUnit = matches[2];
@@ -21,13 +22,16 @@ export function timeShift(resp, panel, series) {
         results.forEach((item) => {
           if (startsWith(item.id, series.id)) {
             item.data = item.data.map((row) => [
-              moment.utc(row[0]).add(offsetValue, offsetUnit).valueOf(),
+              moment(row[0]).add(offsetValue, offsetUnit).valueOf(),
               row[1],
             ]);
           }
         });
       }
     }
+
+    // reset default moment timezone
+    moment.tz.setDefault(defaultTimezone);
 
     return next(results);
   };
