@@ -75,7 +75,10 @@ export const IntegrationsAppContext: React.FC<{
                           <startServices.customIntegrations.ContextProvider>
                             <Router history={history}>
                               <AgentPolicyContextProvider>
-                                <PackageInstallProvider notifications={startServices.notifications}>
+                                <PackageInstallProvider
+                                  notifications={startServices.notifications}
+                                  theme$={theme$}
+                                >
                                   <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
                                   {children}
                                 </PackageInstallProvider>

@@ -239,7 +239,10 @@ export const FleetAppContext: React.FC<{
                       <UIExtensionsContext.Provider value={extensions}>
                         <FleetStatusProvider>
                           <Router history={history}>
-                            <PackageInstallProvider notifications={startServices.notifications}>
+                            <PackageInstallProvider
+                              notifications={startServices.notifications}
+                              theme$={theme$}
+                            >
                               {children}
                             </PackageInstallProvider>
                           </Router>
