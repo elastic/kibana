@@ -67,6 +67,11 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
               hasDataT = Boolean(resultUx?.hasData);
               indices = resultUx?.indices;
               break;
+            case 'infra_metrics':
+              const resultMetrics = await getDataHandler(dataType)?.hasData();
+              hasDataT = Boolean(resultMetrics?.hasData);
+              indices = resultMetrics?.indices;
+              break;
             case 'apm':
             case 'mobile':
               const resultApm = await getDataHandler('apm')?.hasData();
