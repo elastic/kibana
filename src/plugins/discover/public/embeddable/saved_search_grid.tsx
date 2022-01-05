@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 import React, { useState } from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { getServices } from '../kibana_services';
-import { ElasticSearchHit } from '../services/doc_views/doc_views_types';
 import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
+import { ElasticSearchHit } from '../types';
 
 export interface DiscoverGridEmbeddableProps extends DiscoverGridProps {
   totalHitCount: number;

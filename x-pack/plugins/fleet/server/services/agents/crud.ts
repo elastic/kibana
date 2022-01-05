@@ -122,30 +122,46 @@ export async function getAgentsByKuery(
 
   const kueryNode = _joinFilters(filters);
   const body = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
-  const res = await esClient.search<FleetServerAgent, {}>({
-    index: AGENTS_INDEX,
-    from: (page - 1) * perPage,
-    size: perPage,
-    track_total_hits: true,
-    ignore_unavailable: true,
-    body: {
-      ...body,
-      sort: [{ [sortField]: { order: sortOrder } }],
-    },
-  });
+  const queryAgents = async (from: number, size: number) =>
+    esClient.search<FleetServerAgent, {}>({
+      index: AGENTS_INDEX,
+      from,
+      size,
+      track_total_hits: true,
+      ignore_unavailable: true,
+      body: {
+        ...body,
+        sort: [{ [sortField]: { order: sortOrder } }],
+      },
+    });
+  const res = await queryAgents((page - 1) * perPage, perPage);
 
   let agents = res.body.hits.hits.map(searchHitToAgent);
+  let total = (res.body.hits.total as estypes.SearchTotalHits).value;
   // filtering for a range on the version string will not work,
   // nor does filtering on a flattened field (local_metadata), so filter here
   if (showUpgradeable) {
-    agents = agents.filter((agent) =>
-      isAgentUpgradeable(agent, appContextService.getKibanaVersion())
-    );
+    // fixing a bug where upgradeable filter was not returning right results https://github.com/elastic/kibana/issues/117329
+    // query all agents, then filter upgradeable, and return the requested page and correct total
+    // if there are more than SO_SEARCH_LIMIT agents, the logic falls back to same as before
+    if (total < SO_SEARCH_LIMIT) {
+      const response = await queryAgents(0, SO_SEARCH_LIMIT);
+      agents = response.body.hits.hits
+        .map(searchHitToAgent)
+        .filter((agent) => isAgentUpgradeable(agent, appContextService.getKibanaVersion()));
+      total = agents.length;
+      const start = (page - 1) * perPage;
+      agents = agents.slice(start, start + perPage);
+    } else {
+      agents = agents.filter((agent) =>
+        isAgentUpgradeable(agent, appContextService.getKibanaVersion())
+      );
+    }
   }
 
   return {
     agents,
-    total: (res.body.hits.total as estypes.SearchTotalHits).value,
+    total,
     page,
     perPage,
   };
@@ -216,11 +232,11 @@ export async function getAgentById(esClient: ElasticsearchClient, agentId: strin
 
 export function isAgentDocument(
   maybeDocument: any
-): maybeDocument is estypes.MgetHit<FleetServerAgent> {
+): maybeDocument is estypes.MgetResponseItem<FleetServerAgent> {
   return '_id' in maybeDocument && '_source' in maybeDocument;
 }
 
-export type ESAgentDocumentResult = estypes.MgetHit<FleetServerAgent>;
+export type ESAgentDocumentResult = estypes.MgetResponseItem<FleetServerAgent>;
 
 export async function getAgentDocuments(
   esClient: ElasticsearchClient,
@@ -321,6 +337,7 @@ export async function bulkUpdateAgents(
     items: res.body.items.map((item) => ({
       id: item.update!._id as string,
       success: !item.update!.error,
+      // @ts-expect-error it not assignable to ErrorCause
       error: item.update!.error as Error,
     })),
   };

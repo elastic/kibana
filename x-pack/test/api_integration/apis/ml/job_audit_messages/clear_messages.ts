@@ -16,6 +16,7 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
+  const retry = getService('retry');
 
   let notificationIndices: string[] = [];
 
@@ -57,20 +58,25 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.success).to.eql(true);
       expect(body.last_cleared).to.be.above(timestamp);
 
-      const { body: getBody } = await supertest
-        .get(`/api/ml/job_audit_messages/messages/test_get_job_audit_messages_1`)
-        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+      await retry.tryForTime(5000, async () => {
+        const { body: getBody } = await supertest
+          .get(`/api/ml/job_audit_messages/messages/test_get_job_audit_messages_1`)
+          .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+          .set(COMMON_REQUEST_HEADERS)
+          .expect(200);
 
-      expect(getBody.messages.length).to.eql(1);
+        expect(getBody.messages.length).to.eql(
+          1,
+          `Expected 1 job audit message, got ${JSON.stringify(getBody.messages, null, 2)}`
+        );
 
-      expect(omit(getBody.messages[0], ['timestamp', 'node_name'])).to.eql({
-        job_id: 'test_get_job_audit_messages_1',
-        message: 'Job created',
-        level: 'info',
-        job_type: 'anomaly_detector',
-        cleared: true,
+        expect(omit(getBody.messages[0], ['timestamp', 'node_name'])).to.eql({
+          job_id: 'test_get_job_audit_messages_1',
+          message: 'Job created',
+          level: 'info',
+          job_type: 'anomaly_detector',
+          cleared: true,
+        });
       });
     });
 

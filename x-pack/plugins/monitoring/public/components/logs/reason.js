@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Legacy } from '../../legacy_shims';
 import { Monospace } from '../metricbeat_migration/instruction_steps/components/monospace/monospace';
 

@@ -8,7 +8,7 @@
 
 import React, { useCallback, useEffect } from 'react';
 import { EuiFormRow, EuiFieldNumber, EuiFieldNumberProps, EuiIconTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../kibana_react/public';
 import { AggParamEditorProps } from '../agg_param_props';

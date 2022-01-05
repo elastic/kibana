@@ -462,49 +462,64 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
       log.debug('> ML saved objects deleted.');
     },
 
-    async installFleetPackage(packageName: string) {
+    async setupFleet() {
+      log.debug(`Setting up Fleet`);
+      await retry.tryForTime(2 * 60 * 1000, async () => {
+        await supertest.post(`/api/fleet/setup`).set(COMMON_REQUEST_HEADERS).expect(200);
+      });
+      log.debug(` > Setup done`);
+    },
+
+    async installFleetPackage(packageName: string): Promise<string> {
       log.debug(`Installing Fleet package '${packageName}'`);
 
       const version = await this.getFleetPackageVersion(packageName);
 
-      await supertest
-        .post(`/api/fleet/epm/packages/${packageName}-${version}`)
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+      await retry.tryForTime(30 * 1000, async () => {
+        await supertest
+          .post(`/api/fleet/epm/packages/${packageName}/${version}`)
+          .set(COMMON_REQUEST_HEADERS)
+          .expect(200);
+      });
 
       log.debug(` > Installed`);
+      return version;
     },
 
-    async removeFleetPackage(packageName: string) {
-      log.debug(`Removing Fleet package '${packageName}'`);
+    async removeFleetPackage(packageName: string, version: string) {
+      log.debug(`Removing Fleet package '${packageName}-${version}'`);
 
-      const version = await this.getFleetPackageVersion(packageName);
-
-      await supertest
-        .delete(`/api/fleet/epm/packages/${packageName}-${version}`)
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+      await retry.tryForTime(30 * 1000, async () => {
+        await supertest
+          .delete(`/api/fleet/epm/packages/${packageName}/${version}`)
+          .set(COMMON_REQUEST_HEADERS)
+          .expect(200);
+      });
 
       log.debug(` > Removed`);
     },
 
     async getFleetPackageVersion(packageName: string): Promise<string> {
       log.debug(`Fetching version for Fleet package '${packageName}'`);
+      let packageVersion = '';
 
-      const { body } = await supertest
-        .get(`/api/fleet/epm/packages?experimental=true`)
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(200);
+      await retry.tryForTime(10 * 1000, async () => {
+        const { body } = await supertest
+          .get(`/api/fleet/epm/packages?experimental=true`)
+          .set(COMMON_REQUEST_HEADERS)
+          .expect(200);
 
-      const packageVersion =
-        body.response.find(
-          ({ name, version }: { name: string; version: string }) => name === packageName && version
-        )?.version ?? '';
+        packageVersion =
+          body.response.find(
+            ({ name, version }: { name: string; version: string }) =>
+              name === packageName && version
+          )?.version ?? '';
 
-      expect(packageVersion).to.not.eql(
-        '',
-        `Fleet package definition for '${packageName}' should exist and have a version`
-      );
+        expect(packageVersion).to.not.eql(
+          '',
+          `Fleet package definition for '${packageName}' should exist and have a version`
+        );
+      });
 
       log.debug(` > found version '${packageVersion}'`);
       return packageVersion;
@@ -521,6 +536,40 @@ export function MachineLearningTestResourcesProvider({ getService }: FtrProvider
 
     async clearAdvancedSettingProperty(propertyName: string) {
       await kibanaServer.uiSettings.unset(propertyName);
+    },
+
+    async installKibanaSampleData(sampleDataId: 'ecommerce' | 'flights' | 'logs') {
+      log.debug(`Installing Kibana sample data '${sampleDataId}'`);
+
+      await supertest
+        .post(`/api/sample_data/${sampleDataId}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(200);
+
+      log.debug(` > Installed`);
+    },
+
+    async removeKibanaSampleData(sampleDataId: 'ecommerce' | 'flights' | 'logs') {
+      log.debug(`Removing Kibana sample data '${sampleDataId}'`);
+
+      await supertest
+        .delete(`/api/sample_data/${sampleDataId}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .expect(204); // No Content
+
+      log.debug(` > Removed`);
+    },
+
+    async installAllKibanaSampleData() {
+      await this.installKibanaSampleData('ecommerce');
+      await this.installKibanaSampleData('flights');
+      await this.installKibanaSampleData('logs');
+    },
+
+    async removeAllKibanaSampleData() {
+      await this.removeKibanaSampleData('ecommerce');
+      await this.removeKibanaSampleData('flights');
+      await this.removeKibanaSampleData('logs');
     },
   };
 }

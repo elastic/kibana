@@ -30,6 +30,7 @@ import {
   LayerDescriptor,
   MapExtent,
   StyleDescriptor,
+  TileMetaFeature,
   Timeslice,
   StyleMetaDescriptor,
 } from '../../../common/descriptor_types';
@@ -75,6 +76,11 @@ export interface ILayer {
    * ILayer.getMbLayerIds returns a list of all mapbox layers assoicated with this layer.
    */
   getMbLayerIds(): string[];
+
+  /*
+   * ILayer.getMbSourceId returns mapbox source id assoicated with this layer.
+   */
+  getMbSourceId(): string;
 
   ownsMbLayerId(mbLayerId: string): boolean;
   ownsMbSourceId(mbSourceId: string): boolean;
@@ -298,7 +304,7 @@ export class AbstractLayer implements ILayer {
     return this._source.getMinZoom();
   }
 
-  _getMbSourceId() {
+  getMbSourceId() {
     return this.getId();
   }
 
@@ -479,5 +485,9 @@ export class AbstractLayer implements ILayer {
 
   isBasemap(order: number): boolean {
     return false;
+  }
+
+  _getMetaFromTiles(): TileMetaFeature[] {
+    return this._descriptor.__metaFromTiles || [];
   }
 }

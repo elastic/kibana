@@ -9,6 +9,7 @@ import { CoreSetup, SavedObjectsClientContract } from '../../../../../src/core/s
 import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
 import { CollectorDependencies } from './types';
 import { fetchDetectionsMetrics } from './detections';
+import { SAVED_OBJECT_TYPES } from '../../../cases/common/constants';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 export interface UsageData {
@@ -17,7 +18,8 @@ export interface UsageData {
 
 export async function getInternalSavedObjectsClient(core: CoreSetup) {
   return core.getStartServices().then(async ([coreStart]) => {
-    return coreStart.savedObjects.createInternalRepository();
+    // note: we include the cases hidden types here otherwise we would not be able to query them. If at some point cases is not considered a hidden type this can be removed
+    return coreStart.savedObjects.createInternalRepository(SAVED_OBJECT_TYPES);
   });
 }
 

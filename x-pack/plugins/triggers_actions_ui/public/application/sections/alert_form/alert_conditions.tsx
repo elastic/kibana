@@ -6,7 +6,7 @@
  */
 
 import React, { PropsWithChildren } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexItem, EuiText, EuiFlexGroup, EuiTitle, EuiButtonEmpty } from '@elastic/eui';
 import { partition } from 'lodash';
 import { ActionGroup, getBuiltinActionGroups } from '../../../../../alerting/common';

@@ -35,7 +35,7 @@ import { META_FIELDS, SavedObject } from '../../common';
 import { SavedObjectNotFound } from '../../../kibana_utils/common';
 import { DataViewMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
-import { DuplicateDataViewError } from '../errors';
+import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../errors';
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
@@ -67,6 +67,7 @@ interface IndexPatternsServiceDeps {
   onNotification: OnNotification;
   onError: OnError;
   onRedirectNoIndexPattern?: () => void;
+  getCanSave: () => Promise<boolean>;
 }
 
 export class DataViewsService {
@@ -78,6 +79,7 @@ export class DataViewsService {
   private onNotification: OnNotification;
   private onError: OnError;
   private dataViewCache: ReturnType<typeof createDataViewCache>;
+  private getCanSave: () => Promise<boolean>;
 
   /**
    * @deprecated Use `getDefaultDataView` instead (when loading data view) and handle
@@ -93,6 +95,7 @@ export class DataViewsService {
     onNotification,
     onError,
     onRedirectNoIndexPattern = () => {},
+    getCanSave = () => Promise.resolve(false),
   }: IndexPatternsServiceDeps) {
     this.apiClient = apiClient;
     this.config = uiSettings;
@@ -101,6 +104,7 @@ export class DataViewsService {
     this.onNotification = onNotification;
     this.onError = onError;
     this.ensureDefaultDataView = createEnsureDefaultDataView(uiSettings, onRedirectNoIndexPattern);
+    this.getCanSave = getCanSave;
 
     this.dataViewCache = createDataViewCache();
   }
@@ -247,7 +251,7 @@ export class DataViewsService {
    * @param options
    * @returns FieldSpec[]
    */
-  getFieldsForWildcard = async (options: GetFieldsOptions) => {
+  getFieldsForWildcard = async (options: GetFieldsOptions): Promise<FieldSpec[]> => {
     const metaFields = await this.config.get(META_FIELDS);
     return this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
@@ -255,6 +259,7 @@ export class DataViewsService {
       type: options.type,
       rollupIndex: options.rollupIndex,
       allowNoIndex: options.allowNoIndex,
+      filter: options.filter,
     });
   };
 
@@ -378,7 +383,6 @@ export class DataViewsService {
       attributes: {
         title,
         timeFieldName,
-        intervalName,
         fields,
         sourceFilters,
         fieldFormatMap,
@@ -403,7 +407,6 @@ export class DataViewsService {
       id,
       version,
       title,
-      intervalName,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
       fields: this.fieldArrayToMap(parsedFields, parsedFieldAttrs),
@@ -557,6 +560,9 @@ export class DataViewsService {
    */
 
   async createSavedObject(indexPattern: DataView, override = false) {
+    if (!(await this.getCanSave())) {
+      throw new DataViewInsufficientAccessError();
+    }
     const dupe = await findByTitle(this.savedObjectsClient, indexPattern.title);
     if (dupe) {
       if (override) {
@@ -595,6 +601,9 @@ export class DataViewsService {
     ignoreErrors: boolean = false
   ): Promise<void | Error> {
     if (!indexPattern.id) return;
+    if (!(await this.getCanSave())) {
+      throw new DataViewInsufficientAccessError(indexPattern.id);
+    }
 
     // get the list of attributes
     const body = indexPattern.getAsSavedObjectBody();
@@ -678,6 +687,9 @@ export class DataViewsService {
    * @param indexPatternId: Id of kibana Index Pattern to delete
    */
   async delete(indexPatternId: string) {
+    if (!(await this.getCanSave())) {
+      throw new DataViewInsufficientAccessError(indexPatternId);
+    }
     this.dataViewCache.clear(indexPatternId);
     return this.savedObjectsClient.delete(DATA_VIEW_SAVED_OBJECT_TYPE, indexPatternId);
   }

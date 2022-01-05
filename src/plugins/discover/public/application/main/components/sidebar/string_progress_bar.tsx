@@ -18,7 +18,5 @@ interface Props {
 export function StringFieldProgressBar({ value, percent, count }: Props) {
   const ariaLabel = `${value}: ${count} (${percent}%)`;
 
-  return (
-    <EuiProgress value={percent} max={100} color="secondary" aria-label={ariaLabel} size="s" />
-  );
+  return <EuiProgress value={percent} max={100} color="success" aria-label={ariaLabel} size="s" />;
 }

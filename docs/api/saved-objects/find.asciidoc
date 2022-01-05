@@ -73,7 +73,7 @@ change. Use the find API for traditional paginated results, but avoid using it t
 
 ==== Examples
 
-Find index patterns with titles that start with `my`:
+Find {data-sources} with titles that start with `my`:
 
 [source,sh]
 --------------------------------------------------

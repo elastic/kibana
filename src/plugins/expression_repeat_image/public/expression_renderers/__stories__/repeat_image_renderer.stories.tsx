@@ -9,7 +9,7 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { Render } from '../../../../presentation_util/public/__stories__';
-import { repeatImageRenderer } from '../repeat_image_renderer';
+import { getRepeatImageRenderer } from '../repeat_image_renderer';
 import {
   getElasticLogo,
   getElasticOutline,
@@ -31,7 +31,7 @@ const Renderer = ({
     emptyImage: elasticOutline,
   };
 
-  return <Render renderer={repeatImageRenderer} config={config} width="400px" />;
+  return <Render renderer={getRepeatImageRenderer()} config={config} width="400px" />;
 };
 
 storiesOf('enderers/repeatImage', module).add(

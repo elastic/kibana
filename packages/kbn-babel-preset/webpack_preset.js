@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { USES_STYLED_COMPONENTS } = require.resolve('./styled_components_files');
+const { USES_STYLED_COMPONENTS } = require('./styled_components_files');
 
 module.exports = () => {
   return {
@@ -19,6 +19,7 @@ module.exports = () => {
           // Please read the explanation for this
           // in node_preset.js
           corejs: '3.2.1',
+          bugfixes: true,
         },
       ],
       require('./common_preset'),

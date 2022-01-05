@@ -8,13 +8,13 @@
 
 import { CoreSetup, PluginInitializerContext } from 'src/core/public';
 import moment from 'moment';
-import { TimefilterSetup } from '../query';
+import type { TimefilterSetup } from '../query';
 import { QuerySuggestionGetFn } from './providers/query_suggestion_provider';
 import {
   getEmptyValueSuggestions,
   setupValueSuggestionProvider,
-  ValueSuggestionsGetFn,
 } from './providers/value_suggestion_provider';
+import type { ValueSuggestionsGetFn } from './providers/value_suggestion_provider';
 
 import { ConfigSchema } from '../../config';
 import { UsageCollectionSetup } from '../../../usage_collection/public';

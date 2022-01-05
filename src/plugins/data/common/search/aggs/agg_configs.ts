@@ -58,7 +58,7 @@ export interface AggConfigsOptions {
 
 export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string | IAggType }>;
 
-export type GenericBucket = estypes.AggregationsBucket & {
+export type GenericBucket = estypes.AggregationsBuckets<any> & {
   [property: string]: estypes.AggregationsAggregate;
 };
 
@@ -406,6 +406,7 @@ export class AggConfigs {
                     .map(([filter, field]) => ({
                       range: {
                         [field]: {
+                          format: 'strict_date_optional_time',
                           gte: moment(filter?.query.range[field].gte).subtract(shift).toISOString(),
                           lte: moment(filter?.query.range[field].lte).subtract(shift).toISOString(),
                         },

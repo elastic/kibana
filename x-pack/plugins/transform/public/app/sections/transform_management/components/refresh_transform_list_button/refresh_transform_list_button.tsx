@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 
 import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface RefreshTransformListButton {
   isLoading: boolean;
@@ -19,7 +19,7 @@ export const RefreshTransformListButton: FC<RefreshTransformListButton> = ({
   isLoading,
 }) => (
   <EuiButton
-    color="secondary"
+    color="success"
     iconType="refresh"
     data-test-subj={`transformRefreshTransformListButton${isLoading ? ' loading' : ' loaded'}`}
     onClick={onClick}

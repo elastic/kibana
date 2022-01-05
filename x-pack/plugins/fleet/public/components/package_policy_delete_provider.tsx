@@ -8,7 +8,7 @@
 import React, { Fragment, useMemo, useRef, useState } from 'react';
 import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useStartServices, sendRequest, sendDeletePackagePolicy, useConfig } from '../hooks';
 import { AGENT_API_ROUTES, AGENTS_PREFIX } from '../../common/constants';

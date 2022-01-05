@@ -8,17 +8,14 @@
 import { PropsOf } from '@elastic/eui';
 import { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { decorateWithGlobalStorybookThemeProviders } from '../test_utils/use_global_storybook_theme';
 import { DataSearchErrorCallout } from './data_search_error_callout';
 
 export default {
   title: 'infra/dataSearch/DataSearchErrorCallout',
   decorators: [
-    (wrappedStory) => (
-      <EuiThemeProvider>
-        <div style={{ width: 600 }}>{wrappedStory()}</div>
-      </EuiThemeProvider>
-    ),
+    (wrappedStory) => <div style={{ width: 600 }}>{wrappedStory()}</div>,
+    decorateWithGlobalStorybookThemeProviders,
   ],
   parameters: {
     layout: 'padded',

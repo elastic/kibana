@@ -10,7 +10,8 @@ import React, { ReactElement } from 'react';
 import rison from 'rison-node';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
-import type { Filter, IndexPatternField, IndexPattern } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
 import { esFilters } from '../../../../../../../src/plugins/data/public';
 import { AbstractESSource } from '../es_source';
 import {
@@ -35,7 +36,6 @@ import {
   FIELD_ORIGIN,
   GIS_API_PATH,
   MVT_GETTILE_API_PATH,
-  MVT_TOKEN_PARAM_NAME,
   SCALING_TYPES,
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
@@ -60,14 +60,12 @@ import {
 } from '../../../../../../../src/plugins/data/common';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
-import { GeoJsonWithMeta, SourceStatus } from '../vector_source';
-import { ITiledSingleLayerVectorSource } from '../tiled_single_layer_vector_source';
+import { GeoJsonWithMeta, IMvtVectorSource, SourceStatus } from '../vector_source';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { TopHitsUpdateSourceEditor } from './top_hits';
 import { getDocValueAndSourceFields, ScriptField } from './util/get_docvalue_source_fields';
-import { ITiledSingleLayerMvtParams } from '../tiled_single_layer_vector_source/tiled_single_layer_vector_source';
 import {
   addFeatureToIndex,
   deleteFeatureFromIndex,
@@ -85,8 +83,6 @@ type ESSearchSourceSyncMeta = Pick<
   | 'topHitsSize'
 >;
 
-const ES_MVT_HITS_LAYER_NAME = 'hits';
-
 export function timerangeToTimeextent(timerange: TimeRange): Timeslice | undefined {
   const timeRangeBounds = getTimeFilter().calculateBounds(timerange);
   return timeRangeBounds.min !== undefined && timeRangeBounds.max !== undefined
@@ -101,7 +97,7 @@ export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
 });
 
-export class ESSearchSource extends AbstractESSource implements ITiledSingleLayerVectorSource {
+export class ESSearchSource extends AbstractESSource implements IMvtVectorSource {
   readonly _descriptor: ESSearchSourceDescriptor;
   protected readonly _tooltipFields: ESDocField[];
 
@@ -127,7 +123,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         : SortDirection.desc,
       scalingType: isValidStringConfig(descriptor.scalingType)
         ? descriptor.scalingType!
-        : SCALING_TYPES.LIMIT,
+        : SCALING_TYPES.MVT,
       topHitsSplitField: isValidStringConfig(descriptor.topHitsSplitField)
         ? descriptor.topHitsSplitField!
         : '',
@@ -764,10 +760,6 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return reason;
   }
 
-  getLayerName(): string {
-    return ES_MVT_HITS_LAYER_NAME;
-  }
-
   async _getEditableIndex(): Promise<string> {
     const indexList = await this.getSourceIndexList();
     if (indexList.length === 0) {
@@ -800,9 +792,11 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     await deleteFeatureFromIndex(index, featureId);
   }
 
-  async getUrlTemplateWithMeta(
-    searchFilters: VectorSourceRequestMeta
-  ): Promise<ITiledSingleLayerMvtParams> {
+  getTileSourceLayer(): string {
+    return 'hits';
+  }
+
+  async getTileUrl(searchFilters: VectorSourceRequestMeta, refreshToken: string): Promise<string> {
     const indexPattern = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(indexPattern.title);
 
@@ -836,27 +830,24 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       `/${GIS_API_PATH}/${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`
     );
 
-    const urlTemplate = `${mvtUrlServicePath}\
+    return `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
-&requestBody=${risonDsl}`;
-
-    return {
-      refreshTokenParamName: MVT_TOKEN_PARAM_NAME,
-      layerName: this.getLayerName(),
-      minSourceZoom: this.getMinZoom(),
-      maxSourceZoom: this.getMaxZoom(),
-      urlTemplate,
-    };
+&requestBody=${risonDsl}\
+&token=${refreshToken}`;
   }
 
   async getTimesliceMaskFieldName(): Promise<string | null> {
     if (this._isTopHits() || this._descriptor.scalingType === SCALING_TYPES.MVT) {
       return null;
     }
-
-    const indexPattern = await this.getIndexPattern();
-    return indexPattern.timeFieldName ? indexPattern.timeFieldName : null;
+    try {
+      const indexPattern = await this.getIndexPattern();
+      return indexPattern.timeFieldName ? indexPattern.timeFieldName : null;
+    } catch (e) {
+      // do not throw when index pattern does not exist, error will be surfaced by getGeoJsonWithMeta
+      return null;
+    }
   }
 
   getUpdateDueToTimeslice(prevMeta: DataRequestMeta, timeslice?: Timeslice): boolean {

@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import React, { Fragment, useMemo, useState } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Space, SpacesApiUi } from '../../../../../../../../spaces/public';
 import type { Role, RoleKibanaPrivilege } from '../../../../../../../common/model';

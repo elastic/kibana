@@ -9,7 +9,7 @@ import './_classification_exploration.scss';
 
 import React, { FC, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiDataGrid,
@@ -347,7 +347,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
                               inMemory={{ level: 'sorting' }}
                               toolbarVisibility={{
                                 showColumnSelector: true,
-                                showStyleSelector: false,
+                                showDisplaySelector: false,
                                 showFullScreenSelector: false,
                                 showSortSelector: false,
                               }}

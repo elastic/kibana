@@ -35,7 +35,7 @@ const RETRY_CLICK_RETRY_ON_ERRORS = [
 export class WebElementWrapper {
   private By = By;
   private Keys = Key;
-  public isChromium: boolean = [Browsers.Chrome, Browsers.ChromiumEdge].includes(this.browserType);
+  public isChromium: boolean;
 
   public static create(
     webElement: WebElement | WebElementWrapper,
@@ -69,7 +69,9 @@ export class WebElementWrapper {
     private fixedHeaderHeight: number,
     private logger: ToolingLog,
     private browserType: Browsers
-  ) {}
+  ) {
+    this.isChromium = [Browsers.Chrome, Browsers.ChromiumEdge].includes(this.browserType);
+  }
 
   private async _findWithCustomTimeout(
     findFunction: () => Promise<Array<WebElement | WebElementWrapper>>,
@@ -488,8 +490,7 @@ export class WebElementWrapper {
   public async findByTestSubject(selector: string) {
     return await this.retryCall(async function find(wrapper) {
       return wrapper._wrap(
-        await wrapper._webElement.findElement(wrapper.By.css(testSubjSelector(selector))),
-        wrapper.By.css(selector)
+        await wrapper._webElement.findElement(wrapper.By.css(testSubjSelector(selector)))
       );
     });
   }

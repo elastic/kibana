@@ -231,10 +231,6 @@ export type Category = {
   count: number;
 };
 
-export type CategoryFieldMeta = {
-  categories: Category[];
-};
-
 export type GeometryTypes = {
   isPointsOnly: boolean;
   isLinesOnly: boolean;
@@ -244,7 +240,7 @@ export type GeometryTypes = {
 export type FieldMeta = {
   [key: string]: {
     range?: RangeFieldMeta;
-    categories?: CategoryFieldMeta;
+    categories: Category[];
   };
 };
 

@@ -10,10 +10,9 @@ import { APMConfig } from '../..';
 import { APMRouteHandlerResources } from '../../routes/typings';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
-import { PromiseReturnType } from '../../../../observability/typings/common';
+import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
 
-jest.mock('../settings/apm_indices/get_apm_indices', () => ({
+jest.mock('../../routes/settings/apm_indices/get_apm_indices', () => ({
   getApmIndices: async () =>
     ({
       sourcemap: 'apm-*',
@@ -23,10 +22,10 @@ jest.mock('../settings/apm_indices/get_apm_indices', () => ({
       transaction: 'apm-*',
       metric: 'apm-*',
       apmAgentConfigurationIndex: 'apm-*',
-    } as PromiseReturnType<typeof getApmIndices>),
+    } as Awaited<ReturnType<typeof getApmIndices>>),
 }));
 
-jest.mock('../data_view/get_dynamic_data_view', () => ({
+jest.mock('../../routes/data_view/get_dynamic_data_view', () => ({
   getDynamicDataView: async () => {
     return;
   },

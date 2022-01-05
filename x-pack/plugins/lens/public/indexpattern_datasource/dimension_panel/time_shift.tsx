@@ -14,7 +14,7 @@ import { Query } from 'src/plugins/data/public';
 import { parseTimeShift } from '../../../../../../src/plugins/data/common';
 import {
   adjustTimeScaleLabelSuffix,
-  IndexPatternColumn,
+  GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '../operations';
 import { IndexPattern, IndexPatternLayer } from '../types';
@@ -70,7 +70,7 @@ export function TimeShift({
   activeData,
   layerId,
 }: {
-  selectedColumn: IndexPatternColumn;
+  selectedColumn: GenericIndexPatternColumn;
   indexPattern: IndexPattern;
   columnId: string;
   layer: IndexPatternLayer;
@@ -127,8 +127,9 @@ export function TimeShift({
       }}
     >
       <EuiFormRow
-        display="columnCompressed"
+        display="rowCompressed"
         fullWidth
+        data-test-subj="indexPattern-dimension-time-shift-row"
         label={i18n.translate('xpack.lens.indexPattern.timeShift.label', {
           defaultMessage: 'Time shift',
         })}
@@ -145,6 +146,10 @@ export function TimeShift({
             i18n.translate('xpack.lens.indexPattern.timeShift.noMultipleHelp', {
               defaultMessage:
                 'Time shift should be a multiple of the date histogram interval. Either adjust time shift or date histogram interval',
+            })) ||
+          (isLocalValueInvalid &&
+            i18n.translate('xpack.lens.indexPattern.timeShift.genericInvalidHelp', {
+              defaultMessage: 'Time shift value is not valid.',
             }))
         }
         isInvalid={Boolean(isLocalValueInvalid || localValueTooSmall || localValueNotMultiple)}

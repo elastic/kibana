@@ -6,60 +6,77 @@
  */
 
 import React from 'react';
-import maki from '@elastic/maki';
 import xml2js from 'xml2js';
 import uuid from 'uuid/v4';
 import Canvg from 'canvg';
 import calcSDF  from 'bitmap-sdf';
-import { isRetina } from '../../../util';
 import { parseXmlString } from '../../../../common/parse_xml_string';
 import { SymbolIcon } from './components/legend/symbol_icon';
 import { getIsDarkMode } from '../../../kibana_services';
+import { MAKI_ICONS } from './maki_icons';
 
-export const CUSTOM_ICON_PREFIX_SDF = '__kbn__custom_icon_sdf__';
-export const LARGE_MAKI_ICON_SIZE = 15;
-const LARGE_MAKI_ICON_SIZE_AS_STRING = LARGE_MAKI_ICON_SIZE.toString();
-export const SMALL_MAKI_ICON_SIZE = 11;
-export const HALF_LARGE_MAKI_ICON_SIZE = Math.ceil(LARGE_MAKI_ICON_SIZE);
+const MAKI_ICON_SIZE = 16;
+export const HALF_MAKI_ICON_SIZE = MAKI_ICON_SIZE / 2;
 
-export const SYMBOLS = {};
-maki.svgArray.forEach((svgString) => {
-  const ID_FRAG = 'id="';
-  const index = svgString.indexOf(ID_FRAG);
-  if (index !== -1) {
-    const idStartIndex = index + ID_FRAG.length;
-    const idEndIndex = svgString.substring(idStartIndex).indexOf('"') + idStartIndex;
-    const fullSymbolId = svgString.substring(idStartIndex, idEndIndex);
-    const symbolId = fullSymbolId.substring(0, fullSymbolId.length - 3); // remove '-15' or '-11' from id
-    const symbolSize = fullSymbolId.substring(fullSymbolId.length - 2); // grab last 2 chars from id
-    // only show large icons, small/large icon selection will based on configured size style
-    if (symbolSize === LARGE_MAKI_ICON_SIZE_AS_STRING) {
-      SYMBOLS[symbolId] = svgString;
-    }
-  }
-});
-
-async function loadImage(src) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = (error) => reject(error);
-    img.src = src;
-  });
-}
-
-export const SYMBOL_OPTIONS = Object.keys(SYMBOLS).map((symbolId) => {
+export const SYMBOL_OPTIONS = Object.keys(MAKI_ICONS).map((symbolId) => {
   return {
     key: symbolId,
     label: symbolId,
   };
 });
 
+/**
+ * Converts a SVG icon to a monochrome image using a signed distance function.
+ *
+ * @param {string} svgString - SVG icon as string
+ * @param {number} [cutoff=0.25] - balance between SDF inside 1 and outside 0 of glyph
+ * @param {number} [radius=0.25] - size of SDF around the cutoff as percent of output icon size
+ * @return {ImageData} Monochrome image that can be added to a MapLibre map
+ */
+export async function createSdfIcon(svgString, cutoff = 0.25, radius = 0.25) {
+  const buffer = 3;
+  const size = MAKI_ICON_SIZE + buffer * 4;
+  const svgCanvas = document.createElement('canvas');
+  svgCanvas.width = size;
+  svgCanvas.height = size;
+  const svgCtx = svgCanvas.getContext('2d');
+  const v = Canvg.fromString(svgCtx, svgString, {
+    ignoreDimensions: true,
+    offsetX: buffer / 2,
+    offsetY: buffer / 2,
+  });
+  v.resize(size - buffer, size - buffer);
+  await v.render();
+
+  const distances = calcSDF(svgCtx, {
+    channel: 3,
+    cutoff,
+    radius: radius * size,
+  });
+
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  const imageData = ctx.createImageData(size, size);
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      imageData.data[j * size * 4 + i * 4 + 0] = 0;
+      imageData.data[j * size * 4 + i * 4 + 1] = 0;
+      imageData.data[j * size * 4 + i * 4 + 2] = 0;
+      imageData.data[j * size * 4 + i * 4 + 3] = distances[j * size + i] * 255;
+    }
+  }
+  return imageData;
+}
+
 export function getMakiSymbolSvg(symbolId) {
-  if (!SYMBOLS[symbolId]) {
+  const svg = MAKI_ICONS?.[symbolId]?.svg;
+  if (!svg) {
     throw new Error(`Unable to find symbol: ${symbolId}`);
   }
-  return SYMBOLS[symbolId];
+  return svg;
 }
 
 export function getMakiSymbolAnchor(symbolId) {
@@ -75,98 +92,6 @@ export function getMakiSymbolAnchor(symbolId) {
 
 export function getCustomIconId() {
   return `${CUSTOM_ICON_PREFIX_SDF}${uuid()}`;
-}
-
-export async function createSdfIcon(svgString, cutoff, radius) {
-  const svgCanvas = document.createElement('canvas');
-  const svgCtx = svgCanvas.getContext('2d');
-  const size = 256;
-  const v = Canvg.fromString(svgCtx, svgString);
-  v.resize(size, size, true);
-  await v.render();
-
-  // Debugging section (uncomment to download SVG image on canvas)
-  // TODO Remove this for production
-
-  // const a = document.createElement('a');
-  // const blob = await new Promise((resolve) => svgCtx.canvas.toBlob(resolve));
-  // const domUrl = window.URL || window.webkitURL || window;
-  // a.href = domUrl.createObjectURL(blob);
-  // a.download = 'svgimage.png';
-  // a.click();
-  // URL.revokeObjectURL(a.href);
-
-  // End debugging section
-
-  const distances = calcSDF(svgCtx, {
-    channel: 3,
-    cutoff,
-    radius: radius * size,
-  });
-
-  const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d');
-
-  ctx.imageSmoothingEnabled = true;
-  const imageData = ctx.createImageData(size, size);
-  for (let i = 0; i < size; i++) {
-    for (let j = 0; j < size; j++) {
-      imageData.data[j*size*4 + i*4 + 0] = 0;
-      imageData.data[j*size*4 + i*4 + 1] = 0;
-      imageData.data[j*size*4 + i*4 + 2] = 0;
-      imageData.data[j*size*4 + i*4 + 3] = distances[j*size+i]*255;
-    }
-  }
-
-  // Scale image
-  const pixelRatio = window.devicePixelRatio;
-  const ratio = (isRetina() ? 36 : 21) / size;
-  const scaledSize = size * ratio;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.putImageData(imageData, 0, 0);
-  ctx.drawImage(ctx.canvas, 0, 0, size, size, 0, 0, scaledSize, scaledSize);
-  const scaledImageData = ctx.getImageData(0, 0, scaledSize, scaledSize);
-
-  // Debugging section (uncomment to download sdf image on canvas)
-  // TODO Remove this for production
-
-  // const a = document.createElement('a');
-  // const blob = await new Promise((resolve) => ctx.canvas.toBlob(resolve));
-  // const domUrl = window.URL || window.webkitURL || window;
-  // a.href = domUrl.createObjectURL(blob);
-  // a.download = 'sdfimage.png';
-  // a.click();
-  // URL.revokeObjectURL(a.href);
-
-  // End debugging section
-
-  // Debugging section (uncomment to download scaled SDF image)
-  // TODO Remove this for production
-
-  // const a = document.createElement('a');
-  // const canvas3 = document.createElement('canvas');
-  // canvas3.width = 45;
-  // canvas3.height = 45;
-  // const ctx3 = canvas3.getContext('2d');
-  // ctx3.putImageData(scaledImageData, 0, 0);
-  // const blob = await new Promise((resolve) => ctx3.canvas.toBlob(resolve));
-  // const domUrl = window.URL || window.webkitURL || window;
-  // a.href = domUrl.createObjectURL(blob);
-  // a.download = 'blob.png';
-  // a.click();
-  // URL.revokeObjectURL(a.href);
-
-  // End debugging section
-
-  return { imageData: scaledImageData, pixelRatio };
-}
-
-// Style descriptor stores symbolId, for example 'aircraft'
-// Icons are registered in Mapbox with full maki ids, for example 'aircraft-11'
-export function getMakiIconId(symbolId, iconPixelSize) {
-  return `${symbolId}-${iconPixelSize}`;
 }
 
 export function buildSrcUrl(svgString) {

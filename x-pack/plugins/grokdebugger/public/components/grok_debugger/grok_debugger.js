@@ -27,7 +27,7 @@ import { CustomPatternsInput } from '../custom_patterns_input';
 import { EventOutput } from '../event_output';
 import { GrokdebuggerRequest } from '../../models/grokdebugger_request';
 import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const i18nTexts = {
   simulate: {

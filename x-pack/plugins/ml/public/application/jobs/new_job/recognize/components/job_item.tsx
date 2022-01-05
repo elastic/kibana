@@ -17,7 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ModuleJobUI } from '../page';
 import { SETUP_RESULTS_WIDTH } from './module_jobs';
 import { tabColor } from '../../../../../../common/util/group_color_utils';
@@ -53,7 +53,7 @@ export const JobItem: FC<JobItemProps> = memo(
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiText size="s" color="secondary">
+              <EuiText size="s" color="success">
                 {jobPrefix}
                 {id}
               </EuiText>
@@ -118,7 +118,7 @@ export const JobItem: FC<JobItemProps> = memo(
               <EuiFlexItem grow={false}>
                 <EuiIcon
                   type={setupResult.success ? 'check' : 'cross'}
-                  color={setupResult.success ? 'secondary' : 'danger'}
+                  color={setupResult.success ? 'success' : 'danger'}
                   size="m"
                   aria-label={
                     setupResult.success
@@ -135,7 +135,7 @@ export const JobItem: FC<JobItemProps> = memo(
               <EuiFlexItem grow={false}>
                 <EuiIcon
                   type={datafeedResult.success ? 'check' : 'cross'}
-                  color={datafeedResult.success ? 'secondary' : 'danger'}
+                  color={datafeedResult.success ? 'success' : 'danger'}
                   size="m"
                   aria-label={
                     setupResult.success
@@ -181,5 +181,5 @@ function getDatafeedStartedIcon({ awaitingMlNodeAllocation, success }: DatafeedR
     return { type: 'alert', color: 'warning' };
   }
 
-  return success ? { type: 'check', color: 'secondary' } : { type: 'cross', color: 'danger' };
+  return success ? { type: 'check', color: 'success' } : { type: 'cross', color: 'danger' };
 }

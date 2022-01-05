@@ -23,9 +23,10 @@ export function readCliArgs(argv: string[]) {
       'rpm',
       'deb',
       'docker-images',
+      'docker-push',
       'skip-docker-contexts',
       'skip-docker-ubi',
-      'skip-docker-centos',
+      'skip-docker-ubuntu',
       'skip-docker-cloud',
       'release',
       'skip-node-download',
@@ -50,6 +51,8 @@ export function readCliArgs(argv: string[]) {
       rpm: null,
       deb: null,
       'docker-images': null,
+      'docker-push': false,
+      'docker-tag-qualifier': null,
       'version-qualifier': '',
     },
     unknown: (flag) => {
@@ -95,6 +98,8 @@ export function readCliArgs(argv: string[]) {
   const buildOptions: BuildOptions = {
     isRelease: Boolean(flags.release),
     versionQualifier: flags['version-qualifier'],
+    dockerPush: Boolean(flags['docker-push']),
+    dockerTagQualifier: flags['docker-tag-qualifier'],
     initialize: !Boolean(flags['skip-initialize']),
     downloadFreshNode: !Boolean(flags['skip-node-download']),
     downloadCloudDependencies: !Boolean(flags['skip-cloud-dependencies-download']),
@@ -104,8 +109,8 @@ export function readCliArgs(argv: string[]) {
     createExamplePlugins: Boolean(flags['example-plugins']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
-    createDockerCentOS:
-      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-centos']),
+    createDockerUbuntu:
+      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubuntu']),
     createDockerCloud: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud']),
     createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
     createDockerContexts: !Boolean(flags['skip-docker-contexts']),

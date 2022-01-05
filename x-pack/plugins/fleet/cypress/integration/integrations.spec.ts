@@ -88,7 +88,7 @@ describe('Add Integration', () => {
       fixture: 'integrations/agent_policy.json',
     });
     // TODO fixture includes 1 package policy, should be empty initially
-    cy.intercept('GET', '/api/fleet/epm/packages/apache-1.1.0', {
+    cy.intercept('GET', '/api/fleet/epm/packages/apache/1.1.0', {
       fixture: 'integrations/apache.json',
     });
     addAndVerifyIntegration();

@@ -73,12 +73,14 @@ export function CustomizablePalette({
   setPalette,
   dataBounds,
   showContinuity = true,
+  showRangeTypeSelector = true,
 }: {
   palettes: PaletteRegistry;
   activePalette?: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
   dataBounds?: { min: number; max: number };
   showContinuity?: boolean;
+  showRangeTypeSelector?: boolean;
 }) {
   if (!dataBounds || !activePalette) {
     return null;
@@ -218,98 +220,100 @@ export function CustomizablePalette({
             />
           </EuiFormRow>
         )}
-        <EuiFormRow
-          label={
-            <>
-              {i18n.translate('xpack.lens.table.dynamicColoring.rangeType.label', {
-                defaultMessage: 'Value type',
-              })}{' '}
-              <EuiIconTip
-                content={i18n.translate(
-                  'xpack.lens.table.dynamicColoring.customPalette.colorStopsHelpPercentage',
-                  {
-                    defaultMessage:
-                      'Percent value types are relative to the full range of available data values.',
-                  }
-                )}
-                position="top"
-                size="s"
-              />
-            </>
-          }
-          display="rowCompressed"
-        >
-          <EuiButtonGroup
-            isFullWidth
-            legend={i18n.translate('xpack.lens.table.dynamicColoring.rangeType.label', {
-              defaultMessage: 'Value type',
-            })}
-            data-test-subj="lnsPalettePanel_dynamicColoring_custom_range_groups"
-            name="dynamicColoringRangeType"
-            buttonSize="compressed"
-            options={[
-              {
-                id: `${idPrefix}percent`,
-                label: i18n.translate('xpack.lens.table.dynamicColoring.rangeType.percent', {
-                  defaultMessage: 'Percent',
-                }),
-                'data-test-subj': 'lnsPalettePanel_dynamicColoring_rangeType_groups_percent',
-              },
-              {
-                id: `${idPrefix}number`,
-                label: i18n.translate('xpack.lens.table.dynamicColoring.rangeType.number', {
-                  defaultMessage: 'Number',
-                }),
-                'data-test-subj': 'lnsPalettePanel_dynamicColoring_rangeType_groups_number',
-              },
-            ]}
-            idSelected={
-              activePalette.params?.rangeType
-                ? `${idPrefix}${activePalette.params?.rangeType}`
-                : `${idPrefix}percent`
+        {showRangeTypeSelector && (
+          <EuiFormRow
+            label={
+              <>
+                {i18n.translate('xpack.lens.table.dynamicColoring.rangeType.label', {
+                  defaultMessage: 'Value type',
+                })}{' '}
+                <EuiIconTip
+                  content={i18n.translate(
+                    'xpack.lens.table.dynamicColoring.customPalette.colorStopsHelpPercentage',
+                    {
+                      defaultMessage:
+                        'Percent value types are relative to the full range of available data values.',
+                    }
+                  )}
+                  position="top"
+                  size="s"
+                />
+              </>
             }
-            onChange={(id) => {
-              const newRangeType = id.replace(
-                idPrefix,
-                ''
-              ) as RequiredPaletteParamTypes['rangeType'];
-
-              const params: CustomPaletteParams = { rangeType: newRangeType };
-              const { min: newMin, max: newMax } = getDataMinMax(newRangeType, dataBounds);
-              const { min: oldMin, max: oldMax } = getDataMinMax(
-                activePalette.params?.rangeType,
-                dataBounds
-              );
-              const newColorStops = remapStopsByNewInterval(colorStopsToShow, {
-                oldInterval: oldMax - oldMin,
-                newInterval: newMax - newMin,
-                newMin,
-                oldMin,
-              });
-              if (isCurrentPaletteCustom) {
-                const stops = getPaletteStops(
-                  palettes,
-                  { ...activePalette.params, colorStops: newColorStops, ...params },
-                  { dataBounds }
-                );
-                params.colorStops = newColorStops;
-                params.stops = stops;
-              } else {
-                params.stops = getPaletteStops(
-                  palettes,
-                  { ...activePalette.params, ...params },
-                  { prevPalette: activePalette.name, dataBounds }
-                );
+            display="rowCompressed"
+          >
+            <EuiButtonGroup
+              isFullWidth
+              legend={i18n.translate('xpack.lens.table.dynamicColoring.rangeType.label', {
+                defaultMessage: 'Value type',
+              })}
+              data-test-subj="lnsPalettePanel_dynamicColoring_custom_range_groups"
+              name="dynamicColoringRangeType"
+              buttonSize="compressed"
+              options={[
+                {
+                  id: `${idPrefix}percent`,
+                  label: i18n.translate('xpack.lens.table.dynamicColoring.rangeType.percent', {
+                    defaultMessage: 'Percent',
+                  }),
+                  'data-test-subj': 'lnsPalettePanel_dynamicColoring_rangeType_groups_percent',
+                },
+                {
+                  id: `${idPrefix}number`,
+                  label: i18n.translate('xpack.lens.table.dynamicColoring.rangeType.number', {
+                    defaultMessage: 'Number',
+                  }),
+                  'data-test-subj': 'lnsPalettePanel_dynamicColoring_rangeType_groups_number',
+                },
+              ]}
+              idSelected={
+                activePalette.params?.rangeType
+                  ? `${idPrefix}${activePalette.params?.rangeType}`
+                  : `${idPrefix}percent`
               }
-              // why not use newMin/newMax here?
-              // That's because there's the concept of continuity to accomodate, where in some scenarios it has to
-              // take into account the stop value rather than the data value
-              params.rangeMin = newColorStops[0].stop;
-              params.rangeMax = newColorStops[newColorStops.length - 1].stop;
-              setPalette(mergePaletteParams(activePalette, params));
-            }}
-          />
-        </EuiFormRow>
+              onChange={(id) => {
+                const newRangeType = id.replace(
+                  idPrefix,
+                  ''
+                ) as RequiredPaletteParamTypes['rangeType'];
+
+                const params: CustomPaletteParams = { rangeType: newRangeType };
+                const { min: newMin, max: newMax } = getDataMinMax(newRangeType, dataBounds);
+                const { min: oldMin, max: oldMax } = getDataMinMax(
+                  activePalette.params?.rangeType,
+                  dataBounds
+                );
+                const newColorStops = remapStopsByNewInterval(colorStopsToShow, {
+                  oldInterval: oldMax - oldMin,
+                  newInterval: newMax - newMin,
+                  newMin,
+                  oldMin,
+                });
+                if (isCurrentPaletteCustom) {
+                  const stops = getPaletteStops(
+                    palettes,
+                    { ...activePalette.params, colorStops: newColorStops, ...params },
+                    { dataBounds }
+                  );
+                  params.colorStops = newColorStops;
+                  params.stops = stops;
+                } else {
+                  params.stops = getPaletteStops(
+                    palettes,
+                    { ...activePalette.params, ...params },
+                    { prevPalette: activePalette.name, dataBounds }
+                  );
+                }
+                // why not use newMin/newMax here?
+                // That's because there's the concept of continuity to accomodate, where in some scenarios it has to
+                // take into account the stop value rather than the data value
+                params.rangeMin = newColorStops[0].stop;
+                params.rangeMax = newColorStops[newColorStops.length - 1].stop;
+                setPalette(mergePaletteParams(activePalette, params));
+              }}
+            />
+          </EuiFormRow>
+        )}
         <EuiFormRow
           display="rowCompressed"
           label={i18n.translate('xpack.lens.table.dynamicColoring.customPalette.colorStopsLabel', {

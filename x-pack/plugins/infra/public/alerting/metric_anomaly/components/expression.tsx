@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { EuiFlexGroup, EuiSpacer, EuiText, EuiLoadingContent } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useInfraMLCapabilities } from '../../../containers/ml/infra_ml_capabilities';
 import { SubscriptionSplashPrompt } from '../../../components/subscription_splash_content';
@@ -18,8 +18,8 @@ import {
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../triggers_actions_ui/public/common';
 import {
-  AlertTypeParams,
-  AlertTypeParamsExpressionProps,
+  RuleTypeParams,
+  RuleTypeParamsExpressionProps,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../../../triggers_actions_ui/public/types';
 import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
@@ -39,11 +39,11 @@ export interface AlertContextMeta {
   nodeType?: InventoryItemType;
 }
 
-type AlertParams = AlertTypeParams &
+type AlertParams = RuleTypeParams &
   MetricAnomalyParams & { sourceId: string; spaceId: string; hasInfraMLCapabilities: boolean };
 
 type Props = Omit<
-  AlertTypeParamsExpressionProps<AlertParams, AlertContextMeta>,
+  RuleTypeParamsExpressionProps<AlertParams, AlertContextMeta>,
   'defaultActionGroupId' | 'actionGroups' | 'charts' | 'data'
 >;
 
@@ -59,7 +59,7 @@ export const Expression: React.FC<Props> = (props) => {
   const { http, notifications } = useKibanaContextForPlugin().services;
   const { space } = useActiveKibanaSpace();
 
-  const { setAlertParams, alertParams, alertInterval, metadata } = props;
+  const { setRuleParams, ruleParams, ruleInterval, metadata } = props;
   const { source, createDerivedIndexPattern } = useSourceViaHttp({
     sourceId: 'default',
     fetch: http.fetch,
@@ -72,103 +72,103 @@ export const Expression: React.FC<Props> = (props) => {
   );
 
   const [influencerFieldName, updateInfluencerFieldName] = useState(
-    alertParams.influencerFilter?.fieldName ?? 'host.name'
+    ruleParams.influencerFilter?.fieldName ?? 'host.name'
   );
 
   useEffect(() => {
-    setAlertParams('hasInfraMLCapabilities', hasInfraMLCapabilities);
-  }, [setAlertParams, hasInfraMLCapabilities]);
+    setRuleParams('hasInfraMLCapabilities', hasInfraMLCapabilities);
+  }, [setRuleParams, hasInfraMLCapabilities]);
 
   useEffect(() => {
-    if (alertParams.influencerFilter) {
-      setAlertParams('influencerFilter', {
-        ...alertParams.influencerFilter,
+    if (ruleParams.influencerFilter) {
+      setRuleParams('influencerFilter', {
+        ...ruleParams.influencerFilter,
         fieldName: influencerFieldName,
       });
     }
-  }, [influencerFieldName, alertParams, setAlertParams]);
+  }, [influencerFieldName, ruleParams, setRuleParams]);
   const updateInfluencerFieldValue = useCallback(
     (value: string) => {
       if (value) {
-        setAlertParams('influencerFilter', {
-          ...alertParams.influencerFilter,
+        setRuleParams('influencerFilter', {
+          ...ruleParams.influencerFilter,
           fieldValue: value,
         } as MetricAnomalyParams['influencerFilter']);
       } else {
-        setAlertParams('influencerFilter', undefined);
+        setRuleParams('influencerFilter', undefined);
       }
     },
-    [setAlertParams, alertParams]
+    [setRuleParams, ruleParams]
   );
 
   useEffect(() => {
-    setAlertParams('alertInterval', alertInterval);
-  }, [setAlertParams, alertInterval]);
+    setRuleParams('alertInterval', ruleInterval);
+  }, [setRuleParams, ruleInterval]);
 
   const updateNodeType = useCallback(
     (nt: any) => {
-      setAlertParams('nodeType', nt);
+      setRuleParams('nodeType', nt);
     },
-    [setAlertParams]
+    [setRuleParams]
   );
 
   const updateMetric = useCallback(
     (metric: string) => {
-      setAlertParams('metric', metric as MetricAnomalyParams['metric']);
+      setRuleParams('metric', metric as MetricAnomalyParams['metric']);
     },
-    [setAlertParams]
+    [setRuleParams]
   );
 
   const updateSeverityThreshold = useCallback(
     (threshold: any) => {
-      setAlertParams('threshold', threshold);
+      setRuleParams('threshold', threshold);
     },
-    [setAlertParams]
+    [setRuleParams]
   );
 
   const prefillNodeType = useCallback(() => {
     const md = metadata;
     if (md && md.nodeType) {
-      setAlertParams(
+      setRuleParams(
         'nodeType',
         getMLNodeTypeFromInventoryNodeType(md.nodeType) ?? defaultExpression.nodeType
       );
     } else {
-      setAlertParams('nodeType', defaultExpression.nodeType);
+      setRuleParams('nodeType', defaultExpression.nodeType);
     }
-  }, [metadata, setAlertParams]);
+  }, [metadata, setRuleParams]);
 
   const prefillMetric = useCallback(() => {
     const md = metadata;
     if (md && md.metric) {
-      setAlertParams(
+      setRuleParams(
         'metric',
         getMLMetricFromInventoryMetric(md.metric.type) ?? defaultExpression.metric
       );
     } else {
-      setAlertParams('metric', defaultExpression.metric);
+      setRuleParams('metric', defaultExpression.metric);
     }
-  }, [metadata, setAlertParams]);
+  }, [metadata, setRuleParams]);
 
   useEffect(() => {
-    if (!alertParams.nodeType) {
+    if (!ruleParams.nodeType) {
       prefillNodeType();
     }
 
-    if (!alertParams.threshold) {
-      setAlertParams('threshold', defaultExpression.threshold);
+    if (!ruleParams.threshold) {
+      setRuleParams('threshold', defaultExpression.threshold);
     }
 
-    if (!alertParams.metric) {
+    if (!ruleParams.metric) {
       prefillMetric();
     }
 
-    if (!alertParams.sourceId) {
-      setAlertParams('sourceId', source?.id || 'default');
+    if (!ruleParams.sourceId) {
+      setRuleParams('sourceId', source?.id || 'default');
     }
 
-    if (!alertParams.spaceId) {
-      setAlertParams('spaceId', space?.id || 'default');
+    if (!ruleParams.spaceId) {
+      setRuleParams('spaceId', space?.id || 'default');
     }
   }, [metadata, derivedIndexPattern, defaultExpression, source, space]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -190,7 +190,7 @@ export const Expression: React.FC<Props> = (props) => {
         <StyledExpressionRow>
           <NodeTypeExpression
             options={nodeTypes}
-            value={alertParams.nodeType ?? defaultExpression.nodeType}
+            value={ruleParams.nodeType ?? defaultExpression.nodeType}
             onChange={updateNodeType}
           />
         </StyledExpressionRow>
@@ -199,7 +199,7 @@ export const Expression: React.FC<Props> = (props) => {
       <StyledExpressionRow>
         <StyledExpression>
           <WhenExpression
-            aggType={alertParams.metric ?? defaultExpression.metric}
+            aggType={ruleParams.metric ?? defaultExpression.metric}
             onChangeSelectedAggType={updateMetric}
             customAggTypesOptions={{
               memory_usage: {
@@ -231,7 +231,7 @@ export const Expression: React.FC<Props> = (props) => {
         </StyledExpression>
         <StyledExpression>
           <SeverityThresholdExpression
-            value={alertParams.threshold ?? ANOMALY_THRESHOLD.CRITICAL}
+            value={ruleParams.threshold ?? ANOMALY_THRESHOLD.CRITICAL}
             onChange={updateSeverityThreshold}
           />
         </StyledExpression>
@@ -239,9 +239,9 @@ export const Expression: React.FC<Props> = (props) => {
       <EuiSpacer size={'m'} />
       <InfluencerFilter
         derivedIndexPattern={derivedIndexPattern}
-        nodeType={alertParams.nodeType}
+        nodeType={ruleParams.nodeType}
         fieldName={influencerFieldName}
-        fieldValue={alertParams.influencerFilter?.fieldValue ?? ''}
+        fieldValue={ruleParams.influencerFilter?.fieldValue ?? ''}
         onChangeFieldName={updateInfluencerFieldName}
         onChangeFieldValue={updateInfluencerFieldValue}
       />

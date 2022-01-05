@@ -28,7 +28,7 @@ export async function mountManagementSection(
   const { http, notifications, getStartServices } = coreSetup;
   const startServices = await getStartServices();
   const [core, plugins] = startServices;
-  const { application, chrome, docLinks, i18n, overlays, savedObjects, uiSettings } = core;
+  const { application, chrome, docLinks, i18n, overlays, theme, savedObjects, uiSettings } = core;
   const { data, share, spaces, triggersActionsUi } = plugins;
   const { docTitle } = chrome;
 
@@ -47,6 +47,7 @@ export async function mountManagementSection(
     i18n,
     notifications,
     overlays,
+    theme,
     savedObjects,
     storage: localStorage,
     uiSettings,

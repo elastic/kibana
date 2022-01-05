@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { Router } from 'react-router-dom';
 
-import { Filter } from '../../../../../../src/plugins/data/common/es_query';
+import type { Filter } from '@kbn/es-query';
 import '../../common/mock/match_media';
 import {
   TestProviders,

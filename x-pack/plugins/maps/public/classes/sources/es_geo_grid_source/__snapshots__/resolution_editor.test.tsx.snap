@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`resolution editor should add super-fine option 1`] = `
+exports[`render 1`] = `
 <Fragment>
   <EuiFormRow
     describedByIds={Array []}
@@ -8,69 +8,45 @@ exports[`resolution editor should add super-fine option 1`] = `
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
-    label="Grid resolution"
+    label="Resolution"
     labelType="label"
   >
-    <EuiSelect
+    <EuiRange
       compressed={true}
+      fullWidth={false}
+      isLoading={false}
+      levels={Array []}
+      max={4}
+      min={1}
       onChange={[Function]}
-      options={
+      showInput={false}
+      showLabels={false}
+      showRange={false}
+      showTicks={true}
+      showValue={false}
+      step={1}
+      tickInterval={1}
+      ticks={
         Array [
           Object {
-            "text": "coarse",
-            "value": "COARSE",
+            "label": "low",
+            "value": 1,
           },
           Object {
-            "text": "fine",
-            "value": "FINE",
+            "label": "",
+            "value": 2,
           },
           Object {
-            "text": "finest",
-            "value": "MOST_FINE",
+            "label": "",
+            "value": 3,
           },
           Object {
-            "text": "super fine",
-            "value": "SUPER_FINE",
+            "label": "high",
+            "value": 4,
           },
         ]
       }
-      value="COARSE"
-    />
-  </EuiFormRow>
-</Fragment>
-`;
-
-exports[`resolution editor should omit super-fine option 1`] = `
-<Fragment>
-  <EuiFormRow
-    describedByIds={Array []}
-    display="columnCompressed"
-    fullWidth={false}
-    hasChildLabel={true}
-    hasEmptyLabelSpace={false}
-    label="Grid resolution"
-    labelType="label"
-  >
-    <EuiSelect
-      compressed={true}
-      onChange={[Function]}
-      options={
-        Array [
-          Object {
-            "text": "coarse",
-            "value": "COARSE",
-          },
-          Object {
-            "text": "fine",
-            "value": "FINE",
-          },
-          Object {
-            "text": "finest",
-            "value": "MOST_FINE",
-          },
-        ]
-      }
-      value="COARSE"
+      value={1}
     />
   </EuiFormRow>
 </Fragment>

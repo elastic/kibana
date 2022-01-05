@@ -8,7 +8,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import type { IndexPattern, IndexPatternField } from 'src/plugins/data/common';
 

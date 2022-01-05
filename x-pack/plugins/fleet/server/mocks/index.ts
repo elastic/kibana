@@ -7,19 +7,23 @@
 import { of } from 'rxjs';
 
 import {
+  coreMock,
   elasticsearchServiceMock,
   loggingSystemMock,
+  savedObjectsClientMock,
   savedObjectsServiceMock,
-  coreMock,
 } from '../../../../../src/core/server/mocks';
 import { dataPluginMock } from '../../../../../src/plugins/data/server/mocks';
 import { licensingMock } from '../../../../plugins/licensing/server/mocks';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
 import type { PackagePolicyServiceInterface } from '../services/package_policy';
-import type { AgentPolicyServiceInterface, AgentService } from '../services';
+import type { AgentPolicyServiceInterface, PackageService } from '../services';
 import type { FleetAppContext } from '../plugin';
 import { createMockTelemetryEventsSender } from '../telemetry/__mocks__';
+import { createFleetAuthzMock } from '../../common';
+import { agentServiceMock } from '../services/agents/agent_service.mock';
+import type { FleetRequestHandlerContext } from '../types';
 
 // Export all mocks from artifacts
 export * from '../services/artifacts/mocks';
@@ -29,8 +33,8 @@ export interface MockedFleetAppContext extends FleetAppContext {
   data: ReturnType<typeof dataPluginMock.createStartContract>;
   encryptedSavedObjectsStart?: ReturnType<typeof encryptedSavedObjectsMock.createStart>;
   savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
-  securitySetup?: ReturnType<typeof securityMock.createSetup>;
-  securityStart?: ReturnType<typeof securityMock.createStart>;
+  securitySetup: ReturnType<typeof securityMock.createSetup>;
+  securityStart: ReturnType<typeof securityMock.createStart>;
   logger: ReturnType<ReturnType<typeof loggingSystemMock.create>['get']>;
 }
 
@@ -64,10 +68,27 @@ export const createAppContextStartContractMock = (): MockedFleetAppContext => {
   };
 };
 
+export const createFleetRequestHandlerContextMock = (): jest.Mocked<
+  FleetRequestHandlerContext['fleet']
+> => {
+  return {
+    authz: createFleetAuthzMock(),
+    agentClient: {
+      asCurrentUser: agentServiceMock.createClient(),
+      asInternalUser: agentServiceMock.createClient(),
+    },
+    epm: {
+      internalSoClient: savedObjectsClientMock.create(),
+    },
+    spaceId: 'default',
+  };
+};
+
 function createCoreRequestHandlerContextMock() {
   return {
     core: coreMock.createRequestHandlerContext(),
     licensing: licensingMock.createRequestHandlerContext(),
+    fleet: createFleetRequestHandlerContextMock(),
   };
 }
 
@@ -79,6 +100,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServi
   return {
     _compilePackagePolicyInputs: jest.fn(),
     buildPackagePolicyFromPackage: jest.fn(),
+    buildPackagePolicyFromPackageWithVersion: jest.fn(),
     bulkCreate: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
@@ -92,6 +114,7 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyServi
     upgrade: jest.fn(),
     getUpgradeDryRunDiff: jest.fn(),
     getUpgradePackagePolicyInfo: jest.fn(),
+    enrichPolicyWithDefaultsFromPackage: jest.fn(),
   };
 };
 
@@ -112,11 +135,16 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
 /**
  * Creates a mock AgentService
  */
-export const createMockAgentService = (): jest.Mocked<AgentService> => {
+export const createMockAgentService = () => agentServiceMock.create();
+
+/**
+ * Creates a mock AgentClient
+ */
+export const createMockAgentClient = () => agentServiceMock.createClient();
+
+export const createMockPackageService = (): PackageService => {
   return {
-    getAgentStatusById: jest.fn(),
-    getAgentStatusForAgentPolicy: jest.fn(),
-    getAgent: jest.fn(),
-    listAgents: jest.fn(),
+    getInstallation: jest.fn(),
+    ensureInstalledPackage: jest.fn(),
   };
 };

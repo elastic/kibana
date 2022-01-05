@@ -5,35 +5,37 @@
  * 2.0.
  */
 
-import { Writable } from 'stream';
-import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
-import { IScopedSearchClient } from 'src/plugins/data/server';
-import { Datatable } from 'src/plugins/expressions/server';
-import { ReportingConfig } from '../../..';
-import {
-  cellHasFormulas,
-  ES_SEARCH_STRATEGY,
+import { i18n } from '@kbn/i18n';
+import type { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
+import type { IScopedSearchClient } from 'src/plugins/data/server';
+import type { Datatable } from 'src/plugins/expressions/server';
+import type { Writable } from 'stream';
+import type { ReportingConfig } from '../../..';
+import type {
   IndexPattern,
   ISearchSource,
   ISearchStartSearchSource,
   SearchFieldValue,
   SearchSourceFields,
-  tabifyDocs,
 } from '../../../../../../../src/plugins/data/common';
 import {
+  cellHasFormulas,
+  ES_SEARCH_STRATEGY,
+  tabifyDocs,
+} from '../../../../../../../src/plugins/data/common';
+import type {
   FieldFormat,
   FieldFormatConfig,
   IFieldFormatsRegistry,
 } from '../../../../../../../src/plugins/field_formats/common';
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
-import { CancellationToken } from '../../../../common';
+import type { CancellationToken } from '../../../../common/cancellation_token';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
-import { LevelLogger } from '../../../lib';
-import { TaskRunResult } from '../../../lib/tasks';
-import { JobParamsCSV } from '../types';
+import type { LevelLogger } from '../../../lib';
+import type { TaskRunResult } from '../../../lib/tasks';
+import type { JobParamsCSV } from '../types';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 
@@ -65,7 +67,6 @@ function isPlainStringArray(
 
 export class CsvGenerator {
   private _columns?: string[];
-  private _formatters?: Record<string, FieldFormat>;
   private csvContainsFormulas = false;
   private maxSizeReached = false;
   private csvRowCount = 0;
@@ -94,7 +95,7 @@ export class CsvGenerator {
         index: index.title,
         scroll: scrollSettings.duration,
         size: scrollSettings.size,
-        ignore_throttled: !includeFrozen,
+        ignore_throttled: includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
       },
     };
 
@@ -120,10 +121,6 @@ export class CsvGenerator {
    * Load field formats for each field in the list
    */
   private getFormatters(table: Datatable) {
-    if (this._formatters) {
-      return this._formatters;
-    }
-
     // initialize field formats
     const formatters: Record<string, FieldFormat> = {};
     table.columns.forEach((c) => {
@@ -131,8 +128,7 @@ export class CsvGenerator {
       formatters[c.id] = fieldFormat;
     });
 
-    this._formatters = formatters;
-    return this._formatters;
+    return formatters;
   }
 
   private escapeValues(settings: CsvExportSettings) {
@@ -242,7 +238,7 @@ export class CsvGenerator {
   /*
    * Format a Datatable into rows of CSV content
    */
-  private generateRows(
+  private async generateRows(
     columns: string[],
     table: Datatable,
     builder: MaxSizeStringBuilder,
@@ -255,14 +251,38 @@ export class CsvGenerator {
         break;
       }
 
-      const row =
-        columns
-          .map((f) => ({ column: f, data: dataTableRow[f] }))
-          .map(this.formatCellValues(formatters))
-          .map(this.escapeValues(settings))
-          .join(settings.separator) + '\n';
+      /*
+       * Intrinsically, generating the rows is a synchronous process. Awaiting
+       * on a setImmediate call here partititions what could be a very long and
+       * CPU-intenstive synchronous process into an asychronous process. This
+       * give NodeJS to process other asychronous events that wait on the Event
+       * Loop.
+       *
+       * See: https://nodejs.org/en/docs/guides/dont-block-the-event-loop/
+       *
+       * It's likely this creates a lot of context switching, and adds to the
+       * time it would take to generate the CSV. There are alternatives to the
+       * chosen performance solution:
+       *
+       * 1. Partition the synchronous process with fewer partitions, by using
+       * the loop counter to call setImmediate only every N amount of rows.
+       * Testing is required to see what the best N value for most data will
+       * be.
+       *
+       * 2. Use a C++ add-on to generate the CSV using the Node Worker Pool
+       * instead of using the Event Loop
+       */
+      await new Promise(setImmediate);
 
-      if (!builder.tryAppend(row)) {
+      const rowDefinition: string[] = [];
+      const format = this.formatCellValues(formatters);
+      const escape = this.escapeValues(settings);
+
+      for (const column of columns) {
+        rowDefinition.push(escape(format({ column, data: dataTableRow[column] })));
+      }
+
+      if (!builder.tryAppend(rowDefinition.join(settings.separator) + '\n')) {
         this.logger.warn(`Max Size Reached after ${this.csvRowCount} rows.`);
         this.maxSizeReached = true;
         if (this.cancellationToken) {
@@ -377,7 +397,7 @@ export class CsvGenerator {
         }
 
         const formatters = this.getFormatters(table);
-        this.generateRows(columns, table, builder, formatters, settings);
+        await this.generateRows(columns, table, builder, formatters, settings);
 
         // update iterator
         currentRecord += table.rows.length;

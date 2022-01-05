@@ -20,8 +20,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const browser = getService('browser');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
-  const FORMULA_TAB_HEIGHT = 40;
-
   const PageObjects = getPageObjects([
     'common',
     'header',
@@ -41,7 +39,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async findAllFields() {
-      return await testSubjects.findAll('lnsFieldListPanelField');
+      const fields = await testSubjects.findAll('lnsFieldListPanelField');
+      return await Promise.all(fields.map((field) => field.getVisibleText()));
     },
 
     async isLensPageOrFail() {
@@ -133,7 +132,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           : `lns-indexPatternDimension-${opts.operation}`;
         async function getAriaPressed() {
           const operationSelectorContainer = await testSubjects.find(operationSelector);
-          await testSubjects.click(operationSelector, undefined, FORMULA_TAB_HEIGHT);
+          await testSubjects.click(operationSelector);
           const ariaPressed = await operationSelectorContainer.getAttribute('aria-pressed');
           return ariaPressed;
         }
@@ -506,6 +505,37 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await PageObjects.common.pressEnterKey();
       await PageObjects.common.sleep(1000); // give time for debounced components to rerender
     },
+
+    /**
+     * Add new term to Top values/terms agg
+     * @param opts field to add
+     */
+    async addTermToAgg(field: string) {
+      const lastIndex = (
+        await find.allByCssSelector('[data-test-subj^="indexPattern-dimension-field"]')
+      ).length;
+      await testSubjects.click('indexPattern-terms-add-field');
+      // count the number of defined terms
+      const target = await testSubjects.find(`indexPattern-dimension-field-${lastIndex}`);
+      await comboBox.openOptionsList(target);
+      await comboBox.setElement(target, field);
+    },
+
+    async checkTermsAreNotAvailableToAgg(fields: string[]) {
+      const lastIndex = (
+        await find.allByCssSelector('[data-test-subj^="indexPattern-dimension-field"]')
+      ).length;
+      await testSubjects.click('indexPattern-terms-add-field');
+      // count the number of defined terms
+      const target = await testSubjects.find(`indexPattern-dimension-field-${lastIndex}`);
+      // await comboBox.openOptionsList(target);
+      for (const field of fields) {
+        await comboBox.setCustom(`indexPattern-dimension-field-${lastIndex}`, field);
+        await comboBox.openOptionsList(target);
+        await testSubjects.missingOrFail(`lns-fieldOption-${field}`);
+      }
+    },
+
     /**
      * Save the current Lens visualization.
      */
@@ -560,10 +590,26 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await colorPickerInput.type(color);
       await PageObjects.common.sleep(1000); // give time for debounced components to rerender
     },
+    hasVisualOptionsButton() {
+      return testSubjects.exists('lnsVisualOptionsButton');
+    },
     async openVisualOptions() {
       await retry.try(async () => {
         await testSubjects.click('lnsVisualOptionsButton');
         await testSubjects.exists('lnsVisualOptionsButton');
+      });
+    },
+    async retrySetValue(
+      input: string,
+      value: string,
+      options = {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      } as Record<string, boolean>
+    ) {
+      await retry.try(async () => {
+        await testSubjects.setValue(input, value, options);
+        expect(await (await testSubjects.find(input)).getAttribute('value')).to.eql(value);
       });
     },
     async useCurvedLines() {
@@ -809,6 +855,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }, {});
     },
 
+    async getCountOfDatatableColumns() {
+      const table = await find.byCssSelector('.euiDataGrid');
+      const $ = await table.parseDomContent();
+      return (await $('.euiDataGridHeaderCell__content')).length;
+    },
+
     async getDatatableHeader(index = 0) {
       log.debug(`All headers ${await testSubjects.getVisibleText('dataGridHeader')}`);
       return find.byCssSelector(
@@ -819,13 +871,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getDatatableCell(rowIndex = 0, colIndex = 0) {
-      const table = await find.byCssSelector('.euiDataGrid');
-      const $ = await table.parseDomContent();
-      const columnNumber = $('.euiDataGridHeaderCell__content').length;
       return await find.byCssSelector(
-        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"]:nth-child(${
-          rowIndex * columnNumber + colIndex + 2
-        })`
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-id="${rowIndex},${colIndex}"]`
       );
     },
 
@@ -872,7 +919,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openPalettePanel(chartType: string) {
-      await testSubjects.click(`${chartType}_dynamicColoring_trigger`);
+      await retry.try(async () => {
+        await testSubjects.click(`${chartType}_dynamicColoring_trigger`);
+        // wait for the UI to settle
+        await PageObjects.common.sleep(100);
+        await testSubjects.existOrFail('lns-indexPattern-PalettePanelContainer', { timeout: 2500 });
+      });
     },
 
     async closePalettePanel() {
@@ -942,6 +994,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async assertMetric(title: string, count: string) {
       await this.assertExactText('[data-test-subj="lns_metric_title"]', title);
       await this.assertExactText('[data-test-subj="lns_metric_value"]', count);
+    },
+
+    async setMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {
+      await testSubjects.click('lnsMetric_dynamicColoring_groups_' + coloringType);
+    },
+
+    async getMetricStyle() {
+      const el = await testSubjects.find('lns_metric_value');
+      const styleString = await el.getAttribute('style');
+      return styleString.split(';').reduce<Record<string, string>>((memo, cssLine) => {
+        const [prop, value] = cssLine.split(':');
+        if (prop && value) {
+          memo[prop.trim()] = value.trim();
+        }
+        return memo;
+      }, {});
     },
 
     async assertMissingValues(option: string) {
@@ -1170,6 +1238,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click(`legend-${value}`);
       const filterIn = await testSubjects.find(`legend-${value}-filterIn`);
       await filterIn.click();
+    },
+
+    hasEmptySizeRatioButtonGroup() {
+      return testSubjects.exists('lnsEmptySizeRatioButtonGroup');
     },
   });
 }

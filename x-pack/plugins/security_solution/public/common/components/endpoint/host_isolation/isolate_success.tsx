@@ -7,7 +7,7 @@
 
 import React, { memo, ReactNode, useMemo } from 'react';
 import { EuiCallOut, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { GET_ISOLATION_SUCCESS_MESSAGE, GET_UNISOLATION_SUCCESS_MESSAGE } from './translations';
 import { useCasesFromAlerts } from '../../../../detections/containers/detection_engine/alerts/use_cases_from_alerts';
 import { CaseDetailsLink } from '../../../../common/components/links';

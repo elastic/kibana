@@ -23,11 +23,11 @@ import {
 } from '../../../../common/components/exceptions/add_exception_modal';
 import * as i18n from '../translations';
 import { inputsModel, inputsSelectors, State } from '../../../../common/store';
-import { TimelineId } from '../../../../../common';
+import { TimelineId } from '../../../../../common/types';
 import { AlertData, EcsHit } from '../../../../common/components/exceptions/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
-import { EventFiltersModal } from '../../../../management/pages/event_filters/view/components/modal';
+import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/flyout';
 import { useAlertsActions } from './use_alerts_actions';
 import { useExceptionModal } from './use_add_exception_modal';
 import { useExceptionActions } from './use_add_exception_actions';
@@ -79,7 +79,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
   });
 
-  const alertStatus = get(0, ecsRowData?.['kibana.alert.workflow_status']) as Status;
+  const alertStatus = get(0, ecsRowData?.kibana?.alert?.workflow_status) as Status | undefined;
 
   const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
 
@@ -164,6 +164,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   });
   const { eventFilterActionItems } = useEventFilterAction({
     onAddEventFilterClick: handleOnAddEventFilterClick,
+    disabled: !isEvent,
   });
   const items: React.ReactElement[] = useMemo(
     () =>
@@ -217,7 +218,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
           />
         )}
       {isAddEventFilterModalOpen && ecsRowData != null && (
-        <EventFiltersModal data={ecsRowData} onCancel={closeAddEventFilterModal} />
+        <EventFiltersFlyout data={ecsRowData} onCancel={closeAddEventFilterModal} />
       )}
     </>
   );

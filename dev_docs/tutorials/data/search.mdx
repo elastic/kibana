@@ -129,6 +129,12 @@ setTimeout(() => {
 }, 1000);
 ```
 
+<DocCallOut color="danger" title="Cancel your searches if results are no longer needed">
+  Users might no longer be interested in search results. For example, they might start a new search
+  or leave your app without waiting for the results. You should handle such cases by using
+  `AbortController` with search API.
+</DocCallOut>
+
 #### Search strategies
 
 By default, the search service uses the DSL query and aggregation syntax and returns the response from Elasticsearch as is. It also provides several additional basic strategies, such as Async DSL (`x-pack` default) and EQL.

@@ -20,14 +20,13 @@ import {
   CasesClientPostRequestRt,
   CasePostRequest,
   CaseType,
-  OWNER_FIELD,
-  ENABLE_CASE_CONNECTOR,
-  MAX_TITLE_LENGTH,
-} from '../../../common';
-import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
+  ActionTypes,
+} from '../../../common/api';
+import { ENABLE_CASE_CONNECTOR, MAX_TITLE_LENGTH } from '../../../common/constants';
 
 import { Operations } from '../../authorization';
-import { createCaseError, flattenCaseSavedObject, transformNewCase } from '../../common';
+import { createCaseError } from '../../common/error';
+import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
 import { CasesClientArgs } from '..';
 
 /**
@@ -80,36 +79,22 @@ export const create = async (
       entities: [{ owner: query.owner, id: savedObjectID }],
     });
 
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { username, full_name, email } = user;
-    const createdDate = new Date().toISOString();
-
     const newCase = await caseService.postNewCase({
       unsecuredSavedObjectsClient,
       attributes: transformNewCase({
-        createdDate,
+        user,
         newCase: query,
-        username,
-        full_name,
-        email,
-        connector: query.connector,
       }),
       id: savedObjectID,
     });
 
-    await userActionService.bulkCreate({
+    await userActionService.createUserAction({
+      type: ActionTypes.create_case,
       unsecuredSavedObjectsClient,
-      actions: [
-        buildCaseUserActionItem({
-          action: 'create',
-          actionAt: createdDate,
-          actionBy: { username, full_name, email },
-          caseId: newCase.id,
-          fields: ['description', 'status', 'tags', 'title', 'connector', 'settings', OWNER_FIELD],
-          newValue: query,
-          owner: newCase.attributes.owner,
-        }),
-      ],
+      caseId: newCase.id,
+      user,
+      payload: query,
+      owner: newCase.attributes.owner,
     });
 
     return CaseResponseRt.encode(

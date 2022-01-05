@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ThemeServiceStart } from 'kibana/public';
 import { createGetterSetter } from '../../../kibana_utils/public';
 import { DataPublicPluginStart } from '../../../data/public';
 
@@ -15,3 +16,5 @@ export const [getDataActions, setDataActions] =
 export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
 >('vislib data.fieldFormats');
+
+export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('vislib theme service');

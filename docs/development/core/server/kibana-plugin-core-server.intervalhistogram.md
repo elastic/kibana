@@ -4,7 +4,7 @@
 
 ## IntervalHistogram interface
 
-an IntervalHistogram object that samples and reports the event loop delay over time. The delays will be reported in nanoseconds.
+an IntervalHistogram object that samples and reports the event loop delay over time. The delays will be reported in milliseconds.
 
 <b>Signature:</b>
 

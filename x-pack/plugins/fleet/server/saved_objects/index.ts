@@ -35,7 +35,7 @@ import {
 import { migratePackagePolicyToV7140, migrateInstallationToV7140 } from './migrations/to_v7_14_0';
 import { migratePackagePolicyToV7150 } from './migrations/to_v7_15_0';
 import { migrateInstallationToV7160, migratePackagePolicyToV7160 } from './migrations/to_v7_16_0';
-import { migrateOutputToV800 } from './migrations/to_v8_0_0';
+import { migrateInstallationToV800, migrateOutputToV800 } from './migrations/to_v8_0_0';
 
 /*
  * Saved object types and mappings
@@ -113,6 +113,7 @@ const getSavedObjectTypes = (
         is_default_monitoring: { type: 'boolean' },
         hosts: { type: 'keyword' },
         ca_sha256: { type: 'keyword', index: false },
+        ca_trusted_fingerprint: { type: 'keyword', index: false },
         config: { type: 'flattened' },
         config_yaml: { type: 'text' },
         is_preconfigured: { type: 'boolean', index: false },
@@ -238,6 +239,7 @@ const getSavedObjectTypes = (
             type: { type: 'keyword' },
           },
         },
+        installed_kibana_space_id: { type: 'keyword' },
         package_assets: {
           type: 'nested',
           properties: {
@@ -255,6 +257,7 @@ const getSavedObjectTypes = (
       '7.14.0': migrateInstallationToV7140,
       '7.14.1': migrateInstallationToV7140,
       '7.16.0': migrateInstallationToV7160,
+      '8.0.0': migrateInstallationToV800,
     },
   },
   [ASSETS_SAVED_OBJECT_TYPE]: {

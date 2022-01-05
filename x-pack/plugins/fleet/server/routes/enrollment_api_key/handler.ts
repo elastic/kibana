@@ -36,7 +36,13 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
       perPage: request.query.perPage,
       kuery: request.query.kuery,
     });
-    const body: GetEnrollmentAPIKeysResponse = { list: items, total, page, perPage };
+    const body: GetEnrollmentAPIKeysResponse = {
+      list: items, // deprecated
+      items,
+      total,
+      page,
+      perPage,
+    };
 
     return response.ok({ body });
   } catch (error) {
@@ -49,7 +55,7 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
   TypeOf<typeof PostEnrollmentAPIKeyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     const apiKey = await APIKeyService.generateEnrollmentAPIKey(soClient, esClient, {
       name: request.body.name,
@@ -68,7 +74,7 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
 export const deleteEnrollmentApiKeyHandler: RequestHandler<
   TypeOf<typeof DeleteEnrollmentAPIKeyRequestSchema.params>
 > = async (context, request, response) => {
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     await APIKeyService.deleteEnrollmentApiKey(esClient, request.params.keyId);
 

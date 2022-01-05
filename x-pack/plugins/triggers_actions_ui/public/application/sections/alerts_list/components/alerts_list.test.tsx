@@ -13,7 +13,7 @@ import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { AlertsList } from './alerts_list';
-import { AlertTypeModel, ValidationResult } from '../../../../types';
+import { RuleTypeModel, ValidationResult } from '../../../../types';
 import {
   AlertExecutionStatusErrorReasons,
   ALERTS_FEATURE_ID,
@@ -56,7 +56,7 @@ const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/actio
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
-const alertType = {
+const ruleType = {
   id: 'test_alert_type',
   description: 'test',
   iconClass: 'test',
@@ -64,7 +64,7 @@ const alertType = {
   validate: (): ValidationResult => {
     return { errors: {} };
   },
-  alertParamsExpression: () => null,
+  ruleParamsExpression: () => null,
   requiresAppContext: false,
 };
 const alertTypeFromApi = {
@@ -82,7 +82,7 @@ const alertTypeFromApi = {
   },
   ruleTaskTimeout: '1m',
 };
-ruleTypeRegistry.list.mockReturnValue([alertType]);
+ruleTypeRegistry.list.mockReturnValue([ruleType]);
 actionTypeRegistry.list.mockReturnValue([]);
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
@@ -297,7 +297,7 @@ describe('alerts_list component with items', () => {
     loadAlertTypes.mockResolvedValue([alertTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
 
-    const ruleTypeMock: AlertTypeModel = {
+    const ruleTypeMock: RuleTypeModel = {
       id: 'test_alert_type',
       iconClass: 'test',
       description: 'Alert when testing',
@@ -305,7 +305,7 @@ describe('alerts_list component with items', () => {
       validate: () => {
         return { errors: {} };
       },
-      alertParamsExpression: jest.fn(),
+      ruleParamsExpression: jest.fn(),
       requiresAppContext: !editable,
     };
 
@@ -328,6 +328,8 @@ describe('alerts_list component with items', () => {
   }
 
   it('renders table of alerts', async () => {
+    // Use fake timers so we don't have to wait for the EuiToolTip timeout
+    jest.useFakeTimers();
     await setup();
     expect(wrapper.find('EuiBasicTable')).toHaveLength(1);
     expect(wrapper.find('EuiTableRow')).toHaveLength(mockedAlertsData.length);
@@ -359,6 +361,23 @@ describe('alerts_list component with items', () => {
       wrapper.find('EuiTableRowCell[data-test-subj="alertsTableCell-lastExecutionDate"]').length
     ).toEqual(mockedAlertsData.length);
 
+    // Last run tooltip
+    wrapper
+      .find('[data-test-subj="alertsTableCell-lastExecutionDateTooltip"]')
+      .first()
+      .simulate('mouseOver');
+
+    // Run the timers so the EuiTooltip will be visible
+    jest.runAllTimers();
+
+    wrapper.update();
+    expect(wrapper.find('.euiToolTipPopover').text()).toBe('Start time of the last execution.');
+
+    wrapper
+      .find('[data-test-subj="alertsTableCell-lastExecutionDateTooltip"]')
+      .first()
+      .simulate('mouseOut');
+
     // Schedule interval column
     expect(
       wrapper.find('EuiTableRowCell[data-test-subj="alertsTableCell-interval"]').length
@@ -375,6 +394,20 @@ describe('alerts_list component with items', () => {
         (data) =>
           data.executionStatus.lastDuration > parseDuration(alertTypeFromApi.ruleTaskTimeout)
       ).length
+    );
+
+    // Duration tooltip
+    wrapper
+      .find('[data-test-subj="alertsTableCell-durationTooltip"]')
+      .first()
+      .simulate('mouseOver');
+
+    // Run the timers so the EuiTooltip will be visible
+    jest.runAllTimers();
+
+    wrapper.update();
+    expect(wrapper.find('.euiToolTipPopover').text()).toBe(
+      'The length of time it took for the rule to run.'
     );
 
     // Status column
@@ -399,6 +432,9 @@ describe('alerts_list component with items', () => {
     expect(wrapper.find('EuiHealth[data-test-subj="alertStatus-error"]').last().text()).toEqual(
       'License Error'
     );
+
+    // Clearing all mocks will also reset fake timers.
+    jest.clearAllMocks();
   });
 
   it('loads alerts when refresh button is clicked', async () => {
@@ -606,7 +642,7 @@ describe('alerts_list with show only capability', () => {
     loadAlertTypes.mockResolvedValue([alertTypeFromApi]);
     loadAllActions.mockResolvedValue([]);
 
-    const ruleTypeMock: AlertTypeModel = {
+    const ruleTypeMock: RuleTypeModel = {
       id: 'test_alert_type',
       iconClass: 'test',
       description: 'Alert when testing',
@@ -614,7 +650,7 @@ describe('alerts_list with show only capability', () => {
       validate: () => {
         return { errors: {} };
       },
-      alertParamsExpression: jest.fn(),
+      ruleParamsExpression: jest.fn(),
       requiresAppContext: !editable,
     };
 

@@ -11,10 +11,7 @@ import { EuiTextColor } from '@elastic/eui';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import {
-  createSdfIcon,
-  CUSTOM_ICON_PREFIX_SDF,
   getIconPalette,
-  getMakiIconId,
   getMakiSymbolAnchor,
   // @ts-expect-error
 } from '../symbol_utils';
@@ -37,50 +34,13 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     return palette.length;
   }
 
-  syncIconWithMb(symbolLayerId: string, mbMap: MbMap, iconPixelSize: number) {
+  syncIconWithMb(symbolLayerId: string, mbMap: MbMap) {
     if (this._isIconDynamicConfigComplete()) {
-      this._syncCustomIconsWithMb(mbMap).then(() => {
-        mbMap.setLayoutProperty(
-          symbolLayerId,
-          'icon-image',
-          this._getMbIconImageExpression(iconPixelSize)
-        );
-        mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', this._getMbIconAnchorExpression());
-      });
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', this._getMbIconImageExpression());
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', this._getMbIconAnchorExpression());
     } else {
       mbMap.setLayoutProperty(symbolLayerId, 'icon-image', null);
       mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', null);
-    }
-  }
-
-  async _syncCustomIconsWithMb(mbMap: MbMap) {
-    if (this._options.useCustomIconMap && this._options.customIconStops) {
-      await Promise.all(
-        this._options.customIconStops.map(({ icon, svg, cutoff, radius }) => {
-          if (icon.startsWith(CUSTOM_ICON_PREFIX_SDF) && svg) {
-            this._customIconCheck({ symbolId: icon, svg, cutoff, radius, mbMap });
-          }
-        })
-      );
-    }
-  }
-
-  async _customIconCheck({
-    symbolId,
-    svg,
-    cutoff,
-    radius,
-    mbMap,
-  }: {
-    symbolId: string;
-    svg: string;
-    cutoff?: number;
-    radius?: number;
-    mbMap: MbMap;
-  }) {
-    if (!mbMap.hasImage(symbolId)) {
-      const { imageData, pixelRatio } = await createSdfIcon(svg, cutoff, radius);
-      mbMap.addImage(symbolId, imageData, { pixelRatio, sdf: true });
     }
   }
 
@@ -88,33 +48,30 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     if (this._options.useCustomIconMap && this._options.customIconStops) {
       const stops = [];
       for (let i = 1; i < this._options.customIconStops.length; i++) {
-        const { stop, icon, svg, cutoff, radius } = this._options.customIconStops[i];
+        const { stop, icon } = this._options.customIconStops[i];
         stops.push({
           stop,
           style: icon,
-          svg,
-          cutoff,
-          radius,
         });
       }
 
       return {
+        fallbackSymbolId:
+          this._options.customIconStops.length > 0 ? this._options.customIconStops[0].icon : null,
         stops,
-        fallbackSymbol:
-          this._options.customIconStops.length > 0 ? this._options.customIconStops[0] : null,
       };
     }
 
     return assignCategoriesToPalette({
-      categories: _.get(this.getCategoryFieldMeta(), 'categories', []),
+      categories: this.getCategoryFieldMeta(),
       paletteValues: getIconPalette(this._options.iconPaletteId),
     });
   }
 
-  _getMbIconImageExpression(iconPixelSize: number) {
-    const { stops, fallbackSymbol } = this._getPaletteStops();
+  _getMbIconImageExpression() {
+    const { stops, fallbackSymbolId } = this._getPaletteStops();
 
-    if (stops.length < 1 || !fallbackSymbol) {
+    if (stops.length < 1 || !fallbackSymbolId) {
       // occurs when no data
       return null;
     }
@@ -122,26 +79,19 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     const mbStops = [];
     stops.forEach(({ stop, style }) => {
       mbStops.push(`${stop}`);
-      if (style.startsWith(CUSTOM_ICON_PREFIX_SDF)) {
-        mbStops.push(style);
-      } else {
-        mbStops.push(getMakiIconId(style, iconPixelSize));
-      }
+      mbStops.push(style);
     });
 
-    if (fallbackSymbol) {
-      const { icon } = fallbackSymbol;
-      mbStops.push(
-        icon.startsWith(CUSTOM_ICON_PREFIX_SDF) ? icon : getMakiIconId(icon, iconPixelSize)
-      ); // last item is fallback style for anything that does not match provided stops
+    if (fallbackSymbolId) {
+      mbStops.push(fallbackSymbolId); // last item is fallback style for anything that does not match provided stops
     }
     return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
   }
 
   _getMbIconAnchorExpression() {
-    const { stops, fallbackSymbol } = this._getPaletteStops();
+    const { stops, fallbackSymbolId } = this._getPaletteStops();
 
-    if (stops.length < 1 || !fallbackSymbol) {
+    if (stops.length < 1 || !fallbackSymbolId) {
       // occurs when no data
       return null;
     }
@@ -149,18 +99,11 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     const mbStops = [];
     stops.forEach(({ stop, style }) => {
       mbStops.push(`${stop}`);
-      if (!style.startsWith(CUSTOM_ICON_PREFIX_SDF)) {
-        // then use maki anchor
-        mbStops.push(getMakiSymbolAnchor(style));
-      } else {
-        mbStops.push('center')
-      }
+      mbStops.push(getMakiSymbolAnchor(style));
     });
 
-    const { icon } = fallbackSymbol;
-
-    if (icon && !icon.startsWith(CUSTOM_ICON_PREFIX_SDF)) {
-      mbStops.push(getMakiSymbolAnchor(icon)); // last item is fallback style for anything that does not match provided stops
+    if (fallbackSymbolId) {
+      mbStops.push(getMakiSymbolAnchor(fallbackSymbolId)); // last item is fallback style for anything that does not match provided stops
     }
     return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
   }
@@ -170,26 +113,23 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
   }
 
   renderLegendDetailRow({ isPointsOnly, isLinesOnly }: LegendProps) {
-    const { stops, fallbackSymbol } = this._getPaletteStops();
+    const { stops, fallbackSymbolId } = this._getPaletteStops();
     const breaks = [];
-    stops.forEach(({ stop, style, svg }) => {
+    stops.forEach(({ stop, style }) => {
       if (stop) {
         breaks.push({
           color: 'grey',
           label: this.formatField(stop),
           symbolId: style,
-          svg,
         });
       }
     });
 
-    if (fallbackSymbol) {
-      const { icon, svg } = fallbackSymbol;
+    if (fallbackSymbolId) {
       breaks.push({
         color: 'grey',
-        label: <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>,
-        symbolId: icon,
-        svg,
+        label: <EuiTextColor color="success">{getOtherCategoryLabel()}</EuiTextColor>,
+        symbolId: fallbackSymbolId,
       });
     }
 

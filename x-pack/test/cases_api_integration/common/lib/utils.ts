@@ -52,6 +52,7 @@ import {
   ConnectorMappings,
   CasesByAlertId,
   CaseResolveResponse,
+  CaseMetricsResponse,
 } from '../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
 import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
@@ -441,7 +442,7 @@ export const removeServerGeneratedPropertiesFromSavedObject = <
 export const removeServerGeneratedPropertiesFromUserAction = (
   attributes: CaseUserActionResponse
 ) => {
-  const keysToRemove: Array<keyof CaseUserActionResponse> = ['action_id', 'action_at'];
+  const keysToRemove: Array<keyof CaseUserActionResponse> = ['action_id', 'created_at'];
   return removeServerGeneratedPropertiesFromObject<
     CaseUserActionResponse,
     typeof keysToRemove[number]
@@ -693,6 +694,7 @@ export const createCaseWithConnector = async ({
 }): Promise<{
   postedCase: CaseResponse;
   connector: CreateConnectorResponse;
+  configuration: CasesConfigureResponse;
 }> => {
   const connector = await createConnector({
     supertest,
@@ -704,7 +706,7 @@ export const createCaseWithConnector = async ({
   });
 
   actionsRemover.add(auth.space ?? 'default', connector.id, 'action', 'actions');
-  await createConfiguration(
+  const configuration = await createConfiguration(
     supertest,
     {
       ...getConfigurationRequest({
@@ -739,7 +741,7 @@ export const createCaseWithConnector = async ({
     auth
   );
 
-  return { postedCase, connector };
+  return { postedCase, connector, configuration };
 };
 
 export const createCase = async (
@@ -1092,6 +1094,28 @@ export const getCase = async ({
     .expect(expectedHttpCode);
 
   return theCase;
+};
+
+export const getCaseMetrics = async ({
+  supertest,
+  caseId,
+  features,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  caseId: string;
+  features: string[];
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseMetricsResponse> => {
+  const { body: metricsResponse } = await supertest
+    .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/metrics/${caseId}`)
+    .query({ features: JSON.stringify(features) })
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return metricsResponse;
 };
 
 export const resolveCase = async ({

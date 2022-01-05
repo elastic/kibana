@@ -33,7 +33,8 @@ import { Footer, footerHeight } from '../footer';
 import { TimelineHeader } from '../header';
 import { calculateTotalPages, combineQueries } from '../helpers';
 import { TimelineRefetch } from '../refetch_timeline';
-import { esQuery, FilterManager } from '../../../../../../../../src/plugins/data/public';
+import { FilterManager } from '../../../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
 import {
   ControlColumnProps,
   KueryFilterQueryKind,
@@ -60,7 +61,6 @@ import { HeaderActions } from '../body/actions/header_actions';
 import { getDefaultControlColumn } from '../body/control_columns';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { Sourcerer } from '../../../../common/components/sourcerer';
-
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
   width: 100%;
@@ -120,8 +120,13 @@ const DatePicker = styled(EuiFlexItem)`
     width: auto;
   }
 `;
-
 DatePicker.displayName = 'DatePicker';
+
+const SourcererFlex = styled(EuiFlexItem)`
+  align-items: flex-end;
+`;
+
+SourcererFlex.displayName = 'SourcererFlex';
 
 const VerticalRule = styled.div`
   width: 2px;
@@ -190,8 +195,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     loading: loadingSourcerer,
     indexPattern,
     runtimeMappings,
+    // important to get selectedPatterns from useSourcererDataView
+    // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns,
   } = useSourcererDataView(SourcererScopeName.timeline);
+
   const { uiSettings } = useKibana().services;
   const ACTION_BUTTON_COUNT = 5;
 
@@ -205,7 +213,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [activeFilterManager, uiSettings]
   );
 
-  const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(uiSettings), [uiSettings]);
+  const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const kqlQuery: {
     query: string;
     language: KueryFilterQueryKind;
@@ -353,7 +361,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   setFullScreen={setTimelineFullScreen}
                 />
               )}
-              <DatePicker grow={1}>
+              <DatePicker grow={10}>
                 <SuperDatePicker
                   id="timeline"
                   timelineId={timelineId}
@@ -363,11 +371,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
               <EuiFlexItem grow={false}>
                 <TimelineDatePickerLock />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <SourcererFlex grow={1}>
                 {activeTab === TimelineTabs.query && (
                   <Sourcerer scope={SourcererScopeName.timeline} />
                 )}
-              </EuiFlexItem>
+              </SourcererFlex>
             </EuiFlexGroup>
             <TimelineHeaderContainer data-test-subj="timelineHeader">
               <TimelineHeader

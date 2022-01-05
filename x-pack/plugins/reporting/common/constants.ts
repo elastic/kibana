@@ -7,6 +7,8 @@
 
 export const PLUGIN_ID = 'reporting';
 
+export const REPORTING_TRANSACTION_TYPE = PLUGIN_ID;
+
 export const REPORTING_SYSTEM_INDEX = '.reporting';
 
 export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
@@ -53,17 +55,6 @@ export const UI_SETTINGS_CSV_SEPARATOR = 'csv:separator';
 export const UI_SETTINGS_CSV_QUOTE_VALUES = 'csv:quoteValues';
 export const UI_SETTINGS_DATEFORMAT_TZ = 'dateFormat:tz';
 
-export const LAYOUT_TYPES = {
-  CANVAS: 'canvas',
-  PRESERVE_LAYOUT: 'preserve_layout',
-  PRINT: 'print',
-};
-
-export const DEFAULT_VIEWPORT = {
-  width: 1950,
-  height: 1200,
-};
-
 // Export Type Definitions
 export const CSV_REPORT_TYPE = 'CSV';
 export const CSV_JOB_TYPE = 'csv_searchsource';
@@ -85,7 +76,12 @@ export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 export const CSV_REPORT_TYPE_DEPRECATED = 'CSV';
 export const CSV_JOB_TYPE_DEPRECATED = 'csv';
 
-export const USES_HEADLESS_JOB_TYPES = [PDF_JOB_TYPE, PNG_JOB_TYPE];
+export const USES_HEADLESS_JOB_TYPES = [
+  PDF_JOB_TYPE,
+  PNG_JOB_TYPE,
+  PDF_JOB_TYPE_V2,
+  PNG_JOB_TYPE_V2,
+];
 
 export const DEPRECATED_JOB_TYPES = [CSV_JOB_TYPE_DEPRECATED];
 
