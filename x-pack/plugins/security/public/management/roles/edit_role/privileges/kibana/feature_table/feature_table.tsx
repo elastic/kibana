@@ -85,7 +85,8 @@ export class FeatureTable extends Component<Props, {}> {
         (feature) =>
           this.props.privilegeCalculator.getEffectivePrimaryFeaturePrivilege(
             feature.id,
-            this.props.privilegeIndex
+            this.props.privilegeIndex,
+            this.props.allSpacesSelected
           ) != null
       ).length;
 
