@@ -34,6 +34,7 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
    * Callback to add a filter to filter bar
    */
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  sessionId?: string;
 }
 export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
   showDistributions?: boolean;
@@ -87,6 +88,7 @@ export interface FieldStatisticsTableProps {
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   savedSearchRefetch$?: DataRefetch$;
+  searchSessionId?: string;
 }
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
@@ -101,6 +103,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     onAddFilter,
     trackUiMetric,
     savedSearchRefetch$,
+    searchSessionId,
   } = props;
   const { uiSettings } = services;
   const [embeddable, setEmbeddable] = useState<
@@ -144,10 +147,20 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         filters,
         visibleFieldNames: columns,
         onAddFilter,
+        sessionId: searchSessionId,
       });
       embeddable.reload();
     }
-  }, [embeddable, indexPattern, savedSearch, query, columns, filters, onAddFilter]);
+  }, [
+    embeddable,
+    indexPattern,
+    savedSearch,
+    query,
+    columns,
+    filters,
+    onAddFilter,
+    searchSessionId,
+  ]);
 
   useEffect(() => {
     if (showPreviewByDefault && embeddable && !isErrorEmbeddable(embeddable)) {
