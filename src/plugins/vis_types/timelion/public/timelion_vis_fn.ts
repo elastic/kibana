@@ -65,9 +65,7 @@ export const getTimelionVisualizationConfig = (
     const visParams = {
       expression: args.expression,
       interval: args.interval,
-      ariaLabel:
-        (variables?.embeddableTitle as string) ||
-        getExecutionContext()?.description,
+      ariaLabel: (variables?.embeddableTitle as string) || getExecutionContext()?.description,
     };
 
     const response = await timelionRequestHandler({
