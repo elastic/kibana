@@ -34,7 +34,7 @@ jest.mock('../../../lib/kibana/kibana_react', () => {
   };
 });
 
-const SEARCH_QUERY = '?search=test';
+const mockSearchQuery = '?search=test';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -42,7 +42,7 @@ jest.mock('react-router-dom', () => {
   return {
     ...original,
     useLocation: jest.fn(() => ({
-      search: SEARCH_QUERY,
+      search: mockSearchQuery,
     })),
   };
 });
@@ -116,7 +116,7 @@ describe('Table Navigation', () => {
       `EuiTab[data-test-subj="navigation-${HostsTableType.authentications}"]`
     );
     expect(firstTab.props().href).toBe(
-      `/app/securitySolutionUI/hosts/siem-window/authentications${SEARCH_QUERY}`
+      `/app/securitySolutionUI/hosts/siem-window/authentications${mockSearchQuery}`
     );
   });
 });
