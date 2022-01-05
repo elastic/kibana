@@ -17,6 +17,7 @@ import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
+  TaskInstance,
 } from '../../../../task_manager/server';
 import { UptimeServerSetup } from '../adapters';
 import { installSyntheticsIndexTemplates } from '../../rest_api/synthetics_service/install_index_templates';
@@ -126,11 +127,13 @@ export class SyntheticsService {
     });
   }
 
-  public scheduleSyncTask(taskManager: TaskManagerStartContract) {
+  public async scheduleSyncTask(taskManager: TaskManagerStartContract): Promise<TaskInstance> {
     const interval =
       this.config.unsafe.service.syncInterval ?? SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT;
-    taskManager
-      .ensureScheduled({
+
+    try {
+      await taskManager.removeIfExists(SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID);
+      const taskInstance = await taskManager.ensureScheduled({
         id: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID,
         taskType: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE,
         schedule: {
@@ -139,18 +142,19 @@ export class SyntheticsService {
         params: {},
         state: {},
         scope: ['uptime'],
-      })
-      .then((_result) => {
-        this.logger?.info(
-          `Task ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID} scheduled with interval ${interval}.`
-        );
-      })
-      .catch((e) => {
-        this.logger?.error(
-          `Error running task: ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID}, `,
-          e?.message() ?? e
-        );
       });
+
+      this.logger?.info(
+        `Task ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID} scheduled with interval ${taskInstance.schedule?.interval}.`
+      );
+
+      return taskInstance;
+    } catch (e) {
+      this.logger?.error(
+        `Error running task: ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID}, `,
+        e?.message() ?? e
+      );
+    }
   }
 
   async getOutput(request?: KibanaRequest) {
