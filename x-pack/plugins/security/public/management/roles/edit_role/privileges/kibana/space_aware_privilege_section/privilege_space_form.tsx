@@ -466,6 +466,9 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   private resetRoleFeature = (roleFeature: FeaturesPrivileges) => {
     const securedFeatures = this.props.kibanaPrivileges.getSecuredFeatures();
     return Object.entries(roleFeature).reduce((features, [featureId, privileges]) => {
+      if (!Array.isArray(privileges)) {
+        return features;
+      }
       const securedFeature = securedFeatures.find((sf) => sf.id === featureId);
       const primaryFeaturePrivilege = securedFeature
         ?.getPrimaryFeaturePrivileges({ includeMinimalFeaturePrivileges: true })
@@ -476,22 +479,20 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           ) {
             return false;
           }
-          return Array.isArray(privileges) && privileges.includes(pfp.id);
+          return privileges.includes(pfp.id);
         }) ?? { disabled: false, requireAllSpaces: false };
       return {
         ...features,
-        [featureId]: Array.isArray(privileges)
-          ? privileges.filter((p) => {
-              if (
-                primaryFeaturePrivilege?.disabled ||
-                (primaryFeaturePrivilege?.requireAllSpaces &&
-                  !this.state.selectedSpaceIds.includes(ALL_SPACES_ID))
-              ) {
-                return false;
-              }
-              return true;
-            })
-          : privileges,
+        [featureId]: privileges.filter((p) => {
+          if (
+            primaryFeaturePrivilege?.disabled ||
+            (primaryFeaturePrivilege?.requireAllSpaces &&
+              !this.state.selectedSpaceIds.includes(ALL_SPACES_ID))
+          ) {
+            return false;
+          }
+          return true;
+        }),
       };
     }, {});
   };
