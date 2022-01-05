@@ -40,7 +40,7 @@ Add a [project config](https://github.com/sqren/backport/blob/master/docs/config
   // the branches available to backport to
   "targetBranchChoices": ["main", "6.3", "6.2", "6.1", "6.0"],
 
-  // Automatically detect which branches a pull request should be backported to based on the pull request labels.
+  // Optional: Automatically detect which branches a pull request should be backported to based on the pull request labels.
   "branchLabelMapping": {
     "^backport-to-(.+)$": "$1"
   }
@@ -110,33 +110,33 @@ The CLI options will override the [configuration options](https://github.com/sqr
 
 `backport` can be imported as a Node module and interacted with programatically. This can be useful when creating automation around the Backport tool. See for example the [Backport Github Action](https://github.com/elastic/kibana-github-actions/blob/f5c58195840b8b0cf6036cfeba6e0b497306fb39/backport/index.ts)
 
-#### `backportRun`
+### `backportRun`
 
 Backport a commit programatically. Commits can be selected via `pullNumber` or `sha`.
 
-##### Arguments:
+#### Arguments:
 
 All of the options listed on [configuration.md](https://github.com/sqren/backport/blob/main/docs/configuration.md) are valid. The most common options are:
 
-`accessToken` _string_ **(Required)**
+`accessToken` _string_ **(Required)**<br/>
 Github access token to authenticate the request
 
-`repoName` _string_ **(Required)**
+`repoName` _string_ **(Required)**<br/>
 Name of repository
 
-`repoOwner` _string_ **(Required)**
+`repoOwner` _string_ **(Required)**<br/>
 Owner of repository (organisation or username)
 
-`pullNumber` _number_
+`pullNumber` _number_<br/>
 Filter commits by pull request number
 
-`sha` _string_
+`sha` _string_<br/>
 Filter commits by commit sha
 
-`ci` _boolean_
+`ci` _boolean_<br/>
 Enabling this will disable the interactive prompts
 
-##### Example
+#### Example
 
 ```ts
 import { backportRun } from 'backport';
@@ -155,34 +155,34 @@ const result = await backportRun({
 console.log(result);
 ```
 
-#### `getCommits`
+### `getCommits`
 
 Retrieve information about commits and whether they are backported
 
-##### Arguments:
+#### Arguments:
 
-`accessToken` _string_ **(Required)**
+`accessToken` _string_ **(Required)**<br/>
 Github access token to authenticate the request
 
-`repoName` _string_ **(Required)**
+`repoName` _string_ **(Required)**<br/>
 Name of repository
 
-`repoOwner` _string_ **(Required)**
+`repoOwner` _string_ **(Required)**<br/>
 Owner of repository (organisation or username)
 
-`author` _string_
+`author` _string_<br/>
 Filter commits by Github user
 
-`pullNumber` _number_
+`pullNumber` _number_<br/>
 Filter commits by pull request number
 
-`sha` _string_
+`sha` _string_<br/>
 Filter commits by commit sha
 
-`sourceBranch` _string_
+`sourceBranch` _string_<br/>
 The branch to display commits from. Defaults to the default branch (normally "main" or "master")
 
-##### Example
+#### Example
 
 ```ts
 import { getCommits } from 'backport';
