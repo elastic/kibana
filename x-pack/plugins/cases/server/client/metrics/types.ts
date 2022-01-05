@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CaseMetricsResponse } from '../../../common/api';
 
 export interface MetricsHandler {
@@ -12,3 +13,11 @@ export interface MetricsHandler {
   compute(): Promise<CaseMetricsResponse>;
   setupFeature?(feature: string): void;
 }
+
+export interface AggregationBuilder {
+  build(): Record<string, estypes.AggregationsAggregationContainer>;
+  formatResponse(aggregations: AggregationResponse): CaseMetricsResponse;
+  getName(): string;
+}
+
+export type AggregationResponse = Record<string, estypes.AggregationsAggregate> | undefined;
