@@ -52,6 +52,7 @@ import {
   getTelemetryFunction,
 } from '../common/lib';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
+import { setTheme } from '.';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -120,6 +121,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
   public setup(core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
     bootstrap(uiActions);
+    setTheme(core.theme);
 
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,

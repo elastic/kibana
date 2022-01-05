@@ -11,7 +11,7 @@ import * as ReactDOM from 'react-dom';
 import { Page, PageProps } from './components/page';
 
 export const render = (container: HTMLElement, props: PageProps) => {
-  ReactDOM.render(React.createElement(Page, props), container);
+  ReactDOM.render(React.createElement(Page, { ...props }), container);
 
   return () => {
     ReactDOM.unmountComponentAtNode(container);

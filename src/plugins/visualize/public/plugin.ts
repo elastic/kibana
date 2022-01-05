@@ -49,6 +49,7 @@ import type { SpacesApi } from '../../../../x-pack/plugins/spaces/public';
 import { setVisEditorsRegistry, setUISettings, setUsageCollector } from './services';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
 import { VisualizeLocatorDefinition } from '../common/locator';
+import { setTheme } from './services';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -136,6 +137,7 @@ export class VisualizePlugin
       stopUrlTracker();
     };
 
+    setTheme(core.theme);
     setUISettings(core.uiSettings);
 
     core.application.register({

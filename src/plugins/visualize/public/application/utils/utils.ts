@@ -13,6 +13,7 @@ import { Filter } from '@kbn/es-query';
 import { redirectWhenMissing } from '../../../../kibana_utils/public';
 import { VisualizeConstants } from '../visualize_constants';
 import { VisualizeServices, VisualizeEditorVisInstance } from '../types';
+import { getTheme } from '../../services';
 
 export const addHelpMenuToAppChrome = (chrome: ChromeStart, docLinks: DocLinksStart) => {
   chrome.setHelpExtension({
@@ -91,5 +92,6 @@ export const redirectToSavedObjectPage = (
     onBeforeRedirect() {
       setActiveUrl(VisualizeConstants.LANDING_PAGE_PATH);
     },
+    theme: getTheme(),
   })(error);
 };

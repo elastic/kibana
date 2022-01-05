@@ -10,8 +10,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiWrappingPopover } from '@elastic/eui';
+import { Observable } from 'rxjs';
 
-import { CoreStart, HttpStart } from 'kibana/public';
+import { CoreStart, CoreTheme, HttpStart } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { ShareContextMenu } from '../components/share_context_menu';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
@@ -42,6 +44,7 @@ export class ShareMenuManager {
           post: core.http.post,
           basePath: core.http.basePath.get(),
           anonymousAccess,
+          theme$: core.theme.theme$,
         });
       },
     };
@@ -65,12 +68,14 @@ export class ShareMenuManager {
     basePath,
     embedUrlParamExtensions,
     anonymousAccess,
+    theme$,
     showPublicUrlSwitch,
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
     post: HttpStart['post'];
     basePath: string;
     anonymousAccess: AnonymousAccessServiceContract | undefined;
+    theme$: Observable<CoreTheme>;
   }) {
     if (this.isOpen) {
       this.onClose();
@@ -82,30 +87,32 @@ export class ShareMenuManager {
     document.body.appendChild(this.container);
     const element = (
       <I18nProvider>
-        <EuiWrappingPopover
-          id="sharePopover"
-          button={anchorElement}
-          isOpen={true}
-          closePopover={this.onClose}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-        >
-          <ShareContextMenu
-            allowEmbed={allowEmbed}
-            allowShortUrl={allowShortUrl}
-            objectId={objectId}
-            objectType={objectType}
-            shareMenuItems={menuItems}
-            sharingData={sharingData}
-            shareableUrl={shareableUrl}
-            onClose={this.onClose}
-            post={post}
-            basePath={basePath}
-            embedUrlParamExtensions={embedUrlParamExtensions}
-            anonymousAccess={anonymousAccess}
-            showPublicUrlSwitch={showPublicUrlSwitch}
-          />
-        </EuiWrappingPopover>
+        <KibanaThemeProvider theme$={theme$}>
+          <EuiWrappingPopover
+            id="sharePopover"
+            button={anchorElement}
+            isOpen={true}
+            closePopover={this.onClose}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <ShareContextMenu
+              allowEmbed={allowEmbed}
+              allowShortUrl={allowShortUrl}
+              objectId={objectId}
+              objectType={objectType}
+              shareMenuItems={menuItems}
+              sharingData={sharingData}
+              shareableUrl={shareableUrl}
+              onClose={this.onClose}
+              post={post}
+              basePath={basePath}
+              embedUrlParamExtensions={embedUrlParamExtensions}
+              anonymousAccess={anonymousAccess}
+              showPublicUrlSwitch={showPublicUrlSwitch}
+            />
+          </EuiWrappingPopover>
+        </KibanaThemeProvider>
       </I18nProvider>
     );
     ReactDOM.render(element, this.container);

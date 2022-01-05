@@ -8,39 +8,47 @@
 
 import * as React from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { Observable } from 'rxjs';
 import { EuiPageTemplate } from '@elastic/eui';
+import { CoreTheme } from 'kibana/public';
 import { Error } from './error';
 import { RedirectManager } from '../redirect_manager';
 import { Spinner } from './spinner';
+import { KibanaThemeProvider } from '../../../../../kibana_react/public';
 
 export interface PageProps {
   manager: Pick<RedirectManager, 'error$'>;
+  theme$: Observable<CoreTheme>;
 }
 
-export const Page: React.FC<PageProps> = ({ manager }) => {
+export const Page: React.FC<PageProps> = ({ manager, theme$ }) => {
   const error = useObservable(manager.error$);
 
   if (error) {
     return (
-      <EuiPageTemplate
-        template="centeredContent"
-        pageContentProps={{
-          color: 'danger',
-        }}
-      >
-        <Error error={error} />
-      </EuiPageTemplate>
+      <KibanaThemeProvider theme$={theme$}>
+        <EuiPageTemplate
+          template="centeredContent"
+          pageContentProps={{
+            color: 'danger',
+          }}
+        >
+          <Error error={error} />
+        </EuiPageTemplate>
+      </KibanaThemeProvider>
     );
   }
 
   return (
-    <EuiPageTemplate
-      template="centeredContent"
-      pageContentProps={{
-        color: 'primary',
-      }}
-    >
-      <Spinner />
-    </EuiPageTemplate>
+    <KibanaThemeProvider theme$={theme$}>
+      <EuiPageTemplate
+        template="centeredContent"
+        pageContentProps={{
+          color: 'primary',
+        }}
+      >
+        <Spinner />
+      </EuiPageTemplate>
+    </KibanaThemeProvider>
   );
 };

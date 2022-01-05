@@ -9,10 +9,11 @@
 import { EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Markdown } from '../../../../kibana_react/public';
+import { KibanaThemeProvider, Markdown } from '../../../../kibana_react/public';
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { IContainer } from '../containers';
+import { getTheme } from '../..';
 
 export const ERROR_EMBEDDABLE_TYPE = 'error';
 
@@ -38,18 +39,21 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
     const title = typeof this.error === 'string' ? this.error : this.error.message;
     this.dom = dom;
     ReactDOM.render(
-      // @ts-ignore
-      <div className="embPanel__error embPanel__content" data-test-subj="embeddableStackError">
-        <EuiText color="subdued" size="xs">
-          <EuiIcon type="alert" color="danger" />
-          <EuiSpacer size="s" />
-          <Markdown
-            markdown={title}
-            openLinksInNewTab={true}
-            data-test-subj="errorMessageMarkdown"
-          />
-        </EuiText>
-      </div>,
+      <KibanaThemeProvider theme$={getTheme().theme$}>
+        // @ts-ignore
+        <div className="embPanel__error embPanel__content" data-test-subj="embeddableStackError">
+          <EuiText color="subdued" size="xs">
+            <EuiIcon type="alert" color="danger" />
+            <EuiSpacer size="s" />
+            <Markdown
+              markdown={title}
+              openLinksInNewTab={true}
+              data-test-subj="errorMessageMarkdown"
+            />
+          </EuiText>
+        </div>
+        ,
+      </KibanaThemeProvider>,
       dom
     );
   }

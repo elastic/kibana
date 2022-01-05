@@ -9,6 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
 import { AppMountParameters, CoreStart } from '../../../../src/core/public';
+import { KibanaThemeProvider } from '../../../../../kibana/src/plugins/kibana_react/public';
 import { CaptureTest } from './containers/capture_test';
 import { Main } from './containers/main';
 import { ApplicationContextProvider } from './application_context';
@@ -21,14 +22,17 @@ export const renderApp = (
   { appBasePath, element, history }: AppMountParameters, // FIXME: appBasePath is deprecated
   forwardedParams: MyForwardableState
 ) => {
+  const theme$ = coreStart.theme.theme$;
   ReactDOM.render(
     <ApplicationContextProvider forwardedState={forwardedParams}>
-      <Router history={history}>
-        <Switch>
-          <Route path={ROUTES.captureTest} exact render={() => <CaptureTest />} />
-          <Route render={() => <Main basename={appBasePath} {...coreStart} {...deps} />} />
-        </Switch>
-      </Router>
+      <KibanaThemeProvider theme$={theme$}>
+        <Router history={history}>
+          <Switch>
+            <Route path={ROUTES.captureTest} exact render={() => <CaptureTest />} />
+            <Route render={() => <Main basename={appBasePath} {...coreStart} {...deps} />} />
+          </Switch>
+        </Router>
+      </KibanaThemeProvider>
     </ApplicationContextProvider>,
     element
   );
