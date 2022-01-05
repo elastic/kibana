@@ -8,7 +8,7 @@
 import { createMockedIndexPattern } from '../../../mocks';
 import { formulaOperation, GenericOperationDefinition, GenericIndexPatternColumn } from '../index';
 import { FormulaIndexPatternColumn } from './formula';
-import { regenerateLayerFromAst } from './parse';
+import { expandFormulaColumn, generateFormulaLayer } from './parse';
 import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../../types';
 import { tinymathFunctions } from './util';
 import { TermsIndexPatternColumn } from '../terms';
@@ -417,14 +417,19 @@ describe('formula', () => {
 
     function testIsBrokenFormula(formula: string) {
       expect(
-        regenerateLayerFromAst(
+        generateFormulaLayer({
           formula,
-          layer,
-          'col1',
-          currentColumn,
+          layer: {
+            ...layer,
+            columns: {
+              ...layer.columns,
+              col1: currentColumn,
+            },
+          },
+          id: 'col1',
           indexPattern,
-          operationDefinitionMap
-        ).newLayer
+          operations: operationDefinitionMap,
+        })
       ).toEqual({
         ...layer,
         columns: {
@@ -457,29 +462,23 @@ describe('formula', () => {
 
     it('should mutate the layer with new columns for valid formula expressions', () => {
       expect(
-        regenerateLayerFromAst(
-          'average(bytes)',
-          layer,
-          'col1',
-          currentColumn,
+        generateFormulaLayer({
+          formula: 'average(bytes)',
+          layer: {
+            ...layer,
+            columns: {
+              ...layer.columns,
+              col1: currentColumn,
+            },
+          },
+          id: 'col1',
           indexPattern,
-          operationDefinitionMap
-        ).newLayer
+          operations: operationDefinitionMap,
+        })
       ).toEqual({
         ...layer,
         columnOrder: ['col1X0', 'col1'],
         columns: {
-          ...layer.columns,
-          col1: {
-            ...currentColumn,
-            label: 'average(bytes)',
-            references: ['col1X0'],
-            params: {
-              ...currentColumn.params,
-              formula: 'average(bytes)',
-              isFormulaBroken: false,
-            },
-          },
           col1X0: {
             customLabel: true,
             dataType: 'number',
@@ -490,20 +489,35 @@ describe('formula', () => {
             sourceField: 'bytes',
             timeScale: false,
           },
+          col1: {
+            ...currentColumn,
+            label: 'average(bytes)',
+            references: ['col1X0'],
+            params: {
+              ...currentColumn.params,
+              formula: 'average(bytes)',
+              isFormulaBroken: false,
+            },
+          },
         },
       });
     });
 
     it('should create a valid formula expression for numeric literals', () => {
       expect(
-        regenerateLayerFromAst(
-          '0',
-          layer,
-          'col1',
-          currentColumn,
+        generateFormulaLayer({
+          formula: '0',
+          layer: {
+            ...layer,
+            columns: {
+              ...layer.columns,
+              col1: currentColumn,
+            },
+          },
+          id: 'col1',
           indexPattern,
-          operationDefinitionMap
-        ).newLayer
+          operations: operationDefinitionMap,
+        })
       ).toEqual({
         ...layer,
         columnOrder: ['col1X0', 'col1'],
@@ -641,14 +655,12 @@ describe('formula', () => {
 
     it('returns the locations of each function', () => {
       expect(
-        regenerateLayerFromAst(
-          'moving_average(average(bytes), window=7) + count()',
+        expandFormulaColumn({
+          formula: 'moving_average(average(bytes), window=7) + count()',
           layer,
-          'col1',
-          currentColumn,
+          id: 'col1',
           indexPattern,
-          operationDefinitionMap
-        ).locations
+        }).meta.locations
       ).toEqual({
         col1X0: { min: 15, max: 29 },
         col1X1: { min: 0, max: 41 },

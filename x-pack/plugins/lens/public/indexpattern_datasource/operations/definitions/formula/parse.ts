@@ -12,6 +12,7 @@ import {
   OperationDefinition,
   GenericOperationDefinition,
   GenericIndexPatternColumn,
+  operationDefinitionMap,
 } from '../index';
 import { IndexPattern, IndexPatternLayer } from '../../../types';
 import { mathOperation } from './math';
@@ -26,7 +27,8 @@ import {
 import { FormulaIndexPatternColumn } from './formula';
 import { getColumnOrder } from '../../layer_helpers';
 
-function getManagedId(mainId: string, index: number) {
+/** @internal **/
+export function getManagedId(mainId: string, index: number) {
   return `${mainId}X${index}`;
 }
 
@@ -35,15 +37,15 @@ function parseAndExtract(
   layer: IndexPatternLayer,
   columnId: string,
   indexPattern: IndexPattern,
-  operationDefinitionMap: Record<string, GenericOperationDefinition>,
+  operations: Record<string, GenericOperationDefinition>,
   label?: string
 ) {
-  const { root, error } = tryToParse(text, operationDefinitionMap);
+  const { root, error } = tryToParse(text, operations);
   if (error || root == null) {
     return { extracted: [], isValid: false };
   }
   // before extracting the data run the validation task and throw if invalid
-  const errors = runASTValidation(root, layer, indexPattern, operationDefinitionMap);
+  const errors = runASTValidation(root, layer, indexPattern, operations);
   if (errors.length) {
     return { extracted: [], isValid: false };
   }
@@ -52,7 +54,7 @@ function parseAndExtract(
     */
   const extracted = extractColumns(
     columnId,
-    operationDefinitionMap,
+    operations,
     root,
     layer,
     indexPattern,
@@ -185,63 +187,113 @@ function extractColumns(
   return columns;
 }
 
-export function regenerateLayerFromAst(
-  text: string,
-  layer: IndexPatternLayer,
-  columnId: string,
-  currentColumn: FormulaIndexPatternColumn,
-  indexPattern: IndexPattern,
-  operationDefinitionMap: Record<string, GenericOperationDefinition>
-) {
-  const { extracted, isValid } = parseAndExtract(
-    text,
-    layer,
-    columnId,
-    indexPattern,
-    filterByVisibleOperation(operationDefinitionMap),
-    currentColumn.customLabel ? currentColumn.label : undefined
+/** @internal **/
+interface ColumnsWithFormulaMeta {
+  columns: Record<string, GenericIndexPatternColumn>;
+  meta: {
+    locations: Record<string, TinymathLocation>;
+  };
+}
+
+const getEmptyColumnsWithFormulaMeta = (): ColumnsWithFormulaMeta => ({
+  columns: {},
+  meta: {
+    locations: {},
+  },
+});
+
+/** @public **/
+export function expandFormulaColumn(params: {
+  id: string;
+  formula: string;
+  layer: IndexPatternLayer;
+  indexPattern: IndexPattern;
+  operations?: Record<string, GenericOperationDefinition>;
+}) {
+  const { columns, meta } = Object.entries(params.layer.columns).reduce<ColumnsWithFormulaMeta>(
+    (acc, [currentColumnId, currentColumn]) => {
+      if (currentColumnId.startsWith(params.id)) {
+        if (currentColumnId === params.id) {
+          const formulaColumns = generateFormulaColumns({
+            ...params,
+            column: currentColumn,
+          });
+
+          acc.columns = { ...acc.columns, ...formulaColumns.columns };
+          acc.meta = { ...acc.meta, ...formulaColumns.meta };
+        }
+      } else {
+        acc.columns[currentColumnId] = { ...currentColumn };
+      }
+      return acc;
+    },
+    getEmptyColumnsWithFormulaMeta()
   );
 
-  const columns = { ...layer.columns };
+  return {
+    columns,
+    meta,
+    columnOrder: getColumnOrder({
+      ...params.layer,
+      columns,
+    }),
+  };
+}
 
-  const locations: Record<string, TinymathLocation> = {};
+/** @public **/
+export function generateFormulaColumns({
+  formula,
+  layer,
+  indexPattern,
+  id,
+  column,
+  operations = operationDefinitionMap,
+}: Parameters<typeof expandFormulaColumn>[0] & {
+  column: GenericIndexPatternColumn;
+}): ColumnsWithFormulaMeta {
+  const { columns, meta } = getEmptyColumnsWithFormulaMeta();
 
-  Object.keys(columns).forEach((k) => {
-    if (k.startsWith(columnId)) {
-      delete columns[k];
+  const { extracted, isValid } = parseAndExtract(
+    formula,
+    layer,
+    id,
+    indexPattern,
+    filterByVisibleOperation(operations),
+    column.customLabel ? column.label : undefined
+  );
+
+  extracted.forEach(({ column: extractedColumn, location }, index) => {
+    const managedId = getManagedId(id, index);
+    columns[managedId] = extractedColumn;
+
+    if (location) {
+      meta.locations[managedId] = location;
     }
   });
 
-  extracted.forEach(({ column, location }, index) => {
-    columns[getManagedId(columnId, index)] = column;
-    if (location) locations[getManagedId(columnId, index)] = location;
-  });
-
-  columns[columnId] = {
-    ...currentColumn,
-    label: !currentColumn.customLabel
-      ? text ??
+  columns[id] = {
+    ...column,
+    label: !column.customLabel
+      ? formula ??
         i18n.translate('xpack.lens.indexPattern.formulaLabel', {
           defaultMessage: 'Formula',
         })
-      : currentColumn.label,
+      : column.label,
+    references: !isValid ? [] : [getManagedId(id, extracted.length - 1)],
     params: {
-      ...currentColumn.params,
-      formula: text,
+      formula,
       isFormulaBroken: !isValid,
     },
-    references: !isValid ? [] : [getManagedId(columnId, extracted.length - 1)],
   } as FormulaIndexPatternColumn;
 
   return {
-    newLayer: {
-      ...layer,
-      columns,
-      columnOrder: getColumnOrder({
-        ...layer,
-        columns,
-      }),
-    },
-    locations,
+    columns,
+    meta,
   };
+}
+
+/** @internal **/
+export function generateFormulaLayer(params: Parameters<typeof expandFormulaColumn>[0]) {
+  const { columns, columnOrder } = expandFormulaColumn(params);
+  return { ...params.layer, columns, columnOrder };
 }

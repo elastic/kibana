@@ -25,6 +25,10 @@ export const lensPluginMock = {
       getXyVisTypes: jest
         .fn()
         .mockReturnValue(new Promise((resolve) => resolve(visualizationTypes))),
+      formula: {
+        expandFormulaColumn: jest.fn(),
+        generateFormulaColumns: jest.fn(),
+      },
     };
     return startContract;
   },

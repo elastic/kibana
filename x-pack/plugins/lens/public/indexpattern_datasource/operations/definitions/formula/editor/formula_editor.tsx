@@ -45,7 +45,7 @@ import { trackUiEvent } from '../../../../../lens_ui_telemetry';
 
 import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
-import { regenerateLayerFromAst } from '../parse';
+import { generateFormulaLayer, expandFormulaColumn } from '../parse';
 import { filterByVisibleOperation } from '../util';
 import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
 
@@ -151,16 +151,21 @@ export function FormulaEditor({
     setIsCloseable(true);
     // If the text is not synced, update the column.
     if (text !== currentColumn.params.formula) {
-      updateLayer((prevLayer) => {
-        return regenerateLayerFromAst(
-          text || '',
-          prevLayer,
-          columnId,
-          currentColumn,
+      updateLayer((prevLayer) =>
+        generateFormulaLayer({
+          id: columnId,
+          formula: text || '',
+          layer: {
+            ...prevLayer,
+            columns: {
+              ...prevLayer.columns,
+              [columnId]: { ...currentColumn },
+            },
+          },
           indexPattern,
-          operationDefinitionMap
-        ).newLayer;
-      });
+          operations: operationDefinitionMap,
+        })
+      );
     }
   });
 
@@ -173,15 +178,21 @@ export function FormulaEditor({
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', []);
         if (currentColumn.params.formula) {
           // Only submit if valid
-          const { newLayer } = regenerateLayerFromAst(
-            text || '',
-            layer,
-            columnId,
-            currentColumn,
-            indexPattern,
-            operationDefinitionMap
+          updateLayer(
+            generateFormulaLayer({
+              id: columnId,
+              formula: text || '',
+              layer: {
+                ...layer,
+                columns: {
+                  ...layer.columns,
+                  [columnId]: { ...currentColumn },
+                },
+              },
+              indexPattern,
+              operations: operationDefinitionMap,
+            })
           );
-          updateLayer(newLayer);
         }
 
         return;
@@ -209,14 +220,19 @@ export function FormulaEditor({
           // If the formula is already broken, show the latest error message in the workspace
           if (currentColumn.params.formula !== text) {
             updateLayer(
-              regenerateLayerFromAst(
-                text || '',
-                layer,
-                columnId,
-                currentColumn,
+              generateFormulaLayer({
+                id: columnId,
+                formula: text || '',
+                layer: {
+                  ...layer,
+                  columns: {
+                    ...layer.columns,
+                    [columnId]: { ...currentColumn },
+                  },
+                },
                 indexPattern,
-                visibleOperationsMap
-              ).newLayer
+                operations: operationDefinitionMap,
+              })
             );
           }
         }
@@ -264,14 +280,30 @@ export function FormulaEditor({
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', []);
 
         // Only submit if valid
-        const { newLayer, locations } = regenerateLayerFromAst(
-          text || '',
-          layer,
-          columnId,
-          currentColumn,
+        const {
+          columnOrder,
+          columns,
+          meta: { locations },
+        } = expandFormulaColumn({
+          id: columnId,
+          formula: text || '',
+          layer: {
+            ...layer,
+            columns: {
+              ...layer.columns,
+              [columnId]: currentColumn,
+            },
+          },
           indexPattern,
-          visibleOperationsMap
-        );
+          operations: operationDefinitionMap,
+        });
+
+        const newLayer = {
+          ...layer,
+          columnOrder,
+          columns,
+        };
+
         updateLayer(newLayer);
 
         const managedColumns = getManagedColumnsFrom(columnId, newLayer.columns);

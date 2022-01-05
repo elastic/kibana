@@ -11,7 +11,7 @@ import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPattern } from '../../../types';
 import { runASTValidation, tryToParse } from './validation';
 import { WrappedFormulaEditor } from './editor';
-import { regenerateLayerFromAst } from './parse';
+import { generateFormulaLayer } from './parse';
 import { generateFormula } from './generate';
 import { filterByVisibleOperation } from './util';
 import { getManagedColumnsFrom } from '../../layer_helpers';
@@ -141,22 +141,20 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
     },
     createCopy(layer, sourceId, targetId, indexPattern, operationDefinitionMap) {
       const currentColumn = layer.columns[sourceId] as FormulaIndexPatternColumn;
-      const tempLayer = {
-        ...layer,
-        columns: {
-          ...layer.columns,
-          [targetId]: { ...currentColumn },
+
+      return generateFormulaLayer({
+        id: targetId,
+        formula: currentColumn.params.formula ?? '',
+        layer: {
+          ...layer,
+          columns: {
+            ...layer.columns,
+            [targetId]: { ...currentColumn },
+          },
         },
-      };
-      const { newLayer } = regenerateLayerFromAst(
-        currentColumn.params.formula ?? '',
-        tempLayer,
-        targetId,
-        currentColumn,
         indexPattern,
-        operationDefinitionMap
-      );
-      return newLayer;
+        operations: operationDefinitionMap,
+      });
     },
 
     paramEditor: WrappedFormulaEditor,

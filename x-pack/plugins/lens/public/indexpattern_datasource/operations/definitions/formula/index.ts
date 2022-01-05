@@ -7,6 +7,8 @@
 
 export type { FormulaIndexPatternColumn } from './formula';
 export { formulaOperation } from './formula';
-export { regenerateLayerFromAst } from './parse';
+
+export { expandFormulaColumn, generateFormulaLayer, generateFormulaColumns } from './parse';
+
 export type { MathIndexPatternColumn } from './math';
 export { mathOperation } from './math';
