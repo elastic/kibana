@@ -13,6 +13,7 @@ const createSetupMock = (): jest.Mocked<ListPluginSetup> => {
   const mock: jest.Mocked<ListPluginSetup> = {
     getExceptionListClient: jest.fn().mockReturnValue(getExceptionListClientMock()),
     getListClient: jest.fn().mockReturnValue(getListClientMock()),
+    registerExtension: jest.fn(),
   };
   return mock;
 };

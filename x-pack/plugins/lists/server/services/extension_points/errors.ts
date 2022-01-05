@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-export class ErrorWithStatusCode extends Error {
-  private readonly statusCode: number;
+export class ExtensionPointError extends Error {
+  public readonly meta?: unknown;
 
-  constructor(message: string, statusCode: number) {
+  constructor(message: string, meta?: unknown) {
     super(message);
-    this.statusCode = statusCode;
-
-    // For debugging - capture name of subclasses
     this.name = this.constructor.name;
+    this.meta = meta;
   }
-
-  public getStatusCode = (): number => this.statusCode;
 }
