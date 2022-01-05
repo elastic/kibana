@@ -112,9 +112,10 @@ export function getOptionsFromCliArgs(
         'Parent id of merge commit. Defaults to 1 when supplied without arguments',
       type: 'number',
       coerce: (mainline) => {
-        // `--mainline` (default to 1 when no parent is given)
         if (mainline === undefined) {
-          return 1;
+          // return 1 if `--mainline` is given without a value
+          // return undefined if --mainline is not supplied at all
+          return argv.includes('--mainline') ? 1 : undefined;
         }
 
         // use specified mainline parent
@@ -343,9 +344,9 @@ export function getOptionsFromCliArgs(
     multipleCommits: multiple ?? multipleCommits,
 
     // rename array types to plural
-    assignees: assignee ?? [],
-    commitPaths: path ?? [],
-    reviewers: reviewer ?? [],
+    assignees: assignee,
+    commitPaths: path,
+    reviewers: reviewer,
     sourcePRLabels: sourcePRLabel,
     targetBranchChoices: targetBranchChoice,
     targetBranches: targetBranch,

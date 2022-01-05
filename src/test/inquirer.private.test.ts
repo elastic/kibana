@@ -40,7 +40,7 @@ describe('inquirer cli', () => {
     ]);
     expect(res).toMatchInlineSnapshot(`
       "Please specify a target branch: \\"--branch 6.1\\".
-       Read more: https://github.com/sqren/backport/blob/main/docs/configuration.md#project-config-backportrcjson"
+      Read more: https://github.com/sqren/backport/blob/main/docs/configuration.md#project-config-backportrcjson"
     `);
   });
 
@@ -52,20 +52,11 @@ describe('inquirer cli', () => {
       '--accessToken',
       devAccessToken,
     ]);
-    expect(res).toMatchInlineSnapshot(`
-      "? Select commit (Use arrow keys)
-      ❯ 1. v6.0.0
-        2. Bump dependencies
-        3. Add support for historical branch label mappings (#282)
-        4. Add status comment (#281)
-        5. Add \`--reviewer\` option (#280)
-        6. By default append \\"(cherry picked from commit...)\\" to commit message. Disab
-      le with \`--no-cherrypick-ref\` (#279)
-        7. Improve git unit tests (#278)
-        8. Add tests for \`getCommitsWithoutBackports\`
-        9. Add Details View and \`--details\` flag (#277)
-        10.Feature: Show hint about missing backports (#276)"
-    `);
+
+    const lineCount = res.split('\n').length;
+    expect(lineCount).toBe(12);
+
+    expect(res.includes('Select commit (Use arrow keys)')).toBe(true);
   });
 
   it('should return error when access token is invalid', async () => {

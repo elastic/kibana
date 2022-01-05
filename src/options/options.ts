@@ -27,6 +27,7 @@ export const defaultConfigOptions = {
   autoMergeMethod: 'merge',
   cherrypickRef: true,
   ci: false,
+  commitPaths: [] as Array<string>,
   details: false,
   fork: true,
   maxNumber: 10,
@@ -34,6 +35,7 @@ export const defaultConfigOptions = {
   multipleCommits: false,
   noVerify: true,
   resetAuthor: false,
+  reviewers: [] as Array<string>,
   sourcePRLabels: [] as string[],
   targetBranchChoices: [] as TargetBranchChoiceOrString[],
   targetBranches: [] as string[],
@@ -130,7 +132,7 @@ function requireAccessToken(combinedOptions: CombinedOptions): string {
 function requireRepoName(combinedOptions: CombinedOptions): string {
   if (!combinedOptions.repoName) {
     throw new HandledError(
-      `Please specify a repo name: "--repo-name kibana". \n\nRead more: ${PROJECT_CONFIG_DOCS_LINK}`
+      `Please specify a repo name: "--repo-name kibana".\n\nRead more: ${PROJECT_CONFIG_DOCS_LINK}`
     );
   }
   return combinedOptions.repoName;
@@ -139,7 +141,7 @@ function requireRepoName(combinedOptions: CombinedOptions): string {
 function requireRepoOwner(combinedOptions: CombinedOptions): string {
   if (!combinedOptions.repoOwner) {
     throw new HandledError(
-      `Please specify a repo owner: "--repo-owner elastic". \n\nRead more: ${PROJECT_CONFIG_DOCS_LINK}`
+      `Please specify a repo owner: "--repo-owner elastic".\n\nRead more: ${PROJECT_CONFIG_DOCS_LINK}`
     );
   }
   return combinedOptions.repoOwner;
@@ -158,7 +160,7 @@ function requireTargetBranch(config: {
     isEmpty(config.branchLabelMapping)
   ) {
     throw new HandledError(
-      `Please specify a target branch: "--branch 6.1". \n\n Read more: ${PROJECT_CONFIG_DOCS_LINK}`
+      `Please specify a target branch: "--branch 6.1".\n\nRead more: ${PROJECT_CONFIG_DOCS_LINK}`
     );
   }
 }

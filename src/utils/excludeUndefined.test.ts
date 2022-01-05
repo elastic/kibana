@@ -8,10 +8,10 @@ describe('excludeUndefined', () => {
         bar: undefined,
         baz: null,
       })
-    ).toEqual({ foo: 'foo' });
+    ).toEqual({ foo: 'foo', baz: null });
   });
 
-  it('has the correct types', () => {
+  it('has the correct types after merging', () => {
     const obj = excludeUndefined({
       foo: 'foo',
       bar: undefined,
@@ -27,6 +27,6 @@ describe('excludeUndefined', () => {
       ...obj,
     };
 
-    expect(res).toEqual({ bar: 'bar', foo: 'foo' });
+    expect(res).toEqual({ bar: 'bar', foo: 'foo', baz: null });
   });
 });

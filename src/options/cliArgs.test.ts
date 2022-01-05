@@ -21,8 +21,6 @@ describe('getOptionsFromCliArgs', () => {
       const argv = [
         '--access-token',
         'my access token',
-        '--author',
-        'sqren',
         '--repo-owner',
         'elastic',
         '--repo-name',
@@ -33,11 +31,6 @@ describe('getOptionsFromCliArgs', () => {
         accessToken: 'my access token',
         repoOwner: 'elastic',
         repoName: 'kibana',
-        author: 'sqren',
-        mainline: 1,
-        reviewers: [],
-        assignees: [],
-        commitPaths: [],
       });
     });
   });

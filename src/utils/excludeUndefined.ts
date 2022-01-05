@@ -16,6 +16,6 @@ export function excludeUndefined<T extends Record<string, any>>(
   obj: T
 ): ExcludeUndefined<T> {
   return Object.fromEntries(
-    Object.entries(obj).filter(([, v]) => v != null)
+    Object.entries(obj).filter(([, v]) => v !== undefined)
   ) as ExcludeUndefined<T>;
 }
