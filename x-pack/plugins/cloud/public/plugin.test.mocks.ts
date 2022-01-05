@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { sha256 } from 'js-sha256';
-import type { FullStoryDeps, FullStoryApi, FullStoryService } from './fullstory';
+import { customEvents } from '@kbn/custom-events';
+import { PublicMethodsOf } from '@kbn/utility-types';
 
-export const fullStoryApiMock: jest.Mocked<FullStoryApi> = {
-  event: jest.fn(),
-  setUserVars: jest.fn(),
-  identify: jest.fn(),
+export const customEventsApiMock: jest.Mocked<PublicMethodsOf<typeof customEvents>> = {
+  initialize: jest.fn().mockResolvedValue(true),
+  setCustomEventContext: jest.fn(),
+  setUserContext: jest.fn(),
+  reportCustomEvent: jest.fn(),
 };
-export const initializeFullStoryMock = jest.fn<FullStoryService, [FullStoryDeps]>(() => ({
-  fullStory: fullStoryApiMock,
-  sha256,
-}));
-jest.doMock('./fullstory', () => {
-  return { initializeFullStory: initializeFullStoryMock };
+
+jest.doMock('@kbn/custom-events', () => {
+  return { customEvents: customEventsApiMock };
 });

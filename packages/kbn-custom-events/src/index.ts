@@ -12,7 +12,8 @@ import { FullStoryApi } from './fullstory';
 
 export interface CustomEventConfig {
   enabled: boolean;
-  orgId?: string;
+  fullstoryOrgId?: string;
+  esOrgId?: string;
   basePath: any;
   userIdPromise: Promise<string | undefined>;
   packageInfo: PackageInfo;
@@ -34,8 +35,8 @@ class CustomEvents {
   public async initialize(config: CustomEventConfig): Promise<boolean> {
     // Very defensive try/catch to avoid any UnhandledPromiseRejections
     try {
-      const { enabled, orgId, basePath, userIdPromise, packageInfo } = config;
-      if (!enabled || !orgId) {
+      const { enabled, fullstoryOrgId, esOrgId, basePath, userIdPromise, packageInfo } = config;
+      if (!enabled || !fullstoryOrgId) {
         return false; // do not load any fullstory code in the browser if not enabled
       }
 
@@ -50,15 +51,16 @@ class CustomEvents {
 
       const { fullStory, sha256 } = initializeFullStory({
         basePath,
-        orgId,
+        orgId: fullstoryOrgId,
         packageInfo,
       });
 
       // This needs to be called syncronously to be sure that we populate the user ID soon enough to make sessions merging
       // across domains work
       if (userId) {
-        // Do the hashing here to keep it at clear as possible in our source code that we do not send literal user IDs
-        const hashedId = sha256(userId.toString());
+        // Join the cloud org id and the user to create a truly unique user id.
+        // The hashing here is to keep it at clear as possible in our source code that we do not send literal user IDs
+        const hashedId = sha256(`${esOrgId}:${userId}`);
         const kibanaVer = packageInfo.version;
         // TODO: use semver instead
         const parsedVer = (kibanaVer.indexOf('.') > -1 ? kibanaVer.split('.') : []).map((s) =>
@@ -67,6 +69,7 @@ class CustomEvents {
         fullStory.identify(
           hashedId,
           this.formatContext({
+            esOrgId,
             version: kibanaVer,
             versionMajor: parsedVer[0] ?? -1,
             versionMinor: parsedVer[1] ?? -1,

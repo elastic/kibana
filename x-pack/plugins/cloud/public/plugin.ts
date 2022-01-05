@@ -7,7 +7,6 @@
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext, HttpStart } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { Subscription } from 'rxjs';
 import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/public';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { ELASTIC_SUPPORT_LINK, CLOUD_SNAPSHOTS_PATH } from '../common/constants';
@@ -23,7 +22,7 @@ export interface CloudConfigType {
   profile_url?: string;
   deployment_url?: string;
   organization_url?: string;
-  full_story: {
+  full_story?: {
     enabled: boolean;
     org_id?: string;
   };
@@ -52,7 +51,6 @@ export interface CloudSetup {
 export class CloudPlugin implements Plugin<CloudSetup> {
   private config!: CloudConfigType;
   private isCloudEnabled: boolean;
-  private appSubscription?: Subscription;
   private customEventsService: CustomEventsSystem;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
@@ -61,9 +59,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     this.isCloudEnabled = false;
   }
 
-  public setup(core: CoreSetup, { home }: CloudSetupDependencies) {
-    this.customEventsService.setup(core);
-
+  public setup(core: CoreSetup, { home, security }: CloudSetupDependencies) {
     const {
       id,
       cname,
@@ -72,6 +68,11 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       deployment_url: deploymentUrl,
       base_url: baseUrl,
     } = this.config;
+
+    this.customEventsService.setup(core, {
+      authc: security?.authc,
+      esOrgId: id || 'unknown',
+    });
 
     this.isCloudEnabled = getIsCloudEnabled(id);
 
@@ -102,7 +103,6 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   public start(coreStart: CoreStart, { security }: CloudStartDependencies) {
     const { deployment_url: deploymentUrl, base_url: baseUrl } = this.config;
 
-    this.customEventsService.start(coreStart, { authc: security?.authc });
     coreStart.chrome.setHelpSupportUrl(ELASTIC_SUPPORT_LINK);
 
     const setLinks = (authorized: boolean) => {
@@ -132,7 +132,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public stop() {
-    this.appSubscription?.unsubscribe();
+    this.customEventsService.stop();
   }
 
   /**

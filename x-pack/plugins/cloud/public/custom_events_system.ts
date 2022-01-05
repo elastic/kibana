@@ -6,13 +6,7 @@
  */
 
 import { customEvents } from '@kbn/custom-events';
-import {
-  CoreSetup,
-  CoreStart,
-  IBasePath,
-  PackageInfo,
-  PluginInitializerContext,
-} from 'kibana/public';
+import { CoreSetup, IBasePath, PackageInfo, PluginInitializerContext } from 'kibana/public';
 import { Subscription } from 'rxjs';
 import {
   AuthenticatedUser,
@@ -25,8 +19,9 @@ import { CloudConfigType } from '.';
  * that lives in the Kibana Platform.
  */
 
-interface StartDeps {
+interface SetupDeps {
   authc?: AuthenticationServiceStart;
+  esOrgId: string;
 }
 
 export class CustomEventsSystem {
@@ -43,40 +38,39 @@ export class CustomEventsSystem {
     private readonly config: CloudConfigType
   ) {
     this.packageInfo = initializerContext.env.packageInfo;
-    this.enabled = config.full_story.enabled;
+    this.enabled = config.full_story?.enabled;
   }
 
-  async setup(coreSetup: CoreSetup) {
+  async setup(coreSetup: CoreSetup, deps: SetupDeps) {
     if (!this.enabled) return;
 
     this.basePath = coreSetup.http.basePath;
-  }
 
-  async start(coreStart: CoreStart, start: StartDeps) {
-    if (!this.enabled || !start) return;
-
-    const { authc } = start;
-
-    this.setupCustomEventReporting(coreStart, { authc }).catch((e) =>
+    this.setupCustomEventReporting(coreSetup, deps).catch((e) =>
       // eslint-disable-next-line no-console
       console.debug(`Error setting up FullStory: ${e.toString()}`)
     );
   }
 
-  private async setupCustomEventReporting(coreStart: CoreStart, { authc }: StartDeps) {
-    const { enabled, org_id: orgId } = this.config.full_story;
+  private async setupCustomEventReporting(coreSetup: CoreSetup, { authc, esOrgId }: SetupDeps) {
+    const { enabled, org_id: fullstoryOrgId } = this.config.full_story || {};
 
-    if (!enabled || !orgId) {
+    if (!enabled || !fullstoryOrgId) {
       return; // do not load any fullstory code in the browser if not enabled
     }
     // Very defensive try/catch to avoid any UnhandledPromiseRejections
     try {
+      const applicationPromise = coreSetup.getStartServices().then(([coreStart]) => {
+        return coreStart.application;
+      });
+
       const userIdPromise: Promise<string | undefined> = authc
         ? loadUserId({ getCurrentUser: authc.getCurrentUser })
         : Promise.resolve(undefined);
 
       const initSuccess = await customEvents.initialize({
-        orgId,
+        fullstoryOrgId,
+        esOrgId,
         enabled,
         userIdPromise,
         basePath: this.basePath,
@@ -86,10 +80,12 @@ export class CustomEventsSystem {
       // This needs to be called syncronously to be sure that we populate the user ID soon enough to make sessions merging
       // across domains work
       if (initSuccess) {
-        const { application } = coreStart;
-        this.appSubscription = application?.currentAppId$.subscribe((appId) => {
+        const application = await applicationPromise;
+        this.appSubscription = application.currentAppId$.subscribe((appId) => {
           // Update the current application every time it changes
-          customEvents.setCustomEventContext({ appId: appId || 'unknown' });
+          customEvents.setCustomEventContext({
+            appId: appId || 'unknown',
+          });
         });
       }
     } catch (e) {
