@@ -97,7 +97,7 @@ export const CalloutGroup: React.FC<{
             color={isError ? 'danger' : 'warning'}
             iconType="alert"
             data-test-subj={isError ? 'preview-error' : 'preview-warning'}
-            title={startedAt != null ?? `[${startedAt}]`}
+            title={startedAt != null ? `[${startedAt}]` : null}
           >
             <EuiText>
               <p>{log}</p>
