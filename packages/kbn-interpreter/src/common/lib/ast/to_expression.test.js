@@ -7,6 +7,7 @@
  */
 
 import { toExpression } from '@kbn/interpreter';
+import { cloneDeep, set, unset } from 'lodash';
 
 describe('toExpression', () => {
   describe('single expression', () => {
@@ -614,6 +615,112 @@ describe('toExpression', () => {
 
       const expression = toExpression(astObj);
       expect(expression).toBe('both named="example" another="item" "one" "two" "three"');
+    });
+  });
+
+  describe('patch expression', () => {
+    const expression = 'f1 a=1 a=2 b=1 b={f2 c=1 c=2 | f3 d=1 d=2} | f4 e=1 e=2';
+    const ast = {
+      type: 'expression',
+      chain: [
+        {
+          type: 'function',
+          function: 'f1',
+          arguments: {
+            a: [1, 2],
+            b: [
+              1,
+              {
+                type: 'expression',
+                chain: [
+                  {
+                    type: 'function',
+                    function: 'f2',
+                    arguments: { c: ['a', 'b'] },
+                  },
+                  {
+                    type: 'function',
+                    function: 'f3',
+                    arguments: { d: [1, 2] },
+                  },
+                ],
+              },
+            ],
+          },
+        },
+        {
+          type: 'function',
+          function: 'f4',
+          arguments: {
+            e: [1, 2],
+          },
+        },
+      ],
+    };
+
+    it.each([
+      [
+        expression,
+        'f1 a="updated" a=2 b=1 b={f2 c="a" c="b" | f3 d=1 d=2} | f4 e=1 e=2',
+        set(cloneDeep(ast), 'chain.0.arguments.a.0', 'updated'),
+      ],
+      [
+        expression,
+        'f1 a=1 a=2 b=1 b={f2 c="updated" c="b" | f3 d=1 d=2} | f4 e=1 e=2',
+        set(cloneDeep(ast), 'chain.0.arguments.b.1.chain.0.arguments.c.0', 'updated'),
+      ],
+      [
+        expression,
+        'f1 a={updated} a=2 b=1 b={f2 c="a" c="b" | f3 d=1 d=2} | f4 e=1 e=2',
+        set(cloneDeep(ast), 'chain.0.arguments.a.0', {
+          type: 'expression',
+          chain: [
+            {
+              type: 'function',
+              function: 'updated',
+              arguments: {},
+            },
+          ],
+        }),
+      ],
+      [
+        '/* comment */ f1 a /* comment */ =1',
+        '/* comment */ f1 a /* comment */ =2',
+        {
+          type: 'expression',
+          chain: [
+            {
+              type: 'function',
+              function: 'f1',
+              arguments: {
+                a: [2],
+              },
+            },
+          ],
+        },
+      ],
+    ])('should patch "%s" to become "%s"', (source, expected, ast) => {
+      expect(toExpression(ast, { source })).toBe(expected);
+    });
+
+    it.each([
+      [
+        expression,
+        set(cloneDeep(ast), 'chain.2', {
+          type: 'function',
+          function: 'f5',
+          arguments: {},
+        }),
+      ],
+      [expression, unset(cloneDeep(ast), 'chain.1')],
+      [expression, set(cloneDeep(ast), 'chain.0.function', 'updated')],
+      [expression, set(cloneDeep(ast), 'chain.0.arguments.c', [1])],
+      [expression, unset(cloneDeep(ast), 'chain.0.arguments.b')],
+      [expression, unset(cloneDeep(ast), 'chain.0.arguments.b.1')],
+      [expression, set(cloneDeep(ast), 'chain.0.arguments.b.2', 3)],
+      [expression, set(cloneDeep(ast), 'chain.0.arguments.b.1', 2)],
+    ])('should fail on patching expression', (source, ast) => {
+      expect(() => toExpression(ast, { source })).toThrowError();
     });
   });
 });

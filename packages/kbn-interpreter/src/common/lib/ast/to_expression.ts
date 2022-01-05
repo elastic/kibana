@@ -8,6 +8,21 @@
 
 import { getType } from '../get_type';
 import type { Ast, AstArgument, AstFunction, AstNode } from './ast';
+import { isAst } from './ast';
+import { patch } from './patch';
+
+interface Options {
+  /**
+   * Node type.
+   */
+  type?: 'argument' | 'expression' | 'function';
+
+  /**
+   * Original expression to apply the new AST to.
+   * At the moment, only arguments values changes are supported.
+   */
+  source?: string;
+}
 
 function getArgumentString(arg: AstArgument, argKey?: string, level = 0): string {
   const type = getType(arg);
@@ -97,8 +112,13 @@ function getExpression(chain: AstFunction[], level = 0) {
     .join(separator);
 }
 
-// TODO: Respect the user's existing formatting
-export function toExpression(ast: AstNode, type = 'expression'): string {
+export function toExpression(ast: AstNode, options: string | Options = 'expression'): string {
+  const { type, source } = typeof options === 'string' ? ({ type: options } as Options) : options;
+
+  if (source && isAst(ast)) {
+    return patch(source, ast);
+  }
+
   if (type === 'argument') {
     return getArgumentString(ast as AstArgument);
   }
