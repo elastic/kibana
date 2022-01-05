@@ -31,6 +31,7 @@ export interface TagCloudRendererParams extends TagCloudCommonParams {
   palette: PaletteOutput;
   metric: ExpressionValueVisDimension;
   bucket?: ExpressionValueVisDimension;
+  ariaLabel?: string;
 }
 
 export interface TagcloudRendererConfig {

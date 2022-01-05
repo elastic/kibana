@@ -236,6 +236,9 @@ export const visTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition => ({
   fn(context, args, handlers) {
     const visType = args.chartType;
     const visConfig = {
+      ariaLabel:
+        (handlers.variables?.embeddableTitle as string) ||
+        handlers.getExecutionContext()?.description,
       type: args.chartType,
       addLegend: args.addLegend,
       addTooltip: args.addTooltip,

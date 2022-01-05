@@ -145,6 +145,7 @@ export interface VisParams {
   palette: PaletteOutput;
   fillOpacity?: number;
   fittingFunction?: Exclude<Fit, 'explicit'>;
+  ariaLabel?: string;
 }
 
 export interface XYVisConfig {

@@ -98,6 +98,7 @@ export class VisualizeEmbeddable
   private filters?: Filter[];
   private searchSessionId?: string;
   private syncColors?: boolean;
+  private embeddableTitle?: string;
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
   private expression?: ExpressionAstExpression;
@@ -141,6 +142,7 @@ export class VisualizeEmbeddable
     this.syncColors = this.input.syncColors;
     this.searchSessionId = this.input.searchSessionId;
     this.query = this.input.query;
+    this.embeddableTitle = this.getTitle();
 
     this.vis = vis;
     this.vis.uiState.on('change', this.uiStateChangeHandler);
@@ -257,6 +259,11 @@ export class VisualizeEmbeddable
 
     if (this.syncColors !== this.input.syncColors) {
       this.syncColors = this.input.syncColors;
+      dirty = true;
+    }
+
+    if (this.embeddableTitle !== this.getTitle()) {
+      this.embeddableTitle = this.getTitle();
       dirty = true;
     }
 
@@ -406,6 +413,9 @@ export class VisualizeEmbeddable
         timeRange: this.timeRange,
         query: this.input.query,
         filters: this.input.filters,
+      },
+      variables: {
+        embeddableTitle: this.getTitle(),
       },
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,

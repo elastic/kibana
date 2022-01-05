@@ -189,7 +189,12 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
 
     return (
       <Chart>
-        <Settings debugState={window._echDebugStateFlag ?? false} theme={chartTheme} />
+        <Settings
+          debugState={window._echDebugStateFlag ?? false}
+          theme={chartTheme}
+          ariaLabel={args.ariaLabel}
+          ariaUseDefaultSummary={!args.ariaLabel}
+        />
         <Goal
           id="goal"
           subtype={subtype}

@@ -136,6 +136,9 @@ export const tagcloudFunction: ExpressionTagcloudFunction = () => {
           bucket: args.bucket,
         }),
         palette: args.palette,
+        ariaLabel:
+          (handlers.variables?.embeddableTitle as string) ||
+          handlers.getExecutionContext()?.description,
       };
 
       if (handlers?.inspectorAdapters?.tables) {

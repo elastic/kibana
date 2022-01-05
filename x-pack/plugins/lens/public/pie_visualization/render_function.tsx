@@ -333,6 +333,8 @@ export function PieComponent(
             },
           }}
           baseTheme={chartBaseTheme}
+          ariaLabel={props.args.ariaLabel}
+          ariaUseDefaultSummary={!props.args.ariaLabel}
         />
         <Partition
           id={shape}
