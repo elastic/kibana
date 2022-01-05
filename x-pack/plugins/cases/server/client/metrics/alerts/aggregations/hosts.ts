@@ -10,6 +10,26 @@ import { get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AggregationBuilder, AggregationResponse } from '../../types';
 
+type HostsAggregate = HostsAggregateResponse | undefined;
+
+interface HostsAggregateResponse {
+  hosts_frequency?: {
+    buckets: FieldAggregateBucket[];
+  };
+  hosts_total?: {
+    value: number;
+  };
+}
+
+interface FieldAggregateBucket {
+  key: string;
+  doc_count: number;
+  top_fields: estypes.AggregationsTopHitsAggregate;
+}
+
+const hostName = 'host.name';
+const hostId = 'host.id';
+
 export class AlertHosts implements AggregationBuilder {
   constructor(private readonly uniqueValuesLimit: number = 10) {}
 
@@ -79,24 +99,4 @@ export class AlertHosts implements AggregationBuilder {
   getName() {
     return 'hosts';
   }
-}
-
-const hostName = 'host.name';
-const hostId = 'host.id';
-
-type HostsAggregate = HostsAggregateResponse | undefined;
-
-interface HostsAggregateResponse {
-  hosts_frequency?: {
-    buckets: FieldAggregateBucket[];
-  };
-  hosts_total?: {
-    value: number;
-  };
-}
-
-interface FieldAggregateBucket {
-  key: string;
-  doc_count: number;
-  top_fields: estypes.AggregationsTopHitsAggregate;
 }
