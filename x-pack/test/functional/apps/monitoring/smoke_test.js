@@ -9,33 +9,51 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
-  const overview = getService('monitoringClusterOverview');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common']);
+  const find = getService('find');
+
+  const overview = getService('monitoringClusterOverview');
 
   const pauseForInspection = (component = 'page') => {
-    log.debug(`=== PAUSE for inspection of ${component}, press enter when ready ===`);
+    log.info(`=== PAUSE for inspection of ${component}, press enter when ready ===`);
     return new Promise((resolve) => process.stdin.once('data', resolve));
   };
 
   // eslint-disable-next-line mocha/no-exclusive-tests
   describe.only('smoke test', () => {
     before(async () => {
+      const originalWindowSize = await browser.getWindowSize();
+      await browser.setWindowSize(originalWindowSize.width, originalWindowSize.height * 2);
+
       await PageObjects.common.navigateToApp('monitoring');
       await overview.closeAlertsModal();
     });
 
-    it('shows elasticsearch panel with data', async () => {
-      expect(await overview.getEsStatus()).to.be('Healthy');
+    it('shows overview with panels for each stack component', async () => {
       expect(await overview.getEsNumberOfNodes()).to.match(/Nodes: \d+/);
 
-      await pauseForInspection();
-    });
-
-    it('shows kibana panel', async () => {
       expect(await overview.getKbnStatus()).to.be('Healthy');
       expect(await overview.getKbnInstances()).to.match(/Instances: \d+/);
 
-      await pauseForInspection();
+      expect(await overview.getLsNodes()).to.match(/Nodes: \d+/);
+
+      await pauseForInspection('overview');
+    });
+
+    it('shows logstash monitoring data', async() => {
+      await PageObjects.common.navigateToApp('monitoring');
+      await overview.clickLsOverview();
+
+      await pauseForInspection('logstash overview');
+
+      await find.clickByCssSelector('.euiTabs [title="Nodes"]');
+
+      await pauseForInspection('logstash nodes');
+
+      await find.clickByCssSelector('.euiTabs [title="Pipelines"]');
+
+      await pauseForInspection('logstash pipelines');
     });
   });
 }
