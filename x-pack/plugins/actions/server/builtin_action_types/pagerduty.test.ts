@@ -163,6 +163,25 @@ describe('validateParams()', () => {
     expect(validateParams(actionType, { timestamp })).toEqual({ timestamp });
   });
 
+  test('should validate and pass all the valid ISO-8601 formatted dates', () => {
+    const date1 = '2011-05-06T17:00Z';
+    const date2 = '2011-05-06T03:30-07';
+    const date3 = '2011-05-06';
+
+    expect(validateParams(actionType, { timestamp: date1 })).toEqual({ timestamp: date1 });
+    expect(validateParams(actionType, { timestamp: date2 })).toEqual({ timestamp: date2 });
+    expect(validateParams(actionType, { timestamp: date3 })).toEqual({ timestamp: date3 });
+  });
+
+  test('should validate and throw error when timestamp is a non-ISO-8601 date', () => {
+    const timestamp = `01-01-2021 10:00:00`;
+    expect(() => {
+      validateParams(actionType, {
+        timestamp,
+      });
+    }).toThrowError(`error validating action params: error parsing timestamp "${timestamp}"`);
+  });
+
   test('should validate and throw error when timestamp is invalid', () => {
     const timestamp = `1963-09-55 90:23:45`;
     expect(() => {
