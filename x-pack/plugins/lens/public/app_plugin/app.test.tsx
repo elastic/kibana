@@ -126,11 +126,13 @@ describe('Lens App', () => {
     defaultSavedObjectId = '1234';
     defaultDoc = {
       savedObjectId: defaultSavedObjectId,
+      visualizationType: 'testVis',
+      type: 'lens',
       title: 'An extremely cool default document!',
       expression: 'definitely a valid expression',
       state: {
         query: 'lucene',
-        filters: [{ query: { match_phrase: { src: 'test' } } }],
+        filters: [{ query: { match_phrase: { src: 'test' } }, meta: { index: 'index-pattern-0' } }],
       },
       references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
     } as unknown as Document;
@@ -685,7 +687,7 @@ describe('Lens App', () => {
             savedObjectId: defaultSavedObjectId,
             title: 'hello there2',
             state: expect.objectContaining({
-              filters: [unpinned],
+              filters: services.data.query.filterManager.inject([unpinned], []),
             }),
           }),
           true,
@@ -1252,24 +1254,28 @@ describe('Lens App', () => {
     });
 
     it('should not confirm when changes are saved', async () => {
-      const { props } = await mountWith({
-        preloadedState: {
-          persistedDoc: {
-            ...defaultDoc,
-            state: {
-              ...defaultDoc.state,
-              datasourceStates: { testDatasource: {} },
-              visualization: {},
-            },
-          },
-          isSaveable: true,
-          ...(defaultDoc.state as Partial<LensAppState>),
-          visualization: {
-            activeId: 'testVis',
-            state: {},
+      const preloadedState = {
+        persistedDoc: {
+          ...defaultDoc,
+          state: {
+            ...defaultDoc.state,
+            datasourceStates: { testDatasource: {} },
+            visualization: {},
           },
         },
-      });
+        isSaveable: true,
+        ...(defaultDoc.state as Partial<LensAppState>),
+        visualization: {
+          activeId: 'testVis',
+          state: {},
+        },
+      };
+
+      const customProps = makeDefaultProps();
+      customProps.datasourceMap.testDatasource.isEqual = () => true; // if this returns false, the documents won't be accounted equal
+
+      const { props } = await mountWith({ preloadedState, props: customProps });
+
       const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
       lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(defaultLeave).toHaveBeenCalled();

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Filter } from '@kbn/es-query';
 import {
   SavedObjectAttributes,
   SavedObjectsClientContract,
@@ -12,7 +13,7 @@ import {
   ResolvedSimpleSavedObject,
 } from 'kibana/public';
 import { Query } from '../../../../../src/plugins/data/public';
-import { DOC_TYPE, PersistableFilter } from '../../common';
+import { DOC_TYPE } from '../../common';
 import { LensSavedObjectAttributes } from '../async_services';
 
 export interface Document {
@@ -29,7 +30,7 @@ export interface Document {
       activePaletteId: string;
       state?: unknown;
     };
-    filters: PersistableFilter[];
+    filters: Filter[];
   };
   references: SavedObjectReference[];
 }

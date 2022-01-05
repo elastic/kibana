@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
+import { cloneDeep, mergeWith } from 'lodash';
 import { fromExpression, toExpression, Ast, ExpressionFunctionAST } from '@kbn/interpreter';
 import {
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
   SavedObjectReference,
   SavedObjectUnsanitizedDoc,
+  SavedObjectMigrationContext,
 } from 'src/core/server';
 import { Filter } from '@kbn/es-query';
 import { Query } from 'src/plugins/data/public';
+import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
 import { PersistableFilter } from '../../common';
 import {
   LensDocShapePost712,
@@ -31,6 +33,8 @@ import {
   commonRemoveTimezoneDateHistogramParam,
   commonUpdateVisLayerType,
   commonMakeReversePaletteAsCustom,
+  commonRenameFilterReferences,
+  getLensFilterMigrations,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -440,7 +444,15 @@ const moveDefaultReversedPaletteToCustom: SavedObjectMigrationFn<
   return { ...newDoc, attributes: commonMakeReversePaletteAsCustom(newDoc.attributes) };
 };
 
-export const migrations: SavedObjectMigrationMap = {
+const renameFilterReferences: SavedObjectMigrationFn<
+  LensDocShape715<VisState716>,
+  LensDocShape715<VisState716>
+> = (doc) => {
+  const newDoc = cloneDeep(doc);
+  return { ...newDoc, attributes: commonRenameFilterReferences(newDoc.attributes) };
+};
+
+const lensMigrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
   // sitting directly on the esaggs as an argument and not a nested function (which lens_auto_date was).
@@ -453,4 +465,25 @@ export const migrations: SavedObjectMigrationMap = {
   '7.14.0': removeTimezoneDateHistogramParam,
   '7.15.0': addLayerTypeToVisualization,
   '7.16.0': moveDefaultReversedPaletteToCustom,
+  '8.1.0': renameFilterReferences,
 };
+
+export const mergeSavedObjectMigrationMaps = (
+  obj1: SavedObjectMigrationMap,
+  obj2: SavedObjectMigrationMap
+): SavedObjectMigrationMap => {
+  const customizer = (objValue: SavedObjectMigrationFn, srcValue: SavedObjectMigrationFn) => {
+    if (!srcValue || !objValue) {
+      return srcValue || objValue;
+    }
+    return (state: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) =>
+      objValue(srcValue(state, context), context);
+  };
+
+  return mergeWith({ ...obj1 }, obj2, customizer);
+};
+
+export const getAllMigrations = (
+  filterMigrations: MigrateFunctionsObject
+): SavedObjectMigrationMap =>
+  mergeSavedObjectMigrationMaps(lensMigrations, getLensFilterMigrations(filterMigrations));

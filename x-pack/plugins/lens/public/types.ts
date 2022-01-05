@@ -289,6 +289,15 @@ export interface Datasource<T = unknown, P = unknown> {
    * Given the current state layer and a columnId will verify if the column configuration has errors
    */
   isValidColumn: (state: T, layerId: string, columnId: string) => boolean;
+  /**
+   * Are these datasources equivalent?
+   */
+  isEqual: (
+    persistableState1: P,
+    references1: SavedObjectReference[],
+    persistableState2: P,
+    references2: SavedObjectReference[]
+  ) => boolean;
 }
 
 export interface DatasourceFixAction<T> {
@@ -343,6 +352,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   onRemove?: (accessor: string) => void;
   state: T;
   activeData?: Record<string, Datatable>;
+  hideTooltip?: boolean;
   invalid?: boolean;
   invalidMessage?: string;
 };
