@@ -46,7 +46,9 @@ const appToIcon = (app: string) => {
 // Helper function: translate an app id to user friendly string
 const appToTooltip = (appId: string | undefined) => {
   if (appId === 'ml') {
-    return 'Machine Learning';
+    return i18n.translate('xpack.data.mgmt.searchSessions.table.mlAppName', {
+      defaultMessage: 'Machine Learning',
+    });
   }
 };
 
