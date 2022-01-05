@@ -2873,8 +2873,6 @@ export interface SavedObjectsValidationMap {
     [version: string]: SavedObjectsValidationSpec;
 }
 
-// Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "SavedObjectsValidationFunction"
-//
 // @public
 export type SavedObjectsValidationSpec = ObjectType;
 

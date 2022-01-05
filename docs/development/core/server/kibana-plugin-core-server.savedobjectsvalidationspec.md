@@ -4,9 +4,7 @@
 
 ## SavedObjectsValidationSpec type
 
-Allowed property validation options: either @<!-- -->kbn/config-schema validations or custom validation functions.
-
-See  for custom validation.
+Allows for validating properties using @<!-- -->kbn/config-schema validations.
 
 <b>Signature:</b>
 

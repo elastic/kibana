@@ -23,9 +23,9 @@ type SavedObjectSanitizedDocSchema = {
  *
  * @internal
  */
-export const createSavedObjectSanitizedDocSchema = (rule: SavedObjectsValidationSpec) =>
+export const createSavedObjectSanitizedDocSchema = (attributesSchema: SavedObjectsValidationSpec) =>
   schema.object<SavedObjectSanitizedDocSchema>({
-    attributes: rule,
+    attributes: attributesSchema,
     id: schema.string(),
     type: schema.string(),
     references: schema.arrayOf(
@@ -38,7 +38,7 @@ export const createSavedObjectSanitizedDocSchema = (rule: SavedObjectsValidation
     ),
     namespace: schema.maybe(schema.string()),
     namespaces: schema.maybe(schema.arrayOf(schema.string())),
-    migrationVersion: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+    migrationVersion: schema.maybe(schema.recordOf(schema.string(), schema.string())),
     coreMigrationVersion: schema.maybe(schema.string()),
     updated_at: schema.maybe(schema.string()),
     version: schema.maybe(schema.string()),

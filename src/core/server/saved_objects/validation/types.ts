@@ -9,9 +9,7 @@
 import { ObjectType } from '@kbn/config-schema';
 
 /**
- * Allowed property validation options: either @kbn/config-schema validations or custom validation functions.
- *
- * See {@link SavedObjectsValidationFunction} for custom validation.
+ * Allows for validating properties using @kbn/config-schema validations.
  *
  * @public
  */
@@ -26,7 +24,7 @@ export type SavedObjectsValidationSpec = ObjectType;
  *
  * @example
  * ```typescript
- * const validationMap: SavedObjectValidationMap = {
+ * const validationMap: SavedObjectsValidationMap = {
  *   '1.0.0': schema.object({
  *     foo: schema.string(),
  *   }),

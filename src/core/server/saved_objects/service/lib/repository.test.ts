@@ -994,18 +994,16 @@ describe('SavedObjectsRepository', () => {
           { ...obj3, id: 'three-again', attributes: { title: 123 } },
         ]);
         expect(client.bulk).toHaveBeenCalledTimes(1); // only called once for the valid object
-        expect(result.saved_objects).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining(obj3),
-            expect.objectContaining({
-              error: new Error(
-                '[attributes.title]: expected value of type [string] but got [number]: Bad Request'
-              ),
-              id: 'three-again',
-              type: 'dashboard',
-            }),
-          ])
-        );
+        expect(result.saved_objects).toEqual([
+          expect.objectContaining(obj3),
+          expect.objectContaining({
+            error: new Error(
+              '[attributes.title]: expected value of type [string] but got [number]: Bad Request'
+            ),
+            id: 'three-again',
+            type: 'dashboard',
+          }),
+        ]);
       });
     });
 

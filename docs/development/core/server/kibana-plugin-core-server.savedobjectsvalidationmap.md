@@ -18,7 +18,7 @@ export interface SavedObjectsValidationMap
 
 
 ```typescript
-const validationMap: SavedObjectValidationMap = {
+const validationMap: SavedObjectsValidationMap = {
   '1.0.0': schema.object({
     foo: schema.string(),
   }),

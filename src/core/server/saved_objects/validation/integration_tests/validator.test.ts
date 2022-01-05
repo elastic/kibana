@@ -216,18 +216,16 @@ describe('validates saved object types when a schema is provided', () => {
     // @ts-expect-error - The invalidObj is intentionally malformed for testing
     const results = await savedObjectsClient.bulkCreate([validObj, invalidObj]);
 
-    expect(results.saved_objects).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining(validObj),
-        expect.objectContaining({
-          error: new Error(
-            '[attributes.a]: expected value of type [number] but got [string]: Bad Request'
-          ),
-          id: 'bulk-invalid',
-          type: 'schema-using-kbn-config',
-        }),
-      ])
-    );
+    expect(results.saved_objects).toEqual([
+      expect.objectContaining(validObj),
+      expect.objectContaining({
+        error: new Error(
+          '[attributes.a]: expected value of type [number] but got [string]: Bad Request'
+        ),
+        id: 'bulk-invalid',
+        type: 'schema-using-kbn-config',
+      }),
+    ]);
   });
 
   describe('when validating with a config schema', () => {
