@@ -138,11 +138,7 @@ export function getEuiGridColumns(
   );
 }
 
-export function getVisibleColumns(
-  columns: string[],
-  indexPattern: DataView,
-  showTimeCol: boolean
-) {
+export function getVisibleColumns(columns: string[], indexPattern: DataView, showTimeCol: boolean) {
   const timeFieldName = indexPattern.timeFieldName;
 
   if (showTimeCol && !columns.find((col) => col === timeFieldName)) {

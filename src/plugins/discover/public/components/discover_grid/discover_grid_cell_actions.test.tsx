@@ -19,9 +19,7 @@ import { DataViewField } from 'src/plugins/data/common';
 
 describe('Discover cell actions ', function () {
   it('should not show cell actions for unfilterable fields', async () => {
-    expect(
-      buildCellActions({ name: 'foo', filterable: false } as DataViewField)
-    ).toBeUndefined();
+    expect(buildCellActions({ name: 'foo', filterable: false } as DataViewField)).toBeUndefined();
   });
 
   it('triggers filter function when FilterInBtn is clicked', async () => {

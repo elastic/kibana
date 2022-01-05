@@ -25,11 +25,11 @@ import {
   esFilters,
   Filter,
   FilterManager,
-  DataView,
   Query,
   SearchSessionInfoProvider,
   syncQueryStateWithUrl,
 } from '../../../../../data/public';
+import { DataView } from '../../../../../data/common';
 import { migrateLegacyQuery } from '../../../utils/migrate_legacy_query';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
 import { SavedSearch } from '../../../services/saved_searches';
