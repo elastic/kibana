@@ -7,6 +7,7 @@
 
 import React, { FC, Fragment, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useMlKibana, useTimefilter, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { ML_PAGES } from '../../../../common/constants/locator';
@@ -15,6 +16,7 @@ import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_
 import { checkPermission } from '../../capabilities/check_capabilities';
 
 import type { ResultLink, IndexDataVisualizerSpec } from '../../../../../data_visualizer/public';
+import { MlPageHeader } from '../../components/page_header';
 
 interface GetUrlParams {
   indexPatternId: string;
@@ -121,7 +123,17 @@ export const IndexDataVisualizerPage: FC = () => {
 
   return IndexDataVisualizer ? (
     <Fragment>
-      {IndexDataVisualizer !== null && <IndexDataVisualizer additionalLinks={links} />}
+      {IndexDataVisualizer !== null ? (
+        <>
+          <MlPageHeader>
+            <FormattedMessage
+              id="xpack.ml.dataVisualizer.pageHeader"
+              defaultMessage="Data Visualizer"
+            />
+          </MlPageHeader>
+          <IndexDataVisualizer additionalLinks={links} />
+        </>
+      ) : null}
       <HelpMenu docLink={docLinks.links.ml.guide} />
     </Fragment>
   ) : (
