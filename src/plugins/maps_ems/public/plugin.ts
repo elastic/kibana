@@ -6,25 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/public';
 import {
   setKibanaVersion,
-  setLicensingPluginStart,
+  setLicensingPluginSetup,
   setMapConfig,
   getIsEnterprisePlus,
 } from './kibana_services';
 import type { MapsEmsPluginPublicSetup, MapsEmsPluginPublicStart } from './index';
 import type { MapConfig } from '../config';
 import { createEMSSettings } from '../common/ems_settings';
-import type {
-  LicensingPluginSetup,
-  LicensingPluginStart,
-} from '../../../../x-pack/plugins/licensing/public';
+import type { LicensingPluginSetup } from '../../../../x-pack/plugins/licensing/public';
 import { createEMSClientLazy } from './lazy_load_bundle';
 
-interface MapsEmsStartPublicDependencies {
-  licensing?: LicensingPluginStart;
-}
 interface MapsEmsSetupPublicDependencies {
   licensing?: LicensingPluginSetup;
 }
@@ -43,6 +37,10 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPl
     setKibanaVersion(kibanaVersion);
     setMapConfig(mapConfig);
 
+    if (plugins.licensing) {
+      setLicensingPluginSetup(plugins.licensing);
+    }
+
     return {
       config: mapConfig,
       createEMSSettings: () => {
@@ -55,9 +53,5 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPl
     };
   }
 
-  public start(core: CoreStart, plugins: MapsEmsStartPublicDependencies) {
-    if (plugins.licensing) {
-      setLicensingPluginStart(plugins.licensing);
-    }
-  }
+  public start() {}
 }
