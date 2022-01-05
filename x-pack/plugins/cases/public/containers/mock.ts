@@ -250,6 +250,8 @@ export const basicCommentPatch: Comment = {
   updatedAt: basicUpdatedAt,
   updatedBy: {
     username: 'elastic',
+    email: 'elastic@elastic.co',
+    fullName: 'Elastic',
   },
 };
 

@@ -12,12 +12,12 @@ import { EuiText, EuiLoadingSpinner } from '@elastic/eui';
 import * as i18n from './translations';
 import { CommentType } from '../../../common/api';
 import { LinkAnchor } from '../links';
-import { RuleDetailsNavigation } from './helpers';
+import { RuleDetailsNavigation } from './types';
 
 interface Props {
   alertId: string;
   commentType: CommentType;
-  getRuleDetailsHref: RuleDetailsNavigation['href'];
+  getRuleDetailsHref?: RuleDetailsNavigation['href'];
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
   ruleId?: string | null;
   ruleName?: string | null;
@@ -42,7 +42,7 @@ const AlertCommentEventComponent: React.FC<Props> = ({
     },
     [ruleId, onRuleDetailsClick]
   );
-  const detectionsRuleDetailsHref = getRuleDetailsHref(ruleId);
+  const detectionsRuleDetailsHref = getRuleDetailsHref?.(ruleId) ?? '';
 
   return commentType !== CommentType.generatedAlert ? (
     <>

@@ -19,7 +19,7 @@ const comments: Comment[] = [
     index: 'alert-index-1',
     id: 'comment-id',
     createdAt: '2020-02-19T23:06:33.798Z',
-    createdBy: { username: 'elastic' },
+    createdBy: { username: 'elastic', email: 'elastic@elastic.co', fullName: 'Elastic' },
     rule: {
       id: null,
       name: null,
@@ -38,7 +38,7 @@ const comments: Comment[] = [
     index: 'alert-index-2',
     id: 'comment-id',
     createdAt: '2020-02-19T23:06:33.798Z',
-    createdBy: { username: 'elastic' },
+    createdBy: { username: 'elastic', email: 'elastic@elastic.co', fullName: 'Elastic' },
     pushedAt: null,
     pushedBy: null,
     rule: {

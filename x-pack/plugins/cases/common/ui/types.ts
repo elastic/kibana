@@ -12,7 +12,6 @@ import {
   CasePatchRequest,
   CaseStatuses,
   CaseType,
-  CommentRequest,
   User,
   ActionConnector,
   CaseExternalServiceBasic,
