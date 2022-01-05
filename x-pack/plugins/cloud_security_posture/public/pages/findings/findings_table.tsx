@@ -19,8 +19,9 @@ import {
 } from '@elastic/eui';
 import { orderBy } from 'lodash';
 import * as TEST_SUBJECTS from './test_subjects';
-import type { CspFinding, FindingsFetchState } from './types';
+import * as TEXT from './translations';
 import { CSPEvaluationBadge } from '../../components/csp_evaluation_badge';
+import type { CspFinding, FindingsFetchState } from './types';
 
 interface BaseFindingsTableProps {
   selectItem(v: CspFinding | undefined): void;
@@ -101,30 +102,30 @@ const resultEvaluationRenderer = (type: PropsOf<typeof CSPEvaluationBadge>['type
 const columns: Array<EuiTableFieldDataColumnType<CspFinding>> = [
   {
     field: 'resource.filename',
-    name: TX.RESOURCE,
+    name: TEXT.RESOURCE,
     truncateText: true,
   },
   {
     field: 'rule.name',
-    name: TX.RULE_NAME,
+    name: TEXT.RULE_NAME,
     width: '50%',
     truncateText: true,
     render: ruleNameRenderer,
   },
   {
     field: 'result.evaluation',
-    name: TX.EVALUATION,
+    name: TEXT.EVALUATION,
     width: '80px',
     render: resultEvaluationRenderer,
   },
   {
     field: 'rule.tags',
-    name: TX.TAGS,
+    name: TEXT.TAGS,
     render: ruleTagsRenderer,
   },
   {
     field: '@timestamp',
-    name: TX.TIMESTAMP,
+    name: TEXT.TIMESTAMP,
     truncateText: true,
   },
 ];

@@ -28,6 +28,7 @@ import type {
   IKibanaSearchResponse,
   TimeRange,
 } from '../../../../../../src/plugins/data/common';
+import { SEARCH_FAILED } from './translations';
 
 type FindingsEsSearchMutation = UseMutationResult<
   IKibanaSearchResponse<SearchResponse<CspFinding>>,
