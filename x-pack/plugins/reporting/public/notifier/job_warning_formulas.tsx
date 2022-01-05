@@ -8,6 +8,7 @@
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
 import { ToastInput } from 'src/core/public';
+import { getTheme } from '..';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { JobId, JobSummary } from '../../common/types';
 import { DownloadButton } from './job_download_button';
@@ -23,7 +24,8 @@ export const getWarningFormulasToast = (
       id="xpack.reporting.publicNotifier.csvContainsFormulas.formulaReportTitle"
       defaultMessage="Report may contain formulas {reportObjectType} '{reportObjectTitle}'"
       values={{ reportObjectType: job.jobtype, reportObjectTitle: job.title }}
-    />
+    />,
+    { theme$: getTheme().theme$ }
   ),
   text: toMountPoint(
     <Fragment>
@@ -37,7 +39,8 @@ export const getWarningFormulasToast = (
         <ReportLink getUrl={getReportLink} />
       </p>
       <DownloadButton getUrl={getDownloadLink} job={job} />
-    </Fragment>
+    </Fragment>,
+    { theme$: getTheme().theme$ }
   ),
   'data-test-subj': 'completeReportCsvFormulasWarning',
 });

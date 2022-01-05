@@ -13,6 +13,7 @@ import { toMountPoint } from '../../../../../../../kibana_react/public';
 import { IContainer } from '../../../../containers';
 import { AddPanelFlyout } from './add_panel_flyout';
 import { UsageCollectionStart } from '../../../../../../../usage_collection/public';
+import { getTheme } from '../../../../../';
 
 export function openAddPanelFlyout(options: {
   embeddable: IContainer;
@@ -49,7 +50,8 @@ export function openAddPanelFlyout(options: {
         reportUiCounter={reportUiCounter}
         SavedObjectFinder={SavedObjectFinder}
         showCreateNewMenu={showCreateNewMenu}
-      />
+      />,
+      { theme$: getTheme().theme$ }
     ),
     {
       'data-test-subj': 'dashboardAddPanel',

@@ -20,6 +20,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import React, { Component, ReactElement } from 'react';
 import { IUiSettingsClient, ToastsSetup } from 'src/core/public';
 import url from 'url';
+import { getTheme } from '../..';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import {
   CSV_REPORT_TYPE,
@@ -291,7 +292,8 @@ class ReportingPanelContentUi extends Component<Props, State> {
                   </a>
                 ),
               }}
-            />
+            />,
+            { theme$: getTheme().theme$ }
           ),
           'data-test-subj': 'queueReportSuccess',
         });

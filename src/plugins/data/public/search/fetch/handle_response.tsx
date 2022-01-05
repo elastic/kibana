@@ -12,7 +12,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { IKibanaSearchResponse } from 'src/plugins/data/common';
 import { ShardFailureOpenModalButton } from '../../ui/shard_failure_modal';
 import { toMountPoint } from '../../../../kibana_react/public';
-import { getNotifications } from '../../services';
+import { getNotifications, getTheme } from '../../services';
 import type { SearchRequest } from '..';
 
 export function handleResponse(request: SearchRequest, response: IKibanaSearchResponse) {
@@ -46,7 +46,8 @@ export function handleResponse(request: SearchRequest, response: IKibanaSearchRe
         {description}
         <EuiSpacer size="s" />
         <ShardFailureOpenModalButton request={request.body} response={rawResponse} title={title} />
-      </>
+      </>,
+      { theme$: getTheme().theme$ }
     );
 
     getNotifications().toasts.addWarning({ title, text });

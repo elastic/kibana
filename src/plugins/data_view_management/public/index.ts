@@ -17,10 +17,13 @@
  * in the setup/start interfaces in `plugin.ts`. The remaining items exported here are
  * either types, or static code.
  */
-import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext, ThemeServiceStart } from 'src/core/public';
+import { createGetterSetter } from '../../kibana_utils/public';
 import { IndexPatternManagementPlugin } from './plugin';
 export type { IndexPatternManagementSetup, IndexPatternManagementStart } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new IndexPatternManagementPlugin(initializerContext);
 }
+
+export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');

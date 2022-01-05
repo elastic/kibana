@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiTextAlign } from '@elastic/eui';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { getOverlays } from '../../services';
+import { getOverlays, getTheme } from '../../services';
 import { toMountPoint } from '../../../../kibana_react/public';
 import { ShardFailureModal } from './shard_failure_modal';
 import { ShardFailureRequest } from './shard_failure_types';
@@ -38,7 +38,8 @@ export default function ShardFailureOpenModalButton({
           response={response}
           title={title}
           onClose={() => modal.close()}
-        />
+        />,
+        { theme$: getTheme().theme$ }
       ),
       {
         className: 'shardFailureModal',

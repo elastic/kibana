@@ -8,9 +8,14 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
+import { ThemeServiceStart } from '../../../../core/public';
+import { themeServiceMock } from '../../../../core/public/mocks';
 import { UiComponent } from '../../../kibana_utils/public';
 import { uiToReactComponent } from './ui_to_react_component';
 import { reactToUiComponent } from './react_to_ui_component';
+import { KibanaThemeProvider } from '..';
+
+const theme: ThemeServiceStart = themeServiceMock.createStartContract();
 
 const UiComp: UiComponent<{ cnt?: number }> = () => ({
   render: (el, { cnt = 0 }) => {
@@ -24,7 +29,12 @@ describe('uiToReactComponent', () => {
     const ReactComp = uiToReactComponent(UiComp);
     const div = document.createElement('div');
 
-    ReactDOM.render(<ReactComp />, div);
+    ReactDOM.render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <ReactComp />
+      </KibanaThemeProvider>,
+      div
+    );
 
     expect(div.innerHTML).toBe('<div>cnt: 0</div>');
   });
@@ -33,7 +43,12 @@ describe('uiToReactComponent', () => {
     const ReactComp = uiToReactComponent(UiComp);
     const div = document.createElement('div');
 
-    ReactDOM.render(<ReactComp cnt={5} />, div);
+    ReactDOM.render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <ReactComp cnt={5} />
+      </KibanaThemeProvider>,
+      div
+    );
 
     expect(div.innerHTML).toBe('<div>cnt: 5</div>');
   });
@@ -42,11 +57,21 @@ describe('uiToReactComponent', () => {
     const ReactComp = uiToReactComponent(UiComp);
     const div = document.createElement('div');
 
-    ReactDOM.render(<ReactComp cnt={1} />, div);
+    ReactDOM.render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <ReactComp cnt={1} />
+      </KibanaThemeProvider>,
+      div
+    );
 
     expect(div.innerHTML).toBe('<div>cnt: 1</div>');
 
-    ReactDOM.render(<ReactComp cnt={2} />, div);
+    ReactDOM.render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <ReactComp cnt={2} />
+      </KibanaThemeProvider>,
+      div
+    );
 
     expect(div.innerHTML).toBe('<div>cnt: 2</div>');
   });
@@ -61,7 +86,12 @@ describe('uiToReactComponent', () => {
     const ReactComp = uiToReactComponent(UiComp2);
     const div = document.createElement('div');
 
-    ReactDOM.render(<ReactComp cnt={1} />, div);
+    ReactDOM.render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <ReactComp cnt={1} />
+      </KibanaThemeProvider>,
+      div
+    );
     ReactDOM.unmountComponentAtNode(div);
 
     expect(div.innerHTML).toBe('');
@@ -81,7 +111,12 @@ describe('uiToReactComponent', () => {
 
     expect(unmount).toHaveBeenCalledTimes(0);
 
-    ReactDOM.render(<ReactComp cnt={1} />, div);
+    ReactDOM.render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <ReactComp cnt={1} />
+      </KibanaThemeProvider>,
+      div
+    );
 
     expect(unmount).toHaveBeenCalledTimes(0);
 
@@ -103,15 +138,30 @@ describe('uiToReactComponent', () => {
 
     expect(render).toHaveBeenCalledTimes(0);
 
-    ReactDOM.render(<ReactComp cnt={1} />, div);
+    ReactDOM.render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <ReactComp cnt={1} />
+      </KibanaThemeProvider>,
+      div
+    );
 
     expect(render).toHaveBeenCalledTimes(1);
 
-    ReactDOM.render(<ReactComp cnt={2} />, div);
+    ReactDOM.render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <ReactComp cnt={2} />
+      </KibanaThemeProvider>,
+      div
+    );
 
     expect(render).toHaveBeenCalledTimes(2);
 
-    ReactDOM.render(<ReactComp cnt={3} />, div);
+    ReactDOM.render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <ReactComp cnt={3} />
+      </KibanaThemeProvider>,
+      div
+    );
 
     expect(render).toHaveBeenCalledTimes(3);
   });
@@ -120,7 +170,12 @@ describe('uiToReactComponent', () => {
     const ReactComp = uiToReactComponent(UiComp, 'span');
     const div = document.createElement('div');
 
-    ReactDOM.render(<ReactComp cnt={5} />, div);
+    ReactDOM.render(
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <ReactComp cnt={5} />
+      </KibanaThemeProvider>,
+      div
+    );
 
     expect(div.innerHTML).toBe('<span>cnt: 5</span>');
   });
@@ -132,11 +187,21 @@ test('can adapt component many times', () => {
   );
   const div = document.createElement('div');
 
-  ReactDOM.render(<ReactComp />, div);
+  ReactDOM.render(
+    <KibanaThemeProvider theme$={theme.theme$}>
+      <ReactComp />
+    </KibanaThemeProvider>,
+    div
+  );
 
   expect(div.textContent).toBe('cnt: 0');
 
-  ReactDOM.render(<ReactComp cnt={123} />, div);
+  ReactDOM.render(
+    <KibanaThemeProvider theme$={theme.theme$}>
+      <ReactComp cnt={123} />
+    </KibanaThemeProvider>,
+    div
+  );
 
   expect(div.textContent).toBe('cnt: 123');
 });

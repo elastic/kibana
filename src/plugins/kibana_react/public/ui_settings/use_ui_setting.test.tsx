@@ -13,12 +13,15 @@ import { useUiSetting$ } from './use_ui_setting';
 import { createKibanaReactContext } from '../context';
 import { KibanaServices } from '../context/types';
 import { Subject } from 'rxjs';
-import { coreMock } from '../../../../core/public/mocks';
+import { ThemeServiceStart } from '../../../../core/public';
+import { coreMock, themeServiceMock } from '../../../../core/public/mocks';
 import useObservable from 'react-use/lib/useObservable';
+import { KibanaThemeProvider } from '..';
 
 jest.mock('react-use/lib/useObservable');
 const useObservableSpy = useObservable as any as jest.SpyInstance;
 useObservableSpy.mockImplementation((observable, def) => def);
+const theme: ThemeServiceStart = themeServiceMock.createStartContract();
 
 const mock = (): [KibanaServices, Subject<any>] => {
   const core = coreMock.createStart();
@@ -65,9 +68,11 @@ describe('useUiSetting', () => {
     const { Provider } = createKibanaReactContext(core);
 
     ReactDOM.render(
-      <Provider>
-        <TestConsumer setting="foo" />
-      </Provider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <Provider>
+          <TestConsumer setting="foo" />
+        </Provider>
+      </KibanaThemeProvider>,
       container
     );
 
@@ -82,9 +87,11 @@ describe('useUiSetting', () => {
     const { Provider } = createKibanaReactContext(core);
 
     ReactDOM.render(
-      <Provider>
-        <TestConsumer setting="foo" />
-      </Provider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <Provider>
+          <TestConsumer setting="foo" />
+        </Provider>
+      </KibanaThemeProvider>,
       container
     );
 
@@ -114,9 +121,11 @@ describe('useUiSetting$', () => {
     const { Provider } = createKibanaReactContext(core);
 
     ReactDOM.render(
-      <Provider>
-        <TestConsumerX setting="foo" />
-      </Provider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <Provider>
+          <TestConsumerX setting="foo" />
+        </Provider>
+      </KibanaThemeProvider>,
       container
     );
 
@@ -131,9 +140,11 @@ describe('useUiSetting$', () => {
     const { Provider } = createKibanaReactContext(core);
 
     ReactDOM.render(
-      <Provider>
-        <TestConsumerX setting="non_existing" />
-      </Provider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <Provider>
+          <TestConsumerX setting="non_existing" />
+        </Provider>
+      </KibanaThemeProvider>,
       container
     );
 
@@ -147,9 +158,11 @@ describe('useUiSetting$', () => {
     expect(useObservableSpy).toHaveBeenCalledTimes(0);
 
     ReactDOM.render(
-      <Provider>
-        <TestConsumerX setting="theme:darkMode" />
-      </Provider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <Provider>
+          <TestConsumerX setting="theme:darkMode" />
+        </Provider>
+      </KibanaThemeProvider>,
       container
     );
 
@@ -162,9 +175,11 @@ describe('useUiSetting$', () => {
     const { Provider } = createKibanaReactContext(core);
 
     ReactDOM.render(
-      <Provider>
-        <TestConsumerX setting="a" newValue="c" />
-      </Provider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <Provider>
+          <TestConsumerX setting="a" newValue="c" />
+        </Provider>
+      </KibanaThemeProvider>,
       container
     );
 

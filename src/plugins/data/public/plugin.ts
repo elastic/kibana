@@ -26,6 +26,7 @@ import {
   setNotifications,
   setOverlays,
   setSearchService,
+  setTheme,
   setUiSettings,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
@@ -82,6 +83,7 @@ export class DataPublicPlugin
     const startServices = createStartServicesGetter(core.getStartServices);
 
     this.usageCollection = usageCollection;
+    setTheme(core.theme);
 
     const searchService = this.searchService.setup(core, {
       bfetch,

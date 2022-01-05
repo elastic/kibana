@@ -21,6 +21,7 @@ import {
   getSavedObjectsClient,
   getSavedObjectsTagging,
   getSavedObjects,
+  getTheme,
 } from '../../kibana_services';
 import { getAppTitle } from '../../../common/i18n_getters';
 import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
@@ -148,6 +149,7 @@ export function MapsListView() {
       tableListTitle={getAppTitle()}
       toastNotifications={getToasts()}
       searchFilters={searchFilters}
+      theme={getTheme()}
     />
   );
 }

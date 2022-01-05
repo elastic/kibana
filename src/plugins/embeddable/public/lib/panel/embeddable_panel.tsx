@@ -42,6 +42,7 @@ import { CustomizePanelModal } from './panel_header/panel_actions/customize_titl
 import { EmbeddableStart } from '../../plugin';
 import { EmbeddableErrorLabel } from './embeddable_error_label';
 import { EmbeddableStateTransfer, ErrorEmbeddable } from '..';
+import { getTheme } from '../..';
 
 const sortByOrderField = (
   { order: orderA }: { order?: number },
@@ -360,7 +361,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
                   resolve({ title, hideTitle });
                 }}
                 cancel={() => session.close()}
-              />
+              />,
+              { theme$: getTheme().theme$ }
             ),
             {
               'data-test-subj': 'customizePanel',

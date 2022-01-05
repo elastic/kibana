@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext, ThemeServiceStart } from 'src/core/public';
+import { createGetterSetter } from '../../../../src/plugins/kibana_utils/public';
 import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingPublicPlugin } from './plugin';
 import { getSharedComponents } from './shared';
@@ -27,3 +28,5 @@ export { ReportingAPIClient, ReportingPublicPlugin as Plugin };
 export function plugin(initializerContext: PluginInitializerContext): ReportingPublicPlugin {
   return new ReportingPublicPlugin(initializerContext);
 }
+
+export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');

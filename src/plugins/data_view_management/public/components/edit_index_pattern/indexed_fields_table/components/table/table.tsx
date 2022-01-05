@@ -32,6 +32,7 @@ import { toMountPoint } from '../../../../../../../kibana_react/public';
 
 import { IIndexPattern } from '../../../../../../../data/public';
 import { IndexedFieldItem } from '../../types';
+import { getTheme } from '../../../../../';
 
 // localized labels
 const additionalInfoAriaLabel = i18n.translate(
@@ -322,7 +323,8 @@ const getConflictBtn = (
           },
           fieldName,
           conflictDescriptions,
-        })
+        }),
+        { theme$: getTheme().theme$ }
       )
     );
   };

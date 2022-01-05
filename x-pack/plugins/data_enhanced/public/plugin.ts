@@ -81,7 +81,8 @@ export class DataEnhancedPlugin
               usageCollector: this.usageCollector,
               tourDisabled: plugins.screenshotMode.isScreenshotMode(),
             })
-          )
+          ),
+          { theme$: core.theme.theme$ }
         ),
       });
     }

@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
 import { ToastInput } from 'src/core/public';
+import { getTheme } from '..';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { JobSummary, ManagementLinkFn } from '../../common/types';
 
@@ -24,7 +25,8 @@ export const getFailureToast = (
         id="xpack.reporting.publicNotifier.error.couldNotCreateReportTitle"
         defaultMessage="Could not create report for {reportObjectType} '{reportObjectTitle}'."
         values={{ reportObjectType: job.jobtype, reportObjectTitle: job.title }}
-      />
+      />,
+      { theme$: getTheme().theme$ }
     ),
     text: toMountPoint(
       <Fragment>
@@ -58,7 +60,8 @@ export const getFailureToast = (
             }}
           />
         </p>
-      </Fragment>
+      </Fragment>,
+      { theme$: getTheme().theme$ }
     ),
     iconType: undefined,
     'data-test-subj': 'completeReportFailure',

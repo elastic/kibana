@@ -15,7 +15,7 @@ import ReactDOM from 'react-dom';
 import { ApplicationStart, HttpStart, ToastsSetup } from 'kibana/public';
 import type { ThemeServiceStart } from '../../../../core/public';
 import { SavedObjectNotFound } from '..';
-import { KibanaThemeProvider } from '../../../kibana_react/public';
+import { KibanaThemeProvider } from '../theme';
 
 const ReactMarkdown = React.lazy(() => import('react-markdown'));
 const ErrorRenderer = (props: { children: string }) => (

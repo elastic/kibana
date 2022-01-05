@@ -39,6 +39,7 @@ import type { PersistedLog } from '../../query';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
 import { KIBANA_USER_QUERY_LANGUAGE_KEY, getFieldSubtypeNested } from '../../../common';
+import { getTheme } from '../../services';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -475,7 +476,8 @@ export default class QueryStringInputUI extends Component<Props, State> {
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </div>
+            </div>,
+            { theme$: getTheme().theme$ }
           ),
         });
       }

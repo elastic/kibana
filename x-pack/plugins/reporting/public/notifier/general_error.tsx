@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { ToastInput } from 'src/core/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
+import { getTheme } from '..';
 
 export const getGeneralErrorToast = (errorText: string, err: Error): ToastInput => ({
   text: toMountPoint(
@@ -24,7 +25,8 @@ export const getGeneralErrorToast = (errorText: string, err: Error): ToastInput 
         id="xpack.reporting.publicNotifier.error.tryRefresh"
         defaultMessage="Try refreshing the page."
       />
-    </Fragment>
+    </Fragment>,
+    { theme$: getTheme().theme$ }
   ),
   iconType: undefined,
 });

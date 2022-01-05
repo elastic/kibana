@@ -7,6 +7,5 @@
     "name": "App Services",
     "githubTeam": "kibana-app-services"
   },
-  "requiredBundles": ["kibanaReact"],
   "extraPublicDirs": ["common", "demos/state_containers/todomvc", "common/state_containers"]
 }

@@ -29,7 +29,7 @@ import { ManagementSetup, ManagementStart } from '../../../../src/plugins/manage
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';
-import { ReportingSetup, ReportingStart } from './';
+import { ReportingSetup, ReportingStart, setTheme } from './';
 import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import { getGeneralErrorToast } from './notifier';
@@ -158,6 +158,7 @@ export class ReportingPublicPlugin
 
     const startServices$ = Rx.from(getStartServices());
     const usesUiCapabilities = !this.config.roles.enabled;
+    setTheme(core.theme);
 
     const apiClient = this.getApiClient(core.http, core.uiSettings);
 

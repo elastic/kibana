@@ -14,6 +14,7 @@ import { UrlForwardingSetup } from '../../url_forwarding/public';
 import { ManagementSetup } from '../../management/public';
 import { IndexPatternFieldEditorStart } from '../../data_view_field_editor/public';
 import { DataViewEditorStart } from '../../data_view_editor/public';
+import { setTheme } from '.';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -54,6 +55,7 @@ export class IndexPatternManagementPlugin
     { management, urlForwarding }: IndexPatternManagementSetupDependencies
   ) {
     const kibanaSection = management.sections.section.kibana;
+    setTheme(core.theme);
 
     if (!kibanaSection) {
       throw new Error('`kibana` management section not found.');

@@ -54,6 +54,7 @@ export const getSavedObjectsTagging = () => pluginsStart.savedObjectsTagging;
 export const getPresentationUtilContext = () => pluginsStart.presentationUtil.ContextProvider;
 export const getSecurityService = () => pluginsStart.security;
 export const getSpacesApi = () => pluginsStart.spaces;
+export const getTheme = () => coreStart.theme;
 
 // xpack.maps.* kibana.yml settings from this plugin
 let mapAppConfig: MapsConfigType;

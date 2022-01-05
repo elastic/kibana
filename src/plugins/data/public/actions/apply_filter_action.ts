@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '../../../kibana_react/public';
 import { Action, createAction, IncompatibleActionError } from '../../../ui_actions/public';
-import { getOverlays, getIndexPatterns } from '../services';
+import { getOverlays, getTheme, getIndexPatterns } from '../services';
 import { applyFiltersPopover } from '../ui/apply_filters';
 import { Filter, FilterManager, TimefilterContract, esFilters } from '..';
 
@@ -77,7 +77,8 @@ export function createFilterAction(
                   overlay.close();
                   resolve(filterSelection);
                 }
-              )
+              ),
+              { theme$: getTheme().theme$ }
             ),
             {
               'data-test-subj': 'test',

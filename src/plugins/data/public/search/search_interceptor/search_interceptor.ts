@@ -51,6 +51,7 @@ import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { createRequestHash } from './utils';
 import { SearchAbortController } from './search_abort_controller';
+import { getTheme } from '../../services';
 
 export interface SearchInterceptorDeps {
   bfetch: BfetchPublicSetup;
@@ -377,7 +378,7 @@ export class SearchInterceptor {
   private showTimeoutErrorToast = (e: SearchTimeoutError, sessionId?: string) => {
     this.deps.toasts.addDanger({
       title: 'Timed out',
-      text: toMountPoint(e.getErrorMessage(this.application)),
+      text: toMountPoint(e.getErrorMessage(this.application), { theme$: getTheme().theme$ }),
     });
   };
 
@@ -392,7 +393,9 @@ export class SearchInterceptor {
     this.deps.toasts.addWarning(
       {
         title: 'Your search session is still running',
-        text: toMountPoint(SearchSessionIncompleteWarning(this.docLinks)),
+        text: toMountPoint(SearchSessionIncompleteWarning(this.docLinks), {
+          theme$: getTheme().theme$,
+        }),
       },
       {
         toastLifeTimeMs: 60000,
@@ -423,14 +426,14 @@ export class SearchInterceptor {
         title: i18n.translate('data.search.esErrorTitle', {
           defaultMessage: 'Cannot retrieve search results',
         }),
-        text: toMountPoint(e.getErrorMessage(this.application)),
+        text: toMountPoint(e.getErrorMessage(this.application), { theme$: getTheme().theme$ }),
       });
     } else if (e.constructor.name === 'HttpFetchError') {
       this.deps.toasts.addDanger({
         title: i18n.translate('data.search.httpErrorTitle', {
           defaultMessage: 'Cannot retrieve your data',
         }),
-        text: toMountPoint(getHttpError(e.message)),
+        text: toMountPoint(getHttpError(e.message), { theme$: getTheme().theme$ }),
       });
     } else {
       this.deps.toasts.addError(e, {

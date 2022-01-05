@@ -23,6 +23,7 @@ import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../visualizations/public
 import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 import { getTableColumns, getNoItemsMessage } from '../utils';
+import { getTheme } from '../../services';
 
 export const VisualizeListing = () => {
   const {
@@ -198,6 +199,7 @@ export const VisualizeListing = () => {
       })}
       toastNotifications={toastNotifications}
       searchFilters={searchFilters}
+      theme={getTheme()}
     >
       {dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&
         dashboardCapabilities.createNew && (
