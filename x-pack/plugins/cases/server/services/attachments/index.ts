@@ -28,13 +28,17 @@ import {
 import { ClientArgs } from '..';
 import { buildFilter, combineFilters } from '../../client/utils';
 import { defaultSortField } from '../../common/utils';
-
-interface GetAllAlertsAttachToCaseArgs extends ClientArgs {
+import { AggregationResponse } from '../../client/metrics/types';
+interface AttachedToCaseArgs extends ClientArgs {
   caseId: string;
   filter?: KueryNode;
 }
 
-type CountAlertsAttachedToCaseArgs = GetAllAlertsAttachToCaseArgs;
+type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs;
+type CountAlertsAttachedToCaseArgs = AttachedToCaseArgs;
+interface CountActionsAttachedToCaseArgs extends AttachedToCaseArgs {
+  aggregations: Record<string, estypes.AggregationsAggregationContainer>;
+}
 
 interface GetAttachmentArgs extends ClientArgs {
   attachmentId: string;
@@ -82,6 +86,7 @@ export class AttachmentService {
         { alerts: { value: number } }
       >({
         type: CASE_COMMENT_SAVED_OBJECT,
+        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
         page: 1,
         perPage: 1,
         sortField: defaultSortField,
@@ -142,6 +147,46 @@ export class AttachmentService {
       return result;
     } catch (error) {
       this.log.error(`Error on GET all alerts for case id ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Executes the aggregations against the actions attached to a case.
+   */
+  public async executeCaseActionsAggregations({
+    unsecuredSavedObjectsClient,
+    caseId,
+    filter,
+    aggregations,
+  }: CountActionsAttachedToCaseArgs): Promise<AggregationResponse | undefined> {
+    try {
+      this.log.debug(`Attempting to count actions for case id ${caseId}`);
+      const actionsFilter = buildFilter({
+        filters: [CommentType.actions],
+        field: 'type',
+        operator: 'or',
+        type: CASE_COMMENT_SAVED_OBJECT,
+      });
+
+      const combinedFilter = combineFilters([actionsFilter, filter]);
+
+      const response = await unsecuredSavedObjectsClient.find<
+        AttachmentAttributes,
+        AggregationResponse
+      >({
+        type: CASE_COMMENT_SAVED_OBJECT,
+        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+        page: 1,
+        perPage: 1,
+        sortField: defaultSortField,
+        aggs: aggregations,
+        filter: combinedFilter,
+      });
+
+      return response.aggregations;
+    } catch (error) {
+      this.log.error(`Error while counting actions for case id ${caseId}: ${error}`);
       throw error;
     }
   }
