@@ -30,6 +30,7 @@ interface IContainerStyleProps {
   type: ItemType;
   timelineMargins: Margins;
   isSelected: boolean;
+  hasToggle: boolean;
 }
 
 interface IBarStyleProps {
@@ -44,7 +45,10 @@ const Container = euiStyled.div<IContainerStyleProps>`
   padding-top: ${({ theme }) => theme.eui.paddingSizes.s};
   padding-bottom: ${({ theme }) => theme.eui.euiSizeM};
   margin-right: ${(props) => props.timelineMargins.right}px;
-  margin-left: ${(props) => props.timelineMargins.left}px;
+  margin-left: ${(props) =>
+    props.hasToggle
+      ? props.timelineMargins.left - 30 // fix margin if there is a toggle
+      : props.timelineMargins.left}px ;
   background-color: ${({ isSelected, theme }) =>
     isSelected ? theme.eui.euiColorLightestShade : 'initial'};
   cursor: pointer;
@@ -81,6 +85,7 @@ interface IWaterfallItemProps {
   timelineMargins: Margins;
   totalDuration?: number;
   item: IWaterfallSpanOrTransaction;
+  hasToggle: boolean;
   color: string;
   isSelected: boolean;
   errorCount: number;
@@ -180,6 +185,7 @@ export function WaterfallItem({
   timelineMargins,
   totalDuration,
   item,
+  hasToggle,
   color,
   isSelected,
   errorCount,
@@ -200,6 +206,7 @@ export function WaterfallItem({
       type={item.docType}
       timelineMargins={timelineMargins}
       isSelected={isSelected}
+      hasToggle={hasToggle}
       onClick={(e: React.MouseEvent) => {
         e.stopPropagation();
         onClick();

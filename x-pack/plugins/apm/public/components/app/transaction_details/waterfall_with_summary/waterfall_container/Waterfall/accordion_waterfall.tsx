@@ -102,6 +102,8 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
     setIsOpen((isCurrentOpen) => !isCurrentOpen);
   }
 
+  const hasToggle = !!children.length;
+
   return (
     <StyledAccordion
       className="waterfall_accordion"
@@ -117,7 +119,7 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem grow={false}>
             <ToggleAccordionButton
-              show={!!children.length}
+              show={hasToggle}
               isOpen={isOpen}
               childrenAmount={children.length}
               onClick={toggleAccordion}
@@ -129,6 +131,7 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
               timelineMargins={timelineMargins}
               color={item.color}
               item={item}
+              hasToggle={hasToggle}
               totalDuration={duration}
               isSelected={item.id === waterfallItemId}
               errorCount={errorCount}
