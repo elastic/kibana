@@ -93,7 +93,6 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
       );
     }
 
-    // return <EuiLinkTo to={getSourcesPath(addPath, true)}>{card}</EuiLinkTo>;
     return card;
   };
 
@@ -111,11 +110,6 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
     };
 
   }
-
-  console.log(
-    sourcesHalfList().firstHalf,
-    sourcesHalfList().secondHalf
-  );
 
   const visibleSources = (
     <>
