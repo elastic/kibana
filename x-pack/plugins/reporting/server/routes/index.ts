@@ -7,7 +7,7 @@
 
 import { ReportingCore } from '..';
 import { LevelLogger } from '../lib';
-import { registerDeprecationsRoutes } from './deprecations';
+import { registerDeprecationsRoutes } from './deprecations/deprecations';
 import { registerDiagnosticRoutes } from './diagnostic';
 import {
   registerGenerateCsvFromSavedObjectImmediate,
