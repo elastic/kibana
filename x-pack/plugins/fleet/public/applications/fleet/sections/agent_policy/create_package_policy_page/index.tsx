@@ -118,16 +118,11 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   // Agent policy state
   const [agentPolicy, setAgentPolicy] = useState<AgentPolicy | undefined>();
 
-  const defaultPolicy = {
-    name: 'Default policy',
+  const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>({
+    name: 'Agent policy 1',
     description: '',
     namespace: 'default',
     monitoring_enabled: Object.values(dataTypes),
-    is_default: true,
-  };
-
-  const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>({
-    ...defaultPolicy,
   });
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);

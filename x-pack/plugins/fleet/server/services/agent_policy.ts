@@ -135,19 +135,7 @@ class AgentPolicyService {
 
     let searchParams;
 
-    const isDefaultPolicy =
-      preconfiguredAgentPolicy.is_default || preconfiguredAgentPolicy.is_default_fleet_server;
-
-    if (isDefaultPolicy) {
-      searchParams = {
-        searchFields: [
-          preconfiguredAgentPolicy.is_default_fleet_server
-            ? 'is_default_fleet_server'
-            : 'is_default',
-        ],
-        search: 'true',
-      };
-    } else if (id) {
+    if (id) {
       searchParams = {
         id: String(id),
       };
@@ -239,9 +227,7 @@ class AgentPolicyService {
       options
     );
 
-    if (!agentPolicy.is_default && !agentPolicy.is_default_fleet_server) {
-      await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'created', newSo.id);
-    }
+    await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'created', newSo.id);
 
     return { id: newSo.id, ...newSo.attributes };
   }
@@ -596,20 +582,6 @@ class AgentPolicyService {
     );
   }
 
-  public async getDefaultAgentPolicyId(soClient: SavedObjectsClientContract) {
-    const agentPolicies = await soClient.find({
-      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-      searchFields: ['is_default'],
-      search: 'true',
-    });
-
-    if (agentPolicies.saved_objects.length === 0) {
-      throw new Error('No default agent policy');
-    }
-
-    return agentPolicies.saved_objects[0].id;
-  }
-
   public async delete(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -622,14 +594,6 @@ class AgentPolicyService {
 
     if (agentPolicy.is_managed) {
       throw new HostedAgentPolicyRestrictionRelatedError(`Cannot delete hosted agent policy ${id}`);
-    }
-
-    if (agentPolicy.is_default) {
-      throw new Error('The default agent policy cannot be deleted');
-    }
-
-    if (agentPolicy.is_default_fleet_server) {
-      throw new Error('The default fleet server agent policy cannot be deleted');
     }
 
     const { total } = await getAgentsByKuery(esClient, {
@@ -700,7 +664,6 @@ class AgentPolicyService {
       coordinator_idx: 0,
       data: fullPolicy as unknown as FleetServerPolicy['data'],
       policy_id: fullPolicy.id,
-      default_fleet_server: policy.is_default_fleet_server === true,
     };
 
     if (policy.unenroll_timeout) {

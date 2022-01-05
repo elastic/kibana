@@ -733,8 +733,7 @@ class PackagePolicyService {
           namespace: newPolicy.namespace ?? 'default',
           description: newPolicy.description ?? '',
           enabled: newPolicy.enabled ?? true,
-          policy_id:
-            newPolicy.policy_id ?? (await agentPolicyService.getDefaultAgentPolicyId(soClient)),
+          policy_id: newPolicy.policy_id, // TODO BWC previously optional
           output_id: newPolicy.output_id ?? '',
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,

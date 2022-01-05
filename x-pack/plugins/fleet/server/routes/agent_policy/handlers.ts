@@ -6,15 +6,23 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { RequestHandler, ResponseHeaders } from 'src/core/server';
+import type {
+  ElasticsearchClient,
+  RequestHandler,
+  ResponseHeaders,
+  SavedObjectsClientContract,
+} from 'src/core/server';
 import pMap from 'p-map';
 import { safeDump } from 'js-yaml';
+
+import type { AuthenticatedUser } from '../../../../security/common/model';
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService, packagePolicyService } from '../../services';
 import { getAgentsByKuery } from '../../services/agents';
 import { AGENTS_PREFIX } from '../../constants';
 import type {
+  AgentPolicy,
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
   CreateAgentPolicyRequestSchema,
@@ -115,10 +123,10 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
-  const isDefaultFleetServer = request.body.is_default_fleet_server ?? false;
+  const { has_fleet_server: hasFleetServer, ...newPolicy } = request.body;
   const spaceId = context.fleet.spaceId;
   try {
-    if (isDefaultFleetServer) {
+    if (hasFleetServer) {
       // install fleet server package if not yet installed
       await ensureInstalledPackage({
         savedObjectsClient: soClient,
@@ -142,39 +150,23 @@ export const createAgentPolicyHandler: FleetRequestHandler<
         esClient,
       });
     }
+    const agentPolicy = await agentPolicyService.create(soClient, esClient, newPolicy, {
+      user,
+    });
 
-    const packageToInstall = isDefaultFleetServer ? FLEET_SERVER_PACKAGE : FLEET_SYSTEM_PACKAGE;
-
-    // eslint-disable-next-line prefer-const
-    let [agentPolicy, newPackagePolicy] = await Promise.all([
-      agentPolicyService.create(soClient, esClient, request.body, {
-        user,
-      }),
-      // TODO case when both isDefaultFleetServer and withSysMonitoring is true
-      // If needed, retrieve System package information and build a new package policy for the system package
-      // NOTE: we ignore failures in attempting to create package policy, since agent policy might have been created
-      // successfully
-      isDefaultFleetServer || withSysMonitoring
-        ? packagePolicyService
-            .buildPackagePolicyFromPackage(soClient, packageToInstall)
-            .catch(() => undefined)
-        : undefined,
-    ]);
-
-    // Create the system monitoring package policy and add it to agent policy.
-    if (
-      (withSysMonitoring || isDefaultFleetServer) &&
-      newPackagePolicy !== undefined &&
-      agentPolicy !== undefined
-    ) {
-      newPackagePolicy.policy_id = agentPolicy.id;
-      newPackagePolicy.namespace = agentPolicy.namespace;
-      newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall);
-
-      await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
+    // Create the fleet server package policy and add it to agent policy.
+    if (hasFleetServer) {
+      await createPackagePolicy(soClient, esClient, agentPolicy, FLEET_SERVER_PACKAGE, {
         spaceId,
         user,
-        bumpRevision: false,
+      });
+    }
+
+    // Create the system monitoring package policy and add it to agent policy.
+    if (withSysMonitoring) {
+      await createPackagePolicy(soClient, esClient, agentPolicy, FLEET_SYSTEM_PACKAGE, {
+        spaceId,
+        user,
       });
     }
 
@@ -191,6 +183,33 @@ export const createAgentPolicyHandler: FleetRequestHandler<
     return defaultIngestErrorHandler({ error, response });
   }
 };
+
+async function createPackagePolicy(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  agentPolicy: AgentPolicy,
+  packageToInstall: string,
+  options: { spaceId: string; user: AuthenticatedUser | undefined }
+) {
+  // If needed, retrieve package information and build a new package policy for the package
+  // NOTE: we ignore failures in attempting to create package policy, since agent policy might have been created
+  // successfully
+  const newPackagePolicy = await packagePolicyService
+    .buildPackagePolicyFromPackage(soClient, packageToInstall)
+    .catch(() => undefined);
+
+  if (!newPackagePolicy) return;
+
+  newPackagePolicy.policy_id = agentPolicy.id;
+  newPackagePolicy.namespace = agentPolicy.namespace;
+  newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall);
+
+  await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
+    spaceId: options.spaceId,
+    user: options.user,
+    bumpRevision: false,
+  });
+}
 
 export const updateAgentPolicyHandler: RequestHandler<
   TypeOf<typeof UpdateAgentPolicyRequestSchema.params>,

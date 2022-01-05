@@ -379,12 +379,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   // Fleet server unhealthy status
   const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
-  const onClickAddFleetServer = useCallback(() => {
-    const defaultPolicy = agentPolicies.find((policy) => policy.is_default_fleet_server);
-    if (defaultPolicy) {
-      setEnrollmentFlyoutState({ isOpen: true, selectedPolicyId: defaultPolicy.id });
-    }
-  }, [agentPolicies]);
+  const onClickAddFleetServer = () => setEnrollmentFlyoutState({ isOpen: true });
 
   const columns = [
     {

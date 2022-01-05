@@ -90,10 +90,7 @@ export const AgentPolicySelectionStep = ({
 }) => {
   const regularAgentPolicies = useMemo(() => {
     return Array.isArray(agentPolicies)
-      ? agentPolicies.filter(
-          (policy) =>
-            policy && !policy.is_managed && (!excludeFleetServer || !policy.is_default_fleet_server)
-        )
+      ? agentPolicies.filter((policy) => policy && !policy.is_managed && !excludeFleetServer)
       : [];
   }, [agentPolicies, excludeFleetServer]);
 

@@ -18,6 +18,7 @@ export const AgentPolicyBaseSchema = {
   is_managed: schema.maybe(schema.boolean()),
   is_default: schema.maybe(schema.boolean()),
   is_default_fleet_server: schema.maybe(schema.boolean()),
+  has_fleet_server: schema.maybe(schema.boolean()),
   unenroll_timeout: schema.maybe(schema.number({ min: 0 })),
   monitoring_enabled: schema.maybe(
     schema.arrayOf(

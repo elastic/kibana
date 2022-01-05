@@ -15,7 +15,6 @@ import {
 
 export const addIntegration = () => {
   cy.getBySel(ADD_POLICY_BTN).click();
-  cy.get('#existing').click(); // select Existing Hosts tab for agent policy
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
   // sometimes agent is assigned to default policy, sometimes not
   cy.getBySel(CONFIRM_MODAL_BTN).click();

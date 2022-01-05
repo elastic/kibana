@@ -6,11 +6,16 @@
  */
 
 import { AGENT_POLICIES_TAB, ENROLLMENT_TOKENS_TAB } from '../screens/fleet';
+import { cleanupAgentPolicies } from '../tasks/cleanup';
 import { FLEET, navigateTo } from '../tasks/navigation';
 
 describe('Fleet startup', () => {
   beforeEach(() => {
     navigateTo(FLEET);
+  });
+
+  after(() => {
+    cleanupAgentPolicies();
   });
 
   function navigateToAgentPolicies() {
@@ -35,24 +40,24 @@ describe('Fleet startup', () => {
     });
   });
 
-  it('should create Default Fleet Server policy', () => {
+  it('should create Fleet Server policy', () => {
     cy.getBySel('toastCloseButton').click();
     cy.getBySel('createFleetServerPolicyBtn').click();
     cy.getBySel('euiToastHeader');
 
     navigateToAgentPolicies();
 
-    navigateToAgentPolicy('Default Fleet Server policy');
+    navigateToAgentPolicy('Fleet Server policy 1');
     cy.get('.euiLink').contains('Fleet Server');
 
     cy.get('.euiButtonEmpty').contains('View all agent policies').click();
 
     navigateToEnrollmentTokens();
 
-    cy.get('.euiTableCellContent').contains('Default Fleet Server policy');
+    cy.get('.euiTableCellContent').contains('Fleet Server policy 1');
   });
 
-  it('should create Default policy', () => {
+  it('should create agent policy', () => {
     cy.getBySel('addAgentBtnTop').click();
     cy.getBySel('toastCloseButton').click();
     cy.getBySel('createPolicyBtn').click();
@@ -62,13 +67,15 @@ describe('Fleet startup', () => {
 
     navigateToAgentPolicies();
 
-    navigateToAgentPolicy('Default policy');
+    navigateToAgentPolicy('Agent policy 1');
     cy.get('.euiLink').contains('System');
 
     cy.get('.euiButtonEmpty').contains('View all agent policies').click();
 
     navigateToEnrollmentTokens();
-    cy.get('.euiTableCellContent').contains('Default policy');
+    cy.get('.euiTableCellContent').contains('Agent policy 1');
+
+    // TODO might take longer to install elastic agent async
 
     cy.visit('/app/integrations/installed');
     cy.getBySel('integration-card:epr:elastic_agent');

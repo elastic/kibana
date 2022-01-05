@@ -70,14 +70,13 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     before(async () => {
-      // create default policies
+      // create agent policies
       let { body: apiResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'kibana')
         .send({
-          name: 'Default Fleet Server policy',
+          name: 'Fleet Server policy 1',
           namespace: 'default',
-          is_default_fleet_server: true,
         })
         .expect(200);
       const defaultFleetServerPolicy = apiResponse.item;
@@ -86,20 +85,19 @@ export default function (providerContext: FtrProviderContext) {
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'kibana')
         .send({
-          name: 'Default policy',
+          name: 'Agent policy 1',
           namespace: 'default',
-          is_default: true,
         })
         .expect(200));
 
       const defaultServerPolicy = apiResponse.item;
 
       if (!defaultFleetServerPolicy) {
-        throw new Error('No default Fleet server policy');
+        throw new Error('No Fleet server policy');
       }
 
       if (!defaultServerPolicy) {
-        throw new Error('No default policy');
+        throw new Error('No agent policy');
       }
 
       await supertest

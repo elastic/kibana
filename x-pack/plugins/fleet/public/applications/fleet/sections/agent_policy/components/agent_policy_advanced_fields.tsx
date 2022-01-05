@@ -10,7 +10,6 @@ import {
   EuiDescribedFormGroup,
   EuiFormRow,
   EuiSpacer,
-  EuiText,
   EuiComboBox,
   EuiIconTip,
   EuiCheckboxGroup,
@@ -274,11 +273,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-      {isEditing &&
-      'id' in agentPolicy &&
-      !agentPolicy.is_managed &&
-      !agentPolicy.is_default &&
-      !agentPolicy.is_default_fleet_server ? (
+      {isEditing && 'id' in agentPolicy && !agentPolicy.is_managed ? (
         <EuiDescribedFormGroup
           title={
             <h4>
@@ -300,7 +295,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                   return (
                     <EuiButton
                       color="danger"
-                      disabled={Boolean(agentPolicy.is_default)}
                       onClick={() => deleteAgentPolicyPrompt(agentPolicy.id!, onDelete)}
                     >
                       <FormattedMessage
@@ -311,17 +305,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                   );
                 }}
               </AgentPolicyDeleteProvider>
-              {agentPolicy.is_default ? (
-                <>
-                  <EuiSpacer size="xs" />
-                  <EuiText color="subdued" size="xs">
-                    <FormattedMessage
-                      id="xpack.fleet.policyForm.unableToDeleteDefaultPolicyText"
-                      defaultMessage="Default policy cannot be deleted"
-                    />
-                  </EuiText>
-                </>
-              ) : null}
             </>
           }
         />

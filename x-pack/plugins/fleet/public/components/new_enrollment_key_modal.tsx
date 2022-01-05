@@ -63,9 +63,8 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
   agentPolicies = [],
 }) => {
   const { notifications } = useStartServices();
-  const policyIdDefaultValue = agentPolicies.find((agentPolicy) => agentPolicy.is_default)?.id;
   const form = useCreateApiKeyForm(
-    policyIdDefaultValue,
+    undefined,
     (key: EnrollmentAPIKey) => {
       onClose(key);
       notifications.toasts.addSuccess(
@@ -109,7 +108,6 @@ export const NewEnrollmentTokenModal: React.FunctionComponent<Props> = ({
         >
           <EuiSelect
             required={true}
-            defaultValue={policyIdDefaultValue}
             {...form.policyIdInput.props}
             options={agentPolicies
               .filter((agentPolicy) => !agentPolicy.is_managed)

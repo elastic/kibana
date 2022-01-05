@@ -226,14 +226,10 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         if (wasDeleted) {
           return { created: false, deleted: preconfigurationId };
         }
-      } else if (
-        !preconfiguredAgentPolicy.is_default &&
-        !preconfiguredAgentPolicy.is_default_fleet_server
-      ) {
+      } else {
         throw new Error(
           i18n.translate('xpack.fleet.preconfiguration.missingIDError', {
-            defaultMessage:
-              '{agentPolicyName} is missing an `id` field. `id` is required, except for policies marked is_default or is_default_fleet_server.',
+            defaultMessage: '{agentPolicyName} is missing an `id` field. `id` is required.',
             values: { agentPolicyName: preconfiguredAgentPolicy.name },
           })
         );

@@ -23,9 +23,14 @@ import {
   SETTINGS_TAB,
   UPDATE_PACKAGE_BTN,
 } from '../screens/integrations';
+import { cleanupAgentPolicies } from '../tasks/cleanup';
 
 describe('Add Integration', () => {
   const integration = 'Apache';
+
+  after(() => {
+    cleanupAgentPolicies();
+  });
 
   describe('Real API', () => {
     afterEach(() => {
@@ -71,26 +76,4 @@ describe('Add Integration', () => {
     addIntegration();
     cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-');
   }
-
-  it.skip('[Mocked requests] should display Apache integration in the Policies list once installed ', () => {
-    cy.intercept('POST', '/api/fleet/package_policies', {
-      fixture: 'integrations/create_integration_response.json',
-    });
-    cy.intercept(
-      'GET',
-      '/api/fleet/package_policies?page=1&perPage=20&kuery=ingest-package-policies.package.name%3A%20apache',
-      { fixture: 'integrations/list.json' }
-    );
-    cy.intercept('GET', '/api/fleet/agent_policies?*', {
-      fixture: 'integrations/agent_policies.json',
-    });
-    cy.intercept('GET', '/api/fleet/agent_policies/30e16140-2106-11ec-a289-25321523992d', {
-      fixture: 'integrations/agent_policy.json',
-    });
-    // TODO fixture includes 1 package policy, should be empty initially
-    cy.intercept('GET', '/api/fleet/epm/packages/apache/1.1.0', {
-      fixture: 'integrations/apache.json',
-    });
-    addAndVerifyIntegration();
-  });
 });

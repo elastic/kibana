@@ -37,7 +37,6 @@ export interface PackageService {
 export interface AgentPolicyServiceInterface {
   get: typeof agentPolicyService['get'];
   list: typeof agentPolicyService['list'];
-  getDefaultAgentPolicyId: typeof agentPolicyService['getDefaultAgentPolicyId'];
   getFullAgentPolicy: typeof agentPolicyService['getFullAgentPolicy'];
   getByIds: typeof agentPolicyService['getByIDs'];
 }

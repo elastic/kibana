@@ -50,7 +50,7 @@ describe('Add Integration', () => {
 
   function addAndVerifyIntegration() {
     navigateTo(FLEET_AGENT_POLICIES);
-    cy.contains('Default Fleet Server policy').click();
+    cy.contains('Fleet Server policy 1').click();
     cy.contains('Add integration').click();
 
     cy.contains(integration).click();

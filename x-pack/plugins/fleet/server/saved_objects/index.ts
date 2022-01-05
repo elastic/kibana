@@ -77,8 +77,6 @@ const getSavedObjectTypes = (
         name: { type: 'keyword' },
         description: { type: 'text' },
         namespace: { type: 'keyword' },
-        is_default: { type: 'boolean' },
-        is_default_fleet_server: { type: 'boolean' },
         is_managed: { type: 'boolean' },
         status: { type: 'keyword' },
         package_policies: { type: 'keyword' },

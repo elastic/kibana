@@ -144,7 +144,7 @@ export async function generateEnrollmentAPIKey(
   data: {
     name?: string;
     expiration?: string;
-    agentPolicyId?: string;
+    agentPolicyId: string;
     forceRecreate?: boolean;
   }
 ): Promise<EnrollmentAPIKey> {
@@ -153,8 +153,7 @@ export async function generateEnrollmentAPIKey(
   if (data.agentPolicyId) {
     await validateAgentPolicyId(soClient, data.agentPolicyId);
   }
-  const agentPolicyId =
-    data.agentPolicyId ?? (await agentPolicyService.getDefaultAgentPolicyId(soClient));
+  const agentPolicyId = data.agentPolicyId; // TODO agentPolicyId should be required, BWC?
 
   if (providedKeyName && !forceRecreate) {
     let hasMore = true;

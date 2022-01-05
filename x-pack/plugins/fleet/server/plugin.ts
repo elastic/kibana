@@ -415,7 +415,6 @@ export class FleetPlugin
       agentPolicyService: {
         get: agentPolicyService.get,
         list: agentPolicyService.list,
-        getDefaultAgentPolicyId: agentPolicyService.getDefaultAgentPolicyId,
         getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,
         getByIds: agentPolicyService.getByIDs,
       },

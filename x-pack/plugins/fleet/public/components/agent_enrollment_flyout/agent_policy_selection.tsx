@@ -38,11 +38,6 @@ const resolveAgentId = (
     if (agentPolicies.length === 1) {
       return agentPolicies[0].id;
     }
-
-    const defaultAgentPolicy = agentPolicies.find((agentPolicy) => agentPolicy.is_default);
-    if (defaultAgentPolicy) {
-      return defaultAgentPolicy.id;
-    }
   }
 
   return selectedAgentPolicyId;

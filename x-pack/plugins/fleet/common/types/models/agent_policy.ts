@@ -19,6 +19,7 @@ export interface NewAgentPolicy {
   description?: string;
   is_default?: boolean;
   is_default_fleet_server?: boolean; // Optional when creating a policy
+  has_fleet_server?: boolean;
   is_managed?: boolean; // Optional when creating a policy
   monitoring_enabled?: MonitoringType;
   unenroll_timeout?: number;
@@ -139,10 +140,6 @@ export interface FleetServerPolicy {
   data: {
     [k: string]: unknown;
   };
-  /**
-   * True when this policy is the default policy to start Fleet Server
-   */
-  default_fleet_server: boolean;
   /**
    * Auto unenroll any Elastic Agents which have not checked in for this many seconds
    */

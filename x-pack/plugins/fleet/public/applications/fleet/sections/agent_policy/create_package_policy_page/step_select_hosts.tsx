@@ -42,6 +42,16 @@ interface Props {
   updateSelectedTab: (tab: SelectedPolicyTab) => void;
 }
 
+const getLatestPolicyIndex = (policies: AgentPolicy[]) => {
+  const indices = policies
+    .map((pol: AgentPolicy) => pol.name)
+    .map((name) => {
+      const match = name.match(/Agent policy (\d+)/);
+      return match ? parseInt(match[1], 10) : 1;
+    });
+  return Math.max(...indices, 1) + 1;
+};
+
 export const StepSelectHosts: React.FunctionComponent<Props> = ({
   agentPolicy,
   updateAgentPolicy,
@@ -55,7 +65,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
   defaultAgentPolicyId,
   updateSelectedTab,
 }) => {
-  let agentPolicies = [];
+  let agentPolicies: AgentPolicy[] = [];
   const { data: agentPoliciesData, error: err } = useGetAgentPolicies({
     page: 1,
     perPage: 1000,
@@ -76,8 +86,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
     if (agentPolicies.length > 0) {
       updateNewAgentPolicy({
         ...newAgentPolicy,
-        name: '',
-        is_default: false,
+        name: `Agent policy ${getLatestPolicyIndex(agentPolicies)}`,
       });
     }
   }, [agentPolicies.length]); // eslint-disable-line react-hooks/exhaustive-deps

@@ -355,15 +355,6 @@ const AgentPolicySelectionStep = ({
     return agentPolicies.map((policy) => ({ text: policy.name, value: policy.id }));
   }, [agentPolicies]);
 
-  useEffect(() => {
-    // Select default value
-    if (agentPolicies.length && !policyId) {
-      const defaultPolicy =
-        agentPolicies.find((p) => p.is_default_fleet_server) || agentPolicies[0];
-      setPolicyId(defaultPolicy.id);
-    }
-  }, [options, agentPolicies, policyId, setPolicyId]);
-
   const onChangeCallback = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       setPolicyId(e.target.value);
@@ -396,7 +387,7 @@ const AgentPolicySelectionStep = ({
         <EuiText>
           <FormattedMessage
             id="xpack.fleet.fleetServerSetup.selectAgentPolicyDescriptionText"
-            defaultMessage="Agent policies allow you to configure and manage your agents remotely. We recommend using the “Default Fleet Server policy” which includes the necessary configuration to run a Fleet Server."
+            defaultMessage="Agent policies allow you to configure and manage your agents remotely. We recommend creating a Fleet Server policy which includes the necessary configuration to run a Fleet Server."
           />
         </EuiText>
         <EuiSpacer size="m" />
