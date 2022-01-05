@@ -178,6 +178,7 @@ export const basicCaseMetricsFeatures: CaseMetricsFeature[] = [
   'alerts.count',
   'alerts.users',
   'alerts.hosts',
+  'actions.isolateHost',
   'connectors',
 ];
 
@@ -194,6 +195,12 @@ export const basicCaseMetrics: CaseMetrics = {
     users: {
       total: 1,
       values: [{ name: 'Jon', count: 12 }],
+    },
+  },
+  actions: {
+    isolateHost: {
+      isolate: { total: 5 },
+      unisolate: { total: 3 },
     },
   },
   connectors: { total: 1 },

@@ -42,6 +42,11 @@ export enum CommentType {
   actions = 'actions',
 }
 
+export enum IsolateHostActionType {
+  isolate = 'isolate',
+  unisolate = 'unisolate',
+}
+
 export const ContextTypeUserRt = rt.type({
   comment: rt.string,
   type: rt.literal(CommentType.user),
