@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionPiePlugin } from './plugin';
+import { ExpressionPartitionVisPlugin } from './plugin';
 
 export function plugin() {
-  return new ExpressionPiePlugin();
+  return new ExpressionPartitionVisPlugin();
 }
 
-export type { ExpressionPiePluginSetup, ExpressionPiePluginStart } from './types';
+export type { ExpressionPartitionVisPluginSetup, ExpressionPartitionVisPluginStart } from './types';

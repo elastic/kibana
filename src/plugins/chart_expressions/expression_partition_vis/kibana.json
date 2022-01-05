@@ -1,12 +1,12 @@
 {
-  "id": "expressionPie",
+  "id": "expressionPartitionVis",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "owner": {
     "name": "Vis Editors",
     "githubTeam": "kibana-vis-editors"
   },
-  "description": "Expression Pie plugin adds a `pie` renderer and function to the expression plugin. The renderer will display the `pie` chart.",
+  "description": "Expression Partition Visualization plugin adds a `partitionVis` renderer and `pieVis`, `treemapVis`, `mosaicVis` functions to the expression plugin. The renderer will display the `pie`, `waffle` and `mosaic` charts.",
   "server": true,
   "ui": true,
   "extraPublicDirs": [

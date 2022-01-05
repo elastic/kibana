@@ -38,7 +38,7 @@ import {
   PieVisParams,
   LabelPositions,
   ValueFormats,
-} from '../../../../../chart_expressions/expression_pie/common';
+} from '../../../../../chart_expressions/expression_partition_vis/common';
 
 import { emptySizeRatioOptions, getLabelPositions, getValuesFormats } from '../collections';
 import { getLegendPositions } from '../positions';

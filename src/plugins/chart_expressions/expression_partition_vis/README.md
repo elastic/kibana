@@ -1,4 +1,4 @@
-# expressionPie
+# expressionPartitionVis
 
 Expression Pie plugin adds a `pie` renderer and function to the expression plugin. The renderer will display the `Pie` chart.
 

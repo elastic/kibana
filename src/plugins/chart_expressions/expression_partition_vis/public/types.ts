@@ -5,15 +5,17 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ExpressionsServerStart, ExpressionsServerSetup } from '../../../expressions/server';
+import { ChartsPluginSetup } from '../../../charts/public';
+import { ExpressionsPublicPlugin, ExpressionsServiceStart } from '../../../expressions/public';
 
-export type ExpressionPiePluginSetup = void;
-export type ExpressionPiePluginStart = void;
+export type ExpressionPartitionVisPluginSetup = void;
+export type ExpressionPartitionVisPluginStart = void;
 
 export interface SetupDeps {
-  expressions: ExpressionsServerSetup;
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
+  charts: ChartsPluginSetup;
 }
 
 export interface StartDeps {
-  expression: ExpressionsServerStart;
+  expression: ExpressionsServiceStart;
 }

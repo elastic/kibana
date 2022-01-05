@@ -11,7 +11,7 @@ import {
   LabelPositions,
   ValueFormats,
   EmptySizeRatios,
-} from '../../../../chart_expressions/expression_pie/common';
+} from '../../../../chart_expressions/expression_partition_vis/common';
 
 export const getLabelPositions = [
   {

@@ -22,11 +22,11 @@ import { VisTypePieDependencies } from '../plugin';
 
 export const strings = {
   getDisplayName: () =>
-    i18n.translate('expressionPie.renderer.pieVis.displayName', {
+    i18n.translate('expressionPartitionVis.renderer.pieVis.displayName', {
       defaultMessage: 'Pie visualization',
     }),
   getHelpDescription: () =>
-    i18n.translate('expressionPie.renderer.pieVis.helpDescription', {
+    i18n.translate('expressionPartitionVis.renderer.pieVis.helpDescription', {
       defaultMessage: 'Render a pie',
     }),
 };

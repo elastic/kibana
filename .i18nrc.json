@@ -32,7 +32,7 @@
     "expressionGauge": "src/plugins/chart_expressions/expression_gauge",
     "expressionTagcloud": "src/plugins/chart_expressions/expression_tagcloud",
     "expressionMetricVis": "src/plugins/chart_expressions/expression_metric",
-    "expressionPie": "src/plugins/chart_expressions/expression_pie",
+    "expressionPartitionVis": "src/plugins/chart_expressions/expression_partition_vis",
     "inputControl": "src/plugins/input_control_vis",
     "inspector": "src/plugins/inspector",
     "inspectorViews": "src/legacy/core_plugins/inspector_views",

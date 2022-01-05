@@ -7,10 +7,21 @@
  */
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/server';
 import { pieLabelsFunction, pieVisFunction } from '../common';
-import { ExpressionPiePluginSetup, ExpressionPiePluginStart, SetupDeps, StartDeps } from './types';
+import {
+  ExpressionPartitionVisPluginSetup,
+  ExpressionPartitionVisPluginStart,
+  SetupDeps,
+  StartDeps,
+} from './types';
 
-export class ExpressionPiePlugin
-  implements Plugin<ExpressionPiePluginSetup, ExpressionPiePluginStart, SetupDeps, StartDeps>
+export class ExpressionPartitionVisPlugin
+  implements
+    Plugin<
+      ExpressionPartitionVisPluginSetup,
+      ExpressionPartitionVisPluginStart,
+      SetupDeps,
+      StartDeps
+    >
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps) {
     expressions.registerFunction(pieLabelsFunction);

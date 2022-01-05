@@ -15,7 +15,7 @@ import {
   PieVisExpressionFunctionDefinition,
   PieVisParams,
   LabelsParams,
-} from '../../../chart_expressions/expression_pie/common';
+} from '../../../chart_expressions/expression_partition_vis/common';
 import { getEsaggsFn } from './to_ast_esaggs';
 
 const prepareDimension = (params: SchemaConfig) => {

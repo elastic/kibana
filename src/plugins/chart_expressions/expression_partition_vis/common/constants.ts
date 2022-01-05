@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionPiePlugin } from './plugin';
+export const PLUGIN_ID = 'expressionPartitionVis';
+export const PLUGIN_NAME = 'expressionPartitionVis';
 
-export function plugin() {
-  return new ExpressionPiePlugin();
-}
+export const PIE_VIS_EXPRESSION_NAME = 'pie_vis';
+export const PIE_LABELS_VALUE = 'pie_labels_value';
+export const PIE_LABELS_FUNCTION = 'pie_labels';
 
-export type { ExpressionPiePluginSetup, ExpressionPiePluginStart } from './types';
+export const DEFAULT_PERCENT_DECIMALS = 2;

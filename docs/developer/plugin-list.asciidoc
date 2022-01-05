@@ -114,7 +114,7 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Expression MetricVis plugin adds a metric renderer and function to the expression plugin. The renderer will display the metric chart.
 
 
-|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_pie/README.md[expressionPie]
+|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_partition_vis/README.md[expressionPartitionVis]
 |Expression Pie plugin adds a pie renderer and function to the expression plugin. The renderer will display the Pie chart.
 
 

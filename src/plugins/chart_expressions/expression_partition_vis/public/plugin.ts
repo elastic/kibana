@@ -12,7 +12,12 @@ import { ChartsPluginSetup } from '../../../charts/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import { pieLabelsFunction, pieVisFunction } from '../common';
 import { getPieVisRenderer } from './expression_renderers';
-import { ExpressionPiePluginSetup, ExpressionPiePluginStart, SetupDeps, StartDeps } from './types';
+import {
+  ExpressionPartitionVisPluginSetup,
+  ExpressionPartitionVisPluginStart,
+  SetupDeps,
+  StartDeps,
+} from './types';
 
 /** @internal */
 export interface VisTypePieDependencies {
@@ -30,11 +35,11 @@ export interface VisTypePiePluginStartDependencies {
   fieldFormats: FieldFormatsStart;
 }
 
-export class ExpressionPiePlugin {
+export class ExpressionPartitionVisPlugin {
   public setup(
     core: CoreSetup<VisTypePiePluginStartDependencies>,
     { expressions, charts }: SetupDeps
-  ): ExpressionPiePluginSetup {
+  ): ExpressionPartitionVisPluginSetup {
     expressions.registerFunction(pieLabelsFunction);
     expressions.registerFunction(pieVisFunction);
 
@@ -50,7 +55,7 @@ export class ExpressionPiePlugin {
     );
   }
 
-  public start(core: CoreStart, deps: StartDeps): ExpressionPiePluginStart {}
+  public start(core: CoreStart, deps: StartDeps): ExpressionPartitionVisPluginStart {}
 
   public stop() {}
 }

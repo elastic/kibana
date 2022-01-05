@@ -12,7 +12,7 @@ import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '../../../data/public';
-import { PieVisParams } from '../../../chart_expressions/expression_pie/common';
+import { PieVisParams } from '../../../chart_expressions/expression_partition_vis/common';
 
 /**
  * Get esaggs expressions function
