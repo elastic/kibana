@@ -20,6 +20,7 @@ import { performBulkActionSchema } from '../../../../../common/detection_engine/
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { routeLimitedConcurrencyTag } from '../../../../utils/route_limited_concurrency_tag';
 import { initPromisePool } from '../../../../utils/promise_pool';
 import { isElasticRule } from '../../../../usage/detections';
 import { buildMlAuthz } from '../../../machine_learning/authz';
@@ -35,6 +36,7 @@ import { buildSiemResponse } from '../utils';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
+const MAX_ROUTE_CONCURRENCY = 5;
 
 type RuleActionFn = (rule: Rule) => Promise<void>;
 
@@ -140,7 +142,7 @@ export const performBulkActionRoute = (
         body: buildRouteValidation<typeof performBulkActionSchema>(performBulkActionSchema),
       },
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
         timeout: {
           idleSocket: moment.duration(15, 'minutes').asMilliseconds(),
         },

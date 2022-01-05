@@ -37,7 +37,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const fetchRule = (ruleId: string) =>
     supertest.get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`).set('kbn-xsrf', 'true');
 
-  describe('perform_bulk_action', () => {
+  describe.only('perform_bulk_action', () => {
     beforeEach(async () => {
       await createSignalsIndex(supertest, log);
     });
@@ -146,156 +146,185 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(rulesResponse.total).to.eql(2);
     });
 
-    it('should set, add and delete tags in rules', async () => {
-      const ruleId = 'ruleId';
-      const tags = ['tag1', 'tag2'];
-      await createRule(supertest, log, getSimpleRule(ruleId));
+    describe('edit action', () => {
+      it('should set, add and delete tags in rules', async () => {
+        const ruleId = 'ruleId';
+        const tags = ['tag1', 'tag2'];
+        await createRule(supertest, log, getSimpleRule(ruleId));
 
-      const { body: setTagsBody } = await postBulkAction()
-        .send({
-          query: '',
-          action: BulkAction.edit,
-          [BulkAction.edit]: [
-            {
-              type: BulkActionEditType.set_tags,
-              value: ['reset-tag'],
-            },
-          ],
-        })
-        .expect(200);
+        const { body: setTagsBody } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.set_tags,
+                value: ['reset-tag'],
+              },
+            ],
+          })
+          .expect(200);
 
-      expect(setTagsBody).to.eql({ success: true, rules_count: 1 });
+        expect(setTagsBody).to.eql({ success: true, rules_count: 1 });
 
-      const { body: setTagsRule } = await fetchRule(ruleId).expect(200);
+        const { body: setTagsRule } = await fetchRule(ruleId).expect(200);
 
-      expect(setTagsRule.tags).to.eql(['reset-tag']);
+        expect(setTagsRule.tags).to.eql(['reset-tag']);
 
-      const { body: addTagsBody } = await postBulkAction()
-        .send({
-          query: '',
-          action: BulkAction.edit,
-          [BulkAction.edit]: [
-            {
-              type: BulkActionEditType.add_tags,
-              value: tags,
-            },
-          ],
-        })
-        .expect(200);
+        const { body: addTagsBody } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.add_tags,
+                value: tags,
+              },
+            ],
+          })
+          .expect(200);
 
-      expect(addTagsBody).to.eql({ success: true, rules_count: 1 });
+        expect(addTagsBody).to.eql({ success: true, rules_count: 1 });
 
-      const { body: addedTagsRule } = await fetchRule(ruleId).expect(200);
+        const { body: addedTagsRule } = await fetchRule(ruleId).expect(200);
 
-      expect(addedTagsRule.tags).to.eql(['reset-tag', ...tags]);
+        expect(addedTagsRule.tags).to.eql(['reset-tag', ...tags]);
 
-      await postBulkAction()
-        .send({
-          query: '',
-          action: BulkAction.edit,
-          [BulkAction.edit]: [
-            {
-              type: BulkActionEditType.delete_tags,
-              value: ['reset-tag', 'tag1'],
-            },
-          ],
-        })
-        .expect(200);
+        await postBulkAction()
+          .send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.delete_tags,
+                value: ['reset-tag', 'tag1'],
+              },
+            ],
+          })
+          .expect(200);
 
-      const { body: deletedTagsRule } = await fetchRule(ruleId).expect(200);
+        const { body: deletedTagsRule } = await fetchRule(ruleId).expect(200);
 
-      expect(deletedTagsRule.tags).to.eql(['tag2']);
+        expect(deletedTagsRule.tags).to.eql(['tag2']);
+      });
+
+      it('should set, add and delete index patterns in rules', async () => {
+        const ruleId = 'ruleId';
+        const indices = ['index1-*', 'index2-*'];
+        await createRule(supertest, log, getSimpleRule(ruleId));
+
+        const { body: setIndexBody } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.set_index_patterns,
+                value: ['initial-index-*'],
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(setIndexBody).to.eql({ success: true, rules_count: 1 });
+
+        const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
+
+        expect(setIndexRule.index).to.eql(['initial-index-*']);
+
+        const { body: addIndexBody } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.add_index_patterns,
+                value: indices,
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(addIndexBody).to.eql({ success: true, rules_count: 1 });
+
+        const { body: addIndexRule } = await fetchRule(ruleId).expect(200);
+
+        expect(addIndexRule.index).to.eql(['initial-index-*', ...indices]);
+
+        await postBulkAction()
+          .send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.delete_index_patterns,
+                value: ['index1-*'],
+              },
+            ],
+          })
+          .expect(200);
+
+        const { body: deleteIndexRule } = await fetchRule(ruleId).expect(200);
+
+        expect(deleteIndexRule.index).to.eql(['initial-index-*', 'index2-*']);
+      });
+
+      it('should set timeline values in rule', async () => {
+        const ruleId = 'ruleId';
+        const timelineId = '91832785-286d-4ebe-b884-1a208d111a70';
+        const timelineTitle = 'Test timeline';
+        await createRule(supertest, log, getSimpleRule(ruleId));
+
+        const { body } = await postBulkAction()
+          .send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.set_timeline,
+                value: {
+                  timeline_id: timelineId,
+                  timeline_title: timelineTitle,
+                },
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(body).to.eql({ success: true, rules_count: 1 });
+
+        const { body: rule } = await fetchRule(ruleId).expect(200);
+
+        expect(rule.timeline_id).to.eql(timelineId);
+        expect(rule.timeline_title).to.eql(timelineTitle);
+      });
     });
 
-    it('should set, add and delete index patterns in rules', async () => {
-      const ruleId = 'ruleId';
-      const indices = ['index1-*', 'index2-*'];
-      await createRule(supertest, log, getSimpleRule(ruleId));
-
-      const { body: setIndexBody } = await postBulkAction()
-        .send({
-          query: '',
-          action: BulkAction.edit,
-          [BulkAction.edit]: [
-            {
-              type: BulkActionEditType.set_index_patterns,
-              value: ['initial-index-*'],
-            },
-          ],
-        })
-        .expect(200);
-
-      expect(setIndexBody).to.eql({ success: true, rules_count: 1 });
-
-      const { body: setIndexRule } = await fetchRule(ruleId).expect(200);
-
-      expect(setIndexRule.index).to.eql(['initial-index-*']);
-
-      const { body: addIndexBody } = await postBulkAction()
-        .send({
-          query: '',
-          action: BulkAction.edit,
-          [BulkAction.edit]: [
-            {
-              type: BulkActionEditType.add_index_patterns,
-              value: indices,
-            },
-          ],
-        })
-        .expect(200);
-
-      expect(addIndexBody).to.eql({ success: true, rules_count: 1 });
-
-      const { body: addIndexRule } = await fetchRule(ruleId).expect(200);
-
-      expect(addIndexRule.index).to.eql(['initial-index-*', ...indices]);
-
-      await postBulkAction()
-        .send({
-          query: '',
-          action: BulkAction.edit,
-          [BulkAction.edit]: [
-            {
-              type: BulkActionEditType.delete_index_patterns,
-              value: ['index1-*'],
-            },
-          ],
-        })
-        .expect(200);
-
-      const { body: deleteIndexRule } = await fetchRule(ruleId).expect(200);
-
-      expect(deleteIndexRule.index).to.eql(['initial-index-*', 'index2-*']);
-    });
-
-    it('should set timeline values in rule', async () => {
+    it('should limit concurrent requests to 5', async () => {
       const ruleId = 'ruleId';
       const timelineId = '91832785-286d-4ebe-b884-1a208d111a70';
       const timelineTitle = 'Test timeline';
       await createRule(supertest, log, getSimpleRule(ruleId));
 
-      const { body } = await postBulkAction()
-        .send({
-          query: '',
-          action: BulkAction.edit,
-          [BulkAction.edit]: [
-            {
-              type: BulkActionEditType.set_timeline,
-              value: {
-                timeline_id: timelineId,
-                timeline_title: timelineTitle,
+      const responses = await Promise.all(
+        Array.from({ length: 10 }).map(() =>
+          postBulkAction().send({
+            query: '',
+            action: BulkAction.edit,
+            [BulkAction.edit]: [
+              {
+                type: BulkActionEditType.set_timeline,
+                value: {
+                  timeline_id: timelineId,
+                  timeline_title: timelineTitle,
+                },
               },
-            },
-          ],
-        })
-        .expect(200);
+            ],
+          })
+        )
+      );
 
-      expect(body).to.eql({ success: true, rules_count: 1 });
-
-      const { body: rule } = await fetchRule(ruleId).expect(200);
-
-      expect(rule.timeline_id).to.eql(timelineId);
-      expect(rule.timeline_title).to.eql(timelineTitle);
+      expect(responses.filter((r) => r.body.statusCode === 429).length).to.eql(5);
     });
   });
 };

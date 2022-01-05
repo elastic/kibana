@@ -400,3 +400,5 @@ export const WARNING_TRANSFORM_STATES = new Set([
  * https://github.com/elastic/kibana/issues/94418
  */
 export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 50;
+
+export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrency`;
