@@ -475,9 +475,10 @@ export const sendAlertToTimelineAction = async ({
     const { thresholdFrom, thresholdTo, dataProviders } = getThresholdAggregationData(ecsData);
 
     const params = getField(ecsData, ALERT_RULE_PARAMETERS);
-    const filters = getFiltersFromRule(params.filters) ?? [];
-    const language = params.language ?? 'kuery';
-    const query = params.query ?? '';
+    const filters = getFiltersFromRule(params.filters ?? ecsData.signal?.rule?.filters) ?? [];
+    const language = params.language ?? ecsData.signal?.rule?.language ?? 'kuery';
+    const query = params.query ?? ecsData.signal?.rule?.query ?? '';
+    const indexNames = params.index ?? ecsData.signal?.rule?.index ?? [];
 
     return createTimeline({
       from: thresholdFrom,
@@ -488,7 +489,7 @@ export const sendAlertToTimelineAction = async ({
         filters,
         dataProviders,
         id: TimelineId.active,
-        indexNames: [],
+        indexNames,
         dateRange: {
           start: thresholdFrom,
           end: thresholdTo,

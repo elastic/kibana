@@ -64,8 +64,7 @@ export const useInvestigateInTimeline = ({
         timeline: {
           ...timeline,
           filterManager,
-          // by setting as an empty array, it will default to all in the reducer because of the event type
-          indexNames: [],
+          indexNames: timeline.indexNames ?? [],
           show: true,
         },
         to: toTimeline,
