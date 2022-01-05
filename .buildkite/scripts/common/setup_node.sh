@@ -60,6 +60,7 @@ echo "--- Setup Yarn"
 YARN_VERSION=$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")
 export YARN_VERSION
 
+rm -rf "$(npm root -g)/yarn" # TODO remove me
 mkdir -p "$(npm root -g)/yarn/test" # TODO remove me after testing
 
 if [[ ! $(which yarn) || $(yarn --version) != "$YARN_VERSION" ]]; then
