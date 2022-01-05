@@ -28,6 +28,8 @@ export const addExcludeFrozenToQuery = (originalQuery: QueryDslQueryContainer | 
 
   const query = cloneDeep(originalQuery);
 
+  delete query.match_all;
+
   if (isPopulatedObject(query.bool)) {
     // Must_not can be both arrays or singular object
     if (Array.isArray(query.bool.must_not)) {

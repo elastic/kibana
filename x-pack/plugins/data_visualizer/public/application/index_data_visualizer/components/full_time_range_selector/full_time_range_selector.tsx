@@ -126,7 +126,12 @@ export const FullTimeRangeSelector: FC<Props> = ({
               display="base"
               size="m"
               iconType="boxesVertical"
-              aria-label="More"
+              aria-label={i18n.translate(
+                'xpack.ml.fullTimeRangeSelector.moreOptionsButtonAriaLabel',
+                {
+                  defaultMessage: 'More options',
+                }
+              )}
               onClick={onButtonClick}
             />
           }
