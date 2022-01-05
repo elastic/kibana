@@ -57,7 +57,8 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./setup/metricbeat_migration'));
     loadTestFile(require.resolve('./setup/metricbeat_migration_mb'));
 
-    // Uncomment with TEST_KIBANA_URL set to run only SM smoke tests
-    //loadTestFile(require.resolve('./smoke_test'));
+    if (process.env.TEST_KIBANA_MONITORING_SMOKE) {
+      loadTestFile(require.resolve('./smoke_test'));
+    }
   });
 }
