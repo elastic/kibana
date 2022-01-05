@@ -392,7 +392,7 @@ describe('PrivilegeSpaceForm', () => {
     expect(wrapper.find(FeatureTable).props().canCustomizeSubFeaturePrivileges).toBe(canCustomize);
   });
 
-  describe('Feature with disabled on read privileges', () => {
+  describe('Feature with a disabled `read` privilege', () => {
     const role = createRole([
       {
         base: [],
