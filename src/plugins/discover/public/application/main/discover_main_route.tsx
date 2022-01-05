@@ -122,6 +122,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
             onBeforeRedirect() {
               getUrlTracker().setTrackedUrl('/');
             },
+            theme: core.theme,
           })(e);
         }
       }
@@ -139,6 +140,7 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
     id,
     services,
     toastNotifications,
+    core.theme,
   ]);
 
   useEffect(() => {

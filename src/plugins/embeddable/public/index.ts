@@ -10,6 +10,8 @@ import './index.scss';
 
 import { PluginInitializerContext } from 'src/core/public';
 import { EmbeddablePublicPlugin } from './plugin';
+import type { ThemeServiceStart } from '../../../core/public';
+import { createGetterSetter } from '../../../plugins/kibana_utils/public';
 
 export type {
   Adapters,
@@ -82,6 +84,8 @@ export type { EnhancementRegistryDefinition } from './types';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
+
+export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');
 
 export type {
   EmbeddableSetup,

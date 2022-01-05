@@ -7,11 +7,15 @@
  */
 
 import { PluginInitializerContext } from '../../../core/public';
+import type { ThemeServiceStart } from '../../../core/public';
 import { UiActionsPlugin } from './plugin';
+import { createGetterSetter } from '../../../plugins/kibana_utils/public';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new UiActionsPlugin(initializerContext);
 }
+
+export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');
 
 export type { UiActionsSetup, UiActionsStart } from './plugin';
 export type { UiActionsServiceParams } from './service';
