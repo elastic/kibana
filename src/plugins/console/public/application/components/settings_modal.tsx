@@ -26,6 +26,8 @@ import {
   EuiSelect,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiRadio,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { DevToolsSettings } from '../../services';
@@ -117,29 +119,21 @@ export function DevToolsSettingsModal(props: Props) {
     []
   );
 
+  const renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) => {
+    return (
+      <EuiFlexGroup gutterSize="none" responsive={false}>
+        <EuiFlexItem grow={false}>{child}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip content={tipContent} position="bottom" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
   // It only makes sense to show polling options if the user needs to fetch any data.
   const pollingFields =
     fields || indices || templates ? (
       <Fragment>
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="console.settingsPage.fetchingDataLabel"
-              defaultMessage="Fetch autocomplete suggestions"
-            />
-          }
-        >
-          <EuiSwitch
-            checked={!polling}
-            label={
-              <FormattedMessage
-                defaultMessage="Fetch once on load"
-                id="console.settingsPage.fetchingOnLoadLabel"
-              />
-            }
-            onChange={() => setPolling(!polling)}
-          />
-        </EuiFormRow>
         <EuiFormRow
           label={
             <FormattedMessage
@@ -155,32 +149,56 @@ export function DevToolsSettingsModal(props: Props) {
             />
           }
         >
-          <EuiFlexGroup alignItems="center" gutterSize="m">
-            <EuiFlexItem grow={false}>
-              <EuiSwitch
-                checked={polling}
-                data-test-subj="autocompletePolling"
-                id="autocompletePolling"
-                label={
-                  <FormattedMessage
-                    defaultMessage="Refresh every"
-                    id="console.settingsPage.pollingLabelText"
-                  />
-                }
-                onChange={(e) => setPolling(e.target.checked)}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiSelect
-                fullWidth
-                compressed
-                options={intervalOptions}
-                value={pollInterval}
-                onChange={onIntervalChange}
-                disabled={!polling}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiRadio
+                  label={renderWithIconTip(
+                    <FormattedMessage
+                      id="console.settingsPage.pollingLabelText"
+                      defaultMessage="Refresh every"
+                    />,
+                    <FormattedMessage
+                      id="console.settingsPage.pollingDescription"
+                      defaultMessage="Configures autocomplete refresh frequency"
+                    />
+                  )}
+                  id="autocompletePolling"
+                  checked={polling}
+                  onChange={() => setPolling(true)}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiSelect
+                  fullWidth
+                  compressed
+                  options={intervalOptions}
+                  value={pollInterval}
+                  onChange={onIntervalChange}
+                  disabled={!polling}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiRadio
+                  label={renderWithIconTip(
+                    <FormattedMessage
+                      id="console.settingsPage.refreshOnceLabel"
+                      defaultMessage="Only refresh when Console is opened"
+                    />,
+                    <FormattedMessage
+                      id="console.settingsPage.refreshOnceDescription"
+                      defaultMessage="Reduces bandwidth costs"
+                    />
+                  )}
+                  id="autocompletePollingDisabled"
+                  checked={!polling}
+                  onChange={() => setPolling(false)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
         </EuiFormRow>
 
         <EuiButton
