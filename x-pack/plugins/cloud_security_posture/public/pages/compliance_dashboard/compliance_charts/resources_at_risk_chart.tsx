@@ -8,7 +8,7 @@
 import React from 'react';
 import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
 import { euiPaletteForStatus } from '@elastic/eui';
-import { useNavigateToCSPFindings } from '../../../common/hooks/use_navigate_to_csp_findings';
+import { useNavigateToCSPFindings } from '../../../common/navigation/use_navigate_to_csp_findings';
 import { CloudPostureStats } from '../../../../common/types';
 
 export function sortAscending<T>(getter: (x: T) => number | string) {

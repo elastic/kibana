@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { RouteProps } from 'react-router-dom';
+import { CSP_DASHBOARD_PATH, CSP_FINDINGS_PATH } from '../common/navigation/constants';
 import * as pages from '../pages';
-import { CSP_FINDINGS_PATH, CSP_DASHBOARD_PATH } from '../common/constants';
 
 export const routes: readonly RouteProps[] = [
   { path: CSP_FINDINGS_PATH, component: pages.Findings },

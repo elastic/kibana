@@ -7,6 +7,8 @@
 import React from 'react';
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import type { EuiPageHeaderProps } from '@elastic/eui';
+import { allNavigationItems } from '../../common/navigation/constants';
+import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { FindingsTableContainer } from './findings_container';
 import { CspPageTemplate } from '../../components/page_template';
 import { useKubebeatDataView } from './utils';
@@ -18,6 +20,7 @@ const pageHeader: EuiPageHeaderProps = {
 
 export const Findings = () => {
   const dataView = useKubebeatDataView();
+  useCspBreadcrumbs([allNavigationItems.findings]);
 
   return (
     <CspPageTemplate pageHeader={pageHeader}>
