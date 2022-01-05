@@ -685,5 +685,9 @@ describe('PrivilegeSpaceForm', () => {
         ])
       );
     });
+
+    test.todo(
+      'should unset the feature privilege and all sub-feature privileges when "* All spaces" is removed'
+    );
   });
 });

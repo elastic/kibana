@@ -429,7 +429,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
     const form = role.kibana[this.state.privilegeIndex];
     form.spaces = [...selectedSpaceIds];
-    form.feature = this.resetRoleFeature(form.feature);
+    form.feature = this.resetRoleFeature(form.feature, selectedSpaceIds); // Remove any feature privilege(s) that cannot currently be selected
 
     this.setState({
       selectedSpaceIds,
@@ -449,7 +449,6 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     if (privilegeName === CUSTOM_PRIVILEGE_VALUE) {
       form.base = [];
       isCustomizingFeaturePrivileges = true;
-      form.feature = this.resetRoleFeature(form.feature);
     } else {
       form.base = [privilegeName];
       form.feature = {};
@@ -463,7 +462,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     });
   };
 
-  private resetRoleFeature = (roleFeature: FeaturesPrivileges) => {
+  private resetRoleFeature = (roleFeature: FeaturesPrivileges, selectedSpaceIds: string[]) => {
     const securedFeatures = this.props.kibanaPrivileges.getSecuredFeatures();
     return Object.entries(roleFeature).reduce((features, [featureId, privileges]) => {
       if (!Array.isArray(privileges)) {
@@ -472,27 +471,15 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
       const securedFeature = securedFeatures.find((sf) => sf.id === featureId);
       const primaryFeaturePrivilege = securedFeature
         ?.getPrimaryFeaturePrivileges({ includeMinimalFeaturePrivileges: true })
-        .find((pfp) => {
-          if (
-            pfp?.disabled ||
-            (pfp?.requireAllSpaces && !this.state.selectedSpaceIds.includes(ALL_SPACES_ID))
-          ) {
-            return false;
-          }
-          return privileges.includes(pfp.id);
-        }) ?? { disabled: false, requireAllSpaces: false };
+        .find((pfp) => privileges.includes(pfp.id)) ?? { disabled: false, requireAllSpaces: false };
+      const newFeaturePrivileges =
+        primaryFeaturePrivilege?.disabled ||
+        (primaryFeaturePrivilege?.requireAllSpaces && !selectedSpaceIds.includes(ALL_SPACES_ID))
+          ? [] // The primary feature privilege cannot be selected; remove that and any selected sub-feature privileges, too
+          : privileges;
       return {
         ...features,
-        [featureId]: privileges.filter((p) => {
-          if (
-            primaryFeaturePrivilege?.disabled ||
-            (primaryFeaturePrivilege?.requireAllSpaces &&
-              !this.state.selectedSpaceIds.includes(ALL_SPACES_ID))
-          ) {
-            return false;
-          }
-          return true;
-        }),
+        ...(newFeaturePrivileges.length && { [featureId]: newFeaturePrivileges }),
       };
     }, {});
   };
