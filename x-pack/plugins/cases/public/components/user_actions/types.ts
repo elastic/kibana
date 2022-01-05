@@ -11,7 +11,7 @@ import { ActionTypes, UserActionWithResponse } from '../../../common/api';
 import { Case, CaseUserActions, Ecs, Comment } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { AddCommentRefObject } from '../add_comment';
-import { UserActionMarkdownRefObject } from './user_action_markdown';
+import { UserActionMarkdownRefObject } from './markdown_form';
 import { CasesNavigation } from '../links';
 import { UNSUPPORTED_ACTION_TYPES } from './constants';
 

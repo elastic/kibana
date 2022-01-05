@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
-import * as i18n from './translations';
+import * as i18n from '../translations';
 
 interface UserActionShowAlertProps {
   id: string;

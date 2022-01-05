@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { TestProviders } from '../../common/mock';
-import { UserActionTimestamp } from './user_action_timestamp';
+import { UserActionTimestamp } from './timestamp';
 
 jest.mock('@kbn/i18n-react', () => {
   const originalModule = jest.requireActual('@kbn/i18n-react');

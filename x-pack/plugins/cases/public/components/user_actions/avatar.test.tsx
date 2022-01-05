@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { UserActionAvatar } from './user_action_avatar';
+import { UserActionAvatar } from './avatar';
 
 const props = {
   username: 'elastic',

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { UserActionMarkdown } from './user_action_markdown';
+import { UserActionMarkdown } from './markdown_form';
 import { TestProviders } from '../../common/mock';
 import { waitFor } from '@testing-library/react';
 const onChangeEditable = jest.fn();

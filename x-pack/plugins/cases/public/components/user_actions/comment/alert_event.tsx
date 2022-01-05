@@ -9,10 +9,10 @@ import React, { memo, useCallback } from 'react';
 import { isEmpty } from 'lodash';
 import { EuiText, EuiLoadingSpinner } from '@elastic/eui';
 
-import * as i18n from './translations';
-import { CommentType } from '../../../common/api';
-import { LinkAnchor } from '../links';
-import { RuleDetailsNavigation } from './types';
+import { CommentType } from '../../../../common/api';
+import * as i18n from '../translations';
+import { LinkAnchor } from '../../links';
+import { RuleDetailsNavigation } from '../types';
 
 interface Props {
   alertId: string;

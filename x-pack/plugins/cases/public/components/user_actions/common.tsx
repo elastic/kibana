@@ -9,11 +9,11 @@ import React from 'react';
 import { EuiCommentProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { Actions, ConnectorUserAction } from '../../../common/api';
-import { UserActionTimestamp } from './user_action_timestamp';
+import { UserActionTimestamp } from './timestamp';
 import { UserActionResponse } from './types';
-import { UserActionUsernameWithAvatar } from './user_action_username_with_avatar';
-import { UserActionCopyLink } from './user_action_copy_link';
-import { UserActionMoveToReference } from './user_action_move_to_reference';
+import { UserActionUsernameWithAvatar } from './avatar_username';
+import { UserActionCopyLink } from './copy_link';
+import { UserActionMoveToReference } from './move_to_reference';
 import { CaseUserActions } from '../../containers/types';
 
 interface Props {

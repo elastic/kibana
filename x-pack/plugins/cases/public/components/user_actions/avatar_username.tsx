@@ -6,11 +6,10 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiAvatar } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { UserActionUsername } from './user_action_username';
-import * as i18n from './translations';
+import { UserActionAvatar } from './avatar';
+import { UserActionUsername } from './username';
 
 interface UserActionUsernameWithAvatarProps {
   username?: string | null;
@@ -28,11 +27,7 @@ const UserActionUsernameWithAvatarComponent = ({
     data-test-subj="user-action-username-with-avatar"
   >
     <EuiFlexItem grow={false}>
-      <EuiAvatar
-        size="s"
-        name={(isEmpty(fullName) ? username : fullName) ?? i18n.UNKNOWN}
-        data-test-subj="user-action-username-avatar"
-      />
+      <UserActionAvatar username={username} fullName={fullName} size="s" />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <UserActionUsername username={username} fullName={fullName} />

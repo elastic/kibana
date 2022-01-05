@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { HostIsolationCommentEvent } from './user_action_host_isolation_comment_event';
+import { HostIsolationCommentEvent } from './host_isolation_event';
 
 const defaultProps = () => {
   return {

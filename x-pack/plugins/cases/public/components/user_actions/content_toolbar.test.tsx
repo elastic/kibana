@@ -7,10 +7,7 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import {
-  UserActionContentToolbar,
-  UserActionContentToolbarProps,
-} from './user_action_content_toolbar';
+import { UserActionContentToolbar, UserActionContentToolbarProps } from './content_toolbar';
 
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/lib/kibana');

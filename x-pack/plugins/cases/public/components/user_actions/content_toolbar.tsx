@@ -8,8 +8,8 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { UserActionCopyLink } from './user_action_copy_link';
-import { UserActionPropertyActions } from './user_action_property_actions';
+import { UserActionCopyLink } from './copy_link';
+import { UserActionPropertyActions } from './property_actions';
 
 export interface UserActionContentToolbarProps {
   commentMarkdown: string;

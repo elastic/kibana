@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { UserActionPropertyActions } from './user_action_property_actions';
+import { UserActionPropertyActions } from './property_actions';
 
 jest.mock('../../common/lib/kibana');
 

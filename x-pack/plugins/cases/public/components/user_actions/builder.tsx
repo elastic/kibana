@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createCommentUserActionBuilder } from './comment';
+import { createCommentUserActionBuilder } from './comment/comment';
 import { createConnectorUserActionBuilder } from './connector';
 import { createDescriptionUserActionBuilder } from './description';
 import { createPushedUserActionBuilder } from './pushed';

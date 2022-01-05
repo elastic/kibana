@@ -19,34 +19,30 @@ import {
   CommentResponseUserType,
   CommentResponseAlertsType,
   CommentResponseActionsType,
-} from '../../../common/api';
+} from '../../../../common/api';
 import {
   ActionsNavigation,
   RuleDetailsNavigation,
   UserActionBuilder,
   UserActionBuilderArgs,
   UserActionResponse,
-} from './types';
-import { createCommonUserActionBuilder } from './common';
-import { Comment, Ecs } from '../../containers/types';
-import { UserActionAvatar } from './user_action_avatar';
-import { UserActionContentToolbar } from './user_action_content_toolbar';
-import {
-  ContentWrapper,
-  UserActionMarkdown,
-  UserActionMarkdownRefObject,
-} from './user_action_markdown';
-import { UserActionTimestamp } from './user_action_timestamp';
-import { UserActionUsername } from './user_action_username';
-import { AddCommentRefObject } from '../add_comment';
-import { SnakeToCamelCase } from '../../../common/types';
-import { UserActionUsernameWithAvatar } from './user_action_username_with_avatar';
-import { AlertCommentEvent } from './user_action_alert_comment_event';
-import { UserActionCopyLink } from './user_action_copy_link';
-import { UserActionShowAlert } from './user_action_show_alert';
-import * as i18n from './translations';
-import { MarkdownRenderer } from '../markdown_editor';
-import { HostIsolationCommentEvent } from './user_action_host_isolation_comment_event';
+} from '../types';
+import { createCommonUserActionBuilder } from '../common';
+import { Comment, Ecs } from '../../../containers/types';
+import { UserActionAvatar } from '../avatar';
+import { UserActionContentToolbar } from '../content_toolbar';
+import { ContentWrapper, UserActionMarkdown, UserActionMarkdownRefObject } from '../markdown_form';
+import { UserActionTimestamp } from '../timestamp';
+import { UserActionUsername } from '../username';
+import { AddCommentRefObject } from '../../add_comment';
+import { SnakeToCamelCase } from '../../../../common/types';
+import { UserActionUsernameWithAvatar } from '../avatar_username';
+import { AlertCommentEvent } from './alert_event';
+import { UserActionCopyLink } from '../copy_link';
+import { UserActionShowAlert } from './show_alert';
+import * as i18n from '../translations';
+import { MarkdownRenderer } from '../../markdown_editor';
+import { HostIsolationCommentEvent } from './host_isolation_event';
 
 const getUserAttachmentUserAction = ({
   comment,

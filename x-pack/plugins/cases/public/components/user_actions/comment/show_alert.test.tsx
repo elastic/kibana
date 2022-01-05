@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { UserActionShowAlert } from './user_action_show_alert';
+import { UserActionShowAlert } from './show_alert';
 
 const props = {
   id: 'action-id',

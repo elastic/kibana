@@ -11,7 +11,7 @@ import copy from 'copy-to-clipboard';
 
 import { useKibana } from '../../common/lib/kibana';
 import { TestProviders } from '../../common/mock';
-import { UserActionCopyLink } from './user_action_copy_link';
+import { UserActionCopyLink } from './copy_link';
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 

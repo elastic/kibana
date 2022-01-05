@@ -6,19 +6,19 @@
  */
 
 import React, { memo } from 'react';
-import { EuiAvatar } from '@elastic/eui';
+import { EuiAvatar, EuiAvatarProps } from '@elastic/eui';
 
 import * as i18n from './translations';
 
 interface UserActionAvatarProps {
   username?: string | null;
   fullName?: string | null;
+  size?: EuiAvatarProps['size'];
 }
 
-const UserActionAvatarComponent = ({ username, fullName }: UserActionAvatarProps) => {
+const UserActionAvatarComponent = ({ username, fullName, size = 'm' }: UserActionAvatarProps) => {
   const avatarName = fullName && fullName.length > 0 ? fullName : username ?? i18n.UNKNOWN;
-
-  return <EuiAvatar name={avatarName} data-test-subj={`user-action-avatar`} />;
+  return <EuiAvatar name={avatarName} data-test-subj={`user-action-avatar`} size={size} />;
 };
 
 export const UserActionAvatar = memo(UserActionAvatarComponent);

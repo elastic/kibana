@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { UserActionUsername } from './user_action_username';
+import { UserActionUsername } from './username';
 
 const props = {
   username: 'elastic',
