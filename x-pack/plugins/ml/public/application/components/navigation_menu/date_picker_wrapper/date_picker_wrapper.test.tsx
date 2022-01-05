@@ -20,7 +20,17 @@ jest.mock('@elastic/eui', () => {
   const EuiSuperDatePickerMock = jest.fn(() => {
     return null;
   });
-  return { EuiSuperDatePicker: EuiSuperDatePickerMock };
+  const EuiFlexGroupMock = jest.fn(({ children }) => {
+    return <>{children}</>;
+  });
+  const EuiFlexItemMock = jest.fn(({ children }) => {
+    return <>{children}</>;
+  });
+  return {
+    EuiSuperDatePicker: EuiSuperDatePickerMock,
+    EuiFlexGroup: EuiFlexGroupMock,
+    EuiFlexItem: EuiFlexItemMock,
+  };
 });
 
 jest.mock('../../../util/url_state', () => {
