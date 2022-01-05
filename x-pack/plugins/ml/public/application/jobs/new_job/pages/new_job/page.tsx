@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, Fragment } from 'react';
+import React, { FC, useEffect, Fragment, useMemo } from 'react';
 import { EuiPageContentHeader, EuiPageContentHeaderSection } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -47,11 +47,16 @@ export interface PageProps {
 
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const mlContext = useMlContext();
-  const jobCreator = jobCreatorFactory(jobType)(
-    mlContext.currentDataView,
-    mlContext.currentSavedSearch,
-    mlContext.combinedQuery
+  const jobCreator = useMemo(
+    () =>
+      jobCreatorFactory(jobType)(
+        mlContext.currentDataView,
+        mlContext.currentSavedSearch,
+        mlContext.combinedQuery
+      ),
+    [jobType]
   );
+
   const { displayErrorToast } = useToastNotificationService();
 
   const { from, to } = getTimeFilterRange();
@@ -179,7 +184,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   const chartLoader = new ChartLoader(mlContext.currentDataView, mlContext.combinedQuery);
 
-  const jobValidator = new JobValidator(jobCreator);
+  const jobValidator = useMemo(() => new JobValidator(jobCreator), [jobCreator]);
 
   const resultsLoader = new ResultsLoader(jobCreator, chartInterval, chartLoader);
 
