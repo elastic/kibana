@@ -70,25 +70,18 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
     display: 'flex',
     alignItems: 'center',
     textAlign: 'center',
-    padding: '0 1em'
-  }
+    padding: '0 1em',
+  };
 
   const visibleSources = (
     <EuiFlexGrid columns={3} gutterSize="m" className="source-grid-configured">
       {sources.map(({ name, serviceType, addPath, connected, accountContextOnly }, i) => (
         <React.Fragment key={i}>
           <EuiFlexItem grow>
-
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem grow>
-                <EuiSplitPanel.Outer
-                  display="plain"
-                  hasShadow
-                  hasBorder={true}
-                  grow
-                >
+                <EuiSplitPanel.Outer display="plain" hasShadow={false} hasBorder={true}>
                   <EuiSplitPanel.Inner>
-
                     <EuiFlexGroup
                       justifyContent="center"
                       alignItems="center"
@@ -112,43 +105,38 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                         </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
-
                   </EuiSplitPanel.Inner>
-
-                  <EuiSplitPanel.Inner
-                    color="subdued"
-                    paddingSize="none"
-                  >
-
+                  <EuiSplitPanel.Inner color="subdued" paddingSize="none">
                     <EuiFlexGroup
                       justifyContent="center"
                       alignItems="center"
                       gutterSize="s"
                       responsive={false}
                     >
-
-                      {(!isOrganization || (isOrganization && !accountContextOnly)) && (
+                      {((!isOrganization || (isOrganization && !accountContextOnly)) && (
                         <EuiFlexItem grow>
-                          <EuiButtonEmptyTo to={`${getSourcesPath(addPath, isOrganization)}/connect`}>
+                          <EuiButtonEmptyTo
+                            to={`${getSourcesPath(addPath, isOrganization)}/connect`}
+                          >
                             {CONFIGURED_SOURCES_CONNECT_BUTTON}
                           </EuiButtonEmptyTo>
                         </EuiFlexItem>
-                      ) || (
-                          <EuiFlexItem grow={false}>
-                            <EuiText size="s" color="subdued" style={organizationalContentSourceStyle}>
-                              <p>Add an organizational content source</p>
-                            </EuiText>
-                          </EuiFlexItem>
-                        )}
-
+                      )) || (
+                        <EuiFlexItem grow={false}>
+                          <EuiText
+                            size="s"
+                            color="subdued"
+                            style={organizationalContentSourceStyle}
+                          >
+                            <p>Add an organizational content source</p>
+                          </EuiText>
+                        </EuiFlexItem>
+                      )}
                     </EuiFlexGroup>
-
                   </EuiSplitPanel.Inner>
-
                 </EuiSplitPanel.Outer>
               </EuiFlexItem>
             </EuiFlexGroup>
-
           </EuiFlexItem>
         </React.Fragment>
       ))}

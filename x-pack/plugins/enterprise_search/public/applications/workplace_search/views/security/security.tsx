@@ -169,10 +169,7 @@ export const Security: React.FC = () => {
         hasUnsavedChanges={unsavedChanges}
         messageText={SECURITY_UNSAVED_CHANGES_MESSAGE}
       />
-      <EuiPanel
-        hasShadow={false}
-        hasBorder
-      >
+      <EuiPanel hasShadow={false} hasBorder={true}>
         {allSourcesToggle}
         {!hasPlatinumLicense && platinumLicenseCallout}
         {sourceTables}
