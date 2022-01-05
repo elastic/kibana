@@ -57,7 +57,7 @@ export const useDataVisualizerGridData = (
   const dataVisualizerListStateRef = useRef(dataVisualizerListState);
 
   const [lastRefresh, setLastRefresh] = useState(0);
-  const [searchSessionId, setSearchSessionId] = useState<string | undefined>();
+  const searchSessionId = input.sessionId;
 
   const {
     currentSavedSearch,
@@ -117,13 +117,6 @@ export const useDataVisualizerGridData = (
     }),
     lastRefresh,
   ]);
-
-  useEffect(() => {
-    const currentSearchSessionId = data.search?.session?.getSessionId();
-    if (currentSearchSessionId !== undefined) {
-      setSearchSessionId(currentSearchSessionId);
-    }
-  }, [data]);
 
   const _timeBuckets = useMemo(() => {
     return new TimeBuckets({
