@@ -197,14 +197,14 @@ export const previewRulesRoute = async (
             const currentLogs = {
               errors: warningsAndErrorsStore
                 .filter((item) => item.newStatus === RuleExecutionStatus.failed)
-                .map((item) => item.message ?? 'ERROR'),
+                .map((item) => item.message ?? 'Unkown Error'),
               warnings: warningsAndErrorsStore
                 .filter(
                   (item) =>
                     item.newStatus === RuleExecutionStatus['partial failure'] ||
                     item.newStatus === RuleExecutionStatus.warning
                 )
-                .map((item) => item.message ?? 'WARNING'),
+                .map((item) => item.message ?? 'Unknown Warning'),
               startedAt: startedAt.toDate().toISOString(),
             };
             logs.push(currentLogs);

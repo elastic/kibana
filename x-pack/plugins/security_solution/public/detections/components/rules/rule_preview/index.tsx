@@ -74,7 +74,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     }
   }, [spaces]);
 
-  const areAllMlJobsRunning = useMemo(() => {
+  const areRelaventMlJobsRunning = useMemo(() => {
     if (ruleType !== 'machine_learning') {
       return true; // Don't do the expensive logic if we don't need it
     }
@@ -137,7 +137,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
             <PreviewButton
               fill
               isLoading={isPreviewRequestInProgress}
-              isDisabled={isDisabled || !areAllMlJobsRunning}
+              isDisabled={isDisabled || !areRelaventMlJobsRunning}
               onClick={createPreview}
               data-test-subj="queryPreviewButton"
             >

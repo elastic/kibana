@@ -25,6 +25,9 @@ interface LogAccordionProps {
   isError?: boolean;
 }
 
+const addLogs = (startedAt: string, logs: string[], allLogs: SortedLogs[]) =>
+  logs.length ? [{ startedAt, logs }, ...allLogs] : allLogs;
+
 export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = ({
   logs,
   hasNoiseWarning,
@@ -35,15 +38,9 @@ export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = ({
         errors: SortedLogs[];
         warnings: SortedLogs[];
       }>(
-        (acc, curr) => ({
-          errors:
-            curr.errors.length > 0 // Filter out empty error logs
-              ? [{ startedAt: curr.startedAt, logs: curr.errors }, ...acc.errors]
-              : acc.errors,
-          warnings:
-            curr.warnings.length > 0 // Filter out empty warning logs
-              ? [{ startedAt: curr.startedAt, logs: curr.warnings }, ...acc.warnings]
-              : acc.warnings,
+        ({ errors, warnings }, curr) => ({
+          errors: addLogs(curr.startedAt, curr.errors, errors),
+          warnings: addLogs(curr.startedAt, curr.warnings, warnings),
         }),
         { errors: [], warnings: [] }
       ),
@@ -62,7 +59,7 @@ export const PreviewLogsComponent: React.FC<PreviewLogsComponentProps> = ({
 const LogAccordion: React.FC<LogAccordionProps> = ({ logs, isError }) => {
   const firstLog = logs[0];
   const restOfLogs = logs.slice(1);
-  return firstLog != null ? (
+  return firstLog ? (
     <>
       <CalloutGroup logs={firstLog.logs} startedAt={firstLog.startedAt} isError={isError} />
       {restOfLogs.length > 0 ? (

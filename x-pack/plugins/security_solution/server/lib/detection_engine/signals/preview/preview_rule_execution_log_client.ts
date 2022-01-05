@@ -70,7 +70,6 @@ export const createWarningsAndErrors = () => {
     },
 
     clearWarningsAndErrorsStore() {
-      // Clears the array
       warningsAndErrorsStore.length = 0;
     },
   };
