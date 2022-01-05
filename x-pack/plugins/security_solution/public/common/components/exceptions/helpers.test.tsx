@@ -750,7 +750,7 @@ describe('Exception helpers', () => {
           code: 'some event code',
         },
         'event.code': 'some event code',
-      } as Flattened<Ecs>);
+      });
 
       expect(defaultItems[0].entries).toEqual([
         {
@@ -853,7 +853,7 @@ describe('Exception helpers', () => {
           code: 'ransomware',
         },
         'event.code': 'ransomware',
-      } as Flattened<Ecs>);
+      });
 
       expect(defaultItems[0].entries).toEqual([
         {
@@ -967,7 +967,7 @@ describe('Exception helpers', () => {
           code: 'memory_signature',
         },
         'event.code': 'memory_signature',
-      } as Flattened<Ecs>);
+      });
 
       expect(defaultItems[0].entries).toEqual([
         {
@@ -1019,7 +1019,7 @@ describe('Exception helpers', () => {
           code: 'memory_signature',
         },
         'event.code': 'memory_signature',
-      } as Flattened<Ecs>);
+      });
 
       // should not contain name or executable
       expect(defaultItems[0].entries).toEqual([
@@ -1080,7 +1080,7 @@ describe('Exception helpers', () => {
           },
         },
         'event.code': 'shellcode_thread',
-      } as Flattened<Ecs>);
+      });
 
       expect(defaultItems[0].entries).toEqual([
         {
@@ -1161,7 +1161,7 @@ describe('Exception helpers', () => {
             },
           },
         },
-      } as Flattened<Ecs>);
+      });
 
       // no name, no exceutable, no allocation_type
       expect(defaultItems[0].entries).toEqual([
@@ -1247,7 +1247,7 @@ describe('Exception helpers', () => {
         user: {
           id: '0987',
         },
-      } as Flattened<Ecs>);
+      });
 
       expect(defaultItems[0].entries).toEqual([
         {
@@ -1436,7 +1436,7 @@ describe('Exception helpers', () => {
         user: {
           id: '0987',
         },
-      } as Flattened<Ecs>);
+      });
 
       expect(defaultItems[0].entries).toEqual([
         {
