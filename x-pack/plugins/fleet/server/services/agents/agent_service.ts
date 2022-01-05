@@ -12,7 +12,7 @@ import type { ElasticsearchClient, KibanaRequest } from 'kibana/server';
 import type { AgentStatus, ListWithKuery } from '../../types';
 import type { Agent, GetAgentStatusResponse } from '../../../common';
 
-import { checkSuperuser } from '../../routes/security';
+import { getAuthzFromRequest } from '../../routes/security';
 
 import { FleetUnauthorizedError } from '../../errors';
 
@@ -123,8 +123,9 @@ export class AgentServiceImpl implements AgentService {
   constructor(private readonly internalEsClient: ElasticsearchClient) {}
 
   public asScoped(req: KibanaRequest) {
-    const preflightCheck = () => {
-      if (!checkSuperuser(req)) {
+    const preflightCheck = async () => {
+      const authz = await getAuthzFromRequest(req);
+      if (!authz.fleet.all) {
         throw new FleetUnauthorizedError(
           `User does not have adequate permissions to access Fleet agents.`
         );

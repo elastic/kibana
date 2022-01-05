@@ -43,12 +43,7 @@ import {
   INTEGRATIONS_ROUTING_PATHS,
   pagePathGetters,
 } from '../../../../constants';
-import {
-  useCapabilities,
-  useGetPackageInfoByKey,
-  useLink,
-  useAgentPolicyContext,
-} from '../../../../hooks';
+import { useGetPackageInfoByKey, useLink, useAgentPolicyContext } from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type {
   CreatePackagePolicyRouteState,
@@ -102,7 +97,8 @@ export function Detail() {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref } = useLink();
-  const hasWriteCapabilities = useCapabilities().write;
+  const services = useStartServices();
+  const hasWriteCapabilities = services.authz.fleet.all;
   const permissionCheck = usePermissionCheck();
   const missingSecurityConfiguration =
     !permissionCheck.data?.success && permissionCheck.data?.error === 'MISSING_SECURITY';
@@ -111,7 +107,6 @@ export function Detail() {
   const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
-  const services = useStartServices();
   const agentPolicyIdFromContext = getAgentPolicyId();
 
   // Package info state
@@ -384,12 +379,12 @@ export function Detail() {
                             content: missingSecurityConfiguration ? (
                               <FormattedMessage
                                 id="xpack.fleet.epm.addPackagePolicyButtonSecurityRequiredTooltip"
-                                defaultMessage="To add Elastic Agent Integrations, you must have security enabled and have the superuser role. Contact your administrator."
+                                defaultMessage="To add Elastic Agent Integrations, you must have security enabled and have the All privilege for Fleet. Contact your administrator."
                               />
                             ) : (
                               <FormattedMessage
                                 id="xpack.fleet.epm.addPackagePolicyButtonPrivilegesRequiredTooltip"
-                                defaultMessage="To add Elastic Agent integrations, you must have the superuser role. Contact your adminstrator."
+                                defaultMessage="Elastic Agent Integrations require the All privilege for Fleet. Contact your adminstrator."
                               />
                             ),
                           }

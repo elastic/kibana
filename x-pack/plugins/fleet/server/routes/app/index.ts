@@ -12,8 +12,13 @@ import { appContextService } from '../../services';
 import type { CheckPermissionsResponse, GenerateServiceTokenResponse } from '../../../common';
 import { defaultIngestErrorHandler, GenerateServiceTokenError } from '../../errors';
 import type { FleetAuthzRouter } from '../security';
+import type { FleetRequestHandler } from '../../types';
 
-export const getCheckPermissionsHandler: RequestHandler = async (context, request, response) => {
+export const getCheckPermissionsHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
   const missingSecurityBody: CheckPermissionsResponse = {
     success: false,
     error: 'MISSING_SECURITY',
@@ -22,19 +27,7 @@ export const getCheckPermissionsHandler: RequestHandler = async (context, reques
   if (!appContextService.getSecurityLicense().isEnabled()) {
     return response.ok({ body: missingSecurityBody });
   } else {
-    const security = appContextService.getSecurity();
-    const user = security.authc.getCurrentUser(request);
-
-    // Defensively handle situation where user is undefined (should only happen when ES security is disabled)
-    // This should be covered by the `getSecurityLicense().isEnabled()` check above, but we leave this for robustness.
-    if (!user) {
-      return response.ok({
-        body: missingSecurityBody,
-      });
-    }
-
-    // replace this check?
-    if (!user?.roles.includes('superuser')) {
+    if (!context.fleet.authz.fleet.all) {
       return response.ok({
         body: {
           success: false,
