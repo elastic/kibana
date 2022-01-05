@@ -76,7 +76,7 @@ export const IntegrationsAppContext: React.FC<{
                             <Router history={history}>
                               <AgentPolicyContextProvider>
                                 <PackageInstallProvider notifications={startServices.notifications}>
-                                  <IntegrationsHeader {...{ setHeaderActionMenu }} />
+                                  <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
                                   {children}
                                 </PackageInstallProvider>
                               </AgentPolicyContextProvider>
