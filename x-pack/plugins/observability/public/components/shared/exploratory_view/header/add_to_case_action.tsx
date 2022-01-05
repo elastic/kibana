@@ -39,7 +39,10 @@ export function AddToCaseAction({ lensAttributes, timeRange }: AddToCaseProps) {
     useAddToCase({
       lensAttributes,
       getToastText,
-      timeRange: { from: absoluteFromDate.toISOString(), to: absoluteToDate.toISOString() },
+      timeRange: {
+        from: absoluteFromDate?.toISOString() ?? '',
+        to: absoluteToDate?.toISOString() ?? '',
+      },
     });
 
   const getAllCasesSelectorModalProps: AllCasesSelectorModalProps = {
