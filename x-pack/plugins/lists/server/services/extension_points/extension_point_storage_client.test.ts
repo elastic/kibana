@@ -13,8 +13,8 @@ import { DataValidationError } from '../exception_lists/utils/errors';
 
 import { ExtensionPointError } from './errors';
 import {
-  ExceptionListPreUpdateItemServerExtension,
   ExceptionsListPreCreateItemServerExtension,
+  ExceptionsListPreUpdateItemServerExtension,
   ExtensionPoint,
   ExtensionPointStorageClientInterface,
   ExtensionPointStorageInterface,
@@ -72,7 +72,7 @@ describe('When using the ExtensionPointStorageClient', () => {
       },
       {
         callback: jest.fn(
-          callbackFn.bind(window, 3) as ExceptionListPreUpdateItemServerExtension['callback']
+          callbackFn.bind(window, 3) as ExceptionsListPreUpdateItemServerExtension['callback']
         ),
         type: 'exceptionsListPreUpdateItem',
       },

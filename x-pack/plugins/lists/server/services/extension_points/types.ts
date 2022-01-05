@@ -40,7 +40,7 @@ export type ExceptionsListPreCreateItemServerExtension = ServerExtensionPointDef
  * Extension point is triggered prior to updating the Exception List Item. Throw'ing will cause the
  * update operation to fail
  */
-export type ExceptionListPreUpdateItemServerExtension = ServerExtensionPointDefinition<
+export type ExceptionsListPreUpdateItemServerExtension = ServerExtensionPointDefinition<
   'exceptionsListPreUpdateItem',
   UpdateExceptionListItemOptions,
   UpdateExceptionListItemOptions
@@ -48,7 +48,7 @@ export type ExceptionListPreUpdateItemServerExtension = ServerExtensionPointDefi
 
 export type ExtensionPoint =
   | ExceptionsListPreCreateItemServerExtension
-  | ExceptionListPreUpdateItemServerExtension;
+  | ExceptionsListPreUpdateItemServerExtension;
 
 /**
  * A Map of extension point type and associated Set of callbacks

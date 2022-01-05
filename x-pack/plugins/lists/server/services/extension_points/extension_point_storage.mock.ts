@@ -9,8 +9,8 @@ import { MockedLogger, loggerMock } from '@kbn/logging/mocks';
 
 import { ExtensionPointStorage } from './extension_point_storage';
 import {
-  ExceptionListPreUpdateItemServerExtension,
   ExceptionsListPreCreateItemServerExtension,
+  ExceptionsListPreUpdateItemServerExtension,
   ExtensionPointStorageInterface,
 } from './types';
 
@@ -21,7 +21,7 @@ export interface ExtensionPointStorageContextMock {
   /** An Exception List Item pre-create extension point added to the storage. Appends `-1` to the data's `name` attribute */
   exceptionPreCreate: jest.Mocked<ExceptionsListPreCreateItemServerExtension>;
   /** An Exception List Item pre-update extension point added to the storage. Appends `-2` to the data's `name` attribute */
-  exceptionPreUpdate: jest.Mocked<ExceptionListPreUpdateItemServerExtension>;
+  exceptionPreUpdate: jest.Mocked<ExceptionsListPreUpdateItemServerExtension>;
 }
 
 export const createExtensionPointStorageMock = (
