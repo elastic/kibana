@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { allNavigationItems } from '../../common/navigation/constants';
+import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { SummarySection } from './dashboard_sections/summary_section';
 import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
 import { useCloudPostureStatsApi } from '../../common/api';
@@ -34,12 +36,16 @@ const CompliancePage = () => {
   );
 };
 
-export const ComplianceDashboard = () => (
-  <CspPageTemplate
-    pageHeader={{
-      pageTitle: 'Compliance',
-    }}
-  >
-    <CompliancePage />
-  </CspPageTemplate>
-);
+export const ComplianceDashboard = () => {
+  useCspBreadcrumbs([allNavigationItems.dashboard]);
+
+  return (
+    <CspPageTemplate
+      pageHeader={{
+        pageTitle: 'Compliance',
+      }}
+    >
+      <CompliancePage />
+    </CspPageTemplate>
+  );
+};

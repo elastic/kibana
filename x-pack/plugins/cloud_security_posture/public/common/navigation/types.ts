@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { CSP_FINDINGS_PATH, CSP_DASHBOARD_PATH } from '../common/constants';
-
-export const navigationLinks = [
-  { name: 'Dashboard', path: CSP_DASHBOARD_PATH },
-  { name: 'Findings', path: CSP_FINDINGS_PATH },
-] as const;
+export interface CspNavigationItem {
+  name: string;
+  path: string;
+}

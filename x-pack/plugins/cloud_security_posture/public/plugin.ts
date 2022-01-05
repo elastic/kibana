@@ -8,14 +8,14 @@
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../../src/core/public';
 import type { CspSetup, CspStart, CspPluginSetup, CspPluginStart } from './types';
 import { AppNavLinkStatus, AppStatus } from '../../../../src/core/public';
-import { PLUGIN_NAME } from '../common';
+import { PLUGIN_NAME, PLUGIN_ID } from '../common';
 
 export class CspPlugin implements Plugin<CspSetup, CspStart, CspPluginSetup, CspPluginStart> {
   public setup(core: CoreSetup<CspPluginStart, CspStart>, plugins: CspPluginSetup): CspSetup {
     // Register an application into the side navigation menu
 
     core.application.register({
-      id: 'csp',
+      id: PLUGIN_ID,
       title: PLUGIN_NAME,
       status: AppStatus.accessible,
       navLinkStatus: AppNavLinkStatus.hidden,
