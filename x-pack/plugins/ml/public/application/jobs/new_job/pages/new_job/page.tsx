@@ -182,11 +182,17 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   chartInterval.setMaxBars(MAX_BARS);
   chartInterval.setInterval('auto');
 
-  const chartLoader = new ChartLoader(mlContext.currentDataView, mlContext.combinedQuery);
+  const chartLoader = useMemo(
+    () => new ChartLoader(mlContext.currentDataView, mlContext.combinedQuery),
+    []
+  );
 
   const jobValidator = useMemo(() => new JobValidator(jobCreator), [jobCreator]);
 
-  const resultsLoader = new ResultsLoader(jobCreator, chartInterval, chartLoader);
+  const resultsLoader = useMemo(
+    () => new ResultsLoader(jobCreator, chartInterval, chartLoader),
+    []
+  );
 
   useEffect(() => {
     return () => {
