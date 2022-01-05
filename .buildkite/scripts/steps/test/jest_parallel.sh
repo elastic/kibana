@@ -36,6 +36,7 @@ while read -r config; do
     fi
 
     echo "Uploading to codecov"
+    node .buildkite/scripts/steps/test/clean_coverage_paths.js target/jest-coverage/coverage-final.json
     # codecov exits with an error if max-old-space-size is set, see https://github.com/codecov/uploader/issues/475
     NODE_OPTIONS="" ./codecov -X network -f target/jest-coverage/coverage-final.json # TODO move ./codecov
   fi
