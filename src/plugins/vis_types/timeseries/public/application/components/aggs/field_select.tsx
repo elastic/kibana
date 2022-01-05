@@ -18,8 +18,7 @@ import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 import type { SanitizedFieldType, IndexPatternValue } from '../../../../common/types';
 import type { TimeseriesUIRestrictions } from '../../../../common/ui_restrictions';
 
-// @ts-ignore
-import { isFieldEnabled } from '../../lib/check_ui_restrictions';
+import { isFieldEnabled } from '../../../../common/check_ui_restrictions';
 
 interface FieldSelectProps {
   label: string | ReactNode;
