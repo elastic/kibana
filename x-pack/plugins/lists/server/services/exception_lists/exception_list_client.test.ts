@@ -53,6 +53,18 @@ describe('exception_list_client', () => {
       extensionPointStorageContext = createExtensionPointStorageMock();
     });
 
+    it('should initialize class instance with `enableServerExtensionPoints` enabled by default', async () => {
+      exceptionListClient = new ExceptionListClient({
+        savedObjectsClient: getExceptionListSavedObjectClientMock(),
+        serverExtensionsClient: extensionPointStorageContext.extensionPointStorage.getClient(),
+        user: 'elastic',
+      });
+
+      await exceptionListClient.createExceptionListItem(getCreateExceptionListItemOptionsMock());
+
+      expect(extensionPointStorageContext.exceptionPreCreate.callback).toHaveBeenCalled();
+    });
+
     // Test client methods that use the `pipeRun()` method of the ExtensionPointStorageClient`
     describe.each([
       [
@@ -84,7 +96,6 @@ describe('exception_list_client', () => {
         describe('and server extension points are enabled', () => {
           beforeEach(() => {
             exceptionListClient = new ExceptionListClient({
-              enableServerExtensionPoints: false,
               savedObjectsClient: getExceptionListSavedObjectClientMock(),
               serverExtensionsClient:
                 extensionPointStorageContext.extensionPointStorage.getClient(),
@@ -129,7 +140,7 @@ describe('exception_list_client', () => {
         describe('and server extension points are DISABLED', () => {
           beforeEach(() => {
             exceptionListClient = new ExceptionListClient({
-              enableServerExtensionPoints: true,
+              enableServerExtensionPoints: false,
               savedObjectsClient: getExceptionListSavedObjectClientMock(),
               serverExtensionsClient:
                 extensionPointStorageContext.extensionPointStorage.getClient(),

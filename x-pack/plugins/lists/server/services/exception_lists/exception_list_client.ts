@@ -86,7 +86,7 @@ export class ExceptionListClient {
     user,
     savedObjectsClient,
     serverExtensionsClient,
-    enableServerExtensionPoints = false,
+    enableServerExtensionPoints = true,
   }: ConstructorOptions) {
     this.user = user;
     this.savedObjectsClient = savedObjectsClient;
