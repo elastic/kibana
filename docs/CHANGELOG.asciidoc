@@ -13,6 +13,7 @@ Review important information about the {kib} 7.16.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.16.3>>
 * <<release-notes-7.16.2>>
 * <<release-notes-7.16.1>>
 * <<release-notes-7.16.0>>
@@ -68,6 +69,16 @@ Review important information about the {kib} 7.16.x releases.
 //* <<release-notes-7.0.0-alpha1>>
 
 --
+
+[[release-notes-7.16.3]]
+== {kib} 7.16.3
+
+coming::[7.16.3]
+
+The 7.16.3 release includes the following bug fix.
+
+Security::
+Fixes P12 parsing for certificates with "Basic constraints" {kibana-pull}122056[#122056]
 
 [[release-notes-7.16.2]]
 == {kib} 7.16.2
