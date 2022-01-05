@@ -14,16 +14,16 @@ import { Router, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import useObservable from 'react-use/lib/useObservable';
 
 import type { TopNavMenuData } from 'src/plugins/navigation/public';
+
+import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
 } from '../../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 
 import { PackageInstallProvider } from '../integrations/hooks';
 
@@ -209,12 +209,20 @@ export const FleetAppContext: React.FC<{
   history: AppMountParameters['history'];
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
+  theme$: AppMountParameters['theme$'];
   /** For testing purposes only */
   routerHistory?: History<any>;
 }> = memo(
-  ({ children, startServices, config, history, kibanaVersion, extensions, routerHistory }) => {
-    const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
-
+  ({
+    children,
+    startServices,
+    config,
+    history,
+    kibanaVersion,
+    extensions,
+    routerHistory,
+    theme$,
+  }) => {
     return (
       <RedirectAppLinks application={startServices.application}>
         <startServices.i18n.Context>
@@ -222,7 +230,7 @@ export const FleetAppContext: React.FC<{
             <EuiErrorBoundary>
               <ConfigContext.Provider value={config}>
                 <KibanaVersionContext.Provider value={kibanaVersion}>
-                  <EuiThemeProvider darkMode={isDarkMode}>
+                  <KibanaThemeProvider theme$={theme$}>
                     <UIExtensionsContext.Provider value={extensions}>
                       <FleetStatusProvider>
                         <Router history={history}>
@@ -232,7 +240,7 @@ export const FleetAppContext: React.FC<{
                         </Router>
                       </FleetStatusProvider>
                     </UIExtensionsContext.Provider>
-                  </EuiThemeProvider>
+                  </KibanaThemeProvider>
                 </KibanaVersionContext.Provider>
               </ConfigContext.Provider>
             </EuiErrorBoundary>
