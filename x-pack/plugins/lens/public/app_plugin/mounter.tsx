@@ -12,6 +12,7 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { HashRouter, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
 import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
@@ -116,6 +117,9 @@ export async function mountApp(
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
   addHelpMenuToAppChrome(coreStart.chrome, coreStart.docLinks);
+  coreStart.chrome.docTitle.change(
+    i18n.translate('xpack.lens.pageTitle', { defaultMessage: 'Lens' })
+  );
 
   setReportManager(
     new LensReportManager({
