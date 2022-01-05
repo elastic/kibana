@@ -7,10 +7,11 @@
 
 import { MockedLogger, loggerMock } from '@kbn/logging/mocks';
 
-import { ExtensionPointStorage, ExtensionPointStorageInterface } from './extension_point_storage';
+import { ExtensionPointStorage } from './extension_point_storage';
 import {
   ExceptionListPreUpdateItemServerExtension,
   ExceptionsListPreCreateItemServerExtension,
+  ExtensionPointStorageInterface,
 } from './types';
 
 export interface ExtensionPointStorageContextMock {

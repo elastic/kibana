@@ -13,11 +13,11 @@ import { DataValidationError } from '../exception_lists/utils/errors';
 
 import { ExtensionPointStorageClientInterface } from './extension_point_storage_client';
 import { ExtensionPointError } from './errors';
-import { ExtensionPointStorageInterface } from './extension_point_storage';
 import {
   ExceptionListPreUpdateItemServerExtension,
   ExceptionsListPreCreateItemServerExtension,
   ExtensionPoint,
+  ExtensionPointStorageInterface,
 } from './types';
 import { createExtensionPointStorageMock } from './extension_point_storage.mock';
 

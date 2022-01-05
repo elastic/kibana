@@ -10,10 +10,10 @@ import { Logger } from 'kibana/server';
 import type {
   ExtensionPoint,
   ExtensionPointCallbackArgument,
+  ExtensionPointStorageInterface,
   NarrowExtensionPointToType,
 } from './types';
 import { ExtensionPointError } from './errors';
-import { ExtensionPointStorageInterface } from './extension_point_storage';
 
 export class ExtensionPointStorageClient {
   constructor(
