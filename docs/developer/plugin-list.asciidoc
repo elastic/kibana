@@ -236,6 +236,10 @@ oss plugins.
 generating deep links to other apps, and creating short URLs.
 
 
+|{kib-repo}blob/{branch}/src/plugins/shared_ux/README.md[sharedUX]
+|The sharedUX plugin contains common components, services and utilities for making a consistent user experience among plugins.
+
+
 |{kib-repo}blob/{branch}/src/plugins/telemetry/README.md[telemetry]
 |Telemetry allows Kibana features to have usage tracked in the wild. The general term "telemetry" refers to multiple things:
 

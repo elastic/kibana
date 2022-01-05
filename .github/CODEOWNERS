@@ -476,3 +476,8 @@ x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 
 # EUI design
 /src/plugins/kibana_react/public/page_template/ @elastic/eui-design @elastic/kibana-app-services
+
+# Application Experience
+
+## Shared UX
+/src/plugins/shared_ux @elastic/shared-ux
