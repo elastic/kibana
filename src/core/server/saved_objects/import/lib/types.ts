@@ -21,6 +21,10 @@ export type ImportStateMap = Map<string, ImportStateValue>;
  */
 export interface ImportStateValue {
   /**
+   * This attribute indicates that the object for this entry is *only* a reference, it does not exist in the import file.
+   */
+  isOnlyReference?: boolean;
+  /**
    * This attribute indicates that the object should have this ID instead of what was specified in the import file.
    */
   destinationId?: string;

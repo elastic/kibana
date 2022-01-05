@@ -7,6 +7,7 @@
  */
 
 import type { collectSavedObjects } from './lib/collect_saved_objects';
+import type { checkReferenceOrigins } from './lib/check_reference_origins';
 import type { regenerateIds } from './lib/regenerate_ids';
 import type { validateReferences } from './lib/validate_references';
 import type { checkConflicts } from './lib/check_conflicts';
@@ -17,6 +18,13 @@ import type { executeImportHooks } from './lib/execute_import_hooks';
 export const mockCollectSavedObjects = jest.fn() as jest.MockedFunction<typeof collectSavedObjects>;
 jest.mock('./lib/collect_saved_objects', () => ({
   collectSavedObjects: mockCollectSavedObjects,
+}));
+
+export const mockCheckReferenceOrigins = jest.fn() as jest.MockedFunction<
+  typeof checkReferenceOrigins
+>;
+jest.mock('./lib/check_reference_origins', () => ({
+  checkReferenceOrigins: mockCheckReferenceOrigins,
 }));
 
 export const mockRegenerateIds = jest.fn() as jest.MockedFunction<typeof regenerateIds>;

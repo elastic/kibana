@@ -11,6 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { SavedObject, SavedObjectsClientContract, SavedObjectsImportFailure } from '../../types';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import type { ImportStateMap } from './types';
+import { createOriginQuery } from './utils';
 
 interface CheckOriginConflictsParams {
   objects: Array<SavedObject<{ title?: string }>>;
@@ -22,8 +23,9 @@ interface CheckOriginConflictsParams {
   pendingOverwrites: Set<string>;
 }
 
-type CheckOriginConflictParams = Omit<CheckOriginConflictsParams, 'objects'> & {
+type CheckOriginConflictParams = Omit<CheckOriginConflictsParams, 'objects' | 'importIdMap'> & {
   object: SavedObject<{ title?: string }>;
+  objectIdsBeingImported: Set<string>;
 };
 
 interface InexactMatch<T> {
@@ -43,11 +45,6 @@ const isLeft = <T>(object: Either<T>): object is Left<T> => object.tag === 'left
 
 const MAX_CONCURRENT_SEARCHES = 10;
 
-const createQueryTerm = (input: string) => input.replace(/\\/g, '\\\\').replace(/\"/g, '\\"');
-const createQuery = (type: string, id: string) =>
-  // 1st query term will match raw object IDs (_id), 2nd query term will match originId
-  // we intentionally do not include a namespace prefix for the raw object IDs, because this search is only for multi-namespace object types
-  `"${createQueryTerm(`${type}:${id}`)}" | "${createQueryTerm(id)}"`;
 const transformObjectsToAmbiguousConflictFields = (
   objects: Array<SavedObject<{ title?: string }>>
 ) =>
@@ -81,9 +78,14 @@ const getAmbiguousConflictSourceKey = <T>({ object }: InexactMatch<T>) =>
 const checkOriginConflict = async (
   params: CheckOriginConflictParams
 ): Promise<Either<{ title?: string }>> => {
-  const { object, savedObjectsClient, typeRegistry, namespace, importStateMap, pendingOverwrites } =
-    params;
-  const importIds = new Set(importStateMap.keys());
+  const {
+    object,
+    savedObjectsClient,
+    typeRegistry,
+    namespace,
+    objectIdsBeingImported,
+    pendingOverwrites,
+  } = params;
   const { type, originId, id } = object;
 
   if (!typeRegistry.isMultiNamespace(type) || pendingOverwrites.has(`${type}:${id}`)) {
@@ -92,10 +94,9 @@ const checkOriginConflict = async (
     return { tag: 'right', value: object };
   }
 
-  const search = createQuery(type, originId || id);
   const findOptions = {
     type,
-    search,
+    search: createOriginQuery(type, originId || id),
     rootSearchFields: ['_id', 'originId'],
     page: 1,
     perPage: 10,
@@ -110,7 +111,9 @@ const checkOriginConflict = async (
     return { tag: 'right', value: object };
   }
   // This is an "inexact match" so far; filter the conflict destination(s) to exclude any that exactly match other objects we are importing.
-  const objects = savedObjects.filter((obj) => !importIds.has(`${obj.type}:${obj.id}`));
+  const objects = savedObjects.filter(
+    (obj) => !objectIdsBeingImported.has(`${obj.type}:${obj.id}`)
+  );
   const destinations = transformObjectsToAmbiguousConflictFields(objects);
   if (destinations.length === 0) {
     // No conflict destinations remain after filtering, so this is a "no match" result.
@@ -138,9 +141,15 @@ const checkOriginConflict = async (
  *     B. Otherwise, this is an "ambiguous conflict" result; return an error.
  */
 export async function checkOriginConflicts({ objects, ...params }: CheckOriginConflictsParams) {
+  const objectIdsBeingImported = new Set<string>();
+  for (const [key, { isOnlyReference }] of params.importStateMap.entries()) {
+    if (!isOnlyReference) {
+      objectIdsBeingImported.add(key);
+    }
+  }
   // Check each object for possible destination conflicts, ensuring we don't too many concurrent searches running.
   const mapper = async (object: SavedObject<{ title?: string }>) =>
-    checkOriginConflict({ object, ...params });
+    checkOriginConflict({ object, objectIdsBeingImported, ...params });
   const checkOriginConflictResults = await pMap(objects, mapper, {
     concurrency: MAX_CONCURRENT_SEARCHES,
   });

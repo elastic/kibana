@@ -60,6 +60,12 @@ export async function collectSavedObjects({
     createFilterStream<SavedObject>((obj) => (filter ? filter(obj) : true)),
     createMapStream((obj: SavedObject) => {
       importStateMap.set(`${obj.type}:${obj.id}`, {});
+      for (const ref of obj.references ?? []) {
+        const key = `${ref.type}:${ref.id}`;
+        if (!importStateMap.has(key)) {
+          importStateMap.set(key, { isOnlyReference: true });
+        }
+      }
       // Ensure migrations execute on every saved object
       return Object.assign({ migrationVersion: {} }, obj);
     }),

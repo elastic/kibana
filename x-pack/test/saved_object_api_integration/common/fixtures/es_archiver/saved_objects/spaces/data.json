@@ -710,3 +710,60 @@
     "type": "doc"
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:inbound-reference-origin-match-1-newId",
+    "index": ".kibana",
+    "source": {
+      "originId": "inbound-reference-origin-match-1",
+      "index-pattern": {
+        "title": "This is used to test if an imported object with a reference to this originId will be remapped properly"
+      },
+      "namespaces": ["*"],
+      "type": "index-pattern",
+      "migrationVersion": { "index-pattern": "8.0.0" },
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:inbound-reference-origin-match-2a",
+    "index": ".kibana",
+    "source": {
+      "originId": "inbound-reference-origin-match-2",
+      "index-pattern": {
+        "title": "This is used to test if an imported object with a reference to this originId will *not* be remapped"
+      },
+      "namespaces": ["*"],
+      "type": "index-pattern",
+      "migrationVersion": { "index-pattern": "8.0.0" },
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "index-pattern:inbound-reference-origin-match-2b",
+    "index": ".kibana",
+    "source": {
+      "originId": "inbound-reference-origin-match-2",
+      "index-pattern": {
+        "title": "This is used to test if an imported object with a reference to this originId will *not* be remapped"
+      },
+      "namespaces": ["*"],
+      "type": "index-pattern",
+      "migrationVersion": { "index-pattern": "8.0.0" },
+      "updated_at": "2017-09-21T18:49:16.270Z"
+    },
+    "type": "doc"
+  }
+}

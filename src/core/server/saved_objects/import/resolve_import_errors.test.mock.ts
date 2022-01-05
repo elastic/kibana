@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { checkReferenceOrigins } from './lib/check_reference_origins';
 import type { validateRetries } from './lib/validate_retries';
 import type { createObjectsFilter } from './lib/create_objects_filter';
 import type { collectSavedObjects } from './lib/collect_saved_objects';
@@ -16,6 +17,13 @@ import type { getImportStateMapForRetries } from './lib/get_import_state_map_for
 import type { splitOverwrites } from './lib/split_overwrites';
 import type { createSavedObjects } from './lib/create_saved_objects';
 import type { executeImportHooks } from './lib/execute_import_hooks';
+
+export const mockCheckReferenceOrigins = jest.fn() as jest.MockedFunction<
+  typeof checkReferenceOrigins
+>;
+jest.mock('./lib/check_reference_origins', () => ({
+  checkReferenceOrigins: mockCheckReferenceOrigins,
+}));
 
 export const mockValidateRetries = jest.fn() as jest.MockedFunction<typeof validateRetries>;
 jest.mock('./lib/validate_retries', () => ({

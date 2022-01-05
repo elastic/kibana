@@ -8,6 +8,7 @@
 
 import {
   mockCollectSavedObjects,
+  mockCheckReferenceOrigins,
   mockRegenerateIds,
   mockValidateReferences,
   mockCheckConflicts,
@@ -40,6 +41,7 @@ describe('#importSavedObjectsFromStream', () => {
       collectedObjects: [],
       importStateMap: new Map(),
     });
+    mockCheckReferenceOrigins.mockResolvedValue({ importStateMap: new Map() });
     mockRegenerateIds.mockReturnValue(new Map());
     mockValidateReferences.mockResolvedValue([]);
     mockCheckConflicts.mockResolvedValue({
@@ -136,20 +138,53 @@ describe('#importSavedObjectsFromStream', () => {
       expect(mockCollectSavedObjects).toHaveBeenCalledWith(collectSavedObjectsOptions);
     });
 
+    test('checks reference origins', async () => {
+      const options = setupOptions();
+      const collectedObjects = [createObject()];
+      const importStateMap = new Map([
+        [`${collectedObjects[0].type}:${collectedObjects[0].id}`, {}],
+        [`foo:bar`, { isOnlyReference: true }],
+      ]);
+      mockCollectSavedObjects.mockResolvedValue({
+        errors: [],
+        collectedObjects,
+        importStateMap,
+      });
+
+      await importSavedObjectsFromStream(options);
+      expect(mockCheckReferenceOrigins).toHaveBeenCalledWith({
+        savedObjectsClient,
+        typeRegistry,
+        namespace,
+        importStateMap,
+      });
+    });
+
     test('validates references', async () => {
       const options = setupOptions();
       const collectedObjects = [createObject()];
       mockCollectSavedObjects.mockResolvedValue({
         errors: [],
         collectedObjects,
-        importStateMap: new Map(),
+        importStateMap: new Map([
+          [`${collectedObjects[0].type}:${collectedObjects[0].id}`, {}],
+          [`foo:bar`, { isOnlyReference: true }],
+        ]),
+      });
+      mockCheckReferenceOrigins.mockResolvedValue({
+        importStateMap: new Map([[`foo:bar`, { isOnlyReference: true, id: 'baz' }]]),
       });
 
       await importSavedObjectsFromStream(options);
       expect(mockValidateReferences).toHaveBeenCalledWith(
         collectedObjects,
         savedObjectsClient,
-        namespace
+        namespace,
+        new Map([
+          // This importStateMap is a combination of the other two
+          [`${collectedObjects[0].type}:${collectedObjects[0].id}`, {}],
+          [`foo:bar`, { isOnlyReference: true, id: 'baz' }],
+        ])
       );
     });
 
@@ -247,27 +282,31 @@ describe('#importSavedObjectsFromStream', () => {
           importStateMap: new Map([
             ['foo', {}],
             ['bar', {}],
-            ['baz', {}],
+            ['baz', { isOnlyReference: true }],
           ]),
+        });
+        mockCheckReferenceOrigins.mockResolvedValue({
+          importStateMap: new Map([['baz', { isOnlyReference: true, destinationId: 'newId1' }]]),
         });
         mockValidateReferences.mockResolvedValue([errors[1]]);
         mockCheckConflicts.mockResolvedValue({
           errors: [errors[2]],
           filteredObjects,
-          importStateMap: new Map([['bar', { destinationId: 'newId1' }]]),
+          importStateMap: new Map([['foo', { destinationId: 'newId2' }]]),
           pendingOverwrites: new Set(),
         });
         mockCheckOriginConflicts.mockResolvedValue({
           errors: [errors[3]],
-          importStateMap: new Map([['baz', { destinationId: 'newId2' }]]),
+          importStateMap: new Map([['bar', { destinationId: 'newId3' }]]),
           pendingOverwrites: new Set(),
         });
 
         await importSavedObjectsFromStream(options);
+        // assert that the importStateMap is correctly composed of the results from the four modules
         const importStateMap = new Map([
-          ['foo', {}],
-          ['bar', { destinationId: 'newId1' }],
-          ['baz', { destinationId: 'newId2' }],
+          ['foo', { destinationId: 'newId2' }],
+          ['bar', { destinationId: 'newId3' }],
+          ['baz', { isOnlyReference: true, destinationId: 'newId1' }],
         ]);
         const createSavedObjectsParams = {
           objects: collectedObjects,
@@ -313,15 +352,21 @@ describe('#importSavedObjectsFromStream', () => {
           collectedObjects,
           importStateMap: new Map([
             ['foo', {}],
-            ['bar', {}],
+            ['bar', { isOnlyReference: true }],
           ]),
         });
+        mockCheckReferenceOrigins.mockResolvedValue({
+          importStateMap: new Map([['bar', { isOnlyReference: true, destinationId: 'newId' }]]),
+        });
         mockValidateReferences.mockResolvedValue([errors[1]]);
-        // this importStateMap is not composed with the one obtained from `collectSavedObjects`
-        const importStateMap: ImportStateMap = new Map().set(`id1`, { destinationId: `newId1` });
-        mockRegenerateIds.mockReturnValue(importStateMap);
+        mockRegenerateIds.mockReturnValue(new Map([['foo', { destinationId: `randomId1` }]]));
 
         await importSavedObjectsFromStream(options);
+        // assert that the importStateMap is correctly composed of the results from the three modules
+        const importStateMap: ImportStateMap = new Map([
+          ['foo', { destinationId: `randomId1` }],
+          ['bar', { isOnlyReference: true, destinationId: 'newId' }],
+        ]);
         const createSavedObjectsParams = {
           objects: collectedObjects,
           accumulatedErrors: errors,

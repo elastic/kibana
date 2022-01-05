@@ -7,6 +7,7 @@
  */
 
 export { checkConflicts } from './check_conflicts';
+export { checkReferenceOrigins } from './check_reference_origins';
 export { checkOriginConflicts } from './check_origin_conflicts';
 export { collectSavedObjects } from './collect_saved_objects';
 export { createLimitStream } from './create_limit_stream';

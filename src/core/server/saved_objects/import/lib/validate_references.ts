@@ -9,6 +9,7 @@
 import { SavedObject, SavedObjectsClientContract } from '../../types';
 import { SavedObjectsImportFailure, SavedObjectsImportRetry } from '../types';
 import { SavedObjectsImportError } from '../errors';
+import type { ImportStateMap } from './types';
 
 const REF_TYPES_TO_VALIDATE = ['index-pattern', 'search'];
 
@@ -25,7 +26,8 @@ const getObjectsToSkip = (retries: SavedObjectsImportRetry[] = []) =>
 export async function getNonExistingReferenceAsKeys(
   savedObjects: SavedObject[],
   savedObjectsClient: SavedObjectsClientContract,
-  namespace?: string,
+  namespace: string | undefined,
+  importStateMap: ImportStateMap,
   retries?: SavedObjectsImportRetry[]
 ) {
   const objectsToSkip = getObjectsToSkip(retries);
@@ -33,11 +35,17 @@ export async function getNonExistingReferenceAsKeys(
   // Collect all references within objects
   for (const savedObject of savedObjects) {
     if (objectsToSkip.has(`${savedObject.type}:${savedObject.id}`)) {
-      // skip objects with retries that have specified `ignoreMissingReferences`
+      // skip objects with retries that have specified `ignoreMissingReferences`, or that share an origin with an existing object that has a different ID
       continue;
     }
     const filteredReferences = (savedObject.references || []).filter(filterReferencesToValidate);
     for (const { type, id } of filteredReferences) {
+      const key = `${type}:${id}`;
+      const { isOnlyReference, destinationId } = importStateMap.get(key) ?? {};
+      if (isOnlyReference && destinationId) {
+        // We previously searched for this reference and found one with a matching origin, skip validating this
+        continue;
+      }
       collector.set(`${type}:${id}`, { type, id });
     }
   }
@@ -76,7 +84,8 @@ export async function getNonExistingReferenceAsKeys(
 export async function validateReferences(
   savedObjects: Array<SavedObject<{ title?: string }>>,
   savedObjectsClient: SavedObjectsClientContract,
-  namespace?: string,
+  namespace: string | undefined,
+  importStateMap: ImportStateMap,
   retries?: SavedObjectsImportRetry[]
 ) {
   const objectsToSkip = getObjectsToSkip(retries);
@@ -85,6 +94,7 @@ export async function validateReferences(
     savedObjects,
     savedObjectsClient,
     namespace,
+    importStateMap,
     retries
   );
 

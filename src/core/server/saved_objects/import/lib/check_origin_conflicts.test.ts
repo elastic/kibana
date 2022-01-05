@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { mockCreateOriginQuery } from './check_reference_origins.test.mock';
+
 import {
   SavedObjectsClientContract,
   SavedObjectReference,
@@ -83,6 +85,10 @@ describe('#checkOriginConflicts', () => {
   };
 
   describe('cluster calls', () => {
+    beforeEach(() => {
+      mockCreateOriginQuery.mockClear();
+    });
+
     const multiNsObj = createObject(MULTI_NS_TYPE, 'id-1');
     const multiNsObjWithOriginId = createObject(MULTI_NS_TYPE, 'id-2', 'originId-foo');
     const otherObj = createObject(OTHER_TYPE, 'id-3');
@@ -90,12 +96,10 @@ describe('#checkOriginConflicts', () => {
     const otherObjWithOriginId = createObject(OTHER_TYPE, 'id-4', 'originId-bar');
 
     const expectFindArgs = (n: number, object: SavedObject) => {
-      const { type, id, originId } = object;
-      const search = `"${type}:${originId || id}" | "${originId || id}"`; // this template works for our basic test cases
-      const expectedArgs = expect.objectContaining({ type, search });
-      // exclude rootSearchFields, page, perPage, and fields attributes from assertion -- these are constant
+      const idToCheck = object.originId || object.id;
+      expect(mockCreateOriginQuery).toHaveBeenNthCalledWith(n, object.type, idToCheck);
       // exclude namespace from assertion -- a separate test covers that
-      expect(find).toHaveBeenNthCalledWith(n, expectedArgs);
+      expect(find).toHaveBeenNthCalledWith(n, expect.objectContaining({ type: object.type }));
     };
 
     test('does not execute searches for non-multi-namespace objects', async () => {
@@ -137,22 +141,6 @@ describe('#checkOriginConflicts', () => {
       expect(find).toHaveBeenCalledTimes(1);
       expect(find).toHaveBeenCalledWith(expect.objectContaining({ namespaces: [namespace] }));
     });
-
-    test('search query escapes quote and backslash characters in `id` and/or `originId`', async () => {
-      const weirdId = `some"weird\\id`;
-      const objects = [
-        createObject(MULTI_NS_TYPE, weirdId),
-        createObject(MULTI_NS_TYPE, 'some-id', weirdId),
-      ];
-      const params = setupParams({ objects });
-
-      await checkOriginConflicts(params);
-      const escapedId = `some\\"weird\\\\id`;
-      const expectedQuery = `"${MULTI_NS_TYPE}:${escapedId}" | "${escapedId}"`;
-      expect(find).toHaveBeenCalledTimes(2);
-      expect(find).toHaveBeenNthCalledWith(1, expect.objectContaining({ search: expectedQuery }));
-      expect(find).toHaveBeenNthCalledWith(2, expect.objectContaining({ search: expectedQuery }));
-    });
   });
 
   describe('results', () => {
@@ -187,6 +175,34 @@ describe('#checkOriginConflicts', () => {
         type: 'conflict',
         ...(destinationId && { destinationId }),
       },
+    });
+
+    test('filters inexact matches of other objects that are being imported, but does not filter inexact matches of references that are not being imported', async () => {
+      // obj1, obj2, and obj3 exist in this space, and obj1 has references to both obj2 and obj3
+      // try to import obj1, obj2, and obj4; simulating a scenario where obj1 and obj2 were filtered out during `checkConflicts`, so we only call `checkOriginConflicts` with the remainder
+      const obj1 = createObject(MULTI_NS_TYPE, 'id-1');
+      const obj2 = createObject(MULTI_NS_TYPE, 'id-2', 'some-originId');
+      const obj3 = createObject(MULTI_NS_TYPE, 'id-3', 'some-originId');
+      const obj4 = createObject(MULTI_NS_TYPE, 'id-4', 'some-originId');
+      const objects = [obj4];
+      const params = setupParams({
+        objects,
+        importStateMap: new Map([
+          [`${obj1.type}:${obj1.id}`, {}],
+          [`${obj2.type}:${obj2.id}`, {}],
+          [`${obj3.type}:${obj3.id}`, { isOnlyReference: true }], // this attribute signifies that there is a reference to this object, but it is not present in the collected objects from the import file
+          [`${obj4.type}:${obj4.id}`, {}],
+        ]),
+      });
+      mockFindResult(obj2, obj3); // find for obj4: the result is an inexact match with two destinations, one of which is exactly matched by obj2 -- accordingly, obj4 has an inexact match to obj3
+
+      const checkOriginConflictsResult = await checkOriginConflicts(params);
+      const expectedResult = {
+        importStateMap: new Map(),
+        errors: [createConflictError(obj4, obj3.id)],
+        pendingOverwrites: new Set(),
+      };
+      expect(checkOriginConflictsResult).toEqual(expectedResult);
     });
 
     describe('object result without a `importStateMap` entry (no match or exact match)', () => {

@@ -15,6 +15,7 @@ import {
   SavedObjectsImportHook,
 } from './types';
 import {
+  checkReferenceOrigins,
   validateReferences,
   checkOriginConflicts,
   createSavedObjects,
@@ -72,20 +73,35 @@ export async function importSavedObjectsFromStream({
     supportedTypes,
   });
   errorAccumulator = [...errorAccumulator, ...collectSavedObjectsResult.errors];
-  /** Map of all IDs for objects that we are attempting to import; each value is empty by default */
+  // Map of all IDs for objects that we are attempting to import, and any references that are not included in the read stream;
+  // each value is empty by default
   let importStateMap = collectSavedObjectsResult.importStateMap;
   let pendingOverwrites = new Set<string>();
+
+  // Check any references that aren't included in the import file and retries, to see if they have a match with a different origin
+  const checkReferenceOriginsResult = await checkReferenceOrigins({
+    savedObjectsClient,
+    typeRegistry,
+    namespace,
+    importStateMap,
+  });
+  importStateMap = new Map([...importStateMap, ...checkReferenceOriginsResult.importStateMap]);
 
   // Validate references
   const validateReferencesResult = await validateReferences(
     collectSavedObjectsResult.collectedObjects,
     savedObjectsClient,
-    namespace
+    namespace,
+    importStateMap
   );
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult];
 
   if (createNewCopies) {
-    importStateMap = regenerateIds(collectSavedObjectsResult.collectedObjects);
+    importStateMap = new Map([
+      ...importStateMap, // preserve any entries for references that aren't included in collectedObjects
+      ...regenerateIds(collectSavedObjectsResult.collectedObjects),
+    ]);
+    // TODO: check reference origins!
   } else {
     // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
     const checkConflictsParams = {

@@ -18,7 +18,12 @@ describe('getNonExistingReferenceAsKeys()', () => {
   });
 
   test('returns empty response when no objects exist', async () => {
-    const result = await getNonExistingReferenceAsKeys([], savedObjectsClient);
+    const result = await getNonExistingReferenceAsKeys(
+      [],
+      savedObjectsClient,
+      undefined,
+      new Map()
+    );
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
@@ -45,7 +50,27 @@ describe('getNonExistingReferenceAsKeys()', () => {
       savedObjects,
       savedObjectsClient,
       undefined,
+      new Map(),
       retries
+    );
+    expect(result).toEqual([]);
+    expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+  });
+
+  test('skips references when an importStateMap entry indicates that we have already found an origin match with a different ID', async () => {
+    const savedObjects = [
+      {
+        id: '2',
+        type: 'visualization',
+        attributes: {},
+        references: [{ name: 'ref_0', type: 'index-pattern', id: '1' }],
+      },
+    ];
+    const result = await getNonExistingReferenceAsKeys(
+      savedObjects,
+      savedObjectsClient,
+      undefined,
+      new Map([[`index-pattern:1`, { isOnlyReference: true, destinationId: 'not-1' }]])
     );
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
@@ -72,7 +97,12 @@ describe('getNonExistingReferenceAsKeys()', () => {
         ],
       },
     ];
-    const result = await getNonExistingReferenceAsKeys(savedObjects, savedObjectsClient);
+    const result = await getNonExistingReferenceAsKeys(
+      savedObjects,
+      savedObjectsClient,
+      undefined,
+      new Map()
+    );
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
@@ -102,7 +132,12 @@ describe('getNonExistingReferenceAsKeys()', () => {
         },
       ],
     });
-    const result = await getNonExistingReferenceAsKeys(savedObjects, savedObjectsClient);
+    const result = await getNonExistingReferenceAsKeys(
+      savedObjects,
+      savedObjectsClient,
+      undefined,
+      new Map()
+    );
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
       [MockFunction] {
@@ -147,7 +182,12 @@ describe('getNonExistingReferenceAsKeys()', () => {
         ],
       },
     ];
-    const result = await getNonExistingReferenceAsKeys(savedObjects, savedObjectsClient);
+    const result = await getNonExistingReferenceAsKeys(
+      savedObjects,
+      savedObjectsClient,
+      undefined,
+      new Map()
+    );
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
@@ -196,7 +236,12 @@ describe('getNonExistingReferenceAsKeys()', () => {
         },
       ],
     });
-    const result = await getNonExistingReferenceAsKeys(savedObjects, savedObjectsClient);
+    const result = await getNonExistingReferenceAsKeys(
+      savedObjects,
+      savedObjectsClient,
+      undefined,
+      new Map()
+    );
     expect(result).toEqual(['index-pattern:1', 'search:3']);
     expect(savedObjectsClient.bulkGet).toMatchInlineSnapshot(`
       [MockFunction] {
@@ -242,7 +287,7 @@ describe('validateReferences()', () => {
   });
 
   test('returns empty when no objects are passed in', async () => {
-    const result = await validateReferences([], savedObjectsClient);
+    const result = await validateReferences([], savedObjectsClient, undefined, new Map());
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
@@ -340,7 +385,7 @@ describe('validateReferences()', () => {
         ],
       },
     ];
-    const result = await validateReferences(savedObjects, savedObjectsClient);
+    const result = await validateReferences(savedObjects, savedObjectsClient, undefined, new Map());
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -461,7 +506,13 @@ describe('validateReferences()', () => {
         ignoreMissingReferences: true,
       },
     ];
-    const result = await validateReferences(savedObjects, savedObjectsClient, undefined, retries);
+    const result = await validateReferences(
+      savedObjects,
+      savedObjectsClient,
+      undefined,
+      new Map(),
+      retries
+    );
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
   });
@@ -491,7 +542,7 @@ describe('validateReferences()', () => {
         ],
       },
     ];
-    const result = await validateReferences(savedObjects, savedObjectsClient);
+    const result = await validateReferences(savedObjects, savedObjectsClient, undefined, new Map());
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
   });
@@ -517,7 +568,7 @@ describe('validateReferences()', () => {
         ],
       },
     ];
-    const result = await validateReferences(savedObjects, savedObjectsClient);
+    const result = await validateReferences(savedObjects, savedObjectsClient, undefined, new Map());
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
@@ -542,7 +593,7 @@ describe('validateReferences()', () => {
         ],
       },
     ];
-    const result = await validateReferences(savedObjects, savedObjectsClient);
+    const result = await validateReferences(savedObjects, savedObjectsClient, undefined, new Map());
     expect(result).toEqual([]);
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(0);
   });
@@ -574,7 +625,7 @@ describe('validateReferences()', () => {
       },
     ];
     await expect(
-      validateReferences(savedObjects, savedObjectsClient)
+      validateReferences(savedObjects, savedObjectsClient, undefined, new Map())
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error fetching references for imported objects"`
     );
