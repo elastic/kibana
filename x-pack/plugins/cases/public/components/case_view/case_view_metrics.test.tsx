@@ -71,6 +71,23 @@ describe('CaseViewMetrics', () => {
     expect(getAllByText('0')).toHaveLength(basicCaseMetricsFeatures.length);
   });
 
+  it('should prevent negative value for isolateHost actions', () => {
+    const incosistentMetrics = {
+      actions: {
+        isolateHost: {
+          isolate: { total: 1 },
+          unisolate: { total: 2 },
+        },
+      },
+    };
+    const { getByText } = renderCaseMetrics({
+      metrics: incosistentMetrics,
+      features: ['actions.isolateHost'],
+    });
+    expect(getByText('Isolated Hosts')).toBeInTheDocument();
+    expect(getByText('0')).toBeInTheDocument();
+  });
+
   describe.each(metricsFeaturesTests)('Metrics feature: %s ', (feature, text, total) => {
     it('should render metric', () => {
       const { getByText } = renderCaseMetrics({ features: [feature] });

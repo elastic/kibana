@@ -43,9 +43,10 @@ const useMetricItems = (
   const alertsCount = alerts?.count ?? 0;
   const totalAlertUsers = alerts?.users?.total ?? 0;
   const totalAlertHosts = alerts?.hosts?.total ?? 0;
-  const totalIsolatedHosts = actions?.isolateHost
-    ? actions.isolateHost.isolate.total - actions.isolateHost.unisolate.total
-    : 0;
+  const totalIsolatedHosts =
+    actions?.isolateHost && actions.isolateHost.isolate.total >= actions.isolateHost.unisolate.total
+      ? actions.isolateHost.isolate.total - actions.isolateHost.unisolate.total
+      : 0;
 
   const metricItems = useMemo<MetricItems>(() => {
     const items: Array<[CaseMetricsFeature, MetricItem]> = [

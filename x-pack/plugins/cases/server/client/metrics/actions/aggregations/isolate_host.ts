@@ -14,8 +14,10 @@ interface ActionsAggregation {
     buckets: Array<{ key: string; doc_count: number }>;
   };
 }
+type ActionsAggregationResponse = ActionsAggregation | undefined;
 
 export class IsolateHostActions implements AggregationBuilder {
+  // uniqueValuesLimit should not be lower than the number of actions.type values (currently 2) or some information could be lost
   constructor(private readonly uniqueValuesLimit: number = 10) {}
 
   build() {
@@ -30,7 +32,7 @@ export class IsolateHostActions implements AggregationBuilder {
   }
 
   formatResponse(aggregationsResponse: AggregationResponse) {
-    const aggs = aggregationsResponse as ActionsAggregation | undefined;
+    const aggs = aggregationsResponse as ActionsAggregationResponse;
     const actionsCounters = aggs?.actions?.buckets.reduce<Record<string, number>>(
       (result, { key, doc_count: total }) => ({ ...result, [key]: total }),
       {}
