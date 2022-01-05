@@ -44,26 +44,18 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
   const getSourceCard = ({ name, serviceType, addPath, accountContextOnly }: SourceDataItem) => {
-
     const disabled = !hasPlatinumLicense && accountContextOnly;
 
     // TODO
     // does this card need a disabled state?
     const card = (
       <>
-        <EuiFlexGroup
-          justifyContent="center"
-          alignItems="center"
-          responsive={false}
-          gutterSize="m"
-        >
+        <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false} gutterSize="m">
           <EuiFlexItem grow={false}>
             <SourceIcon serviceType={serviceType} name={name} size="l" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiText size="m">
-              {name}
-            </EuiText>
+            <EuiText size="m">{name}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText textAlign="right">
@@ -97,28 +89,18 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
   };
 
   const sourcesHalfList = (side) => {
-
-    const halfwayThrough = Math.ceil(sources.length / 2)
+    const halfwayThrough = Math.ceil(sources.length / 2);
 
     const firstHalf = sources.slice(0, halfwayThrough);
 
     const secondHalf = sources.slice(halfwayThrough, sources.length);
 
-    return {
-      firstHalf: firstHalf,
-      secondHalf: secondHalf
-    };
-
-  }
+    return { firstHalf, secondHalf };
+  };
 
   const visibleSources = (
     <>
-      <EuiFlexGroup
-        direction="row"
-        alignItems="flexStart"
-        gutterSize="xl"
-      >
-
+      <EuiFlexGroup direction="row" alignItems="flexStart" gutterSize="xl">
         <EuiFlexItem>
           <EuiFlexGroup
             justifyContent="center"
@@ -134,15 +116,12 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
                   alignItems="stretch"
                   data-test-subj="AvailableSourceCard"
                 >
-                  <EuiFlexItem>
-                    {getSourceCard(source)}
-                  </EuiFlexItem>
+                  <EuiFlexItem>{getSourceCard(source)}</EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
         </EuiFlexItem>
-
         <EuiFlexItem>
           <EuiFlexGroup
             justifyContent="center"
@@ -158,15 +137,12 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
                   alignItems="stretch"
                   data-test-subj="AvailableSourceCard"
                 >
-                  <EuiFlexItem>
-                    {getSourceCard(source)}
-                  </EuiFlexItem>
+                  <EuiFlexItem>{getSourceCard(source)}</EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
         </EuiFlexItem>
-
       </EuiFlexGroup>
     </>
   );
