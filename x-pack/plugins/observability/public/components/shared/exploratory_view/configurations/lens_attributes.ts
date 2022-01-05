@@ -102,7 +102,7 @@ export class LensAttributes {
   visualization: XYState;
   layerConfigs: LayerConfig[];
   isMultiSeries: boolean;
-  globalFilter?: string;
+  globalFilter?: { query: string; language: string };
 
   constructor(layerConfigs: LayerConfig[]) {
     this.layers = {};
