@@ -12,6 +12,8 @@ import { SERVER_APP_ID } from '../../../../../common/constants';
 import { threatRuleParams, ThreatRuleParams } from '../../schemas/rule_schemas';
 import { threatMatchExecutor } from '../../signals/executors/threat_match';
 import { SecurityAlertType, CreateIndicatorMatchRuleOptions } from '../types';
+import { DETECTION_ENGINE_MAX_PER_PAGE } from '../../../../../common/cti/constants';
+import { updatePercolatorIndex } from './percolator/update_percolator_index';
 
 export const createIndicatorMatchAlertType = (
   createOptions: CreateIndicatorMatchRuleOptions
@@ -59,11 +61,34 @@ export const createIndicatorMatchAlertType = (
           completeRule,
           searchAfterSize,
           tuple,
+          tupleIndex,
           wrapHits,
+          withTimeout,
         },
         services,
         state,
       } = execOptions;
+
+      if (tupleIndex === 0) {
+        console.log('____firstTuple');
+        const { threatFilters, threatIndex, threatLanguage, threatMapping, threatQuery } =
+          completeRule.ruleParams;
+        await updatePercolatorIndex({
+          buildRuleMessage,
+          esClient: services.search.asCurrentUser,
+          exceptionItems,
+          listClient,
+          logger,
+          percolatorRuleDataClient,
+          perPage: DETECTION_ENGINE_MAX_PER_PAGE,
+          threatFilters: threatFilters ?? [],
+          threatIndex,
+          threatLanguage,
+          threatMapping,
+          threatQuery,
+          withTimeout,
+        });
+      }
 
       const result = await threatMatchExecutor({
         buildRuleMessage,
@@ -80,6 +105,7 @@ export const createIndicatorMatchAlertType = (
         tuple,
         version,
         wrapHits,
+        withTimeout,
       });
       return { ...result, state };
     },

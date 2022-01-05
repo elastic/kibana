@@ -10,7 +10,7 @@ import { getQueryFilter } from '../../../../../common/detection_engine/get_query
 import {
   EventCountOptions,
   GetSortWithTieBreakerOptions,
-  GetThreatListOptions,
+  GetEventsPageOptions,
   SortWithTieBreaker,
   ThreatListDoc,
 } from './types';
@@ -19,7 +19,7 @@ import {
   ELASTICSEARCH_MAX_PER_PAGE,
 } from '../../../../../common/cti/constants';
 
-export const getNextIndicatorPage = async ({
+export const getNextEventsPage = async ({
   esClient,
   query,
   language,
@@ -29,22 +29,16 @@ export const getNextIndicatorPage = async ({
   sortField,
   sortOrder,
   exceptionItems,
-  threatFilters,
+  filters,
   listClient,
   buildRuleMessage,
   logger,
-}: GetThreatListOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
+}: GetEventsPageOptions): Promise<estypes.SearchResponse<ThreatListDoc>> => {
   const calculatedPerPage = perPage ?? DETECTION_ENGINE_MAX_PER_PAGE;
   if (calculatedPerPage > ELASTICSEARCH_MAX_PER_PAGE) {
     throw new TypeError('perPage cannot exceed the size of 10000');
   }
-  const queryFilter = getQueryFilter(
-    query,
-    language ?? 'kuery',
-    threatFilters,
-    index,
-    exceptionItems
-  );
+  const queryFilter = getQueryFilter(query, language ?? 'kuery', filters, index, exceptionItems);
 
   logger.debug(
     buildRuleMessage(
@@ -130,10 +124,10 @@ export const getTotalEventCount = async ({
   return response.count;
 };
 
-export const getFirstIndicatorPage = (
-  params: Omit<GetThreatListOptions, 'searchAfter' | 'sortField' | 'sortOrder'>
+export const getFirstEventsPage = (
+  params: Omit<GetEventsPageOptions, 'searchAfter' | 'sortField' | 'sortOrder'>
 ) =>
-  getNextIndicatorPage({
+  getNextEventsPage({
     ...params,
     searchAfter: undefined,
     sortField: undefined,

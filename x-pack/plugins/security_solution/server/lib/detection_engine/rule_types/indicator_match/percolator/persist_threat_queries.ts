@@ -7,12 +7,12 @@
 
 import chunk from 'lodash/chunk';
 import { IRuleDataClient } from '../../../../../../../rule_registry/server';
-import { BoolFilter } from '../types';
+import { PercolatorQuery } from '../../../signals/threat_mapping/types';
 import { ELASTICSEARCH_MAX_PER_PAGE } from '../../../../../../common/cti/constants';
 
 interface PersistThreatQueriesOptions {
   percolatorRuleDataClient: IRuleDataClient;
-  threatQueriesToPersist: BoolFilter[];
+  threatQueriesToPersist: PercolatorQuery[];
 }
 
 export const persistThreatQueries = async ({
@@ -22,19 +22,20 @@ export const persistThreatQueries = async ({
   const chunkedThreatQueries = chunk(threatQueriesToPersist, ELASTICSEARCH_MAX_PER_PAGE);
   const writeRequests = chunkedThreatQueries.map((queries) =>
     percolatorRuleDataClient.getWriter().bulk({
-      body: queries.flatMap((filter, i) => {
-        const id = filter._name;
-        const indicator = filter.indicator;
-        delete filter._name;
-        delete filter.indicator;
+      body: queries.flatMap((query) => {
+        const id = query._name;
+        const indicator = query.indicator;
+        delete query._name;
+        delete query.indicator;
         return [
           {
             create: {
+              // todo: don't hardcode default
               _index: `${percolatorRuleDataClient.indexName}-default`,
               _id: id,
             },
           },
-          { query: filter, ...indicator?._source },
+          { query, ...indicator?._source },
         ];
       }),
     })

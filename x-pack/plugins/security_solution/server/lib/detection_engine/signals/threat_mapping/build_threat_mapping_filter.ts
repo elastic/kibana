@@ -10,7 +10,7 @@ import type { Filter } from '@kbn/es-query';
 import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   BooleanFilter,
-  BoolFilter,
+  PercolatorQuery,
   BuildEntriesMappingFilterOptions,
   BuildThreatMappingFilterOptions,
   CreateAndOrClausesOptions,
@@ -169,10 +169,10 @@ export const splitShouldClauses = ({
 export const createPercolateQueries = ({
   threatMapping,
   threatList,
-}: Omit<BuildEntriesMappingFilterOptions, 'chunkSize'>): BoolFilter[] => {
-  return threatList.reduce<BoolFilter[]>((queries, indicator) => {
-    const query = threatMapping.reduce<BoolFilter[]>((clauses, threatMapItem) => {
-      const filters = threatMapItem.entries.reduce<BoolFilter[]>((clauseParts, entry) => {
+}: Omit<BuildEntriesMappingFilterOptions, 'chunkSize'>): PercolatorQuery[] => {
+  return threatList.reduce<PercolatorQuery[]>((queries, indicator) => {
+    const query = threatMapping.reduce<PercolatorQuery[]>((clauses, threatMapItem) => {
+      const filters = threatMapItem.entries.reduce<PercolatorQuery[]>((clauseParts, entry) => {
         const value = get(entry.value, indicator.fields);
         if (value != null && value.length === 1) {
           clauseParts.push({

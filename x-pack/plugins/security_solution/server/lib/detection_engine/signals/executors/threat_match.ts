@@ -38,6 +38,7 @@ export const threatMatchExecutor = async ({
   bulkCreate,
   wrapHits,
   percolatorRuleDataClient,
+  withTimeout,
 }: {
   completeRule: CompleteRule<ThreatRuleParams>;
   tuple: RuleRangeTuple;
@@ -53,6 +54,7 @@ export const threatMatchExecutor = async ({
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   percolatorRuleDataClient: IRuleDataClient;
+  withTimeout: <T>(func: () => Promise<T>, funcName: string) => Promise<T>;
 }) => {
   const ruleParams = completeRule.ruleParams;
 
@@ -91,6 +93,7 @@ export const threatMatchExecutor = async ({
       threatQuery: ruleParams.threatQuery,
       tuple,
       type: ruleParams.type,
+      withTimeout,
       wrapHits,
     });
   });

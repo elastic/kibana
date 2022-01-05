@@ -8,7 +8,7 @@
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
 import { SignalSearchResponse, SignalsEnrichment } from '../types';
 import { enrichSignalThreatMatches } from './enrich_signal_threat_matches';
-import { getFirstIndicatorPage } from './get_threat_list';
+import { getFirstEventsPage } from './get_threat_list';
 import { BuildThreatEnrichmentOptions, GetMatchedThreats } from './types';
 
 export const buildThreatEnrichment = ({
@@ -33,7 +33,7 @@ export const buildThreatEnrichment = ({
         },
       },
     };
-    const threatResponse = await getFirstIndicatorPage({
+    const threatResponse = await getFirstEventsPage({
       esClient: services.scopedClusterClient.asCurrentUser,
       exceptionItems,
       threatFilters: [...threatFilters, matchedThreatsFilter],

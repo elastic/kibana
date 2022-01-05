@@ -71,6 +71,7 @@ import {
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { scheduleThrottledNotificationActions } from '../notifications/schedule_throttle_notification_actions';
 import { IEventLogService } from '../../../../../event_log/server';
+import { IRuleDataClient } from '../../../../../rule_registry/server';
 
 export const signalRulesAlertType = ({
   logger,
@@ -365,6 +366,11 @@ export const signalRulesAlertType = ({
               buildRuleMessage,
               bulkCreate,
               wrapHits,
+              percolatorRuleDataClient: {} as IRuleDataClient,
+              withTimeout: async <T>(func: () => Promise<T>, funcName: string) => {
+                const resolved = await func();
+                return resolved;
+              },
             });
           }
         } else if (isQueryRule(type)) {

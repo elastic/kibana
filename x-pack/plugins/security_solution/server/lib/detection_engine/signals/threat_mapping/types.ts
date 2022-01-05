@@ -40,6 +40,22 @@ import { IRuleDataClient } from '../../../../../../rule_registry/server';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
+export interface UpdatePercolatorIndexOptions {
+  buildRuleMessage: BuildRuleMessage;
+  esClient: IAbortableEsClient;
+  exceptionItems: ExceptionListItemSchema[];
+  listClient: ListClient;
+  logger: Logger;
+  percolatorRuleDataClient: IRuleDataClient;
+  perPage: number;
+  threatFilters: unknown[];
+  threatIndex: ThreatIndex;
+  threatLanguage: ThreatLanguageOrUndefined;
+  threatMapping: ThreatMapping;
+  threatQuery: ThreatQuery;
+  withTimeout: <T>(func: () => Promise<T>, funcName: string) => Promise<T>;
+}
+
 export interface CreateThreatSignalsOptions {
   alertId: string;
   buildRuleMessage: BuildRuleMessage;
@@ -68,6 +84,7 @@ export interface CreateThreatSignalsOptions {
   threatQuery: ThreatQuery;
   tuple: RuleRangeTuple;
   type: Type;
+  withTimeout: <T>(func: () => Promise<T>, funcName: string) => Promise<T>;
   wrapHits: WrapHits;
 }
 
@@ -77,7 +94,33 @@ export interface CreateThreatSignalOptions {
   bulkCreate: BulkCreate;
   completeRule: CompleteRule<ThreatRuleParams>;
   currentResult: SearchAfterAndBulkCreateReturnType;
-  currentThreatList: Indicator[];
+  currentThreatList: IndicatorHit[];
+  eventsTelemetry: TelemetryEventsSender | undefined;
+  exceptionItems: ExceptionListItemSchema[];
+  filters: unknown[];
+  inputIndex: string[];
+  language: LanguageOrUndefined;
+  listClient: ListClient;
+  logger: Logger;
+  outputIndex: string;
+  query: string;
+  savedId: string | undefined;
+  searchAfterSize: number;
+  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  threatEnrichment: SignalsEnrichment;
+  threatMapping: ThreatMapping;
+  tuple: RuleRangeTuple;
+  type: Type;
+  wrapHits: WrapHits;
+}
+
+export interface FetchSourceEventsOptions {
+  alertId: string;
+  buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
+  completeRule: CompleteRule<ThreatRuleParams>;
+  currentResult: SearchAfterAndBulkCreateReturnType;
+  currentThreatList: IndicatorHit[];
   eventsTelemetry: TelemetryEventsSender | undefined;
   exceptionItems: ExceptionListItemSchema[];
   filters: unknown[];
@@ -99,28 +142,28 @@ export interface CreateThreatSignalOptions {
 
 export interface BuildThreatMappingFilterOptions {
   chunkSize?: number;
-  threatList: Indicator[];
+  threatList: IndicatorHit[];
   threatMapping: ThreatMapping;
 }
 
 export interface FilterThreatMappingOptions {
-  indicator: Indicator;
+  indicator: IndicatorHit;
   threatMapping: ThreatMapping;
 }
 
 export interface CreateInnerAndClausesOptions {
-  indicator: Indicator;
+  indicator: IndicatorHit;
   threatMappingEntries: ThreatMappingEntries;
 }
 
 export interface CreateAndOrClausesOptions {
-  indicator: Indicator;
+  indicator: IndicatorHit;
   threatMapping: ThreatMapping;
 }
 
 export interface BuildEntriesMappingFilterOptions {
   chunkSize: number;
-  threatList: Indicator[];
+  threatList: IndicatorHit[];
   threatMapping: ThreatMapping;
 }
 
@@ -133,16 +176,17 @@ export interface BooleanFilter {
   bool: { should: unknown[]; minimum_should_match: number };
 }
 
-export interface BoolFilter {
+export interface PercolatorQuery {
   bool: { filter?: unknown[]; should?: unknown[]; minimum_should_match: number };
   _name?: string;
-  indicator?: Indicator;
+  indicator?: IndicatorHit;
 }
 
-export interface GetThreatListOptions {
+export interface GetEventsPageOptions {
   buildRuleMessage: BuildRuleMessage;
   esClient: IAbortableEsClient;
   exceptionItems: ExceptionListItemSchema[];
+  filters: unknown[];
   index: string[];
   language: ThreatLanguageOrUndefined;
   listClient: ListClient;
@@ -152,7 +196,6 @@ export interface GetThreatListOptions {
   searchAfter: string[] | undefined;
   sortField: string | undefined;
   sortOrder: SortOrderOrUndefined;
-  threatFilters: unknown[];
 }
 
 export interface CreateThreatQueriesForPercolatorOptions {
@@ -167,6 +210,20 @@ export interface CreateThreatQueriesForPercolatorOptions {
   threatLanguage: ThreatLanguageOrUndefined;
   threatMapping: ThreatMapping;
   threatQuery: ThreatQuery;
+}
+
+export interface FetchEventsOptions<T> {
+  buildRuleMessage: BuildRuleMessage;
+  esClient: IAbortableEsClient;
+  exceptionItems: ExceptionListItemSchema[];
+  listClient: ListClient;
+  logger: Logger;
+  perPage?: number;
+  filters: unknown[];
+  index: ThreatIndex;
+  language: ThreatLanguageOrUndefined;
+  query: ThreatQuery;
+  transformHits: (hits: EventHit[]) => T[];
 }
 
 export interface EventCountOptions {
@@ -185,15 +242,19 @@ export interface GetSortWithTieBreakerOptions {
   sortOrder: SortOrderOrUndefined;
 }
 
-export interface ThreatListDoc {
+export interface EventDoc {
   [key: string]: unknown;
 }
+
+export type ThreatListDoc = EventDoc;
+export type SourceEventDoc = EventDoc;
 
 /**
  * This is an ECS document being returned, but the user could return or use non-ecs based
  * documents potentially.
  */
-export type Indicator = estypes.SearchHit<ThreatListDoc>;
+export type IndicatorHit = estypes.SearchHit<ThreatListDoc>;
+export type EventHit = estypes.SearchHit<EventDoc>;
 
 export interface ThreatEnrichment {
   feed: Record<string, unknown>;
@@ -212,7 +273,7 @@ export interface ThreatMatchNamedQuery {
   value: string;
 }
 
-export type GetMatchedThreats = (ids: string[]) => Promise<Indicator[]>;
+export type GetMatchedThreats = (ids: string[]) => Promise<IndicatorHit[]>;
 
 export interface BuildThreatEnrichmentOptions {
   buildRuleMessage: BuildRuleMessage;

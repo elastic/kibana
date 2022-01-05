@@ -66,6 +66,8 @@ export interface RunOpts<TParams extends RuleParams> {
     from: Moment;
     maxSignals: number;
   };
+  tupleIndex: number;
+  withTimeout: <T>(func: () => Promise<T>, funcName: string) => Promise<T>;
   wrapHits: WrapHits;
   wrapSequences: WrapSequences;
 }
