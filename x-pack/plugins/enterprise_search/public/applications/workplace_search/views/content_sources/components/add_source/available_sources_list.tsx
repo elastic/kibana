@@ -40,11 +40,6 @@ interface AvailableSourcesListProps {
   sources: SourceDataItem[];
 }
 
-const columnStyle = {
-  columnCount: "2",
-  columnGap: "2em"
-}
-
 export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sources }) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
@@ -102,32 +97,84 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
     return card;
   };
 
-  const visibleSources = (
-    // TODO probably should be using something other than a div here
-    <div style={columnStyle}>
-      <EuiFlexGroup
-        justifyContent="center"
-        alignItems="center"
-        responsive={false}
-        gutterSize="none"
-      >
-      </EuiFlexGroup>
+  const sourcesHalfList = (side) => {
 
-      {sources.map((source, i) => (
-        <EuiFlexItem grow={false} key={i}>
+    const halfwayThrough = Math.ceil(sources.length / 2)
+
+    const firstHalf = sources.slice(0, halfwayThrough);
+
+    const secondHalf = sources.slice(halfwayThrough, sources.length);
+
+    return {
+      firstHalf: firstHalf,
+      secondHalf: secondHalf
+    };
+
+  }
+
+  console.log(
+    sourcesHalfList().firstHalf,
+    sourcesHalfList().secondHalf
+  );
+
+  const visibleSources = (
+    <>
+      <EuiFlexGroup
+        direction="row"
+        alignItems="flexStart"
+        gutterSize="xl"
+      >
+
+        <EuiFlexItem>
           <EuiFlexGroup
             justifyContent="center"
             alignItems="stretch"
-            data-test-subj="AvailableSourceCard"
+            direction="column"
+            responsive={false}
+            gutterSize="none"
           >
-            <EuiFlexItem>
-              {getSourceCard(source)}
-            </EuiFlexItem>
+            {sourcesHalfList().firstHalf.map((source, i) => (
+              <EuiFlexItem grow={false} key={i}>
+                <EuiFlexGroup
+                  justifyContent="center"
+                  alignItems="stretch"
+                  data-test-subj="AvailableSourceCard"
+                >
+                  <EuiFlexItem>
+                    {getSourceCard(source)}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            ))}
           </EuiFlexGroup>
         </EuiFlexItem>
-      ))}
 
-    </div>
+        <EuiFlexItem>
+          <EuiFlexGroup
+            justifyContent="center"
+            alignItems="stretch"
+            direction="column"
+            responsive={false}
+            gutterSize="none"
+          >
+            {sourcesHalfList().secondHalf.map((source, i) => (
+              <EuiFlexItem grow={false} key={i}>
+                <EuiFlexGroup
+                  justifyContent="center"
+                  alignItems="stretch"
+                  data-test-subj="AvailableSourceCard"
+                >
+                  <EuiFlexItem>
+                    {getSourceCard(source)}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+
+      </EuiFlexGroup>
+    </>
   );
 
   const emptyState = (
@@ -151,7 +198,7 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
           .
         </p>
       </EuiText>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       {sources.length > 0 ? visibleSources : emptyState}
     </>
   );
