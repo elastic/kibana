@@ -47,6 +47,7 @@ import {
   ALERT_ORIGINAL_EVENT_KIND,
   ALERT_ORIGINAL_EVENT_MODULE,
 } from '../../../../common/field_maps/field_names';
+import { Ecs } from '../../../../common/ecs';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
@@ -729,7 +730,7 @@ describe('Exception helpers', () => {
     });
   });
 
-  describe.skip('defaultEndpointExceptionItems', () => {
+  describe('defaultEndpointExceptionItems', () => {
     test('it should return pre-populated Endpoint items for non-specified event code', () => {
       const defaultItems = defaultEndpointExceptionItems('list_id', 'my_rule', {
         _id: '123',
@@ -748,7 +749,8 @@ describe('Exception helpers', () => {
         event: {
           code: 'some event code',
         },
-      });
+        'event.code': 'some event code',
+      } as Flattened<Ecs>);
 
       expect(defaultItems[0].entries).toEqual([
         {
@@ -850,7 +852,8 @@ describe('Exception helpers', () => {
         event: {
           code: 'ransomware',
         },
-      });
+        'event.code': 'ransomware',
+      } as Flattened<Ecs>);
 
       expect(defaultItems[0].entries).toEqual([
         {
@@ -963,7 +966,8 @@ describe('Exception helpers', () => {
         event: {
           code: 'memory_signature',
         },
-      });
+        'event.code': 'memory_signature',
+      } as Flattened<Ecs>);
 
       expect(defaultItems[0].entries).toEqual([
         {
@@ -1014,7 +1018,8 @@ describe('Exception helpers', () => {
         event: {
           code: 'memory_signature',
         },
-      });
+        'event.code': 'memory_signature',
+      } as Flattened<Ecs>);
 
       // should not contain name or executable
       expect(defaultItems[0].entries).toEqual([
@@ -1074,7 +1079,8 @@ describe('Exception helpers', () => {
             },
           },
         },
-      });
+        'event.code': 'shellcode_thread',
+      } as Flattened<Ecs>);
 
       expect(defaultItems[0].entries).toEqual([
         {
@@ -1135,6 +1141,7 @@ describe('Exception helpers', () => {
         event: {
           code: 'shellcode_thread',
         },
+        'event.code': 'shellcode_thread',
         Target: {
           process: {
             thread: {
@@ -1154,7 +1161,7 @@ describe('Exception helpers', () => {
             },
           },
         },
-      });
+      } as Flattened<Ecs>);
 
       // no name, no exceutable, no allocation_type
       expect(defaultItems[0].entries).toEqual([
@@ -1203,6 +1210,7 @@ describe('Exception helpers', () => {
         event: {
           code: 'behavior',
         },
+        'event.code': 'behavior',
         file: {
           path: 'fake-file-path',
           name: 'fake-file-name',
@@ -1239,7 +1247,7 @@ describe('Exception helpers', () => {
         user: {
           id: '0987',
         },
-      });
+      } as Flattened<Ecs>);
 
       expect(defaultItems[0].entries).toEqual([
         {
@@ -1390,6 +1398,7 @@ describe('Exception helpers', () => {
         event: {
           code: 'behavior',
         },
+        'event.code': 'behavior',
         file: {
           // path: 'fake-file-path', intentionally left commented
           name: 'fake-file-name',
@@ -1427,7 +1436,7 @@ describe('Exception helpers', () => {
         user: {
           id: '0987',
         },
-      });
+      } as Flattened<Ecs>);
 
       expect(defaultItems[0].entries).toEqual([
         {
