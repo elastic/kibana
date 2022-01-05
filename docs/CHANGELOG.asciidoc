@@ -182,17 +182,16 @@ To review the depcrecations in previous versions, refer to the <<deprecations-8.
 === Features
 {kib} 8.0.0-rc1 adds the following new and notable features.
 
-APM::
-* Adds ability to create agent keys in APM settings {kibana-pull}120373[#120373]
-* Adds Agent key table in APM settings {kibana-pull}119543[#119543]
 Elastic Security::
 For the Elastic Security 8.0.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Management::
 Display managed badge for transforms {kibana-pull}117679[#117679]
 Monitoring::
 Enterprise Search Stack Monitoring {kibana-pull}114303[#114303]
-Uptime::
-Allows users to set Download Speed, Upload Speed, and Latency for their synthetic monitors {kibana-pull}118594[#118594]
+Observability::
+* Adds ability to create agent keys in APM settings {kibana-pull}120373[#120373]
+* Adds Agent key table in APM settings {kibana-pull}119543[#119543]
+* Allows users to set Download Speed, Upload Speed, and Latency for their synthetic monitors {kibana-pull}118594[#118594]
 
 [[enhancements-and-bug-fixes-v8.0.0-rc1]]
 === Enhancements and bug fixes
@@ -202,7 +201,22 @@ For detailed information about the 8.0.0-rc1 release, review the enhancements an
 [float]
 [[enhancement-v8.0.0-rc1]]
 === Enhancements
-APM::
+Canvas::
+Reverts By-Value Embeddables {kibana-pull}117613[#117613]
+Discover::
+Adds multi-layer time axis for opt-out only {kibana-pull}115853[#115853]
+Elastic Security::
+For the Elastic Security 8.0.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+Adds consistent `_meta` property to all Fleet ES assets {kibana-pull}119380[#119380]
+Kibana Home & Add Data::
+Moves overview page and link to the accordion solution title {kibana-pull}114018[#114018]
+Lens & Visualizations::
+* Handle removal of deprecated date histogram interval in *Vega* {kibana-pull}109090[#109090]
+* Adds value labels to Heatmap in *Lens* {kibana-pull}106406[#106406]
+Machine Learning::
+Adds support for `force` stop deployment {kibana-pull}118563[#118563]
+Observability::
 * Service maps: Adds sparklines to the detail popover {kibana-pull}120021[#120021]
 * Offer users upgrade to multi-metric job {kibana-pull}119980[#119980]
 * Display relevant anomalies from multi-metric job {kibana-pull}119709[#119709]
@@ -214,18 +228,10 @@ APM::
 * Adds links to navigate from alerts table to rule {kibana-pull}118035[#118035]
 * Reinstates ML multi-metric job {kibana-pull}117836[#117836]
 * Re-enables metric-based UI {kibana-pull}117021[#117021]
-Canvas::
-Reverts By-Value Embeddables {kibana-pull}117613[#117613]
-Discover::
-Adds multi-layer time axis for opt-out only {kibana-pull}115853[#115853]
-Elastic Security::
-For the Elastic Security 8.0.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
-Fleet::
-Adds consistent `_meta` property to all Fleet ES assets {kibana-pull}119380[#119380]
-Kibana Home & Add Data::
-Moves overview page and link to the accordion solution title {kibana-pull}114018[#114018]
-Machine Learning::
-Adds support for `force` stop deployment {kibana-pull}118563[#118563]
+* Make Alerts page use shared {kib} time range {kibana-pull}115192[#115192]
+* Adds enabled toggle {kibana-pull}119994[#119994]
+* Adds missing tooltip to the report metric badge in *Exploratory View* {kibana-pull}119940[#119940]
+* Adds step duration in step list {kibana-pull}116266[#116266]
 Platform::
 Moves developer architecture docs to user docs {kibana-pull}119125[#119125]
 Reporting::
@@ -233,26 +239,22 @@ Reporting::
 * Updates the design of the *Reports* management UI, including the addition of a link to {kib} app where the report was generated {kibana-pull}111412[#111412]
 Security::
 Adds ability to clone role mappings {kibana-pull}118434[#118434]
-Uptime::
-* Adds enabled toggle {kibana-pull}119994[#119994]
-* Adds missing tooltip to the report metric badge in *Exploratory View* {kibana-pull}119940[#119940]
-* Adds step duration in step list {kibana-pull}116266[#116266]
 
 [float]
 [[fixes-v8.0.0-rc1]]
 === Bug Fixes
-APM::
-* Renames occurrences of `alert_type` to `rule_type` in Infra {kibana-pull}120455[#120455]
-* Fixes failing alerts table pagination functional tests {kibana-pull}119985[#119985]
-* Fixes an issue where search terms with certain characters caused the APM UI to crash {kibana-pull}118063[#118063]
-* Ignore unavailable indices for ML jobs {kibana-pull}117632[#117632]
-* Disables the actions button when users have inadequate privileges {kibana-pull}117488[#117488]
-* Replaces manual rate calculation with `rate` agg {kibana-pull}115651[#115651]
+Canvas::
+* Fixes Error overflow {kibana-pull}122158[#122158]
+* Fixes expression input {kibana-pull}121490[#121490]
+* Hides edit menu when in view-only mode {kibana-pull}118779[#118779]
 Dashboard::
-Page now resets to zero when rows per page is changed on *Add from Library* window {kibana-pull}118627[#118627]
+* Allow text wrapping for panel titles and dashboard descriptions for PDF generation {kibana-pull}121360[#121360]
+* Page now resets to zero when rows per page is changed on *Add from Library* window {kibana-pull}118627[#118627]
+* Fixes full screen error when pressing back arrow in browser {kibana-pull}118113[#118113]
 Elastic Security::
 For the Elastic Security 8.0.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Fleet::
+* Adds `installed_kibana_space_id` to `epm-packages` saved objects {kibana-pull}120517[#120517]
 * Handle Saved Object ID changes {kibana-pull}119527[#119527]
 * Fixes upgradeable agents filter {kibana-pull}119338[#119338]
 Lens & Visualizations::
@@ -277,20 +279,32 @@ Management::
 * Autocomplete for t_test aggregation {kibana-pull}117782[#117782]
 * Disables create data view for data frame analytics and transforms wizards {kibana-pull}117690[#117690]
 Maps::
+* Fixes an issue where drawings do not show when there is a global filter {kibana-pull}121239[#121239]
 * Use minimum symbol size if meta is not loaded {kibana-pull}119119[#119119]
 * Do not fail migration when JSON.parse fails {kibana-pull}117342[#117342]
 * Do not allow label overlap {kibana-pull}116190[#116190]
-Metrics::
+Monitoring::
+Correct linear regression formula {kibana-pull}120222[#120222]
+Observability::
+* Renames alerting types in Infra {kibana-pull}121061[#121061]
+* Renames occurrences of `alert_type` to `rule_type` in Infra {kibana-pull}120455[#120455]
+* Fixes failing alerts table pagination functional tests {kibana-pull}119985[#119985]
+* Switch to _source for updating documents instead of fields API {kibana-pull}118245[#118245]
+* Fixes an issue where search terms with certain characters caused the APM UI to crash {kibana-pull}118063[#118063]
+* Ignore unavailable indices for ML jobs {kibana-pull}117632[#117632]
+* Disables the actions button when users have inadequate privileges {kibana-pull}117488[#117488]
+* Replaces manual rate calculation with `rate` agg {kibana-pull}115651[#115651]
 * Adds migration to fix incorrect action group spelling {kibana-pull}119626[#119626]
 * Fixes bug with manage views button {kibana-pull}118547[#118547]
 * Disables No Data checkboxes for doc count alerts {kibana-pull}117194[#117194]
-Monitoring::
-Correct linear regression formula {kibana-pull}120222[#120222]
-Reporting::
-Fixes an issue where PDF and PNG reports break on Windows operating systems when the {kib} server hostname is `0.0.0.0` {kibana-pull}117022[#117022]
-Uptime::
+* Prevent event propagation on step_duration {kibana-pull}122039[#122039]
+* Disables the button to create alerts in Uptime when users do not have permissions to do so {kibana-pull}120379[#120379]
 * Fixes a bug that prevented users from saving Uptime configurations when the `inspect` option was turned on {kibana-pull}119142[#119142]
 * Adds a callout to informs users that they do not have permissions to create ML jobs for Uptime monitors {kibana-pull}117684[#117684]
+Platform::
+Fixes font glitches in code editor {kibana-pull}121392[#121392]
+Reporting::
+Fixes an issue where PDF and PNG reports break on Windows operating systems when the {kib} server hostname is `0.0.0.0` {kibana-pull}117022[#117022]
 
 [[release-notes-8.0.0-beta1]]
 == {kib} 8.0.0-beta1
