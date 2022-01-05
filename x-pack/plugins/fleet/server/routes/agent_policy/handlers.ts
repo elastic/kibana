@@ -22,6 +22,7 @@ import type {
   CopyAgentPolicyRequestSchema,
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
+  FleetRequestHandler,
 } from '../../types';
 import type { AgentPolicy, NewPackagePolicy } from '../../types';
 import { FLEET_SYSTEM_PACKAGE } from '../../../common';
