@@ -74,7 +74,7 @@ const getActionButton = (mode: ColorRangeItemMode) => {
   if (mode === 'value') {
     return ColorRangeDeleteButton;
   }
-  return mode === 'edit' ? ColorRangeEditButton : ColorRangeAutoDetectButton;
+  return mode === 'edit' ? ColorRangeAutoDetectButton : ColorRangeEditButton;
 };
 
 export function ColorRangeItem({
