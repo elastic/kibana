@@ -58,6 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.hasFixAction()).to.be(true);
       await PageObjects.lens.useFixAction();
+      await PageObjects.lens.waitForVisualization();
 
       expect(await PageObjects.lens.getDatatableCellText(2, 2)).to.eql('5,541.5');
       expect(await PageObjects.lens.getDatatableCellText(2, 3)).to.eql('3,628');
@@ -79,6 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.hasFixAction()).to.be(true);
       await PageObjects.lens.useFixAction();
+      await PageObjects.lens.waitForVisualization();
 
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.eql('Filters of ip › geo.src');
     });
