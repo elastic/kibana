@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { toExpression } from '@kbn/interpreter/common';
+import { toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import {
   EuiEmptyPrompt,
@@ -299,7 +299,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           <>
             <p>
               {i18n.translate('xpack.lens.editorFrame.emptyWorkspaceHeading', {
-                defaultMessage: 'Lens is a new tool for creating visualization',
+                defaultMessage: 'Lens is the recommended editor for creating visualizations',
               })}
             </p>
             <p>

@@ -10,4 +10,5 @@ import { CaseMetricsResponse } from '../../../common/api';
 export interface MetricsHandler {
   getFeatures(): Set<string>;
   compute(): Promise<CaseMetricsResponse>;
+  setupFeature?(feature: string): void;
 }
