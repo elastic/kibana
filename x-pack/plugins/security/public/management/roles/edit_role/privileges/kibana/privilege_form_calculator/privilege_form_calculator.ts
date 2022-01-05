@@ -105,14 +105,14 @@ export class PrivilegeFormCalculator {
 
     const selectedFeaturePrivileges = this.getSelectedFeaturePrivileges(featureId, privilegeIndex);
 
-    const displayedPrivilege = feature
+    const effectivePrivilege = feature
       .getPrimaryFeaturePrivileges({ includeMinimalFeaturePrivileges: true })
       .find((fp) => {
         return selectedFeaturePrivileges.includes(fp.id) || basePrivilege?.grantsPrivilege(fp);
       });
-    const correctSpacesSelected = displayedPrivilege?.requireAllSpaces ? allSpacesSelected : true;
-    const availablePrivileges = correctSpacesSelected && !displayedPrivilege?.disabled;
-    if (availablePrivileges) return displayedPrivilege;
+    const correctSpacesSelected = effectivePrivilege?.requireAllSpaces ? allSpacesSelected : true;
+    const availablePrivileges = correctSpacesSelected && !effectivePrivilege?.disabled;
+    if (availablePrivileges) return effectivePrivilege;
   }
 
   /**
