@@ -8,6 +8,7 @@
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { getExceptionsPreCreateItemHandler } from './handlers/exceptions_pre_create_handler';
 import { getExceptionsPreUpdateItemHandler } from './handlers/exceptions_pre_update_handler';
+import type { ListsServerExtensionRegistrar } from '../../../../lists/server';
 
 export const registerListsPluginEndpointExtensionPoints = (
   registerListsExtensionPoint: ListsServerExtensionRegistrar,

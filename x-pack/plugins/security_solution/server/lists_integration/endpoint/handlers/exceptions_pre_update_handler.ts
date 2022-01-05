@@ -5,4 +5,18 @@
  * 2.0.
  */
 
-export const getExceptionsPreUpdateItemHandler = () => {};
+import {
+  ExceptionsListPreUpdateItemServerExtension,
+  UpdateExceptionListItemOptions,
+} from '../../../../../lists/server';
+
+export const getExceptionsPreUpdateItemHandler =
+  (): ExceptionsListPreUpdateItemServerExtension['callback'] => {
+    return async (
+      data: UpdateExceptionListItemOptions
+    ): Promise<UpdateExceptionListItemOptions> => {
+      return data;
+
+      // FIXME: implement method
+    };
+  };

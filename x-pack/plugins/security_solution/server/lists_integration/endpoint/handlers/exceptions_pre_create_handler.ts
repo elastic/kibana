@@ -5,15 +5,25 @@
  * 2.0.
  */
 
-export const getExceptionsPreCreateItemHandler = () => {
-  return async () => {
-    // If Trusted app - validate
-    //
-    // if Event Filters - validate
-    //
-    // if Host Isolation Exceptions - validate
-    //
-    //
-    // --- else, just return
+import {
+  CreateExceptionListItemOptions,
+  ExceptionsListPreCreateItemServerExtension,
+} from '../../../../../lists/server';
+
+export const getExceptionsPreCreateItemHandler =
+  (): ExceptionsListPreCreateItemServerExtension['callback'] => {
+    return async (
+      data: CreateExceptionListItemOptions
+    ): Promise<CreateExceptionListItemOptions> => {
+      return data;
+      // FIXME:PT implement callback logic
+      // If Trusted app - validate
+      //
+      // if Event Filters - validate
+      //
+      // if Host Isolation Exceptions - validate
+      //
+      //
+      // --- else, just return
+    };
   };
-};
