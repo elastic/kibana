@@ -60,16 +60,11 @@ echo "--- Setup Yarn"
 YARN_VERSION=$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")
 export YARN_VERSION
 
-npm root -g
-ls -alh "$(npm root -g)"
-rm -rf "$(npm root -g)/yarn" # TODO remove me
-mkdir -p "$(npm root -g)/yarn/test" # TODO remove me after testing
-which yarn || true
-
 if [[ ! $(which yarn) || $(yarn --version) != "$YARN_VERSION" ]]; then
+  rm -rf "$(npm root -g)/yarn" # in case the directory is in a bad state
   if [[ ! $(npm install -g "yarn@^${YARN_VERSION}") ]]; then
-    # Installing yarn fails once in a while
-    # if it fails at a bad time, a yarn directory is left behind that causes all subsequent installs to fail
+    # If this command is terminated early, e.g. because the build was cancelled in buildkite,
+    # a yarn directory is left behind in a bad state that can cause all subsequent installs to fail
     rm -rf "$(npm root -g)/yarn"
     echo "Trying again to install yarn..."
     npm install -g "yarn@^${YARN_VERSION}"
