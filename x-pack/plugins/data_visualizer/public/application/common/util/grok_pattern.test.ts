@@ -43,7 +43,7 @@ describe('grok pattern', () => {
     expect(grokPattern).toEqual(expectedGrokPattern);
   });
 
-  it('should not rename the correct field', () => {
+  it('should not rename the field if incorrect index is supplied', () => {
     const index = 2; // wrong index
     const renamedField = 'field2_renamed';
 
