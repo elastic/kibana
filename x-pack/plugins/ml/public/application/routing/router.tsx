@@ -100,9 +100,7 @@ export const MlRouter: FC<{
   <Router history={pageDeps.history}>
     <LegacyHashUrlRedirect>
       <UrlStateProvider>
-        <div className="ml-app" data-test-subj="mlApp">
-          <MlPage pageDeps={pageDeps} />
-        </div>
+        <MlPage pageDeps={pageDeps} />
       </UrlStateProvider>
     </LegacyHashUrlRedirect>
   </Router>

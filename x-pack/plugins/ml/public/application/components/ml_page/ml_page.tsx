@@ -17,7 +17,10 @@ import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
 import { MlRoute, PageDependencies } from '../../routing/router';
 import { DatePickerWrapper } from '../navigation_menu/date_picker_wrapper';
 import { useActiveRoute } from '../../routing/use_active_route';
-import { KibanaPageTemplate } from '../../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaPageTemplate,
+  RedirectAppLinks,
+} from '../../../../../../../src/plugins/kibana_react/public';
 
 export const MlPageControlsContext = createContext<{
   setPageTitle: (v?: React.ReactNode | undefined) => void;
@@ -78,7 +81,14 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
 
   return (
     <KibanaPageTemplate
+      className={'ml-app'}
+      data-test-subj={'mlApp'}
       restrictWidth={false}
+      // EUI TODO
+      // The different template options need to be manually recreated by the individual pages.
+      // These classes help enforce the layouts.
+      pageContentProps={{ className: 'kbnAppWrapper' }}
+      pageContentBodyProps={{ className: 'kbnAppWrapper' }}
       solutionNav={{
         name: i18n.translate('xpack.ml.plugin.title', {
           defaultMessage: 'Machine Learning',
@@ -86,7 +96,6 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         icon: 'machineLearningApp',
         items: useSideNavItems(activeRoute.id),
       }}
-      grow={true}
       pageHeader={{
         pageTitle: pageState.pageHeader,
         rightSideItems: [...(activeRoute.enableDatePicker ? [<DatePickerWrapper />] : [])],
@@ -109,30 +118,40 @@ interface CommonPageWrapperProps {
 
 const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(
   ({ setPageTitle, pageDeps, routeList }) => {
+    const {
+      services: { application },
+    } = useMlKibana();
+
     return (
-      <MlPageControlsContext.Provider
-        value={{ setPageTitle, setHeaderActionMenu: pageDeps.setHeaderActionMenu }}
-      >
-        <EuiPageContentBody restrictWidth={false}>
-          {routeList.map((route) => {
-            return (
-              <Route
-                key={route.id}
-                path={route.path}
-                exact
-                render={(props) => {
-                  window.setTimeout(() => {
-                    pageDeps.setBreadcrumbs(route.breadcrumbs);
-                  });
-                  return (
-                    <MlPageWrapper path={route.path}>{route.render(props, pageDeps)}</MlPageWrapper>
-                  );
-                }}
-              />
-            );
-          })}
-        </EuiPageContentBody>
-      </MlPageControlsContext.Provider>
+      /** RedirectAppLinks intercepts all <a> tags to use navigateToUrl
+       * avoiding full page reload **/
+      <RedirectAppLinks application={application}>
+        <MlPageControlsContext.Provider
+          value={{ setPageTitle, setHeaderActionMenu: pageDeps.setHeaderActionMenu }}
+        >
+          <EuiPageContentBody restrictWidth={false}>
+            {routeList.map((route) => {
+              return (
+                <Route
+                  key={route.id}
+                  path={route.path}
+                  exact
+                  render={(props) => {
+                    window.setTimeout(() => {
+                      pageDeps.setBreadcrumbs(route.breadcrumbs);
+                    });
+                    return (
+                      <MlPageWrapper path={route.path}>
+                        {route.render(props, pageDeps)}
+                      </MlPageWrapper>
+                    );
+                  }}
+                />
+              );
+            })}
+          </EuiPageContentBody>
+        </MlPageControlsContext.Provider>
+      </RedirectAppLinks>
     );
   }
 );
