@@ -1,0 +1,150 @@
+{
+  "type": "doc",
+  "value": {
+    "id" : "dccbe186-70f8-486e-9f62-1189297ee07e",
+    "index" : ".monitoring-logstash-8-mb",
+    "source" : {
+      "@timestamp" : "2018-01-22T09:33:31.108Z",
+      "process" : {
+        "pid" : 80400
+      },
+      "event" : {
+        "dataset" : "logstash.node",
+        "module" : "logstash",
+        "duration" : 500020056
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      },
+      "host" : {
+        "name" : "Kevins-MBP"
+      },
+      "agent" : {
+        "type" : "metricbeat",
+        "version" : "8.1.0",
+        "ephemeral_id" : "44ef744e-0c91-40a8-a96d-efe126c9f111",
+        "id" : "9ba62349-5343-4ed2-b5cf-4eb07c7cf816",
+        "name" : "Kevins-MBP"
+      },
+      "metricset" : {
+        "period" : 10000,
+        "name" : "node"
+      },
+      "logstash" : {
+        "cluster" : {
+          "id" : "1rhApLfQShSh3JsNqYCkmA"
+        },
+        "elasticsearch" : {
+          "cluster" : {
+            "id" : "1rhApLfQShSh3JsNqYCkmA"
+          }
+        },
+        "node" : {
+          "version" : "8.0.0",
+          "jvm" : {
+            "version" : "11.0.12"
+          },
+          "state" : {
+            "pipeline" : {
+              "hash" : "cab3f0050df81e44b145bdce95c1258cdcfbe1475139f66c6821610efd55d6fb",
+              "ephemeral_id" : "099afd27-5e2b-4e0b-a5cb-7f60e18e1d5d",
+              "representation" : {
+                "version" : "0.0.0",
+                "hash" : "cab3f0050df81e44b145bdce95c1258cdcfbe1475139f66c6821610efd55d6fb",
+                "graph" : {
+                  "vertices" : [
+                    {
+                      "explicit_id" : false,
+                      "id" : "mygen01",
+                      "meta" : {
+                        "source" : {
+                          "column" : 3,
+                          "id" : "/Users/lacabane/Downloads/logstash-8.0.0-beta1/logstash.dev.conf",
+                          "line" : 2,
+                          "protocol" : "file"
+                        }
+                      },
+                      "plugin_type" : "input",
+                      "type" : "plugin",
+                      "config_name" : "stdin"
+                    },
+                    {
+                      "explicit_id" : false,
+                      "id" : "__QUEUE__",
+                      "meta" : null,
+                      "type" : "queue"
+                    },
+                    {
+                      "type" : "plugin",
+                      "config_name" : "elasticsearch",
+                      "explicit_id" : false,
+                      "id" : "475194af69738a73b1a4c89f2fe72764a1acb6bd93da9c1a67676b60bd4015a6",
+                      "meta" : {
+                        "source" : {
+                          "id" : "/Users/lacabane/Downloads/logstash-8.0.0-beta1/logstash.dev.conf",
+                          "line" : 5,
+                          "protocol" : "file",
+                          "column" : 3
+                        }
+                      },
+                      "plugin_type" : "output"
+                    },
+                    {
+                      "plugin_type" : "output",
+                      "type" : "plugin",
+                      "config_name" : "stdout",
+                      "explicit_id" : false,
+                      "id" : "42354128ef3d71655b0572609540bc02f1d79fa6333ea5f247fc30c989995bf4",
+                      "meta" : {
+                        "source" : {
+                          "line" : 10,
+                          "protocol" : "file",
+                          "column" : 3,
+                          "id" : "/Users/lacabane/Downloads/logstash-8.0.0-beta1/logstash.dev.conf"
+                        }
+                      }
+                    }
+                  ],
+                  "edges" : [
+                    {
+                      "type" : "plain",
+                      "from" : "mygen01",
+                      "id" : "60ad1213301436803103c4581783a82d056c535ed37dd1f3a335549c27827273",
+                      "to" : "__QUEUE__"
+                    },
+                    {
+                      "from" : "__QUEUE__",
+                      "id" : "f110838210722e86a51ab528c415da273c0995233cb6b02c821eb9b9d100255d",
+                      "to" : "475194af69738a73b1a4c89f2fe72764a1acb6bd93da9c1a67676b60bd4015a6",
+                      "type" : "plain"
+                    },
+                    {
+                      "to" : "42354128ef3d71655b0572609540bc02f1d79fa6333ea5f247fc30c989995bf4",
+                      "type" : "plain",
+                      "from" : "__QUEUE__",
+                      "id" : "498622302d9fa3d8c3c72011c8a1f33813da1437d47ad1faabb5a04c5e1587b8"
+                    }
+                  ]
+                },
+                "type" : "lir"
+              },
+              "batch_size" : 125,
+              "workers" : 16,
+              "id" : "nginx_logs"
+            }
+          },
+          "id" : "29a3dfa6-c146-4534-9bc0-be475d2ce950",
+          "host" : "Shaunaks-MacBook-Pro.local"
+        }
+      },
+      "service" : {
+        "id" : "29a3dfa6-c146-4534-9bc0-be475d2ce950",
+        "hostname" : "Shaunaks-MacBook-Pro.local",
+        "version" : "8.0.0",
+        "address" : "http://localhost:9600/_node",
+        "type" : "logstash",
+        "name" : "logstash"
+      }
+    } 
+  }
+}
