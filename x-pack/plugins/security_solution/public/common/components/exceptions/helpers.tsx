@@ -784,10 +784,9 @@ export const entryHasNonEcsType = (
 export const defaultEndpointExceptionItems = (
   listId: string,
   ruleName: string,
-  alertEcsData: Flattened<Ecs>
+  alertEcsData: Flattened<Ecs> & { 'event.code'?: string }
 ): ExceptionsBuilderExceptionItem[] => {
-  const { event: alertEvent } = alertEcsData;
-  const eventCode = alertEvent?.code ?? '';
+  const eventCode = alertEcsData['event.code'] ?? alertEcsData.event?.code;
 
   switch (eventCode) {
     case 'behavior':
@@ -833,7 +832,7 @@ export const defaultEndpointExceptionItems = (
         getPrepopulatedEndpointException({
           listId,
           ruleName,
-          eventCode,
+          eventCode: eventCode ?? '',
           codeSignature,
           alertEcsData,
         })
