@@ -13,7 +13,7 @@ import { VIS_EVENT_TO_TRIGGER, VisTypeDefinition } from '../../../../visualizati
 import { DEFAULT_PERCENT_DECIMALS } from '../../common';
 import { PieTypeProps } from '../types';
 import {
-  PieVisParams,
+  PartitionVisParams,
   LabelPositions,
   ValueFormats,
   EmptySizeRatios,
@@ -25,7 +25,7 @@ export const getPieVisTypeDefinition = ({
   showElasticChartsOptions = false,
   palettes,
   trackUiMetric,
-}: PieTypeProps): VisTypeDefinition<PieVisParams> => ({
+}: PieTypeProps): VisTypeDefinition<PartitionVisParams> => ({
   name: 'pie',
   title: i18n.translate('visTypePie.pie.pieTitle', { defaultMessage: 'Pie' }),
   icon: 'visPie',

@@ -8,10 +8,10 @@
 
 import { getColumnByAccessor } from './accessor';
 import { DatatableColumn, Datatable } from '../../../../expressions/public';
-import { BucketColumns, PieVisParams } from '../../common/types';
+import { BucketColumns, PartitionVisParams } from '../../common/types';
 
 export const getColumns = (
-  visParams: PieVisParams,
+  visParams: PartitionVisParams,
   visData: Datatable
 ): {
   metricColumn: DatatableColumn;

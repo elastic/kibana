@@ -22,7 +22,7 @@ export type {
 } from './types/expression_functions';
 
 export type {
-  PieVisParams,
+  PartitionVisParams,
   PieVisConfig,
   LabelsParams,
   Dimension,

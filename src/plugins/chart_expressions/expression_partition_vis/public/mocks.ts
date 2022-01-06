@@ -9,7 +9,7 @@
 import { Datatable } from '../../../expressions/public';
 import {
   BucketColumns,
-  PieVisParams,
+  PartitionVisParams,
   LabelPositions,
   ValueFormats,
 } from '../common/types/expression_renderers';
@@ -269,7 +269,7 @@ export const createMockVisData = (): Datatable => {
   };
 };
 
-export const createMockPieParams = (): PieVisParams => {
+export const createMockPieParams = (): PartitionVisParams => {
   return {
     addLegend: true,
     addTooltip: true,
@@ -331,5 +331,5 @@ export const createMockPieParams = (): PieVisParams => {
         },
       ],
     },
-  } as unknown as PieVisParams;
+  } as unknown as PartitionVisParams;
 };

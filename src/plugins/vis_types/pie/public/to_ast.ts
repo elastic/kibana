@@ -13,7 +13,7 @@ import {
   PIE_VIS_EXPRESSION_NAME,
   PARTITION_LABELS_FUNCTION,
   PieVisExpressionFunctionDefinition,
-  PieVisParams,
+  PartitionVisParams,
   LabelsParams,
 } from '../../../chart_expressions/expression_partition_vis/common';
 import { getEsaggsFn } from './to_ast_esaggs';
@@ -55,7 +55,7 @@ const prepareLabels = (params: LabelsParams) => {
   return buildExpression([pieLabels]);
 };
 
-export const toExpressionAst: VisToExpressionAst<PieVisParams> = async (vis, params) => {
+export const toExpressionAst: VisToExpressionAst<PartitionVisParams> = async (vis, params) => {
   const schemas = getVisSchemas(vis, params);
   const args = {
     // explicitly pass each param to prevent extra values trapping
@@ -66,7 +66,7 @@ export const toExpressionAst: VisToExpressionAst<PieVisParams> = async (vis, par
     truncateLegend: vis.params.truncateLegend,
     maxLegendLines: vis.params.maxLegendLines,
     distinctColors: vis.params?.distinctColors,
-    isDonut: vis.params.isDonut,
+    isDonut: vis.params.isDonut ?? false,
     emptySizeRatio: vis.params.emptySizeRatio,
     palette: preparePalette(vis.params?.palette),
     labels: prepareLabels(vis.params.labels),

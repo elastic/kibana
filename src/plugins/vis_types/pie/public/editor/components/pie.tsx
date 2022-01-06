@@ -35,7 +35,7 @@ import { PaletteRegistry } from '../../../../../charts/public';
 import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
 import { PieTypeProps } from '../../types';
 import {
-  PieVisParams,
+  PartitionVisParams,
   LabelPositions,
   ValueFormats,
 } from '../../../../../chart_expressions/expression_partition_vis/common';
@@ -43,7 +43,7 @@ import {
 import { emptySizeRatioOptions, getLabelPositions, getValuesFormats } from '../collections';
 import { getLegendPositions } from '../positions';
 
-export interface PieOptionsProps extends VisEditorOptionsProps<PieVisParams>, PieTypeProps {}
+export interface PieOptionsProps extends VisEditorOptionsProps<PartitionVisParams>, PieTypeProps {}
 
 const emptySizeRatioLabel = i18n.translate('visTypePie.editors.pie.emptySizeRatioLabel', {
   defaultMessage: 'Inner area size',
@@ -82,9 +82,9 @@ function DecimalSlider<ParamName extends string>({
 
 const PieOptions = (props: PieOptionsProps) => {
   const { stateParams, setValue, aggs } = props;
-  const setLabels = <T extends keyof PieVisParams['labels']>(
+  const setLabels = <T extends keyof PartitionVisParams['labels']>(
     paramName: T,
-    value: PieVisParams['labels'][T]
+    value: PartitionVisParams['labels'][T]
   ) => setValue('labels', { ...stateParams.labels, [paramName]: value });
   const legendUiStateValue = props.uiState?.get('vis.legendOpen');
   const [palettesRegistry, setPalettesRegistry] = useState<PaletteRegistry | undefined>(undefined);

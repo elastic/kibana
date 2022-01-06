@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { LegendAction, SeriesIdentifier, useLegendAction } from '@elastic/charts';
 import { DataPublicPluginStart } from '../../../../data/public';
-import { PieVisParams } from '../../common/types';
+import { PartitionVisParams } from '../../common/types';
 import { ClickTriggerEvent } from '../../../../charts/public';
 import { FieldFormatsStart } from '../../../../field_formats/public';
 
@@ -23,7 +23,7 @@ export const getLegendActions = (
   ) => Promise<boolean>,
   getFilterEventData: (series: SeriesIdentifier) => ClickTriggerEvent | null,
   onFilter: (data: ClickTriggerEvent, negate?: any) => void,
-  visParams: PieVisParams,
+  visParams: PartitionVisParams,
   actions: DataPublicPluginStart['actions'],
   formatter: FieldFormatsStart
 ): LegendAction => {

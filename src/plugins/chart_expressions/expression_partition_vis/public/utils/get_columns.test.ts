@@ -7,7 +7,7 @@
  */
 
 import { getColumns } from './get_columns';
-import { PieVisParams } from '../../common/types';
+import { PartitionVisParams } from '../../common/types';
 import { createMockPieParams, createMockVisData } from '../mocks';
 
 const visParams = createMockPieParams();
@@ -162,7 +162,7 @@ describe('getColumns', () => {
           aggType: 'count',
         },
       },
-    } as unknown as PieVisParams;
+    } as unknown as PartitionVisParams;
     const { metricColumn } = getColumns(visParamsOnlyMetric, visData);
     expect(metricColumn).toEqual({
       id: 'col-1-1',
@@ -217,7 +217,7 @@ describe('getColumns', () => {
           aggType: 'count',
         },
       },
-    } as unknown as PieVisParams;
+    } as unknown as PartitionVisParams;
     const { bucketColumns, metricColumn } = getColumns(visParamsOnlyMetric, visData);
     expect(bucketColumns).toEqual([{ name: metricColumn.name }]);
   });
