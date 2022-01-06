@@ -25,12 +25,7 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL,
 } from '../../../../../common/constants';
-import {
-  RuleAlertType,
-  IRuleSavedAttributesSavedObjectAttributes,
-  HapiReadableStream,
-  IRuleStatusSOAttributes,
-} from '../../rules/types';
+import { RuleAlertType, HapiReadableStream, IRuleStatusSOAttributes } from '../../rules/types';
 import { requestMock } from './request';
 import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
 import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
@@ -41,7 +36,10 @@ import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detec
 import { RuleParams } from '../../schemas/rule_schemas';
 import { SanitizedAlert, ResolvedSanitizedRule } from '../../../../../../alerting/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
-import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
+import {
+  getPerformBulkActionSchemaMock,
+  getPerformBulkActionEditSchemaMock,
+} from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { GetCurrentStatusBulkResult } from '../../rule_execution_log/types';
 // eslint-disable-next-line no-restricted-imports
@@ -130,6 +128,13 @@ export const getBulkActionRequest = () =>
     method: 'patch',
     path: DETECTION_ENGINE_RULES_BULK_ACTION,
     body: getPerformBulkActionSchemaMock(),
+  });
+
+export const getBulkActionEditRequest = () =>
+  requestMock.create({
+    method: 'patch',
+    path: DETECTION_ENGINE_RULES_BULK_ACTION,
+    body: getPerformBulkActionEditSchemaMock(),
   });
 
 export const getDeleteBulkRequest = () =>
@@ -469,7 +474,7 @@ export const getMockPrivilegesResult = () => ({
 });
 
 export const getEmptySavedObjectsResponse =
-  (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
+  (): SavedObjectsFindResponse<IRuleStatusSOAttributes> => ({
     page: 1,
     per_page: 1,
     total: 0,
