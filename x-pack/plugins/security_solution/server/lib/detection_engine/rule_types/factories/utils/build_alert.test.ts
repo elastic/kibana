@@ -125,20 +125,7 @@ describe('buildAlert', () => {
         to: 'now',
         references: ['http://example.com', 'https://example.com'],
         version: 1,
-        exceptions_list: [
-          {
-            id: 'some_uuid',
-            list_id: 'list_id_single',
-            namespace_type: 'single',
-            type: 'detection',
-          },
-          {
-            id: 'endpoint_list',
-            list_id: 'endpoint_list',
-            namespace_type: 'agnostic',
-            type: 'endpoint',
-          },
-        ],
+        exceptions_list: getListArrayMock(),
         immutable: false,
         type: 'query',
         language: 'kuery',
@@ -156,32 +143,6 @@ describe('buildAlert', () => {
         name: 'rule-name',
         updated_by: 'sample user',
         tags: ['some fake tag 1', 'some fake tag 2'],
-        type: 'query',
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: 'TA0000',
-              name: 'test tactic',
-              reference: 'https://attack.mitre.org/tactics/TA0000/',
-            },
-            technique: [
-              {
-                id: 'T0000',
-                name: 'test technique',
-                reference: 'https://attack.mitre.org/techniques/T0000/',
-                subtechnique: [
-                  {
-                    id: 'T0000.000',
-                    name: 'test subtechnique',
-                    reference: 'https://attack.mitre.org/techniques/T0000/000/',
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-        rule_id: 'rule-1',
         interval: '5m',
         throttle: 'no_actions',
       }),
@@ -279,20 +240,7 @@ describe('buildAlert', () => {
         to: 'now',
         references: ['http://example.com', 'https://example.com'],
         version: 1,
-        exceptions_list: [
-          {
-            id: 'some_uuid',
-            list_id: 'list_id_single',
-            namespace_type: 'single',
-            type: 'detection',
-          },
-          {
-            id: 'endpoint_list',
-            list_id: 'endpoint_list',
-            namespace_type: 'agnostic',
-            type: 'endpoint',
-          },
-        ],
+        exceptions_list: getListArrayMock(),
         immutable: false,
         type: 'query',
         language: 'kuery',
@@ -310,32 +258,6 @@ describe('buildAlert', () => {
         name: 'rule-name',
         updated_by: 'sample user',
         tags: ['some fake tag 1', 'some fake tag 2'],
-        type: 'query',
-        threat: [
-          {
-            framework: 'MITRE ATT&CK',
-            tactic: {
-              id: 'TA0000',
-              name: 'test tactic',
-              reference: 'https://attack.mitre.org/tactics/TA0000/',
-            },
-            technique: [
-              {
-                id: 'T0000',
-                name: 'test technique',
-                reference: 'https://attack.mitre.org/techniques/T0000/',
-                subtechnique: [
-                  {
-                    id: 'T0000.000',
-                    name: 'test subtechnique',
-                    reference: 'https://attack.mitre.org/techniques/T0000/000/',
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-        rule_id: 'rule-1',
         interval: '5m',
         throttle: 'no_actions',
       }),
