@@ -275,6 +275,7 @@ export class DocLinksService {
           mappingJoinFieldsPerformance: `${ELASTICSEARCH_DOCS}parent-join.html#_parent_join_and_performance`,
           mappingMeta: `${ELASTICSEARCH_DOCS}mapping-field-meta.html`,
           mappingMetaFields: `${ELASTICSEARCH_DOCS}mapping-meta-field.html`,
+          mappingMultifields: `${ELASTICSEARCH_DOCS}multi-fields.html`,
           mappingNormalizer: `${ELASTICSEARCH_DOCS}normalizer.html`,
           mappingNorms: `${ELASTICSEARCH_DOCS}norms.html`,
           mappingNullValue: `${ELASTICSEARCH_DOCS}null-value.html`,
