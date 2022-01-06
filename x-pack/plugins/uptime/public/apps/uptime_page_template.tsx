@@ -62,7 +62,7 @@ export const UptimePageTemplateComponent: React.FC<Props & EuiPageTemplateProps>
   return (
     <>
       <StyledPageTemplateComponent
-        pageHeader={pageHeader}
+        pageHeader={data?.indexExists ? pageHeader : undefined}
         data-test-subj={noDataConfig ? 'data-missing' : undefined}
         noDataConfig={isMainRoute && !loading ? noDataConfig : undefined}
         {...pageTemplateProps}
