@@ -6,11 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const reportingAPI = getService('reporting');
   const log = getService('log');
   const es = getService('es');
   const esArchiver = getService('esArchiver');
@@ -19,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['reporting', 'common', 'discover', 'timePicker']);
   const filterBar = getService('filterBar');
+  const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
 
   const setFieldsFromSource = async (setValue: boolean) => {
     await kibanaServer.uiSettings.update({ 'discover:searchFieldsFromSource': setValue });
@@ -38,17 +37,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('Discover CSV Export', () => {
-    describe('Check Available', () => {
-      before(async () => {
-        await esArchiver.emptyKibanaIndex();
-        await reportingAPI.initEcommerce();
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.selectIndexPattern('ecommerce');
-      });
+    before('initialize tests', async () => {
+      log.debug('ReportingPage:initTests');
+      await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await kibanaServer.importExport.load(ecommerceSOPath);
+      await browser.setWindowSize(1600, 850);
+    });
 
-      after(async () => {
-        await reportingAPI.teardownEcommerce();
+    after('clean up archives', async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+      await kibanaServer.importExport.unload(ecommerceSOPath);
+      await es.deleteByQuery({
+        index: '.reporting-*',
+        refresh: true,
+        body: { query: { match_all: {} } },
       });
+      await esArchiver.emptyKibanaIndex();
+    });
+
+    describe('Check Available', () => {
+      beforeEach(() => PageObjects.common.navigateToApp('discover'));
 
       it('is available if new', async () => {
         await PageObjects.reporting.openCsvReportingPanel();
@@ -63,15 +71,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Generate CSV: new search', () => {
-      before(async () => {
-        await reportingAPI.initEcommerce();
-      });
-
-      after(async () => {
-        await reportingAPI.teardownEcommerce();
-      });
-
       beforeEach(async () => {
+        await kibanaServer.importExport.load(ecommerceSOPath);
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('ecommerce');
       });
@@ -116,87 +117,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Generate CSV: sparse data', () => {
-      const TEST_INDEX_NAME = 'sparse_data';
-      const TEST_DOC_COUNT = 510;
-
-      const reset = async () => {
-        try {
-          await es.indices.delete({ index: TEST_INDEX_NAME });
-        } catch (err) {
-          // ignore 404 error
-        }
-      };
-
-      const createDocs = async () => {
-        interface TestDoc {
-          timestamp: string;
-          name: string;
-          updated_at?: string;
-        }
-
-        const docs = Array<TestDoc>(TEST_DOC_COUNT);
-
-        for (let i = 0; i <= docs.length - 1; i++) {
-          const name = `test-${i + 1}`;
-          const timestamp = moment
-            .utc('2006-08-14T00:00:00')
-            .subtract(TEST_DOC_COUNT - i, 'days')
-            .format();
-
-          if (i === 0) {
-            // only the oldest document has a value for updated_at
-            docs[i] = {
-              timestamp,
-              name,
-              updated_at: moment.utc('2006-08-14T00:00:00').format(),
-            };
-          } else {
-            // updated_at field does not exist in first 500 documents
-            docs[i] = { timestamp, name };
-          }
-        }
-
-        const res = await es.bulk({
-          index: TEST_INDEX_NAME,
-          body: docs.map((d) => `{"index": {}}\n${JSON.stringify(d)}\n`),
-        });
-
-        log.info(`Indexed ${res.items.length} test data docs.`);
-      };
-
-      before(async () => {
-        await reset();
-        await createDocs();
-        await reportingAPI.initLogs();
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.loadSavedSearch('Sparse Columns');
-      });
-
-      after(async () => {
-        await reportingAPI.teardownLogs();
-        await reset();
-      });
-
-      beforeEach(async () => {
-        const fromTime = 'Jan 10, 2005 @ 00:00:00.000';
-        const toTime = 'Dec 23, 2006 @ 00:00:00.000';
-        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await retry.try(async () => {
-          expect(await PageObjects.discover.getHitCount()).to.equal(TEST_DOC_COUNT.toString());
-        });
-      });
-
-      it(`handles field formatting for a field that doesn't exist initially`, async () => {
-        const res = await getReport();
-        expect(res.status).to.equal(200);
-        expect(res.get('content-type')).to.equal('text/csv; charset=utf-8');
-
-        const csvFile = res.text;
-        expectSnapshot(csvFile).toMatch();
-      });
-    });
-
     describe('Generate CSV: archived search', () => {
       const setupPage = async () => {
         const fromTime = 'Jun 22, 2019 @ 00:00:00.000';
@@ -205,20 +125,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       };
 
       before(async () => {
-        await reportingAPI.initEcommerce();
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.selectIndexPattern('ecommerce');
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+        await kibanaServer.importExport.load(ecommerceSOPath);
       });
 
       after(async () => {
-        await reportingAPI.teardownEcommerce();
+        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+        await kibanaServer.importExport.unload(ecommerceSOPath);
       });
 
-      beforeEach(async () => {
-        await setupPage();
-      });
+      beforeEach(() => PageObjects.common.navigateToApp('discover'));
 
       it('generates a report with data', async () => {
+        await setupPage();
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
         await retry.try(async () => {
           expect(await PageObjects.discover.getHitCount()).to.equal('740');
@@ -229,6 +148,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('generates a report with filtered data', async () => {
+        await setupPage();
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
         await retry.try(async () => {
           expect(await PageObjects.discover.getHitCount()).to.equal('740');
@@ -245,6 +165,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('generates a report with discover:searchFieldsFromSource = true', async () => {
+        await setupPage();
         await PageObjects.discover.loadSavedSearch('Ecommerce Data');
 
         await retry.try(async () => {
