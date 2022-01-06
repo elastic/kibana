@@ -55,6 +55,7 @@ export class IndexLifecycleManagementPlugin
             chrome: { docTitle },
             i18n: { Context: I18nContext },
             application,
+            docLinks,
           } = coreStart;
 
           const license = await licensing.license$.pipe(first()).toPromise();
@@ -72,6 +73,7 @@ export class IndexLifecycleManagementPlugin
             this.breadcrumbService,
             license,
             theme$,
+            docLinks,
             cloud
           );
 
