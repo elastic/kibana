@@ -21,12 +21,6 @@ describe('query_preview/helpers', () => {
     });
 
     test('returns false if timeframe selection is "Last hour" and average hits per hour is less than one execution duration', () => {
-      const isItNoisy = isNoisy(10, 'h');
-
-      expect(isItNoisy).toBeFalsy();
-    });
-
-    test('returns false if timeframe selection is "Last hour" and hits is 0', () => {
       const isItNoisy = isNoisy(0, 'h');
 
       expect(isItNoisy).toBeFalsy();
