@@ -8,12 +8,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ISearchSource, EsQuerySortValue, IndexPattern } from '../../../../../data/public';
+import { ISearchSource, EsQuerySortValue, DataView } from '../../../../../data/common';
 import { EsHitRecord } from '../../types';
 
 export async function fetchAnchor(
   anchorId: string,
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   searchSource: ISearchSource,
   sort: EsQuerySortValue[],
   useNewFieldsApi: boolean = false
@@ -42,7 +42,7 @@ export function updateSearchSource(
   anchorId: string,
   sort: EsQuerySortValue[],
   useNewFieldsApi: boolean,
-  indexPattern: IndexPattern
+  indexPattern: DataView
 ) {
   searchSource
     .setParent(undefined)
