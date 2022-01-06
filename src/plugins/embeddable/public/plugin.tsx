@@ -52,7 +52,7 @@ import {
   getTelemetryFunction,
 } from '../common/lib';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
-import { setTheme } from '.';
+import { setTheme } from './services';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -120,8 +120,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { uiActions }: EmbeddableSetupDependencies) {
-    bootstrap(uiActions);
     setTheme(core.theme);
+    bootstrap(uiActions);
 
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
@@ -149,7 +149,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
           : defaultEmbeddableFactoryProvider(def)
       );
     });
-    setTheme(core.theme);
 
     this.appListSubscription = core.application.applications$.subscribe((appList) => {
       this.appList = appList;
@@ -187,6 +186,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
             inspector={inspector}
             SavedObjectFinder={getSavedObjectFinder(core.savedObjects, core.uiSettings)}
             containerContext={containerContext}
+            theme={core.theme}
           />
         );
 

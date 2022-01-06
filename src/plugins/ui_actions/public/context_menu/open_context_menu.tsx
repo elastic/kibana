@@ -12,7 +12,7 @@ import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elas
 import { EventEmitter } from 'events';
 import ReactDOM from 'react-dom';
 import { KibanaThemeProvider } from '../../../kibana_react/public';
-import { getTheme } from '../index';
+import { getTheme } from '../services';
 
 let activeSession: ContextMenuSession | null = null;
 

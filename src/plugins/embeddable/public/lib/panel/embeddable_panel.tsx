@@ -12,7 +12,7 @@ import React from 'react';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import { buildContextMenuForActions, UiActionsService, Action } from '../ui_actions';
-import { CoreStart, OverlayStart } from '../../../../../core/public';
+import { CoreStart, OverlayStart, ThemeServiceStart } from '../../../../../core/public';
 import { toMountPoint } from '../../../../kibana_react/public';
 import { UsageCollectionStart } from '../../../../usage_collection/public';
 
@@ -42,7 +42,6 @@ import { CustomizePanelModal } from './panel_header/panel_actions/customize_titl
 import { EmbeddableStart } from '../../plugin';
 import { EmbeddableErrorLabel } from './embeddable_error_label';
 import { EmbeddableStateTransfer, ErrorEmbeddable } from '..';
-import { getTheme } from '../..';
 
 const sortByOrderField = (
   { order: orderA }: { order?: number },
@@ -84,6 +83,7 @@ interface Props {
   showBadges?: boolean;
   showNotifications?: boolean;
   containerContext?: EmbeddableContainerContext;
+  theme: ThemeServiceStart;
 }
 
 interface State {
@@ -348,8 +348,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     ) {
       return actions;
     }
-
-    const createGetUserData = (overlays: OverlayStart) =>
+    const createGetUserData = (overlays: OverlayStart, theme: ThemeServiceStart) =>
       async function getUserData(context: { embeddable: IEmbeddable }) {
         return new Promise<{ title: string | undefined; hideTitle?: boolean }>((resolve) => {
           const session = overlays.openModal(
@@ -362,7 +361,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
                 }}
                 cancel={() => session.close()}
               />,
-              { theme$: getTheme().theme$ }
+              { theme$: theme.theme$ }
             ),
             {
               'data-test-subj': 'customizePanel',
@@ -375,13 +374,16 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     // registry.
     return {
       ...actions,
-      customizePanelTitle: new CustomizePanelTitleAction(createGetUserData(this.props.overlays)),
+      customizePanelTitle: new CustomizePanelTitleAction(
+        createGetUserData(this.props.overlays, this.props.theme)
+      ),
       addPanel: new AddPanelAction(
         this.props.getEmbeddableFactory,
         this.props.getAllEmbeddableFactories,
         this.props.overlays,
         this.props.notifications,
         this.props.SavedObjectFinder,
+        this.props.theme,
         this.props.reportUiCounter
       ),
       removePanel: new RemovePanelAction(),

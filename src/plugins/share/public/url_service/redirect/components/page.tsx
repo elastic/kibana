@@ -8,9 +8,8 @@
 
 import * as React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
 import { EuiPageTemplate } from '@elastic/eui';
-import { CoreTheme } from 'kibana/public';
+import { ThemeServiceSetup } from 'kibana/public';
 import { Error } from './error';
 import { RedirectManager } from '../redirect_manager';
 import { Spinner } from './spinner';
@@ -18,15 +17,15 @@ import { KibanaThemeProvider } from '../../../../../kibana_react/public';
 
 export interface PageProps {
   manager: Pick<RedirectManager, 'error$'>;
-  theme$: Observable<CoreTheme>;
+  theme: ThemeServiceSetup;
 }
 
-export const Page: React.FC<PageProps> = ({ manager, theme$ }) => {
+export const Page: React.FC<PageProps> = ({ manager, theme }) => {
   const error = useObservable(manager.error$);
 
   if (error) {
     return (
-      <KibanaThemeProvider theme$={theme$}>
+      <KibanaThemeProvider theme$={theme.theme$}>
         <EuiPageTemplate
           template="centeredContent"
           pageContentProps={{
@@ -40,7 +39,7 @@ export const Page: React.FC<PageProps> = ({ manager, theme$ }) => {
   }
 
   return (
-    <KibanaThemeProvider theme$={theme$}>
+    <KibanaThemeProvider theme$={theme.theme$}>
       <EuiPageTemplate
         template="centeredContent"
         pageContentProps={{

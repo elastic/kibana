@@ -7,7 +7,7 @@
  */
 
 import React, { PureComponent } from 'react';
-import { OverlayModalStart } from 'src/core/public';
+import { OverlayModalStart, ThemeServiceStart } from 'src/core/public';
 
 import {
   EuiIcon,
@@ -32,7 +32,6 @@ import { toMountPoint } from '../../../../../../../kibana_react/public';
 
 import { IIndexPattern } from '../../../../../../../data/public';
 import { IndexedFieldItem } from '../../types';
-import { getTheme } from '../../../../../';
 
 // localized labels
 const additionalInfoAriaLabel = i18n.translate(
@@ -180,6 +179,7 @@ interface IndexedFieldProps {
   editField: (field: IndexedFieldItem) => void;
   deleteField: (fieldName: string) => void;
   openModal: OverlayModalStart['open'];
+  theme: ThemeServiceStart;
 }
 
 const getItems = (conflictDescriptions: IndexedFieldItem['conflictDescriptions']) => {
@@ -312,7 +312,8 @@ export const getConflictModalContent = ({
 const getConflictBtn = (
   fieldName: string,
   conflictDescriptions: IndexedFieldItem['conflictDescriptions'],
-  openModal: IndexedFieldProps['openModal']
+  openModal: IndexedFieldProps['openModal'],
+  theme: ThemeServiceStart
 ) => {
   const onClick = () => {
     const overlayRef = openModal(
@@ -324,7 +325,7 @@ const getConflictBtn = (
           fieldName,
           conflictDescriptions,
         }),
-        { theme$: getTheme().theme$ }
+        { theme$: theme.theme$ }
       )
     );
   };
@@ -357,7 +358,12 @@ export class Table extends PureComponent<IndexedFieldProps> {
       <span>
         {type === 'conflict' && conflictDescription ? '' : type}
         {field.conflictDescriptions
-          ? getConflictBtn(field.name, field.conflictDescriptions, this.props.openModal)
+          ? getConflictBtn(
+              field.name,
+              field.conflictDescriptions,
+              this.props.openModal,
+              this.props.theme
+            )
           : ''}
       </span>
     );

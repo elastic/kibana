@@ -6,14 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { Page, PageProps } from './components/page';
+import { ThemeServiceSetup } from 'src/core/public';
+import { createGetterSetter } from '../../kibana_utils/public';
 
-export const render = (container: HTMLElement, props: PageProps) => {
-  ReactDOM.render(React.createElement(Page, props), container);
-
-  return () => {
-    ReactDOM.unmountComponentAtNode(container);
-  };
-};
+export const [getTheme, setTheme] = createGetterSetter<ThemeServiceSetup>('Theme');

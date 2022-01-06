@@ -13,7 +13,7 @@ import { KibanaThemeProvider, Markdown } from '../../../../kibana_react/public';
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { IContainer } from '../containers';
-import { getTheme } from '../..';
+import { getTheme } from '../../services';
 
 export const ERROR_EMBEDDABLE_TYPE = 'error';
 
@@ -44,7 +44,6 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
     } catch (err) {
       theme = {};
     }
-    // @ts-ignore
     const node = (
       <div className="embPanel__error embPanel__content" data-test-subj="embeddableStackError">
         <EuiText color="subdued" size="xs">

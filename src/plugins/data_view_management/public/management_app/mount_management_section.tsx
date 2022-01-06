@@ -39,7 +39,7 @@ export async function mountManagementSection(
   params: ManagementAppMountParams
 ) {
   const [
-    { chrome, application, uiSettings, notifications, overlays, http, docLinks },
+    { chrome, application, uiSettings, notifications, overlays, http, docLinks, theme },
     { data, dataViewFieldEditor, dataViewEditor },
     indexPatternManagementStart,
   ] = await getStartServices();
@@ -67,7 +67,7 @@ export async function mountManagementSection(
 
   ReactDOM.render(
     <KibanaContextProvider services={deps}>
-      <KibanaThemeProvider theme$={params.theme$}>
+      <KibanaThemeProvider theme$={theme.theme$}>
         <I18nProvider>
           <Router history={params.history}>
             <Switch>

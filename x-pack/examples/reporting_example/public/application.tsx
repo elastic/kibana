@@ -22,10 +22,9 @@ export const renderApp = (
   { appBasePath, element, history }: AppMountParameters, // FIXME: appBasePath is deprecated
   forwardedParams: MyForwardableState
 ) => {
-  const theme$ = coreStart.theme.theme$;
   ReactDOM.render(
     <ApplicationContextProvider forwardedState={forwardedParams}>
-      <KibanaThemeProvider theme$={theme$}>
+      <KibanaThemeProvider theme$={coreStart.theme.theme$}>
         <Router history={history}>
           <Switch>
             <Route path={ROUTES.captureTest} exact render={() => <CaptureTest />} />
