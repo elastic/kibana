@@ -43,6 +43,8 @@ jest.mock('../../../util/url_state', () => {
 
 jest.mock('../../../contexts/kibana', () => ({
   useMlKibana: () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { of } = require('rxjs');
     return {
       services: {
         uiSettings: {
@@ -76,6 +78,11 @@ jest.mock('../../../contexts/kibana', () => ({
               },
               history: { get: jest.fn() },
             },
+          },
+        },
+        mlServices: {
+          httpService: {
+            getLoadingCount$: of(0),
           },
         },
       },
