@@ -7,8 +7,8 @@
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { BaseDataGenerator } from './base_data_generator';
-import { POLICY_REFERENCE_PREFIX } from '../service/trusted_apps/mapping';
 import { ConditionEntryField } from '../types';
+import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../service/artifacts/constants';
 
 export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionListItemSchema> {
   generate(overrides: Partial<ExceptionListItemSchema> = {}): ExceptionListItemSchema {
@@ -42,7 +42,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       name: `Generated Exception (${this.randomString(5)})`,
       namespace_type: 'agnostic',
       os_types: [this.randomOSFamily()] as ExceptionListItemSchema['os_types'],
-      tags: [`${POLICY_REFERENCE_PREFIX}all`],
+      tags: [`${BY_POLICY_ARTIFACT_TAG_PREFIX}all`],
       tie_breaker_id: this.seededUUIDv4(),
       type: 'simple',
       updated_at: '2020-04-20T15:25:31.830Z',
