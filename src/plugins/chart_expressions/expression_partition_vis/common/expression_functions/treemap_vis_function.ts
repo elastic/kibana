@@ -15,7 +15,7 @@ import {
   PARTITION_VIS_RENDERER_NAME,
   TREEMAP_VIS_EXPRESSION_NAME,
 } from '../constants';
-import { strings } from './i18n';
+import { errors, strings } from './i18n';
 
 export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => ({
   name: TREEMAP_VIS_EXPRESSION_NAME,
@@ -87,6 +87,11 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
     },
   },
   fn(context, args, handlers) {
+    const maxSupportedBuckets = 2;
+    if ((args.buckets ?? []).length > maxSupportedBuckets) {
+      throw new Error(errors.moreThanNBucketsAreNotSupportedError(maxSupportedBuckets));
+    }
+
     const visConfig: PartitionVisParams = {
       ...args,
       palette: args.palette,
