@@ -15,12 +15,12 @@ function isAliasPattern(pattern: string) {
   return (pattern.match(ALIAS_PATTERN) ?? []).length === 1;
 }
 
-export function splitGrok(grokPattern: string, filter: boolean = false) {
+function splitGrok(grokPattern: string, filter: boolean = false) {
   const grokList = grokPattern.split(MATCH_FIELDS);
   return filter === true ? grokList.filter((d) => d[0] === '%' && d[1] === '{') : grokList;
 }
 
-export function getGrokField(field: string) {
+function getGrokField(field: string) {
   if (field[0] !== '%' && field[1] !== '{') {
     return { valid: false, type: '', name: '' };
   }
