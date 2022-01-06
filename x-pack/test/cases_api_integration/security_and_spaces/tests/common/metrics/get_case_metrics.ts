@@ -40,12 +40,8 @@ export default ({ getService }: FtrProviderContext): void => {
           features: ['lifespan'],
         });
 
-        expect(metrics).to.eql({
-          lifespan: {
-            creationDate: '2021-06-17T18:57:41.682Z',
-            closeDate: '2021-06-17T18:57:42.682Z',
-          },
-        });
+        expect(metrics.lifespan?.creationDate).to.be('2021-06-17T18:57:41.682Z');
+        expect(metrics.lifespan?.closeDate).to.eql('2021-06-17T18:57:42.682Z');
       });
 
       it('returns an error when passing invalid features', async () => {

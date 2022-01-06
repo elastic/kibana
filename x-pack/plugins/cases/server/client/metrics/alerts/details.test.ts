@@ -10,7 +10,7 @@ import { CasesClientArgs } from '../../types';
 import { loggingSystemMock } from '../../../../../../../src/core/server/mocks';
 
 import { AlertDetails } from './details';
-import { mockAlertsService } from './test_utils';
+import { mockAlertsService } from '../test_utils/alerts';
 
 describe('AlertDetails', () => {
   beforeEach(() => {
