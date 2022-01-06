@@ -167,13 +167,12 @@ running {kib} on Darwin, Reporting will download Chromium into the proper area o
 the {kib} installation path the first time the server starts. If the server
 does not have access to the Internet, you must download the
 Chromium browser and install it into the {kib} installation path.
-Here are the steps to do that:
 
-1. Download the Chromium zip file.
+1. Download the Chromium zip file:
 
-** For x64 systems, the link is: https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac/901912/chrome-mac.zip
-** For ARM systems, the link is: https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac_Arm/901913/chrome-mac.zip
+** For <a href="https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac/901912/chrome-mac.zip">x64</a> systems
+** For <a href="https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac_Arm/901913/chrome-mac.zip">ARM</a> systems
 
 2. Copy the zip file into the holding area. Relative to the root directory of {kib}, the path is `.chromium/x64` for x64 systems and `.chromium/arm64` for ARM systems.
 
-3. When {kib} starts, it will automatically extract the browser from the zip file, and it is ready to use for PNG and PDF reports.
+When {kib} starts, it will automatically extract the browser from the zip file, and it is ready to use for PNG and PDF reports.
