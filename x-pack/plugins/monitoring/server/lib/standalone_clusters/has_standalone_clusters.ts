@@ -24,13 +24,7 @@ export async function hasStandaloneClusters(req: LegacyRequest, ccs: string) {
     config: Globals.app.config,
     ccs,
   });
-  // use legacy because no integration exists for enterprisesearch
-  const enterprisesearchIndexPatterns = getLegacyIndexPattern({
-    moduleType: 'enterprisesearch',
-    config: Globals.app.config,
-    ccs,
-  });
-  const indexPatterns = [lsIndexPatterns, beatsIndexPatterns, enterprisesearchIndexPatterns];
+  const indexPatterns = [lsIndexPatterns, beatsIndexPatterns];
   const indexPatternList = indexPatterns.reduce((list, patterns) => {
     list.push(...patterns.split(','));
     return list;
