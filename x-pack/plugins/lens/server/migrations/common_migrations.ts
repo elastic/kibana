@@ -8,10 +8,10 @@
 import { cloneDeep } from 'lodash';
 import { PaletteOutput } from 'src/plugins/charts/common';
 import {
+  MigrateFunctionsObject,
   getApplyMigrationWithinObject,
   getIntraObjectMigrationMap,
-} from 'src/plugins/kibana_utils/common/persistable_state';
-import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
+} from '../../../../../src/plugins/kibana_utils/common';
 import {
   LensDocShapePre712,
   OperationTypePre712,

@@ -63,4 +63,9 @@ export type {
   PersistableState,
   PersistableStateDefinition,
 } from './persistable_state';
-export { migrateToLatest, mergeMigrationFunctionMaps } from './persistable_state';
+export {
+  migrateToLatest,
+  mergeMigrationFunctionMaps,
+  getApplyMigrationWithinObject,
+  getIntraObjectMigrationMap,
+} from './persistable_state';
