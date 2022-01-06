@@ -8,13 +8,13 @@
 import { uniq, omit } from 'lodash';
 import uuid from 'uuid/v4';
 import uuidv5 from 'uuid/v5';
+import { safeDump } from 'js-yaml';
+import pMap from 'p-map';
 import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   SavedObjectsBulkUpdateResponse,
 } from 'src/core/server';
-
-import { safeDump } from 'js-yaml';
 
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
 
@@ -23,6 +23,7 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENTS_PREFIX,
   PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
 } from '../constants';
 import type {
   PackagePolicy,
@@ -194,7 +195,9 @@ class AgentPolicyService {
     if (agentPolicies.total === 0) {
       return {
         created: true,
-        policy: await this.create(soClient, esClient, newAgentPolicy, { id: String(id) }),
+        policy: await this.create(soClient, esClient, newAgentPolicy, {
+          id: id ? String(id) : uuidv5(newAgentPolicy.name, UUID_V5_NAMESPACE),
+        }),
       };
     }
 
@@ -214,6 +217,7 @@ class AgentPolicyService {
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
     await this.requireUniqueName(soClient, agentPolicy);
+
     const newSo = await soClient.create<AgentPolicySOAttributes>(
       SAVED_OBJECT_TYPE,
       {
@@ -463,6 +467,7 @@ class AgentPolicyService {
       fields: ['revision', 'data_output_id', 'monitoring_output_id'],
       searchFields: ['data_output_id', 'monitoring_output_id'],
       search: escapeSearchQueryPhrase(outputId),
+      perPage: SO_SEARCH_LIMIT,
     });
     const bumpedPolicies = currentPolicies.saved_objects.map((policy) => {
       policy.attributes = {
@@ -474,11 +479,10 @@ class AgentPolicyService {
       return policy;
     });
     const res = await soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
-
-    await Promise.all(
-      currentPolicies.saved_objects.map((policy) =>
-        this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', policy.id)
-      )
+    await pMap(
+      currentPolicies.saved_objects,
+      (policy) => this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', policy.id),
+      { concurrency: 50 }
     );
 
     return res;
@@ -492,6 +496,7 @@ class AgentPolicyService {
     const currentPolicies = await soClient.find<AgentPolicySOAttributes>({
       type: SAVED_OBJECT_TYPE,
       fields: ['revision'],
+      perPage: SO_SEARCH_LIMIT,
     });
     const bumpedPolicies = currentPolicies.saved_objects.map((policy) => {
       policy.attributes = {
@@ -504,10 +509,10 @@ class AgentPolicyService {
     });
     const res = await soClient.bulkUpdate<AgentPolicySOAttributes>(bumpedPolicies);
 
-    await Promise.all(
-      currentPolicies.saved_objects.map((policy) =>
-        this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', policy.id)
-      )
+    await pMap(
+      currentPolicies.saved_objects,
+      (policy) => this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', policy.id),
+      { concurrency: 50 }
     );
 
     return res;

@@ -53,11 +53,11 @@ import { incrementPackageName } from '../../services/package_policy';
 import { ensureInstalledPackage } from '../../services/epm/packages';
 import { ensureDefaultEnrollmentAPIKeysExists } from '../../services/setup';
 
-export const getAgentPoliciesHandler: RequestHandler<
+export const getAgentPoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetAgentPoliciesRequestSchema.query>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
+  const soClient = context.fleet.epm.internalSoClient;
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const { full: withPackagePolicies = false, ...restOfQuery } = request.query;
   try {
