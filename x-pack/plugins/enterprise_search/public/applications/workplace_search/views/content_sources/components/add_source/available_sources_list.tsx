@@ -11,6 +11,7 @@ import { useValues } from 'kea';
 
 import {
   EuiCard,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -63,7 +64,8 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiHorizontalRule size="full" margin="s" />
+        <EuiSpacer size="l" />
+        <EuiHorizontalRule size="full" margin="none" />
       </>
     );
 
@@ -88,62 +90,21 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
     return card;
   };
 
-  const sourcesHalfList = (side) => {
-    const halfwayThrough = Math.ceil(sources.length / 2);
-
-    const firstHalf = sources.slice(0, halfwayThrough);
-
-    const secondHalf = sources.slice(halfwayThrough, sources.length);
-
-    return { firstHalf, secondHalf };
-  };
-
   const visibleSources = (
     <>
-      <EuiFlexGroup direction="row" alignItems="flexStart" gutterSize="xl">
-        <EuiFlexItem>
-          <EuiFlexGroup
-            justifyContent="center"
-            alignItems="stretch"
-            direction="column"
-            responsive={false}
-            gutterSize="none"
-          >
-            {sourcesHalfList().firstHalf.map((source, i) => (
-              <EuiFlexItem grow={false} key={i}>
-                <EuiFlexGroup
-                  justifyContent="center"
-                  alignItems="stretch"
-                  data-test-subj="AvailableSourceCard"
-                >
-                  <EuiFlexItem>{getSourceCard(source)}</EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFlexGroup
-            justifyContent="center"
-            alignItems="stretch"
-            direction="column"
-            responsive={false}
-            gutterSize="none"
-          >
-            {sourcesHalfList().secondHalf.map((source, i) => (
-              <EuiFlexItem grow={false} key={i}>
-                <EuiFlexGroup
-                  justifyContent="center"
-                  alignItems="stretch"
-                  data-test-subj="AvailableSourceCard"
-                >
-                  <EuiFlexItem>{getSourceCard(source)}</EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiFlexGrid columns={2} direction="column" gutterSize="l">
+        {sources.map((source, i) => (
+          <EuiFlexItem grow={false} key={i}>
+            <EuiFlexGroup
+              justifyContent="center"
+              alignItems="stretch"
+              data-test-subj="AvailableSourceCard"
+            >
+              <EuiFlexItem>{getSourceCard(source)}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGrid>
     </>
   );
 
