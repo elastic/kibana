@@ -7,6 +7,7 @@
  */
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/server';
 import { partitionLabelsFunction, pieVisFunction } from '../common';
+import { treemapVisFunction } from '../common/expression_functions';
 import {
   ExpressionPartitionVisPluginSetup,
   ExpressionPartitionVisPluginStart,
@@ -26,6 +27,7 @@ export class ExpressionPartitionVisPlugin
   public setup(core: CoreSetup, { expressions }: SetupDeps) {
     expressions.registerFunction(partitionLabelsFunction);
     expressions.registerFunction(pieVisFunction);
+    expressions.registerFunction(treemapVisFunction);
   }
 
   public start(core: CoreStart, deps: StartDeps) {}

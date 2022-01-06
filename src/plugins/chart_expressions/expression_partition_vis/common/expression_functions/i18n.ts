@@ -74,4 +74,21 @@ export const strings = {
     i18n.translate('expressionPartitionVis.reusable.function.args.labelsHelpText', {
       defaultMessage: 'Pie labels config',
     }),
+
+  getSliceSizeHelp: () =>
+    i18n.translate('expressionPartitionVis.reusable.function.dimension.metric', {
+      defaultMessage: 'Slice size',
+    }),
+  getSliceHelp: () =>
+    i18n.translate('expressionPartitionVis.reusable.function.dimension.buckets', {
+      defaultMessage: 'Slice',
+    }),
+  getColumnSplitHelp: () =>
+    i18n.translate('expressionPartitionVis.reusable.function.dimension.splitcolumn', {
+      defaultMessage: 'Column split',
+    }),
+  getRowSplitHelp: () =>
+    i18n.translate('expressionPartitionVis.reusable.function.dimension.splitrow', {
+      defaultMessage: 'Row split',
+    }),
 };

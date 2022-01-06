@@ -18,6 +18,7 @@ import {
   SetupDeps,
   StartDeps,
 } from './types';
+import { treemapVisFunction } from '../common/expression_functions';
 
 /** @internal */
 export interface VisTypePieDependencies {
@@ -42,6 +43,7 @@ export class ExpressionPartitionVisPlugin {
   ): ExpressionPartitionVisPluginSetup {
     expressions.registerFunction(partitionLabelsFunction);
     expressions.registerFunction(pieVisFunction);
+    expressions.registerFunction(treemapVisFunction);
 
     const getStartDeps = async () => {
       const [coreStart, deps] = await core.getStartServices();

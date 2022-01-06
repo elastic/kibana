@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { EmptySizeRatios, PartitionVisParams } from '../types/expression_renderers';
+import { PartitionVisParams } from '../types/expression_renderers';
 import { prepareLogTable } from '../../../../visualizations/common/prepare_log_table';
-import { chartTypes, PieVisExpressionFunctionDefinition } from '../types/expression_functions';
+import { chartTypes, TreemapVisExpressionFunctionDefinition } from '../types/expression_functions';
 import {
   PARTITION_LABELS_FUNCTION,
   PARTITION_LABELS_VALUE,
-  PIE_VIS_EXPRESSION_NAME,
   PARTITION_VIS_RENDERER_NAME,
+  TREEMAP_VIS_EXPRESSION_NAME,
 } from '../constants';
 import { strings } from './i18n';
 
-export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
-  name: PIE_VIS_EXPRESSION_NAME,
+export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => ({
+  name: TREEMAP_VIS_EXPRESSION_NAME,
   type: 'render',
   inputTypes: ['datatable'],
   help: strings.getPieVisFunctionName(),
@@ -75,16 +75,6 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       help: strings.getDistinctColorsArgHelp(),
       default: false,
     },
-    isDonut: {
-      types: ['boolean'],
-      help: strings.getIsDonutArgHelp(),
-      default: false,
-    },
-    emptySizeRatio: {
-      types: ['number'],
-      help: strings.getEmptySizeRatioArgHelp(),
-      default: EmptySizeRatios.SMALL,
-    },
     palette: {
       types: ['palette', 'system_palette'],
       help: strings.getPaletteArgHelp(),
@@ -125,7 +115,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
         visData: context,
         visConfig,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
-        visType: chartTypes.PIE,
+        visType: chartTypes.TREEMAP,
         params: {
           listenOnChange: true,
         },

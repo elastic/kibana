@@ -44,7 +44,7 @@ export interface LabelsParams {
   percentDecimals: number;
 }
 
-interface PieCommonParams {
+interface VisCommonParams {
   addTooltip: boolean;
   addLegend: boolean;
   legendPosition: Position;
@@ -52,18 +52,9 @@ interface PieCommonParams {
   truncateLegend: boolean;
   maxLegendLines: number;
   distinctColors: boolean;
-  isDonut: boolean;
-  emptySizeRatio?: EmptySizeRatios;
 }
 
-export interface PieVisParams extends PieCommonParams {
-  dimensions: Dimensions;
-  labels: LabelsParams;
-  palette: PaletteOutput;
-}
-
-export interface PieVisConfig extends PieCommonParams {
-  buckets?: ExpressionValueVisDimension[];
+interface VisCommonConfig extends VisCommonParams {
   metric: ExpressionValueVisDimension;
   splitColumn?: ExpressionValueVisDimension[];
   splitRow?: ExpressionValueVisDimension[];
@@ -71,10 +62,36 @@ export interface PieVisConfig extends PieCommonParams {
   palette: PaletteOutput;
 }
 
+export interface PartitionVisParams extends VisCommonParams {
+  dimensions: Dimensions;
+  labels: LabelsParams;
+  palette: PaletteOutput;
+  isDonut?: boolean;
+  emptySizeRatio?: EmptySizeRatios;
+}
+
+export interface PieVisConfig extends VisCommonConfig {
+  buckets?: ExpressionValueVisDimension[];
+  isDonut: boolean;
+  emptySizeRatio?: EmptySizeRatios;
+}
+
+export interface TreemapVisConfig extends VisCommonConfig {
+  buckets?: ExpressionValueVisDimension[];
+}
+
+export interface MosaicVisConfig extends VisCommonConfig {
+  buckets?: ExpressionValueVisDimension[];
+}
+
+export interface WaffleVisConfig extends VisCommonConfig {
+  bucket?: ExpressionValueVisDimension;
+}
+
 export interface RenderValue {
   visData: Datatable;
   visType: string;
-  visConfig: PieVisParams;
+  visConfig: PartitionVisParams;
   syncColors: boolean;
 }
 

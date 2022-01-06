@@ -35,7 +35,7 @@ import {
 import type { FieldFormat } from '../../../../field_formats/common';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
-  PieVisParams,
+  PartitionVisParams,
   BucketColumns,
   ValueFormats,
   PieContainerDimensions,
@@ -69,7 +69,7 @@ declare global {
   }
 }
 export interface PartitionVisComponentProps {
-  visParams: PieVisParams;
+  visParams: PartitionVisParams;
   visData: Datatable;
   uiState: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];

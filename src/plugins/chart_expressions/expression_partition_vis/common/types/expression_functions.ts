@@ -6,14 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { PARTITION_LABELS_VALUE, PIE_VIS_EXPRESSION_NAME } from '../constants';
+import {
+  PARTITION_LABELS_VALUE,
+  PIE_VIS_EXPRESSION_NAME,
+  TREEMAP_VIS_EXPRESSION_NAME,
+} from '../constants';
 import {
   ExpressionFunctionDefinition,
   Datatable,
   ExpressionValueRender,
   ExpressionValueBoxed,
 } from '../../../../expressions/common';
-import { RenderValue, PieVisConfig, LabelPositions, ValueFormats } from './expression_renderers';
+import {
+  RenderValue,
+  PieVisConfig,
+  LabelPositions,
+  ValueFormats,
+  TreemapVisConfig,
+} from './expression_renderers';
 
 export interface PartitionLabelsArguments {
   show: boolean;
@@ -44,3 +54,18 @@ export type PieVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
   PieVisConfig,
   ExpressionValueRender<RenderValue>
 >;
+
+export type TreemapVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  typeof TREEMAP_VIS_EXPRESSION_NAME,
+  Datatable,
+  TreemapVisConfig,
+  ExpressionValueRender<RenderValue>
+>;
+
+export const chartTypes = {
+  PIE: 'pie',
+  DONUT: 'donut',
+  TREEMAP: 'treemap',
+  MOSAIC: 'mosaic',
+  WAFFLE: 'waffle',
+};

@@ -63,7 +63,7 @@ const visData: Datatable = {
 };
 
 const config: RenderValue = {
-  visType: 'pie_vis',
+  visType: 'pieVis',
   visData,
   visConfig: {
     dimensions: {

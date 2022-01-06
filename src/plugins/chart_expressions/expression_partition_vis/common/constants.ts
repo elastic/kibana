@@ -9,9 +9,10 @@
 export const PLUGIN_ID = 'expressionPartitionVis';
 export const PLUGIN_NAME = 'expressionPartitionVis';
 
-export const PIE_VIS_EXPRESSION_NAME = 'pie_vis';
-export const PARTITION_VIS_RENDERER_NAME = 'partition_vis';
-export const PARTITION_LABELS_VALUE = 'partition_labels_value';
-export const PARTITION_LABELS_FUNCTION = 'partition_labels';
+export const PIE_VIS_EXPRESSION_NAME = 'pieVis';
+export const TREEMAP_VIS_EXPRESSION_NAME = 'treemapVis';
+export const PARTITION_VIS_RENDERER_NAME = 'partitionVis';
+export const PARTITION_LABELS_VALUE = 'partitionLabelsValue';
+export const PARTITION_LABELS_FUNCTION = 'partitionLabels';
 
 export const DEFAULT_PERCENT_DECIMALS = 2;

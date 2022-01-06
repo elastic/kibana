@@ -17,7 +17,7 @@ import { isEqual } from 'lodash';
 import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { SeriesLayer, PaletteRegistry, lightenColor } from '../../../../charts/public';
 import type { DatatableRow } from '../../../../expressions/public';
-import type { BucketColumns, PieVisParams, SplitDimensionParams } from '../../common/types';
+import type { BucketColumns, PartitionVisParams, SplitDimensionParams } from '../../common/types';
 import { getDistinctSeries } from './get_distinct_series';
 
 const EMPTY_SLICE = Symbol('empty_slice');
@@ -28,7 +28,7 @@ export const computeColor = (
   overwriteColors: { [key: string]: string } = {},
   columns: Array<Partial<BucketColumns>>,
   rows: DatatableRow[],
-  visParams: PieVisParams,
+  visParams: PartitionVisParams,
   palettes: PaletteRegistry | null,
   syncColors: boolean,
   formatter: FieldFormatsStart,
@@ -82,6 +82,7 @@ export const computeColor = (
       visParams.palette?.params ?? { colors: [] }
     );
   }
+
   const seriesLayers: SeriesLayer[] = [];
   let tempParent: typeof d | typeof d['parent'] = d;
   while (tempParent.parent && tempParent.depth > 0) {
@@ -130,7 +131,7 @@ export const computeColor = (
 
 export const getLayers = (
   columns: Array<Partial<BucketColumns>>,
-  visParams: PieVisParams,
+  visParams: PartitionVisParams,
   overwriteColors: { [key: string]: string } = {},
   rows: DatatableRow[],
   palettes: PaletteRegistry | null,
