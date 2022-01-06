@@ -13,6 +13,7 @@ import type {
   ExtensionPointStorageClientInterface,
   ExtensionPointStorageInterface,
   NarrowExtensionPointToType,
+  ServerExtensionCallbackContext,
 } from './types';
 import { ExtensionPointError } from './errors';
 
@@ -38,6 +39,7 @@ export class ExtensionPointStorageClient implements ExtensionPointStorageClientI
    *
    * @param extensionType
    * @param initialCallbackInput The initial argument given to the first extension point callback
+   * @param callbackContext
    * @param callbackResponseValidator A function to validate the returned data from an extension point callback
    */
   async pipeRun<
@@ -46,9 +48,10 @@ export class ExtensionPointStorageClient implements ExtensionPointStorageClientI
     P extends Parameters<D['callback']> = Parameters<D['callback']>
   >(
     extensionType: T,
-    initialCallbackInput: P[0],
-    callbackResponseValidator?: (data: P[0]) => Error | undefined
-  ): Promise<P[0]> {
+    initialCallbackInput: P,
+    callbackContext: ServerExtensionCallbackContext,
+    callbackResponseValidator?: (data: P) => Error | undefined
+  ): Promise<P> {
     let inputArgument = initialCallbackInput;
     const externalExtensions = this.get(extensionType);
 
@@ -60,18 +63,19 @@ export class ExtensionPointStorageClient implements ExtensionPointStorageClientI
       const extensionRegistrationSource =
         this.storage.getExtensionRegistrationSource(externalExtension);
 
+      const callback = externalExtension.callback.bind(callbackContext);
+
       try {
-        inputArgument = await externalExtension.callback(
-          inputArgument as ExtensionPointCallbackArgument
-        );
+        inputArgument = await callback(inputArgument as ExtensionPointCallbackArgument);
       } catch (error) {
         // Log the error that the external callback threw and keep going with the running of others
-        this.logger?.error(
+        this.logger.error(
           new ExtensionPointError(
             `Extension point execution error for ${externalExtension.type}: ${extensionRegistrationSource}`,
             error
           )
         );
+        this.logger.error(error);
       }
 
       if (callbackResponseValidator) {

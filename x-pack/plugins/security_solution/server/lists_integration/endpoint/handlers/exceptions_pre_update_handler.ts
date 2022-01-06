@@ -12,9 +12,10 @@ import {
 
 export const getExceptionsPreUpdateItemHandler =
   (): ExceptionsListPreUpdateItemServerExtension['callback'] => {
-    return async (
+    return async function (
       data: UpdateExceptionListItemOptions
-    ): Promise<UpdateExceptionListItemOptions> => {
+    ): Promise<UpdateExceptionListItemOptions> {
+      console.log(`Request from: ${this.request?.url}`);
       return data;
 
       // FIXME: implement method

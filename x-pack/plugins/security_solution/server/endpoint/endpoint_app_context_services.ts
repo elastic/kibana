@@ -40,6 +40,7 @@ import {
   EndpointScopedFleetServicesInterface,
 } from './services/endpoint_fleet_services';
 import type { ListsServerExtensionRegistrar } from '../../../lists/server';
+import { registerListsPluginEndpointExtensionPoints } from '../lists_integration';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -124,13 +125,7 @@ export class EndpointAppContextService {
     if (this.startDependencies.registerListsServerExtension) {
       const { registerListsServerExtension } = this.startDependencies;
 
-      registerListsServerExtension({
-        type: 'exceptionsListPreCreateItem',
-        callback: async (arg: CreateExceptionListItemOptions) => {
-          // this.startDependencies?.logger.info('exceptionsListPreCreateItem called!');
-          return arg;
-        },
-      });
+      registerListsPluginEndpointExtensionPoints(registerListsServerExtension, this);
     }
   }
 

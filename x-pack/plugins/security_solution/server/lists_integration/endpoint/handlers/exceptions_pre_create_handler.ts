@@ -12,9 +12,11 @@ import {
 
 export const getExceptionsPreCreateItemHandler =
   (): ExceptionsListPreCreateItemServerExtension['callback'] => {
-    return async (
+    return async function (
       data: CreateExceptionListItemOptions
-    ): Promise<CreateExceptionListItemOptions> => {
+    ): Promise<CreateExceptionListItemOptions> {
+      console.log(`Request from: ${this.request?.url}`);
+
       return data;
       // FIXME:PT implement callback logic
       // If Trusted app - validate

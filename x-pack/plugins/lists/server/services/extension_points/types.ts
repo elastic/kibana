@@ -7,13 +7,27 @@
 
 import { PromiseType } from 'utility-types';
 import { UnionToIntersection } from '@kbn/utility-types';
+import { KibanaRequest } from 'kibana/server';
 
 import {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '../exception_lists/exception_list_client_types';
 
+/**
+ * The `this` context provided to extension point's callback function
+ * NOTE: in order to access this context, callbacks **MUST** be defined using `function()` instead of arrow functions.
+ */
+export interface ServerExtensionCallbackContext {
+  /**
+   * The Lists plugin HTTP Request. May be undefined if the callback is executed from a area of code that
+   * is not triggered via one of the HTTP handlers
+   */
+  request?: KibanaRequest;
+}
+
 export type ServerExtensionCallback<A extends object | void = void, R = unknown> = (
+  this: ServerExtensionCallbackContext,
   args: A
 ) => Promise<R>;
 
@@ -23,6 +37,20 @@ interface ServerExtensionPointDefinition<
   Response = void
 > {
   type: T;
+  /**
+   * The callback that will be executed at the given extension point. The Function will be provided a context (`this)`
+   * that includes supplemental data associated with its type. In order to access that data, the callback **MUST**
+   * be defined using `function()` and NOT an arrow function.
+   *
+   * @example
+   *
+   * {
+   *   type: 'some type',
+   *   callback: function() {
+   *     // this === context is available
+   *   }
+   * }
+   */
   callback: ServerExtensionCallback<Args, Response>;
 }
 
@@ -57,6 +85,7 @@ export type ExtensionPoint =
  * Registration function for server-side extension points
  */
 export type ListsServerExtensionRegistrar = (extension: ExtensionPoint) => void;
+
 export type NarrowExtensionPointToType<T extends ExtensionPoint['type']> = {
   type: T;
 } & ExtensionPoint;
@@ -81,6 +110,7 @@ export interface ExtensionPointStorageClientInterface {
   >(
     extensionType: T,
     initialCallbackInput: P[0],
+    callbackContext: ServerExtensionCallbackContext,
     callbackResponseValidator?: (data: P[0]) => Error | undefined
   ): Promise<P[0]>;
 }
