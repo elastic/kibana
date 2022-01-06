@@ -12,7 +12,9 @@ import {
   CaseStatuses,
   CaseUserActionResponse,
   StatusInfo,
+  StatusUserAction,
   StatusUserActionRt,
+  UserActionWithResponse,
 } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -87,23 +89,22 @@ export function getStatusInfo(
 ): StatusInfo {
   const accStatusInfo = statusUserActions.reduce<StatusCalculations>(
     (acc, userAction) => {
-      const attributes = userAction.attributes;
-      const newStatusChangeTimestamp = moment(attributes.created_at);
+      const newStatusChangeTimestamp = moment(userAction.attributes.created_at);
 
-      if (!StatusUserActionRt.is(attributes) || !newStatusChangeTimestamp.isValid()) {
+      if (!isValidStatusChangeUserAction(userAction.attributes, newStatusChangeTimestamp)) {
         return acc;
       }
 
       const { durations, lastStatus, lastStatusChangeTimestamp, numberOfReopens } = acc;
 
+      const attributes = userAction.attributes;
       const newStatus = attributes.payload.status;
 
       return {
-        durations: updateDuration({
+        durations: updateStatusDuration({
           durations,
           status: lastStatus,
-          newStatusChangeTimestamp,
-          lastStatusChangeTimestamp,
+          additionalDuration: newStatusChangeTimestamp.diff(lastStatusChangeTimestamp),
         }),
         lastStatus: newStatus,
         lastStatusChangeTimestamp: newStatusChangeTimestamp,
@@ -122,11 +123,10 @@ export function getStatusInfo(
   );
 
   // add in the duration from the current time to the duration of the last known status of the case
-  const accumulatedDurations = updateDuration({
+  const accumulatedDurations = updateStatusDuration({
     durations: accStatusInfo.durations,
     status: accStatusInfo.lastStatus,
-    newStatusChangeTimestamp: moment(),
-    lastStatusChangeTimestamp: accStatusInfo.lastStatusChangeTimestamp,
+    additionalDuration: moment().diff(accStatusInfo.lastStatusChangeTimestamp),
   });
 
   return {
@@ -136,21 +136,26 @@ export function getStatusInfo(
   };
 }
 
+function isValidStatusChangeUserAction(
+  attributes: CaseUserActionResponse,
+  newStatusChangeTimestamp: moment.Moment
+): attributes is UserActionWithResponse<StatusUserAction> {
+  return StatusUserActionRt.is(attributes) && newStatusChangeTimestamp.isValid();
+}
+
 function isReopen(newStatus: CaseStatuses, lastStatus: CaseStatuses): boolean {
   // if the new status is going from close to anything other than closed then we are reopening the issue
   return newStatus !== CaseStatuses.closed && lastStatus === CaseStatuses.closed;
 }
 
-function updateDuration({
+function updateStatusDuration({
   durations,
   status,
-  newStatusChangeTimestamp,
-  lastStatusChangeTimestamp,
+  additionalDuration,
 }: {
   durations: Map<CaseStatuses, number>;
   status: CaseStatuses;
-  newStatusChangeTimestamp: moment.Moment;
-  lastStatusChangeTimestamp: moment.Moment;
+  additionalDuration: number;
 }): Map<CaseStatuses, number> {
   const duration = durations.get(status);
   if (duration === undefined) {
@@ -158,7 +163,7 @@ function updateDuration({
   }
 
   const updatedDurations = new Map(durations.entries());
-  updatedDurations.set(status, duration + newStatusChangeTimestamp.diff(lastStatusChangeTimestamp));
+  updatedDurations.set(status, duration + additionalDuration);
 
   return updatedDurations;
 }
