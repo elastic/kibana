@@ -124,7 +124,7 @@ function requireAccessToken(combinedOptions: CombinedOptions): string {
   if (!combinedOptions.accessToken) {
     const globalConfigPath = getGlobalConfigPath();
     throw new HandledError(
-      `Please update your config file: ${globalConfigPath}.\nIt must contain a valid "accessToken".\n\nRead more: ${GLOBAL_CONFIG_DOCS_LINK}`
+      `Please update your config file: "${globalConfigPath}".\nIt must contain a valid "accessToken".\n\nRead more: ${GLOBAL_CONFIG_DOCS_LINK}`
     );
   }
   return combinedOptions.accessToken;
