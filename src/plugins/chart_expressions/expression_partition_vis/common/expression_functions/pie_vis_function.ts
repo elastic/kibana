@@ -16,116 +16,84 @@ import {
   PIE_VIS_EXPRESSION_NAME,
   PARTITION_VIS_RENDERER_NAME,
 } from '../constants';
+import { strings } from './i18n';
 
 export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
   name: PIE_VIS_EXPRESSION_NAME,
   type: 'render',
   inputTypes: ['datatable'],
-  help: i18n.translate('expressionPartitionVis.pieVis.function.help', {
-    defaultMessage: 'Pie visualization',
-  }),
+  help: strings.getPieVisFunctionName(),
   args: {
     metric: {
       types: ['vis_dimension'],
-      help: i18n.translate('expressionPartitionVis.pieVis.function.args.metricHelpText', {
-        defaultMessage: 'Metric dimensions config',
-      }),
+      help: strings.getMetricArgHelp(),
       required: true,
     },
     buckets: {
       types: ['vis_dimension'],
-      help: i18n.translate('expressionPartitionVis.pieVis.function.args.bucketsHelpText', {
-        defaultMessage: 'Buckets dimensions config',
-      }),
+      help: strings.getBucketsArgHelp(),
       multi: true,
     },
     splitColumn: {
       types: ['vis_dimension'],
-      help: i18n.translate('expressionPartitionVis.pieVis.function.args.splitColumnHelpText', {
-        defaultMessage: 'Split by column dimension config',
-      }),
+      help: strings.getSplitColumnArgHelp(),
       multi: true,
     },
     splitRow: {
       types: ['vis_dimension'],
-      help: i18n.translate('expressionPartitionVis.pieVis.function.args.splitRowHelpText', {
-        defaultMessage: 'Split by row dimension config',
-      }),
+      help: strings.getSplitRowArgHelp(),
       multi: true,
     },
     addTooltip: {
       types: ['boolean'],
-      help: i18n.translate('expressionPartitionVis.pieVis.function.args.addTooltipHelpText', {
-        defaultMessage: 'Show tooltip on slice hover',
-      }),
+      help: strings.getAddTooltipArgHelp(),
       default: true,
     },
     addLegend: {
       types: ['boolean'],
-      help: i18n.translate('expressionPartitionVis.pieVis.function.args.addLegendHelpText', {
-        defaultMessage: 'Show legend chart legend',
-      }),
+      help: strings.getAddLegendArgHelp(),
     },
     legendPosition: {
       types: ['string'],
-      help: i18n.translate('expressionPartitionVis.pieVis.function.args.legendPositionHelpText', {
-        defaultMessage: 'Position the legend on top, bottom, left, right of the chart',
-      }),
+      help: strings.getLegendPositionArgHelp(),
     },
     nestedLegend: {
       types: ['boolean'],
-      help: i18n.translate('expressionPartitionVis.pieVis.function.args.nestedLegendHelpText', {
-        defaultMessage: 'Show a more detailed legend',
-      }),
+      help: strings.getNestedLegendArgHelp(),
       default: false,
     },
     truncateLegend: {
       types: ['boolean'],
-      help: i18n.translate('expressionPartitionVis.pieVis.function.args.truncateLegendHelpText', {
-        defaultMessage: 'Defines if the legend items will be truncated or not',
-      }),
+      help: strings.getTruncateLegendArgHelp(),
       default: true,
     },
     maxLegendLines: {
       types: ['number'],
-      help: i18n.translate('expressionPartitionVis.pieVis.function.args.maxLegendLinesHelpText', {
-        defaultMessage: 'Defines the number of lines per legend item',
-      }),
+      help: strings.getMaxLegendLinesArgHelp(),
     },
     distinctColors: {
       types: ['boolean'],
-      help: i18n.translate('expressionPartitionVis.pieVis.function.args.distinctColorsHelpText', {
-        defaultMessage:
-          'Maps different color per slice. Slices with the same value have the same color',
-      }),
+      help: strings.getDistinctColorsArgHelp(),
       default: false,
     },
     isDonut: {
       types: ['boolean'],
-      help: i18n.translate('expressionPartitionVis.pieVis.function.args.isDonutHelpText', {
-        defaultMessage: 'Displays the pie chart as donut',
-      }),
+      help: strings.getIsDonutArgHelp(),
       default: false,
     },
     emptySizeRatio: {
       types: ['number'],
-      help: i18n.translate('expressionPartitionVis.pieVis.function.args.emptySizeRatioHelpText', {
-        defaultMessage: 'Defines donut inner empty area size',
-      }),
+      help: strings.getEmptySizeRatioArgHelp(),
       default: EmptySizeRatios.SMALL,
     },
     palette: {
       types: ['palette', 'system_palette'],
-      help: i18n.translate('expressionPartitionVis.pieVis.function.args.paletteHelpText', {
-        defaultMessage: 'Defines the chart palette name',
-      }),
+      help: strings.getPaletteArgHelp(),
       default: '{palette}',
     },
     labels: {
       types: [PARTITION_LABELS_VALUE],
-      help: i18n.translate('expressionPartitionVis.pieVis.function.args.labelsHelpText', {
-        defaultMessage: 'Pie labels config',
-      }),
+      help: strings.getLabelsArgHelp(),
       default: `{${PARTITION_LABELS_FUNCTION}}`,
     },
   },
