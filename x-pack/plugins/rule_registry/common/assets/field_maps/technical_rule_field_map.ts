@@ -72,11 +72,6 @@ export const technicalRuleFieldMap = {
     array: false,
     required: false,
   },
-  [Fields.ALERT_RULE_AUTHOR]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   [Fields.ALERT_RULE_CATEGORY]: {
     type: 'keyword',
     array: false,
@@ -97,17 +92,7 @@ export const technicalRuleFieldMap = {
     array: false,
     required: false,
   },
-  [Fields.ALERT_RULE_DESCRIPTION]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   [Fields.ALERT_RULE_ENABLED]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_FROM]: {
     type: 'keyword',
     array: false,
     required: false,
@@ -117,32 +102,12 @@ export const technicalRuleFieldMap = {
     array: false,
     required: false,
   },
-  [Fields.ALERT_RULE_LICENSE]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
   [Fields.ALERT_RULE_NAME]: {
     type: 'keyword',
     array: false,
     required: true,
   },
-  [Fields.ALERT_RULE_NOTE]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_REFERENCES]: {
-    type: 'keyword',
-    array: true,
-    required: false,
-  },
   [Fields.ALERT_RULE_RULE_ID]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_RULE_NAME_OVERRIDE]: {
     type: 'keyword',
     array: false,
     required: false,
@@ -150,11 +115,6 @@ export const technicalRuleFieldMap = {
   [Fields.ALERT_RULE_TAGS]: {
     type: 'keyword',
     array: true,
-    required: false,
-  },
-  [Fields.ALERT_RULE_TO]: {
-    type: 'keyword',
-    array: false,
     required: false,
   },
   [Fields.ALERT_RULE_TYPE]: {
@@ -168,11 +128,6 @@ export const technicalRuleFieldMap = {
     required: false,
   },
   [Fields.ALERT_RULE_UPDATED_BY]: {
-    type: 'keyword',
-    array: false,
-    required: false,
-  },
-  [Fields.ALERT_RULE_VERSION]: {
     type: 'keyword',
     array: false,
     required: false,

@@ -1145,7 +1145,6 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_WORKFLOW_STATUS]: 'open',
           [ALERT_REASON]: `event on zeek-sensor-amsterdam created high alert boot.`,
           [ALERT_RULE_NAME]: 'boot',
-          [ALERT_RULE_RULE_NAME_OVERRIDE]: 'event.action',
           [ALERT_DEPTH]: 1,
           ...flattenWithPrefix(ALERT_ORIGINAL_EVENT, {
             action: 'boot',

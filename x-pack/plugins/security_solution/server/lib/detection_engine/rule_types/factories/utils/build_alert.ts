@@ -157,7 +157,8 @@ export const buildAlert = (
       updated_at: updatedAt.toISOString(),
       updated_by: updatedBy ?? '',
       type: completeRule.ruleParams.type,
-      ...commonRuleParams,
+      rule_id: commonRuleParams.rule_id,
+      threat: commonRuleParams.threat,
     }),
   } as unknown as RACAlert;
 };
