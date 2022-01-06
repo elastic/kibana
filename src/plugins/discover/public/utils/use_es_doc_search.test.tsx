@@ -9,7 +9,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { buildSearchBody, useEsDocSearch } from './use_es_doc_search';
 import { Observable } from 'rxjs';
-import { IndexPattern } from 'src/plugins/data/common';
+import { DataView } from 'src/plugins/data/common';
 import { DocProps } from '../application/doc/components/doc';
 import { ElasticRequestState } from '../application/doc/types';
 import { SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource } from '../../common';
@@ -39,7 +39,7 @@ describe('Test of <Doc /> helper / hook', () => {
   test('buildSearchBody given useNewFieldsApi is false', () => {
     const indexPattern = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
-    } as unknown as IndexPattern;
+    } as unknown as DataView;
     const actual = buildSearchBody('1', indexPattern, false);
     expect(actual).toMatchInlineSnapshot(`
       Object {
@@ -64,7 +64,7 @@ describe('Test of <Doc /> helper / hook', () => {
   test('buildSearchBody useNewFieldsApi is true', () => {
     const indexPattern = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
-    } as unknown as IndexPattern;
+    } as unknown as DataView;
     const actual = buildSearchBody('1', indexPattern, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
@@ -94,7 +94,7 @@ describe('Test of <Doc /> helper / hook', () => {
   test('buildSearchBody with requestSource', () => {
     const indexPattern = {
       getComputedFields: () => ({ storedFields: [], scriptFields: [], docvalueFields: [] }),
-    } as unknown as IndexPattern;
+    } as unknown as DataView;
     const actual = buildSearchBody('1', indexPattern, true, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
@@ -137,7 +137,7 @@ describe('Test of <Doc /> helper / hook', () => {
           },
         },
       }),
-    } as unknown as IndexPattern;
+    } as unknown as DataView;
     const actual = buildSearchBody('1', indexPattern, true);
     expect(actual).toMatchInlineSnapshot(`
       Object {
