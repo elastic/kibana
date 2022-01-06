@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import type { ElasticsearchClient, Logger } from 'src/core/server';
 
 import type { AuthenticationProvider } from '../../common/model';
+import type { AuditLogger } from '../audit';
+import { sessionCleanupEvent } from '../audit';
 import type { ConfigType } from '../config';
 
 export interface SessionIndexOptions {
@@ -15,6 +19,7 @@ export interface SessionIndexOptions {
   readonly kibanaIndexName: string;
   readonly config: Pick<ConfigType, 'session' | 'authc'>;
   readonly logger: Logger;
+  readonly auditLogger: AuditLogger;
 }
 
 /**
@@ -484,24 +489,58 @@ export class SessionIndex {
       });
     }
 
+    const operations: Array<Required<Pick<BulkOperationContainer, 'delete'>>> = [];
     try {
-      const { body: response } = await this.options.elasticsearchClient.deleteByQuery(
-        {
-          index: this.indexName,
-          refresh: true,
-          body: { query: { bool: { should: deleteQueries } } },
-        },
-        { ignore: [409, 404] }
-      );
-
-      if (response.deleted! > 0) {
-        this.options.logger.debug(
-          `Cleaned up ${response.deleted} invalid or expired session values.`
+      const { body: searchResponse } =
+        await this.options.elasticsearchClient.search<SessionIndexValue>(
+          {
+            index: this.indexName,
+            body: { query: { bool: { should: deleteQueries } } },
+            _source_includes: 'usernameHash,provider',
+          },
+          { ignore: [409, 404] }
         );
-      }
+      searchResponse.hits.hits.forEach(({ _id, _source }) => {
+        const { usernameHash, provider } = _source!;
+        this.options.auditLogger.log(
+          sessionCleanupEvent({ sessionId: _id, usernameHash, provider })
+        );
+        operations.push({ delete: { _id } });
+      });
     } catch (err) {
-      this.options.logger.error(`Failed to clean up sessions: ${err.message}`);
+      this.options.logger.error(`Failed to look up invalid or expired sessions: ${err.message}`);
       throw err;
+    }
+
+    if (operations.length > 0) {
+      try {
+        const { body: deleteResponse } = await this.options.elasticsearchClient.bulk({
+          index: this.indexName,
+          operations,
+        });
+        if (deleteResponse.errors) {
+          const errorCount = deleteResponse.items.reduce(
+            (count, item) => (item.delete!.error ? count + 1 : count),
+            0
+          );
+          if (errorCount < deleteResponse.items.length) {
+            this.options.logger.warn(
+              `Failed to clean up ${errorCount} of ${deleteResponse.items.length} invalid or expired sessions. The remaining sessions were cleaned up successfully.`
+            );
+          } else {
+            this.options.logger.error(
+              `Failed to clean up ${deleteResponse.items.length} invalid or expired sessions.`
+            );
+          }
+        } else {
+          this.options.logger.debug(
+            `Cleaned up ${deleteResponse.items.length} invalid or expired sessions.`
+          );
+        }
+      } catch (err) {
+        this.options.logger.error(`Failed to clean up sessions: ${err.message}`);
+        throw err;
+      }
     }
   }
 }

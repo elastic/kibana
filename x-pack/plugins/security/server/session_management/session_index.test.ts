@@ -11,6 +11,8 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import type { ElasticsearchClient } from 'src/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
 
+import type { AuditLogger } from '../audit';
+import { auditServiceMock } from '../audit/index.mock';
 import { ConfigSchema, createConfig } from '../config';
 import { securityMock } from '../mocks';
 import { getSessionIndexTemplate, SessionIndex } from './session_index';
@@ -19,11 +21,13 @@ import { sessionIndexMock } from './session_index.mock';
 describe('Session index', () => {
   let mockElasticsearchClient: DeeplyMockedKeys<ElasticsearchClient>;
   let sessionIndex: SessionIndex;
+  let auditLogger: AuditLogger;
   const indexName = '.kibana_some_tenant_security_session_1';
   const indexTemplateName = '.kibana_some_tenant_security_session_index_template_1';
   beforeEach(() => {
     mockElasticsearchClient = elasticsearchServiceMock.createElasticsearchClient();
-    const sessionIndexOptions = {
+    auditLogger = auditServiceMock.create().withoutRequest;
+    sessionIndex = new SessionIndex({
       logger: loggingSystemMock.createLogger(),
       kibanaIndexName: '.kibana_some_tenant',
       config: createConfig(
@@ -32,9 +36,8 @@ describe('Session index', () => {
         { isTLSEnabled: false }
       ),
       elasticsearchClient: mockElasticsearchClient,
-    };
-
-    sessionIndex = new SessionIndex(sessionIndexOptions);
+      auditLogger,
+    });
   });
 
   describe('#initialize', () => {
@@ -219,18 +222,38 @@ describe('Session index', () => {
 
   describe('#cleanUp', () => {
     const now = 123456;
+    const sessionValue = {
+      _id: 'SESSION_ID',
+      _source: { usernameHash: 'USERNAME_HASH', provider: { name: 'basic1', type: 'basic' } },
+    };
     beforeEach(() => {
-      mockElasticsearchClient.deleteByQuery.mockResolvedValue(
-        securityMock.createApiResponse({ body: {} as any })
+      mockElasticsearchClient.search.mockResolvedValue(
+        securityMock.createApiResponse({
+          body: { hits: { hits: [sessionValue] } } as any,
+        })
+      );
+      mockElasticsearchClient.bulk.mockResolvedValue(
+        securityMock.createApiResponse({
+          body: { items: [{}] } as any,
+        })
       );
       jest.spyOn(Date, 'now').mockImplementation(() => now);
     });
 
-    it('throws if call to Elasticsearch fails', async () => {
+    it('throws if search call to Elasticsearch fails', async () => {
       const failureReason = new errors.ResponseError(
         securityMock.createApiResponse(securityMock.createApiResponse({ body: { type: 'Uh oh.' } }))
       );
-      mockElasticsearchClient.deleteByQuery.mockRejectedValue(failureReason);
+      mockElasticsearchClient.search.mockRejectedValue(failureReason);
+
+      await expect(sessionIndex.cleanUp()).rejects.toBe(failureReason);
+    });
+
+    it('throws if bulk delete call to Elasticsearch fails', async () => {
+      const failureReason = new errors.ResponseError(
+        securityMock.createApiResponse(securityMock.createApiResponse({ body: { type: 'Uh oh.' } }))
+      );
+      mockElasticsearchClient.bulk.mockRejectedValue(failureReason);
 
       await expect(sessionIndex.cleanUp()).rejects.toBe(failureReason);
     });
@@ -238,11 +261,11 @@ describe('Session index', () => {
     it('when neither `lifespan` nor `idleTimeout` is configured', async () => {
       await sessionIndex.cleanUp();
 
-      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
-      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith(
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.search).toHaveBeenCalledWith(
         {
           index: indexName,
-          refresh: true,
+          _source_includes: 'usernameHash,provider',
           body: {
             query: {
               bool: {
@@ -287,6 +310,12 @@ describe('Session index', () => {
         },
         { ignore: [409, 404] }
       );
+
+      expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith({
+        index: indexName,
+        operations: [{ delete: { _id: sessionValue._id } }],
+      });
     });
 
     it('when only `lifespan` is configured', async () => {
@@ -299,15 +328,16 @@ describe('Session index', () => {
           { isTLSEnabled: false }
         ),
         elasticsearchClient: mockElasticsearchClient,
+        auditLogger: auditServiceMock.create().withoutRequest,
       });
 
       await sessionIndex.cleanUp();
 
-      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
-      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith(
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.search).toHaveBeenCalledWith(
         {
           index: indexName,
-          refresh: true,
+          _source_includes: 'usernameHash,provider',
           body: {
             query: {
               bool: {
@@ -362,6 +392,12 @@ describe('Session index', () => {
         },
         { ignore: [409, 404] }
       );
+
+      expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith({
+        index: indexName,
+        operations: [{ delete: { _id: sessionValue._id } }],
+      });
     });
 
     it('when only `idleTimeout` is configured', async () => {
@@ -375,15 +411,16 @@ describe('Session index', () => {
           { isTLSEnabled: false }
         ),
         elasticsearchClient: mockElasticsearchClient,
+        auditLogger: auditServiceMock.create().withoutRequest,
       });
 
       await sessionIndex.cleanUp();
 
-      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
-      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith(
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.search).toHaveBeenCalledWith(
         {
           index: indexName,
-          refresh: true,
+          _source_includes: 'usernameHash,provider',
           body: {
             query: {
               bool: {
@@ -432,6 +469,12 @@ describe('Session index', () => {
         },
         { ignore: [409, 404] }
       );
+
+      expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith({
+        index: indexName,
+        operations: [{ delete: { _id: sessionValue._id } }],
+      });
     });
 
     it('when both `lifespan` and `idleTimeout` are configured', async () => {
@@ -445,15 +488,16 @@ describe('Session index', () => {
           { isTLSEnabled: false }
         ),
         elasticsearchClient: mockElasticsearchClient,
+        auditLogger: auditServiceMock.create().withoutRequest,
       });
 
       await sessionIndex.cleanUp();
 
-      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
-      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith(
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.search).toHaveBeenCalledWith(
         {
           index: indexName,
-          refresh: true,
+          _source_includes: 'usernameHash,provider',
           body: {
             query: {
               bool: {
@@ -512,6 +556,12 @@ describe('Session index', () => {
         },
         { ignore: [409, 404] }
       );
+
+      expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith({
+        index: indexName,
+        operations: [{ delete: { _id: sessionValue._id } }],
+      });
     });
 
     it('when both `lifespan` and `idleTimeout` are configured and multiple providers are enabled', async () => {
@@ -540,15 +590,16 @@ describe('Session index', () => {
           { isTLSEnabled: false }
         ),
         elasticsearchClient: mockElasticsearchClient,
+        auditLogger: auditServiceMock.create().withoutRequest,
       });
 
       await sessionIndex.cleanUp();
 
-      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledTimes(1);
-      expect(mockElasticsearchClient.deleteByQuery).toHaveBeenCalledWith(
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.search).toHaveBeenCalledWith(
         {
           index: indexName,
-          refresh: true,
+          _source_includes: 'usernameHash,provider',
           body: {
             query: {
               bool: {
@@ -639,6 +690,22 @@ describe('Session index', () => {
           },
         },
         { ignore: [409, 404] }
+      );
+
+      expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith({
+        index: indexName,
+        operations: [{ delete: { _id: sessionValue._id } }],
+      });
+    });
+
+    it('should log audit event', async () => {
+      await sessionIndex.cleanUp();
+
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: { action: 'session_cleanup', category: ['authentication'], outcome: 'unknown' },
+        })
       );
     });
   });

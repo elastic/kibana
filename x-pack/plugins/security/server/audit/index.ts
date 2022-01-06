@@ -11,6 +11,7 @@ export type { AuditEvent } from './audit_events';
 export {
   userLoginEvent,
   userLogoutEvent,
+  sessionCleanupEvent,
   accessAgreementAcknowledgedEvent,
   httpRequestEvent,
   savedObjectEvent,

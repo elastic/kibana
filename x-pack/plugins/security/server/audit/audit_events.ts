@@ -156,6 +156,35 @@ export function userLogoutEvent({ username, provider }: UserLogoutParams): Audit
   };
 }
 
+export interface SessionCleanupParams {
+  sessionId: string;
+  usernameHash?: string;
+  provider: AuthenticationProvider;
+}
+
+export function sessionCleanupEvent({
+  usernameHash,
+  sessionId,
+  provider,
+}: SessionCleanupParams): AuditEvent {
+  return {
+    message: `Removing invalid or expired session for user [hash=${usernameHash}]`,
+    event: {
+      action: 'session_cleanup',
+      category: ['authentication'],
+      outcome: 'unknown',
+    },
+    user: {
+      hash: usernameHash,
+    },
+    kibana: {
+      session_id: sessionId,
+      authentication_provider: provider.name,
+      authentication_type: provider.type,
+    },
+  };
+}
+
 export interface AccessAgreementAcknowledgedParams {
   username: string;
   provider: AuthenticationProvider;
