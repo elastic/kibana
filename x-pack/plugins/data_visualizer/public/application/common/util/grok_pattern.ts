@@ -41,7 +41,7 @@ export function getFieldsFromGrokPattern(grokPattern: string) {
   return splitGrok(grokPattern, true).map((d) => {
     const { valid, name, type } = getGrokField(d);
     if (valid === false) {
-      return d;
+      return { name: d, type };
     }
     return { name, type };
   });

@@ -23,6 +23,8 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 
+import { FILE_FORMATS } from '../../../../../../file_upload/common';
+
 import {
   getFormatOptions,
   getTimestampFormatOptions,
@@ -32,10 +34,16 @@ import {
 } from './options';
 import { isTimestampFormatValid } from './overrides_validation';
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { replaceFieldInGrokPattern } from '../../../common/util/grok_pattern';
 import {
-  getFieldsFromGrokPattern,
-  replaceFieldInGrokPattern,
-} from '../../../common/util/grok_pattern';
+  convertDelimiter,
+  convertDelimiterBack,
+  getColumnNames,
+  getGrokFieldNames,
+  isLinesToSampleValid,
+  LINES_TO_SAMPLE_VALUE_MIN,
+  LINES_TO_SAMPLE_VALUE_MAX,
+} from './overrides_utils';
 
 import { TIMESTAMP_OPTIONS, CUSTOM_DROPDOWN_OPTION } from './options/option_lists';
 
@@ -43,10 +51,6 @@ const formatOptions = getFormatOptions();
 const timestampFormatOptions = getTimestampFormatOptions();
 const delimiterOptions = getDelimiterOptions();
 const quoteOptions = getQuoteOptions();
-// const charsetOptions = getCharsetOptions();
-
-const LINES_TO_SAMPLE_VALUE_MIN = 3;
-const LINES_TO_SAMPLE_VALUE_MAX = 1000000;
 
 class OverridesUI extends Component {
   constructor(props) {
@@ -97,10 +101,7 @@ class OverridesUI extends Component {
 
     const { newColumnNames, originalColumnNames } = getColumnNames(columnNames, originalSettings);
 
-    const { newGrokFieldNames, originalGrokFieldNames } = getGrokFieldNames(
-      grokPattern,
-      originalSettings.grokPattern
-    );
+    const newGrokFieldNames = getGrokFieldNames(grokPattern, originalSettings.grokPattern);
 
     const overrides = {
       charset: charset === undefined ? originalSettings.charset : charset,
@@ -122,7 +123,7 @@ class OverridesUI extends Component {
 
     return {
       originalColumnNames,
-      originalGrokFieldNames,
+      originalGrokFieldNames: newGrokFieldNames,
       customDelimiter: customD === undefined ? '' : customD,
       customTimestampFormat: '',
       linesToSampleValid: true,
@@ -238,19 +239,13 @@ class OverridesUI extends Component {
   onGrokPatternFieldChange = (e, i) => {
     const name = e.target.value;
     const newGrokPattern = replaceFieldInGrokPattern(this.state.overrides.grokPattern, name, i);
-    const { newGrokFieldNames } = getGrokFieldNames(
-      newGrokPattern,
-      this.state.overrides.grokPattern
-    );
+    const newGrokFieldNames = getGrokFieldNames(newGrokPattern, this.state.overrides.grokPattern);
     this.setOverride({ grokPattern: newGrokPattern, grokFieldNames: newGrokFieldNames });
   };
 
   grokPatternChange = (e) => {
     const newGrokPattern = e.target.value;
-    const { newGrokFieldNames } = getGrokFieldNames(
-      newGrokPattern,
-      this.state.overrides.grokPattern
-    );
+    const newGrokFieldNames = getGrokFieldNames(newGrokPattern, this.state.overrides.grokPattern);
     this.setOverride({ grokPattern: newGrokPattern, grokFieldNames: newGrokFieldNames });
   };
 
@@ -347,7 +342,7 @@ class OverridesUI extends Component {
             isClearable={false}
           />
         </EuiFormRow>
-        {format === 'delimited' && (
+        {format === FILE_FORMATS.DELIMITED && (
           <React.Fragment>
             <EuiFormRow
               label={
@@ -424,7 +419,7 @@ class OverridesUI extends Component {
             </EuiFormRow>
           </React.Fragment>
         )}
-        {format === 'semi_structured_text' && (
+        {format === FILE_FORMATS.SEMI_STRUCTURED_TEXT && (
           <React.Fragment>
             <EuiFormRow
               label={
@@ -505,7 +500,7 @@ class OverridesUI extends Component {
             isClearable={false}
           />
         </EuiFormRow> */}
-        {format === 'delimited' && originalColumnNames.length > 0 && (
+        {format === FILE_FORMATS.DELIMITED && originalColumnNames.length > 0 && (
           <React.Fragment>
             <EuiSpacer />
             <EuiTitle size="s">
@@ -528,7 +523,7 @@ class OverridesUI extends Component {
           </React.Fragment>
         )}
 
-        {format === 'semi_structured_text' && originalGrokFieldNames.length > 0 && (
+        {format === FILE_FORMATS.SEMI_STRUCTURED_TEXT && originalGrokFieldNames.length > 0 && (
           <React.Fragment>
             <EuiSpacer />
             <EuiTitle size="s">
@@ -567,100 +562,4 @@ function getSortedFields(fields) {
   return fields
     .map((f) => ({ label: f }))
     .sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true }));
-}
-
-// Some delimiter characters cannot be used as items in select list.
-// so show a textual description of the character instead.
-function convertDelimiter(d) {
-  switch (d) {
-    case ',':
-      return {
-        delimiter: 'comma',
-      };
-    case '\t':
-      return {
-        delimiter: 'tab',
-      };
-    case ';':
-      return {
-        delimiter: 'semicolon',
-      };
-    case '|':
-      return {
-        delimiter: 'pipe',
-      };
-    case ' ':
-      return {
-        delimiter: 'space',
-      };
-
-    default:
-      return {
-        delimiter: CUSTOM_DROPDOWN_OPTION,
-        customDelimiter: d,
-      };
-  }
-}
-
-// Convert the delimiter textual descriptions back to their real characters.
-function convertDelimiterBack(delimiter, customDelimiter) {
-  switch (delimiter) {
-    case 'comma':
-      return ',';
-    case 'tab':
-      return '\t';
-    case 'semicolon':
-      return ';';
-    case 'pipe':
-      return '|';
-    case 'space':
-      return ' ';
-    case CUSTOM_DROPDOWN_OPTION:
-      return customDelimiter;
-
-    default:
-      return undefined;
-  }
-}
-
-function getColumnNames(columnNames, originalSettings) {
-  const newColumnNames =
-    columnNames === undefined && originalSettings.columnNames !== undefined
-      ? [...originalSettings.columnNames]
-      : columnNames;
-
-  const originalColumnNames = newColumnNames !== undefined ? [...newColumnNames] : [];
-
-  return {
-    newColumnNames,
-    originalColumnNames,
-  };
-}
-
-function getGrokFieldNames(grokPattern, originalGrokPattern) {
-  if (originalGrokPattern === undefined) {
-    return {
-      newGrokFieldNames: [],
-      originalGrokFieldNames: [],
-    };
-  }
-
-  if (grokPattern === undefined) {
-    const originalGrokFieldNames = getFieldsFromGrokPattern(originalGrokPattern).map((f) => f.name);
-    return {
-      newGrokFieldNames: originalGrokFieldNames,
-      originalGrokFieldNames,
-    };
-  }
-
-  const newGrokFieldNames = getFieldsFromGrokPattern(grokPattern).map((f) => f.name);
-
-  return {
-    newGrokFieldNames,
-    originalGrokFieldNames: newGrokFieldNames,
-  };
-}
-
-function isLinesToSampleValid(linesToSample) {
-  return linesToSample > LINES_TO_SAMPLE_VALUE_MIN && linesToSample <= LINES_TO_SAMPLE_VALUE_MAX;
 }
