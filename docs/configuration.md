@@ -9,7 +9,7 @@ All config options can additionally be overriden via CLI options.
 
 ## Global config (`.backport/config.json`)
 
-During installation `backport` will create an empty configuration file in `~/.backport/config.json`. You must update this file with a [Github Access Token](https://github.com/settings/tokens/new)
+During installation `backport` will create an empty configuration file in `~/.backport/config.json`. You must update this file with a [Github Access Token](https://github.com/settings/tokens)
 
 Example:
 
@@ -22,7 +22,7 @@ Example:
 #### `accessToken` **required**
 
 Personal access token.
-Access tokens can be created here: https://github.com/settings/tokens/new
+Access tokens can be created here: https://github.com/settings/tokens
 
 Please select the necessary access scopes:
 
