@@ -694,10 +694,10 @@ export class LensAttributes {
 
       layers[layerId] = {
         columnOrder: [
-          `x-axis-column-${layerId}`,
           ...(breakdown && sourceField !== USE_BREAK_DOWN_COLUMN && breakdown !== PERCENTILE
             ? [`breakdown-column-${layerId}`]
             : []),
+          `x-axis-column-${layerId}`,
           `y-axis-column-${layerId}`,
           ...Object.keys(this.getChildYAxises(layerConfig, layerId, columnFilter)),
         ],
