@@ -139,6 +139,7 @@ export const gaugeVisTypeDefinition: VisTypeDefinition<GaugeVisParams> = {
           '!sampler',
           '!diversified_sampler',
           '!multi_terms',
+          '!significant_text',
         ],
       },
     ],
