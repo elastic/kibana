@@ -47,7 +47,7 @@ export interface RenderTooltipContentParams {
   }: {
     layerId: string;
     featureId?: string | number;
-    mbProperties: GeoJsonProperties;
+    mbProperties?: GeoJsonProperties;
   }) => Promise<ITooltipProperty[]>;
   loadFeatureGeometry: ({
     layerId,
