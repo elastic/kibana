@@ -9,12 +9,9 @@ import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 export default function ({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['common']);
-  const retry = getService('retry');
   const overview = getService('monitoringClusterOverview');
   const pipelinesList = getService('monitoringLogstashPipelines');
   const pipelineViewer = getService('monitoringLogstashPipelineViewer');
-  const lsClusterSummaryStatus = getService('monitoringLogstashSummaryStatus');
 
   describe('Logstash pipeline viewer mb', () => {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
