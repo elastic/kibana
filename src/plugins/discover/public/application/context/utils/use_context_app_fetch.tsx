@@ -12,7 +12,7 @@ import { DiscoverServices } from '../../../build_services';
 import { fetchAnchor } from '../services/anchor';
 import { fetchSurroundingDocs, SurrDocType } from '../services/context';
 import { MarkdownSimple, toMountPoint, wrapWithTheme } from '../../../../../kibana_react/public';
-import { IndexPattern, SortDirection } from '../../../../../data/public';
+import { DataView, SortDirection } from '../../../../../data/common';
 import {
   ContextFetchState,
   FailureReason,
@@ -29,7 +29,7 @@ const createError = (statusKey: string, reason: FailureReason, error?: Error) =>
 
 export interface ContextAppFetchProps {
   anchorId: string;
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   appState: AppState;
   useNewFieldsApi: boolean;
   services: DiscoverServices;

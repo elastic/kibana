@@ -96,8 +96,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('group nodes by custom field', async () => {
         await pageObjects.infraHome.goToTime(DATE_WITH_DATA);
         await pageObjects.infraHome.getWaffleMap();
-        const groups = await pageObjects.infraHome.groupByCustomField('host.os.platform');
-        expect(groups).to.eql(['ubuntu']);
+        await retry.try(async () => {
+          const groups = await pageObjects.infraHome.groupByCustomField('host.os.platform');
+          expect(groups).to.eql(['ubuntu']);
+        });
       });
 
       it('filter nodes by search term', async () => {
