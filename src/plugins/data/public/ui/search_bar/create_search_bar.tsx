@@ -197,7 +197,6 @@ export function createSearchBar({ core, storage, data, usageCollection }: Statef
           isClearable={props.isClearable}
           placeholder={props.placeholder}
           {...overrideDefaultBehaviors(props)}
-          theme={core.theme}
         />
       </KibanaContextProvider>
     );

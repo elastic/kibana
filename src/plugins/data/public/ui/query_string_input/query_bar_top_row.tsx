@@ -24,7 +24,6 @@ import {
   EuiSuperUpdateButton,
   OnRefreshProps,
 } from '@elastic/eui';
-import { ThemeServiceStart } from 'kibana/public';
 import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
 import { useKibana, withKibana } from '../../../../kibana_react/public';
 import QueryStringInputUI from './query_string_input';
@@ -74,7 +73,6 @@ export interface QueryBarTopRowProps {
   showAutoRefreshOnly?: boolean;
   timeHistory?: TimeHistoryContract;
   timeRangeForSuggestionsOverride?: boolean;
-  theme: ThemeServiceStart;
 }
 
 const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -361,7 +359,6 @@ export const QueryBarTopRow = React.memo(
             nonKqlMode={props.nonKqlMode}
             nonKqlModeHelpText={props.nonKqlModeHelpText}
             timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
-            theme={props.theme}
           />
         </EuiFlexItem>
       );

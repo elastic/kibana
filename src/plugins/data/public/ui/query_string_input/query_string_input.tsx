@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEqual, isFunction } from 'lodash';
-import { ThemeServiceStart, Toast } from 'src/core/public';
+import { Toast } from 'src/core/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 import { IDataPluginServices, IIndexPattern, Query } from '../..';
@@ -40,6 +40,7 @@ import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { SuggestionsComponent } from '..';
 import { getFieldSubtypeNested, KIBANA_USER_QUERY_LANGUAGE_KEY } from '../../../common';
 import { onRaf } from '../utils';
+import { getTheme } from '../../services';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -83,7 +84,6 @@ export interface QueryStringInputProps {
    * Override whether autocomplete suggestions are restricted by time range.
    */
   timeRangeForSuggestionsOverride?: boolean;
-  theme: ThemeServiceStart;
 }
 
 interface Props extends QueryStringInputProps {
@@ -489,7 +489,7 @@ export default class QueryStringInputUI extends PureComponent<Props, State> {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </div>,
-            { theme$: this.props.theme.theme$ }
+            { theme$: getTheme().theme$ }
           ),
         });
       }

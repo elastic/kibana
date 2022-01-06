@@ -16,7 +16,6 @@ import memoizeOne from 'memoize-one';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { Query, Filter } from '@kbn/es-query';
-import { ThemeServiceStart } from 'kibana/public';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
@@ -81,7 +80,6 @@ export interface SearchBarOwnProps {
   displayStyle?: 'inPage' | 'detached';
   // super update button background fill control
   fillSubmitButton?: boolean;
-  theme: ThemeServiceStart;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -394,7 +392,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           nonKqlMode={this.props.nonKqlMode}
           nonKqlModeHelpText={this.props.nonKqlModeHelpText}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
-          theme={this.props.theme}
         />
       );
     }
