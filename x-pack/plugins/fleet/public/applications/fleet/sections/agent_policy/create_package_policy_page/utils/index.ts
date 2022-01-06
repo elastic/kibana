@@ -6,3 +6,5 @@
  */
 
 export { appendOnSaveQueryParamsToPath } from './append_on_save_query_params';
+
+export { incrementPolicyName } from './increment_policy_name';

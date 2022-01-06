@@ -16,6 +16,7 @@ import { AgentPolicyIntegrationForm } from '../components';
 import type { ValidationResults } from '../components/agent_policy_validation';
 
 import { StepSelectAgentPolicy } from './step_select_agent_policy';
+import { incrementPolicyName } from './utils';
 
 export enum SelectedPolicyTab {
   NEW = 'new',
@@ -40,16 +41,6 @@ interface Props {
   setHasAgentPolicyError: (hasError: boolean) => void;
   updateSelectedTab: (tab: SelectedPolicyTab) => void;
 }
-
-const getLatestPolicyIndex = (policies: AgentPolicy[]) => {
-  const indices = policies
-    .map((pol: AgentPolicy) => pol.name)
-    .map((name) => {
-      const match = name.match(/Agent policy (\d+)/);
-      return match ? parseInt(match[1], 10) : 1;
-    });
-  return Math.max(...indices, 1) + 1;
-};
 
 export const StepSelectHosts: React.FunctionComponent<Props> = ({
   agentPolicy,
@@ -84,7 +75,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
     if (agentPolicies.length > 0) {
       updateNewAgentPolicy({
         ...newAgentPolicy,
-        name: `Agent policy ${getLatestPolicyIndex(agentPolicies)}`,
+        name: incrementPolicyName(agentPolicies),
       });
     }
   }, [agentPolicies.length]); // eslint-disable-line react-hooks/exhaustive-deps
