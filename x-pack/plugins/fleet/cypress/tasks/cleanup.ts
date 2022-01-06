@@ -7,13 +7,15 @@
 
 export function cleanupAgentPolicies() {
   cy.request('/api/fleet/agent_policies').then((response: any) => {
-    response.body.items.forEach((policy: any) => {
-      cy.request({
-        method: 'POST',
-        url: '/api/fleet/agent_policies/delete',
-        body: { agentPolicyId: policy.id },
-        headers: { 'kbn-xsrf': 'kibana' },
+    response.body.items
+      .filter((policy: any) => policy.agents === 0)
+      .forEach((policy: any) => {
+        cy.request({
+          method: 'POST',
+          url: '/api/fleet/agent_policies/delete',
+          body: { agentPolicyId: policy.id },
+          headers: { 'kbn-xsrf': 'kibana' },
+        });
       });
-    });
   });
 }
