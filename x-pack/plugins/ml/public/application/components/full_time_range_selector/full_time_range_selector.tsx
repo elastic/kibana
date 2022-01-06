@@ -13,7 +13,6 @@ import {
   EuiButton,
   EuiFlexItem,
   EuiButtonIcon,
-  useGeneratedHtmlId,
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover,
@@ -52,21 +51,6 @@ export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, ca
 
   const items = [
     <EuiContextMenuItem
-      key="include-frozen"
-      onClick={() => {
-        setRange(dataView, query, false);
-        closePopover();
-      }}
-    >
-      <FormattedMessage
-        id="xpack.ml.fullTimeRangeSelector.useFullDataMenuLabel"
-        defaultMessage="Use full data"
-        values={{
-          dataViewTitle: dataView.title,
-        }}
-      />
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
       key="exclude-frozen"
       onClick={() => {
         setRange(dataView, query, true);
@@ -74,8 +58,21 @@ export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, ca
       }}
     >
       <FormattedMessage
-        id="xpack.ml.fullTimeRangeSelector.useFullNonFrozenDataMenuLabel"
-        defaultMessage="Use full non-frozen data"
+        id="xpack.ml.fullTimeRangeSelector.useFullDataExcludingFrozenMenuLabel"
+        defaultMessage="Exclude frozen data tier"
+      />
+    </EuiContextMenuItem>,
+
+    <EuiContextMenuItem
+      key="include-frozen"
+      onClick={() => {
+        setRange(dataView, query, false);
+        closePopover();
+      }}
+    >
+      <FormattedMessage
+        id="xpack.ml.fullTimeRangeSelector.useFullDataIncludingFrozenMenuLabel"
+        defaultMessage="Include frozen data tier"
       />
     </EuiContextMenuItem>,
   ];
@@ -89,7 +86,7 @@ export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, ca
       >
         <FormattedMessage
           id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
-          defaultMessage="Use full non-frozen {dataViewTitle} data"
+          defaultMessage="Use full {dataViewTitle} data"
           values={{
             dataViewTitle: dataView.title,
           }}

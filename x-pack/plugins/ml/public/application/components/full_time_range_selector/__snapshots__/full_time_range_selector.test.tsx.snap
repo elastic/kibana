@@ -12,7 +12,7 @@ exports[`FullTimeRangeSelector renders the selector 1`] = `
     onClick={[Function]}
   >
     <FormattedMessage
-      defaultMessage="Use full non-frozen {dataViewTitle} data"
+      defaultMessage="Use full {dataViewTitle} data"
       id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
       values={
         Object {
@@ -51,21 +51,17 @@ exports[`FullTimeRangeSelector renders the selector 1`] = `
               onClick={[Function]}
             >
               <FormattedMessage
-                defaultMessage="Use full data"
-                id="xpack.ml.fullTimeRangeSelector.useFullDataMenuLabel"
-                values={
-                  Object {
-                    "dataViewTitle": "test-data-view",
-                  }
-                }
+                defaultMessage="Exclude frozen data tier"
+                id="xpack.ml.fullTimeRangeSelector.useFullDataExcludingFrozenMenuLabel"
+                values={Object {}}
               />
             </EuiContextMenuItem>,
             <EuiContextMenuItem
               onClick={[Function]}
             >
               <FormattedMessage
-                defaultMessage="Use full non-frozen data"
-                id="xpack.ml.fullTimeRangeSelector.useFullNonFrozenDataMenuLabel"
+                defaultMessage="Include frozen data tier"
+                id="xpack.ml.fullTimeRangeSelector.useFullDataIncludingFrozenMenuLabel"
                 values={Object {}}
               />
             </EuiContextMenuItem>,

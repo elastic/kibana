@@ -78,21 +78,6 @@ export const FullTimeRangeSelector: FC<Props> = ({
 
   const items = [
     <EuiContextMenuItem
-      key="include-frozen"
-      onClick={() => {
-        setRange(indexPattern, query, false);
-        closePopover();
-      }}
-    >
-      <FormattedMessage
-        id="xpack.dataVisualizer.index.fullTimeRangeSelector.useFullDataMenuLabel"
-        defaultMessage="Use full data"
-        values={{
-          dataViewTitle: indexPattern.title,
-        }}
-      />
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
       key="exclude-frozen"
       onClick={() => {
         setRange(indexPattern, query, true);
@@ -101,7 +86,19 @@ export const FullTimeRangeSelector: FC<Props> = ({
     >
       <FormattedMessage
         id="xpack.dataVisualizer.index.fullTimeRangeSelector.useFullNonFrozenDataMenuLabel"
-        defaultMessage="Use full non-frozen data"
+        defaultMessage="Exclude frozen data tier"
+      />
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      key="include-frozen"
+      onClick={() => {
+        setRange(indexPattern, query, false);
+        closePopover();
+      }}
+    >
+      <FormattedMessage
+        id="xpack.dataVisualizer.index.fullTimeRangeSelector.useFullDataMenuLabel"
+        defaultMessage="Include frozen data tier"
       />
     </EuiContextMenuItem>,
   ];
@@ -110,12 +107,13 @@ export const FullTimeRangeSelector: FC<Props> = ({
     <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
       <EuiButton
         isDisabled={disabled}
+        // By default we will exclude frozen data tier
         onClick={() => setRange(indexPattern, query, true)}
         data-test-subj="dataVisualizerButtonUseFullData"
       >
         <FormattedMessage
-          id="xpack.ml.fullTimeRangeSelector.useFullNonFrozenDataMenuLabel"
-          defaultMessage="Use full non-frozen data"
+          id="xpack.dataVisualizer.index.fullTimeRangeSelector.useFullDataButtonLabel"
+          defaultMessage="Use full data"
         />
       </EuiButton>
       <EuiFlexItem grow={false}>
@@ -127,7 +125,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
               size="m"
               iconType="boxesVertical"
               aria-label={i18n.translate(
-                'xpack.ml.fullTimeRangeSelector.moreOptionsButtonAriaLabel',
+                'xpack.dataVisualizer.index.fullTimeRangeSelector.moreOptionsButtonAriaLabel',
                 {
                   defaultMessage: 'More options',
                 }
