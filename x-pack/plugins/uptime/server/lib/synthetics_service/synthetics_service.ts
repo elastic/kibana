@@ -127,7 +127,9 @@ export class SyntheticsService {
     });
   }
 
-  public async scheduleSyncTask(taskManager: TaskManagerStartContract): Promise<TaskInstance> {
+  public async scheduleSyncTask(
+    taskManager: TaskManagerStartContract
+  ): Promise<TaskInstance | null> {
     const interval =
       this.config.unsafe.service.syncInterval ?? SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT;
 
@@ -154,6 +156,8 @@ export class SyntheticsService {
         `Error running task: ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID}, `,
         e?.message() ?? e
       );
+
+      return null;
     }
   }
 
