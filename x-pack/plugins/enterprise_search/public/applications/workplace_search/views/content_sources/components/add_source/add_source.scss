@@ -4,10 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 // --------------------------------------------------
 // View: Adding a Source flow
 // --------------------------------------------------
+
+.organizational-content-source-label {
+  padding: 0 $euiSizeM;
+  min-height: $euiButtonHeight;
+  line-height: $euiButtonHeight;
+}
 
 .adding-a-source {
   ul {
@@ -79,6 +84,7 @@
     .euiFlexItem:first-child {
       align-self: flex-end;
     }
+
     .euiFlexItem:last-child {
       align-self: flex-start;
     }

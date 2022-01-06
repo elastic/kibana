@@ -65,14 +65,6 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
     </span>
   );
 
-  const organizationalContentSourceStyle = {
-    minHeight: '40px',
-    display: 'flex',
-    alignItems: 'center',
-    textAlign: 'center',
-    padding: '0 1em',
-  };
-
   const visibleSources = (
     <EuiFlexGrid columns={3} gutterSize="m" className="source-grid-configured">
       {sources.map(({ name, serviceType, addPath, connected, accountContextOnly }, i) => (
@@ -80,7 +72,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
           <EuiFlexItem grow>
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem grow>
-                <EuiSplitPanel.Outer display="plain" hasShadow={false} hasBorder={true}>
+                <EuiSplitPanel.Outer display="plain" hasShadow={false} hasBorder>
                   <EuiSplitPanel.Inner>
                     <EuiFlexGroup
                       justifyContent="center"
@@ -126,7 +118,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                           <EuiText
                             size="s"
                             color="subdued"
-                            style={organizationalContentSourceStyle}
+                            className="eui-textCenter organizational-content-source-label"
                           >
                             <p>Add an organizational content source</p>
                           </EuiText>
