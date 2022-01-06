@@ -35,7 +35,7 @@ export async function getPipelineStateDocument({
     // This is important because a user may pick a very narrow time picker window. If we were to use a start/end value
     // that could result in us being unable to render the graph
     // Use the logstash_stats documents to determine whether the instance is up/down
-    type: 'logstash_state',
+    types: ['logstash_state', 'node'],
     metric: LogstashMetric.getMetricFields(),
     clusterUuid,
     filters,
