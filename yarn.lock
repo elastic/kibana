@@ -6178,11 +6178,6 @@
   dependencies:
     "@types/unist" "*"
 
-"@types/memoize-one@^4.1.0":
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/@types/memoize-one/-/memoize-one-4.1.1.tgz#41dd138a4335b5041f7d8fc038f9d593d88b3369"
-  integrity sha512-+9djKUUn8hOyktLCfCy4hLaIPgDNovaU36fsnZe9trFHr6ddlbIn2q0SEsnkCkNR+pBWEU440Molz/+Mpyf+gQ==
-
 "@types/micromatch@^4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@types/micromatch/-/micromatch-4.0.1.tgz#9381449dd659fc3823fd2a4190ceacc985083bc7"
@@ -19570,6 +19565,11 @@ memfs@^3.1.2:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/memoize-one/-/memoize-one-5.1.1.tgz#047b6e3199b508eaec03504de71229b8eb1d75c0"
   integrity sha512-HKeeBpWvqiVJD57ZUAsJNm71eHTykffzcLZVYWiVfQeI1rJtuEaS7hQiEpWfVVk18donPwJEcFKIkCmPJNOhHA==
+
+memoize-one@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/memoize-one/-/memoize-one-6.0.0.tgz#b2591b871ed82948aee4727dc6abceeeac8c1045"
+  integrity sha512-rkpe71W0N0c0Xz6QD0eJETuWAJGnJ9afsl1srmwPrI+yBCkge5EycXXbYRyvL29zZVUWQCY7InPRCv3GDXuZNw==
 
 memoizee@0.4.X:
   version "0.4.14"

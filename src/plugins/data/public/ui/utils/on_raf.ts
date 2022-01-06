@@ -6,8 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { QuerySuggestion } from '../../autocomplete';
-
-export type SuggestionOnClick = (suggestion: QuerySuggestion, index: number) => void;
-
-export type SuggestionOnMouseEnter = (suggestion: QuerySuggestion, index: number) => void;
+/**
+ * Debounce a function till next animation frame
+ * @param fn
+ */
+export function onRaf(fn: Function) {
+  let req: number | null;
+  return (...args: unknown[]) => {
+    if (req) window.cancelAnimationFrame(req);
+    req = window.requestAnimationFrame(() => {
+      req = null;
+      fn(...args);
+    });
+  };
+}
