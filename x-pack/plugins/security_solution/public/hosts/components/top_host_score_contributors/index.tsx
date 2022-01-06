@@ -5,39 +5,21 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
-import {
-  Chart,
-  LineSeries,
-  ScaleType,
-  Settings,
-  Axis,
-  Position,
-  AnnotationDomainType,
-  LineAnnotation,
-  TooltipValue,
-} from '@elastic/charts';
-import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
+import React, { useMemo } from 'react';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingChart,
-  EuiText,
   EuiPanel,
-  EuiBasicTable,
-  EuiTableFieldDataColumnType,
   EuiInMemoryTable,
+  EuiTableFieldDataColumnType,
 } from '@elastic/eui';
-import styled from 'styled-components';
-import { chartDefaultSettings, useTheme } from '../../../common/components/charts/common';
-import { useTimeZone } from '../../../common/lib/kibana';
-import { histogramDateTimeFormatter } from '../../../common/components/utils';
+
 import { HeaderSection } from '../../../common/components/header_section';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import * as i18n from './translations';
 import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
 import { ESTermQuery } from '../../../../common/typed_json';
-import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 
 export interface TopHostScoreContributorsProps {
   hostName: string;
@@ -117,7 +99,6 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            {/* possible bug, multiple places using the same query id */}
             <InspectButton queryId={QUERY_ID} title={i18n.TOP_RISK_SCORE_CONTRIBUTORS} />
           </EuiFlexItem>
         </EuiFlexGroup>

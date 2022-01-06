@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { HostRiskScoreOverTime } from '../../components/host_score_over_time';
 import { TopHostScoreContributors } from '../../components/top_host_score_contributors';
 import { HostsComponentsQueryProps } from './types';
+
+import { useRiskyHostsDashboardButtonHref } from '../../../overview/containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href';
+import { HostRiskInformation } from '../../components/host_risk_information';
 
 const HostRiskTabBodyComponent: React.FC<HostsComponentsQueryProps & { hostName: string }> = ({
   hostName,
@@ -17,25 +20,38 @@ const HostRiskTabBodyComponent: React.FC<HostsComponentsQueryProps & { hostName:
   endDate,
   filterQuery,
 }) => {
+  const { buttonHref } = useRiskyHostsDashboardButtonHref(startDate, endDate);
+
   return (
-    <EuiFlexGroup direction="row">
-      <EuiFlexItem grow={2}>
-        <HostRiskScoreOverTime
-          hostName={hostName}
-          from={startDate}
-          to={endDate}
-          filterQuery={filterQuery}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <TopHostScoreContributors
-          hostName={hostName}
-          from={startDate}
-          to={endDate}
-          filterQuery={filterQuery}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup direction="row">
+        <EuiFlexItem grow={2}>
+          <HostRiskScoreOverTime
+            hostName={hostName}
+            from={startDate}
+            to={endDate}
+            filterQuery={filterQuery}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <TopHostScoreContributors
+            hostName={hostName}
+            from={startDate}
+            to={endDate}
+            filterQuery={filterQuery}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiButton
+        href={buttonHref}
+        isDisabled={!buttonHref}
+        data-test-subj="risky-hosts-view-dashboard-button"
+        target="_blank"
+      >
+        {'View source dashboard'}
+      </EuiButton>
+      <HostRiskInformation />
+    </>
   );
 };
 
