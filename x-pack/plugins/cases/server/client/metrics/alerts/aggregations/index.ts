@@ -7,4 +7,3 @@
 
 export * from './hosts';
 export * from './users';
-export * from './types';
