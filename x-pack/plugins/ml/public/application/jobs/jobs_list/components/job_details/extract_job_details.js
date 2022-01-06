@@ -42,7 +42,7 @@ export function extractJobDetails(job, basePath, refreshJobList) {
       defaultMessage: 'Custom settings',
     }),
     position: 'right',
-    items: settings ? filterObjects(settings, true, true) : [],
+    items: settings ? filterObjects(settings, true, true).map(formatValues) : [],
   };
 
   const jobTags = {
