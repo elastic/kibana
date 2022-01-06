@@ -57,7 +57,7 @@ export const DeleteActionModal: FC<DeleteAction> = ({
               <EuiText>
                 <FormattedMessage
                   id="xpack.transform.transformList.deleteManagedBulkTransformsDescription"
-                  defaultMessage="At least one of these transforms is provided by Elastic; deleting them might impact other parts of the product."
+                  defaultMessage="At least one of these transforms is preconfigured by Elastic; deleting them might impact other parts of the product."
                 />
               </EuiText>
             </>
@@ -109,7 +109,7 @@ export const DeleteActionModal: FC<DeleteAction> = ({
               <EuiText>
                 <FormattedMessage
                   id="xpack.transform.transformList.deleteManagedTransformDescription"
-                  defaultMessage="This preconfigured transform is provided by Elastic; deleting it might impact other parts of the product."
+                  defaultMessage="This transform is preconfigured by Elastic; deleting it might impact other parts of the product."
                 />
               </EuiText>
             </>

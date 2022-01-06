@@ -32,7 +32,7 @@ interface Props {
   showStartDatafeedModal(job: MlSummaryJob[]): void;
 }
 
-export const StartDatafeedsConfirmModal: FC<Props> = ({
+export const ResetJobsConfirmModal: FC<Props> = ({
   setShowFunction,
   unsetShowFunction,
   refreshJobs,
@@ -77,7 +77,7 @@ export const StartDatafeedsConfirmModal: FC<Props> = ({
     const title = (
       <FormattedMessage
         id="xpack.ml.jobsList.startDatafeedsModal.startDatafeedsTitle"
-        defaultMessage="Start datafeed for {jobsCount, plural, one {{jobId}} other {# jobs}}?"
+        defaultMessage="Reset jobs for {jobsCount, plural, one {{jobId}} other {# jobs}}?"
         values={{
           jobsCount: jobIds.length,
           jobId: jobIds[0],
@@ -86,7 +86,7 @@ export const StartDatafeedsConfirmModal: FC<Props> = ({
     );
 
     return (
-      <EuiModal data-test-subj="mlStartDatafeedsConfirmModal" onClose={closeModal}>
+      <EuiModal data-test-subj="mlResetJobsConfirmModal" onClose={closeModal}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -96,7 +96,7 @@ export const StartDatafeedsConfirmModal: FC<Props> = ({
               <EuiText>
                 <FormattedMessage
                   id="xpack.ml.jobsList.startDatafeedsModal.startManagedDatafeedsDescription"
-                  defaultMessage="{jobsCount, plural, one {This job} other {At least one of these jobs}} is preconfigured by Elastic; starting {jobsCount, plural, one {it} other {them}} might impact other parts of the product."
+                  defaultMessage="{jobsCount, plural, one {This job} other {At least one of these jobs}} is preconfigured by Elastic; resetting {jobsCount, plural, one {it} other {them}} might impact other parts of the product."
                   values={{
                     jobsCount: jobIds.length,
                   }}
@@ -122,7 +122,7 @@ export const StartDatafeedsConfirmModal: FC<Props> = ({
               }}
               fill
               color="danger"
-              data-test-subj="mlStartDatafeedsConfirmModalButton"
+              data-test-subj="mlResetJobsConfirmModalButton"
             >
               <FormattedMessage
                 id="xpack.ml.jobsList.startDatafeedsConfirmModal.startButtonLabel"

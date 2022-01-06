@@ -47,7 +47,7 @@ export const StartActionModal: FC<StartAction> = ({ closeModal, items, startAndC
           <>
             <FormattedMessage
               id="xpack.transform.transformList.startManagedTransformsDescription"
-              defaultMessage="{transformsCount, plural, one {This preconfigured transform} other {At least one of these transforms}} is provided by Elastic; starting {transformsCount, plural, one {it} other {them}} might impact other parts of the product."
+              defaultMessage="{transformsCount, plural, one {This transform} other {At least one of these transforms}} is preconfigured by Elastic; starting {transformsCount, plural, one {it} other {them}} might impact other parts of the product."
               values={{
                 transformsCount: items.length,
               }}
