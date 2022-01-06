@@ -115,13 +115,13 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
     }
 
     public async waitForRefreshButtonLoaded() {
-      await testSubjects.existOrFail('~mlAnalyticsRefreshListButton', { timeout: 10 * 1000 });
-      await testSubjects.existOrFail('mlAnalyticsRefreshListButton loaded', { timeout: 30 * 1000 });
+      await testSubjects.existOrFail('~mlRefreshPageButton', { timeout: 10 * 1000 });
+      await testSubjects.existOrFail('mlRefreshPageButton loaded', { timeout: 30 * 1000 });
     }
 
     public async refreshAnalyticsTable() {
       await this.waitForRefreshButtonLoaded();
-      await testSubjects.click('~mlAnalyticsRefreshListButton');
+      await testSubjects.click('~mlRefreshPageButton');
       await this.waitForRefreshButtonLoaded();
       await this.waitForAnalyticsToLoad();
     }
@@ -203,7 +203,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       shouldBeDisplayed: boolean
     ) {
       await this.waitForRefreshButtonLoaded();
-      await testSubjects.click('~mlAnalyticsRefreshListButton');
+      await testSubjects.click('~mlRefreshPageButton');
       await this.waitForRefreshButtonLoaded();
       await testSubjects.existOrFail('mlAnalyticsJobList', { timeout: 30 * 1000 });
 

@@ -221,13 +221,13 @@ export function MachineLearningJobTableProvider(
     }
 
     public async waitForRefreshButtonLoaded() {
-      await testSubjects.existOrFail('~mlRefreshJobListButton', { timeout: 10 * 1000 });
-      await testSubjects.existOrFail('mlRefreshJobListButton loaded', { timeout: 30 * 1000 });
+      await testSubjects.existOrFail('~mlRefreshPageButton', { timeout: 10 * 1000 });
+      await testSubjects.existOrFail('mlRefreshPageButton loaded', { timeout: 30 * 1000 });
     }
 
     public async refreshJobList() {
       await this.waitForRefreshButtonLoaded();
-      await testSubjects.click('~mlRefreshJobListButton');
+      await testSubjects.click('~mlRefreshPageButton');
       await this.waitForRefreshButtonLoaded();
       await this.waitForJobsToLoad();
     }
