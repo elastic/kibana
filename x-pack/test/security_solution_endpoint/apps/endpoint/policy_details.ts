@@ -235,7 +235,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     );
   };
 
-  describe('When on the Endpoint Policy Details Page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/100236
+  describe.skip('When on the Endpoint Policy Details Page', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
