@@ -22,6 +22,8 @@ import { sourcererSelectors } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
+import { userHasPermissions } from '../../../detections/pages/detection_engine/rules/helpers';
+import { useUserData } from '../../../detections/components/user_info';
 
 interface CreateFieldButtonProps {
   selectedDataViewId: string;
@@ -41,6 +43,7 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
     const {
       dataViewFieldEditor,
       data: { dataViews },
+      application: { capabilities },
     } = useKibana().services;
 
     useEffect(() => {
@@ -83,7 +86,11 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       timelineId,
     ]);
 
-    if (!dataViewFieldEditor?.userPermissions.editIndexPattern()) {
+    if (
+      !dataViewFieldEditor?.userPermissions.editIndexPattern() ||
+      // remove below check once resolved: https://github.com/elastic/kibana/issues/122462
+      !capabilities.indexPatterns.save
+    ) {
       return null;
     }
 

@@ -30,9 +30,11 @@ describe('CreateFieldButton', () => {
     mockIndexPatternFieldEditor = indexPatternFieldEditorPluginMock.createStartContract();
     useKibanaMock().services.dataViewFieldEditor = mockIndexPatternFieldEditor;
     useKibanaMock().services.data.dataViews.get = () => new Promise(() => undefined);
+    // @ts-ignore
+    useKibanaMock().services.application.capabilities.indexPatterns.save = true;
   });
 
-  it('displays the button when user has permissions', () => {
+  it('displays the button when user has read permissions', () => {
     mockIndexPatternFieldEditor.userPermissions.editIndexPattern = () => true;
 
     render(
@@ -49,7 +51,7 @@ describe('CreateFieldButton', () => {
     expect(screen.getByRole('button')).toBeInTheDocument();
   });
 
-  it("doesn't display the button when user doesn't have permissions", () => {
+  it("doesn't display the button when user doesn't have read permissions", () => {
     mockIndexPatternFieldEditor.userPermissions.editIndexPattern = () => false;
     render(
       <CreateFieldButton
