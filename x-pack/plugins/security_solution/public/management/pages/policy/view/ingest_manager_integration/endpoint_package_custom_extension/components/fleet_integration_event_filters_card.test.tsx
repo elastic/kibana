@@ -40,7 +40,7 @@ describe('Fleet integration policy endpoint security event filters card', () => 
         renderResult = mockedContext.render(
           <FleetIntegrationEventFiltersCard policyId={policy.id} />
         );
-        await waitFor(mockedApi.responseProvider.eventFiltersList);
+        await waitFor(() => expect(mockedApi.responseProvider.eventFiltersList).toHaveBeenCalled());
       });
       return renderResult;
     };
@@ -83,14 +83,16 @@ describe('Fleet integration policy endpoint security event filters card', () => 
   });
 
   it('should show an error toast when API request fails', async () => {
-    const errorMessage = 'Uh oh! API error!';
+    const error = new Error('Uh oh! API error!');
     mockedApi.responseProvider.eventFiltersList.mockImplementation(() => {
-      throw new Error(errorMessage);
+      throw error;
     });
 
+    await render();
     await waitFor(() => {
+      expect(mockedContext.coreStart.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
       expect(mockedContext.coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith(
-        `There was an error trying to fetch event filters stats: ${errorMessage}`
+        `There was an error trying to fetch event filters stats: "${error}"`
       );
     });
   });
