@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/public';
+import { CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
 import {
   setKibanaVersion,
-  setLicensingPluginSetup,
+  setLicensingPluginStart,
   setMapConfig,
   getIsEnterprisePlus,
 } from './kibana_services';
 import type { MapsEmsPluginPublicSetup, MapsEmsPluginPublicStart } from './index';
 import type { MapConfig } from '../config';
 import { createEMSSettings } from '../common/ems_settings';
-import type { LicensingPluginSetup } from '../../../../x-pack/plugins/licensing/public';
+import type { LicensingPluginStart } from '../../../../x-pack/plugins/licensing/public';
 import { createEMSClientLazy } from './lazy_load_bundle';
 
-interface MapsEmsSetupPublicDependencies {
-  licensing?: LicensingPluginSetup;
+interface MapsEmsStartPublicDependencies {
+  licensing?: LicensingPluginStart;
 }
 
 export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPluginPublicStart> {
@@ -30,7 +30,11 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPl
     this._initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, plugins: MapsEmsSetupPublicDependencies) {
+  public setup() {
+    return {};
+  }
+
+  public start(code: CoreStart, plugins: MapsEmsStartPublicDependencies) {
     const mapConfig = this._initializerContext.config.get<MapConfig>();
     const kibanaVersion = this._initializerContext.env.packageInfo.version;
 
@@ -38,9 +42,8 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPl
     setMapConfig(mapConfig);
 
     if (plugins.licensing) {
-      setLicensingPluginSetup(plugins.licensing);
+      setLicensingPluginStart(plugins.licensing);
     }
-
     return {
       config: mapConfig,
       createEMSSettings: () => {
@@ -52,6 +55,4 @@ export class MapsEmsPlugin implements Plugin<MapsEmsPluginPublicSetup, MapsEmsPl
       },
     };
   }
-
-  public start() {}
 }

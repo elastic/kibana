@@ -7,7 +7,7 @@
  */
 
 import type { MapConfig } from '../config';
-import { LicensingPluginSetup } from '../../../../x-pack/plugins/licensing/public';
+import { LicensingPluginStart } from '../../../../x-pack/plugins/licensing/public';
 import { ILicense } from '../../../../x-pack/plugins/licensing/common/types';
 import { LICENSE_CHECK_ID } from '../common';
 
@@ -30,7 +30,7 @@ export function getIsEnterprisePlus() {
   return isEnterprisePlus;
 }
 
-export async function setLicensingPluginSetup(licensingPlugin: LicensingPluginSetup) {
+export async function setLicensingPluginStart(licensingPlugin: LicensingPluginStart) {
   const license = await licensingPlugin.refresh();
   updateLicenseState(license);
   licensingPlugin.license$.subscribe(updateLicenseState);

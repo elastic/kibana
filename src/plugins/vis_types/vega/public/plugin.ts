@@ -24,7 +24,7 @@ import {
 
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
-import type { MapsEmsPluginPublicSetup } from '../../../maps_ems/public';
+import type { MapsEmsPluginPublicStart } from '../../../maps_ems/public';
 import type { IServiceSettings } from './vega_view/vega_map_view/service_settings/service_settings_types';
 
 import { ConfigSchema } from '../config';
@@ -48,12 +48,12 @@ export interface VegaPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   inspector: InspectorSetup;
   data: DataPublicPluginSetup;
-  mapsEms: MapsEmsPluginPublicSetup;
 }
 
 /** @internal */
 export interface VegaPluginStartDependencies {
   data: DataPublicPluginStart;
+  mapsEms: MapsEmsPluginPublicStart;
 }
 
 /** @internal */
@@ -66,7 +66,7 @@ export class VegaPlugin implements Plugin<void, void> {
 
   public setup(
     core: CoreSetup,
-    { inspector, data, expressions, visualizations, mapsEms }: VegaPluginSetupDependencies
+    { inspector, data, expressions, visualizations }: VegaPluginSetupDependencies
   ) {
     setInjectedVars({
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
@@ -74,7 +74,6 @@ export class VegaPlugin implements Plugin<void, void> {
     });
 
     setUISettings(core.uiSettings);
-    setMapsEms(mapsEms);
 
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
       core,
@@ -92,10 +91,11 @@ export class VegaPlugin implements Plugin<void, void> {
     visualizations.createBaseVisualization(createVegaTypeDefinition());
   }
 
-  public start(core: CoreStart, { data }: VegaPluginStartDependencies) {
+  public start(core: CoreStart, { data, mapsEms }: VegaPluginStartDependencies) {
     setNotifications(core.notifications);
     setData(data);
     setInjectedMetadata(core.injectedMetadata);
     setDocLinks(core.docLinks);
+    setMapsEms(mapsEms);
   }
 }

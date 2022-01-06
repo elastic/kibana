@@ -10,7 +10,7 @@ import type { MapsConfigType } from '../config';
 import type { MapsPluginStartDependencies } from './plugin';
 import type { EMSSettings } from '../../../../src/plugins/maps_ems/common/ems_settings';
 import type { PaletteRegistry } from '../../../../src/plugins/charts/public';
-import { MapsEmsPluginPublicSetup } from '../../../../src/plugins/maps_ems/public';
+import { MapsEmsPluginPublicStart } from '../../../../src/plugins/maps_ems/public';
 
 let coreStart: CoreStart;
 let pluginsStart: MapsPluginStartDependencies;
@@ -59,14 +59,14 @@ export const getMapAppConfig = () => mapAppConfig;
 export const getShowMapsInspectorAdapter = () => getMapAppConfig().showMapsInspectorAdapter;
 export const getPreserveDrawingBuffer = () => getMapAppConfig().preserveDrawingBuffer;
 
-let mapsEms: MapsEmsPluginPublicSetup;
+let mapsEms: MapsEmsPluginPublicStart;
 let emsSettings: EMSSettings;
-export const setMapsEmsSetup = (value: MapsEmsPluginPublicSetup) => {
+export const setMapsEmsStart = (value: MapsEmsPluginPublicStart) => {
   mapsEms = value;
   emsSettings = mapsEms.createEMSSettings();
 };
 // map.* kibana.yml settings from maps_ems plugin that are shared between OSS map visualizations and maps app
-export const getMapsEmsSetup: () => MapsEmsPluginPublicSetup = () => {
+export const getMapsEmsStart: () => MapsEmsPluginPublicStart = () => {
   return mapsEms;
 };
 

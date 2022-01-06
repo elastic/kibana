@@ -19,9 +19,11 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export type { MapConfig, TileMapConfig } from '../config';
 export type { EMSConfig } from '../common';
 
-export interface MapsEmsPluginPublicSetup {
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface MapsEmsPluginPublicSetup {}
+
+export interface MapsEmsPluginPublicStart {
   config: MapConfig;
   createEMSSettings(): EMSSettings;
   createEMSClient(): Promise<EMSClient>;
 }
-export type MapsEmsPluginPublicStart = ReturnType<MapsEmsPlugin['start']>;

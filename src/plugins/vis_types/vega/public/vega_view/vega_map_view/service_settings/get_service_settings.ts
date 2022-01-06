@@ -9,10 +9,10 @@
 import type { IServiceSettings } from './service_settings_types';
 import { ServiceSettings } from './service_settings';
 import { getMapsEms } from '../../../services';
-import type { MapsEmsPluginPublicSetup, MapConfig } from '../../../../../../maps_ems/public';
+import type { MapsEmsPluginPublicStart, MapConfig } from '../../../../../../maps_ems/public';
 
 export async function getServiceSettings(): Promise<IServiceSettings> {
-  const mapsEms: MapsEmsPluginPublicSetup = getMapsEms();
+  const mapsEms: MapsEmsPluginPublicStart = getMapsEms();
   const mapsEmsConfig: MapConfig = mapsEms.config;
   const emsClient = await mapsEms.createEMSClient();
   // any kibana user, regardless of distribution, should get all zoom levels

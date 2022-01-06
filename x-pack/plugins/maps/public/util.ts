@@ -7,7 +7,7 @@
 
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
 import { FONTS_API_PATH } from '../common/constants';
-import { getHttp, getTilemap, getEMSSettings, getMapsEmsSetup } from './kibana_services';
+import { getHttp, getTilemap, getEMSSettings, getMapsEmsStart } from './kibana_services';
 import { getLicenseId } from './licensed_features';
 
 export function getKibanaTileMap(): unknown {
@@ -34,7 +34,7 @@ let emsClient: EMSClient | null = null;
 let latestLicenseId: string | undefined;
 async function getEMSClient(): Promise<EMSClient> {
   if (!emsClient) {
-    emsClient = await getMapsEmsSetup().createEMSClient();
+    emsClient = await getMapsEmsStart().createEMSClient();
   }
   const licenseId = getLicenseId();
   if (latestLicenseId !== licenseId) {

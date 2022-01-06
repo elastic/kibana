@@ -21,7 +21,7 @@ import type {
 } from '../../../../src/core/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MapInspectorView } from './inspector/map_inspector_view';
-import { setMapAppConfig, setStartServices, setMapsEmsSetup } from './kibana_services';
+import { setMapAppConfig, setStartServices, setMapsEmsStart } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
@@ -49,7 +49,7 @@ import {
 import { registerLayerWizard } from './classes/layers';
 import { registerSource } from './classes/sources/source_registry';
 import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
-import type { MapsEmsPluginPublicSetup } from '../../../../src/plugins/maps_ems/public';
+import type { MapsEmsPluginPublicStart } from '../../../../src/plugins/maps_ems/public';
 import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import type { FileUploadPluginStart } from '../../file_upload/public';
@@ -80,7 +80,6 @@ export interface MapsPluginSetupDependencies {
   home?: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
-  mapsEms: MapsEmsPluginPublicSetup;
   share: SharePluginSetup;
   licensing: LicensingPluginSetup;
   usageCollection?: UsageCollectionSetup;
@@ -103,6 +102,7 @@ export interface MapsPluginStartDependencies {
   presentationUtil: PresentationUtilPluginStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
+  mapsEms: MapsEmsPluginPublicStart;
 }
 
 /**
@@ -133,7 +133,6 @@ export class MapsPlugin
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();
-    setMapsEmsSetup(plugins.mapsEms);
     setMapAppConfig(config);
 
     const locator = plugins.share.url.locators.create(
@@ -191,6 +190,7 @@ export class MapsPlugin
   public start(core: CoreStart, plugins: MapsPluginStartDependencies): MapsStartApi {
     setLicensingPluginStart(plugins.licensing);
     setStartServices(core, plugins);
+    setMapsEmsStart(plugins.mapsEms);
 
     if (core.application.capabilities.maps.show) {
       plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);
