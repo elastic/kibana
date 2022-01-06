@@ -151,63 +151,32 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     newAgentPolicy: NewAgentPolicy,
-    searchParams:
-      | { id: string }
-      | {
-          searchFields: string[];
-          search: string;
-        },
-    id?: string | number
+    searchParams: { id: string }
   ): Promise<{
     created: boolean;
     policy: AgentPolicy;
   }> {
     // For preconfigured policies with a specified ID
-    if ('id' in searchParams) {
-      try {
-        const agentPolicy = await soClient.get<AgentPolicySOAttributes>(
-          AGENT_POLICY_SAVED_OBJECT_TYPE,
-          searchParams.id
-        );
-        return {
-          created: false,
-          policy: {
-            id: agentPolicy.id,
-            ...agentPolicy.attributes,
-          },
-        };
-      } catch (e) {
-        if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-          return {
-            created: true,
-            policy: await this.create(soClient, esClient, newAgentPolicy, { id: searchParams.id }),
-          };
-        } else throw e;
-      }
-    }
-
-    // For default policies without a specified ID
-    const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
-      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
-      ...searchParams,
-    });
-
-    if (agentPolicies.total === 0) {
+    try {
+      const agentPolicy = await soClient.get<AgentPolicySOAttributes>(
+        AGENT_POLICY_SAVED_OBJECT_TYPE,
+        searchParams.id
+      );
       return {
-        created: true,
-        policy: await this.create(soClient, esClient, newAgentPolicy, {
-          id: id ? String(id) : uuidv5(newAgentPolicy.name, UUID_V5_NAMESPACE),
-        }),
+        created: false,
+        policy: {
+          id: agentPolicy.id,
+          ...agentPolicy.attributes,
+        },
       };
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        return {
+          created: true,
+          policy: await this.create(soClient, esClient, newAgentPolicy, { id: searchParams.id }),
+        };
+      } else throw e;
     }
-
-    return {
-      created: false,
-      policy: {
-        id: agentPolicies.saved_objects[0].id,
-        ...agentPolicies.saved_objects[0].attributes,
-      },
-    };
   }
 
   public async create(

@@ -35,6 +35,8 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const isUnenrolling = agent.status === 'unenrolling';
 
+  const hasFleetServer = agentPolicy && policyHasFleetServer(agentPolicy);
+
   const onClose = useMemo(() => {
     if (onCancelReassign) {
       return onCancelReassign;
@@ -60,7 +62,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
               refreshAgent();
             }}
             useForceUnenroll={isUnenrolling}
-            hasFleetServer={policyHasFleetServer}
+            hasFleetServer={hasFleetServer}
           />
         </EuiPortal>
       )}
