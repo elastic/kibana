@@ -17,6 +17,7 @@ snapshots.js
 !/.ci
 !/.eslintrc.js
 !.storybook
+!.buildkite
 
 # plugin overrides
 /src/core/lib/kbn_internal_native_observable

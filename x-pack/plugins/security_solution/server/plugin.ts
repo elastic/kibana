@@ -37,6 +37,7 @@ import {
   createThresholdAlertType,
 } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
+import { registerLimitedConcurrencyRoutes } from './routes/limited_concurrency';
 import { ManifestTask } from './endpoint/lib/artifacts';
 import { CheckMetadataTransformsTask } from './endpoint/lib/metadata';
 import { initSavedObjects } from './saved_objects';
@@ -50,7 +51,6 @@ import {
   DEFAULT_ALERTS_INDEX,
 } from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
-import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
@@ -416,6 +416,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerIngestCallback,
       licenseService,
       exceptionListsClient: exceptionListClient,
+      registerListsServerExtension: this.lists?.registerExtension,
     });
 
     this.telemetryReceiver.start(
