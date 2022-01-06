@@ -17,6 +17,7 @@ import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
+  TaskInstance,
 } from '../../../../task_manager/server';
 import { UptimeServerSetup } from '../adapters';
 import { installSyntheticsIndexTemplates } from '../../rest_api/synthetics_service/install_index_templates';
@@ -37,6 +38,7 @@ import {
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID = 'UPTIME:SyntheticsService:sync-task';
+const SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT = '5m';
 
 export class SyntheticsService {
   private logger: Logger;
@@ -125,27 +127,38 @@ export class SyntheticsService {
     });
   }
 
-  public scheduleSyncTask(taskManager: TaskManagerStartContract) {
-    taskManager
-      .ensureScheduled({
+  public async scheduleSyncTask(
+    taskManager: TaskManagerStartContract
+  ): Promise<TaskInstance | null> {
+    const interval =
+      this.config.unsafe.service.syncInterval ?? SYNTHETICS_SERVICE_SYNC_INTERVAL_DEFAULT;
+
+    try {
+      await taskManager.removeIfExists(SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID);
+      const taskInstance = await taskManager.ensureScheduled({
         id: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID,
         taskType: SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE,
         schedule: {
-          interval: '1m',
+          interval,
         },
         params: {},
         state: {},
         scope: ['uptime'],
-      })
-      .then((_result) => {
-        this.logger?.info(`Task ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID} scheduled. `);
-      })
-      .catch((e) => {
-        this.logger?.error(
-          `Error running task: ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID}, `,
-          e?.message() ?? e
-        );
       });
+
+      this.logger?.info(
+        `Task ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID} scheduled with interval ${taskInstance.schedule?.interval}.`
+      );
+
+      return taskInstance;
+    } catch (e) {
+      this.logger?.error(
+        `Error running task: ${SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_ID}, `,
+        e?.message() ?? e
+      );
+
+      return null;
+    }
   }
 
   async getOutput(request?: KibanaRequest) {
