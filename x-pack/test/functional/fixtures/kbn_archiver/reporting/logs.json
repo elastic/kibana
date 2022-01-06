@@ -449,7 +449,7 @@
     "title": "sparse_data",
     "typeMeta": "{}"
   },
-  "coreMigrationVersion": "8.1.0",
+  "coreMigrationVersion": "8.0.0",
   "id": "8e5af470-62de-11ec-a5fd-9f30aac1abbf",
   "migrationVersion": {
     "index-pattern": "8.0.0"
@@ -480,7 +480,7 @@
     ],
     "title": "Sparse Columns"
   },
-  "coreMigrationVersion": "8.1.0",
+  "coreMigrationVersion": "8.0.0",
   "id": "c4367dd0-62de-11ec-a5fd-9f30aac1abbf",
   "migrationVersion": {
     "search": "8.0.0"
