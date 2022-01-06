@@ -13,14 +13,14 @@ import {
   ExpressionValueRender,
   ExpressionValueBoxed,
 } from '../../../../expressions/common';
-import { RenderValue, PieVisConfig } from './expression_renderers';
+import { RenderValue, PieVisConfig, LabelPositions, ValueFormats } from './expression_renderers';
 
 export interface PieLabelsArguments {
   show: boolean;
-  position: string;
+  position: LabelPositions;
   values: boolean;
   truncate: number | null;
-  valuesFormat: string;
+  valuesFormat: ValueFormats;
   lastLevel: boolean;
   percentDecimals: number;
 }
@@ -29,10 +29,10 @@ export type ExpressionValuePieLabels = ExpressionValueBoxed<
   typeof PIE_LABELS_VALUE,
   {
     show: boolean;
-    position: string;
+    position: LabelPositions;
     values: boolean;
     truncate: number | null;
-    valuesFormat: string;
+    valuesFormat: ValueFormats;
     last_level: boolean;
     percentDecimals: number;
   }
