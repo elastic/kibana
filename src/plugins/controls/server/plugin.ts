@@ -6,22 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
 import { EmbeddableSetup } from '../../embeddable/server';
 import { controlGroupContainerPersistableStateServiceFactory } from './control_group/control_group_container_factory';
 import { optionsListPersistableStateServiceFactory } from './control_types/options_list/options_list_embeddable_factory';
+import { setupOptionsListSuggestionsRoute } from './control_types/options_list/options_list_suggestions_route';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
 }
 
 export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
+  constructor(initializerContext: PluginInitializerContext) {
+    // console.log(
+    //   '\n\n\\n CONSTRUCTING CONTROLS PLUGIN',
+    //   (initializerContext.config.get() as any).autocomplete
+    // );
+  }
+
   public setup(core: CoreSetup, plugins: SetupDeps) {
     plugins.embeddable.registerEmbeddableFactory(optionsListPersistableStateServiceFactory());
 
     plugins.embeddable.registerEmbeddableFactory(
       controlGroupContainerPersistableStateServiceFactory(plugins.embeddable)
     );
+
+    setupOptionsListSuggestionsRoute(core);
     return {};
   }
 

@@ -19,11 +19,13 @@ import { dataViewsServiceFactory } from './data_views';
 import { controlsServiceFactory } from './controls';
 import { overlaysServiceFactory } from './overlays';
 import { dataServiceFactory } from './data';
+import { httpServiceFactory } from './http';
 
 export const providers: PluginServiceProviders<
   ControlsServices,
   KibanaPluginServiceParams<ControlsPluginStartDeps>
 > = {
+  http: new PluginServiceProvider(httpServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   controls: new PluginServiceProvider(controlsServiceFactory),

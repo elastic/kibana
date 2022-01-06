@@ -6,21 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { ControlsDataService } from '../data';
+import { ControlsHTTPService } from '../http';
 import { ControlsPluginStartDeps } from '../../types';
 import { KibanaPluginServiceFactory } from '../../../../presentation_util/public';
 
-export type DataServiceFactory = KibanaPluginServiceFactory<
-  ControlsDataService,
+export type HttpServiceFactory = KibanaPluginServiceFactory<
+  ControlsHTTPService,
   ControlsPluginStartDeps
 >;
-
-export const dataServiceFactory: DataServiceFactory = ({ startPlugins }) => {
+export const httpServiceFactory: HttpServiceFactory = ({ coreStart }) => {
   const {
-    data: { query, autocomplete },
-  } = startPlugins;
+    http: { fetch },
+  } = coreStart;
+
   return {
-    autocomplete,
-    query,
+    fetch,
   };
 };

@@ -13,11 +13,13 @@ import { registry as stubRegistry } from './stub';
 import { ControlsPluginStart } from '../types';
 import { ControlsDataService } from './data';
 import { ControlsService } from './controls';
+import { ControlsHTTPService } from './http';
 
 export interface ControlsServices {
   dataViews: ControlsDataViewsService;
   overlays: ControlsOverlaysService;
   data: ControlsDataService;
+  http: ControlsHTTPService;
   controls: ControlsService;
 }
 

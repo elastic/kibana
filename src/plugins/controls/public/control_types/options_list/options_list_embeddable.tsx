@@ -12,6 +12,7 @@ import {
   compareFilters,
   buildPhraseFilter,
   buildPhrasesFilter,
+  buildQueryFromFilters,
 } from '@kbn/es-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
@@ -35,6 +36,7 @@ import { OptionsListStrings } from './options_list_strings';
 import { DataView } from '../../../../data_views/public';
 import { ControlInput, ControlOutput } from '../..';
 import { pluginServices } from '../../services';
+import { getSuggestions } from './options_list_suggestions';
 
 const OptionsListReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<OptionsListEmbeddableInput>
@@ -155,7 +157,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   private fetchAvailableOptions = async () => {
     this.updateComponentState({ loading: true });
-    const { ignoreParentSettings, filters, fieldName, query } = this.getInput();
+    const { ignoreParentSettings, filters, fieldName, query, selectedOptions } = this.getInput();
     const dataView = await this.getCurrentDataView();
     const field = dataView.getFieldByName(fieldName);
 
@@ -169,8 +171,19 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       ),
     ];
 
-    // TODO Switch between `terms_agg` and `terms_enum` method depending on the value of ignoreParentSettings
-    // const method = Object.values(ignoreParentSettings || {}).includes(false) ?
+    // TEMP run getSuggestions from new API
+    const timeService = this.dataService.query.timefilter.timefilter;
+    const currentTimeFilter = timeService.createFilter(dataView, timeService.getTime());
+    const builtTimeFilter = currentTimeFilter
+      ? buildQueryFromFilters([currentTimeFilter], dataView).filter
+      : [];
+    getSuggestions(dataView.title, {
+      field: field.name,
+      selectedOptions,
+      filters: [...boolFilter, ...builtTimeFilter],
+      searchString: this.searchString,
+    });
+    // end TEMP
 
     const newOptions = await this.dataService.autocomplete.getValueSuggestions({
       query: this.searchString,

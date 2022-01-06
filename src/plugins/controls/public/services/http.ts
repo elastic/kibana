@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/server';
-import { ControlsPlugin } from './plugin';
+import { CoreSetup } from '../../../../core/public';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new ControlsPlugin(initializerContext);
+export interface ControlsHTTPService {
+  fetch: CoreSetup['http']['fetch'];
+}

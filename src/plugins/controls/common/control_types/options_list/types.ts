@@ -18,3 +18,16 @@ export interface OptionsListEmbeddableInput extends ControlInput {
   singleSelect?: boolean;
   loading?: boolean;
 }
+
+export interface OptionsListSuggestionResponse {
+  suggestions: string[];
+  totalCardinality: number;
+  invalidSelections?: string[];
+}
+
+export interface OptionsListSuggestionRequest {
+  selectedOptions?: string[];
+  searchString?: string;
+  filters?: any[]; // TODO remove usage of any
+  field: string;
+}

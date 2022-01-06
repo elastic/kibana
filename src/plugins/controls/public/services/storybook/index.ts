@@ -17,11 +17,13 @@ import { dataServiceFactory } from './data';
 import { overlaysServiceFactory } from './overlays';
 import { controlsServiceFactory } from './controls';
 import { dataViewsServiceFactory } from './data_views';
+import { httpServiceFactory } from '../stub/http';
 
 export type { ControlsServices } from '..';
 
 export const providers: PluginServiceProviders<ControlsServices> = {
   dataViews: new PluginServiceProvider(dataViewsServiceFactory),
+  http: new PluginServiceProvider(httpServiceFactory),
   data: new PluginServiceProvider(dataServiceFactory),
   overlays: new PluginServiceProvider(overlaysServiceFactory),
   controls: new PluginServiceProvider(controlsServiceFactory),
