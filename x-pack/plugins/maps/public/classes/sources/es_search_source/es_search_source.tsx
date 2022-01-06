@@ -281,7 +281,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
     const indexPattern: IndexPattern = await this.getIndexPattern();
 
-    const { docValueFields, sourceOnlyFields, scriptFields } = getDocValueAndSourceFields(
+    const { docValueFields, geometryFields, sourceOnlyFields, scriptFields } = getDocValueAndSourceFields(
       indexPattern,
       searchFilters.fieldNames,
       'epoch_millis'
@@ -296,6 +296,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       size: topHitsSize,
       script_fields: scriptFields,
       docvalue_fields: docValueFields,
+      fields: geometryFields,
     };
 
     if (this._hasSort()) {
@@ -389,7 +390,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   ) {
     const indexPattern = await this.getIndexPattern();
 
-    const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
+    const { docValueFields, geometryFields, sourceOnlyFields } = getDocValueAndSourceFields(
       indexPattern,
       searchFilters.fieldNames,
       'epoch_millis'
@@ -418,6 +419,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     } else {
       searchSource.setField('source', sourceOnlyFields);
     }
+    searchSource.setField('fields', geometryFields);
     if (this._hasSort()) {
       searchSource.setField('sort', this._buildEsSort());
     }
@@ -568,7 +570,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       return {};
     }
 
-    const { docValueFields } = getDocValueAndSourceFields(
+    const { docValueFields, geometryFields } = getDocValueAndSourceFields(
       indexPattern,
       this._getTooltipPropertyNames(),
       'strict_date_optional_time'
@@ -580,6 +582,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     searchSource.setField('trackTotalHits', false);
 
     searchSource.setField('index', indexPattern);
+    searchSource.setField('fields', geometryFields);
     searchSource.setField('size', 1);
 
     const query = {

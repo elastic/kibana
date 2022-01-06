@@ -19,10 +19,12 @@ export function getDocValueAndSourceFields(
   dateFormat: string
 ): {
   docValueFields: Array<string | { format: string; field: string }>;
+  geometryFields: string[];
   sourceOnlyFields: string[];
   scriptFields: Record<string, { script: ScriptField }>;
 } {
   const docValueFields: Array<string | { format: string; field: string }> = [];
+  const geometryFields: string[] = [];
   const sourceOnlyFields: string[] = [];
   const scriptFields: Record<string, { script: ScriptField }> = {};
   fieldNames.forEach((fieldName) => {
@@ -34,6 +36,8 @@ export function getDocValueAndSourceFields(
           lang: field.lang || '',
         },
       };
+    } else if (field.type === 'geo_point' || field.type === 'geo_shape') {
+      geometryFields.push(fieldName);
     } else if (field.readFromDocValues || field.runtimeField) {
       const docValueField =
         field.type === 'date'
@@ -48,5 +52,5 @@ export function getDocValueAndSourceFields(
     }
   });
 
-  return { docValueFields, sourceOnlyFields, scriptFields };
+  return { docValueFields, geometryFields, sourceOnlyFields, scriptFields };
 }
