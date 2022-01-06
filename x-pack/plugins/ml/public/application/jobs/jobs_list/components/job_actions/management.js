@@ -27,7 +27,7 @@ export function actionsMenuContent(
   showDeleteJobModal,
   showResetJobModal,
   showStartDatafeedModal,
-  showStartDatafeedsConfirmModal,
+  showCloseJobsConfirmModal,
   showStopDatafeedsConfirmModal,
   refreshJobs,
   showCreateAlertFlyout
@@ -53,12 +53,7 @@ export function actionsMenuContent(
       enabled: (item) => isJobBlocked(item) === false && canStartStopDatafeed,
       available: (item) => isStartable([item]),
       onClick: (item) => {
-        if (isManagedJob(item)) {
-          showStartDatafeedsConfirmModal([item]);
-        } else {
-          showStartDatafeedModal([item]);
-        }
-
+        showStartDatafeedModal([item]);
         closeMenu();
       },
       'data-test-subj': 'mlActionButtonStartDatafeed',
@@ -111,7 +106,12 @@ export function actionsMenuContent(
       enabled: (item) => isJobBlocked(item) === false && canCloseJob,
       available: (item) => isClosable([item]),
       onClick: (item) => {
-        closeJobs([item], refreshJobs);
+        if (isManagedJob(item)) {
+          showCloseJobsConfirmModal([item]);
+        } else {
+          closeJobs([item], refreshJobs);
+        }
+
         closeMenu(true);
       },
       'data-test-subj': 'mlActionButtonCloseJob',

@@ -20,8 +20,7 @@ import {
 } from '@elastic/eui';
 import { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { isManagedJob } from '../../../jobs_utils';
-// @ts-ignore
-import { startDatafeeds } from '../utils';
+import { closeJobs } from '../utils';
 
 type ShowFunc = (jobs: MlSummaryJob[]) => void;
 
@@ -29,20 +28,18 @@ interface Props {
   setShowFunction(showFunc: ShowFunc): void;
   unsetShowFunction(): void;
   refreshJobs(): void;
-  showStartDatafeedModal(job: MlSummaryJob[]): void;
 }
 
-export const StartDatafeedsConfirmModal: FC<Props> = ({
+export const CloseJobsConfirmModal: FC<Props> = ({
   setShowFunction,
   unsetShowFunction,
   refreshJobs,
-  showStartDatafeedModal,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [isManaged, setHasManaged] = useState(true);
-  const [jobsToStart, setJobsToStart] = useState<MlSummaryJob[]>([]);
+  const [hasManagedJob, setHasManaged] = useState(true);
+  const [jobsToReset, setJobsToReset] = useState<MlSummaryJob[]>([]);
 
-  const jobIds = useMemo(() => jobsToStart.map(({ id }) => id), [jobsToStart]);
+  const jobIds = useMemo(() => jobsToReset.map(({ id }) => id), [jobsToReset]);
 
   useEffect(() => {
     if (typeof setShowFunction === 'function') {
@@ -56,7 +53,7 @@ export const StartDatafeedsConfirmModal: FC<Props> = ({
   }, []);
 
   const showModal = useCallback((jobs: MlSummaryJob[]) => {
-    setJobsToStart(jobs);
+    setJobsToReset(jobs);
 
     if (jobs.some((j) => isManagedJob(j))) {
       setModalVisible(true);
@@ -73,11 +70,11 @@ export const StartDatafeedsConfirmModal: FC<Props> = ({
     return null;
   }
 
-  if (isManaged) {
+  if (hasManagedJob) {
     const title = (
       <FormattedMessage
         id="xpack.ml.jobsList.startDatafeedsModal.startDatafeedsTitle"
-        defaultMessage="Start datafeed for {jobsCount, plural, one {{jobId}} other {# jobs}}?"
+        defaultMessage="Close {jobsCount, plural, one {{jobId}} other {# jobs}}?"
         values={{
           jobsCount: jobIds.length,
           jobId: jobIds[0],
@@ -86,7 +83,7 @@ export const StartDatafeedsConfirmModal: FC<Props> = ({
     );
 
     return (
-      <EuiModal data-test-subj="mlStartDatafeedsConfirmModal" onClose={closeModal}>
+      <EuiModal data-test-subj="mlCloseJobsConfirmModal" onClose={closeModal}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
         </EuiModalHeader>
@@ -96,7 +93,7 @@ export const StartDatafeedsConfirmModal: FC<Props> = ({
               <EuiText>
                 <FormattedMessage
                   id="xpack.ml.jobsList.startDatafeedsModal.startManagedDatafeedsDescription"
-                  defaultMessage="{jobsCount, plural, one {This job} other {At least one of these jobs}} is preconfigured by Elastic; starting {jobsCount, plural, one {it} other {them}} might impact other parts of the product."
+                  defaultMessage="{jobsCount, plural, one {This job} other {At least one of these jobs}} is preconfigured by Elastic; closing {jobsCount, plural, one {it} other {them}} might impact other parts of the product."
                   values={{
                     jobsCount: jobIds.length,
                   }}
@@ -117,16 +114,16 @@ export const StartDatafeedsConfirmModal: FC<Props> = ({
 
             <EuiButton
               onClick={() => {
-                showStartDatafeedModal(jobsToStart);
+                closeJobs(jobsToReset, refreshJobs);
                 closeModal();
               }}
               fill
               color="danger"
-              data-test-subj="mlStartDatafeedsConfirmModalButton"
+              data-test-subj="mlCloseJobsConfirmModalButton"
             >
               <FormattedMessage
-                id="xpack.ml.jobsList.startDatafeedsConfirmModal.startButtonLabel"
-                defaultMessage="Start {jobsCount, plural, one {datafeed} other {datafeeds}}"
+                id="xpack.ml.jobsList.startDatafeedsConfirmModal.closeButtonLabel"
+                defaultMessage="Close {jobsCount, plural, one {job} other {jobs}}"
                 values={{
                   jobsCount: jobIds.length,
                 }}

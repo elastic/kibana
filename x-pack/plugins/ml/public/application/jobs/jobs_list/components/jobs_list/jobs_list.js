@@ -360,7 +360,7 @@ export class JobsList extends Component {
           this.props.showDeleteJobModal,
           this.props.showResetJobModal,
           this.props.showStartDatafeedModal,
-          this.props.showStartDatafeedsConfirmModal,
+          this.props.showCloseJobsConfirmModal,
           this.props.showStopDatafeedsConfirmModal,
           this.props.refreshJobs,
           this.props.showCreateAlertFlyout
@@ -436,7 +436,7 @@ JobsList.propTypes = {
   showEditJobFlyout: PropTypes.func,
   showDeleteJobModal: PropTypes.func,
   showStartDatafeedModal: PropTypes.func,
-  showStartDatafeedsConfirmModal: PropTypes.func,
+  showCloseJobsConfirmModal: PropTypes.func,
   showCreateAlertFlyout: PropTypes.func,
   showStopDatafeedsConfirmModal: PropTypes.func,
   refreshJobs: PropTypes.func,

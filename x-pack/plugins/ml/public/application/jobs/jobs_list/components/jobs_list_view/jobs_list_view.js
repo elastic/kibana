@@ -43,7 +43,7 @@ import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/cons
 import { JobListMlAnomalyAlertFlyout } from '../../../../../alerting/ml_alerting_flyout';
 import { EditJobConfirmModal } from '../confirm_modals/edit_job_confirm_modal';
 import { StopDatafeedsConfirmModal } from '../confirm_modals/stop_datafeeds_confirm_modal';
-import { StartDatafeedsConfirmModal } from '../confirm_modals/start_datafeeds_confirm_modal';
+import { CloseJobsConfirmModal } from '../confirm_modals/close_jobs_confirm_modal';
 
 let blockingJobsRefreshTimeout = null;
 
@@ -75,7 +75,7 @@ export class JobsListView extends Component {
     this.showEditJobFlyout = () => {};
     this.showEditJobConfirmModal = () => {};
     this.showStopDatafeedsConfirmModal = () => {};
-    this.showStartDatafeedsConfirmModal = () => {};
+    this.showCloseJobsConfirmModal = () => {};
     this.showDeleteJobModal = () => {};
     this.showResetJobModal = () => {};
     this.showStartDatafeedModal = () => {};
@@ -227,12 +227,12 @@ export class JobsListView extends Component {
     this.showStopDatafeedsConfirmModal = () => {};
   };
 
-  setShowShowStartDatafeedsConfirmModalFunction = (func) => {
-    this.showStartDatafeedsConfirmModal = func;
+  setShowCloseJobsConfirmModalFunction = (func) => {
+    this.showCloseJobsConfirmModal = func;
   };
 
-  unsetShowShowStartDatafeedsConfirmModalFunction = () => {
-    this.showStartDatafeedsConfirmModal = () => {};
+  unsetShowCloseJobsConfirmModalFunction = () => {
+    this.showCloseJobsConfirmModal = () => {};
   };
 
   setShowDeleteJobModalFunction = (func) => {
@@ -556,7 +556,7 @@ export class JobsListView extends Component {
                 <MultiJobActions
                   selectedJobs={this.state.selectedJobs}
                   allJobIds={jobIds}
-                  showStartDatafeedsConfirmModal={this.showStartDatafeedsConfirmModal}
+                  showCloseJobsConfirmModal={this.showCloseJobsConfirmModal}
                   showStartDatafeedModal={this.showStartDatafeedModal}
                   showDeleteJobModal={this.showDeleteJobModal}
                   showResetJobModal={this.showResetJobModal}
@@ -579,7 +579,7 @@ export class JobsListView extends Component {
                 showEditJobConfirmModal={this.showEditJobConfirmModal}
                 showDeleteJobModal={this.showDeleteJobModal}
                 showResetJobModal={this.showResetJobModal}
-                showStartDatafeedsConfirmModal={this.showStartDatafeedsConfirmModal}
+                showCloseJobsConfirmModal={this.showCloseJobsConfirmModal}
                 showStartDatafeedModal={this.showStartDatafeedModal}
                 showStopDatafeedsConfirmModal={this.showStopDatafeedsConfirmModal}
                 refreshJobs={() => this.refreshJobSummaryList(true)}
@@ -610,6 +610,11 @@ export class JobsListView extends Component {
                 allJobIds={jobIds}
               />
 
+              <CloseJobsConfirmModal
+                setShowFunction={this.setShowCloseJobsConfirmModalFunction}
+                unsetShowFunction={this.unsetShowCloseJobsConfirmModalFunction}
+                refreshJobs={() => this.refreshJobSummaryList(true)}
+              />
               <DeleteJobModal
                 setShowFunction={this.setShowDeleteJobModalFunction}
                 unsetShowFunction={this.unsetShowDeleteJobModalFunction}
@@ -619,13 +624,6 @@ export class JobsListView extends Component {
                 setShowFunction={this.setShowResetJobModalFunction}
                 unsetShowFunction={this.unsetShowResetJobModalFunction}
                 refreshJobs={() => this.refreshJobSummaryList(true)}
-              />
-              <StartDatafeedsConfirmModal
-                setShowFunction={this.setShowShowStartDatafeedsConfirmModalFunction}
-                unsetShowFunction={this.unsetShowShowStartDatafeedsConfirmModalFunction}
-                refreshJobs={() => this.refreshJobSummaryList(true)}
-                showStartDatafeedModal={this.showStartDatafeedModal}
-                allJobIds={jobIds}
               />
               <StartDatafeedModal
                 setShowFunction={this.setShowStartDatafeedModalFunction}

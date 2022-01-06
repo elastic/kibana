@@ -98,7 +98,12 @@ class MultiJobActionsMenuUI extends Component {
           icon="cross"
           disabled={this.canCloseJob === false}
           onClick={() => {
-            closeJobs(this.props.jobs);
+            if (this.props.jobs.some((j) => isManagedJob(j))) {
+              this.props.showCloseJobsConfirmModal(this.props.jobs);
+            } else {
+              closeJobs(this.props.jobs);
+            }
+
             this.closePopover();
           }}
           data-test-subj="mlADJobListMultiSelectCloseJobActionButton"
@@ -165,11 +170,7 @@ class MultiJobActionsMenuUI extends Component {
           icon="play"
           disabled={this.canStartStopDatafeed === false}
           onClick={() => {
-            if (this.props.jobs.some((j) => isManagedJob(j))) {
-              this.props.showStartDatafeedsConfirmModal(this.props.jobs);
-            } else {
-              this.props.showStartDatafeedModal(this.props.jobs);
-            }
+            this.props.showStartDatafeedModal(this.props.jobs);
             this.closePopover();
           }}
           data-test-subj="mlADJobListMultiSelectStartDatafeedActionButton"

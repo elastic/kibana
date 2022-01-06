@@ -38,7 +38,7 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
   refreshJobs,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [isManaged, setHasManaged] = useState(true);
+  const [hasManagedJob, setHasManaged] = useState(true);
   const [jobsToStop, setJobsToStop] = useState<MlSummaryJob[]>([]);
 
   const jobIds = useMemo(() => jobsToStop.map(({ id }) => id), [jobsToStop]);
@@ -72,7 +72,7 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
     return null;
   }
 
-  if (isManaged) {
+  if (hasManagedJob) {
     const title = (
       <FormattedMessage
         id="xpack.ml.jobsList.stopDatafeedsModal.stopDatafeedsTitle"

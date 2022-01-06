@@ -17,12 +17,14 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
 
 import { resetJobs } from '../utils';
 import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { RESETTING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import { OpenJobsWarningCallout } from './open_jobs_warning_callout';
+import { isManagedJob } from '../../../jobs_utils';
 
 type ShowFunc = (jobs: MlSummaryJob[]) => void;
 
@@ -37,6 +39,7 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
   const [modalVisible, setModalVisible] = useState(false);
   const [jobIds, setJobIds] = useState<string[]>([]);
   const [jobs, setJobs] = useState<MlSummaryJob[]>([]);
+  const [hasManagedJob, setHasManagedJob] = useState(false);
 
   useEffect(() => {
     if (typeof setShowFunction === 'function') {
@@ -52,6 +55,8 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
   const showModal = useCallback((tempJobs: MlSummaryJob[]) => {
     setJobIds(tempJobs.map(({ id }) => id));
     setJobs(tempJobs);
+    setHasManagedJob(tempJobs.some((j) => isManagedJob(j)));
+
     setModalVisible(true);
     setResetting(false);
   }, []);
@@ -90,6 +95,22 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
       <EuiModalBody>
         <>
           <OpenJobsWarningCallout jobs={jobs} />
+
+          {hasManagedJob === true ? (
+            <>
+              <EuiCallOut color="warning">
+                <FormattedMessage
+                  id="xpack.ml.jobsList.startDatafeedsModal.startManagedDatafeedsDescription"
+                  defaultMessage="{jobsCount, plural, one {This job} other {At least one of these jobs}} is preconfigured by Elastic; starting {jobsCount, plural, one {it} other {them}} by specifying an end time impact other parts of the product."
+                  values={{
+                    jobsCount: jobIds.length,
+                  }}
+                />
+              </EuiCallOut>
+              <EuiSpacer />
+            </>
+          ) : null}
+
           <EuiText>
             <FormattedMessage
               id="xpack.ml.jobsList.resetJobModal.resetMultipleJobsDescription"
