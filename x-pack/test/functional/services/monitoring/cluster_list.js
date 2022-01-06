@@ -34,6 +34,10 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
       return PageObjects.monitoring.tableGetRowsFromContainer(SUBJ_TABLE_CONTAINER);
     }
 
+    getClusterLinks() {
+      return testSubjects.findAll(`${SUBJ_TABLE_CONTAINER} > clusterLink`);
+    }
+
     setFilter(text) {
       return PageObjects.monitoring.tableSetFilter(SUBJ_SEARCH_BAR, text);
     }
