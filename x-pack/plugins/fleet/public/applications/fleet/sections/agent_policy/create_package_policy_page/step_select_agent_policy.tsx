@@ -9,11 +9,11 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiSelectOption } from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiComboBox,
   EuiPortal,
   EuiFormRow,
   EuiDescribedFormGroup,
@@ -41,23 +41,12 @@ const AgentPolicyFormRow = styled(EuiFormRow)`
 
 export const StepSelectAgentPolicy: React.FunctionComponent<{
   packageInfo?: PackageInfo;
-  defaultAgentPolicyId?: string;
   agentPolicy: AgentPolicy | undefined;
   updateAgentPolicy: (agentPolicy: AgentPolicy | undefined) => void;
   setHasAgentPolicyError: (hasError: boolean) => void;
-}> = ({
-  packageInfo,
-  agentPolicy,
-  updateAgentPolicy,
-  defaultAgentPolicyId,
-  setHasAgentPolicyError,
-}) => {
+}> = ({ packageInfo, agentPolicy, updateAgentPolicy, setHasAgentPolicyError }) => {
   const { isReady: isFleetReady } = useFleetStatus();
 
-  // Selected agent policy state
-  const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>(
-    agentPolicy?.id ?? defaultAgentPolicyId
-  );
   const [selectedAgentPolicyError, setSelectedAgentPolicyError] = useState<Error>();
 
   // Create new agent policy flyout state
@@ -90,6 +79,11 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     }, {});
   }, [agentPolicies]);
 
+  // Selected agent policy state
+  const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>(
+    agentPolicy?.id ?? (agentPolicies.length === 1 ? agentPolicies[0].id : undefined)
+  );
+
   const doesAgentPolicyHaveLimitedPackage = useCallback(
     (policy: AgentPolicy, pkgInfo: PackageInfo) => {
       return policy
@@ -121,12 +115,12 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     }
   }, [selectedPolicyId, agentPolicy, updateAgentPolicy]);
 
-  const agentPolicyOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
+  const agentPolicyOptions: EuiSelectOption[] = useMemo(
     () =>
       packageInfo
         ? agentPolicies.map((agentConf) => {
             return {
-              label: agentConf.name,
+              text: agentConf.name,
               value: agentConf.id,
               disabled: doesAgentPolicyHaveLimitedPackage(agentConf, packageInfo),
               'data-test-subj': 'agentPolicyItem',
@@ -136,49 +130,22 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
     [agentPolicies, doesAgentPolicyHaveLimitedPackage, packageInfo]
   );
 
-  const selectedAgentPolicyOption = useMemo(
-    () => agentPolicyOptions.find((option) => option.value === selectedPolicyId),
-    [agentPolicyOptions, selectedPolicyId]
-  );
-
   // Try to select default agent policy
   useEffect(() => {
     if (!selectedPolicyId && agentPolicies.length && agentPolicyOptions.length) {
-      const firstEnabledOption = agentPolicyOptions.find((option) => !option.disabled);
-      const defaultAgentPolicy = agentPolicies.find((policy) => policy.is_default);
-      if (defaultAgentPolicy) {
-        const defaultAgentPolicyOption = agentPolicyOptions.find(
-          (option) => option.value === defaultAgentPolicy.id
-        );
-        if (defaultAgentPolicyOption && !defaultAgentPolicyOption.disabled) {
-          setSelectedPolicyId(defaultAgentPolicy.id);
-        } else {
-          if (firstEnabledOption) {
-            setSelectedPolicyId(firstEnabledOption.value);
-          }
-        }
-      } else if (firstEnabledOption) {
-        setSelectedPolicyId(firstEnabledOption.value);
+      const enabledOptions = agentPolicyOptions.filter((option) => !option.disabled);
+      if (enabledOptions.length === 1) {
+        setSelectedPolicyId(enabledOptions[0].value as string | undefined);
       }
     }
   }, [agentPolicies, agentPolicyOptions, selectedPolicyId]);
 
   // Bubble up any issues with agent policy selection
   useEffect(() => {
-    if (
-      selectedPolicyId &&
-      !selectedAgentPolicyError &&
-      selectedAgentPolicyOption &&
-      !selectedAgentPolicyOption.disabled
-    ) {
+    if (selectedPolicyId && !selectedAgentPolicyError) {
       setHasAgentPolicyError(false);
     } else setHasAgentPolicyError(true);
-  }, [
-    selectedAgentPolicyError,
-    selectedAgentPolicyOption,
-    selectedPolicyId,
-    setHasAgentPolicyError,
-  ]);
+  }, [selectedAgentPolicyError, selectedPolicyId, setHasAgentPolicyError]);
 
   // Display agent policies list error if there is one
   if (agentPoliciesError) {
@@ -293,29 +260,19 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                 )
               }
             >
-              <EuiComboBox
+              <EuiSelect
                 placeholder={i18n.translate(
                   'xpack.fleet.createPackagePolicy.StepSelectPolicy.agentPolicyPlaceholderText',
                   {
                     defaultMessage: 'Select an agent policy to add this integration to',
                   }
                 )}
-                singleSelection={{ asPlainText: true }}
-                isClearable={false}
-                fullWidth={true}
+                hasNoInitialSelection={agentPolicies.length > 1}
+                fullWidth
                 isLoading={isAgentPoliciesLoading || !packageInfo}
                 options={agentPolicyOptions}
-                selectedOptions={selectedAgentPolicyOption ? [selectedAgentPolicyOption] : []}
-                onChange={(options) => {
-                  const selectedOption = options[0] || undefined;
-                  if (selectedOption) {
-                    if (selectedOption.value !== selectedPolicyId) {
-                      setSelectedPolicyId(selectedOption.value);
-                    }
-                  } else {
-                    setSelectedPolicyId(undefined);
-                  }
-                }}
+                value={selectedPolicyId || undefined}
+                onChange={(e) => setSelectedPolicyId(e.target.value)}
               />
             </AgentPolicyFormRow>
           </EuiDescribedFormGroup>

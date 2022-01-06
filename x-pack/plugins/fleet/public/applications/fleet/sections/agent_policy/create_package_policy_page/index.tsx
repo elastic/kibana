@@ -500,13 +500,11 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         validation={validation}
         packageInfo={packageInfo}
         setHasAgentPolicyError={setHasAgentPolicyError}
-        defaultAgentPolicyId={queryParamsPolicyId}
         updateSelectedTab={updateSelectedPolicy}
       />
     ),
     [
       packageInfo,
-      queryParamsPolicyId,
       agentPolicy,
       updateAgentPolicy,
       newAgentPolicy,

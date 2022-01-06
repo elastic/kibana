@@ -61,33 +61,18 @@ describe('Fleet startup', () => {
       cleanupAgentPolicies();
     });
 
-    it('should have no agent policy by default', () => {
-      cy.request('/api/fleet/agent_policies?full=true').then((response: any) => {
-        expect(response.body.items.length).to.equal(0);
+    before(() => {
+      cy.request({
+        method: 'PUT',
+        url: '/api/fleet/settings',
+        body: { fleet_server_hosts: ['http://localhost:8220'] },
+        headers: { 'kbn-xsrf': 'kibana' },
       });
     });
 
-    describe('Fleet Server policy', () => {
-      before(() => {
-        cy.request({
-          method: 'PUT',
-          url: '/api/fleet/settings',
-          body: { fleet_server_hosts: ['http://localhost:8220'] },
-          headers: { 'kbn-xsrf': 'kibana' },
-        });
-      });
-
-      it('should create Fleet Server policy', () => {
-        cy.getBySel(AGENTS_TAB).click();
-        cy.getBySel('addAgentButton').click();
-        cy.getBySel('toastCloseButton').click();
-
-        cy.getBySel('createFleetServerPolicyBtn').click();
-        cy.getBySel('euiToastHeader');
-
-        cy.getBySel('euiFlyoutCloseButton').click();
-
-        verifyFleetServerPolicy('Fleet Server policy 1', 'Fleet Server');
+    it('should have no agent policy by default', () => {
+      cy.request('/api/fleet/agent_policies?full=true').then((response: any) => {
+        expect(response.body.items.length).to.equal(0);
       });
     });
 
@@ -106,6 +91,19 @@ describe('Fleet startup', () => {
 
       cy.visit('/app/integrations/installed');
       cy.getBySel('integration-card:epr:elastic_agent');
+    });
+
+    it('should create Fleet Server policy', () => {
+      cy.getBySel(AGENTS_TAB).click();
+      cy.getBySel('addAgentButton').click();
+      cy.getBySel('toastCloseButton').click();
+
+      cy.getBySel('createFleetServerPolicyBtn').click();
+      cy.getBySel('euiToastHeader');
+
+      cy.getBySel('euiFlyoutCloseButton').click();
+
+      verifyFleetServerPolicy('Fleet Server policy 1', 'Fleet Server');
     });
   });
 });

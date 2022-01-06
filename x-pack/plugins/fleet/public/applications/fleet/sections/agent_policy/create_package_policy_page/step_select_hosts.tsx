@@ -38,7 +38,6 @@ interface Props {
   validation: ValidationResults;
   packageInfo?: PackageInfo;
   setHasAgentPolicyError: (hasError: boolean) => void;
-  defaultAgentPolicyId?: string;
   updateSelectedTab: (tab: SelectedPolicyTab) => void;
 }
 
@@ -62,7 +61,6 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
   validation,
   packageInfo,
   setHasAgentPolicyError,
-  defaultAgentPolicyId,
   updateSelectedTab,
 }) => {
   let agentPolicies: AgentPolicy[] = [];
@@ -111,7 +109,6 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
       content: (
         <StepSelectAgentPolicy
           packageInfo={packageInfo}
-          defaultAgentPolicyId={defaultAgentPolicyId}
           agentPolicy={agentPolicy}
           updateAgentPolicy={updateAgentPolicy}
           setHasAgentPolicyError={setHasAgentPolicyError}
