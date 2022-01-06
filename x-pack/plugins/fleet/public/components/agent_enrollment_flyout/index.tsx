@@ -127,7 +127,6 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<Props> = ({
       <EuiFlyoutBody
         banner={
           fleetStatus.isReady &&
-          !isFleetServerPolicySelected &&
           !isLoadingInitialRequest &&
           fleetServerHosts.length === 0 &&
           mode === 'managed' ? (
