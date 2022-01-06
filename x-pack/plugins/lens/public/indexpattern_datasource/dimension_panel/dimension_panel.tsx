@@ -49,7 +49,7 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
   const layerId = props.layerId;
   const layer = props.state.layers[layerId];
   const currentIndexPattern = props.state.indexPatterns[layer.indexPatternId];
-  const { columnId, uniqueLabel, invalid, invalidMessage } = props;
+  const { columnId, uniqueLabel, invalid, invalidMessage, hideTooltip } = props;
 
   const currentColumnHasErrors = useMemo(
     () => invalid || isColumnInvalid(layer, columnId, currentIndexPattern),
@@ -64,23 +64,23 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
   const formattedLabel = wrapOnDot(uniqueLabel);
 
   if (currentColumnHasErrors) {
+    let tooltipContent;
+    if (!hideTooltip) {
+      tooltipContent = invalidMessage ?? (
+        <p>
+          {i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
+            defaultMessage: 'Invalid configuration.',
+          })}
+          <br />
+          {i18n.translate('xpack.lens.configure.invalidConfigTooltipClick', {
+            defaultMessage: 'Click for more details.',
+          })}
+        </p>
+      );
+    }
+
     return (
-      <EuiToolTip
-        content={
-          invalidMessage ?? (
-            <p>
-              {i18n.translate('xpack.lens.configure.invalidConfigTooltip', {
-                defaultMessage: 'Invalid configuration.',
-              })}
-              <br />
-              {i18n.translate('xpack.lens.configure.invalidConfigTooltipClick', {
-                defaultMessage: 'Click for more details.',
-              })}
-            </p>
-          )
-        }
-        anchorClassName="eui-displayBlock"
-      >
+      <EuiToolTip content={tooltipContent} anchorClassName="eui-displayBlock">
         <EuiText
           size="s"
           color="danger"
