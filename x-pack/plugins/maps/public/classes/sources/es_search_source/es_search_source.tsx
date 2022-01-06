@@ -281,15 +281,13 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
     const indexPattern: IndexPattern = await this.getIndexPattern();
 
-    const { docValueFields, geometryFields, sourceOnlyFields, scriptFields } = getDocValueAndSourceFields(
-      indexPattern,
-      searchFilters.fieldNames,
-      'epoch_millis'
-    );
+    const { docValueFields, geometryFields, sourceOnlyFields, scriptFields } =
+      getDocValueAndSourceFields(indexPattern, searchFilters.fieldNames, 'epoch_millis');
     const topHits: {
       size: number;
       script_fields: Record<string, { script: ScriptField }>;
       docvalue_fields: Array<string | { format: string; field: string }>;
+      fields: Array<string | { format: string; field: string }>;
       _source?: boolean | { includes: string[] };
       sort?: Array<Record<string, SortDirectionNumeric>>;
     } = {
