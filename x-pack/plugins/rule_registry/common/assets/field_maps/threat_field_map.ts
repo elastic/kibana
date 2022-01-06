@@ -6,6 +6,16 @@
  */
 
 export const threatFieldMap = {
+  'threat.feed.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'threat.feed.dashboard_id': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'threat.indicator.as.number': {
     type: 'long',
     array: false,

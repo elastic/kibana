@@ -22,6 +22,7 @@ import { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { IRuleDataClient } from '../../../../../../rule_registry/server';
+import { DETECTION_ENGINE_MAX_PER_PAGE } from '../../../../../common/cti/constants';
 
 export const threatMatchExecutor = async ({
   completeRule,
@@ -56,43 +57,59 @@ export const threatMatchExecutor = async ({
   percolatorRuleDataClient: IRuleDataClient;
   withTimeout: <T>(func: () => Promise<T>, funcName: string) => Promise<T>;
 }) => {
-  const ruleParams = completeRule.ruleParams;
+  const {
+    concurrentSearches,
+    filters,
+    index,
+    itemsPerSearch,
+    language,
+    outputIndex,
+    query,
+    savedId,
+    threatFilters,
+    threatIndex,
+    threatIndicatorPath,
+    threatLanguage,
+    threatMapping,
+    threatQuery,
+    type,
+  } = completeRule.ruleParams;
 
   return withSecuritySpan('threatMatchExecutor', async () => {
     const inputIndex = await getInputIndex({
       experimentalFeatures,
       services,
       version,
-      index: ruleParams.index,
+      index,
     });
     return createThreatSignals({
       alertId: completeRule.alertId,
       buildRuleMessage,
       bulkCreate,
       completeRule,
-      concurrentSearches: ruleParams.concurrentSearches ?? 1,
+      concurrentSearches: concurrentSearches ?? 1,
       eventsTelemetry,
       exceptionItems,
-      filters: ruleParams.filters ?? [],
+      filters: filters ?? [],
       inputIndex,
-      itemsPerSearch: ruleParams.itemsPerSearch ?? 9000,
-      language: ruleParams.language,
+      itemsPerSearch: itemsPerSearch ?? DETECTION_ENGINE_MAX_PER_PAGE,
+      language,
       listClient,
       logger,
-      outputIndex: ruleParams.outputIndex,
+      outputIndex,
       percolatorRuleDataClient,
-      query: ruleParams.query,
-      savedId: ruleParams.savedId,
+      query,
+      savedId,
       searchAfterSize,
       services,
-      threatFilters: ruleParams.threatFilters ?? [],
-      threatIndex: ruleParams.threatIndex,
-      threatIndicatorPath: ruleParams.threatIndicatorPath,
-      threatLanguage: ruleParams.threatLanguage,
-      threatMapping: ruleParams.threatMapping,
-      threatQuery: ruleParams.threatQuery,
+      threatFilters: threatFilters ?? [],
+      threatIndex,
+      threatIndicatorPath,
+      threatLanguage,
+      threatMapping,
+      threatQuery,
       tuple,
-      type: ruleParams.type,
+      type,
       withTimeout,
       wrapHits,
     });

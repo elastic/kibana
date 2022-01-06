@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import chunk from 'lodash/fp/chunk';
+import chunk from 'lodash/chunk';
+import { SearchResponse } from 'kibana/server';
 import { getTotalEventCount, getNextEventsPage } from './get_threat_list';
 
-import { BooleanFilter, PercolatorQuery, CreateThreatSignalsOptions } from './types';
+import {
+  BooleanFilter,
+  PercolatorQuery,
+  CreateThreatSignalsOptions,
+  EventHit,
+  EventDoc,
+} from './types';
 import { createThreatSignal } from './create_threat_signal';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 import { buildExecutionIntervalValidator, combineConcurrentResults } from './utils';
@@ -16,7 +23,12 @@ import { buildThreatEnrichment } from './build_threat_enrichment';
 import { createThreatQueriesForPercolator } from '../../rule_types/indicator_match/percolator/create_threat_queries_for_percolator';
 import { persistThreatQueries } from '../../rule_types/indicator_match/percolator/persist_threat_queries';
 import { fetchSourceEvents } from '../../rule_types/indicator_match/percolator/fetch_source_events';
-import { DETECTION_ENGINE_MAX_PER_PAGE } from '../../../../../common/cti/constants';
+import {
+  DETECTION_ENGINE_MAX_PER_PAGE,
+  ELASTICSEARCH_MAX_PER_PAGE,
+} from '../../../../../common/cti/constants';
+import { percolateSourceEvents } from '../../rule_types/indicator_match/percolator/percolate_all_source_events';
+import { enrichEvents } from '../../rule_types/indicator_match/percolator/enrich_events';
 
 export const createThreatSignals = async ({
   alertId,
@@ -54,7 +66,7 @@ export const createThreatSignals = async ({
   const perPage = concurrentSearches * itemsPerSearch;
   const maxSignals = completeRule.ruleParams.maxSignals;
 
-  const results: SearchAfterAndBulkCreateReturnType = {
+  let results: SearchAfterAndBulkCreateReturnType = {
     success: true,
     warning: false,
     bulkCreateTimes: [],
@@ -83,7 +95,7 @@ export const createThreatSignals = async ({
   console.log('____sourceCount', matchableSourceEventCount);
 
   if (matchableSourceEventCount) {
-    const sourceEvents = await fetchSourceEvents({
+    const sourceEventHits: EventHit[] = await fetchSourceEvents({
       buildRuleMessage,
       esClient: services.search.asCurrentUser,
       exceptionItems,
@@ -96,7 +108,21 @@ export const createThreatSignals = async ({
       query,
     });
 
-    console.log('____firstSourceEvent', JSON.stringify(sourceEvents[0]));
+    const chunkedSourceEventHits = chunk(sourceEventHits, ELASTICSEARCH_MAX_PER_PAGE);
+
+    const matchedPercolateQueriesByChunk = await percolateSourceEvents({
+      chunkedSourceEventHits,
+      percolatorRuleDataClient,
+    });
+
+    // todo: fix types
+    // @ts-ignore
+    const enrichedEvents: Array<BaseHit<Record<string, unknown>>> = enrichEvents({
+      chunkedSourceEventHits,
+      matchedPercolateQueriesByChunk,
+    });
+
+    results = await bulkCreate(enrichedEvents);
   }
 
   // const threatEnrichment = buildThreatEnrichment({
