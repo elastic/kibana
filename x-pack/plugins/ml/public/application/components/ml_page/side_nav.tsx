@@ -167,6 +167,7 @@ export function useSideNavItems(activeRouteId: string | undefined) {
       },
       'data-test-subj': testSubject + (id === activeRouteId ? ' selected' : ''),
       items: items ? items.map(getTabItem) : undefined,
+      forceOpen: true,
     };
   }
 

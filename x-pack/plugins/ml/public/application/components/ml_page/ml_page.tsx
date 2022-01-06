@@ -94,7 +94,13 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
           defaultMessage: 'Machine Learning',
         }),
         icon: 'machineLearningApp',
-        items: useSideNavItems(activeRoute.id),
+        items: [
+          {
+            id: '',
+            name: '',
+            items: useSideNavItems(activeRoute.id),
+          },
+        ],
       }}
       pageHeader={{
         pageTitle: pageState.pageHeader,
