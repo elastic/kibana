@@ -18,7 +18,7 @@ export async function getRules(
 
   const filter: Array<{ [key: string]: unknown }> = [{ term: { cluster_uuid: clusterUuid } }];
   if (kibanaUuid) {
-    filter.push({ term: { 'kibana_metrics.kibana.uuid': kibanaUuid } });
+    filter.push({ term: { 'kibana_rule.kibana.uuid': kibanaUuid } });
   }
 
   const params = {
@@ -34,14 +34,14 @@ export async function getRules(
       aggs: {
         rules: {
           terms: {
-            field: 'kibana_metrics.rule.id',
+            field: 'kibana_rule.rule.id',
           },
           aggs: {
             first: {
               top_hits: {
                 sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
                 size: 1,
-                _source: 'kibana_metrics.rule',
+                _source: 'kibana_rule.rule',
               },
             },
           },
@@ -53,6 +53,6 @@ export async function getRules(
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
   return response.aggregations?.rules?.buckets?.map((bucket: { first?: ElasticsearchResponse }) => {
-    return bucket?.first?.hits?.hits[0]._source?.kibana_metrics?.rule;
+    return bucket?.first?.hits?.hits[0]._source?.kibana_rule?.rule;
   });
 }

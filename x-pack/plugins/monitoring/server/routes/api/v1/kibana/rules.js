@@ -10,7 +10,7 @@ import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { getKibanaClusterStatus } from './_get_kibana_cluster_status';
 import { handleError } from '../../../../lib/errors';
 import { INDEX_PATTERN_KIBANA } from '../../../../../common/constants';
-import { getRules } from '../../../../lib/kibana/kibana_metrics/get_rules';
+import { getRules } from '../../../../lib/kibana/kibana_rules/get_rules';
 
 export function kibanaRulesRoute(server) {
   /**

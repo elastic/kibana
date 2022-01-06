@@ -8,7 +8,7 @@
 import { checkParam, MissingRequiredError } from '../../error_missing_required';
 import { LegacyRequest, Cluster } from '../../../types';
 import { createQuery } from '../../create_query';
-import { KibanaMetric } from '../../metrics';
+import { KibanaRule } from '../../metrics';
 
 export async function getAggregatedRules(
   req: LegacyRequest,
@@ -23,14 +23,14 @@ export async function getAggregatedRules(
 
   return Promise.all(
     clusters.map(async (cluster) => {
-      const metric = KibanaMetric.getMetricFields();
+      const metric = KibanaRule.getMetricFields();
       const params = {
         index: kbnIndexPattern,
         size: 0,
         ignore_unavailable: true,
         body: {
           query: createQuery({
-            types: ['kibana_metrics'],
+            types: ['kibana_rule'],
             start,
             end,
             clusterUuid: cluster.cluster_uuid,
@@ -39,12 +39,12 @@ export async function getAggregatedRules(
           aggs: {
             rule_ids: {
               terms: {
-                field: 'kibana_metrics.rule.id',
+                field: 'kibana_rule.rule.id',
               },
             },
             average_drift: {
               avg: {
-                field: 'kibana_metrics.rule.averageDrift',
+                field: 'kibana_rule.rule.averageDrift',
               },
             },
           },

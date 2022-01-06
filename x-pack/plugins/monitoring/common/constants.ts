@@ -28,7 +28,6 @@ export const MONITORING_SYSTEM_API_VERSION = '7';
  * @type {string}
  */
 export const KIBANA_STATS_TYPE_MONITORING = 'kibana_stats'; // similar to KIBANA_STATS_TYPE but rolled up into 10s stats from 5s intervals through ops_buffer
-export const KIBANA_METRICS_TYPE_MONITORING = 'kibana_metrics';
 /**
  * The type name used within the Monitoring index to publish Kibana stats.
  * @type {string}

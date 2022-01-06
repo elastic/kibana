@@ -38,7 +38,7 @@ import { getLogTypes } from '../logs';
 import { isInCodePath } from './is_in_code_path';
 import { LegacyRequest, Cluster } from '../../types';
 import { RulesByType } from '../../../common/types/alerts';
-import { getAggregatedRules } from '../kibana/kibana_metrics/get_aggregated_rules';
+import { getAggregatedRules } from '../kibana/kibana_rules/get_aggregated_rules';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
@@ -198,7 +198,7 @@ export async function getClustersFromRequest(
     );
     const clusterKibanaRules = kibanaRules?.find((rule) => rule.clusterUuid === kibana.clusterUuid);
     set(clusters[clusterIndex], 'kibana', kibana.stats);
-    set(clusters[clusterIndex], 'kibana.rules', clusterKibanaRules?.rules);
+    set(clusters[clusterIndex], 'kibana.rules', clusterKibanaRules?.rules ?? {});
   });
 
   // add logstash data

@@ -172,11 +172,9 @@ export class TaskManagerPlugin
           }
 
           const pending = claiming + running;
-          return [
-            {
-              pending,
-            },
-          ];
+          return {
+            pending,
+          };
         },
       });
     }

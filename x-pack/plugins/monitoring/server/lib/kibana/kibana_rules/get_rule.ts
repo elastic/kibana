@@ -18,7 +18,7 @@ export async function getRule(
 
   const filter = [
     { term: { cluster_uuid: clusterUuid } },
-    { term: { 'kibana_metrics.rule.id': ruleId } },
+    { term: { 'kibana_rule.rule.id': ruleId } },
   ];
   const params = {
     index: kbnIndexPattern,
@@ -36,5 +36,5 @@ export async function getRule(
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
-  return response.hits?.hits[0]?._source.kibana_metrics.rule;
+  return response.hits?.hits[0]?._source.kibana_rule.rule;
 }

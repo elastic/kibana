@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { KibanaEventsRateClusterMetric, KibanaMetric, KibanaStat } from './classes';
+import {
+  KibanaEventsRateClusterMetric,
+  KibanaRule,
+  KibanaTaskManager,
+  KibanaStat,
+} from './classes';
 import { LARGE_FLOAT, SMALL_FLOAT, LARGE_BYTES } from '../../../../common/formatting';
 import { i18n } from '@kbn/i18n';
 
@@ -254,8 +259,8 @@ export const metrics = {
     units: '',
   }),
 
-  kibana_rule_drift: new KibanaMetric({
-    field: 'kibana_metrics.rule.averageDrift',
+  kibana_rule_drift: new KibanaRule({
+    field: 'kibana_rule.rule.averageDrift',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.ruleDrift.label', {
       defaultMessage: 'Drift',
     }),
@@ -266,9 +271,9 @@ export const metrics = {
     metricAgg: 'avg',
     units: '',
   }),
-  kibana_rule_total_executions: new KibanaMetric({
+  kibana_rule_total_executions: new KibanaRule({
     derivative: true,
-    field: 'kibana_metrics.rule.totalExecutions',
+    field: 'kibana_rule.rule.totalExecutions',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.totalExecutions.label', {
       defaultMessage: 'Rate of Total Executions',
     }),
@@ -283,8 +288,8 @@ export const metrics = {
     units: '',
   }),
 
-  kibana_task_manager_pending_tasks: new KibanaMetric({
-    field: 'kibana_metrics.task_manager.pending',
+  kibana_task_manager_pending_tasks: new KibanaTaskManager({
+    field: 'kibana_task_manager.task_manager.pending',
     label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.taskManagerPendingTasks.label', {
       defaultMessage: 'Pending tasks',
     }),

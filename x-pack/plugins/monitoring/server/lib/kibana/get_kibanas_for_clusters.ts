@@ -10,7 +10,7 @@ import { LegacyRequest, Cluster, Bucket } from '../../types';
 import { checkParam } from '../error_missing_required';
 import { createQuery } from '../create_query';
 import { KibanaClusterMetric } from '../metrics';
-import { getRules } from './kibana_metrics/get_rules';
+import { getRules } from './kibana_rules/get_rules';
 
 /*
  * Get high-level info for Kibanas in a set of clusters

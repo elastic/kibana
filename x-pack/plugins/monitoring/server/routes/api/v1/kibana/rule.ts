@@ -16,7 +16,7 @@ import { prefixIndexPattern } from '../../../../../common/ccs_utils';
 import { metricSet } from './metric_set_rule';
 import { INDEX_PATTERN_KIBANA } from '../../../../../common/constants';
 import { LegacyRequest, LegacyServer, RouteDependencies } from '../../../../types';
-import { getRule } from '../../../../lib/kibana/kibana_metrics/get_rule';
+import { getRule } from '../../../../lib/kibana/kibana_rules/get_rule';
 
 /**
  * Kibana instance: This will fetch all data required to display a Kibana
@@ -55,7 +55,7 @@ export function kibanaRuleRoute(server: LegacyServer, npRoute: RouteDependencies
           getMetrics(req, kbnIndexPattern, metricSet, [
             {
               bool: {
-                should: [{ term: { 'kibana_metrics.rule.id': ruleId } }],
+                should: [{ term: { 'kibana_rule.rule.id': ruleId } }],
               },
             },
           ]),

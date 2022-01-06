@@ -8,7 +8,7 @@
 // @ts-ignore
 export { ElasticsearchMetric } from './elasticsearch/classes';
 // @ts-ignore
-export { KibanaClusterMetric, KibanaMetric, KibanaStat } from './kibana/classes';
+export { KibanaClusterMetric, KibanaRule, KibanaTaskManager, KibanaStat } from './kibana/classes';
 export type { ApmMetricFields } from './apm/classes';
 export { ApmMetric, ApmClusterMetric } from './apm/classes';
 // @ts-ignore

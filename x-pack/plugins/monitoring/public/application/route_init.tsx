@@ -73,6 +73,7 @@ export const RouteInit: React.FC<RouteInitProps> = ({
 };
 
 const isExpired = (license: any): boolean => {
+  return false;
   const { expiry_date_in_millis: expiryDateInMillis } = license;
 
   if (expiryDateInMillis !== undefined) {

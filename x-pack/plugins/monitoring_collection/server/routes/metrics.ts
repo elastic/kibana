@@ -8,6 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { IRouter, ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
+import { KIBANA_METRICS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 import { MetricResult } from '../plugin';
 
 const SNAPSHOT_REGEX = /-snapshot/i;

@@ -67,8 +67,7 @@ export interface ElasticsearchSourceKibanaStats {
   concurrent_connections?: number;
 }
 
-export interface ElasticsearchSourceKibanaMetrics {
-  type: string;
+export interface ElasticsearchSourceKibanaRule {
   timestamp: Date;
   kibana?: ElasticsearchSourceKibanaStats['kibana'];
   rule?: {
@@ -79,6 +78,14 @@ export interface ElasticsearchSourceKibanaMetrics {
     totalExecutions?: number;
     averageDrift?: number;
     averageDuration?: number;
+  };
+}
+
+export interface ElasticsearchSourceKibanaTaskManager {
+  timestamp: Date;
+  kibana?: ElasticsearchSourceKibanaStats['kibana'];
+  task_manager?: {
+    pending?: number;
   };
 }
 
@@ -213,7 +220,8 @@ export interface ElasticsearchLegacySource {
     type?: string;
   };
   kibana_stats?: ElasticsearchSourceKibanaStats;
-  kibana_metrics?: ElasticsearchSourceKibanaMetrics;
+  kibana_rule?: ElasticsearchSourceKibanaRule;
+  taks_manager?: ElasticsearchSourceKibanaTaskManager;
   license?: {
     status?: string;
     type?: string;

@@ -17,11 +17,7 @@ import type {
 } from 'src/core/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { ServiceStatusLevels } from '../../../../../src/core/server';
-import {
-  KIBANA_STATS_TYPE_MONITORING,
-  KIBANA_SETTINGS_TYPE,
-  KIBANA_METRICS_TYPE_MONITORING,
-} from '../../common/constants';
+import { KIBANA_STATS_TYPE_MONITORING, KIBANA_SETTINGS_TYPE } from '../../common/constants';
 
 import { sendBulkPayload } from './lib';
 import { getKibanaSettings } from './collectors';
@@ -180,23 +176,20 @@ export class BulkUploader implements IBulkUploader {
   private async getKibanaMetrics() {
     const kibanaMetrics = await this.monitoringCollection?.getMetrics();
     if (!kibanaMetrics) {
-      return [
-        {
-          type: KIBANA_METRICS_TYPE_MONITORING,
-          result: {},
-        },
-      ];
+      return [];
     }
     const metrics = Object.keys(kibanaMetrics).reduce(
-      (accum: Array<{ type: string; result: unknown }>, type) => {
+      (
+        accum: Array<{ type: string; result: { timestamp: Date; [type: string]: unknown } }>,
+        type
+      ) => {
         const result = kibanaMetrics[type];
         if (Array.isArray(result)) {
           accum.push(
             ...result.map((item) => {
               return {
-                type: KIBANA_METRICS_TYPE_MONITORING,
+                type: `kibana_${type}`,
                 result: {
-                  type,
                   timestamp: new Date(),
                   [type]: item,
                 },
@@ -205,9 +198,8 @@ export class BulkUploader implements IBulkUploader {
           );
         } else {
           accum.push({
-            type: KIBANA_METRICS_TYPE_MONITORING,
+            type: `kibana_${type}`,
             result: {
-              type,
               timestamp: new Date(),
               [type]: result,
             },

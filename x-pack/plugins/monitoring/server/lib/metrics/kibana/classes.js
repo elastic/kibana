@@ -79,19 +79,36 @@ export class KibanaStat extends Metric {
   }
 }
 
-export class KibanaMetric extends Metric {
+export class KibanaRule extends Metric {
   constructor(opts) {
     super({
       ...opts,
       app: 'kibana',
-      ...KibanaMetric.getMetricFields(),
+      ...KibanaRule.getMetricFields(),
     });
   }
 
   static getMetricFields() {
     return {
-      uuidField: 'kibana_metrics.kibana.uuid',
-      timestampField: 'kibana_metrics.timestamp',
+      uuidField: 'kibana_rule.kibana.uuid',
+      timestampField: 'timestamp',
+    };
+  }
+}
+
+export class KibanaTaskManager extends Metric {
+  constructor(opts) {
+    super({
+      ...opts,
+      app: 'kibana',
+      ...KibanaTaskManager.getMetricFields(),
+    });
+  }
+
+  static getMetricFields() {
+    return {
+      uuidField: 'kibana_task_manager.kibana.uuid',
+      timestampField: 'timestamp',
     };
   }
 }
