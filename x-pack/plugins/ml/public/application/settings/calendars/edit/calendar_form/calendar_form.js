@@ -33,12 +33,13 @@ function EditHeader({ calendarId, description }) {
   return (
     <Fragment>
       <MlPageHeader>
-        <FormattedMessage
-          id="xpack.ml.calendarsEdit.calendarForm.calendarTitle"
-          defaultMessage="Calendar {calendarId}"
-          values={{ calendarId }}
-          data-test-subj={'mlCalendarTitle'}
-        />
+        <span data-test-subj={'mlCalendarTitle'}>
+          <FormattedMessage
+            id="xpack.ml.calendarsEdit.calendarForm.calendarTitle"
+            defaultMessage="Calendar {calendarId}"
+            values={{ calendarId }}
+          />
+        </span>
       </MlPageHeader>
       {description ? (
         <>
