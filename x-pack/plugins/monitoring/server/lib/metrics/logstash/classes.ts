@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import _ from 'lodash';
-import { ClusterMetric, Metric } from '../classes';
+import { i18n } from '@kbn/i18n';
+import { ClusterMetric, Metric, MetricOptions } from '../classes';
 import { LARGE_FLOAT } from '../../../../common/formatting';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
-import { i18n } from '@kbn/i18n';
 
 const msTimeUnitLabel = i18n.translate('xpack.monitoring.metrics.logstash.msTimeUnitLabel', {
   defaultMessage: 'ms',
@@ -18,8 +20,14 @@ const perSecondUnitLabel = i18n.translate('xpack.monitoring.metrics.logstash.per
   defaultMessage: '/s',
 });
 
+type LogstashClusterMetricOptions = Pick<
+  MetricOptions,
+  'field' | 'label' | 'description' | 'format' | 'metricAgg' | 'units'
+> &
+  Partial<Pick<MetricOptions, 'title' | 'derivative'>>;
+
 export class LogstashClusterMetric extends ClusterMetric {
-  constructor(opts) {
+  constructor(opts: LogstashClusterMetricOptions) {
     super({
       ...opts,
       app: 'logstash',
@@ -35,8 +43,13 @@ export class LogstashClusterMetric extends ClusterMetric {
   }
 }
 
+type LogstashEventsLatencyClusterMetricOptions = Pick<
+  MetricOptions,
+  'field' | 'label' | 'description'
+>;
+
 export class LogstashEventsLatencyClusterMetric extends LogstashClusterMetric {
-  constructor(opts) {
+  constructor(opts: LogstashEventsLatencyClusterMetricOptions) {
     super({
       ...opts,
       format: LARGE_FLOAT,
@@ -90,18 +103,23 @@ export class LogstashEventsLatencyClusterMetric extends LogstashClusterMetric {
         },
       },
     };
-
-    this.calculation = (bucket) => {
-      const timeInMillisDeriv = _.get(bucket, 'events_time_in_millis_deriv.normalized_value', null);
-      const totalEventsDeriv = _.get(bucket, 'events_total_deriv.normalized_value', null);
-
-      return Metric.calculateLatency(timeInMillisDeriv, totalEventsDeriv);
-    };
   }
+
+  public calculation = (bucket: object) => {
+    const timeInMillisDeriv = _.get(bucket, 'events_time_in_millis_deriv.normalized_value', null);
+    const totalEventsDeriv = _.get(bucket, 'events_total_deriv.normalized_value', null);
+
+    return Metric.calculateLatency(timeInMillisDeriv, totalEventsDeriv);
+  };
 }
 
+type LogstashEventsRateClusterMetricOptions = Pick<
+  MetricOptions,
+  'field' | 'label' | 'description'
+>;
+
 export class LogstashEventsRateClusterMetric extends LogstashClusterMetric {
-  constructor(opts) {
+  constructor(opts: LogstashEventsRateClusterMetricOptions) {
     super({
       ...opts,
       derivative: true,
@@ -141,8 +159,14 @@ export class LogstashEventsRateClusterMetric extends LogstashClusterMetric {
   }
 }
 
+type LogstashMetricOptions = Pick<
+  MetricOptions,
+  'field' | 'label' | 'description' | 'units' | 'derivative' | 'metricAgg' | 'format'
+> &
+  Partial<Pick<MetricOptions, 'title' | 'format'>>;
+
 export class LogstashMetric extends Metric {
-  constructor(opts) {
+  constructor(opts: LogstashMetricOptions) {
     super({
       ...opts,
       app: 'logstash',
@@ -158,8 +182,10 @@ export class LogstashMetric extends Metric {
   }
 }
 
+type LogstashEventsLatencyMetricOptions = Pick<MetricOptions, 'field' | 'label' | 'description'>;
+
 export class LogstashEventsLatencyMetric extends LogstashMetric {
-  constructor(opts) {
+  constructor(opts: LogstashEventsLatencyMetricOptions) {
     super({
       ...opts,
       format: LARGE_FLOAT,
@@ -189,8 +215,7 @@ export class LogstashEventsLatencyMetric extends LogstashMetric {
         },
       },
     };
-
-    this.calculation = (bucket) => {
+    this.calculation = (bucket: object) => {
       const timeInMillisDeriv = _.get(bucket, 'events_time_in_millis_deriv.normalized_value', null);
       const totalEventsDeriv = _.get(bucket, 'events_total_deriv.normalized_value', null);
 
@@ -199,8 +224,10 @@ export class LogstashEventsLatencyMetric extends LogstashMetric {
   }
 }
 
+type LogstashEventsRateMetricOptions = Pick<MetricOptions, 'field' | 'label' | 'description'>;
+
 export class LogstashEventsRateMetric extends LogstashMetric {
-  constructor(opts) {
+  constructor(opts: LogstashEventsRateMetricOptions) {
     super({
       ...opts,
       derivative: true,
@@ -211,8 +238,14 @@ export class LogstashEventsRateMetric extends LogstashMetric {
   }
 }
 
+type LogstashPipelineQueueSizeMetricOptions = Pick<
+  MetricOptions,
+  'field' | 'label' | 'description' | 'format' | 'units'
+> &
+  Partial<Pick<MetricOptions, 'title'>>;
+
 export class LogstashPipelineQueueSizeMetric extends LogstashMetric {
-  constructor(opts) {
+  constructor(opts: LogstashPipelineQueueSizeMetricOptions) {
     super({ ...opts });
 
     this.dateHistogramSubAggs = {
@@ -242,19 +275,32 @@ export class LogstashPipelineQueueSizeMetric extends LogstashMetric {
         },
       },
     };
-
-    this.calculation = (bucket) => _.get(bucket, 'pipelines.total_queue_size_for_node.value');
+    this.calculation = (bucket: object) => {
+      return _.get(bucket, 'pipelines.total_queue_size_for_node.value');
+    };
   }
 }
 
+type LogstashPipelineThroughputMetricOptions = Pick<
+  MetricOptions,
+  'field' | 'label' | 'description' | 'format' | 'units'
+> &
+  Partial<Pick<MetricOptions, 'uuidField'>> & {
+    mbField?: string;
+  };
+
 export class LogstashPipelineThroughputMetric extends LogstashMetric {
-  constructor(opts) {
+  constructor(opts: LogstashPipelineThroughputMetricOptions) {
     super({
       ...opts,
       derivative: true,
     });
 
-    this.getDateHistogramSubAggs = ({ pipeline }) => {
+    this.getDateHistogramSubAggs = ({
+      pipeline,
+    }: {
+      pipeline: { uuids: string[]; id: string };
+    }) => {
       return {
         metric_deriv: {
           derivative: {
@@ -336,15 +382,30 @@ export class LogstashPipelineThroughputMetric extends LogstashMetric {
   }
 }
 
+type LogstashPipelineNodeCountMetricOptions = Pick<
+  MetricOptions,
+  'field' | 'label' | 'description' | 'format' | 'units'
+> &
+  Partial<Pick<MetricOptions, 'uuidField'>>;
+
 export class LogstashPipelineNodeCountMetric extends LogstashMetric {
-  constructor(opts) {
+  constructor(opts: LogstashPipelineNodeCountMetricOptions) {
     super({
       ...opts,
       derivative: false,
     });
 
-    this.getDateHistogramSubAggs = ({ pageOfPipelines }) => {
-      const termAggExtras = {};
+    this.getDateHistogramSubAggs = ({
+      pageOfPipelines,
+    }: {
+      pageOfPipelines: Array<{ id: string }>;
+    }) => {
+      const termAggExtras: {
+        include: string[];
+      } = {
+        include: [],
+      };
+
       if (pageOfPipelines) {
         termAggExtras.include = pageOfPipelines.map((pipeline) => pipeline.id);
       }
@@ -404,14 +465,14 @@ export class LogstashPipelineNodeCountMetric extends LogstashMetric {
       };
     };
 
-    this.calculation = (bucket) => {
-      const pipelineNodesCounts = {};
+    this.calculation = (bucket: object) => {
+      const pipelineNodesCounts: any = {};
       const legacyPipelineBuckets = _.get(bucket, 'pipelines_nested.by_pipeline_id.buckets', []);
       const mbPiplineBuckets = _.get(bucket, 'pipelines_mb_nested.by_pipeline_id.buckets', []);
       const pipelineBuckets = legacyPipelineBuckets.length
         ? legacyPipelineBuckets
         : mbPiplineBuckets;
-      pipelineBuckets.forEach((pipelineBucket) => {
+      pipelineBuckets.forEach((pipelineBucket: any) => {
         pipelineNodesCounts[pipelineBucket.key] = _.get(pipelineBucket, 'to_root.node_count.value');
       });
 

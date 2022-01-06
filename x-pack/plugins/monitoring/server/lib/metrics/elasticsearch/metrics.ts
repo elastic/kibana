@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { QuotaMetric } from '../classes';
 import {
   RequestRateMetric,
@@ -27,7 +28,6 @@ import {
   LARGE_BYTES,
   LARGE_ABBREVIATED,
 } from '../../../../common/formatting';
-import { i18n } from '@kbn/i18n';
 
 const indexingRateTitle = i18n.translate('xpack.monitoring.metrics.es.indexingRateTitle', {
   defaultMessage: 'Indexing Rate', // title to use for the chart

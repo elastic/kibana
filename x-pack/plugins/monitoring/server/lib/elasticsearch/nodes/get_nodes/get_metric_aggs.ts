@@ -23,9 +23,9 @@ export function getMetricAggs(listingMetrics: string[]) {
 
   listingMetrics.forEach((metricName) => {
     const metric = metrics[metricName];
-    let metricAgg = null;
+    let metricAgg = {};
 
-    if (!metric) {
+    if (!metric || !metric.metricAgg) {
       return;
     }
 
@@ -49,7 +49,7 @@ export function getMetricAggs(listingMetrics: string[]) {
 
     aggItems = {
       ...aggItems,
-      ...convertMetricNames(metricName, metric.aggs || metricAgg),
+      ...convertMetricNames(metricName, metric.aggs ? metric.aggs : metricAgg),
     };
   });
 

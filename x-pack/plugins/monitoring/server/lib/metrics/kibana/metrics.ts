@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { KibanaEventsRateClusterMetric, KibanaMetric } from './classes';
 import { LARGE_FLOAT, SMALL_FLOAT, LARGE_BYTES } from '../../../../common/formatting';
-import { i18n } from '@kbn/i18n';
 
 const clientResponseTimeTitle = i18n.translate(
   'xpack.monitoring.metrics.kibana.clientResponseTimeTitle',

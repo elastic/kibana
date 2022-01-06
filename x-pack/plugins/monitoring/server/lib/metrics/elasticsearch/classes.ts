@@ -5,14 +5,22 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import _ from 'lodash';
-import { Metric } from '../classes';
+import { i18n } from '@kbn/i18n';
+import { Metric, MetricOptions } from '../classes';
 import { LARGE_FLOAT, SMALL_FLOAT, SMALL_BYTES } from '../../../../common/formatting';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../../common/constants';
-import { i18n } from '@kbn/i18n';
+
+type ElasticsearchMetricOptions = Pick<
+  MetricOptions,
+  'format' | 'metricAgg' | 'field' | 'label' | 'description' | 'units' | 'derivative'
+> &
+  Partial<Pick<MetricOptions, 'title'>> & { type: string; min?: number };
 
 export class ElasticsearchMetric extends Metric {
-  constructor(opts) {
+  constructor(opts: ElasticsearchMetricOptions) {
     super({
       ...opts,
       app: 'elasticsearch',
@@ -31,8 +39,18 @@ export class ElasticsearchMetric extends Metric {
   }
 }
 
+type DifferenceMetricOptions = Pick<
+  MetricOptions,
+  'description' | 'format' | 'metricAgg' | 'units' | 'label' | 'title'
+> & {
+  type: string;
+  fieldSource: string;
+  metric: string;
+  metric2: string;
+};
+
 export class DifferenceMetric extends ElasticsearchMetric {
-  constructor({ fieldSource, metric, metric2, ...opts }) {
+  constructor({ fieldSource, metric, metric2, ...opts }: DifferenceMetricOptions) {
     super({
       ...opts,
       field: '', // NOTE: this is not used for this
@@ -56,14 +74,21 @@ export class DifferenceMetric extends ElasticsearchMetric {
 
     this.getFields = () => [`${fieldSource}.${metric}`, `${fieldSource}.${metric2}`];
 
-    this.calculation = (bucket) => {
+    this.calculation = (bucket: object) => {
       return _.get(bucket, 'metric_max.value') - _.get(bucket, 'metric2_max.value');
     };
   }
 }
 
+type LatencyMetricOptions = Pick<MetricOptions, 'field' | 'label' | 'description'> &
+  Partial<Pick<MetricOptions, 'title'>> & {
+    type: string;
+    fieldSource: string;
+    metric: string;
+  };
+
 export class LatencyMetric extends ElasticsearchMetric {
-  constructor({ metric, fieldSource, ...opts }) {
+  constructor({ metric, fieldSource, ...opts }: LatencyMetricOptions) {
     super({
       ...opts,
       format: LARGE_FLOAT,
@@ -117,7 +142,7 @@ export class LatencyMetric extends ElasticsearchMetric {
       },
     };
 
-    this.calculation = (bucket) => {
+    this.calculation = (bucket: object) => {
       const timeInMillisDeriv = _.get(bucket, 'event_time_in_millis_deriv.normalized_value', null);
       const totalEventsDeriv = _.get(bucket, 'event_total_deriv.normalized_value', null);
 
@@ -126,8 +151,12 @@ export class LatencyMetric extends ElasticsearchMetric {
   }
 }
 
+type RequestRateMetricOptions = Pick<MetricOptions, 'field' | 'label' | 'description'> &
+  Partial<Pick<MetricOptions, 'format' | 'units' | 'derivative' | 'title'>> & {
+    type: string;
+  };
 export class RequestRateMetric extends ElasticsearchMetric {
-  constructor(opts) {
+  constructor(opts: RequestRateMetricOptions) {
     super({
       ...opts,
       derivative: true,
@@ -140,8 +169,10 @@ export class RequestRateMetric extends ElasticsearchMetric {
   }
 }
 
+type ThreadPoolQueueMetricOptions = Pick<MetricOptions, 'field' | 'label' | 'description'> &
+  Partial<Pick<MetricOptions, 'title'>>;
 export class ThreadPoolQueueMetric extends ElasticsearchMetric {
-  constructor(opts) {
+  constructor(opts: ThreadPoolQueueMetricOptions) {
     super({
       ...opts,
       title: 'Thread Queue',
@@ -153,8 +184,11 @@ export class ThreadPoolQueueMetric extends ElasticsearchMetric {
   }
 }
 
+type ThreadPoolRejectedMetricOptions = Pick<MetricOptions, 'field' | 'label' | 'description'> &
+  Partial<Pick<MetricOptions, 'title'>>;
+
 export class ThreadPoolRejectedMetric extends ElasticsearchMetric {
-  constructor(opts) {
+  constructor(opts: ThreadPoolRejectedMetricOptions) {
     super({
       ...opts,
       title: 'Thread Rejections',
@@ -174,8 +208,11 @@ export class ThreadPoolRejectedMetric extends ElasticsearchMetric {
  * @see NodeIndexMemoryMetric
  * @see SingleIndexMemoryMetric
  */
+
+type IndexMemoryMetricOptions = Pick<MetricOptions, 'field' | 'label' | 'description'> &
+  Partial<Pick<MetricOptions, 'title'>> & { type: string };
 export class IndexMemoryMetric extends ElasticsearchMetric {
-  constructor(opts) {
+  constructor(opts: IndexMemoryMetricOptions) {
     super({
       title: 'Index Memory',
       ...opts,
@@ -186,8 +223,11 @@ export class IndexMemoryMetric extends ElasticsearchMetric {
   }
 }
 
+type NodeIndexMemoryMetricOptions = Pick<MetricOptions, 'field' | 'label' | 'description'> &
+  Partial<Pick<MetricOptions, 'title'>>;
+
 export class NodeIndexMemoryMetric extends IndexMemoryMetric {
-  constructor(opts) {
+  constructor(opts: NodeIndexMemoryMetricOptions) {
     super({
       ...opts,
       type: 'node',
@@ -198,8 +238,11 @@ export class NodeIndexMemoryMetric extends IndexMemoryMetric {
   }
 }
 
+type IndicesMemoryMetricOptions = Pick<MetricOptions, 'field' | 'label' | 'description'> &
+  Partial<Pick<MetricOptions, 'title'>>;
+
 export class IndicesMemoryMetric extends IndexMemoryMetric {
-  constructor(opts) {
+  constructor(opts: IndicesMemoryMetricOptions) {
     super({
       ...opts,
       type: 'cluster',
@@ -210,8 +253,11 @@ export class IndicesMemoryMetric extends IndexMemoryMetric {
   }
 }
 
+type SingleIndexMemoryMetricOptions = Pick<MetricOptions, 'field' | 'label' | 'description'> &
+  Partial<Pick<MetricOptions, 'title'>>;
+
 export class SingleIndexMemoryMetric extends IndexMemoryMetric {
-  constructor(opts) {
+  constructor(opts: SingleIndexMemoryMetricOptions) {
     super({
       ...opts,
       type: 'index',
@@ -222,8 +268,11 @@ export class SingleIndexMemoryMetric extends IndexMemoryMetric {
   }
 }
 
+type WriteThreadPoolQueueMetricOptions = Pick<MetricOptions, 'label' | 'description'> &
+  Partial<Pick<MetricOptions, 'title'>>;
+
 export class WriteThreadPoolQueueMetric extends ElasticsearchMetric {
-  constructor(opts) {
+  constructor(opts: WriteThreadPoolQueueMetricOptions) {
     super({
       ...opts,
       field: 'node_stats.thread_pool.write.queue', // in 7.0, we can only check for this threadpool
@@ -244,8 +293,7 @@ export class WriteThreadPoolQueueMetric extends ElasticsearchMetric {
         max: { field: 'node_stats.thread_pool.write.queue' },
       },
     };
-
-    this.calculation = (bucket) => {
+    this.calculation = (bucket: object) => {
       const index = _.get(bucket, 'index.value', null);
       const bulk = _.get(bucket, 'bulk.value', null);
       const write = _.get(bucket, 'write.value', null);
@@ -260,8 +308,13 @@ export class WriteThreadPoolQueueMetric extends ElasticsearchMetric {
   }
 }
 
+type WriteThreadPoolRejectedMetricOptions = Pick<
+  MetricOptions,
+  'label' | 'description' | 'field' | 'title'
+>;
+
 export class WriteThreadPoolRejectedMetric extends ElasticsearchMetric {
-  constructor(opts) {
+  constructor(opts: WriteThreadPoolRejectedMetricOptions) {
     super({
       ...opts,
       field: 'node_stats.thread_pool.write.rejected', // in 7.0, we can only check for this threadpool
@@ -303,14 +356,13 @@ export class WriteThreadPoolRejectedMetric extends ElasticsearchMetric {
         },
       },
     };
-
-    this.calculation = (bucket) => {
+    this.calculation = (bucket: object) => {
       const index = _.get(bucket, 'index_deriv.normalized_value', null);
       const bulk = _.get(bucket, 'bulk_deriv.normalized_value', null);
       const write = _.get(bucket, 'write_deriv.normalized_value', null);
 
       if (index !== null || bulk !== null || write !== null) {
-        const valueOrZero = (value) => (value < 0 ? 0 : value || 0);
+        const valueOrZero = (value: number) => (value < 0 ? 0 : value || 0);
 
         return valueOrZero(index) + valueOrZero(bulk) + valueOrZero(write);
       }
@@ -321,16 +373,20 @@ export class WriteThreadPoolRejectedMetric extends ElasticsearchMetric {
   }
 }
 
+type MillisecondsToSecondsMetricOptions = Pick<
+  MetricOptions,
+  'label' | 'description' | 'field' | 'title' | 'format' | 'metricAgg' | 'units'
+> & { type: string };
+
 export class MillisecondsToSecondsMetric extends ElasticsearchMetric {
-  constructor(opts) {
+  constructor(opts: MillisecondsToSecondsMetricOptions) {
     super({
       ...opts,
       units: i18n.translate('xpack.monitoring.metrics.es.secondsUnitLabel', {
         defaultMessage: 's',
       }),
     });
-
-    this.calculation = (bucket) => {
+    this.calculation = (bucket: object) => {
       return _.get(bucket, 'metric.value') / 1000;
     };
   }
