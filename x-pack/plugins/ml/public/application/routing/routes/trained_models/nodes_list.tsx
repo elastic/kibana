@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { NavigateToPath } from '../../../contexts/kibana';
+import { NavigateToPath, useTimefilter } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -32,6 +32,7 @@ export const nodesListRouteFactory = (
       href: '',
     },
   ],
+  enableDatePicker: true,
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
@@ -42,6 +43,7 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     deps.dataViewsContract,
     basicResolvers(deps)
   );
+  useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
   return (
     <PageLoader context={context}>
       <Page />
