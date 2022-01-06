@@ -9,6 +9,7 @@
     "discover": "src/plugins/discover",
     "bfetch": "src/plugins/bfetch",
     "dashboard": "src/plugins/dashboard",
+    "controls": "src/plugins/controls",
     "data": "src/plugins/data",
     "dataViews": "src/plugins/data_views",
     "embeddableApi": "src/plugins/embeddable",
