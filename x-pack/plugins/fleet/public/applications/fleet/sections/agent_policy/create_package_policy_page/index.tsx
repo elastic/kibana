@@ -295,12 +295,19 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         return;
       }
 
+      const packagePolicyPath = getPath('policy_details', { policyId: packagePolicy.policy_id });
+
       if (routeState?.onSaveNavigateTo && policy) {
         const [appId, options] = routeState.onSaveNavigateTo;
 
         if (options?.path) {
+          // If we saved a package policy that isn't the initial one, it was created inline
+          // and we need to navigate to that policy rather than whatever the initial package policy
+          // was when we loaded this page
+          const wasPolicyCreatedInline = savedPackagePolicy?.id !== packagePolicy.id;
+
           const pathWithQueryString = appendOnSaveQueryParamsToPath({
-            path: options.path,
+            path: wasPolicyCreatedInline ? packagePolicyPath : options.path,
             policy,
             mappingOptions: routeState.onSaveQueryParams,
             paramsToApply,
@@ -310,10 +317,18 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           navigateToApp(...routeState.onSaveNavigateTo);
         }
       } else {
-        history.push(getPath('policy_details', { policyId: agentPolicy!.id }));
+        history.push(packagePolicyPath);
       }
     },
-    [agentPolicy, getPath, navigateToApp, history, routeState]
+    [
+      packagePolicy.policy_id,
+      getPath,
+      navigateToApp,
+      history,
+      routeState,
+      savedPackagePolicy,
+      packagePolicy.id,
+    ]
   );
 
   const onSubmit = useCallback(async () => {
