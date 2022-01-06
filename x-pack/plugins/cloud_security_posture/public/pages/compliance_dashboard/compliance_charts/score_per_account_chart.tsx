@@ -8,21 +8,14 @@
 import React from 'react';
 import { Axis, BarSeries, Chart, Settings } from '@elastic/charts';
 import { statusColors } from '../../../common/constants';
+import { EvaluationResult } from '../../../../common/types';
 
-const mockData = [
-  { id: '1', name: 'e836f61f0', value: 303, evaluation: 'pass' },
-  { id: '2', name: 'e836f61f0', value: 204, evaluation: 'fail' },
-  { id: '3', name: 'f0e26fd4d', value: 180, evaluation: 'pass' },
-  { id: '4', name: 'f0e26fd4d', value: 200, evaluation: 'fail' },
-  { id: '5', name: '4553458ce', value: 150, evaluation: 'pass' },
-  { id: '6', name: '4553458ce', value: 130, evaluation: 'fail' },
-  { id: '7', name: '7f6535170', value: 550, evaluation: 'pass' },
-  { id: '8', name: '7f6535170', value: 230, evaluation: 'fail' },
-  { id: '9', name: 'f04f0fa90', value: 130, evaluation: 'pass' },
-  { id: '10', name: 'f04f0fa90', value: 130, evaluation: 'fail' },
-];
-
-export const ScorePerAccountChart = ({ data: accountEvaluations = mockData }) => {
+// soon to be deprecated
+export const ScorePerAccountChart = ({
+  data: accountEvaluations,
+}: {
+  data: EvaluationResult[];
+}) => {
   return (
     <Chart size={{ height: 200 }}>
       <Settings theme={theme} rotation={90} showLegend={false} />
@@ -35,7 +28,7 @@ export const ScorePerAccountChart = ({ data: accountEvaluations = mockData }) =>
         id="bars"
         name="0"
         data={accountEvaluations}
-        xAccessor={'name'}
+        xAccessor={'resource'}
         yAccessors={['value']}
         splitSeriesAccessors={['evaluation']}
         stackAccessors={['evaluation']}
@@ -50,7 +43,6 @@ const theme = {
   barSeriesStyle: {
     displayValue: {
       fontSize: 14,
-      fontFamily: "'Open Sans', Helvetica, Arial, sans-serif",
       fill: { color: 'white', borderColor: 'blue', borderWidth: 0 },
       offsetX: 5,
       offsetY: -5,

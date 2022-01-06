@@ -20,8 +20,8 @@ import {
 import { orderBy } from 'lodash';
 import * as TEST_SUBJECTS from './test_subjects';
 import * as TEXT from './translations';
-import { CSPEvaluationBadge } from '../../components/csp_evaluation_badge';
 import type { CspFinding, FindingsFetchState } from './types';
+import { CspEvaluationBadge } from '../../components/csp_evaluation_badge';
 
 interface BaseFindingsTableProps {
   selectItem(v: CspFinding | undefined): void;
@@ -95,8 +95,8 @@ const ruleTagsRenderer = (tags: string[]) => (
     </EuiFlexItem>
   </EuiFlexGroup>
 );
-const resultEvaluationRenderer = (type: PropsOf<typeof CSPEvaluationBadge>['type']) => (
-  <CSPEvaluationBadge type={type} />
+const resultEvaluationRenderer = (type: PropsOf<typeof CspEvaluationBadge>['type']) => (
+  <CspEvaluationBadge type={type} />
 );
 
 const columns: Array<EuiTableFieldDataColumnType<CspFinding>> = [

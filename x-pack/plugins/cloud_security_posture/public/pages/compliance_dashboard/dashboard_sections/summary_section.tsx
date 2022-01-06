@@ -15,6 +15,7 @@ import { useCloudPostureStatsApi } from '../../../common/api';
 
 export const SummarySection = () => {
   const getStats = useCloudPostureStatsApi();
+  if (!getStats.isSuccess) return null;
 
   return (
     <EuiFlexGrid columns={3}>
