@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest, Logger } from 'src/core/server';
-import { CreateExceptionListItemOptions, ExceptionListClient } from '../../../lists/server';
+import { ExceptionListClient } from '../../../lists/server';
 import {
   CasesClient,
   PluginStartContract as CasesPluginStartContract,

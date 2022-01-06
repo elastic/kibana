@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 /**
  * Provides base methods for doing validation that apply across endpoint exception entries
  */
 export class BaseValidator {
-  protected isItemByPolicy<T>(item: T): boolean {
+  protected isItemByPolicy(item: ExceptionListItemSchema): boolean {
     // FIXME:PT implement method
   }
 
@@ -17,7 +19,7 @@ export class BaseValidator {
    * Validates that by-policy artifacts is permitted and that each policy referenced in the item is valid
    * @protected
    */
-  protected async validateByPolicyItem(item): Promise<void> {
+  protected async validateByPolicyItem(item: ExceptionListItemSchema): Promise<void> {
     if (this.isItemByPolicy(item)) {
       // FIXME:PT implement method
     }
