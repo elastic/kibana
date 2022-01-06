@@ -25,7 +25,7 @@ export const StatisticCard: React.FC<StatisticCardProps> = ({ title, count = 0, 
       title={title}
       titleSize="xs"
       display="plain"
-      hasBorder={true}
+      hasBorder
       description={
         <EuiTitle size="l">
           <EuiTextColor color="default">{count}</EuiTextColor>
