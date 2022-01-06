@@ -143,6 +143,8 @@ export const CalendarForm = ({
               data-test-subj="mlCalendarDescriptionInput"
             />
           </EuiFormRow>
+
+          <EuiSpacer size="m" />
         </Fragment>
       )}
 

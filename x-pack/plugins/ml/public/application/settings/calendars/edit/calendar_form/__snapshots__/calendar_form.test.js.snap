@@ -65,6 +65,9 @@ exports[`CalendarForm Renders calendar form 1`] = `
       value=""
     />
   </EuiFormRow>
+  <EuiSpacer
+    size="m"
+  />
   <EuiSwitch
     checked={false}
     data-test-subj="mlCalendarApplyToAllJobsSwitch"
