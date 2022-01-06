@@ -161,12 +161,12 @@ See <<maps-connect-to-ems>> for information on how to connect your {kib} server 
 
 [float]
 [[reporting-manual-chromium-install]]
-=== Manually Installing the Chromium browser for Darwin
+=== Manually install the Chromium browser for Darwin
 Chromium is not embedded into {kib} for the Darwin (Mac OS) architecture. When
-running {kib} on Darwin, Reporting will download Chromium into proper area of
+running {kib} on Darwin, Reporting will download Chromium into the proper area of
 the {kib} installation path the first time the server starts. If the server
-does not have access to the Internet, you will need to manually download the
-Chromium browser separately and install it into the {kib} installation path.
+does not have access to the Internet, you must download the
+Chromium browser and install it into the {kib} installation path.
 Here are the steps to do that:
 
 1. Download the Chromium zip file.
@@ -176,4 +176,4 @@ Here are the steps to do that:
 
 2. Copy the zip file into the holding area. Relative to the root directory of {kib}, the path is `.chromium/x64` for x64 systems and `.chromium/arm64` for ARM systems.
 
-3. When {kib} starts up, it will extract the browser from the zip file automatically, and it is ready to use for PNG and PDF reports.
+3. When {kib} starts, it will automatically extract the browser from the zip file, and it is ready to use for PNG and PDF reports.

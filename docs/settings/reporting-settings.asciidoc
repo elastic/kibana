@@ -133,7 +133,7 @@ Specify the {time-units}[amount of time] before taking a screenshot when visuali
 [[reporting-chromium-settings]]
 ==== Chromium settings
 
-For PDF and PNG reports, Reporting spawns a headless Chromium browser process on the server to load and capture a screenshot of the Kibana app. When installing {kib} on Linux and Windows platforms, the Chromium binary comes bundled with the Kibana download. For Mac platforms, the Chromium binary is downloaded the first time {kib} is started.
+For PDF and PNG reports, Reporting spawns a headless Chromium browser process on the server to load and capture a screenshot of the {kib} app. When installing {kib} on Linux and Windows platforms, the Chromium binary comes bundled with the {kib} download. For Mac platforms, the Chromium binary is downloaded the first time {kib} is started.
 
 `xpack.reporting.capture.browser.chromium.disableSandbox`::
 It is recommended that you research the feasibility of enabling unprivileged user namespaces. An exception is if you are running {kib} in Docker because the container runs in a user namespace with the built-in seccomp/bpf filters. For more information, refer to <<reporting-chromium-sandbox>>. Defaults to `false` for all operating systems except Debian and Red Hat Linux, which use `true`.

@@ -13,7 +13,7 @@ To generate reports, {kib} uses the Chromium web browser, which runs on the {kib
 [NOTE]
 ============
 Chromium is not embedded into {kib} for the Darwin (Mac OS) architecture. When
-running Kibana on Darwin, Reporting will download Chromium into proper area of
+running {kib} on Darwin, Reporting will download Chromium into the proper area of
 the {kib} installation path the first time the server starts. To separately
 download and install the browser, see <<reporting-manual-chromium-install>>.
 ============
