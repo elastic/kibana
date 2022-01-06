@@ -138,7 +138,7 @@ describe('runSequentially', () => {
           "base": "7.x",
           "body": "# Backport
 
-      This is an automatic backport to 7.x of:
+      This is an automatic backport to \`7.x\` of:
        - #55
 
       ### Questions ?

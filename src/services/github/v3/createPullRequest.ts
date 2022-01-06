@@ -103,7 +103,7 @@ export function getPullRequestBody({
 
   return `# Backport
 
-This is an automatic backport to ${targetBranch} of:
+This is an automatic backport to \`${targetBranch}\` of:
 ${commitMessages}
 
 ### Questions ?

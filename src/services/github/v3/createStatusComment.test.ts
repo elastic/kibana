@@ -21,8 +21,7 @@ describe('getCommentBody', () => {
       The pull request could not be backported due to the following error:
       \`A terrible error occured\`
 
-      ## How to fix
-
+      ### How to fix
       Re-run the backport manually:
       \`\`\`
       node scripts/backport --pr 55
@@ -113,8 +112,7 @@ describe('getCommentBody', () => {
       |❌|7.x|My boom error!|
       |❌|7.1|My boom error!|
 
-      ## How to fix
-
+      ### How to fix
       Re-run the backport manually:
       \`\`\`
       node scripts/backport --pr 55
@@ -162,8 +160,7 @@ describe('getCommentBody', () => {
       |✅|7.x|[<img src=\\"https://img.shields.io/github/pulls/detail/state/elastic/kibana/55\\">](url-to-pr-55)|
       |❌|7.1|My boom error!|
 
-      ## How to fix
-
+      ### How to fix
       Re-run the backport manually:
       \`\`\`
       node scripts/backport --pr 55
@@ -244,8 +241,7 @@ describe('getCommentBody', () => {
       |❌|7.1|**Backport failed because of merge conflicts**<br><br>You might need to backport the following PRs to 7.1:<br> - [New Zealand commit message](url-to-pr-5)<br> - [Australia commit](url-to-pr-44)|
       |❌|7.2|**Backport failed because of merge conflicts**|
 
-      ## How to fix
-
+      ### How to fix
       Re-run the backport manually:
       \`\`\`
       node scripts/backport --pr 55

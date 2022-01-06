@@ -105,7 +105,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
             "base": "6.x",
             "body": "# Backport
 
-        This is an automatic backport to 6.x of:
+        This is an automatic backport to \`6.x\` of:
          - #1000
          - #2000
 
@@ -205,7 +205,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
             "base": "6.x",
             "body": "# Backport
 
-        This is an automatic backport to 6.x of:
+        This is an automatic backport to \`6.x\` of:
          - My original commit message (mySha)
 
         ### Questions ?
@@ -288,7 +288,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
             "base": "6.x",
             "body": "# Backport
 
-        This is an automatic backport to 6.x of:
+        This is an automatic backport to \`6.x\` of:
          - My original commit message (mySha)
 
         ### Questions ?
