@@ -8,42 +8,49 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { configArray } from '../constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('default index pattern api', () => {
-    const newId = () => `default-id-${Date.now()}-${Math.random()}`;
-    it('can set default index pattern', async () => {
-      const defaultId = newId();
-      const response1 = await supertest.post('/api/index_patterns/default').send({
-        index_pattern_id: defaultId,
-        force: true,
+    configArray.forEach((config) => {
+      describe(config.name, () => {
+        const newId = () => `default-id-${Date.now()}-${Math.random()}`;
+        it('can set default index pattern', async () => {
+          const defaultId = newId();
+          const defaultPath = `${config.basePath}/default`;
+          const serviceKeyId = `${config.serviceKey}_id`;
+          const response1 = await supertest.post(defaultPath).send({
+            [serviceKeyId]: defaultId,
+            force: true,
+          });
+          expect(response1.status).to.be(200);
+          expect(response1.body.acknowledged).to.be(true);
+
+          const response2 = await supertest.get(defaultPath);
+          expect(response2.status).to.be(200);
+          expect(response2.body[serviceKeyId]).to.be(defaultId);
+
+          const response3 = await supertest.post(defaultPath).send({
+            [serviceKeyId]: newId(),
+            // no force this time, so this new default shouldn't be set
+          });
+
+          expect(response3.status).to.be(200);
+          const response4 = await supertest.get(defaultPath);
+          expect(response4.body[serviceKeyId]).to.be(defaultId); // original default id is used
+
+          const response5 = await supertest.post(defaultPath).send({
+            [serviceKeyId]: null,
+            force: true,
+          });
+          expect(response5.status).to.be(200);
+
+          const response6 = await supertest.get(defaultPath);
+          expect(response6.body[serviceKeyId]).to.be(null);
+        });
       });
-      expect(response1.status).to.be(200);
-      expect(response1.body.acknowledged).to.be(true);
-
-      const response2 = await supertest.get('/api/index_patterns/default');
-      expect(response2.status).to.be(200);
-      expect(response2.body.index_pattern_id).to.be(defaultId);
-
-      const response3 = await supertest.post('/api/index_patterns/default').send({
-        index_pattern_id: newId(),
-        // no force this time, so this new default shouldn't be set
-      });
-
-      expect(response3.status).to.be(200);
-      const response4 = await supertest.get('/api/index_patterns/default');
-      expect(response4.body.index_pattern_id).to.be(defaultId); // original default id is used
-
-      const response5 = await supertest.post('/api/index_patterns/default').send({
-        index_pattern_id: null,
-        force: true,
-      });
-      expect(response5.status).to.be(200);
-
-      const response6 = await supertest.get('/api/index_patterns/default');
-      expect(response6.body.index_pattern_id).to.be(null);
     });
   });
 }

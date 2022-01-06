@@ -6,7 +6,7 @@
  */
 import { useMemo } from 'react';
 import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
+import { useMatrixHistogramCombined } from '../../../../common/containers/matrix_histogram';
 import { MatrixHistogramType } from '../../../../../common/search_strategy';
 import { convertToBuildEsQuery } from '../../../../common/lib/keury';
 import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
@@ -14,7 +14,6 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { QUERY_PREVIEW_ERROR } from './translations';
 import { DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import { FieldValueThreshold } from '../threshold_input';
-import { FieldValueQueryBar } from '../query_bar';
 
 interface PreviewHistogramParams {
   previewId: string | undefined;
@@ -22,7 +21,6 @@ interface PreviewHistogramParams {
   startDate: string;
   spaceId: string;
   threshold?: FieldValueThreshold;
-  query: FieldValueQueryBar;
   index: string[];
   ruleType: Type;
 }
@@ -33,15 +31,10 @@ export const usePreviewHistogram = ({
   endDate,
   spaceId,
   threshold,
-  query,
   index,
   ruleType,
 }: PreviewHistogramParams) => {
   const { uiSettings } = useKibana().services;
-  const {
-    query: { query: queryString, language },
-    filters,
-  } = query;
 
   const [filterQuery, error] = convertToBuildEsQuery({
     config: getEsQueryConfig(uiSettings),
@@ -49,11 +42,8 @@ export const usePreviewHistogram = ({
       fields: [],
       title: index.join(),
     },
-    queries: [
-      { query: `signal.rule.id:${previewId}`, language: 'kuery' },
-      { query: queryString, language },
-    ],
-    filters,
+    queries: [{ query: `kibana.alert.rule.uuid:${previewId}`, language: 'kuery' }],
+    filters: [],
   });
 
   const stackByField = useMemo(() => {
@@ -76,5 +66,5 @@ export const usePreviewHistogram = ({
     };
   }, [startDate, endDate, filterQuery, spaceId, error, threshold, stackByField]);
 
-  return useMatrixHistogram(matrixHistogramRequest);
+  return useMatrixHistogramCombined(matrixHistogramRequest);
 };
