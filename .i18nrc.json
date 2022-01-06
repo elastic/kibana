@@ -10,6 +10,7 @@
     "core": "src/core",
     "customIntegrations": "src/plugins/custom_integrations",
     "dashboard": "src/plugins/dashboard",
+    "controls": "src/plugins/controls",
     "data": "src/plugins/data",
     "dataViews": "src/plugins/data_views",
     "devTools": "src/plugins/dev_tools",
