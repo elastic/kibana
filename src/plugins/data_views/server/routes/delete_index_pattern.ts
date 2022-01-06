@@ -9,50 +9,59 @@
 import { schema } from '@kbn/config-schema';
 import { handleErrors } from './util/handle_errors';
 import { IRouter, StartServicesAccessor } from '../../../../core/server';
-import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
+import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
+import { SPECIFIC_DATA_VIEW_PATH, SPECIFIC_DATA_VIEW_PATH_LEGACY } from '../constants';
 
-export const registerDeleteIndexPatternRoute = (
-  router: IRouter,
-  getStartServices: StartServicesAccessor<
-    DataViewsServerPluginStartDependencies,
-    DataViewsServerPluginStart
-  >
-) => {
-  router.delete(
-    {
-      path: '/api/index_patterns/index_pattern/{id}',
-      validate: {
-        params: schema.object(
-          {
-            id: schema.string({
-              minLength: 1,
-              maxLength: 1_000,
-            }),
-          },
-          { unknowns: 'allow' }
-        ),
+const deleteIndexPatternRouteFactory =
+  (path: string) =>
+  (
+    router: IRouter,
+    getStartServices: StartServicesAccessor<
+      DataViewsServerPluginStartDependencies,
+      DataViewsServerPluginStart
+    >
+  ) => {
+    router.delete(
+      {
+        path,
+        validate: {
+          params: schema.object(
+            {
+              id: schema.string({
+                minLength: 1,
+                maxLength: 1_000,
+              }),
+            },
+            { unknowns: 'allow' }
+          ),
+        },
       },
-    },
-    router.handleLegacyErrors(
-      handleErrors(async (ctx, req, res) => {
-        const savedObjectsClient = ctx.core.savedObjects.client;
-        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-        const [, , { indexPatternsServiceFactory }] = await getStartServices();
-        const indexPatternsService = await indexPatternsServiceFactory(
-          savedObjectsClient,
-          elasticsearchClient,
-          req
-        );
-        const id = req.params.id;
+      router.handleLegacyErrors(
+        handleErrors(async (ctx, req, res) => {
+          const savedObjectsClient = ctx.core.savedObjects.client;
+          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const [, , { dataViewsServiceFactory }] = await getStartServices();
+          const indexPatternsService = await dataViewsServiceFactory(
+            savedObjectsClient,
+            elasticsearchClient,
+            req
+          );
+          const id = req.params.id;
 
-        await indexPatternsService.delete(id);
+          await indexPatternsService.delete(id);
 
-        return res.ok({
-          headers: {
-            'content-type': 'application/json',
-          },
-        });
-      })
-    )
-  );
-};
+          return res.ok({
+            headers: {
+              'content-type': 'application/json',
+            },
+          });
+        })
+      )
+    );
+  };
+
+export const registerDeleteDataViewRoute = deleteIndexPatternRouteFactory(SPECIFIC_DATA_VIEW_PATH);
+
+export const registerDeleteDataViewRouteLegacy = deleteIndexPatternRouteFactory(
+  SPECIFIC_DATA_VIEW_PATH_LEGACY
+);
