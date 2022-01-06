@@ -178,10 +178,6 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     };
   }
 
-  public extendContext(extraContext: Record<string, unknown>) {
-    this.container.transitions.extendContext(extraContext);
-  }
-
   public get context(): Record<string, unknown> {
     return {
       ...(this.parent?.context ?? {}),
