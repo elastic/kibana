@@ -58,7 +58,7 @@ export const RenderWithFn: FC<Props> = ({
       return;
     }
 
-    if (!firstRender) {
+    if (!firstRender.current) {
       handlers.current.destroy();
     }
 
