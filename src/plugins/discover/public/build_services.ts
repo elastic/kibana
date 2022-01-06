@@ -21,7 +21,7 @@ import {
 import {
   FilterManager,
   TimefilterContract,
-  IndexPatternsContract,
+  DataViewsContract,
   DataPublicPluginStart,
 } from 'src/plugins/data/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
@@ -56,7 +56,7 @@ export interface DiscoverServices {
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
   fieldFormats: FieldFormatsStart;
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: DataViewsContract;
   inspector: InspectorPublicPluginStart;
   metadata: { branch: string };
   navigation: NavigationPublicPluginStart;
