@@ -764,14 +764,14 @@ export default function ({
         if (nonEmptyToken && nonEmptyToken.type.indexOf('url') < 0) {
           const { position, value } = nonEmptyToken;
 
-          context.prefixToAdd = ', ';
           editor.insert(
             {
               column: position.column + value.length,
               lineNumber: position.lineNumber,
             },
-            context.prefixToAdd
+            ', '
           );
+          context.prefixToAdd = '';
         }
     }
 
