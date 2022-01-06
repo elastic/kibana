@@ -12,6 +12,7 @@ import { CaseMetrics, CaseMetricsFeature } from '../../../common/ui';
 import {
   ASSOCIATED_HOSTS_METRIC,
   ASSOCIATED_USERS_METRIC,
+  ISOLATED_HOSTS_METRIC,
   TOTAL_ALERTS_METRIC,
   TOTAL_CONNECTORS_METRIC,
 } from './translations';
@@ -37,17 +38,22 @@ const useMetricItems = (
   metrics: CaseMetrics | null,
   features: CaseMetricsFeature[]
 ): MetricItems => {
-  const { alerts, connectors } = metrics ?? {};
+  const { alerts, actions, connectors } = metrics ?? {};
   const totalConnectors = connectors?.total ?? 0;
   const alertsCount = alerts?.count ?? 0;
   const totalAlertUsers = alerts?.users?.total ?? 0;
   const totalAlertHosts = alerts?.hosts?.total ?? 0;
+  const totalIsolatedHosts =
+    actions?.isolateHost && actions.isolateHost.isolate.total >= actions.isolateHost.unisolate.total
+      ? actions.isolateHost.isolate.total - actions.isolateHost.unisolate.total
+      : 0;
 
   const metricItems = useMemo<MetricItems>(() => {
     const items: Array<[CaseMetricsFeature, MetricItem]> = [
       ['alerts.count', { title: TOTAL_ALERTS_METRIC, value: alertsCount }],
       ['alerts.users', { title: ASSOCIATED_USERS_METRIC, value: totalAlertUsers }],
       ['alerts.hosts', { title: ASSOCIATED_HOSTS_METRIC, value: totalAlertHosts }],
+      ['actions.isolateHost', { title: ISOLATED_HOSTS_METRIC, value: totalIsolatedHosts }],
       ['connectors', { title: TOTAL_CONNECTORS_METRIC, value: totalConnectors }],
     ];
 
@@ -58,7 +64,14 @@ const useMetricItems = (
       ],
       []
     );
-  }, [features, alertsCount, totalAlertUsers, totalAlertHosts, totalConnectors]);
+  }, [
+    features,
+    alertsCount,
+    totalAlertUsers,
+    totalAlertHosts,
+    totalIsolatedHosts,
+    totalConnectors,
+  ]);
 
   return metricItems;
 };
