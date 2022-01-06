@@ -74,10 +74,10 @@ The endpoint is now split into two separate endpoints:
 [%collapsible]
 ====
 *Details* +
-APM NodeJS and RUM Javascript anomaly detection job modules have been removed. For more information, refer to {kibana-pull}119945[#119945].
+APM Node.js and RUM JavaScript anomaly detection job modules have been removed. For more information, refer to {kibana-pull}119945[#119945].
 
 *Impact* +
-When you upgrade to 8.0.0, you are unable to create and view the APM NodeJS and RUM Javascript jobs in Machine Learning.
+When you upgrade to 8.0.0, you are unable to create and view the APM Node.js and RUM JavaScript jobs in Machine Learning.
 ====
 
 [discrete]
