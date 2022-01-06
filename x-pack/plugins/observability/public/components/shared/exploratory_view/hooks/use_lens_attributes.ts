@@ -116,7 +116,7 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
       return null;
     }
 
-    const lensAttributes = new LensAttributes(layerConfigs);
+    const lensAttributes = new LensAttributes(layerConfigs, reportTypeT);
 
     return lensAttributes.getJSON(lastRefresh);
     // we also want to check the state on allSeries changes

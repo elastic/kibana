@@ -131,6 +131,7 @@ export default function Embeddable({
             </EuiTitle>
           </EuiFlexItem>
         )}
+
         {showCalculationMethod && (
           <EuiFlexItem grow={false} style={{ minWidth: 150 }}>
             <OperationTypeComponent

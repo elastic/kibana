@@ -253,6 +253,7 @@ export function getSingleMetricConfig(_config: ConfigProps): SeriesConfig {
     defaultSeriesType: '',
     filterFields: [],
     seriesTypes: [],
+    definitionFields: [],
     reportType: 'singleMetric',
     metricOptions: [
       {
@@ -283,8 +284,8 @@ export function getSingleMetricConfig(_config: ConfigProps): SeriesConfig {
         ],
       },
       {
-        id: 'source_ips',
-        field: 'Records_source_ips',
+        id: 'source.ip',
+        field: 'source.ip',
         label: 'Source',
         columnFilters: [
           {
@@ -294,8 +295,8 @@ export function getSingleMetricConfig(_config: ConfigProps): SeriesConfig {
         ],
       },
       {
-        id: 'destination_ips',
-        field: 'Records_destination_ips',
+        id: 'destination.ip',
+        field: 'destination.ip',
         label: 'Destination',
         columnFilters: [
           {
@@ -373,6 +374,7 @@ export function getSingleMetricConfig(_config: ConfigProps): SeriesConfig {
         ],
       },
     ],
+    labels: {},
   };
 }
 

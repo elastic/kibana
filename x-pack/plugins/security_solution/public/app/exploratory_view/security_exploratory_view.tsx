@@ -36,7 +36,7 @@ export const reportConfigMap = {
 export const indexPatternList = {
   security:
     'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*,.alerts-security.alerts-default',
-  // 'apm-*-transaction*,traces-apm*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,winlogbeat-*,.alerts-security.alerts-default',
+  // 'remote_cluster:.alerts-security.alerts-default,remote_cluster:apm-*-transaction*,remote_cluster:auditbeat-*,remote_cluster:endgame-*,remote_cluster:filebeat-*,remote_cluster:logs-*,remote_cluster:packetbeat-*,remote_cluster:traces-apm*,remote_cluster:winlogbeat-*',
   securityAlerts: '.alerts-security.alerts-default-*',
 };
 
@@ -57,6 +57,7 @@ export const reportTypes = [
   { reportType: 'unique_ip', label: 'Unique IPs' },
   { reportType: 'events', label: 'events' },
   { reportType: 'unique_private_ip', label: 'Unique IPs' },
+  { reportType: 'singleMetric', label: 'Single metric' },
 ];
 
 export const SecurityExploratoryView = ({

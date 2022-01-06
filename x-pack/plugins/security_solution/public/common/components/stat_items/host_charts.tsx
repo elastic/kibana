@@ -90,7 +90,6 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
                       time: timerange,
                     },
                   ]}
-                  showExploreButton={false}
                   compressed
                   disableBorder
                   disableShadow
@@ -125,7 +124,6 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
                     yLeft: false,
                     yRight: false,
                   }}
-                  showExploreButton={true}
                   compressed
                   disableBorder
                   disableShadow
@@ -161,12 +159,11 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
                         },
                         name: 'Source IPs',
                         dataType: 'security', // number (?)
-                        selectedMetricField: 'Records_source_ips',
+                        selectedMetricField: 'source.ip',
                         time: timerange,
-                        operationType: 'count', // unique_count(?)
+                        operationType: 'unique_count',
                       },
                     ]}
-                    showExploreButton={false}
                     compressed
                     disableBorder
                     disableShadow
@@ -213,7 +210,6 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
                       yLeft: false,
                       yRight: false,
                     }}
-                    showExploreButton={false}
                     compressed
                     disableBorder
                     disableShadow
@@ -238,12 +234,11 @@ export const HostCharts = ({ from, to, inputsModelId = 'global' }: Props) => {
                         },
                         name: 'Destination IPs',
                         dataType: 'security',
-                        selectedMetricField: 'Records_destination_ips',
+                        selectedMetricField: 'destination.ip',
                         time: timerange,
-                        operationType: 'count',
+                        operationType: 'unique_count',
                       },
                     ]}
-                    showExploreButton={false}
                     compressed
                     disableBorder
                     disableShadow

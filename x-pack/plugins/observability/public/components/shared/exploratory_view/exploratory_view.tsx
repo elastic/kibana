@@ -21,7 +21,7 @@ import { SeriesViews } from './views/series_views';
 import { LensEmbeddable } from './lens_embeddable';
 import { EmptyView } from './components/empty_view';
 import type { ChartTimeRange } from './header/last_updated';
-import { useExploratoryView } from './contexts/exploatory_view_config';
+import { useExploratoryView } from './contexts/exploratory_view_config';
 
 export type PanelId = 'seriesPanel' | 'chartPanel';
 
