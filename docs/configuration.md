@@ -182,7 +182,7 @@ Important: Since this command will be included in status comments on Github, it 
 
 Example of how `backportBinary` is used:
 
-<img src="https://user-images.githubusercontent.com/209966/148453206-28ad93f0-7cca-4552-a2ce-6fbc80e1d179.png" width="400"/>
+<img src="https://user-images.githubusercontent.com/209966/148454343-0a0ee0d1-cc3f-4c45-aa58-f3a5c28b81be.png" width="600"/>
 
 Default: `backport`
 

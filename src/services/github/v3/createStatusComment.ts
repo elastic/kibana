@@ -66,7 +66,7 @@ export function getCommentBody({
   backportResponse: BackportResponse;
 }): string {
   const { repoName, repoOwner, autoMerge } = options;
-  const backportPRCommand = `\n## How to fix\n\nRe-run the backport manually:\n\`\`\`\n${options.backportBinary} --pr ${pullNumber}\n\`\`\``;
+  const backportPRCommand = `\n### How to fix\n\nRe-run the backport manually:\n\`\`\`\n${options.backportBinary} --pr ${pullNumber}\n\`\`\``;
   const supportSection =
     '\n\n### Questions ?\nPlease refer to the [Backport tool documentation](https://github.com/sqren/backport)';
 
