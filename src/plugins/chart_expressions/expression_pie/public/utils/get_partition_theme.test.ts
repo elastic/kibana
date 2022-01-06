@@ -27,9 +27,11 @@ describe('getConfig', () => {
             ...visParams.dimensions,
             splitColumn: [
               {
+                type: 'vis_dimension',
                 accessor: 1,
                 format: {
                   id: 'number',
+                  params: {},
                 },
               },
             ],
@@ -48,9 +50,11 @@ describe('getConfig', () => {
             ...visParams.dimensions,
             splitRow: [
               {
+                type: 'vis_dimension',
                 accessor: 1,
                 format: {
                   id: 'number',
+                  params: {},
                 },
               },
             ],

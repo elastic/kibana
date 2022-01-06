@@ -7,7 +7,6 @@
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect, useRef } from 'react';
-
 import {
   Chart,
   Datum,
@@ -21,13 +20,13 @@ import {
   SeriesIdentifier,
   PartitionLayout,
 } from '@elastic/charts';
+import { useEuiTheme } from '@elastic/eui';
 import {
   LegendToggle,
   ClickTriggerEvent,
   ChartsPluginSetup,
   PaletteRegistry,
 } from '../../../../charts/public';
-import { DataPublicPluginStart } from '../../../../data/public';
 import type { PersistedState } from '../../../../visualizations/public';
 import {
   Datatable,
@@ -52,11 +51,12 @@ import {
   getPartitionTheme,
   getColumns,
   getSplitDimensionAccessor,
+  getColumnByAccessor,
 } from '../utils';
 import { ChartSplit, SMALL_MULTIPLES_ID } from './chart_split';
 import { VisualizationNoResults } from './visualization_noresults';
-
-import './pie_vis_component.scss';
+import { VisTypePiePluginStartDependencies } from '../plugin';
+import { pieChartWrapperStyle, pieChartContainerStyleFactory } from './pie_vis_component.styles';
 
 declare global {
   interface Window {
@@ -66,7 +66,6 @@ declare global {
     _echDebugStateFlag?: boolean;
   }
 }
-
 export interface PieComponentProps {
   visParams: PieVisParams;
   visData: Datatable;
@@ -75,17 +74,18 @@ export interface PieComponentProps {
   renderComplete: IInterpreterRenderHandlers['done'];
   chartsThemeService: ChartsPluginSetup['theme'];
   palettesRegistry: PaletteRegistry;
-  services: DataPublicPluginStart;
+  services: VisTypePiePluginStartDependencies;
   syncColors: boolean;
 }
 
 const PieComponent = (props: PieComponentProps) => {
+  const theme = useEuiTheme();
   const chartTheme = props.chartsThemeService.useChartsTheme();
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
   const [showLegend, setShowLegend] = useState<boolean>(() => {
     const bwcLegendStateDefault =
       props.visParams.addLegend == null ? false : props.visParams.addLegend;
-    return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) as boolean;
+    return props.uiState?.get('vis.legendOpen', bwcLegendStateDefault) ?? bwcLegendStateDefault;
   });
   const [dimensions, setDimensions] = useState<undefined | PieContainerDimensions>();
 
@@ -297,9 +297,9 @@ const PieComponent = (props: PieComponentProps) => {
     : undefined;
 
   const splitChartDimension = visParams.dimensions.splitColumn
-    ? visData.columns[visParams.dimensions.splitColumn[0].accessor]
+    ? getColumnByAccessor(visParams.dimensions.splitColumn[0].accessor, visData.columns)
     : visParams.dimensions.splitRow
-    ? visData.columns[visParams.dimensions.splitRow[0].accessor]
+    ? getColumnByAccessor(visParams.dimensions.splitRow[0].accessor, visData.columns)
     : undefined;
 
   /**
@@ -327,11 +327,11 @@ const PieComponent = (props: PieComponentProps) => {
   const canShowPieChart = !isAllZeros && !hasNegative;
 
   return (
-    <div className="pieChart__container" data-test-subj="visTypePieChart">
+    <div css={pieChartContainerStyleFactory(theme.euiTheme)} data-test-subj="visTypePieChart">
       {!canShowPieChart ? (
         <VisualizationNoResults hasNegativeValues={hasNegative} />
       ) : (
-        <div className="pieChart__wrapper" ref={parentRef}>
+        <div css={pieChartWrapperStyle} ref={parentRef}>
           <LegendToggle
             onClick={toggleLegend}
             showLegend={showLegend}
@@ -348,7 +348,7 @@ const PieComponent = (props: PieComponentProps) => {
               showLegend={showLegend}
               legendPosition={legendPosition}
               legendMaxDepth={visParams.nestedLegend ? undefined : 1}
-              legendColorPicker={legendColorPicker}
+              legendColorPicker={props.uiState ? legendColorPicker : undefined}
               flatLegend={Boolean(splitChartDimension)}
               tooltip={tooltip}
               onElementClick={(args) => {
@@ -365,10 +365,12 @@ const PieComponent = (props: PieComponentProps) => {
                 getLegendActionEventData(visData),
                 handleLegendAction,
                 visParams,
-                services.actions,
+                services.data.actions,
                 services.fieldFormats
               )}
               theme={[
+                // Chart background should be transparent for the usage at Canvas.
+                { background: { color: 'transparent' } },
                 themeOverrides,
                 chartTheme,
                 {
