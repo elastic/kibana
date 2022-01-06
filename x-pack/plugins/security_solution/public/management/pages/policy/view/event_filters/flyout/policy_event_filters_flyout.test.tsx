@@ -17,7 +17,6 @@ import {
 } from '../../../../../../common/mock/endpoint';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
 import { PolicyData } from '../../../../../../../common/endpoint/types';
-import { getPolicyEventFiltersPath } from '../../../../../common/routing';
 import { eventFiltersListQueryHttpMock } from '../../../../event_filters/test_utils';
 import { PolicyEventFiltersFlyout } from './policy_event_filters_flyout';
 import { parseQueryFilterToKQL, parsePoliciesAndFilterToKql } from '../../../../../common/utils';
@@ -26,8 +25,8 @@ import {
   FoundExceptionListItemSchema,
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { EventFiltersHttpService } from '../../../../event_filters/service';
 
-const endpointGenerator = new EndpointDocGenerator('seed');
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
   path: '/api/exception_lists/items/_find',
   query: {
@@ -40,53 +39,40 @@ const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
     sort_order: undefined,
   },
 });
-const emptyList = {
+const getEmptyList = () => ({
   data: [],
   page: 1,
   per_page: 10,
   total: 0,
-};
+});
 
 const getCleanedExceptionWithNewTags = (
   exception: UpdateExceptionListItemSchema,
   testTags: string[],
   policy: PolicyData
 ) => {
-  const exceptionToUpdateCleaned = {
+  const exceptionToUpdateWithNewTags = {
     ...exception,
     tags: [...testTags, `policy:${policy.id}`],
   };
-  // Clean unnecessary fields for update action
-  [
-    'created_at',
-    'created_by',
-    'created_at',
-    'created_by',
-    'list_id',
-    'tie_breaker_id',
-    'updated_at',
-    'updated_by',
-  ].forEach((field) => {
-    delete exceptionToUpdateCleaned[field as keyof UpdateExceptionListItemSchema];
-  });
-  return exceptionToUpdateCleaned;
+
+  return EventFiltersHttpService.cleanEventFilterToUpdate(exceptionToUpdateWithNewTags);
 };
 
 describe('Policy details event filters flyout', () => {
   let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
   let renderResult: ReturnType<AppContextTestRender['render']>;
-  let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
   let mockedApi: ReturnType<typeof eventFiltersListQueryHttpMock>;
   let policy: PolicyData;
   let onCloseMock: jest.Mock;
 
   beforeEach(() => {
+    const endpointGenerator = new EndpointDocGenerator('seed');
     policy = endpointGenerator.generatePolicyPackagePolicy();
     mockedContext = createAppRootMockRenderer();
     mockedApi = eventFiltersListQueryHttpMock(mockedContext.coreStart.http);
     onCloseMock = jest.fn();
-    ({ history } = mockedContext);
     render = async () => {
       await act(async () => {
         renderResult = mockedContext.render(
@@ -96,8 +82,6 @@ describe('Policy details event filters flyout', () => {
       });
       return renderResult;
     };
-
-    history.push(getPolicyEventFiltersPath(policy.id));
   });
 
   it('should render a list of assignable policies and searchbar', async () => {
@@ -126,7 +110,7 @@ describe('Policy details event filters flyout', () => {
     expect(await renderResult.findByTestId('artifactsList')).toBeTruthy();
 
     // results for search
-    mockedApi.responseProvider.eventFiltersList.mockImplementationOnce(() => emptyList);
+    mockedApi.responseProvider.eventFiltersList.mockImplementationOnce(() => getEmptyList());
 
     // do a search
     userEvent.type(renderResult.getByTestId('searchField'), 'no results with this{enter}');
@@ -146,7 +130,7 @@ describe('Policy details event filters flyout', () => {
 
   it('should render "not assignable items" when no possible exceptions can be assigned', async () => {
     // both exceptions list requests will return no results
-    mockedApi.responseProvider.eventFiltersList.mockImplementation(() => emptyList);
+    mockedApi.responseProvider.eventFiltersList.mockImplementation(() => getEmptyList());
     await render();
     expect(await renderResult.findByTestId('eventFilters-no-assignable-items')).toBeTruthy();
   });
@@ -194,7 +178,7 @@ describe('Policy details event filters flyout', () => {
 
     beforeEach(async () => {
       exceptions = {
-        ...emptyList,
+        ...getEmptyList(),
         total: 2,
         data: [
           getExceptionListItemSchemaMock({
