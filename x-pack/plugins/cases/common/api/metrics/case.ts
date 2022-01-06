@@ -81,6 +81,33 @@ export const CaseMetricsResponseRt = rt.partial(
       total: rt.number,
     }),
     /**
+     * Actions taken within the case
+     */
+    actions: rt.partial(
+      rt.type({
+        isolateHost: rt.type({
+          /**
+           * Isolate host action information
+           */
+          isolate: rt.type({
+            /**
+             * Total times the isolate host action has been performed
+             */
+            total: rt.number,
+          }),
+          /**
+           * Unisolate host action information
+           */
+          unisolate: rt.type({
+            /**
+             * Total times the unisolate host action has been performed
+             */
+            total: rt.number,
+          }),
+        }),
+      }).props
+    ),
+    /**
      * The case's open,close,in-progress details
      */
     lifespan: rt.type({

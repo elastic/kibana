@@ -94,6 +94,7 @@ export const getPieVisTypeDefinition = ({
           '!sampler',
           '!diversified_sampler',
           '!multi_terms',
+          '!significant_text',
         ],
       },
       {
@@ -112,6 +113,7 @@ export const getPieVisTypeDefinition = ({
           '!sampler',
           '!diversified_sampler',
           '!multi_terms',
+          '!significant_text',
         ],
       },
     ],
