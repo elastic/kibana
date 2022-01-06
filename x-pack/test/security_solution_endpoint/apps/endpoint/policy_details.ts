@@ -452,6 +452,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           getExpectedAgentPolicyEndpointInput({
             id: policyInfo.packagePolicy.id,
             name: policyInfo.packagePolicy.name,
+            revision: agentFullPolicy.inputs[0].revision,
             meta: {
               package: {
                 version: policyInfo.packageInfo.version,
