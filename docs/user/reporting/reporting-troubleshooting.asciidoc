@@ -170,8 +170,8 @@ Chromium browser and install it into the {kib} installation path.
 
 1. Download the Chromium zip file:
 
-** For <a href="https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac/901912/chrome-mac.zip">x64</a> systems
-** For <a href="https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac_Arm/901913/chrome-mac.zip">ARM</a> systems
+** For https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac/901912/chrome-mac.zip[x64] systems
+** For https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac_Arm/901913/chrome-mac.zip[ARM] systems
 
 2. Copy the zip file into the holding area. Relative to the root directory of {kib}, the path is:
 
