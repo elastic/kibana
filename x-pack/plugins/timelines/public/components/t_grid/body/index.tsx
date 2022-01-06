@@ -673,7 +673,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               pageSize,
               timelineId: id,
             });
-
           return {
             ...header,
             actions: {

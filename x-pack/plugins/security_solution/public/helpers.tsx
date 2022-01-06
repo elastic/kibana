@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { get, isEmpty } from 'lodash/fp';
 import React from 'react';
 import { matchPath, RouteProps, Redirect } from 'react-router-dom';
@@ -209,10 +209,12 @@ RedirectRoute.displayName = 'RedirectRoute';
 
 const siemSignalsFieldMappings: Record<string, string> = {
   [ALERT_RULE_UUID]: 'signal.rule.id',
+  [ALERT_RULE_NAME]: 'signal.rule.name',
 };
 
 const alertFieldMappings: Record<string, string> = {
   'signal.rule.id': ALERT_RULE_UUID,
+  'signal.rule.name': ALERT_RULE_NAME,
 };
 
 /*
@@ -228,5 +230,7 @@ export const getField = (ecsData: Ecs, field: string) => {
     'kibana.alert',
     'signal'
   );
-  return get(aadField, ecsData) ?? get(siemSignalsField, ecsData);
+  const aadValue = get(aadField, ecsData);
+  const siemSignalsValue = get(siemSignalsField, ecsData);
+  return { value: aadValue ?? siemSignalsValue, field: aadValue ? aadField : siemSignalsField };
 };

@@ -131,7 +131,7 @@ export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
     };
   }
   const ecsData = ecs as Ecs;
-  const ruleFrom = getField(ecsData, ALERT_RULE_FROM);
+  const { value: ruleFrom } = getField(ecsData, ALERT_RULE_FROM);
   const elapsedTimeRule = moment.duration(
     moment().diff(dateMath.parse(ruleFrom != null ? ruleFrom[0] : 'now-0s'))
   );
@@ -170,9 +170,8 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
       };
 
       try {
-        thresholdResult = JSON.parse(
-          (getField(thresholdData, ALERT_THRESHOLD_RESULT) as string[])[0]
-        );
+        const { value: thresholdValue } = getField(thresholdData, ALERT_THRESHOLD_RESULT);
+        thresholdResult = JSON.parse(thresholdValue[0]);
         aggField = JSON.parse(threshold[0]).field;
       } catch (err) {
         // Legacy support
@@ -189,9 +188,11 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
       }
 
       // Legacy support
-      const ruleFromStr = getField(thresholdData, ALERT_RULE_FROM)[0];
+      const { value: ruleFromStrValues } = getField(thresholdData, ALERT_RULE_FROM);
+      const ruleFromStr = ruleFromStrValues[0];
       const ruleFrom = dateMath.parse(ruleFromStr) ?? moment(); // The fallback here will essentially ensure 0 results
-      const originalTimeStr = getField(thresholdData, ALERT_ORIGINAL_TIME)[0];
+      const { value: originalTimeStrValues } = getField(thresholdData, ALERT_ORIGINAL_TIME);
+      const originalTimeStr = originalTimeStrValues[0];
       const originalTime = originalTimeStr != null ? moment(originalTimeStr) : ruleFrom;
       const ruleInterval = moment.duration(moment().diff(ruleFrom));
       const fromOriginalTime = originalTime.clone().subtract(ruleInterval); // This is the default... can overshoot
@@ -254,13 +255,13 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
 };
 
 export const isEqlRuleWithGroupId = (ecsData: Ecs) => {
-  const ruleType = getField(ecsData, ALERT_RULE_TYPE);
-  const groupId = getField(ecsData, ALERT_GROUP_ID);
+  const { value: ruleType } = getField(ecsData, ALERT_RULE_TYPE);
+  const { value: groupId } = getField(ecsData, ALERT_GROUP_ID);
   return ruleType?.length && ruleType[0] === 'eql' && groupId?.length;
 };
 
 export const isThresholdRule = (ecsData: Ecs) => {
-  const ruleType = getField(ecsData, ALERT_RULE_TYPE);
+  const { value: ruleType } = getField(ecsData, ALERT_RULE_TYPE);
   return Array.isArray(ruleType) && ruleType.length && ruleType[0] === 'threshold';
 };
 
@@ -383,9 +384,9 @@ export const sendAlertToTimelineAction = async ({
    */
   const ecsData: Ecs = Array.isArray(ecs) && ecs.length > 0 ? ecs[0] : (ecs as Ecs);
   const alertIds = Array.isArray(ecs) ? ecs.map((d) => d._id) : [];
-  const ruleNote = getField(ecsData, ALERT_RULE_NOTE);
+  const { value: ruleNote } = getField(ecsData, ALERT_RULE_NOTE);
   const noteContent = Array.isArray(ruleNote) && ruleNote.length > 0 ? ruleNote[0] : '';
-  const ruleTimelineId = getField(ecsData, ALERT_RULE_TIMELINE_ID);
+  const { value: ruleTimelineId } = getField(ecsData, ALERT_RULE_TIMELINE_ID);
   const timelineId =
     Array.isArray(ruleTimelineId) && ruleTimelineId.length > 0 ? ruleTimelineId[0] : '';
   const { to, from } = determineToAndFrom({ ecs });

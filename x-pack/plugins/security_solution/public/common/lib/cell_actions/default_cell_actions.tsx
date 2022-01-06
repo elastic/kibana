@@ -26,7 +26,8 @@ import { parseValue } from '../../../timelines/components/timeline/body/renderer
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
 import { escapeDataProviderId } from '../../components/drag_and_drop/helpers';
 import { useKibana } from '../kibana';
-import { getLink } from './helpers';
+import { getLinkColumnDefinition } from './helpers';
+import { getField } from '../../../helpers';
 
 /** a noop required by the filter in / out buttons */
 const onFilterAdded = () => {};
@@ -44,66 +45,6 @@ const useKibanaServices = () => {
 };
 
 export const EmptyComponent = () => <></>;
-
-const cellActionLink = [
-  ({
-    browserFields,
-    data,
-    ecsData,
-    header,
-    timelineId,
-    pageSize,
-  }: {
-    browserFields: BrowserFields;
-    data: TimelineNonEcsData[][];
-    ecsData: Ecs[];
-    header?: ColumnHeaderOptions;
-    timelineId: string;
-    pageSize: number;
-  }) => {
-    return getLink(header?.id, header?.type, header?.linkField)
-      ? ({ rowIndex, columnId, Component, closePopover }: EuiDataGridColumnCellActionProps) => {
-          const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
-          const ecs = pageRowIndex < ecsData.length ? ecsData[pageRowIndex] : null;
-          const link = getLink(columnId, header?.type, header?.linkField);
-          const linkField = header?.linkField ? header?.linkField : link?.linkField;
-          const linkValues = header && getOr([], linkField ?? '', ecs);
-          const eventId = header && get('_id' ?? '', ecs);
-          if (pageRowIndex >= data.length) {
-            // data grid expects each cell action always return an element, it crashes if returns null
-            return <></>;
-          }
-
-          const values = getMappedNonEcsValue({
-            data: data[pageRowIndex],
-            fieldName: columnId,
-          });
-
-          const value = parseValue(head(values));
-          return link && eventId && values && !isEmpty(value) ? (
-            <FormattedFieldValue
-              Component={Component}
-              contextId={`expanded-value-${columnId}-row-${pageRowIndex}-${timelineId}`}
-              eventId={eventId}
-              fieldFormat={header?.format || ''}
-              fieldName={columnId}
-              fieldType={header?.type || ''}
-              isButton={true}
-              isDraggable={false}
-              value={value}
-              truncate={false}
-              title={values.length > 1 ? `${link?.label}: ${value}` : link?.label}
-              linkValue={head(linkValues)}
-              onClick={closePopover}
-            />
-          ) : (
-            // data grid expects each cell action always return an element, it crashes if returns null
-            <></>
-          );
-        }
-      : EmptyComponent;
-  },
-];
 
 export const cellActions: TGridCellAction[] = [
   ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
@@ -209,7 +150,15 @@ export const cellActions: TGridCellAction[] = [
         </>
       );
     },
-  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
+  ({
+      data,
+      pageSize,
+      timelineId,
+    }: {
+      data: TimelineNonEcsData[][];
+      pageSize: number;
+      timelineId: string;
+    }) =>
     ({ rowIndex, columnId, Component }) => {
       const { timelines } = useKibanaServices();
 
@@ -237,7 +186,128 @@ export const cellActions: TGridCellAction[] = [
         </>
       );
     },
+  ({
+    browserFields,
+    data,
+    ecsData,
+    header,
+    timelineId,
+    pageSize,
+  }: {
+    browserFields: BrowserFields;
+    data: TimelineNonEcsData[][];
+    ecsData: Ecs[];
+    header?: ColumnHeaderOptions;
+    timelineId: string;
+    pageSize: number;
+  }) => {
+    if (header !== undefined) {
+      return ({
+        rowIndex,
+        columnId,
+        Component,
+        closePopover,
+      }: EuiDataGridColumnCellActionProps) => {
+        /* eslint-disable @typescript-eslint/no-shadow */
+        const {
+          pageRowIndex,
+          link,
+          eventId,
+          value,
+          values,
+          title,
+          fieldName,
+          fieldFormat,
+          fieldType,
+          linkValue,
+        } = useMemo(() => {
+          const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+          const ecs = ecsData[pageRowIndex];
+          const link = getLinkColumnDefinition(columnId, header?.type, header?.linkField);
+          const linkField = header?.linkField ? header?.linkField : link?.linkField;
+          const linkValues = header && getOr([], linkField ?? '', ecs);
+          const eventId = header && get('_id' ?? '', ecs);
+          const values = getMappedNonEcsValue({
+            data: data[pageRowIndex],
+            fieldName: columnId,
+          });
+          const value = parseValue(head(values));
+          const title = values && values.length > 1 ? `${link?.label}: ${value}` : link?.label;
+          // if linkField is defined but link values is empty, it's possible we are trying to look for a column definition for an old event set
+          if (linkField !== undefined && linkValues.length === 0 && values !== undefined) {
+            const { field: normalizedLinkField, value: normalizedLinkValue } = getField(
+              ecs,
+              linkField
+            );
+            const { field: normalizedColumnId } = getField(ecs, columnId);
+            const normalizedLink = getLinkColumnDefinition(
+              normalizedColumnId,
+              header?.type,
+              normalizedLinkField
+            );
+            return {
+              pageRowIndex,
+              link: normalizedLink,
+              eventId,
+              fieldFormat: header?.format || '',
+              fieldName: normalizedColumnId,
+              fieldType: header?.type || '',
+              value: parseValue(head(normalizedColumnId)),
+              values,
+              title,
+              linkValue: head(normalizedLinkValue),
+            };
+          } else {
+            return {
+              pageRowIndex,
+              link,
+              eventId,
+              fieldFormat: header?.format || '',
+              fieldName: columnId,
+              fieldType: header?.type || '',
+              value,
+              values,
+              title,
+              linkValue: head(linkValues),
+            };
+          }
+        }, [columnId, rowIndex]);
+
+        const showEmpty = useMemo(() => {
+          const hasLink = link !== undefined && values && !isEmpty(value);
+          if (pageRowIndex >= data.length) {
+            return true;
+          } else {
+            return hasLink !== true;
+          }
+        }, [link, pageRowIndex, value, values]);
+
+        return showEmpty === false ? (
+          <FormattedFieldValue
+            Component={Component}
+            contextId={`expanded-value-${columnId}-row-${pageRowIndex}-${timelineId}`}
+            eventId={eventId}
+            fieldFormat={fieldFormat}
+            fieldName={fieldName}
+            fieldType={fieldType}
+            isButton={true}
+            isDraggable={false}
+            value={value}
+            truncate={false}
+            title={title}
+            linkValue={linkValue}
+            onClick={closePopover}
+          />
+        ) : (
+          // data grid expects each cell action always return an element, it crashes if returns null
+          <></>
+        );
+      };
+    } else {
+      return EmptyComponent;
+    }
+  },
 ];
 
 /** the default actions shown in `EuiDataGrid` cells */
-export const defaultCellActions = [...cellActions, ...cellActionLink];
+export const defaultCellActions = [...cellActions];
