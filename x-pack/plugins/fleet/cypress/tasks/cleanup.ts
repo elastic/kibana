@@ -19,3 +19,18 @@ export function cleanupAgentPolicies() {
       });
   });
 }
+
+export function unenrollAgent() {
+  cy.request('/api/fleet/agents?page=1&perPage=20&showInactive=false&showUpgradeable=false').then(
+    (response: any) => {
+      response.body.items.forEach((agent: any) => {
+        cy.request({
+          method: 'POST',
+          url: `api/fleet/agents/${agent.id}/unenroll`,
+          body: { revoke: true },
+          headers: { 'kbn-xsrf': 'kibana' },
+        });
+      });
+    }
+  );
+}

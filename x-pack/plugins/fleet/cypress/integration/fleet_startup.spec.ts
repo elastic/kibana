@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AGENT_POLICIES_TAB, ENROLLMENT_TOKENS_TAB } from '../screens/fleet';
-import { cleanupAgentPolicies } from '../tasks/cleanup';
+import { AGENTS_TAB, AGENT_POLICIES_TAB, ENROLLMENT_TOKENS_TAB } from '../screens/fleet';
+import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
 import { FLEET, navigateTo } from '../tasks/navigation';
 
 describe('Fleet startup', () => {
@@ -49,6 +49,11 @@ describe('Fleet startup', () => {
 
       verifyFleetServerPolicy('Fleet Server policy', 'Fleet Server');
     });
+
+    after(() => {
+      unenrollAgent();
+      cleanupAgentPolicies();
+    });
   });
 
   describe('Create policies', () => {
@@ -56,21 +61,34 @@ describe('Fleet startup', () => {
       cleanupAgentPolicies();
     });
 
-    // one policy was created in runner.ts to enroll a fleet server before starting cypress tests
-    it('should have one agent policy by default created through API', () => {
+    it('should have no agent policy by default', () => {
       cy.request('/api/fleet/agent_policies?full=true').then((response: any) => {
-        expect(response.body.items.length).to.equal(1);
-        expect(response.body.items[0].name).to.equal('Fleet Server policy');
+        expect(response.body.items.length).to.equal(0);
       });
     });
 
-    // TODO can be recreated after force unenroll and delete policy
-    it.skip('should create Fleet Server policy', () => {
-      cy.getBySel('toastCloseButton').click();
-      cy.getBySel('addFleetServerBtn').click();
-      cy.getBySel('euiToastHeader');
+    describe('Fleet Server policy', () => {
+      before(() => {
+        cy.request({
+          method: 'PUT',
+          url: '/api/fleet/settings',
+          body: { fleet_server_hosts: ['http://localhost:8220'] },
+          headers: { 'kbn-xsrf': 'kibana' },
+        });
+      });
 
-      verifyFleetServerPolicy('Fleet Server policy 1', 'Fleet Server');
+      it('should create Fleet Server policy', () => {
+        cy.getBySel(AGENTS_TAB).click();
+        cy.getBySel('addAgentButton').click();
+        cy.getBySel('toastCloseButton').click();
+
+        cy.getBySel('createFleetServerPolicyBtn').click();
+        cy.getBySel('euiToastHeader');
+
+        cy.getBySel('euiFlyoutCloseButton').click();
+
+        verifyFleetServerPolicy('Fleet Server policy 1', 'Fleet Server');
+      });
     });
 
     it('should create agent policy', () => {

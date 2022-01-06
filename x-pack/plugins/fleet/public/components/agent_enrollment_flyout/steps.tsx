@@ -18,6 +18,8 @@ import { useKibanaVersion } from '../../hooks';
 
 import { AgentPolicyCreateInlineForm } from '../../applications/fleet/sections/agent_policy/components';
 
+import { policyHasFleetServer } from '../../applications/fleet/sections/agents/services/has_fleet_server';
+
 import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
 import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
 
@@ -90,7 +92,10 @@ export const AgentPolicySelectionStep = ({
 }) => {
   const regularAgentPolicies = useMemo(() => {
     return Array.isArray(agentPolicies)
-      ? agentPolicies.filter((policy) => policy && !policy.is_managed && !excludeFleetServer)
+      ? agentPolicies.filter(
+          (policy) =>
+            policy && !policy.is_managed && (!excludeFleetServer || !policyHasFleetServer(policy))
+        )
       : [];
   }, [agentPolicies, excludeFleetServer]);
 

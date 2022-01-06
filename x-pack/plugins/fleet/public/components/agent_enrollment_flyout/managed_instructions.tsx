@@ -11,7 +11,7 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useGetOneEnrollmentAPIKey, useLink, useFleetStatus } from '../../hooks';
+import { useGetOneEnrollmentAPIKey, useLink, useFleetStatus, useGetAgents } from '../../hooks';
 
 import { ManualInstructions } from '../../components/enrollment_instructions';
 import {
@@ -71,6 +71,12 @@ export const ManagedInstructions = React.memo<Props>(
     const apiKey = useGetOneEnrollmentAPIKey(selectedApiKeyId);
     const fleetServerInstructions = useFleetServerInstructions(apiKey?.data?.item?.policy_id);
 
+    const { data: agents } = useGetAgents({
+      page: 1,
+      perPage: 1000,
+      showInactive: false,
+    });
+
     const fleetServerSteps = useMemo(() => {
       const {
         serviceToken,
@@ -101,6 +107,7 @@ export const ManagedInstructions = React.memo<Props>(
               selectedApiKeyId,
               setSelectedAPIKeyId,
               setSelectedPolicyId,
+              excludeFleetServer: true,
             })
           : AgentEnrollmentKeySelectionStep({ agentPolicy, selectedApiKeyId, setSelectedAPIKeyId }),
         DownloadStep(isFleetServerPolicySelected || false),
@@ -140,7 +147,7 @@ export const ManagedInstructions = React.memo<Props>(
       return null;
     }
 
-    if (fleetStatus.isReady) {
+    if (fleetStatus.isReady && agents && agents.items.length > 0) {
       return (
         <>
           <EuiText>
@@ -157,8 +164,10 @@ export const ManagedInstructions = React.memo<Props>(
 
     return (
       <>
-        {fleetStatus.missingRequirements?.length === 1 &&
-        fleetStatus.missingRequirements[0] === 'fleet_server' ? (
+        {(fleetStatus.missingRequirements?.length === 1 &&
+          fleetStatus.missingRequirements[0] === 'fleet_server') ||
+        !agents ||
+        agents.items.length === 0 ? (
           <FleetServerMissingRequirements />
         ) : (
           <DefaultMissingRequirements />

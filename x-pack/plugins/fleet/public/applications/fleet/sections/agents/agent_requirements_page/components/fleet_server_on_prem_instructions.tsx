@@ -350,6 +350,13 @@ const AgentPolicySelectionStep = ({
     return agentPolicies.map((policy) => ({ text: policy.name, value: policy.id }));
   }, [agentPolicies]);
 
+  useEffect(() => {
+    // Select default value
+    if (agentPolicies.length && !policyId) {
+      setPolicyId(agentPolicies[0].id);
+    }
+  }, [agentPolicies, policyId, setPolicyId]);
+
   const onChangeCallback = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       setPolicyId(e.target.value);
