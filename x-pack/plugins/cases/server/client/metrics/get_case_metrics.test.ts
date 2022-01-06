@@ -7,7 +7,7 @@
 
 import { getCaseMetrics } from './get_case_metrics';
 import { CaseAttributes, CaseResponse } from '../../../common/api';
-import { createCasesClientMock } from '../mocks';
+import { CasesClientMock, createCasesClientMock } from '../mocks';
 import { CasesClientArgs } from '../types';
 import { createAuthorizationMock } from '../../authorization/mock';
 import { loggingSystemMock, savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
@@ -21,10 +21,16 @@ describe('getMetrics', () => {
     closed_at: '2021-11-23T19:59:44Z',
   };
 
-  const client = createMockClient();
-  const { mockServices, clientArgs } = createMockClientArgs();
+  let client: CasesClientMock;
+  let mockServices: ReturnType<typeof createMockClientArgs>['mockServices'];
+  let clientArgs: ReturnType<typeof createMockClientArgs>['clientArgs'];
 
   beforeEach(() => {
+    client = createMockClient();
+    ({ mockServices, clientArgs } = createMockClientArgs());
+  });
+
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
