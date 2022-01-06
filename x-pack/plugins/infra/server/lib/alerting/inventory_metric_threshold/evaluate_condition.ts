@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { mapValues, last, first } from 'lodash';
 import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
+import { mapValues, last, first } from 'lodash';
 import {
   isTooManyBucketsPreviewException,
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
@@ -42,6 +42,7 @@ export const evaluateCondition = async ({
   compositeSize,
   filterQuery,
   lookbackSize,
+  startTime,
 }: {
   condition: InventoryMetricConditions;
   nodeType: InventoryItemType;
@@ -51,14 +52,18 @@ export const evaluateCondition = async ({
   compositeSize: number;
   filterQuery?: string;
   lookbackSize?: number;
+  startTime?: number;
 }): Promise<Record<string, ConditionResult>> => {
   const { comparator, warningComparator, metric, customMetric } = condition;
   let { threshold, warningThreshold } = condition;
 
+  const to = startTime ? moment(startTime) : moment();
+
   const timerange = {
-    to: Date.now(),
-    from: moment().subtract(condition.timeSize, condition.timeUnit).toDate().getTime(),
-    interval: condition.timeUnit,
+    to: to.valueOf(),
+    from: to.clone().subtract(condition.timeSize, condition.timeUnit).valueOf(),
+    interval: `${condition.timeSize}${condition.timeUnit}`,
+    forceInterval: true,
   } as InfraTimerangeInput;
   if (lookbackSize) {
     timerange.lookbackSize = lookbackSize;
