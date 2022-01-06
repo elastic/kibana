@@ -11,6 +11,8 @@ export const PLUGIN_NAME = 'expressionPartitionVis';
 
 export const PIE_VIS_EXPRESSION_NAME = 'pieVis';
 export const TREEMAP_VIS_EXPRESSION_NAME = 'treemapVis';
+export const MOSAIC_VIS_EXPRESSION_NAME = 'mosaicVis';
+export const WAFFLE_VIS_EXPRESSION_NAME = 'waffleVis';
 export const PARTITION_VIS_RENDERER_NAME = 'partitionVis';
 export const PARTITION_LABELS_VALUE = 'partitionLabelsValue';
 export const PARTITION_LABELS_FUNCTION = 'partitionLabels';

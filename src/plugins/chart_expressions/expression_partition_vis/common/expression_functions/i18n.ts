@@ -21,6 +21,10 @@ export const strings = {
     i18n.translate('expressionPartitionVis.reusable.function.args.bucketsHelpText', {
       defaultMessage: 'Buckets dimensions config',
     }),
+  getBucketArgHelp: () =>
+    i18n.translate('expressionPartitionVis.waffle.function.args.bucketHelpText', {
+      defaultMessage: 'Bucket dimensions config',
+    }),
   getSplitColumnArgHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.args.splitColumnHelpText', {
       defaultMessage: 'Split by column dimension config',

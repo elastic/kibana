@@ -10,7 +10,13 @@ import { FieldFormatsStart } from '../../../field_formats/public';
 import { CoreSetup, CoreStart, ThemeServiceStart } from '../../../../core/public';
 import { ChartsPluginSetup } from '../../../charts/public';
 import { DataPublicPluginStart } from '../../../data/public';
-import { partitionLabelsFunction, pieVisFunction } from '../common';
+import {
+  partitionLabelsFunction,
+  pieVisFunction,
+  treemapVisFunction,
+  mosaicVisFunction,
+  waffleVisFunction,
+} from '../common';
 import { getPartitionVisRenderer } from './expression_renderers';
 import {
   ExpressionPartitionVisPluginSetup,
@@ -18,7 +24,6 @@ import {
   SetupDeps,
   StartDeps,
 } from './types';
-import { treemapVisFunction } from '../common/expression_functions';
 
 /** @internal */
 export interface VisTypePieDependencies {
@@ -44,6 +49,8 @@ export class ExpressionPartitionVisPlugin {
     expressions.registerFunction(partitionLabelsFunction);
     expressions.registerFunction(pieVisFunction);
     expressions.registerFunction(treemapVisFunction);
+    expressions.registerFunction(mosaicVisFunction);
+    expressions.registerFunction(waffleVisFunction);
 
     const getStartDeps = async () => {
       const [coreStart, deps] = await core.getStartServices();

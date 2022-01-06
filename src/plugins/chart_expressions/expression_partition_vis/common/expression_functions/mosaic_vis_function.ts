@@ -8,17 +8,17 @@
 
 import { PartitionVisParams } from '../types/expression_renderers';
 import { prepareLogTable } from '../../../../visualizations/common/prepare_log_table';
-import { chartTypes, TreemapVisExpressionFunctionDefinition } from '../types';
+import { chartTypes, MosaicVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
   PARTITION_LABELS_VALUE,
   PARTITION_VIS_RENDERER_NAME,
-  TREEMAP_VIS_EXPRESSION_NAME,
+  MOSAIC_VIS_EXPRESSION_NAME,
 } from '../constants';
 import { errors, strings } from './i18n';
 
-export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => ({
-  name: TREEMAP_VIS_EXPRESSION_NAME,
+export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
+  name: MOSAIC_VIS_EXPRESSION_NAME,
   type: 'render',
   inputTypes: ['datatable'],
   help: strings.getPieVisFunctionName(),
@@ -120,7 +120,7 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
         visData: context,
         visConfig,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
-        visType: chartTypes.TREEMAP,
+        visType: chartTypes.MOSAIC,
         params: {
           listenOnChange: true,
         },

@@ -10,6 +10,8 @@ import {
   PARTITION_LABELS_VALUE,
   PIE_VIS_EXPRESSION_NAME,
   TREEMAP_VIS_EXPRESSION_NAME,
+  MOSAIC_VIS_EXPRESSION_NAME,
+  WAFFLE_VIS_EXPRESSION_NAME,
 } from '../constants';
 import {
   ExpressionFunctionDefinition,
@@ -23,6 +25,8 @@ import {
   LabelPositions,
   ValueFormats,
   TreemapVisConfig,
+  MosaicVisConfig,
+  WaffleVisConfig,
 } from './expression_renderers';
 
 export interface PartitionLabelsArguments {
@@ -59,6 +63,20 @@ export type TreemapVisExpressionFunctionDefinition = ExpressionFunctionDefinitio
   typeof TREEMAP_VIS_EXPRESSION_NAME,
   Datatable,
   TreemapVisConfig,
+  ExpressionValueRender<RenderValue>
+>;
+
+export type MosaicVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  typeof MOSAIC_VIS_EXPRESSION_NAME,
+  Datatable,
+  MosaicVisConfig,
+  ExpressionValueRender<RenderValue>
+>;
+
+export type WaffleVisExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  typeof WAFFLE_VIS_EXPRESSION_NAME,
+  Datatable,
+  WaffleVisConfig,
   ExpressionValueRender<RenderValue>
 >;
 

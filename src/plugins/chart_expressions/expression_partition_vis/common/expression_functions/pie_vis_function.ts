@@ -8,7 +8,7 @@
 
 import { EmptySizeRatios, PartitionVisParams } from '../types/expression_renderers';
 import { prepareLogTable } from '../../../../visualizations/common/prepare_log_table';
-import { chartTypes, PieVisExpressionFunctionDefinition } from '../types/expression_functions';
+import { chartTypes, PieVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
   PARTITION_LABELS_VALUE,

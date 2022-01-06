@@ -7,12 +7,7 @@
  */
 
 import { Datatable } from '../../../expressions/public';
-import {
-  BucketColumns,
-  PartitionVisParams,
-  LabelPositions,
-  ValueFormats,
-} from '../common/types/expression_renderers';
+import { BucketColumns, PartitionVisParams, LabelPositions, ValueFormats } from '../common/types';
 
 export const createMockBucketColumns = (): BucketColumns[] => {
   return [

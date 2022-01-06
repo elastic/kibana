@@ -6,8 +6,13 @@
  * Side Public License, v 1.
  */
 import { CoreSetup, CoreStart, Plugin } from '../../../../core/server';
-import { partitionLabelsFunction, pieVisFunction } from '../common';
-import { treemapVisFunction } from '../common/expression_functions';
+import {
+  partitionLabelsFunction,
+  pieVisFunction,
+  treemapVisFunction,
+  mosaicVisFunction,
+  waffleVisFunction,
+} from '../common';
 import {
   ExpressionPartitionVisPluginSetup,
   ExpressionPartitionVisPluginStart,
@@ -28,6 +33,8 @@ export class ExpressionPartitionVisPlugin
     expressions.registerFunction(partitionLabelsFunction);
     expressions.registerFunction(pieVisFunction);
     expressions.registerFunction(treemapVisFunction);
+    expressions.registerFunction(mosaicVisFunction);
+    expressions.registerFunction(waffleVisFunction);
   }
 
   public start(core: CoreStart, deps: StartDeps) {}

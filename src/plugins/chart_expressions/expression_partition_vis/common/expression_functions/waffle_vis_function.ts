@@ -8,17 +8,17 @@
 
 import { PartitionVisParams } from '../types/expression_renderers';
 import { prepareLogTable } from '../../../../visualizations/common/prepare_log_table';
-import { chartTypes, TreemapVisExpressionFunctionDefinition } from '../types';
+import { chartTypes, WaffleVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
   PARTITION_LABELS_VALUE,
   PARTITION_VIS_RENDERER_NAME,
-  TREEMAP_VIS_EXPRESSION_NAME,
+  WAFFLE_VIS_EXPRESSION_NAME,
 } from '../constants';
-import { errors, strings } from './i18n';
+import { strings } from './i18n';
 
-export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => ({
-  name: TREEMAP_VIS_EXPRESSION_NAME,
+export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
+  name: WAFFLE_VIS_EXPRESSION_NAME,
   type: 'render',
   inputTypes: ['datatable'],
   help: strings.getPieVisFunctionName(),
@@ -28,10 +28,9 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
       help: strings.getMetricArgHelp(),
       required: true,
     },
-    buckets: {
+    bucket: {
       types: ['vis_dimension'],
-      help: strings.getBucketsArgHelp(),
-      multi: true,
+      help: strings.getBucketArgHelp(),
     },
     splitColumn: {
       types: ['vis_dimension'],
@@ -87,17 +86,13 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
     },
   },
   fn(context, args, handlers) {
-    const maxSupportedBuckets = 2;
-    if ((args.buckets ?? []).length > maxSupportedBuckets) {
-      throw new Error(errors.moreThanNBucketsAreNotSupportedError(maxSupportedBuckets));
-    }
-
+    const buckets = args.bucket ? [args.bucket] : [];
     const visConfig: PartitionVisParams = {
       ...args,
       palette: args.palette,
       dimensions: {
         metric: args.metric,
-        buckets: args.buckets,
+        buckets,
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,
       },
@@ -106,7 +101,7 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
     if (handlers?.inspectorAdapters?.tables) {
       const logTable = prepareLogTable(context, [
         [[args.metric], strings.getSliceSizeHelp()],
-        [args.buckets, strings.getSliceHelp()],
+        [buckets, strings.getSliceHelp()],
         [args.splitColumn, strings.getColumnSplitHelp()],
         [args.splitRow, strings.getRowSplitHelp()],
       ]);
@@ -120,7 +115,7 @@ export const treemapVisFunction = (): TreemapVisExpressionFunctionDefinition => 
         visData: context,
         visConfig,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
-        visType: chartTypes.TREEMAP,
+        visType: chartTypes.WAFFLE,
         params: {
           listenOnChange: true,
         },
