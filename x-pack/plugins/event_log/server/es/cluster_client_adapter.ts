@@ -537,7 +537,7 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       return {
         page,
         per_page: perPage,
-        total: isNumber(total) ? total : total.value,
+        total: isNumber(total) ? total : total!.value,
         data: hits.map((hit) => hit._source),
       };
     } catch (err) {

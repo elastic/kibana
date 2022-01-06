@@ -90,6 +90,7 @@ export interface IVectorStyle extends IStyle {
     previousFields: IField[],
     mapColors: string[]
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
+  getIsPointsOnly(): boolean;
   isTimeAware(): boolean;
   getPrimaryColor(): string;
   getIcon(showIncompleteIndicator: boolean): ReactElement;
@@ -479,7 +480,7 @@ export class VectorStyle implements IVectorStyle {
         handlePropertyChange={handlePropertyChange}
         styleProperties={styleProperties}
         layer={this._layer}
-        isPointsOnly={this._getIsPointsOnly()}
+        isPointsOnly={this.getIsPointsOnly()}
         isLinesOnly={this._getIsLinesOnly()}
         onIsTimeAwareChange={onIsTimeAwareChange}
         isTimeAware={this.isTimeAware()}
@@ -632,7 +633,7 @@ export class VectorStyle implements IVectorStyle {
     ) as Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
   }
 
-  _getIsPointsOnly = () => {
+  getIsPointsOnly = () => {
     return this._styleMeta.isPointsOnly();
   };
 
@@ -702,7 +703,7 @@ export class VectorStyle implements IVectorStyle {
 
   getIcon(showIncompleteIndicator: boolean) {
     const isLinesOnly = this._getIsLinesOnly();
-    const isPointsOnly = this._getIsPointsOnly();
+    const isPointsOnly = this.getIsPointsOnly();
 
     let strokeColor;
     if (isLinesOnly) {
@@ -770,7 +771,7 @@ export class VectorStyle implements IVectorStyle {
     return (
       <VectorStyleLegend
         styles={this._getLegendDetailStyleProperties()}
-        isPointsOnly={this._getIsPointsOnly()}
+        isPointsOnly={this.getIsPointsOnly()}
         isLinesOnly={this._getIsLinesOnly()}
         symbolId={this._getSymbolId()}
       />

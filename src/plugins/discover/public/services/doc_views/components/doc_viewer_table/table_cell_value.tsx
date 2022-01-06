@@ -13,7 +13,7 @@ import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { IgnoredReason } from '../../../../utils/get_ignored_reason';
 import { FieldRecord } from './table';
-import { DocViewTableRowBtnCollapse } from './table_row_btn_collapse';
+import { DocViewTableRowBtnCollapse } from './legacy/table_row_btn_collapse';
 
 const COLLAPSE_LINE_LENGTH = 350;
 

@@ -337,8 +337,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/92567
-    describe.skip('and the save button is clicked', () => {
+    describe('and the save button is clicked', () => {
       let policyInfo: PolicyTestResourceInfo;
 
       beforeEach(async () => {
@@ -367,7 +366,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
-        await pageObjects.common.closeToast();
+        await testSubjects.waitForHidden('toastCloseButton');
         await pageObjects.endpoint.navigateToEndpointList();
         await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
 
@@ -395,6 +394,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
+        await testSubjects.waitForHidden('toastCloseButton');
 
         const agentFullPolicy = await policyTestResources.getFullAgentPolicy(
           policyInfo.agentPolicy.id
@@ -442,6 +442,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
+        await testSubjects.waitForHidden('toastCloseButton');
 
         const agentFullPolicy = await policyTestResources.getFullAgentPolicy(
           policyInfo.agentPolicy.id
@@ -451,6 +452,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           getExpectedAgentPolicyEndpointInput({
             id: policyInfo.packagePolicy.id,
             name: policyInfo.packagePolicy.name,
+            revision: agentFullPolicy.inputs[0].revision,
             meta: {
               package: {
                 version: policyInfo.packageInfo.version,
@@ -476,7 +478,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await advancedPolicyField.clearValueWithKeyboard();
 
         // Make sure the toast button closes so the save button on the sticky footer is visible
-        await (await testSubjects.find('toastCloseButton')).click();
         await testSubjects.waitForHidden('toastCloseButton');
         await pageObjects.policy.confirmAndSave();
 
@@ -490,7 +491,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           getExpectedAgentPolicyEndpointInput({
             id: policyInfo.packagePolicy.id,
             name: policyInfo.packagePolicy.name,
-            revision: 3,
+            revision: agentFullPolicyUpdated.inputs[0].revision,
             meta: {
               package: {
                 version: policyInfo.packageInfo.version,
