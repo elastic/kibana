@@ -13,7 +13,7 @@ interface Props {
   value: Score;
 }
 
-export const CSPHealthBadge = ({ value }: Props) => {
+export const CspHealthBadge = ({ value }: Props) => {
   if (value <= 65) return <EuiBadge color="danger">{'Critical'}</EuiBadge>;
   if (value <= 86) return <EuiBadge color="warning">{'Warning'}</EuiBadge>;
   if (value <= 100) return <EuiBadge color="success">{'Healthy'}</EuiBadge>;

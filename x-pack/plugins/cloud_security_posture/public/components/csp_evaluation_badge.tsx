@@ -6,14 +6,18 @@
  */
 
 import React from 'react';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
 
 interface Props {
   type: 'passed' | 'failed';
 }
 
-export const CSPEvaluationBadge = ({ type }: Props) => (
-  <EuiBadge color={type === 'passed' ? 'success' : type === 'failed' ? 'danger' : 'default'}>
-    {type.toUpperCase()}
-  </EuiBadge>
+const getColor = (type: Props['type']): EuiBadgeProps['color'] => {
+  if (type === 'passed') return 'success';
+  if (type === 'failed') return 'danger';
+  return 'default';
+};
+
+export const CspEvaluationBadge = ({ type }: Props) => (
+  <EuiBadge color={getColor(type)}>{type.toUpperCase()}</EuiBadge>
 );

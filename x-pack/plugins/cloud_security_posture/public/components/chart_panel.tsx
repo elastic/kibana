@@ -6,27 +6,36 @@
  */
 
 import React, { useCallback } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { EuiPanel, EuiText, EuiTitle, EuiLoadingChart, EuiFlexGroup } from '@elastic/eui';
+import { CHART_PANEL_TEST_SUBJECTS } from './constants';
 
-interface ChartPanelProps {
+interface ChartPanelProps<TData = unknown> {
   title?: string;
   description?: string;
   hasBorder?: boolean;
   isLoading: boolean;
   isError: boolean;
-  data: any;
-  chart: React.FC<{ data: any }>;
+  data: TData;
+  chart: React.FC<{ data: TData }>;
 }
 
 const Loading = () => (
-  <EuiFlexGroup justifyContent="center" alignItems="center" data-test-subj="loading">
+  <EuiFlexGroup
+    justifyContent="center"
+    alignItems="center"
+    data-test-subj={CHART_PANEL_TEST_SUBJECTS.LOADING}
+  >
     <EuiLoadingChart size="m" />
   </EuiFlexGroup>
 );
 
 const Error = () => (
-  <EuiFlexGroup justifyContent="center" alignItems="center" data-test-subj="error">
+  <EuiFlexGroup
+    justifyContent="center"
+    alignItems="center"
+    data-test-subj={CHART_PANEL_TEST_SUBJECTS.ERROR}
+  >
     <EuiText size="xs" color="subdued">
       {'Error'}
     </EuiText>
@@ -34,14 +43,18 @@ const Error = () => (
 );
 
 const Empty = () => (
-  <EuiFlexGroup justifyContent="center" alignItems="center" data-test-subj="empty">
+  <EuiFlexGroup
+    justifyContent="center"
+    alignItems="center"
+    data-test-subj={CHART_PANEL_TEST_SUBJECTS.EMPTY}
+  >
     <EuiText size="xs" color="subdued">
       {'No data to display'}
     </EuiText>
   </EuiFlexGroup>
 );
 
-export const ChartPanel = ({
+export const ChartPanel = <TData extends unknown>({
   title,
   description,
   hasBorder = true,
@@ -49,7 +62,7 @@ export const ChartPanel = ({
   isLoading,
   isError,
   data,
-}: ChartPanelProps) => {
+}: ChartPanelProps<TData>) => {
   const renderChart = useCallback(() => {
     if (isLoading) return <Loading />;
     if (isError) return <Error />;
@@ -61,9 +74,9 @@ export const ChartPanel = ({
     <EuiPanel hasBorder={hasBorder} hasShadow={false} data-test-subj="chart-panel">
       <EuiFlexGroup direction="column" gutterSize="xs">
         {title && (
-          <StyledEuiTitle size="s">
+          <EuiTitle size="s" css={euiTitleStyle}>
             <h3>{title}</h3>
-          </StyledEuiTitle>
+          </EuiTitle>
         )}
         {description && (
           <EuiText size="xs" color="subdued">
@@ -76,6 +89,6 @@ export const ChartPanel = ({
   );
 };
 
-const StyledEuiTitle = styled(EuiTitle)`
+const euiTitleStyle = css`
   font-weight: 400;
 `;

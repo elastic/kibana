@@ -12,18 +12,28 @@ import {
   EuiPanel,
   EuiIcon,
   EuiTitle,
-  IconType,
   EuiSpacer,
   EuiDescriptionList,
 } from '@elastic/eui';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
 import { ComplianceTrendChart } from '../compliance_charts/compliance_trend_chart';
 import { useCloudPostureStatsApi } from '../../../common/api/use_cloud_posture_stats_api';
-import { CSPHealthBadge } from '../../../components/csp_health_badge';
+import { CspHealthBadge } from '../../../components/csp_health_badge';
 import { ChartPanel } from '../../../components/chart_panel';
 
-const logoMap: Record<string, IconType> = {
+type BenchmarksWithIcons = 'CIS Kubernetes';
+
+const logoMap: Record<BenchmarksWithIcons, EuiIconType> = {
   'CIS Kubernetes': 'logoKubernetes',
+};
+
+const isBenchmarkWithIcon = (benchmark: string): benchmark is BenchmarksWithIcons =>
+  benchmark in logoMap;
+
+const getBenchmarkLogo = (benchmarkName: BenchmarksWithIcons | string): EuiIconType => {
+  if (isBenchmarkWithIcon(benchmarkName)) return logoMap[benchmarkName];
+  return 'logoElastic';
 };
 
 export const BenchmarksSection = () => {
@@ -44,7 +54,7 @@ export const BenchmarksSection = () => {
                 borderRight: `1px solid lightgray`,
               }}
             >
-              <EuiIcon type={logoMap[benchmark.name]} size="xxl" />
+              <EuiIcon type={getBenchmarkLogo(benchmark.name)} size="xxl" />
               <EuiSpacer />
               <EuiTitle size={'s'}>
                 <h3>{benchmark.name}</h3>
@@ -100,7 +110,7 @@ export const BenchmarksSection = () => {
                     title: 'Status',
                     description:
                       benchmark.postureScore !== undefined ? (
-                        <CSPHealthBadge value={benchmark.postureScore} />
+                        <CspHealthBadge value={benchmark.postureScore} />
                       ) : (
                         'error'
                       ),

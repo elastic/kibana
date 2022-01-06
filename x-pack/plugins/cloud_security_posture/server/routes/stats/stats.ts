@@ -14,7 +14,7 @@ import type {
 import type {
   CloudPostureStats,
   BenchmarkStats,
-  EvaluationStats,
+  EvaluationResult,
   Score,
 } from '../../../common/types';
 import {
@@ -117,7 +117,7 @@ export const getBenchmarksStats = async (
 export const getResourcesEvaluation = async (
   esClient: ElasticsearchClient,
   cycleId: string
-): Promise<EvaluationStats[]> => {
+): Promise<EvaluationResult[]> => {
   const failedEvaluationsPerResourceResult = await esClient.search(
     getResourcesEvaluationEsQuery(cycleId, RULE_FAILED, numOfResource)
   );

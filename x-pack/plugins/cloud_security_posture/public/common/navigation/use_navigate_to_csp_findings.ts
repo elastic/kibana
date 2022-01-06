@@ -8,7 +8,7 @@
 import { useHistory } from 'react-router-dom';
 import { CSP_FINDINGS_PATH } from './constants';
 
-export const useNavigateToCSPFindings = () => {
+export const useNavigateToCspFindings = () => {
   const history = useHistory();
 
   return {
