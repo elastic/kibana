@@ -24,7 +24,6 @@ import {
   ALERT_DURATION,
   ALERT_END,
   ALERT_INSTANCE_ID,
-  ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
@@ -38,6 +37,7 @@ import {
 } from '../../common/technical_rule_data_field_names';
 import { IRuleDataClient } from '../rule_data_client';
 import { AlertExecutorOptionsWithExtraServices } from '../types';
+import { fetchExistingAlerts } from './fetch_existing_alerts';
 import {
   CommonAlertFieldName,
   CommonAlertIdFieldName,
@@ -193,38 +193,12 @@ export const createLifecycleExecutor =
     > = {};
 
     if (trackedAlertStates.length) {
-      const { hits } = await ruleDataClient.getReader().search({
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    [ALERT_RULE_UUID]: commonRuleFields[ALERT_RULE_UUID],
-                  },
-                },
-                {
-                  terms: {
-                    [ALERT_UUID]: trackedAlertStates.map(
-                      (trackedAlertState) => trackedAlertState.alertUuid
-                    ),
-                  },
-                },
-              ],
-            },
-          },
-          size: trackedAlertStates.length,
-          collapse: {
-            field: ALERT_UUID,
-          },
-          sort: {
-            [TIMESTAMP]: 'desc' as const,
-          },
-        },
-        allow_no_indices: true,
-      });
-
-      hits.hits.forEach((hit) => {
+      const result = await fetchExistingAlerts(
+        ruleDataClient,
+        trackedAlertStates,
+        commonRuleFields
+      );
+      result.forEach((hit) => {
         const alertId = hit._source[ALERT_INSTANCE_ID];
         if (alertId) {
           trackedAlertsDataMap[alertId] = {
