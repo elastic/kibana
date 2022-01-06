@@ -9,6 +9,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, Pagination } from '@elastic/eui';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useAppUrl } from '../../../../../../common/lib/kibana';
+import { APP_UI_ID } from '../../../../../../../common/constants';
 import { useSearchAssignedEventFilters } from '../hooks';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
@@ -27,11 +29,13 @@ import {
 } from '../../policy_hooks';
 import { getCurrentArtifactsLocation } from '../../../store/policy_details/selectors';
 import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
+import { getEventFiltersListPath } from '../../../../../common/routing';
 
 interface PolicyEventFiltersListProps {
   policy: ImmutableObject<PolicyData>;
 }
 export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({ policy }) => {
+  const { getAppUrl } = useAppUrl();
   const policiesRequest = useGetEndpointSpecificPolicies();
   const navigateCallback = usePolicyDetailsEventFiltersNavigateCallback();
   const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
@@ -93,10 +97,24 @@ export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({
 
   const artifactCardPolicies = useEndpointPoliciesToArtifactPolicies(policiesRequest.data?.items);
   const provideCardProps: ArtifactCardGridProps['cardComponentProps'] = (artifact) => {
+    const viewUrlPath = getEventFiltersListPath({
+      filter: (artifact as ExceptionListItemSchema).item_id,
+    });
+    const fullDetailsAction = {
+      icon: 'controlsHorizontal',
+      children: i18n.translate(
+        'xpack.securitySolution.endpoint.policy.eventFilters.list.fullDetailsAction',
+        { defaultMessage: 'View full details' }
+      ),
+      href: getAppUrl({ appId: APP_UI_ID, path: viewUrlPath }),
+      navigateAppId: APP_UI_ID,
+      navigateOptions: { path: viewUrlPath },
+      'data-test-subj': 'view-full-details-action',
+    };
     const item = artifact as ExceptionListItemSchema;
     return {
       expanded: expandedItemsMap.get(item.id) || false,
-      actions: [],
+      actions: [fullDetailsAction],
       policies: artifactCardPolicies,
     };
   };
