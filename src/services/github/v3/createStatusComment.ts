@@ -2,7 +2,7 @@ import { Octokit } from '@octokit/rest';
 import { BackportResponse } from '../../../main';
 import { ValidConfigOptions } from '../../../options/options';
 import { logger, redactAccessToken } from '../../logger';
-import { getFirstLine, getShortSha } from '../commitFormatters';
+import { getFirstLine } from '../commitFormatters';
 
 export async function createStatusComment({
   options,
@@ -66,15 +66,15 @@ export function getCommentBody({
   backportResponse: BackportResponse;
 }): string {
   const { repoName, repoOwner, autoMerge } = options;
-  const backportPRCommand = `To backport manually run: \`node scripts/backport --pr ${pullNumber}\`.\nFor more info read the [Backport documentation](https://github.com/sqren/backport#backport)`;
+  const backportPRCommand = `\n## How to fix\n\nRe-run the backport manually:\n\`\`\`\n${options.backportBinary} --pr ${pullNumber}\n\`\`\``;
+  const supportSection =
+    '\n\n### Questions ?\nPlease refer to the [Backport tool documentation](https://github.com/sqren/backport)';
 
   if (backportResponse.status === 'failure') {
     return `## 💔 Backport failed
 The pull request could not be backported due to the following error:
 \`${backportResponse.errorMessage}\`
-
-${backportPRCommand}
-`;
+${backportPRCommand}${supportSection}`;
   }
 
   const tableBody = backportResponse.results
@@ -88,24 +88,23 @@ ${backportPRCommand}
       }
 
       if (result.error.meta?.type === 'commitsWithoutBackports') {
-        const conflictMessage = result.error.meta.commitsWithoutBackports.map(
-          (c) => {
-            if (c.commit.pullNumber) {
-              return ` - [#${c.commit.pullNumber}](${c.commit.pullUrl})`;
-            }
+        const conflictingPullRequests =
+          result.error.meta.commitsWithoutBackports.map((c) => {
+            return ` - [${getFirstLine(c.commit.originalMessage)}](${
+              c.commit.pullUrl
+            })`;
+          });
 
-            return ` - ${getFirstLine(c.commit.originalMessage)} (${getShortSha(
-              c.commit.sha
-            )})`;
-          }
-        );
+        const conflictSection = `<br><br>You might need to backport the following PRs to ${
+          result.targetBranch
+        }:<br>${conflictingPullRequests.join('<br>')}`;
 
         return [
           '❌',
           result.targetBranch,
-          `Could not backport due to conflicts, possibly caused by the following unbackported commits:<br>${conflictMessage.join(
-            '<br>'
-          )}`,
+          `**Backport failed because of merge conflicts**${
+            conflictingPullRequests.length > 0 ? conflictSection : ''
+          }`,
         ];
       }
 
@@ -115,7 +114,7 @@ ${backportPRCommand}
     .join('|\n|');
 
   const table = backportResponse.results.length
-    ? `| Status | Branch | Result |\n|:------:|:------:|:------:|\n|${tableBody}|`
+    ? `| Status | Branch | Result |\n|:------:|:------:|:------|\n|${tableBody}|`
     : '';
 
   const didAllBackportsSucceed = backportResponse.results.every(
@@ -132,14 +131,15 @@ ${backportPRCommand}
 
   const autoMergeMessage =
     autoMerge && didAnyBackportsSucceed
-      ? 'Note: Successful backport PRs will be merged automatically after passing CI.\n'
+      ? '\nNote: Successful backport PRs will be merged automatically after passing CI.'
       : '';
 
   const backportPRCommandMessage = !didAllBackportsSucceed
-    ? `${backportPRCommand}\n\n`
+    ? `${backportPRCommand}`
     : '';
 
   return redactAccessToken(
-    `${header}\n\n${table}\n\n${backportPRCommandMessage}${autoMergeMessage}`
+    `${header}\n\n${table}
+${backportPRCommandMessage}${autoMergeMessage}${supportSection}`
   );
 }

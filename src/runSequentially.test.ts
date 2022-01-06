@@ -47,6 +47,7 @@ describe('runSequentially', () => {
       autoFixConflicts: undefined,
       autoMerge: false,
       autoMergeMethod: 'merge',
+      backportBinary: 'node scripts/backport',
       branchLabelMapping: undefined,
       historicalBranchLabelMappings: [],
       cherrypickRef: true,

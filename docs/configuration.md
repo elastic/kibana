@@ -36,7 +36,7 @@ CLI: `--accessToken myAccessToken`
 
 #### `editor`
 
-If a conflicts occurs your editor of choice will be opened to make it easier for you to resolve the conflict
+If a merge conflicts occurs during backportin your editor of choice will be opened to make it easier for you to resolve the conflict
 
 CLI: `--editor code`
 
@@ -93,7 +93,7 @@ Config:
 
 #### `targetBranchChoices` **required**
 
-List of target branches the user can select interactively. The array can contain branch names as strings or objects that also contains the field `checked` which indicates whether the branch should be pre-selected. It is useful to pre-select branches you often backport to.
+List of target branches the user can select interactively.
 
 CLI: `--target-branch-choice <branch>`
 
@@ -101,9 +101,16 @@ Config:
 
 ```json
 {
+  "targetBranchChoices": ["6.3", "6.2", "6.1", "6.0"]
+}
+```
+
+The array can contain branch names as strings or objects that also contains the field `checked` which indicates whether the branch should be pre-selected. It is useful to pre-select branches you often backport to.
+
+```json
+{
   "targetBranchChoices": [
-    { "name": "6.x", "checked": true },
-    "6.3",
+    { "name": "6.3", "checked": true },
     "6.2",
     "6.1",
     "6.0"
@@ -162,6 +169,30 @@ Config:
 ```json
 {
   "autoAssign": true
+}
+```
+
+#### `backportBinary`
+
+The official way to run backport is by installing it globally and running `backport`. There are however many other ways to run it. It can be installed locally and then run with `npx backport`/`yarn backport` or wrapped in a custom script and run like a node.js application `node scripts/backport`.
+
+If you are using a non-standard way to run backport it is useful to add that here, to ensure that the Github comments posted by the backport tool includes the correct command.
+
+Important: Since this command will be included in status comments on Github, it must NOT include sensitive information, like an access token.
+
+Example of how `backportBinary` is used:
+
+<img src="https://user-images.githubusercontent.com/209966/148453206-28ad93f0-7cca-4552-a2ce-6fbc80e1d179.png" width="400"/>
+
+Default: `backport`
+
+CLI: N/A
+
+Config:
+
+```json
+{
+  "backportBinary": "node scripts/backport"
 }
 ```
 

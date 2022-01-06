@@ -7,7 +7,9 @@ describe('getCommentBody', () => {
   it('when an unknown error occurs', () => {
     expect(
       getCommentBody({
-        options: {} as ValidConfigOptions,
+        options: {
+          backportBinary: 'node scripts/backport',
+        } as ValidConfigOptions,
         pullNumber: 55,
         backportResponse: {
           status: 'failure',
@@ -19,9 +21,15 @@ describe('getCommentBody', () => {
       The pull request could not be backported due to the following error:
       \`A terrible error occured\`
 
-      To backport manually run: \`node scripts/backport --pr 55\`.
-      For more info read the [Backport documentation](https://github.com/sqren/backport#backport)
-      "
+      ## How to fix
+
+      Re-run the backport manually:
+      \`\`\`
+      node scripts/backport --pr 55
+      \`\`\`
+
+      ### Questions ?
+      Please refer to the [Backport tool documentation](https://github.com/sqren/backport)"
     `);
   });
 
@@ -57,12 +65,14 @@ describe('getCommentBody', () => {
       "## 💚 All backports created successfully
 
       | Status | Branch | Result |
-      |:------:|:------:|:------:|
+      |:------:|:------:|:------|
       |✅|7.x|[<img src=\\"https://img.shields.io/github/pulls/detail/state/elastic/kibana/55\\">](url-to-pr)|
       |✅|7.1|[<img src=\\"https://img.shields.io/github/pulls/detail/state/elastic/kibana/66\\">](url-to-pr)|
 
       Note: Successful backport PRs will be merged automatically after passing CI.
-      "
+
+      ### Questions ?
+      Please refer to the [Backport tool documentation](https://github.com/sqren/backport)"
     `);
   });
 
@@ -73,6 +83,7 @@ describe('getCommentBody', () => {
           repoName: 'kibana',
           repoOwner: 'elastic',
           autoMerge: true,
+          backportBinary: 'node scripts/backport',
         } as ValidConfigOptions,
         pullNumber: 55,
         backportResponse: {
@@ -98,14 +109,19 @@ describe('getCommentBody', () => {
       "## 💔 Some backports could not be created
 
       | Status | Branch | Result |
-      |:------:|:------:|:------:|
+      |:------:|:------:|:------|
       |❌|7.x|My boom error!|
       |❌|7.1|My boom error!|
 
-      To backport manually run: \`node scripts/backport --pr 55\`.
-      For more info read the [Backport documentation](https://github.com/sqren/backport#backport)
+      ## How to fix
 
-      "
+      Re-run the backport manually:
+      \`\`\`
+      node scripts/backport --pr 55
+      \`\`\`
+
+      ### Questions ?
+      Please refer to the [Backport tool documentation](https://github.com/sqren/backport)"
     `);
   });
 
@@ -116,6 +132,7 @@ describe('getCommentBody', () => {
           repoName: 'kibana',
           repoOwner: 'elastic',
           autoMerge: true,
+          backportBinary: 'node scripts/backport',
         } as ValidConfigOptions,
         pullNumber: 55,
         backportResponse: {
@@ -141,15 +158,20 @@ describe('getCommentBody', () => {
       "## 💔 Some backports could not be created
 
       | Status | Branch | Result |
-      |:------:|:------:|:------:|
+      |:------:|:------:|:------|
       |✅|7.x|[<img src=\\"https://img.shields.io/github/pulls/detail/state/elastic/kibana/55\\">](url-to-pr-55)|
       |❌|7.1|My boom error!|
 
-      To backport manually run: \`node scripts/backport --pr 55\`.
-      For more info read the [Backport documentation](https://github.com/sqren/backport#backport)
+      ## How to fix
 
+      Re-run the backport manually:
+      \`\`\`
+      node scripts/backport --pr 55
+      \`\`\`
       Note: Successful backport PRs will be merged automatically after passing CI.
-      "
+
+      ### Questions ?
+      Please refer to the [Backport tool documentation](https://github.com/sqren/backport)"
     `);
   });
 
@@ -160,6 +182,7 @@ describe('getCommentBody', () => {
           repoName: 'kibana',
           repoOwner: 'elastic',
           autoMerge: true,
+          backportBinary: 'node scripts/backport',
         } as ValidConfigOptions,
         pullNumber: 55,
         backportResponse: {
@@ -184,6 +207,16 @@ describe('getCommentBody', () => {
                     commit: {
                       pullNumber: 5,
                       pullUrl: 'url-to-pr-5',
+                      originalMessage: 'New Zealand commit message',
+                    },
+                  },
+
+                  {
+                    //@ts-expect-error
+                    commit: {
+                      pullNumber: 44,
+                      pullUrl: 'url-to-pr-44',
+                      originalMessage: 'Australia commit',
                     },
                   },
                 ],
@@ -196,15 +229,7 @@ describe('getCommentBody', () => {
               errorMessage: 'My boom error!',
               error: new HandledError('Boom!', {
                 type: 'commitsWithoutBackports',
-                commitsWithoutBackports: [
-                  {
-                    //@ts-expect-error
-                    commit: {
-                      sha: 'acdefg',
-                      originalMessage: 'Some long message\nin multiple lines',
-                    },
-                  },
-                ],
+                commitsWithoutBackports: [],
               }),
             },
           ],
@@ -214,16 +239,21 @@ describe('getCommentBody', () => {
       "## 💔 Some backports could not be created
 
       | Status | Branch | Result |
-      |:------:|:------:|:------:|
+      |:------:|:------:|:------|
       |✅|7.x|[<img src=\\"https://img.shields.io/github/pulls/detail/state/elastic/kibana/55\\">](url-to-pr-55)|
-      |❌|7.1|Could not backport due to conflicts, possibly caused by the following unbackported commits:<br> - [#5](url-to-pr-5)|
-      |❌|7.2|Could not backport due to conflicts, possibly caused by the following unbackported commits:<br> - Some long message (acdefg)|
+      |❌|7.1|**Backport failed because of merge conflicts**<br><br>You might need to backport the following PRs to 7.1:<br> - [New Zealand commit message](url-to-pr-5)<br> - [Australia commit](url-to-pr-44)|
+      |❌|7.2|**Backport failed because of merge conflicts**|
 
-      To backport manually run: \`node scripts/backport --pr 55\`.
-      For more info read the [Backport documentation](https://github.com/sqren/backport#backport)
+      ## How to fix
 
+      Re-run the backport manually:
+      \`\`\`
+      node scripts/backport --pr 55
+      \`\`\`
       Note: Successful backport PRs will be merged automatically after passing CI.
-      "
+
+      ### Questions ?
+      Please refer to the [Backport tool documentation](https://github.com/sqren/backport)"
     `);
   });
 });

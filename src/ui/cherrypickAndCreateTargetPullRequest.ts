@@ -17,7 +17,6 @@ import {
   getRepoForkOwner,
   fetchBranch,
   ConflictingFiles,
-  getIsCommitInBranch,
 } from '../services/git';
 import { getFirstLine, getShortSha } from '../services/github/commitFormatters';
 import { addAssigneesToPullRequest } from '../services/github/v3/addAssigneesToPullRequest';
@@ -30,11 +29,11 @@ import {
   PullRequestPayload,
 } from '../services/github/v3/createPullRequest';
 import { enablePullRequestAutoMerge } from '../services/github/v4/enablePullRequestAutoMerge';
-import { fetchCommitsByAuthor } from '../services/github/v4/fetchCommits/fetchCommitsByAuthor';
 import { consoleLog, logger } from '../services/logger';
 import { confirmPrompt } from '../services/prompts';
 import { sequentially } from '../services/sequentially';
 import { Commit } from '../services/sourceCommit/parseSourceCommit';
+import { getCommitsWithoutBackports } from './getCommitsWithoutBackports';
 
 export async function cherrypickAndCreateTargetPullRequest({
   options,
@@ -155,70 +154,6 @@ async function backportViaFilesystem({
   return createPullRequest({ options, prPayload });
 }
 
-// when the user is facing a git conflict we should help them understand
-// why the conflict occurs. In many cases it's because one or more commits haven't been backported yet
-export async function getCommitsWithoutBackports({
-  options,
-  commit,
-  targetBranch,
-  conflictingFiles,
-}: {
-  options: ValidConfigOptions;
-  commit: Commit;
-  targetBranch: string;
-  conflictingFiles: string[];
-}) {
-  const commitsInConflictingPaths = await fetchCommitsByAuthor({
-    ...options,
-    author: null, // retrieve commits across all authors
-    commitPaths: conflictingFiles,
-  });
-
-  return (
-    await Promise.all(
-      commitsInConflictingPaths
-        .filter((c) => {
-          // exclude the commit we are currently trying to backport
-          if (c.sha === commit.sha) {
-            return false;
-          }
-
-          // exclude commits that are newer than the commit we are trying to backport
-          if (c.committedDate > commit.committedDate) {
-            return false;
-          }
-
-          const alreadyBackported = c.expectedTargetPullRequests.some(
-            (pr) => pr.branch === targetBranch && pr.state === 'MERGED'
-          );
-          if (alreadyBackported) {
-            return false;
-          }
-
-          return true;
-        })
-        .slice(0, 10) // limit to max 10 commits
-        .map(async (c) => {
-          const isCommitInBranch = await getIsCommitInBranch(options, c.sha);
-          return { c, isCommitInBranch };
-        })
-    )
-  )
-    .filter(({ isCommitInBranch }) => !isCommitInBranch)
-    .map(({ c }) => {
-      // get pull request for the target branch (if it exists)
-      const unmergedPr = c.expectedTargetPullRequests.find(
-        (pr) => pr.branch === targetBranch
-      );
-
-      const formatted = ` - ${getFirstLine(c.originalMessage)}${
-        unmergedPr?.state === 'OPEN' ? chalk.gray(' (backport pending)') : ''
-      }${c.pullUrl ? `\n   ${c.pullUrl}` : ''}`;
-
-      return { formatted, commit: c };
-    });
-}
-
 /*
  * Returns the name of the backport branch without remote name
  *
@@ -301,6 +236,16 @@ async function waitForCherrypick(
     conflictingFiles: conflictingFiles.map((f) => f.relative).slice(0, 50),
   });
 
+  if (options.ci) {
+    throw new HandledError(
+      `Commit could not be cherrypicked due to conflicts`,
+      {
+        type: 'commitsWithoutBackports',
+        commitsWithoutBackports,
+      }
+    );
+  }
+
   consoleLog(
     chalk.bold('\nThe commit could not be backported due to conflicts\n')
   );
@@ -314,16 +259,6 @@ async function waitForCherrypick(
 
     consoleLog(
       `${commitsWithoutBackports.map((c) => c.formatted).join('\n')}\n\n`
-    );
-  }
-
-  if (options.ci) {
-    throw new HandledError(
-      `Commit could not be cherrypicked due to conflicts`,
-      {
-        type: 'commitsWithoutBackports',
-        commitsWithoutBackports,
-      }
     );
   }
 

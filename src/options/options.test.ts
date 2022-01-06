@@ -125,9 +125,10 @@ describe('getOptions', () => {
       accessToken: 'abc',
       assignees: [],
       autoAssign: false,
+      authenticatedUsername: 'john.diller',
       autoMerge: false,
       autoMergeMethod: 'merge',
-      authenticatedUsername: 'john.diller',
+      backportBinary: 'backport',
       branchLabelMapping: {
         foo: 'bar',
       },

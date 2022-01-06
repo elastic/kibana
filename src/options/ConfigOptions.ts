@@ -26,6 +26,7 @@ type Options = Partial<{
   autoFixConflicts: AutoFixConflictsHandler;
   autoMerge: boolean;
   autoMergeMethod: string;
+  backportBinary: string;
   cherrypickRef: boolean;
   ci: boolean;
   commitPaths: string[];

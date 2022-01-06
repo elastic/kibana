@@ -25,6 +25,7 @@ export const defaultConfigOptions = {
   autoAssign: false,
   autoMerge: false,
   autoMergeMethod: 'merge',
+  backportBinary: 'backport',
   cherrypickRef: true,
   ci: false,
   commitPaths: [] as Array<string>,
