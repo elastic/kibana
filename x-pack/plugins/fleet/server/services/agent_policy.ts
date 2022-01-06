@@ -144,7 +144,7 @@ class AgentPolicyService {
 
     if (!searchParams) throw new Error('Missing ID');
 
-    return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams, id);
+    return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams);
   }
 
   private async ensureAgentPolicy(
