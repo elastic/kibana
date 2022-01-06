@@ -11,21 +11,24 @@ import { createLicensedRouteHandler } from '../../licensed_route_handler';
 import type { ElasticsearchRole } from './model';
 import { transformElasticsearchRoleToRole } from './model';
 
-export function defineGetAllRolesRoutes({ router, authz }: RouteDefinitionParams) {
+export function defineGetAllRolesRoutes({ router, authz, getFeatures }: RouteDefinitionParams) {
   router.get(
     { path: '/api/security/role', validate: false },
     createLicensedRouteHandler(async (context, request, response) => {
       try {
-        const { body: elasticsearchRoles } =
+        const [features, { body: elasticsearchRoles }] = await Promise.all([
+          getFeatures(),
           await context.core.elasticsearch.client.asCurrentUser.security.getRole<
             Record<string, ElasticsearchRole>
-          >();
+          >(),
+        ]);
 
         // Transform elasticsearch roles into Kibana roles and return in a list sorted by the role name.
         return response.ok({
           body: Object.entries(elasticsearchRoles)
             .map(([roleName, elasticsearchRole]) =>
               transformElasticsearchRoleToRole(
+                features,
                 // @ts-expect-error @elastic/elasticsearch SecurityIndicesPrivileges.names expected to be string[]
                 elasticsearchRole,
                 roleName,

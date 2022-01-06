@@ -56,11 +56,19 @@ interface TestOptions {
     apiArguments?: { get: unknown[]; put: unknown[] };
     recordSubFeaturePrivilegeUsage?: boolean;
   };
+  features?: KibanaFeature[];
 }
 
 const putRoleTest = (
   description: string,
-  { name, payload, licenseCheckResult = { state: 'valid' }, apiResponses, asserts }: TestOptions
+  {
+    name,
+    payload,
+    licenseCheckResult = { state: 'valid' },
+    apiResponses,
+    asserts,
+    features,
+  }: TestOptions
 ) => {
   test(description, async () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
@@ -88,43 +96,45 @@ const putRoleTest = (
       securityFeatureUsageServiceMock.createStartContract()
     );
 
-    mockRouteDefinitionParams.getFeatures.mockResolvedValue([
-      new KibanaFeature({
-        id: 'feature_1',
-        name: 'feature 1',
-        app: [],
-        category: { id: 'foo', label: 'foo' },
-        privileges: {
-          all: {
-            ui: [],
-            savedObject: { all: [], read: [] },
+    mockRouteDefinitionParams.getFeatures.mockResolvedValue(
+      features ?? [
+        new KibanaFeature({
+          id: 'feature_1',
+          name: 'feature 1',
+          app: [],
+          category: { id: 'foo', label: 'foo' },
+          privileges: {
+            all: {
+              ui: [],
+              savedObject: { all: [], read: [] },
+            },
+            read: {
+              ui: [],
+              savedObject: { all: [], read: [] },
+            },
           },
-          read: {
-            ui: [],
-            savedObject: { all: [], read: [] },
-          },
-        },
-        subFeatures: [
-          {
-            name: 'sub feature 1',
-            privilegeGroups: [
-              {
-                groupType: 'independent',
-                privileges: [
-                  {
-                    id: 'sub_feature_privilege_1',
-                    name: 'first sub-feature privilege',
-                    includeIn: 'none',
-                    ui: [],
-                    savedObject: { all: [], read: [] },
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      }),
-    ]);
+          subFeatures: [
+            {
+              name: 'sub feature 1',
+              privilegeGroups: [
+                {
+                  groupType: 'independent',
+                  privileges: [
+                    {
+                      id: 'sub_feature_privilege_1',
+                      name: 'first sub-feature privilege',
+                      includeIn: 'none',
+                      ui: [],
+                      savedObject: { all: [], read: [] },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        }),
+      ]
+    );
 
     definePutRolesRoutes(mockRouteDefinitionParams);
     const [[{ validate }, handler]] = mockRouteDefinitionParams.router.put.mock.calls;
@@ -206,6 +216,56 @@ describe('PUT role', () => {
       name: 'foo-role',
       licenseCheckResult: { state: 'invalid', message: 'test forbidden message' },
       asserts: { statusCode: 403, result: { message: 'test forbidden message' } },
+    });
+
+    describe('feature validation', () => {
+      const fooFeature = new KibanaFeature({
+        id: 'bar',
+        name: 'bar',
+        privileges: {
+          all: {
+            requireAllSpaces: true,
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          read: {
+            disabled: true,
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+        app: [],
+        category: { id: 'bar', label: 'bar' },
+      });
+
+      putRoleTest('returns validation errors', {
+        name: 'bar-role',
+        payload: {
+          kibana: [
+            {
+              spaces: ['bar-space'],
+              base: [],
+              feature: {
+                bar: ['all', 'read'],
+              },
+            },
+          ],
+        },
+        features: [fooFeature],
+        asserts: {
+          statusCode: 400,
+          result: {
+            message:
+              'Role cannot be updated due to validation errors: ["Feature privilege [bar.all] requires all spaces to be selected but received [bar-space]","Feature [bar] does not support privilege [read]."]',
+          },
+        },
+      });
     });
   });
 

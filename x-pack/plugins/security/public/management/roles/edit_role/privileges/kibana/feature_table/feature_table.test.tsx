@@ -49,6 +49,7 @@ const setup = (config: TestConfig) => {
       onChangeAll={onChangeAll}
       canCustomizeSubFeaturePrivileges={config.canCustomizeSubFeaturePrivileges}
       privilegeIndex={config.privilegeIndex}
+      allSpacesSelected={true}
     />
   );
 
