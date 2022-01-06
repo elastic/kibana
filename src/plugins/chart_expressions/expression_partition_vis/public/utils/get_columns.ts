@@ -6,9 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { getColumnByAccessor } from './accessor';
+import { ExpressionValueVisDimension } from '../../../../visualizations/common';
 import { DatatableColumn, Datatable } from '../../../../expressions/public';
 import { BucketColumns, PartitionVisParams } from '../../common/types';
+import { getColumnByAccessor } from './accessor';
+
+const getMetricColumn = (
+  metricAccessor: ExpressionValueVisDimension['accessor'],
+  visData: Datatable
+) => {
+  return getColumnByAccessor(metricAccessor, visData.columns);
+};
 
 export const getColumns = (
   visParams: PartitionVisParams,
@@ -17,28 +25,23 @@ export const getColumns = (
   metricColumn: DatatableColumn;
   bucketColumns: Array<Partial<BucketColumns>>;
 } => {
-  if (visParams.dimensions.buckets && visParams.dimensions.buckets.length > 0) {
-    const bucketColumns: Array<Partial<BucketColumns>> = visParams.dimensions.buckets.map(
-      ({ accessor, format }) => ({
-        ...getColumnByAccessor(accessor, visData.columns),
-        format,
-      })
-    );
+  const { metric, buckets } = visParams.dimensions;
+  if (buckets && buckets.length > 0) {
+    const bucketColumns: Array<Partial<BucketColumns>> = buckets.map(({ accessor, format }) => ({
+      ...getColumnByAccessor(accessor, visData.columns),
+      format,
+    }));
+
     const lastBucketId = bucketColumns[bucketColumns.length - 1].id;
     const matchingIndex = visData.columns.findIndex((col) => col.id === lastBucketId);
     return {
       bucketColumns,
-      metricColumn: visData.columns[matchingIndex + 1],
+      metricColumn: getMetricColumn(metric?.accessor ?? matchingIndex + 1, visData),
     };
   }
-  const metricAccessor = visParams?.dimensions?.metric.accessor ?? 0;
-  const metricColumn = getColumnByAccessor(metricAccessor, visData.columns);
+  const metricColumn = getMetricColumn(metric.accessor ?? 0, visData);
   return {
     metricColumn,
-    bucketColumns: [
-      {
-        name: metricColumn.name,
-      },
-    ],
+    bucketColumns: [{ name: metricColumn.name }],
   };
 };
