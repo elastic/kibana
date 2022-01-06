@@ -59003,8 +59003,7 @@ async function setupRemoteCache(repoRootPath) {
   if (!(await isVaultAvailable())) {
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].info('[bazel_tools] vault is not available, unable to setup remote cache settings.');
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].info('[bazel_tools] building packages will work, but will be slower in many cases.');
-    _log__WEBPACK_IMPORTED_MODULE_4__["log"].info('[bazel_tools] to setup vault, if you are an Elastic employee, visit:');
-    _log__WEBPACK_IMPORTED_MODULE_4__["log"].info('[bazel_tools] https://github.com/elastic/infra/tree/master/docs/vault#github-auth');
+    _log__WEBPACK_IMPORTED_MODULE_4__["log"].info('[bazel_tools] reach out to Operations if you need assistance with this.');
     return;
   }
 
@@ -59020,8 +59019,7 @@ async function setupRemoteCache(repoRootPath) {
   } catch (ex) {
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].info('[bazel_tools] unable to read bazel remote cache key from vault, are you authenticated?');
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].info('[bazel_tools] building packages will work, but will be slower in many cases.');
-    _log__WEBPACK_IMPORTED_MODULE_4__["log"].info('[bazel_tools] to setup vault, if you are an Elastic employee, visit:');
-    _log__WEBPACK_IMPORTED_MODULE_4__["log"].info('[bazel_tools] https://github.com/elastic/infra/tree/master/docs/vault#github-auth');
+    _log__WEBPACK_IMPORTED_MODULE_4__["log"].info('[bazel_tools] reach out to Operations if you need assistance with this.');
     _log__WEBPACK_IMPORTED_MODULE_4__["log"].info(`[bazel_tools] ${ex}`);
     return;
   }

@@ -51,8 +51,7 @@ export async function setupRemoteCache(repoRootPath: string) {
   if (!(await isVaultAvailable())) {
     log.info('[bazel_tools] vault is not available, unable to setup remote cache settings.');
     log.info('[bazel_tools] building packages will work, but will be slower in many cases.');
-    log.info('[bazel_tools] to setup vault, if you are an Elastic employee, visit:');
-    log.info('[bazel_tools] https://github.com/elastic/infra/tree/master/docs/vault#github-auth');
+    log.info('[bazel_tools] reach out to Operations if you need assistance with this.');
     return;
   }
 
@@ -72,8 +71,7 @@ export async function setupRemoteCache(repoRootPath: string) {
       '[bazel_tools] unable to read bazel remote cache key from vault, are you authenticated?'
     );
     log.info('[bazel_tools] building packages will work, but will be slower in many cases.');
-    log.info('[bazel_tools] to setup vault, if you are an Elastic employee, visit:');
-    log.info('[bazel_tools] https://github.com/elastic/infra/tree/master/docs/vault#github-auth');
+    log.info('[bazel_tools] reach out to Operations if you need assistance with this.');
     log.info(`[bazel_tools] ${ex}`);
 
     return;
