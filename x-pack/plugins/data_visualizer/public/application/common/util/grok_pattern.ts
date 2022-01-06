@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-const MATCH_FIELDS = /(%{\w*?:\w*?})/g;
+const ALIAS_PATTERN = /^%{\w*?}$/;
+const MATCH_FIELDS = /(%{\w*?:\w*?})/;
 const MATCH_AND_CAPTURE_FIELDS = /%{(\w*?):(\w*?)}/;
 
-function isSinglePattern(pattern: string) {
-  // if the pattern contains more than one field,
-  // assume the fields can be edited
-  return (pattern.match(MATCH_FIELDS) ?? []).length === 1;
+function isAliasPattern(pattern: string) {
+  //  check to see if the pattern is a single alias pattern,
+  // e.g. %{COMBINEDAPACHELOG}
+  return (pattern.match(ALIAS_PATTERN) ?? []).length === 1;
 }
 
 export function splitGrok(grokPattern: string, filter: boolean = false) {
@@ -34,7 +35,7 @@ export function getGrokField(field: string) {
 }
 
 export function getFieldsFromGrokPattern(grokPattern: string) {
-  if (isSinglePattern(grokPattern)) {
+  if (isAliasPattern(grokPattern)) {
     return [];
   }
 
@@ -48,7 +49,7 @@ export function getFieldsFromGrokPattern(grokPattern: string) {
 }
 
 export function replaceFieldInGrokPattern(grokPattern: string, fieldName: string, index: number) {
-  if (isSinglePattern(grokPattern)) {
+  if (isAliasPattern(grokPattern)) {
     return grokPattern;
   }
 
