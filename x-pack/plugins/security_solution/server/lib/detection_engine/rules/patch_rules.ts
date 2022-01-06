@@ -37,11 +37,8 @@ class PatchError extends Error {
 
 export const patchRules = async ({
   rulesClient,
-  savedObjectsClient,
   author,
   buildingBlockType,
-  ruleStatusClient,
-  spaceId,
   description,
   eventCategoryOverride,
   falsePositives,

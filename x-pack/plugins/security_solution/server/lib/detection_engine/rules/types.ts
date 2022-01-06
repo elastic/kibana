@@ -257,20 +257,17 @@ export interface CreateRulesOptions {
 }
 
 export interface UpdateRulesOptions {
-  isRuleRegistryEnabled: boolean;
-  spaceId: string;
-  ruleStatusClient: IRuleExecutionLogClient;
   rulesClient: RulesClient;
   defaultOutputIndex: string;
   existingRule: SanitizedAlert<RuleParams> | null | undefined;
   ruleUpdate: UpdateRulesSchema;
 }
 
-export interface PatchRulesOptions {
-  spaceId: string;
-  ruleStatusClient: IRuleExecutionLogClient;
+export interface PatchRulesOptions extends Partial<PatchRulesFieldsOptions> {
   rulesClient: RulesClient;
-  savedObjectsClient: SavedObjectsClientContract;
+  rule: SanitizedAlert<RuleParams> | null | undefined;
+}
+interface PatchRulesFieldsOptions {
   anomalyThreshold: AnomalyThresholdOrUndefined;
   author: AuthorOrUndefined;
   buildingBlockType: BuildingBlockTypeOrUndefined;
@@ -318,7 +315,6 @@ export interface PatchRulesOptions {
   version: VersionOrUndefined;
   exceptionsList: ListArrayOrUndefined;
   actions: RuleAlertAction[] | undefined;
-  rule: SanitizedAlert<RuleParams> | null | undefined;
   namespace?: NamespaceOrUndefined;
 }
 
