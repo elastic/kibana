@@ -173,6 +173,9 @@ Chromium browser and install it into the {kib} installation path.
 ** For <a href="https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac/901912/chrome-mac.zip">x64</a> systems
 ** For <a href="https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac_Arm/901913/chrome-mac.zip">ARM</a> systems
 
-2. Copy the zip file into the holding area. Relative to the root directory of {kib}, the path is `.chromium/x64` for x64 systems and `.chromium/arm64` for ARM systems.
+2. Copy the zip file into the holding area. Relative to the root directory of {kib}, the path is:
 
-When {kib} starts, it will automatically extract the browser from the zip file, and it is ready to use for PNG and PDF reports.
+** `.chromium/x64` for x64 systems
+** `.chromium/arm64` for ARM systems
+
+When {kib} starts, it will automatically extract the browser from the zip file, and is then ready for PNG and PDF reports.
