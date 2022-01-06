@@ -10,7 +10,6 @@ import { createQuery } from '../create_query';
 import { LogstashMetric } from '../metrics';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
-import { checkParam } from '../error_missing_required';
 import { LegacyRequest, PipelineVersion } from '../../types';
 import { mergePipelineVersions } from './merge_pipeline_versions';
 
