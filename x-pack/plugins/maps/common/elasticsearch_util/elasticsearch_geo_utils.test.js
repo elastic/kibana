@@ -129,7 +129,7 @@ describe('hitsToGeoJson', () => {
       {
         _id: 'doc1',
         _index: 'index1',
-        _source: {
+        fields: {
           [geoFieldName]: [
             {
               type: 'Point',
@@ -180,7 +180,7 @@ describe('hitsToGeoJson', () => {
       {
         _id: 'doc1',
         _index: 'index1',
-        _source: {
+        fields: {
           [geoFieldName]: {
             type: 'GeometryCollection',
             geometries: [
@@ -245,7 +245,7 @@ describe('hitsToGeoJson', () => {
       {
         _id: 'doc1',
         _index: 'index1',
-        _source: {
+        fields: {
           [geoFieldName]: {
             type: 'Point',
             coordinates: [100, 20],
