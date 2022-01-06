@@ -44,6 +44,11 @@ import { configDeprecations, getInfraDeprecationsFactory } from './deprecations'
 
 export const config: PluginConfigDescriptor = {
   schema: schema.object({
+    alerting: schema.object({
+      inventory_threshold: schema.object({
+        group_by_page_size: schema.number({ defaultValue: 10000 }),
+      }),
+    }),
     inventory: schema.object({
       compositeSize: schema.number({ defaultValue: 2000 }),
     }),

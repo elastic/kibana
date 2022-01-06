@@ -150,7 +150,8 @@ const getData = async (
       snapshotRequest,
       source,
       compositeSize,
-      logQueryFields
+      logQueryFields,
+      false
     );
 
     if (!nodes.length) return { [UNGROUPED_FACTORY_KEY]: null }; // No Data state
