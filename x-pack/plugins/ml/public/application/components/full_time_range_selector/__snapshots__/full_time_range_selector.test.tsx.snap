@@ -1,19 +1,79 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FullTimeRangeSelector renders the selector 1`] = `
-<EuiButton
-  data-test-subj="mlButtonUseFullData"
-  isDisabled={false}
-  onClick={[Function]}
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="xs"
+  responsive={false}
 >
-  <FormattedMessage
-    defaultMessage="Use full {dataViewTitle} data"
-    id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
-    values={
-      Object {
-        "dataViewTitle": "test-data-view",
+  <EuiButton
+    data-test-subj="mlButtonUseFullData"
+    isDisabled={false}
+    onClick={[Function]}
+  >
+    <FormattedMessage
+      defaultMessage="Use full non-frozen {dataViewTitle} data"
+      id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
+      values={
+        Object {
+          "dataViewTitle": "test-data-view",
+        }
       }
-    }
-  />
-</EuiButton>
+    />
+  </EuiButton>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiPopover
+      anchorPosition="downRight"
+      button={
+        <EuiButtonIcon
+          aria-label="More"
+          display="base"
+          iconType="boxesVertical"
+          onClick={[Function]}
+          size="m"
+        />
+      }
+      closePopover={[Function]}
+      display="inlineBlock"
+      hasArrow={true}
+      id="mlFullTimeRangeSelectorOption"
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="none"
+    >
+      <EuiContextMenuPanel
+        hasFocus={true}
+        items={
+          Array [
+            <EuiContextMenuItem
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="Use full data"
+                id="xpack.ml.fullTimeRangeSelector.useFullDataMenuLabel"
+                values={
+                  Object {
+                    "dataViewTitle": "test-data-view",
+                  }
+                }
+              />
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              onClick={[Function]}
+            >
+              <FormattedMessage
+                defaultMessage="Use full non-frozen data"
+                id="xpack.ml.fullTimeRangeSelector.useFullNonFrozenDataMenuLabel"
+                values={Object {}}
+              />
+            </EuiContextMenuItem>,
+          ]
+        }
+        size="s"
+      />
+    </EuiPopover>
+  </EuiFlexItem>
+</EuiFlexGroup>
 `;
