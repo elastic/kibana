@@ -748,7 +748,9 @@ describe('The metric threshold alert type', () => {
 
 const createMockStaticConfiguration = (sources: any) => ({
   alerting: {
-    group_by_page_size: 100,
+    metric_threshold: {
+      group_by_page_size: 100,
+    },
   },
   inventory: {
     compositeSize: 2000,
