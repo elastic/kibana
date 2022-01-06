@@ -23,7 +23,6 @@ import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../visualizations/public
 import { VisualizeServices } from '../types';
 import { VisualizeConstants } from '../visualize_constants';
 import { getTableColumns, getNoItemsMessage } from '../utils';
-import { getTheme } from '../../services';
 
 export const VisualizeListing = () => {
   const {
@@ -42,6 +41,7 @@ export const VisualizeListing = () => {
       visualizeCapabilities,
       dashboardCapabilities,
       kbnUrlStateStorage,
+      theme,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
@@ -199,7 +199,7 @@ export const VisualizeListing = () => {
       })}
       toastNotifications={toastNotifications}
       searchFilters={searchFilters}
-      theme={getTheme()}
+      theme={theme}
     >
       {dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&
         dashboardCapabilities.createNew && (

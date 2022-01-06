@@ -25,5 +25,5 @@
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": ["kibanaReact", "kibanaUtils", "discover"]
+  "requiredBundles": ["kibanaReact", "discover"]
 }

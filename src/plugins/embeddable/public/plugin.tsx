@@ -149,6 +149,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
           : defaultEmbeddableFactoryProvider(def)
       );
     });
+    setTheme(core.theme);
 
     this.appListSubscription = core.application.applications$.subscribe((appList) => {
       this.appList = appList;

@@ -17,6 +17,7 @@ import {
   NotificationsSetup,
   Plugin,
   PluginInitializerContext,
+  ThemeServiceStart,
 } from 'src/core/public';
 import type { ScreenshottingSetup } from '../../screenshotting/public';
 import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
@@ -29,7 +30,7 @@ import { ManagementSetup, ManagementStart } from '../../../../src/plugins/manage
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';
-import { ReportingSetup, ReportingStart, setTheme } from './';
+import { ReportingSetup, ReportingStart } from './';
 import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import { getGeneralErrorToast } from './notifier';
@@ -56,13 +57,18 @@ function getStored(): JobId[] {
   return sessionValue ? JSON.parse(sessionValue) : [];
 }
 
-function handleError(notifications: NotificationsSetup, err: Error): Rx.Observable<JobSummarySet> {
+function handleError(
+  notifications: NotificationsSetup,
+  err: Error,
+  theme: ThemeServiceStart
+): Rx.Observable<JobSummarySet> {
   notifications.toasts.addDanger(
     getGeneralErrorToast(
       i18n.translate('xpack.reporting.publicNotifier.pollingErrorMessage', {
         defaultMessage: 'Reporting notifier error!',
       }),
-      err
+      err,
+      theme
     )
   );
   window.console.error(err);
@@ -158,7 +164,6 @@ export class ReportingPublicPlugin
 
     const startServices$ = Rx.from(getStartServices());
     const usesUiCapabilities = !this.config.roles.enabled;
-    setTheme(core.theme);
 
     const apiClient = this.getApiClient(core.http, core.uiSettings);
 
@@ -236,6 +241,7 @@ export class ReportingPublicPlugin
         startServices$,
         uiSettings,
         usesUiCapabilities,
+        theme: core.theme,
       })
     );
 
@@ -247,6 +253,7 @@ export class ReportingPublicPlugin
         startServices$,
         uiSettings,
         usesUiCapabilities,
+        theme: core.theme,
       })
     );
 
@@ -256,7 +263,7 @@ export class ReportingPublicPlugin
   public start(core: CoreStart) {
     const { notifications } = core;
     const apiClient = this.getApiClient(core.http, core.uiSettings);
-    const streamHandler = new StreamHandler(notifications, apiClient);
+    const streamHandler = new StreamHandler(notifications, apiClient, core.theme);
     const interval = durationToNumber(this.config.poll.jobsRefresh.interval);
     Rx.timer(0, interval)
       .pipe(
@@ -265,7 +272,7 @@ export class ReportingPublicPlugin
         filter((storedJobs) => storedJobs.length > 0), // stop the pipeline here if there are none pending
         mergeMap((storedJobs) => streamHandler.findChangedStatusJobs(storedJobs)), // look up the latest status of all pending jobs on the server
         mergeMap(({ completed, failed }) => streamHandler.showNotifications({ completed, failed })),
-        catchError((err) => handleError(notifications, err))
+        catchError((err) => handleError(notifications, err, core.theme))
       )
       .subscribe();
 

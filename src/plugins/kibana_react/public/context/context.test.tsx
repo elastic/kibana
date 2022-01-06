@@ -9,12 +9,10 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { context, createKibanaReactContext, useKibana, KibanaContextProvider } from './context';
-import { CoreStart, ThemeServiceStart } from '../../../../core/public';
-import { coreMock, overlayServiceMock, themeServiceMock } from '../../../../core/public/mocks';
-import { KibanaThemeProvider } from '..';
+import { coreMock, overlayServiceMock } from '../../../../core/public/mocks';
+import { CoreStart } from '../../../../core/public';
 
 let container: HTMLDivElement | null;
-const theme: ThemeServiceStart = themeServiceMock.createStartContract();
 
 beforeEach(() => {
   container = document.createElement('div');
@@ -29,11 +27,9 @@ afterEach(() => {
 test('can mount <Provider> without crashing', () => {
   const services = coreMock.createStart();
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme.theme$}>
-      <context.Provider value={{ services } as any}>
-        <div>Hello world</div>
-      </context.Provider>
-    </KibanaThemeProvider>,
+    <context.Provider value={{ services } as any}>
+      <div>Hello world</div>
+    </context.Provider>,
     container
   );
 });
@@ -47,11 +43,9 @@ test('useKibana() hook retrieves Kibana context', () => {
   const core = coreMock.createStart();
   (core as any).foo = 'bar';
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme.theme$}>
-      <context.Provider value={{ services: core } as any}>
-        <TestConsumer />
-      </context.Provider>
-    </KibanaThemeProvider>,
+    <context.Provider value={{ services: core } as any}>
+      <TestConsumer />
+    </context.Provider>,
     container
   );
 
@@ -66,11 +60,9 @@ test('createContext() creates context that can be consumed by useKibana() hook',
   const { Provider } = createKibanaReactContext(services);
 
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme.theme$}>
-      <Provider>
-        <TestConsumer />
-      </Provider>
-    </KibanaThemeProvider>,
+    <Provider>
+      <TestConsumer />
+    </Provider>,
     container
   );
 
@@ -91,11 +83,9 @@ test('services, notifications and overlays objects are always available', () => 
   };
 
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme.theme$}>
-      <Provider>
-        <Test />
-      </Provider>
-    </KibanaThemeProvider>,
+    <Provider>
+      <Test />
+    </Provider>,
     container
   );
 });
@@ -112,11 +102,9 @@ test('<KibanaContextProvider> provider provides default kibana-react context', (
   };
 
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme.theme$}>
-      <KibanaContextProvider>
-        <Test />
-      </KibanaContextProvider>
-    </KibanaThemeProvider>,
+    <KibanaContextProvider>
+      <Test />
+    </KibanaContextProvider>,
     container
   );
 });
@@ -129,11 +117,9 @@ test('<KibanaContextProvider> can set custom services in context', () => {
   };
 
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme.theme$}>
-      <KibanaContextProvider services={{ test: 'quux' }}>
-        <Test />
-      </KibanaContextProvider>
-    </KibanaThemeProvider>,
+    <KibanaContextProvider services={{ test: 'quux' }}>
+      <Test />
+    </KibanaContextProvider>,
     container
   );
 });
@@ -148,15 +134,13 @@ test('nested <KibanaContextProvider> override and merge services', () => {
   };
 
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme.theme$}>
-      <KibanaContextProvider services={{ foo: 'foo', bar: 'bar', baz: 'baz' }}>
-        <KibanaContextProvider services={{ foo: 'foo2' }}>
-          <KibanaContextProvider services={{ baz: 'baz3' }}>
-            <Test />
-          </KibanaContextProvider>
+    <KibanaContextProvider services={{ foo: 'foo', bar: 'bar', baz: 'baz' }}>
+      <KibanaContextProvider services={{ foo: 'foo2' }}>
+        <KibanaContextProvider services={{ baz: 'baz3' }}>
+          <Test />
         </KibanaContextProvider>
       </KibanaContextProvider>
-    </KibanaThemeProvider>,
+    </KibanaContextProvider>,
     container
   );
 });
@@ -178,13 +162,11 @@ test('overlays wrapper uses the closest overlays service', () => {
   } as Partial<CoreStart>;
 
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme.theme$}>
-      <KibanaContextProvider services={core1}>
-        <KibanaContextProvider services={core2}>
-          <Test />
-        </KibanaContextProvider>
+    <KibanaContextProvider services={core1}>
+      <KibanaContextProvider services={core2}>
+        <Test />
       </KibanaContextProvider>
-    </KibanaThemeProvider>,
+    </KibanaContextProvider>,
     container
   );
 
@@ -218,13 +200,11 @@ test('notifications wrapper uses the closest notifications service', () => {
   } as Partial<CoreStart>;
 
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme.theme$}>
-      <KibanaContextProvider services={core1}>
-        <KibanaContextProvider services={core2}>
-          <Test />
-        </KibanaContextProvider>
+    <KibanaContextProvider services={core1}>
+      <KibanaContextProvider services={core2}>
+        <Test />
       </KibanaContextProvider>
-    </KibanaThemeProvider>,
+    </KibanaContextProvider>,
     container
   );
 
@@ -259,13 +239,11 @@ test('overlays wrapper uses available overlays service, higher up in <KibanaCont
   expect(core1.overlays!.openFlyout).toHaveBeenCalledTimes(0);
 
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme.theme$}>
-      <KibanaContextProvider services={core1}>
-        <KibanaContextProvider services={core2}>
-          <Test />
-        </KibanaContextProvider>
+    <KibanaContextProvider services={core1}>
+      <KibanaContextProvider services={core2}>
+        <Test />
       </KibanaContextProvider>
-    </KibanaThemeProvider>,
+    </KibanaContextProvider>,
     container
   );
 

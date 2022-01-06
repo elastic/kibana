@@ -18,9 +18,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import React, { Component, ReactElement } from 'react';
-import { IUiSettingsClient, ToastsSetup } from 'src/core/public';
+import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from 'src/core/public';
 import url from 'url';
-import { getTheme } from '../..';
 import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import {
   CSV_REPORT_TYPE,
@@ -47,6 +46,7 @@ export interface ReportingPanelProps {
   options?: ReactElement | null;
   isDirty?: boolean;
   onClose?: () => void;
+  theme: ThemeServiceSetup;
 }
 
 export type Props = ReportingPanelProps & { intl: InjectedIntl };
@@ -293,7 +293,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
                 ),
               }}
             />,
-            { theme$: getTheme().theme$ }
+            { theme$: this.props.theme.theme$ }
           ),
           'data-test-subj': 'queueReportSuccess',
         });

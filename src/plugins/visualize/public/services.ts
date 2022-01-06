@@ -7,7 +7,7 @@
  */
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
 
-import type { IUiSettingsClient, ThemeServiceStart } from '../../../core/public';
+import type { IUiSettingsClient } from '../../../core/public';
 import type { VisEditorsRegistry } from './vis_editors_registry';
 import type { UsageCollectionStart } from '../../usage_collection/public';
 
@@ -20,5 +20,3 @@ export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCo
 
 export const [getVisEditorsRegistry, setVisEditorsRegistry] =
   createGetterSetter<VisEditorsRegistry>('VisEditorsRegistry');
-
-export const [getTheme, setTheme] = createGetterSetter<ThemeServiceStart>('Theme');

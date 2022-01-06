@@ -38,24 +38,34 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
   public render(dom: HTMLElement) {
     const title = typeof this.error === 'string' ? this.error : this.error.message;
     this.dom = dom;
-    ReactDOM.render(
-      <KibanaThemeProvider theme$={getTheme().theme$}>
-        // @ts-ignore
-        <div className="embPanel__error embPanel__content" data-test-subj="embeddableStackError">
-          <EuiText color="subdued" size="xs">
-            <EuiIcon type="alert" color="danger" />
-            <EuiSpacer size="s" />
-            <Markdown
-              markdown={title}
-              openLinksInNewTab={true}
-              data-test-subj="errorMessageMarkdown"
-            />
-          </EuiText>
-        </div>
-        ,
-      </KibanaThemeProvider>,
-      dom
+    let theme;
+    try {
+      theme = getTheme();
+    } catch (err) {
+      theme = {};
+    }
+    // @ts-ignore
+    const node = (
+      <div className="embPanel__error embPanel__content" data-test-subj="embeddableStackError">
+        <EuiText color="subdued" size="xs">
+          <EuiIcon type="alert" color="danger" />
+          <EuiSpacer size="s" />
+          <Markdown
+            markdown={title}
+            openLinksInNewTab={true}
+            data-test-subj="errorMessageMarkdown"
+          />
+        </EuiText>
+      </div>
     );
+    const content =
+      theme && theme.theme$ ? (
+        <KibanaThemeProvider theme$={theme.theme$}>{node}</KibanaThemeProvider>
+      ) : (
+        node
+      );
+
+    ReactDOM.render(content, dom);
   }
 
   public destroy() {

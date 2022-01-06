@@ -11,13 +11,8 @@ import * as ReactDOM from 'react-dom';
 import { act, Simulate } from 'react-dom/test-utils';
 import { createStateContainer } from './create_state_container';
 import { createStateContainerReactHelpers } from './create_state_container_react_helpers';
-import { ThemeServiceStart } from '../../../../core/public';
-import { themeServiceMock } from '../../../../core/public/mocks';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaThemeProvider } from '../../public/theme';
 
 let container: HTMLDivElement | null;
-const theme: ThemeServiceStart = themeServiceMock.createStartContract();
 
 beforeEach(() => {
   container = document.createElement('div');
@@ -45,11 +40,9 @@ test('<Provider> passes state to <Consumer>', () => {
   const { Provider, Consumer } = createStateContainerReactHelpers<typeof stateContainer>();
 
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme.theme$}>
-      <Provider value={stateContainer}>
-        <Consumer>{(s: typeof stateContainer) => s.get().hello}</Consumer>
-      </Provider>
-    </KibanaThemeProvider>,
+    <Provider value={stateContainer}>
+      <Consumer>{(s: typeof stateContainer) => s.get().hello}</Consumer>
+    </Provider>,
     container
   );
 
@@ -79,11 +72,9 @@ test('<Provider> passes state to connect()()', () => {
   const DemoConnected = connect<Props1, 'message'>(mergeProps)(Demo);
 
   ReactDOM.render(
-    <KibanaThemeProvider theme$={theme.theme$}>
-      <Provider value={stateContainer}>
-        <DemoConnected stop="?" />
-      </Provider>
-    </KibanaThemeProvider>,
+    <Provider value={stateContainer}>
+      <DemoConnected stop="?" />
+    </Provider>,
     container
   );
 
@@ -96,11 +87,9 @@ test('context receives stateContainer', () => {
 
   ReactDOM.render(
     /* eslint-disable @typescript-eslint/no-shadow */
-    <KibanaThemeProvider theme$={theme.theme$}>
-      <Provider value={stateContainer}>
-        <context.Consumer>{(stateContainer) => stateContainer.get().foo}</context.Consumer>
-      </Provider>
-    </KibanaThemeProvider>,
+    <Provider value={stateContainer}>
+      <context.Consumer>{(stateContainer) => stateContainer.get().foo}</context.Consumer>
+    </Provider>,
     /* eslint-enable @typescript-eslint/no-shadow */
     container
   );
@@ -122,11 +111,9 @@ describe('hooks', () => {
       };
 
       ReactDOM.render(
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <Provider value={stateContainer}>
-            <Demo />
-          </Provider>
-        </KibanaThemeProvider>,
+        <Provider value={stateContainer}>
+          <Demo />
+        </Provider>,
         container
       );
 
@@ -144,11 +131,9 @@ describe('hooks', () => {
       };
 
       ReactDOM.render(
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <Provider value={stateContainer}>
-            <Demo />
-          </Provider>
-        </KibanaThemeProvider>,
+        <Provider value={stateContainer}>
+          <Demo />
+        </Provider>,
         container
       );
 
@@ -169,11 +154,9 @@ describe('hooks', () => {
       };
 
       ReactDOM.render(
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <Provider value={stateContainer}>
-            <Demo />
-          </Provider>
-        </KibanaThemeProvider>,
+        <Provider value={stateContainer}>
+          <Demo />
+        </Provider>,
         container
       );
 
@@ -213,11 +196,9 @@ describe('hooks', () => {
       };
 
       ReactDOM.render(
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <Provider value={stateContainer}>
-            <Demo />
-          </Provider>
-        </KibanaThemeProvider>,
+        <Provider value={stateContainer}>
+          <Demo />
+        </Provider>,
         container
       );
 
@@ -250,11 +231,9 @@ describe('hooks', () => {
       };
 
       ReactDOM.render(
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <Provider value={stateContainer}>
-            <Demo />
-          </Provider>
-        </KibanaThemeProvider>,
+        <Provider value={stateContainer}>
+          <Demo />
+        </Provider>,
         container
       );
 
@@ -277,11 +256,9 @@ describe('hooks', () => {
       };
 
       ReactDOM.render(
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <Provider value={stateContainer}>
-            <Demo />
-          </Provider>
-        </KibanaThemeProvider>,
+        <Provider value={stateContainer}>
+          <Demo />
+        </Provider>,
         container
       );
 
@@ -310,11 +287,9 @@ describe('hooks', () => {
         return <>{value}</>;
       };
       ReactDOM.render(
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <Provider value={stateContainer}>
-            <Demo />
-          </Provider>
-        </KibanaThemeProvider>,
+        <Provider value={stateContainer}>
+          <Demo />
+        </Provider>,
         container
       );
 
@@ -348,11 +323,9 @@ describe('hooks', () => {
         return <>{JSON.stringify(value)}</>;
       };
       ReactDOM.render(
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <Provider value={stateContainer}>
-            <Demo />
-          </Provider>
-        </KibanaThemeProvider>,
+        <Provider value={stateContainer}>
+          <Demo />
+        </Provider>,
         container
       );
 
@@ -392,11 +365,9 @@ describe('hooks', () => {
         return <>{JSON.stringify(value)}</>;
       };
       ReactDOM.render(
-        <KibanaThemeProvider theme$={theme.theme$}>
-          <Provider value={stateContainer}>
-            <Demo />
-          </Provider>
-        </KibanaThemeProvider>,
+        <Provider value={stateContainer}>
+          <Demo />
+        </Provider>,
         container
       );
 

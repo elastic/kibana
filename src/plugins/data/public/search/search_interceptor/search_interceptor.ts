@@ -21,7 +21,7 @@ import {
   tap,
 } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { CoreSetup, CoreStart, ToastsSetup } from 'kibana/public';
+import { CoreSetup, CoreStart, ThemeServiceSetup, ToastsSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { BatchedFunc, BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import {
@@ -51,7 +51,6 @@ import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { createRequestHash } from './utils';
 import { SearchAbortController } from './search_abort_controller';
-import { getTheme } from '../../services';
 
 export interface SearchInterceptorDeps {
   bfetch: BfetchPublicSetup;
@@ -61,6 +60,7 @@ export interface SearchInterceptorDeps {
   toasts: ToastsSetup;
   usageCollector?: SearchUsageCollector;
   session: ISessionService;
+  theme: ThemeServiceSetup;
 }
 
 const MAX_CACHE_ITEMS = 50;
@@ -378,7 +378,7 @@ export class SearchInterceptor {
   private showTimeoutErrorToast = (e: SearchTimeoutError, sessionId?: string) => {
     this.deps.toasts.addDanger({
       title: 'Timed out',
-      text: toMountPoint(e.getErrorMessage(this.application), { theme$: getTheme().theme$ }),
+      text: toMountPoint(e.getErrorMessage(this.application), { theme$: this.deps.theme.theme$ }),
     });
   };
 
@@ -394,7 +394,7 @@ export class SearchInterceptor {
       {
         title: 'Your search session is still running',
         text: toMountPoint(SearchSessionIncompleteWarning(this.docLinks), {
-          theme$: getTheme().theme$,
+          theme$: this.deps.theme.theme$,
         }),
       },
       {
@@ -426,14 +426,14 @@ export class SearchInterceptor {
         title: i18n.translate('data.search.esErrorTitle', {
           defaultMessage: 'Cannot retrieve search results',
         }),
-        text: toMountPoint(e.getErrorMessage(this.application), { theme$: getTheme().theme$ }),
+        text: toMountPoint(e.getErrorMessage(this.application), { theme$: this.deps.theme.theme$ }),
       });
     } else if (e.constructor.name === 'HttpFetchError') {
       this.deps.toasts.addDanger({
         title: i18n.translate('data.search.httpErrorTitle', {
           defaultMessage: 'Cannot retrieve your data',
         }),
-        text: toMountPoint(getHttpError(e.message), { theme$: getTheme().theme$ }),
+        text: toMountPoint(getHttpError(e.message), { theme$: this.deps.theme.theme$ }),
       });
     } else {
       this.deps.toasts.addError(e, {

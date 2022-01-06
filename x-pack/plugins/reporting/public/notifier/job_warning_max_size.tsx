@@ -7,8 +7,7 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
-import { ToastInput } from 'src/core/public';
-import { getTheme } from '..';
+import { ThemeServiceStart, ToastInput } from 'src/core/public';
 import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { JobId, JobSummary } from '../../common/types';
 import { DownloadButton } from './job_download_button';
@@ -17,7 +16,8 @@ import { ReportLink } from './report_link';
 export const getWarningMaxSizeToast = (
   job: JobSummary,
   getReportLink: () => string,
-  getDownloadLink: (jobId: JobId) => string
+  getDownloadLink: (jobId: JobId) => string,
+  theme: ThemeServiceStart
 ): ToastInput => ({
   title: toMountPoint(
     <FormattedMessage
@@ -25,7 +25,7 @@ export const getWarningMaxSizeToast = (
       defaultMessage="Created partial report for {reportObjectType} '{reportObjectTitle}'"
       values={{ reportObjectType: job.jobtype, reportObjectTitle: job.title }}
     />,
-    { theme$: getTheme().theme$ }
+    { theme$: theme.theme$ }
   ),
   text: toMountPoint(
     <Fragment>
@@ -40,7 +40,7 @@ export const getWarningMaxSizeToast = (
       </p>
       <DownloadButton getUrl={getDownloadLink} job={job} />
     </Fragment>,
-    { theme$: getTheme().theme$ }
+    { theme$: theme.theme$ }
   ),
   'data-test-subj': 'completeReportMaxSizeWarning',
 });
