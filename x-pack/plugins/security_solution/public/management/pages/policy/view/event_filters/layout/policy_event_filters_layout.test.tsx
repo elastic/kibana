@@ -83,7 +83,20 @@ describe('Policy event filters layout', () => {
     );
   });
 
-  it('should hide the `Assign event filters to policy` button when license is downgraded to gold or below', () => {
+  it('should hide `Assign event filters to policy` on empty state with unassigned policies when downgraded to a gold or below license', () => {
+    getEndpointPrivilegesInitialStateMock({
+      canCreateArtifactsByPolicy: false,
+    });
+    mockedApi.responseProvider.eventFiltersList.mockReturnValue(
+      getFoundExceptionListItemSchemaMock(0)
+    );
+
+    const component = render();
+    mockedContext.history.push(getPolicyDetailsArtifactsListPath(policyItem.id));
+    expect(component.queryByTestId('assign-event-filter-button')).toBeNull();
+  });
+
+  it('should hide the `Assign event filters to policy` button license is downgraded to gold or below', () => {
     getEndpointPrivilegesInitialStateMock({
       canCreateArtifactsByPolicy: false,
     });
