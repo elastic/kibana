@@ -7,5 +7,5 @@ set -euo pipefail
 node scripts/build --all-platforms --debug
 
 cd target
-buildkite-agent artifact upload "./*.tar.gz;./*.zip;./*.deb;./*.rpm"
+buildkite-agent artifact upload "./kibana-[0-9]*-docker-image.tar.gz;./*.deb;./*.rpm"
 cd ..

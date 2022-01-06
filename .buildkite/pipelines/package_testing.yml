@@ -4,6 +4,7 @@ steps:
     agents:
       queue: c2-16
     timeout_in_minutes: 60
+    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
 
   - wait
 
