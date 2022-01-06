@@ -6,18 +6,15 @@
  * Side Public License, v 1.
  */
 
-import {
-  REPORT_INTERVAL_MS,
-  LOCALSTORAGE_KEY,
-  PAYLOAD_CONTENT_ENCODING,
-} from '../../common/constants';
+import { LOCALSTORAGE_KEY, PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 import { TelemetryService } from './telemetry_service';
 import { Storage } from '../../../kibana_utils/public';
 import type { EncryptedTelemetryPayload } from '../../common/types';
+import { isReportIntervalExpired } from '../../common/is_report_interval_expired';
 
 export class TelemetrySender {
   private readonly telemetryService: TelemetryService;
-  private lastReported?: string;
+  private lastReported?: number;
   private readonly storage: Storage;
   private intervalId: number = 0; // setInterval returns a positive integer, 0 means no interval is set
   private retryCount: number = 0;
@@ -32,38 +29,56 @@ export class TelemetrySender {
 
     const attributes = this.storage.get(LOCALSTORAGE_KEY);
     if (attributes) {
-      this.lastReported = attributes.lastReport;
+      this.lastReported = parseInt(attributes.lastReport, 10);
     }
   }
 
-  private saveToBrowser = () => {
+  private updateLastReported = (lastReported: number) => {
+    this.lastReported = lastReported;
     // we are the only code that manipulates this key, so it's safe to blindly overwrite the whole object
-    this.storage.set(LOCALSTORAGE_KEY, { lastReport: this.lastReported });
+    this.storage.set(LOCALSTORAGE_KEY, { lastReport: `${this.lastReported}` });
   };
 
-  private shouldSendReport = (): boolean => {
+  /**
+   * Using the local and SO's `lastReported` values, it decides whether the last report should be considered as expired
+   * @returns `true` if a new report should be generated. `false` otherwise.
+   */
+  private isReportDue = async (): Promise<boolean> => {
+    // Try to decide with the local `lastReported` to avoid querying the server
+    if (!isReportIntervalExpired(this.lastReported)) {
+      // If it is not expired locally, there's no need to send it again yet.
+      return false;
+    }
+
+    // Double-check with the server's value
+    const globalLastReported = await this.telemetryService.fetchLastReported();
+
+    if (globalLastReported) {
+      // Update the local value to avoid repetitions of this request (it was already expired, so it doesn't really matter if the server's value is older)
+      this.updateLastReported(globalLastReported);
+    }
+
+    return isReportIntervalExpired(globalLastReported);
+  };
+
+  /**
+   * Using configuration and the lastReported dates, it decides whether a new telemetry report should be sent.
+   * @returns `true` if a new report should be sent. `false` otherwise.
+   */
+  private shouldSendReport = async (): Promise<boolean> => {
     if (this.telemetryService.canSendTelemetry()) {
-      if (!this.lastReported) {
-        return true;
-      }
-      // returns NaN for any malformed or unset (null/undefined) value
-      const lastReported = parseInt(this.lastReported, 10);
-      // If it's been a day since we last sent telemetry
-      if (isNaN(lastReported) || Date.now() - lastReported > REPORT_INTERVAL_MS) {
-        return true;
-      }
+      return await this.isReportDue();
     }
 
     return false;
   };
 
   private sendIfDue = async (): Promise<void> => {
-    if (!this.shouldSendReport()) {
+    if (!(await this.shouldSendReport())) {
       return;
     }
     // optimistically update the report date and reset the retry counter for a new time report interval window
-    this.lastReported = `${Date.now()}`;
-    this.saveToBrowser();
+    this.updateLastReported(Date.now());
     this.retryCount = 0;
     await this.sendUsageData();
   };
@@ -89,6 +104,8 @@ export class TelemetrySender {
             })
         )
       );
+
+      await this.telemetryService.updateLastReported().catch(() => {}); // Let's catch the error. Worst-case scenario another Telemetry report will be generated somewhere else.
     } catch (err) {
       // ignore err and try again but after a longer wait period.
       this.retryCount = this.retryCount + 1;
