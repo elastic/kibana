@@ -28,10 +28,10 @@ export interface Dimension {
 }
 
 export interface Dimensions {
-  metric: Dimension;
-  buckets?: Dimension[];
-  splitRow?: Dimension[];
-  splitColumn?: Dimension[];
+  metric: ExpressionValueVisDimension;
+  buckets?: ExpressionValueVisDimension[];
+  splitRow?: ExpressionValueVisDimension[];
+  splitColumn?: ExpressionValueVisDimension[];
 }
 
 export interface LabelsParams {
@@ -68,7 +68,7 @@ export interface PieVisConfig extends PieCommonParams {
   splitColumn?: ExpressionValueVisDimension[];
   splitRow?: ExpressionValueVisDimension[];
   labels: ExpressionValuePieLabels;
-  palette: string;
+  palette: PaletteOutput;
 }
 
 export interface RenderValue {

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { getColumnByAccessor } from './accessor';
 import { DatatableColumn, Datatable } from '../../../../expressions/public';
 import { BucketColumns, PieVisParams } from '../../common/types';
 
@@ -19,7 +20,7 @@ export const getColumns = (
   if (visParams.dimensions.buckets && visParams.dimensions.buckets.length > 0) {
     const bucketColumns: Array<Partial<BucketColumns>> = visParams.dimensions.buckets.map(
       ({ accessor, format }) => ({
-        ...visData.columns[accessor],
+        ...getColumnByAccessor(accessor, visData.columns),
         format,
       })
     );
@@ -31,7 +32,7 @@ export const getColumns = (
     };
   }
   const metricAccessor = visParams?.dimensions?.metric.accessor ?? 0;
-  const metricColumn = visData.columns[metricAccessor];
+  const metricColumn = getColumnByAccessor(metricAccessor, visData.columns);
   return {
     metricColumn,
     bucketColumns: [

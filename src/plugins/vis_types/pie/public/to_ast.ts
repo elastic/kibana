@@ -8,6 +8,7 @@
 
 import { getVisSchemas, VisToExpressionAst, SchemaConfig } from '../../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
+import { PaletteOutput } from '../../../charts/common';
 import {
   PIE_VIS_EXPRESSION_NAME,
   PIE_LABELS_FUNCTION,
@@ -26,6 +27,13 @@ const prepareDimension = (params: SchemaConfig) => {
   }
 
   return buildExpression([visdimension]);
+};
+
+const preparePalette = (palette?: PaletteOutput) => {
+  const paletteExpressionFunction = buildExpressionFunction('system_palette', {
+    name: palette?.name,
+  });
+  return buildExpression([paletteExpressionFunction]);
 };
 
 const prepareLabels = (params: LabelsParams) => {
@@ -60,7 +68,7 @@ export const toExpressionAst: VisToExpressionAst<PieVisParams> = async (vis, par
     distinctColors: vis.params?.distinctColors,
     isDonut: vis.params.isDonut,
     emptySizeRatio: vis.params.emptySizeRatio,
-    palette: vis.params?.palette?.name,
+    palette: preparePalette(vis.params?.palette),
     labels: prepareLabels(vis.params.labels),
     metric: schemas.metric.map(prepareDimension),
     buckets: schemas.segment?.map(prepareDimension),

@@ -14,8 +14,8 @@ import {
   ArrayEntry,
 } from '@elastic/charts';
 import { isEqual } from 'lodash';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
 import { SeriesLayer, PaletteRegistry, lightenColor } from '../../../../charts/public';
-import type { DataPublicPluginStart } from '../../../../data/public';
 import type { DatatableRow } from '../../../../expressions/public';
 import type { BucketColumns, PieVisParams, SplitDimensionParams } from '../../common/types';
 import { getDistinctSeries } from './get_distinct_series';
@@ -25,13 +25,13 @@ const EMPTY_SLICE = Symbol('empty_slice');
 export const computeColor = (
   d: ShapeTreeNode,
   isSplitChart: boolean,
-  overwriteColors: { [key: string]: string },
+  overwriteColors: { [key: string]: string } = {},
   columns: Array<Partial<BucketColumns>>,
   rows: DatatableRow[],
   visParams: PieVisParams,
   palettes: PaletteRegistry | null,
   syncColors: boolean,
-  formatter: DataPublicPluginStart['fieldFormats'],
+  formatter: FieldFormatsStart,
   format?: BucketColumns['format']
 ) => {
   const { parentSeries, allSeries } = getDistinctSeries(rows, columns);
@@ -78,7 +78,8 @@ export const computeColor = (
         totalSeries: allSeries.length || 1,
         behindText: visParams.labels.show,
         syncColors,
-      }
+      },
+      visParams.palette?.params ?? { colors: [] }
     );
   }
   const seriesLayers: SeriesLayer[] = [];
@@ -115,21 +116,25 @@ export const computeColor = (
   if (overwriteColor) {
     return lightenColor(overwriteColor, seriesLayers.length, columns.length);
   }
-  return palettes?.get(visParams.palette.name).getCategoricalColor(seriesLayers, {
-    behindText: visParams.labels.show,
-    maxDepth: columns.length,
-    totalSeries: rows.length,
-    syncColors,
-  });
+  return palettes?.get(visParams.palette.name).getCategoricalColor(
+    seriesLayers,
+    {
+      behindText: visParams.labels.show,
+      maxDepth: columns.length,
+      totalSeries: rows.length,
+      syncColors,
+    },
+    visParams.palette?.params ?? { colors: [] }
+  );
 };
 
 export const getLayers = (
   columns: Array<Partial<BucketColumns>>,
   visParams: PieVisParams,
-  overwriteColors: { [key: string]: string },
+  overwriteColors: { [key: string]: string } = {},
   rows: DatatableRow[],
   palettes: PaletteRegistry | null,
-  formatter: DataPublicPluginStart['fieldFormats'],
+  formatter: FieldFormatsStart,
   syncColors: boolean
 ): PartitionLayer[] => {
   const fillLabel: Partial<PartitionFillLabel> = {

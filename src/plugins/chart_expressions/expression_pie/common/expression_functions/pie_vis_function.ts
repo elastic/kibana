@@ -7,10 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PieVisParams } from '../types/expression_renderers';
+import { EmptySizeRatios, PieVisParams } from '../types/expression_renderers';
 import { prepareLogTable } from '../../../../visualizations/common/prepare_log_table';
 import { PieVisExpressionFunctionDefinition } from '../types/expression_functions';
-import { PIE_LABELS_VALUE, PIE_VIS_EXPRESSION_NAME } from '../constants';
+import { PIE_LABELS_FUNCTION, PIE_LABELS_VALUE, PIE_VIS_EXPRESSION_NAME } from '../constants';
 
 export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
   name: PIE_VIS_EXPRESSION_NAME,
@@ -107,35 +107,34 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       help: i18n.translate('expressionPie.pieVis.function.args.emptySizeRatioHelpText', {
         defaultMessage: 'Defines donut inner empty area size',
       }),
+      default: EmptySizeRatios.SMALL,
     },
     palette: {
-      types: ['string'],
+      types: ['palette', 'system_palette'],
       help: i18n.translate('expressionPie.pieVis.function.args.paletteHelpText', {
         defaultMessage: 'Defines the chart palette name',
       }),
-      default: 'default',
+      default: '{palette}',
     },
     labels: {
       types: [PIE_LABELS_VALUE],
       help: i18n.translate('expressionPie.pieVis.function.args.labelsHelpText', {
         defaultMessage: 'Pie labels config',
       }),
+      default: `{${PIE_LABELS_FUNCTION}}`,
     },
   },
   fn(context, args, handlers) {
     const visConfig: PieVisParams = {
       ...args,
-      palette: {
-        type: 'palette',
-        name: args.palette,
-      },
+      palette: args.palette,
       dimensions: {
         metric: args.metric,
         buckets: args.buckets,
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,
       },
-    } as PieVisParams;
+    };
 
     if (handlers?.inspectorAdapters?.tables) {
       const logTable = prepareLogTable(context, [
