@@ -36,7 +36,6 @@ export function getSecurityKPIConfig(_config: ConfigProps): SeriesConfig {
       'event.category',
     ],
     baseFilters: [],
-    palette: { type: 'palette', name: 'status' },
     definitionFields: [{ field: 'host.name' }],
     metricOptions: [
       {
