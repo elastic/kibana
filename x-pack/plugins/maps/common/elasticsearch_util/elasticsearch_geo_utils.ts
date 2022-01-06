@@ -129,10 +129,7 @@ export function hitsToGeoJson(
   };
 }
 
-// Parse geo_point docvalue_field
-// Either
-// 1) Array of latLon strings
-// 2) latLon string
+// Parse geo_point fields API response
 export function geoPointToGeometry(
   value: Point[] | Point | undefined,
   accumulator: Geometry[]
@@ -151,6 +148,7 @@ export function geoPointToGeometry(
   accumulator.push(value as Point);
 }
 
+// Parse geo_shape fields API response
 export function geoShapeToGeometry(
   value: ESGeometry | ESGeometry[] | undefined,
   accumulator: Geometry[]
@@ -167,7 +165,7 @@ export function geoShapeToGeometry(
     return;
   }
 
-  if (value.type === GEO_JSON_TYPE.GEOMETRY_COLLECTION) {
+  if (value.type.toLowerCase() === GEO_JSON_TYPE.GEOMETRY_COLLECTION.toLowerCase()) {
     const geometryCollection = value as unknown as { geometries: ESGeometry[] };
     for (let i = 0; i < geometryCollection.geometries.length; i++) {
       geoShapeToGeometry(geometryCollection.geometries[i], accumulator);
