@@ -13,7 +13,6 @@ import {
   getSecurityUniqueIpsKPIConfig,
   getSingleMetricConfig,
   getSecurityAuthenticationsConfig,
-  getEventsKPIConfig,
   getSecurityUniquePrivateIpsKPIConfig,
 } from './kpi_over_time_config';
 import { RenderAppProps } from '../types';
@@ -27,7 +26,6 @@ export const reportConfigMap = {
     getSecurityUniqueIpsKPIConfig,
     getSingleMetricConfig,
     getSecurityAuthenticationsConfig,
-    getEventsKPIConfig,
     getSecurityUniquePrivateIpsKPIConfig,
   ],
   securityAlerts: [getSecurityAlertsKPIConfig],

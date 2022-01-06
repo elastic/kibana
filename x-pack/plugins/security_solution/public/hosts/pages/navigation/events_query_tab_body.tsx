@@ -36,6 +36,7 @@ import {
   reportConfigMap,
 } from '../../../app/exploratory_view/security_exploratory_view';
 import { STACK_BY } from '../../../common/components/matrix_histogram/translations';
+import { ReportTypes } from '../../../../../observability/public';
 
 const EVENTS_HISTOGRAM_ID = 'eventsHistogramQuery';
 
@@ -159,7 +160,7 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
           title={'Events'}
           reportConfigMap={reportConfigMap}
           dataTypesIndexPatterns={indexPatternList}
-          reportType="events"
+          reportType={ReportTypes.KPI}
           attributes={[
             {
               reportDefinitions: {
@@ -167,8 +168,10 @@ const EventsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
               },
               name: selectedStackByOption.value,
               dataType: 'security',
-              selectedMetricField: selectedStackByOption.value,
+              selectedMetricField: 'EVENT_RECORDS',
+              breakdown: selectedStackByOption.value,
               time: { from: 'now-24h', to: 'now' },
+              seriesType: 'bar_stacked',
             },
           ]}
           legendIsVisible={true}

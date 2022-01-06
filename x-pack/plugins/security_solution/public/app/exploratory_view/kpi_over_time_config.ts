@@ -28,7 +28,13 @@ export function getSecurityKPIConfig(_config: ConfigProps): SeriesConfig {
     ],
     hasOperationType: false,
     filterFields: [],
-    breakdownFields: ['agent.type', 'event.module', 'event.dataset', 'event.category'],
+    breakdownFields: [
+      'agent.type',
+      'event.action',
+      'event.module',
+      'event.dataset',
+      'event.category',
+    ],
     baseFilters: [],
     palette: { type: 'palette', name: 'status' },
     definitionFields: [{ field: 'host.name' }],
@@ -51,7 +57,8 @@ export function getSecurityKPIConfig(_config: ConfigProps): SeriesConfig {
       },
       {
         label: 'Events',
-        id: 'EVENTS',
+        id: 'EVENT_RECORDS',
+        field: 'EVENT_RECORDS',
         columnType: FILTER_RECORDS,
         columnFilters: [
           {
@@ -375,46 +382,5 @@ export function getSingleMetricConfig(_config: ConfigProps): SeriesConfig {
       },
     ],
     labels: {},
-  };
-}
-
-export function getEventsKPIConfig(_config: ConfigProps): SeriesConfig {
-  return {
-    reportType: 'events',
-    defaultSeriesType: 'bar_stacked',
-    seriesTypes: [],
-    xAxisColumn: {
-      sourceField: '@timestamp',
-    },
-    yAxisColumns: [
-      {
-        operationType: 'unique_count',
-        sourceField: REPORT_METRIC_FIELD,
-      },
-    ],
-    hasOperationType: true,
-    filterFields: [],
-    breakdownFields: ['event.action'],
-    baseFilters: [],
-    palette: { type: 'palette', name: 'status' },
-    definitionFields: ['event.action'],
-    metricOptions: [
-      {
-        label: 'event.action',
-        field: 'event.action',
-        id: 'event.action',
-      },
-      {
-        label: 'event.dataset',
-        field: 'event.dataset',
-        id: 'event.dataset',
-      },
-      {
-        label: 'event.module',
-        field: 'event.module',
-        id: 'event.module',
-      },
-    ],
-    labels: { 'host.name': 'Hosts', 'url.full': 'URL', 'agent.type': 'Agent type' },
   };
 }
