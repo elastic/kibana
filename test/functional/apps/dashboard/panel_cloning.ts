@@ -13,6 +13,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'dashboard',
     'header',
@@ -51,6 +52,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('retains original panel dimensions', async () => {
       const panelDimensions = await PageObjects.dashboard.getPanelDimensions();
       expect(panelDimensions[0]).to.eql(panelDimensions[1]);
+    });
+
+    it('clone is by value', async () => {
+      const panelName = PIE_CHART_VIS_NAME.replace(/\s+/g, '');
+      const clonedPanel = await testSubjects.find(`embeddablePanelHeading-${panelName}(copy)`);
+      const descendants = await testSubjects.findAllDescendant(
+        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
+        clonedPanel
+      );
+      expect(descendants.length).to.equal(0);
     });
 
     it('gives a correct title to the clone of a clone', async () => {
