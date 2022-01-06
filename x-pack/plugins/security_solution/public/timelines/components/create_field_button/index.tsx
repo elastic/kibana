@@ -22,8 +22,6 @@ import { sourcererSelectors } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
 import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
-import { userHasPermissions } from '../../../detections/pages/detection_engine/rules/helpers';
-import { useUserData } from '../../../detections/components/user_info';
 
 interface CreateFieldButtonProps {
   selectedDataViewId: string;

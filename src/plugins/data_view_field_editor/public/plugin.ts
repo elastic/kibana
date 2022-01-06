@@ -54,11 +54,6 @@ export class IndexPatternFieldEditorPlugin
       openDeleteModal,
       userPermissions: {
         editIndexPattern: () => {
-          console.log('CAPS', {
-            'management.kibana.indexPatterns': capabilities.management.kibana.indexPatterns,
-            'indexPatterns.save': capabilities.indexPatterns.save,
-            capabilities,
-          });
           return capabilities.management.kibana.indexPatterns;
         },
       },
