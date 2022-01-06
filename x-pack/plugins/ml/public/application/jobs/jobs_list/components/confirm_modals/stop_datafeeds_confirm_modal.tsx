@@ -95,7 +95,7 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
               <EuiText>
                 <FormattedMessage
                   id="xpack.ml.jobsList.stopDatafeedsModal.stopManagedDatafeedsDescription"
-                  defaultMessage="{jobsCount, plural, one {This job was} other {At least one of these jobs was}} deployed as part of a module; stopping {jobsCount, plural, one {it} other {them}} might impact other parts of the product."
+                  defaultMessage="{jobsCount, plural, one {This preconfigured job} other {At least one of these jobs}} is provided by Elastic; stopping {jobsCount, plural, one {it} other {them}} might impact other parts of the product."
                   values={{
                     jobsCount: jobIds.length,
                   }}

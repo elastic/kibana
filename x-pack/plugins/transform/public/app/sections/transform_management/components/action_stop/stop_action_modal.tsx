@@ -47,7 +47,7 @@ export const StopActionModal: FC<StopAction> = ({ closeModal, items, stopAndClos
           <>
             <FormattedMessage
               id="xpack.transform.transformList.stopManagedTransformsDescription"
-              defaultMessage="{transformsCount, plural, one {This transform was} other {At least one of these transforms was}} deployed as part of a module; stopping {transformsCount, plural, one {it} other {them}} might impact other parts of the product."
+              defaultMessage="{transformsCount, plural, one {This preconfigured transform} other {At least one of these transforms}} is provided by Elastic; stopping {transformsCount, plural, one {it} other {them}} might impact other parts of the product."
               values={{
                 transformsCount: items.length,
               }}

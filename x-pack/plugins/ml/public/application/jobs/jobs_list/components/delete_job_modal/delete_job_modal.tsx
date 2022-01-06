@@ -114,7 +114,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
                   <EuiText>
                     <FormattedMessage
                       id="xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription"
-                      defaultMessage="{jobsCount, plural, one {This job was} other {At least one of these jobs was}} deployed as part of a module; deleting {jobsCount, plural, one {it} other {them}} might impact other parts of the product.
+                      defaultMessage="{jobsCount, plural, one {This preconfigured job} other {At least one of these jobs}} is provided by Elastic; deleting {jobsCount, plural, one {it} other {them}} might impact other parts of the product.
                 {jobsCount, plural, one {It} other {They}} will be deleted in the background
                 and may not disappear from the jobs list instantly."
                       values={{

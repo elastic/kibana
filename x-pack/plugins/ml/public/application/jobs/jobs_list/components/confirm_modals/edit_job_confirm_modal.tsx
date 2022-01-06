@@ -91,7 +91,7 @@ export const EditJobConfirmModal: FC<Props> = ({
               <EuiText>
                 <FormattedMessage
                   id="xpack.ml.jobsList.editJobModal.editManagedJobDescription"
-                  defaultMessage="This job has been deployed and managed by Elastic so editing it may impact other parts of the product."
+                  defaultMessage="This preconfigured job is provided by Elastic; editing it may impact other parts of the product."
                 />
               </EuiText>
             </>
