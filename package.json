@@ -340,7 +340,7 @@
     "react-moment-proptypes": "^1.7.0",
     "react-monaco-editor": "^0.41.2",
     "react-popper-tooltip": "^2.10.1",
-    "react-query": "^3.28.0",
+    "react-query": "^3.34.7",
     "react-redux": "^7.2.0",
     "react-resizable": "^1.7.5",
     "react-resize-detector": "^4.2.0",

@@ -16,30 +16,25 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SectionLoading } from '../../shared_imports';
 import { ProcessTree } from '../ProcessTree';
-import { Process } from '../../../common/types/process_tree';
+import { Process, ProcessEvent } from '../../../common/types/process_tree';
 import { SessionViewDetailPanel } from '../SessionViewDetailPanel';
 import { useStyles } from './styles';
 import {
   useSearchQuery,
   useFetchSessionViewProcessEvents,
-  useParseSessionViewProcessEvents,
 } from './hooks';
 
 interface SessionViewDeps {
   // the root node of the process tree to render. e.g process.entry.entity_id or process.session.entity_id
   sessionEntityId: string;
   height?: number;
+  jumpToEvent?: ProcessEvent;
 }
 
 /**
  * The main wrapper component for the session view.
- * TODO:
- * - Details panel
- * - Fullscreen toggle
- * - Search results navigation
- * - Settings menu (needs design)
  */
-export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
+export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionViewDeps) => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isDetailMounted, setIsDetailMounted] = useState(false);
   const [selectedProcess, setSelectedProcess] = useState<Process | null>(null);
@@ -53,8 +48,16 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
   };
 
   const { onSearch, searchQuery } = useSearchQuery();
-  const { isLoading, isError, data: getData } = useFetchSessionViewProcessEvents(sessionEntityId);
-  const { data } = useParseSessionViewProcessEvents(getData);
+
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    fetchPreviousPage,
+    hasPreviousPage
+  } = useFetchSessionViewProcessEvents(sessionEntityId, jumpToEvent);
 
   const renderNoData = () => {
     return (
@@ -67,7 +70,9 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
   };
 
   const renderProcessTree = () => {
-    if (isLoading) {
+    // we only show this loader on initial load
+    // otherwise as more pages are loaded it renders to full component
+    if (isFetching && !data) {
       return (
         <SectionLoading>
           <FormattedMessage
@@ -77,7 +82,7 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
         </SectionLoading>
       );
     }
-    if (isError) {
+    if (error) {
       return (
         <EuiEmptyPrompt
           iconType="alert"
@@ -87,16 +92,18 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
         />
       );
     }
-    if (data) {
+    if (data && data.pages.length) {
       return (
         <div css={styles.processTree}>
+          {hasPreviousPage && <EuiButton onClick={() => fetchPreviousPage()}>Load previous</EuiButton>}
           <ProcessTree
             sessionEntityId={sessionEntityId}
-            forward={data}
+            data={data.pages}
             searchQuery={searchQuery}
             selectedProcess={selectedProcess}
             onProcessSelected={onProcessSelected}
           />
+          {hasNextPage && <EuiButton onClick={() => fetchNextPage()}>Load more</EuiButton>}
         </div>
       );
     }
@@ -110,7 +117,6 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
           height={height}
           selectedProcess={selectedProcess}
           setIsDetailOpen={setIsDetailOpen}
-          session={data?.[0]?.process.session}
         />
       );
     }
@@ -123,7 +129,7 @@ export const SessionView = ({ sessionEntityId, height }: SessionViewDeps) => {
     }
   };
 
-  if (!(isLoading || isError || data.length)) {
+  if (!isFetching && (!data || data.pages.length === 0)) {
     return renderNoData();
   }
 

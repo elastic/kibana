@@ -33,7 +33,7 @@ export class SessionViewPlugin implements Plugin {
     const router = core.http.createRouter();
 
     // Register server routes
-    registerRoutes(router);
+    registerRoutes(router, this.logger);
 
     // Register saved objects
     savedObjects.registerType(getTestSavedObject());

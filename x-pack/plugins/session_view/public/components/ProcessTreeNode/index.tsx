@@ -15,12 +15,14 @@ import React, { useMemo, useRef, useLayoutEffect, useState, useEffect, MouseEven
 import { EuiButton, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Process } from '../../../common/types/process_tree';
+import { sortProcesses } from '../../../common/utils/sort_processes';
 import { useStyles, ButtonType } from './styles';
 import { ProcessTreeAlerts } from '../ProcessTreeAlerts';
 
 interface ProcessDeps {
   process: Process;
   isSessionLeader?: boolean;
+  orphans?: Process[];
   isOrphan?: boolean;
   depth?: number;
   onProcessSelected?: (process: Process) => void;
@@ -33,6 +35,7 @@ interface ProcessDeps {
 export function ProcessTreeNode({
   process,
   isSessionLeader = false,
+  orphans,
   isOrphan,
   depth = 0,
   onProcessSelected,
@@ -85,7 +88,15 @@ export function ProcessTreeNode({
   const { interactive } = processDetails.process;
 
   const renderChildren = () => {
-    const { children } = process;
+    let { children } = process;
+
+    // we pass an array of orphans to the session leader 
+    // for lack of a better approach, we just mix the orphans with its children and re-sort by timestamp.
+    // we could just add orphans to the children of the session leader in useProcessTree, but
+    // it makes it difficult to re-parent them when their parent actually shows up (e.g in the case of reverse pagination)
+    if (orphans) {
+      children = [...children, ...orphans].sort(sortProcesses);
+    }
 
     if (!childrenExpanded || !children || children.length === 0) {
       return;

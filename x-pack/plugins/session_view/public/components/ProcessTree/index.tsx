@@ -7,7 +7,7 @@
 import React, { useRef, useLayoutEffect, useCallback } from 'react';
 import { ProcessTreeNode } from '../ProcessTreeNode';
 import { useProcessTree } from './hooks';
-import { ProcessEvent, Process } from '../../../common/types/process_tree';
+import { Process, ProcessEventsPage } from '../../../common/types/process_tree';
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
 
@@ -15,11 +15,7 @@ interface ProcessTreeDeps {
   // process.entity_id to act as root node (typically a session (or entry session) leader).
   sessionEntityId: string;
 
-  // bi-directional paging support. allows us to load
-  // processes before and after a particular process.entity_id
-  // implementation in-complete. see hooks.js
-  forward: ProcessEvent[]; // load next
-  backward?: ProcessEvent[]; // load previous
+  data: ProcessEventsPage[];
 
   // plain text search query (only searches "process.working_directory process.args.join(' ')"
   searchQuery?: string;
@@ -27,24 +23,20 @@ interface ProcessTreeDeps {
   // currently selected process
   selectedProcess?: Process | null;
   onProcessSelected?: (process: Process) => void;
-  hideOrphans?: boolean;
 }
 
 export const ProcessTree = ({
   sessionEntityId,
-  forward,
-  backward,
+  data,
   searchQuery,
   selectedProcess,
   onProcessSelected,
-  hideOrphans = true,
 }: ProcessTreeDeps) => {
   const styles = useStyles();
 
   const { sessionLeader, orphans, searchResults } = useProcessTree({
     sessionEntityId,
-    forward,
-    backward,
+    data,
     searchQuery,
   });
 
@@ -125,31 +117,16 @@ export const ProcessTree = ({
   // eslint-disable-next-line no-console
   console.log(searchResults);
 
-  const renderOrphans = () => {
-    if (!hideOrphans) {
-      return orphans.map((process) => {
-        return (
-          <ProcessTreeNode
-            key={process.id}
-            isOrphan
-            process={process}
-            onProcessSelected={onProcessSelected}
-          />
-        );
-      });
-    }
-  };
-
   return (
     <div ref={scrollerRef} css={styles.scroller} data-test-subj="sessionViewProcessTree">
       {sessionLeader && (
         <ProcessTreeNode
           isSessionLeader
           process={sessionLeader}
+          orphans={orphans}
           onProcessSelected={onProcessSelected}
         />
       )}
-      {renderOrphans()}
       <div ref={selectionAreaRef} css={styles.selectionArea} />
     </div>
   );

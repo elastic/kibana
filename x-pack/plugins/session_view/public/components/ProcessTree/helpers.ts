@@ -30,6 +30,10 @@ export const buildProcessTree = (
   sessionEntityId: string,
   backwardDirection: boolean = false
 ) => {
+  if (backwardDirection) {
+    events = events.slice().reverse();
+  }
+ 
   events.forEach((event) => {
     const process = processMap[event.process.entity_id];
     const parentProcess = processMap[event.process.parent?.entity_id];
@@ -46,11 +50,32 @@ export const buildProcessTree = (
       }
     } else if (process.id !== sessionEntityId && !orphans.includes(process)) {
       // if no parent process, process is probably orphaned
-      orphans.push(process);
+      if (backwardDirection) {
+        orphans.unshift(process);
+      } else {
+        orphans.push(process);
+      }
     }
   });
 
-  return processMap;
+  const newOrphans: Process[] = [];
+
+  // with this new page of events processed, lets try re-parent any orphans
+  orphans.forEach(process => {
+    const parentProcess = processMap[process.getDetails().process.parent.entity_id];
+
+    if (parentProcess) {
+      process.parent = parentProcess; // handy for recursive operations (like auto expand)
+
+      if (!parentProcess.children.includes(process) && parentProcess.id !== process.id) {
+        parentProcess.children.push(process);
+      }
+    } else {
+      newOrphans.push(process);
+    }
+  });
+
+  return [processMap, newOrphans];
 };
 
 export const searchProcessTree = (processMap: ProcessMap, searchQuery: string | undefined) => {
@@ -113,12 +138,15 @@ export const processNewEvents = (
   }
 
   const updatedProcessMap = updateProcessMap(eventsProcessMap, events);
-  const builtProcessMap = buildProcessTree(
+  const [builtProcessMap, newOrphans] = <[ProcessMap, Process[]]>buildProcessTree(
     updatedProcessMap,
     events,
     orphans,
     sessionEntityId,
     backwardDirection
   );
-  return autoExpandProcessTree(builtProcessMap);
+  return [
+    autoExpandProcessTree(builtProcessMap),
+    newOrphans
+  ];
 };
