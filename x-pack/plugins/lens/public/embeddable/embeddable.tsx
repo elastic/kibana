@@ -70,7 +70,6 @@ export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>
 
 export interface LensUnwrapMetaInfo {
   sharingSavedObjectProps?: SharingSavedObjectProps;
-  title?: string;
 }
 
 export interface LensUnwrapResult {
