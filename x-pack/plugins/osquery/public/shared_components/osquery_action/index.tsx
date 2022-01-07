@@ -17,6 +17,7 @@ import { KibanaContextProvider, useKibana } from '../../common/lib/kibana';
 import { LiveQuery } from '../../live_queries';
 import { queryClient } from '../../query_client';
 import { OsqueryIcon } from '../../components/osquery_icon';
+import { KibanaThemeProvider } from '../../shared_imports';
 
 interface OsqueryActionProps {
   metadata?: {
@@ -134,13 +135,15 @@ export const OsqueryAction = React.memo(OsqueryActionComponent);
 
 // @ts-expect-error update types
 const OsqueryActionWrapperComponent = ({ services, ...props }) => (
-  <KibanaContextProvider services={services}>
-    <EuiErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <OsqueryAction {...props} />
-      </QueryClientProvider>
-    </EuiErrorBoundary>
-  </KibanaContextProvider>
+  <KibanaThemeProvider theme$={services.theme.theme$}>
+    <KibanaContextProvider services={services}>
+      <EuiErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <OsqueryAction {...props} />
+        </QueryClientProvider>
+      </EuiErrorBoundary>
+    </KibanaContextProvider>
+  </KibanaThemeProvider>
 );
 
 const OsqueryActionWrapper = React.memo(OsqueryActionWrapperComponent);
