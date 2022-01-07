@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { SslConfig } from '@kbn/server-http-tools';
+
+import path from 'path';
 import {
   PluginInitializerContext,
   CoreStart,
@@ -87,6 +90,36 @@ export class Plugin implements PluginType {
       plugins.usageCollection,
       () => this.savedObjectsClient
     );
+
+    try {
+      const tlsConfig = new SslConfig({
+        key: path.join(__filename, config?.unsafe?.service?.tls.key),
+        certificate: path.join(__filename, config?.unsafe?.service?.tls.certificate),
+      } as any);
+      // eslint-disable-next-line no-console
+      console.log('with path');
+      // eslint-disable-next-line no-console
+      console.log(tlsConfig.key);
+      // eslint-disable-next-line no-console
+      console.log(tlsConfig.certificate);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log(e);
+    }
+
+    try {
+      // eslint-disable-next-line no-console
+      console.log('without path');
+
+      const tlsConfig1 = new SslConfig(config?.unsafe?.service?.tls);
+      // eslint-disable-next-line no-console
+      console.log(tlsConfig1.key);
+      // eslint-disable-next-line no-console
+      console.log(tlsConfig1.certificate);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log(e);
+    }
 
     return {
       ruleRegistry: ruleDataClient,

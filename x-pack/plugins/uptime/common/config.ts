@@ -7,6 +7,7 @@
 
 import { PluginConfigDescriptor } from 'kibana/server';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { sslSchema } from '@kbn/server-http-tools';
 
 export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
@@ -38,6 +39,7 @@ export const config: PluginConfigDescriptor = {
               manifestUrl: schema.string(),
               hosts: schema.maybe(schema.arrayOf(schema.string())),
               syncInterval: schema.maybe(schema.string()),
+              tls: schema.maybe(sslSchema),
             })
           ),
         })
