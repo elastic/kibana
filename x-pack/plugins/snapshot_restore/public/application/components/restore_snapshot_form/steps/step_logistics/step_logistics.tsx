@@ -218,7 +218,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
               label={
                 <FormattedMessage
                   id="xpack.snapshotRestore.restoreForm.stepLogistics.allDataStreamsAndIndicesLabel"
-                  defaultMessage="All data streams and indices, including system indices"
+                  defaultMessage="All data streams and indices"
                 />
               }
               checked={isAllIndicesAndDataStreams}

@@ -6,6 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { IScopedClusterClient } from 'kibana/server';
 import type { SnapshotDetailsEs } from '../../../common/types';
 import { deserializeSnapshotDetails } from '../../../common/lib';
 import type { RouteDependencies } from '../../types';
@@ -22,6 +23,30 @@ const sortFieldToESParams = {
   durationInMillis: 'duration',
   'shards.total': 'shard_count',
   'shards.failed': 'failed_shard_count',
+};
+
+const getSystemDataStreamsByName = async (clusterClient: IScopedClusterClient) => {
+  const { body: allDataStreams } = await clusterClient.asCurrentUser.indices.getDataStream({
+    name: '*',
+    expand_wildcards: ['hidden', 'all'],
+  });
+
+  return allDataStreams.data_streams.filter((ds) => ds.hidden).flatMap((ds) => ds.name);
+};
+
+const getSystemIndicesByName = async (clusterClient: IScopedClusterClient) => {
+  const { body: allIndices } = await clusterClient.asCurrentUser.indices.get({
+    index: '*',
+    expand_wildcards: ['hidden', 'all'],
+  });
+
+  return Object.keys(allIndices).reduce((list: string[], index: string) => {
+    if (allIndices[index].settings?.index?.hidden) {
+      return list.concat(index);
+    }
+
+    return list;
+  }, []);
 };
 
 const isSearchingForNonExistentRepository = (
@@ -210,26 +235,10 @@ export function registerSnapshotsRoutes({
             return +new Date(b.end_time!) - +new Date(a.end_time!);
           }) as SnapshotDetailsEs[];
 
-        const { body: allDataStreams } = await clusterClient.asCurrentUser.indices.getDataStream({
-          name: '*',
-          expand_wildcards: ['hidden', 'all'],
-        });
-
-        const { body: allIndices } = await clusterClient.asCurrentUser.indices.get({
-          index: '*',
-          expand_wildcards: ['hidden', 'all'],
-        });
-
-        const systemDataStreams = allDataStreams.data_streams
-          .filter((ds) => ds.hidden)
-          .flatMap((ds) => ds.name);
-        const systemIndices = Object.keys(allIndices).reduce((list: string[], index: string) => {
-          if (allIndices[index].settings?.index?.hidden) {
-            return list.concat(index);
-          }
-
-          return list;
-        }, []);
+        // We need to ignore system indices/ds from the UI since in the resulting snapshot they wont be present.
+        // Also the restore snapshot wizard lets you select system indices to restore, but that will result in an error from ES.
+        const systemIndices = await getSystemIndicesByName(clusterClient);
+        const systemDataStreams = await getSystemDataStreamsByName(clusterClient);
 
         return res.ok({
           body: deserializeSnapshotDetails(

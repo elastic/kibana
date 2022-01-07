@@ -39,6 +39,8 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
   const getSnapshotFn = router.getMockApiFn('snapshot.get');
   const deleteSnapshotFn = router.getMockApiFn('snapshot.delete');
   const getRepoFn = router.getMockApiFn('snapshot.getRepository');
+  const getDataStreamFn = router.getMockApiFn('indices.getDataStream');
+  const getIndicesFn = router.getMockApiFn('indices.get');
 
   beforeAll(() => {
     registerSnapshotsRoutes({
@@ -244,6 +246,16 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       const mockGetSnapshotEsResponse = {
         snapshots: [{ snapshot, repository }],
       };
+
+      getDataStreamFn.mockResolvedValue({
+        body: {
+          data_streams: [],
+        },
+      });
+
+      getIndicesFn.mockResolvedValue({
+        body: {},
+      });
 
       getClusterSettingsFn.mockResolvedValue({
         body: mockSnapshotGetManagedRepositoryEsResponse,
