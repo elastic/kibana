@@ -10,12 +10,21 @@ import { useProcessTree } from './hooks';
 import { Process, ProcessEventsPage } from '../../../common/types/process_tree';
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
+import { EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+type FetchFunction = () => void;
 
 interface ProcessTreeDeps {
   // process.entity_id to act as root node (typically a session (or entry session) leader).
   sessionEntityId: string;
 
   data: ProcessEventsPage[];
+  isFetching: boolean;
+  hasNextPage: boolean | undefined;
+  hasPreviousPage: boolean | undefined;
+  fetchNextPage: FetchFunction;
+  fetchPreviousPage: FetchFunction;
 
   // plain text search query (only searches "process.working_directory process.args.join(' ')"
   searchQuery?: string;
@@ -28,6 +37,11 @@ interface ProcessTreeDeps {
 export const ProcessTree = ({
   sessionEntityId,
   data,
+  isFetching,
+  hasNextPage,
+  hasPreviousPage,
+  fetchNextPage,
+  fetchPreviousPage,
   searchQuery,
   selectedProcess,
   onProcessSelected,
@@ -46,14 +60,9 @@ export const ProcessTree = ({
   useScroll({
     div: scrollerRef.current,
     handler: (pos: number, endReached: boolean) => {
-      if (endReached) {
-        // eslint-disable-next-line no-console
-        console.log('end reached');
-        // TODO: call load more
+      if (!isFetching && endReached) {
+        fetchNextPage();
       }
-
-      // eslint-disable-next-line no-console
-      console.log(pos);
     },
   });
 
@@ -117,8 +126,22 @@ export const ProcessTree = ({
   // eslint-disable-next-line no-console
   console.log(searchResults);
 
+  function renderLoadMoreButton(text: JSX.Element, func: FetchFunction) {
+    return <EuiButton
+      fullWidth
+      onClick={() => func()}
+      isLoading={isFetching}
+    >
+      {text}
+    </EuiButton>;
+  }
+
   return (
     <div ref={scrollerRef} css={styles.scroller} data-test-subj="sessionViewProcessTree">
+      {hasPreviousPage && renderLoadMoreButton(
+        <FormattedMessage id="xpack.sessionView.loadPrevious" defaultMessage="Load previous" />,
+        fetchPreviousPage
+      )}
       {sessionLeader && (
         <ProcessTreeNode
           isSessionLeader
@@ -128,6 +151,10 @@ export const ProcessTree = ({
         />
       )}
       <div ref={selectionAreaRef} css={styles.selectionArea} />
+      {hasNextPage && renderLoadMoreButton(
+        <FormattedMessage id="xpack.sessionView.loadNext" defaultMessage="Load next" />,
+        fetchNextPage
+      )}
     </div>
   );
 };

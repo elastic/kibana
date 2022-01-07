@@ -33,22 +33,25 @@ export const buildProcessTree = (
   if (backwardDirection) {
     events = events.slice().reverse();
   }
- 
+
   events.forEach((event) => {
     const process = processMap[event.process.entity_id];
     const parentProcess = processMap[event.process.parent?.entity_id];
 
+    // if session leader, or process already has a parent, return 
+    if (process.id === sessionEntityId || process.parent) {
+      return;
+    }
+
     if (parentProcess) {
       process.parent = parentProcess; // handy for recursive operations (like auto expand)
 
-      if (!parentProcess.children.includes(process) && parentProcess.id !== process.id) {
-        if (backwardDirection) {
-          parentProcess.children.unshift(process);
-        } else {
-          parentProcess.children.push(process);
-        }
+      if (backwardDirection) {
+        parentProcess.children.unshift(process);
+      } else {
+        parentProcess.children.push(process);
       }
-    } else if (process.id !== sessionEntityId && !orphans.includes(process)) {
+    } else if (!orphans.includes(process)){
       // if no parent process, process is probably orphaned
       if (backwardDirection) {
         orphans.unshift(process);
@@ -67,9 +70,7 @@ export const buildProcessTree = (
     if (parentProcess) {
       process.parent = parentProcess; // handy for recursive operations (like auto expand)
 
-      if (!parentProcess.children.includes(process) && parentProcess.id !== process.id) {
-        parentProcess.children.push(process);
-      }
+      parentProcess.children.push(process);
     } else {
       newOrphans.push(process);
     }

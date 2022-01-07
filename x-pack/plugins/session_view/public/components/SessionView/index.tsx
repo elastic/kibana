@@ -95,15 +95,18 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
     if (data && data.pages.length) {
       return (
         <div css={styles.processTree}>
-          {hasPreviousPage && <EuiButton onClick={() => fetchPreviousPage()}>Load previous</EuiButton>}
           <ProcessTree
             sessionEntityId={sessionEntityId}
             data={data.pages}
             searchQuery={searchQuery}
             selectedProcess={selectedProcess}
             onProcessSelected={onProcessSelected}
+            isFetching={isFetching}
+            hasPreviousPage={hasPreviousPage}
+            hasNextPage={hasNextPage}
+            fetchNextPage={fetchNextPage}
+            fetchPreviousPage={fetchPreviousPage}
           />
-          {hasNextPage && <EuiButton onClick={() => fetchNextPage()}>Load more</EuiButton>}
         </div>
       );
     }
