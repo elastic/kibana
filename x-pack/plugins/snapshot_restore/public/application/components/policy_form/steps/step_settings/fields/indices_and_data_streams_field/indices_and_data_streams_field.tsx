@@ -115,7 +115,7 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
       label={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepSettings.allDataStreamsAndIndicesLabel"
-          defaultMessage="All data streams and indices"
+          defaultMessage="All data streams and indices, including system indices"
         />
       }
       checked={isAllIndices}
