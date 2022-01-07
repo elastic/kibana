@@ -65,7 +65,6 @@ function isPlainStringArray(
 
 export class CsvGenerator {
   private _columns?: string[];
-  private _formatters?: Record<string, FieldFormat>;
   private csvContainsFormulas = false;
   private maxSizeReached = false;
   private csvRowCount = 0;
@@ -122,10 +121,6 @@ export class CsvGenerator {
    * Load field formats for each field in the list
    */
   private getFormatters(table: Datatable) {
-    if (this._formatters) {
-      return this._formatters;
-    }
-
     // initialize field formats
     const formatters: Record<string, FieldFormat> = {};
     table.columns.forEach((c) => {
@@ -133,8 +128,7 @@ export class CsvGenerator {
       formatters[c.id] = fieldFormat;
     });
 
-    this._formatters = formatters;
-    return this._formatters;
+    return formatters;
   }
 
   private escapeValues(settings: CsvExportSettings) {
