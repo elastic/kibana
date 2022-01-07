@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import { filter, distinctUntilChanged } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 
-import { TransformId } from '../../../common/types/transform';
+import { TransformConfigUnion, TransformId } from '../../../common/types/transform';
 
 // Via https://github.com/elastic/elasticsearch/blob/master/x-pack/plugin/core/src/main/java/org/elasticsearch/xpack/core/transform/utils/TransformStrings.java#L24
 // Matches a string that contains lowercase characters, digits, hyphens, underscores or dots.
@@ -77,4 +77,10 @@ export const useRefreshTransformList = (
       refreshTransformList$.next(REFRESH_TRANSFORM_LIST_STATE.LOADING);
     },
   };
+};
+
+export const overrideTransformForCloning = (originalConfig: TransformConfigUnion) => {
+  // 'Managed' means job is preconfigured and deployed by other solutions
+  // we should not clone this setting
+  return { ...originalConfig, _meta: { ...originalConfig._meta, managed: false } };
 };
