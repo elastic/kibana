@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_RULE_ID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { buildSignalsSearchQuery } from './build_signals_query';
 
 describe('buildSignalsSearchQuery', () => {
@@ -38,7 +38,7 @@ describe('buildSignalsSearchQuery', () => {
                     },
                     {
                       match: {
-                        [ALERT_RULE_RULE_ID]: ruleId,
+                        [`${ALERT_RULE_PARAMETERS}.rule_id`]: ruleId,
                       },
                     },
                   ],

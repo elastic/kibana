@@ -11,8 +11,6 @@ import {
   ALERT_RISK_SCORE,
   ALERT_RULE_NAME,
   ALERT_RULE_PARAMETERS,
-  ALERT_RULE_RULE_ID,
-  ALERT_RULE_RULE_NAME_OVERRIDE,
   ALERT_RULE_UUID,
   ALERT_SEVERITY,
   ALERT_WORKFLOW_STATUS,
@@ -124,7 +122,9 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccessOrStatus(supertest, log, id);
         await waitForSignalsToBePresent(supertest, log, 1, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
-        expect(signalsOpen.hits.hits[0]._source![ALERT_RULE_RULE_ID]).eql(getSimpleRule().rule_id);
+        expect(signalsOpen.hits.hits[0]._source![ALERT_RULE_PARAMETERS].rule_id).eql(
+          getSimpleRule().rule_id
+        );
       });
 
       it('should query and get back expected signal structure using a basic KQL query', async () => {

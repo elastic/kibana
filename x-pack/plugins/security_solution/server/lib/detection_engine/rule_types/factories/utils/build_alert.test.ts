@@ -143,6 +143,30 @@ describe('buildAlert', () => {
         name: 'rule-name',
         updated_by: 'sample user',
         tags: ['some fake tag 1', 'some fake tag 2'],
+        threat: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0000',
+              name: 'test tactic',
+              reference: 'https://attack.mitre.org/tactics/TA0000/',
+            },
+            technique: [
+              {
+                id: 'T0000',
+                name: 'test technique',
+                reference: 'https://attack.mitre.org/techniques/T0000/',
+                subtechnique: [
+                  {
+                    id: 'T0000.000',
+                    name: 'test subtechnique',
+                    reference: 'https://attack.mitre.org/techniques/T0000/000/',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
         interval: '5m',
         throttle: 'no_actions',
       }),
@@ -258,6 +282,30 @@ describe('buildAlert', () => {
         name: 'rule-name',
         updated_by: 'sample user',
         tags: ['some fake tag 1', 'some fake tag 2'],
+        threat: [
+          {
+            framework: 'MITRE ATT&CK',
+            tactic: {
+              id: 'TA0000',
+              name: 'test tactic',
+              reference: 'https://attack.mitre.org/tactics/TA0000/',
+            },
+            technique: [
+              {
+                id: 'T0000',
+                name: 'test technique',
+                reference: 'https://attack.mitre.org/techniques/T0000/',
+                subtechnique: [
+                  {
+                    id: 'T0000.000',
+                    name: 'test subtechnique',
+                    reference: 'https://attack.mitre.org/techniques/T0000/000/',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
         interval: '5m',
         throttle: 'no_actions',
       }),

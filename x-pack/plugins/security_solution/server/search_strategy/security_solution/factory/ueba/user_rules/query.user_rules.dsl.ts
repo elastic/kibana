@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { ALERT_RISK_SCORE, ALERT_RULE_NAME, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
+import { ALERT_RISK_SCORE, ALERT_RULE_NAME, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { Direction, UserRulesRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
@@ -67,7 +67,7 @@ export const buildUserRulesQuery = ({
                 },
                 rule_type: {
                   terms: {
-                    field: ALERT_RULE_TYPE,
+                    field: `${ALERT_RULE_PARAMETERS}.type`,
                   },
                 },
               },

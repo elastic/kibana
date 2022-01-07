@@ -8,7 +8,7 @@
 import {
   ALERT_BUILDING_BLOCK_TYPE,
   ALERT_WORKFLOW_STATUS,
-  ALERT_RULE_RULE_ID,
+  ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
 
 import type { Filter } from '@kbn/es-query';
@@ -102,14 +102,14 @@ export const buildAlertsFilter = (ruleStaticId: string | null): Filter[] =>
             negate: false,
             disabled: false,
             type: 'phrase',
-            key: ALERT_RULE_RULE_ID,
+            key: `${ALERT_RULE_PARAMETERS}.rule_id`,
             params: {
               query: ruleStaticId,
             },
           },
           query: {
             match_phrase: {
-              [ALERT_RULE_RULE_ID]: ruleStaticId,
+              [`${ALERT_RULE_PARAMETERS}.rule_id`]: ruleStaticId,
             },
           },
         },

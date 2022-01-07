@@ -6,7 +6,7 @@
  */
 
 import { KbnClient } from '@kbn/test';
-import { ALERT_RULE_RULE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_PARAMETERS, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
 import type { TransportResult } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -293,7 +293,7 @@ export const getQuerySignalIds = (signalIds: SignalIds) => ({
 export const getQuerySignalsRuleId = (ruleIds: string[]) => ({
   query: {
     terms: {
-      [ALERT_RULE_RULE_ID]: ruleIds,
+      [`${ALERT_RULE_PARAMETERS}.rule_id`]: ruleIds,
     },
   },
 });

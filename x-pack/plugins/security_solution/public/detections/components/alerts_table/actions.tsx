@@ -7,14 +7,14 @@
 
 /* eslint-disable complexity */
 
-import { getOr, isEmpty } from 'lodash/fp';
+import { get, getOr, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 
 import dateMath from '@elastic/datemath';
 
 import { FilterStateStore, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { ALERT_RULE_FROM, ALERT_RULE_TYPE, ALERT_RULE_NOTE } from '@kbn/rule-data-utils';
+import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 
 import {
   ALERT_ORIGINAL_TIME,
@@ -131,7 +131,8 @@ export const determineToAndFrom = ({ ecs }: { ecs: Ecs[] | Ecs }) => {
     };
   }
   const ecsData = ecs as Ecs;
-  const ruleFrom = getField(ecsData, ALERT_RULE_FROM);
+  const ruleFrom =
+    get(`${ALERT_RULE_PARAMETERS}.from`, ecsData) ?? get('signal.rule.from', ecsData);
   const elapsedTimeRule = moment.duration(
     moment().diff(dateMath.parse(ruleFrom != null ? ruleFrom[0] : 'now-0s'))
   );
@@ -189,7 +190,8 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
       }
 
       // Legacy support
-      const ruleFromStr = getField(thresholdData, ALERT_RULE_FROM)[0];
+      const ruleFromStr = (get(`${ALERT_RULE_PARAMETERS}.from`, ecsData) ??
+        get('signal.rule.from', ecsData))[0];
       const ruleFrom = dateMath.parse(ruleFromStr) ?? moment(); // The fallback here will essentially ensure 0 results
       const originalTimeStr = getField(thresholdData, ALERT_ORIGINAL_TIME)[0];
       const originalTime = originalTimeStr != null ? moment(originalTimeStr) : ruleFrom;
@@ -254,13 +256,15 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
 };
 
 export const isEqlRuleWithGroupId = (ecsData: Ecs) => {
-  const ruleType = getField(ecsData, ALERT_RULE_TYPE);
+  const ruleType =
+    get(`${ALERT_RULE_PARAMETERS}.type`, ecsData) ?? get('signal.rule.type', ecsData);
   const groupId = getField(ecsData, ALERT_GROUP_ID);
   return ruleType?.length && ruleType[0] === 'eql' && groupId?.length;
 };
 
 export const isThresholdRule = (ecsData: Ecs) => {
-  const ruleType = getField(ecsData, ALERT_RULE_TYPE);
+  const ruleType =
+    get(`${ALERT_RULE_PARAMETERS}.type`, ecsData) ?? get('signal.rule.type', ecsData);
   return Array.isArray(ruleType) && ruleType.length && ruleType[0] === 'threshold';
 };
 
@@ -383,7 +387,8 @@ export const sendAlertToTimelineAction = async ({
    */
   const ecsData: Ecs = Array.isArray(ecs) && ecs.length > 0 ? ecs[0] : (ecs as Ecs);
   const alertIds = Array.isArray(ecs) ? ecs.map((d) => d._id) : [];
-  const ruleNote = getField(ecsData, ALERT_RULE_NOTE);
+  const ruleNote =
+    get(`${ALERT_RULE_PARAMETERS}.note`, ecsData) ?? get('signal.rule.note', ecsData);
   const noteContent = Array.isArray(ruleNote) && ruleNote.length > 0 ? ruleNote[0] : '';
   const ruleTimelineId = getField(ecsData, ALERT_RULE_TIMELINE_ID);
   const timelineId =

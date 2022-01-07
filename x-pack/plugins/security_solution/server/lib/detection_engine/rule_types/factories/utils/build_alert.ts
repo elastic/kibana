@@ -156,6 +156,7 @@ export const buildAlert = (
       throttle: throttle ?? undefined,
       updated_at: updatedAt.toISOString(),
       updated_by: updatedBy ?? '',
+      threat: commonRuleParams.threat,
     }),
   } as unknown as RACAlert;
 };
