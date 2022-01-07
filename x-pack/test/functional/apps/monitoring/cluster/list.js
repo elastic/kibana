@@ -75,6 +75,29 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    describe('with standalone cluster', () => {
+      const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
+
+      before(async () => {
+        await setup('x-pack/test/functional/es_archives/monitoring/standalone_cluster', {
+          from: 'Feb 4, 2019 @ 17:50:00.000',
+          to: 'Feb 4, 2019 @ 17:52:00.000',
+        });
+
+        await clusterList.closeAlertsModal();
+        await clusterList.assertDefaults();
+      });
+
+      after(async () => {
+        await tearDown();
+      });
+
+      it('displays a standalone cluster', async () => {
+        expect(await clusterList.hasCluster('__standalone_cluster__')).to.be(true);
+        expect(await clusterList.hasCluster('lfhHkgqfTy2Vy3SvlPSvXg')).to.be(true);
+      });
+    });
+
     describe('with all basic license clusters', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
