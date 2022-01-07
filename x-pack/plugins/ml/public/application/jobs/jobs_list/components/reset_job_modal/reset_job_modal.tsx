@@ -100,8 +100,8 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
             <>
               <EuiCallOut color="warning">
                 <FormattedMessage
-                  id="xpack.ml.jobsList.startDatafeedsModal.startManagedDatafeedsDescription"
-                  defaultMessage="{jobsCount, plural, one {This job} other {At least one of these jobs}} is preconfigured by Elastic; starting {jobsCount, plural, one {it} other {them}} by specifying an end time impact other parts of the product."
+                  id="xpack.ml.jobsList.startDatafeedsModal.resetManagedDatafeedsDescription"
+                  defaultMessage="{jobsCount, plural, one {This job} other {At least one of these jobs}} is preconfigured by Elastic; resetting {jobsCount, plural, one {it} other {them}} by specifying an end time impact other parts of the product."
                   values={{
                     jobsCount: jobIds.length,
                   }}

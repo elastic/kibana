@@ -92,7 +92,7 @@ export const CloseJobsConfirmModal: FC<Props> = ({
             <>
               <EuiText>
                 <FormattedMessage
-                  id="xpack.ml.jobsList.startDatafeedsModal.startManagedDatafeedsDescription"
+                  id="xpack.ml.jobsList.startDatafeedsModal.closeManagedDatafeedsDescription"
                   defaultMessage="{jobsCount, plural, one {This job} other {At least one of these jobs}} is preconfigured by Elastic; closing {jobsCount, plural, one {it} other {them}} might impact other parts of the product."
                   values={{
                     jobsCount: jobIds.length,
