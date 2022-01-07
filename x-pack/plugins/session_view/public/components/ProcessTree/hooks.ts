@@ -20,7 +20,6 @@ import { processNewEvents, searchProcessTree, autoExpandProcessTree } from './he
 interface UseProcessTreeDeps {
   sessionEntityId: string;
   data: ProcessEventsPage[];
-  backward?: ProcessEvent[];
   searchQuery?: string;
 }
 

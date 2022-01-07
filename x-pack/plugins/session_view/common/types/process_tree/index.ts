@@ -31,7 +31,6 @@ export interface User {
 
 export interface ProcessEventResults {
   events: any[];
-  cursor: string;
 }
 
 export interface ProcessFields {
