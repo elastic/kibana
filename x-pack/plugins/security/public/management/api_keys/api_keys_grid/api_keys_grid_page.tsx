@@ -388,14 +388,16 @@ export class APIKeysGridPage extends Component<Props, State> {
                 return {
                   value: username,
                   view: (
-                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type="user" />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText>{username}</EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    <EuiToolTip delay="long" position="left" content={username}>
+                      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon type="user" />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText>{username}</EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiToolTip>
                   ),
                 };
               }),
