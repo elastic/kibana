@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IndexPattern, ISearchSource } from 'src/plugins/data/common';
+import type { DataView, ISearchSource } from 'src/plugins/data/common';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
 import { unhashUrl } from '../../../../../../kibana_utils/public';
@@ -31,7 +31,7 @@ export const getTopNavLinks = ({
   searchSource,
   onOpenSavedSearch,
 }: {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   navigateTo: (url: string) => void;
   savedSearch: SavedSearch;
   services: DiscoverServices;

@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useCallback, useState, ChangeEventHandler } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -23,11 +23,23 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSwitch,
+  EuiSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import { DevToolsSettings } from '../../services';
 
 export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
+
+const PRESETS_IN_MINUTES = [1, 5, 10];
+const intervalOptions = PRESETS_IN_MINUTES.map((value) => ({
+  value: value * 60000,
+  text: i18n.translate('console.settingsPage.refreshInterval.timeInterval', {
+    defaultMessage: '{value} {value, plural, one {minute} other {minutes}}',
+    values: { value },
+  }),
+}));
 
 interface Props {
   onSaveSettings: (newSettings: DevToolsSettings) => void;
@@ -43,6 +55,7 @@ export function DevToolsSettingsModal(props: Props) {
   const [indices, setIndices] = useState(props.settings.autocomplete.indices);
   const [templates, setTemplates] = useState(props.settings.autocomplete.templates);
   const [polling, setPolling] = useState(props.settings.polling);
+  const [pollInterval, setPollInterval] = useState(props.settings.pollInterval);
   const [tripleQuotes, setTripleQuotes] = useState(props.settings.tripleQuotes);
   const [historyDisabled, setHistoryDisabled] = useState(props.settings.historyDisabled);
 
@@ -93,10 +106,16 @@ export function DevToolsSettingsModal(props: Props) {
         templates,
       },
       polling,
+      pollInterval,
       tripleQuotes,
       historyDisabled,
     });
   }
+
+  const onIntervalChange: ChangeEventHandler<HTMLSelectElement> = useCallback(
+    (e) => setPollInterval(parseInt(e.target.value, 10)),
+    []
+  );
 
   // It only makes sense to show polling options if the user needs to fetch any data.
   const pollingFields =
@@ -117,18 +136,32 @@ export function DevToolsSettingsModal(props: Props) {
             />
           }
         >
-          <EuiSwitch
-            checked={polling}
-            data-test-subj="autocompletePolling"
-            id="autocompletePolling"
-            label={
-              <FormattedMessage
-                defaultMessage="Automatically refresh autocomplete suggestions"
-                id="console.settingsPage.pollingLabelText"
+          <EuiFlexGroup alignItems="center" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                checked={polling}
+                data-test-subj="autocompletePolling"
+                id="autocompletePolling"
+                label={
+                  <FormattedMessage
+                    defaultMessage="Refresh every"
+                    id="console.settingsPage.pollingLabelText"
+                  />
+                }
+                onChange={(e) => setPolling(e.target.checked)}
               />
-            }
-            onChange={(e) => setPolling(e.target.checked)}
-          />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiSelect
+                fullWidth
+                compressed
+                options={intervalOptions}
+                value={pollInterval}
+                onChange={onIntervalChange}
+                disabled={!polling}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFormRow>
 
         <EuiButton

@@ -6,7 +6,13 @@
  */
 
 import React, { useMemo } from 'react';
-import { ConfigKey, MonitorFields, TLSFields, DataStream } from '../../../common/runtime_types';
+import {
+  ConfigKey,
+  MonitorFields,
+  TLSFields,
+  DataStream,
+  ScheduleUnit,
+} from '../../../common/runtime_types';
 import { useTrackPageview } from '../../../../observability/public';
 import { SyntheticsProviders } from '../fleet_package/contexts';
 import { PolicyConfig } from '../fleet_package/types';
@@ -71,6 +77,8 @@ export const EditMonitorConfig = ({ monitor }: Props) => {
         defaultName: defaultConfig?.name || '', // TODO - figure out typing concerns for name
         defaultLocations: defaultConfig.locations,
         isEditable: true,
+        isZipUrlSourceEnabled: false,
+        allowedScheduleUnits: [ScheduleUnit.MINUTES],
       }}
       httpDefaultValues={fullDefaultConfig[DataStream.HTTP]}
       tcpDefaultValues={fullDefaultConfig[DataStream.TCP]}
