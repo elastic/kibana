@@ -30,10 +30,10 @@ export async function getAggregatedRules(
         ignore_unavailable: true,
         body: {
           query: createQuery({
-            types: ['kibana_rule'],
+            types: ['kibana_rule', 'rule'],
             start,
             end,
-            clusterUuid: cluster.cluster_uuid,
+            clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
             metric,
           }),
           aggs: {
@@ -54,7 +54,7 @@ export async function getAggregatedRules(
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
       const response = await callWithRequest(req, 'search', params);
       return {
-        clusterUuid: cluster.cluster_uuid,
+        clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
         rules: {
           averageDrift: response?.aggregations?.average_drift?.value,
           count: response?.aggregations?.rule_ids?.buckets?.length,

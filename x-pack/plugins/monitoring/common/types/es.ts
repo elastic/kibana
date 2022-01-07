@@ -561,7 +561,7 @@ export interface ElasticsearchMetricbeatSource {
     };
   };
   kibana?: {
-    metrics?: ElasticsearchSourceKibanaMetrics;
+    rule?: ElasticsearchSourceKibanaRule['rule'];
     stats?: {
       name?: string;
       index?: string;

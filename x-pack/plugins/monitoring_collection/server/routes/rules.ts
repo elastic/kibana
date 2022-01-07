@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { IRouter, ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
-import { KIBANA_METRICS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 import { MetricResult } from '../plugin';
 
 const SNAPSHOT_REGEX = /-snapshot/i;
@@ -20,7 +19,7 @@ const ServiceStatusToLegacyState: Record<string, string> = {
   [ServiceStatusLevels.available.toString()]: 'green',
 };
 
-export function registerMetricsRoute({
+export function registerRulesRoute({
   router,
   config,
   overallStatus$,
@@ -39,11 +38,11 @@ export function registerMetricsRoute({
     };
   };
   overallStatus$: Observable<ServiceStatus>;
-  getMetrics: () => Promise<Record<string, MetricResult[]>>;
+  getMetrics: () => Promise<MetricResult[] | undefined>;
 }) {
   router.get(
     {
-      path: '/api/metrics',
+      path: '/api/monitoring_collection/rules',
       options: {
         // authRequired: !config.allowAnonymous,
         tags: ['api'], // ensures that unauthenticated calls receive a 401 rather than a 302 redirect to login page
@@ -51,11 +50,23 @@ export function registerMetricsRoute({
       validate: false,
     },
     async (context, req, res) => {
-      const metrics = await getMetrics();
+      const rules = await getMetrics();
+      const rulesById = rules?.reduce((accum: { [id: string]: MetricResult }, rule) => {
+        accum[rule.id ?? ''] = rule;
+        return accum;
+      }, {});
       const overallStatus = await overallStatus$.pipe(first()).toPromise();
+      const getClusterUuid = async (): Promise<string> => {
+        const { body } = await context.core.elasticsearch.client.asCurrentUser.info({
+          filter_path: 'cluster_uuid',
+        });
+        const { cluster_uuid: uuid } = body;
+        return uuid;
+      };
       return res.ok({
         body: {
-          ...metrics,
+          rules: rulesById,
+          cluster_uuid: await getClusterUuid(),
           kibana: {
             uuid: config.uuid,
             name: config.server.name,

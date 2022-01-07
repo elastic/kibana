@@ -36,5 +36,8 @@ export async function getRule(
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
-  return response.hits?.hits[0]?._source.kibana_rule.rule;
+  return (
+    response.hits?.hits[0]?._source.kibana_rule?.rule ??
+    response.hits?.hits[0]?._source.kibana?.rule
+  );
 }

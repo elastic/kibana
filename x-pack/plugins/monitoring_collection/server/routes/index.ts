@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { registerMetricsRoute } from './metrics';
+export { registerRulesRoute } from './rules';
+export { registerTaskManagerRoute } from './task_manager';

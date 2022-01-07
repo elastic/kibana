@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/server';
-import { registerMetricsRoute } from './routes';
+import { registerRulesRoute, registerTaskManagerRoute } from './routes';
 
 export interface MonitoringCollectionSetup {
   registerMetric: (metric: Metric) => void;
@@ -35,7 +35,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     this.initializerContext = initializerContext;
   }
 
-  async getMetrics() {
+  async getAllMetrics() {
     const metrics: Record<string, MetricResult[]> = {};
     for (const metric of this.metrics) {
       metrics[metric.type] = await metric.fetch();
@@ -43,11 +43,19 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     return metrics;
   }
 
+  async getMetrics(type?: string) {
+    for (const metric of this.metrics) {
+      if (metric.type === type) {
+        return await metric.fetch();
+      }
+    }
+  }
+
   setup(core: CoreSetup, plugins: {}) {
     const router = core.http.createRouter();
     const kibanaIndex = core.savedObjects.getKibanaIndex();
 
-    registerMetricsRoute({
+    registerRulesRoute({
       router,
       config: {
         allowAnonymous: core.status.isStatusPageAnonymous(),
@@ -57,14 +65,27 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         uuid: this.initializerContext.env.instanceUuid,
       },
       overallStatus$: core.status.overall$,
-      getMetrics: async () => await this.getMetrics(),
+      getMetrics: async () => await this.getMetrics('rule'),
+    });
+
+    registerTaskManagerRoute({
+      router,
+      config: {
+        allowAnonymous: core.status.isStatusPageAnonymous(),
+        kibanaIndex,
+        kibanaVersion: this.initializerContext.env.packageInfo.version,
+        server: core.http.getServerInfo(),
+        uuid: this.initializerContext.env.instanceUuid,
+      },
+      overallStatus$: core.status.overall$,
+      getMetrics: async () => await this.getMetrics('task_manager'),
     });
 
     return {
       registerMetric: (metric: Metric) => {
         this.metrics.push(metric);
       },
-      getMetrics: async () => await this.getMetrics(),
+      getMetrics: async () => await this.getAllMetrics(),
     };
   }
 

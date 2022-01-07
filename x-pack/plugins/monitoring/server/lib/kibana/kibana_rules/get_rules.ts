@@ -41,7 +41,7 @@ export async function getRules(
               top_hits: {
                 sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
                 size: 1,
-                _source: 'kibana_rule.rule',
+                _source: ['kibana.rule', 'kibana_rule.rule'],
               },
             },
           },
@@ -53,6 +53,9 @@ export async function getRules(
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
   return response.aggregations?.rules?.buckets?.map((bucket: { first?: ElasticsearchResponse }) => {
-    return bucket?.first?.hits?.hits[0]._source?.kibana_rule?.rule;
+    return (
+      bucket?.first?.hits?.hits[0]._source?.kibana_rule?.rule ??
+      bucket?.first?.hits?.hits[0]._source?.kibana?.rule
+    );
   });
 }

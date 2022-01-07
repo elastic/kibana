@@ -359,8 +359,8 @@ export class AlertingPlugin {
                 // This is in nanoseconds
                 lastExecutionDuration: (lastExecute?.event?.duration ?? 0) / (1000 * 1000),
                 lastExecutionTimeout: lastTimeout?.['@timestamp'],
-                averageDrift: metrics.drift ?? 0,
-                averageDuration: metrics.duration ?? 0,
+                averageDrift: isNaN(metrics.drift) ? 0 : metrics.drift,
+                averageDuration: isNaN(metrics.duration) ? 0 : metrics.duration,
                 totalExecutions,
               };
 
