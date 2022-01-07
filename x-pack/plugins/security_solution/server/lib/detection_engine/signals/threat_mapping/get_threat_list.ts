@@ -18,8 +18,9 @@ import {
   DETECTION_ENGINE_MAX_PER_PAGE,
   ELASTICSEARCH_MAX_PER_PAGE,
 } from '../../../../../common/cti/constants';
+import { buildEventsSearchQuery } from '../build_events_query';
 
-export const getNextEventsPage = async ({
+export const getNextPage = async ({
   esClient,
   query,
   language,
@@ -105,29 +106,41 @@ export const getSortWithTieBreaker = ({
   }
 };
 
-export const getTotalEventCount = async ({
+export const getEventCount = async ({
   esClient,
   query,
   language,
   filters,
   index,
   exceptionItems,
+  tuple,
+  timestampOverride,
 }: EventCountOptions): Promise<number> => {
-  const queryFilter = getQueryFilter(query, language ?? 'kuery', filters, index, exceptionItems);
+  const filter = getQueryFilter(query, language ?? 'kuery', filters, index, exceptionItems);
+  let eventSearchQueryBodyQuery;
+  if (tuple) {
+    eventSearchQueryBodyQuery = buildEventsSearchQuery({
+      index,
+      from: tuple.from.toISOString(),
+      to: tuple.to.toISOString(),
+      filter,
+      size: 0,
+      timestampOverride,
+      searchAfterSortIds: undefined,
+    }).body.query;
+  }
   const { body: response } = await esClient.count({
-    body: {
-      query: queryFilter,
-    },
+    body: { query: eventSearchQueryBodyQuery ?? filter },
     ignore_unavailable: true,
     index,
   });
   return response.count;
 };
 
-export const getFirstEventsPage = (
+export const getFirstPage = (
   params: Omit<GetEventsPageOptions, 'searchAfter' | 'sortField' | 'sortOrder'>
 ) =>
-  getNextEventsPage({
+  getNextPage({
     ...params,
     searchAfter: undefined,
     sortField: undefined,

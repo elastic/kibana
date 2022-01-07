@@ -233,6 +233,8 @@ export interface EventCountOptions {
   language: ThreatLanguageOrUndefined;
   query: string;
   filters: unknown[];
+  tuple?: RuleRangeTuple;
+  timestampOverride?: string;
 }
 
 export interface GetSortWithTieBreakerOptions {

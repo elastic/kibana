@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  getFirstEventsPage,
-  getNextEventsPage,
-} from '../../../signals/threat_mapping/get_threat_list';
+import { getFirstPage, getNextPage } from '../../../signals/threat_mapping/get_threat_list';
 import { FetchEventsOptions } from '../../../signals/threat_mapping/types';
 
 export const fetchItems = async <T>({
@@ -26,7 +23,7 @@ export const fetchItems = async <T>({
 }: FetchEventsOptions<T>) => {
   let items: T[] = [];
 
-  let eventPage = await getFirstEventsPage({
+  let eventPage = await getFirstPage({
     buildRuleMessage,
     esClient,
     exceptionItems,
@@ -42,7 +39,7 @@ export const fetchItems = async <T>({
   while (eventPage.hits.hits.length) {
     items = items.concat(transformHits(eventPage.hits.hits));
 
-    eventPage = await getNextEventsPage({
+    eventPage = await getNextPage({
       buildRuleMessage,
       esClient,
       exceptionItems,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import chunk from 'lodash/chunk';
 import { Logger } from 'src/core/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
@@ -14,7 +15,7 @@ import {
 } from '../../../../../../alerting/server';
 import { ListClient } from '../../../../../../lists/server';
 import { getInputIndex } from '../get_input_output_index';
-import { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
+import { RuleRangeTuple, BulkCreate, WrapHits, SearchAfterAndBulkCreateReturnType } from '../types';
 import { TelemetryEventsSender } from '../../../telemetry/sender';
 import { BuildRuleMessage } from '../rule_messages';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
@@ -22,7 +23,17 @@ import { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
 import { ExperimentalFeatures } from '../../../../../common/experimental_features';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { IRuleDataClient } from '../../../../../../rule_registry/server';
-import { DETECTION_ENGINE_MAX_PER_PAGE } from '../../../../../common/cti/constants';
+import {
+  DETECTION_ENGINE_MAX_PER_PAGE,
+  ELASTICSEARCH_MAX_PER_PAGE,
+} from '../../../../../common/cti/constants';
+import { getEventCount } from '../threat_mapping/get_threat_list';
+import { EventHit } from '../threat_mapping/types';
+import { fetchSourceEvents } from '../../rule_types/indicator_match/percolator/fetch_source_events';
+import { percolateSourceEvents } from '../../rule_types/indicator_match/percolator/percolate_all_source_events';
+import { enrichEvents } from '../../rule_types/indicator_match/percolator/enrich_events';
+import { createSearchAfterReturnType } from '../utils';
+import { BaseHit } from '../../../../../common/detection_engine/types';
 
 export const threatMatchExecutor = async ({
   completeRule,
@@ -57,61 +68,73 @@ export const threatMatchExecutor = async ({
   percolatorRuleDataClient: IRuleDataClient;
   withTimeout: <T>(func: () => Promise<T>, funcName: string) => Promise<T>;
 }) => {
-  const {
-    concurrentSearches,
-    filters,
-    index,
-    itemsPerSearch,
-    language,
-    outputIndex,
-    query,
-    savedId,
-    threatFilters,
-    threatIndex,
-    threatIndicatorPath,
-    threatLanguage,
-    threatMapping,
-    threatQuery,
-    type,
-  } = completeRule.ruleParams;
-
   return withSecuritySpan('threatMatchExecutor', async () => {
+    const logDebugMessage = (message: string) => logger.debug(buildRuleMessage(message));
+    logDebugMessage('Indicator matching rule starting');
+
+    let results = createSearchAfterReturnType();
+    if (tuple == null || tuple.to == null || tuple.from == null) {
+      logDebugMessage(`[-] malformed date tuple`);
+      return { ...results, success: false, errors: ['malformed date tuple'] };
+    }
+
+    const { filters, index, language, query, maxSignals, timestampOverride } =
+      completeRule.ruleParams;
     const inputIndex = await getInputIndex({
       experimentalFeatures,
       services,
       version,
       index,
     });
-    return createThreatSignals({
-      alertId: completeRule.alertId,
-      buildRuleMessage,
-      bulkCreate,
-      completeRule,
-      concurrentSearches: concurrentSearches ?? 1,
-      eventsTelemetry,
-      exceptionItems,
-      filters: filters ?? [],
-      inputIndex,
-      itemsPerSearch: itemsPerSearch ?? DETECTION_ENGINE_MAX_PER_PAGE,
-      language,
-      listClient,
-      logger,
-      outputIndex,
-      percolatorRuleDataClient,
-      query,
-      savedId,
-      searchAfterSize,
-      services,
-      threatFilters: threatFilters ?? [],
-      threatIndex,
-      threatIndicatorPath,
-      threatLanguage,
-      threatMapping,
-      threatQuery,
-      tuple,
-      type,
-      withTimeout,
-      wrapHits,
-    });
+
+    const matchableSourceEventCount = await withTimeout<number>(
+      () =>
+        getEventCount({
+          esClient: services.scopedClusterClient.asCurrentUser,
+          exceptionItems,
+          filters: filters ?? [],
+          index: inputIndex,
+          language,
+          query,
+          timestampOverride,
+          tuple,
+        }),
+      'getTotalEventCount'
+    );
+    logDebugMessage(`matchable source event count: ${matchableSourceEventCount}`);
+    console.log('____sourceCount', matchableSourceEventCount);
+
+    if (matchableSourceEventCount) {
+      const sourceEventHits: EventHit[] = await fetchSourceEvents({
+        buildRuleMessage,
+        esClient: services.search.asCurrentUser,
+        exceptionItems,
+        listClient,
+        logger,
+        perPage: DETECTION_ENGINE_MAX_PER_PAGE,
+        filters: filters ?? [],
+        index: inputIndex,
+        language,
+        query,
+      });
+
+      const chunkedSourceEventHits = chunk(sourceEventHits, ELASTICSEARCH_MAX_PER_PAGE);
+
+      const matchedPercolateQueriesByChunk = await percolateSourceEvents({
+        chunkedSourceEventHits,
+        percolatorRuleDataClient,
+      });
+
+      const enrichedEvents: Array<BaseHit<Record<string, unknown>>> = enrichEvents({
+        chunkedSourceEventHits,
+        matchedPercolateQueriesByChunk,
+      });
+
+      results = await bulkCreate(enrichedEvents);
+    }
+
+    console.log('____IM rule execution complete');
+    logDebugMessage('Indicator matching rule has completed');
+    return results;
   });
 };
