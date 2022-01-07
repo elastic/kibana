@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { BulkAction } from '../common/schemas';
+import { BulkAction, BulkActionEditType } from '../common/schemas';
 import { PerformBulkActionSchema } from './perform_bulk_action_schema';
 
 export const getPerformBulkActionSchemaMock = (): PerformBulkActionSchema => ({
   query: '',
   action: BulkAction.disable,
+});
+
+export const getPerformBulkActionEditSchemaMock = (): PerformBulkActionSchema => ({
+  query: '',
+  action: BulkAction.edit,
+  [BulkAction.edit]: [{ type: BulkActionEditType.add_tags, value: ['tag1'] }],
 });
