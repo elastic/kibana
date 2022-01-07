@@ -22,6 +22,7 @@ import type {
   CopyAgentPolicyRequestSchema,
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
+  FleetRequestHandler,
 } from '../../types';
 import type { AgentPolicy, NewPackagePolicy } from '../../types';
 import { FLEET_SYSTEM_PACKAGE } from '../../../common';
@@ -39,12 +40,12 @@ import type {
 import { defaultIngestErrorHandler } from '../../errors';
 import { incrementPackageName } from '../../services/package_policy';
 
-export const getAgentPoliciesHandler: RequestHandler<
+export const getAgentPoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetAgentPoliciesRequestSchema.query>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const soClient = context.fleet.epm.internalSoClient;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   const { full: withPackagePolicies = false, ...restOfQuery } = request.query;
   try {
     const { items, total, page, perPage } = await agentPolicyService.list(soClient, {

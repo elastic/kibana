@@ -27,8 +27,9 @@ import { uiMetricService, UIM_OVERVIEW_PAGE_LOAD } from '../../lib/ui_metric';
 import { getBackupStep } from './backup_step';
 import { getFixIssuesStep } from './fix_issues_step';
 import { getUpgradeStep } from './upgrade_step';
+import { getMigrateSystemIndicesStep } from './migrate_system_indices';
 
-type OverviewStep = 'backup' | 'fix_issues';
+type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues';
 
 export const Overview = withRouter(({ history }: RouteComponentProps) => {
   const {
@@ -49,6 +50,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
 
   const [completedStepsMap, setCompletedStepsMap] = useState({
     backup: false,
+    migrate_system_indices: false,
     fix_issues: false,
   });
 
@@ -69,7 +71,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
             defaultMessage: 'Upgrade Assistant',
           })}
           description={i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
-            defaultMessage: 'Get ready for the next major version of Elastic!',
+            defaultMessage: 'Get ready for the next version of Elastic!',
           })}
           rightSideItems={[
             <EuiButtonEmpty
@@ -103,6 +105,10 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
               cloud,
               isComplete: isStepComplete('backup'),
               setIsComplete: setCompletedStep.bind(null, 'backup'),
+            }),
+            getMigrateSystemIndicesStep({
+              isComplete: isStepComplete('migrate_system_indices'),
+              setIsComplete: setCompletedStep.bind(null, 'migrate_system_indices'),
             }),
             getFixIssuesStep({
               isComplete: isStepComplete('fix_issues'),

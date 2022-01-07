@@ -213,9 +213,6 @@ describe('Host Isolation', () => {
           .mockImplementation(() =>
             Promise.resolve({ body: legacyMetadataSearchResponse(searchResponse) })
           );
-        if (indexExists) {
-          ctx.core.elasticsearch.client.asCurrentUser.index = mockIndexResponse;
-        }
 
         ctx.core.elasticsearch.client.asInternalUser.index = mockIndexResponse;
         ctx.core.elasticsearch.client.asCurrentUser.search = mockSearchResponse;
@@ -358,13 +355,12 @@ describe('Host Isolation', () => {
           },
           { endpointDsExists: true }
         );
+
+        const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
         const actionDocs: [
           { index: string; body: LogsEndpointAction },
           { index: string; body: EndpointAction }
-        ] = [
-          (ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock).mock.calls[0][0],
-          (ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock).mock.calls[1][0],
-        ];
+        ] = [(indexDoc as jest.Mock).mock.calls[0][0], (indexDoc as jest.Mock).mock.calls[1][0]];
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
         expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
@@ -380,13 +376,11 @@ describe('Host Isolation', () => {
           },
           { endpointDsExists: true }
         );
+        const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
         const actionDocs: [
           { index: string; body: LogsEndpointAction },
           { index: string; body: EndpointAction }
-        ] = [
-          (ctx.core.elasticsearch.client.asCurrentUser.index as jest.Mock).mock.calls[0][0],
-          (ctx.core.elasticsearch.client.asInternalUser.index as jest.Mock).mock.calls[1][0],
-        ];
+        ] = [(indexDoc as jest.Mock).mock.calls[0][0], (indexDoc as jest.Mock).mock.calls[1][0]];
 
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
         expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
