@@ -6,37 +6,29 @@
  * Side Public License, v 1.
  */
 
-import {
-  Filter,
-  buildEsQuery,
-  compareFilters,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  buildQueryFromFilters,
-} from '@kbn/es-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { merge, Subject, Subscription, BehaviorSubject } from 'rxjs';
 import { tap, debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
+import { Filter, compareFilters, buildPhraseFilter, buildPhrasesFilter } from '@kbn/es-query';
 
 import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
-import {
-  withSuspense,
-  LazyReduxEmbeddableWrapper,
-  ReduxEmbeddableWrapperPropsWithChildren,
-} from '../../../../presentation_util/public';
 import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
 import { ControlsDataViewsService } from '../../services/data_views';
 import { Embeddable, IContainer } from '../../../../embeddable/public';
-import { ControlsDataService } from '../../services/data';
+import { runOptionsListRequest } from './options_list_service';
 import { optionsListReducers } from './options_list_reducers';
 import { OptionsListStrings } from './options_list_strings';
 import { DataView } from '../../../../data_views/public';
 import { ControlInput, ControlOutput } from '../..';
 import { pluginServices } from '../../services';
-import { getSuggestions } from './options_list_suggestions';
+import {
+  withSuspense,
+  LazyReduxEmbeddableWrapper,
+  ReduxEmbeddableWrapperPropsWithChildren,
+} from '../../../../presentation_util/public';
 
 const OptionsListReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<OptionsListEmbeddableInput>
@@ -73,11 +65,11 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private node?: HTMLElement;
 
   // Controls services
-  private dataService: ControlsDataService;
   private dataViewsService: ControlsDataViewsService;
 
   // Internal data fetching state for this input control.
   private typeaheadSubject: Subject<string> = new Subject<string>();
+  private abortController?: AbortController;
   private dataView?: DataView;
   private searchString = '';
 
@@ -91,7 +83,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     super(input, output, parent); // get filters for initial output...
 
     // Destructure controls services
-    ({ data: this.dataService, dataViews: this.dataViewsService } = pluginServices.getServices());
+    ({ dataViews: this.dataViewsService } = pluginServices.getServices());
 
     this.componentState = { loading: true };
     this.updateComponentState(this.componentState);
@@ -157,43 +149,28 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   private fetchAvailableOptions = async () => {
     this.updateComponentState({ loading: true });
-    const { ignoreParentSettings, filters, fieldName, query, selectedOptions } = this.getInput();
+    const { ignoreParentSettings, filters, fieldName, query, selectedOptions, timeRange } =
+      this.getInput();
     const dataView = await this.getCurrentDataView();
     const field = dataView.getFieldByName(fieldName);
-
     if (!field) throw fieldMissingError(fieldName);
 
-    const boolFilter = [
-      buildEsQuery(
+    if (this.abortController) this.abortController.abort();
+    this.abortController = new AbortController();
+    const response = await runOptionsListRequest(
+      {
+        field,
         dataView,
-        ignoreParentSettings?.ignoreQuery ? [] : query ?? [],
-        ignoreParentSettings?.ignoreFilters ? [] : filters ?? []
-      ),
-    ];
+        selectedOptions,
+        searchString: this.searchString,
+        ...(ignoreParentSettings?.ignoreQuery ? {} : { query }),
+        ...(ignoreParentSettings?.ignoreFilters ? {} : { filters }),
+        ...(ignoreParentSettings?.ignoreTimerange ? {} : { timeRange }),
+      },
+      this.abortController.signal
+    );
 
-    // TEMP run getSuggestions from new API
-    const timeService = this.dataService.query.timefilter.timefilter;
-    const currentTimeFilter = timeService.createFilter(dataView, timeService.getTime());
-    const builtTimeFilter = currentTimeFilter
-      ? buildQueryFromFilters([currentTimeFilter], dataView).filter
-      : [];
-    getSuggestions(dataView.title, {
-      field: field.name,
-      selectedOptions,
-      filters: [...boolFilter, ...builtTimeFilter],
-      searchString: this.searchString,
-    });
-    // end TEMP
-
-    const newOptions = await this.dataService.autocomplete.getValueSuggestions({
-      query: this.searchString,
-      indexPattern: dataView,
-      useTimeRange: !ignoreParentSettings?.ignoreTimerange,
-      method: 'terms_agg', // terms_agg method is required to use timeRange
-      boolFilter,
-      field,
-    });
-    this.updateComponentState({ availableOptions: newOptions, loading: false });
+    this.updateComponentState({ availableOptions: response.suggestions, loading: false });
   };
 
   private initialize = async () => {
@@ -234,6 +211,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   public destroy = () => {
     super.destroy();
+    this.abortController?.abort();
     this.subscriptions.unsubscribe();
   };
 

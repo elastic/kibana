@@ -14,8 +14,8 @@ import { Observable } from 'rxjs';
 import { CoreSetup, ElasticsearchClient } from '../../../../../core/server';
 import { getKbnServerError, reportServerError } from '../../../../kibana_utils/server';
 import {
-  OptionsListSuggestionRequest,
-  OptionsListSuggestionResponse,
+  OptionsListRequestBody,
+  OptionsListResponse,
 } from '../../../common/control_types/options_list/types';
 
 export const setupOptionsListSuggestionsRoute = ({ http }: CoreSetup) => {
@@ -33,7 +33,7 @@ export const setupOptionsListSuggestionsRoute = ({ http }: CoreSetup) => {
         ),
         body: schema.object(
           {
-            field: schema.string(),
+            fieldName: schema.string(),
             filters: schema.maybe(schema.any()),
             searchString: schema.maybe(schema.string()),
             selectedOptions: schema.maybe(schema.arrayOf(schema.string())),
@@ -44,7 +44,7 @@ export const setupOptionsListSuggestionsRoute = ({ http }: CoreSetup) => {
     },
     async (context, request, response) => {
       try {
-        const suggestionRequest: OptionsListSuggestionRequest = request.body;
+        const suggestionRequest: OptionsListRequestBody = request.body;
         const { index } = request.params;
         const esClient = context.core.elasticsearch.client.asCurrentUser;
         const suggestionsResponse = await getOptionsListSuggestions({
@@ -68,16 +68,16 @@ const getOptionsListSuggestions = async ({
   request,
   index,
 }: {
-  request: OptionsListSuggestionRequest;
+  request: OptionsListRequestBody;
   abortedEvent$: Observable<void>;
   esClient: ElasticsearchClient;
   index: string;
-}): Promise<OptionsListSuggestionResponse> => {
+}): Promise<OptionsListResponse> => {
   const abortController = new AbortController();
   abortedEvent$.subscribe(() => abortController.abort());
 
-  const { field, searchString, selectedOptions, filters } = request;
-  const body = getOptionsListBody(field, searchString, selectedOptions, filters);
+  const { fieldName, searchString, selectedOptions, filters } = request;
+  const body = getOptionsListBody(fieldName, searchString, selectedOptions, filters);
   const rawEsResult = await esClient.search({ index, body }, { signal: abortController.signal });
 
   // parse raw ES response into OptionsListSuggestionResponse
@@ -105,7 +105,7 @@ const getOptionsListSuggestions = async ({
 };
 
 const getOptionsListBody = (
-  field: string,
+  fieldName: string,
   searchString?: string,
   selectedOptions?: string[],
   filters: estypes.QueryDslQueryContainer[] = []
@@ -121,7 +121,7 @@ const getOptionsListBody = (
   const shardSize = 10;
   const suggestionsAgg = {
     terms: {
-      field,
+      fieldName,
       include: `${getEscapedQuery(searchString ?? '')}.*`,
       execution_hint: executionHint,
       shard_size: shardSize,
@@ -130,7 +130,7 @@ const getOptionsListBody = (
 
   // Validation
   const selectedOptionsFilters = selectedOptions?.reduce((acc, currentOption) => {
-    acc[currentOption] = { match: { [field]: currentOption } };
+    acc[currentOption] = { match: { [fieldName]: currentOption } };
     return acc;
   }, {} as { [key: string]: { match: { [key: string]: string } } });
 
@@ -157,7 +157,7 @@ const getOptionsListBody = (
       ...(validationAgg ? { validation: validationAgg } : {}),
       unique_terms: {
         cardinality: {
-          field,
+          field: fieldName,
         },
       },
     },

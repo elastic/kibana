@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { BoolQuery } from '@kbn/es-query';
 import { ControlInput } from '../../types';
 
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';
@@ -19,15 +20,15 @@ export interface OptionsListEmbeddableInput extends ControlInput {
   loading?: boolean;
 }
 
-export interface OptionsListSuggestionResponse {
+export interface OptionsListResponse {
   suggestions: string[];
   totalCardinality: number;
   invalidSelections?: string[];
 }
 
-export interface OptionsListSuggestionRequest {
+export interface OptionsListRequestBody {
+  filters?: Array<{ bool: BoolQuery }>;
   selectedOptions?: string[];
   searchString?: string;
-  filters?: any[]; // TODO remove usage of any
-  field: string;
+  fieldName: string;
 }
