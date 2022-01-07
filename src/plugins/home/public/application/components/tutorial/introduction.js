@@ -16,6 +16,7 @@ import {
   EuiPageHeader,
   EuiButtonEmpty,
   EuiSpacer,
+  EuiBadge,
 } from '@elastic/eui';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
@@ -98,6 +99,8 @@ function IntroductionUI({
                 {betaBadge}
               </>
             )}
+            &nbsp;
+            <EuiBadge>Beats</EuiBadge>
           </>
         }
         description={
