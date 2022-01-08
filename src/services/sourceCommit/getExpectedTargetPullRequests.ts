@@ -3,7 +3,7 @@ import { ValidConfigOptions } from '../../options/options';
 import { filterNil } from '../../utils/filterEmpty';
 import { getFirstLine } from '../github/commitFormatters';
 import {
-  PullRequestNode,
+  SourcePullRequestNode,
   SourceCommitWithTargetPullRequest,
   TimelineEdge,
   TimelinePullRequestEdge,
@@ -14,6 +14,10 @@ export type ExpectedTargetPullRequest = {
   number?: number;
   branch: string;
   state: 'OPEN' | 'CLOSED' | 'MERGED' | 'MISSING';
+  mergeCommit?: {
+    sha: string;
+    message: string;
+  };
 };
 
 export function getExpectedTargetPullRequests(
@@ -50,8 +54,8 @@ export function getExpectedTargetPullRequests(
 
 function getExistingTargetPullRequests(
   sourceCommit: SourceCommitWithTargetPullRequest,
-  sourcePullRequest: PullRequestNode
-) {
+  sourcePullRequest: SourcePullRequestNode
+): ExpectedTargetPullRequest[] {
   const sourceCommitMessage = getFirstLine(sourceCommit.message);
 
   return sourcePullRequest.timelineItems.edges
@@ -71,11 +75,11 @@ function getExistingTargetPullRequests(
           const { targetCommit } = commitEdge.node;
 
           const matchingRepoName =
-            sourceCommit.repository.name === targetCommit.repository.name;
+            sourceCommit.repository.name === targetPullRequest.repository.name;
 
           const matchingRepoOwner =
             sourceCommit.repository.owner.login ===
-            targetCommit.repository.owner.login;
+            targetPullRequest.repository.owner.login;
 
           const targetCommitMessage = getFirstLine(targetCommit.message);
 
@@ -100,15 +104,21 @@ function getExistingTargetPullRequests(
         number: targetPullRequest.number,
         branch: targetPullRequest.baseRefName,
         state: targetPullRequest.state,
+        mergeCommit: targetPullRequest.targetMergeCommit
+          ? {
+              sha: targetPullRequest.targetMergeCommit.oid,
+              message: targetPullRequest.targetMergeCommit.message,
+            }
+          : undefined,
       };
     });
 }
 
 function getMissingTargetPullRequests(
-  sourcePullRequest: PullRequestNode,
+  sourcePullRequest: SourcePullRequestNode,
   existingTargetPullRequests: ExpectedTargetPullRequest[],
   branchLabelMapping: NonNullable<ValidConfigOptions['branchLabelMapping']>
-) {
+): ExpectedTargetPullRequest[] {
   const labels = sourcePullRequest.labels.nodes.map((label) => label.name);
   const targetBranchesFromLabels = labels
     .map((label) => getTargetBranchForLabel({ branchLabelMapping, label }))

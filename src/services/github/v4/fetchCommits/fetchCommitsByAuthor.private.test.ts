@@ -1,5 +1,7 @@
+import gql from 'graphql-tag';
 import { getDevAccessToken } from '../../../../test/private/getDevAccessToken';
 import { Commit } from '../../../sourceCommit/parseSourceCommit';
+import * as apiRequestV4Module from '../apiRequestV4';
 import { fetchCommitsByAuthor } from './fetchCommitsByAuthor';
 
 describe('fetchCommitsByAuthor', () => {
@@ -7,6 +9,48 @@ describe('fetchCommitsByAuthor', () => {
 
   beforeAll(async () => {
     devAccessToken = await getDevAccessToken();
+  });
+
+  describe('snapshot request/response', () => {
+    let spy: jest.SpyInstance;
+    let commits: Commit[];
+
+    beforeEach(async () => {
+      spy = jest.spyOn(apiRequestV4Module, 'apiRequestV4');
+      commits = await fetchCommitsByAuthor({
+        accessToken: devAccessToken,
+        author: 'sqren',
+        historicalBranchLabelMappings: [],
+        maxNumber: 10,
+        repoName: 'kibana',
+        repoOwner: 'elastic',
+        sourceBranch: 'main',
+        dateSince: '2021-01-10T00:00:00Z',
+        dateUntil: '2022-01-01T00:00:00Z',
+        commitPaths: [] as Array<string>,
+      });
+    });
+
+    it('makes the right queries', () => {
+      const queries = spy.mock.calls.reduce((acc, call) => {
+        const query = call[0].query;
+        const ast = gql(query);
+        //@ts-expect-error
+        const name = ast.definitions[0].name.value;
+        return { ...acc, [name]: query };
+      }, {});
+
+      const queryNames = Object.keys(queries);
+      expect(queryNames).toEqual(['AuthorId', 'CommitsByAuthor']);
+
+      queryNames.forEach((name) => {
+        expect(queries[name]).toMatchSnapshot(`Query: ${name}`);
+      });
+    });
+
+    it('returns the correct response', async () => {
+      expect(commits).toMatchSnapshot();
+    });
   });
 
   describe('commitPaths', () => {
@@ -18,6 +62,8 @@ describe('fetchCommitsByAuthor', () => {
       repoName: 'repo-with-different-commit-paths',
       repoOwner: 'backport-org',
       sourceBranch: 'main',
+      dateSince: null,
+      dateUntil: null,
     });
 
     const getCommitMessages = (commits: Commit[]) => {
@@ -104,6 +150,8 @@ describe('fetchCommitsByAuthor', () => {
         repoOwner: 'backport-org',
         sourceBranch: 'master',
         author: null,
+        dateSince: null,
+        dateUntil: null,
       });
     });
 
@@ -127,12 +175,20 @@ describe('fetchCommitsByAuthor', () => {
           state: 'MERGED',
           number: 6,
           url: 'https://github.com/backport-org/backport-e2e/pull/6',
+          mergeCommit: {
+            message: 'Add 🍏 emoji (#5) (#6)',
+            sha: '4bcd876d4ceaa73cf437bfc89b74d1a4e704c0a6',
+          },
         },
         {
           branch: '7.8',
           state: 'MERGED',
           number: 7,
           url: 'https://github.com/backport-org/backport-e2e/pull/7',
+          mergeCommit: {
+            message: 'Add 🍏 emoji (#5) (#7)',
+            sha: '46cd6f9999effdf894a36dbc7db90e890f4be840',
+          },
         },
       ]);
     });

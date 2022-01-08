@@ -110,6 +110,10 @@ describe('parseSourceCommit', () => {
           number: 5678,
           state: 'MERGED',
           url: 'https://github.com/elastic/kibana/pull/5678',
+          mergeCommit: {
+            message: 'My commit message (#66)',
+            sha: 'target-merge-commit-sha',
+          },
         },
         {
           branch: '6.2',
@@ -188,7 +192,7 @@ describe('parseSourceCommit', () => {
 
   it('returns the correct source commit', () => {
     const mockSourceCommit = getMockSourceCommit({
-      sourceCommit: { message: 'My commit message (#1234)' },
+      sourceCommit: { message: 'My commit message (#1234)', sha: 'my-sha' },
       sourcePullRequest: {
         number: 1234,
         labels: ['v6.3.0', 'v6.2.0', 'v6.1.0'],
@@ -227,6 +231,10 @@ describe('parseSourceCommit', () => {
           number: 5678,
           state: 'MERGED',
           url: 'https://github.com/elastic/kibana/pull/5678',
+          mergeCommit: {
+            message: 'My commit message (#1234)',
+            sha: 'target-merge-commit-sha',
+          },
         },
         {
           branch: '6.2',
@@ -242,7 +250,7 @@ describe('parseSourceCommit', () => {
       originalMessage: 'My commit message (#1234)',
       pullNumber: 1234,
       pullUrl: 'https://github.com/elastic/kibana/pull/1234',
-      sha: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
+      sha: 'my-sha',
       sourceBranch: 'source-branch-from-associated-pull-request',
     });
   });

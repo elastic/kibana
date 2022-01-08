@@ -66,6 +66,16 @@ export function getOptionsFromCliArgs(
       conflicts: ['noCherrypickRef'],
     })
 
+    .option('since', {
+      description: 'ISO-8601 date for filtering commits',
+      type: 'string',
+    })
+
+    .option('until', {
+      description: 'ISO-8601 date for filtering commits',
+      type: 'string',
+    })
+
     .option('details', {
       description: 'Show details about each commit',
       type: 'boolean',
@@ -314,7 +324,11 @@ export function getOptionsFromCliArgs(
     multipleBranches,
     multipleCommits,
     all,
+
+    // filters
     author,
+    since,
+    until,
 
     // negations
     verify,
@@ -337,7 +351,10 @@ export function getOptionsFromCliArgs(
   return excludeUndefined({
     ...restOptions,
 
+    // filters
     author: all ? null : author,
+    dateSince: since,
+    dateUntil: until,
 
     // `multiple` is a cli-only flag to override `multipleBranches` and `multipleCommits`
     multipleBranches: multiple ?? multipleBranches,

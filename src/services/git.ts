@@ -9,6 +9,7 @@ import { getRepoOwnerPath, getRepoPath } from './env';
 import { stat } from './fs-promisified';
 import { getShortSha } from './github/commitFormatters';
 import { logger } from './logger';
+import { ExpectedTargetPullRequest } from './sourceCommit/getExpectedTargetPullRequests';
 import { Commit } from './sourceCommit/parseSourceCommit';
 
 async function folderExists(path: string): Promise<boolean> {
@@ -187,7 +188,8 @@ export async function fetchBranch(options: ValidConfigOptions, branch: string) {
 
 export async function cherrypick(
   options: ValidConfigOptions,
-  sha: Commit['sha']
+  sha: Commit['sha'],
+  mergedTargetPullRequest?: ExpectedTargetPullRequest
 ): Promise<{
   conflictingFiles: {
     absolute: string;
@@ -215,8 +217,13 @@ export async function cherrypick(
     // commit was already backported
     if (e.message.includes('The previous cherry-pick is now empty')) {
       const shortSha = getShortSha(sha);
+
       throw new HandledError(
-        `Cherrypick failed because the selected commit (${shortSha}) is empty. Did you already backport this commit?`
+        `Cherrypick failed because the selected commit (${shortSha}) is empty. ${
+          mergedTargetPullRequest?.url
+            ? `It looks like the commit was already backported in ${mergedTargetPullRequest.url}`
+            : 'Did you already backport this commit? '
+        }`
       );
     }
 

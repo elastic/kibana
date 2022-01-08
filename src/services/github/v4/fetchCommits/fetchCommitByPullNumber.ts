@@ -35,7 +35,7 @@ export async function fetchCommitByPullNumber(options: {
       repository(owner: $repoOwner, name: $repoName) {
         pullRequest(number: $pullNumber) {
           mergeCommit {
-            ...${sourceCommitWithTargetPullRequestFragment.name}
+            ...SourceCommitWithTargetPullRequest
           }
         }
       }

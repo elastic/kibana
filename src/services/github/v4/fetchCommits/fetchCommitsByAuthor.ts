@@ -23,6 +23,8 @@ function fetchByCommitPath({
     repoName: string;
     repoOwner: string;
     sourceBranch: string;
+    dateSince: string | null;
+    dateUntil: string | null;
   };
   authorId: string | null;
   commitPath: string | null;
@@ -34,6 +36,8 @@ function fetchByCommitPath({
     repoName,
     repoOwner,
     sourceBranch,
+    dateSince,
+    dateUntil,
   } = options;
 
   const query = /* GraphQL */ `
@@ -44,6 +48,8 @@ function fetchByCommitPath({
       $sourceBranch: String!
       $authorId: ID
       $commitPath: String
+      $dateSince: GitTimestamp
+      $dateUntil: GitTimestamp
     ) {
       repository(owner: $repoOwner, name: $repoName) {
         ref(qualifiedName: $sourceBranch) {
@@ -53,10 +59,12 @@ function fetchByCommitPath({
                 first: $maxNumber
                 author: { id: $authorId }
                 path: $commitPath
+                since: $dateSince
+                until: $dateUntil
               ) {
                 edges {
                   node {
-                    ...${sourceCommitWithTargetPullRequestFragment.name}
+                    ...SourceCommitWithTargetPullRequest
                   }
                 }
               }
@@ -69,18 +77,22 @@ function fetchByCommitPath({
     ${sourceCommitWithTargetPullRequestFragment.source}
   `;
 
+  const variables = {
+    repoOwner,
+    repoName,
+    sourceBranch,
+    maxNumber,
+    authorId,
+    commitPath,
+    dateSince,
+    dateUntil,
+  };
+
   return apiRequestV4<CommitByAuthorResponse>({
     githubApiBaseUrlV4,
     accessToken,
     query,
-    variables: {
-      repoOwner,
-      repoName,
-      sourceBranch,
-      maxNumber,
-      authorId,
-      commitPath,
-    },
+    variables,
   });
 }
 
@@ -95,6 +107,8 @@ export async function fetchCommitsByAuthor(options: {
   repoName: string;
   repoOwner: string;
   sourceBranch: string;
+  dateSince: string | null;
+  dateUntil: string | null;
 }): Promise<Commit[]> {
   const { sourceBranch, commitPaths = [] } = options;
 

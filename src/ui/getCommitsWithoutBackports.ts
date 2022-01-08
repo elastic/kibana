@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import { Commit } from '../entrypoint.module';
 import { ValidConfigOptions } from '../options/options';
+import { getIsCommitInBranch } from '../services/git';
 import { getFirstLine } from '../services/github/commitFormatters';
 import { fetchCommitsByAuthor } from '../services/github/v4/fetchCommits/fetchCommitsByAuthor';
 
@@ -26,35 +27,56 @@ export async function getCommitsWithoutBackports({
   const commitsInConflictingPaths = await fetchCommitsByAuthor({
     ...options,
     author: null, // retrieve commits across all authors
+    dateSince: null,
+    dateUntil: commit.committedDate,
     commitPaths: conflictingFiles,
   });
 
-  return commitsInConflictingPaths
-    .filter((c) => {
-      // exclude the commit we are currently trying to backport
-      if (c.sha === commit.sha) {
-        return false;
-      }
+  const promises = await Promise.all(
+    commitsInConflictingPaths
+      .filter((c) => {
+        // exclude the commit we are currently trying to backport
+        if (c.sha === commit.sha) {
+          return false;
+        }
 
-      // exclude commits that are newer than the commit we are trying to backport
-      if (c.committedDate > commit.committedDate) {
-        return false;
-      }
+        // exclude commits that are newer than the commit we are trying to backport
+        if (c.committedDate > commit.committedDate) {
+          return false;
+        }
 
-      // only consider commits that have an associated pull request
-      if (!c.pullUrl) {
-        return false;
-      }
+        // only consider commits that have an associated pull request
+        if (!c.pullUrl) {
+          return false;
+        }
 
-      // only include commit if it has an unmerged PR for the given target branch
-      const hasUnmergedPr = c.expectedTargetPullRequests.some(
-        (pr) => pr.branch === targetBranch && pr.state !== 'MERGED'
-      );
+        // only include commit if it has an unmerged PR for the given target branch
+        const hasUnmergedPr = c.expectedTargetPullRequests.some(
+          (pr) => pr.branch === targetBranch && pr.state !== 'MERGED'
+        );
 
-      return hasUnmergedPr;
-    })
-    .slice(0, 10) // limit to max 10 commits
-    .map((c) => {
+        return hasUnmergedPr;
+      })
+      .slice(0, 10) // limit to max 10 commits
+      .map(async (c) => {
+        const results = await Promise.all(
+          c.expectedTargetPullRequests.map(async (targetPr) => {
+            if (!targetPr.mergeCommit) {
+              return false;
+            }
+
+            return getIsCommitInBranch(options, targetPr.mergeCommit.sha);
+          })
+        );
+
+        const isCommitInBranch = results.some((inBranch) => inBranch === true);
+        return { c, isCommitInBranch };
+      })
+  );
+
+  return promises
+    .filter(({ isCommitInBranch }) => !isCommitInBranch)
+    .map(({ c }) => {
       // get pull request for the target branch (if it exists)
       const pendingBackportPr = c.expectedTargetPullRequests.find(
         (pr) => pr.branch === targetBranch && pr.state === 'OPEN'

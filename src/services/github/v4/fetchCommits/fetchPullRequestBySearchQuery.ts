@@ -29,7 +29,7 @@ export async function fetchPullRequestBySearchQuery(
         nodes {
           ... on PullRequest {
             mergeCommit {
-              ...${sourceCommitWithTargetPullRequestFragment.name}
+              ...SourceCommitWithTargetPullRequest
             }
           }
         }
@@ -39,16 +39,17 @@ export async function fetchPullRequestBySearchQuery(
     ${sourceCommitWithTargetPullRequestFragment.source}
   `;
 
-  const authorFilter = author ? `author:${author}` : '';
-  const searchQuery = `type:pr is:merged sort:updated-desc repo:${repoOwner}/${repoName} ${authorFilter} ${prFilter} base:${sourceBranch}`;
+  const authorFilter = author ? ` author:${author}` : '';
+  const searchQuery = `type:pr is:merged sort:updated-desc repo:${repoOwner}/${repoName}${authorFilter} ${prFilter} base:${sourceBranch}`;
+  const variables = {
+    query: searchQuery,
+    maxNumber: maxNumber,
+  };
   const res = await apiRequestV4<PullRequestBySearchQueryResponse>({
     githubApiBaseUrlV4,
     accessToken,
     query,
-    variables: {
-      query: searchQuery,
-      maxNumber: maxNumber,
-    },
+    variables,
   });
 
   const commits = res.search.nodes.map((pullRequestNode) => {

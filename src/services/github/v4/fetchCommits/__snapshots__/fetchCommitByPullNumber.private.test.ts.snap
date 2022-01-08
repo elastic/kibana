@@ -1,54 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`fetchCommitsByAuthor when commit has an associated pull request should call with correct args to fetch author id 1`] = `
-Array [
-  Object {
-    "query": "
-    query AuthorId($author: String!) {
-      user(login: $author) {
-        id
-      }
-    }
-  ",
-    "variables": Object {
-      "author": "sqren",
-    },
-  },
-]
-`;
-
-exports[`fetchCommitsByAuthor when commit has an associated pull request should call with correct args to fetch commits 1`] = `
-Array [
-  Object {
-    "query": "
-    query CommitsByAuthor(
+exports[`fetchCommitByPullNumber snapshot request/response makes the right queries: Query: CommitByPullNumber 1`] = `
+"
+    query CommitByPullNumber(
       $repoOwner: String!
       $repoName: String!
-      $maxNumber: Int!
-      $sourceBranch: String!
-      $authorId: ID
-      $commitPath: String
-      $dateSince: GitTimestamp
-      $dateUntil: GitTimestamp
+      $pullNumber: Int!
     ) {
       repository(owner: $repoOwner, name: $repoName) {
-        ref(qualifiedName: $sourceBranch) {
-          target {
-            ... on Commit {
-              history(
-                first: $maxNumber
-                author: { id: $authorId }
-                path: $commitPath
-                since: $dateSince
-                until: $dateUntil
-              ) {
-                edges {
-                  node {
-                    ...SourceCommitWithTargetPullRequest
-                  }
-                }
-              }
-            }
+        pullRequest(number: $pullNumber) {
+          mergeCommit {
+            ...SourceCommitWithTargetPullRequest
           }
         }
       }
@@ -133,17 +95,30 @@ Array [
       }
     }
   
-  ",
-    "variables": Object {
-      "authorId": "myUserId",
-      "commitPath": null,
-      "dateSince": null,
-      "dateUntil": null,
-      "maxNumber": 10,
-      "repoName": "kibana",
-      "repoOwner": "elastic",
-      "sourceBranch": "source-branch-from-options",
+  "
+`;
+
+exports[`fetchCommitByPullNumber snapshot request/response returns the correct response 1`] = `
+Object {
+  "committedDate": "2021-12-20T14:20:16Z",
+  "expectedTargetPullRequests": Array [
+    Object {
+      "branch": "8.0",
+      "mergeCommit": Object {
+        "message": "[APM] Add note about synthtrace to APM docs (#121633) (#121643)
+
+Co-authored-by: Søren Louv-Jansen <soren.louv@elastic.co>",
+        "sha": "842adfdeb5541b059231857522f9009771a46107",
+      },
+      "number": 121643,
+      "state": "MERGED",
+      "url": "https://github.com/elastic/kibana/pull/121643",
     },
-  },
-]
+  ],
+  "originalMessage": "[APM] Add note about synthtrace to APM docs (#121633)",
+  "pullNumber": 121633,
+  "pullUrl": "https://github.com/elastic/kibana/pull/121633",
+  "sha": "d421ddcf6157150596581c7885afa3690cec6339",
+  "sourceBranch": "main",
+}
 `;

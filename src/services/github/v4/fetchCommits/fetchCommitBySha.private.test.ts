@@ -1,4 +1,7 @@
+import gql from 'graphql-tag';
 import { getDevAccessToken } from '../../../../test/private/getDevAccessToken';
+import { Commit } from '../../../sourceCommit/parseSourceCommit';
+import * as apiRequestV4Module from '../apiRequestV4';
 import { fetchCommitBySha } from './fetchCommitBySha';
 
 describe('fetchCommitBySha', () => {
@@ -6,6 +9,44 @@ describe('fetchCommitBySha', () => {
 
   beforeEach(async () => {
     devAccessToken = await getDevAccessToken();
+  });
+
+  describe('snapshot request/response', () => {
+    let spy: jest.SpyInstance;
+    let commit: Commit;
+
+    beforeEach(async () => {
+      spy = jest.spyOn(apiRequestV4Module, 'apiRequestV4');
+
+      commit = await fetchCommitBySha({
+        repoOwner: 'elastic',
+        repoName: 'kibana',
+        accessToken: devAccessToken,
+        sha: 'd421ddcf6157150596581c7885afa3690cec6339',
+        sourceBranch: 'main',
+        historicalBranchLabelMappings: [],
+      });
+    });
+
+    it('makes the right queries', () => {
+      const queries = spy.mock.calls.reduce((acc, call) => {
+        const query = call[0].query;
+        const ast = gql(query);
+        //@ts-expect-error
+        const name = ast.definitions[0].name.value;
+        return { ...acc, [name]: query };
+      }, {});
+
+      const queryNames = Object.keys(queries);
+      expect(queryNames).toEqual(['CommitsBySha']);
+      queryNames.forEach((name) => {
+        expect(queries[name]).toMatchSnapshot(`Query: ${name}`);
+      });
+    });
+
+    it('returns the correct response', async () => {
+      expect(commit).toMatchSnapshot();
+    });
   });
 
   it('should return single commit with pull request', async () => {
@@ -31,6 +72,10 @@ describe('fetchCommitBySha', () => {
           state: 'MERGED',
           number: 71014,
           url: 'https://github.com/elastic/kibana/pull/71014',
+          mergeCommit: {
+            message: '[APM] Add API tests (#70740) (#71014)',
+            sha: 'd15242be682582e58cd69f6b7707565434e99293',
+          },
         },
       ],
     });

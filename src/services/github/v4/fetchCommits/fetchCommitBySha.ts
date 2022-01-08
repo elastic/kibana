@@ -28,13 +28,13 @@ export async function fetchCommitBySha(options: {
   } = options;
 
   const query = /* GraphQL */ `
-  query CommitsBySha($repoOwner: String!, $repoName: String!, $oid: String!) {
-    repository(owner: $repoOwner, name: $repoName) {
-      object(expression: $oid) {
-        ...${sourceCommitWithTargetPullRequestFragment.name}
+    query CommitsBySha($repoOwner: String!, $repoName: String!, $oid: String!) {
+      repository(owner: $repoOwner, name: $repoName) {
+        object(expression: $oid) {
+          ...SourceCommitWithTargetPullRequest
+        }
       }
     }
-  }
 
     ${sourceCommitWithTargetPullRequestFragment.source}
   `;

@@ -1,5 +1,3 @@
-jest.unmock('./services/logger');
-
 import { getCommits } from './entrypoint.module';
 import { getDevAccessToken } from './test/private/getDevAccessToken';
 
@@ -22,6 +20,10 @@ describe('entrypoint.module', () => {
             number: 4,
             state: 'MERGED',
             url: 'https://github.com/backport-org/backport-e2e/pull/4',
+            mergeCommit: {
+              message: 'Add family emoji (#2) (#4)',
+              sha: 'f8b4f6ae7ffaf2732fa5e33e98b3ea772bdfff1d',
+            },
           },
         ],
         originalMessage: 'Add family emoji (#2)',

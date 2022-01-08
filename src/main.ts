@@ -55,7 +55,7 @@ export async function main(
       error: e,
     };
 
-    if (options?.ci) {
+    if (options) {
       await createStatusComment({
         options,
         backportResponse,

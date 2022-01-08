@@ -45,6 +45,10 @@ describe('getExpectedTargetPullRequests', () => {
         state: 'MERGED',
         number: 5678,
         url: 'https://github.com/elastic/kibana/pull/5678',
+        mergeCommit: {
+          message: 'identical messages (#1234)',
+          sha: 'target-merge-commit-sha',
+        },
       },
     ]);
   });
@@ -143,6 +147,10 @@ describe('getExpectedTargetPullRequests', () => {
         state: 'MERGED',
         number: 5678,
         url: 'https://github.com/elastic/kibana/pull/5678',
+        mergeCommit: {
+          message: 'message two (#1234)',
+          sha: 'target-merge-commit-sha',
+        },
       },
     ]);
   });
@@ -197,6 +205,10 @@ describe('getExpectedTargetPullRequests', () => {
         state: 'MERGED',
         number: 5678,
         url: 'https://github.com/elastic/kibana/pull/5678',
+        mergeCommit: {
+          message: 'message one (#1234)\n\nsomething else',
+          sha: 'target-merge-commit-sha',
+        },
       },
     ]);
   });
@@ -255,6 +267,10 @@ describe('getExpectedTargetPullRequests', () => {
         state: 'MERGED',
         number: 5678,
         url: 'https://github.com/elastic/kibana/pull/5678',
+        mergeCommit: {
+          message: 'identical messages (#1234)',
+          sha: 'target-merge-commit-sha',
+        },
       },
       { branch: '7.1', state: 'MISSING' },
     ]);
@@ -483,6 +499,10 @@ describe('getExpectedTargetPullRequests', () => {
         number: 5678,
         state: 'MERGED',
         url: 'https://github.com/elastic/kibana/pull/5678',
+        mergeCommit: {
+          message: 'identical messages (#1234)',
+          sha: 'target-merge-commit-sha',
+        },
       },
       { branch: 'branch-1', state: 'MISSING' },
       { branch: 'branch-2', state: 'MISSING' },

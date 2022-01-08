@@ -20,17 +20,6 @@ export async function createStatusComment({
       log: logger,
     });
 
-    // don't post update if there are no new pull requests created
-    if (backportResponse.status === 'success') {
-      const hasOnlyUpdates = backportResponse.results.every(
-        (result) => result.status === 'success' && result.didUpdate
-      );
-
-      if (hasOnlyUpdates) {
-        return;
-      }
-    }
-
     await Promise.all(
       backportResponse.commits.map((commit) => {
         if (!commit.pullNumber) {
@@ -42,6 +31,11 @@ export async function createStatusComment({
           pullNumber: commit.pullNumber,
           backportResponse,
         });
+
+        // only post comment if there is a body
+        if (!body) {
+          return;
+        }
 
         return octokit.issues.createComment({
           owner: repoOwner,
@@ -64,8 +58,26 @@ export function getCommentBody({
   options: ValidConfigOptions;
   pullNumber: number;
   backportResponse: BackportResponse;
-}): string {
+}): string | undefined {
   const { repoName, repoOwner, autoMerge } = options;
+
+  // custom handling when running backport locally (as opposed to on CI)
+  if (!options.ci) {
+    // don't post comment when the overall process failed
+    if (backportResponse.status === 'failure') {
+      return;
+    }
+
+    // only post a comment if all backports succeeded
+    const didAllBackportsSucceed = backportResponse.results.every(
+      (r) => r.status === 'success'
+    );
+
+    if (!didAllBackportsSucceed) {
+      return;
+    }
+  }
+
   const backportPRCommand = `\n### How to fix\nRe-run the backport manually:\n\`\`\`\n${options.backportBinary} --pr ${pullNumber}\n\`\`\``;
   const supportSection =
     '\n\n### Questions ?\nPlease refer to the [Backport tool documentation](https://github.com/sqren/backport)';
@@ -78,6 +90,10 @@ ${backportPRCommand}${supportSection}`;
   }
 
   const tableBody = backportResponse.results
+    .filter((result) => {
+      // only post status updates for successful backports when running manually (non-ci)
+      return options.ci || result.status === 'success';
+    })
     .map((result) => {
       if (result.status === 'success') {
         return [
@@ -87,7 +103,9 @@ ${backportPRCommand}${supportSection}`;
         ];
       }
 
-      if (result.error.meta?.type === 'commitsWithoutBackports') {
+      if (
+        result.error.meta?.type === 'merge-conflict-due-to-missing-backports'
+      ) {
         const conflictingPullRequests =
           result.error.meta.commitsWithoutBackports.map((c) => {
             return ` - [${getFirstLine(c.commit.originalMessage)}](${
@@ -125,9 +143,14 @@ ${backportPRCommand}${supportSection}`;
     (r) => r.status === 'success'
   );
 
-  const header = didAllBackportsSucceed
-    ? '## 💚 All backports created successfully'
-    : '## 💔 Some backports could not be created';
+  let header = '';
+  if (didAllBackportsSucceed) {
+    header = '## 💚 All backports created successfully';
+  } else if (didAnyBackportsSucceed) {
+    header = '## 💔 Some backports could not be created';
+  } else {
+    header = '## 💔 All backports failed';
+  }
 
   const autoMergeMessage =
     autoMerge && didAnyBackportsSucceed

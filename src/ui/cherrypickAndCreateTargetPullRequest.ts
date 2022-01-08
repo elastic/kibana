@@ -182,6 +182,11 @@ async function waitForCherrypick(
   const spinnerText = `Cherry-picking: ${chalk.greenBright(
     getFirstLine(commit.originalMessage)
   )}`;
+
+  const mergedTargetPullRequest = commit.expectedTargetPullRequests.find(
+    (pr) => pr.state === 'MERGED' && pr.branch === targetBranch
+  );
+
   const cherrypickSpinner = ora(spinnerText).start();
 
   let conflictingFiles: ConflictingFiles;
@@ -192,7 +197,8 @@ async function waitForCherrypick(
     await fetchBranch(options, commit.sourceBranch);
     ({ conflictingFiles, unstagedFiles, needsResolving } = await cherrypick(
       options,
-      commit.sha
+      commit.sha,
+      mergedTargetPullRequest
     ));
 
     // no conflicts encountered
@@ -240,7 +246,7 @@ async function waitForCherrypick(
     throw new HandledError(
       `Commit could not be cherrypicked due to conflicts`,
       {
-        type: 'commitsWithoutBackports',
+        type: 'merge-conflict-due-to-missing-backports',
         commitsWithoutBackports,
       }
     );

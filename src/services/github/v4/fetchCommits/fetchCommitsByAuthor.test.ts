@@ -17,6 +17,8 @@ const defaultOptions = {
   repoName: 'kibana',
   repoOwner: 'elastic',
   sourceBranch: 'source-branch-from-options',
+  dateSince: null,
+  dateUntil: null,
 };
 
 const authorIdMockData = { user: { id: 'myUserId' } } as const;
@@ -82,6 +84,11 @@ describe('fetchCommitsByAuthor', () => {
               state: 'MERGED',
               number: 99,
               url: 'https://github.com/elastic/kibana/pull/99',
+              mergeCommit: {
+                message:
+                  'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',
+                sha: 'target-merge-commit-sha',
+              },
             },
           ],
           sourceBranch: 'master',

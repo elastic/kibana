@@ -267,7 +267,7 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         options,
         commits: [
           {
-            committedDate: 'eee',
+            committedDate: '2021-08-18T16:11:38Z',
             sourceBranch: '7.x',
             sha: 'mySha',
             originalMessage: 'My original commit message',
@@ -344,6 +344,8 @@ describe('cherrypickAndCreateTargetPullRequest', () => {
         Object {
           "authorId": null,
           "commitPath": "conflicting-file.txt",
+          "dateSince": null,
+          "dateUntil": "2021-08-18T16:11:38Z",
           "maxNumber": 10,
           "repoName": "kibana",
           "repoOwner": "elastic",

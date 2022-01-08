@@ -31,9 +31,7 @@ export function mockGqlRequest<T>({
 }
 
 function getGqlName(query: string) {
-  const obj = gql`
-    ${query}
-  `;
+  const obj = gql(query);
 
   // @ts-expect-error
   return obj.definitions[0].name.value;

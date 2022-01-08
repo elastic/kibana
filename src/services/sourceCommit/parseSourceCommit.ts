@@ -7,16 +7,19 @@ import {
 } from './getExpectedTargetPullRequests';
 
 export interface Commit {
+  // source commit
   committedDate: string;
   sourceBranch: string;
   sha: string;
   originalMessage: string; // TODO: rename to message
   pullNumber?: number;
   pullUrl?: string;
+
+  // target pull requests
   expectedTargetPullRequests: ExpectedTargetPullRequest[];
 }
 
-export interface PullRequestNode {
+export interface SourcePullRequestNode {
   baseRefName: string;
   url: string;
   number: number;
@@ -25,8 +28,12 @@ export interface PullRequestNode {
       name: string;
     }[];
   };
+  sourceMergeCommit: {
+    oid: string;
+    message: string;
+  };
   timelineItems: {
-    edges: Array<TimelineEdge>;
+    edges: TimelineEdge[];
   };
 }
 
@@ -41,9 +48,22 @@ export interface TimelinePullRequestEdge {
       state: 'OPEN' | 'CLOSED' | 'MERGED';
       baseRefName: string;
       number: number;
+
+      targetMergeCommit: {
+        oid: string;
+        message: string;
+      } | null;
+
+      repository: {
+        name: string;
+        owner: {
+          login: string;
+        };
+      };
+
       commits: {
         edges: Array<{
-          node: { targetCommit: InnerCommitNode };
+          node: { targetCommit: { message: string; oid: string } };
         }>;
       };
     };
@@ -54,7 +74,7 @@ interface TimelineIssueEdge {
   node: { targetPullRequest: { __typename: 'Issue' } };
 }
 
-type InnerCommitNode = {
+export type SourceCommitWithTargetPullRequest = {
   repository: {
     name: string;
     owner: { login: string };
@@ -62,11 +82,8 @@ type InnerCommitNode = {
   oid: string;
   message: string;
   committedDate: string;
-};
-
-export type SourceCommitWithTargetPullRequest = InnerCommitNode & {
   associatedPullRequests: {
-    edges: { node: PullRequestNode }[] | null;
+    edges: { node: SourcePullRequestNode }[] | null;
   };
 };
 
@@ -83,9 +100,15 @@ export function parseSourceCommit({
 }): Commit {
   const sourcePullRequest =
     sourceCommit.associatedPullRequests.edges?.[0]?.node;
-  const commitMessage = sourceCommit.message;
+
+  // use info from associated pull request if available. Fall back to commit info
+  const commitMessage =
+    sourcePullRequest?.sourceMergeCommit.message ?? sourceCommit.message;
+  const commitSha =
+    sourcePullRequest?.sourceMergeCommit.oid ?? sourceCommit.oid;
   const pullNumber =
     sourcePullRequest?.number ?? extractPullNumber(commitMessage);
+
   const sourceBranch = sourcePullRequest?.baseRefName ?? options.sourceBranch;
   const branchLabelMapping = getBranchLabelMappingForCommit(
     sourceCommit,
@@ -101,7 +124,7 @@ export function parseSourceCommit({
   return {
     committedDate: sourceCommit.committedDate,
     sourceBranch,
-    sha: sourceCommit.oid,
+    sha: commitSha,
     originalMessage: commitMessage,
     pullNumber,
     pullUrl: sourcePullRequest?.url,
@@ -110,9 +133,9 @@ export function parseSourceCommit({
 }
 
 export const sourceCommitWithTargetPullRequestFragment = {
-  name: 'SourceCommitWithTargetPullRequest',
   source: /* GraphQL */ `
-    fragment InnerCommitNode on Commit {
+    fragment SourceCommitWithTargetPullRequest on Commit {
+      # Source Commit
       repository {
         name
         owner {
@@ -122,14 +145,11 @@ export const sourceCommitWithTargetPullRequestFragment = {
       oid
       message
       committedDate
-    }
 
-    fragment SourceCommitWithTargetPullRequest on Commit {
-      ...InnerCommitNode
+      # Source pull request: PR where source commit was merged in
       associatedPullRequests(first: 1) {
         edges {
           node {
-            # Source PR
             url
             number
             labels(first: 50) {
@@ -138,6 +158,14 @@ export const sourceCommitWithTargetPullRequestFragment = {
               }
             }
             baseRefName
+
+            # source merge commit (the commit that actually went into the source branch)
+            sourceMergeCommit: mergeCommit {
+              oid
+              message
+            }
+
+            # (possible) backport pull requests referenced in the source pull request
             timelineItems(last: 20, itemTypes: CROSS_REFERENCED_EVENT) {
               edges {
                 node {
@@ -145,8 +173,19 @@ export const sourceCommitWithTargetPullRequestFragment = {
                     targetPullRequest: source {
                       __typename
 
-                      # Target PRs
+                      # Target PRs (backport PRs)
                       ... on PullRequest {
+                        # target merge commit: the backport commit that was merged into the target branch
+                        targetMergeCommit: mergeCommit {
+                          oid
+                          message
+                        }
+                        repository {
+                          name
+                          owner {
+                            login
+                          }
+                        }
                         url
                         title
                         state
@@ -156,7 +195,8 @@ export const sourceCommitWithTargetPullRequestFragment = {
                           edges {
                             node {
                               targetCommit: commit {
-                                ...InnerCommitNode
+                                message
+                                oid
                               }
                             }
                           }

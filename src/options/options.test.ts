@@ -41,7 +41,7 @@ describe('getOptions', () => {
       });
       await expect(() => getOptions([])).rejects
         .toThrowErrorMatchingInlineSnapshot(`
-              "Please update your config file: /Users/sqren/.backport/config.json.
+              "Please update your config file: \\"/Users/sqren/.backport/config.json\\".
               It must contain a valid \\"accessToken\\".
 
               Read more: https://github.com/sqren/backport/blob/main/docs/configuration.md#global-config-backportconfigjson"
@@ -135,6 +135,8 @@ describe('getOptions', () => {
       cherrypickRef: true,
       ci: false,
       commitPaths: [],
+      dateSince: null,
+      dateUntil: null,
       details: false,
       editor: 'code',
       fork: true,

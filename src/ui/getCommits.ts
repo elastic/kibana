@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import ora from 'ora';
 import { ValidConfigOptions } from '../options/options';
 import { HandledError } from '../services/HandledError';
-import { getShortSha } from '../services/github/commitFormatters';
+import { getFirstLine, getShortSha } from '../services/github/commitFormatters';
 import { fetchCommitByPullNumber } from '../services/github/v4/fetchCommits/fetchCommitByPullNumber';
 import { fetchCommitBySha } from '../services/github/v4/fetchCommits/fetchCommitBySha';
 import { fetchCommitsByAuthor } from '../services/github/v4/fetchCommits/fetchCommitsByAuthor';
@@ -38,7 +38,10 @@ export async function getCommits(options: ValidConfigOptions) {
 
       // add styles to make it look like a prompt question
       spinner.stopAndPersist(
-        getOraPersistsOption('Select pull request', commit.originalMessage)
+        getOraPersistsOption(
+          'Select pull request',
+          getFirstLine(commit.originalMessage)
+        )
       );
 
       return [commit];

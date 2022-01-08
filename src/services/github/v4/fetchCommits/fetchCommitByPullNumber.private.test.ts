@@ -1,4 +1,7 @@
+import gql from 'graphql-tag';
 import { getDevAccessToken } from '../../../../test/private/getDevAccessToken';
+import { Commit } from '../../../sourceCommit/parseSourceCommit';
+import * as apiRequestV4Module from '../apiRequestV4';
 import { fetchCommitByPullNumber } from './fetchCommitByPullNumber';
 
 describe('fetchCommitByPullNumber', () => {
@@ -6,6 +9,45 @@ describe('fetchCommitByPullNumber', () => {
 
   beforeAll(async () => {
     devAccessToken = await getDevAccessToken();
+  });
+
+  describe('snapshot request/response', () => {
+    let spy: jest.SpyInstance;
+    let commit: Commit;
+
+    beforeEach(async () => {
+      spy = jest.spyOn(apiRequestV4Module, 'apiRequestV4');
+
+      commit = await fetchCommitByPullNumber({
+        repoOwner: 'elastic',
+        repoName: 'kibana',
+        accessToken: devAccessToken,
+        pullNumber: 121633,
+        sourceBranch: 'master',
+        historicalBranchLabelMappings: [],
+      });
+    });
+
+    it('makes the right queries', () => {
+      const queries = spy.mock.calls.reduce((acc, call) => {
+        const query = call[0].query;
+        const ast = gql(query);
+        //@ts-expect-error
+        const name = ast.definitions[0].name.value;
+        return { ...acc, [name]: query };
+      }, {});
+
+      const queryNames = Object.keys(queries);
+      expect(queryNames).toEqual(['CommitByPullNumber']);
+
+      queryNames.forEach((name) => {
+        expect(queries[name]).toMatchSnapshot(`Query: ${name}`);
+      });
+    });
+
+    it('returns the correct response', async () => {
+      expect(commit).toMatchSnapshot();
+    });
   });
 
   describe('when PR was merged', () => {
@@ -32,12 +74,20 @@ describe('fetchCommitByPullNumber', () => {
             state: 'MERGED',
             number: 6,
             url: 'https://github.com/backport-org/backport-e2e/pull/6',
+            mergeCommit: {
+              message: 'Add 🍏 emoji (#5) (#6)',
+              sha: '4bcd876d4ceaa73cf437bfc89b74d1a4e704c0a6',
+            },
           },
           {
             branch: '7.8',
             state: 'MERGED',
             number: 7,
             url: 'https://github.com/backport-org/backport-e2e/pull/7',
+            mergeCommit: {
+              message: 'Add 🍏 emoji (#5) (#7)',
+              sha: '46cd6f9999effdf894a36dbc7db90e890f4be840',
+            },
           },
         ],
       });

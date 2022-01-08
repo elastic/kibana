@@ -1,7 +1,7 @@
 import { Commit } from './sourceCommit/parseSourceCommit';
 
 type Meta = {
-  type: 'commitsWithoutBackports';
+  type: 'merge-conflict-due-to-missing-backports';
   commitsWithoutBackports: {
     formatted: string;
     commit: Commit;

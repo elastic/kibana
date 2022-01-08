@@ -6,6 +6,7 @@ import { fetchCommitBySha } from './services/github/v4/fetchCommits/fetchCommitB
 import { fetchCommitsByAuthor } from './services/github/v4/fetchCommits/fetchCommitsByAuthor';
 import { getOptionsFromGithub } from './services/github/v4/getOptionsFromGithub/getOptionsFromGithub';
 import { initLogger } from './services/logger';
+import { excludeUndefined } from './utils/excludeUndefined';
 
 initLogger();
 
@@ -27,7 +28,7 @@ export function backportRun(
   //
   args: string[] = []
 ) {
-  return main(args, options);
+  return main(args, excludeUndefined(options));
 }
 
 export async function getCommits(options: {
@@ -44,6 +45,8 @@ export async function getCommits(options: {
   sha?: string;
   skipRemoteConfig?: boolean;
   sourceBranch?: string;
+  dateUntil?: string;
+  dateSince?: string;
 }) {
   const optionsFromGithub = await getOptionsFromGithub(options);
 
@@ -70,6 +73,10 @@ export async function getCommits(options: {
   return fetchCommitsByAuthor({
     ...optionsFromGithub,
     ...options,
+
+    // filters
     author: options.author ?? null,
+    dateSince: options.dateSince ?? null,
+    dateUntil: options.dateUntil ?? null,
   });
 }

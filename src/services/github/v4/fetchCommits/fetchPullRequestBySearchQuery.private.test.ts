@@ -64,12 +64,20 @@ describe('fetchPullRequestBySearchQuery', () => {
               state: 'MERGED',
               number: 6,
               url: 'https://github.com/backport-org/backport-e2e/pull/6',
+              mergeCommit: {
+                message: 'Add 🍏 emoji (#5) (#6)',
+                sha: '4bcd876d4ceaa73cf437bfc89b74d1a4e704c0a6',
+              },
             },
             {
               branch: '7.8',
               state: 'MERGED',
               number: 7,
               url: 'https://github.com/backport-org/backport-e2e/pull/7',
+              mergeCommit: {
+                message: 'Add 🍏 emoji (#5) (#7)',
+                sha: '46cd6f9999effdf894a36dbc7db90e890f4be840',
+              },
             },
           ],
           originalMessage: 'Add 🍏 emoji (#5)',

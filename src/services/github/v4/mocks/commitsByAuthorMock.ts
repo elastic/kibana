@@ -39,6 +39,10 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
                           nodes: [{ name: 'my-label-b' }],
                         },
                         number: 85,
+                        sourceMergeCommit: {
+                          oid: 'f3b618b9421fdecdb36862f907afbdd6344b361d',
+                          message: 'Add witch (#85)',
+                        },
                         timelineItems: {
                           edges: [],
                         },
@@ -68,12 +72,26 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
                         },
                         baseRefName: 'master',
                         number: 80,
+                        sourceMergeCommit: {
+                          oid: '79cf18453ec32a4677009dcbab1c9c8c73fc14fe',
+                          message:
+                            'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',
+                        },
                         timelineItems: {
                           edges: [
                             {
                               node: {
                                 targetPullRequest: {
                                   __typename: 'PullRequest',
+                                  targetMergeCommit: {
+                                    oid: 'target-merge-commit-sha',
+                                    message:
+                                      'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',
+                                  },
+                                  repository: {
+                                    name: 'kibana',
+                                    owner: { login: 'elastic' },
+                                  },
                                   url: 'https://github.com/elastic/kibana/pull/99',
                                   title: 'some title',
                                   state: 'MERGED',
@@ -84,12 +102,6 @@ export const commitsByAuthorMock: CommitByAuthorResponse = {
                                       {
                                         node: {
                                           targetCommit: {
-                                            repository: {
-                                              name: 'kibana',
-                                              owner: { login: 'elastic' },
-                                            },
-                                            committedDate:
-                                              '2021-12-23T00:00:00Z',
                                             oid: 'abc',
                                             message:
                                               'Add SF mention (#80)\n\n* Add SF mention\r\n\r\n* Add several emojis!',

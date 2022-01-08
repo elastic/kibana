@@ -34,6 +34,7 @@ jest.mock('ora', () => {
 jest.mock('../../services/logger', () => {
   const spy = jest.fn();
   return {
+    initLogger: jest.fn(),
     redactAccessToken: jest.fn((str: string) => str),
     consoleLog: jest.fn(),
     updateLogger: jest.fn(),
