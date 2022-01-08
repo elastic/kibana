@@ -8,6 +8,7 @@
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
 import stats from 'stats-lite';
+import { sortBy } from 'lodash';
 import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
 import { MonitoringCollectionSetup } from '../../monitoring_collection/server';
 import {
@@ -38,6 +39,7 @@ import { ErroredTask, isTaskRunEvent, TaskRun } from './task_events';
 import { RanTask } from './task_running';
 import { unwrap } from './lib/result_type';
 import { TaskStatus } from '.';
+import { calculateRunningAverage } from './monitoring/task_run_calcultors';
 
 export interface TaskManagerSetupContract {
   /**
@@ -160,6 +162,9 @@ export class TaskManagerPlugin
       plugins.monitoringCollection.registerMetric({
         type: 'task_manager',
         fetch: async () => {
+          const drift = calculateRunningAverage(
+            this.lastMonitoringStat?.stats?.runtime?.value?.drift ?? []
+          );
           // How many and which alerting tasks are pending to run? How long is each one waiting?
           const byTaskType = this.lastMonitoringStat?.stats.workload?.value?.task_types;
           let claiming = 0;
@@ -174,6 +179,7 @@ export class TaskManagerPlugin
           const pending = claiming + running;
           return {
             pending,
+            drift,
           };
         },
       });
@@ -284,17 +290,20 @@ export class TaskManagerPlugin
       getHealthMetrics: (id: string) => {
         const drifts: number[] = [];
         const durations: number[] = [];
-        this.taskPollingLifecycle?.events2
-          .filter(
+        const eventsSortedByMostRecent = sortBy(
+          this.taskPollingLifecycle?.events2.filter(
             (taskEvent) => isTaskRunEvent(taskEvent) && hasTiming(taskEvent) && taskEvent.id === id
-          )
-          .forEach((taskEvent: TaskLifecycleEvent) => {
-            const { task }: RanTask | ErroredTask = unwrap((taskEvent as TaskRun).event);
-            const drift = taskEvent.timing!.start - task.runAt.getTime();
-            const duration = taskEvent.timing!.stop - taskEvent.timing!.start;
-            drifts.push(drift);
-            durations.push(duration);
-          });
+          ),
+          'timing.start'
+        ).reverse();
+
+        eventsSortedByMostRecent.forEach((taskEvent: TaskLifecycleEvent) => {
+          const { task }: RanTask | ErroredTask = unwrap((taskEvent as TaskRun).event);
+          const drift = taskEvent.timing!.start - task.runAt.getTime();
+          const duration = taskEvent.timing!.stop - taskEvent.timing!.start;
+          drifts.push(drift);
+          durations.push(duration);
+        });
         const last5Drifts = drifts.slice(-5);
         const last5Durations = durations.slice(-5);
         return {

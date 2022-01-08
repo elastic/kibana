@@ -38,7 +38,7 @@ export function registerTaskManagerRoute({
     };
   };
   overallStatus$: Observable<ServiceStatus>;
-  getMetrics: () => Promise<MetricResult[] | undefined>;
+  getMetrics: () => Promise<MetricResult | undefined>;
 }) {
   router.get(
     {

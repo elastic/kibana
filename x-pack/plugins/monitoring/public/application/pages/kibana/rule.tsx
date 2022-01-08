@@ -50,7 +50,7 @@ const KibanaRule = ({ data, alerts }: { data: any; alerts: any }) => {
           <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem grow={true}>
               <MonitoringTimeseriesContainer
-                series={data.metrics.kibana_rule_drift}
+                series={data.metrics.kibana_rule_duration}
                 onBrush={onBrush}
                 zoomInfo={zoomInfo}
               />

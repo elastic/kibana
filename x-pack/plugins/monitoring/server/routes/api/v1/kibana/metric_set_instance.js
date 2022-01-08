@@ -25,4 +25,13 @@ export const metricSet = [
     name: 'kibana_requests',
   },
   'kibana_task_manager_pending_tasks',
+  {
+    name: 'kibana_task_manager_drift_p99',
+    keys: [
+      'kibana_task_manager_drift_p50',
+      'kibana_task_manager_drift_p90',
+      'kibana_task_manager_drift_p95',
+      'kibana_task_manager_drift_p99',
+    ],
+  },
 ];

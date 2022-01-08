@@ -42,9 +42,9 @@ export async function getAggregatedRules(
                 field: 'kibana_rule.rule.id',
               },
             },
-            average_drift: {
+            average_duration: {
               avg: {
-                field: 'kibana_rule.rule.averageDrift',
+                field: 'kibana_rule.rule.averageDuration',
               },
             },
           },
@@ -56,7 +56,7 @@ export async function getAggregatedRules(
       return {
         clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
         rules: {
-          averageDrift: response?.aggregations?.average_drift?.value,
+          averageDuration: response?.aggregations?.average_duration?.value,
           count: response?.aggregations?.rule_ids?.buckets?.length,
         },
       };

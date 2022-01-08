@@ -52,7 +52,7 @@ export function registerRulesRoute({
     async (context, req, res) => {
       const rules = await getMetrics();
       const rulesById = rules?.reduce((accum: { [id: string]: MetricResult }, rule) => {
-        accum[rule.id ?? ''] = rule;
+        accum[rule.id as string] = rule;
         return accum;
       }, {});
       const overallStatus = await overallStatus$.pipe(first()).toPromise();

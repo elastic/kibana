@@ -46,6 +46,7 @@ export {
   WriteOperations,
   AlertingAuthorizationEntity,
 } from './authorization';
+export type { RuleMetric } from './monitoring';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
 

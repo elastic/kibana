@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import { JsonObject } from '@kbn/utility-types';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/server';
 import { registerRulesRoute, registerTaskManagerRoute } from './routes';
 
 export interface MonitoringCollectionSetup {
   registerMetric: (metric: Metric) => void;
-  getMetrics: () => Promise<Record<string, MetricResult[]>>;
+  getMetrics: () => Promise<Record<string, MetricResult | MetricResult[]>>;
 }
 
 // interface PluginDependencySetup {}
 
 // interface PluginDependencyStart {}
 
-export interface MetricResult {
-  [key: string]: string | number | undefined;
-}
+export type MetricResult = JsonObject;
+// [key: string]: string | number | undefined;
 
 export interface Metric {
   type: string;
-  fetch: () => Promise<MetricResult[]>;
+  fetch: () => Promise<MetricResult | MetricResult[]>;
 }
 
 export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSetup, void, {}, {}> {
@@ -36,7 +36,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
   }
 
   async getAllMetrics() {
-    const metrics: Record<string, MetricResult[]> = {};
+    const metrics: Record<string, MetricResult | MetricResult[]> = {};
     for (const metric of this.metrics) {
       metrics[metric.type] = await metric.fetch();
     }
@@ -65,7 +65,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         uuid: this.initializerContext.env.instanceUuid,
       },
       overallStatus$: core.status.overall$,
-      getMetrics: async () => await this.getMetrics('rule'),
+      getMetrics: async () => (await this.getMetrics('rule')) as MetricResult[],
     });
 
     registerTaskManagerRoute({
@@ -78,7 +78,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         uuid: this.initializerContext.env.instanceUuid,
       },
       overallStatus$: core.status.overall$,
-      getMetrics: async () => await this.getMetrics('task_manager'),
+      getMetrics: async () => (await this.getMetrics('task_manager')) as MetricResult,
     });
 
     return {

@@ -271,6 +271,21 @@ export const metrics = {
     metricAgg: 'avg',
     units: '',
   }),
+  kibana_rule_duration: new KibanaRule({
+    field: 'kibana_rule.rule.averageDuration',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.ruleDuration.label', {
+      defaultMessage: 'Duration',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.ruleDuration.description',
+      {
+        defaultMessage: 'TODO: fill out.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'avg',
+    units: '',
+  }),
   kibana_rule_total_executions: new KibanaRule({
     derivative: true,
     field: 'kibana_rule.rule.totalExecutions',
@@ -295,6 +310,66 @@ export const metrics = {
     }),
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.taskManagerPendingTasks.description',
+      {
+        defaultMessage: 'TODO: fill out.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+  }),
+  kibana_task_manager_drift_p50: new KibanaTaskManager({
+    field: 'kibana_task_manager.task_manager.drift.p50',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.taskManagerP50Drift.label', {
+      defaultMessage: 'P50 drift',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.taskManagerP50Drift.description',
+      {
+        defaultMessage: 'TODO: fill out.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+  }),
+  kibana_task_manager_drift_p90: new KibanaTaskManager({
+    field: 'kibana_task_manager.task_manager.drift.p90',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.taskManagerP90Drift.label', {
+      defaultMessage: 'P90 drift',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.taskManagerP90Drift.description',
+      {
+        defaultMessage: 'TODO: fill out.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+  }),
+  kibana_task_manager_drift_p95: new KibanaTaskManager({
+    field: 'kibana_task_manager.task_manager.drift.p95',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.taskManagerP95Drift.label', {
+      defaultMessage: 'P95 drift',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.taskManagerP95Drift.description',
+      {
+        defaultMessage: 'TODO: fill out.',
+      }
+    ),
+    format: SMALL_FLOAT,
+    metricAgg: 'max',
+    units: '',
+  }),
+  kibana_task_manager_drift_p99: new KibanaTaskManager({
+    field: 'kibana_task_manager.task_manager.drift.p99',
+    label: i18n.translate('xpack.monitoring.metrics.kibanaInstance.taskManagerP99Drift.label', {
+      defaultMessage: 'P99 drift',
+    }),
+    description: i18n.translate(
+      'xpack.monitoring.metrics.kibanaInstance.taskManagerP99Drift.description',
       {
         defaultMessage: 'TODO: fill out.',
       }

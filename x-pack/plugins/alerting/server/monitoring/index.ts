@@ -4,5 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export const metricSet = ['kibana_rule_duration', 'kibana_rule_total_executions'];
+export { registerCollector } from './register_collector';
+export * from './types';
