@@ -583,7 +583,6 @@ export function Detail() {
       tabs={headerTabs}
       tabsClassName="fleet__epm__shiftNavTabs"
     >
-      {'foobar'}
       {integrationInfo || packageInfo ? (
         <Breadcrumbs packageTitle={integrationInfo?.title || packageInfo?.title || ''} />
       ) : null}
