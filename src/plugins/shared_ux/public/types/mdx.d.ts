@@ -6,14 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SharedUXPlugin } from './plugin';
-
-/**
- * Creates the Shared UX plugin.
- */
-export function plugin() {
-  return new SharedUXPlugin();
+// Importing MDX files requires a type definition not currently included in the stack.
+declare module '*.mdx' {
+  let MDXComponent: (props) => JSX.Element;
+  // eslint-disable-next-line import/no-default-export
+  export default MDXComponent;
 }
-
-export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
-export { ExitFullScreenButton, LazyExitFullScreenButton } from './components';

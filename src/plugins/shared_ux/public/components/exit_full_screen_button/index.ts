@@ -6,14 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SharedUXPlugin } from './plugin';
+import { ExitFullScreenButton } from './exit_full_screen_button';
+export { ExitFullScreenButton } from './exit_full_screen_button';
 
-/**
- * Creates the Shared UX plugin.
- */
-export function plugin() {
-  return new SharedUXPlugin();
-}
-
-export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
-export { ExitFullScreenButton, LazyExitFullScreenButton } from './components';
+// React.lazy requires default export
+// eslint-disable-next-line import/no-default-export
+export default ExitFullScreenButton;

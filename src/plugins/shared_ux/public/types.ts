@@ -6,14 +6,26 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
+import { FC } from 'react';
+
+/** @internal */
 export interface SharedUXPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SharedUXPluginStart {}
+/**
+ * The Shared UX plugin public contract, containing prewired components, services, and
+ * other constructs useful to consumers.
+ */
+export interface SharedUXPluginStart {
+  /**
+   * A React component that provides a pre-wired `React.Context` which connects components to Shared UX services.
+   */
+  ServicesContext: FC;
+}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+/** @internal */
 export interface SharedUXPluginSetupDeps {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+/** @internal */
 export interface SharedUXPluginStartDeps {}
