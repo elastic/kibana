@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
+import { TutorialsCategory } from '../../../../common/constants';
 
 function IntroductionUI({
   description,
@@ -31,6 +32,7 @@ function IntroductionUI({
   intl,
   notices,
   basePath,
+  category,
 }) {
   let rightSideItems;
   if (previewUrl) {
@@ -99,8 +101,15 @@ function IntroductionUI({
                 {betaBadge}
               </>
             )}
-            &nbsp;
-            <EuiBadge>Beats</EuiBadge>
+
+            {category === TutorialsCategory.LOGGING || category === TutorialsCategory.METRICS ? (
+              <>
+                &nbsp;
+                <EuiBadge>Beats</EuiBadge>
+              </>
+            ) : (
+              <></>
+            )}
           </>
         }
         description={
