@@ -48,17 +48,21 @@ export const ZipUrlTLSFieldsCodec = t.partial({
 export type ZipUrlTLSFields = t.TypeOf<typeof ZipUrlTLSFieldsCodec>;
 
 // CommonFields
-export const CommonFieldsCodec = t.interface({
-  [ConfigKey.NAME]: t.string,
-  [ConfigKey.MONITOR_TYPE]: DataStreamCodec,
-  [ConfigKey.ENABLED]: t.boolean,
-  [ConfigKey.SCHEDULE]: Schedule,
-  [ConfigKey.LOCATIONS]: t.array(t.string),
-  [ConfigKey.APM_SERVICE_NAME]: t.string,
-  [ConfigKey.TIMEOUT]: t.string,
-  [ConfigKey.TAGS]: t.array(t.string),
-  [ConfigKey.LOCATIONS]: ServiceLocationsCodec,
-});
+export const CommonFieldsCodec = t.intersection([
+  t.interface({
+    [ConfigKey.NAME]: t.string,
+    [ConfigKey.MONITOR_TYPE]: DataStreamCodec,
+    [ConfigKey.ENABLED]: t.boolean,
+    [ConfigKey.SCHEDULE]: Schedule,
+    [ConfigKey.LOCATIONS]: t.array(t.string),
+    [ConfigKey.APM_SERVICE_NAME]: t.string,
+    [ConfigKey.TAGS]: t.array(t.string),
+    [ConfigKey.LOCATIONS]: ServiceLocationsCodec,
+  }),
+  t.partial({
+    [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
+  }),
+]);
 
 export type CommonFields = t.TypeOf<typeof CommonFieldsCodec>;
 

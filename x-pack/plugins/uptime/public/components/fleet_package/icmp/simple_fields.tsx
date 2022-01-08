@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiFieldText, EuiFieldNumber } from '@elastic/eui';
 import { ConfigKey, Validation } from '../types';
@@ -20,9 +20,12 @@ interface Props {
 
 export const ICMPSimpleFields = memo<Props>(({ validate }) => {
   const { fields, setFields } = useICMPSimpleFieldsContext();
-  const handleInputChange = ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
-    setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
-  };
+  const handleInputChange = useCallback(
+    ({ value, configKey }: { value: unknown; configKey: ConfigKey }) => {
+      setFields((prevFields) => ({ ...prevFields, [configKey]: value }));
+    },
+    [setFields]
+  );
 
   return (
     <SimpleFieldsWrapper fields={fields} validate={validate} onInputChange={handleInputChange}>
