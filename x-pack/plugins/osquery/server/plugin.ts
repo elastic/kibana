@@ -228,7 +228,7 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       service: this.osqueryAppContextService,
       config: (): ConfigType => config,
       security: plugins.security,
-      telemetryEventsSender: new TelemetryEventsSender(this.logger.get('telemetry_events')),
+      telemetryEventsSender: this.telemetryEventsSender,
     };
 
     initSavedObjects(core.savedObjects);

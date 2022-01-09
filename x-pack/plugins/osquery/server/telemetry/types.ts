@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { PackageUpdateEvent } from './services/upgrade_sender';
-
+import type {
+  OSQUERY_LIVE_QUERIES_CHANNEL_NAME,
+  LiveQueryEvent,
+} from './services/live_query_sender';
 export interface OsqueryTelemetryChannelEvents {
   // channel name => event type
-  'osquery-upgrades': PackageUpdateEvent;
+  [OSQUERY_LIVE_QUERIES_CHANNEL_NAME]: LiveQueryEvent;
 }
 
 export type OsqueryTelemetryChannel = keyof OsqueryTelemetryChannelEvents;

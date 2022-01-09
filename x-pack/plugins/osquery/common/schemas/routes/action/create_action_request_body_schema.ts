@@ -12,13 +12,15 @@ import {
   agentSelection,
   ecsMappingOrUndefined,
   savedQueryIdOrUndefined,
+  eventSourceOrUndefined,
 } from '../../common/schemas';
 
 export const createActionRequestBodySchema = t.type({
-  agentSelection,
+  agent_selection: agentSelection,
   query,
   saved_query_id: savedQueryIdOrUndefined,
   ecs_mapping: ecsMappingOrUndefined,
+  event_source: eventSourceOrUndefined,
 });
 
 export type CreateActionRequestBodySchema = t.OutputOf<typeof createActionRequestBodySchema>;

@@ -19,9 +19,11 @@ import {
   createActionRequestBodySchema,
   CreateActionRequestBodySchema,
 } from '../../../common/schemas/routes/action/create_action_request_body_schema';
+import { EventSourceOrUndefined } from '../../../common/schemas/common';
 
 import { incrementCount } from '../usage';
 import { getInternalSavedObjectsClient } from '../../usage/collector';
+import { sendTelemetryEvents } from '../../telemetry/services/live_query_sender';
 
 export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
@@ -44,8 +46,12 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
         osqueryContext.getStartServices
       );
 
-      const { agentSelection } = request.body as { agentSelection: AgentSelection };
-      const selectedAgents = await parseAgentSelection(soClient, osqueryContext, agentSelection);
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const { agent_selection, event_source } = request.body as {
+        agent_selection: AgentSelection;
+        event_source: EventSourceOrUndefined;
+      };
+      const selectedAgents = await parseAgentSelection(soClient, osqueryContext, agent_selection);
       incrementCount(internalSavedObjectsClient, 'live_query');
       if (!selectedAgents.length) {
         incrementCount(internalSavedObjectsClient, 'live_query', 'errors');
@@ -78,6 +84,18 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
           index: '.fleet-actions',
           body: action,
         });
+
+        try {
+          sendTelemetryEvents(
+            osqueryContext.logFactory.get(),
+            osqueryContext.telemetryEventsSender,
+            {
+              eventSource: event_source,
+              savedQuery: !!request.body.saved_query_id,
+            }
+          );
+          // eslint-disable-next-line no-empty
+        } catch (e) {}
 
         return response.ok({
           body: {

@@ -128,7 +128,8 @@ const OsqueryActionComponent: React.FC<OsqueryActionProps> = ({ metadata }) => {
     );
   }
 
-  return <LiveQuery formType="simple" agentId={agentId} />;
+  // TODO: Make eventSource a prop of OsqueryAction
+  return <LiveQuery formType="simple" agentId={agentId} eventSource="metrics_app" />;
 };
 
 export const OsqueryAction = React.memo(OsqueryActionComponent);

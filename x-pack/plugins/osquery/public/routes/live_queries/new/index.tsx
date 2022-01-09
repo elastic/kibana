@@ -68,7 +68,11 @@ const NewLiveQueryPageComponent = () => {
 
   return (
     <WithHeaderLayout leftColumn={LeftColumn}>
-      <LiveQuery agentPolicyIds={agentPolicyIds} {...initialFormData} />
+      <LiveQuery
+        agentPolicyIds={agentPolicyIds}
+        {...initialFormData}
+        eventSource="osquery_app_live_query"
+      />
     </WithHeaderLayout>
   );
 };
