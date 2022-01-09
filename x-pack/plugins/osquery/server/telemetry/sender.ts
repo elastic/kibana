@@ -78,24 +78,28 @@ export class TelemetryEventsSender {
       return;
     }
 
-    this.isSending = true;
+    try {
+      this.isSending = true;
 
-    this.isOptedIn = await this.isTelemetryOptedIn();
-    if (!this.isOptedIn) {
-      this.logger.debug(`Telemetry is not opted-in.`);
-      for (const channel of Object.keys(this.queuesPerChannel)) {
-        this.queuesPerChannel[channel].clearEvents();
+      this.isOptedIn = await this.isTelemetryOptedIn();
+      if (!this.isOptedIn) {
+        this.logger.debug(`Telemetry is not opted-in.`);
+        for (const channel of Object.keys(this.queuesPerChannel)) {
+          this.queuesPerChannel[channel].clearEvents();
+        }
+        this.isSending = false;
+        return;
       }
-      this.isSending = false;
-      return;
-    }
 
-    for (const channel of Object.keys(this.queuesPerChannel)) {
-      await this.sendEvents(
-        await this.fetchTelemetryUrl(channel),
-        this.clusterInfo,
-        this.queuesPerChannel[channel]
-      );
+      for (const channel of Object.keys(this.queuesPerChannel)) {
+        await this.sendEvents(
+          await this.fetchTelemetryUrl(channel),
+          this.clusterInfo,
+          this.queuesPerChannel[channel]
+        );
+      }
+    } catch (err) {
+      this.logger.warn(`Error sending telemetry events data: ${err}`);
     }
 
     this.isSending = false;

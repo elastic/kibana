@@ -12,8 +12,8 @@ import type { TelemetryEventsSender } from '../sender';
  */
 export const createMockTelemetryEventsSender = (
   enableTelemetry?: boolean
-): jest.Mocked<TelemetryEventsSender> => {
-  return {
+): jest.Mocked<TelemetryEventsSender> =>
+  ({
     setup: jest.fn(),
     start: jest.fn(),
     stop: jest.fn(),
@@ -22,5 +22,4 @@ export const createMockTelemetryEventsSender = (
     isTelemetryOptedIn: jest.fn().mockReturnValue(enableTelemetry ?? jest.fn()),
     sendIfDue: jest.fn(),
     sendEvents: jest.fn(),
-  } as unknown as jest.Mocked<TelemetryEventsSender>;
-};
+  } as unknown as jest.Mocked<TelemetryEventsSender>);

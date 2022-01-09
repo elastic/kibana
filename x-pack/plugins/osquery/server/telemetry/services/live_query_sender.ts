@@ -5,23 +5,31 @@
  * 2.0.
  */
 
-import { mapKeys, snakeCase } from 'lodash';
+import { isEmpty, pickBy } from 'lodash';
 import type { Logger } from 'src/core/server';
+import { AgentSelection, ECSMappingOrUndefined } from '../../../common/schemas/common';
 
 import type { TelemetryEventsSender } from '../sender';
-import type { AgentSelection, ECSMappingOrUndefined } from '../../../common/schemas/common';
+import { getOsqueryTablesFromQuery, getEcsMapping, getAgentSelection } from './utils';
 
 export interface LiveQueryEvent {
-  // tables: {
-  //   [key: string]: {
-  //     all: boolean;
-  //     columns: string[];
-  //   };
-  // };
-  // ecs_mapping: ECSMappingOrUndefined;
-  agentSelection?: AgentSelection;
-  eventSource?: LiveQueryEventSourceType;
-  savedQuery?: boolean;
+  table: Array<{
+    name: string;
+    columns: string[];
+  }>;
+  ecs_mapping: Array<{
+    key: string;
+    value?: string;
+    static?: boolean;
+  }>;
+  agent_selection?: {
+    agents: number;
+    all_agents_selected: boolean;
+    platforms_selected: string[];
+    policies: number;
+  };
+  event_source?: LiveQueryEventSourceType;
+  saved_query?: boolean;
 }
 
 export enum LiveQueryEventSourceType {
@@ -37,15 +45,27 @@ export const OSQUERY_LIVE_QUERIES_CHANNEL_NAME = 'osquery-live-queries-test';
 export function sendTelemetryEvents(
   logger: Logger,
   eventsTelemetry: TelemetryEventsSender | undefined,
-  upgradeEvent: LiveQueryEvent
+  liveQueryEvent: Record<string, unknown>
 ) {
   if (eventsTelemetry === undefined) {
     return;
   }
 
   try {
+    const eventData = pickBy(
+      {
+        saved_query: liveQueryEvent.saved_query,
+        event_source: liveQueryEvent.event_source,
+        table: getOsqueryTablesFromQuery(liveQueryEvent.query as string),
+        agent_selection: getAgentSelection(liveQueryEvent.agent_selection as AgentSelection),
+        ecs_mapping: getEcsMapping(liveQueryEvent.ecs_mapping as ECSMappingOrUndefined),
+      },
+      (value) => !isEmpty(value)
+    );
+
     eventsTelemetry.queueTelemetryEvents(OSQUERY_LIVE_QUERIES_CHANNEL_NAME, [
-      mapKeys(upgradeEvent, (value, key) => snakeCase(key)),
+      // @ts-expect-error update types
+      eventData,
     ]);
   } catch (exc) {
     logger.error(`queuing telemetry events failed ${exc}`);
