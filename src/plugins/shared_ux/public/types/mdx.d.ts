@@ -8,7 +8,7 @@
 
 // Importing MDX files requires a type definition not currently included in the stack.
 declare module '*.mdx' {
-  let MDXComponent: (props) => JSX.Element;
+  let MDXComponent: (props: any) => JSX.Element;
   // eslint-disable-next-line import/no-default-export
   export default MDXComponent;
 }
