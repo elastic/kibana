@@ -22,7 +22,7 @@ import {
 } from './bwc/types';
 
 import { GridData } from './embeddable/types';
-import { ControlGroupInput } from '../../presentation_util/common/controls/control_group/types';
+import { ControlGroupInput } from '../../controls/common';
 export type PanelId = string;
 export type SavedObjectId = string;
 
