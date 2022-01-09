@@ -90,8 +90,11 @@ export const createActionRoute = (router: IRouter, osqueryContext: OsqueryAppCon
             osqueryContext.logFactory.get(),
             osqueryContext.telemetryEventsSender,
             {
-              eventSource: event_source,
-              savedQuery: !!request.body.saved_query_id,
+              agent_selection,
+              ecs_mapping: request.body.ecs_mapping,
+              event_source,
+              query: request.body.query,
+              saved_query: !!request.body.saved_query_id,
             }
           );
           // eslint-disable-next-line no-empty

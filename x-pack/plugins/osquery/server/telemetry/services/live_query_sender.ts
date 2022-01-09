@@ -40,7 +40,7 @@ export enum LiveQueryEventSourceType {
   CASES_APP = 'cases_app',
 }
 
-export const OSQUERY_LIVE_QUERIES_CHANNEL_NAME = 'osquery-live-queries-test';
+export const OSQUERY_LIVE_QUERIES_CHANNEL_NAME = 'osquery-live-queries';
 
 export function sendTelemetryEvents(
   logger: Logger,
