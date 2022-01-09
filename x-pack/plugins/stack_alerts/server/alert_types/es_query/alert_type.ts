@@ -159,7 +159,6 @@ export function getAlertType(logger: Logger): RuleType<
       typeof ActionGroupId
     >
   ) {
-    await new Promise((resolve) => setTimeout(resolve, 10000));
     const { alertId, name, services, params, state } = options;
     const previousTimestamp = state.latestTimestamp;
 

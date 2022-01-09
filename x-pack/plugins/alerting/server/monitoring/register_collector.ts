@@ -6,6 +6,7 @@
  */
 import type { Request } from '@hapi/hapi';
 import { MonitoringCollectionSetup } from '../../../monitoring_collection/server';
+import { addSpaceIdToPath } from '../../../spaces/common';
 import { KibanaRequest, CoreSetup } from '../../../../../src/core/server';
 import { AlertingPluginsStart, EVENT_LOG_ACTIONS } from '../plugin';
 import { RawRule } from '../types';
@@ -22,29 +23,32 @@ export function registerCollector({
     type: 'rule',
     fetch: async () => {
       const services = await core.getStartServices();
+
       const savedObjectClient = await services[0].savedObjects.createInternalRepository(['alert']);
       const esoClient = await services[1].encryptedSavedObjects.getClient({
         includedHiddenTypes: ['alert'],
       });
+      const spacesService = await services[1].spaces?.spacesService;
 
       // Find all rules
-      const response = await savedObjectClient.find<RawRule>({ type: 'alert' });
+      const response = await savedObjectClient.find<RawRule>({ type: 'alert', namespaces: ['*'] });
       const rules = response.saved_objects;
 
       const ruleMetrics: RuleMetric[] = await Promise.all(
         rules.map(async ({ attributes: rule, id, namespaces }) => {
           // Get the last execute event log
+          const namespace = namespaces ? namespaces[0] : undefined;
           const {
             attributes: { apiKey },
           } = await esoClient.getDecryptedAsInternalUser<RawRule>('alert', id, {
-            namespace: namespaces ? namespaces[0] : undefined,
+            namespace,
           });
 
-          // rule.
           const requestHeaders: Record<string, string> = {};
           if (apiKey) {
             requestHeaders.authorization = `ApiKey ${apiKey}`;
           }
+
           const fakeRequest = KibanaRequest.from({
             headers: requestHeaders,
             path: '/',
@@ -58,7 +62,10 @@ export function registerCollector({
               },
             },
           } as unknown as Request);
-
+          if (namespace) {
+            const path = addSpaceIdToPath('/', spacesService?.namespaceToSpaceId(namespace));
+            core.http.basePath.set(fakeRequest, path);
+          }
           const eventLogClient = services[1].eventLog.getClient(fakeRequest);
 
           const [aggResult, executeEvents, timeoutEvents] = await Promise.all([
