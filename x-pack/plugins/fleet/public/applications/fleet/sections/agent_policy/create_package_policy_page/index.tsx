@@ -146,6 +146,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     inputs: [],
   });
 
+  const [wasNewAgentPolicyCreated, setWasNewAgentPolicyCreated] = useState<boolean>(false);
+
   // Validation state
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
@@ -276,6 +278,10 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   }, [packagePolicy, agentCount]);
   const doOnSaveNavigation = useRef<boolean>(true);
 
+  const handleInlineAgentPolicyCreate = useCallback(() => {
+    setWasNewAgentPolicyCreated(true);
+  }, []);
+
   // Detect if user left page
   useEffect(() => {
     return () => {
@@ -301,13 +307,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         const [appId, options] = routeState.onSaveNavigateTo;
 
         if (options?.path) {
-          // If we saved a package policy that isn't the initial one, it was created inline
-          // and we need to navigate to that policy rather than whatever the initial package policy
-          // was when we loaded this page
-          const wasPolicyCreatedInline = savedPackagePolicy?.id !== packagePolicy.id;
-
           const pathWithQueryString = appendOnSaveQueryParamsToPath({
-            path: wasPolicyCreatedInline ? packagePolicyPath : options.path,
+            path: wasNewAgentPolicyCreated ? packagePolicyPath : options.path,
             policy,
             mappingOptions: routeState.onSaveQueryParams,
             paramsToApply,
@@ -320,15 +321,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         history.push(packagePolicyPath);
       }
     },
-    [
-      packagePolicy.policy_id,
-      getPath,
-      navigateToApp,
-      history,
-      routeState,
-      savedPackagePolicy,
-      packagePolicy.id,
-    ]
+    [packagePolicy.policy_id, getPath, navigateToApp, history, routeState, wasNewAgentPolicyCreated]
   );
 
   const onSubmit = useCallback(async () => {
@@ -415,9 +408,16 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         agentPolicy={agentPolicy}
         updateAgentPolicy={updateAgentPolicy}
         setHasAgentPolicyError={setHasAgentPolicyError}
+        onNewAgentPolicyCreate={handleInlineAgentPolicyCreate}
       />
     ),
-    [packageInfo, queryParamsPolicyId, agentPolicy, updateAgentPolicy]
+    [
+      packageInfo,
+      queryParamsPolicyId,
+      agentPolicy,
+      updateAgentPolicy,
+      handleInlineAgentPolicyCreate,
+    ]
   );
 
   const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
