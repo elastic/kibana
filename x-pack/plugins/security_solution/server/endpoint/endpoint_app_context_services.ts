@@ -41,6 +41,8 @@ import {
 } from './services/endpoint_fleet_services';
 import type { ListsServerExtensionRegistrar } from '../../../lists/server';
 import { registerListsPluginEndpointExtensionPoints } from '../lists_integration';
+import { EndpointAuthz } from '../../common/endpoint/types/authz';
+import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -52,6 +54,7 @@ export type EndpointAppContextServiceStartContract = Partial<
     'agentService' | 'packageService' | 'packagePolicyService' | 'agentPolicyService'
   >
 > & {
+  fleetAuthzService?: FleetStartContract['authz'];
   logger: Logger;
   endpointMetadataService: EndpointMetadataService;
   manifestManager?: ManifestManager;
@@ -133,6 +136,19 @@ export class EndpointAppContextService {
 
   public getExperimentalFeatures(): Readonly<ExperimentalFeatures> | undefined {
     return this.startDependencies?.config.experimentalFeatures;
+  }
+
+  private getFleetAuthzService(): FleetStartContract['authz'] {
+    if (!this.startDependencies?.fleetAuthzService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.fleetAuthzService;
+  }
+
+  public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
+    const fleetAuthz = await this.getFleetAuthzService().fromRequest(request);
+    return calculateEndpointAuthz(this.getLicenseService(), fleetAuthz);
   }
 
   public getEndpointMetadataService(): EndpointMetadataService {

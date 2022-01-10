@@ -412,6 +412,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const exceptionListClient = this.lists!.getExceptionListClient(savedObjectsClient, 'kibana');
 
     this.endpointAppContextService.start({
+      fleetAuthzService: plugins.fleet?.authz,
       agentService: plugins.fleet?.agentService,
       packageService: plugins.fleet?.packageService,
       packagePolicyService: plugins.fleet?.packagePolicyService,

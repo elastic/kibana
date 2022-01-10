@@ -119,6 +119,7 @@ export const createMockEndpointAppContextServiceStartContract =
       packagePolicyService,
       logger,
       packageService: createMockPackageService(),
+      fleetAuthzService: createFleetAuthzServiceMock(),
       manifestManager: getManifestManagerMock(),
       security: securityMock.createStart(),
       alerting: alertsMock.createStart(),
@@ -146,18 +147,21 @@ export const createMockPackageService = (): jest.Mocked<PackageService> => {
   };
 };
 
+export const createFleetAuthzServiceMock = (): jest.Mocked<FleetStartContract['authz']> => {
+  return {
+    fromRequest: jest.fn(async (_) => createFleetAuthzMock()),
+  };
+};
+
 /**
- * Creates a mock IndexPatternService for use in tests that need to interact with the Fleet's
- * ESIndexPatternService.
+ * Creates the Fleet Start contract mock return by the Fleet Plugin
  *
  * @param indexPattern a string index pattern to return when called by a test
  * @returns the same value as `indexPattern` parameter
  */
 export const createMockFleetStartContract = (indexPattern: string): FleetStartContract => {
   return {
-    authz: {
-      fromRequest: jest.fn().mockResolvedValue(createFleetAuthzMock()),
-    },
+    authz: createFleetAuthzServiceMock(),
     fleetSetupCompleted: jest.fn().mockResolvedValue(undefined),
     esIndexPatternService: {
       getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
