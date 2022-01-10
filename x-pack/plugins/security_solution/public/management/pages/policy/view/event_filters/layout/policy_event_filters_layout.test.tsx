@@ -109,4 +109,20 @@ describe('Policy event filters layout', () => {
 
     expect(component.queryByTestId('eventFilters-assign-button')).toBeNull();
   });
+
+  it('should hide the `Assign event filters` flyout when license is downgraded to gold or below', () => {
+    getEndpointPrivilegesInitialStateMock({
+      canCreateArtifactsByPolicy: false,
+    });
+    mockedApi.responseProvider.eventFiltersList.mockReturnValue(
+      getFoundExceptionListItemSchemaMock(2)
+    );
+
+    const component = render();
+    mockedContext.history.push(
+      `${getPolicyDetailsArtifactsListPath(policyItem.id)}/eventFilters?show=list`
+    );
+
+    expect(component.queryByTestId('eventFilters-assign-flyout')).toBeNull();
+  });
 });

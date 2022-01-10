@@ -146,7 +146,7 @@ export const PolicyEventFiltersLayout = React.memo<PolicyEventFiltersLayoutProps
             {canCreateArtifactsByPolicy && assignToPolicyButton}
           </EuiPageHeaderSection>
         </EuiPageHeader>
-        {urlParams.show === 'list' && (
+        {canCreateArtifactsByPolicy && urlParams.show === 'list' && (
           <PolicyEventFiltersFlyout policyItem={policyItem} onClose={handleOnCloseFlyout} />
         )}
         <EuiSpacer size="l" />
