@@ -15,6 +15,7 @@ import {
   EuiEmptyPrompt,
   EuiIconTip,
   EuiTitle,
+  EuiSelect,
 } from '@elastic/eui';
 import { euiLightVars as lightEuiTheme } from '@kbn/ui-shared-deps-src/theme';
 import { Axis, BarSeries, Chart, CurveType, LineSeries, Settings } from '@elastic/charts';
@@ -27,16 +28,31 @@ export interface ComponentOpts {
     average: number;
     valuesWithTimestamp: Record<string, number>;
   };
+  numberOfExecutions: number;
+  onChangeDuration: (length: number) => void;
 }
 
-const DESIRED_NUM_EXECUTION_DURATIONS = 30;
+const NUM_EXECUTIONS_OPTIONS = [120, 60, 30, 15].map((value) => ({
+  value,
+  text: i18n.translate(
+    'xpack.triggersActionsUI.sections.executionDurationChart.numberOfExecutionsOption',
+    {
+      defaultMessage: '{value} executions',
+      values: {
+        value,
+      },
+    }
+  ),
+}));
 
 export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
   executionDuration,
+  numberOfExecutions,
+  onChangeDuration,
 }: ComponentOpts) => {
   const paddedExecutionDurations = padOrTruncateDurations(
     executionDuration.valuesWithTimestamp,
-    DESIRED_NUM_EXECUTION_DURATIONS
+    numberOfExecutions
   );
 
   return (
@@ -52,22 +68,22 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
             </h4>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip
-            color="subdued"
-            type="questionInCircle"
-            content={i18n.translate(
-              'xpack.triggersActionsUI.sections.executionDurationChart.recentDurationsTooltip',
-              {
-                defaultMessage: `Recent rule executions include up to the last {numExecutions} executions.`,
-                values: {
-                  numExecutions: DESIRED_NUM_EXECUTION_DURATIONS,
-                },
-              }
-            )}
-            position="top"
-          />
-        </EuiFlexItem>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiSelect
+              id="select-number-execution-durations"
+              options={NUM_EXECUTIONS_OPTIONS}
+              value={numberOfExecutions}
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.sections.executionDurationChart.selectNumberOfExecutionDurationsLabel',
+                {
+                  defaultMessage: 'Select number of executions',
+                }
+              )}
+              onChange={({ target }) => onChangeDuration(Number(target.value))}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
 
       {executionDuration.valuesWithTimestamp &&

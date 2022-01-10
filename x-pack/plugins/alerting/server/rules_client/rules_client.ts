@@ -217,6 +217,7 @@ export interface UpdateOptions<Params extends AlertTypeParams> {
 export interface GetAlertSummaryParams {
   id: string;
   dateStart?: string;
+  numberOfExecutions?: number;
 }
 
 // NOTE: Changing this prefix will require a migration to update the prefix in all existing `rule` saved objects
@@ -530,7 +531,11 @@ export class RulesClient {
     }
   }
 
-  public async getAlertSummary({ id, dateStart }: GetAlertSummaryParams): Promise<AlertSummary> {
+  public async getAlertSummary({
+    id,
+    dateStart,
+    numberOfExecutions,
+  }: GetAlertSummaryParams): Promise<AlertSummary> {
     this.logger.debug(`getAlertSummary(): getting alert ${id}`);
     const rule = (await this.get({ id, includeLegacyId: true })) as SanitizedRuleWithLegacyId;
 
@@ -543,7 +548,7 @@ export class RulesClient {
 
     // default duration of instance summary is 60 * rule interval
     const dateNow = new Date();
-    const durationMillis = parseDuration(rule.schedule.interval) * 60;
+    const durationMillis = parseDuration(rule.schedule.interval) * (numberOfExecutions ?? 60);
     const defaultDateStart = new Date(dateNow.valueOf() - durationMillis);
     const parsedDateStart = parseDate(dateStart, 'dateStart', defaultDateStart);
 

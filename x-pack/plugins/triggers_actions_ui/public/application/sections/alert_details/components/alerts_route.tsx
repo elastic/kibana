@@ -36,11 +36,12 @@ export const AlertsRoute: React.FunctionComponent<WithAlertSummaryProps> = ({
   } = useKibana().services;
 
   const [alertSummary, setAlertSummary] = useState<AlertSummary | null>(null);
+  const [numberOfExecutions, setNumberOfExecutions] = useState(60);
 
   useEffect(() => {
-    getAlertSummary(rule.id, loadAlertSummary, setAlertSummary, toasts);
+    getAlertSummary(rule.id, loadAlertSummary, setAlertSummary, toasts, numberOfExecutions);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rule]);
+  }, [rule, numberOfExecutions]);
 
   return alertSummary ? (
     <Alerts
@@ -49,6 +50,8 @@ export const AlertsRoute: React.FunctionComponent<WithAlertSummaryProps> = ({
       ruleType={ruleType}
       readOnly={readOnly}
       alertSummary={alertSummary}
+      numberOfExecutions={numberOfExecutions}
+      onChangeDuration={setNumberOfExecutions}
     />
   ) : (
     <CenterJustifiedSpinner />
@@ -59,10 +62,11 @@ export async function getAlertSummary(
   ruleId: string,
   loadAlertSummary: AlertApis['loadAlertSummary'],
   setAlertSummary: React.Dispatch<React.SetStateAction<AlertSummary | null>>,
-  toasts: Pick<ToastsApi, 'addDanger'>
+  toasts: Pick<ToastsApi, 'addDanger'>,
+  executionDuration: number
 ) {
   try {
-    const loadedSummary = await loadAlertSummary(ruleId);
+    const loadedSummary = await loadAlertSummary(ruleId, executionDuration);
     setAlertSummary(loadedSummary);
   } catch (e) {
     toasts.addDanger({

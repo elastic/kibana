@@ -53,6 +53,8 @@ type AlertsProps = {
   readOnly: boolean;
   alertSummary: AlertSummary;
   requestRefresh: () => Promise<void>;
+  numberOfExecutions: number;
+  onChangeDuration: (length: number) => void;
   durationEpoch?: number;
 } & Pick<AlertApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
 
@@ -155,6 +157,8 @@ export function Alerts({
   muteAlertInstance,
   unmuteAlertInstance,
   requestRefresh,
+  numberOfExecutions,
+  onChangeDuration,
   durationEpoch = Date.now(),
 }: AlertsProps) {
   const [pagination, setPagination] = useState<Pagination>({
@@ -257,7 +261,11 @@ export function Alerts({
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={4}>
-          <ExecutionDurationChart executionDuration={alertSummary.executionDuration} />
+          <ExecutionDurationChart
+            executionDuration={alertSummary.executionDuration}
+            numberOfExecutions={numberOfExecutions}
+            onChangeDuration={onChangeDuration}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xl" />
