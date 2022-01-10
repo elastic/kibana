@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
 import { CERTIFICATES_ROUTE, OVERVIEW_ROUTE } from '../../common/constants';
@@ -25,6 +25,10 @@ interface Props {
 const StyledPageTemplateComponentWrapper = styled.div`
   .euiPageHeaderContent > .euiFlexGroup {
     flex-wrap: wrap;
+  }
+
+  .euiPageHeaderContent > .euiFlexGroup > .euiFlexItem {
+    align-items: center;
   }
 `;
 
