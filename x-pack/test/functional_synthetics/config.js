@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
+import path, { resolve } from 'path';
+
+import { defineDockerServersConfig } from '@kbn/test';
 
 import { services } from './services';
 import { pageObjects } from './page_objects';
@@ -20,6 +22,9 @@ export const dockerImage =
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }) {
+  const registryPort = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+  console.warn('registryPort', registryPort);
+
   const kibanaCommonConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
   );
@@ -27,47 +32,19 @@ export default async function ({ readConfigFile }) {
     require.resolve('../../../test/functional/config.js')
   );
 
+  // mount the config file for the package registry as well as
+  // the directory containing additional packages into the container
+  const dockerArgs = [
+    '-v',
+    `${path.join(
+      path.dirname(__filename),
+      './fixtures/package_registry_config.yml'
+    )}:/package-registry/config.yml`,
+  ];
+
   return {
     // list paths to the files that contain your plugins tests
-    testFiles: [
-      resolve(__dirname, './apps/advanced_settings'),
-      resolve(__dirname, './apps/canvas'),
-      resolve(__dirname, './apps/graph'),
-      resolve(__dirname, './apps/monitoring'),
-      resolve(__dirname, './apps/watcher'),
-      resolve(__dirname, './apps/dashboard'),
-      resolve(__dirname, './apps/discover'),
-      resolve(__dirname, './apps/security'),
-      resolve(__dirname, './apps/spaces'),
-      resolve(__dirname, './apps/logstash'),
-      resolve(__dirname, './apps/grok_debugger'),
-      resolve(__dirname, './apps/infra'),
-      resolve(__dirname, './apps/ml'),
-      resolve(__dirname, './apps/rollup_job'),
-      resolve(__dirname, './apps/maps'),
-      resolve(__dirname, './apps/status_page'),
-      resolve(__dirname, './apps/upgrade_assistant'),
-      resolve(__dirname, './apps/visualize'),
-      resolve(__dirname, './apps/uptime'),
-      resolve(__dirname, './apps/saved_objects_management'),
-      resolve(__dirname, './apps/dev_tools'),
-      resolve(__dirname, './apps/apm'),
-      resolve(__dirname, './apps/api_keys'),
-      resolve(__dirname, './apps/index_patterns'),
-      resolve(__dirname, './apps/index_management'),
-      resolve(__dirname, './apps/index_lifecycle_management'),
-      resolve(__dirname, './apps/ingest_pipelines'),
-      resolve(__dirname, './apps/snapshot_restore'),
-      resolve(__dirname, './apps/cross_cluster_replication'),
-      resolve(__dirname, './apps/remote_clusters'),
-      resolve(__dirname, './apps/transform'),
-      resolve(__dirname, './apps/reporting_management'),
-      resolve(__dirname, './apps/management'),
-      resolve(__dirname, './apps/lens'), // smokescreen tests cause flakiness in other tests
-
-      // This license_management file must be last because it is destructive.
-      resolve(__dirname, './apps/license_management'),
-    ],
+    testFiles: [resolve(__dirname, './apps/uptime')],
 
     services,
     pageObjects,
@@ -92,6 +69,7 @@ export default async function ({ readConfigFile }) {
         '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
         '--xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled=true',
         '--savedObjects.maxImportPayloadBytes=10485760', // for OSS test management/_import_objects,
+        ...(registryPort ? [`--xpack.fleet.registryUrl=http://localhost:${registryPort}`] : []),
       ],
     },
     uiSettings: {
@@ -586,5 +564,15 @@ export default async function ({ readConfigFile }) {
       },
       defaultRoles: ['superuser'],
     },
+    dockerServers: defineDockerServersConfig({
+      registry: {
+        enabled: !!registryPort,
+        image: dockerImage,
+        portInContainer: 8080,
+        port: registryPort,
+        args: dockerArgs,
+        waitForLogLine: 'package manifests loaded',
+      },
+    }),
   };
 }

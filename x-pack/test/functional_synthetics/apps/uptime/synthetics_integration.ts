@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { FullAgentPolicy } from '../../../../plugins/fleet/common';
+import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getPageObjects, getService } = providerContext;
@@ -130,9 +131,8 @@ export default function (providerContext: FtrProviderContext) {
     type: `synthetics/${monitorType}`,
     use_output: 'default',
   });
-  // FLAKY: https://github.com/elastic/kibana/issues/116980
-  describe.skip('When on the Synthetics Integration Policy Create Page', function () {
-    this.tags(['ciGroup10']);
+  describe('When on the Synthetics Integration Policy Create Page', function () {
+    skipIfNoDockerRegistry(providerContext);
     const basicConfig = {
       name: monitorName,
       apmServiceName: 'Sample APM Service',
@@ -172,8 +172,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/103390
-    describe.skip('create new policy', () => {
+    describe('create new policy', () => {
       let version: string;
 
       beforeEach(async () => {
