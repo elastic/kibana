@@ -37,7 +37,7 @@ export default function ({
         `;
         const result = await expectExpression('rareterms', expression).getResponse();
 
-        expect(result.columns.length).to.be(1149);
+        expect(result.rows.length).to.be(1149);
         result.rows.forEach((row: DatatableRow) => {
           expect(row['col-1-2']).to.be(1);
         });
