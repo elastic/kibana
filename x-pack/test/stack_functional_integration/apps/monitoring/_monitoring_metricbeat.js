@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Browser } from '../../../../../test/functional/services/common';
+
 export default ({ getService, getPageObjects }) => {
   describe('monitoring app - stack functional integration - suite', () => {
     const browser = getService('browser');
@@ -13,6 +15,7 @@ export default ({ getService, getPageObjects }) => {
     const testSubjects = getService('testSubjects');
     const isSaml = !!process.env.VM.includes('saml') || !!process.env.VM.includes('oidc');
     const clusterOverview = getService('monitoringClusterOverview');
+    const find = getService('find')
 
     before(async () => {
       await browser.setWindowSize(1200, 800);
@@ -30,6 +33,8 @@ export default ({ getService, getPageObjects }) => {
     });
 
     it('should have Monitoring already enabled', async () => {
+      // await this.browser.refresh();
+      await find.clickByLinkText('elasticsearch');
       await testSubjects.click('esOverview');
     });
 
