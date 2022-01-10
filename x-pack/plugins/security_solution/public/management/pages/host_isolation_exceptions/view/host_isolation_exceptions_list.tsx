@@ -70,6 +70,12 @@ export const HostIsolationExceptionsList = () => {
         : undefined,
   });
 
+  const { isLoading: isLoadingAll, data: allData } = useFetchHostIsolationExceptionsList({
+    page: 0,
+    perPage: 1,
+    enabled: data && !data.total,
+  });
+
   const toasts = useToasts();
 
   // load the list of policies>
@@ -87,10 +93,10 @@ export const HostIsolationExceptionsList = () => {
   };
 
   const listItems = data?.data || [];
-  const totalCountListItems = data?.total || 0;
+  const allListItems = allData?.data || [];
 
   const showFlyout = privileges.canIsolateHost && !!location.show;
-  const hasDataToShow = !!location.filter || listItems.length > 0;
+  const hasDataToShow = allListItems.length > 0 || listItems.length > 0;
 
   useEffect(() => {
     if (!isLoading && listItems.length === 0 && !privileges.canIsolateHost) {
@@ -181,7 +187,7 @@ export const HostIsolationExceptionsList = () => {
     [navigateCallback]
   );
 
-  if (isLoading && !hasDataToShow) {
+  if ((isLoading || isLoadingAll) && !hasDataToShow) {
     return <ManagementPageLoader data-test-subj="hostIsolationExceptionListLoader" />;
   }
 
@@ -234,7 +240,7 @@ export const HostIsolationExceptionsList = () => {
             defaultValue={location.filter}
             onSearch={handleOnSearch}
             policyList={policiesRequest.data?.items}
-            hasPolicyFilter={true}
+            hasPolicyFilter
             defaultIncludedPolicies={location.included_policies}
             placeholder={i18n.translate(
               'xpack.securitySolution.hostIsolationExceptions.search.placeholder',
@@ -248,7 +254,7 @@ export const HostIsolationExceptionsList = () => {
             <FormattedMessage
               id="xpack.securitySolution.hostIsolationExceptions.list.totalCount"
               defaultMessage="Showing {total, plural, one {# exception} other {# exceptions}}"
-              values={{ total: totalCountListItems }}
+              values={{ total: listItems.length }}
             />
           </EuiText>
           <EuiSpacer size="s" />
