@@ -46,7 +46,8 @@ function getInferenceConfigHelpText(documentationDocsLink: string): React.ReactN
             {INFERENCE_CONFIG_DOCS.documentation.linkLabel}
           </EuiLink>
         ),
-      }} />
+      }}
+    />
   );
 }
 
