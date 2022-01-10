@@ -14,6 +14,7 @@ import { findTestSubject, takeMountedSnapshot } from '@elastic/eui/lib/test';
 import {
   fatalErrorsServiceMock,
   injectedMetadataServiceMock,
+  docLinksServiceMock,
 } from '../../../../src/core/public/mocks';
 import { HttpService } from '../../../../src/core/public/http';
 import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/public/mocks';
@@ -99,7 +100,9 @@ const testSort = (headerName: string) => {
 
 const TestComponent = ({ testPolicies }: { testPolicies: PolicyFromES[] }) => {
   return (
-    <KibanaContextProvider services={{ getUrlForApp: () => '' }}>
+    <KibanaContextProvider
+      services={{ getUrlForApp: () => '', docLinks: docLinksServiceMock.createStartContract() }}
+    >
       <PolicyListContextProvider>
         <PolicyList updatePolicies={jest.fn()} policies={testPolicies} />
       </PolicyListContextProvider>

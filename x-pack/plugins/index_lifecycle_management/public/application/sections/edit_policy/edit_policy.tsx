@@ -26,7 +26,6 @@ import {
 
 import { TextField, useForm, useFormData, useKibana } from '../../../shared_imports';
 import { toasts } from '../../services/notification';
-import { createDocLink } from '../../services/documentation';
 import { UseField } from './form';
 import { savePolicy } from './save_policy';
 import {
@@ -67,7 +66,7 @@ export const EditPolicy: React.FunctionComponent = () => {
   } = useEditPolicyContext();
 
   const {
-    services: { cloud },
+    services: { cloud, docLinks },
   } = useKibana();
 
   const [isClonedPolicy, setIsClonedPolicy] = useState(false);
@@ -166,11 +165,7 @@ export const EditPolicy: React.FunctionComponent = () => {
         }
         bottomBorder
         rightSideItems={[
-          <EuiButtonEmpty
-            href={createDocLink('index-lifecycle-management.html')}
-            target="_blank"
-            iconType="help"
-          >
+          <EuiButtonEmpty href={docLinks.links.elasticsearch.ilm} target="_blank" iconType="help">
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.documentationLinkText"
               defaultMessage="Documentation"
