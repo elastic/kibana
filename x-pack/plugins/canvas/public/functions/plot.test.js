@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { functionWrapper, fontStyle } from '../../../../../src/plugins/presentation_util/public';
+import { fontStyle, functionWrapper } from '../../../../../src/plugins/presentation_util/public';
 import { testPlot } from '../../canvas_plugin_src/functions/common/__fixtures__/test_pointseries';
 import {
   grayscalePalette,
