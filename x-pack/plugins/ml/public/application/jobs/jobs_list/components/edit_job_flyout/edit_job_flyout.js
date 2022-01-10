@@ -22,6 +22,8 @@ import {
   EuiFlexItem,
   EuiTabbedContent,
   EuiConfirmModal,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
@@ -33,6 +35,7 @@ import { ml } from '../../../../services/ml_api_service';
 import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { collapseLiteralStrings } from '../../../../../../shared_imports';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../../../common/constants/states';
+import { isManagedJob } from '../../../jobs_utils';
 
 export class EditJobFlyoutUI extends Component {
   _initialJobFormState = null;
@@ -324,6 +327,8 @@ export class EditJobFlyoutUI extends Component {
         jobClosed,
       } = this.state;
 
+      console.log('job', job, isManagedJob(job));
+
       const tabs = [
         {
           id: 'job-details',
@@ -412,6 +417,18 @@ export class EditJobFlyoutUI extends Component {
                 />
               </h2>
             </EuiTitle>
+
+            {isManagedJob(job) ? (
+              <>
+                <EuiSpacer size="s" />
+                <EuiCallOut color="warning">
+                  <FormattedMessage
+                    id="xpack.ml.jobsList.editJobModal.editManagedJobDescription"
+                    defaultMessage="This job is preconfigured by Elastic; editing it may impact other parts of the product."
+                  />
+                </EuiCallOut>
+              </>
+            ) : null}
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} onTabClick={() => {}} />

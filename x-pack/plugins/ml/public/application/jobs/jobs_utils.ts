@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { isPopulatedObject } from '../../../common';
 import { MlSummaryJob } from '../../../common/types/anomaly_detection_jobs';
 
-export const isManagedJob = (job: MlSummaryJob) => {
-  return isPopulatedObject(job.customSettings) && job.customSettings.managed === true;
+export const isManagedJob = (job: MlSummaryJob | MlJob) => {
+  return (
+    (isPopulatedObject(job, ['customSettings']) && job.customSettings.managed === true) ||
+    (isPopulatedObject(job, ['custom_settings']) && job.custom_settings.managed === true)
+  );
 };

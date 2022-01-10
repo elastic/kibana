@@ -355,7 +355,6 @@ export class JobsList extends Component {
           </EuiScreenReaderOnly>
         ),
         actions: actionsMenuContent(
-          this.props.showEditJobConfirmModal,
           this.props.showEditJobFlyout,
           this.props.showDeleteJobModal,
           this.props.showResetJobModal,

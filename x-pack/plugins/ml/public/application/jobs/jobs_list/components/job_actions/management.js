@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 import { isManagedJob } from '../../../jobs_utils';
 
 export function actionsMenuContent(
-  showEditJobConfirmModal,
   showEditJobFlyout,
   showDeleteJobModal,
   showResetJobModal,
@@ -163,11 +162,7 @@ export function actionsMenuContent(
       icon: 'pencil',
       enabled: (item) => isJobBlocked(item) === false && canUpdateJob && canUpdateDatafeed,
       onClick: (item) => {
-        if (isManagedJob(item)) {
-          showEditJobConfirmModal(item);
-        } else {
-          showEditJobFlyout(item);
-        }
+        showEditJobFlyout(item);
         closeMenu();
       },
       'data-test-subj': 'mlActionButtonEditJob',

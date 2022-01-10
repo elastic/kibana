@@ -41,7 +41,6 @@ import { RefreshJobsListButton } from '../refresh_jobs_list_button';
 
 import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import { JobListMlAnomalyAlertFlyout } from '../../../../../alerting/ml_alerting_flyout';
-import { EditJobConfirmModal } from '../confirm_modals/edit_job_confirm_modal';
 import { StopDatafeedsConfirmModal } from '../confirm_modals/stop_datafeeds_confirm_modal';
 import { CloseJobsConfirmModal } from '../confirm_modals/close_jobs_confirm_modal';
 
@@ -73,7 +72,6 @@ export class JobsListView extends Component {
     this.updateFunctions = {};
 
     this.showEditJobFlyout = () => {};
-    this.showEditJobConfirmModal = () => {};
     this.showStopDatafeedsConfirmModal = () => {};
     this.showCloseJobsConfirmModal = () => {};
     this.showDeleteJobModal = () => {};
@@ -209,14 +207,6 @@ export class JobsListView extends Component {
   };
   unsetShowEditJobFlyoutFunction = () => {
     this.showEditJobFlyout = () => {};
-  };
-
-  setShowEditJobConfirmModalFunction = (func) => {
-    this.showEditJobConfirmModal = func;
-  };
-
-  unsetShowEditJobModalFunction = () => {
-    this.showEditJobConfirmModal = () => {};
   };
 
   setShowStopDatafeedsConfirmModalFunction = (func) => {
@@ -576,7 +566,6 @@ export class JobsListView extends Component {
                 toggleRow={this.toggleRow}
                 selectJobChange={this.selectJobChange}
                 showEditJobFlyout={this.showEditJobFlyout}
-                showEditJobConfirmModal={this.showEditJobConfirmModal}
                 showDeleteJobModal={this.showDeleteJobModal}
                 showResetJobModal={this.showResetJobModal}
                 showCloseJobsConfirmModal={this.showCloseJobsConfirmModal}
@@ -595,14 +584,6 @@ export class JobsListView extends Component {
                 refreshJobs={() => this.refreshJobSummaryList(true)}
                 allJobIds={jobIds}
               />
-              <EditJobConfirmModal
-                setShowFunction={this.setShowEditJobConfirmModalFunction}
-                unsetShowFunction={this.unsetShowEditJobModalFunction}
-                refreshJobs={() => this.refreshJobSummaryList(true)}
-                allJobIds={jobIds}
-                showEditJobFlyout={this.showEditJobFlyout}
-              />
-
               <StopDatafeedsConfirmModal
                 setShowFunction={this.setShowStopDatafeedsConfirmModalFunction}
                 unsetShowFunction={this.unsetShowStopDatafeedsConfirmModalFunction}
