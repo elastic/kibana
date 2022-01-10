@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Subject, Observable, of } from 'rxjs';
-import { shareReplay, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject } from 'rxjs';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import type { CoreTheme, ThemeServiceSetup, ThemeServiceStart } from './types';
 
@@ -16,24 +15,23 @@ export interface SetupDeps {
 }
 
 export class ThemeService {
-  private theme$?: Observable<CoreTheme>;
-  private stop$ = new Subject<void>();
+  private theme$?: BehaviorSubject<CoreTheme>;
   private mq = window.matchMedia('(prefers-color-scheme: dark)');
 
   setup({ injectedMetadata }: SetupDeps): ThemeServiceSetup {
     const theme = injectedMetadata.getTheme();
-    this.theme$ = of({
+    this.theme$ = new BehaviorSubject({
       darkMode: theme.theme === 'system' ? this.mq.matches : theme.theme === 'dark',
     });
 
     if (theme.theme === 'system') {
       this.mq.addEventListener('change', (e) => {
-        // FIXME Update theme$
+        this.theme$?.next({ darkMode: e.matches });
       });
     }
 
     return {
-      theme$: this.theme$.pipe(takeUntil(this.stop$), shareReplay(1)),
+      theme$: this.theme$,
     };
   }
 
@@ -43,11 +41,11 @@ export class ThemeService {
     }
 
     return {
-      theme$: this.theme$.pipe(takeUntil(this.stop$), shareReplay(1)),
+      theme$: this.theme$,
     };
   }
 
   public stop() {
-    this.stop$.next();
+    this.theme$?.complete();
   }
 }
