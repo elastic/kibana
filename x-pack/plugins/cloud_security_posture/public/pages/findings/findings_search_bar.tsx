@@ -12,7 +12,7 @@ import * as TEST_SUBJECTS from './test_subjects';
 import type { DataView, TimeRange } from '../../../../../../src/plugins/data/common';
 import type { FindingsFetchState } from './types';
 import type { CspPluginSetup } from '../../types';
-import type { URLState } from './findings_container';
+import type { FindingsUrlQuery } from './findings_container';
 import { PLUGIN_NAME } from '../../../common';
 
 interface BaseFindingsSearchBarProps {
@@ -20,7 +20,7 @@ interface BaseFindingsSearchBarProps {
   dateRange: TimeRange;
   query: Query;
   filters: Filter[];
-  setSource(v: URLState): void;
+  setQuery(v: FindingsUrlQuery): void;
 }
 
 type FindingsSearchBarProps = FindingsFetchState & BaseFindingsSearchBarProps;
@@ -31,7 +31,7 @@ export const FindingsSearchBar = ({
   query,
   filters,
   status,
-  setSource,
+  setQuery,
 }: FindingsSearchBarProps) => {
   const {
     data: {
@@ -43,7 +43,7 @@ export const FindingsSearchBar = ({
   useEffect(() => {
     const subscription = queryService.filterManager.getUpdates$().subscribe(() =>
       // TODO: add a condition to check if component is mounted
-      setSource({
+      setQuery({
         filters: queryService.filterManager.getFilters(),
         query,
         dateRange,
@@ -51,7 +51,7 @@ export const FindingsSearchBar = ({
     );
 
     return () => subscription.unsubscribe();
-  }, [dateRange, query, queryService.filterManager, setSource]);
+  }, [dateRange, query, queryService.filterManager, setQuery]);
 
   return (
     <SearchBar
@@ -69,16 +69,17 @@ export const FindingsSearchBar = ({
       query={query}
       filters={filters}
       onRefresh={(v) =>
-        setSource({
+        setQuery({
           query,
           filters,
           ...v,
         })
       }
       onQuerySubmit={(v) =>
-        setSource({
-          ...v,
+        setQuery({
+          query,
           filters,
+          ...v,
         })
       }
     />

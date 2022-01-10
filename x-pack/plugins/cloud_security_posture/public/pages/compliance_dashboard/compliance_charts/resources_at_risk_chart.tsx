@@ -15,15 +15,24 @@ import {
   Settings,
 } from '@elastic/charts';
 import { euiPaletteForStatus } from '@elastic/eui';
+import type { Query } from '@kbn/es-query';
+import { useHistory } from 'react-router-dom';
 import { CloudPostureStats, EvaluationResult } from '../../../../common/types';
-import { useNavigateToCspFindings } from '../../../common/navigation/use_navigate_to_csp_findings';
+import { encodeQuery } from '../../../common/navigation/query_utils';
+import { allNavigationItems } from '../../../common/navigation/constants';
 
 interface ResourcesAtRiskChartProps {
   data: CloudPostureStats['resourcesEvaluations'];
 }
 
+const getResourceQuery = (resource: string, evaluation: string): Query => ({
+  language: 'kuery',
+  query: `resource.filename : "${resource}" and result.evaluation : "${evaluation}" `,
+});
+
 export const ResourcesAtRiskChart = ({ data: resources }: ResourcesAtRiskChartProps) => {
-  const { navigate } = useNavigateToCspFindings();
+  const history = useHistory();
+
   if (!resources) return null;
 
   const handleElementClick: ElementClickListener = (elements) => {
@@ -31,9 +40,10 @@ export const ResourcesAtRiskChart = ({ data: resources }: ResourcesAtRiskChartPr
     const [geometryValue] = element;
     const { resource, evaluation } = geometryValue.datum as EvaluationResult;
 
-    navigate(
-      `(language:kuery,query:'resource.filename : "${resource}" and result.evaluation : ${evaluation.toLowerCase()}')`
-    );
+    history.push({
+      pathname: allNavigationItems.findings.path,
+      search: encodeQuery(getResourceQuery(resource, evaluation)),
+    });
   };
 
   const top5 = resources.length > 5 ? resources.slice(0, 5) : resources;

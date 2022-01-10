@@ -4,12 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useEffect } from 'react';
 import type { Filter, Query } from '@kbn/es-query';
 import { useMutation, useQuery } from 'react-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { encode, decode, RisonObject } from 'rison-node';
-import { useHistory } from 'react-router-dom';
 import type {
   DataView,
   IKibanaSearchResponse,
@@ -50,52 +47,6 @@ export const useKubebeatDataView = () => {
   const getKubebeatDataView = () => findDataView().then((v) => (v ? v : createDataView()));
 
   return useQuery(['kubebeat_dataview'], getKubebeatDataView);
-};
-
-export const useSourceQueryParam = <T extends RisonObject>(getDefaultQuery: () => T) => {
-  const history = useHistory();
-  const [state, set] = useState<T>(getDefaultQuery());
-
-  const setSource = (v: T) => {
-    try {
-      const next = `source=${encode(v)}`;
-      const current = history.location.search.slice(1);
-
-      // React-Router won't trigger a new component render if the query is the same
-      // so we trigger it manually
-      // use case is re-fetching same query
-      if (next === current) {
-        set(() => ({ ...state }));
-      } else {
-        history.push({ search: next });
-      }
-    } catch (e) {
-      // TODO: use real logger
-      // eslint-disable-next-line no-console
-      console.error('Unable to encode source');
-    }
-  };
-
-  useEffect(() => {
-    const params = new URLSearchParams(history.location.search);
-    const source = params.get('source');
-    if (!source) return;
-
-    try {
-      set(decode(source) as T);
-    } catch (e) {
-      set(getDefaultQuery());
-
-      // TODO: use real logger
-      // eslint-disable-next-line no-console
-      console.error('Unable to decode URL');
-    }
-  }, [history.location.search, getDefaultQuery]);
-
-  return {
-    source: state,
-    setSource,
-  };
 };
 
 export const useEsClientMutation = <T extends unknown>({

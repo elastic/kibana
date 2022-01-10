@@ -5,23 +5,20 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { css } from '@emotion/react';
 import { EuiSpacer } from '@elastic/eui';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { UseMutationResult } from 'react-query';
 import type { Filter, Query } from '@kbn/es-query';
+import type { RisonObject } from 'rison-node';
+import { useHistory, useLocation } from 'react-router-dom';
 import { FindingsTable } from './findings_table';
 import { FindingsRuleFlyout } from './findings_flyout';
 import { FindingsSearchBar } from './findings_search_bar';
 import * as TEST_SUBJECTS from './test_subjects';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import {
-  extractErrorMessage,
-  useSourceQueryParam,
-  useEsClientMutation,
-  isNonNullable,
-} from './utils';
+import { extractErrorMessage, useEsClientMutation, isNonNullable } from './utils';
 import type { CspFinding, FindingsFetchState } from './types';
 import type {
   DataView,
@@ -29,6 +26,7 @@ import type {
   TimeRange,
 } from '../../../../../../src/plugins/data/common';
 import { SEARCH_FAILED } from './translations';
+import { encodeQuery, decodeQuery } from '../../common/navigation/query_utils';
 
 type FindingsEsSearchMutation = UseMutationResult<
   IKibanaSearchResponse<SearchResponse<CspFinding>>,
@@ -36,13 +34,15 @@ type FindingsEsSearchMutation = UseMutationResult<
   void
 >;
 
-export interface URLState {
+export interface FindingsUrlQuery extends RisonObject {
   dateRange: TimeRange;
-  query?: Query;
+  query: Query;
   filters: Filter[];
 }
 
-const getDefaultQuery = (): Required<URLState> => ({
+const getError = (e: unknown) => (e instanceof Error ? e : new Error());
+
+const getDefaultQuery = (): FindingsUrlQuery => ({
   query: { language: 'kuery', query: '' },
   filters: [],
   dateRange: {
@@ -73,25 +73,28 @@ export const getFetchState = <T extends FindingsEsSearchMutation>(v: T): Finding
 export const FindingsTableContainer = ({ dataView }: { dataView: DataView }) => {
   const { notifications } = useKibana().services;
   const [selectedFinding, setSelectedFinding] = useState<CspFinding | undefined>();
-  const { source: searchState, setSource: setSearchSource } = useSourceQueryParam(getDefaultQuery);
+  const history = useHistory();
+  const loc = useLocation();
+  const urlQuery = useMemo(() => decodeQuery<FindingsUrlQuery>(loc.search), [loc.search]);
+  const query = useMemo(() => ({ ...getDefaultQuery(), ...urlQuery }), [urlQuery]);
   const mutation = useEsClientMutation<CspFinding>({
-    ...searchState,
+    ...query,
     dataView,
   });
   const fetchState = getFetchState(mutation);
 
   // This sends a new search request to ES
-  // it's called whenever we have a new searchState from the URL
+  // it's called whenever we have a new query from the URL
   useEffect(() => {
     mutation.mutate(undefined, {
       onError: (e) => {
-        notifications?.toasts.addError(e instanceof Error ? e : new Error(), {
+        notifications?.toasts.addError(getError(e), {
           title: SEARCH_FAILED,
         });
       },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchState, mutation.mutate]);
+  }, [query, mutation.mutate]);
 
   return (
     <div
@@ -102,10 +105,14 @@ export const FindingsTableContainer = ({ dataView }: { dataView: DataView }) => 
       `}
     >
       <FindingsSearchBar
-        {...searchState}
+        {...query}
         {...fetchState}
         dataView={dataView}
-        setSource={setSearchSource}
+        setQuery={(nextQuery) =>
+          history.push({
+            search: encodeQuery(nextQuery),
+          })
+        }
       />
       <EuiSpacer />
       <FindingsTable {...fetchState} selectItem={setSelectedFinding} />

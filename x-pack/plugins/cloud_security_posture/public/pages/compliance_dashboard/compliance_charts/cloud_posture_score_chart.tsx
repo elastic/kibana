@@ -16,19 +16,31 @@ import {
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import type { PartitionElementEvent } from '@elastic/charts';
+import type { Query } from '@kbn/es-query';
+import { useHistory } from 'react-router-dom';
 import { statusColors } from '../../../common/constants';
 import type { BenchmarkStats } from '../../../../common/types';
-import { useNavigateToCspFindings } from '../../../common/navigation/use_navigate_to_csp_findings';
 import * as TEXT from '../translations';
+import { encodeQuery } from '../../../common/navigation/query_utils';
+import { allNavigationItems } from '../../../common/navigation/constants';
 
 interface CloudPostureScoreChartProps {
   data: BenchmarkStats;
 }
 
+const getBenchmarkAndResultEvaluationQuery = (
+  benchmarkName: string,
+  evaluation: string
+): Query => ({
+  language: 'kuery',
+  query: `rule.benchmark : "${benchmarkName}" and result.evaluation : "${evaluation}" `,
+});
+
 export const CloudPostureScoreChart = ({
   data: { totalPassed, totalFailed, name: benchmarkName },
 }: CloudPostureScoreChartProps) => {
-  const { navigate } = useNavigateToCspFindings();
+  const history = useHistory();
+
   if (totalPassed === undefined || totalFailed === undefined || name === undefined) return null;
 
   const handleElementClick: ElementClickListener = (elements) => {
@@ -36,9 +48,12 @@ export const CloudPostureScoreChart = ({
     const [layerValue] = element;
     const rollupValue = layerValue[0].groupByRollup as string;
 
-    navigate(
-      `(language:kuery,query:'rule.benchmark : "${benchmarkName}" and result.evaluation : ${rollupValue.toLowerCase()}')`
-    );
+    history.push({
+      pathname: allNavigationItems.findings.path,
+      search: encodeQuery(
+        getBenchmarkAndResultEvaluationQuery(benchmarkName, rollupValue.toLowerCase())
+      ),
+    });
   };
 
   const total = totalPassed + totalFailed;

@@ -8,7 +8,7 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router, Redirect, Switch, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { CSP_DASHBOARD_PATH } from '../common/navigation/constants';
+import { allNavigationItems } from '../common/navigation/constants';
 import { routes } from './routes';
 import { UnknownRoute } from '../components/unknown_route';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
@@ -41,4 +41,4 @@ export const CspApp = ({ core, deps, params }: CspAppDeps) => (
   </KibanaContextProvider>
 );
 
-const RedirectToDashboard = () => <Redirect to={CSP_DASHBOARD_PATH} />;
+const RedirectToDashboard = () => <Redirect to={allNavigationItems.dashboard.path} />;
