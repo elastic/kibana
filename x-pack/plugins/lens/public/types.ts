@@ -363,6 +363,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   onRemove?: (accessor: string) => void;
   state: T;
   activeData?: Record<string, Datatable>;
+  hideTooltip?: boolean;
   invalid?: boolean;
   invalidMessage?: string;
 };
