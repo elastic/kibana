@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Filter, IndexPattern, ISearchSource } from 'src/plugins/data/public';
+import { Filter, DataView, ISearchSource } from 'src/plugins/data/common';
 import { reverseSortDir, SortDirection } from '../utils/sorting';
 import { convertIsoToMillis, extractNanos } from '../utils/date_conversion';
 import { fetchHitsInInterval } from '../utils/fetch_hits_in_interval';
@@ -29,7 +29,7 @@ const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS
  * Fetch successor or predecessor documents of a given anchor document
  *
  * @param {SurrDocType} type - `successors` or `predecessors`
- * @param {IndexPattern} indexPattern
+ * @param {DataView} indexPattern
  * @param {EsHitRecord} anchor - anchor record
  * @param {string} tieBreakerField - name of the tie breaker, the 2nd sort field
  * @param {SortDirection} sortDir - direction of sorting
@@ -40,7 +40,7 @@ const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS
  */
 export async function fetchSurroundingDocs(
   type: SurrDocType,
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   anchor: EsHitRecord,
   tieBreakerField: string,
   sortDir: SortDirection,
@@ -105,7 +105,7 @@ export async function fetchSurroundingDocs(
 
 export function updateSearchSource(
   searchSource: ISearchSource,
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   filters: Filter[],
   useNewFieldsApi: boolean
 ) {
