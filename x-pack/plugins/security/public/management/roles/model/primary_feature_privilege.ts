@@ -27,4 +27,12 @@ export class PrimaryFeaturePrivilege extends KibanaPrivilege {
     }
     return `minimal_${this.id}`;
   }
+
+  public get requireAllSpaces() {
+    return this.config.requireAllSpaces ?? false;
+  }
+
+  public get disabled() {
+    return this.config.disabled ?? false;
+  }
 }
