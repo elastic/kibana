@@ -83,3 +83,10 @@ export const EVENTS_UNIT = (totalCount: number) =>
     values: { totalCount },
     defaultMessage: `{totalCount, plural, =1 {event} other {events}}`,
   });
+
+export const VIEW_DASHBOARD_BUTTON = i18n.translate(
+  'xpack.securitySolution.hosts.navigaton.hostRisk.viewDashboardButtonLabel',
+  {
+    defaultMessage: 'View source dashboard',
+  }
+);

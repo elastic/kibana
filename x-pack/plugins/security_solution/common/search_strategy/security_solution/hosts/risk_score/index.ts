@@ -12,7 +12,7 @@ import type {
 } from '../../../../../../../../src/plugins/data/common';
 import { RISKY_HOSTS_INDEX_PREFIX } from '../../../../constants';
 import { ESTermQuery } from '../../../../typed_json';
-import { Inspect, Maybe, TimerangeInput } from '../../../common';
+import { Direction, Inspect, Maybe, TimerangeInput } from '../../../common';
 
 export interface HostsRiskScoreRequestOptions extends IEsSearchRequest {
   defaultIndex: string[];
@@ -21,6 +21,8 @@ export interface HostsRiskScoreRequestOptions extends IEsSearchRequest {
   timerange?: TimerangeInput;
   filterQuery?: ESTermQuery | string;
   onlyLatest?: boolean;
+  limit?: number;
+  sortOrder?: Direction.asc | Direction.desc;
 }
 
 export interface HostsRiskScoreStrategyResponse extends IEsSearchResponse {

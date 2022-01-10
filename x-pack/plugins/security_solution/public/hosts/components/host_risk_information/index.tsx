@@ -21,6 +21,7 @@ import {
   EuiButton,
   EuiSpacer,
   EuiBasicTableColumn,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -61,16 +62,8 @@ const tableItems: TableItem[] = [
 
 export const HOST_RISK_INFO_BUTTON_CLASS = 'HostRiskInformation__button';
 
-export const HostRiskInformation = () => {
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-
-  const handleOnClose = useCallback(() => {
-    setIsFlyoutVisible(false);
-  }, []);
-
-  const handleOnOpen = useCallback(() => {
-    setIsFlyoutVisible(true);
-  }, []);
+export const HostRiskInformationButtonIcon = () => {
+  const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
 
   return (
     <>
@@ -86,6 +79,32 @@ export const HostRiskInformation = () => {
       {isFlyoutVisible && <HostRiskInformationFlyout handleOnClose={handleOnClose} />}
     </>
   );
+};
+
+export const HostRiskInformationButtonEmpty = () => {
+  const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
+
+  return (
+    <>
+      <EuiButtonEmpty onClick={handleOnOpen} data-test-subj="open-risk-information-flyout">
+        {i18n.INFO_BUTTON_TEXT}
+      </EuiButtonEmpty>
+      {isFlyoutVisible && <HostRiskInformationFlyout handleOnClose={handleOnClose} />}
+    </>
+  );
+};
+
+const useOnOpenCloseHandler = (): [boolean, () => void, () => void] => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleOnClose = useCallback(() => {
+    setIsOpen(false);
+  }, []);
+
+  const handleOnOpen = useCallback(() => {
+    setIsOpen(true);
+  }, []);
+  return [isOpen, handleOnOpen, handleOnClose];
 };
 
 const HostRiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => void }) => {

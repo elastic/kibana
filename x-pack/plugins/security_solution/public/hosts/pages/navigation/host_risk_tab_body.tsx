@@ -7,12 +7,17 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import styled from 'styled-components';
 import { HostRiskScoreOverTime } from '../../components/host_score_over_time';
 import { TopHostScoreContributors } from '../../components/top_host_score_contributors';
 import { HostsComponentsQueryProps } from './types';
-
+import * as i18n from '../translations';
 import { useRiskyHostsDashboardButtonHref } from '../../../overview/containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href';
-import { HostRiskInformation } from '../../components/host_risk_information';
+import { HostRiskInformationButtonEmpty } from '../../components/host_risk_information';
+
+const StyledEuiFlexGroup = styled(EuiFlexGroup)`
+  margin-top: ${({ theme }) => theme.eui.paddingSizes.l};
+`;
 
 const HostRiskTabBodyComponent: React.FC<HostsComponentsQueryProps & { hostName: string }> = ({
   hostName,
@@ -42,15 +47,21 @@ const HostRiskTabBodyComponent: React.FC<HostsComponentsQueryProps & { hostName:
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiButton
-        href={buttonHref}
-        isDisabled={!buttonHref}
-        data-test-subj="risky-hosts-view-dashboard-button"
-        target="_blank"
-      >
-        {'View source dashboard'}
-      </EuiButton>
-      <HostRiskInformation />
+      <StyledEuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            href={buttonHref}
+            isDisabled={!buttonHref}
+            data-test-subj="risky-hosts-view-dashboard-button"
+            target="_blank"
+          >
+            {i18n.VIEW_DASHBOARD_BUTTON}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <HostRiskInformationButtonEmpty />
+        </EuiFlexItem>
+      </StyledEuiFlexGroup>
     </>
   );
 };

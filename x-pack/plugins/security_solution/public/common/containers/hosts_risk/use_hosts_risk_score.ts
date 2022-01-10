@@ -8,12 +8,11 @@ import { i18n } from '@kbn/i18n';
 
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useKibana } from '../../lib/kibana';
 import { inputsActions } from '../../store/actions';
 import { isIndexNotFoundError } from '../../utils/exceptions';
-import { getHostRiskIndex, HostsRiskScore } from '../../../../common/search_strategy';
+import { Direction, getHostRiskIndex, HostsRiskScore } from '../../../../common/search_strategy';
 
 import { useHostsRiskScoreComplete } from './use_hosts_risk_score_complete';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
@@ -44,12 +43,16 @@ export const useHostsRiskScore = ({
   onlyLatest = true,
   filterQuery,
   queryId = QUERY_ID,
+  sortOrder,
+  limit,
 }: {
   timerange?: { to: string; from: string };
   filterQuery?: ESTermQuery | string;
   hostName?: string;
   onlyLatest?: boolean;
   queryId?: string;
+  limit?: number;
+  sortOrder?: Direction;
 }): HostRisk | null => {
   const riskyHostsFeatureEnabled = useIsExperimentalFeatureEnabled('riskyHostsEnabled');
   const [isModuleEnabled, setIsModuleEnabled] = useState<boolean | undefined>(undefined);
@@ -115,10 +118,23 @@ export const useHostsRiskScore = ({
           hostNames: hostName ? [hostName] : undefined,
           defaultIndex: [getHostRiskIndex(space.id, onlyLatest)],
           onlyLatest,
+          sortOrder,
+          limit,
         });
       });
     }
-  }, [start, data, timerange, filterQuery, hostName, onlyLatest, riskyHostsFeatureEnabled, spaces]);
+  }, [
+    start,
+    data,
+    timerange,
+    filterQuery,
+    hostName,
+    onlyLatest,
+    riskyHostsFeatureEnabled,
+    spaces,
+    sortOrder,
+    limit,
+  ]);
 
   if ((!hostName && !timerange) || !riskyHostsFeatureEnabled) {
     return null;

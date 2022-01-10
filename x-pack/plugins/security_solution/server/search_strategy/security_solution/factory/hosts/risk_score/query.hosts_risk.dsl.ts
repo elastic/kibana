@@ -8,11 +8,15 @@
 import { Direction, HostsRiskScoreRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
+const QUERY_SIZE = 10;
+
 export const buildHostsRiskScoreQuery = ({
   timerange,
   hostNames,
   defaultIndex,
   filterQuery,
+  limit = QUERY_SIZE,
+  sortOrder = Direction.desc,
 }: HostsRiskScoreRequestOptions) => {
   const filter = [...createQueryFilterClauses(filterQuery)];
 
@@ -37,6 +41,7 @@ export const buildHostsRiskScoreQuery = ({
     allow_no_indices: false,
     ignore_unavailable: true,
     track_total_hits: false,
+    size: limit,
     body: {
       query: {
         bool: {
@@ -46,7 +51,7 @@ export const buildHostsRiskScoreQuery = ({
       sort: [
         {
           '@timestamp': {
-            order: Direction.desc,
+            order: sortOrder,
           },
         },
       ],

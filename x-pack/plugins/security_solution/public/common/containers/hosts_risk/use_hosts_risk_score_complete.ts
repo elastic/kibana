@@ -31,6 +31,8 @@ export const getHostsRiskScore = ({
   filterQuery,
   hostNames,
   signal,
+  limit,
+  sortOrder,
 }: GetHostsRiskScoreProps): Observable<HostsRiskScoreStrategyResponse> =>
   data.search.search<HostsRiskScoreRequestOptions, HostsRiskScoreStrategyResponse>(
     {
@@ -39,6 +41,8 @@ export const getHostsRiskScore = ({
       timerange,
       filterQuery,
       hostNames,
+      limit,
+      sortOrder,
     },
     {
       strategy: 'securitySolutionSearchStrategy',

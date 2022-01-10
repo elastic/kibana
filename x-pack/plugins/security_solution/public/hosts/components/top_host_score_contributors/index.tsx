@@ -20,6 +20,7 @@ import { InspectButton, InspectButtonContainer } from '../../../common/component
 import * as i18n from './translations';
 import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
 import { ESTermQuery } from '../../../../common/typed_json';
+import { Direction } from '../../../../../timelines/common';
 
 export interface TopHostScoreContributorsProps {
   hostName: string;
@@ -69,7 +70,10 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
     hostName,
     timerange,
     filterQuery,
+    onlyLatest: false,
     queryId: QUERY_ID,
+    limit: 1,
+    sortOrder: Direction.desc,
   });
 
   const result = hostRisk?.result;
