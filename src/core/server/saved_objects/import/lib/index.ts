@@ -18,7 +18,7 @@ export { getImportStateMapForRetries } from './get_import_state_map_for_retries'
 export { getNonUniqueEntries } from './get_non_unique_entries';
 export { regenerateIds } from './regenerate_ids';
 export { splitOverwrites } from './split_overwrites';
-export { getNonExistingReferenceAsKeys, validateReferences } from './validate_references';
+export { validateReferences } from './validate_references';
 export { validateRetries } from './validate_retries';
 export { executeImportHooks } from './execute_import_hooks';
 export type { ImportStateMap, ImportStateValue } from './types';
