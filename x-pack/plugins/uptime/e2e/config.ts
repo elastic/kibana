@@ -44,6 +44,11 @@ async function config({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.username=kibana_system`,
         `--elasticsearch.password=changeme`,
         '--xpack.reporting.enabled=false',
+        '--xpack.uptime.unsafe.service.manifestUrl=',
+        `--xpack.uptime.unsafe.service.username=${process.env.SYNTHETICS_SERVICE_USERNAME}`,
+        `--xpack.uptime.unsafe.service.password=${process.env.SYNTHETICS_SERVICE_PASSWORD}`,
+        '--xpack.uptime.unsafe.service.hosts=["https://synthetics-service-es.es.us-west2.gcp.elastic-cloud.com:9243"]',
+        '--xpack.uptime.ui.unsafe.monitorManagement.enabled=true',
       ],
     },
   };
