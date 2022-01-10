@@ -11,6 +11,7 @@ import { RawRule } from '../types';
 import { SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import { migrationMocks } from 'src/core/server/mocks';
+import { RuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 const migrationContext = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -2055,6 +2056,37 @@ describe('successful migrations', () => {
         undefined
       );
     });
+
+    test('doesnt change AAD rule params if not a siem.signals rule', () => {
+      const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+      const alert = getMockData(
+        { params: { outputIndex: 'output-index', type: 'query' }, alertTypeId: 'not.siem.signals' },
+        true
+      );
+      expect(migration800(alert, migrationContext).attributes.alertTypeId).toEqual(
+        'not.siem.signals'
+      );
+      expect(migration800(alert, migrationContext).attributes.enabled).toEqual(true);
+      expect(migration800(alert, migrationContext).attributes.params.outputIndex).toEqual(
+        'output-index'
+      );
+    });
+
+    test.each(Object.keys(ruleTypeMappings) as RuleType[])(
+      'Changes AAD rule params accordingly if rule is a siem.signals %p rule',
+      (ruleType) => {
+        const migration800 = getMigrations(encryptedSavedObjectsSetup, isPreconfigured)['8.0.0'];
+        const alert = getMockData(
+          { params: { outputIndex: 'output-index', type: ruleType }, alertTypeId: 'siem.signals' },
+          true
+        );
+        expect(migration800(alert, migrationContext).attributes.alertTypeId).toEqual(
+          ruleTypeMappings[ruleType]
+        );
+        expect(migration800(alert, migrationContext).attributes.enabled).toEqual(false);
+        expect(migration800(alert, migrationContext).attributes.params.outputIndex).toEqual('');
+      }
+    );
 
     describe('Metrics Inventory Threshold rule', () => {
       test('Migrates incorrect action group spelling', () => {

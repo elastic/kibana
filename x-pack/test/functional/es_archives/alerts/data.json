@@ -346,6 +346,7 @@
         "consumer" : "alertsFixture",
         "params" : {
           "ruleId" : "4ec223b9-77fa-4895-8539-6b3e586a2858",
+          "type": "query",
           "exceptionsList" : [
             {
               "id" : "endpoint_list",

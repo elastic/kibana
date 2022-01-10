@@ -131,7 +131,7 @@ export function getMigrations(
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
     pipeMigrations(
       addThreatIndicatorPathToThreatMatchRules,
-      addRACRuleTypes,
+      addSecuritySolutionAADRuleTypes,
       fixInventoryThresholdGroupId
     )
   );
@@ -652,7 +652,7 @@ function setLegacyId(doc: SavedObjectUnsanitizedDoc<RawRule>): SavedObjectUnsani
   };
 }
 
-function addRACRuleTypes(
+function addSecuritySolutionAADRuleTypes(
   doc: SavedObjectUnsanitizedDoc<RawRule>
 ): SavedObjectUnsanitizedDoc<RawRule> {
   const ruleType = doc.attributes.params.type;
@@ -662,6 +662,7 @@ function addRACRuleTypes(
         attributes: {
           ...doc.attributes,
           alertTypeId: ruleTypeMappings[ruleType],
+          enabled: false,
           params: {
             ...doc.attributes.params,
             outputIndex: '',
