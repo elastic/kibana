@@ -407,6 +407,34 @@ export class Authenticator {
   }
 
   /**
+   * Tries to reauthenticate request with the existing session.
+   * @param request Request instance.
+   */
+  async reauthenticate(request: KibanaRequest) {
+    assertRequest(request);
+
+    const existingSessionValue = await this.getSessionValue(request);
+    if (!existingSessionValue) {
+      this.logger.warn('It is not possible to extend session since it is no longer available.');
+      return AuthenticationResult.notHandled();
+    }
+
+    // We can ignore `undefined` value here since it's ruled out on the previous step, if provider isn't
+    // available then `getSessionValue` should have returned `null`.
+    const provider = this.providers.get(existingSessionValue.provider.name)!;
+    const authenticationResult = await provider.authenticate(request, existingSessionValue.state);
+    if (!authenticationResult.notHandled()) {
+      await this.updateSessionValue(request, {
+        provider: existingSessionValue.provider,
+        authenticationResult,
+        existingSessionValue,
+      });
+    }
+
+    return authenticationResult;
+  }
+
+  /**
    * Deauthenticates current request.
    * @param request Request instance.
    */
