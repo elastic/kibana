@@ -17,6 +17,11 @@ export interface IngestStats {
   failed: number;
 }
 
+export interface TrainedModelModelSizeStats {
+  model_size_bytes: number;
+  required_native_memory_bytes: number;
+}
+
 export interface TrainedModelStat {
   model_id?: string;
   pipeline_count?: number;
@@ -46,6 +51,7 @@ export interface TrainedModelStat {
     >;
   };
   deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
+  model_size_stats?: TrainedModelModelSizeStats;
 }
 
 type TreeNode = object;
@@ -126,7 +132,6 @@ export interface InferenceConfigResponse {
 
 export interface TrainedModelDeploymentStatsResponse {
   model_id: string;
-  model_size_bytes: number;
   inference_threads: number;
   model_threads: number;
   state: DeploymentState;
@@ -170,6 +175,7 @@ export interface AllocatedModel {
   state: string;
   model_threads: number;
   model_size_bytes: number;
+  required_native_memory_bytes: number;
   node: {
     /**
      * Not required for rendering in the Nodes overview

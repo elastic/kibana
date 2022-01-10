@@ -10,13 +10,11 @@ import {
   ALERT_DURATION,
   ALERT_SEVERITY,
   ALERT_STATUS,
-  ALERT_REASON,
-  TIMESTAMP,
-} from '@kbn/rule-data-utils/technical_field_names';
-import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
-} from '@kbn/rule-data-utils/alerts_as_data_status';
+  ALERT_REASON,
+  TIMESTAMP,
+} from '@kbn/rule-data-utils';
 import type { TimelineNonEcsData } from '../../../../../../timelines/common';
 import type { CellValueElementProps } from '../../../../../../timelines/public';
 import { AlertStatusIndicator } from '../../../../components/shared/alert_status_indicator';

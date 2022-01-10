@@ -468,12 +468,32 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await comboBox.setCustom('indexPattern-dimension-time-shift', shift);
     },
 
+    async enableFilter() {
+      await testSubjects.click('indexPattern-advanced-popover');
+      await retry.try(async () => {
+        await testSubjects.click('indexPattern-filter-by-enable');
+      });
+    },
+
+    async setFilterBy(queryString: string) {
+      this.typeFilter(queryString);
+      await retry.try(async () => {
+        await testSubjects.click('indexPattern-filters-existingFilterTrigger');
+      });
+    },
+
+    async typeFilter(queryString: string) {
+      const queryInput = await testSubjects.find('indexPattern-filters-queryStringInput');
+      await queryInput.type(queryString);
+    },
+
     async hasFixAction() {
       return await testSubjects.exists('errorFixAction');
     },
 
     async useFixAction() {
       await testSubjects.click('errorFixAction');
+      await this.waitForVisualization();
     },
 
     async isTopLevelAggregation() {
@@ -490,8 +510,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async addFilterToAgg(queryString: string) {
       await testSubjects.click('lns-newBucket-add');
-      const queryInput = await testSubjects.find('indexPattern-filters-queryStringInput');
-      await queryInput.type(queryString);
+      this.typeFilter(queryString);
       // Problem here is that after typing in the queryInput a dropdown will fetch the server
       // with suggestions and show up. Depending on the cursor position and some other factors
       // pressing Enter at this point may lead to auto-complete the queryInput with random stuff from the
@@ -589,6 +608,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const colorPickerInput = await testSubjects.find('~indexPattern-dimension-colorPicker');
       await colorPickerInput.type(color);
       await PageObjects.common.sleep(1000); // give time for debounced components to rerender
+    },
+    hasVisualOptionsButton() {
+      return testSubjects.exists('lnsVisualOptionsButton');
     },
     async openVisualOptions() {
       await retry.try(async () => {
@@ -1235,6 +1257,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click(`legend-${value}`);
       const filterIn = await testSubjects.find(`legend-${value}-filterIn`);
       await filterIn.click();
+    },
+
+    hasEmptySizeRatioButtonGroup() {
+      return testSubjects.exists('lnsEmptySizeRatioButtonGroup');
     },
   });
 }

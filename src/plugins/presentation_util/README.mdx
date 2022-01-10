@@ -209,3 +209,98 @@ export function MyComponent() {
 }
 ```
 </DocAccordion>
+
+## Redux Embeddables
+The Redux Embeddables system allows embeddable authors to interact with their embeddables in a standardized way using Redux toolkit. This wrapper abstracts away store and slice creation, embeddable input sync, and context creation. To use this system, a developer can wrap their components in the ReduxEmbeddableWrapper, supplying only an object of reducers.
+
+### Reducers
+The reducer object expected by the ReduxEmbeddableWrapper is the same type as the reducers expected by [Redux Toolkit's CreateSlice](https://redux-toolkit.js.org/api/createslice).
+
+<DocAccordion buttonContent="Reducers Example" initialIsOpen>
+```ts
+// my_embeddable_reducers.ts
+import { MyEmbeddableInput } from './my_embeddable';
+
+export const myEmbeddableReducers = {
+  setSpecialBoolean: (
+    state: WritableDraft<MyEmbeddableInput>,
+    action: PayloadAction<MyEmbeddableInput['specialBoolean']>
+  ) => {
+    state.specialBoolean = action.payload;
+  }
+}
+    
+```
+</DocAccordion>
+
+### Lazy Component and Types
+Because the ReduxEmbeddableWrapper is a lazy component, it also must be unwrapped with the `withSuspense` component from Presentation Util. When you await this component, you must also pass in the type information so that the redux store and actions are properly typed.
+ 
+ <DocAccordion buttonContent="Awaiting LazyReduxEmbeddableWrapper" initialIsOpen>
+  ```ts
+  // my_embeddable.tsx
+
+  import {
+    withSuspense,
+    LazyReduxEmbeddableWrapper,
+    ReduxEmbeddableWrapperPropsWithChildren,
+  } from '../../../../presentation_util/public';
+
+  export interface MyEmbeddableInput {
+    specialBoolean: boolean
+  }
+
+  const MyEmbeddableReduxWrapper = withSuspense<
+    ReduxEmbeddableWrapperPropsWithChildren<MyEmbeddableInput>
+  >(LazyReduxEmbeddableWrapper);
+      
+  ```
+</DocAccordion>
+
+The ReduxEmbeddableWrapper should be used inside of embeddable classes, and should wrap all components under the embeddable in the render function.
+
+<DocAccordion buttonContent="Wrapping Embeddable Render" initialIsOpen>
+  ```ts
+  // my_embeddable.tsx
+
+  public render(dom: HTMLElement) {
+    if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
+    this.domNode = dom;
+    ReactDOM.render(
+        <MyEmbeddableReduxWrapper embeddable={this} reducers={myEmbeddableReducers}>
+          <MyEmbeddableComponent />
+        </MyEmbeddableReduxWrapper>,
+      dom
+    );
+  }
+  ```
+</DocAccordion>
+
+### Accessing Actions and State
+
+From components under the embeddable, actions, containerActions, and the current state of the redux store are accessed via the ReduxEmbeddableContext. This context requires the input type and the type of the reducers, and will return the appropriately typed actions, a hook for dispatching actions, a selector to get the current redux state, and a suite of `containerActions` if the embeddable is a Container.
+
+<DocAccordion buttonContent="Accessing Redux Embeddable Context" initialIsOpen>
+  ```ts
+  // my_embeddable_component.tsx
+  import { useReduxEmbeddableContext } from '../../../../presentation_util/public';
+
+  const {
+    useEmbeddableSelector,
+    useEmbeddableDispatch,
+    actions: { setSpecialBoolean },
+  } = useReduxEmbeddableContext<
+    MyEmbeddableInput,
+    typeof myEmbeddableReducers
+  >();
+
+  const dispatch = useEmbeddableDispatch();
+
+  // current state
+  const { specialBoolean } = useEmbeddableSelector((state) => state);
+
+  // change specialBoolean after 5 seconds
+  setTimeout(() => dispatch(setSpecialBoolean(false)), 5000);
+  ```
+</DocAccordion>
+
