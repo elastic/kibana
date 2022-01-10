@@ -50,7 +50,7 @@ import type {
 } from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
 import { incrementPackageName } from '../../services/package_policy';
-import { ensureInstalledPackage } from '../../services/epm/packages';
+import { bulkInstallPackages } from '../../services/epm/packages';
 import { ensureDefaultEnrollmentAPIKeysExists } from '../../services/setup';
 
 export const getAgentPoliciesHandler: FleetRequestHandler<
@@ -145,32 +145,27 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const spaceId = context.fleet.spaceId;
   try {
     let agentPolicyId;
+    const packagesToInstall = [];
     if (hasFleetServer) {
-      // install fleet server package if not yet installed
-      await ensureInstalledPackage({
-        savedObjectsClient: soClient,
-        pkgName: FLEET_SERVER_PACKAGE,
-        esClient,
-      });
+      packagesToInstall.push(FLEET_SERVER_PACKAGE);
 
       agentPolicyId = await getAgentPolicyId(soClient);
     }
     if (withSysMonitoring) {
-      // install system package if not yet installed
-      await ensureInstalledPackage({
-        savedObjectsClient: soClient,
-        pkgName: FLEET_SYSTEM_PACKAGE,
-        esClient,
-      });
+      packagesToInstall.push(FLEET_SYSTEM_PACKAGE);
     }
     if (request.body.monitoring_enabled?.length) {
-      // install elastic agent package if not yet installed
-      ensureInstalledPackage({
+      packagesToInstall.push(FLEET_ELASTIC_AGENT_PACKAGE);
+    }
+    if (packagesToInstall.length > 0) {
+      await bulkInstallPackages({
         savedObjectsClient: soClient,
-        pkgName: FLEET_ELASTIC_AGENT_PACKAGE,
         esClient,
+        packagesToInstall,
+        spaceId,
       });
     }
+
     const agentPolicy = await agentPolicyService.create(soClient, esClient, newPolicy, {
       user,
       id: agentPolicyId,

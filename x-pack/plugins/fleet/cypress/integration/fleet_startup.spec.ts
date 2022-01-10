@@ -89,13 +89,7 @@ describe('Fleet startup', () => {
 
       cy.visit('/app/integrations/installed');
       // wait for elastic-agent if not visible at first
-      cy.get('.euiCard').then((els) => {
-        if (els.length === 2) {
-          cy.wait(5000);
-          cy.visit('/app/integrations/installed');
-        }
-        cy.getBySel('integration-card:epr:elastic_agent');
-      });
+      cy.getBySel('integration-card:epr:elastic_agent');
     });
 
     it('should create Fleet Server policy', () => {
