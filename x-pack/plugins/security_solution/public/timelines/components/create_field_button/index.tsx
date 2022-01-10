@@ -84,7 +84,8 @@ export const CreateFieldButton = React.memo<CreateFieldButtonProps>(
       timelineId,
     ]);
 
-    if (!indexPatternFieldEditor?.userPermissions.editIndexPattern() ||
+    if (
+      !indexPatternFieldEditor?.userPermissions.editIndexPattern() ||
       // remove below check once resolved: https://github.com/elastic/kibana/issues/122462
       !capabilities.indexPatterns.save
     ) {
