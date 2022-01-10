@@ -5,6 +5,10 @@
 and contains no major enhancements.
 For detailed information about this release, see the {kibana-ref}/release-notes.html[release notes].
 
+// tag::notable-highlights[]
+
+// end::notable-highlights[]
+
 Previous versions: {kibana-ref-all}/7.16/whats-new.html[7.16] |
 {kibana-ref-all}/7.15/whats-new.html[7.15] | {kibana-ref-all}/7.14/whats-new.html[7.14] | {kibana-ref-all}/7.13/whats-new.html[7.13] | {kibana-ref-all}/7.12/whats-new.html[7.12] | {kibana-ref-all}/7.11/whats-new.html[7.11] |
 {kibana-ref-all}/7.10/whats-new.html[7.10] | {kibana-ref-all}/7.9/whats-new.html[7.9] | {kibana-ref-all}/7.8/whats-new.html[7.8] | {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] |
