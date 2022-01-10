@@ -1,0 +1,23 @@
+{
+  "id": "controls",
+  "owner": {
+    "name": "Kibana Presentation",
+    "githubTeam": "kibana-presentation"
+  },
+  "description": "The Controls Plugin contains embeddable components intended to create a simple query interface for end users, and a powerful editing suite that allows dashboard authors to build controls",
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "extraPublicDirs": ["common"],
+  "requiredPlugins": [
+    "presentationUtil",
+    "savedObjects",
+    "kibanaReact",
+    "expressions",
+    "embeddable",
+    "dataViews",
+    "data"
+  ],
+  "optionalPlugins": []
+}
