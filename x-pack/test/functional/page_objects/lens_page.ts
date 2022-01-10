@@ -473,6 +473,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async useFixAction() {
       await testSubjects.click('errorFixAction');
+      await this.waitForVisualization();
     },
 
     async isTopLevelAggregation() {
