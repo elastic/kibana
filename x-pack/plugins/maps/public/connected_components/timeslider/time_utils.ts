@@ -95,13 +95,21 @@ export function newTicks(min: number, max: number, interval: number): EuiRangeTi
     });
   }
 
+  if (ticks.length < 2) {
+    ticks.push({
+      value: max,
+      label: moment.tz(max, timezone).format(format),
+    });
+  }
+
   const maxTicks = 20;
   let filteredArr: Array<{ value: number; label: string }> = [];
   if (ticks.length > maxTicks) {
     const nth = Math.ceil(ticks.length / maxTicks);
-    filteredArr = ticks.filter(function (_value, index) {
+    filteredArr = ticks.filter((_value, index) => {
       return index % nth === 0;
     });
+
     if (filteredArr.length === maxTicks - 1) {
       filteredArr.push(ticks[ticks.length - 1]);
     }
@@ -207,4 +215,54 @@ export function getTimeRanges(timeRangeBounds: TimeRangeBounds) {
   }
 
   return value;
+}
+
+export function getCustomLabel(value: { time: { value: string }; type: { value: string } }) {
+  return value.time.value + ' ' + value.type.value; // i18n ?
+}
+
+export function getCustomInterval(value: { time: { value: string }; type: { value: string } }) {
+  return moment
+    .duration(value.time.value, value.type.value as moment.unitOfTime.DurationConstructor)
+    .asMilliseconds();
+}
+
+const DROPDOWN_OPTIONS = [
+  { value: 'minutes', text: 'minutes' },
+  { value: 'hours', text: 'hours' },
+  { value: 'days', text: 'days' },
+  { value: 'months', text: 'months' },
+  { value: 'years', text: 'years' },
+];
+
+export function filterOptions(max: number) {
+  return DROPDOWN_OPTIONS.filter((el: { value: string }) => {
+    return (
+      moment.duration(1, el.value as moment.unitOfTime.DurationConstructor).asMilliseconds() < max
+    );
+  });
+}
+
+export function durationAsString(ms: number, maxPrecission = 3) {
+  const duration = moment.duration(ms);
+  const items = [
+    { timeUnit: 'years', value: Math.floor(duration.asYears()) },
+    { timeUnit: 'months', value: Math.floor(duration.asMonths()) },
+    { timeUnit: 'days', value: Math.floor(duration.asDays()) },
+    { timeUnit: 'hours', value: Math.floor(duration.hours()) },
+    { timeUnit: 'minutes', value: Math.floor(duration.minutes()) },
+  ];
+
+  const formattedItems = items.reduce((accumulator: string[], { value, timeUnit }) => {
+    if (accumulator.length >= maxPrecission || (accumulator.length === 0 && value === 0)) {
+      return accumulator;
+    }
+
+    if (value !== 0) {
+      accumulator.push(value + ' ' + timeUnit);
+    }
+    return accumulator;
+  }, []);
+
+  return formattedItems.length !== 0 ? formattedItems.join(' ') : '-';
 }

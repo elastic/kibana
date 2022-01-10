@@ -85,3 +85,9 @@ $timesliderWidth: 650px;
 .mapTimeslider__euiButton-controls {
   min-width: 0;
 }
+
+.mapTimeslider_form {
+ .euiCallOut {
+   max-width: 350px;
+ }
+}

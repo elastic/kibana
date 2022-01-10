@@ -12,7 +12,14 @@ import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks
 import { i18n } from '@kbn/i18n';
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { epochToKbnDateFormat, getInterval, getTicks, newTicks } from './time_utils';
+import {
+  epochToKbnDateFormat,
+  getInterval,
+  getTicks,
+  newTicks,
+  getCustomLabel,
+  getCustomInterval,
+} from './time_utils';
 import { TimeRange, TimeRangeBounds } from '../../../../../../src/plugins/data/common';
 import { getTimeFilter } from '../../kibana_services';
 import { Timeslice } from '../../../common/descriptor_types';
@@ -37,7 +44,6 @@ interface State {
   ticks: EuiRangeTick[];
   isPopoverOpen: boolean;
   step: number;
-  rangeButtonMsg: string;
 }
 
 function prettyPrintTimeslice(timeslice: [number, number]) {
@@ -62,7 +68,6 @@ class KeyedTimeslider extends Component<Props, State> {
     max: number;
     ticks: EuiRangeTick[];
     step: number;
-    rangeButtonMsg: string;
   };
 
   constructor(props: Props) {
@@ -88,9 +93,6 @@ class KeyedTimeslider extends Component<Props, State> {
       max,
       ticks: getTicks(min, max, interval),
       step: 1,
-      rangeButtonMsg: i18n.translate('xpack.maps.timeslider.rangeButtonMsg', {
-        defaultMessage: 'Auto',
-      }),
     };
 
     this.state = {
@@ -101,10 +103,7 @@ class KeyedTimeslider extends Component<Props, State> {
       ticks,
       timeslice,
       isPopoverOpen: false,
-      step: props.timeRangeStep,
-      rangeButtonMsg: i18n.translate('xpack.maps.timeslider.rangeButtonMsg', {
-        defaultMessage: 'Auto',
-      }),
+      step: timeslice[1] - timeslice[0] < props.timeRangeStep ? 1 : props.timeRangeStep,
     };
   }
 
@@ -117,6 +116,7 @@ class KeyedTimeslider extends Component<Props, State> {
     this._isMounted = true;
     // auto-select range between first tick and second tick
     this._onChange([this.state.ticks[0].value, this.state.ticks[1].value]);
+    // this._onChange([this.state.min, this.state.max]);
   }
 
   _doesTimesliceCoverTimerange() {
@@ -202,15 +202,16 @@ class KeyedTimeslider extends Component<Props, State> {
     if (!data.default) {
       const updatedTicks = newTicks(this.defaultRange.min, this.defaultRange.max, data.ms);
 
-      this.setState({
-        min: updatedTicks[0].value,
-        max: updatedTicks[updatedTicks.length - 1].value,
-        ticks: updatedTicks,
-        step: data.ms,
-      });
-      this._onChange([updatedTicks[0].value, updatedTicks[1].value]);
-      this.props.setTimeRangeStep(data.ms);
-      // dispatch(setTimeRangeStep(data.ms));
+      if (updatedTicks.length > 1) {
+        this.setState({
+          min: updatedTicks[0].value,
+          max: updatedTicks[updatedTicks.length - 1].value,
+          ticks: updatedTicks,
+          step: data.ms,
+        });
+        this._onChange([updatedTicks[0].value, updatedTicks[1].value]);
+        this.props.setTimeRangeStep(data.ms);
+      }
     } else {
       this.setState({
         min: this.defaultRange.min,
@@ -220,7 +221,20 @@ class KeyedTimeslider extends Component<Props, State> {
       });
       this._onChange([this.defaultRange.ticks[0].value, this.defaultRange.ticks[1].value]);
       this.props.setTimeRangeStep(this.defaultRange.step);
-      // dispatch(setTimeRangeStep(this.defaultRange.step));
+    }
+  };
+
+  _setCustomInteval = (event: React.SyntheticEvent) => {
+    const target = event.target as typeof event.target & {
+      time: { value: string };
+      type: { value: string };
+    };
+    const data = {
+      label: getCustomLabel(target),
+      ms: getCustomInterval(target),
+    };
+    if (data.ms) {
+      this._updateTimeRange(data);
     }
   };
 
@@ -246,6 +260,7 @@ class KeyedTimeslider extends Component<Props, State> {
             timeRangeBounds={this.defaultRange.timeRangeBounds}
             timeRangeStep={this.props.timeRangeStep}
             handler={this._updateTimeRange}
+            customIntervalHandler={this._setCustomInteval}
           />
 
           <div className="mapTimeslider__timeWindow">
@@ -296,8 +311,8 @@ class KeyedTimeslider extends Component<Props, State> {
             value={this.state.timeslice}
             onChange={this._onDualControlChange}
             showTicks={true}
-            min={this.state.min}
-            max={this.state.max}
+            min={this.state.ticks[0].value}
+            max={this.state.ticks[this.state.ticks.length - 1].value}
             step={this.state.step}
             ticks={this.state.ticks}
             isDraggable
