@@ -7,7 +7,7 @@
  */
 
 import { Capabilities, IUiSettingsClient } from 'kibana/public';
-import type { IndexPattern } from 'src/plugins/data/public';
+import type { DataView } from 'src/plugins/data/common';
 import type { DiscoverServices } from '../build_services';
 import { dataPluginMock } from '../../../data/public/mocks';
 import { createSearchSourceMock } from '../../../data/common/search/search_source/mocks';
@@ -65,7 +65,7 @@ describe('getSharingData', () => {
   });
 
   test('fields have prepended timeField', async () => {
-    const index = { ...indexPatternMock } as IndexPattern;
+    const index = { ...indexPatternMock } as DataView;
     index.timeFieldName = 'cool-timefield';
 
     const searchSourceMock = createSearchSourceMock({ index });
@@ -109,7 +109,7 @@ describe('getSharingData', () => {
       },
     } as unknown as IUiSettingsClient;
 
-    const index = { ...indexPatternMock } as IndexPattern;
+    const index = { ...indexPatternMock } as DataView;
     index.timeFieldName = 'cool-timefield';
 
     const searchSourceMock = createSearchSourceMock({ index });
