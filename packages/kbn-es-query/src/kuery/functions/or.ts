@@ -23,7 +23,8 @@ export function isNode(node: KqlFunctionNode): node is KqlOrFunctionNode {
   return node.function === KQL_FUNCTION_NAME_OR;
 }
 
-export function buildNode(subQueries: KqlFunctionNode[]): KqlOrFunctionNode {
+export function buildNode(subQueries: KqlFunctionNode[]): KqlFunctionNode {
+  if (subQueries.length === 1) return subQueries[0];
   return {
     type: KQL_NODE_TYPE_FUNCTION,
     function: KQL_FUNCTION_NAME_OR,

@@ -9,7 +9,7 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Query } from '../filters';
 import type { BoolQuery, DataViewBase } from './types';
-import { fromKueryExpression, functions } from '../kuery';
+import { fromKueryExpression, toElasticsearchQuery, functions } from '../kuery';
 import { KqlFunctionNode } from '../kuery/node_types/function';
 
 /** @internal */
@@ -36,7 +36,7 @@ function buildQuery(
   config: SerializableRecord = {}
 ): BoolQuery {
   const compoundQueryAST = functions.and.buildNode(queryASTs);
-  const kueryQuery = functions.and.toElasticsearchQuery(compoundQueryAST, indexPattern, config);
+  const kueryQuery = toElasticsearchQuery(compoundQueryAST, indexPattern, config);
 
   return Object.assign(
     {
