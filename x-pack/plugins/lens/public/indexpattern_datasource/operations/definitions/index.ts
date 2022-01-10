@@ -293,7 +293,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * This flag is used by the formula to assign the kql= and lucene= named arguments and set up
    * autocomplete.
    */
-  filterable?: boolean;
+  filterable?: boolean | { helpMessage: string };
   shiftable?: boolean;
 
   getHelpMessage?: (props: HelpProps<C>) => React.ReactNode;
