@@ -42,6 +42,19 @@ export const getThemeSettings = (
   const { defaultDarkMode } = getThemeInfo(options);
 
   return {
+    theme: {
+      name: i18n.translate('core.ui_settings.params.themeTitle', {
+        defaultMessage: 'Theme',
+      }),
+      description: i18n.translate('core.ui_settings.params.darkModeText', {
+        defaultMessage: `Choose if Kibana's theme should follow your system settings, or fixed in light or dark. A page refresh is required for the setting to be applied.`,
+      }),
+      value: 'system',
+      requiresPageReload: true,
+      type: 'select',
+      options: ['system', 'light', 'dark'],
+      schema: schema.string(),
+    },
     'theme:darkMode': {
       name: i18n.translate('core.ui_settings.params.darkModeTitle', {
         defaultMessage: 'Dark mode',
