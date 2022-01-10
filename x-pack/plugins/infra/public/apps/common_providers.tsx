@@ -11,7 +11,7 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
-  useUiSetting$,
+  useKibana,
 } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { NavigationWarningPromptProvider } from '@kbn/observability-plugin/public';
@@ -28,11 +28,11 @@ export const CommonInfraProviders: React.FC<{
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme$: AppMountParameters['theme$'];
 }> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+  const { services } = useKibana();
 
   return (
     <TriggersActionsProvider triggersActionsUI={triggersActionsUI}>
-      <EuiThemeProvider darkMode={darkMode}>
+      <EuiThemeProvider theme$={services.theme?.theme$}>
         <DataUIProviders appName={appName} storage={storage}>
           <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
             <NavigationWarningPromptProvider>{children}</NavigationWarningPromptProvider>
