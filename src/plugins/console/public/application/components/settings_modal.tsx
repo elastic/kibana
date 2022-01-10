@@ -30,13 +30,31 @@ import { DevToolsSettings } from '../../services';
 
 export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
 
+const onceTimeInterval = () =>
+  i18n.translate('console.settingsPage.refreshInterval.onceTimeInterval', {
+    defaultMessage: 'Once, when console loads',
+  });
+
+const everyNMinutesTimeInterval = (value: number) =>
+  i18n.translate('console.settingsPage.refreshInterval.everyNMinutesTimeInterval', {
+    defaultMessage: 'Every {value} minutes',
+    values: { value },
+  });
+
+const everyHourTimeInterval = () =>
+  i18n.translate('console.settingsPage.refreshInterval.everyHourTimeInterval', {
+    defaultMessage: 'Every hour',
+  });
+
 const PRESETS_IN_MINUTES = [0, 10, 20, 60];
 const intervalOptions = PRESETS_IN_MINUTES.map((value) => ({
   value: (value * 60000).toString(),
-  inputDisplay: i18n.translate('console.settingsPage.refreshInterval.timeInterval', {
-    defaultMessage: value === 0 ? 'Once, when console loads' : 'Every {value} minutes',
-    values: { value },
-  }),
+  inputDisplay:
+    value === 0
+      ? onceTimeInterval()
+      : value === 60
+      ? everyHourTimeInterval()
+      : everyNMinutesTimeInterval(value),
 }));
 
 interface Props {
