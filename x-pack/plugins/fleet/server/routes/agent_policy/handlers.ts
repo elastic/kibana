@@ -114,6 +114,24 @@ export const getOneAgentPolicyHandler: RequestHandler<
   }
 };
 
+async function getAgentPolicyId(soClient: SavedObjectsClientContract): Promise<string | undefined> {
+  let agentPolicyId;
+  // creating first fleet server policy with id 'fleet-server-policy'
+  const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
+  let agentPolicy;
+  try {
+    agentPolicy = await agentPolicyService.get(soClient, FLEET_SERVER_POLICY_ID, false);
+  } catch (err) {
+    if (!err.isBoom || err.output.statusCode !== 404) {
+      throw err;
+    }
+  }
+  if (!agentPolicy) {
+    agentPolicyId = FLEET_SERVER_POLICY_ID;
+  }
+  return agentPolicyId;
+}
+
 export const createAgentPolicyHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof CreateAgentPolicyRequestSchema.query>,
@@ -126,6 +144,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   const { has_fleet_server: hasFleetServer, ...newPolicy } = request.body;
   const spaceId = context.fleet.spaceId;
   try {
+    let agentPolicyId;
     if (hasFleetServer) {
       // install fleet server package if not yet installed
       await ensureInstalledPackage({
@@ -133,6 +152,8 @@ export const createAgentPolicyHandler: FleetRequestHandler<
         pkgName: FLEET_SERVER_PACKAGE,
         esClient,
       });
+
+      agentPolicyId = await getAgentPolicyId(soClient);
     }
     if (withSysMonitoring) {
       // install system package if not yet installed
@@ -152,6 +173,7 @@ export const createAgentPolicyHandler: FleetRequestHandler<
     }
     const agentPolicy = await agentPolicyService.create(soClient, esClient, newPolicy, {
       user,
+      id: agentPolicyId,
     });
 
     // Create the fleet server package policy and add it to agent policy.

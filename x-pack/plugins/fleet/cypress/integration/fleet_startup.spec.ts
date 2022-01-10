@@ -87,10 +87,15 @@ describe('Fleet startup', () => {
 
       verifyFleetServerPolicy('Agent policy 1', 'System');
 
-      // TODO might take longer to install elastic agent async
-
       cy.visit('/app/integrations/installed');
-      cy.getBySel('integration-card:epr:elastic_agent');
+      // wait for elastic-agent if not visible at first
+      cy.get('.euiCard').then((els) => {
+        if (els.length === 2) {
+          cy.wait(5000);
+          cy.visit('/app/integrations/installed');
+        }
+        cy.getBySel('integration-card:epr:elastic_agent');
+      });
     });
 
     it('should create Fleet Server policy', () => {

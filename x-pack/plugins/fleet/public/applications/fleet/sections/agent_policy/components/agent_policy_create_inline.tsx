@@ -49,16 +49,12 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
 }) => {
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
 
-  const defaultPolicy = {
+  const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>({
     name: isFleetServerPolicy ? 'Fleet Server policy 1' : 'Agent policy 1',
     description: '',
     namespace: 'default',
     monitoring_enabled: Object.values(dataTypes),
     has_fleet_server: isFleetServerPolicy,
-  };
-
-  const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>({
-    ...defaultPolicy,
   });
 
   const updateNewAgentPolicy = useCallback(
