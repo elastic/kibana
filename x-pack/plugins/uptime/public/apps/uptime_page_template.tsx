@@ -39,6 +39,10 @@ export const UptimePageTemplateComponent: React.FC<Props & EuiPageTemplateProps>
       .euiPageHeaderContent > .euiFlexGroup {
         flex-wrap: wrap;
       }
+
+      .euiPageHeaderContent > .euiFlexGroup > .euiFlexItem {
+        align-items: center;
+      }
     `;
   }, [PageTemplateComponent]);
 
