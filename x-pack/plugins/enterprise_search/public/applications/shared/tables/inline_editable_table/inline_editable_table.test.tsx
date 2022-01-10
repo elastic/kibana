@@ -153,6 +153,21 @@ describe('InlineEditableTable', () => {
     expect(rowProps(items[1])).toEqual({ className: 'is-being-edited' });
   });
 
+  it('will pass errors for row that is currently being edited', () => {
+    setMockValues({
+      ...mockValues,
+      isEditing: true,
+      editingItemId: 2,
+      rowErrors: ['first error', 'second error'],
+    });
+    const itemList = [{ id: 1 }, { id: 2 }];
+    const wrapper = shallow(<InlineEditableTableContents {...requiredParams} items={itemList} />);
+    const rowErrors = wrapper.find(ReorderableTable).prop('rowErrors') as (item: any) => object;
+    expect(rowErrors(items[0])).toEqual(undefined);
+    // Since editingItemId is 2 and the second item (position 1) in item list has an id of 2, it gets the errors
+    expect(rowErrors(items[1])).toEqual(['first error', 'second error']);
+  });
+
   it('will update the passed columns and pass them through to the underlying table', () => {
     const updatedColumns = {};
     const canRemoveLastItem = true;

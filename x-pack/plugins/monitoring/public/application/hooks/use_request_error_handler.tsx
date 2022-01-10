@@ -5,16 +5,17 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
 import { includes } from 'lodash';
-import { IHttpFetchError } from 'kibana/public';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { IHttpFetchError, ResponseErrorBody } from 'kibana/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
-import { formatMsg } from '../../../../../../src/plugins/kibana_legacy/public';
+import { formatMsg } from '../../lib/format_msg';
 import { toMountPoint, useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { MonitoringStartPluginDependencies } from '../../types';
 
-export function formatMonitoringError(err: IHttpFetchError) {
+export function formatMonitoringError(err: IHttpFetchError<ResponseErrorBody>) {
   if (err.response?.status && err.response?.status !== -1) {
     return (
       <EuiText>
@@ -37,20 +38,21 @@ export const useRequestErrorHandler = () => {
   const { services } = useKibana<MonitoringStartPluginDependencies>();
   const history = useHistory();
   return useCallback(
-    (err: IHttpFetchError) => {
+    (err: IHttpFetchError<ResponseErrorBody>) => {
       if (err.response?.status === 403) {
         // redirect to error message view
         history.push('/access-denied');
       } else if (err.response?.status === 404 && !includes(window.location.hash, 'no-data')) {
-        // pass through if this is a 404 and we're already on the no-data page
+        // pass through if this is a 404, and we're already on the no-data page
         const formattedError = formatMonitoringError(err);
         services.notifications?.toasts.addDanger({
-          title: toMountPoint(
-            <FormattedMessage
-              id="xpack.monitoring.ajaxErrorHandler.requestFailedNotificationTitle"
-              defaultMessage="Monitoring Request Failed"
-            />
+          title: i18n.translate(
+            'xpack.monitoring.ajaxErrorHandler.requestFailedNotificationTitle',
+            {
+              defaultMessage: 'Monitoring Request Failed',
+            }
           ),
+
           text: toMountPoint(
             <div>
               {formattedError}
@@ -61,21 +63,19 @@ export const useRequestErrorHandler = () => {
                   defaultMessage="Retry"
                 />
               </EuiButton>
-            </div>
+            </div>,
+            { theme$: services.theme?.theme$ }
           ),
         });
       } else {
         services.notifications?.toasts.addDanger({
-          title: toMountPoint(
-            <FormattedMessage
-              id="xpack.monitoring.ajaxErrorHandler.requestErrorNotificationTitle"
-              defaultMessage="Monitoring Request Error"
-            />
-          ),
-          text: toMountPoint(formatMonitoringError(err)),
+          title: i18n.translate('xpack.monitoring.ajaxErrorHandler.requestErrorNotificationTitle', {
+            defaultMessage: 'Monitoring Request Error',
+          }),
+          text: toMountPoint(formatMonitoringError(err), { theme$: services.theme?.theme$ }),
         });
       }
     },
-    [history, services.notifications?.toasts]
+    [history, services.notifications?.toasts, services.theme]
   );
 };

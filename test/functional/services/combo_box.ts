@@ -46,7 +46,9 @@ export class ComboBoxService extends FtrService {
    */
   private async clickOption(isMouseClick: boolean, element: WebElementWrapper): Promise<void> {
     // element.click causes scrollIntoView which causes combobox to close, using _webElement.click instead
-    return isMouseClick ? await element.clickMouseButton() : await element._webElement.click();
+    await this.retry.try(async () => {
+      return isMouseClick ? await element.clickMouseButton() : await element._webElement.click();
+    });
   }
 
   /**

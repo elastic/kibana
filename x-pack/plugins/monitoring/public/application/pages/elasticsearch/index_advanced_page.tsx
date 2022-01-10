@@ -87,7 +87,13 @@ export const ElasticsearchIndexAdvancedPage: React.FC<ComponentProps> = ({ clust
   }, [clusterUuid, services.data?.query.timefilter.timefilter, services.http, index]);
 
   return (
-    <ItemTemplate title={title} getPageData={getPageData} id={index} pageType="indices">
+    <ItemTemplate
+      title={title}
+      getPageData={getPageData}
+      id={index}
+      pageType="indices"
+      pageTitle={index}
+    >
       <SetupModeRenderer
         productName={ELASTICSEARCH_SYSTEM_ID}
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (

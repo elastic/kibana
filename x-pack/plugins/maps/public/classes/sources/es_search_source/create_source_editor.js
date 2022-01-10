@@ -5,34 +5,20 @@
  * 2.0.
  */
 
-import React, { Fragment, Component } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFormRow, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiPanel } from '@elastic/eui';
 
 import { SingleFieldSelect } from '../../../components/single_field_select';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
 import { i18n } from '@kbn/i18n';
 import { SCALING_TYPES } from '../../../../common/constants';
-import { DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
-import { ScalingForm } from './util/scaling_form';
-import {
-  getGeoFields,
-  getGeoTileAggNotSupportedReason,
-  supportsGeoTileAgg,
-} from '../../../index_pattern_util';
-
-function doesGeoFieldSupportGeoTileAgg(indexPattern, geoFieldName) {
-  return indexPattern ? supportsGeoTileAgg(indexPattern.fields.getByName(geoFieldName)) : false;
-}
+import { getGeoFields } from '../../../index_pattern_util';
 
 const RESET_INDEX_PATTERN_STATE = {
   indexPattern: undefined,
   geoFields: undefined,
-
-  // ES search source descriptor state
   geoFieldName: undefined,
-  filterByMapBounds: DEFAULT_FILTER_BY_MAP_BOUNDS,
-  scalingType: SCALING_TYPES.CLUSTERS, // turn on clusting by default
 };
 
 export class CreateSourceEditor extends Component {
@@ -69,40 +55,23 @@ export class CreateSourceEditor extends Component {
   };
 
   _onGeoFieldSelect = (geoFieldName) => {
-    // Respect previous scaling type selection unless newly selected geo field does not support clustering.
-    const scalingType =
-      this.state.scalingType === SCALING_TYPES.CLUSTERS &&
-      !doesGeoFieldSupportGeoTileAgg(this.state.indexPattern, geoFieldName)
-        ? SCALING_TYPES.LIMIT
-        : this.state.scalingType;
     this.setState(
       {
         geoFieldName,
-        scalingType,
-      },
-      this._previewLayer
-    );
-  };
-
-  _onScalingPropChange = ({ propName, value }) => {
-    this.setState(
-      {
-        [propName]: value,
       },
       this._previewLayer
     );
   };
 
   _previewLayer = () => {
-    const { indexPattern, geoFieldName, filterByMapBounds, scalingType } = this.state;
+    const { indexPattern, geoFieldName } = this.state;
 
     const sourceConfig =
       indexPattern && geoFieldName
         ? {
             indexPatternId: indexPattern.id,
             geoField: geoFieldName,
-            filterByMapBounds,
-            scalingType,
+            scalingType: SCALING_TYPES.MVT,
           }
         : null;
     this.props.onSourceConfigChange(sourceConfig);
@@ -131,35 +100,6 @@ export class CreateSourceEditor extends Component {
     );
   }
 
-  _renderScalingPanel() {
-    if (!this.state.indexPattern || !this.state.geoFieldName) {
-      return null;
-    }
-
-    return (
-      <Fragment>
-        <EuiSpacer size="m" />
-        <ScalingForm
-          filterByMapBounds={this.state.filterByMapBounds}
-          indexPatternId={this.state.indexPattern ? this.state.indexPattern.id : ''}
-          onChange={this._onScalingPropChange}
-          scalingType={this.state.scalingType}
-          supportsClustering={doesGeoFieldSupportGeoTileAgg(
-            this.state.indexPattern,
-            this.state.geoFieldName
-          )}
-          clusteringDisabledReason={
-            this.state.indexPattern
-              ? getGeoTileAggNotSupportedReason(
-                  this.state.indexPattern.fields.getByName(this.state.geoFieldName)
-                )
-              : null
-          }
-        />
-      </Fragment>
-    );
-  }
-
   render() {
     return (
       <EuiPanel>
@@ -169,8 +109,6 @@ export class CreateSourceEditor extends Component {
         />
 
         {this._renderGeoSelect()}
-
-        {this._renderScalingPanel()}
       </EuiPanel>
     );
   }

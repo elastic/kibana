@@ -5,10 +5,17 @@
  * 2.0.
  */
 import rison, { RisonValue } from 'rison-node';
+import {
+  buildQueryFilter,
+  PhraseFilter,
+  ExistsFilter,
+  buildPhraseFilter as esBuildPhraseFilter,
+  buildPhrasesFilter as esBuildPhrasesFilter,
+  buildExistsFilter as esBuildExistsFilter,
+} from '@kbn/es-query';
 import type { ReportViewType, SeriesUrl, UrlFilter } from '../types';
 import type { AllSeries, AllShortSeries } from '../hooks/use_series_storage';
 import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
-import { esFilters, ExistsFilter } from '../../../../../../../../src/plugins/data/public';
 import { URL_KEYS } from './constants/url_constants';
 import { PersistableFilter } from '../../../../../../lens/common';
 
@@ -59,15 +66,38 @@ export function createExploratoryViewUrl(
 export function buildPhraseFilter(field: string, value: string, indexPattern: IndexPattern) {
   const fieldMeta = indexPattern?.fields.find((fieldT) => fieldT.name === field);
   if (fieldMeta) {
-    return [esFilters.buildPhraseFilter(fieldMeta, value, indexPattern)];
+    return [esBuildPhraseFilter(fieldMeta, value, indexPattern)];
   }
+  return [];
+}
+
+export function getQueryFilter(field: string, value: string[], indexPattern: IndexPattern) {
+  const fieldMeta = indexPattern?.fields.find((fieldT) => fieldT.name === field);
+  if (fieldMeta && indexPattern.id) {
+    return value.map((val) =>
+      buildQueryFilter(
+        {
+          query_string: {
+            fields: [field],
+            query: `*${val}*`,
+          },
+        },
+        indexPattern.id!,
+        ''
+      )
+    );
+  }
+
   return [];
 }
 
 export function buildPhrasesFilter(field: string, value: string[], indexPattern: IndexPattern) {
   const fieldMeta = indexPattern?.fields.find((fieldT) => fieldT.name === field);
   if (fieldMeta) {
-    return [esFilters.buildPhrasesFilter(fieldMeta, value, indexPattern)];
+    if (value.length === 1) {
+      return [esBuildPhraseFilter(fieldMeta, value[0], indexPattern)];
+    }
+    return [esBuildPhrasesFilter(fieldMeta, value, indexPattern)];
   }
   return [];
 }
@@ -75,12 +105,12 @@ export function buildPhrasesFilter(field: string, value: string[], indexPattern:
 export function buildExistsFilter(field: string, indexPattern: IndexPattern) {
   const fieldMeta = indexPattern?.fields.find((fieldT) => fieldT.name === field);
   if (fieldMeta) {
-    return [esFilters.buildExistsFilter(fieldMeta, indexPattern)];
+    return [esBuildExistsFilter(fieldMeta, indexPattern)];
   }
   return [];
 }
 
-type FiltersType = PersistableFilter[] | ExistsFilter[];
+type FiltersType = Array<PersistableFilter | ExistsFilter | PhraseFilter>;
 
 export function urlFilterToPersistedFilter({
   urlFilters,
@@ -88,23 +118,36 @@ export function urlFilterToPersistedFilter({
   indexPattern,
 }: {
   urlFilters: UrlFilter[];
-  initFilters: FiltersType;
+  initFilters?: FiltersType;
   indexPattern: IndexPattern;
 }) {
   const parsedFilters: FiltersType = initFilters ? [...initFilters] : [];
 
-  urlFilters.forEach(({ field, values = [], notValues = [] }) => {
-    if (values?.length > 0) {
-      const filter = buildPhrasesFilter(field, values, indexPattern);
-      parsedFilters.push(...filter);
-    }
+  urlFilters.forEach(
+    ({ field, values = [], notValues = [], wildcards = [], notWildcards = ([] = []) }) => {
+      if (values.length > 0) {
+        const filter = buildPhrasesFilter(field, values, indexPattern);
+        parsedFilters.push(...filter);
+      }
 
-    if (notValues?.length > 0) {
-      const filter = buildPhrasesFilter(field, notValues, indexPattern)[0];
-      filter.meta.negate = true;
-      parsedFilters.push(filter);
+      if (notValues.length > 0) {
+        const filter = buildPhrasesFilter(field, notValues, indexPattern)[0];
+        filter.meta.negate = true;
+        parsedFilters.push(filter);
+      }
+
+      if (wildcards.length > 0) {
+        const filter = getQueryFilter(field, wildcards, indexPattern);
+        parsedFilters.push(...filter);
+      }
+
+      if (notWildcards.length > 0) {
+        const filter = getQueryFilter(field, notWildcards, indexPattern)[0];
+        filter.meta.negate = true;
+        parsedFilters.push(filter);
+      }
     }
-  });
+  );
 
   return parsedFilters;
 }

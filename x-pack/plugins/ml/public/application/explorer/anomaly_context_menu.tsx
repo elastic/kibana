@@ -13,7 +13,7 @@ import {
   EuiFlexItem,
   EuiPopover,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useMlKibana } from '../contexts/kibana';
 import type { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
@@ -75,7 +75,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
                 aria-label={i18n.translate('xpack.ml.explorer.anomalies.actionsAriaLabel', {
                   defaultMessage: 'Actions',
                 })}
-                color="subdued"
+                color="text"
                 iconType="boxesHorizontal"
                 onClick={setIsMenuOpen.bind(null, !isMenuOpen)}
                 data-test-subj="mlExplorerAnomalyPanelMenu"

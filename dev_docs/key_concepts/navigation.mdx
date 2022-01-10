@@ -30,7 +30,7 @@ Assuming you want to link from your app to *Discover*. When building such URL th
 
 ### Prepending a proper `basePath`
 
-To prepend Kibana's `basePath` use the [core.http.basePath.prepend](https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.ibasepath.prepend.md) helper:
+To prepend Kibana's `basePath` use the [core.http.basePath.prepend](https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.ibasepath.prepend.md) helper:
 
 ```tsx
 const discoverUrl = core.http.basePath.prepend(`/discover`);
@@ -50,7 +50,7 @@ console.log(discoverUrl); // http://localhost:5601/bpr/s/space/app/discover
 const discoverUrlWithSomeState = core.http.basePath.prepend(`/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'2020-09-10T11:39:50.203Z',to:'2020-09-10T11:40:20.249Z'))&_a=(columns:!(_source),filters:!(),index:'90943e30-9a47-11e8-b64d-95841ca0b247',interval:auto,query:(language:kuery,query:''),sort:!())`);
 ```
 
-Instead, each app should expose [a locator](https://github.com/elastic/kibana/blob/master/src/plugins/share/common/url_service/locators/README.md).
+Instead, each app should expose [a locator](https://github.com/elastic/kibana/blob/main/src/plugins/share/common/url_service/locators/README.md).
 Other apps should use those locators for navigation or URL creation.
 
 ```tsx
@@ -60,7 +60,7 @@ const discoverUrl = await plugins.discover.locator.getUrl({filters, timeRange});
 await plugins.discover.locator.navigate({filters, timeRange});
 ```
 
-To get a better idea, take a look at *Discover* locator [implementation](https://github.com/elastic/kibana/blob/master/src/plugins/discover/public/locator.ts).
+To get a better idea, take a look at *Discover* locator [implementation](https://github.com/elastic/kibana/blob/main/src/plugins/discover/public/locator.ts).
 It allows specifying various **Discover** app state pieces like: index pattern, filters, query, time range and more.
 
 There are two ways to access locators of other apps:
@@ -86,8 +86,8 @@ window.location.href = urlToADashboard;
 
 To navigate between different Kibana apps without a page reload there are APIs in `core`:
 
-* [core.application.navigateToApp](https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.applicationstart.navigatetoapp.md)
-* [core.application.navigateToUrl](https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.applicationstart.navigatetourl.md)
+* [core.application.navigateToApp](https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.applicationstart.navigatetoapp.md)
+* [core.application.navigateToUrl](https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.applicationstart.navigatetourl.md)
 
 *Rendering a link to a different app on its own would also cause a full page reload:*
 
@@ -112,7 +112,7 @@ const MySPALink = () =>
 ```
 
 As it would be too much boilerplate to do this for each link in your app, there is a handy wrapper that helps with it:
-[RedirectAppLinks](https://github.com/elastic/kibana/blob/master/src/plugins/kibana_react/public/app_links/redirect_app_link.tsx#L49).
+[RedirectAppLinks](https://github.com/elastic/kibana/blob/main/src/plugins/kibana_react/public/app_links/redirect_app_link.tsx#L49).
 
 ```jsx
 const MyApp = () =>
@@ -134,9 +134,9 @@ Common rules to follow in this scenario:
 
 This is required to make sure `core` is aware of navigations triggered inside your app, so it could act accordingly when needed.
 
-* `Core`'s [ScopedHistory](https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.scopedhistory.md) instance.
-* [Example usage](https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.appmountparameters.history.md)
-* [Example plugin](https://github.com/elastic/kibana/blob/master/test/plugin_functional/plugins/core_plugin_a/public/application.tsx#L120)
+* `Core`'s [ScopedHistory](https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.scopedhistory.md) instance.
+* [Example usage](https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.appmountparameters.history.md)
+* [Example plugin](https://github.com/elastic/kibana/blob/main/test/plugin_functional/plugins/core_plugin_a/public/application.tsx#L120)
 
 Relative links will be resolved relative to your app's route (e.g.: `http://localhost5601/app/{your-app-id}`)
 and setting up internal links in your app in SPA friendly way would look something like:
@@ -152,7 +152,7 @@ const MyInternalLink = () => <Link to="/my-other-page"></Link>
 Try to avoid using `window.location` and `window.history` directly.
 
 <DocCallOut>
-  Instead, use [ScopedHistory](https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.scopedhistory.md) instance provided by `core`.
+  Instead, use [ScopedHistory](https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.scopedhistory.md) instance provided by `core`.
 </DocCallOut>
 
 - This way `core` will know about location changes triggered within your app, and it would act accordingly.
@@ -190,7 +190,7 @@ There are utils to help you to implement such kind of state syncing.
 - Adding a query param flag or simple key/value to the URL.
 
 <DocCallOut>
-  Follow [these docs](https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync#state-syncing-utilities) to learn more.
+  Follow [these docs](https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync#state-syncing-utilities) to learn more.
 </DocCallOut>
 
 ## Preserving state between navigations
@@ -212,7 +212,7 @@ you'd notice that state is stored inside that link, and it also gets updated whe
 ![image](../assets/state_inside_the_link.png)
 
 This is where separation into `_a` and `_g` query params comes into play. What is considered a *global* state gets constantly updated in those navigation links. In the example above it was a time filter.
-This is backed by [KbnUrlTracker](https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts#L57) util. You can use it to achieve similar behavior.
+This is backed by [KbnUrlTracker](https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts#L57) util. You can use it to achieve similar behavior.
 
 NOTE: After migrating to KP navigation works without page reloads and all plugins are loaded simultaneously.
 Hence, likely there are simpler ways to preserve state of your application, unless you want to do it through URL.

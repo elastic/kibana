@@ -88,11 +88,13 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           ? sources.updateSourceConfiguration(
               requestContext.core.savedObjects.client,
               sourceId,
+              // @ts-ignore
               patchedSourceConfigurationProperties
             )
           : sources.createSourceConfiguration(
               requestContext.core.savedObjects.client,
               sourceId,
+              // @ts-ignore
               patchedSourceConfigurationProperties
             ));
 
@@ -157,7 +159,7 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       const results = await hasData(source.configuration.metricAlias, client);
 
       return response.ok({
-        body: { hasData: results },
+        body: { hasData: results, configuration: source.configuration },
       });
     }
   );

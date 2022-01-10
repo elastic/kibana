@@ -5,16 +5,19 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataViewFieldBase, IFieldSubType, DataViewBase } from '@kbn/es-query';
 import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { IFieldType } from './fields';
 import { RUNTIME_FIELD_TYPES } from './constants';
 import { DataViewField } from './fields';
 import { FieldFormat, SerializedFieldFormat } from '../../field_formats/common';
+
+export type { QueryDslQueryContainer };
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
@@ -56,7 +59,6 @@ export interface DataViewAttributes {
   type?: string;
   typeMeta?: string;
   timeFieldName?: string;
-  intervalName?: string;
   sourceFilters?: string;
   fieldFormatMap?: string;
   fieldAttrs?: string;
@@ -127,6 +129,7 @@ export interface GetFieldsOptions {
   metaFields?: string[];
   rollupIndex?: string;
   allowNoIndex?: boolean;
+  filter?: QueryDslQueryContainer;
 }
 
 export interface GetFieldsOptionsTimePattern {
@@ -245,11 +248,6 @@ export interface DataViewSpec {
    */
   version?: string;
   title?: string;
-  /**
-   * @deprecated
-   * Deprecated. Was used by time range based index patterns
-   */
-  intervalName?: string;
   timeFieldName?: string;
   sourceFilters?: SourceFilter[];
   fields?: DataViewFieldMap;

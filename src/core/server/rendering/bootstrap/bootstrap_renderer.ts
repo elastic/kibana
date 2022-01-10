@@ -8,6 +8,7 @@
 
 import { createHash } from 'crypto';
 import { PackageInfo } from '@kbn/config';
+import { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import { UiPlugins } from '../../plugins';
 import { IUiSettingsClient } from '../../ui_settings';
 import { HttpAuth, KibanaRequest } from '../../http';
@@ -50,12 +51,11 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
 
   return async function bootstrapRenderer({ uiSettingsClient, request }) {
     let darkMode = false;
-    let themeVersion = 'v8';
+    const themeVersion: ThemeVersion = 'v8';
 
     try {
       const authenticated = isAuthenticated(request);
       darkMode = authenticated ? await uiSettingsClient.get('theme:darkMode') : false;
-      themeVersion = authenticated ? await uiSettingsClient.get('theme:version') : 'v8';
     } catch (e) {
       // just use the default values in case of connectivity issues with ES
     }

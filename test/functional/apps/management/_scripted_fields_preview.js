@@ -13,10 +13,12 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['settings']);
   const SCRIPTED_FIELD_NAME = 'myScriptedField';
 
-  // FLAKY: https://github.com/elastic/kibana/issues/89475
+  // FLAKY: https://github.com/elastic/kibana/issues/118981
   describe.skip('scripted fields preview', () => {
     before(async function () {
       await browser.setWindowSize(1200, 800);
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaIndexPatterns();
       await PageObjects.settings.createIndexPattern();
 
       await PageObjects.settings.navigateTo();

@@ -14,15 +14,14 @@ import { FeaturesPlugin } from './plugin';
 // run-time contracts.
 export { uiCapabilitiesRegex } from './feature_schema';
 
-export {
-  KibanaFeature,
+export type {
   KibanaFeatureConfig,
   FeatureKibanaPrivileges,
-  ElasticsearchFeature,
   ElasticsearchFeatureConfig,
   FeatureElasticsearchPrivileges,
 } from '../common';
-export { PluginSetupContract, PluginStartContract } from './plugin';
+export { KibanaFeature, ElasticsearchFeature } from '../common';
+export type { PluginSetupContract, PluginStartContract } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new FeaturesPlugin(initializerContext);

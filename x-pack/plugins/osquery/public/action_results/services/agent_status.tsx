@@ -14,7 +14,7 @@ const visColors = euiPaletteColorBlindBehindText();
 const colorToHexMap = {
   default: '#d3dae6',
   primary: visColors[1],
-  secondary: visColors[0],
+  success: visColors[0],
   accent: visColors[2],
   warning: visColors[5],
   danger: visColors[9],
@@ -25,7 +25,7 @@ export const AGENT_STATUSES: ActionAgentStatus[] = ['success', 'pending', 'faile
 export function getColorForAgentStatus(agentStatus: ActionAgentStatus): string {
   switch (agentStatus) {
     case 'success':
-      return colorToHexMap.secondary;
+      return colorToHexMap.success;
     case 'pending':
       return colorToHexMap.default;
     case 'failed':

@@ -16,10 +16,10 @@ bulkUpdate<T = unknown>(objects: Array<SavedObjectsBulkUpdateObject<T>>, options
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  objects | <code>Array&lt;SavedObjectsBulkUpdateObject&lt;T&gt;&gt;</code> |  |
-|  options | <code>SavedObjectsBulkUpdateOptions</code> |  |
+|  objects | Array&lt;SavedObjectsBulkUpdateObject&lt;T&gt;&gt; |  |
+|  options | SavedObjectsBulkUpdateOptions |  |
 
 <b>Returns:</b>
 
-`Promise<SavedObjectsBulkUpdateResponse<T>>`
+Promise&lt;SavedObjectsBulkUpdateResponse&lt;T&gt;&gt;
 

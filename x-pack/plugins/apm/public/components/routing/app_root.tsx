@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
 import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { Route } from 'react-router-dom';
@@ -91,10 +90,11 @@ export function ApmAppRoot({
 }
 
 function MountApmHeaderActionMenu() {
-  const { setHeaderActionMenu } = useApmPluginContext().appMountParameters;
+  const { setHeaderActionMenu, theme$ } =
+    useApmPluginContext().appMountParameters;
 
   return (
-    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
+    <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
       <ApmHeaderActionMenu />
     </HeaderMenuPortal>
   );

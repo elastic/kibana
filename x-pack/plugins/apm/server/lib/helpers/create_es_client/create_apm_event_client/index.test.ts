@@ -4,16 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { setTimeout as setTimeoutPromise } from 'timers/promises';
 import {
   contextServiceMock,
   executionContextServiceMock,
 } from '../../../../../../../../src/core/server/mocks';
 import { createHttpServer } from 'src/core/server/test_utils';
 import supertest from 'supertest';
-import { createApmEventClient } from '.';
+import { APMEventClient } from '.';
 
-describe('createApmEventClient', () => {
+describe('APMEventClient', () => {
   let server: ReturnType<typeof createHttpServer>;
 
   beforeEach(() => {
@@ -34,17 +34,19 @@ describe('createApmEventClient', () => {
     });
     const router = createRouter('/');
 
-    const abort = jest.fn();
+    let abortSignal: AbortSignal | undefined;
     router.get(
       { path: '/', validate: false },
       async (context, request, res) => {
-        const eventClient = createApmEventClient({
+        const eventClient = new APMEventClient({
           esClient: {
-            search: () => {
-              return Object.assign(
-                new Promise((resolve) => setTimeout(resolve, 3000)),
-                { abort }
-              );
+            search: async (
+              params: any,
+              { signal }: { signal: AbortSignal }
+            ) => {
+              abortSignal = signal;
+              await setTimeoutPromise(3_000);
+              return {};
             },
           } as any,
           debug: false,
@@ -67,6 +69,8 @@ describe('createApmEventClient', () => {
 
     await server.start();
 
+    expect(abortSignal?.aborted).toBeFalsy();
+
     const incomingRequest = supertest(innerServer.listener)
       .get('/')
       // end required to send request
@@ -83,6 +87,6 @@ describe('createApmEventClient', () => {
       }, 100);
     });
 
-    expect(abort).toHaveBeenCalled();
+    expect(abortSignal?.aborted).toBe(true);
   });
 });

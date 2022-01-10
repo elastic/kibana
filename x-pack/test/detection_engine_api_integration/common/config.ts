@@ -70,6 +70,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             'testing_ignored.constant',
             '/testing_regex*/',
           ])}`, // See tests within the file "ignore_fields.ts" which use these values in "alertIgnoreFields"
+          '--xpack.ruleRegistry.write.enabled=true',
+          '--xpack.ruleRegistry.write.cache.enabled=false',
+          '--xpack.ruleRegistry.unsafe.indexUpgrade.enabled=true',
+          '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['ruleRegistryEnabled'])}`,
           ...(ssl
             ? [
                 `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,

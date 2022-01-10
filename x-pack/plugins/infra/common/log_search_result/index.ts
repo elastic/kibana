@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+export type { SearchResult } from './log_search_result';
 export {
   getSearchResultIndexBeforeTime,
   getSearchResultIndexAfterTime,
   getSearchResultKey,
-  SearchResult,
 } from './log_search_result';

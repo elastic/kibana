@@ -1,11 +1,4 @@
 @mixin mapToolbarButtonGroupBorderRadius {
-  @include kbnThemeStyle($theme: 'v7') {
-    border-radius: $euiBorderRadius;
-  }
-
-  @include kbnThemeStyle($theme: 'v8') {
-    border-radius: $euiBorderRadiusSmall;
-  }
-
+  border-radius: $euiBorderRadiusSmall;
   overflow: hidden;
 }

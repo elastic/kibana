@@ -14,7 +14,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import React, { useCallback, useRef, useState, useMemo } from 'react';
-import styled, { StyledComponent } from 'styled-components';
+import styled from 'styled-components';
 
 import { useCreateRule } from '../../../../containers/detection_engine/rules';
 import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
@@ -47,7 +47,7 @@ import { formatRule, stepIsValid } from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 import { ruleStepsOrder } from '../utils';
-import { APP_ID } from '../../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../../common/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
@@ -73,19 +73,6 @@ const MyEuiPanel = styled(EuiPanel)<{
 `;
 
 MyEuiPanel.displayName = 'MyEuiPanel';
-
-const StepDefineRuleAccordion: StyledComponent<
-  typeof EuiAccordion,
-  any, // eslint-disable-line
-  { ref: React.MutableRefObject<EuiAccordion | null> },
-  never
-> = styled(EuiAccordion)`
-  .euiAccordion__childWrapper {
-    overflow: visible;
-  }
-`;
-
-StepDefineRuleAccordion.displayName = 'StepDefineRuleAccordion';
 
 const CreateRulePageComponent: React.FC = () => {
   const [
@@ -269,7 +256,7 @@ const CreateRulePageComponent: React.FC = () => {
 
   if (ruleName && ruleId) {
     displaySuccessToast(i18n.SUCCESSFULLY_CREATED_RULES(ruleName), dispatchToaster);
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRuleDetailsUrl(ruleId),
     });
@@ -284,13 +271,13 @@ const CreateRulePageComponent: React.FC = () => {
       needsListsConfiguration
     )
   ) {
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.alerts,
       path: getDetectionEngineUrl(),
     });
     return null;
   } else if (!userHasPermissions(canUserCRUD)) {
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.rules,
       path: getRulesUrl(),
     });
@@ -311,7 +298,7 @@ const CreateRulePageComponent: React.FC = () => {
               title={i18n.PAGE_TITLE}
             />
             <MyEuiPanel zindex={4} hasBorder>
-              <StepDefineRuleAccordion
+              <EuiAccordion
                 initialIsOpen={true}
                 id={RuleStep.defineRule}
                 buttonContent={defineRuleButton}
@@ -341,7 +328,7 @@ const CreateRulePageComponent: React.FC = () => {
                   onSubmit={submitStepDefineRule}
                   descriptionColumns="singleSplit"
                 />
-              </StepDefineRuleAccordion>
+              </EuiAccordion>
             </MyEuiPanel>
             <EuiSpacer size="l" />
             <MyEuiPanel hasBorder zindex={3}>

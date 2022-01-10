@@ -7,7 +7,7 @@
 
 import React, { ChangeEvent, FocusEvent, FunctionComponent, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { EuiIcon } from '@elastic/eui';
+import { EuiSelect, EuiSelectOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 const strings = {
@@ -57,30 +57,29 @@ export const DropdownFilter: FunctionComponent<Props> = ({
     }
   };
 
-  const dropdownOptions = options.map((option) => {
+  const dropdownOptions: EuiSelectOption[] = options.map((option) => {
     const { text } = option;
     const optionValue = option.value;
     const selected = optionValue === value;
 
-    return (
-      <option key={optionValue} value={optionValue} aria-selected={selected}>
-        {text}
-      </option>
-    );
+    return {
+      text,
+      selected,
+      value: optionValue,
+    };
   });
 
-  /* eslint-disable jsx-a11y/no-onchange */
   return (
     <div className="canvasDropdownFilter">
-      <select
+      <EuiSelect
         className="canvasDropdownFilter__select"
         value={value}
         onChange={changeHandler}
         data-test-subj="canvasDropdownFilter__select"
-      >
-        {dropdownOptions}
-      </select>
-      <EuiIcon className="canvasDropdownFilter__icon" type="arrowDown" />
+        options={dropdownOptions}
+        fullWidth
+        compressed
+      />
     </div>
   );
 };

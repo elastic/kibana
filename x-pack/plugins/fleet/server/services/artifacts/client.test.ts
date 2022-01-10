@@ -28,6 +28,7 @@ describe('When using the Fleet Artifacts Client', () => {
       singleHit._source.package_name = 'not endpoint';
     }
 
+    // @ts-expect-error not full interface
     esClientMock.get.mockImplementation(() => {
       return elasticsearchServiceMock.createSuccessTransportRequestPromise(singleHit);
     });

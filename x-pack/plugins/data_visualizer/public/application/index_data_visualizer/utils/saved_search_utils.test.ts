@@ -75,7 +75,7 @@ const kqlSavedSearch: SavedSearch = {
   title: 'farequote_filter_and_kuery',
   description: '',
   columns: ['_source'],
-  // @ts-expect-error We don't need the full object here
+  // @ts-expect-error this isn't a valid SavedSearch object... but does anyone care?
   kibanaSavedObjectMeta: {
     searchSourceJSON:
       '{"highlightAll":true,"version":true,"query":{"query":"responsetime > 49","language":"kuery"},"filter":[{"meta":{"index":"90a978e0-1c80-11ec-b1d7-f7e5cf21b9e0","negate":false,"disabled":false,"alias":null,"type":"phrase","key":"airline","value":"ASA","params":{"query":"ASA","type":"phrase"}},"query":{"match":{"airline":{"query":"ASA","type":"phrase"}}},"$state":{"store":"appState"}}],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',

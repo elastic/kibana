@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { uniqueId } from 'lodash';
 import React, { useState } from 'react';
@@ -16,7 +16,7 @@ import {
   QuerySuggestion,
 } from '../../../../../../../src/plugins/data/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useDynamicDataViewFetcher } from '../../../hooks/use_dynamic_data_view';
 import { fromQuery, toQuery } from '../Links/url_helpers';
@@ -52,7 +52,7 @@ export function KueryBar(props: {
     suggestions: [],
     isLoadingSuggestions: false,
   });
-  const { urlParams } = useUrlParams();
+  const { urlParams } = useLegacyUrlParams();
   const location = useLocation();
   const { data } = useApmPluginContext().plugins;
 

@@ -102,7 +102,7 @@ export const getEventIdToDataMapping = (
   }, {});
 
 export const isEventBuildingBlockType = (event: Ecs): boolean =>
-  !isEmpty(event.signal?.rule?.building_block_type);
+  !isEmpty(event.kibana?.alert?.building_block_type);
 
 export const isEvenEqlSequence = (event: Ecs): boolean => {
   if (!isEmpty(event.eql?.sequenceNumber)) {
@@ -117,7 +117,7 @@ export const isEvenEqlSequence = (event: Ecs): boolean => {
 };
 /** Return eventType raw or signal or eql */
 export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
-  if (!isEmpty(event.signal?.rule?.id)) {
+  if (!isEmpty(event.kibana?.alert?.rule?.uuid)) {
     return 'signal';
   } else if (!isEmpty(event.eql?.parentId)) {
     return 'eql';

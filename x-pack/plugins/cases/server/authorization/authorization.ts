@@ -12,7 +12,7 @@ import { PluginStartContract as FeaturesPluginStart } from '../../../features/se
 import { AuthFilterHelpers, GetSpaceFn, OwnerEntity } from './types';
 import { getOwnersFilter } from './utils';
 import { AuthorizationAuditLogger, OperationDetails } from '.';
-import { createCaseError } from '../common';
+import { createCaseError } from '../common/error';
 
 /**
  * This class handles ensuring that the user making a request has the correct permissions
@@ -231,8 +231,10 @@ export class Authorization {
           ? Array.from(featureCaseOwners)
           : privileges.kibana.reduce<string[]>((authorizedOwners, { authorized, privilege }) => {
               if (authorized && requiredPrivileges.has(privilege)) {
-                const owner = requiredPrivileges.get(privilege)!;
-                authorizedOwners.push(owner);
+                const owner = requiredPrivileges.get(privilege);
+                if (owner) {
+                  authorizedOwners.push(owner);
+                }
               }
 
               return authorizedOwners;

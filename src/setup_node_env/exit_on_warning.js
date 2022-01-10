@@ -39,12 +39,6 @@ var IGNORE_WARNINGS = [
     name: 'DeprecationWarning',
     code: 'DEP0148',
   },
-  // In future versions of Node.js, fs.rmdir(path, { recursive: true }) will be removed.
-  // Remove after https://github.com/elastic/synthetics/pull/390
-  {
-    name: 'DeprecationWarning',
-    code: 'DEP0147',
-  },
   {
     // TODO: @elastic/es-clients - The new client will attempt a Product check and it will `process.emitWarning`
     //  that the security features are blocking such check.

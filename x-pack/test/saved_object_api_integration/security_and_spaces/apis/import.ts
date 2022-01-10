@@ -130,7 +130,6 @@ export default function ({ getService }: FtrProviderContext) {
             spaceId,
             singleRequest,
             responseBodyOverride: expectSavedObjectForbidden([
-              'dashboard',
               'globaltype',
               'isolatedtype',
               'sharedtype',
@@ -152,11 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
           overwrite,
           spaceId,
           singleRequest,
-          responseBodyOverride: expectSavedObjectForbidden([
-            'dashboard',
-            'globaltype',
-            'isolatedtype',
-          ]),
+          responseBodyOverride: expectSavedObjectForbidden(['globaltype', 'isolatedtype']),
         }),
         createTestDefinitions(group2, true, { overwrite, spaceId, singleRequest }),
         createTestDefinitions(group3, true, { overwrite, spaceId, singleRequest }),

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
 import { getProperty, IndexMapping } from '../../../mappings';
 
@@ -16,8 +16,8 @@ export function getSortingParams(
   mappings: IndexMapping,
   type: string | string[],
   sortField?: string,
-  sortOrder?: estypes.SearchSortOrder
-): { sort?: estypes.SearchSortContainer[] } {
+  sortOrder?: estypes.SortOrder
+): { sort?: estypes.SortCombinations[] } {
   if (!sortField) {
     return {};
   }

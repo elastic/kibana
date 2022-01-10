@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
-import type { Transform as EsTransform } from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { keyBy } from 'lodash';
 import { TransformHealthRuleParams } from './schema';
 import {
@@ -29,8 +29,7 @@ interface TestResult {
   context: TransformHealthAlertContext;
 }
 
-// @ts-ignore FIXME update types in the elasticsearch client
-type Transform = EsTransform & { id: string; description?: string; sync: object };
+type Transform = estypes.Transform & { id: string; description?: string; sync: object };
 
 type TransformWithAlertingRules = Transform & { alerting_rules: TransformHealthAlertRule[] };
 

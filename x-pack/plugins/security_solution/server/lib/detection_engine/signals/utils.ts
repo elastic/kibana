@@ -10,9 +10,9 @@ import moment from 'moment';
 import uuidv5 from 'uuid/v5';
 
 import dateMath from '@elastic/datemath';
-import type { estypes } from '@elastic/elasticsearch';
-import { ApiResponse, Context } from '@elastic/elasticsearch/lib/Transport';
-import { ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TransportResult } from '@elastic/elasticsearch';
+import { ALERT_UUID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { ListArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { MAX_EXCEPTION_LIST_SIZE } from '@kbn/securitysolution-list-constants';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
@@ -58,17 +58,10 @@ import {
   ThreatRuleParams,
   ThresholdRuleParams,
 } from '../schemas/rule_schemas';
-import { WrappedRACAlert } from '../rule_types/types';
+import { RACAlert, WrappedRACAlert } from '../rule_types/types';
 import { SearchTypes } from '../../../../common/detection_engine/types';
 import { IRuleExecutionLogClient } from '../rule_execution_log/types';
-import {
-  EQL_RULE_TYPE_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  QUERY_RULE_TYPE_ID,
-  SIGNALS_ID,
-  THRESHOLD_RULE_TYPE_ID,
-} from '../../../../common/constants';
+import { withSecuritySpan } from '../../../utils/with_security_span';
 
 interface SortExceptionsReturn {
   exceptionsWithValueLists: ExceptionListItemSchema[];
@@ -143,9 +136,9 @@ export const hasTimestampFields = async (args: {
   timestampField: string;
   ruleName: string;
   // any is derived from here
-  // node_modules/@elastic/elasticsearch/api/kibana.d.ts
+  // node_modules/@elastic/elasticsearch/lib/api/kibana.d.ts
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  timestampFieldCapsResponse: ApiResponse<Record<string, any>, Context>;
+  timestampFieldCapsResponse: TransportResult<Record<string, any>, unknown>;
   inputIndices: string[];
   ruleStatusClient: IRuleExecutionLogClient;
   ruleId: string;
@@ -226,21 +219,25 @@ export const checkPrivilegesFromEsClient = async (
   esClient: ElasticsearchClient,
   indices: string[]
 ): Promise<Privilege> =>
-  (
-    await esClient.transport.request({
-      path: '/_security/user/_has_privileges',
-      method: 'POST',
-      body: {
-        index: [
-          {
-            names: indices ?? [],
-            allow_restricted_indices: true,
-            privileges: ['read'],
+  withSecuritySpan(
+    'checkPrivilegesFromEsClient',
+    async () =>
+      (
+        await esClient.transport.request({
+          path: '/_security/user/_has_privileges',
+          method: 'POST',
+          body: {
+            index: [
+              {
+                names: indices ?? [],
+                allow_restricted_indices: true,
+                privileges: ['read'],
+              },
+            ],
           },
-        ],
-      },
-    })
-  ).body as Privilege;
+        })
+      ).body as Privilege
+  );
 
 export const getNumCatchupIntervals = ({
   gap,
@@ -955,10 +952,10 @@ export const isMachineLearningParams = (params: RuleParams): params is MachineLe
  * Ref: https://github.com/elastic/elasticsearch/issues/28806#issuecomment-369303620
  *
  * return stringified Long.MAX_VALUE if we receive Number.MAX_SAFE_INTEGER
- * @param sortIds estypes.SearchSortResults | undefined
+ * @param sortIds estypes.SortResults | undefined
  * @returns SortResults
  */
-export const getSafeSortIds = (sortIds: estypes.SearchSortResults | undefined) => {
+export const getSafeSortIds = (sortIds: estypes.SortResults | undefined) => {
   return sortIds?.map((sortId) => {
     // haven't determined when we would receive a null value for a sort id
     // but in case we do, default to sending the stringified Java max_int
@@ -991,7 +988,11 @@ export const isWrappedSignalHit = (event: SimpleHit): event is WrappedSignalHit 
 };
 
 export const isWrappedRACAlert = (event: SimpleHit): event is WrappedRACAlert => {
-  return (event as WrappedRACAlert)?._source?.[ALERT_INSTANCE_ID] != null;
+  return (event as WrappedRACAlert)?._source?.[ALERT_UUID] != null;
+};
+
+export const isRACAlert = (event: unknown): event is RACAlert => {
+  return get(event, ALERT_UUID) != null;
 };
 
 export const racFieldMappings: Record<string, string> = {
@@ -1007,16 +1008,4 @@ export const getField = <T extends SearchTypes>(event: SimpleHit, field: string)
   } else if (isWrappedEventHit(event)) {
     return get(event._source, field) as T;
   }
-};
-
-/**
- * Maps legacy rule types to RAC rule type IDs.
- */
-export const ruleTypeMappings = {
-  eql: EQL_RULE_TYPE_ID,
-  machine_learning: ML_RULE_TYPE_ID,
-  query: QUERY_RULE_TYPE_ID,
-  saved_query: SIGNALS_ID,
-  threat_match: INDICATOR_RULE_TYPE_ID,
-  threshold: THRESHOLD_RULE_TYPE_ID,
 };

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { getHealthStatusStream } from './get_state';
 export { scheduleAlertingHealthCheck, initializeAlertingHealth } from './task';

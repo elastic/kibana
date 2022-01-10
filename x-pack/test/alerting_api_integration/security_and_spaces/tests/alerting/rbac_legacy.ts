@@ -226,13 +226,19 @@ export default function alertTests({ getService }: FtrProviderContext) {
 
           async function ensureAlertIsRunning() {
             // ensure the alert still runs and that it can schedule actions
-            const numberOfAlertExecutions = (
-              await esTestIndexTool.search('alert:test.always-firing', reference)
-            ).body.hits.total.value;
+            const alwaysFiringResponse = await esTestIndexTool.search(
+              'alert:test.always-firing',
+              reference
+            );
+            // @ts-expect-error doesnt handle total: number
+            const numberOfAlertExecutions = alwaysFiringResponse.body.hits.total.value;
 
-            const numberOfActionExecutions = (
-              await esTestIndexTool.search('action:test.index-record', reference)
-            ).body.hits.total.value;
+            const indexRecordResponse = await esTestIndexTool.search(
+              'action:test.index-record',
+              reference
+            );
+            // @ts-expect-error doesnt handle total: number
+            const numberOfActionExecutions = indexRecordResponse.body.hits.total.value;
 
             // wait for alert to execute and for its action to be scheduled and run
             await retry.try(async () => {
@@ -246,9 +252,11 @@ export default function alertTests({ getService }: FtrProviderContext) {
                 reference
               );
 
+              // @ts-expect-error doesnt handle total: number
               expect(alertSearchResult.body.hits.total.value).to.be.greaterThan(
                 numberOfAlertExecutions
               );
+              // @ts-expect-error doesnt handle total: number
               expect(actionSearchResult.body.hits.total.value).to.be.greaterThan(
                 numberOfActionExecutions
               );

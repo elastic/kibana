@@ -36,7 +36,7 @@ import { useFormatUrl } from '../../../../common/components/link_to';
 import { NeedAdminForUpdateRulesCallOut } from '../../../components/callouts/need_admin_for_update_callout';
 import { MlJobCompatibilityCallout } from '../../../components/callouts/ml_job_compatibility_callout';
 import { MissingPrivilegesCallOut } from '../../../components/callouts/missing_privileges_callout';
-import { APP_ID } from '../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 
 type Func = () => Promise<void>;
@@ -125,7 +125,7 @@ const RulesPageComponent: React.FC = () => {
   const goToNewRule = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, { deepLinkId: SecurityPageName.rules, path: getCreateRuleUrl() });
+      navigateToApp(APP_UI_ID, { deepLinkId: SecurityPageName.rules, path: getCreateRuleUrl() });
     },
     [navigateToApp]
   );
@@ -156,7 +156,7 @@ const RulesPageComponent: React.FC = () => {
       needsListsConfiguration
     )
   ) {
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.alerts,
       path: getDetectionEngineUrl(),
     });
@@ -181,11 +181,12 @@ const RulesPageComponent: React.FC = () => {
         importComplete={handleRefreshRules}
         importData={importRules}
         successMessage={i18n.SUCCESSFULLY_IMPORTED_RULES}
-        showCheckBox={true}
         showModal={showImportModal}
         submitBtnText={i18n.IMPORT_RULE_BTN_TITLE}
         subtitle={i18n.INITIAL_PROMPT_TEXT}
         title={i18n.IMPORT_RULE}
+        showExceptionsCheckBox
+        showCheckBox
       />
       <SecuritySolutionPageWrapper>
         <DetectionEngineHeaderPage title={i18n.PAGE_TITLE}>
@@ -210,6 +211,7 @@ const RulesPageComponent: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="rules-import-modal-button"
                 iconType="importAction"
                 isDisabled={!userHasPermissions(canUserCRUD) || loading}
                 onClick={() => {

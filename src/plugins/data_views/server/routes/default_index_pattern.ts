@@ -8,74 +8,89 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter, StartServicesAccessor } from '../../../../core/server';
-import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
+import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 import { handleErrors } from './util/handle_errors';
+import { SERVICE_PATH, SERVICE_PATH_LEGACY, SERVICE_KEY, SERVICE_KEY_LEGACY } from '../constants';
 
-export const registerManageDefaultIndexPatternRoutes = (
-  router: IRouter,
-  getStartServices: StartServicesAccessor<
-    DataViewsServerPluginStartDependencies,
-    DataViewsServerPluginStart
-  >
-) => {
-  router.get(
-    {
-      path: '/api/index_patterns/default',
-      validate: {},
-    },
-    handleErrors(async (ctx, req, res) => {
-      const savedObjectsClient = ctx.core.savedObjects.client;
-      const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-      const [, , { indexPatternsServiceFactory }] = await getStartServices();
-      const indexPatternsService = await indexPatternsServiceFactory(
-        savedObjectsClient,
-        elasticsearchClient
-      );
-
-      const defaultIndexPatternId = await indexPatternsService.getDefaultId();
-
-      return res.ok({
-        body: {
-          index_pattern_id: defaultIndexPatternId,
-        },
-      });
-    })
-  );
-
-  router.post(
-    {
-      path: '/api/index_patterns/default',
-      validate: {
-        body: schema.object({
-          index_pattern_id: schema.nullable(
-            schema.string({
-              minLength: 1,
-              maxLength: 1_000,
-            })
-          ),
-          force: schema.boolean({ defaultValue: false }),
-        }),
+const manageDefaultIndexPatternRoutesFactory =
+  (path: string, serviceKey: string) =>
+  (
+    router: IRouter,
+    getStartServices: StartServicesAccessor<
+      DataViewsServerPluginStartDependencies,
+      DataViewsServerPluginStart
+    >
+  ) => {
+    router.get(
+      {
+        path,
+        validate: {},
       },
-    },
-    handleErrors(async (ctx, req, res) => {
-      const savedObjectsClient = ctx.core.savedObjects.client;
-      const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-      const [, , { indexPatternsServiceFactory }] = await getStartServices();
-      const indexPatternsService = await indexPatternsServiceFactory(
-        savedObjectsClient,
-        elasticsearchClient
-      );
+      handleErrors(async (ctx, req, res) => {
+        const savedObjectsClient = ctx.core.savedObjects.client;
+        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const [, , { dataViewsServiceFactory }] = await getStartServices();
+        const indexPatternsService = await dataViewsServiceFactory(
+          savedObjectsClient,
+          elasticsearchClient,
+          req
+        );
 
-      const newDefaultId = req.body.index_pattern_id;
-      const force = req.body.force;
+        const defaultIndexPatternId = await indexPatternsService.getDefaultId();
 
-      await indexPatternsService.setDefault(newDefaultId, force);
+        return res.ok({
+          body: {
+            [`${serviceKey}_id`]: defaultIndexPatternId,
+          },
+        });
+      })
+    );
 
-      return res.ok({
-        body: {
-          acknowledged: true,
+    router.post(
+      {
+        path,
+        validate: {
+          body: schema.object({
+            [`${serviceKey}_id`]: schema.nullable(
+              schema.string({
+                minLength: 1,
+                maxLength: 1_000,
+              })
+            ),
+            force: schema.boolean({ defaultValue: false }),
+          }),
         },
-      });
-    })
-  );
-};
+      },
+      handleErrors(async (ctx, req, res) => {
+        const savedObjectsClient = ctx.core.savedObjects.client;
+        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const [, , { dataViewsServiceFactory }] = await getStartServices();
+        const indexPatternsService = await dataViewsServiceFactory(
+          savedObjectsClient,
+          elasticsearchClient,
+          req
+        );
+
+        const newDefaultId = req.body[`${serviceKey}_id`] as string;
+        const force = req.body.force as boolean;
+
+        await indexPatternsService.setDefault(newDefaultId, force);
+
+        return res.ok({
+          body: {
+            acknowledged: true,
+          },
+        });
+      })
+    );
+  };
+
+export const registerManageDefaultDataViewRoute = manageDefaultIndexPatternRoutesFactory(
+  `${SERVICE_PATH}/default`,
+  SERVICE_KEY
+);
+
+export const registerManageDefaultDataViewRouteLegacy = manageDefaultIndexPatternRoutesFactory(
+  `${SERVICE_PATH_LEGACY}/default`,
+  SERVICE_KEY_LEGACY
+);

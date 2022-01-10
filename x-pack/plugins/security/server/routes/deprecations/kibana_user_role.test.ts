@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { SecurityRoleMapping, SecurityUser } from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import type { RequestHandler, RouteConfig } from 'src/core/server';
@@ -18,11 +18,11 @@ import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types'
 import { routeDefinitionParamsMock } from '../index.mock';
 import { defineKibanaUserRoleDeprecationRoutes } from './kibana_user_role';
 
-function createMockUser(user: Partial<SecurityUser> = {}) {
+function createMockUser(user: Partial<estypes.SecurityUser> = {}) {
   return { enabled: true, username: 'userA', roles: ['roleA'], metadata: {}, ...user };
 }
 
-function createMockRoleMapping(mapping: Partial<SecurityRoleMapping> = {}) {
+function createMockRoleMapping(mapping: Partial<estypes.SecurityRoleMapping> = {}) {
   return { enabled: true, roles: ['roleA'], rules: {}, metadata: {}, ...mapping };
 }
 

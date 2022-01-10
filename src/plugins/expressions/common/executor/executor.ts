@@ -100,16 +100,18 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
   /**
    * @deprecated
    */
-  public readonly functions = new FunctionsRegistry(this as Executor);
+  public readonly functions: FunctionsRegistry;
 
   /**
    * @deprecated
    */
-  public readonly types = new TypesRegistry(this as Executor);
+  public readonly types: TypesRegistry;
 
   protected parent?: Executor<Context>;
 
   constructor(state?: ExecutorState<Context>) {
+    this.functions = new FunctionsRegistry(this as Executor);
+    this.types = new TypesRegistry(this as Executor);
     this.container = createExecutorContainer<Context>(state);
   }
 
@@ -176,10 +178,6 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     };
   }
 
-  public extendContext(extraContext: Record<string, unknown>) {
-    this.container.transitions.extendContext(extraContext);
-  }
-
   public get context(): Record<string, unknown> {
     return {
       ...(this.parent?.context ?? {}),
@@ -208,13 +206,8 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     params: ExpressionExecutionParams = {}
   ): Execution<Input, Output> {
     const executionParams = {
+      params,
       executor: this,
-      params: {
-        ...params,
-        // for canvas we are passing this in,
-        // canvas should be refactored to not pass any extra context in
-        extraContext: this.context,
-      },
     } as ExecutionParams;
 
     if (typeof ast === 'string') executionParams.expression = ast;

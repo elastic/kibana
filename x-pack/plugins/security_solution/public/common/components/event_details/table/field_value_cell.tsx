@@ -37,6 +37,7 @@ export const FieldValueCell = React.memo(
   }: FieldValueCellProps) => {
     return (
       <EuiFlexGroup
+        alignItems="flexStart"
         data-test-subj={`event-field-${data.field}`}
         direction="column"
         gutterSize="none"
@@ -71,6 +72,7 @@ export const FieldValueCell = React.memo(
                     isObjectArray={data.isObjectArray}
                     value={value}
                     linkValue={(getLinkValue && getLinkValue(data.field)) ?? linkValue}
+                    truncate={false}
                   />
                 )}
               </EuiFlexItem>

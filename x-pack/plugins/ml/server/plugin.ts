@@ -16,7 +16,6 @@ import type {
   CapabilitiesStart,
   IClusterClient,
   SavedObjectsServiceStart,
-  SharedGlobalConfig,
   UiSettingsServiceStart,
 } from 'kibana/server';
 import type { SecurityPluginSetup } from '../../security/server';
@@ -82,14 +81,11 @@ export class MlServerPlugin
   private dataViews: DataViewsPluginStart | null = null;
   private isMlReady: Promise<void>;
   private setMlReady: () => void = () => {};
-  private readonly kibanaIndexConfig: SharedGlobalConfig;
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
     this.mlLicense = new MlLicense();
     this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
-
-    this.kibanaIndexConfig = ctx.config.legacy.get();
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup {
@@ -150,6 +146,39 @@ export class MlServerPlugin
       () => this.savedObjectsStart
     );
 
+    const getSpaces = plugins.spaces
+      ? () => coreSetup.getStartServices().then(([, { spaces }]) => spaces!)
+      : undefined;
+
+    const getDataViews = () => {
+      if (this.dataViews === null) {
+        throw Error('Data views plugin not initialized');
+      }
+      return this.dataViews;
+    };
+
+    const resolveMlCapabilities = async (request: KibanaRequest) => {
+      if (this.capabilities === null) {
+        return null;
+      }
+      const capabilities = await this.capabilities.resolveCapabilities(request);
+      return capabilities.ml as MlCapabilities;
+    };
+
+    const { internalServicesProviders, sharedServicesProviders } = createSharedServices(
+      this.mlLicense,
+      getSpaces,
+      plugins.cloud,
+      plugins.security?.authz,
+      resolveMlCapabilities,
+      () => this.clusterClient,
+      () => getInternalSavedObjectsClient(),
+      () => this.uiSettings,
+      () => this.fieldsFormat,
+      getDataViews,
+      () => this.isMlReady
+    );
+
     const routeInit: RouteInitialization = {
       router: coreSetup.http.createRouter(),
       routeGuard: new RouteGuard(
@@ -162,25 +191,6 @@ export class MlServerPlugin
         () => this.dataViews
       ),
       mlLicense: this.mlLicense,
-    };
-
-    const resolveMlCapabilities = async (request: KibanaRequest) => {
-      if (this.capabilities === null) {
-        return null;
-      }
-      const capabilities = await this.capabilities.resolveCapabilities(request);
-      return capabilities.ml as MlCapabilities;
-    };
-
-    const getSpaces = plugins.spaces
-      ? () => coreSetup.getStartServices().then(([, { spaces }]) => spaces!)
-      : undefined;
-
-    const getDataViews = () => {
-      if (this.dataViews === null) {
-        throw Error('Data views plugin not initialized');
-      }
-      return this.dataViews;
     };
 
     annotationRoutes(routeInit, plugins.security);
@@ -207,23 +217,9 @@ export class MlServerPlugin
       resolveMlCapabilities,
     });
     trainedModelsRoutes(routeInit);
-    alertingRoutes(routeInit);
+    alertingRoutes(routeInit, sharedServicesProviders);
 
     initMlServerLog({ log: this.log });
-
-    const { internalServicesProviders, sharedServicesProviders } = createSharedServices(
-      this.mlLicense,
-      getSpaces,
-      plugins.cloud,
-      plugins.security?.authz,
-      resolveMlCapabilities,
-      () => this.clusterClient,
-      () => getInternalSavedObjectsClient(),
-      () => this.uiSettings,
-      () => this.fieldsFormat,
-      getDataViews,
-      () => this.isMlReady
-    );
 
     if (plugins.alerting) {
       registerMlAlerts({
@@ -235,7 +231,7 @@ export class MlServerPlugin
     }
 
     if (plugins.usageCollection) {
-      registerCollector(plugins.usageCollection, this.kibanaIndexConfig.kibana.index);
+      registerCollector(plugins.usageCollection, coreSetup.savedObjects.getKibanaIndex());
     }
 
     return sharedServicesProviders;

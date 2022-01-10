@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { Agent } from '../../common/shared_imports';
 
@@ -14,8 +14,12 @@ interface BaseDataPoint {
   doc_count: number;
 }
 
+interface AggDataPoint extends estypes.AggregationsTermsAggregateBase {
+  buckets: AggregationDataPoint[];
+}
+
 export type AggregationDataPoint = BaseDataPoint & {
-  [key: string]: estypes.AggregationsTermsAggregate<AggregationDataPoint>;
+  [key: string]: AggDataPoint;
 };
 
 export interface Group {

@@ -7,7 +7,7 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import {
   buildEmptyFilter,
   Filter,
@@ -40,7 +40,7 @@ interface Props {
   timeRangeForSuggestionsOverride?: boolean;
 }
 
-function FilterBarUI(props: Props) {
+const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
   const kibana = useKibana<IDataPluginServices>();
@@ -54,6 +54,8 @@ function FilterBarUI(props: Props) {
       props.onFiltersUpdated(filters);
     }
   }
+
+  const onAddFilterClick = () => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen);
 
   function renderItems() {
     return props.filters.map((filter, i) => (
@@ -81,7 +83,7 @@ function FilterBarUI(props: Props) {
     const button = (
       <EuiButtonEmpty
         size="s"
-        onClick={() => setIsAddFilterPopoverOpen(true)}
+        onClick={onAddFilterClick}
         data-test-subj="addFilter"
         className="globalFilterBar__addButton"
       >
@@ -224,6 +226,6 @@ function FilterBarUI(props: Props) {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-}
+});
 
 export const FilterBar = injectI18n(FilterBarUI);

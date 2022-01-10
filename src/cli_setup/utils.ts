@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { getConfigPath } from '@kbn/utils';
+import { getConfigPath, getDataPath } from '@kbn/utils';
 import inquirer from 'inquirer';
 import { duration } from 'moment';
 import { merge } from 'lodash';
+import { kibanaPackageJson } from '@kbn/utils';
 
 import { Logger } from '../core/server';
 import { ClusterClient } from '../core/server/elasticsearch/client';
@@ -30,8 +31,8 @@ const logger: Logger = {
   get: () => logger,
 };
 
-export const kibanaConfigWriter = new KibanaConfigWriter(getConfigPath(), logger);
-export const elasticsearch = new ElasticsearchService(logger).setup({
+export const kibanaConfigWriter = new KibanaConfigWriter(getConfigPath(), getDataPath(), logger);
+export const elasticsearch = new ElasticsearchService(logger, kibanaPackageJson.version).setup({
   connectionCheckInterval: duration(Infinity),
   elasticsearch: {
     createClient: (type, config) => {

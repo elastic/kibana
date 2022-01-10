@@ -8,7 +8,7 @@
 import { get } from 'lodash';
 import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createQuery } from './create_query';
 import {
   INDEX_PATTERN_ELASTICSEARCH,

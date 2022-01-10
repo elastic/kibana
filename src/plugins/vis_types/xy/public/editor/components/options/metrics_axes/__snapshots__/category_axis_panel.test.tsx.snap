@@ -61,6 +61,7 @@ exports[`CategoryAxisPanel component should init with the default set of props 1
         "truncate": 0,
       }
     }
+    disableSingleLayerAxisControls={false}
     setAxisLabel={[Function]}
   />
 </EuiPanel>

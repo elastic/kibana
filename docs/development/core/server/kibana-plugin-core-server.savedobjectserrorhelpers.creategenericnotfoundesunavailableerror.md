@@ -14,10 +14,10 @@ static createGenericNotFoundEsUnavailableError(type?: string | null, id?: string
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string &#124; null</code> |  |
-|  id | <code>string &#124; null</code> |  |
+|  type | string \| null |  |
+|  id | string \| null |  |
 
 <b>Returns:</b>
 
-`DecoratedError`
+DecoratedError
 

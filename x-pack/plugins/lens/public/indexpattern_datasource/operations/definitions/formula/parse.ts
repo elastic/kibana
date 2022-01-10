@@ -8,8 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import { isObject } from 'lodash';
 import type { TinymathAST, TinymathVariable, TinymathLocation } from '@kbn/tinymath';
-import { OperationDefinition, GenericOperationDefinition, IndexPatternColumn } from '../index';
-import { IndexPattern, IndexPatternLayer } from '../../../types';
+import type {
+  OperationDefinition,
+  GenericOperationDefinition,
+  GenericIndexPatternColumn,
+} from '../index';
+import type { IndexPattern, IndexPatternLayer } from '../../../types';
 import { mathOperation } from './math';
 import { documentField } from '../../../document_field';
 import { runASTValidation, shouldHaveFieldArgument, tryToParse } from './validation';
@@ -18,8 +22,9 @@ import {
   findVariables,
   getOperationParams,
   groupArgsByType,
+  mergeWithGlobalFilter,
 } from './util';
-import { FormulaIndexPatternColumn } from './formula';
+import type { FormulaIndexPatternColumn } from './formula';
 import { getColumnOrder } from '../../layer_helpers';
 
 function getManagedId(mainId: string, index: number) {
@@ -39,7 +44,13 @@ function parseAndExtract(
     return { extracted: [], isValid: false };
   }
   // before extracting the data run the validation task and throw if invalid
-  const errors = runASTValidation(root, layer, indexPattern, operationDefinitionMap);
+  const errors = runASTValidation(
+    root,
+    layer,
+    indexPattern,
+    operationDefinitionMap,
+    layer.columns[columnId]
+  );
   if (errors.length) {
     return { extracted: [], isValid: false };
   }
@@ -67,8 +78,9 @@ function extractColumns(
   layer: IndexPatternLayer,
   indexPattern: IndexPattern,
   label: string
-): Array<{ column: IndexPatternColumn; location?: TinymathLocation }> {
-  const columns: Array<{ column: IndexPatternColumn; location?: TinymathLocation }> = [];
+): Array<{ column: GenericIndexPatternColumn; location?: TinymathLocation }> {
+  const columns: Array<{ column: GenericIndexPatternColumn; location?: TinymathLocation }> = [];
+  const globalFilter = layer.columns[idPrefix].filter;
 
   function parseNode(node: TinymathAST) {
     if (typeof node === 'number' || node.type !== 'function') {
@@ -99,10 +111,14 @@ function extractColumns(
         ? indexPattern.getFieldByName(fieldName.value)!
         : documentField;
 
-      const mappedParams = getOperationParams(nodeOperation, namedArguments || []);
+      const mappedParams = mergeWithGlobalFilter(
+        nodeOperation,
+        getOperationParams(nodeOperation, namedArguments || []),
+        globalFilter
+      );
 
       const newCol = (
-        nodeOperation as OperationDefinition<IndexPatternColumn, 'field'>
+        nodeOperation as OperationDefinition<GenericIndexPatternColumn, 'field'>
       ).buildColumn(
         {
           layer,
@@ -137,9 +153,13 @@ function extractColumns(
         mathColumn.label = label;
       }
 
-      const mappedParams = getOperationParams(nodeOperation, namedArguments || []);
+      const mappedParams = mergeWithGlobalFilter(
+        nodeOperation,
+        getOperationParams(nodeOperation, namedArguments || []),
+        globalFilter
+      );
       const newCol = (
-        nodeOperation as OperationDefinition<IndexPatternColumn, 'fullReference'>
+        nodeOperation as OperationDefinition<GenericIndexPatternColumn, 'fullReference'>
       ).buildColumn(
         {
           layer,
@@ -227,7 +247,7 @@ export function regenerateLayerFromAst(
       isFormulaBroken: !isValid,
     },
     references: !isValid ? [] : [getManagedId(columnId, extracted.length - 1)],
-  };
+  } as FormulaIndexPatternColumn;
 
   return {
     newLayer: {

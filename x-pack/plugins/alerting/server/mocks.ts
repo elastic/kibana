@@ -19,6 +19,7 @@ export { rulesClientMock };
 const createSetupMock = () => {
   const mock: jest.Mocked<PluginSetupContract> = {
     registerType: jest.fn(),
+    getSecurityHealth: jest.fn(),
   };
   return mock;
 };
@@ -62,6 +63,21 @@ const createAlertInstanceFactoryMock = <
   return mock as unknown as AlertInstanceMock<InstanceState, InstanceContext>;
 };
 
+const createAbortableSearchClientMock = () => {
+  const mock = {
+    search: jest.fn(),
+  };
+
+  return mock;
+};
+
+const createAbortableSearchServiceMock = () => {
+  return {
+    asInternalUser: createAbortableSearchClientMock(),
+    asCurrentUser: createAbortableSearchClientMock(),
+  };
+};
+
 const createAlertServicesMock = <
   InstanceState extends AlertInstanceState = AlertInstanceState,
   InstanceContext extends AlertInstanceContext = AlertInstanceContext
@@ -73,6 +89,9 @@ const createAlertServicesMock = <
       .mockReturnValue(alertInstanceFactoryMock),
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+    shouldWriteAlerts: () => true,
+    shouldStopExecution: () => true,
+    search: createAbortableSearchServiceMock(),
   };
 };
 export type AlertServicesMock = ReturnType<typeof createAlertServicesMock>;

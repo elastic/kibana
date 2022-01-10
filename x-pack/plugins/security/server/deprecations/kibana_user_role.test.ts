@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type { SecurityRoleMapping, SecurityUser } from '@elastic/elasticsearch/api/types';
+import type { SecurityRoleMapping, SecurityUser } from '@elastic/elasticsearch/lib/api/types';
 
 import type { PackageInfo, RegisterDeprecationsConfig } from 'src/core/server';
 import {

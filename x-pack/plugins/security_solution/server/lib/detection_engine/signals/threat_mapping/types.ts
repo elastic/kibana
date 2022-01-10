@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   ThreatQuery,
   ThreatMapping,
@@ -173,6 +173,7 @@ export interface ThreatListDoc {
 export type ThreatListItem = estypes.SearchHit<ThreatListDoc>;
 
 export interface ThreatEnrichment {
+  feed: Record<string, unknown>;
   indicator: Record<string, unknown>;
   matched: Record<string, unknown>;
 }

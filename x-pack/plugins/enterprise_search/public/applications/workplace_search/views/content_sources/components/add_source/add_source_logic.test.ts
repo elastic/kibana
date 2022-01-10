@@ -15,6 +15,8 @@ import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
+
 jest.mock('../../../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
@@ -413,13 +415,8 @@ describe('AddSourceLogic', () => {
           expect(setSourceConfigDataSpy).toHaveBeenCalledWith(sourceConfigData);
         });
 
-        it('handles error', async () => {
-          http.get.mockReturnValue(Promise.reject('this is an error'));
-
+        itShowsServerErrorAsFlashMessage(http.get, () => {
           AddSourceLogic.actions.getSourceConfigData('github');
-          await nextTick();
-
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
       });
 
@@ -474,13 +471,8 @@ describe('AddSourceLogic', () => {
           );
         });
 
-        it('handles error', async () => {
-          http.get.mockReturnValue(Promise.reject('this is an error'));
-
+        itShowsServerErrorAsFlashMessage(http.get, () => {
           AddSourceLogic.actions.getSourceConnectData('github', successCallback);
-          await nextTick();
-
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
       });
 
@@ -506,13 +498,8 @@ describe('AddSourceLogic', () => {
           expect(setSourceConnectDataSpy).toHaveBeenCalledWith(sourceConnectData);
         });
 
-        it('handles error', async () => {
-          http.get.mockReturnValue(Promise.reject('this is an error'));
-
+        itShowsServerErrorAsFlashMessage(http.get, () => {
           AddSourceLogic.actions.getSourceReConnectData('github');
-          await nextTick();
-
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
       });
 
@@ -532,13 +519,8 @@ describe('AddSourceLogic', () => {
           expect(setPreContentSourceConfigDataSpy).toHaveBeenCalledWith(config);
         });
 
-        it('handles error', async () => {
-          http.get.mockReturnValue(Promise.reject('this is an error'));
-
+        itShowsServerErrorAsFlashMessage(http.get, () => {
           AddSourceLogic.actions.getPreContentSourceConfigData();
-          await nextTick();
-
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
       });
 
@@ -601,13 +583,8 @@ describe('AddSourceLogic', () => {
           );
         });
 
-        it('handles error', async () => {
-          http.put.mockReturnValue(Promise.reject('this is an error'));
-
+        itShowsServerErrorAsFlashMessage(http.put, () => {
           AddSourceLogic.actions.saveSourceConfig(true);
-          await nextTick();
-
-          expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
         });
       });
 

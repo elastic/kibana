@@ -6,7 +6,7 @@
  */
 
 import React, { ComponentType } from 'react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Observable } from 'rxjs';
 import { CoreStart } from 'src/core/public';
 import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';

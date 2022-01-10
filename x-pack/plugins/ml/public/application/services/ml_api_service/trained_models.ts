@@ -14,6 +14,7 @@ import {
   TrainedModelConfigResponse,
   ModelPipelines,
   TrainedModelStat,
+  NodesOverviewResponse,
 } from '../../../../common/types/trained_models';
 
 export interface InferenceQueryParams {
@@ -114,9 +115,33 @@ export function trainedModelsApiProvider(httpService: HttpService) {
      * @param modelId - Model ID
      */
     deleteTrainedModel(modelId: string) {
-      return httpService.http<any>({
+      return httpService.http<{ acknowledge: boolean }>({
         path: `${apiBasePath}/trained_models/${modelId}`,
         method: 'DELETE',
+      });
+    },
+
+    getTrainedModelsNodesOverview() {
+      return httpService.http<NodesOverviewResponse>({
+        path: `${apiBasePath}/trained_models/nodes_overview`,
+        method: 'GET',
+      });
+    },
+
+    startModelAllocation(modelId: string) {
+      return httpService.http<{ acknowledge: boolean }>({
+        path: `${apiBasePath}/trained_models/${modelId}/deployment/_start`,
+        method: 'POST',
+      });
+    },
+
+    stopModelAllocation(modelId: string, options: { force: boolean } = { force: false }) {
+      const force = options?.force;
+
+      return httpService.http<{ acknowledge: boolean }>({
+        path: `${apiBasePath}/trained_models/${modelId}/deployment/_stop`,
+        method: 'POST',
+        query: { force },
       });
     },
   };

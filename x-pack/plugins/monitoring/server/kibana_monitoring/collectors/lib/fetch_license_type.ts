@@ -7,13 +7,13 @@
 
 import { get } from 'lodash';
 import { ElasticsearchClient } from 'src/core/server';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../common/constants';
 import { getCcsIndexPattern } from '../../../lib/alerts/get_ccs_index_pattern';
 
 export async function fetchLicenseType(
   client: ElasticsearchClient,
-  availableCcs: string[],
+  availableCcs: boolean,
   clusterUuid: string
 ) {
   let index = INDEX_PATTERN_ELASTICSEARCH;

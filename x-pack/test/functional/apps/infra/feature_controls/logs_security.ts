@@ -50,6 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_logs_all_role'),
@@ -59,7 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows logs navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Logs', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Alerts', 'Logs', 'Stack Management']);
       });
 
       describe('logs landing page without data', () => {
@@ -112,6 +113,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_logs_read_role'),
@@ -121,7 +123,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows logs navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Logs', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Alerts', 'Logs', 'Stack Management']);
       });
 
       describe('logs landing page without data', () => {
@@ -174,6 +176,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_logs_no_privileges_role'),

@@ -12,7 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "System Shells via Services",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"services.exe\" and\n  process.name : (\"cmd.exe\", \"powershell.exe\") and\n  \n  /* Third party FP's */\n  not process.args : \"NVDisplay.ContainerLocalSystem\"\n",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.parent.name : \"services.exe\" and\n  process.name : (\"cmd.exe\", \"powershell.exe\", \"pwsh.exe\", \"powershell_ise.exe\") and\n  \n  /* Third party FP's */\n  not process.args : \"NVDisplay.ContainerLocalSystem\"\n",
   "risk_score": 47,
   "rule_id": "0022d47d-39c7-4f69-a232-4fe9dc7a3acd",
   "severity": "medium",
@@ -49,5 +49,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 9
+  "version": 10
 }

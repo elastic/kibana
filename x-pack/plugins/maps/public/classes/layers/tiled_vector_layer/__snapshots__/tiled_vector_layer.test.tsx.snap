@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`icon should use no data icon 1`] = `
-<span
-  color="subdued"
-  data-euiicon-type="minusInCircle"
-  size="m"
-/>
-`;

@@ -766,12 +766,12 @@
           {
             "parentPluginId": "inspector",
             "id": "def-public.Adapters.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  any"
             ],
             "path": "src/plugins/inspector/common/adapters/types.ts",
             "deprecated": false
@@ -1227,12 +1227,19 @@
           {
             "parentPluginId": "inspector",
             "id": "def-public.RequestStatistics.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: RequestStatistic",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestStatistic",
+                "text": "RequestStatistic"
+              }
             ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
             "deprecated": false
@@ -2022,12 +2029,12 @@
           {
             "parentPluginId": "inspector",
             "id": "def-common.Adapters.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  any"
             ],
             "path": "src/plugins/inspector/common/adapters/types.ts",
             "deprecated": false
@@ -2230,12 +2237,19 @@
           {
             "parentPluginId": "inspector",
             "id": "def-common.RequestStatistics.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: RequestStatistic",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.RequestStatistic",
+                "text": "RequestStatistic"
+              }
             ],
             "path": "src/plugins/inspector/common/adapters/request/types.ts",
             "deprecated": false

@@ -36,12 +36,19 @@ export interface IRuleDataService {
   getResourceName(relativeName: string): string;
 
   /**
-   * If write is enabled, everything works as usual.
-   * If it's disabled, writing to all alerts-as-data indices will be disabled,
+   * If write is enabled for the specified registration context, everything works as usual.
+   * If it's disabled, writing to the registration context's alerts-as-data indices will be disabled,
    * and also Elasticsearch resources associated with the indices will not be
    * installed.
    */
-  isWriteEnabled(): boolean;
+  isWriteEnabled(registrationContext: string): boolean;
+
+  /**
+   * If writer cache is enabled (the default), the writer will be cached
+   * after being initialized. Disabling this is useful for tests, where we
+   * expect to easily be able to clean up after ourselves between test cases.
+   */
+  isWriterCacheEnabled(): boolean;
 
   /**
    * Installs common Elasticsearch resources used by all alerts-as-data indices.
@@ -75,6 +82,8 @@ interface ConstructorOptions {
   logger: Logger;
   kibanaVersion: string;
   isWriteEnabled: boolean;
+  isWriterCacheEnabled: boolean;
+  disabledRegistrationContexts: string[];
 }
 
 export class RuleDataService implements IRuleDataService {
@@ -87,11 +96,11 @@ export class RuleDataService implements IRuleDataService {
   constructor(private readonly options: ConstructorOptions) {
     this.indicesByBaseName = new Map();
     this.indicesByFeatureId = new Map();
-
     this.resourceInstaller = new ResourceInstaller({
       getResourceName: (name) => this.getResourceName(name),
       getClusterClient: options.getClusterClient,
       logger: options.logger,
+      disabledRegistrationContexts: options.disabledRegistrationContexts,
       isWriteEnabled: options.isWriteEnabled,
     });
 
@@ -107,10 +116,26 @@ export class RuleDataService implements IRuleDataService {
     return joinWithDash(this.getResourcePrefix(), relativeName);
   }
 
-  public isWriteEnabled(): boolean {
-    return this.options.isWriteEnabled;
+  public isWriteEnabled(registrationContext: string): boolean {
+    return this.options.isWriteEnabled && !this.isRegistrationContextDisabled(registrationContext);
   }
 
+  public isRegistrationContextDisabled(registrationContext: string): boolean {
+    return this.options.disabledRegistrationContexts.includes(registrationContext);
+  }
+
+  /**
+   * If writer cache is enabled (the default), the writer will be cached
+   * after being initialized. Disabling this is useful for tests, where we
+   * expect to easily be able to clean up after ourselves between test cases.
+   */
+  public isWriterCacheEnabled(): boolean {
+    return this.options.isWriterCacheEnabled;
+  }
+
+  /**
+   * Installs common Elasticsearch resources used by all alerts-as-data indices.
+   */
   public initializeService(): void {
     // Run the installation of common resources and handle exceptions.
     this.installCommonResources = this.resourceInstaller
@@ -130,7 +155,7 @@ export class RuleDataService implements IRuleDataService {
         'Rule data service is not initialized. Make sure to call initializeService() in the rule registry plugin setup phase'
       );
     }
-
+    const { registrationContext } = indexOptions;
     const indexInfo = new IndexInfo({ indexOptions, kibanaVersion: this.options.kibanaVersion });
 
     const indicesAssociatedWithFeature = this.indicesByFeatureId.get(indexOptions.feature) ?? [];
@@ -153,8 +178,9 @@ export class RuleDataService implements IRuleDataService {
         if (isLeft(result)) {
           return result;
         }
-
-        await this.resourceInstaller.installIndexLevelResources(indexInfo);
+        if (!this.isRegistrationContextDisabled(registrationContext)) {
+          await this.resourceInstaller.installIndexLevelResources(indexInfo);
+        }
 
         const clusterClient = await this.options.getClusterClient();
         return right(clusterClient);
@@ -175,7 +201,8 @@ export class RuleDataService implements IRuleDataService {
     return new RuleDataClient({
       indexInfo,
       resourceInstaller: this.resourceInstaller,
-      isWriteEnabled: this.isWriteEnabled(),
+      isWriteEnabled: this.isWriteEnabled(registrationContext),
+      isWriterCacheEnabled: this.isWriterCacheEnabled(),
       waitUntilReadyForReading,
       waitUntilReadyForWriting,
       logger: this.options.logger,

@@ -12,6 +12,7 @@ import '../../../__mocks__/engine_logic.mock';
 import React from 'react';
 
 import { shallow } from 'enzyme';
+import { set } from 'lodash/fp';
 
 import { CurationsTable, EmptyState } from '../components';
 
@@ -33,8 +34,10 @@ const MOCK_VALUES = {
       id: 'cur-id-2',
     },
   ],
-  // LicensingLogics
-  hasPlatinumLicense: true,
+  // EngineLogic
+  engine: {
+    adaptive_relevance_suggestions_active: true,
+  },
 };
 
 describe('CurationsOverview', () => {
@@ -67,36 +70,15 @@ describe('CurationsOverview', () => {
     expect(wrapper.find(CurationsTable)).toHaveLength(1);
   });
 
-  it('renders a suggestions table when the user has a platinum license and curations suggestions enabled', () => {
-    setMockValues({
-      ...MOCK_VALUES,
-      hasPlatinumLicense: true,
-      curationsSettings: {
-        enabled: true,
-      },
-    });
+  it('renders a suggestions table when suggestions are active', () => {
+    setMockValues(set('engine.adaptive_relevance_suggestions_active', true, MOCK_VALUES));
     const wrapper = shallow(<CurationsOverview />);
 
     expect(wrapper.find(SuggestionsTable).exists()).toBe(true);
   });
 
-  it('doesn\t render a suggestions table when the user has no platinum license', () => {
-    setMockValues({
-      ...MOCK_VALUES,
-      hasPlatinumLicense: false,
-    });
-    const wrapper = shallow(<CurationsOverview />);
-
-    expect(wrapper.find(SuggestionsTable).exists()).toBe(false);
-  });
-
-  it('doesn\t render a suggestions table when the user has disabled suggestions', () => {
-    setMockValues({
-      ...MOCK_VALUES,
-      curationsSettings: {
-        enabled: false,
-      },
-    });
+  it('doesn\t render a suggestions table when suggestions are not active', () => {
+    setMockValues(set('engine.adaptive_relevance_suggestions_active', false, MOCK_VALUES));
     const wrapper = shallow(<CurationsOverview />);
 
     expect(wrapper.find(SuggestionsTable).exists()).toBe(false);

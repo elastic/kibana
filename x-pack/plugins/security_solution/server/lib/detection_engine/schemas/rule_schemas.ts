@@ -28,6 +28,16 @@ import {
 import { listArray } from '@kbn/securitysolution-io-ts-list-types';
 import { version } from '@kbn/securitysolution-io-ts-types';
 import {
+  SIGNALS_ID,
+  EQL_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  THRESHOLD_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+} from '@kbn/securitysolution-rules';
+
+import {
   author,
   buildingBlockTypeOrUndefined,
   description,
@@ -62,16 +72,7 @@ import {
   created_at,
   updated_at,
 } from '../../../../common/detection_engine/schemas/common/schemas';
-
-import {
-  SIGNALS_ID,
-  SERVER_APP_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  QUERY_RULE_TYPE_ID,
-  EQL_RULE_TYPE_ID,
-  THRESHOLD_RULE_TYPE_ID,
-} from '../../../../common/constants';
+import { SERVER_APP_ID } from '../../../../common/constants';
 import { SanitizedRuleConfig } from '../../../../../alerting/common';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
@@ -216,9 +217,10 @@ export const notifyWhen = t.union([
 export const allRuleTypes = t.union([
   t.literal(SIGNALS_ID),
   t.literal(EQL_RULE_TYPE_ID),
+  t.literal(INDICATOR_RULE_TYPE_ID),
   t.literal(ML_RULE_TYPE_ID),
   t.literal(QUERY_RULE_TYPE_ID),
-  t.literal(INDICATOR_RULE_TYPE_ID),
+  t.literal(SAVED_QUERY_RULE_TYPE_ID),
   t.literal(THRESHOLD_RULE_TYPE_ID),
 ]);
 export type AllRuleTypes = t.TypeOf<typeof allRuleTypes>;

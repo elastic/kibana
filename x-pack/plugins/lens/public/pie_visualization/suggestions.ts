@@ -7,19 +7,55 @@
 
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { SuggestionRequest, VisualizationSuggestion } from '../types';
+import type { SuggestionRequest, TableSuggestionColumn, VisualizationSuggestion } from '../types';
 import { layerTypes } from '../../common';
 import type { PieVisualizationState } from '../../common/expressions';
-import { CHART_NAMES, MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS } from './constants';
+import { PartitionChartsMeta } from './partition_charts_meta';
+import { isPartitionShape } from './render_helpers';
+import { PieChartTypes } from '../../common/expressions/pie_chart/types';
 
-function shouldReject({ table, keptLayerIds }: SuggestionRequest<PieVisualizationState>) {
+function hasIntervalScale(columns: TableSuggestionColumn[]) {
+  return columns.some((col) => col.operation.scale === 'interval');
+}
+
+function shouldReject({ table, keptLayerIds, state }: SuggestionRequest<PieVisualizationState>) {
+  // Histograms are not good for pi. But we should not reject them on switching between partition charts.
+  const shouldRejectIntervals =
+    state?.shape && isPartitionShape(state.shape) ? false : hasIntervalScale(table.columns);
+
   return (
     keptLayerIds.length > 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
     table.changeType === 'reorder' ||
-    table.columns.some((col) => col.operation.scale === 'interval') // Histograms are not good for pie
+    shouldRejectIntervals ||
+    table.columns.some((col) => col.operation.isStaticValue)
   );
 }
+
+function getNewShape(
+  groups: TableSuggestionColumn[],
+  subVisualizationId?: PieVisualizationState['shape']
+) {
+  if (subVisualizationId) {
+    return subVisualizationId;
+  }
+
+  let newShape: PieVisualizationState['shape'] | undefined;
+
+  if (groups.length !== 1 && !subVisualizationId) {
+    newShape = 'pie';
+  }
+
+  return newShape ?? 'donut';
+}
+
+function hasCustomSuggestionsExists(shape: PieChartTypes | string | undefined) {
+  return shape ? ['treemap', 'waffle', 'mosaic'].includes(shape) : false;
+}
+
+const maximumGroupLength = Math.max(
+  ...Object.values(PartitionChartsMeta).map(({ maxBuckets }) => maxBuckets)
+);
 
 export function suggestions({
   table,
@@ -36,7 +72,7 @@ export function suggestions({
 
   const [groups, metrics] = partition(table.columns, (col) => col.operation.isBucketed);
 
-  if (metrics.length > 1 || groups.length > Math.max(MAX_PIE_BUCKETS, MAX_TREEMAP_BUCKETS)) {
+  if (metrics.length > 1 || groups.length > maximumGroupLength) {
     return [];
   }
 
@@ -52,20 +88,18 @@ export function suggestions({
 
   const results: Array<VisualizationSuggestion<PieVisualizationState>> = [];
 
-  if (groups.length <= MAX_PIE_BUCKETS && subVisualizationId !== 'treemap') {
-    let newShape: PieVisualizationState['shape'] =
-      (subVisualizationId as PieVisualizationState['shape']) || 'donut';
-    if (groups.length !== 1 && !subVisualizationId) {
-      newShape = 'pie';
-    }
-
+  if (
+    groups.length <= PartitionChartsMeta.pie.maxBuckets &&
+    !hasCustomSuggestionsExists(subVisualizationId)
+  ) {
+    const newShape = getNewShape(groups, subVisualizationId as PieVisualizationState['shape']);
     const baseSuggestion: VisualizationSuggestion<PieVisualizationState> = {
       title: i18n.translate('xpack.lens.pie.suggestionLabel', {
         defaultMessage: 'As {chartName}',
-        values: { chartName: CHART_NAMES[newShape].label },
+        values: { chartName: PartitionChartsMeta[newShape].label },
         description: 'chartName is already translated',
       }),
-      score: state && state.shape !== 'treemap' ? 0.6 : 0.4,
+      score: state && !hasCustomSuggestionsExists(state.shape) ? 0.6 : 0.4,
       state: {
         shape: newShape,
         palette: mainPalette || state?.palette,
@@ -92,7 +126,10 @@ export function suggestions({
       },
       previewIcon: 'bullseye',
       // dont show suggestions for same type
-      hide: table.changeType === 'reduced' || (state && state.shape !== 'treemap'),
+      hide:
+        table.changeType === 'reduced' ||
+        hasIntervalScale(groups) ||
+        (state && !hasCustomSuggestionsExists(state.shape)),
     };
 
     results.push(baseSuggestion);
@@ -100,7 +137,7 @@ export function suggestions({
       ...baseSuggestion,
       title: i18n.translate('xpack.lens.pie.suggestionLabel', {
         defaultMessage: 'As {chartName}',
-        values: { chartName: CHART_NAMES[newShape === 'pie' ? 'donut' : 'pie'].label },
+        values: { chartName: PartitionChartsMeta[newShape === 'pie' ? 'donut' : 'pie'].label },
         description: 'chartName is already translated',
       }),
       score: 0.1,
@@ -113,7 +150,7 @@ export function suggestions({
   }
 
   if (
-    groups.length <= MAX_TREEMAP_BUCKETS &&
+    groups.length <= PartitionChartsMeta.treemap.maxBuckets &&
     (!subVisualizationId || subVisualizationId === 'treemap')
   ) {
     results.push({
@@ -153,7 +190,89 @@ export function suggestions({
       },
       previewIcon: 'bullseye',
       // hide treemap suggestions from bottom bar, but keep them for chart switcher
-      hide: table.changeType === 'reduced' || !state || (state && state.shape === 'treemap'),
+      hide:
+        table.changeType === 'reduced' ||
+        !state ||
+        hasIntervalScale(groups) ||
+        (state && state.shape === 'treemap'),
+    });
+  }
+
+  if (
+    groups.length <= PartitionChartsMeta.mosaic.maxBuckets &&
+    (!subVisualizationId || subVisualizationId === 'mosaic')
+  ) {
+    results.push({
+      title: i18n.translate('xpack.lens.pie.mosaicSuggestionLabel', {
+        defaultMessage: 'As Mosaic',
+      }),
+      score: state?.shape === 'mosaic' ? 0.7 : 0.5,
+      state: {
+        shape: 'mosaic',
+        palette: mainPalette || state?.palette,
+        layers: [
+          state?.layers[0]
+            ? {
+                ...state.layers[0],
+                layerId: table.layerId,
+                groups: groups.map((col) => col.columnId),
+                metric: metricColumnId,
+                categoryDisplay: 'default',
+                layerType: layerTypes.DATA,
+              }
+            : {
+                layerId: table.layerId,
+                groups: groups.map((col) => col.columnId),
+                metric: metricColumnId,
+                numberDisplay: 'percent',
+                categoryDisplay: 'default',
+                legendDisplay: 'default',
+                nestedLegend: false,
+                layerType: layerTypes.DATA,
+              },
+        ],
+      },
+      previewIcon: 'bullseye',
+      hide: true,
+    });
+  }
+
+  if (
+    groups.length <= PartitionChartsMeta.waffle.maxBuckets &&
+    (!subVisualizationId || subVisualizationId === 'waffle')
+  ) {
+    results.push({
+      title: i18n.translate('xpack.lens.pie.waffleSuggestionLabel', {
+        defaultMessage: 'As Waffle',
+      }),
+      score: state?.shape === 'waffle' ? 0.7 : 0.5,
+      state: {
+        shape: 'waffle',
+        palette: mainPalette || state?.palette,
+        layers: [
+          state?.layers[0]
+            ? {
+                ...state.layers[0],
+                layerId: table.layerId,
+                groups: groups.map((col) => col.columnId),
+                metric: metricColumnId,
+                categoryDisplay: 'default',
+                layerType: layerTypes.DATA,
+              }
+            : {
+                layerId: table.layerId,
+                groups: groups.map((col) => col.columnId),
+                metric: metricColumnId,
+                numberDisplay: 'percent',
+                categoryDisplay: 'default',
+                legendDisplay: 'default',
+                nestedLegend: false,
+                layerType: layerTypes.DATA,
+              },
+        ],
+      },
+      previewIcon: 'bullseye',
+      hide: true,
     });
   }
 

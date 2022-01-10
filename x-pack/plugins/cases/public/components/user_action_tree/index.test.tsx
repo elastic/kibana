@@ -11,7 +11,6 @@ import { waitFor } from '@testing-library/react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import routeData from 'react-router';
 
-import { getFormMock, useFormMock, useFormDataMock } from '../__mock__/form';
 import { useUpdateComment } from '../../containers/use_update_comment';
 import {
   basicCase,
@@ -23,7 +22,8 @@ import {
 } from '../../containers/mock';
 import { UserActionTree } from '.';
 import { TestProviders } from '../../common/mock';
-import { Ecs } from '../../../common';
+import { Ecs } from '../../../common/ui/types';
+import { Actions } from '../../../common/api';
 
 const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();
@@ -34,7 +34,6 @@ const defaultProps = {
   caseServices: {},
   caseUserActions: [],
   connectors: [],
-  getCaseDetailHrefWithCommentId: jest.fn(),
   actionsNavigation: { href: jest.fn(), onClick: jest.fn() },
   getRuleDetailsHref: jest.fn(),
   onRuleDetailsClick: jest.fn(),
@@ -71,9 +70,6 @@ describe(`UserActionTree`, () => {
       isLoadingIds: [],
       patchComment,
     }));
-    const formHookMock = getFormMock(sampleData);
-    useFormMock.mockImplementation(() => ({ form: formHookMock }));
-    useFormDataMock.mockImplementation(() => [{ content: sampleData.content, comment: '' }]);
 
     jest
       .spyOn(routeData, 'useParams')
@@ -99,8 +95,8 @@ describe(`UserActionTree`, () => {
 
   it('Renders service now update line with top and bottom when push is required', async () => {
     const ourActions = [
-      getUserAction(['pushed'], 'push-to-service'),
-      getUserAction(['comment'], 'update'),
+      getUserAction('pushed', 'push_to_service'),
+      getUserAction('comment', Actions.update),
     ];
 
     const props = {
@@ -128,7 +124,7 @@ describe(`UserActionTree`, () => {
   });
 
   it('Renders service now update line with top only when push is up to date', async () => {
-    const ourActions = [getUserAction(['pushed'], 'push-to-service')];
+    const ourActions = [getUserAction('pushed', 'push_to_service')];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
@@ -154,7 +150,10 @@ describe(`UserActionTree`, () => {
     });
   });
   it('Outlines comment when update move to link is clicked', async () => {
-    const ourActions = [getUserAction(['comment'], 'create'), getUserAction(['comment'], 'update')];
+    const ourActions = [
+      getUserAction('comment', Actions.create),
+      getUserAction('comment', Actions.update),
+    ];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
@@ -189,7 +188,7 @@ describe(`UserActionTree`, () => {
     });
   });
   it('Switches to markdown when edit is clicked and back to panel when canceled', async () => {
-    const ourActions = [getUserAction(['comment'], 'create')];
+    const ourActions = [getUserAction('comment', Actions.create)];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
@@ -233,7 +232,7 @@ describe(`UserActionTree`, () => {
   });
 
   it('calls update comment when comment markdown is saved', async () => {
-    const ourActions = [getUserAction(['comment'], 'create')];
+    const ourActions = [getUserAction('comment', Actions.create)];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
@@ -258,6 +257,13 @@ describe(`UserActionTree`, () => {
       )
       .first()
       .simulate('click');
+
+    wrapper
+      .find(`.euiMarkdownEditorTextArea`)
+      .first()
+      .simulate('change', {
+        target: { value: sampleData.content },
+      });
 
     wrapper
       .find(
@@ -305,6 +311,13 @@ describe(`UserActionTree`, () => {
       .simulate('click');
 
     wrapper
+      .find(`.euiMarkdownEditorTextArea`)
+      .first()
+      .simulate('change', {
+        target: { value: sampleData.content },
+      });
+
+    wrapper
       .find(`[data-test-subj="description-action"] [data-test-subj="user-action-save-markdown"]`)
       .first()
       .simulate('click');
@@ -322,21 +335,16 @@ describe(`UserActionTree`, () => {
     });
   });
 
-  it('quotes', async () => {
-    const commentData = {
-      comment: '',
-    };
-    const setFieldValue = jest.fn();
+  it('shows quoted text in last MarkdownEditorTextArea', async () => {
+    const quoteableText = `> ${defaultProps.data.description} \n\n`;
 
-    const formHookMock = getFormMock(commentData);
-    useFormMock.mockImplementation(() => ({ form: { ...formHookMock, setFieldValue } }));
-
-    const props = defaultProps;
     const wrapper = mount(
       <TestProviders>
-        <UserActionTree {...props} />
+        <UserActionTree {...defaultProps} />
       </TestProviders>
     );
+
+    expect(wrapper.find(`.euiMarkdownEditorTextArea`).text()).not.toContain(quoteableText);
 
     wrapper
       .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-ellipses"]`)
@@ -347,8 +355,9 @@ describe(`UserActionTree`, () => {
       .find(`[data-test-subj="description-action"] [data-test-subj="property-actions-quote"]`)
       .first()
       .simulate('click');
+
     await waitFor(() => {
-      expect(setFieldValue).toBeCalledWith('comment', `> ${props.data.description} \n`);
+      expect(wrapper.find(`.euiMarkdownEditorTextArea`).text()).toContain(quoteableText);
     });
   });
 
@@ -356,7 +365,7 @@ describe(`UserActionTree`, () => {
     const commentId = 'basic-comment-id';
     jest.spyOn(routeData, 'useParams').mockReturnValue({ commentId });
 
-    const ourActions = [getUserAction(['comment'], 'create')];
+    const ourActions = [getUserAction('comment', Actions.create)];
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
@@ -376,6 +385,7 @@ describe(`UserActionTree`, () => {
       ).toEqual(true);
     });
   });
+
   describe('Host isolation action', () => {
     it('renders in the cases details view', async () => {
       const isolateAction = [getHostIsolationUserAction()];

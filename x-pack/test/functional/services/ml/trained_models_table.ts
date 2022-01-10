@@ -146,8 +146,8 @@ export function TrainedModelsTableProvider({ getService }: FtrProviderContext) {
       // 'Created at' will be different on each run,
       // so we will just assert that the value is in the expected timestamp format.
       expect(modelRow.createdAt).to.match(
-        /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
-        `Expected trained model row created at time to have same format as '2019-12-05 12:28:34' (got '${modelRow.createdAt}')`
+        /^\w{3}\s\d+,\s\d{4}\s@\s\d{2}:\d{2}:\d{2}\.\d{3}$/,
+        `Expected trained model row created at time to have same format as 'Dec 5, 2019 @ 12:28:34.594' (got '${modelRow.createdAt}')`
       );
     }
 

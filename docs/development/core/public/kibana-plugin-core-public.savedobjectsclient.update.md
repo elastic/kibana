@@ -16,13 +16,13 @@ update<T = unknown>(type: string, id: string, attributes: T, { version, referenc
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  type | <code>string</code> |  |
-|  id | <code>string</code> |  |
-|  attributes | <code>T</code> |  |
-|  { version, references, upsert } | <code>SavedObjectsUpdateOptions</code> |  |
+|  type | string |  |
+|  id | string |  |
+|  attributes | T |  |
+|  { version, references, upsert } | SavedObjectsUpdateOptions |  |
 
 <b>Returns:</b>
 
-`Promise<SimpleSavedObject<T>>`
+Promise&lt;SimpleSavedObject&lt;T&gt;&gt;
 
 

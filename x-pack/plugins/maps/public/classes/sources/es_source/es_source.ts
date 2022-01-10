@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-import { Filter, IndexPatternField, IndexPattern, ISearchSource } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { IndexPatternField, IndexPattern, ISearchSource } from 'src/plugins/data/public';
 import type { Query } from 'src/plugins/data/common';
 import { AbstractVectorSource, BoundsRequestMeta } from '../vector_source';
 import {
@@ -20,7 +21,7 @@ import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { DataRequestAbortError } from '../../util/data_request';
-import { expandToTileBoundaries } from '../../../../common/geo_tile_utils';
+import { expandToTileBoundaries } from '../../util/geo_tile_utils';
 import { IVectorSource } from '../vector_source';
 import { TimeRange } from '../../../../../../../src/plugins/data/common';
 import {

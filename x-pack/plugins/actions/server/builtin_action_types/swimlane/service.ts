@@ -9,7 +9,7 @@ import { Logger } from '@kbn/logging';
 import axios from 'axios';
 
 import { ActionsConfigurationUtilities } from '../../actions_config';
-import { getErrorMessage, request } from '../lib/axios_utils';
+import { getErrorMessage, request, throwIfResponseIsNotValid } from '../lib/axios_utils';
 import { getBodyForEventAction } from './helpers';
 import {
   CreateCommentParams,
@@ -89,6 +89,12 @@ export const createExternalService = (
         method: 'post',
         url: getPostRecordUrl(appId),
       });
+
+      throwIfResponseIsNotValid({
+        res,
+        requiredAttributesToBeInTheResponse: ['id', 'name', 'createdDate'],
+      });
+
       return {
         id: res.data.id,
         title: res.data.name,
@@ -122,6 +128,11 @@ export const createExternalService = (
         logger,
         method: 'patch',
         url: getPostRecordIdUrl(appId, params.incidentId),
+      });
+
+      throwIfResponseIsNotValid({
+        res,
+        requiredAttributesToBeInTheResponse: ['id', 'name', 'modifiedDate'],
       });
 
       return {

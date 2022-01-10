@@ -11,7 +11,11 @@ import { EuiSpacer, EuiCallOut } from '@elastic/eui';
 import * as i18n from './translations';
 import { SNStoreButton } from './sn_store_button';
 
-const InstallationCalloutComponent: React.FC = () => {
+interface Props {
+  appId: string;
+}
+
+const InstallationCalloutComponent: React.FC<Props> = ({ appId }) => {
   return (
     <>
       <EuiSpacer size="s" />
@@ -22,7 +26,7 @@ const InstallationCalloutComponent: React.FC = () => {
         data-test-subj="snInstallationCallout"
         title={i18n.INSTALLATION_CALLOUT_TITLE}
       >
-        <SNStoreButton color="warning" />
+        <SNStoreButton color="warning" appId={appId} />
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>

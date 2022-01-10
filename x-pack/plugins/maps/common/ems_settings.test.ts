@@ -18,7 +18,6 @@ const IS_ENTERPRISE_PLUS = () => true;
 describe('EMSSettings', () => {
   const mockConfig: IEMSConfig = {
     includeElasticMapsService: true,
-    proxyElasticMapsServiceInMaps: false,
     emsUrl: '',
     emsFileApiUrl: DEFAULT_EMS_FILE_API_URL,
     emsTileApiUrl: DEFAULT_EMS_TILE_API_URL,

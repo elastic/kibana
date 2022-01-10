@@ -25,8 +25,7 @@ import { registerMapsUsageCollector } from './maps_telemetry/collectors/register
 import { APP_ID, APP_ICON, MAP_SAVED_OBJECT_TYPE, getFullPath } from '../common/constants';
 import { mapSavedObjects, mapsTelemetrySavedObjects } from './saved_objects';
 import { MapsXPackConfig } from '../config';
-// @ts-ignore
-import { setIndexPatternsService, setInternalRepository } from './kibana_server_services';
+import { setStartServices } from './kibana_server_services';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
 import { emsBoundariesSpecProvider } from './tutorials/ems';
 // @ts-ignore
@@ -39,6 +38,8 @@ import { EMSSettings } from '../common/ems_settings';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import { EmbeddableSetup } from '../../../../src/plugins/embeddable/server';
 import { embeddableMigrations } from './embeddable_migrations';
+import { CustomIntegrationsPluginSetup } from '../../../../src/plugins/custom_integrations/server';
+import { registerIntegrations } from './register_integrations';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
@@ -47,6 +48,7 @@ interface SetupDeps {
   licensing: LicensingPluginSetup;
   mapsEms: MapsEmsPluginSetup;
   embeddable: EmbeddableSetup;
+  customIntegrations?: CustomIntegrationsPluginSetup;
 }
 
 export interface StartDeps {
@@ -77,17 +79,37 @@ export class MapsPlugin implements Plugin {
 
     home.sampleData.addAppLinksToSampleDataset('ecommerce', [
       {
-        path: getFullPath('2c9c1f60-1909-11e9-919b-ffe5949a18d2'),
+        sampleObject: {
+          type: MAP_SAVED_OBJECT_TYPE,
+          id: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
+        },
+        getPath: getFullPath,
         label: sampleDataLinkLabel,
         icon: APP_ICON,
       },
     ]);
 
+    home.sampleData.replacePanelInSampleDatasetDashboard({
+      sampleDataId: 'ecommerce',
+      dashboardId: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
+      oldEmbeddableId: '9c6f83f0-bb4d-11e8-9c84-77068524bcab',
+      embeddableId: '2c9c1f60-1909-11e9-919b-ffe5949a18d2',
+      // @ts-ignore
+      embeddableType: MAP_SAVED_OBJECT_TYPE,
+      embeddableConfig: {
+        isLayerTOCOpen: false,
+      },
+    });
+
     home.sampleData.addSavedObjectsToSampleDataset('flights', getFlightsSavedObjects());
 
     home.sampleData.addAppLinksToSampleDataset('flights', [
       {
-        path: getFullPath('5dd88580-1906-11e9-919b-ffe5949a18d2'),
+        sampleObject: {
+          type: MAP_SAVED_OBJECT_TYPE,
+          id: '5dd88580-1906-11e9-919b-ffe5949a18d2',
+        },
+        getPath: getFullPath,
         label: sampleDataLinkLabel,
         icon: APP_ICON,
       },
@@ -108,7 +130,11 @@ export class MapsPlugin implements Plugin {
     home.sampleData.addSavedObjectsToSampleDataset('logs', getWebLogsSavedObjects());
     home.sampleData.addAppLinksToSampleDataset('logs', [
       {
-        path: getFullPath('de71f4f0-1902-11e9-919b-ffe5949a18d2'),
+        sampleObject: {
+          type: MAP_SAVED_OBJECT_TYPE,
+          id: 'de71f4f0-1902-11e9-919b-ffe5949a18d2',
+        },
+        getPath: getFullPath,
         label: sampleDataLinkLabel,
         icon: APP_ICON,
       },
@@ -133,9 +159,8 @@ export class MapsPlugin implements Plugin {
     );
   }
 
-  // @ts-ignore
   setup(core: CoreSetup, plugins: SetupDeps) {
-    const { usageCollection, home, licensing, features, mapsEms } = plugins;
+    const { usageCollection, home, licensing, features, mapsEms, customIntegrations } = plugins;
     const mapsEmsConfig = mapsEms.config;
     const config$ = this._initializerContext.config.create();
 
@@ -152,6 +177,10 @@ export class MapsPlugin implements Plugin {
 
     if (home) {
       this._initHomeData(home, core.http.basePath.prepend, emsSettings);
+    }
+
+    if (customIntegrations) {
+      registerIntegrations(core, customIntegrations);
     }
 
     features.registerKibanaFeature({
@@ -199,12 +228,7 @@ export class MapsPlugin implements Plugin {
     };
   }
 
-  // @ts-ignore
   start(core: CoreStart, plugins: StartDeps) {
-    setInternalRepository(core.savedObjects.createInternalRepository);
-    setIndexPatternsService(
-      plugins.data.indexPatterns.indexPatternsServiceFactory,
-      core.elasticsearch.client.asInternalUser
-    );
+    setStartServices(core, plugins);
   }
 }

@@ -12,10 +12,12 @@ export const createVisualizeEmbeddableAsync = async (
   ...args: ConstructorParameters<typeof VisualizeEmbeddableType>
 ) => {
   // Build optimization. Move app styles from main bundle
-  // @ts-expect-error TS error, cannot find type declaration for scss
-  await import('./embeddables.scss');
 
-  const { VisualizeEmbeddable } = await import('./visualize_embeddable');
+  const [{ VisualizeEmbeddable }] = await Promise.all([
+    import('./visualize_embeddable'),
+    // @ts-expect-error TS error, cannot find type declaration for scss
+    import('./embeddables.scss'),
+  ]);
 
   return new VisualizeEmbeddable(...args);
 };

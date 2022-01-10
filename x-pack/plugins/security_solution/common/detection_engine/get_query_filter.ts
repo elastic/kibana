@@ -11,7 +11,7 @@ import type {
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { buildExceptionFilter } from '@kbn/securitysolution-list-utils';
-import { Filter, EsQueryConfig, IndexPatternBase, buildEsQuery } from '@kbn/es-query';
+import { Filter, EsQueryConfig, DataViewBase, buildEsQuery } from '@kbn/es-query';
 
 import { ESBoolQuery } from '../typed_json';
 import { Query, Index, TimestampOverrideOrUndefined } from './schemas/common/schemas';
@@ -24,7 +24,7 @@ export const getQueryFilter = (
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   excludeExceptions: boolean = true
 ): ESBoolQuery => {
-  const indexPattern: IndexPatternBase = {
+  const indexPattern: DataViewBase = {
     fields: [],
     title: index.join(),
   };

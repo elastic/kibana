@@ -16,15 +16,18 @@ export const createBootstrapIndex = async (
   index: string
 ): Promise<unknown> => {
   return (
-    await esClient.indices.create({
-      index: `${index}-000001`,
-      body: {
-        aliases: {
-          [index]: {
-            is_write_index: true,
+    await esClient.indices.create(
+      {
+        index: `${index}-000001`,
+        body: {
+          aliases: {
+            [index]: {
+              is_write_index: true,
+            },
           },
         },
       },
-    })
+      { meta: true }
+    )
   ).body;
 };

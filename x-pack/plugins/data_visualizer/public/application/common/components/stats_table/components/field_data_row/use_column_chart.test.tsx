@@ -106,7 +106,7 @@ describe('getLegendText()', () => {
     expect(getLegendText(validUnsupportedChartData, 20)).toBe('Chart not supported.');
   });
   it('should return the chart legend text for empty datasets', () => {
-    expect(getLegendText(validNumericChartData, 20)).toBe('0 documents contain field.');
+    expect(getLegendText(validNumericChartData, 20)).toBe('');
   });
   it('should return the chart legend text for boolean chart types', () => {
     const { getByText } = render(
@@ -186,7 +186,7 @@ describe('useColumnChart()', () => {
     );
 
     expect(result.current.data).toStrictEqual([]);
-    expect(result.current.legendText).toBe('0 documents contain field.');
+    expect(result.current.legendText).toBe('');
     expect(result.current.xScaleType).toBe('linear');
   });
 });

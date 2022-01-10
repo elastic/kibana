@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import React, { FC, useCallback } from 'react';
 import { EuiFieldText, EuiFieldNumber, EuiButtonGroup } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -47,14 +47,18 @@ export const VarValueField: FC<Props> = ({ type, value, onChange }) => {
     },
   ];
 
+  const onNumberChange = useCallback(
+    (e) => {
+      const floatVal = parseFloat(e.target.value);
+      const varValue = isNaN(floatVal) ? '' : floatVal;
+      onChange(varValue);
+    },
+    [onChange]
+  );
+
   if (type === 'number') {
     return (
-      <EuiFieldNumber
-        compressed
-        name="value"
-        value={value as number}
-        onChange={(e) => onChange(parseFloat(e.target.value))}
-      />
+      <EuiFieldNumber compressed name="value" value={value as number} onChange={onNumberChange} />
     );
   }
 

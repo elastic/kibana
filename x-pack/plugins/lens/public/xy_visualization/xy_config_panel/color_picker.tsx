@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './xy_config_panel.scss';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';

@@ -12,7 +12,8 @@ import { FilterLabel } from './filter_label';
 import * as useSeriesHook from '../hooks/use_series_filters';
 import { buildFilterLabel } from '../../filter_value_label/filter_value_label';
 
-describe('FilterLabel', function () {
+// FLAKY: https://github.com/elastic/kibana/issues/115324
+describe.skip('FilterLabel', function () {
   mockAppIndexPattern();
 
   const invertFilter = jest.fn();

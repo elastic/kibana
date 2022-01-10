@@ -16,13 +16,14 @@ export function createMockLevelLogger() {
 
   const logger = new LevelLogger(loggingSystemMock.create()) as jest.Mocked<LevelLogger>;
 
-  logger.clone.mockImplementation(createMockLevelLogger);
-  logger.debug.mockImplementation(consoleLogger('debug'));
+  // logger.debug.mockImplementation(consoleLogger('debug')); // uncomment this to see debug logs in jest tests
   logger.info.mockImplementation(consoleLogger('info'));
   logger.warn.mockImplementation(consoleLogger('warn'));
   logger.warning = jest.fn().mockImplementation(consoleLogger('warn'));
   logger.error.mockImplementation(consoleLogger('error'));
   logger.trace.mockImplementation(consoleLogger('trace'));
+
+  logger.clone.mockImplementation(() => logger);
 
   return logger;
 }

@@ -6,9 +6,9 @@
  */
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { i18n } from '@kbn/i18n';
@@ -69,7 +69,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
       if (
         !(
           isEsSearchResponseWithAggregations(response) &&
-          isMultiBucketAggregate<estypes.AggregationsKeyedBucketKeys>(
+          isMultiBucketAggregate<estypes.AggregationsSignificantLongTermsBucket>(
             response.aggregations.field_values
           )
         )
@@ -83,7 +83,10 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
       }
 
       setOptions(
-        response.aggregations.field_values.buckets.map((value) => ({ label: value.key + '' }))
+        (
+          response.aggregations.field_values
+            .buckets as estypes.AggregationsSignificantLongTermsBucket[]
+        ).map((value) => ({ label: value.key + '' }))
       );
     }, 600),
     [selectedField]

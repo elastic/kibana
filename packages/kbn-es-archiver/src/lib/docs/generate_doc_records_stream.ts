@@ -7,7 +7,7 @@
  */
 
 import { Transform } from 'stream';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
@@ -19,11 +19,13 @@ export function createGenerateDocRecordsStream({
   client,
   stats,
   progress,
+  keepIndexNames,
   query,
 }: {
-  client: KibanaClient;
+  client: Client;
   stats: Stats;
   progress: Progress;
+  keepIndexNames?: boolean;
   query?: Record<string, any>;
 }) {
   return new Transform({
@@ -36,10 +38,8 @@ export function createGenerateDocRecordsStream({
             index,
             scroll: SCROLL_TIMEOUT,
             size: SCROLL_SIZE,
-            _source: 'true',
-            body: {
-              query,
-            },
+            _source: true,
+            query,
             rest_total_hits_as_int: true,
           },
           {
@@ -61,10 +61,10 @@ export function createGenerateDocRecordsStream({
             this.push({
               type: 'doc',
               value: {
-                // always rewrite the .kibana_* index to .kibana_1 so that
+                // if keepIndexNames is false, rewrite the .kibana_* index to .kibana_1 so that
                 // when it is loaded it can skip migration, if possible
-                index: hit._index.startsWith('.kibana') ? '.kibana_1' : hit._index,
-                type: hit._type,
+                index:
+                  hit._index.startsWith('.kibana') && !keepIndexNames ? '.kibana_1' : hit._index,
                 id: hit._id,
                 source: hit._source,
               },

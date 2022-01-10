@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { SpacesLicenseService, SpacesLicense } from './license_service';
+export type { SpacesLicense } from './license_service';
+export { SpacesLicenseService } from './license_service';

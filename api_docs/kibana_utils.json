@@ -59,6 +59,82 @@
       },
       {
         "parentPluginId": "kibanaUtils",
+        "id": "def-public.CharacterNotAllowedInField",
+        "type": "Class",
+        "tags": [],
+        "label": "CharacterNotAllowedInField",
+        "description": [
+          "\nwhen a user is attempting to create a field with disallowed character in the name, like *"
+        ],
+        "signature": [
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.CharacterNotAllowedInField",
+            "text": "CharacterNotAllowedInField"
+          },
+          " extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.KbnError",
+            "text": "KbnError"
+          }
+        ],
+        "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.CharacterNotAllowedInField.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.CharacterNotAllowedInField.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "character",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-public.CharacterNotAllowedInField.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
         "id": "def-public.Defer",
         "type": "Class",
         "tags": [],
@@ -1551,11 +1627,11 @@
         "signature": [
           "(history: ",
           "History",
-          "<any>) => ",
+          "<unknown>) => ",
           "Observable",
           "<{ location: ",
           "Location",
-          "<any>; action: ",
+          "<unknown>; action: ",
           "Action",
           "; }>"
         ],
@@ -1569,11 +1645,11 @@
             "tags": [],
             "label": "history",
             "description": [
-              "- {@link History} instance"
+              "- {@link History } instance"
             ],
             "signature": [
               "History",
-              "<any>"
+              "<unknown>"
             ],
             "path": "src/plugins/kibana_utils/public/history/history_observable.ts",
             "deprecated": false,
@@ -1593,7 +1669,7 @@
         "signature": [
           "(history?: ",
           "History",
-          "<any>) => ",
+          "<unknown>) => ",
           "IKbnUrlControls"
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
@@ -1608,7 +1684,7 @@
             "description": [],
             "signature": [
               "History",
-              "<any>"
+              "<unknown>"
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_storage.ts",
             "deprecated": false,
@@ -1628,9 +1704,9 @@
           "\nCreates {@link IKbnUrlStateStorage} state storage"
         ],
         "signature": [
-          "({ useHash, history, onGetError, onSetError, }?: { useHash: boolean; history?: ",
+          "({ useHash, useHashQuery, history, onGetError, onSetError, }?: { useHash: boolean; useHashQuery?: boolean | undefined; history?: ",
           "History",
-          "<any> | undefined; onGetError?: ((error: Error) => void) | undefined; onSetError?: ((error: Error) => void) | undefined; }) => ",
+          "<unknown> | undefined; onGetError?: ((error: Error) => void) | undefined; onSetError?: ((error: Error) => void) | undefined; }) => ",
           {
             "pluginId": "kibanaUtils",
             "scope": "public",
@@ -1647,7 +1723,7 @@
             "id": "def-public.createKbnUrlStateStorage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    useHash = false,\n    history,\n    onGetError,\n    onSetError,\n  }",
+            "label": "{\n    useHash = false,\n    useHashQuery = true,\n    history,\n    onGetError,\n    onSetError,\n  }",
             "description": [],
             "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
             "deprecated": false,
@@ -1664,6 +1740,19 @@
               },
               {
                 "parentPluginId": "kibanaUtils",
+                "id": "def-public.createKbnUrlStateStorage.$1.useHashQuery",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "useHashQuery",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "kibanaUtils",
                 "id": "def-public.createKbnUrlStateStorage.$1.history",
                 "type": "Object",
                 "tags": [],
@@ -1671,7 +1760,7 @@
                 "description": [],
                 "signature": [
                   "History",
-                  "<any> | undefined"
+                  "<unknown> | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_sync/state_sync_state_storage/create_kbn_url_state_storage.ts",
                 "deprecated": false
@@ -1740,7 +1829,7 @@
           }
         ],
         "returnComment": [
-          "- {@link IKbnUrlStateStorage}"
+          "- {@link IKbnUrlStateStorage }"
         ],
         "initialIsOpen": false
       },
@@ -1766,19 +1855,19 @@
             "section": "def-public.AppUpdater",
             "text": "AppUpdater"
           },
-          ">; toastNotifications: Pick<",
+          ">; toastNotifications: ",
           {
             "pluginId": "core",
             "scope": "public",
             "docId": "kibCorePluginApi",
-            "section": "def-public.ToastsApi",
-            "text": "ToastsApi"
+            "section": "def-public.IToasts",
+            "text": "IToasts"
           },
-          ", \"get$\" | \"add\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">; history?: ",
+          "; history?: ",
           "History",
-          "<any> | undefined; getHistory?: (() => ",
+          "<unknown> | undefined; getHistory?: (() => ",
           "History",
-          "<any>) | undefined; storage?: Storage | undefined; shouldTrackUrlUpdate?: ((pathname: string) => boolean) | undefined; onBeforeNavLinkSaved?: ((newNavLink: string) => string) | undefined; }) => ",
+          "<unknown>) | undefined; storage?: Storage | undefined; shouldTrackUrlUpdate?: ((pathname: string) => boolean) | undefined; onBeforeNavLinkSaved?: ((newNavLink: string) => string) | undefined; }) => ",
           "KbnUrlTracker"
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
@@ -2043,7 +2132,7 @@
                 ],
                 "signature": [
                   "History",
-                  "<any> | undefined"
+                  "<unknown> | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
                 "deprecated": false
@@ -2060,7 +2149,7 @@
                 "signature": [
                   "(() => ",
                   "History",
-                  "<any>) | undefined"
+                  "<unknown>) | undefined"
                 ],
                 "path": "src/plugins/kibana_utils/public/state_management/url/kbn_url_tracker.ts",
                 "deprecated": false,
@@ -2166,7 +2255,7 @@
         "signature": [
           "(history: ",
           "History",
-          "<any>, paramKey: string) => ",
+          "<unknown>, paramKey: string) => ",
           "Observable",
           "<Param | null>"
         ],
@@ -2180,11 +2269,11 @@
             "tags": [],
             "label": "history",
             "description": [
-              "- {@link History} instance"
+              "- {@link History } instance"
             ],
             "signature": [
               "History",
-              "<any>"
+              "<unknown>"
             ],
             "path": "src/plugins/kibana_utils/public/history/history_observable.ts",
             "deprecated": false,
@@ -2222,7 +2311,7 @@
         "signature": [
           "(history: ",
           "History",
-          "<any>) => ",
+          "<unknown>) => ",
           "Observable",
           "<",
           "ParsedQuery",
@@ -2238,11 +2327,11 @@
             "tags": [],
             "label": "history",
             "description": [
-              "- {@link History} instance"
+              "- {@link History } instance"
             ],
             "signature": [
               "History",
-              "<any>"
+              "<unknown>"
             ],
             "path": "src/plugins/kibana_utils/public/history/history_observable.ts",
             "deprecated": false,
@@ -2259,7 +2348,7 @@
         "tags": [],
         "label": "createSessionStorageStateStorage",
         "description": [
-          "\nCreates {@link ISessionStorageStateStorage}\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
+          "\nCreates {@link ISessionStorageStateStorage}\n{@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
         ],
         "signature": [
           "(storage?: Storage) => ",
@@ -2281,7 +2370,7 @@
             "tags": [],
             "label": "storage",
             "description": [
-              "- Option {@link Storage} to use for storing state. By default window.sessionStorage."
+              "- Option {@link Storage } to use for storing state. By default window.sessionStorage."
             ],
             "signature": [
               "Storage"
@@ -2292,7 +2381,7 @@
           }
         ],
         "returnComment": [
-          "- {@link ISessionStorageStateStorage}"
+          "- {@link ISessionStorageStateStorage }"
         ],
         "initialIsOpen": false
       },
@@ -2453,7 +2542,7 @@
             "tags": [],
             "label": "pureTransitions",
             "description": [
-              "- state transitions configuration object. Map of {@link PureTransition}."
+              "- state transitions configuration object. Map of {@link PureTransition }."
             ],
             "signature": [
               "PureTransitions"
@@ -2520,7 +2609,7 @@
             "tags": [],
             "label": "pureTransitions",
             "description": [
-              "- state transitions configuration object. Map of {@link PureTransition}."
+              "- state transitions configuration object. Map of {@link PureTransition }."
             ],
             "signature": [
               "PureTransitions"
@@ -2536,7 +2625,7 @@
             "tags": [],
             "label": "pureSelectors",
             "description": [
-              "- state selectors configuration object. Map of {@link PureSelectors}."
+              "- state selectors configuration object. Map of {@link PureSelectors }."
             ],
             "signature": [
               "PureSelectors"
@@ -2552,7 +2641,7 @@
             "tags": [],
             "label": "options",
             "description": [
-              "- state container options {@link CreateStateContainerOptions}"
+              "- state container options {@link CreateStateContainerOptions }"
             ],
             "signature": [
               {
@@ -2579,7 +2668,7 @@
         "tags": [],
         "label": "createStateContainerReactHelpers",
         "description": [
-          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
+          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
         ],
         "signature": [
           "<Container extends ",
@@ -2917,7 +3006,7 @@
         "signature": [
           "(location: ",
           "Location",
-          "<any>) => ",
+          "<unknown>) => ",
           "ParsedQuery",
           "<string>"
         ],
@@ -2933,7 +3022,7 @@
             "description": [],
             "signature": [
               "Location",
-              "<any>"
+              "<unknown>"
             ],
             "path": "src/plugins/kibana_utils/public/history/get_query_params.ts",
             "deprecated": false,
@@ -3089,7 +3178,9 @@
         "label": "hashQuery",
         "description": [],
         "signature": [
-          "(query: Record<string, any>, options?: IUrlQueryMapperOptions) => { [k: string]: any; }"
+          "(query: ",
+          "IParsedUrlQuery",
+          ", options?: IUrlQueryMapperOptions) => { [k: string]: any; }"
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/hash_unhash_url.ts",
         "deprecated": false,
@@ -3260,7 +3351,7 @@
         "signature": [
           "({\n  history,\n  navigateToApp,\n  basePath,\n  mapping,\n  toastNotifications,\n  onBeforeRedirect,\n}: { history: ",
           "History",
-          "<any>; navigateToApp: (appId: string, options?: ",
+          "<unknown>; navigateToApp: (appId: string, options?: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -3276,15 +3367,15 @@
             "section": "def-public.IBasePath",
             "text": "IBasePath"
           },
-          "; mapping: string | Mapping; toastNotifications: Pick<",
+          "; mapping: string | Mapping; toastNotifications: ",
           {
             "pluginId": "core",
             "scope": "public",
             "docId": "kibCorePluginApi",
-            "section": "def-public.ToastsApi",
-            "text": "ToastsApi"
+            "section": "def-public.IToasts",
+            "text": "IToasts"
           },
-          ", \"get$\" | \"add\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">; onBeforeRedirect?: ((error: ",
+          "; onBeforeRedirect?: ((error: ",
           {
             "pluginId": "kibanaUtils",
             "scope": "common",
@@ -3324,7 +3415,7 @@
                 "description": [],
                 "signature": [
                   "History",
-                  "<any>"
+                  "<unknown>"
                 ],
                 "path": "src/plugins/kibana_utils/public/history/redirect_when_missing.tsx",
                 "deprecated": false
@@ -3640,7 +3731,7 @@
         "signature": [
           "(history: ",
           "History",
-          "<any>, param: string, replace: boolean) => void"
+          "<unknown>, param: string, replace: boolean) => void"
         ],
         "path": "src/plugins/kibana_utils/public/history/remove_query_param.ts",
         "deprecated": false,
@@ -3654,7 +3745,7 @@
             "description": [],
             "signature": [
               "History",
-              "<any>"
+              "<unknown>"
             ],
             "path": "src/plugins/kibana_utils/public/history/remove_query_param.ts",
             "deprecated": false,
@@ -3932,7 +4023,7 @@
         "tags": [],
         "label": "syncState",
         "description": [
-          "\nUtility for syncing application state wrapped in state container\nwith some kind of storage (e.g. URL)\n\nGo {@link https://github.com/elastic/kibana/tree/master/src/plugins/kibana_utils/docs/state_sync | here} for a complete guide and examples.\n"
+          "\nUtility for syncing application state wrapped in state container\nwith some kind of storage (e.g. URL)\n\nGo {@link https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_sync | here} for a complete guide and examples.\n"
         ],
         "signature": [
           "({\n  storageKey,\n  stateStorage,\n  stateContainer,\n}: ",
@@ -3985,7 +4076,7 @@
           }
         ],
         "returnComment": [
-          "- {@link ISyncStateRef}"
+          "- {@link ISyncStateRef }"
         ],
         "initialIsOpen": false
       },
@@ -4029,7 +4120,7 @@
             "tags": [],
             "label": "stateSyncConfigs",
             "description": [
-              "- Array of {@link IStateSyncConfig} to sync"
+              "- Array of {@link IStateSyncConfig } to sync"
             ],
             "signature": [
               {
@@ -4059,7 +4150,9 @@
         "label": "unhashQuery",
         "description": [],
         "signature": [
-          "(query: Record<string, any>, options?: IUrlQueryMapperOptions) => { [k: string]: any; }"
+          "(query: ",
+          "IParsedUrlQuery",
+          ", options?: IUrlQueryMapperOptions) => { [k: string]: any; }"
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/hash_unhash_url.ts",
         "deprecated": false,
@@ -4167,7 +4260,7 @@
             "tags": [],
             "label": "container",
             "description": [
-              "- {@link StateContainer} which state to track."
+              "- {@link StateContainer } which state to track."
             ],
             "signature": [
               "Container"
@@ -4207,7 +4300,7 @@
             "tags": [],
             "label": "comparator",
             "description": [
-              "- {@link Comparator} function used to memoize previous result, to not\nre-render React component if state did not change. By default uses\n`fast-deep-equal` package."
+              "- {@link Comparator } function used to memoize previous result, to not\nre-render React component if state did not change. By default uses\n`fast-deep-equal` package."
             ],
             "signature": [
               {
@@ -4267,7 +4360,7 @@
             "tags": [],
             "label": "container",
             "description": [
-              "- {@link StateContainer} which state to track."
+              "- {@link StateContainer } which state to track."
             ],
             "signature": [
               "Container"
@@ -4278,7 +4371,7 @@
           }
         ],
         "returnComment": [
-          "- latest {@link StateContainer} state"
+          "- latest {@link StateContainer } state"
         ],
         "initialIsOpen": false
       },
@@ -4292,15 +4385,15 @@
           "\nHelper for configuring {@link IKbnUrlStateStorage} to notify about inner errors\n"
         ],
         "signature": [
-          "(toasts: Pick<",
+          "(toasts: ",
           {
             "pluginId": "core",
             "scope": "public",
             "docId": "kibCorePluginApi",
-            "section": "def-public.ToastsApi",
-            "text": "ToastsApi"
+            "section": "def-public.IToasts",
+            "text": "IToasts"
           },
-          ", \"get$\" | \"add\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">) => { onGetError: (error: Error) => void; onSetError: (error: Error) => void; }"
+          ") => { onGetError: (error: Error) => void; onSetError: (error: Error) => void; }"
         ],
         "path": "src/plugins/kibana_utils/public/state_management/url/errors.ts",
         "deprecated": false,
@@ -4313,15 +4406,13 @@
             "label": "toasts",
             "description": [],
             "signature": [
-              "Pick<",
               {
                 "pluginId": "core",
                 "scope": "public",
                 "docId": "kibCorePluginApi",
-                "section": "def-public.ToastsApi",
-                "text": "ToastsApi"
-              },
-              ", \"get$\" | \"add\" | \"remove\" | \"addSuccess\" | \"addWarning\" | \"addDanger\" | \"addError\" | \"addInfo\">"
+                "section": "def-public.IToasts",
+                "text": "IToasts"
+              }
             ],
             "path": "src/plugins/kibana_utils/public/state_management/url/errors.ts",
             "deprecated": false,
@@ -4704,7 +4795,7 @@
         "tags": [],
         "label": "IKbnUrlStateStorage",
         "description": [
-          "\nKbnUrlStateStorage is a state storage for {@link syncState} utility which:\n\n1. Keeps state in sync with the URL.\n2. Serializes data and stores it in the URL in one of the supported formats:\n  * Rison encoded.\n  * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See Kibana's `state:storeInSessionStorage` advanced option for more context.\n3. Takes care of listening to the URL updates and notifies state about the updates.\n4. Takes care of batching URL updates to prevent redundant browser history records.\n\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md | Refer to this guide for more info}"
+          "\nKbnUrlStateStorage is a state storage for {@link syncState} utility which:\n\n1. Keeps state in sync with the URL.\n2. Serializes data and stores it in the URL in one of the supported formats:\n  * Rison encoded.\n  * Hashed URL: In URL we store only the hash from the serialized state, but the state itself is stored in sessionStorage. See Kibana's `state:storeInSessionStorage` advanced option for more context.\n3. Takes care of listening to the URL updates and notifies state about the updates.\n4. Takes care of batching URL updates to prevent redundant browser history records.\n\n{@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/kbn_url_storage.md | Refer to this guide for more info}"
         ],
         "signature": [
           {
@@ -4953,7 +5044,7 @@
         "tags": [],
         "label": "ISessionStorageStateStorage",
         "description": [
-          "\n{@link IStateStorage} for storing state in browser {@link Storage}\n{@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
+          "\n{@link IStateStorage} for storing state in browser {@link Storage}\n{@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_sync/storages/session_storage.md | guide}"
         ],
         "signature": [
           {
@@ -5765,68 +5856,6 @@
       },
       {
         "parentPluginId": "kibanaUtils",
-        "id": "def-public.StartServices",
-        "type": "Interface",
-        "tags": [],
-        "label": "StartServices",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "public",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-public.StartServices",
-            "text": "StartServices"
-          },
-          "<Plugins, OwnContract, Core>"
-        ],
-        "path": "src/plugins/kibana_utils/public/core/create_start_service_getter.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-public.StartServices.plugins",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "plugins",
-            "description": [],
-            "signature": [
-              "Plugins"
-            ],
-            "path": "src/plugins/kibana_utils/public/core/create_start_service_getter.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-public.StartServices.self",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "self",
-            "description": [],
-            "signature": [
-              "OwnContract"
-            ],
-            "path": "src/plugins/kibana_utils/public/core/create_start_service_getter.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-public.StartServices.core",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "core",
-            "description": [],
-            "signature": [
-              "Core"
-            ],
-            "path": "src/plugins/kibana_utils/public/core/create_start_service_getter.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
         "id": "def-public.StateContainer",
         "type": "Interface",
         "tags": [],
@@ -5910,9 +5939,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UiComponentInstance",
-        "description": [
-          "\nInstance of an UiComponent, corresponds to React virtual DOM node."
-        ],
+        "description": [],
         "signature": [
           {
             "pluginId": "kibanaUtils",
@@ -6078,7 +6105,7 @@
             "section": "def-common.MapStateToProps",
             "text": "MapStateToProps"
           },
-          "<State, Pick<Props, StatePropKeys>>) => (component: React.ComponentType<Props>) => React.FC<Pick<Props, Exclude<keyof Props, StatePropKeys>>>"
+          "<State, Pick<Props, StatePropKeys>>) => (component: React.ComponentType<Props>) => React.FC<Omit<Props, StatePropKeys>>"
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
@@ -6195,7 +6222,13 @@
         "description": [],
         "signature": [
           "T extends ",
-          "PureTransition",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.PureTransition",
+            "text": "PureTransition"
+          },
           "<any, any> ? T : never"
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
@@ -6451,6 +6484,40 @@
       },
       {
         "parentPluginId": "kibanaUtils",
+        "id": "def-public.PureTransition",
+        "type": "Type",
+        "tags": [],
+        "label": "PureTransition",
+        "description": [
+          "\nGiven some state and an argument, transform the state and return a new version of the state."
+        ],
+        "signature": [
+          "(state: State) => ",
+          "Transition",
+          "<State, Args>"
+        ],
+        "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-public.PureTransition.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
         "id": "def-public.Reducer",
         "type": "Type",
         "tags": [],
@@ -6565,15 +6632,7 @@
         "label": "StartServicesGetter",
         "description": [],
         "signature": [
-          "() => ",
-          {
-            "pluginId": "kibanaUtils",
-            "scope": "public",
-            "docId": "kibKibanaUtilsPluginApi",
-            "section": "def-public.StartServices",
-            "text": "StartServices"
-          },
-          "<Plugins, OwnContract, ",
+          "() => StartServices<Plugins, OwnContract, ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -6895,7 +6954,7 @@
           "signature": [
             "(history: Pick<",
             "History",
-            "<any>, \"replace\" | \"location\">) => void"
+            "<unknown>, \"replace\" | \"location\">) => void"
           ],
           "path": "src/plugins/kibana_utils/public/plugin.ts",
           "deprecated": false,
@@ -6910,7 +6969,7 @@
               "signature": [
                 "Pick<",
                 "History",
-                "<any>, \"replace\" | \"location\">"
+                "<unknown>, \"replace\" | \"location\">"
               ],
               "path": "src/plugins/kibana_utils/public/plugin.ts",
               "deprecated": false,
@@ -7412,7 +7471,15 @@
           "\n"
         ],
         "signature": [
-          "(res: { custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: Record<string, any> | undefined; } | Buffer | ",
+          "(res: { custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ResponseErrorAttributes",
+            "text": "ResponseErrorAttributes"
+          },
+          " | undefined; } | Buffer | ",
           "Stream",
           " | undefined>(options: ",
           {
@@ -7434,33 +7501,15 @@
           },
           ") => ",
           "KibanaResponse",
-          "<",
+          "<string | Error | { message: string | Error; attributes?: ",
           {
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseError",
-            "text": "ResponseError"
+            "section": "def-server.ResponseErrorAttributes",
+            "text": "ResponseErrorAttributes"
           },
-          ">; unauthorized: (options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ErrorHttpResponseOptions",
-            "text": "ErrorHttpResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseError",
-            "text": "ResponseError"
-          },
-          ">; forbidden: (options?: ",
+          " | undefined; }>; unauthorized: (options?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -7470,33 +7519,15 @@
           },
           ") => ",
           "KibanaResponse",
-          "<",
+          "<string | Error | { message: string | Error; attributes?: ",
           {
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseError",
-            "text": "ResponseError"
+            "section": "def-server.ResponseErrorAttributes",
+            "text": "ResponseErrorAttributes"
           },
-          ">; notFound: (options?: ",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ErrorHttpResponseOptions",
-            "text": "ErrorHttpResponseOptions"
-          },
-          ") => ",
-          "KibanaResponse",
-          "<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseError",
-            "text": "ResponseError"
-          },
-          ">; conflict: (options?: ",
+          " | undefined; }>; forbidden: (options?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -7506,15 +7537,51 @@
           },
           ") => ",
           "KibanaResponse",
-          "<",
+          "<string | Error | { message: string | Error; attributes?: ",
           {
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseError",
-            "text": "ResponseError"
+            "section": "def-server.ResponseErrorAttributes",
+            "text": "ResponseErrorAttributes"
           },
-          ">; customError: (options: ",
+          " | undefined; }>; notFound: (options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ErrorHttpResponseOptions",
+            "text": "ErrorHttpResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<string | Error | { message: string | Error; attributes?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ResponseErrorAttributes",
+            "text": "ResponseErrorAttributes"
+          },
+          " | undefined; }>; conflict: (options?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ErrorHttpResponseOptions",
+            "text": "ErrorHttpResponseOptions"
+          },
+          ") => ",
+          "KibanaResponse",
+          "<string | Error | { message: string | Error; attributes?: ",
+          {
+            "pluginId": "core",
+            "scope": "server",
+            "docId": "kibCoreHttpPluginApi",
+            "section": "def-server.ResponseErrorAttributes",
+            "text": "ResponseErrorAttributes"
+          },
+          " | undefined; }>; customError: (options: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -7532,15 +7599,15 @@
           },
           ">) => ",
           "KibanaResponse",
-          "<",
+          "<string | Error | { message: string | Error; attributes?: ",
           {
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseError",
-            "text": "ResponseError"
+            "section": "def-server.ResponseErrorAttributes",
+            "text": "ResponseErrorAttributes"
           },
-          ">; redirected: (options: ",
+          " | undefined; }>; redirected: (options: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -7596,15 +7663,15 @@
           },
           ") => ",
           "KibanaResponse",
-          "<",
+          "<string | Error | { message: string | Error; attributes?: ",
           {
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCoreHttpPluginApi",
-            "section": "def-server.ResponseError",
-            "text": "ResponseError"
+            "section": "def-server.ResponseErrorAttributes",
+            "text": "ResponseErrorAttributes"
           },
-          ">"
+          " | undefined; }>"
         ],
         "path": "src/plugins/kibana_utils/server/report_server_error.ts",
         "deprecated": false,
@@ -7619,7 +7686,15 @@
               "Formats a `KbnServerError` into a server error response"
             ],
             "signature": [
-              "{ custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: Record<string, any> | undefined; } | Buffer | ",
+              "{ custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ResponseErrorAttributes",
+                "text": "ResponseErrorAttributes"
+              },
+              " | undefined; } | Buffer | ",
               "Stream",
               " | undefined>(options: ",
               {
@@ -7641,33 +7716,15 @@
               },
               ") => ",
               "KibanaResponse",
-              "<",
+              "<string | Error | { message: string | Error; attributes?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseError",
-                "text": "ResponseError"
+                "section": "def-server.ResponseErrorAttributes",
+                "text": "ResponseErrorAttributes"
               },
-              ">; unauthorized: (options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseError",
-                "text": "ResponseError"
-              },
-              ">; forbidden: (options?: ",
+              " | undefined; }>; unauthorized: (options?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -7677,33 +7734,15 @@
               },
               ") => ",
               "KibanaResponse",
-              "<",
+              "<string | Error | { message: string | Error; attributes?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseError",
-                "text": "ResponseError"
+                "section": "def-server.ResponseErrorAttributes",
+                "text": "ResponseErrorAttributes"
               },
-              ">; notFound: (options?: ",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
-              ") => ",
-              "KibanaResponse",
-              "<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseError",
-                "text": "ResponseError"
-              },
-              ">; conflict: (options?: ",
+              " | undefined; }>; forbidden: (options?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -7713,15 +7752,51 @@
               },
               ") => ",
               "KibanaResponse",
-              "<",
+              "<string | Error | { message: string | Error; attributes?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseError",
-                "text": "ResponseError"
+                "section": "def-server.ResponseErrorAttributes",
+                "text": "ResponseErrorAttributes"
               },
-              ">; customError: (options: ",
+              " | undefined; }>; notFound: (options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ErrorHttpResponseOptions",
+                "text": "ErrorHttpResponseOptions"
+              },
+              ") => ",
+              "KibanaResponse",
+              "<string | Error | { message: string | Error; attributes?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ResponseErrorAttributes",
+                "text": "ResponseErrorAttributes"
+              },
+              " | undefined; }>; conflict: (options?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ErrorHttpResponseOptions",
+                "text": "ErrorHttpResponseOptions"
+              },
+              ") => ",
+              "KibanaResponse",
+              "<string | Error | { message: string | Error; attributes?: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreHttpPluginApi",
+                "section": "def-server.ResponseErrorAttributes",
+                "text": "ResponseErrorAttributes"
+              },
+              " | undefined; }>; customError: (options: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -7739,15 +7814,15 @@
               },
               ">) => ",
               "KibanaResponse",
-              "<",
+              "<string | Error | { message: string | Error; attributes?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreHttpPluginApi",
-                "section": "def-server.ResponseError",
-                "text": "ResponseError"
+                "section": "def-server.ResponseErrorAttributes",
+                "text": "ResponseErrorAttributes"
               },
-              ">; redirected: (options: ",
+              " | undefined; }>; redirected: (options: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -8106,6 +8181,82 @@
                   "string"
                 ],
                 "path": "src/plugins/kibana_utils/common/abort_utils.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
+        "id": "def-common.CharacterNotAllowedInField",
+        "type": "Class",
+        "tags": [],
+        "label": "CharacterNotAllowedInField",
+        "description": [
+          "\nwhen a user is attempting to create a field with disallowed character in the name, like *"
+        ],
+        "signature": [
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.CharacterNotAllowedInField",
+            "text": "CharacterNotAllowedInField"
+          },
+          " extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.KbnError",
+            "text": "KbnError"
+          }
+        ],
+        "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.CharacterNotAllowedInField.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-common.CharacterNotAllowedInField.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "character",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/kibana_utils/common/errors/errors.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "kibanaUtils",
+                "id": "def-common.CharacterNotAllowedInField.Unnamed.$2",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "isRequired": true
               }
@@ -8856,7 +9007,7 @@
             "tags": [],
             "label": "pureTransitions",
             "description": [
-              "- state transitions configuration object. Map of {@link PureTransition}."
+              "- state transitions configuration object. Map of {@link PureTransition }."
             ],
             "signature": [
               "PureTransitions"
@@ -8923,7 +9074,7 @@
             "tags": [],
             "label": "pureTransitions",
             "description": [
-              "- state transitions configuration object. Map of {@link PureTransition}."
+              "- state transitions configuration object. Map of {@link PureTransition }."
             ],
             "signature": [
               "PureTransitions"
@@ -8939,7 +9090,7 @@
             "tags": [],
             "label": "pureSelectors",
             "description": [
-              "- state selectors configuration object. Map of {@link PureSelectors}."
+              "- state selectors configuration object. Map of {@link PureSelectors }."
             ],
             "signature": [
               "PureSelectors"
@@ -8955,7 +9106,7 @@
             "tags": [],
             "label": "options",
             "description": [
-              "- state container options {@link CreateStateContainerOptions}"
+              "- state container options {@link CreateStateContainerOptions }"
             ],
             "signature": [
               {
@@ -8982,7 +9133,7 @@
         "tags": [],
         "label": "createStateContainerReactHelpers",
         "description": [
-          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/master/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
+          "\nCreates helpers for using {@link StateContainer | State Containers} with react\nRefer to {@link https://github.com/elastic/kibana/blob/main/src/plugins/kibana_utils/docs/state_containers/react.md | guide} for details"
         ],
         "signature": [
           "<Container extends ",
@@ -9204,33 +9355,6 @@
       },
       {
         "parentPluginId": "kibanaUtils",
-        "id": "def-common.makeRegEx",
-        "type": "Function",
-        "tags": [],
-        "label": "makeRegEx",
-        "description": [],
-        "signature": [
-          "((glob: string) => RegExp) & _.MemoizedFunction"
-        ],
-        "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "kibanaUtils",
-            "id": "def-common.makeRegEx.$1",
-            "type": "string",
-            "tags": [],
-            "label": "glob",
-            "description": [],
-            "path": "src/plugins/kibana_utils/common/field_wildcard.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaUtils",
         "id": "def-common.mergeMigrationFunctionMaps",
         "type": "Function",
         "tags": [],
@@ -9346,8 +9470,8 @@
             "pluginId": "@kbn/utility-types",
             "scope": "server",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
+            "section": "def-server.Serializable",
+            "text": "Serializable"
           },
           ">) => S"
         ],
@@ -9394,8 +9518,8 @@
                 "pluginId": "@kbn/utility-types",
                 "scope": "server",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
+                "section": "def-server.Serializable",
+                "text": "Serializable"
               },
               ">"
             ],
@@ -9506,7 +9630,7 @@
             "tags": [],
             "label": "container",
             "description": [
-              "- {@link StateContainer} which state to track."
+              "- {@link StateContainer } which state to track."
             ],
             "signature": [
               "Container"
@@ -9546,7 +9670,7 @@
             "tags": [],
             "label": "comparator",
             "description": [
-              "- {@link Comparator} function used to memoize previous result, to not\nre-render React component if state did not change. By default uses\n`fast-deep-equal` package."
+              "- {@link Comparator } function used to memoize previous result, to not\nre-render React component if state did not change. By default uses\n`fast-deep-equal` package."
             ],
             "signature": [
               {
@@ -9606,7 +9730,7 @@
             "tags": [],
             "label": "container",
             "description": [
-              "- {@link StateContainer} which state to track."
+              "- {@link StateContainer } which state to track."
             ],
             "signature": [
               "Container"
@@ -9617,7 +9741,7 @@
           }
         ],
         "returnComment": [
-          "- latest {@link StateContainer} state"
+          "- latest {@link StateContainer } state"
         ],
         "initialIsOpen": false
       }
@@ -10203,8 +10327,8 @@
                 "pluginId": "@kbn/utility-types",
                 "scope": "server",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
+                "section": "def-server.Serializable",
+                "text": "Serializable"
               },
               ">) => P) | undefined"
             ],
@@ -10233,8 +10357,8 @@
                     "pluginId": "@kbn/utility-types",
                     "scope": "server",
                     "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.SerializableRecord",
-                    "text": "SerializableRecord"
+                    "section": "def-server.Serializable",
+                    "text": "Serializable"
                   },
                   ">"
                 ],
@@ -10605,9 +10729,7 @@
         "type": "Interface",
         "tags": [],
         "label": "UiComponentInstance",
-        "description": [
-          "\nInstance of an UiComponent, corresponds to React virtual DOM node."
-        ],
+        "description": [],
         "signature": [
           {
             "pluginId": "kibanaUtils",
@@ -10821,7 +10943,7 @@
             "section": "def-common.MapStateToProps",
             "text": "MapStateToProps"
           },
-          "<State, Pick<Props, StatePropKeys>>) => (component: React.ComponentType<Props>) => React.FC<Pick<Props, Exclude<keyof Props, StatePropKeys>>>"
+          "<State, Pick<Props, StatePropKeys>>) => (component: React.ComponentType<Props>) => React.FC<Omit<Props, StatePropKeys>>"
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
         "deprecated": false,
@@ -10938,7 +11060,13 @@
         "description": [],
         "signature": [
           "T extends ",
-          "PureTransition",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.PureTransition",
+            "text": "PureTransition"
+          },
           "<any, any> ? T : never"
         ],
         "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
@@ -11121,9 +11249,7 @@
         "parentPluginId": "kibanaUtils",
         "id": "def-common.PersistableStateDefinition",
         "type": "Type",
-        "tags": [
-          "todo"
-        ],
+        "tags": [],
         "label": "PersistableStateDefinition",
         "description": [],
         "signature": [
@@ -11330,6 +11456,40 @@
             "description": [],
             "signature": [
               "Args"
+            ],
+            "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
+        "id": "def-common.PureTransition",
+        "type": "Type",
+        "tags": [],
+        "label": "PureTransition",
+        "description": [
+          "\nGiven some state and an argument, transform the state and return a new version of the state."
+        ],
+        "signature": [
+          "(state: State) => ",
+          "Transition",
+          "<State, Args>"
+        ],
+        "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.PureTransition.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "state",
+            "description": [],
+            "signature": [
+              "State"
             ],
             "path": "src/plugins/kibana_utils/common/state_containers/types.ts",
             "deprecated": false

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from 'kibana/server';
 import { get } from 'lodash';
 import type { ReportingConfig } from '../';
@@ -206,10 +206,6 @@ export async function getReportingUsage(
     .search(params)
     .then(({ body: response }) => handleResponse(response))
     .then((usage: Partial<RangeStatSets>): ReportingUsageType => {
-      // Allow this to explicitly throw an exception if/when this config is deprecated,
-      // because we shouldn't collect browserType in that case!
-      const browserType = config.get('capture', 'browser', 'type');
-
       const exportTypesHandler = getExportTypesHandler(exportTypesRegistry);
       const availability = exportTypesHandler.getAvailability(
         featureAvailability
@@ -219,7 +215,6 @@ export async function getReportingUsage(
 
       return {
         available: true,
-        browser_type: browserType,
         enabled: true,
         last7Days: getExportStats(last7Days, availability, exportTypesHandler),
         ...getExportStats(all, availability, exportTypesHandler),

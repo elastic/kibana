@@ -20,12 +20,15 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
-      const esClient = context.core.elasticsearch.client.asInternalUser;
-
-      const agents = await osqueryContext.service
-        .getAgentService()
-        // @ts-expect-error update types
-        ?.listAgents(esClient, request.query);
+      let agents;
+      try {
+        agents = await osqueryContext.service
+          .getAgentService()
+          ?.asInternalUser // @ts-expect-error update types
+          .listAgents(request.query);
+      } catch (error) {
+        return response.badRequest({ body: error });
+      }
 
       return response.ok({ body: agents });
     }

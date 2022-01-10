@@ -7,6 +7,7 @@
 
 import type { EcsEventOutcome, EcsEventType, KibanaRequest, LogMeta } from 'src/core/server';
 
+import type { AuthenticationProvider } from '../../common/model';
 import type { AuthenticationResult } from '../authentication/authentication_result';
 
 /**
@@ -126,6 +127,57 @@ export function userLoginEvent({
     error: authenticationResult.error && {
       code: authenticationResult.error.name,
       message: authenticationResult.error.message,
+    },
+  };
+}
+
+export interface UserLogoutParams {
+  username?: string;
+  provider: AuthenticationProvider;
+}
+
+export function userLogoutEvent({ username, provider }: UserLogoutParams): AuditEvent {
+  return {
+    message: `User [${username}] is logging out using ${provider.type} provider [name=${provider.name}]`,
+    event: {
+      action: 'user_logout',
+      category: ['authentication'],
+      outcome: 'unknown',
+    },
+    user: username
+      ? {
+          name: username,
+        }
+      : undefined,
+    kibana: {
+      authentication_provider: provider.name,
+      authentication_type: provider.type,
+    },
+  };
+}
+
+export interface AccessAgreementAcknowledgedParams {
+  username: string;
+  provider: AuthenticationProvider;
+}
+
+export function accessAgreementAcknowledgedEvent({
+  username,
+  provider,
+}: AccessAgreementAcknowledgedParams): AuditEvent {
+  return {
+    message: `${username} acknowledged access agreement using ${provider.type} provider [name=${provider.name}].`,
+    event: {
+      action: 'access_agreement_acknowledged',
+      category: ['authentication'],
+    },
+    user: {
+      name: username,
+    },
+    kibana: {
+      space_id: undefined, // Ensure this does not get populated by audit service
+      authentication_provider: provider.name,
+      authentication_type: provider.type,
     },
   };
 }

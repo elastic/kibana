@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
@@ -52,7 +52,7 @@ export const TEST_CASES: Record<string, ImportTestCase> = Object.freeze({
     expectedNewId: `${CID}3`,
   }),
   CONFLICT_4_OBJ: Object.freeze({ type: 'sharedtype', id: `${CID}4`, expectedNewId: `${CID}4a` }),
-  NEW_SINGLE_NAMESPACE_OBJ: Object.freeze({ type: 'dashboard', id: 'new-dashboard-id' }),
+  NEW_SINGLE_NAMESPACE_OBJ: Object.freeze({ type: 'isolatedtype', id: 'new-isolatedtype-id' }),
   NEW_MULTI_NAMESPACE_OBJ: Object.freeze({ type: 'sharedtype', id: 'new-sharedtype-id' }),
   NEW_NAMESPACE_AGNOSTIC_OBJ: Object.freeze({ type: 'globaltype', id: 'new-globaltype-id' }),
 });
@@ -72,11 +72,7 @@ const getConflictDest = (id: string) => ({
   updatedAt: '2017-09-21T18:59:16.270Z',
 });
 
-export function importTestSuiteFactory(
-  es: KibanaClient,
-  esArchiver: any,
-  supertest: SuperTest<any>
-) {
+export function importTestSuiteFactory(es: Client, esArchiver: any, supertest: SuperTest<any>) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_create');
   const expectResponseBody =
     (

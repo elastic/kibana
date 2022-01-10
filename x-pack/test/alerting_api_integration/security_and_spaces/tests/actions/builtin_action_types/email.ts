@@ -284,6 +284,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
           config: {
             service: '__json',
             from: 'jim@example.com',
+            hasAuth: false,
           },
         })
         .expect(200);

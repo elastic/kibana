@@ -113,11 +113,11 @@ export interface InvalidateAPIKeyResult {
    * Details about these errors. This field is not present in the response when error_count is 0.
    */
   error_details?: Array<{
-    type: string;
-    reason: string;
+    type?: string;
+    reason?: string;
     caused_by?: {
-      type: string;
-      reason: string;
+      type?: string;
+      reason?: string;
     };
   }>;
 }

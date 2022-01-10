@@ -7,107 +7,66 @@
 
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreStart } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { termsOperation, TermsIndexPatternColumn } from './terms';
-import { filtersOperation, FiltersIndexPatternColumn } from './filters';
-import { cardinalityOperation, CardinalityIndexPatternColumn } from './cardinality';
-import { percentileOperation, PercentileIndexPatternColumn } from './percentile';
+import { termsOperation } from './terms';
+import { filtersOperation } from './filters';
+import { cardinalityOperation } from './cardinality';
+import { percentileOperation } from './percentile';
 import {
   minOperation,
-  MinIndexPatternColumn,
   averageOperation,
-  AvgIndexPatternColumn,
   sumOperation,
-  SumIndexPatternColumn,
   maxOperation,
-  MaxIndexPatternColumn,
   medianOperation,
-  MedianIndexPatternColumn,
 } from './metrics';
-import { dateHistogramOperation, DateHistogramIndexPatternColumn } from './date_histogram';
+import { dateHistogramOperation } from './date_histogram';
 import {
   cumulativeSumOperation,
-  CumulativeSumIndexPatternColumn,
   counterRateOperation,
-  CounterRateIndexPatternColumn,
   derivativeOperation,
-  DerivativeIndexPatternColumn,
   movingAverageOperation,
-  MovingAverageIndexPatternColumn,
-  OverallSumIndexPatternColumn,
   overallSumOperation,
-  OverallMinIndexPatternColumn,
   overallMinOperation,
-  OverallMaxIndexPatternColumn,
   overallMaxOperation,
-  OverallAverageIndexPatternColumn,
   overallAverageOperation,
 } from './calculations';
-import { countOperation, CountIndexPatternColumn } from './count';
-import {
-  mathOperation,
-  MathIndexPatternColumn,
-  formulaOperation,
-  FormulaIndexPatternColumn,
-} from './formula';
-import { staticValueOperation, StaticValueIndexPatternColumn } from './static_value';
-import { lastValueOperation, LastValueIndexPatternColumn } from './last_value';
-import { FrameDatasourceAPI, OperationMetadata } from '../../../types';
-import type { BaseIndexPatternColumn, ReferenceBasedIndexPatternColumn } from './column_types';
+import { countOperation } from './count';
+import { mathOperation, formulaOperation } from './formula';
+import { staticValueOperation } from './static_value';
+import { lastValueOperation } from './last_value';
+import { FrameDatasourceAPI, OperationMetadata, ParamEditorCustomProps } from '../../../types';
+import type {
+  BaseIndexPatternColumn,
+  IncompleteColumn,
+  GenericIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
+} from './column_types';
 import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../types';
 import { DateRange, LayerType } from '../../../../common';
 import { ExpressionAstFunction } from '../../../../../../../src/plugins/expressions/public';
 import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
-import { RangeIndexPatternColumn, rangeOperation } from './ranges';
-import { IndexPatternDimensionEditorProps } from '../../dimension_panel';
+import { rangeOperation } from './ranges';
+import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from '../../dimension_panel';
 
-/**
- * A union type of all available column types. If a column is of an unknown type somewhere
- * withing the indexpattern data source it should be typed as `IndexPatternColumn` to make
- * typeguards possible that consider all available column types.
- */
-export type IndexPatternColumn =
-  | FiltersIndexPatternColumn
-  | RangeIndexPatternColumn
-  | TermsIndexPatternColumn
-  | DateHistogramIndexPatternColumn
-  | MinIndexPatternColumn
-  | MaxIndexPatternColumn
-  | AvgIndexPatternColumn
-  | CardinalityIndexPatternColumn
-  | SumIndexPatternColumn
-  | MedianIndexPatternColumn
-  | PercentileIndexPatternColumn
-  | CountIndexPatternColumn
-  | LastValueIndexPatternColumn
-  | CumulativeSumIndexPatternColumn
-  | OverallSumIndexPatternColumn
-  | OverallMinIndexPatternColumn
-  | OverallMaxIndexPatternColumn
-  | OverallAverageIndexPatternColumn
-  | CounterRateIndexPatternColumn
-  | DerivativeIndexPatternColumn
-  | MovingAverageIndexPatternColumn
-  | MathIndexPatternColumn
-  | FormulaIndexPatternColumn
-  | StaticValueIndexPatternColumn;
+export type {
+  IncompleteColumn,
+  BaseIndexPatternColumn,
+  GenericIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
+} from './column_types';
 
-export type FieldBasedIndexPatternColumn = Extract<IndexPatternColumn, { sourceField: string }>;
-
-export { IncompleteColumn } from './column_types';
-
-export { TermsIndexPatternColumn } from './terms';
-export { FiltersIndexPatternColumn } from './filters';
-export { CardinalityIndexPatternColumn } from './cardinality';
-export { PercentileIndexPatternColumn } from './percentile';
-export {
+export type { TermsIndexPatternColumn } from './terms';
+export type { FiltersIndexPatternColumn } from './filters';
+export type { CardinalityIndexPatternColumn } from './cardinality';
+export type { PercentileIndexPatternColumn } from './percentile';
+export type {
   MinIndexPatternColumn,
   AvgIndexPatternColumn,
   SumIndexPatternColumn,
   MaxIndexPatternColumn,
   MedianIndexPatternColumn,
 } from './metrics';
-export { DateHistogramIndexPatternColumn } from './date_histogram';
-export {
+export type { DateHistogramIndexPatternColumn } from './date_histogram';
+export type {
   CumulativeSumIndexPatternColumn,
   CounterRateIndexPatternColumn,
   DerivativeIndexPatternColumn,
@@ -117,15 +76,15 @@ export {
   OverallMaxIndexPatternColumn,
   OverallAverageIndexPatternColumn,
 } from './calculations';
-export { CountIndexPatternColumn } from './count';
-export { LastValueIndexPatternColumn } from './last_value';
-export { RangeIndexPatternColumn } from './ranges';
-export { FormulaIndexPatternColumn, MathIndexPatternColumn } from './formula';
-export { StaticValueIndexPatternColumn } from './static_value';
+export type { CountIndexPatternColumn } from './count';
+export type { LastValueIndexPatternColumn } from './last_value';
+export type { RangeIndexPatternColumn } from './ranges';
+export type { FormulaIndexPatternColumn, MathIndexPatternColumn } from './formula';
+export type { StaticValueIndexPatternColumn } from './static_value';
 
 // List of all operation definitions registered to this data source.
 // If you want to implement a new operation, add the definition to this array and
-// the column type to the `IndexPatternColumn` union type below.
+// the column type to the `GenericIndexPatternColumn` union type below.
 const internalOperationDefinitions = [
   filtersOperation,
   termsOperation,
@@ -197,6 +156,31 @@ export interface ParamEditorProps<C> {
   data: DataPublicPluginStart;
   activeData?: IndexPatternDimensionEditorProps['activeData'];
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
+  paramEditorCustomProps?: ParamEditorCustomProps;
+}
+
+export interface FieldInputProps<C> {
+  layer: IndexPatternLayer;
+  selectedColumn?: C;
+  columnId: string;
+  indexPattern: IndexPattern;
+  updateLayer: (
+    setter: IndexPatternLayer | ((prevLayer: IndexPatternLayer) => IndexPatternLayer)
+  ) => void;
+  onDeleteColumn?: () => void;
+  currentFieldIsInvalid: boolean;
+  incompleteField: IncompleteColumn['sourceField'] | null;
+  incompleteOperation: IncompleteColumn['operationType'];
+  incompleteParams: Omit<IncompleteColumn, 'sourceField' | 'operationType'>;
+  dimensionGroups: IndexPatternDimensionEditorProps['dimensionGroups'];
+  groupId: IndexPatternDimensionEditorProps['groupId'];
+  /**
+   * indexPatternId -> fieldName -> boolean
+   */
+  existingFields: Record<string, Record<string, boolean>>;
+  operationSupportMatrix: OperationSupportMatrix;
+  helpMessage?: React.ReactNode;
+  operationDefinitionMap: Record<string, GenericOperationDefinition>;
 }
 
 export interface HelpProps<C> {
@@ -226,7 +210,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
   getDefaultLabel: (
     column: C,
     indexPattern: IndexPattern,
-    columns: Record<string, IndexPatternColumn>
+    columns: Record<string, GenericIndexPatternColumn>
   ) => string;
   /**
    * This function is called if another column in the same layer changed or got added/removed.
@@ -240,7 +224,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
     changedColumnId: string
   ) => C;
   /**
-   * React component for operation specific settings shown in the popover editor
+   * React component for operation specific settings shown in the flyout editor
    */
   paramEditor?: React.ComponentType<ParamEditorProps<C>>;
   /**
@@ -309,7 +293,7 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
    * This flag is used by the formula to assign the kql= and lucene= named arguments and set up
    * autocomplete.
    */
-  filterable?: boolean;
+  filterable?: boolean | { helpMessage: string };
   shiftable?: boolean;
 
   getHelpMessage?: (props: HelpProps<C>) => React.ReactNode;
@@ -322,6 +306,18 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn> {
     description: string;
     section: 'elasticsearch' | 'calculation';
   };
+  /**
+   * React component for operation field specific behaviour
+   */
+  renderFieldInput?: React.ComponentType<FieldInputProps<C>>;
+  /**
+   * Verify if the a new field can be added to the column
+   */
+  canAddNewField?: (column: C, field: IndexPatternField) => boolean;
+  /**
+   * Operation can influence some visual default settings. This function is used to collect default values offered
+   */
+  getDefaultVisualSettings?: (column: C) => { truncateText?: boolean };
 }
 
 interface BaseBuildColumnArgs {
@@ -336,7 +332,7 @@ interface OperationParam {
   defaultValue?: string | number;
 }
 
-interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn> {
+interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn, P = {}> {
   input: 'none';
 
   /**
@@ -349,9 +345,9 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn> {
    */
   buildColumn: (
     arg: BaseBuildColumnArgs & {
-      previousColumn?: IndexPatternColumn;
+      previousColumn?: GenericIndexPatternColumn;
     },
-    columnParams?: (IndexPatternColumn & C)['params']
+    columnParams?: P
   ) => C;
   /**
    * Returns the meta data of the operation if applied. Undefined
@@ -371,7 +367,7 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn> {
   ) => ExpressionAstFunction;
 }
 
-interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
+interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}> {
   input: 'field';
 
   /**
@@ -390,9 +386,9 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn> {
   buildColumn: (
     arg: BaseBuildColumnArgs & {
       field: IndexPatternField;
-      previousColumn?: IndexPatternColumn;
+      previousColumn?: GenericIndexPatternColumn;
     },
-    columnParams?: (IndexPatternColumn & C)['params'] & {
+    columnParams?: P & {
       kql?: string;
       lucene?: string;
       shift?: string;
@@ -497,7 +493,7 @@ interface FullReferenceOperationDefinition<C extends BaseIndexPatternColumn> {
   buildColumn: (
     arg: BaseBuildColumnArgs & {
       referenceIds: string[];
-      previousColumn?: IndexPatternColumn;
+      previousColumn?: GenericIndexPatternColumn;
     },
     columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'] & {
       kql?: string;
@@ -527,7 +523,7 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
    */
   buildColumn: (
     arg: BaseBuildColumnArgs & {
-      previousColumn?: IndexPatternColumn | ReferenceBasedIndexPatternColumn;
+      previousColumn?: GenericIndexPatternColumn;
     },
     columnParams?: (ReferenceBasedIndexPatternColumn & C)['params'],
     operationDefinitionMap?: Record<string, GenericOperationDefinition>
@@ -558,9 +554,9 @@ interface ManagedReferenceOperationDefinition<C extends BaseIndexPatternColumn> 
   ) => IndexPatternLayer;
 }
 
-interface OperationDefinitionMap<C extends BaseIndexPatternColumn> {
-  field: FieldBasedOperationDefinition<C>;
-  none: FieldlessOperationDefinition<C>;
+interface OperationDefinitionMap<C extends BaseIndexPatternColumn, P = {}> {
+  field: FieldBasedOperationDefinition<C, P>;
+  none: FieldlessOperationDefinition<C, P>;
   fullReference: FullReferenceOperationDefinition<C>;
   managedReference: ManagedReferenceOperationDefinition<C>;
 }
@@ -572,24 +568,25 @@ interface OperationDefinitionMap<C extends BaseIndexPatternColumn> {
  */
 export type OperationDefinition<
   C extends BaseIndexPatternColumn,
-  Input extends keyof OperationDefinitionMap<C>
-> = BaseOperationDefinitionProps<C> & OperationDefinitionMap<C>[Input];
+  Input extends keyof OperationDefinitionMap<C>,
+  P = {}
+> = BaseOperationDefinitionProps<C> & OperationDefinitionMap<C, P>[Input];
 
 /**
  * A union type of all available operation types. The operation type is a unique id of an operation.
  * Each column is assigned to exactly one operation type.
  */
-export type OperationType = typeof internalOperationDefinitions[number]['type'];
+export type OperationType = string;
 
 /**
  * This is an operation definition of an unspecified column out of all possible
  * column types.
  */
 export type GenericOperationDefinition =
-  | OperationDefinition<IndexPatternColumn, 'field'>
-  | OperationDefinition<IndexPatternColumn, 'none'>
-  | OperationDefinition<IndexPatternColumn, 'fullReference'>
-  | OperationDefinition<IndexPatternColumn, 'managedReference'>;
+  | OperationDefinition<BaseIndexPatternColumn, 'field'>
+  | OperationDefinition<BaseIndexPatternColumn, 'none'>
+  | OperationDefinition<BaseIndexPatternColumn, 'fullReference'>
+  | OperationDefinition<BaseIndexPatternColumn, 'managedReference'>;
 
 /**
  * List of all available operation definitions

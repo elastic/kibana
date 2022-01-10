@@ -7,7 +7,7 @@
 
 import { random, times } from 'lodash';
 import expect from '@kbn/expect';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import TaskManagerMapping from '../../../../plugins/task_manager/server/saved_objects/mappings.json';
 import {
@@ -56,7 +56,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const testHistoryIndex = '.kibana_task_manager_test_result';
 
-  describe('scheduling and running tasks', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/120730
+  describe.skip('scheduling and running tasks', () => {
     beforeEach(async () => {
       // clean up before each test
       return await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
@@ -64,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       const exists = await es.indices.exists({ index: testHistoryIndex });
-      if (exists.body) {
+      if (exists) {
         await es.deleteByQuery({
           index: testHistoryIndex,
           refresh: true,
@@ -151,7 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         })
         .then((result) =>
-          (result.body as unknown as SearchResults).hits.hits.filter((task) =>
+          (result as unknown as SearchResults).hits.hits.filter((task) =>
             taskId ? task._source?.taskId === taskId : true
           )
         );

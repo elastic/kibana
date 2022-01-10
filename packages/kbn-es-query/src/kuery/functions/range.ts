@@ -6,49 +6,39 @@
  * Side Public License, v 1.
  */
 
-import { pick, map, mapValues } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { getRangeScript, RangeFilterParams } from '../../filters';
 import { getFields } from './utils/get_fields';
-import { getTimeZoneFromSettings, getDataViewFieldSubtypeNested } from '../../utils';
+import { getDataViewFieldSubtypeNested, getTimeZoneFromSettings } from '../../utils';
 import { getFullFieldNameNode } from './utils/get_full_field_name_node';
-import { IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
+import type { DataViewBase, KueryNode, KueryQueryOptions } from '../..';
 
-export function buildNodeParams(fieldName: string, params: RangeFilterParams) {
-  const paramsToMap = pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
-  const fieldNameArg =
-    typeof fieldName === 'string'
-      ? ast.fromLiteralExpression(fieldName)
-      : nodeTypes.literal.buildNode(fieldName);
-
-  const args = map(paramsToMap, (value: number | string, key: string) => {
-    return nodeTypes.namedArg.buildNode(key, value);
-  });
-
-  return {
-    arguments: [fieldNameArg, ...args],
-  };
+export function buildNodeParams(
+  fieldName: string,
+  operator: keyof Pick<RangeFilterParams, 'gt' | 'gte' | 'lt' | 'lte'>,
+  value: number | string
+) {
+  // Run through the parser instead treating it as a literal because it may contain wildcards
+  const fieldNameArg = ast.fromLiteralExpression(fieldName);
+  const valueArg = nodeTypes.literal.buildNode(value);
+  return { arguments: [fieldNameArg, operator, valueArg] };
 }
 
 export function toElasticsearchQuery(
   node: KueryNode,
-  indexPattern?: IndexPatternBase,
+  indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
   context: Record<string, any> = {}
 ): estypes.QueryDslQueryContainer {
-  const [fieldNameArg, ...args] = node.arguments;
+  const [fieldNameArg, operatorArg, valueArg] = node.arguments;
   const fullFieldNameArg = getFullFieldNameNode(
     fieldNameArg,
     indexPattern,
     context?.nested ? context.nested.path : undefined
   );
   const fields = indexPattern ? getFields(fullFieldNameArg, indexPattern) : [];
-  const namedArgs = extractArguments(args);
-  const queryParams = mapValues(namedArgs, (arg: KueryNode) => {
-    return ast.toElasticsearchQuery(arg);
-  });
 
   // If no fields are found in the index pattern we send through the given field name as-is. We do this to preserve
   // the behaviour of lucene on dashboards where there are panels based on different index patterns that have different
@@ -81,6 +71,10 @@ export function toElasticsearchQuery(
       }
     };
 
+    const queryParams = {
+      [operatorArg]: ast.toElasticsearchQuery(valueArg),
+    };
+
     if (field.scripted) {
       return {
         script: getRangeScript(field, queryParams),
@@ -111,22 +105,4 @@ export function toElasticsearchQuery(
       minimum_should_match: 1,
     },
   };
-}
-
-function extractArguments(args: any) {
-  if ((args.gt && args.gte) || (args.lt && args.lte)) {
-    throw new Error('range ends cannot be both inclusive and exclusive');
-  }
-
-  const unnamedArgOrder = ['gte', 'lte', 'format'];
-
-  return args.reduce((acc: any, arg: any, index: number) => {
-    if (arg.type === 'namedArg') {
-      acc[arg.name] = arg.value;
-    } else {
-      acc[unnamedArgOrder[index]] = arg;
-    }
-
-    return acc;
-  }, {});
 }

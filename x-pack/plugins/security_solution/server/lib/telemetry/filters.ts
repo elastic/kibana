@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TelemetryEvent } from './types';
+import type { TelemetryEvent } from './types';
 
 export interface AllowlistFields {
   [key: string]: boolean | AllowlistFields;
@@ -67,6 +67,7 @@ const allowlistBaseEventFields: AllowlistFields = {
     hash: true,
     Ext: {
       code_signature: true,
+      header_bytes: true,
       header_data: true,
       malware_classification: true,
       malware_signature: true,
@@ -105,6 +106,7 @@ const allowlistBaseEventFields: AllowlistFields = {
 // blindly. Object contents means that we only copy the fields that appear explicitly in
 // the sub-object.
 export const allowlistEventFields: AllowlistFields = {
+  _id: true,
   '@timestamp': true,
   agent: true,
   Endpoint: true,
@@ -140,6 +142,7 @@ export const exceptionListEventFields: AllowlistFields = {
   name: true,
   os_types: true,
   rule_version: true,
+  scope: true,
 };
 
 /**

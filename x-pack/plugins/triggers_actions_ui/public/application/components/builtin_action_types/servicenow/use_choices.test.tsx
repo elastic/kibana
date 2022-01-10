@@ -122,7 +122,7 @@ describe('UseChoices', () => {
   it('it displays an error when service fails', async () => {
     getChoicesMock.mockResolvedValue({
       status: 'error',
-      service_message: 'An error occurred',
+      serviceMessage: 'An error occurred',
     });
 
     const { waitForNextUpdate } = renderHook<UseChoicesProps, UseChoices>(() =>

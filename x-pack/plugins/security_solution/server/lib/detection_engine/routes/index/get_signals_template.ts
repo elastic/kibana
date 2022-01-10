@@ -33,7 +33,7 @@ import signalExtraFields from './signal_extra_fields.json';
   incremented by 10 in order to add "room" for the aforementioned patch
   release
 */
-export const SIGNALS_TEMPLATE_VERSION = 57;
+export const SIGNALS_TEMPLATE_VERSION = 67;
 /**
   @constant
   @type {number}
@@ -59,16 +59,16 @@ export const SIGNALS_FIELD_ALIASES_VERSION = 1;
 export const MIN_EQL_RULE_INDEX_VERSION = 2;
 export const ALIAS_VERSION_FIELD = 'aliases_version';
 
-export const getSignalsTemplate = (index: string, spaceId?: string, aadIndexAliasName?: string) => {
+export const getSignalsTemplate = (index: string, aadIndexAliasName: string) => {
   const fieldAliases = createSignalsFieldAliases();
   const template = {
     index_patterns: [`${index}-*`],
     template: {
-      // aliases: {
-      //   [aadIndexAliasName]: {
-      //     is_write_index: false,
-      //   },
-      // },
+      aliases: {
+        [aadIndexAliasName]: {
+          is_write_index: false,
+        },
+      },
       settings: {
         index: {
           lifecycle: {
@@ -112,10 +112,37 @@ export const createSignalsFieldAliases = () => {
   return fieldAliases;
 };
 
+// signalExtraFields contains the field mappings that have been added to the signals indices over time.
+// We need to include these here because we can't add an alias for a field that isn't in the mapping,
+// and we want to apply the aliases to all old signals indices at the same time.
+const baseProps = {
+  ...signalExtraFields,
+  ...createSignalsFieldAliases(),
+};
+
+const properties = {
+  ...baseProps,
+  signal: {
+    ...baseProps.signal,
+    properties: {
+      ...baseProps.signal.properties,
+      rule: {
+        ...baseProps.signal.properties.rule,
+        properties: {
+          ...baseProps.signal.properties.rule.properties,
+          building_block_type: {
+            type: 'keyword',
+          },
+        },
+      },
+    },
+  },
+};
+
 export const backwardsCompatibilityMappings = [
   {
     minVersion: 0,
-    // Version 45 shipped with 7.14
+    // Version 45 shipped with 7.14. 7.15+ have both the host.os.name.caseless field and the field aliases
     maxVersion: 45,
     mapping: {
       runtime: {
@@ -127,13 +154,7 @@ export const backwardsCompatibilityMappings = [
           },
         },
       },
-      properties: {
-        // signalExtraFields contains the field mappings that have been added to the signals indices over time.
-        // We need to include these here because we can't add an alias for a field that isn't in the mapping,
-        // and we want to apply the aliases to all old signals indices at the same time.
-        ...signalExtraFields,
-        ...createSignalsFieldAliases(),
-      },
+      properties,
     },
   },
 ];

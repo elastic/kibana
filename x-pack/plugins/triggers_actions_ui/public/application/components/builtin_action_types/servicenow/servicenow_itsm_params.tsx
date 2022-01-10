@@ -15,17 +15,18 @@ import {
   EuiTitle,
   EuiLink,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
-import { ServiceNowITSMActionParams, Choice, Fields, ServiceNowActionConnector } from './types';
+import { ServiceNowITSMActionParams, Choice, Fields } from './types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { useGetChoices } from './use_get_choices';
-import { choicesToEuiOptions, DEFAULT_CORRELATION_ID, isLegacyConnector } from './helpers';
+import { choicesToEuiOptions, DEFAULT_CORRELATION_ID } from './helpers';
 
 import * as i18n from './translations';
+import { checkConnectorIsDeprecated } from '../../../../common/connectors_selection';
 
 const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {
@@ -46,9 +47,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
     notifications: { toasts },
   } = useKibana().services;
 
-  const isDeprecatedConnector = isLegacyConnector(
-    actionConnector as unknown as ServiceNowActionConnector
-  );
+  const isDeprecatedActionConnector = checkConnectorIsDeprecated(actionConnector);
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(
@@ -79,9 +78,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
 
   const editComment = useCallback(
     (key, value) => {
-      if (value.length > 0) {
-        editSubActionProperty(key, [{ commentId: '1', comment: value }]);
-      }
+      editSubActionProperty(key, [{ commentId: '1', comment: value }]);
     },
     [editSubActionProperty]
   );
@@ -244,7 +241,7 @@ const ServiceNowParamsFields: React.FunctionComponent<
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {!isDeprecatedConnector && (
+      {!isDeprecatedActionConnector && (
         <>
           <EuiFlexGroup>
             <EuiFlexItem>

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ATTRIBUTE_SERVICE_KEY } from './attribute_service';
+import { ATTRIBUTE_SERVICE_KEY, AttributeServiceUnwrapResult } from './attribute_service';
 import { mockAttributeService } from './attribute_service.mock';
 import { coreMock } from '../../../../../core/public/mocks';
 import { OnSaveProps } from 'src/plugins/saved_objects/public/save_modal';
@@ -35,7 +35,10 @@ describe('attributeService', () => {
       return { id: '123' };
     });
   };
-  const defaultUnwrapMethod = (savedObjectId: string): Promise<TestAttributes> => {
+
+  const defaultUnwrapMethod = (
+    savedObjectId: string
+  ): Promise<AttributeServiceUnwrapResult<TestAttributes>> => {
     return new Promise(() => {
       return { ...attributes };
     });
@@ -104,12 +107,14 @@ describe('attributeService', () => {
         saveMethod: defaultSaveMethod,
         checkForDuplicateTitle: jest.fn(),
       });
-      expect(await attributeService.unwrapAttributes(byReferenceInput)).toEqual(byReferenceInput);
+      expect(await attributeService.unwrapAttributes(byReferenceInput)).toEqual({
+        attributes: byReferenceInput,
+      });
     });
 
     it('returns attributes when when given value type input', async () => {
       const attributeService = mockAttributeService<TestAttributes>(defaultTestType, options);
-      expect(await attributeService.unwrapAttributes(byValueInput)).toEqual(attributes);
+      expect(await attributeService.unwrapAttributes(byValueInput)).toEqual({ attributes });
     });
 
     it('runs attributes through a custom unwrap method', async () => {
@@ -118,16 +123,20 @@ describe('attributeService', () => {
         unwrapMethod: (savedObjectId) => {
           return new Promise((resolve) => {
             return resolve({
-              ...attributes,
-              testAttr2: { array: [1, 2, 3, 4, 5], testAttr3: 'kibanana' },
+              attributes: {
+                ...attributes,
+                testAttr2: { array: [1, 2, 3, 4, 5], testAttr3: 'kibanana' },
+              },
             });
           });
         },
         checkForDuplicateTitle: jest.fn(),
       });
       expect(await attributeService.unwrapAttributes(byReferenceInput)).toEqual({
-        ...attributes,
-        testAttr2: { array: [1, 2, 3, 4, 5], testAttr3: 'kibanana' },
+        attributes: {
+          ...attributes,
+          testAttr2: { array: [1, 2, 3, 4, 5], testAttr3: 'kibanana' },
+        },
       });
     });
   });

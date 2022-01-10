@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { CategoryId, Category } from '../../../../../common/types/categories';
 import type { MlClient } from '../../../../lib/ml_client';
@@ -36,7 +36,7 @@ export function topCategoriesProvider(mlClient: MlClient) {
       },
       []
     );
-    return typeof body.hits.total === 'number' ? body.hits.total : body.hits.total.value;
+    return typeof body.hits.total === 'number' ? body.hits.total : body.hits.total!.value;
   }
 
   async function getTopCategoryCounts(jobId: string, numberOfCategories: number) {

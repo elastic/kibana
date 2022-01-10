@@ -27,7 +27,7 @@ import {
   createCasesClientFactory,
   createCasesClientMock,
 } from '../../client/mocks';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 
 const services = actionsMock.createServices();
 let caseActionType: CaseActionType;

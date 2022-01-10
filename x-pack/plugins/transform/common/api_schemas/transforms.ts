@@ -94,6 +94,13 @@ function transformConfigPayloadValidator<
   }
 }
 
+export const _metaSchema = schema.object(
+  {},
+  {
+    unknowns: 'allow',
+  }
+);
+
 // PUT transforms/{transformId}
 export const putTransformsRequestSchema = schema.object(
   {
@@ -112,6 +119,11 @@ export const putTransformsRequestSchema = schema.object(
     settings: schema.maybe(settingsSchema),
     source: sourceSchema,
     sync: schema.maybe(syncSchema),
+    /**
+     * This _meta field stores an arbitrary key-value map
+     * where keys are strings and values are arbitrary objects (possibly also maps).
+     */
+    _meta: schema.maybe(_metaSchema),
   },
   {
     validate: transformConfigPayloadValidator,

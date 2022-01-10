@@ -20,7 +20,6 @@ import {
   openDetailPanel,
   performExtensionAction,
   reloadIndices,
-  freezeIndices,
   unfreezeIndices,
 } from '../../../../store/actions';
 
@@ -67,9 +66,6 @@ const mapDispatchToProps = (dispatch, { indexNames }) => {
     },
     refreshIndices: () => {
       dispatch(refreshIndices({ indexNames }));
-    },
-    freezeIndices: () => {
-      dispatch(freezeIndices({ indexNames }));
     },
     unfreezeIndices: () => {
       dispatch(unfreezeIndices({ indexNames }));

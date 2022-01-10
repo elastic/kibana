@@ -7,11 +7,14 @@
 
 import { SavedObjectsUtils } from '../../../../../../../../src/core/server';
 import {
+  IEventLogClient,
   IEventLogger,
   IEventLogService,
   SAVED_OBJECT_REL_PRIMARY,
 } from '../../../../../../event_log/server';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { invariant } from '../../../../../common/utils/invariant';
+import { IRuleStatusSOAttributes } from '../../rules/types';
 import { LogStatusChangeArgs } from '../types';
 import {
   RuleExecutionLogAction,
@@ -21,6 +24,8 @@ import {
 
 const spaceIdToNamespace = SavedObjectsUtils.namespaceStringToId;
 
+const now = () => new Date().toISOString();
+
 const statusSeverityDict: Record<RuleExecutionStatus, number> = {
   [RuleExecutionStatus.succeeded]: 0,
   [RuleExecutionStatus['going to run']]: 10,
@@ -28,13 +33,6 @@ const statusSeverityDict: Record<RuleExecutionStatus, number> = {
   [RuleExecutionStatus['partial failure']]: 20,
   [RuleExecutionStatus.failed]: 30,
 };
-
-interface FindExecutionLogArgs {
-  ruleIds: string[];
-  spaceId: string;
-  logsCount?: number;
-  statuses?: RuleExecutionStatus[];
-}
 
 interface LogExecutionMetricsArgs {
   ruleId: string;
@@ -50,24 +48,88 @@ interface EventLogExecutionMetrics {
   executionGapDuration?: number;
 }
 
+interface GetLastStatusChangesArgs {
+  ruleId: string;
+  count: number;
+  includeStatuses?: RuleExecutionStatus[];
+}
+
 interface IExecLogEventLogClient {
-  find: (args: FindExecutionLogArgs) => Promise<{}>;
+  getLastStatusChanges(args: GetLastStatusChangesArgs): Promise<IRuleStatusSOAttributes[]>;
   logStatusChange: (args: LogStatusChangeArgs) => void;
   logExecutionMetrics: (args: LogExecutionMetricsArgs) => void;
 }
 
 export class EventLogClient implements IExecLogEventLogClient {
+  private readonly eventLogClient: IEventLogClient | undefined;
+  private readonly eventLogger: IEventLogger;
   private sequence = 0;
-  private eventLogger: IEventLogger;
 
-  constructor(eventLogService: IEventLogService) {
+  constructor(eventLogService: IEventLogService, eventLogClient: IEventLogClient | undefined) {
+    this.eventLogClient = eventLogClient;
     this.eventLogger = eventLogService.getLogger({
       event: { provider: RULE_EXECUTION_LOG_PROVIDER },
     });
   }
 
-  public async find({ ruleIds, spaceId, statuses, logsCount = 1 }: FindExecutionLogArgs) {
-    return {}; // TODO implement
+  public async getLastStatusChanges(
+    args: GetLastStatusChangesArgs
+  ): Promise<IRuleStatusSOAttributes[]> {
+    if (!this.eventLogClient) {
+      throw new Error('Querying Event Log from a rule executor is not supported at this moment');
+    }
+
+    const soType = ALERT_SAVED_OBJECT_TYPE;
+    const soIds = [args.ruleId];
+    const count = args.count;
+    const includeStatuses = (args.includeStatuses ?? []).map((status) => `"${status}"`);
+
+    const filterBy: string[] = [
+      `event.provider: ${RULE_EXECUTION_LOG_PROVIDER}`,
+      'event.kind: event',
+      `event.action: ${RuleExecutionLogAction['status-change']}`,
+      includeStatuses.length > 0
+        ? `kibana.alert.rule.execution.status:${includeStatuses.join(' ')}`
+        : '',
+    ];
+
+    const kqlFilter = filterBy
+      .filter(Boolean)
+      .map((item) => `(${item})`)
+      .join(' and ');
+
+    const findResult = await this.eventLogClient.findEventsBySavedObjectIds(soType, soIds, {
+      page: 1,
+      per_page: count,
+      sort_field: '@timestamp',
+      sort_order: 'desc',
+      filter: kqlFilter,
+    });
+
+    return findResult.data.map((event) => {
+      invariant(event, 'Event not found');
+      invariant(event['@timestamp'], 'Required "@timestamp" field is not found');
+
+      const statusDate = event['@timestamp'];
+      const status = event.kibana?.alert?.rule?.execution?.status as
+        | RuleExecutionStatus
+        | undefined;
+      const isStatusFailed = status === RuleExecutionStatus.failed;
+      const message = event.message ?? '';
+
+      return {
+        statusDate,
+        status,
+        lastFailureAt: isStatusFailed ? statusDate : undefined,
+        lastFailureMessage: isStatusFailed ? message : undefined,
+        lastSuccessAt: !isStatusFailed ? statusDate : undefined,
+        lastSuccessMessage: !isStatusFailed ? message : undefined,
+        lastLookBackDate: undefined,
+        gap: undefined,
+        bulkCreateTimeDurations: undefined,
+        searchAfterTimeDurations: undefined,
+      };
+    });
   }
 
   public logExecutionMetrics({
@@ -78,6 +140,7 @@ export class EventLogClient implements IExecLogEventLogClient {
     spaceId,
   }: LogExecutionMetricsArgs) {
     this.eventLogger.logEvent({
+      '@timestamp': now(),
       rule: {
         id: ruleId,
         name: ruleName,
@@ -122,6 +185,8 @@ export class EventLogClient implements IExecLogEventLogClient {
     spaceId,
   }: LogStatusChangeArgs) {
     this.eventLogger.logEvent({
+      '@timestamp': now(),
+      message,
       rule: {
         id: ruleId,
         name: ruleName,
@@ -132,7 +197,6 @@ export class EventLogClient implements IExecLogEventLogClient {
         action: RuleExecutionLogAction['status-change'],
         sequence: this.sequence++,
       },
-      message,
       kibana: {
         alert: {
           rule: {

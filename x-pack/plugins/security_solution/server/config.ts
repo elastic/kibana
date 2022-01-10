@@ -90,7 +90,7 @@ export const configSchema = schema.object({
    * @example
    * xpack.securitySolution.enableExperimental:
    *   - someCrazyFeature
-   *   - trustedAppsByPolicyEnabled
+   *   - someEvenCrazierFeature
    */
   enableExperimental: schema.arrayOf(schema.string(), {
     defaultValue: () => [],
@@ -119,12 +119,6 @@ export const configSchema = schema.object({
   }),
 
   /**
-   * Host Endpoint Configuration
-   */
-  endpointResultListDefaultFirstPageIndex: schema.number({ defaultValue: 0 }),
-  endpointResultListDefaultPageSize: schema.number({ defaultValue: 10 }),
-
-  /**
    * Artifacts Configuration
    */
   packagerTaskInterval: schema.string({ defaultValue: '60s' }),
@@ -139,20 +133,15 @@ export const configSchema = schema.object({
 export type ConfigSchema = TypeOf<typeof configSchema>;
 
 export type ConfigType = ConfigSchema & {
-  kibanaIndex: string;
   experimentalFeatures: ExperimentalFeatures;
 };
 
 export const createConfig = (context: PluginInitializerContext): ConfigType => {
-  const globalConfig = context.config.legacy.get();
   const pluginConfig = context.config.get<TypeOf<typeof configSchema>>();
-
-  const kibanaIndex = globalConfig.kibana.index;
   const experimentalFeatures = parseExperimentalConfigValue(pluginConfig.enableExperimental);
 
   return {
     ...pluginConfig,
-    kibanaIndex,
     experimentalFeatures,
   };
 };

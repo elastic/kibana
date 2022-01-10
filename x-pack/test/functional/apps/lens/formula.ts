@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       await PageObjects.lens.clickAddField();
-      await fieldEditor.setName(`*' "'`);
+      await fieldEditor.setName(`ab' "'`);
       await fieldEditor.enableValue();
       await fieldEditor.typeScript("emit('abc')");
       await fieldEditor.save();
@@ -106,21 +106,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.configureDimension({
         dimension: 'lnsDatatable_metrics > lns-empty-dimension',
         operation: 'unique_count',
-        field: `*`,
+        field: `ab`,
         keepOpen: true,
       });
 
       await PageObjects.lens.switchToFormula();
-      await PageObjects.lens.expectFormulaText(`unique_count('*\\' "\\'')`);
+      await PageObjects.lens.expectFormulaText(`unique_count('ab\\' "\\'')`);
 
       await PageObjects.lens.typeFormula('unique_count(');
       const input = await find.activeElement();
-      await input.type('*');
+      await input.type('ab');
       await input.pressKeys(browser.keys.ENTER);
 
       await PageObjects.common.sleep(100);
 
-      await PageObjects.lens.expectFormulaText(`unique_count('*\\' "\\'')`);
+      await PageObjects.lens.expectFormulaText(`unique_count('ab\\' "\\'')`);
     });
 
     it('should persist a broken formula on close', async () => {
@@ -286,6 +286,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('0');
       expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('0');
+    });
+
+    it('should apply a global filter to the current formula', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.switchToVisualization('lnsDatatable');
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsDatatable_metrics > lns-empty-dimension',
+        operation: 'formula',
+        formula: `count()`,
+        keepOpen: true,
+      });
+
+      // check the numbers
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('14,005');
+
+      // add an advanced filter by filter
+      await PageObjects.lens.enableFilter();
+      await PageObjects.lens.setFilterBy('bytes > 4000');
+
+      // check that numbers changed
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await retry.try(async () => {
+        expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('9,169');
+      });
+
+      // now change the formula to add an inner filter to count
+      await PageObjects.lens.typeFormula(`count(kql=`);
+
+      const input = await find.activeElement();
+      await input.type(`bytes > 600000`);
+      // the autocomplete will add quotes and closing brakets, so do not worry about that
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('0');
     });
   });
 }

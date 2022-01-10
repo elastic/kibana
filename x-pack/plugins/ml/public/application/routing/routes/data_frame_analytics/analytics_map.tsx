@@ -35,7 +35,13 @@ export const analyticsMapRouteFactory = (
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
-  const { context } = useResolver(undefined, undefined, deps.config, basicResolvers(deps));
+  const { context } = useResolver(
+    undefined,
+    undefined,
+    deps.config,
+    deps.dataViewsContract,
+    basicResolvers(deps)
+  );
 
   return (
     <PageLoader context={context}>

@@ -1,0 +1,126 @@
+/**
+ * 1. Stack content vertically so the table can scroll when its constrained by a fixed container height.
+ */
+// stylelint-disable selector-no-qualifying-type
+.kbnDocTableWrapper {
+  @include euiScrollBar;
+  overflow: auto;
+  display: flex;
+  flex: 1 1 100%;
+  flex-direction: column; /* 1 */
+
+  th {
+    text-align: left;
+    font-weight: bold;
+  }
+
+  .spinner {
+    position: absolute;
+    top: 40%;
+    left: 0;
+    right: 0;
+    z-index: $euiZLevel1;
+    opacity: .5;
+  }
+
+  // SASSTODO: add a monospace modifier to the doc-table component
+  .kbnDocTable__row {
+    font-family: $euiCodeFontFamily;
+    font-size: $euiFontSizeXS;
+  }
+}
+
+.kbnDocTable__footer {
+  background-color: $euiColorLightShade;
+  padding: $euiSizeXS $euiSizeS;
+  text-align: center;
+}
+
+.kbnDocTable__container.loading {
+  opacity: .5;
+}
+
+.kbnDocTable {
+  th {
+    white-space: nowrap;
+    padding-right: $euiSizeS;
+  }
+}
+
+.kbn-table,
+.kbnDocTable {
+  /**
+  *  Style ES document _source in table view <dt>key:<dt><dd>value</dd>
+  *  Use alpha so this will stand out against non-white backgrounds, e.g. the highlighted
+  *  row in the Context Log.
+  */
+
+  dl.source {
+    margin-bottom: 0;
+    line-height: 2em;
+    word-break: break-word;
+
+    dt,
+    dd {
+      display: inline;
+    }
+
+    dt {
+      background-color: transparentize(shade($euiColorPrimary, 20%), .9);
+      color: $euiTextColor;
+      padding: ($euiSizeXS / 2) $euiSizeXS;
+      margin-right: $euiSizeXS;
+      word-break: normal;
+      border-radius: $euiBorderRadius;
+    }
+  }
+}
+
+.kbnDocTable__row {
+  td {
+    position: relative;
+
+    &:hover {
+      .kbnDocTableRowFilterButton {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.kbnDocTable__row--highlight {
+  td,
+  .kbnDocTableRowFilterButton {
+    background-color: tintOrShade($euiColorPrimary, 90%, 70%);
+  }
+}
+
+.kbnDocTable__error {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1 0 100%;
+  text-align: center;
+}
+
+.table {
+  // Nesting
+  .table {
+    background-color: $euiColorEmptyShade;
+  }
+}
+
+.kbn-table {
+  // sub tables should not have a leading border
+  .table .table {
+    margin-bottom: 0;
+
+    tr:first-child > td {
+      border-top: none;
+    }
+
+    td.field-name {
+      font-weight: $euiFontWeightBold;
+    }
+  }
+}

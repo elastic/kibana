@@ -7,6 +7,7 @@
 
 import { State } from '../../store';
 import { sourcererSelectors } from '../../store/selectors';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 export interface IndicesSelector {
   all: string[];
@@ -14,25 +15,17 @@ export interface IndicesSelector {
 }
 
 export const getIndicesSelector = () => {
-  const getkibanaIndexPatternsSelector = sourcererSelectors.kibanaIndexPatternsSelector();
-  const getConfigIndexPatternsSelector = sourcererSelectors.configIndexPatternsSelector();
   const getSignalIndexNameSelector = sourcererSelectors.signalIndexNameSelector();
+  const getScopeSelector = sourcererSelectors.scopeIdSelector();
 
-  const mapStateToProps = (state: State): IndicesSelector => {
-    const rawIndices = new Set(getConfigIndexPatternsSelector(state));
-    const kibanaIndexPatterns = getkibanaIndexPatternsSelector(state);
-    const alertIndexName = getSignalIndexNameSelector(state);
-    kibanaIndexPatterns.forEach(({ title }) => {
-      if (title !== alertIndexName) {
-        rawIndices.add(title);
-      }
-    });
+  return (state: State, scopeId: SourcererScopeName): IndicesSelector => {
+    const signalIndexName = getSignalIndexNameSelector(state);
+    const { selectedPatterns } = getScopeSelector(state, scopeId);
+    const raw: string[] = selectedPatterns.filter((index) => index !== signalIndexName);
 
     return {
-      all: alertIndexName != null ? [...rawIndices, alertIndexName] : [...rawIndices],
-      raw: [...rawIndices],
+      all: signalIndexName != null ? [...raw, signalIndexName] : [...raw],
+      raw,
     };
   };
-
-  return mapStateToProps;
 };

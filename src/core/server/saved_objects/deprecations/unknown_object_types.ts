@@ -6,19 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import type { DeprecationsDetails } from '../../deprecations';
 import { IScopedClusterClient } from '../../elasticsearch';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { SavedObjectsRawDocSource } from '../serialization';
-import type { KibanaConfigType } from '../../kibana_config';
 import { getIndexForType } from '../service/lib';
 
 interface UnknownTypesDeprecationOptions {
   typeRegistry: ISavedObjectTypeRegistry;
   esClient: IScopedClusterClient;
-  kibanaConfig: KibanaConfigType;
+  kibanaIndex: string;
   kibanaVersion: string;
 }
 
@@ -29,11 +28,11 @@ const getTargetIndices = ({
   types,
   typeRegistry,
   kibanaVersion,
-  kibanaConfig,
+  kibanaIndex,
 }: {
   types: string[];
   typeRegistry: ISavedObjectTypeRegistry;
-  kibanaConfig: KibanaConfigType;
+  kibanaIndex: string;
   kibanaVersion: string;
 }) => {
   return [
@@ -43,7 +42,7 @@ const getTargetIndices = ({
           type,
           typeRegistry,
           kibanaVersion,
-          defaultIndex: kibanaConfig.index,
+          defaultIndex: kibanaIndex,
         })
       )
     ),
@@ -63,14 +62,14 @@ const getUnknownTypesQuery = (knownTypes: string[]): estypes.QueryDslQueryContai
 const getUnknownSavedObjects = async ({
   typeRegistry,
   esClient,
-  kibanaConfig,
+  kibanaIndex,
   kibanaVersion,
 }: UnknownTypesDeprecationOptions) => {
   const knownTypes = getKnownTypes(typeRegistry);
   const targetIndices = getTargetIndices({
     types: knownTypes,
     typeRegistry,
-    kibanaConfig,
+    kibanaIndex,
     kibanaVersion,
   });
   const query = getUnknownTypesQuery(knownTypes);
@@ -133,21 +132,21 @@ export const getUnknownTypesDeprecations = async (
 interface DeleteUnknownTypesOptions {
   typeRegistry: ISavedObjectTypeRegistry;
   esClient: IScopedClusterClient;
-  kibanaConfig: KibanaConfigType;
+  kibanaIndex: string;
   kibanaVersion: string;
 }
 
 export const deleteUnknownTypeObjects = async ({
   esClient,
   typeRegistry,
-  kibanaConfig,
+  kibanaIndex,
   kibanaVersion,
 }: DeleteUnknownTypesOptions) => {
   const knownTypes = getKnownTypes(typeRegistry);
   const targetIndices = getTargetIndices({
     types: knownTypes,
     typeRegistry,
-    kibanaConfig,
+    kibanaIndex,
     kibanaVersion,
   });
   const query = getUnknownTypesQuery(knownTypes);

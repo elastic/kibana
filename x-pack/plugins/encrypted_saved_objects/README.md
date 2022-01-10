@@ -3,7 +3,7 @@
 ## Overview
 
 The purpose of this plugin is to provide a way to encrypt/decrypt attributes on the custom Saved Objects that works with
-security and spaces filtering as well as performing audit logging.
+security and spaces filtering.
 
 [RFC #2: Encrypted Saved Objects Attributes](../../../rfcs/text/0002_encrypted_attributes.md).
 

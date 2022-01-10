@@ -7,7 +7,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiDataGridColumn } from '@elastic/eui';
 import { CoreSetup } from 'src/core/public';
 
@@ -194,11 +194,11 @@ export const useIndexData = (
         const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
         const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
-        setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total.value);
+        setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value);
         setRowCountRelation(
           typeof resp.hits.total === 'number'
             ? ('eq' as estypes.SearchTotalHitsRelation)
-            : resp.hits.total.relation
+            : resp.hits.total!.relation
         );
         setTableItems(docs);
         setStatus(INDEX_STATUS.LOADED);

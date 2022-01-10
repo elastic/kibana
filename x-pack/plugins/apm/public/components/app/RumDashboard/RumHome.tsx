@@ -48,7 +48,7 @@ export function RumHome() {
                     'Enable RUM with the APM agent to collect user experience data.',
                 }
               ),
-              href: core.http.basePath.prepend(`integrations/detail/apm`),
+              href: core.http.basePath.prepend(`/app/home#/tutorial/apm`),
             },
           },
           docsLink: core.docLinks.links.observability.guide,

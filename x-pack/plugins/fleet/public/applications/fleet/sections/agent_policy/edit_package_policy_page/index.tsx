@@ -8,7 +8,7 @@
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { safeLoad } from 'js-yaml';
 import {
   EuiButtonEmpty,
@@ -213,15 +213,16 @@ export const EditPackagePolicyForm = memo<{
             }
 
             const { data: packageData } = await sendGetPackageInfoByKey(
-              pkgKeyFromPackageInfo(_packageInfo!)
+              _packageInfo!.name,
+              _packageInfo!.version
             );
 
-            if (packageData?.response) {
-              setPackageInfo(packageData.response);
+            if (packageData?.item) {
+              setPackageInfo(packageData.item);
 
               const newValidationResults = validatePackagePolicy(
                 newPackagePolicy,
-                packageData.response,
+                packageData.item,
                 safeLoad
               );
               setValidationResults(newValidationResults);
@@ -283,6 +284,7 @@ export const EditPackagePolicyForm = memo<{
   // Update package policy method
   const updatePackagePolicy = useCallback(
     (updatedFields: Partial<UpdatePackagePolicy>) => {
+      setIsEdited(true);
       const newPackagePolicy = {
         ...packagePolicy,
         ...updatedFields,
@@ -343,10 +345,12 @@ export const EditPackagePolicyForm = memo<{
   }, [from, getHref, packageInfo, policyId]);
 
   // Save package policy
+  const [isEdited, setIsEdited] = useState(false);
   const [formState, setFormState] = useState<PackagePolicyFormState>('INVALID');
   const savePackagePolicy = async () => {
     setFormState('LOADING');
-    const result = await sendUpdatePackagePolicy(packagePolicyId, packagePolicy);
+    const { elasticsearch, ...restPackagePolicy } = packagePolicy; // ignore 'elasticsearch' property since it fails route validation
+    const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
     setFormState('SUBMITTED');
     return result;
   };
@@ -582,7 +586,8 @@ export const EditPackagePolicyForm = memo<{
                       <EuiButton
                         onClick={onSubmit}
                         isLoading={formState === 'LOADING'}
-                        disabled={formState !== 'VALID'}
+                        // Allow to save only if the package policy is upgraded or had been edited
+                        disabled={formState !== 'VALID' || (!isEdited && !isUpgrade)}
                         iconType="save"
                         color="primary"
                         fill

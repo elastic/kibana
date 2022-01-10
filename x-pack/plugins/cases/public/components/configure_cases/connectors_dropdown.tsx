@@ -9,11 +9,11 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiSuperSelect } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { ConnectorTypes } from '../../../common';
+import { ConnectorTypes } from '../../../common/api';
 import { ActionConnector } from '../../containers/configure/types';
 import * as i18n from './translations';
 import { useKibana } from '../../common/lib/kibana';
-import { getConnectorIcon, isLegacyConnector } from '../utils';
+import { getConnectorIcon, isDeprecatedConnector } from '../utils';
 import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 
 export interface Props {
@@ -95,10 +95,10 @@ const ConnectorsDropdownComponent: React.FC<Props> = ({
                 <EuiFlexItem grow={false}>
                   <span>
                     {connector.name}
-                    {isLegacyConnector(connector) && ` (${i18n.DEPRECATED_TOOLTIP_TEXT})`}
+                    {isDeprecatedConnector(connector) && ` (${i18n.DEPRECATED_TOOLTIP_TEXT})`}
                   </span>
                 </EuiFlexItem>
-                {isLegacyConnector(connector) && (
+                {isDeprecatedConnector(connector) && (
                   <EuiFlexItem grow={false}>
                     <StyledEuiIconTip
                       aria-label={i18n.DEPRECATED_TOOLTIP_CONTENT}

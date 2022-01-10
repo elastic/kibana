@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { IndexPatternFieldBase, IndexPatternBase, KueryNode, KueryQueryOptions } from '../..';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DataViewFieldBase, DataViewBase, KueryNode, KueryQueryOptions } from '../..';
 import * as literal from '../node_types/literal';
 
 export function buildNodeParams(fieldName: string) {
@@ -18,7 +18,7 @@ export function buildNodeParams(fieldName: string) {
 
 export function toElasticsearchQuery(
   node: KueryNode,
-  indexPattern?: IndexPatternBase,
+  indexPattern?: DataViewBase,
   config: KueryQueryOptions = {},
   context: Record<string, any> = {}
 ): estypes.QueryDslQueryContainer {
@@ -30,7 +30,7 @@ export function toElasticsearchQuery(
     value: context?.nested ? `${context.nested.path}.${fieldNameArg.value}` : fieldNameArg.value,
   };
   const fieldName = literal.toElasticsearchQuery(fullFieldNameArg) as string;
-  const field = indexPattern?.fields?.find((fld: IndexPatternFieldBase) => fld.name === fieldName);
+  const field = indexPattern?.fields?.find((fld: DataViewFieldBase) => fld.name === fieldName);
 
   if (field?.scripted) {
     throw new Error(`Exists query does not support scripted fields`);

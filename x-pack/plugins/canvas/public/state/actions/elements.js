@@ -8,7 +8,7 @@
 import { createAction } from 'redux-actions';
 import immutable from 'object-path-immutable';
 import { get, pick, cloneDeep, without } from 'lodash';
-import { toExpression, safeElementFromExpression } from '@kbn/interpreter/common';
+import { toExpression, safeElementFromExpression } from '@kbn/interpreter';
 import { createThunk } from '../../lib/create_thunk';
 import {
   getPages,
@@ -111,7 +111,8 @@ export const fetchContext = createThunk(
         ...element.ast,
         chain: astChain,
       },
-      variables
+      variables,
+      prevContextValue
     ).then((value) => {
       dispatch(
         args.setValue({

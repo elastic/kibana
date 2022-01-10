@@ -12,8 +12,4 @@ export interface UrlGeneratorContract<Id extends UrlGeneratorId> {
   id: Id;
   createUrl(state: UrlGeneratorStateMapping[Id]['State']): Promise<string>;
   isDeprecated: boolean;
-  migrate(state: UrlGeneratorStateMapping[Id]['State']): Promise<{
-    state: UrlGeneratorStateMapping[Id]['MigratedState'];
-    id: UrlGeneratorStateMapping[Id]['MigratedId'];
-  }>;
 }

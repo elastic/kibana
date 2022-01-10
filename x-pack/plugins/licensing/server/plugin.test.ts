@@ -6,7 +6,7 @@
  */
 
 import { take, toArray } from 'rxjs/operators';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment from 'moment';
 import { LicenseType } from '../common/types';
 import { ElasticsearchError } from './types';
@@ -102,9 +102,6 @@ describe('licensing plugin', () => {
         await license$.pipe(take(1)).toPromise();
 
         expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledTimes(1);
-        expect(esClient.asInternalUser.xpack.info).toHaveBeenCalledWith({
-          accept_enterprise: true,
-        });
       });
 
       it('observable receives updated licenses', async () => {

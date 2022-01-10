@@ -18,7 +18,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ApplicationStart } from 'kibana/public';
 import { createAppNavigationHandler } from '../app_navigation_handler';
@@ -93,6 +93,19 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode }) => 
                     <FormattedMessage
                       id="home.addData.sampleDataButtonLabel"
                       defaultMessage="Try sample data"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="uploadFile"
+                    href={addBasePath('#/tutorial_directory/fileDataViz')}
+                    iconType="importAction"
+                  >
+                    <FormattedMessage
+                      id="home.addData.uploadFileButtonLabel"
+                      defaultMessage="Upload a file"
                     />
                   </EuiButtonEmpty>
                 </EuiFlexItem>

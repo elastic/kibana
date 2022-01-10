@@ -11,7 +11,7 @@ Each tutorial contains three sets of instructions:
 
 [discrete]
 === Creating a new tutorial
-1. Create a new directory in the link:https://github.com/elastic/kibana/tree/master/src/plugins/home/server/tutorials[tutorials directory].
+1. Create a new directory in the link:https://github.com/elastic/kibana/tree/main/src/plugins/home/server/tutorials[tutorials directory].
 2. In the new directory, create a file called `index.ts` that exports a function.
 The function must return a function object that conforms to the `TutorialSchema` interface link:{kib-repo}tree/{branch}/src/plugins/home/server/services/tutorials/lib/tutorial_schema.ts[tutorial schema].
 3. Register the tutorial in link:{kib-repo}tree/{branch}/src/plugins/home/server/tutorials/register.ts[register.ts] by adding it to the `builtInTutorials`.

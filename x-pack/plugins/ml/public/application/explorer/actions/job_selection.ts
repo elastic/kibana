@@ -17,8 +17,7 @@ import { createJobs } from '../explorer_utils';
 export function jobSelectionActionCreator(selectedJobIds: string[]) {
   return from(mlFieldFormatService.populateFormats(selectedJobIds)).pipe(
     map((resp) => {
-      if (resp.err) {
-        console.log('Error populating field formats:', resp.err); // eslint-disable-line no-console
+      if (resp.error) {
         return null;
       }
 

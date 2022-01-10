@@ -8,7 +8,7 @@
 import { castArray } from 'lodash';
 import { EuiCode, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LiveQueryForm } from './form';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
@@ -48,14 +48,19 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   const { data: hasActionResultsPrivileges, isFetched } = useActionResultsPrivileges();
 
   const defaultValue = useMemo(() => {
-    if (agentId || agentPolicyIds || query) {
+    if (agentId || agentPolicyIds?.length || query?.length) {
+      const agentSelection =
+        agentId || agentPolicyIds?.length
+          ? {
+              allAgentsSelected: false,
+              agents: castArray(agentId ?? agentIds ?? []),
+              platformsSelected: [],
+              policiesSelected: agentPolicyIds ?? [],
+            }
+          : null;
+
       return {
-        agentSelection: {
-          allAgentsSelected: false,
-          agents: castArray(agentId ?? agentIds ?? []),
-          platformsSelected: [],
-          policiesSelected: agentPolicyIds ?? [],
-        },
+        ...(agentSelection ? { agentSelection } : {}),
         query,
         savedQueryId,
         ecs_mapping,

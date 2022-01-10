@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
 import {
   GetSortWithTieBreakerOptions,
@@ -52,7 +52,10 @@ export const getThreatList = async ({
       `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
     )
   );
-  const { body: response } = await esClient.search<ThreatListDoc>({
+  const { body: response } = await esClient.search<
+    ThreatListDoc,
+    Record<string, estypes.AggregationsAggregate>
+  >({
     body: {
       query: queryFilter,
       fields: [
@@ -62,6 +65,7 @@ export const getThreatList = async ({
         },
       ],
       search_after: searchAfter,
+      // @ts-expect-error is not compatible with SortCombinations
       sort: getSortWithTieBreaker({
         sortField,
         sortOrder,

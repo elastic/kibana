@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import { errors } from '@elastic/elasticsearch';
 import { Client } from '@elastic/elasticsearch';
 import { FtrService } from '../../functional/ftr_provider_context';
 import {
   metadataCurrentIndexPattern,
   metadataTransformPrefix,
 } from '../../../plugins/security_solution/common/endpoint/constants';
-import { EndpointError } from '../../../plugins/security_solution/server';
 import {
   deleteIndexedHostsAndAlerts,
   IndexedHostsAndAlertsResponse,
@@ -22,6 +21,7 @@ import { TransformConfigUnion } from '../../../plugins/transform/common/types/tr
 import { GetTransformsResponseSchema } from '../../../plugins/transform/common/api_schemas/transforms';
 import { catchAndWrapError } from '../../../plugins/security_solution/server/endpoint/utils';
 import { installOrUpgradeEndpointFleetPackage } from '../../../plugins/security_solution/common/endpoint/data_loaders/setup_fleet_for_endpoint';
+import { EndpointError } from '../../../plugins/security_solution/common/endpoint/errors';
 
 export class EndpointTestResources extends FtrService {
   private readonly esClient = this.ctx.getService('es');
@@ -168,7 +168,7 @@ export class EndpointTestResources extends FtrService {
     // else we just want to make sure the index has data, thus just having one in the index will do
     const size = ids.length || 1;
 
-    await this.retry.waitFor('wait for endpoints hosts', async () => {
+    await this.retry.waitFor('endpoint hosts', async () => {
       try {
         const searchResponse = await this.esClient.search({
           index: metadataCurrentIndexPattern,
@@ -177,10 +177,10 @@ export class EndpointTestResources extends FtrService {
           rest_total_hits_as_int: true,
         });
 
-        return searchResponse.body.hits.total === size;
+        return searchResponse.hits.total === size;
       } catch (error) {
         // We ignore 404's (index might not exist)
-        if (error instanceof ResponseError && error.statusCode === 404) {
+        if (error instanceof errors.ResponseError && error.statusCode === 404) {
           return false;
         }
 

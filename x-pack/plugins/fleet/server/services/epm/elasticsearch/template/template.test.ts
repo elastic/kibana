@@ -9,10 +9,11 @@ import { readFileSync } from 'fs';
 import path from 'path';
 
 import { safeLoad } from 'js-yaml';
+import { loggerMock } from '@kbn/logging/mocks';
+import { elasticsearchServiceMock } from 'src/core/server/mocks';
 
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../../../services';
-
 import type { RegistryDataStream } from '../../../../types';
 import { processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
@@ -22,6 +23,7 @@ import {
   getTemplate,
   getTemplatePriority,
   generateTemplateIndexPattern,
+  updateCurrentWriteIndices,
 } from './template';
 
 const FLEET_COMPONENT_TEMPLATE = '.fleet_component_template-1';
@@ -370,6 +372,40 @@ describe('EPM template', () => {
           fields: {
             number: {
               type: 'double',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(keywordWithMultiFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(keywordWithMultiFieldsMapping);
+  });
+
+  it('tests processing wildcard field with multi fields', () => {
+    const keywordWithMultiFieldsLiteralYml = `
+- name: keywordWithMultiFields
+  type: wildcard
+  multi_fields:
+    - name: raw
+      type: keyword
+    - name: indexed
+      type: text
+`;
+
+    const keywordWithMultiFieldsMapping = {
+      properties: {
+        keywordWithMultiFields: {
+          ignore_above: 1024,
+          type: 'wildcard',
+          fields: {
+            raw: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+            indexed: {
+              type: 'text',
             },
           },
         },
@@ -800,5 +836,63 @@ describe('EPM template', () => {
 
     expect(templateIndexPattern).toEqual(templateIndexPatternDatasetIsPrefixTrue);
     expect(templatePriority).toEqual(templatePriorityDatasetIsPrefixTrue);
+  });
+
+  describe('updateCurrentWriteIndices', () => {
+    it('update all the index matching, index template index pattern', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResolvedValue({
+        body: {
+          data_streams: [{ name: 'test.prefix1-default' }],
+        },
+      } as any);
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test.*-*'],
+            template: {
+              settings: { index: {} },
+              mappings: { properties: {} },
+            },
+          } as any,
+        },
+      ]);
+      expect(esClient.indices.getDataStream).toBeCalledWith({
+        name: 'test.*-*',
+      });
+      const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
+      expect(putMappingsCall).toHaveLength(1);
+      expect(putMappingsCall[0]).toBe('test.prefix1-default');
+    });
+    it('update non replicated datastream', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResolvedValue({
+        body: {
+          data_streams: [
+            { name: 'test-non-replicated' },
+            { name: 'test-replicated', replicated: true },
+          ],
+        },
+      } as any);
+      const logger = loggerMock.create();
+      await updateCurrentWriteIndices(esClient, logger, [
+        {
+          templateName: 'test',
+          indexTemplate: {
+            index_patterns: ['test-*'],
+            template: {
+              settings: { index: {} },
+              mappings: { properties: {} },
+            },
+          } as any,
+        },
+      ]);
+
+      const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
+      expect(putMappingsCall).toHaveLength(1);
+      expect(putMappingsCall[0]).toBe('test-non-replicated');
+    });
   });
 });

@@ -22,7 +22,7 @@ import {
 } from '../../../index_pattern_util';
 import { SortDirection, indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { ESDocField } from '../../fields/es_doc_field';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ScalingForm } from './util/scaling_form';
 
@@ -35,6 +35,8 @@ export class UpdateSourceEditor extends Component {
     sortOrder: PropTypes.string.isRequired,
     scalingType: PropTypes.string.isRequired,
     source: PropTypes.object,
+    hasJoins: PropTypes.bool.isRequired,
+    clearJoins: PropTypes.func.isRequired,
   };
 
   state = {
@@ -205,6 +207,8 @@ export class UpdateSourceEditor extends Component {
           scalingType={this.props.scalingType}
           supportsClustering={this.state.supportsClustering}
           clusteringDisabledReason={this.state.clusteringDisabledReason}
+          hasJoins={this.props.hasJoins}
+          clearJoins={this.props.clearJoins}
         />
       </EuiPanel>
     );

@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { showAlertsToast } from '../../alerts/lib/alerts_toast';
 import { useRequestErrorHandler } from './use_request_error_handler';
+import { EnableAlertResponse, showAlertsToast } from '../../alerts/lib/alerts_toast';
 
 export const useAlertsModal = () => {
   const { services } = useKibana();
@@ -29,9 +29,16 @@ export const useAlertsModal = () => {
 
   async function enableAlerts() {
     try {
-      const response = await services.http?.post('../api/monitoring/v1/alerts/enable', {});
+      if (!services.http?.post) {
+        throw new Error('HTTP service is unavailable');
+      }
+
+      const response = await services.http.post<EnableAlertResponse>(
+        '../api/monitoring/v1/alerts/enable',
+        {}
+      )!;
       window.localStorage.setItem('ALERTS_MODAL_DECISION_MADE', 'true');
-      showAlertsToast(response);
+      showAlertsToast(response, services.theme?.theme$);
     } catch (err) {
       await handleRequestError(err);
     }

@@ -1,5 +1,14 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
 const execSync = require('child_process').execSync;
 const fs = require('fs');
+// eslint-disable-next-line import/no-unresolved
 const { areChangesSkippable, doAnyChangesMatch } = require('kibana-buildkite-library');
 
 const SKIPPABLE_PATHS = [
@@ -57,6 +66,9 @@ const uploadPipeline = (pipelineContent) => {
     if (
       (await doAnyChangesMatch([
         /^x-pack\/plugins\/security_solution/,
+        /^x-pack\/plugins\/cases/,
+        /^x-pack\/plugins\/lists/,
+        /^x-pack\/plugins\/timelines/,
         /^x-pack\/test\/security_solution_cypress/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
@@ -66,12 +78,26 @@ const uploadPipeline = (pipelineContent) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution.yml'));
     }
 
-    // if (
-    //   (await doAnyChangesMatch([/^x-pack\/plugins\/apm/])) ||
-    //   process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
-    // ) {
-    //   pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml'));
-    // }
+    if (
+      (await doAnyChangesMatch([/^x-pack\/plugins\/apm/])) ||
+      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/apm_cypress.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([/^x-pack\/plugins\/fleet/, /^x-pack\/test\/fleet_cypress/])) ||
+      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([/^x-pack\/plugins\/osquery/, /^x-pack\/test\/osquery_cypress/])) ||
+      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/osquery_cypress.yml'));
+    }
 
     if (await doAnyChangesMatch([/^x-pack\/plugins\/uptime/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime.yml'));

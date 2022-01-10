@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiScreenReaderOnly,
@@ -145,7 +145,7 @@ export const MiddleTruncatedText = ({
                   <SecureIcon
                     type="lock"
                     size="s"
-                    color="secondary"
+                    color="success"
                     aria-label={i18n.translate('xpack.uptime.waterfallChart.sidebar.url.https', {
                       defaultMessage: 'https',
                     })}

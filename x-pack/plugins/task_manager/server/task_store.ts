@@ -11,7 +11,7 @@
 import { Subject } from 'rxjs';
 import { omit, defaults } from 'lodash';
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   SavedObject,
@@ -46,7 +46,7 @@ export interface StoreOpts {
 export interface SearchOpts {
   search_after?: Array<number | string>;
   size?: number;
-  sort?: estypes.SearchSort;
+  sort?: estypes.Sort;
   query?: estypes.QueryDslQueryContainer;
   seq_no_primary_term?: boolean;
 }
@@ -336,7 +336,10 @@ export class TaskStore {
     query,
     size = 0,
   }: TSearchRequest): Promise<estypes.SearchResponse<ConcreteTaskInstance>> {
-    const { body } = await this.esClient.search<ConcreteTaskInstance>({
+    const { body } = await this.esClient.search<
+      ConcreteTaskInstance,
+      Record<string, estypes.AggregationsAggregate>
+    >({
       index: this.index,
       ignore_unavailable: true,
       track_total_hits: true,

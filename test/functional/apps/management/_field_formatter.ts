@@ -423,7 +423,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     let testDocumentId: string;
 
     before(async () => {
-      if ((await es.indices.exists({ index: indexTitle })).body) {
+      if (await es.indices.exists({ index: indexTitle })) {
         await es.indices.delete({ index: indexTitle });
       }
 
@@ -431,6 +431,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         index: indexTitle,
         body: {
           mappings: {
+            // @ts-expect-error Type 'Record<string, { type: ES_FIELD_TYPES; }>' is not assignable to type 'Record<string, MappingProperty>'.
             properties: specs.reduce((properties, spec, index) => {
               properties[`${index}`] = { type: spec.fieldType };
               return properties;
@@ -447,7 +448,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }, {} as Record<string, FieldFormatEditorSpecDescriptor['fieldValue']>),
         refresh: 'wait_for',
       });
-      testDocumentId = docResult.body._id;
+      testDocumentId = docResult._id;
 
       const indexPatternResult = await indexPatterns.create(
         { title: indexTitle },

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isEmpty } from 'lodash';
 import { TimestampOverrideOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 
@@ -15,8 +15,8 @@ interface BuildEventsSearchQuery {
   to: string;
   filter: estypes.QueryDslQueryContainer;
   size: number;
-  sortOrder?: estypes.SearchSortOrder;
-  searchAfterSortIds: estypes.SearchSortResults | undefined;
+  sortOrder?: estypes.SortOrder;
+  searchAfterSortIds: estypes.SortResults | undefined;
   timestampOverride: TimestampOverrideOrUndefined;
   trackTotalHits?: boolean;
 }
@@ -95,7 +95,7 @@ export const buildEventsSearchQuery = ({
     { bool: { filter: [{ bool: { should: [...rangeFilter], minimum_should_match: 1 } }] } },
   ];
 
-  const sort: estypes.SearchSort = [];
+  const sort: estypes.Sort = [];
   if (timestampOverride) {
     sort.push({
       [timestampOverride]: {

@@ -8,7 +8,7 @@
 
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 
 import {
   EuiPage,

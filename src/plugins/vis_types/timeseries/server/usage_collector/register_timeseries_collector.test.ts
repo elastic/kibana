@@ -46,7 +46,7 @@ describe('registerTimeseriesUsageCollector', () => {
     const mockedCollectorFetchContext = createCollectorFetchContextMock();
     const fetchResult = await usageCollector.fetch(mockedCollectorFetchContext);
     expect(mockGetStats).toBeCalledTimes(1);
-    expect(mockGetStats).toBeCalledWith(mockedCollectorFetchContext.soClient);
+    expect(mockGetStats).toBeCalledWith(mockedCollectorFetchContext.soClient, undefined);
     expect(fetchResult).toBe(mockStats);
   });
 });

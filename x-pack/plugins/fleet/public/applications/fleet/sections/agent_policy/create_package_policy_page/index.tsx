@@ -10,7 +10,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useRouteMatch, useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -24,6 +24,7 @@ import {
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import { safeLoad } from 'js-yaml';
 
+import { splitPkgKey } from '../../../../../../common';
 import type {
   AgentPolicy,
   NewPackagePolicy,
@@ -59,6 +60,11 @@ import { StepDefinePackagePolicy } from './step_define_package_policy';
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
     padding-bottom: ${(props) => props.theme.eui.paddingSizes.m};
+  }
+
+  // compensating for EuiBottomBar hiding the content
+  @media (max-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+    margin-bottom: 100px;
   }
 `;
 
@@ -147,15 +153,16 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   // Form state
   const [formState, setFormState] = useState<PackagePolicyFormState>('VALID');
 
+  const { pkgName, pkgVersion } = splitPkgKey(params.pkgkey);
   // Fetch package info
   const {
     data: packageInfoData,
     error: packageInfoError,
     isLoading: isPackageInfoLoading,
-  } = useGetPackageInfoByKey(params.pkgkey);
+  } = useGetPackageInfoByKey(pkgName, pkgVersion);
   const packageInfo = useMemo(() => {
-    if (packageInfoData && packageInfoData.response) {
-      return packageInfoData.response;
+    if (packageInfoData && packageInfoData.item) {
+      return packageInfoData.item;
     }
   }, [packageInfoData]);
 
@@ -553,7 +560,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
                   >
                     <FormattedMessage
                       id="xpack.fleet.createPackagePolicy.saveButton"
-                      defaultMessage="Save integration"
+                      defaultMessage="Save and continue"
                     />
                   </EuiButton>
                 </EuiFlexItem>

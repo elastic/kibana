@@ -1,0 +1,108 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Reporting Config Schema context {"dev":false,"dist":false} produces correct config 1`] = `
+Object {
+  "capture": Object {
+    "loadDelay": "PT3S",
+    "maxAttempts": 1,
+    "timeouts": Object {
+      "openUrl": "PT1M",
+      "renderComplete": "PT30S",
+      "waitForElements": "PT30S",
+    },
+    "zoom": 2,
+  },
+  "csv": Object {
+    "checkForFormulas": true,
+    "enablePanelActionDownload": true,
+    "escapeFormulaValues": false,
+    "maxSizeBytes": ByteSizeValue {
+      "valueInBytes": 10485760,
+    },
+    "scroll": Object {
+      "duration": "30s",
+      "size": 500,
+    },
+    "useByteOrderMarkEncoding": false,
+  },
+  "enabled": true,
+  "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "kibanaServer": Object {},
+  "poll": Object {
+    "jobCompletionNotifier": Object {
+      "interval": 10000,
+      "intervalErrorMultiplier": 5,
+    },
+    "jobsRefresh": Object {
+      "interval": 5000,
+      "intervalErrorMultiplier": 5,
+    },
+  },
+  "queue": Object {
+    "indexInterval": "week",
+    "pollEnabled": true,
+    "pollInterval": "PT3S",
+    "pollIntervalErrorMultiplier": 10,
+    "timeout": "PT2M",
+  },
+  "roles": Object {
+    "allow": Array [
+      "reporting_user",
+    ],
+    "enabled": true,
+  },
+}
+`;
+
+exports[`Reporting Config Schema context {"dev":false,"dist":true} produces correct config 1`] = `
+Object {
+  "capture": Object {
+    "loadDelay": "PT3S",
+    "maxAttempts": 3,
+    "timeouts": Object {
+      "openUrl": "PT1M",
+      "renderComplete": "PT30S",
+      "waitForElements": "PT30S",
+    },
+    "zoom": 2,
+  },
+  "csv": Object {
+    "checkForFormulas": true,
+    "enablePanelActionDownload": true,
+    "escapeFormulaValues": false,
+    "maxSizeBytes": ByteSizeValue {
+      "valueInBytes": 10485760,
+    },
+    "scroll": Object {
+      "duration": "30s",
+      "size": 500,
+    },
+    "useByteOrderMarkEncoding": false,
+  },
+  "enabled": true,
+  "kibanaServer": Object {},
+  "poll": Object {
+    "jobCompletionNotifier": Object {
+      "interval": 10000,
+      "intervalErrorMultiplier": 5,
+    },
+    "jobsRefresh": Object {
+      "interval": 5000,
+      "intervalErrorMultiplier": 5,
+    },
+  },
+  "queue": Object {
+    "indexInterval": "week",
+    "pollEnabled": true,
+    "pollInterval": "PT3S",
+    "pollIntervalErrorMultiplier": 10,
+    "timeout": "PT2M",
+  },
+  "roles": Object {
+    "allow": Array [
+      "reporting_user",
+    ],
+    "enabled": true,
+  },
+}
+`;

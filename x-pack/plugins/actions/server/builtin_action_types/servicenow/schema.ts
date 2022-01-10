@@ -14,7 +14,7 @@ export const ExternalIncidentServiceConfigurationBase = {
 
 export const ExternalIncidentServiceConfiguration = {
   ...ExternalIncidentServiceConfigurationBase,
-  isLegacy: schema.boolean({ defaultValue: true }),
+  usesTableApi: schema.boolean({ defaultValue: true }),
 };
 
 export const ExternalIncidentServiceConfigurationBaseSchema = schema.object(
@@ -49,7 +49,7 @@ const CommonAttributes = {
   externalId: schema.nullable(schema.string()),
   category: schema.nullable(schema.string()),
   subcategory: schema.nullable(schema.string()),
-  correlation_id: schema.nullable(schema.string()),
+  correlation_id: schema.nullable(schema.string({ defaultValue: DEFAULT_ALERTS_GROUPING_KEY })),
   correlation_display: schema.nullable(schema.string()),
 };
 

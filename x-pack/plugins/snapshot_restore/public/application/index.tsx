@@ -37,4 +37,4 @@ export const renderApp = (elem: Element, dependencies: AppDependencies) => {
   };
 };
 
-export { AppDependencies };
+export type { AppDependencies };

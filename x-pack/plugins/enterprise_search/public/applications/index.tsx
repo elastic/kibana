@@ -13,11 +13,13 @@ import { Router } from 'react-router-dom';
 import { getContext, resetContext } from 'kea';
 import { Store } from 'redux';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../../src/plugins/kibana_react/public';
 import { InitialAppData } from '../../common/types';
 import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
 
@@ -70,7 +72,7 @@ export const renderApp = (
 
   ReactDOM.render(
     <I18nProvider>
-      <EuiThemeProvider>
+      <KibanaThemeProvider theme$={params.theme$}>
         <KibanaContextProvider services={{ ...core, ...plugins }}>
           <Provider store={store}>
             <Router history={params.history}>
@@ -79,7 +81,7 @@ export const renderApp = (
             </Router>
           </Provider>
         </KibanaContextProvider>
-      </EuiThemeProvider>
+      </KibanaThemeProvider>
     </I18nProvider>,
     params.element
   );
@@ -96,7 +98,7 @@ export const renderApp = (
  * Render function for Kibana's header action menu chrome -
  * reusable by any Enterprise Search plugin simply by passing in
  * a custom HeaderActions component (e.g., WorkplaceSearchHeaderActions)
- * @see https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md
+ * @see https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md
  */
 
 export const renderHeaderActions = (

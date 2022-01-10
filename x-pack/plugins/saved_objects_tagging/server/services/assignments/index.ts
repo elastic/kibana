@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export { AssignmentService, IAssignmentService } from './assignment_service';
+export type { IAssignmentService } from './assignment_service';
+export { AssignmentService } from './assignment_service';
 export { AssignmentError } from './errors';

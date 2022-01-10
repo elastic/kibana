@@ -8,15 +8,11 @@
 
 import { Logger } from 'src/core/server';
 import isEmpty from 'lodash/isEmpty';
-
 import * as t from 'io-ts';
 import { validateNonExact, parseScheduleDates } from '@kbn/securitysolution-io-ts-utils';
+import { SIGNALS_ID } from '@kbn/securitysolution-rules';
 
-import {
-  SIGNALS_ID,
-  DEFAULT_SEARCH_AFTER_PAGE_SIZE,
-  SERVER_APP_ID,
-} from '../../../../common/constants';
+import { DEFAULT_SEARCH_AFTER_PAGE_SIZE, SERVER_APP_ID } from '../../../../common/constants';
 import { isMlRule } from '../../../../common/machine_learning/helpers';
 import {
   isThresholdRule,
@@ -145,12 +141,14 @@ export const signalRulesAlertType = ({
       const searchAfterSize = Math.min(maxSignals, DEFAULT_SEARCH_AFTER_PAGE_SIZE);
       let hasError: boolean = false;
       let result = createSearchAfterReturnType();
+
       const ruleStatusClient = ruleExecutionLogClientOverride
         ? ruleExecutionLogClientOverride
         : new RuleExecutionLogClient({
-            eventLogService,
-            savedObjectsClient: services.savedObjectsClient,
             underlyingClient: config.ruleExecutionLog.underlyingClient,
+            savedObjectsClient: services.savedObjectsClient,
+            eventLogService,
+            logger,
           });
 
       const completeRule: CompleteRule<RuleParams> = {
@@ -266,6 +264,7 @@ export const signalRulesAlertType = ({
         );
         logger.warn(gapMessage);
         hasError = true;
+
         await ruleStatusClient.logStatusChange({
           ...basicLogArguments,
           newStatus: RuleExecutionStatus.failed,
@@ -281,6 +280,7 @@ export const signalRulesAlertType = ({
           lists,
           savedObjectClient: services.savedObjectsClient,
         });
+
         const exceptionItems = await getExceptions({
           client: exceptionsClient,
           lists: params.exceptionsList ?? [],
@@ -403,9 +403,8 @@ export const signalRulesAlertType = ({
               wrapSequences,
             });
           }
-        } else {
-          throw new Error(`unknown rule type ${type}`);
         }
+
         if (result.warningMessages.length) {
           const warningMessage = buildRuleMessage(
             truncateMessageList(result.warningMessages).join()
@@ -429,7 +428,7 @@ export const signalRulesAlertType = ({
                 ?.kibana_siem_app_url,
             });
 
-            logger.info(
+            logger.debug(
               buildRuleMessage(`Found ${result.createdSignalsCount} signals for notification.`)
             );
 
@@ -481,8 +480,7 @@ export const signalRulesAlertType = ({
             });
           }
 
-          // adding this log line so we can get some information from cloud
-          logger.info(
+          logger.debug(
             buildRuleMessage(
               `[+] Finished indexing ${result.createdSignalsCount}  ${
                 !isEmpty(tuples)

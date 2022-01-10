@@ -85,8 +85,6 @@ kibana_vars=(
     logging.root.appenders
     logging.root.level
     map.includeElasticMapsService
-    map.proxyElasticMapsServiceInMaps
-    map.regionmap
     map.tilemap.options.attribution
     map.tilemap.options.maxZoom
     map.tilemap.options.minZoom
@@ -201,6 +199,7 @@ kibana_vars=(
     xpack.alerting.invalidateApiKeysTask.interval
     xpack.alerting.invalidateApiKeysTask.removalDelay
     xpack.alerting.defaultRuleTaskTimeout
+    xpack.alerting.cancelAlertsOnRuleTimeout
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
@@ -255,6 +254,7 @@ kibana_vars=(
     xpack.fleet.agents.kibana.host
     xpack.fleet.agents.tlsCheckDisabled
     xpack.fleet.packages
+    xpack.fleet.registryProxyUrl
     xpack.fleet.registryUrl
     xpack.graph.canEditDrillDownUrls
     xpack.graph.savePolicy
@@ -343,7 +343,6 @@ kibana_vars=(
     xpack.security.authc.saml.realm
     xpack.security.authc.selector.enabled
     xpack.security.cookieName
-    xpack.security.enabled
     xpack.security.encryptionKey
     xpack.security.loginAssistanceMessage
     xpack.security.loginHelp
@@ -356,8 +355,7 @@ kibana_vars=(
     xpack.security.showInsecureClusterWarning
     xpack.securitySolution.alertMergeStrategy
     xpack.securitySolution.alertIgnoreFields
-    xpack.securitySolution.endpointResultListDefaultFirstPageIndex
-    xpack.securitySolution.endpointResultListDefaultPageSize
+    xpack.securitySolution.maxExceptionsImportSize
     xpack.securitySolution.maxRuleImportExportSize
     xpack.securitySolution.maxRuleImportPayloadBytes
     xpack.securitySolution.maxTimelineImportExportSize
@@ -366,7 +364,6 @@ kibana_vars=(
     xpack.securitySolution.prebuiltRulesFromFileSystem
     xpack.securitySolution.prebuiltRulesFromSavedObjects
     xpack.spaces.maxSpaces
-    xpack.task_manager.index
     xpack.task_manager.max_attempts
     xpack.task_manager.max_poll_inactivity_cycles
     xpack.task_manager.max_workers
@@ -379,6 +376,7 @@ kibana_vars=(
     xpack.task_manager.poll_interval
     xpack.task_manager.request_capacity
     xpack.task_manager.version_conflict_threshold
+    xpack.uptime.index
 )
 
 longopts=''

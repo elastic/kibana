@@ -17,7 +17,7 @@ import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
 } from '../common/utils/unwrap_es_response';
-export { rangeQuery, kqlQuery } from './utils/queries';
+export { rangeQuery, kqlQuery, termQuery, termsQuery } from './utils/queries';
 export { getInspectResponse } from '../common/utils/get_inspect_response';
 
 export * from './types';
@@ -32,8 +32,9 @@ export const config: PluginConfigDescriptor = {
       index: schema.string({ defaultValue: 'observability-annotations' }),
     }),
     unsafe: schema.object({
-      alertingExperience: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-      cases: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
+      alertingExperience: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
+      cases: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
+      overviewNext: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
     }),
   }),
 };
@@ -43,11 +44,5 @@ export type ObservabilityConfig = TypeOf<typeof config.schema>;
 export const plugin = (initContext: PluginInitializerContext) =>
   new ObservabilityPlugin(initContext);
 
-export {
-  createOrUpdateIndex,
-  Mappings,
-  ObservabilityPluginSetup,
-  ScopedAnnotationsClient,
-  unwrapEsResponse,
-  WrappedElasticsearchClientError,
-};
+export type { Mappings, ObservabilityPluginSetup, ScopedAnnotationsClient };
+export { createOrUpdateIndex, unwrapEsResponse, WrappedElasticsearchClientError };

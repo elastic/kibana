@@ -14,7 +14,7 @@ const layerMock = {
   getDisplayName: async () => {
     return 'myLayerName';
   },
-  getCustomIconAndTooltipContent: () => {
+  getLayerIcon: () => {
     return {
       icon: <span>mockIcon</span>,
     };

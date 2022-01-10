@@ -15,7 +15,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./custom_integration'));
     loadTestFile(require.resolve('./general'));
     loadTestFile(require.resolve('./home'));
-    loadTestFile(require.resolve('./index_pattern_field_editor'));
+    loadTestFile(require.resolve('./data_view_field_editor'));
     loadTestFile(require.resolve('./index_patterns'));
     loadTestFile(require.resolve('./kql_telemetry'));
     loadTestFile(require.resolve('./saved_objects_management'));

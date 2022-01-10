@@ -9,7 +9,10 @@
 import type { ElasticsearchClient } from '../elasticsearch_client';
 
 export const readIndex = async (esClient: ElasticsearchClient, index: string): Promise<unknown> => {
-  return esClient.indices.get({
-    index,
-  });
+  return esClient.indices.get(
+    {
+      index,
+    },
+    { meta: true }
+  );
 };

@@ -9,7 +9,8 @@ import * as rt from 'io-ts';
 import { ValidationIndicesError, validationIndicesErrorRT } from '../../../../../common/http_api';
 import { DatasetFilter } from '../../../../../common/log_analysis';
 
-export { ValidationIndicesError, validationIndicesErrorRT };
+export type { ValidationIndicesError };
+export { validationIndicesErrorRT };
 
 export const timeRangeValidationErrorRT = rt.strict({
   error: rt.literal('INVALID_TIME_RANGE'),

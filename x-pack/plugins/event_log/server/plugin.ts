@@ -12,7 +12,6 @@ import {
   Plugin as CorePlugin,
   PluginInitializerContext,
   IClusterClient,
-  SharedGlobalConfig,
   IContextProvider,
 } from 'src/core/server';
 import { SpacesPluginStart } from '../../spaces/server';
@@ -50,7 +49,6 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
   private eventLogService?: EventLogService;
   private esContext?: EsContext;
   private eventLogger?: IEventLogger;
-  private globalConfig: SharedGlobalConfig;
   private eventLogClientService?: EventLogClientService;
   private savedObjectProviderRegistry: SavedObjectProviderRegistry;
   private kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
@@ -58,13 +56,12 @@ export class Plugin implements CorePlugin<IEventLogService, IEventLogClientServi
   constructor(private readonly context: PluginInitializerContext) {
     this.systemLogger = this.context.logger.get();
     this.config = this.context.config.get<IEventLogConfig>();
-    this.globalConfig = this.context.config.legacy.get();
     this.savedObjectProviderRegistry = new SavedObjectProviderRegistry();
     this.kibanaVersion = this.context.env.packageInfo.version;
   }
 
   setup(core: CoreSetup): IEventLogService {
-    const kibanaIndex = this.globalConfig.kibana.index;
+    const kibanaIndex = core.savedObjects.getKibanaIndex();
 
     this.systemLogger.debug('setting up plugin');
 

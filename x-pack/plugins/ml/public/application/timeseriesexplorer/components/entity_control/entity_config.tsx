@@ -20,7 +20,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Entity } from './entity_control';
 import { UiPartitionFieldConfig } from '../series_controls/series_controls';
 import { EntityFieldType } from '../../../../../common/types/anomalies';

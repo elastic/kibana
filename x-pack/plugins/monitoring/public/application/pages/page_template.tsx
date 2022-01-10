@@ -8,7 +8,7 @@
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
-import { IHttpFetchError } from 'kibana/public';
+import { IHttpFetchError, ResponseErrorBody } from 'kibana/public';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
 import { MonitoringTimeContainer } from '../hooks/use_monitoring_time';
@@ -49,6 +49,7 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
 
   const { currentTimerange } = useContext(MonitoringTimeContainer.Context);
   const [loaded, setLoaded] = useState(false);
+  const [isRequestPending, setIsRequestPending] = useState(false);
   const history = useHistory();
   const [hasError, setHasError] = useState(false);
   const handleRequestError = useRequestErrorHandler();
@@ -62,19 +63,29 @@ export const PageTemplate: React.FC<PageTemplateProps> = ({
   );
 
   useEffect(() => {
+    setIsRequestPending(true);
     getPageData?.()
       .then(getPageDataResponseHandler)
-      .catch((err: IHttpFetchError) => {
+      .catch((err: IHttpFetchError<ResponseErrorBody>) => {
         handleRequestError(err);
         setHasError(true);
       })
       .finally(() => {
         setLoaded(true);
+        setIsRequestPending(false);
       });
   }, [getPageData, currentTimerange, getPageDataResponseHandler, handleRequestError]);
 
   const onRefresh = () => {
-    getPageData?.().then(getPageDataResponseHandler).catch(handleRequestError);
+    // don't refresh when a request is pending
+    if (isRequestPending) return;
+    setIsRequestPending(true);
+    getPageData?.()
+      .then(getPageDataResponseHandler)
+      .catch(handleRequestError)
+      .finally(() => {
+        setIsRequestPending(false);
+      });
 
     if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
       updateSetupModeData();

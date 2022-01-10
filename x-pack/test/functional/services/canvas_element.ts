@@ -7,6 +7,8 @@
 
 import { rgb, nest } from 'd3';
 
+import { FtrProviderContext } from '../ftr_provider_context';
+
 interface ColorStat {
   color: string;
   percentage: number;
@@ -16,7 +18,9 @@ interface ColorStat {
 
 export type CanvasElementColorStats = ColorStat[];
 
-import { FtrProviderContext } from '../ftr_provider_context';
+function getRoundedChannel(value: number, tolerance: number): number {
+  return Math.round(value / tolerance) * tolerance;
+}
 
 export async function CanvasElementProvider({ getService }: FtrProviderContext) {
   const { driver } = await getService('__webdriver__').init();
@@ -87,9 +91,9 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
       const colors: string[] = [];
       for (let i = 0; i < imageData.length; i += 4) {
         // uses d3's `rgb` method create a color object, `toString()` returns the hex value
-        const r = imageData[i];
-        const g = imageData[i + 1];
-        const b = imageData[i + 2];
+        const r = getRoundedChannel(imageData[i], channelTolerance);
+        const g = getRoundedChannel(imageData[i + 1], channelTolerance);
+        const b = getRoundedChannel(imageData[i + 2], channelTolerance);
         const color = rgb(r, g, b).toString().toUpperCase();
         if (exclude === undefined || !exclude.includes(color)) colors.push(color);
       }
@@ -196,20 +200,13 @@ export async function CanvasElementProvider({ getService }: FtrProviderContext) 
       const actualRGB = rgb(actualColor);
       const expectedRGB = rgb(expectedColor);
 
-      const lowerR = expectedRGB.r - toleranceRange / 2;
-      const upperR = expectedRGB.r + toleranceRange / 2;
-      const lowerG = expectedRGB.g - toleranceRange / 2;
-      const upperG = expectedRGB.g + toleranceRange / 2;
-      const lowerB = expectedRGB.b - toleranceRange / 2;
-      const upperB = expectedRGB.b + toleranceRange / 2;
-
       return (
-        lowerR <= actualRGB.r &&
-        upperR >= actualRGB.r &&
-        lowerG <= actualRGB.g &&
-        upperG >= actualRGB.g &&
-        lowerB <= actualRGB.b &&
-        upperB >= actualRGB.b
+        getRoundedChannel(expectedRGB.r, toleranceRange) ===
+          getRoundedChannel(actualRGB.r, toleranceRange) &&
+        getRoundedChannel(expectedRGB.g, toleranceRange) ===
+          getRoundedChannel(actualRGB.g, toleranceRange) &&
+        getRoundedChannel(expectedRGB.b, toleranceRange) ===
+          getRoundedChannel(actualRGB.b, toleranceRange)
       );
     }
 

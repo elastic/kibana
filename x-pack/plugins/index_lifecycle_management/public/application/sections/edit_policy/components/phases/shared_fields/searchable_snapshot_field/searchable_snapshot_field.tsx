@@ -8,7 +8,7 @@
 import React, { FunctionComponent, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTextColor, EuiSpacer, EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { useKibana, useFormData } from '../../../../../../../shared_imports';
@@ -257,7 +257,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
             'xpack.indexLifecycleMgmt.editPolicy.searchableSnapshotCalloutBody',
             {
               defaultMessage:
-                'Force merge, shrink, read only, and freeze actions are not allowed when converting data to a fully-mounted index in this phase.',
+                'Force merge, shrink and read only actions are not allowed when converting data to a fully-mounted index in this phase.',
             }
           )}
           data-test-subj="searchableSnapshotFieldsDisabledCallout"

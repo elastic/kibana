@@ -12,7 +12,9 @@ export const PRODUCT_RESPONSE_HEADER = 'x-elastic-product';
  * @returns boolean
  */
 // This check belongs to the elasticsearch service as a dedicated helper method.
-export const isSupportedEsServer = (headers: Record<string, string | string[]> | null) => {
+export const isSupportedEsServer = (
+  headers: Record<string, string | string[] | undefined> | null | undefined
+) => {
   return !!headers && headers[PRODUCT_RESPONSE_HEADER] === 'Elasticsearch';
 };
 
@@ -27,7 +29,7 @@ export const isSupportedEsServer = (headers: Record<string, string | string[]> |
  */
 export const isNotFoundFromUnsupportedServer = (args: {
   statusCode: number | null;
-  headers: Record<string, string | string[]> | null;
+  headers: Record<string, string | string[] | undefined> | null;
 }): boolean => {
   return args.statusCode === 404 && !isSupportedEsServer(args.headers);
 };

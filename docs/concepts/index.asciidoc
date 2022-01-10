@@ -35,19 +35,17 @@ Open the search bar using the keyboard shortcut Ctrl+/ on Windows and Linux, Com
 image:concepts/images/global-search.png["Global search showing matches to apps and saved objects for the word visualize"]
 
 [float]
-=== Accessing data with index patterns
+=== Accessing data with data views
 
-{kib} requires an index pattern to tell it which {es} data you want to access,
-and whether the data is time-based. An index pattern can point to one or more {es}
+{kib} requires a data view to tell it which {es} data you want to access,
+and whether the data is time-based. A data view can point to one or more {es}
 data streams, indices, or index aliases by name.
-For example, `logs-elasticsearch-prod-*` is an index pattern,
-and it is time-based with a time field of `@timestamp`. The time field is not editable.
 
-Index patterns are typically created by an administrator when sending data to {es}.
-You can <<index-patterns,create or update index patterns>> in *Stack Management*, or by using a script
+Data views are typically created by an administrator when sending data to {es}.
+You can <<data-views,create or update data views>> in *Stack Management*, or by using a script
 that accesses the {kib} API.
 
-{kib} uses the index pattern to show you a list of fields, such as
+{kib} uses the data view to show you a list of fields, such as
 `event.duration`. You can customize the display name and format for each field.
 For example, you can tell {kib} to display `event.duration` in seconds.
 {kib} has <<managing-fields,field formatters>> for strings,
@@ -75,7 +73,7 @@ and can optionally contain the time filter and extra filters.
 ==== Time filter
 
 The <<set-time-filter, global time filter>> limits the time range of data displayed.
-In most cases, the time filter applies to the time field in the index pattern,
+In most cases, the time filter applies to the time field in the data view,
 but some apps allow you to use a different time field.
 
 Using the time filter, you can configure a refresh rate to periodically
@@ -129,8 +127,7 @@ Previously, {kib} used the {ref}/search-aggregations-bucket-terms-aggregation.ht
 Structured filters are a more interactive way to create {es} queries,
 and are commonly used when building dashboards that are shared by multiple analysts.
 Each filter can be disabled, inverted, or pinned across all apps.
-The structured filters are the only way to use the {es} Query DSL in JSON form,
-or to target a specific index pattern for filtering. Each of the structured
+Each of the structured
 filters is combined with AND logic on the rest of the query.
 
 [role="screenshot"]
@@ -159,7 +156,7 @@ Use the global search to quickly open a saved object.
 * Go to <<discover, Discover>> for instructions on searching your data.
 
 
-include::index-patterns.asciidoc[]
+include::data-views.asciidoc[]
 
 include::set-time-filter.asciidoc[]
 

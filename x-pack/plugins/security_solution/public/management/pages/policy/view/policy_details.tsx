@@ -10,17 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
 import { EuiCallOut, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { usePolicyDetailsSelector } from './policy_hooks';
-import {
-  policyDetails,
-  agentStatusSummary,
-  isLoading,
-  apiError,
-} from '../store/policy_details/selectors';
+import { policyDetails, agentStatusSummary, apiError } from '../store/policy_details/selectors';
 import { AgentsSummary } from './agents_summary';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { PolicyTabs } from './tabs';
 import { AdministrationListPage } from '../../../components/administration_list_page';
-import { PolicyFormLayout } from './policy_forms/components';
 import {
   BackToExternalAppButton,
   BackToExternalAppButtonProps,
@@ -28,18 +21,13 @@ import {
 import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
 import { getEndpointListPath } from '../../../common/routing';
 import { useAppUrl } from '../../../../common/lib/kibana';
-import { APP_ID } from '../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../common/constants';
 
 export const PolicyDetails = React.memo(() => {
-  // TODO: Remove this and related code when removing FF
-  const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
-    'trustedAppsByPolicyEnabled'
-  );
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
   const { getAppUrl } = useAppUrl();
 
   // Store values
-  const loading = usePolicyDetailsSelector(isLoading);
   const policyApiError = usePolicyDetailsSelector(apiError);
   const policyItem = usePolicyDetailsSelector(policyDetails);
   const policyAgentStatusSummary = usePolicyDetailsSelector(agentStatusSummary);
@@ -63,12 +51,12 @@ export const PolicyDetails = React.memo(() => {
       backButtonLabel: i18n.translate(
         'xpack.securitySolution.endpoint.policy.details.backToListTitle',
         {
-          defaultMessage: 'Back to endpoint hosts',
+          defaultMessage: 'View all endpoints',
         }
       ),
       backButtonUrl: getAppUrl({ path: endpointListPath }),
       onBackButtonNavigateTo: [
-        APP_ID,
+        APP_UI_ID,
         {
           path: endpointListPath,
         },
@@ -90,7 +78,17 @@ export const PolicyDetails = React.memo(() => {
   );
 
   const pageBody: React.ReactNode = useMemo(() => {
-    if (loading) {
+    if (policyApiError) {
+      return (
+        <EuiPageTemplate template="centeredContent">
+          <EuiCallOut color="danger" title={policyApiError?.error}>
+            <span data-test-subj="policyDetailsIdNotFoundMessage">{policyApiError?.message}</span>
+          </EuiCallOut>
+        </EuiPageTemplate>
+      );
+    }
+
+    if (!policyItem) {
       return (
         <EuiPageTemplate template="centeredContent">
           <EuiLoadingSpinner
@@ -102,23 +100,8 @@ export const PolicyDetails = React.memo(() => {
       );
     }
 
-    if (policyApiError) {
-      return (
-        <EuiPageTemplate template="centeredContent">
-          <EuiCallOut color="danger" title={policyApiError?.error}>
-            <span data-test-subj="policyDetailsIdNotFoundMessage">{policyApiError?.message}</span>
-          </EuiCallOut>
-        </EuiPageTemplate>
-      );
-    }
-
-    // TODO: Remove this and related code when removing FF
-    if (isTrustedAppsByPolicyEnabled) {
-      return <PolicyTabs />;
-    }
-
-    return <PolicyFormLayout />;
-  }, [isTrustedAppsByPolicyEnabled, loading, policyApiError]);
+    return <PolicyTabs />;
+  }, [policyApiError, policyItem]);
 
   return (
     <AdministrationListPage
@@ -128,7 +111,7 @@ export const PolicyDetails = React.memo(() => {
       headerBackComponent={backToEndpointList}
       actions={policyApiError ? undefined : headerRightContent}
       restrictWidth={true}
-      hasBottomBorder={!isTrustedAppsByPolicyEnabled} // TODO: Remove this and related code when removing FF
+      hasBottomBorder={false}
     >
       {pageBody}
     </AdministrationListPage>

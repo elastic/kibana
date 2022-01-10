@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiIcon, EuiPopover } from '@elastic/eui';
 import { WaterfallMarkerTrend } from './waterfall_marker_trend';
 
@@ -13,7 +14,15 @@ export function WaterfallMarkerIcon({ field, label }: { field: string; label: st
   const [isOpen, setIsOpen] = useState(false);
 
   if (!field) {
-    return <EuiIcon type="dot" size="l" />;
+    return (
+      <EuiIcon
+        aria-label={i18n.translate('xpack.uptime.synthetics.markers.noFieldIcon.label', {
+          defaultMessage: 'An icon indicating that this marker has no field associated with it',
+        })}
+        type="dot"
+        size="l"
+      />
+    );
   }
 
   return (
@@ -25,6 +34,9 @@ export function WaterfallMarkerIcon({ field, label }: { field: string; label: st
       zIndex={100}
       button={
         <EuiButtonIcon
+          aria-label={i18n.translate('xpack.uptime.synthetics.markers.openEmbeddableButton.label', {
+            defaultMessage: 'Use this icon button to show metrics for this annotation marker.',
+          })}
           iconType="dot"
           iconSize="l"
           color="text"

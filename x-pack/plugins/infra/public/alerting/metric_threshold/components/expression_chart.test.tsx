@@ -54,13 +54,6 @@ describe('ExpressionChart', () => {
         metricAlias: 'metricbeat-*',
         inventoryDefaultView: 'host',
         metricsExplorerDefaultView: 'host',
-        fields: {
-          timestamp: '@timestamp',
-          container: 'container.id',
-          host: 'host.name',
-          pod: 'kubernetes.pod.uid',
-          tiebreaker: '_doc',
-        },
         anomalyThreshold: 20,
       },
     };

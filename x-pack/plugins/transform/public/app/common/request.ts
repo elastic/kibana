@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { HttpFetchError } from '../../../../../../src/core/public';
 import type { IndexPattern } from '../../../../../../src/plugins/data/public';
@@ -39,7 +39,7 @@ import {
 export interface SimpleQuery {
   query_string: {
     query: string;
-    default_operator?: estypes.DefaultOperator;
+    default_operator?: estypes.QueryDslOperator;
   };
 }
 
@@ -242,6 +242,7 @@ export const getCreateTransformRequestBody = (
         },
       }
     : {}),
+  ...(transformDetailsState._meta ? { _meta: transformDetailsState._meta } : {}),
   // conditionally add additional settings
   ...getCreateTransformSettingsRequestBody(transformDetailsState),
 });

@@ -6,7 +6,7 @@
     "source": {
       "index-pattern": {
        "fields":"[]",
-        "timeFieldName": "@timestamp",
+        "timeFieldName": "nested.timestamp",
         "title": "date-nested"
       },
       "type": "index-pattern"

@@ -44,7 +44,7 @@ const noResultsCallout = (
 );
 
 export const RelevanceTuningPreview: React.FC = () => {
-  const { updateSearchValue } = useActions(RelevanceTuningLogic);
+  const { setSearchQuery } = useActions(RelevanceTuningLogic);
   const { searchResults, schema } = useValues(RelevanceTuningLogic);
   const { engineName, isMetaEngine } = useValues(EngineLogic);
 
@@ -59,7 +59,7 @@ export const RelevanceTuningPreview: React.FC = () => {
       </EuiTitle>
       <EuiSpacer />
       <EuiFieldSearch
-        onChange={(e) => updateSearchValue(e.target.value)}
+        onChange={(e) => setSearchQuery(e.target.value)}
         placeholder={i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.preview.searchPlaceholder',
           {

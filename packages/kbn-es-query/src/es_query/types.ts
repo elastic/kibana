@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 /**
  * A field's sub type
@@ -54,11 +54,6 @@ export interface DataViewFieldBase {
 }
 
 /**
- * @deprecated Use DataViewField instead. All index pattern interfaces were renamed.
- */
-export type IndexPatternFieldBase = DataViewFieldBase;
-
-/**
  * A base interface for an index pattern
  * @public
  */
@@ -67,11 +62,6 @@ export interface DataViewBase {
   id?: string;
   title: string;
 }
-
-/**
- * @deprecated Use DataViewBase instead.  All index pattern interfaces were renamed.
- */
-export type IndexPatternBase = DataViewBase;
 
 export interface BoolQuery {
   must: estypes.QueryDslQueryContainer[];

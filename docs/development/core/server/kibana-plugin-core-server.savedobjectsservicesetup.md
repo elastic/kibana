@@ -29,7 +29,6 @@ export class Plugin() {
     })
   }
 }
-
 ```
 
 ## Example 2
@@ -44,14 +43,14 @@ export class Plugin() {
     core.savedObjects.registerType(mySoType);
   }
 }
-
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [addClientWrapper](./kibana-plugin-core-server.savedobjectsservicesetup.addclientwrapper.md) | <code>(priority: number, id: string, factory: SavedObjectsClientWrapperFactory) =&gt; void</code> | Add a [client wrapper factory](./kibana-plugin-core-server.savedobjectsclientwrapperfactory.md) with the given priority. |
-|  [registerType](./kibana-plugin-core-server.savedobjectsservicesetup.registertype.md) | <code>&lt;Attributes = any&gt;(type: SavedObjectsType&lt;Attributes&gt;) =&gt; void</code> | Register a [savedObjects type](./kibana-plugin-core-server.savedobjectstype.md) definition.<!-- -->See the [mappings format](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) and [migration format](./kibana-plugin-core-server.savedobjectmigrationmap.md) for more details about these. |
-|  [setClientFactoryProvider](./kibana-plugin-core-server.savedobjectsservicesetup.setclientfactoryprovider.md) | <code>(clientFactoryProvider: SavedObjectsClientFactoryProvider) =&gt; void</code> | Set the default [factory provider](./kibana-plugin-core-server.savedobjectsclientfactoryprovider.md) for creating Saved Objects clients. Only one provider can be set, subsequent calls to this method will fail. |
+|  [addClientWrapper](./kibana-plugin-core-server.savedobjectsservicesetup.addclientwrapper.md) | (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) =&gt; void | Add a [client wrapper factory](./kibana-plugin-core-server.savedobjectsclientwrapperfactory.md) with the given priority. |
+|  [getKibanaIndex](./kibana-plugin-core-server.savedobjectsservicesetup.getkibanaindex.md) | () =&gt; string | Returns the default index used for saved objects. |
+|  [registerType](./kibana-plugin-core-server.savedobjectsservicesetup.registertype.md) | &lt;Attributes extends SavedObjectAttributes = any&gt;(type: SavedObjectsType&lt;Attributes&gt;) =&gt; void | Register a [savedObjects type](./kibana-plugin-core-server.savedobjectstype.md) definition.<!-- -->See the [mappings format](./kibana-plugin-core-server.savedobjectstypemappingdefinition.md) and [migration format](./kibana-plugin-core-server.savedobjectmigrationmap.md) for more details about these. |
+|  [setClientFactoryProvider](./kibana-plugin-core-server.savedobjectsservicesetup.setclientfactoryprovider.md) | (clientFactoryProvider: SavedObjectsClientFactoryProvider) =&gt; void | Set the default [factory provider](./kibana-plugin-core-server.savedobjectsclientfactoryprovider.md) for creating Saved Objects clients. Only one provider can be set, subsequent calls to this method will fail. |
 

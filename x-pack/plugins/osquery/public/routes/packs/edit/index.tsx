@@ -12,8 +12,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
+  EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
@@ -24,7 +25,6 @@ import { usePack } from '../../../packs/use_pack';
 import { useDeletePack } from '../../../packs/use_delete_pack';
 
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
 
 const EditPackPageComponent = () => {
   const { packId } = useParams<{ packId: string }>();
@@ -67,7 +67,7 @@ const EditPackPageComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <BetaBadgeRowWrapper>
+          <EuiText>
             <h1>
               <FormattedMessage
                 id="xpack.osquery.editPack.pageTitle"
@@ -78,8 +78,7 @@ const EditPackPageComponent = () => {
                 }}
               />
             </h1>
-            <BetaBadge />
-          </BetaBadgeRowWrapper>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

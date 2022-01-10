@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from 'kibana/server';
 import type { Field, FieldId, NewJobCaps, RollupFields } from '../../../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
@@ -113,7 +113,7 @@ class FieldsService {
         this._mlClusterClient,
         this._dataViewsService
       );
-      const rollupConfigs: estypes.RollupGetRollupCapabilitiesRollupCapabilitySummary[] | null =
+      const rollupConfigs: estypes.RollupGetRollupCapsRollupCapabilitySummary[] | null =
         await rollupService.getRollupJobs();
 
       // if a rollup index has been specified, yet there are no
@@ -137,7 +137,7 @@ class FieldsService {
 }
 
 function combineAllRollupFields(
-  rollupConfigs: estypes.RollupGetRollupCapabilitiesRollupCapabilitySummary[]
+  rollupConfigs: estypes.RollupGetRollupCapsRollupCapabilitySummary[]
 ): RollupFields {
   const rollupFields: RollupFields = {};
   rollupConfigs.forEach((conf) => {

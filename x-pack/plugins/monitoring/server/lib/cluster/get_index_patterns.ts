@@ -13,6 +13,7 @@ import {
   INDEX_PATTERN_LOGSTASH,
   INDEX_PATTERN_BEATS,
   INDEX_ALERTS,
+  INDEX_PATTERN_ENTERPRISE_SEARCH,
 } from '../../../common/constants';
 
 export function getIndexPatterns(
@@ -27,6 +28,11 @@ export function getIndexPatterns(
   const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
   const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
   const alertsIndex = prefixIndexPattern(config, INDEX_ALERTS, ccs);
+  const enterpriseSearchIndexPattern = prefixIndexPattern(
+    config,
+    INDEX_PATTERN_ENTERPRISE_SEARCH,
+    ccs
+  );
   const indexPatterns = {
     esIndexPattern,
     kbnIndexPattern,
@@ -34,6 +40,7 @@ export function getIndexPatterns(
     beatsIndexPattern,
     apmIndexPattern,
     alertsIndex,
+    enterpriseSearchIndexPattern,
     ...Object.keys(additionalPatterns).reduce((accum, varName) => {
       return {
         ...accum,

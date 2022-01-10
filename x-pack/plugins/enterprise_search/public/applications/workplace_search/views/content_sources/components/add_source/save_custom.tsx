@@ -22,29 +22,27 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
+import { docLinks } from '../../../../../shared/doc_links';
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
-import { CredentialItem } from '../../../../components/shared/credential_item';
 import { LicenseBadge } from '../../../../components/shared/license_badge';
 import {
   SOURCES_PATH,
   SOURCE_DISPLAY_SETTINGS_PATH,
-  CUSTOM_API_DOCUMENT_PERMISSIONS_DOCS_URL,
-  ENT_SEARCH_LICENSE_MANAGEMENT,
   getContentSourcePath,
   getSourcesPath,
 } from '../../../../routes';
 import { CustomSource } from '../../../../types';
-import { ACCESS_TOKEN_LABEL, ID_LABEL, LEARN_CUSTOM_FEATURES_BUTTON } from '../../constants';
+import { LEARN_CUSTOM_FEATURES_BUTTON } from '../../constants';
+
+import { SourceIdentifier } from '../source_identifier';
 
 import {
   SAVE_CUSTOM_BODY1,
   SAVE_CUSTOM_BODY2,
   SAVE_CUSTOM_RETURN_BUTTON,
-  SAVE_CUSTOM_API_KEYS_TITLE,
-  SAVE_CUSTOM_API_KEYS_BODY,
   SAVE_CUSTOM_VISUAL_WALKTHROUGH_TITLE,
   SAVE_CUSTOM_VISUAL_WALKTHROUGH_LINK,
   SAVE_CUSTOM_STYLING_RESULTS_TITLE,
@@ -62,7 +60,7 @@ interface SaveCustomProps {
 
 export const SaveCustom: React.FC<SaveCustomProps> = ({
   documentationUrl,
-  newCustomSource: { id, accessToken, name },
+  newCustomSource: { id, name },
   isOrganization,
   header,
 }) => {
@@ -106,24 +104,8 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule />
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiTitle size="xs">
-                  <h4>{SAVE_CUSTOM_API_KEYS_TITLE}</h4>
-                </EuiTitle>
-                <EuiText grow={false} size="s" color="subdued">
-                  <p>{SAVE_CUSTOM_API_KEYS_BODY}</p>
-                </EuiText>
-                <EuiSpacer />
-                <CredentialItem label={ID_LABEL} value={id} testSubj="ContentSourceId" />
-                <EuiSpacer />
-                <CredentialItem
-                  label={ACCESS_TOKEN_LABEL}
-                  value={accessToken}
-                  testSubj="AccessToken"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <SourceIdentifier id={id} />
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
@@ -195,7 +177,10 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                       defaultMessage="{link} manage content access content on individual or group attributes. Allow or deny access to specific documents."
                       values={{
                         link: (
-                          <EuiLink target="_blank" href={CUSTOM_API_DOCUMENT_PERMISSIONS_DOCS_URL}>
+                          <EuiLink
+                            target="_blank"
+                            href={docLinks.workplaceSearchCustomSourcePermissions}
+                          >
                             {SAVE_CUSTOM_DOC_PERMISSIONS_LINK}
                           </EuiLink>
                         ),
@@ -206,7 +191,7 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({
                 <EuiSpacer size="xs" />
                 {!hasPlatinumLicense && (
                   <EuiText size="s">
-                    <EuiLink target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
+                    <EuiLink target="_blank" href={docLinks.licenseManagement}>
                       {LEARN_CUSTOM_FEATURES_BUTTON}
                     </EuiLink>
                   </EuiText>

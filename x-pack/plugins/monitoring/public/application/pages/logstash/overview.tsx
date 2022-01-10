@@ -41,7 +41,7 @@ export const LogStashOverviewPage: React.FC<ComponentProps> = ({ clusters }) => 
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/logstash`;
 
-    const response = await services.http?.fetch(url, {
+    const response = await services.http?.fetch<any>(url, {
       method: 'POST',
       body: JSON.stringify({
         ccs,
@@ -85,10 +85,9 @@ export const LogStashOverviewPage: React.FC<ComponentProps> = ({ clusters }) => 
       title={title}
       pageTitle={pageTitle}
       getPageData={getPageData}
-      data-test-subj="elasticsearchOverviewPage"
       cluster={cluster}
     >
-      <div data-test-subj="elasticsearchOverviewPage">{renderOverview(data)}</div>
+      <div data-test-subj="logstashOverviewPage">{renderOverview(data)}</div>
     </LogstashTemplate>
   );
 };

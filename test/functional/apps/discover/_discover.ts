@@ -28,16 +28,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
-
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
-
+      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
-
+    after(async () => {
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+    });
     describe('query', function () {
       const queryName1 = 'Query # 1';
 
@@ -120,8 +120,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
           return actualCount === expectedCount;
         });
-        const prevRowData = await PageObjects.discover.getDocTableField(1);
-        log.debug(`The first timestamp value in doc table before brushing: ${prevRowData}`);
+        let prevRowData = '';
+        // to make sure the table is already rendered
+        await retry.try(async () => {
+          prevRowData = await PageObjects.discover.getDocTableField(1);
+          log.debug(`The first timestamp value in doc table before brushing: ${prevRowData}`);
+        });
+
         await PageObjects.discover.brushHistogram();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await retry.waitFor('chart rendering complete after being brushed', async () => {

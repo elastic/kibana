@@ -6,7 +6,7 @@
  */
 
 import { ActionCreator } from 'typescript-fsa';
-import { Query, IIndexPattern, Filter } from 'src/plugins/data/public';
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import { UebaTableType } from '../../store/model';
 import { UebaQueryProps } from '../types';
@@ -54,7 +54,7 @@ export type UebaDetailsTabsProps = HostBodyComponentDispatchProps &
     indexNames: string[];
     pageFilters?: Filter[];
     filterQuery?: string;
-    indexPattern: IIndexPattern;
+    indexPattern: DataViewBase;
     type: uebaModel.UebaType;
   };
 

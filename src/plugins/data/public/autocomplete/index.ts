@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-export {
+export type {
   QuerySuggestion,
-  QuerySuggestionTypes,
   QuerySuggestionGetFn,
   QuerySuggestionGetFnArgs,
   QuerySuggestionBasic,
   QuerySuggestionField,
 } from './providers/query_suggestion_provider';
+export { QuerySuggestionTypes } from './providers/query_suggestion_provider';
 
-export { AutocompleteService, AutocompleteSetup, AutocompleteStart } from './autocomplete_service';
+export type { AutocompleteSetup, AutocompleteStart } from './autocomplete_service';
+export { AutocompleteService } from './autocomplete_service';

@@ -9,55 +9,80 @@
 // TODO: https://github.com/elastic/kibana/issues/110893
 /* eslint-disable @kbn/eslint/no_export_all */
 
+import { ExpressionFunction } from 'src/plugins/expressions';
 import { PresentationUtilPlugin } from './plugin';
+import { pluginServices } from './services';
 
-export {
+export type {
   PresentationCapabilitiesService,
   PresentationDashboardsService,
   PresentationLabsService,
-  getStubPluginServices,
 } from './services';
+export { getStubPluginServices } from './services';
 
-export {
+export type {
   KibanaPluginServiceFactory,
   PluginServiceFactory,
-  PluginServices,
   PluginServiceProviders,
-  PluginServiceProvider,
-  PluginServiceRegistry,
   KibanaPluginServiceParams,
 } from './services/create';
+export { PluginServices, PluginServiceProvider, PluginServiceRegistry } from './services/create';
 
-export { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
-export { SaveModalDashboardProps } from './components/types';
-export { projectIDs, ProjectID, Project } from '../common/labs';
+export type { PresentationUtilPluginSetup, PresentationUtilPluginStart } from './types';
+export type { SaveModalDashboardProps } from './components/types';
+export type { ProjectID, Project } from '../common/labs';
+export { projectIDs } from '../common/labs';
 export * from '../common/lib';
 
 export {
+  LazyExpressionInput,
   LazyLabsBeakerButton,
   LazyLabsFlyout,
   LazyDashboardPicker,
   LazySavedObjectSaveModalDashboard,
   withSuspense,
+  LazyDataViewPicker,
+  LazyFieldPicker,
+  LazyReduxEmbeddableWrapper,
 } from './components';
 
 export * from './components/types';
+
+export type { QuickButtonProps } from './components/solution_toolbar';
 
 export {
   AddFromLibraryButton,
   PrimaryActionButton,
   PrimaryActionPopover,
   QuickButtonGroup,
-  QuickButtonProps,
   SolutionToolbar,
   SolutionToolbarButton,
   SolutionToolbarPopover,
 } from './components/solution_toolbar';
 
+export {
+  ReduxEmbeddableContext,
+  useReduxContainerContext,
+  useReduxEmbeddableContext,
+  type ReduxContainerContextServices,
+  type ReduxEmbeddableWrapperPropsWithChildren,
+} from './components/redux_embeddables';
+
+/**
+ * Register a set of Expression Functions with the Presentation Utility ExpressionInput.  This allows
+ * the Monaco Editor to understand the functions and their arguments.
+ *
+ * This function is async in order to move the logic to an async chunk.
+ *
+ * @param expressionFunctions A set of Expression Functions to use in the ExpressionInput.
+ */
+export const registerExpressionsLanguage = async (expressionFunctions: ExpressionFunction[]) => {
+  const languages = await import('./components/expression_input/language');
+  return languages.registerExpressionsLanguage(expressionFunctions);
+};
+
 export function plugin() {
   return new PresentationUtilPlugin();
 }
-
-import { pluginServices } from './services';
 
 export const useLabs = () => (() => pluginServices.getHooks().labs.useService())();

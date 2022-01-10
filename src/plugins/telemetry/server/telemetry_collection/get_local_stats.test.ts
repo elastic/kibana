@@ -7,7 +7,7 @@
  */
 
 import { merge, omit } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { getLocalStats, handleLocalStats } from './get_local_stats';
 import {
@@ -36,8 +36,8 @@ function mockGetLocalStats<ClusterInfo, ClusterStats>(
   esClient.cluster.stats
     // @ts-expect-error we only care about the response body
     .mockResolvedValue({ body: { ...clusterStats } });
+  // @ts-expect-error we only care about the response body
   esClient.nodes.usage.mockResolvedValue({
-    // @ts-expect-error we only care about the response body
     body: {
       cluster_name: 'testCluster',
       nodes: {
@@ -80,6 +80,7 @@ function mockStatsCollectionConfig(
     esClient: mockGetLocalStats(clusterInfo, clusterStats),
     usageCollection: mockUsageCollection(kibana),
     kibanaRequest: httpServerMock.createKibanaRequest(),
+    refreshCache: false,
   };
 }
 

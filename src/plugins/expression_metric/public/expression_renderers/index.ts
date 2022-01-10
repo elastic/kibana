@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { metricRenderer } from './metric_renderer';
-
-export const renderers = [metricRenderer];
-
-export { metricRenderer };
+export { metricRendererFactory, getMetricRenderer } from './metric_renderer';

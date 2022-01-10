@@ -15,6 +15,7 @@ import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framewor
 import { InfraSourceConfiguration } from '../../../lib/sources';
 import { findInventoryFields } from '../../../../common/inventory_models';
 import { InventoryItemType } from '../../../../common/inventory_models/types';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 
 export interface InfraMetricsAdapterResponse {
   id: string;
@@ -30,7 +31,7 @@ export const getMetricMetadata = async (
   nodeType: InventoryItemType,
   timeRange: { from: number; to: number }
 ): Promise<InfraMetricsAdapterResponse> => {
-  const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
+  const fields = findInventoryFields(nodeType);
   const metricQuery = {
     allow_no_indices: true,
     ignore_unavailable: true,
@@ -45,7 +46,7 @@ export const getMetricMetadata = async (
             },
             {
               range: {
-                [sourceConfiguration.fields.timestamp]: {
+                [TIMESTAMP_FIELD]: {
                   gte: timeRange.from,
                   lte: timeRange.to,
                   format: 'epoch_millis',
