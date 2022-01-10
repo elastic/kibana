@@ -219,7 +219,7 @@ export function Detail() {
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiBadge color={'default'}>Elastic Agent</EuiBadge>
+                      <EuiBadge color="default">Elastic Agent</EuiBadge>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </FlexItemWithMinWidth>
