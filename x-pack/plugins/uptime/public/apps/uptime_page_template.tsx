@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
 import { CERTIFICATES_ROUTE, OVERVIEW_ROUTE } from '../../common/constants';
@@ -31,6 +31,7 @@ export const UptimePageTemplateComponent: React.FC<Props & EuiPageTemplateProps>
   const {
     services: { observability },
   } = useKibana<ClientPluginsStart>();
+  const [hasCompletedFirstLoad, setHasCompletedFirstLoad] = useState(false);
 
   const PageTemplateComponent = observability.navigation.PageTemplate;
 
@@ -51,6 +52,12 @@ export const UptimePageTemplateComponent: React.FC<Props & EuiPageTemplateProps>
     inspectorAdapters.requests.reset();
   }, [inspectorAdapters.requests]);
 
+  useEffect(() => {
+    if (!loading && data && !hasCompletedFirstLoad) {
+      setHasCompletedFirstLoad(true);
+    }
+  }, [data, hasCompletedFirstLoad, loading]);
+
   if (error) {
     return <EmptyStateError errors={[error]} />;
   }
@@ -62,7 +69,7 @@ export const UptimePageTemplateComponent: React.FC<Props & EuiPageTemplateProps>
   return (
     <>
       <StyledPageTemplateComponent
-        pageHeader={data?.indexExists ? pageHeader : undefined}
+        pageHeader={hasCompletedFirstLoad ? pageHeader : undefined}
         data-test-subj={noDataConfig ? 'data-missing' : undefined}
         noDataConfig={isMainRoute && !loading ? noDataConfig : undefined}
         {...pageTemplateProps}
