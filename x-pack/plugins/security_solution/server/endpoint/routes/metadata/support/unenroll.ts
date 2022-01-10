@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
 import type { AgentClient } from '../../../../../../fleet/server';
 import { Agent } from '../../../../../../fleet/common/types/models';
 
 export async function findAllUnenrolledAgentIds(
   agentClient: AgentClient,
-  esClient: ElasticsearchClient,
   endpointPolicyIds: string[],
   pageSize: number = 1000
 ): Promise<string[]> {

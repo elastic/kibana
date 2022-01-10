@@ -83,7 +83,7 @@ Object {
                     true,
                   ],
                 },
-                "function": "pielabels",
+                "function": "pie_labels",
                 "type": "function",
               },
             ],
@@ -106,6 +106,18 @@ Object {
                   ],
                 },
                 "function": "visdimension",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "palette": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {},
+                "function": "system_palette",
                 "type": "function",
               },
             ],

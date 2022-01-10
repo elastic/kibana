@@ -136,25 +136,6 @@ const eventFiltersUpdate = async (
       getNewComment(store.getState())
     ) as UpdateExceptionListItemSchema;
 
-    // Clean unnecessary fields for update action
-    [
-      'created_at',
-      'created_by',
-      'created_at',
-      'created_by',
-      'list_id',
-      'tie_breaker_id',
-      'updated_at',
-      'updated_by',
-    ].forEach((field) => {
-      delete updatedCommentsEntry[field as keyof UpdateExceptionListItemSchema];
-    });
-
-    updatedCommentsEntry.comments = updatedCommentsEntry.comments?.map((comment) => ({
-      comment: comment.comment,
-      id: comment.id,
-    }));
-
     const exception = await eventFiltersService.updateOne(updatedCommentsEntry);
     store.dispatch({
       type: 'eventFiltersUpdateSuccess',

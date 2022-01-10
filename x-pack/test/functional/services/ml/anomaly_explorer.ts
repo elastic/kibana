@@ -121,13 +121,21 @@ export function MachineLearningAnomalyExplorerProvider({
       });
     },
 
-    async filterDashboardSearchWithSearchString(filter: string) {
-      await this.waitForDashboardsToLoad();
-      const searchBarInput = await testSubjects.find('mlDashboardsSearchBox');
-      await searchBarInput.clearValueWithKeyboard();
-      await searchBarInput.type(filter);
-      await this.assertDashboardSearchInputValue(filter);
-      await this.waitForDashboardsToLoad();
+    async filterDashboardSearchWithSearchString(filter: string, expectedRowCount: number = 1) {
+      await retry.tryForTime(20 * 1000, async () => {
+        await this.waitForDashboardsToLoad();
+        const searchBarInput = await testSubjects.find('mlDashboardsSearchBox');
+        await searchBarInput.clearValueWithKeyboard();
+        await searchBarInput.type(filter);
+        await this.assertDashboardSearchInputValue(filter);
+        await this.waitForDashboardsToLoad();
+
+        const dashboardRows = await testSubjects.findAll('~mlDashboardSelectionTableRow', 2000);
+        expect(dashboardRows.length).to.eql(
+          expectedRowCount,
+          `Dashboard table should have ${expectedRowCount} rows, got ${dashboardRows.length}`
+        );
+      });
     },
 
     async assertDashboardSearchInputValue(expectedSearchValue: string) {
@@ -173,6 +181,14 @@ export function MachineLearningAnomalyExplorerProvider({
         expectedChartsCount,
         `Expect ${expectedChartsCount} charts to appear, got ${actualChartsCount}`
       );
+    },
+
+    async scrollChartsContainerIntoView() {
+      await testSubjects.scrollIntoView('mlExplorerChartsContainer');
+    },
+
+    async scrollMapContainerIntoView() {
+      await testSubjects.scrollIntoView('mlAnomaliesMapContainer');
     },
   };
 }
