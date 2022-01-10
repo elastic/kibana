@@ -51,7 +51,6 @@ import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_gen
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { isGlobalEffectScope } from '../../state/type_guards';
 import { NewTrustedApp } from '../../../../../../common/endpoint/types';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 export type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
 export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
@@ -116,19 +115,21 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
       [dispatch, formValues]
     );
 
-    const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
-      'trustedAppsByPolicyEnabled'
-    );
+    const [wasByPolicy, setWasByPolicy] = useState(!isGlobalEffectScope(formValues.effectScope));
+    // set initial state of `wasByPolicy` that checks if the initial state of the exception was by policy or not
+    useEffect(() => {
+      if (!isFormDirty && formValues.effectScope) {
+        setWasByPolicy(!isGlobalEffectScope(formValues.effectScope));
+      }
+    }, [isFormDirty, formValues.effectScope]);
 
     const isGlobal = useMemo(() => {
       return isGlobalEffectScope((formValues as NewTrustedApp).effectScope);
     }, [formValues]);
 
     const showExpiredLicenseBanner = useMemo(() => {
-      return (
-        isTrustedAppsByPolicyEnabled && !isPlatinumPlus && isEditMode && (!isGlobal || isFormDirty)
-      );
-    }, [isTrustedAppsByPolicyEnabled, isPlatinumPlus, isEditMode, isGlobal, isFormDirty]);
+      return !isPlatinumPlus && isEditMode && wasByPolicy && (!isGlobal || isFormDirty);
+    }, [isPlatinumPlus, isEditMode, isGlobal, isFormDirty, wasByPolicy]);
 
     // If there was a failure trying to retrieve the Trusted App for edit item,
     // then redirect back to the list ++ show toast message.
@@ -197,7 +198,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
               id="xpack.securitySolution.trustedapps.createTrustedAppFlyout.expiredLicenseMessage"
               defaultMessage="Your Kibana license has been downgraded. Future policy configurations will now be globally assigned to all policies. For more information, see our "
             />
-            <EuiLink external href={`${docLinks.links.securitySolution.trustedApps}`}>
+            <EuiLink target="_blank" href={`${docLinks.links.securitySolution.trustedApps}`}>
               <FormattedMessage
                 id="xpack.securitySolution.trustedapps.docsLink"
                 defaultMessage="Trusted applications documentation."
@@ -228,6 +229,7 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
             isInvalid={!!creationErrors}
             isEditMode={isEditMode}
             isDirty={isFormDirty}
+            wasByPolicy={wasByPolicy}
             error={creationErrorsMessage}
             policies={policies}
             trustedApp={formValues}

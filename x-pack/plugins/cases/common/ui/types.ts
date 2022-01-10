@@ -128,6 +128,7 @@ export interface FilterOptions {
   status: CaseStatusWithAllStatus;
   tags: string[];
   reporters: User[];
+  owner: string[];
   onlyCollectionType?: boolean;
 }
 
@@ -149,6 +150,7 @@ export type CaseMetricsFeature =
   | 'alerts.count'
   | 'alerts.users'
   | 'alerts.hosts'
+  | 'actions.isolateHost'
   | 'connectors'
   | 'lifespan';
 

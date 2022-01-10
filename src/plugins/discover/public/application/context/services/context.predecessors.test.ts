@@ -8,7 +8,7 @@
 
 import moment from 'moment';
 import { get, last } from 'lodash';
-import { IndexPattern, SortDirection } from 'src/plugins/data/common';
+import { DataView, SortDirection } from 'src/plugins/data/common';
 import { createContextSearchSourceStub } from './_stubs';
 import { fetchSurroundingDocs, SurrDocType } from './context';
 import { setServices } from '../../../kibana_services';
@@ -43,7 +43,7 @@ describe('context predecessors', function () {
     timeFieldName: '@timestamp',
     isTimeNanosBased: () => false,
     popularizeField: () => {},
-  } as unknown as IndexPattern;
+  } as unknown as DataView;
 
   describe('function fetchPredecessors', function () {
     beforeEach(() => {
