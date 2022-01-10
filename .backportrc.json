@@ -41,5 +41,6 @@
     "^v(\\d+).(\\d+).\\d+$": "$1.$2"
   },
   "autoMerge": true,
-  "autoMergeMethod": "squash"
+  "autoMergeMethod": "squash",
+  "backportBinary": "node scripts/backport"
 }
