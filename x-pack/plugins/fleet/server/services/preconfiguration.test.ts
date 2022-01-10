@@ -118,7 +118,7 @@ function getPutPreconfiguredPackagesMock() {
 }
 
 jest.mock('./epm/packages/install', () => ({
-  async installPackage(args: InstallPackageParams): Promise<InstallResult> {
+  async installPackage(args: InstallPackageParams): Promise<InstallResult | undefined> {
     if (args.installSource === 'registry') {
       const [pkgName, pkgVersion] = args.pkgkey.split('-');
       const installError = mockInstallPackageErrors.get(pkgName);
