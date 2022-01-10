@@ -11,7 +11,7 @@ import { useCasesContext } from './use_cases_context';
 
 interface UseCasesFeatures {
   isSyncAlertsEnabled: boolean;
-  metricsFeatures: CaseMetricsFeature[];
+  metricsFeatures: Set<CaseMetricsFeature>;
 }
 
 export const useCasesFeatures = (): UseCasesFeatures => {
@@ -19,7 +19,7 @@ export const useCasesFeatures = (): UseCasesFeatures => {
   const casesFeatures = useMemo(
     () => ({
       isSyncAlertsEnabled: features.alerts.sync,
-      metricsFeatures: features.metrics,
+      metricsFeatures: new Set(features.metrics),
     }),
     [features]
   );

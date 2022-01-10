@@ -24,57 +24,9 @@ const MetricValue = styled(EuiFlexItem)`
 
 export interface CaseViewMetricsProps {
   metrics: CaseMetrics | null;
-  features: CaseMetricsFeature[];
+  features: Set<CaseMetricsFeature>;
   isLoading: boolean;
 }
-
-interface MetricItem {
-  title: string;
-  value: number;
-}
-type MetricItems = MetricItem[];
-
-const useMetricItems = (
-  metrics: CaseMetrics | null,
-  features: CaseMetricsFeature[]
-): MetricItems => {
-  const { alerts, actions, connectors } = metrics ?? {};
-  const totalConnectors = connectors?.total ?? 0;
-  const alertsCount = alerts?.count ?? 0;
-  const totalAlertUsers = alerts?.users?.total ?? 0;
-  const totalAlertHosts = alerts?.hosts?.total ?? 0;
-  const totalIsolatedHosts =
-    actions?.isolateHost && actions.isolateHost.isolate.total >= actions.isolateHost.unisolate.total
-      ? actions.isolateHost.isolate.total - actions.isolateHost.unisolate.total
-      : 0;
-
-  const metricItems = useMemo<MetricItems>(() => {
-    const items: Array<[CaseMetricsFeature, MetricItem]> = [
-      ['alerts.count', { title: TOTAL_ALERTS_METRIC, value: alertsCount }],
-      ['alerts.users', { title: ASSOCIATED_USERS_METRIC, value: totalAlertUsers }],
-      ['alerts.hosts', { title: ASSOCIATED_HOSTS_METRIC, value: totalAlertHosts }],
-      ['actions.isolateHost', { title: ISOLATED_HOSTS_METRIC, value: totalIsolatedHosts }],
-      ['connectors', { title: TOTAL_CONNECTORS_METRIC, value: totalConnectors }],
-    ];
-
-    return items.reduce(
-      (result: MetricItems, [feature, item]) => [
-        ...result,
-        ...(features.includes(feature) ? [item] : []),
-      ],
-      []
-    );
-  }, [
-    features,
-    alertsCount,
-    totalAlertUsers,
-    totalAlertHosts,
-    totalIsolatedHosts,
-    totalConnectors,
-  ]);
-
-  return metricItems;
-};
 
 const CaseViewMetricItems: React.FC<{ metricItems: MetricItems }> = React.memo(
   ({ metricItems }) => (
@@ -94,7 +46,8 @@ CaseViewMetricItems.displayName = 'CaseViewMetricItems';
 
 export const CaseViewMetrics: React.FC<CaseViewMetricsProps> = React.memo(
   ({ metrics, features, isLoading }) => {
-    const metricItems = useMetricItems(metrics, features);
+    const metricItems = useGetTitleValueMetricItems(metrics, features);
+
     return (
       <EuiPanel data-test-subj="case-view-metrics-panel" hasShadow={false} hasBorder={true}>
         <EuiFlexGroup gutterSize="xl" wrap={true} responsive={false}>
@@ -111,3 +64,72 @@ export const CaseViewMetrics: React.FC<CaseViewMetricsProps> = React.memo(
   }
 );
 CaseViewMetrics.displayName = 'CaseViewMetrics';
+
+interface MetricItem {
+  title: string;
+  value: number;
+}
+type MetricItems = MetricItem[];
+
+const useGetTitleValueMetricItems = (
+  metrics: CaseMetrics | null,
+  features: Set<CaseMetricsFeature>
+): MetricItems => {
+  const { alerts, actions, connectors } = metrics ?? {};
+  const totalConnectors = connectors?.total ?? 0;
+  const alertsCount = alerts?.count ?? 0;
+  const totalAlertUsers = alerts?.users?.total ?? 0;
+  const totalAlertHosts = alerts?.hosts?.total ?? 0;
+  const totalIsolatedHosts = calculateTotalIsolatedHosts(actions);
+
+  const metricItems = useMemo<MetricItems>(() => {
+    const items: Array<[CaseMetricsFeature, MetricItem]> = [
+      ['alerts.count', { title: TOTAL_ALERTS_METRIC, value: alertsCount }],
+      ['alerts.users', { title: ASSOCIATED_USERS_METRIC, value: totalAlertUsers }],
+      ['alerts.hosts', { title: ASSOCIATED_HOSTS_METRIC, value: totalAlertHosts }],
+      ['actions.isolateHost', { title: ISOLATED_HOSTS_METRIC, value: totalIsolatedHosts }],
+      ['connectors', { title: TOTAL_CONNECTORS_METRIC, value: totalConnectors }],
+    ];
+
+    return items.reduce(
+      (result: MetricItems, [feature, item]) => [
+        ...result,
+        ...(features.has(feature) ? [item] : []),
+      ],
+      []
+    );
+  }, [
+    features,
+    alertsCount,
+    totalAlertUsers,
+    totalAlertHosts,
+    totalIsolatedHosts,
+    totalConnectors,
+  ]);
+
+  return metricItems;
+};
+
+const calculateTotalIsolatedHosts = (actions: CaseMetrics['actions']) => {
+  if (!actions?.isolateHost) {
+    return 0;
+  }
+
+  return Math.max(actions.isolateHost.isolate.total - actions.isolateHost.unisolate.total, 0);
+};
+
+// TODO: use something like FormattedRelativePreferenceDate for the values for lifespan metrics
+
+const useGetLifespanMetrics = (metrics: CaseMetrics | null, features: Set<CaseMetricsFeature>) => {
+  const { lifespan } = metrics ?? {};
+
+  const metricItems = useMemo<CaseMetrics['lifespan']>(() => {
+    if (!features.has('lifespan')) {
+      return;
+    }
+
+    return lifespan;
+  }, [features, lifespan]);
+
+  return metricItems;
+};

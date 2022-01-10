@@ -154,7 +154,9 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
       metrics,
       isLoading: isLoadingMetrics,
       fetchCaseMetrics,
-    } = useGetCaseMetrics(caseId, metricsFeatures);
+    } = useGetCaseMetrics(caseId, Array.from(metricsFeatures));
+
+    console.log('got metrics');
 
     const handleRefresh = useCallback(() => {
       fetchCase();
@@ -344,7 +346,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                 )}
                 {!initLoadingData && (
                   <EuiFlexGroup direction="column" responsive={false}>
-                    {metricsFeatures.length > 0 && (
+                    {metricsFeatures.size > 0 && (
                       <>
                         <EuiFlexItem>
                           <CaseViewMetrics
