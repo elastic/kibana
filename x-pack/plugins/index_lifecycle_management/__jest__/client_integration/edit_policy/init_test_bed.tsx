@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
+import { docLinksServiceMock } from 'src/core/public/mocks';
 
 import '../helpers/global_mocks';
 
@@ -35,6 +36,7 @@ const EditPolicyContainer = ({ appServicesContext, ...rest }: any) => {
       services={{
         breadcrumbService,
         license: licensingMock.createLicense({ license: { type: 'enterprise' } }),
+        docLinks: docLinksServiceMock.createStartContract(),
         getUrlForApp: () => {},
         ...appServicesContext,
       }}
