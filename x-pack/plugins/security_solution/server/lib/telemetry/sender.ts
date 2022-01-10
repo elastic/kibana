@@ -21,7 +21,7 @@ import { TelemetryReceiver } from './receiver';
 import { allowlistEventFields, copyAllowlistedFields } from './filters';
 import { createTelemetryTaskConfigs } from './tasks';
 import { createUsageCounterLabel } from './helpers';
-import { TelemetryEvent } from './types';
+import type { TelemetryEvent } from './types';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
 import { SecurityTelemetryTask, SecurityTelemetryTaskConfig } from './task';
 

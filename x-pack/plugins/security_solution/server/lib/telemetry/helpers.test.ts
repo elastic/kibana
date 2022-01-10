@@ -20,7 +20,7 @@ import {
   isPackagePolicyList,
   templateExceptionList,
 } from './helpers';
-import { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
+import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
   test('test -5 mins is returned when there is no previous task run', async () => {

@@ -10,7 +10,7 @@ import { LIST_DETECTION_RULE_EXCEPTION, TELEMETRY_CHANNEL_LISTS } from '../const
 import { batchTelemetryRecords, templateExceptionList } from '../helpers';
 import { TelemetryEventsSender } from '../sender';
 import { TelemetryReceiver } from '../receiver';
-import { ExceptionListItem, ESClusterInfo, ESLicense, RuleSearchResult } from '../types';
+import type { ExceptionListItem, ESClusterInfo, ESLicense, RuleSearchResult } from '../types';
 import { TaskExecutionPeriod } from '../task';
 
 export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: number) {

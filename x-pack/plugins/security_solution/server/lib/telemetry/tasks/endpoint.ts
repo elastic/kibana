@@ -7,7 +7,7 @@
 
 import { Logger } from 'src/core/server';
 import { TelemetryEventsSender } from '../sender';
-import {
+import type {
   EndpointMetricsAggregation,
   EndpointPolicyResponseAggregation,
   EndpointPolicyResponseDocument,

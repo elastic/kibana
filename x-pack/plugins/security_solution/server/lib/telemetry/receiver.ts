@@ -22,7 +22,7 @@ import {
   trustedApplicationToTelemetryEntry,
   ruleExceptionListItemToTelemetryEvent,
 } from './helpers';
-import {
+import type {
   TelemetryEvent,
   ESLicense,
   ESClusterInfo,
