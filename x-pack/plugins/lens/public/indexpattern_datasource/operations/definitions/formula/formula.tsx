@@ -6,16 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OperationDefinition } from '../index';
-import { ReferenceBasedIndexPatternColumn } from '../column_types';
-import { IndexPattern } from '../../../types';
+import type { OperationDefinition } from '../index';
+import type { ReferenceBasedIndexPatternColumn } from '../column_types';
+import type { IndexPattern } from '../../../types';
 import { runASTValidation, tryToParse } from './validation';
 import { WrappedFormulaEditor } from './editor';
 import { regenerateLayerFromAst } from './parse';
 import { generateFormula } from './generate';
 import { filterByVisibleOperation } from './util';
 import { getManagedColumnsFrom } from '../../layer_helpers';
-import { isColumnFormatted } from '../helpers';
+import { getFilter, isColumnFormatted } from '../helpers';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
   defaultMessage: 'Formula',
@@ -43,6 +43,11 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
     getDefaultLabel: (column, indexPattern) => column.params.formula ?? defaultLabel,
     input: 'managedReference',
     hidden: true,
+    filterable: {
+      helpMessage: i18n.translate('xpack.lens.indexPattern.formulaFilterableHelpText', {
+        defaultMessage: 'The provided filter will be applied to the entire formula.',
+      }),
+    },
     getDisabledStatus(indexPattern: IndexPattern) {
       return undefined;
     },
@@ -58,7 +63,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         return error?.message ? [error.message] : [];
       }
 
-      const errors = runASTValidation(root, layer, indexPattern, visibleOperationsMap);
+      const errors = runASTValidation(root, layer, indexPattern, visibleOperationsMap, column);
 
       if (errors.length) {
         return errors.map(({ message }) => message);
@@ -134,6 +139,10 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
           ? { formula: previousFormula, isFormulaBroken: false, ...prevFormat }
           : { ...prevFormat },
         references: [],
+        // carry over the filter if coming from another formula,
+        // otherwise the filter has been already migrated into the formula text
+        filter:
+          previousColumn?.operationType === 'formula' ? getFilter(previousColumn, {}) : undefined,
       };
     },
     isTransferable: () => {
