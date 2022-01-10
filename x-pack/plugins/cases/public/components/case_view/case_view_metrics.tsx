@@ -6,8 +6,18 @@
  */
 
 import React, { useMemo } from 'react';
+import prettyMilliseconds from 'pretty-ms';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
+import {
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+} from '@elastic/eui';
 import { CaseMetrics, CaseMetricsFeature } from '../../../common/ui';
 import {
   ASSOCIATED_HOSTS_METRIC,
@@ -16,17 +26,81 @@ import {
   TOTAL_ALERTS_METRIC,
   TOTAL_CONNECTORS_METRIC,
 } from './translations';
+import { getMaybeDate } from '../formatted_date/maybe_date';
 
 const MetricValue = styled(EuiFlexItem)`
   font-size: ${({ theme }) => theme.eui.euiSizeL};
   font-weight: bold;
 `;
 
-export interface CaseViewMetricsProps {
-  metrics: CaseMetrics | null;
-  features: Set<CaseMetricsFeature>;
-  isLoading: boolean;
-}
+const CaseStatusMetrics: React.FC<{ statusMetrics?: CaseMetrics['lifespan'] }> = React.memo(
+  ({ statusMetrics }) => {
+    if (!statusMetrics) {
+      return null;
+    }
+
+    // TODO: translate
+    const items = [
+      { title: 'Case created', value: statusMetrics.creationDate },
+      {
+        title: 'Case in progress duration',
+        value: getInProgressDuration(statusMetrics.statusInfo.inProgressDuration),
+      },
+      {
+        title: 'Case open duration',
+        value: formatDuration(statusMetrics.statusInfo.openDuration),
+      },
+      {
+        title: 'Duration from case creation to close',
+        value: getOpenCloseDuration(statusMetrics.creationDate, statusMetrics.closeDate),
+      },
+    ];
+
+    return (
+      <EuiFlexItem grow={4}>
+        <EuiFlexGrid columns={2} gutterSize="s" responsive={false}>
+          {items.map(({ title, value }) => (
+            <EuiFlexItem>
+              <EuiDescriptionList>
+                <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>{value}</EuiDescriptionListDescription>
+              </EuiDescriptionList>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
+      </EuiFlexItem>
+    );
+  }
+);
+CaseStatusMetrics.displayName = 'CaseStatusMetrics';
+
+const formatDuration = (milliseconds: number) => {
+  return prettyMilliseconds(milliseconds, { compact: true, verbose: true });
+};
+
+// TODO: determine the error values
+const getInProgressDuration = (duration: number) => {
+  if (duration <= 0) {
+    return 'None';
+  }
+
+  return formatDuration(duration);
+};
+
+const getOpenCloseDuration = (openDate: string, closeDate: string | null) => {
+  if (closeDate == null) {
+    return 'N/A';
+  }
+
+  const openDateObject = getMaybeDate(openDate);
+  const closeDateObject = getMaybeDate(closeDate);
+
+  if (!openDateObject.isValid() || !closeDateObject.isValid()) {
+    return 'Unknown';
+  }
+
+  return formatDuration(closeDateObject.diff(openDateObject));
+};
 
 const CaseViewMetricItems: React.FC<{ metricItems: MetricItems }> = React.memo(
   ({ metricItems }) => (
@@ -44,9 +118,16 @@ const CaseViewMetricItems: React.FC<{ metricItems: MetricItems }> = React.memo(
 );
 CaseViewMetricItems.displayName = 'CaseViewMetricItems';
 
+export interface CaseViewMetricsProps {
+  metrics: CaseMetrics | null;
+  features: CaseMetricsFeature[];
+  isLoading: boolean;
+}
+
 export const CaseViewMetrics: React.FC<CaseViewMetricsProps> = React.memo(
   ({ metrics, features, isLoading }) => {
     const metricItems = useGetTitleValueMetricItems(metrics, features);
+    const statusMetrics = useGetLifespanMetrics(metrics, features);
 
     return (
       <EuiPanel data-test-subj="case-view-metrics-panel" hasShadow={false} hasBorder={true}>
@@ -56,7 +137,10 @@ export const CaseViewMetrics: React.FC<CaseViewMetricsProps> = React.memo(
               <EuiLoadingSpinner data-test-subj="case-view-metrics-spinner" size="l" />
             </EuiFlexItem>
           ) : (
-            <CaseViewMetricItems metricItems={metricItems} />
+            <>
+              <CaseViewMetricItems metricItems={metricItems} />
+              <CaseStatusMetrics statusMetrics={statusMetrics} />
+            </>
           )}
         </EuiFlexGroup>
       </EuiPanel>
@@ -73,7 +157,7 @@ type MetricItems = MetricItem[];
 
 const useGetTitleValueMetricItems = (
   metrics: CaseMetrics | null,
-  features: Set<CaseMetricsFeature>
+  features: CaseMetricsFeature[]
 ): MetricItems => {
   const { alerts, actions, connectors } = metrics ?? {};
   const totalConnectors = connectors?.total ?? 0;
@@ -94,7 +178,7 @@ const useGetTitleValueMetricItems = (
     return items.reduce(
       (result: MetricItems, [feature, item]) => [
         ...result,
-        ...(features.has(feature) ? [item] : []),
+        ...(features.includes(feature) ? [item] : []),
       ],
       []
     );
@@ -118,13 +202,14 @@ const calculateTotalIsolatedHosts = (actions: CaseMetrics['actions']) => {
   return Math.max(actions.isolateHost.isolate.total - actions.isolateHost.unisolate.total, 0);
 };
 
-// TODO: use something like FormattedRelativePreferenceDate for the values for lifespan metrics
-
-const useGetLifespanMetrics = (metrics: CaseMetrics | null, features: Set<CaseMetricsFeature>) => {
+const useGetLifespanMetrics = (
+  metrics: CaseMetrics | null,
+  features: CaseMetricsFeature[]
+): CaseMetrics['lifespan'] | undefined => {
   const { lifespan } = metrics ?? {};
 
   const metricItems = useMemo<CaseMetrics['lifespan']>(() => {
-    if (!features.has('lifespan')) {
+    if (!features.includes('lifespan')) {
       return;
     }
 
