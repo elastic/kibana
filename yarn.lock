@@ -9582,10 +9582,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^96.0.0:
-  version "96.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-96.0.0.tgz#c8473498e4c94950fa168187b112019cce9e5c6c"
-  integrity sha512-4g6Hn5RHGsbaBmOrJbDlz/hdVPOc22eRsbvoAAMqkZxR2NJCcddHzCw2FAQeW8lX/C7xWVz3nyDsKX3fE9lIIw==
+chromedriver@^97.0.0:
+  version "97.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-97.0.0.tgz#7005b1a15a6456558d0fc4d5b72c98c12d1b033d"
+  integrity sha512-SZ9MW+/6/Ypz20CNdRKocsmRM2AJ/YwHaWpA1Np2QVPFUbhjhus6vBtqFD+l8M5qrktLWPQSjTwIsDckNfXIRg==
   dependencies:
     "@testim/chrome-version" "^1.0.7"
     axios "^0.21.2"
@@ -25205,10 +25205,10 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.1.0.tgz#d11e5d43674e2718265a30684bcbf6ec734fd3bd"
-  integrity sha512-kUDH4N8WruYprTzvug4Pl73Th+WKb5YiLz8z/anOpHyUNUdM3UzrdTOxmSNaf9AczzBeY+qXihzku8D1lMaKOg==
+selenium-webdriver@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.1.1.tgz#da083177d811f36614950e809e2982570f67d02e"
+  integrity sha512-Fr9e9LC6zvD6/j7NO8M1M/NVxFX67abHcxDJoP5w2KN/Xb1SyYLjMVPGgD14U2TOiKe4XKHf42OmFw9g2JgCBQ==
   dependencies:
     jszip "^3.6.0"
     tmp "^0.2.1"
