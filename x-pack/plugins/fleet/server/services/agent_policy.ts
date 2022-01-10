@@ -147,7 +147,7 @@ class AgentPolicyService {
     policy: AgentPolicy;
   }> {
     // For preconfigured policies with a specified ID
-    const agentPolicy = await this.get(soClient, id);
+    const agentPolicy = await this.get(soClient, id, false).catch(() => null);
     if (!agentPolicy) {
       return {
         created: true,
