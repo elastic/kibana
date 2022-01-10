@@ -11,7 +11,7 @@ import { storiesOf } from '@storybook/react';
 import { Datatable } from '../../../../expressions';
 import { Render } from '../../../../presentation_util/public/__stories__';
 import { getPartitionVisRenderer } from '../expression_renderers';
-import { LabelPositions, RenderValue, ValueFormats } from '../../common/types';
+import { ChartTypes, LabelPositions, RenderValue, ValueFormats } from '../../common/types';
 import { palettes, theme, getStartDeps } from '../__mocks__';
 
 const visData: Datatable = {
@@ -63,7 +63,7 @@ const visData: Datatable = {
 };
 
 const config: RenderValue = {
-  visType: 'pieVis',
+  visType: ChartTypes.PIE,
   visData,
   visConfig: {
     dimensions: {

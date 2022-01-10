@@ -11,7 +11,7 @@ import { Datatable, DatatableColumn } from '../../../../expressions/common';
 import { SerializedFieldFormat } from '../../../../field_formats/common';
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
 import { PaletteOutput } from '../../../../charts/common';
-import { ExpressionValuePartitionLabels } from './expression_functions';
+import { ChartTypes, ExpressionValuePartitionLabels } from './expression_functions';
 
 export enum EmptySizeRatios {
   SMALL = 0.3,
@@ -90,7 +90,7 @@ export interface WaffleVisConfig extends VisCommonConfig {
 
 export interface RenderValue {
   visData: Datatable;
-  visType: string;
+  visType: ChartTypes;
   visConfig: PartitionVisParams;
   syncColors: boolean;
 }
@@ -98,6 +98,7 @@ export interface RenderValue {
 export enum LabelPositions {
   INSIDE = 'inside',
   DEFAULT = 'default',
+  HIDE = 'hide',
 }
 
 export enum ValueFormats {

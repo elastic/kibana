@@ -47,7 +47,7 @@ export const getPartitionVisRenderer: (
   displayName: strings.getDisplayName(),
   help: strings.getHelpDescription(),
   reuseDomNode: true,
-  render: async (domNode, { visConfig, visData, syncColors }, handlers) => {
+  render: async (domNode, { visConfig, visData, visType, syncColors }, handlers) => {
     const showNoResult = shouldShowNoResultsMessage(visData);
 
     handlers.onDestroy(() => {
@@ -66,6 +66,7 @@ export const getPartitionVisRenderer: (
               palettesRegistry={palettesRegistry}
               visParams={visConfig}
               visData={visData}
+              visType={visType}
               renderComplete={handlers.done}
               fireEvent={handlers.event}
               uiState={handlers.uiState as PersistedState}

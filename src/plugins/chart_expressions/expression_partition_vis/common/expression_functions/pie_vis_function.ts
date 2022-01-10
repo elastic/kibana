@@ -8,7 +8,7 @@
 
 import { EmptySizeRatios, PartitionVisParams } from '../types/expression_renderers';
 import { prepareLogTable } from '../../../../visualizations/common/prepare_log_table';
-import { chartTypes, PieVisExpressionFunctionDefinition } from '../types';
+import { ChartTypes, PieVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
   PARTITION_LABELS_VALUE,
@@ -125,7 +125,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
         visData: context,
         visConfig,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
-        visType: chartTypes.PIE,
+        visType: ChartTypes.PIE,
         params: {
           listenOnChange: true,
         },

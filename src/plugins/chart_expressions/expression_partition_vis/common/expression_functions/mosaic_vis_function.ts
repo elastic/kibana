@@ -8,7 +8,7 @@
 
 import { PartitionVisParams } from '../types/expression_renderers';
 import { prepareLogTable } from '../../../../visualizations/common/prepare_log_table';
-import { chartTypes, MosaicVisExpressionFunctionDefinition } from '../types';
+import { ChartTypes, MosaicVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
   PARTITION_LABELS_VALUE,
@@ -120,7 +120,7 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
         visData: context,
         visConfig,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
-        visType: chartTypes.MOSAIC,
+        visType: ChartTypes.MOSAIC,
         params: {
           listenOnChange: true,
         },

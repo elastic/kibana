@@ -59,6 +59,7 @@ import {
   partitionVisWrapperStyle,
   partitionVisContainerStyleFactory,
 } from './partition_vis_component.styles';
+import { ChartTypes } from '../../common/types';
 
 declare global {
   interface Window {
@@ -71,6 +72,7 @@ declare global {
 export interface PartitionVisComponentProps {
   visParams: PartitionVisParams;
   visData: Datatable;
+  visType: ChartTypes;
   uiState: PersistedState;
   fireEvent: IInterpreterRenderHandlers['event'];
   renderComplete: IInterpreterRenderHandlers['done'];
@@ -193,7 +195,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     [props.uiState]
   );
 
-  const { visData, visParams, services, syncColors } = props;
+  const { visData, visParams, visType, services, syncColors } = props;
 
   function getSliceValue(d: Datum, metricColumn: DatatableColumn) {
     const value = d[metricColumn.id];
@@ -255,8 +257,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   }, [visData.rows, metricColumn]);
 
   const config = useMemo(
-    () => getConfig(visParams, chartTheme, dimensions, rescaleFactor),
-    [chartTheme, visParams, dimensions, rescaleFactor]
+    () => getConfig(visType, visParams, visData, chartTheme, dimensions, rescaleFactor),
+    [visType, visParams, visData, chartTheme, dimensions, rescaleFactor]
   );
   const tooltip: TooltipProps = {
     type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,

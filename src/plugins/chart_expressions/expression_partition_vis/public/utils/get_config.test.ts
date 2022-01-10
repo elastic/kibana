@@ -7,18 +7,23 @@
  */
 
 import { getConfig } from './get_config';
-import { createMockPieParams } from '../mocks';
+import { createMockPieParams, createMockVisData } from '../mocks';
+import { ChartTypes } from '../../common/types';
 
 const visParams = createMockPieParams();
+const visData = createMockVisData();
 
 describe('getConfig', () => {
   it('should cap the outerSizeRatio to 1', () => {
-    expect(getConfig(visParams, {}, { width: 400, height: 400 }).outerSizeRatio).toBe(1);
+    expect(
+      getConfig(ChartTypes.PIE, visParams, visData, {}, { width: 400, height: 400 }).outerSizeRatio
+    ).toBe(1);
   });
 
   it('should not have outerSizeRatio for split chart', () => {
     expect(
       getConfig(
+        ChartTypes.PIE,
         {
           ...visParams,
           dimensions: {
@@ -35,6 +40,7 @@ describe('getConfig', () => {
             ],
           },
         },
+        visData,
         {},
         { width: 400, height: 400 }
       ).outerSizeRatio
@@ -42,6 +48,7 @@ describe('getConfig', () => {
 
     expect(
       getConfig(
+        ChartTypes.PIE,
         {
           ...visParams,
           dimensions: {
@@ -58,6 +65,7 @@ describe('getConfig', () => {
             ],
           },
         },
+        visData,
         {},
         { width: 400, height: 400 }
       ).outerSizeRatio
@@ -65,6 +73,6 @@ describe('getConfig', () => {
   });
 
   it('should not set outerSizeRatio if dimensions are not defined', () => {
-    expect(getConfig(visParams, {}).outerSizeRatio).toBeUndefined();
+    expect(getConfig(ChartTypes.PIE, visParams, visData, {}).outerSizeRatio).toBeUndefined();
   });
 });

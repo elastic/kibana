@@ -17,6 +17,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
 import PartitionVisComponent, { PartitionVisComponentProps } from './partition_vis_component';
 import { createMockPieParams, createMockVisData } from '../mocks';
+import { ChartTypes } from '../../common/types';
 
 jest.mock('@elastic/charts', () => {
   const original = jest.requireActual('@elastic/charts');
@@ -51,6 +52,7 @@ describe('PartitionVisComponent', function () {
       palettesRegistry,
       visParams,
       visData,
+      visType: ChartTypes.PIE,
       uiState,
       syncColors: false,
       fireEvent: jest.fn(),

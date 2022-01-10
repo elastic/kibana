@@ -80,10 +80,10 @@ export type WaffleVisExpressionFunctionDefinition = ExpressionFunctionDefinition
   ExpressionValueRender<RenderValue>
 >;
 
-export const chartTypes = {
-  PIE: 'pie',
-  DONUT: 'donut',
-  TREEMAP: 'treemap',
-  MOSAIC: 'mosaic',
-  WAFFLE: 'waffle',
-};
+export enum ChartTypes {
+  PIE = 'pie',
+  DONUT = 'donut',
+  TREEMAP = 'treemap',
+  MOSAIC = 'mosaic',
+  WAFFLE = 'waffle',
+}

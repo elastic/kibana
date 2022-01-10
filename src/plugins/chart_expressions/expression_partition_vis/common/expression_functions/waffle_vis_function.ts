@@ -8,7 +8,7 @@
 
 import { PartitionVisParams } from '../types/expression_renderers';
 import { prepareLogTable } from '../../../../visualizations/common/prepare_log_table';
-import { chartTypes, WaffleVisExpressionFunctionDefinition } from '../types';
+import { ChartTypes, WaffleVisExpressionFunctionDefinition } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
   PARTITION_LABELS_VALUE,
@@ -115,7 +115,7 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
         visData: context,
         visConfig,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
-        visType: chartTypes.WAFFLE,
+        visType: ChartTypes.WAFFLE,
         params: {
           listenOnChange: true,
         },
