@@ -80,9 +80,19 @@ describe('Fleet startup', () => {
       cy.getBySel('addAgentButton').click();
       cy.getBySel('toastCloseButton').click();
       cy.getBySel('standaloneTab').click();
+
+      cy.intercept('POST', '/api/fleet/agent_policies?sys_monitoring=true').as('createAgentPolicy');
+
       cy.getBySel('createPolicyBtn').click();
-      cy.getBySel('euiToastHeader', { timeout: 180000 });
+
+      const startTime = Date.now();
+      cy.wait('@createAgentPolicy', { timeout: 180000 }).then((xhr: any) => {
+        cy.log('Create agent policy took: ' + (Date.now() - startTime) / 1000 + ' s');
+      });
+
+      cy.getBySel('euiToastHeader');
       cy.get('.euiLoadingSpinner').should('not.exist');
+
       cy.getBySel('euiFlyoutCloseButton').click();
 
       verifyFleetServerPolicy('Agent policy 1', 'System');
