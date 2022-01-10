@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, EuiTitle } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiButtonIcon,
+  EuiTitle,
+  EuiFlexItem,
+  EuiText,
+  RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { MouseEvent, useState } from 'react';
 import styled from 'styled-components';
@@ -89,12 +97,37 @@ export const StepsList = ({ data, error, loading }: Props) => {
       render: (pingStatus: string, item) => (
         <StatusBadge status={pingStatus} stepNo={item.synthetics?.step?.index!} />
       ),
+      mobileOptions: {
+        render: (item) => (
+          <EuiFlexItem grow={false}>
+            <StatusBadge
+              isMobile={true}
+              status={item.synthetics?.payload?.status}
+              stepNo={item.synthetics?.step?.index!}
+            />
+          </EuiFlexItem>
+        ),
+        width: '20%',
+        header: STATUS_LABEL,
+        enlarge: false,
+      },
     },
     {
       align: 'left',
       field: 'timestamp',
       name: STEP_NAME_LABEL,
       render: (_timestamp: string, item) => <StepImage step={item} />,
+      mobileOptions: {
+        render: (item: JourneyStep) => (
+          <EuiText>
+            <strong>
+              {item.synthetics?.step?.index!}. {item.synthetics?.step?.name}
+            </strong>
+          </EuiText>
+        ),
+        header: 'Step',
+        enlarge: true,
+      },
     },
     {
       name: 'Step duration',
@@ -106,6 +139,12 @@ export const StepsList = ({ data, error, loading }: Props) => {
             setDurationPopoverOpenIndex={setDurationPopoverOpenIndex}
           />
         );
+      },
+      mobileOptions: {
+        header: i18n.translate('xpack.uptime.pingList.stepDurationHeader', {
+          defaultMessage: 'Step duration',
+        }),
+        show: true,
       },
     },
     {
@@ -120,11 +159,12 @@ export const StepsList = ({ data, error, loading }: Props) => {
           {VIEW_PERFORMANCE}
         </StepDetailLink>
       ),
+      mobileOptions: { show: false },
     },
 
     {
-      align: 'right',
-      width: '24px',
+      width: '40px',
+      align: RIGHT_ALIGNMENT,
       isExpander: true,
       render: (journeyStep: JourneyStep) => {
         return (
@@ -143,7 +183,6 @@ export const StepsList = ({ data, error, loading }: Props) => {
     const { monitor } = item;
 
     return {
-      height: '85px',
       'data-test-subj': `row-${monitor.check_group}`,
       onClick: (evt: MouseEvent) => {
         const targetElem = evt.target as HTMLElement;
