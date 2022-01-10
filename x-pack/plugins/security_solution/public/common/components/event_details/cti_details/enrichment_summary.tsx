@@ -32,9 +32,24 @@ export interface ThreatSummaryDescription {
 }
 
 const EnrichmentFieldProvider = styled.span`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.xs};
   white-space: nowrap;
   font-style: italic;
+`;
+
+export const StyledEuiFlexGroup = styled(EuiFlexGroup)`
+  .hoverActions-active {
+    .timelines__hoverActionButton,
+    .securitySolution__hoverActionButton {
+      opacity: 1;
+    }
+  }
+
+  &:hover {
+    .timelines__hoverActionButton,
+    .securitySolution__hoverActionButton {
+      opacity: 1;
+    }
+  }
 `;
 
 const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
@@ -50,9 +65,9 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
   if (!data || !value) return null;
   const key = `alert-details-value-formatted-field-value-${timelineId}-${eventId}-${data.field}-${value}-${index}-${provider}`;
   return (
-    <EuiFlexGroup key={key} direction="row" gutterSize="none" alignItems="center">
+    <StyledEuiFlexGroup key={key} direction="row" gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>
-        <div className="eui-textBreakAll">
+        <div>
           <FormattedFieldValue
             contextId={timelineId}
             eventId={key}
@@ -62,9 +77,11 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
             isDraggable={isDraggable}
             isObjectArray={data.isObjectArray}
             value={value}
+            truncate={false}
           />
           {provider && (
             <EnrichmentFieldProvider>
+              {' '}
               {i18n.PROVIDER_PREPOSITION} {provider}
             </EnrichmentFieldProvider>
           )}
@@ -82,7 +99,7 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
           />
         )}
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </StyledEuiFlexGroup>
   );
 };
 
