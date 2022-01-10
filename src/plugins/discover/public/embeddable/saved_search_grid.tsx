@@ -12,10 +12,8 @@ import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/dis
 import { getServices } from '../kibana_services';
 import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
 import { ElasticSearchHit } from '../types';
-import { SavedSearch } from '..';
 
 export interface DiscoverGridEmbeddableProps extends DiscoverGridProps {
-  savedSearch: SavedSearch;
   totalHitCount: number;
 }
 

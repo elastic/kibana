@@ -12,10 +12,8 @@ import { DiscoverGridEmbeddable, DiscoverGridEmbeddableProps } from './saved_sea
 import { DiscoverDocTableEmbeddable } from '../components/doc_table/create_doc_table_embeddable';
 import { DocTableEmbeddableProps } from '../components/doc_table/doc_table_embeddable';
 import { SearchProps } from './saved_search_embeddable';
-import { SavedSearch } from '..';
 
 interface SavedSearchEmbeddableComponentProps {
-  savedSearch: SavedSearch;
   searchProps: SearchProps;
   useLegacyTable: boolean;
 }
@@ -24,7 +22,6 @@ const DiscoverDocTableEmbeddableMemoized = React.memo(DiscoverDocTableEmbeddable
 const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
 
 export function SavedSearchEmbeddableComponent({
-  savedSearch,
   searchProps,
   useLegacyTable,
 }: SavedSearchEmbeddableComponentProps) {
@@ -33,7 +30,7 @@ export function SavedSearchEmbeddableComponent({
   }
   return (
     <DiscoverGridEmbeddableMemoized
-      {...({ ...searchProps, savedSearch } as DiscoverGridEmbeddableProps)}
+      {...(searchProps as DiscoverGridEmbeddableProps)}
       className="dscDiscoverGrid"
     />
   );
