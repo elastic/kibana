@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { configureClientMock } from './cluster_client.test.mocks';
+import {
+  configureClientMock,
+  createTransportMock,
+  createInternalErrorHandlerMock,
+} from './cluster_client.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { httpServerMock } from '../../http/http_server.mocks';
 import { httpServiceMock } from '../../http/http_service.mock';
@@ -35,6 +39,8 @@ describe('ClusterClient', () => {
   let internalClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
   let scopedClient: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
 
+  const mockTransport = { mockTransport: true };
+
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     internalClient = elasticsearchClientMock.createInternalClient();
@@ -49,10 +55,13 @@ describe('ClusterClient', () => {
     configureClientMock.mockImplementation((config, { scoped = false }) => {
       return scoped ? scopedClient : internalClient;
     });
+    createTransportMock.mockReturnValue(mockTransport);
   });
 
   afterEach(() => {
     configureClientMock.mockReset();
+    createTransportMock.mockReset();
+    createInternalErrorHandlerMock.mockReset();
   });
 
   it('creates a single internal and scoped client during initialization', () => {
@@ -109,11 +118,68 @@ describe('ClusterClient', () => {
       expect(scopedClient.child).toHaveBeenCalledTimes(1);
       expect(scopedClient.child).toHaveBeenCalledWith({
         headers: expect.any(Object),
-        Transport: expect.any(Function),
+        Transport: mockTransport,
       });
 
       expect(scopedClusterClient.asInternalUser).toBe(clusterClient.asInternalUser);
       expect(scopedClusterClient.asCurrentUser).toBe(scopedClient.child.mock.results[0].value);
+    });
+
+    it('calls `createTransport` with the correct parameters', () => {
+      const getExecutionContext = jest.fn();
+      const getUnauthorizedErrorHandler = jest.fn();
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        getExecutionContext,
+        getUnauthorizedErrorHandler,
+      });
+      const request = httpServerMock.createKibanaRequest();
+
+      clusterClient.asScoped(request);
+
+      expect(createTransportMock).toHaveBeenCalledTimes(1);
+      expect(createTransportMock).toHaveBeenCalledWith({
+        getExecutionContext,
+        getUnauthorizedErrorHandler: expect.any(Function),
+      });
+    });
+
+    it('calls `createTransportcreateInternalErrorHandler` lazily', () => {
+      const getExecutionContext = jest.fn();
+      const getUnauthorizedErrorHandler = jest.fn();
+      const clusterClient = new ClusterClient({
+        config: createConfig(),
+        logger,
+        type: 'custom-type',
+        authHeaders,
+        getExecutionContext,
+        getUnauthorizedErrorHandler,
+      });
+      const request = httpServerMock.createKibanaRequest();
+
+      clusterClient.asScoped(request);
+
+      expect(createTransportMock).toHaveBeenCalledTimes(1);
+      expect(createTransportMock).toHaveBeenCalledWith({
+        getExecutionContext,
+        getUnauthorizedErrorHandler: expect.any(Function),
+      });
+
+      const { getUnauthorizedErrorHandler: getHandler } = createTransportMock.mock.calls[0][0];
+
+      expect(createInternalErrorHandlerMock).not.toHaveBeenCalled();
+
+      getHandler();
+
+      expect(createInternalErrorHandlerMock).toHaveBeenCalledTimes(1);
+      expect(createInternalErrorHandlerMock).toHaveBeenCalledWith({
+        request,
+        getHandler: getUnauthorizedErrorHandler,
+        setAuthHeaders: authHeaders.set,
+      });
     });
 
     it('returns a distinct scoped cluster client on each call', () => {

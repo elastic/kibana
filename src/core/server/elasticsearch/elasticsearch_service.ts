@@ -167,7 +167,7 @@ export class ElasticsearchService
       type,
       authHeaders: this.authHeaders,
       getExecutionContext: () => this.executionContextClient?.getAsHeader(),
-      unauthorizedErrorHandler: this.unauthorizedErrorHandler,
+      getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
     });
   }
 }

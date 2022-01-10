@@ -16,7 +16,11 @@ import { configureClient } from './configure_client';
 import { ElasticsearchClientConfig } from './client_config';
 import { ScopedClusterClient, IScopedClusterClient } from './scoped_cluster_client';
 import { DEFAULT_HEADERS } from '../default_headers';
-import { UnauthorizedErrorHandler, createInternalErrorHandler } from './retry_unauthorized';
+import {
+  UnauthorizedErrorHandler,
+  createInternalErrorHandler,
+  InternalUnauthorizedErrorHandler,
+} from './retry_unauthorized';
 import { createTransport } from './create_transport';
 
 const noop = () => undefined;
@@ -58,7 +62,7 @@ export class ClusterClient implements ICustomClusterClient {
   private readonly authHeaders?: IAuthHeadersStorage;
   private readonly rootScopedClient: KibanaClient;
   private readonly allowListHeaders: string[];
-  private readonly unauthorizedErrorHandler?: UnauthorizedErrorHandler;
+  private readonly getUnauthorizedErrorHandler: () => UnauthorizedErrorHandler | undefined;
   private readonly getExecutionContext: () => string | undefined;
 
   private isClosed = false;
@@ -71,19 +75,19 @@ export class ClusterClient implements ICustomClusterClient {
     type,
     authHeaders,
     getExecutionContext = noop,
-    unauthorizedErrorHandler,
+    getUnauthorizedErrorHandler = noop,
   }: {
     config: ElasticsearchClientConfig;
     logger: Logger;
     type: string;
     authHeaders?: IAuthHeadersStorage;
     getExecutionContext?: () => string | undefined;
-    unauthorizedErrorHandler?: UnauthorizedErrorHandler;
+    getUnauthorizedErrorHandler?: () => UnauthorizedErrorHandler | undefined;
   }) {
     this.config = config;
     this.authHeaders = authHeaders;
     this.getExecutionContext = getExecutionContext;
-    this.unauthorizedErrorHandler = unauthorizedErrorHandler;
+    this.getUnauthorizedErrorHandler = getUnauthorizedErrorHandler;
 
     this.asInternalUser = configureClient(config, { logger, type, getExecutionContext });
     this.rootScopedClient = configureClient(config, {
@@ -98,20 +102,9 @@ export class ClusterClient implements ICustomClusterClient {
   asScoped(request: ScopeableRequest) {
     const scopedHeaders = this.getScopedHeaders(request);
 
-    const createUnauthorizedErrorHandler =
-      this.unauthorizedErrorHandler && this.authHeaders
-        ? () => {
-            return createInternalErrorHandler({
-              handler: this.unauthorizedErrorHandler!,
-              request,
-              setAuthHeaders: this.authHeaders!.set,
-            });
-          }
-        : undefined;
-
     const transportClass = createTransport({
       getExecutionContext: this.getExecutionContext,
-      getUnauthorizedErrorHandler: createUnauthorizedErrorHandler,
+      getUnauthorizedErrorHandler: this.createInternalErrorHandlerAccessor(request),
     });
 
     const scopedClient = this.rootScopedClient.child({
@@ -128,6 +121,20 @@ export class ClusterClient implements ICustomClusterClient {
     this.isClosed = true;
     await Promise.all([this.asInternalUser.close(), this.rootScopedClient.close()]);
   }
+
+  private createInternalErrorHandlerAccessor = (
+    request: ScopeableRequest
+  ): (() => InternalUnauthorizedErrorHandler) | undefined => {
+    if (!this.authHeaders) {
+      return undefined;
+    }
+    return () =>
+      createInternalErrorHandler({
+        request,
+        getHandler: this.getUnauthorizedErrorHandler,
+        setAuthHeaders: this.authHeaders!.set,
+      });
+  };
 
   private getScopedHeaders(request: ScopeableRequest): Headers {
     let scopedHeaders: Headers;

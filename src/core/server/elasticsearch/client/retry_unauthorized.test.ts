@@ -33,7 +33,7 @@ describe('createInternalErrorHandler', () => {
     const request = httpServerMock.createKibanaRequest();
 
     const internalHandler = createInternalErrorHandler({
-      handler,
+      getHandler: () => handler,
       request,
       setAuthHeaders,
     });
@@ -52,7 +52,7 @@ describe('createInternalErrorHandler', () => {
     const request = httpServerMock.createKibanaRequest();
 
     const internalHandler = createInternalErrorHandler({
-      handler,
+      getHandler: () => handler,
       request,
       setAuthHeaders,
     });
@@ -70,7 +70,7 @@ describe('createInternalErrorHandler', () => {
     const request = httpServerMock.createKibanaRequest();
 
     const internalHandler = createInternalErrorHandler({
-      handler,
+      getHandler: () => handler,
       request,
       setAuthHeaders,
     });
@@ -88,7 +88,7 @@ describe('createInternalErrorHandler', () => {
     const request = httpServerMock.createKibanaRequest();
 
     const internalHandler = createInternalErrorHandler({
-      handler,
+      getHandler: () => handler,
       request,
       setAuthHeaders,
     });
@@ -105,7 +105,7 @@ describe('createInternalErrorHandler', () => {
     const request = httpServerMock.createKibanaRequest();
 
     const internalHandler = createInternalErrorHandler({
-      handler,
+      getHandler: () => handler,
       request,
       setAuthHeaders,
     });
@@ -127,7 +127,7 @@ describe('createInternalErrorHandler', () => {
     };
 
     const internalHandler = createInternalErrorHandler({
-      handler,
+      getHandler: () => handler,
       request: fakeRequest,
       setAuthHeaders,
     });
@@ -136,6 +136,31 @@ describe('createInternalErrorHandler', () => {
 
     expect(isNotHandledResult(result)).toBe(true);
     expect(handler).not.toHaveBeenCalled();
+  });
+
+  it('checks the presence of a registered handler for each error', async () => {
+    const handlerResponse = toolkit.retry({ authHeaders: { foo: 'bar' } });
+    const handler = jest.fn().mockResolvedValue(handlerResponse);
+
+    const request = httpServerMock.createKibanaRequest();
+
+    const getHandler = jest.fn().mockReturnValueOnce(undefined).mockReturnValueOnce(handler);
+
+    const internalHandler = createInternalErrorHandler({
+      getHandler,
+      request,
+      setAuthHeaders,
+    });
+
+    const error = createUnauthorizedError();
+    let result = await internalHandler(error);
+
+    expect(isNotHandledResult(result)).toBe(true);
+    expect(handler).not.toHaveBeenCalled();
+
+    result = await internalHandler(error);
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(isRetryResult(result)).toBe(true);
   });
 });
 

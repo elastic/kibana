@@ -96,11 +96,11 @@ const notHandledInternalErrorHandler: InternalUnauthorizedErrorHandler = () => t
  * @internal
  */
 export const createInternalErrorHandler = ({
-  handler,
+  getHandler,
   request,
   setAuthHeaders,
 }: {
-  handler: UnauthorizedErrorHandler;
+  getHandler: () => UnauthorizedErrorHandler | undefined;
   request: ScopeableRequest;
   setAuthHeaders: SetAuthHeaders;
 }): InternalUnauthorizedErrorHandler => {
@@ -110,6 +110,10 @@ export const createInternalErrorHandler = ({
   }
   return async (error) => {
     try {
+      const handler = getHandler();
+      if (!handler) {
+        return toolkit.notHandled();
+      }
       const result = await handler({ request, error }, toolkit);
       if (isRetryResult(result)) {
         setAuthHeaders(request, result.authHeaders);
