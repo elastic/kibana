@@ -10,6 +10,7 @@
     "data",
     "dataViews",
     "embeddable",
+    "controls",
     "inspector",
     "navigation",
     "savedObjects",
