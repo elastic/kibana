@@ -58,11 +58,7 @@ describe('Hover actions', () => {
     openTimelineUsingToggle();
 
     cy.get(DATA_PROVIDERS).should('have.length', DATA_PROVIDER_ITEM_NUMBER);
-    cy.get(DATA_PROVIDERS)
-      .invoke('text')
-      .then((value) => {
-        cy.get(DATA_PROVIDERS).should('have.text', `destination.domain: "${testDomain}"`);
-      });
+    cy.get(DATA_PROVIDERS).should('have.text', `destination.domain: "${testDomain}"`);
   });
 
   it('Show topN', () => {
