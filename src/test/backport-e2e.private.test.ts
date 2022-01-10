@@ -4,27 +4,29 @@ import { resolve } from 'path';
 import { Octokit } from '@octokit/rest';
 import del = require('del');
 import nock from 'nock';
-import { getOptions } from '../../options/options';
-import { runSequentially } from '../../runSequentially';
-import { getCommits } from '../../ui/getCommits';
-import { mockConfigFiles } from '../mockConfigFiles';
-import { listenForCallsToNockScope } from '../nockHelpers';
-import { getDevAccessToken } from '../private/getDevAccessToken';
+import { getOptions } from '../options/options';
+import { runSequentially } from '../runSequentially';
+import { getCommits } from '../ui/getCommits';
+import { mockConfigFiles } from './mockConfigFiles';
+import { listenForCallsToNockScope } from './nockHelpers';
+import { getDevAccessToken } from './private/getDevAccessToken';
 
 jest.unmock('make-dir');
 jest.unmock('del');
 jest.setTimeout(10000);
 
-const INTEGRATION_TEST_DATA_PATH = resolve(
-  './src/test/integration/mock-environment'
+const E2E_TEST_DATA_PATH = resolve(
+  './src/test/tmp-mock-environments/backport-e2e'
 );
-const HOMEDIR_PATH = resolve('./src/test/integration/mock-environment/homedir');
+const HOMEDIR_PATH = resolve(
+  './src/test/tmp-mock-environments/backport-e2e/homedir'
+);
 const REPO_OWNER = 'backport-org';
 const REPO_NAME = 'integration-test';
 const BRANCH_NAME = 'backport/7.x/commit-5bf29b7d';
 const AUHTOR = 'sqren';
 
-describe('integration', () => {
+describe('backport e2e', () => {
   afterAll(() => {
     nock.cleanAll();
   });
@@ -389,5 +391,5 @@ async function resetState(accessToken: string) {
     branchName: BRANCH_NAME,
   });
 
-  await del(INTEGRATION_TEST_DATA_PATH);
+  await del(E2E_TEST_DATA_PATH);
 }

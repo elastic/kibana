@@ -1,7 +1,5 @@
-import makeDir from 'make-dir';
 import ora = require('ora');
 import { ValidConfigOptions } from '../options/options';
-import { getRepoOwnerPath } from '../services/env';
 import {
   addRemote,
   cloneRepo,
@@ -19,7 +17,6 @@ export async function maybeSetupRepo(options: ValidConfigOptions) {
     try {
       const spinnerCloneText = 'Cloning repository (one-time operation)';
       spinner.text = `0% ${spinnerCloneText}`;
-      await makeDir(getRepoOwnerPath(options));
 
       await cloneRepo(options, (progress: string) => {
         spinner.text = `${progress}% ${spinnerCloneText}`;

@@ -1,6 +1,5 @@
 import os from 'os';
 import del from 'del';
-import makeDir = require('make-dir');
 import { ValidConfigOptions } from '../options/options';
 import * as childProcess from '../services/child-process-promisified';
 import * as fs from '../services/fs-promisified';
@@ -17,9 +16,16 @@ describe('maybeSetupRepo', () => {
 
   it('should delete repo if an error occurs', async () => {
     expect.assertions(2);
-    (makeDir as any as jest.Mock).mockImplementationOnce(() => {
-      throw new Error('makeDir failed');
-    });
+
+    execSpy = jest
+      .spyOn(childProcess, 'execAsCallback')
+      .mockImplementation((cmd) => {
+        if (cmd.startsWith('git clone')) {
+          throw new Error('Simulated git clone failure');
+        }
+
+        throw new Error('unknown error');
+      });
 
     await expect(
       maybeSetupRepo({
@@ -28,7 +34,7 @@ describe('maybeSetupRepo', () => {
         repoName: 'kibana',
         repoOwner: 'elastic',
       } as ValidConfigOptions)
-    ).rejects.toThrowError('makeDir failed');
+    ).rejects.toThrowError('Simulated git clone failure');
 
     expect(del).toHaveBeenCalledWith(
       '/myHomeDir/.backport/repositories/elastic/kibana'

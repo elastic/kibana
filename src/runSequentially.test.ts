@@ -70,6 +70,7 @@ describe('runSequentially', () => {
       prDescription: 'myPrDescription',
       prFilter: undefined,
       prTitle: 'myPrTitle {targetBranch} {commitMessages}',
+      publishStatusComment: true,
       pullNumber: undefined,
       repoName: 'kibana',
       repoOwner: 'elastic',
@@ -185,9 +186,8 @@ describe('runSequentially', () => {
     expect(rpcExecOriginalMock.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [
-          "git clone https://x-access-token:myAccessToken@github.com/elastic/kibana.git --progress",
+          "git clone https://x-access-token:myAccessToken@github.com/elastic/kibana.git /myHomeDir/.backport/repositories/elastic/kibana --progress",
           Object {
-            "cwd": "/myHomeDir/.backport/repositories/elastic",
             "maxBuffer": 104857600,
           },
           [Function],

@@ -4,6 +4,6 @@
 /dist
 /yarn-error.log
 .DS_Store
-/src/test/integration/mock-environment
+/src/test/tmp-mock-environments
 /src/test/private/accessToken.txt
 /src/services/git-test-temp

@@ -5,7 +5,7 @@ import ora from 'ora';
 import { ValidConfigOptions } from '../options/options';
 import { HandledError } from './HandledError';
 import { execAsCallback, exec } from './child-process-promisified';
-import { getRepoOwnerPath, getRepoPath } from './env';
+import { getRepoPath } from './env';
 import { stat } from './fs-promisified';
 import { getShortSha } from './github/commitFormatters';
 import { logger } from './logger';
@@ -55,8 +55,10 @@ export function cloneRepo(
     };
 
     const execProcess = execAsCallback(
-      `git clone ${getRemoteUrl(options, options.repoOwner)} --progress`,
-      { cwd: getRepoOwnerPath(options), maxBuffer: 100 * 1024 * 1024 },
+      `git clone ${getRemoteUrl(options, options.repoOwner)} ${getRepoPath(
+        options
+      )} --progress`,
+      { maxBuffer: 100 * 1024 * 1024 },
       cb
     );
 

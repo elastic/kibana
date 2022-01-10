@@ -124,8 +124,9 @@ describe('getOptions', () => {
     expect(options).toEqual({
       accessToken: 'abc',
       assignees: [],
-      autoAssign: false,
       authenticatedUsername: 'john.diller',
+      author: 'john.diller',
+      autoAssign: false,
       autoMerge: false,
       autoMergeMethod: 'merge',
       backportBinary: 'backport',
@@ -151,6 +152,7 @@ describe('getOptions', () => {
       multipleBranches: true,
       multipleCommits: false,
       noVerify: true,
+      publishStatusComment: true,
       repoName: 'kibana',
       repoOwner: 'elastic',
       resetAuthor: false,
@@ -160,7 +162,6 @@ describe('getOptions', () => {
       targetBranchChoices: ['7.9', '8.0'],
       targetBranches: [],
       targetPRLabels: [],
-      author: 'john.diller',
       verbose: false,
     });
   });

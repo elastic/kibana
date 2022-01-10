@@ -215,6 +215,22 @@ Config:
 
 _Note: backslashes must be escaped._
 
+#### `dir`
+
+Clone repository into custom directory
+
+Default: `~/.backport/repositories/`
+
+CLI: `--dir=my/custom/tmp/repo/location`
+
+Config:
+
+```json
+{
+  "dir": "/my/custom/tmp/repo/location"
+}
+```
+
 #### `fork`
 
 `true`: Create backport branch in users own fork
@@ -387,6 +403,20 @@ Config:
 ```json
 {
   "prFilter": "label: \"Backport Needed\""
+}
+```
+
+#### `publishStatusComment`
+
+Whether to publish a status comment to Github with the results of the backport or not
+
+Default: `true`
+
+Config:
+
+```json
+{
+  "publishStatusComment": false
 }
 ```
 

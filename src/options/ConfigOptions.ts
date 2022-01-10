@@ -30,6 +30,7 @@ type Options = Partial<{
   cherrypickRef: boolean;
   ci: boolean;
   commitPaths: string[];
+  dir: string;
   details: boolean;
   editor: string;
   fork: boolean;
@@ -44,6 +45,7 @@ type Options = Partial<{
   prDescription: string;
   prFilter: string;
   prTitle: string;
+  publishStatusComment: boolean;
   pullNumber: number;
   repoName: string;
   repoOwner: string;

@@ -1,7 +1,7 @@
 import { getDevAccessToken } from '../../../test/private/getDevAccessToken';
-import { fetchProjectConfig } from './fetchProjectConfig';
+import { fetchRemoteProjectConfig } from './fetchRemoteProjectConfig';
 
-describe('fetchProjectConfig', () => {
+describe('fetchRemoteProjectConfig', () => {
   let devAccessToken: string;
 
   beforeEach(async () => {
@@ -9,7 +9,7 @@ describe('fetchProjectConfig', () => {
   });
 
   it('returns the backport config from "main" branch', async () => {
-    const projectConfig = await fetchProjectConfig({
+    const projectConfig = await fetchRemoteProjectConfig({
       repoOwner: 'backport-org',
       repoName: 'repo-with-project-config',
       accessToken: devAccessToken,
@@ -31,7 +31,7 @@ describe('fetchProjectConfig', () => {
   });
 
   it('returns the backport config from "branch-with-legacy-config" branch', async () => {
-    const projectConfig = await fetchProjectConfig({
+    const projectConfig = await fetchRemoteProjectConfig({
       repoOwner: 'backport-org',
       repoName: 'repo-with-project-config',
       accessToken: devAccessToken,
@@ -46,7 +46,7 @@ describe('fetchProjectConfig', () => {
   });
 
   it('throws an error if config does not exist', async () => {
-    const promise = fetchProjectConfig({
+    const promise = fetchRemoteProjectConfig({
       repoOwner: 'backport-org',
       repoName: 'repo-with-project-config',
       accessToken: devAccessToken,

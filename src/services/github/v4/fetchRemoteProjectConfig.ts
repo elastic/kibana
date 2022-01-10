@@ -2,7 +2,7 @@ import { ConfigFileOptions } from '../../../entrypoint.module';
 import { withConfigMigrations } from '../../../options/config/readConfigFile';
 import { apiRequestV4 } from './apiRequestV4';
 
-export async function fetchProjectConfig(options: {
+export async function fetchRemoteProjectConfig(options: {
   accessToken: string;
   githubApiBaseUrlV4?: string;
   repoName: string;

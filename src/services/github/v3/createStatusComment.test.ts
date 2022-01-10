@@ -1,7 +1,47 @@
+import nock from 'nock';
 import { BackportResponse } from '../../../main';
 import { ValidConfigOptions } from '../../../options/options';
 import { HandledError } from '../../HandledError';
-import { getCommentBody } from './createStatusComment';
+import { createStatusComment, getCommentBody } from './createStatusComment';
+
+describe('createStatusComment', () => {
+  it('redacts accessToken if it is included in the error message', async () => {
+    const accessToken = 'ghp_abcdefg';
+
+    const scope = nock('https://api.github.com')
+      .post('/repos/elastic/kibana/issues/100/comments')
+      .reply(200, 'some response');
+
+    let postedCommentBody = '';
+    scope.on('request', (req, interceptor, body) => {
+      postedCommentBody = JSON.parse(body).body;
+    });
+
+    await createStatusComment({
+      options: {
+        repoName: 'kibana',
+        repoOwner: 'elastic',
+        accessToken,
+        backportBinary: 'node scripts/backport',
+        publishStatusComment: true,
+        githubApiBaseUrlV3: 'https://api.github.com',
+        ci: true,
+      } as ValidConfigOptions,
+      backportResponse: {
+        commits: [{ pullNumber: 100 }],
+        status: 'failure',
+        errorMessage: `Error message containing very secret access token: ${accessToken}.`,
+      } as BackportResponse,
+    });
+
+    expect(postedCommentBody).toContain(
+      'Error message containing very secret access token: <REDACTED>'
+    );
+
+    scope.done();
+    nock.cleanAll();
+  });
+});
 
 describe('getCommentBody', () => {
   describe('when an unknown error occurs', () => {

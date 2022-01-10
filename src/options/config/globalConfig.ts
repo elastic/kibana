@@ -1,27 +1,21 @@
 import makeDir from 'make-dir';
-import { getGlobalConfigPath, getReposPath } from '../../services/env';
+import { getBackportDirPath, getGlobalConfigPath } from '../../services/env';
 import { chmod, writeFile } from '../../services/fs-promisified';
 import { ConfigFileOptions } from '../ConfigOptions';
 import { readConfigFile } from './readConfigFile';
 
-export async function getGlobalConfig(
-  ci?: boolean
-): Promise<ConfigFileOptions | undefined> {
-  // don't attempt to fetch global config in ci environment
-  if (ci) {
-    return;
-  }
-
+export async function getGlobalConfig(): Promise<ConfigFileOptions> {
   await createGlobalConfigAndFolderIfNotExist();
   const globalConfigPath = getGlobalConfigPath();
   return readConfigFile(globalConfigPath);
 }
 
 export async function createGlobalConfigAndFolderIfNotExist() {
-  const reposPath = getReposPath();
+  // create .backport folder
+  await makeDir(getBackportDirPath());
+
   const globalConfigPath = getGlobalConfigPath();
   const configTemplate = getConfigTemplate();
-  await makeDir(reposPath);
   const didCreate = await createGlobalConfigIfNotExist(
     globalConfigPath,
     configTemplate

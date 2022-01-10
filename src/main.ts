@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import ora from 'ora';
 import { ConfigFileOptions } from './options/ConfigOptions';
 import { getOptions, ValidConfigOptions } from './options/options';
 import { runSequentially, Result } from './runSequentially';
@@ -27,11 +28,14 @@ export async function main(
   argv: string[],
   optionsFromModule?: ConfigFileOptions
 ): Promise<BackportResponse> {
+  const spinner = ora().start('Initializing...');
+
   let options: ValidConfigOptions | null = null;
   let commits: Commit[] = [];
 
   try {
     options = await getOptions(argv, optionsFromModule);
+    spinner.stop();
     commits = await getCommits(options);
     const targetBranches = await getTargetBranches(options, commits);
     const results = await runSequentially({ options, commits, targetBranches });
@@ -48,6 +52,7 @@ export async function main(
 
     return backportResponse;
   } catch (e) {
+    spinner.stop();
     const backportResponse: BackportResponse = {
       status: 'failure',
       commits,

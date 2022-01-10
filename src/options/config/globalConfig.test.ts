@@ -31,8 +31,8 @@ describe('config', () => {
       );
     });
 
-    it("should create config folders if it they don't exist", () => {
-      expect(makeDir).toHaveBeenCalledWith('/myHomeDir/.backport/repositories');
+    it("should create .backport folder if it doesn't exist", () => {
+      expect(makeDir).toHaveBeenCalledWith('/myHomeDir/.backport');
     });
 
     it('should load config', () => {

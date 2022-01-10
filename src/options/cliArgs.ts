@@ -76,6 +76,11 @@ export function getOptionsFromCliArgs(
       type: 'string',
     })
 
+    .option('dir', {
+      description: 'Location where the temporary repository will be stored',
+      type: 'string',
+    })
+
     .option('details', {
       description: 'Show details about each commit',
       type: 'boolean',
@@ -171,6 +176,11 @@ export function getOptionsFromCliArgs(
         'Do not append commit message with "(cherry picked from commit...)"',
       type: 'boolean',
       conflicts: ['cherrypickRef'],
+    })
+
+    .option('noStatusComment', {
+      description: "Don't publish status comment to Github",
+      type: 'boolean',
     })
 
     .option('noVerify', {
@@ -331,10 +341,11 @@ export function getOptionsFromCliArgs(
     until,
 
     // negations
-    verify,
-    noVerify,
     noCherrypickRef,
     noFork,
+    noStatusComment,
+    noVerify,
+    verify,
 
     // array types (should be renamed to plural form)
     assignee,
@@ -373,5 +384,6 @@ export function getOptionsFromCliArgs(
     cherrypickRef: noCherrypickRef === true ? false : restOptions.cherrypickRef,
     fork: noFork === true ? false : restOptions.fork,
     noVerify: verify ?? noVerify,
+    publishStatusComment: noStatusComment === true ? false : undefined,
   });
 }

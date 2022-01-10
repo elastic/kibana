@@ -259,7 +259,7 @@ async function waitForCherrypick(
   if (commitsWithoutBackports.length > 0) {
     consoleLog(
       chalk.italic(
-        `Hint: Before fixing the conflicts manually you should consider backporting the following commits to "${targetBranch}":`
+        `Hint: Before fixing the conflicts manually you should consider backporting the following pull requests to "${targetBranch}":`
       )
     );
 

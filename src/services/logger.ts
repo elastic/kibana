@@ -3,6 +3,7 @@ import { isString } from 'lodash';
 import safeJsonStringify from 'safe-json-stringify';
 import winston, { format } from 'winston';
 import { ConfigFileOptions } from '../options/ConfigOptions';
+import { redact } from '../utils/redact';
 import { getLogfilePath } from './env';
 
 const { combine } = format;
@@ -50,10 +51,10 @@ export function updateLogger(options: ConfigFileOptions) {
   }
 }
 
-export function redactAccessToken(str: string) {
+function redactAccessToken(str: string) {
   // `redactAccessToken` might be called before access token is set
   if (accessToken) {
-    return str.replace(new RegExp(accessToken, 'g'), '<REDACTED>');
+    return redact(accessToken, str);
   }
 
   return str;

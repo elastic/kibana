@@ -1,5 +1,4 @@
 import { AxiosError } from 'axios';
-import ora from 'ora';
 import { ConfigFileOptions } from '../../../../options/ConfigOptions';
 import { withConfigMigrations } from '../../../../options/config/readConfigFile';
 import { filterNil } from '../../../../utils/filterEmpty';
@@ -36,7 +35,7 @@ export async function getOptionsFromGithub(options: {
   const { accessToken, githubApiBaseUrlV4, repoName, repoOwner } = options;
 
   let res: GithubConfigOptionsResponse;
-  const spinner = ora().start('Initializing...');
+
   try {
     res = await apiRequestV4<GithubConfigOptionsResponse>({
       githubApiBaseUrlV4,
@@ -45,9 +44,7 @@ export async function getOptionsFromGithub(options: {
       variables: { repoOwner, repoName },
       handleError: false,
     });
-    spinner.stop();
   } catch (e) {
-    spinner.stop();
     const error = e as AxiosError<
       GithubV4Response<GithubConfigOptionsResponse | null>
     >;

@@ -14,7 +14,8 @@ initLogger();
 export { BackportResponse } from './main';
 export { ConfigFileOptions } from './options/ConfigOptions';
 export { Commit } from './services/sourceCommit/parseSourceCommit';
-export { fetchProjectConfig } from './services/github/v4/fetchProjectConfig';
+export { fetchRemoteProjectConfig as getRemoteProjectConfig } from './services/github/v4/fetchRemoteProjectConfig';
+export { getGlobalConfig as getLocalGlobalConfig } from './options/config/globalConfig';
 
 export function backportRun(
   options: ConfigFileOptions,

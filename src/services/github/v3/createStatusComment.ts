@@ -1,7 +1,8 @@
 import { Octokit } from '@octokit/rest';
 import { BackportResponse } from '../../../main';
 import { ValidConfigOptions } from '../../../options/options';
-import { logger, redactAccessToken } from '../../logger';
+import { redact } from '../../../utils/redact';
+import { logger } from '../../logger';
 import { getFirstLine } from '../commitFormatters';
 
 export async function createStatusComment({
@@ -11,7 +12,17 @@ export async function createStatusComment({
   options: ValidConfigOptions;
   backportResponse: BackportResponse;
 }): Promise<void> {
-  const { githubApiBaseUrlV3, repoName, repoOwner, accessToken } = options;
+  const {
+    githubApiBaseUrlV3,
+    repoName,
+    repoOwner,
+    accessToken,
+    publishStatusComment,
+  } = options;
+
+  if (!publishStatusComment) {
+    return;
+  }
 
   try {
     const octokit = new Octokit({
@@ -38,10 +49,11 @@ export async function createStatusComment({
         }
 
         return octokit.issues.createComment({
+          baseUrl: options.githubApiBaseUrlV3,
           owner: repoOwner,
           repo: repoName,
           issue_number: commit.pullNumber,
-          body,
+          body: redact(options.accessToken, body),
         });
       })
     );
@@ -161,8 +173,6 @@ ${backportPRCommand}${supportSection}`;
     ? `${backportPRCommand}`
     : '';
 
-  return redactAccessToken(
-    `${header}\n\n${table}
-${backportPRCommandMessage}${autoMergeMessage}${supportSection}`
-  );
+  return `${header}\n\n${table}
+${backportPRCommandMessage}${autoMergeMessage}${supportSection}`;
 }
