@@ -19,6 +19,7 @@ import { getIdError, transform } from './utils';
 import { buildSiemResponse } from '../utils';
 
 import { readRules } from '../../rules/read_rules';
+import { legacyMigrate } from '../../rules/utils';
 
 export const deleteRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -47,14 +48,20 @@ export const deleteRulesRoute = (
         const { id, rule_id: ruleId } = request.query;
 
         const rulesClient = context.alerting?.getRulesClient();
-
+        const savedObjectsClient = context.core.savedObjects.client;
         if (!rulesClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
         const ruleStatusClient = context.securitySolution.getExecutionLogClient();
         const rule = await readRules({ isRuleRegistryEnabled, rulesClient, id, ruleId });
-        if (!rule) {
+        const migratedRule = await legacyMigrate({
+          rulesClient,
+          savedObjectsClient,
+          rule,
+        });
+
+        if (!migratedRule) {
           const error = getIdError({ id, ruleId });
           return siemResponse.error({
             body: error.message,
@@ -63,15 +70,16 @@ export const deleteRulesRoute = (
         }
 
         const currentStatus = await ruleStatusClient.getCurrentStatus({
-          ruleId: rule.id,
+          ruleId: migratedRule.id,
           spaceId: context.securitySolution.getSpaceId(),
         });
+
         await deleteRules({
-          ruleId: rule.id,
+          ruleId: migratedRule.id,
           rulesClient,
           ruleStatusClient,
         });
-        const transformed = transform(rule, currentStatus, isRuleRegistryEnabled);
+        const transformed = transform(migratedRule, currentStatus, isRuleRegistryEnabled);
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
         } else {
