@@ -193,7 +193,13 @@ export function FormulaEditor({
       if (error) {
         errors = [error];
       } else if (root) {
-        const validationErrors = runASTValidation(root, layer, indexPattern, visibleOperationsMap);
+        const validationErrors = runASTValidation(
+          root,
+          layer,
+          indexPattern,
+          visibleOperationsMap,
+          currentColumn
+        );
         if (validationErrors.length) {
           errors = validationErrors;
         }
@@ -326,7 +332,7 @@ export function FormulaEditor({
     // from a previous edit
     { skipFirstRender: false },
     256,
-    [text]
+    [text, currentColumn.filter]
   );
 
   const errorCount = warnings.filter(
