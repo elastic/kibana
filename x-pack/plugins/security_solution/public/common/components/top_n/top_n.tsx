@@ -116,7 +116,7 @@ const TopNComponent: React.FC<Props> = ({
   );
 
   return (
-    <TopNContainer>
+    <TopNContainer data-test-subj="topN-container">
       <CloseButton
         aria-label={i18n.CLOSE}
         data-test-subj="close"
