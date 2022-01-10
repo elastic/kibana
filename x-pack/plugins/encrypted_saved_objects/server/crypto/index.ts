@@ -8,6 +8,7 @@
 export type {
   EncryptedSavedObjectTypeRegistration,
   SavedObjectDescriptor,
+  AttributeToEncrypt,
 } from './encrypted_saved_objects_service';
 export { EncryptedSavedObjectsService, descriptorToArray } from './encrypted_saved_objects_service';
 export { EncryptionError, EncryptionErrorOperation } from './encryption_error';
