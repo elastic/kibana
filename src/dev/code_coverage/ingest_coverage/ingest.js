@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { Client } = require('@elastic/elasticsearch');
+const { Client, HttpConnection } = require('@elastic/elasticsearch');
 import { RESEARCH_CI_JOB_NAME } from './constants';
 import { whichIndex } from './ingest_helpers';
 import { fromNullable } from './either';
@@ -17,6 +17,7 @@ const client = new Client({
   node,
   maxRetries: 5,
   requestTimeout: 60000,
+  Connection: HttpConnection,
 });
 const isResearchJob = process.env.COVERAGE_JOB_NAME === RESEARCH_CI_JOB_NAME ? true : false;
 
