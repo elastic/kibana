@@ -19,14 +19,8 @@ export type { IIndexPatternFieldList, TypeMeta } from '../common';
 export { IndexPatternField, DataViewField, DataViewType, META_FIELDS } from '../common';
 
 export type { IndexPatternsContract, DataViewsContract } from './data_views';
-export {
-  IndexPatternsService,
-  IndexPattern,
-  DataViewsApiClient,
-  DataViewsService,
-  DataView,
-  DataViewListItem,
-} from './data_views';
+export type { DataViewListItem } from './data_views';
+export { IndexPatternsService, IndexPattern, DataViewsApiClient, DataViewsService, DataView } from './data_views';
 export { UiSettingsPublicToCommon } from './ui_settings_wrapper';
 export { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';
 
