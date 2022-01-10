@@ -8656,10 +8656,10 @@ bach@^1.0.0:
     async-settle "^1.0.0"
     now-and-later "^2.0.0"
 
-backport@^6.1.3:
-  version "6.1.3"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-6.1.3.tgz#48a0a8b8eadf422c475f816199390ef06fad16e0"
-  integrity sha512-LMSXgUOFI9G/Eu4hZDaC7uQwmpedGSxihxVpVcQYwxfdKgMAsYLRwf2R0uQZaWWzTepbpyN9SXvTR5FnacVSFA==
+backport@6.1.5:
+  version "6.1.5"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-6.1.5.tgz#2e8da121cd7ac89a51003f33fdd7febaa0a34202"
+  integrity sha512-fEn50S9P8mU3odGYZXNaj4LMTpio+zB2Vwq92wlu6u/fOQmkGvSxklp78NoAwSi8UBC3+vPa7G5zFp1uFLD6jg==
   dependencies:
     "@octokit/rest" "^18.12.0"
     axios "^0.24.0"
