@@ -35,9 +35,7 @@ const INFERENCE_CONFIG_DOCS = {
   },
 };
 
-const getInferenceConfigHelpText = (
-documentationDocsLink: string,
-): React.ReactNode => {
+function getInferenceConfigHelpText(documentationDocsLink: string): React.ReactNode {
   return (
     <FormattedMessage
       id="xpack.ingestPipelines.pipelineEditor.inferenceForm.inferenceConfigurationHelpText"
@@ -48,10 +46,9 @@ documentationDocsLink: string,
             {INFERENCE_CONFIG_DOCS.documentation.linkLabel}
           </EuiLink>
         ),
-      }}
-    />
+      }} />
   );
-};
+}
 
 const fieldsConfig: FieldsConfig = {
   /* Required fields config */
