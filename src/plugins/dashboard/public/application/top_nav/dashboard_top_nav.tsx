@@ -161,6 +161,7 @@ export function DashboardTopNav({
           overlays: core.overlays,
           SavedObjectFinder: getSavedObjectFinder(core.savedObjects, uiSettings),
           reportUiCounter: usageCollection?.reportUiCounter,
+          theme: core.theme,
         }),
       }));
     }
@@ -171,6 +172,7 @@ export function DashboardTopNav({
     core.notifications,
     core.savedObjects,
     core.overlays,
+    core.theme,
     uiSettings,
     usageCollection,
   ]);
