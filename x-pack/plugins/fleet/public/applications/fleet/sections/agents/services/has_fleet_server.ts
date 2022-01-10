@@ -9,7 +9,7 @@ import type { AgentPolicy, PackagePolicy } from '../../../types';
 import { FLEET_SERVER_PACKAGE } from '../../../constants';
 
 export function policyHasFleetServer(agentPolicy: AgentPolicy) {
-  return agentPolicy.package_policies.some(
+  return agentPolicy.package_policies?.some(
     (ap: string | PackagePolicy) =>
       typeof ap !== 'string' && ap.package?.name === FLEET_SERVER_PACKAGE
   );

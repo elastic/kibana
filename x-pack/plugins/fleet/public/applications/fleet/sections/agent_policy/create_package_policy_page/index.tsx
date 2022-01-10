@@ -392,12 +392,6 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         setFormState('VALID');
         if (resp.error) throw resp.error;
         if (resp.data) {
-          notifications.toasts.addSuccess(
-            i18n.translate('xpack.fleet.createAgentPolicy.successNotificationTitle', {
-              defaultMessage: "Agent policy '{name}' created",
-              values: { name: newAgentPolicy.name },
-            })
-          );
           policyId = resp.data.item.id;
           setAgentPolicy(resp.data.item);
 

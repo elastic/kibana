@@ -44,7 +44,7 @@ import {
   useLink,
 } from '../../../../hooks';
 import type { PLATFORM_TYPE } from '../../../../hooks';
-import type { PackagePolicy } from '../../../../types';
+import type { AgentPolicy, PackagePolicy } from '../../../../types';
 import { FLEET_SERVER_PACKAGE } from '../../../../constants';
 import { FleetServerOnPremRequiredCallout } from '../../components';
 
@@ -330,7 +330,7 @@ const AgentPolicySelectionStep = ({
   policyId?: string;
   setPolicyId: (v: string) => void;
 }): EuiStepProps => {
-  const { data } = useGetAgentPolicies({ full: true });
+  const { data, resendRequest: refreshAgentPolicies } = useGetAgentPolicies({ full: true });
 
   const agentPolicies = useMemo(
     () =>
@@ -364,6 +364,14 @@ const AgentPolicySelectionStep = ({
     [setPolicyId]
   );
 
+  const onAgentPolicyCreated = useCallback(
+    (policy: AgentPolicy) => {
+      setPolicyId(policy.id);
+      refreshAgentPolicies();
+    },
+    [setPolicyId, refreshAgentPolicies]
+  );
+
   if (agentPolicies.length === 0) {
     return {
       title: i18n.translate('xpack.fleet.fleetServerSetup.stepCreateAgentPolicyTitle', {
@@ -372,7 +380,7 @@ const AgentPolicySelectionStep = ({
       status: undefined,
       children: (
         <AgentPolicyCreateInlineForm
-          updateAgentPolicy={(value: string) => setPolicyId(value)}
+          updateAgentPolicy={onAgentPolicyCreated}
           isFleetServerPolicy={true}
         />
       ),

@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { dataTypes } from '../../../../../../common';
 import { agentPolicyFormValidation } from '../components';
 
-import type { NewAgentPolicy } from '../../../types';
+import type { AgentPolicy, NewAgentPolicy } from '../../../types';
 
 import { sendCreateAgentPolicy, useStartServices } from '../../../hooks';
 
@@ -39,7 +39,7 @@ const StyledEuiAccordion = styled(EuiAccordion)`
 `;
 
 interface Props {
-  updateAgentPolicy: (u: string) => void;
+  updateAgentPolicy: (u: AgentPolicy) => void;
   isFleetServerPolicy?: boolean;
 }
 
@@ -86,7 +86,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
             values: { name: newAgentPolicy.name },
           })
         );
-        updateAgentPolicy(resp.data.item.id);
+        updateAgentPolicy(resp.data.item);
       }
     } catch (e) {
       notifications.toasts.addDanger(

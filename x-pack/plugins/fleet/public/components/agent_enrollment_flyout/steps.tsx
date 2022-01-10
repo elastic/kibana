@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -90,14 +90,14 @@ export const AgentPolicySelectionStep = ({
   setSelectedAPIKeyId?: (key?: string) => void;
   excludeFleetServer?: boolean;
 }) => {
+  const [agentPolicyList, setAgentPolicyList] = useState<AgentPolicy[]>(agentPolicies || []);
+
   const regularAgentPolicies = useMemo(() => {
-    return Array.isArray(agentPolicies)
-      ? agentPolicies.filter(
-          (policy) =>
-            policy && !policy.is_managed && (!excludeFleetServer || !policyHasFleetServer(policy))
-        )
-      : [];
-  }, [agentPolicies, excludeFleetServer]);
+    return agentPolicyList.filter(
+      (policy) =>
+        policy && !policy.is_managed && (!excludeFleetServer || !policyHasFleetServer(policy))
+    );
+  }, [agentPolicyList, excludeFleetServer]);
 
   const onAgentPolicyChange = useCallback(
     async (policyId?: string) => {
@@ -106,6 +106,16 @@ export const AgentPolicySelectionStep = ({
       }
     },
     [setSelectedPolicyId]
+  );
+
+  const onAgentPolicyCreated = useCallback(
+    async (policy: AgentPolicy) => {
+      setAgentPolicyList([...agentPolicyList, policy]);
+      if (setSelectedPolicyId) {
+        setSelectedPolicyId(policy.id);
+      }
+    },
+    [agentPolicyList, setAgentPolicyList, setSelectedPolicyId]
   );
 
   return {
@@ -123,7 +133,7 @@ export const AgentPolicySelectionStep = ({
           excludeFleetServer={excludeFleetServer}
         />
       ) : (
-        <AgentPolicyCreateInlineForm updateAgentPolicy={onAgentPolicyChange} />
+        <AgentPolicyCreateInlineForm updateAgentPolicy={onAgentPolicyCreated} />
       ),
   };
 };
