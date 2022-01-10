@@ -11,7 +11,7 @@ import { createCommonUserActionBuilder } from './common';
 import * as i18n from './translations';
 
 const getLabelTitle = (userAction: UserActionResponse<TitleUserAction>) =>
-  `${i18n.CHANGED_FIELD.toLowerCase()} ${i18n.CASE_NAME.toLowerCase()}  ${i18n.TO} "${
+  `${i18n.CHANGED_FIELD.toLowerCase()} ${i18n.CASE_NAME.toLowerCase()} ${i18n.TO} "${
     userAction.payload.title
   }"`;
 

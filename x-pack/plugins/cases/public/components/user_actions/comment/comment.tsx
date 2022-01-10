@@ -330,30 +330,32 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
 }) => ({
   build: () => {
     const commentUserAction = userAction as UserActionResponse<CommentUserAction>;
+    const comment = caseData.comments.find((c) => c.id === commentUserAction.commentId);
+
+    if (comment == null) {
+      return [];
+    }
 
     if (commentUserAction.action === Actions.create) {
-      const comment = caseData.comments.find((c) => c.id === commentUserAction.commentId);
-      if (comment != null) {
-        const commentAction = getCreateCommentUserAction({
-          userAction: commentUserAction,
-          comment,
-          userCanCrud,
-          commentRefs,
-          manageMarkdownEditIds,
-          selectedOutlineCommentId,
-          loadingCommentIds,
-          loadingAlertData,
-          alertData,
-          getRuleDetailsHref,
-          onRuleDetailsClick,
-          onShowAlertDetails,
-          handleManageMarkdownEditId,
-          handleSaveComment,
-          handleManageQuote,
-        });
+      const commentAction = getCreateCommentUserAction({
+        userAction: commentUserAction,
+        comment,
+        userCanCrud,
+        commentRefs,
+        manageMarkdownEditIds,
+        selectedOutlineCommentId,
+        loadingCommentIds,
+        loadingAlertData,
+        alertData,
+        getRuleDetailsHref,
+        onRuleDetailsClick,
+        onShowAlertDetails,
+        handleManageMarkdownEditId,
+        handleSaveComment,
+        handleManageQuote,
+      });
 
-        return commentAction != null ? [commentAction] : [];
-      }
+      return commentAction != null ? [commentAction] : [];
     }
 
     const label = getUpdateLabelTitle();

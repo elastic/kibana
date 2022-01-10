@@ -7,6 +7,7 @@
 
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
+import { MatcherFunction } from '@testing-library/react';
 
 /**
  * Convenience utility to remove text appended to links by EUI
@@ -25,3 +26,16 @@ export const waitForComponentToUpdate = async () =>
   act(async () => {
     return Promise.resolve();
   });
+
+type Query = (f: MatcherFunction) => HTMLElement;
+
+export const createQueryWithMarkup =
+  (query: Query) =>
+  (text: string): HTMLElement =>
+    query((content: string, node: Parameters<MatcherFunction>[1]) => {
+      const hasText = (el: Parameters<MatcherFunction>[1]) => el?.textContent === text;
+      const childrenDontHaveText = Array.from(node?.children ?? []).every(
+        (child) => !hasText(child as HTMLElement)
+      );
+      return hasText(node) && childrenDontHaveText;
+    });

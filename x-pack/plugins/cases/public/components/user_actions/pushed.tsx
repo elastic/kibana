@@ -122,6 +122,11 @@ export const createPushedUserActionBuilder: UserActionBuilder = ({
       pushedUserAction.payload.externalService,
       index
     );
+
+    if (parsedConnectorId === NONE_CONNECTOR_ID) {
+      return [];
+    }
+
     const footers = getFooters({
       userAction: pushedUserAction,
       caseServices,

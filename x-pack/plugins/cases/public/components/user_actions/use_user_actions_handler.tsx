@@ -12,10 +12,25 @@ import { useLensDraftComment } from '../markdown_editor/plugins/lens/use_lens_dr
 import { useUpdateComment } from '../../containers/use_update_comment';
 import { AddCommentRefObject } from '../add_comment';
 import { UserActionMarkdownRefObject } from './markdown_form';
-import { UserActionTreeProps } from './types';
+import { UserActionBuilderArgs, UserActionTreeProps } from './types';
 import { NEW_COMMENT_ID } from './constants';
 
-type UseUserActionsHandlerArgs = Pick<UserActionTreeProps, 'fetchUserActions' | 'updateCase'>;
+export type UseUserActionsHandlerArgs = Pick<
+  UserActionTreeProps,
+  'fetchUserActions' | 'updateCase'
+>;
+
+export type UseUserActionsHandler = Pick<
+  UserActionBuilderArgs,
+  | 'loadingCommentIds'
+  | 'selectedOutlineCommentId'
+  | 'manageMarkdownEditIds'
+  | 'commentRefs'
+  | 'handleManageMarkdownEditId'
+  | 'handleOutlineComment'
+  | 'handleSaveComment'
+  | 'handleManageQuote'
+> & { handleUpdate: (updatedCase: Case) => void };
 
 const isAddCommentRef = (
   ref: AddCommentRefObject | UserActionMarkdownRefObject | null | undefined
@@ -31,7 +46,7 @@ const isAddCommentRef = (
 export const useUserActionsHandler = ({
   fetchUserActions,
   updateCase,
-}: UseUserActionsHandlerArgs) => {
+}: UseUserActionsHandlerArgs): UseUserActionsHandler => {
   const { detailName: caseId, subCaseId } = useCaseViewParams();
   const { clearDraftComment, draftComment, hasIncomingLensState, openLensModal } =
     useLensDraftComment();
