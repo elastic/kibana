@@ -107,9 +107,7 @@ function IntroductionUI({
                 &nbsp;
                 <EuiBadge>Beats</EuiBadge>
               </>
-            ) : (
-              <></>
-            )}
+            ) : null}
           </>
         }
         description={

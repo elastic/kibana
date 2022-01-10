@@ -11,6 +11,7 @@ import { shallowWithIntl } from '@kbn/test/jest';
 
 import { Introduction } from './introduction';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
+import { TutorialsCategory } from '../../../../common/constants';
 
 const basePathMock = httpServiceMock.createBasePath();
 
@@ -69,6 +70,32 @@ describe('props', () => {
         title="Great tutorial"
         basePath={basePathMock}
         isBeta={true}
+      />
+    );
+    expect(component).toMatchSnapshot(); // eslint-disable-line
+  });
+
+  test('Beats badge should show', () => {
+    const component = shallowWithIntl(
+      <Introduction.WrappedComponent
+        description="this is a great tutorial about..."
+        title="Great tutorial"
+        basePath={basePathMock}
+        isBeta={true}
+        category={TutorialsCategory.METRICS}
+      />
+    );
+    expect(component).toMatchSnapshot(); // eslint-disable-line
+  });
+
+  test('Beats badge should not show', () => {
+    const component = shallowWithIntl(
+      <Introduction.WrappedComponent
+        description="this is a great tutorial about..."
+        title="Great tutorial"
+        basePath={basePathMock}
+        isBeta={true}
+        category={TutorialsCategory.SECURITY_SOLUTION}
       />
     );
     expect(component).toMatchSnapshot(); // eslint-disable-line
