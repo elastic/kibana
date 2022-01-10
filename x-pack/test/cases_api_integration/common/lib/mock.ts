@@ -28,6 +28,7 @@ import {
   AssociationType,
   SubCasesFindResponse,
   CommentRequest,
+  CommentRequestActionsType,
 } from '../../../../plugins/cases/common/api';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
@@ -87,6 +88,21 @@ export const postCommentAlertReq: CommentRequestAlertType = {
   index: 'test-index',
   rule: { id: 'test-rule-id', name: 'test-index-id' },
   type: CommentType.alert,
+  owner: 'securitySolutionFixture',
+};
+
+export const postCommentActionsReq: CommentRequestActionsType = {
+  comment: 'comment text',
+  actions: {
+    targets: [
+      {
+        hostname: 'host-name',
+        endpointId: 'endpoint-id',
+      },
+    ],
+    type: 'isolate',
+  },
+  type: CommentType.actions,
   owner: 'securitySolutionFixture',
 };
 
