@@ -13,14 +13,13 @@ export default function ({ getService, getPageObjects }) {
   const pipelinesList = getService('monitoringLogstashPipelines');
   const pipelineViewer = getService('monitoringLogstashPipelineViewer');
 
-  describe('Logstash pipeline viewer mb', () => {
+  describe('Logstash pipeline viewer', () => {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
-      await setup('x-pack/test/functional/es_archives/monitoring/logstash_pipelines_mb', {
+      await setup('x-pack/test/functional/es_archives/monitoring/logstash_pipelines', {
         from: 'Jan 22, 2018 @ 09:10:00.000',
         to: 'Jan 22, 2018 @ 09:41:00.000',
-        useCreate: true,
       });
 
       await overview.closeAlertsModal();
@@ -36,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
       await tearDown();
     });
 
-    it('displays pipelines inputs and ouputs', async () => {
+    it('displays pipelines inputs, filters and ouputs', async () => {
       const { inputs, filters, outputs } = await pipelineViewer.getPipelineDefinition();
 
       expect(inputs).to.eql([{ name: 'generator', metrics: ['mygen01', '62.5 e/s emitted'] }]);
