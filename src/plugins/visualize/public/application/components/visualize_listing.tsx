@@ -17,7 +17,7 @@ import useMount from 'react-use/lib/useMount';
 
 import { useLocation } from 'react-router-dom';
 
-import { customEvents } from '@kbn/custom-events';
+import { useCustomEventContext } from '@kbn/custom-events';
 import { SavedObjectsFindOptionsReference } from '../../../../../core/public';
 import { useKibana, TableListView } from '../../../../kibana_react/public';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../../visualizations/public';
@@ -63,16 +63,9 @@ export const VisualizeListing = () => {
     }
   }, [history, pathname, visualizations]);
 
-  useEffect(() => {
-    customEvents.setCustomEventContext({
-      page: 'list',
-    });
-    return () => {
-      customEvents.setCustomEventContext({
-        page: undefined,
-      });
-    };
-  }, []);
+  useCustomEventContext({
+    page: 'list',
+  });
 
   useMount(() => {
     // Reset editor state for all apps if the visualize listing page is loaded.

@@ -11,7 +11,7 @@ import { isEqual } from 'lodash';
 import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumb } from '@elastic/eui';
-import { customEvents } from '@kbn/custom-events';
+import { useCustomEventContext } from '@kbn/custom-events';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
@@ -113,19 +113,10 @@ export function App({
     setIndicateNoData(true);
   }, [setIndicateNoData]);
 
-  useEffect(() => {
-    customEvents.setCustomEventContext({
-      entId: savedObjectId || 'new',
-      page: 'editor',
-    });
-
-    return () => {
-      customEvents.setCustomEventContext({
-        entId: undefined,
-        page: undefined,
-      });
-    };
-  }, [savedObjectId]);
+  useCustomEventContext({
+    entId: savedObjectId || 'new',
+    page: 'editor',
+  });
 
   useEffect(() => {
     if (indicateNoData) {
@@ -139,7 +130,7 @@ export function App({
         // Temporarily required until the 'by value' paradigm is default.
         dashboardFeatureFlag.allowByValueEmbeddables && isLinkedToOriginatingApp && !savedObjectId
       ),
-    [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, initialInput]
+    [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, initialInput, savedObjectId]
   );
 
   useEffect(() => {

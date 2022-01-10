@@ -9,7 +9,7 @@
 import { History } from 'history';
 import React, { useEffect, useMemo } from 'react';
 
-import { customEvents } from '@kbn/custom-events';
+import { useCustomEventContext } from '@kbn/custom-events';
 import { useDashboardSelector } from './state';
 import { useDashboardAppState } from './hooks';
 import { useKibana } from '../../../kibana_react/public';
@@ -94,18 +94,10 @@ export function DashboardApp({
     ]);
   }, [chrome, dashboardState.title, dashboardState.viewMode, redirectTo, savedDashboardId]);
 
-  useEffect(() => {
-    customEvents.setCustomEventContext({
-      entId: savedDashboardId || 'new',
-      page: 'app',
-    });
-    return () => {
-      customEvents.setCustomEventContext({
-        entId: undefined,
-        page: undefined,
-      });
-    };
-  }, [savedDashboardId]);
+  useCustomEventContext({
+    page: 'app',
+    entId: savedDashboardId || 'new',
+  });
 
   // clear search session when leaving dashboard route
   useEffect(() => {

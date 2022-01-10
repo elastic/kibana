@@ -67,16 +67,9 @@ export const DashboardListing = ({
     dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
   );
 
-  useEffect(() => {
-    customEvents.setCustomEventContext({
-      page: 'list',
-    });
-    return () => {
-      customEvents.setCustomEventContext({
-        page: undefined,
-      });
-    };
-  }, []);
+  useCustomEventContext({
+    page: 'list',
+  });
 
   // Set breadcrumbs useEffect
   useEffect(() => {
@@ -256,11 +249,10 @@ export const DashboardListing = ({
         references = parsed.tagReferences;
       }
 
-      return savedDashboards
-        .find(searchTerm, {
-          size: listingLimit,
-          hasReference: references,
-        });
+      return savedDashboards.find(searchTerm, {
+        size: listingLimit,
+        hasReference: references,
+      });
     },
     [listingLimit, savedDashboards, savedObjectsTagging]
   );

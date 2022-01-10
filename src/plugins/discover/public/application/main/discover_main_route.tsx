@@ -58,12 +58,9 @@ export function DiscoverMainRoute({ services, history }: DiscoverMainProps) {
 
   const { id } = useParams<DiscoverLandingParams>();
 
-  useEffect(() => {
-    customEvents.setCustomEventContext({ entId: id });
-    return () => {
-      customEvents.setCustomEventContext({ entId: undefined });
-    };
-  }, [id]);
+  useCustomEventContext({
+    entId: id || 'new',
+  });
 
   useEffect(() => {
     const savedSearchId = id;
