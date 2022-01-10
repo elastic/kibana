@@ -81,7 +81,7 @@ const verifySnapshotUpgrade = async (
         const regex = /(?<=\[).*?(?=\])/g;
         const matches = snapshotDeprecation.message.match(regex);
 
-        if (matches?.length === 2) {
+        if (matches?.length === 3) {
           // If there is no matching snapshot, we assume the deprecation was resolved successfully
           return matches[0] === snapshotId && matches[1] === jobId ? false : true;
         }
@@ -130,7 +130,11 @@ const getModelSnapshotUpgradeStatus = async (
   }
 };
 
-export function registerMlSnapshotRoutes({ router, lib: { handleEsError } }: RouteDependencies) {
+export function registerMlSnapshotRoutes({
+  router,
+  log,
+  lib: { handleEsError },
+}: RouteDependencies) {
   // Upgrade ML model snapshot
   router.post(
     {
@@ -310,6 +314,9 @@ export function registerMlSnapshotRoutes({ router, lib: { handleEsError } }: Rou
               });
             }
 
+            log.error(
+              'Failed to determine status of the ML model upgrade, upgradeStatus is not defined and snapshot upgrade is not completed.'
+            );
             return response.customError({
               statusCode: upgradeSnapshotError ? upgradeSnapshotError.statusCode : 500,
               body: {
