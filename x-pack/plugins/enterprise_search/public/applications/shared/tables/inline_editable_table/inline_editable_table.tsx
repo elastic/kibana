@@ -124,7 +124,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
           {!!title && (
-            <EuiTitle size="xs" data-test-subj="title">
+            <EuiTitle size="xs" data-test-subj="inlineEditableTableTitle">
               <h3>{title}</h3>
             </EuiTitle>
           )}
@@ -132,7 +132,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
             <>
               <EuiSpacer size="s" />
               <EuiText
-                data-test-subj="description"
+                data-test-subj="inlineEditableTableDescription"
                 color="subdued"
                 size="s"
                 className="inlineEditableTable__descriptionText"
@@ -149,7 +149,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
             disabled={isEditing}
             onClick={editNewItem}
             color="success"
-            data-test-subj="actionButton"
+            data-test-subj="inlineEditableTableActionButton"
           >
             {addButtonText ||
               i18n.translate('xpack.enterpriseSearch.inlineEditableTable.newRowButtonLabel', {
