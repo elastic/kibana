@@ -27,14 +27,14 @@ describe('InlineEditableTableLogic', () => {
   const { mount } = new LogicMounter(InlineEditableTableLogic);
 
   const DEFAULT_VALUES = {
-    editingItemId: null,
     editingItemValue: null,
     fieldErrors: {},
-    isEditing: false,
     rowErrors: [],
   };
 
   const SELECTORS = {
+    editingItemId: null,
+    isEditing: false,
     doesEditingItemValueContainEmptyProperty: false,
     isEditingUnsavedItem: false,
   };
@@ -102,8 +102,6 @@ describe('InlineEditableTableLogic', () => {
     describe('editNewItem', () => {
       it('updates state to reflect a new item being edited', () => {
         const logic = mountLogic({
-          isEditing: false,
-          editingItemId: 1,
           editingItemValue: {
             id: 1,
             foo: 'some foo',
@@ -113,8 +111,6 @@ describe('InlineEditableTableLogic', () => {
         logic.actions.editNewItem();
         expect(logicValuesWithoutSelectors(logic)).toEqual({
           ...DEFAULT_VALUES,
-          isEditing: true,
-          editingItemId: null,
           editingItemValue: {
             // Note that new values do not yet have an id
             foo: '',
@@ -127,8 +123,6 @@ describe('InlineEditableTableLogic', () => {
     describe('editExistingItem', () => {
       it('updates state to reflect the item that was passed being edited', () => {
         const logic = mountLogic({
-          isEditing: false,
-          editingItemId: 1,
           editingItemValue: {
             id: 1,
             foo: '',
@@ -142,8 +136,6 @@ describe('InlineEditableTableLogic', () => {
         });
         expect(logicValuesWithoutSelectors(logic)).toEqual({
           ...DEFAULT_VALUES,
-          isEditing: true,
-          editingItemId: 2,
           editingItemValue: {
             id: 2,
             foo: 'existing foo',
@@ -208,11 +200,66 @@ describe('InlineEditableTableLogic', () => {
   });
 
   describe('selectors', () => {
+    describe('isEditing', () => {
+      it('is true when the user is currently editing an item', () => {
+        const logic = mountLogic({
+          editingItemValue: {
+            id: null,
+            foo: '',
+          },
+        });
+
+        expect(logic.values.isEditing).toBe(true);
+      });
+
+      it('is false when the user is NOT currently editing an item', () => {
+        const logic = mountLogic({
+          editingItemValue: null,
+        });
+
+        expect(logic.values.isEditing).toBe(false);
+      });
+    });
+
+    describe('editingItemId', () => {
+      it('equals the id of the currently edited item', () => {
+        const logic = mountLogic({
+          editingItemValue: {
+            id: 1,
+            foo: '',
+          },
+        });
+
+        expect(logic.values.editingItemId).toBe(1);
+      });
+
+      it('equals null if the currently edited item is a new unsaved item', () => {
+        const logic = mountLogic({
+          editingItemValue: {
+            id: null,
+            foo: '',
+          },
+        });
+
+        expect(logic.values.editingItemId).toBe(null);
+      });
+
+      it('is null when the user is NOT currently editing an item', () => {
+        const logic = mountLogic({
+          editingItemValue: null,
+        });
+
+        expect(logic.values.editingItemId).toBe(null);
+      });
+    });
+
     describe('isEditingUnsavedItem', () => {
       it('is true when the user is currently editing an unsaved item', () => {
         const logic = mountLogic({
-          isEditing: true,
-          editingItemId: null,
+          editingItemValue: {
+            id: null,
+            foo: '',
+          },
         });
 
         expect(logic.values.isEditingUnsavedItem).toBe(true);
