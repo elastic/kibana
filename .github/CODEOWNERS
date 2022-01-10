@@ -11,7 +11,7 @@
 /packages/kbn-docs-utils/ @elastic/kibana-tech-leads @elastic/kibana-operations
 
 # Virtual teams
-/x-pack/plugins/rule_registry/ @elastic/rac
+/x-pack/plugins/rule_registry/ @elastic/rac @elastic/response-ops
 
 # Data Discovery
 /src/plugins/discover/ @elastic/kibana-data-discovery
