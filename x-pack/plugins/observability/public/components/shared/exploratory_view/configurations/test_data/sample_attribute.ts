@@ -155,7 +155,8 @@ export const sampleAttribute = {
     filters: [],
     query: {
       language: 'kuery',
-      query: 'transaction.duration.us < 60000000',
+      query:
+        'transaction.type: page-load and processor.event: transaction and transaction.type : * and transaction.duration.us < 60000000',
     },
     visualization: {
       axisTitlesVisibilitySettings: {
