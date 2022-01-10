@@ -10,11 +10,19 @@ import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/
 import { ConfigSchema } from './config';
 import { EncryptedSavedObjectsPlugin } from './plugin';
 
-export type { EncryptedSavedObjectTypeRegistration } from './crypto';
-export { EncryptionError } from './crypto';
+export type { EncryptedSavedObjectTypeRegistration, AttributeToEncrypt } from './crypto';
+export { EncryptionError, EncryptionErrorOperation } from './crypto';
 export type { EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart } from './plugin';
-export type { EncryptedSavedObjectsClient } from './saved_objects';
-export type { IsMigrationNeededPredicate } from './create_migration';
+export type {
+  EncryptedSavedObjectsClient,
+  EncryptedSavedObjectsClientOptions,
+  ClientInstanciator,
+} from './saved_objects';
+export type {
+  IsMigrationNeededPredicate,
+  CreateEncryptedSavedObjectsMigrationFn,
+  CreateEncryptedSavedObjectsMigrationFnOpts,
+} from './create_migration';
 
 export const config: PluginConfigDescriptor = {
   schema: ConfigSchema,
