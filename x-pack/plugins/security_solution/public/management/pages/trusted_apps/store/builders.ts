@@ -58,7 +58,6 @@ export const initialTrustedAppsPageState = (): TrustedAppsListPageState => ({
     view_type: 'grid',
     filter: '',
     included_policies: '',
-    excluded_policies: '',
   },
   active: false,
   forceRefresh: false,

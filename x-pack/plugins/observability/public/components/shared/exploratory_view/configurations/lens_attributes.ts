@@ -635,11 +635,17 @@ export class LensAttributes {
       time: { from },
     } = layerConfig;
 
-    const inDays = Math.abs(parseRelativeDate(mainFrom).diff(parseRelativeDate(from), 'days'));
+    const parsedMainFrom = parseRelativeDate(mainFrom);
+    const parsedFrom = parseRelativeDate(from);
+
+    const inDays =
+      parsedMainFrom && parsedFrom ? Math.abs(parsedMainFrom.diff(parsedFrom, 'days')) : 0;
     if (inDays > 1) {
       return inDays + 'd';
     }
-    const inHours = Math.abs(parseRelativeDate(mainFrom).diff(parseRelativeDate(from), 'hours'));
+
+    const inHours =
+      parsedMainFrom && parsedFrom ? Math.abs(parsedMainFrom?.diff(parsedFrom, 'hours')) : 0;
     if (inHours === 0) {
       return null;
     }
