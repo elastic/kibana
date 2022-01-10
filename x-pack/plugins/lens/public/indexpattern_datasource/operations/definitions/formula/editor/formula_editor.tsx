@@ -45,7 +45,7 @@ import { trackUiEvent } from '../../../../../lens_ui_telemetry';
 
 import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
-import { generateFormulaLayer, expandFormulaColumn } from '../parse';
+import { upsertFormulaColumn } from '../parse';
 import { filterByVisibleOperation } from '../util';
 import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
 
@@ -151,20 +151,23 @@ export function FormulaEditor({
     setIsCloseable(true);
     // If the text is not synced, update the column.
     if (text !== currentColumn.params.formula) {
-      updateLayer((prevLayer) =>
-        generateFormulaLayer({
-          id: columnId,
-          formula: text || '',
-          layer: {
-            ...prevLayer,
-            columns: {
-              ...prevLayer.columns,
-              [columnId]: { ...currentColumn },
+      updateLayer(
+        (prevLayer) =>
+          upsertFormulaColumn(
+            columnId,
+            {
+              ...currentColumn,
+              params: {
+                ...currentColumn.params,
+                formula: text || '',
+              },
             },
-          },
-          indexPattern,
-          operations: operationDefinitionMap,
-        })
+            prevLayer,
+            {
+              indexPattern,
+              operations: operationDefinitionMap,
+            }
+          ).layer
       );
     }
   });
@@ -179,19 +182,21 @@ export function FormulaEditor({
         if (currentColumn.params.formula) {
           // Only submit if valid
           updateLayer(
-            generateFormulaLayer({
-              id: columnId,
-              formula: text || '',
-              layer: {
-                ...layer,
-                columns: {
-                  ...layer.columns,
-                  [columnId]: { ...currentColumn },
+            upsertFormulaColumn(
+              columnId,
+              {
+                ...currentColumn,
+                params: {
+                  ...currentColumn.params,
+                  formula: text || '',
                 },
               },
-              indexPattern,
-              operations: operationDefinitionMap,
-            })
+              layer,
+              {
+                indexPattern,
+                operations: operationDefinitionMap,
+              }
+            ).layer
           );
         }
 
@@ -220,19 +225,21 @@ export function FormulaEditor({
           // If the formula is already broken, show the latest error message in the workspace
           if (currentColumn.params.formula !== text) {
             updateLayer(
-              generateFormulaLayer({
-                id: columnId,
-                formula: text || '',
-                layer: {
-                  ...layer,
-                  columns: {
-                    ...layer.columns,
-                    [columnId]: { ...currentColumn },
+              upsertFormulaColumn(
+                columnId,
+                {
+                  ...currentColumn,
+                  params: {
+                    ...currentColumn.params,
+                    formula: text || '',
                   },
                 },
-                indexPattern,
-                operations: operationDefinitionMap,
-              })
+                layer,
+                {
+                  indexPattern,
+                  operations: operationDefinitionMap,
+                }
+              ).layer
             );
           }
         }
@@ -281,28 +288,23 @@ export function FormulaEditor({
 
         // Only submit if valid
         const {
-          columnOrder,
-          columns,
+          layer: newLayer,
           meta: { locations },
-        } = expandFormulaColumn({
-          id: columnId,
-          formula: text || '',
-          layer: {
-            ...layer,
-            columns: {
-              ...layer.columns,
-              [columnId]: currentColumn,
+        } = upsertFormulaColumn(
+          columnId,
+          {
+            ...currentColumn,
+            params: {
+              ...currentColumn.params,
+              formula: text || '',
             },
           },
-          indexPattern,
-          operations: operationDefinitionMap,
-        });
-
-        const newLayer = {
-          ...layer,
-          columnOrder,
-          columns,
-        };
+          layer,
+          {
+            indexPattern,
+            operations: operationDefinitionMap,
+          }
+        );
 
         updateLayer(newLayer);
 

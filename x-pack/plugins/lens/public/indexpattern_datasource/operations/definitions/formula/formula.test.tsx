@@ -8,7 +8,7 @@
 import { createMockedIndexPattern } from '../../../mocks';
 import { formulaOperation, GenericOperationDefinition, GenericIndexPatternColumn } from '../index';
 import { FormulaIndexPatternColumn } from './formula';
-import { expandFormulaColumn, generateFormulaLayer } from './parse';
+import { upsertFormulaColumn } from './parse';
 import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../../types';
 import { tinymathFunctions } from './util';
 import { TermsIndexPatternColumn } from '../terms';
@@ -417,19 +417,21 @@ describe('formula', () => {
 
     function testIsBrokenFormula(formula: string) {
       expect(
-        generateFormulaLayer({
-          formula,
-          layer: {
-            ...layer,
-            columns: {
-              ...layer.columns,
-              col1: currentColumn,
+        upsertFormulaColumn(
+          'col1',
+          {
+            ...currentColumn,
+            params: {
+              ...currentColumn.params,
+              formula,
             },
           },
-          id: 'col1',
-          indexPattern,
-          operations: operationDefinitionMap,
-        })
+          layer,
+          {
+            indexPattern,
+            operations: operationDefinitionMap,
+          }
+        ).layer
       ).toEqual({
         ...layer,
         columns: {
@@ -462,19 +464,21 @@ describe('formula', () => {
 
     it('should mutate the layer with new columns for valid formula expressions', () => {
       expect(
-        generateFormulaLayer({
-          formula: 'average(bytes)',
-          layer: {
-            ...layer,
-            columns: {
-              ...layer.columns,
-              col1: currentColumn,
+        upsertFormulaColumn(
+          'col1',
+          {
+            ...currentColumn,
+            params: {
+              ...currentColumn.params,
+              formula: 'average(bytes)',
             },
           },
-          id: 'col1',
-          indexPattern,
-          operations: operationDefinitionMap,
-        })
+          layer,
+          {
+            indexPattern,
+            operations: operationDefinitionMap,
+          }
+        ).layer
       ).toEqual({
         ...layer,
         columnOrder: ['col1X0', 'col1'],
@@ -505,19 +509,21 @@ describe('formula', () => {
 
     it('should create a valid formula expression for numeric literals', () => {
       expect(
-        generateFormulaLayer({
-          formula: '0',
-          layer: {
-            ...layer,
-            columns: {
-              ...layer.columns,
-              col1: currentColumn,
+        upsertFormulaColumn(
+          'col1',
+          {
+            ...currentColumn,
+            params: {
+              ...currentColumn.params,
+              formula: '0',
             },
           },
-          id: 'col1',
-          indexPattern,
-          operations: operationDefinitionMap,
-        })
+          layer,
+          {
+            indexPattern,
+            operations: operationDefinitionMap,
+          }
+        ).layer
       ).toEqual({
         ...layer,
         columnOrder: ['col1X0', 'col1'],
@@ -655,12 +661,20 @@ describe('formula', () => {
 
     it('returns the locations of each function', () => {
       expect(
-        expandFormulaColumn({
-          formula: 'moving_average(average(bytes), window=7) + count()',
+        upsertFormulaColumn(
+          'col1',
+          {
+            ...currentColumn,
+            params: {
+              ...currentColumn.params,
+              formula: 'moving_average(average(bytes), window=7) + count()',
+            },
+          },
           layer,
-          id: 'col1',
-          indexPattern,
-        }).meta.locations
+          {
+            indexPattern,
+          }
+        ).meta.locations
       ).toEqual({
         col1X0: { min: 15, max: 29 },
         col1X1: { min: 0, max: 41 },

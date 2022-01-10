@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OperationDefinition } from '../index';
+import { BaseIndexPatternColumn, OperationDefinition } from '../index';
 import { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPattern } from '../../../types';
 import { runASTValidation, tryToParse } from './validation';
 import { WrappedFormulaEditor } from './editor';
-import { generateFormulaLayer } from './parse';
+import { upsertFormulaColumn } from './parse';
 import { generateFormula } from './generate';
 import { filterByVisibleOperation } from './util';
 import { getManagedColumnsFrom } from '../../layer_helpers';
@@ -34,6 +34,12 @@ export interface FormulaIndexPatternColumn extends ReferenceBasedIndexPatternCol
       };
     };
   };
+}
+
+export function isFormulaIndexPatternColumn(
+  column: BaseIndexPatternColumn
+): column is FormulaIndexPatternColumn {
+  return 'formula' in (column.params! || {});
 }
 
 export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'managedReference'> =
@@ -142,19 +148,10 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
     createCopy(layer, sourceId, targetId, indexPattern, operationDefinitionMap) {
       const currentColumn = layer.columns[sourceId] as FormulaIndexPatternColumn;
 
-      return generateFormulaLayer({
-        id: targetId,
-        formula: currentColumn.params.formula ?? '',
-        layer: {
-          ...layer,
-          columns: {
-            ...layer.columns,
-            [targetId]: { ...currentColumn },
-          },
-        },
+      return upsertFormulaColumn(targetId, currentColumn, layer, {
         indexPattern,
         operations: operationDefinitionMap,
-      });
+      }).layer;
     },
 
     paramEditor: WrappedFormulaEditor,

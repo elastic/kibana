@@ -39,7 +39,7 @@ import { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_
 import type {
   IndexPatternDatasource as IndexPatternDatasourceType,
   IndexPatternDatasourceSetupPlugins,
-  ExpandFormulaColumnFn,
+  IndexPatternLayer,
 } from './indexpattern_datasource';
 import type {
   XyVisualization as XyVisualizationType,
@@ -163,9 +163,8 @@ export interface LensPublicStart {
   getXyVisTypes: () => Promise<VisualizationType[]>;
 
   formula: {
-    expandFormulaColumn: (
-      params: Parameters<ExpandFormulaColumnFn>[0]
-    ) => Promise<ReturnType<ExpandFormulaColumnFn>>;
+    // @todo:
+    upsertFormulaColumn: (id: string, column: string, params: any) => any;
   };
 }
 
@@ -394,9 +393,10 @@ export class LensPlugin {
         return visualizationTypes;
       },
       formula: {
-        expandFormulaColumn: async (params) => {
-          const { expandFormulaColumn } = await import('./indexpattern_datasource');
-          return expandFormulaColumn(params);
+        // @todo:
+        upsertFormulaColumn: async (id) => {
+          // const { upsertFormulaColumn } = await import('./indexpattern_datasource');
+          return 1;
         },
       },
     };

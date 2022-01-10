@@ -24,7 +24,7 @@ import {
   getOperationParams,
   groupArgsByType,
 } from './util';
-import { FormulaIndexPatternColumn } from './formula';
+import { FormulaIndexPatternColumn, isFormulaIndexPatternColumn } from './formula';
 import { getColumnOrder } from '../../layer_helpers';
 
 /** @internal **/
@@ -202,56 +202,20 @@ const getEmptyColumnsWithFormulaMeta = (): ColumnsWithFormulaMeta => ({
   },
 });
 
-/** @public **/
-export function expandFormulaColumn(params: {
-  id: string;
-  formula: string;
-  layer: IndexPatternLayer;
-  indexPattern: IndexPattern;
-  operations?: Record<string, GenericOperationDefinition>;
-}) {
-  const { columns, meta } = Object.entries(params.layer.columns).reduce<ColumnsWithFormulaMeta>(
-    (acc, [currentColumnId, currentColumn]) => {
-      if (currentColumnId.startsWith(params.id)) {
-        if (currentColumnId === params.id) {
-          const formulaColumns = generateFormulaColumns({
-            ...params,
-            column: currentColumn,
-          });
-
-          acc.columns = { ...acc.columns, ...formulaColumns.columns };
-          acc.meta = { ...acc.meta, ...formulaColumns.meta };
-        }
-      } else {
-        acc.columns[currentColumnId] = { ...currentColumn };
-      }
-      return acc;
-    },
-    getEmptyColumnsWithFormulaMeta()
-  );
-
-  return {
-    columns,
-    meta,
-    columnOrder: getColumnOrder({
-      ...params.layer,
-      columns,
-    }),
-  };
-}
-
-/** @internal **/
-function generateFormulaColumns({
-  formula,
-  layer,
-  indexPattern,
-  id,
-  column,
-  operations = operationDefinitionMap,
-}: Parameters<typeof expandFormulaColumn>[0] & {
-  column: GenericIndexPatternColumn;
-}): ColumnsWithFormulaMeta {
+function generateFormulaColumns(
+  id: string,
+  column: FormulaIndexPatternColumn,
+  layer: IndexPatternLayer,
+  {
+    indexPattern,
+    operations = operationDefinitionMap,
+  }: {
+    indexPattern: IndexPattern;
+    operations?: Record<string, GenericOperationDefinition>;
+  }
+): ColumnsWithFormulaMeta {
   const { columns, meta } = getEmptyColumnsWithFormulaMeta();
+  const formula = column.params.formula || '';
 
   const { extracted, isValid } = parseAndExtract(
     formula,
@@ -292,8 +256,57 @@ function generateFormulaColumns({
   };
 }
 
-/** @internal **/
-export function generateFormulaLayer(params: Parameters<typeof expandFormulaColumn>[0]) {
-  const { columns, columnOrder } = expandFormulaColumn(params);
-  return { ...params.layer, columns, columnOrder };
+/** @public **/
+export function upsertFormulaColumn(
+  id: string,
+  column: FormulaIndexPatternColumn,
+  baseLayer: IndexPatternLayer,
+  params: {
+    indexPattern: IndexPattern;
+    operations?: Record<string, GenericOperationDefinition>;
+  }
+) {
+  const layer = {
+    ...baseLayer,
+    columns: {
+      ...baseLayer.columns,
+      [id]: {
+        ...column,
+      },
+    },
+  };
+
+  const { columns, meta } = Object.entries(layer.columns).reduce<ColumnsWithFormulaMeta>(
+    (acc, [currentColumnId, currentColumn]) => {
+      if (currentColumnId.startsWith(id)) {
+        if (currentColumnId === id && isFormulaIndexPatternColumn(currentColumn)) {
+          const formulaColumns = generateFormulaColumns(
+            currentColumnId,
+            currentColumn,
+            layer,
+            params
+          );
+
+          acc.columns = { ...acc.columns, ...formulaColumns.columns };
+          acc.meta = { ...acc.meta, ...formulaColumns.meta };
+        }
+      } else {
+        acc.columns[currentColumnId] = { ...currentColumn };
+      }
+      return acc;
+    },
+    getEmptyColumnsWithFormulaMeta()
+  );
+
+  return {
+    layer: {
+      ...layer,
+      columns,
+      columnOrder: getColumnOrder({
+        ...layer,
+        columns,
+      }),
+    },
+    meta,
+  };
 }

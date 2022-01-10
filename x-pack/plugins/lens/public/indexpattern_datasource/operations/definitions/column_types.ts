@@ -17,6 +17,7 @@ export interface BaseIndexPatternColumn extends Operation {
   timeScale?: TimeScaleUnit;
   filter?: Query;
   timeShift?: string;
+  params?: Record<string, unknown>;
 }
 
 // Formatting can optionally be added to any column
@@ -36,9 +37,7 @@ export interface FieldBasedIndexPatternColumn extends BaseIndexPatternColumn {
   sourceField: string;
 }
 
-export interface ReferenceBasedIndexPatternColumn
-  extends BaseIndexPatternColumn,
-    FormattedIndexPatternColumn {
+export interface ReferenceBasedIndexPatternColumn extends FormattedIndexPatternColumn {
   references: string[];
 }
 
