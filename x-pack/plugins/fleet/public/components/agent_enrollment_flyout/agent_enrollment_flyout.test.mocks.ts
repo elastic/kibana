@@ -12,6 +12,7 @@ jest.mock('../../hooks/use_request', () => {
     useGetSettings: jest.fn(),
     sendGetFleetStatus: jest.fn(),
     sendGetOneAgentPolicy: jest.fn(),
+    useGetAgents: jest.fn(),
   };
 });
 
