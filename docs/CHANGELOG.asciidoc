@@ -86,7 +86,7 @@ When you upgrade to 8.0.0, you are unable to create and view the APM NodeJS and 
 [%collapsible]
 ====
 *Details* +
-Unknown saved objects types now cause {kib} migrations to fail. For more information, refer to {kibana-pull}118300[#118300].
+Unknown saved object types now cause {kib} migrations to fail. For more information, refer to {kibana-issue}107678[#107678].
 
 *Impact* +
 To complete the migration, re enable plugins or delete documents from the index in the previous version.
@@ -94,7 +94,7 @@ To complete the migration, re enable plugins or delete documents from the index 
 
 [discrete]
 [[breaking-116821]]
-.Removes deprecated config fields from Logs and Metrics APIs and SavedObjects
+.Removes deprecated config fields from Logs and Metrics APIs and saved objects
 [%collapsible]
 ====
 *Details* +
