@@ -57,7 +57,11 @@ function pageStateReducer(state: MlPageUIState, action: PageAction): MlPageUISta
  */
 export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps, children }) => {
   const navigateToPath = useNavigateToPath();
-  const { services } = useMlKibana();
+  const {
+    services: {
+      http: { basePath },
+    },
+  } = useMlKibana();
 
   const [pageState, dispatch] = useReducer<typeof pageStateReducer>(pageStateReducer, {});
 
@@ -67,10 +71,6 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
     },
     [dispatch]
   );
-
-  const {
-    http: { basePath },
-  } = services;
 
   const routeList = useMemo(
     () => Object.values(routes).map((routeFactory) => routeFactory(navigateToPath, basePath.get())),
