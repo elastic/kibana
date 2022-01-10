@@ -31,12 +31,13 @@ export function MonitoringLogstashPipelineViewerProvider({ getService }) {
         );
       };
 
-      const [inputs, outputs] = await Promise.all([
+      const [inputs, filters, outputs] = await Promise.all([
         testSubjects.find(SUBJ_PIPELINE_SECTION_PREFIX + 'Inputs').then(getSectionItems),
+        testSubjects.find(SUBJ_PIPELINE_SECTION_PREFIX + 'Filters').then(getSectionItems),
         testSubjects.find(SUBJ_PIPELINE_SECTION_PREFIX + 'Outputs').then(getSectionItems),
       ]);
 
-      return { inputs, outputs };
+      return { inputs, filters, outputs };
     }
   })();
 }
