@@ -38,8 +38,6 @@ export const METADATA_UNITED_INDEX = '.metrics-endpoint.metadata_united_default'
 
 export const policyIndexPattern = 'metrics-endpoint.policy-*';
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
-export const LIMITED_CONCURRENCY_ENDPOINT_ROUTE_TAG = 'endpoint:limited-concurrency';
-export const LIMITED_CONCURRENCY_ENDPOINT_COUNT = 100;
 
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
 export const HOST_METADATA_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;
