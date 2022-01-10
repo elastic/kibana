@@ -25,7 +25,6 @@ export const STANDALONE_RUN_INSTRUCTIONS_WINDOWS = '.\\elastic-agent.exe install
  Package rules:
 |               | autoUpdatePackages |
 |---------------|:------------------:|
-| Auto-installs |          ❌         |
 | Auto-updates  |          ✔️         |
 
 
@@ -37,9 +36,6 @@ in their custom policy editor implementations.
 */
 
 export const autoUpdatePackages = [
-  FLEET_SYSTEM_PACKAGE,
-  FLEET_ELASTIC_AGENT_PACKAGE,
-  FLEET_SERVER_PACKAGE,
   FLEET_ENDPOINT_PACKAGE,
   FLEET_APM_PACKAGE,
   FLEET_SYNTHETICS_PACKAGE,

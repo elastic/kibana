@@ -237,7 +237,7 @@ describe('agent policy', () => {
     });
   });
 
-  describe('createFleetServerPolicy', () => {
+  describe('deployPolicy', () => {
     beforeEach(() => {
       mockedGetFullAgentPolicy.mockReset();
     });
@@ -254,7 +254,7 @@ describe('agent policy', () => {
         type: 'mocked',
         references: [],
       });
-      await agentPolicyService.createFleetServerPolicy(soClient, 'policy123');
+      await agentPolicyService.deployPolicy(soClient, 'policy123');
 
       expect(esClient.create).not.toBeCalled();
     });
@@ -280,7 +280,7 @@ describe('agent policy', () => {
         type: 'mocked',
         references: [],
       });
-      await agentPolicyService.createFleetServerPolicy(soClient, 'policy123');
+      await agentPolicyService.deployPolicy(soClient, 'policy123');
 
       expect(esClient.create).toBeCalledWith(
         expect.objectContaining({

@@ -16,8 +16,6 @@ import type {
   SavedObjectsBulkUpdateResponse,
 } from 'src/core/server';
 
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-
 import type { AuthenticatedUser } from '../../../security/server';
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -149,26 +147,17 @@ class AgentPolicyService {
     policy: AgentPolicy;
   }> {
     // For preconfigured policies with a specified ID
-    try {
-      const agentPolicy = await soClient.get<AgentPolicySOAttributes>(
-        AGENT_POLICY_SAVED_OBJECT_TYPE,
-        id
-      );
+    const agentPolicy = await this.get(soClient, id);
+    if (!agentPolicy) {
       return {
-        created: false,
-        policy: {
-          id: agentPolicy.id,
-          ...agentPolicy.attributes,
-        },
+        created: true,
+        policy: await this.create(soClient, esClient, newAgentPolicy, { id }),
       };
-    } catch (e) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
-        return {
-          created: true,
-          policy: await this.create(soClient, esClient, newAgentPolicy, { id }),
-        };
-      } else throw e;
     }
+    return {
+      created: false,
+      policy: agentPolicy,
+    };
   }
 
   public async create(
@@ -401,7 +390,7 @@ class AgentPolicyService {
       throw new Error('Copied agent policy not found');
     }
 
-    await this.createFleetServerPolicy(soClient, newAgentPolicy.id);
+    await this.deployPolicy(soClient, newAgentPolicy.id);
 
     return updatedAgentPolicy;
   }
@@ -606,10 +595,7 @@ class AgentPolicyService {
     };
   }
 
-  public async createFleetServerPolicy(
-    soClient: SavedObjectsClientContract,
-    agentPolicyId: string
-  ) {
+  public async deployPolicy(soClient: SavedObjectsClientContract, agentPolicyId: string) {
     // Use internal ES client so we have permissions to write to .fleet* indices
     const esClient = appContextService.getInternalUserESClient();
     const defaultOutputId = await outputService.getDefaultDataOutputId(soClient);

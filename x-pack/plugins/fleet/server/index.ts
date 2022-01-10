@@ -53,6 +53,9 @@ export const config: PluginConfigDescriptor = {
     unused('agents.pollingRequestTimeout', { level: 'critical' }),
     unused('agents.tlsCheckDisabled', { level: 'critical' }),
     unused('agents.fleetServerEnabled', { level: 'critical' }),
+    // Removed default policies
+    unused('agentPolicies.is_default', { level: 'critical' }),
+    unused('agentPolicies.is_default_fleet_server', { level: 'critical' }),
     // Renaming elasticsearch.host => elasticsearch.hosts
     (fullConfig, fromPath, addDeprecation) => {
       const oldValue = fullConfig?.xpack?.fleet?.agents?.elasticsearch?.host;
