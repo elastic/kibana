@@ -81,7 +81,7 @@ const Cards = ({ data }: { data: Card[] }) => (
         <EuiCard textAlign="left" title={card.title}>
           <EuiDescriptionList
             compressed={false}
-            type="column"
+            type="row"
             listItems={card.listItems.map((v) => ({ title: v[0], description: v[1] }))}
           />
         </EuiCard>

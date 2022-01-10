@@ -8,6 +8,7 @@ import React, { useState, useMemo } from 'react';
 import {
   Criteria,
   EuiLink,
+  EuiPanel,
   EuiTableFieldDataColumnType,
   EuiBadgeGroup,
   EuiFlexGroup,
@@ -31,7 +32,7 @@ type FindingsTableProps = FindingsFetchState & BaseFindingsTableProps;
 
 export const FindingsTable = ({ data, status, error, selectItem }: FindingsTableProps) => {
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(25);
+  const [pageSize, setPageSize] = useState(10);
 
   const getCellProps = (item: CspFinding, column: EuiTableFieldDataColumnType<CspFinding>) => ({
     onClick: column.field === 'rule.name' ? () => selectItem(item) : undefined,
@@ -67,65 +68,38 @@ export const FindingsTable = ({ data, status, error, selectItem }: FindingsTable
   };
 
   return (
-    <EuiBasicTable
-      data-test-subj={TEST_SUBJECTS.FINDINGS_TABLE}
-      loading={status === 'loading'}
-      error={error ? error : undefined}
-      items={page}
-      columns={columns}
-      tableLayout={'auto'}
-      pagination={pagination}
-      onChange={onTableChange}
-      cellProps={getCellProps}
-    />
+    <EuiPanel hasBorder hasShadow={false}>
+      <div>
+        <h1>HENRY</h1>
+      </div>
+      <EuiBasicTable
+        data-test-subj={TEST_SUBJECTS.FINDINGS_TABLE}
+        loading={status === 'loading'}
+        error={error ? error : undefined}
+        items={page}
+        columns={columns}
+        tableLayout={'auto'}
+        pagination={pagination}
+        onChange={onTableChange}
+        cellProps={getCellProps}
+      />
+    </EuiPanel>
   );
 };
 
 const ruleNameRenderer = (name: string) => <EuiLink>{name}</EuiLink>;
-const ruleTagsRenderer = (tags: string[]) => (
-  <EuiFlexGroup>
-    <EuiFlexItem>
-      <EuiBadgeGroup>
-        {tags.map((tag) => (
-          <EuiBadge key={tag} color="default">
-            {tag}
-          </EuiBadge>
-        ))}
-      </EuiBadgeGroup>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+
 const resultEvaluationRenderer = (type: PropsOf<typeof CspEvaluationBadge>['type']) => (
   <CspEvaluationBadge type={type} />
 );
 
+// TODO: update CspFinding interface
 const columns: Array<EuiTableFieldDataColumnType<CspFinding>> = [
-  {
-    field: 'resource.filename',
-    name: TEXT.RESOURCE,
-    truncateText: true,
-  },
-  {
-    field: 'rule.name',
-    name: TEXT.RULE_NAME,
-    width: '50%',
-    truncateText: true,
-    render: ruleNameRenderer,
-  },
-  {
-    field: 'result.evaluation',
-    name: TEXT.EVALUATION,
-    width: '80px',
-    render: resultEvaluationRenderer,
-  },
-  {
-    field: 'rule.tags',
-    name: TEXT.TAGS,
-    render: ruleTagsRenderer,
-  },
-  {
-    field: '@timestamp',
-    name: TEXT.TIMESTAMP,
-    truncateText: true,
-  },
+  { field: 'resource.id', name: 'Resource ID' },
+  { field: 'result.evaluation', name: 'Evaluation', render: resultEvaluationRenderer },
+  { field: 'rule.name', name: 'Rule', render: ruleNameRenderer },
+  { field: '', name: 'Cluster ID', render: () => null },
+  { field: '', name: 'Resource Type', render: () => null },
+  { field: '', name: 'Benchmark Integration', render: () => null },
+  { field: '', name: 'Created at', render: () => null },
 ];
