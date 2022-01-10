@@ -211,7 +211,7 @@ export function Detail() {
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="m">
                 <FlexItemWithMinWidth grow={true}>
-                  <EuiFlexGroup alignItems={'center'}>
+                  <EuiFlexGroup alignItems="center">
                     <EuiFlexItem grow={false}>
                       <EuiText>
                         {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
