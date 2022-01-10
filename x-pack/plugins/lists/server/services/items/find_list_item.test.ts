@@ -16,6 +16,21 @@ import { getFindListItemOptionsMock } from './find_list_item.mock';
 import { findListItem } from './find_list_item';
 
 describe('find_list_item', () => {
+  test('It calls esClient with internal origin header to suppress deprecation logs for users from system generated queries', async () => {
+    const options = getFindListItemOptionsMock();
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(getEmptySearchListMock())
+    );
+    await findListItem({ ...options, esClient });
+    expect(esClient.search).toBeCalledWith({
+      body: { query: { term: { _id: 'some-list-id' } } },
+      ignore_unavailable: true,
+      index: '.lists',
+      seq_no_primary_term: true,
+    });
+  });
+
   test('should find a simple single list item', async () => {
     const options = getFindListItemOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;

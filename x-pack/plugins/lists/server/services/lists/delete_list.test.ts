@@ -25,6 +25,19 @@ describe('delete_list', () => {
     jest.clearAllMocks();
   });
 
+  test('It calls esClient with internal origin header to suppress deprecation logs for users from system generated queries', async () => {
+    const list = getListResponseMock();
+    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
+    const options = getDeleteListOptionsMock();
+    await deleteList(options);
+    expect(options.esClient.deleteByQuery).toHaveBeenCalledWith({
+      headers: { 'x-elastic-product-origin': 'security' },
+      index: '.items',
+      query: { term: { list_id: 'some-list-id' } },
+      refresh: false,
+    });
+  });
+
   test('Delete returns a null if the list is also null', async () => {
     (getList as unknown as jest.Mock).mockResolvedValueOnce(null);
     const options = getDeleteListOptionsMock();
@@ -46,8 +59,9 @@ describe('delete_list', () => {
     const options = getDeleteListOptionsMock();
     await deleteList(options);
     const deleteByQuery = {
-      body: { query: { term: { list_id: LIST_ID } } },
+      headers: { 'x-elastic-product-origin': 'security' },
       index: LIST_ITEM_INDEX,
+      query: { term: { list_id: LIST_ID } },
       refresh: false,
     };
     expect(options.esClient.deleteByQuery).toBeCalledWith(deleteByQuery);
@@ -59,6 +73,7 @@ describe('delete_list', () => {
     const options = getDeleteListOptionsMock();
     await deleteList(options);
     const deleteQuery = {
+      headers: { 'x-elastic-product-origin': 'security' },
       id: LIST_ID,
       index: LIST_INDEX,
       refresh: 'wait_for',

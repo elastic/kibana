@@ -24,6 +24,31 @@ describe('delete_list_item_by_value', () => {
     jest.clearAllMocks();
   });
 
+  test('It calls esClient with internal origin header to suppress deprecation logs for users from system generated queries', async () => {
+    const listItems = [getListItemResponseMock()];
+    (getListItemByValues as unknown as jest.Mock).mockResolvedValueOnce(listItems);
+    const options = getDeleteListItemByValueOptionsMock();
+    await deleteListItemByValue(options);
+    expect(options.esClient.deleteByQuery).toBeCalledWith({
+      headers: { 'x-elastic-product-origin': 'security' },
+      index: '.items',
+      query: {
+        bool: {
+          filter: [
+            { term: { list_id: 'some-list-id' } },
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [{ term: { ip: { _name: '0.0', value: '127.0.0.1' } } }],
+              },
+            },
+          ],
+        },
+      },
+      refresh: false,
+    });
+  });
+
   test('Delete returns a an empty array if the list items are also empty', async () => {
     (getListItemByValues as unknown as jest.Mock).mockResolvedValueOnce([]);
     const options = getDeleteListItemByValueOptionsMock();
@@ -45,22 +70,21 @@ describe('delete_list_item_by_value', () => {
     const options = getDeleteListItemByValueOptionsMock();
     await deleteListItemByValue(options);
     const deleteByQuery = {
-      body: {
-        query: {
-          bool: {
-            filter: [
-              { term: { list_id: 'some-list-id' } },
-              {
-                bool: {
-                  minimum_should_match: 1,
-                  should: [{ term: { ip: { _name: '0.0', value: '127.0.0.1' } } }],
-                },
+      headers: { 'x-elastic-product-origin': 'security' },
+      index: '.items',
+      query: {
+        bool: {
+          filter: [
+            { term: { list_id: 'some-list-id' } },
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [{ term: { ip: { _name: '0.0', value: '127.0.0.1' } } }],
               },
-            ],
-          },
+            },
+          ],
         },
       },
-      index: '.items',
       refresh: false,
     };
     expect(options.esClient.deleteByQuery).toBeCalledWith(deleteByQuery);

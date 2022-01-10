@@ -8,6 +8,7 @@
 import { ElasticsearchClient } from 'kibana/server';
 import type { ListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 
+import { createEsClientCallWithHeaders } from '@kbn/securitysolution-utils';
 import { getQueryFilterFromTypeValue } from '../utils';
 
 import { getListItemByValues } from './get_list_item_by_values';
@@ -40,16 +41,19 @@ export const deleteListItemByValue = async ({
     type,
     value: values,
   });
-  await esClient.deleteByQuery({
-    body: {
-      query: {
-        bool: {
-          filter,
+  await esClient.deleteByQuery(
+    createEsClientCallWithHeaders({
+      addOriginHeader: true,
+      request: {
+        index: listItemIndex,
+        query: {
+          bool: {
+            filter,
+          },
         },
+        refresh: false,
       },
-    },
-    index: listItemIndex,
-    refresh: false,
-  });
+    })
+  );
   return listItems;
 };

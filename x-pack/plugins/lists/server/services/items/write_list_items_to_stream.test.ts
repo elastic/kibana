@@ -201,6 +201,26 @@ describe('write_list_items_to_stream', () => {
   });
 
   describe('getResponse', () => {
+    test('It calls esClient with internal origin header to suppress deprecation logs for users from system generated queries', async () => {
+      const options = getResponseOptionsMock();
+      options.searchAfter = ['string 1', 'string 2'];
+      await getResponse(options);
+      const expected = {
+        body: {
+          query: { term: { list_id: LIST_ID } },
+          search_after: ['string 1', 'string 2'],
+          sort: [{ tie_breaker_id: 'asc' }],
+        },
+        headers: {
+          'x-elastic-product-origin': 'security',
+        },
+        ignore_unavailable: true,
+        index: LIST_ITEM_INDEX,
+        size: 100,
+      };
+      expect(options.esClient.search).toBeCalledWith(expected);
+    });
+
     test('It returns a simple response with the default size of 100', async () => {
       const options = getResponseOptionsMock();
       options.searchAfter = ['string 1', 'string 2'];
@@ -210,6 +230,9 @@ describe('write_list_items_to_stream', () => {
           query: { term: { list_id: LIST_ID } },
           search_after: ['string 1', 'string 2'],
           sort: [{ tie_breaker_id: 'asc' }],
+        },
+        headers: {
+          'x-elastic-product-origin': 'security',
         },
         ignore_unavailable: true,
         index: LIST_ITEM_INDEX,
@@ -228,6 +251,9 @@ describe('write_list_items_to_stream', () => {
           query: { term: { list_id: LIST_ID } },
           search_after: ['string 1', 'string 2'],
           sort: [{ tie_breaker_id: 'asc' }],
+        },
+        headers: {
+          'x-elastic-product-origin': 'security',
         },
         ignore_unavailable: true,
         index: LIST_ITEM_INDEX,

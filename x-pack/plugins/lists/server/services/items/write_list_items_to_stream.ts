@@ -9,6 +9,7 @@ import { PassThrough } from 'stream';
 
 import type { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from 'kibana/server';
+import { createEsClientCallWithHeaders } from '@kbn/securitysolution-utils';
 
 import { ErrorWithStatusCode } from '../../error_with_status_code';
 import { findSourceValue } from '../utils/find_source_value';
@@ -118,20 +119,25 @@ export const getResponse = async ({
   size = SIZE,
 }: GetResponseOptions): Promise<estypes.SearchResponse<SearchEsListItemSchema>> => {
   return (
-    await esClient.search<SearchEsListItemSchema>({
-      body: {
-        query: {
-          term: {
-            list_id: listId,
+    await esClient.search<SearchEsListItemSchema>(
+      createEsClientCallWithHeaders({
+        addOriginHeader: true,
+        request: {
+          body: {
+            query: {
+              term: {
+                list_id: listId,
+              },
+            },
+            search_after: searchAfter,
+            sort: [{ tie_breaker_id: 'asc' }],
           },
+          ignore_unavailable: true,
+          index: listItemIndex,
+          size,
         },
-        search_after: searchAfter,
-        sort: [{ tie_breaker_id: 'asc' }],
-      },
-      ignore_unavailable: true,
-      index: listItemIndex,
-      size,
-    })
+      })
+    )
   ).body as unknown as estypes.SearchResponse<SearchEsListItemSchema>;
 };
 
