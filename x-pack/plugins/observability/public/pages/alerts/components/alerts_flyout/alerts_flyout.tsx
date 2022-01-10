@@ -30,6 +30,7 @@ import {
   ALERT_RULE_NAME,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
+  TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import moment from 'moment-timezone';
 import React, { useMemo } from 'react';
@@ -91,7 +92,7 @@ export function AlertsFlyout({
     {
       title: translations.alertsFlyout.lastUpdatedLabel,
       description: (
-        <span title={alertData.start.toString()}>{moment(alertData.start).format(dateFormat)}</span>
+        <span title={moment(alertData.fields[TIMESTAMP]).valueOf().toString()}>{moment(alertData.fields[TIMESTAMP]).format(dateFormat)}</span>
       ),
     },
     {

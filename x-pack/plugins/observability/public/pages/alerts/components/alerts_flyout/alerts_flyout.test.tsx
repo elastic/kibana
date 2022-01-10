@@ -41,6 +41,19 @@ describe('AlertsFlyout', () => {
 
     expect(flyout.getByText('Recovered')).toBeInTheDocument();
   });
+
+  it('should use @timestamp for last updated', async () => {
+    const flyout = render(
+      <AlertsFlyout
+        alert={recoveredAlert}
+        observabilityRuleTypeRegistry={observabilityRuleTypeRegistryMock}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(flyout.getByTitle('1630588125729')).toBeInTheDocument();
+    expect(flyout.getByText('Sep 2, 2021 @ 09:08:45.729')).toBeInTheDocument();
+  });
 });
 
 const activeAlert: TopAlert = {
