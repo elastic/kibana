@@ -94,6 +94,7 @@ import {
 } from './';
 import { AggParamsSampler } from './buckets/sampler';
 import { AggParamsDiversifiedSampler } from './buckets/diversified_sampler';
+import { AggParamsSignificantText } from './buckets/significant_text';
 
 export type { IAggConfig, AggConfigSerialized } from './agg_config';
 export type { CreateAggConfigParams, IAggConfigs } from './agg_configs';
@@ -160,6 +161,7 @@ export interface AggParamsMapping {
   [BUCKET_TYPES.FILTER]: AggParamsFilter;
   [BUCKET_TYPES.FILTERS]: AggParamsFilters;
   [BUCKET_TYPES.SIGNIFICANT_TERMS]: AggParamsSignificantTerms;
+  [BUCKET_TYPES.SIGNIFICANT_TEXT]: AggParamsSignificantText;
   [BUCKET_TYPES.GEOTILE_GRID]: AggParamsGeoTile;
   [BUCKET_TYPES.GEOHASH_GRID]: AggParamsGeoHash;
   [BUCKET_TYPES.HISTOGRAM]: AggParamsHistogram;

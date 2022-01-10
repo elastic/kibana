@@ -11,13 +11,19 @@ import {
   MonitorManagementListResultCodec,
   MonitorManagementListResult,
   ServiceLocations,
-  ServiceLocationsCodec,
+  SyntheticsMonitor,
+  ServiceLocationsApiResponseCodec,
 } from '../../../common/runtime_types';
 import { SyntheticsMonitorSavedObject } from '../../../common/types';
 import { apiService } from './utils';
 
-// TODO, change to monitor runtime type
-export const setMonitor = async ({ monitor, id }: { monitor: any; id?: string }): Promise<void> => {
+export const setMonitor = async ({
+  monitor,
+  id,
+}: {
+  monitor: SyntheticsMonitor;
+  id?: string;
+}): Promise<SyntheticsMonitorSavedObject> => {
   if (id) {
     return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
   } else {
@@ -25,7 +31,6 @@ export const setMonitor = async ({ monitor, id }: { monitor: any; id?: string })
   }
 };
 
-// TODO, change to monitor runtime type
 export const getMonitor = async ({ id }: { id: string }): Promise<SyntheticsMonitorSavedObject> => {
   return await apiService.get(`${API_URLS.SYNTHETICS_MONITORS}/${id}`);
 };
@@ -48,7 +53,7 @@ export const fetchServiceLocations = async (): Promise<ServiceLocations> => {
   const { locations } = await apiService.get(
     API_URLS.SERVICE_LOCATIONS,
     undefined,
-    ServiceLocationsCodec
+    ServiceLocationsApiResponseCodec
   );
   return locations;
 };

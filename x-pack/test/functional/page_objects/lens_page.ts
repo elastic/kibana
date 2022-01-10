@@ -474,6 +474,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async useFixAction() {
       await testSubjects.click('errorFixAction');
+      await this.waitForVisualization();
     },
 
     async isTopLevelAggregation() {
@@ -589,6 +590,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const colorPickerInput = await testSubjects.find('~indexPattern-dimension-colorPicker');
       await colorPickerInput.type(color);
       await PageObjects.common.sleep(1000); // give time for debounced components to rerender
+    },
+    hasVisualOptionsButton() {
+      return testSubjects.exists('lnsVisualOptionsButton');
     },
     async openVisualOptions() {
       await retry.try(async () => {
@@ -1235,6 +1239,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click(`legend-${value}`);
       const filterIn = await testSubjects.find(`legend-${value}-filterIn`);
       await filterIn.click();
+    },
+
+    hasEmptySizeRatioButtonGroup() {
+      return testSubjects.exists('lnsEmptySizeRatioButtonGroup');
     },
   });
 }

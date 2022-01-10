@@ -290,6 +290,7 @@ export class DocLinksService {
           migrationApiDeprecation: `${ELASTICSEARCH_DOCS}migration-api-deprecation.html`,
           nodeRoles: `${ELASTICSEARCH_DOCS}modules-node.html#node-roles`,
           releaseHighlights: `${ELASTICSEARCH_DOCS}release-highlights.html`,
+          version8ReleaseHighlights: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/8.0/elastic-stack-highlights.html`,
           remoteClusters: `${ELASTICSEARCH_DOCS}remote-clusters.html`,
           remoteClustersProxy: `${ELASTICSEARCH_DOCS}remote-clusters.html#proxy-mode`,
           remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}remote-clusters-settings.html#remote-cluster-proxy-settings`,
@@ -312,6 +313,7 @@ export class DocLinksService {
         },
         securitySolution: {
           trustedApps: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/trusted-apps-ov.html`,
+          eventFilters: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/event-filters.html`,
         },
         query: {
           eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -803,6 +805,7 @@ export interface DocLinksStart {
     };
     readonly securitySolution: {
       readonly trustedApps: string;
+      readonly eventFilters: string;
     };
     readonly query: {
       readonly eql: string;
