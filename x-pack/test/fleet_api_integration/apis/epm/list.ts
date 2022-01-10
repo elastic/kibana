@@ -56,7 +56,7 @@ export default function (providerContext: FtrProviderContext) {
         };
         const listResponse = await fetchLimitedPackageList();
 
-        expect(listResponse.items).to.eql(['endpoint', ...BUNDLED_PACKAGES]);
+        expect(listResponse.items.sort()).to.eql(['endpoint', ...BUNDLED_PACKAGES].sort());
       });
 
       it('allows user with only read permission to access', async () => {
