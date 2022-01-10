@@ -41,7 +41,7 @@ describe('Policy event filters layout', () => {
     expect(component.getByTestId('policy-event-filters-loading-spinner')).toBeTruthy();
   });
 
-  it('should renders layout with no assigned event filters data when there are not event filters', async () => {
+  it('should render layout with no assigned event filters data when there are not event filters', async () => {
     mockedApi.responseProvider.eventFiltersList.mockReturnValue(
       getFoundExceptionListItemSchemaMock(0)
     );
@@ -50,7 +50,7 @@ describe('Policy event filters layout', () => {
     expect(await component.findByTestId('policy-event-filters-empty-unexisting')).not.toBeNull();
   });
 
-  it('should renders layout with no assigned event filters data when there are event filters', async () => {
+  it('should render layout with no assigned event filters data when there are event filters', async () => {
     mockedApi.responseProvider.eventFiltersList.mockImplementation(
       // @ts-expect-error
       (args) => {
@@ -71,7 +71,7 @@ describe('Policy event filters layout', () => {
     expect(await component.findByTestId('policy-event-filters-empty-unassigned')).not.toBeNull();
   });
 
-  it('should renders layout with data', async () => {
+  it('should render layout with data', async () => {
     mockedApi.responseProvider.eventFiltersList.mockReturnValue(
       getFoundExceptionListItemSchemaMock(3)
     );
