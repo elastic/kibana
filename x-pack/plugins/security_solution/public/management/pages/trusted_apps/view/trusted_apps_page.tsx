@@ -45,10 +45,9 @@ export const TrustedAppsPage = memo(() => {
   const doEntriesExist = useTrustedAppsSelector(entriesExist);
   const didEntriesExist = useTrustedAppsSelector(prevEntriesExist);
   const navigationCallbackQuery = useTrustedAppsNavigateCallback(
-    (query: string, includedPolicies?: string, excludedPolicies?: string) => ({
+    (query: string, includedPolicies?: string) => ({
       filter: query,
       included_policies: includedPolicies,
-      excluded_policies: excludedPolicies,
     })
   );
 
@@ -62,9 +61,9 @@ export const TrustedAppsPage = memo(() => {
   }));
 
   const handleOnSearch = useCallback(
-    (query: string, includedPolicies?: string, excludedPolicies?: string) => {
+    (query: string, includedPolicies?: string) => {
       dispatch({ type: 'trustedAppForceRefresh', payload: { forceRefresh: true } });
-      navigationCallbackQuery(query, includedPolicies, excludedPolicies);
+      navigationCallbackQuery(query, includedPolicies);
     },
     [dispatch, navigationCallbackQuery]
   );
@@ -118,7 +117,6 @@ export const TrustedAppsPage = memo(() => {
             placeholder={SEARCH_TRUSTED_APP_PLACEHOLDER}
             hasPolicyFilter={true}
             policyList={policyList}
-            defaultExcludedPolicies={location.excluded_policies}
             defaultIncludedPolicies={location.included_policies}
           />
           <EuiFlexGroup
