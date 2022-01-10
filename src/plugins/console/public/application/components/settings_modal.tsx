@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -110,12 +110,12 @@ export function DevToolsSettingsModal(props: Props) {
     });
   }
 
-  const onChange = (value: string) => {
+  const onChange = useCallback((value: string) => {
     const sanitizedValue = parseInt(value, 10);
 
     setPolling(!!sanitizedValue);
     setPollInterval(sanitizedValue);
-  };
+  }, []);
 
   // It only makes sense to show polling options if the user needs to fetch any data.
   const pollingFields =
