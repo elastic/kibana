@@ -1447,7 +1447,7 @@ describe('IndexPattern Data Source', () => {
     });
 
     it('should return mismatched time shifts', () => {
-      const warnings = indexPatternDatasource.getWarningMessages!(state, framePublicAPI);
+      const warnings = indexPatternDatasource.getWarningMessages!(state, framePublicAPI, () => {});
 
       expect(warnings!.map((item) => (item as React.ReactElement).props.id)).toMatchInlineSnapshot(`
         Array [
@@ -1460,7 +1460,7 @@ describe('IndexPattern Data Source', () => {
     it('should show different types of warning messages', () => {
       framePublicAPI.activeData!.first.columns[0].meta.sourceParams!.hasPrecisionError = true;
 
-      const warnings = indexPatternDatasource.getWarningMessages!(state, framePublicAPI);
+      const warnings = indexPatternDatasource.getWarningMessages!(state, framePublicAPI, () => {});
 
       expect(warnings!.map((item) => (item as React.ReactElement).props.id)).toMatchInlineSnapshot(`
         Array [
