@@ -6,7 +6,12 @@
  */
 
 import { isEqual } from 'lodash';
-import { AnalysisResult, InputOverrides, MB } from '../../../../../../file_upload/common';
+import {
+  AnalysisResult,
+  InputOverrides,
+  MB,
+  FILE_FORMATS,
+} from '../../../../../../file_upload/common';
 
 export const DEFAULT_LINES_TO_SAMPLE = 1000;
 const UPLOAD_SIZE_MB = 5;
@@ -72,7 +77,7 @@ export function createUrlOverrides(overrides: InputOverrides, originalSettings: 
     }
   }
 
-  if (formattedOverrides.format === '' && originalSettings.format === 'delimited') {
+  if (formattedOverrides.format === '' && originalSettings.format === FILE_FORMATS.DELIMITED) {
     if (
       formattedOverrides.should_trim_fields !== '' ||
       formattedOverrides.has_header_row !== '' ||
@@ -88,13 +93,19 @@ export function createUrlOverrides(overrides: InputOverrides, originalSettings: 
     }
   }
 
-  if (formattedOverrides.format === '' && originalSettings.format === 'semi_structured_text') {
+  if (
+    formattedOverrides.format === '' &&
+    originalSettings.format === FILE_FORMATS.SEMI_STRUCTURED_TEXT
+  ) {
     if (formattedOverrides.grok_pattern !== '') {
       formattedOverrides.format = originalSettings.format;
     }
   }
 
-  if (formattedOverrides.format === 'ndjson' || originalSettings.format === 'ndjson') {
+  if (
+    formattedOverrides.format === FILE_FORMATS.NDJSON ||
+    originalSettings.format === FILE_FORMATS.NDJSON
+  ) {
     formattedOverrides.should_trim_fields = '';
     formattedOverrides.has_header_row = '';
     formattedOverrides.delimiter = '';

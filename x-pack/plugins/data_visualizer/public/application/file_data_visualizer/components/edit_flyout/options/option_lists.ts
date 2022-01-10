@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-export const FORMAT_OPTIONS = [
-  'delimited',
-  'ndjson',
-  'semi_structured_text',
-  // 'xml',
-];
-
 export const CUSTOM_DROPDOWN_OPTION = 'custom';
 
 export const TIMESTAMP_OPTIONS = [
