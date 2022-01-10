@@ -11,10 +11,10 @@ import { useState, useLayoutEffect } from 'react';
 // rowHeight * pageSize + (filtersHeight + headerHeight + paginationHeight + 1)
 // +1 is for useLayoutEffect to detect the change
 const DATA_GRID_HEIGHT_BY_PAGE_SIZE: { [key: number]: number } = {
-  10: 449,
-  25: 959,
-  50: 1809,
-  100: 3509,
+  10: 389,
+  25: 809,
+  50: 1509,
+  100: 2909,
 };
 
 /**
@@ -30,7 +30,7 @@ const DATA_GRID_HEIGHT_BY_PAGE_SIZE: { [key: number]: number } = {
 const filtersHeight = 32;
 const headerHeight = 40;
 const paginationHeight = 36;
-const rowHeight = 34;
+const rowHeight = 28;
 
 export const useDataGridHeightHack = (pageSize: number, rowCount: number) => {
   const [height, setHeight] = useState(DATA_GRID_HEIGHT_BY_PAGE_SIZE[pageSize]);
