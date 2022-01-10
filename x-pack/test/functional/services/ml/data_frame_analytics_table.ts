@@ -114,15 +114,21 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       return !subSelector ? row : `${row} > ${subSelector}`;
     }
 
-    public async waitForRefreshButtonLoaded() {
-      await testSubjects.existOrFail('~mlRefreshPageButton', { timeout: 10 * 1000 });
-      await testSubjects.existOrFail('mlRefreshPageButton loaded', { timeout: 30 * 1000 });
+    public async waitForRefreshButtonLoaded(buttonTestSubj: string) {
+      await testSubjects.existOrFail(`~${buttonTestSubj}`, { timeout: 10 * 1000 });
+      await testSubjects.existOrFail(`${buttonTestSubj} loaded`, { timeout: 30 * 1000 });
     }
 
-    public async refreshAnalyticsTable() {
-      await this.waitForRefreshButtonLoaded();
-      await testSubjects.click('~mlRefreshPageButton');
-      await this.waitForRefreshButtonLoaded();
+    public async refreshAnalyticsTable(
+      tableEnvironment: 'mlDataFrameAnalytics' | 'stackMgmtJobList' = 'mlDataFrameAnalytics'
+    ) {
+      const testSubjStr =
+        tableEnvironment === 'mlDataFrameAnalytics'
+          ? 'mlRefreshPageButton'
+          : 'mlAnalyticsRefreshListButton';
+      await this.waitForRefreshButtonLoaded(testSubjStr);
+      await testSubjects.click(`~${testSubjStr}`);
+      await this.waitForRefreshButtonLoaded(testSubjStr);
       await this.waitForAnalyticsToLoad();
     }
 
@@ -202,9 +208,9 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       analyticsId: string,
       shouldBeDisplayed: boolean
     ) {
-      await this.waitForRefreshButtonLoaded();
-      await testSubjects.click('~mlRefreshPageButton');
-      await this.waitForRefreshButtonLoaded();
+      await this.waitForRefreshButtonLoaded('mlAnalyticsRefreshListButton');
+      await testSubjects.click('~mlAnalyticsRefreshListButton');
+      await this.waitForRefreshButtonLoaded('mlAnalyticsRefreshListButton');
       await testSubjects.existOrFail('mlAnalyticsJobList', { timeout: 30 * 1000 });
 
       if (shouldBeDisplayed) {

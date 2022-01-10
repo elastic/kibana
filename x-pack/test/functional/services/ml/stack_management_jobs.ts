@@ -112,7 +112,7 @@ export function MachineLearningStackManagementJobsProvider(
     },
 
     async assertDFAJobRowSpaces(dfaJobId: string, expectedSpaces: string[]) {
-      await mlDFAJobTable.refreshAnalyticsTable();
+      await mlDFAJobTable.refreshAnalyticsTable('stackMgmtJobList');
       const rows = await mlDFAJobTable.parseAnalyticsTable('stackMgmtJobList');
       const jobRow = rows.filter((row) => row.id === dfaJobId)[0];
       expect(jobRow).to.have.property('spaces');
