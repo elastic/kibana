@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
+import { shallow } from 'enzyme';
 import { getPrecisionErrorWarningMessages } from './utils';
-import type { IndexPatternPrivateState } from './types';
+import type { IndexPatternPrivateState, GenericIndexPatternColumn } from './types';
 import type { FramePublicAPI } from '../types';
 import type { DocLinksStart } from 'kibana/public';
+import { EuiButton } from '@elastic/eui';
 
 describe('indexpattern_datasource utils', () => {
   describe('getPrecisionErrorWarningMessages', () => {
@@ -34,7 +37,9 @@ describe('indexpattern_datasource utils', () => {
           },
         },
         indexPatterns: {
-          one: {},
+          one: {
+            getFieldByName: (x: string) => ({ name: x, displayName: x }),
+          },
         },
       } as unknown as IndexPatternPrivateState;
       framePublicAPI = {
@@ -82,6 +87,41 @@ describe('indexpattern_datasource utils', () => {
       expect(
         getPrecisionErrorWarningMessages(state, framePublicAPI, docLinks, () => {})
       ).toHaveLength(1);
+    });
+
+    test('if has precision error and sorting is by count ascending, show fix action and switch to rare terms', () => {
+      framePublicAPI.activeData!.id.columns[0].meta.sourceParams!.hasPrecisionError = true;
+      state.layers.id.columnOrder = ['col1', 'col2'];
+      state.layers.id.columns = {
+        col1: {
+          operationType: 'terms',
+          sourceField: 'category',
+          params: {
+            orderBy: {
+              type: 'column',
+              columnId: 'col2',
+            },
+            orderDirection: 'asc',
+          },
+        } as unknown as GenericIndexPatternColumn,
+        col2: {
+          operationType: 'count',
+        } as unknown as GenericIndexPatternColumn,
+      };
+      const setState = jest.fn();
+      const warnings = getPrecisionErrorWarningMessages(state, framePublicAPI, docLinks, setState);
+
+      expect(warnings).toHaveLength(1);
+      const DummyComponent = () => <>{warnings[0]}</>;
+      const warningUi = shallow(<DummyComponent />);
+      warningUi.find(EuiButton).simulate('click');
+      const stateSetter = setState.mock.calls[0][0];
+      const newState = stateSetter(state);
+      expect(newState.layers.id.columns.col1.label).toEqual('Rare values of category');
+      expect(newState.layers.id.columns.col1.params.orderBy).toEqual({
+        type: 'rare',
+        maxDocCount: 1,
+      });
     });
   });
 });

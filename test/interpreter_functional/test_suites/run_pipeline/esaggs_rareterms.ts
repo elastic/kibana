@@ -32,12 +32,12 @@ export default function ({
         const expression = `
           kibana_context timeRange={timerange from='${timeRange.from}' to='${timeRange.to}'}
           | esaggs index={indexPatternLoad id='logstash-*'}
-          aggs={aggRareTerms id="1" enabled=true schema="bucket" field="geo.srcdest" maxDocCount=1}
+          aggs={aggRareTerms id="1" enabled=true schema="bucket" field="geo.srcdest" max_doc_count=1}
           aggs={aggCount id="2" enabled=true schema="metric"}
         `;
         const result = await expectExpression('rareterms', expression).getResponse();
 
-        expect(result.columns.length).to.be(10);
+        expect(result.columns.length).to.be(1149);
         result.rows.forEach((row: DatatableRow) => {
           expect(row['col-1-2']).to.be(1);
         });
