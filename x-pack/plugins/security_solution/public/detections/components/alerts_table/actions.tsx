@@ -159,7 +159,10 @@ const getFiltersFromRule = (filters: string[]): Filter[] =>
 
 const calculateFromTimeFallback = (thresholdData: Ecs, originalTime: moment.Moment) => {
   // relative time that the rule's time range starts at (e.g. now-1h)
-  const ruleFrom = dateMath.parse(getField(thresholdData, ALERT_RULE_FROM));
+
+  const ruleFromValue = getField(thresholdData, ALERT_RULE_FROM);
+  const normalizedRuleFromValue = Array.isArray(ruleFromValue) ? ruleFromValue[0] : ruleFromValue;
+  const ruleFrom = dateMath.parse(normalizedRuleFromValue);
 
   // get the absolute (moment.duration) interval by subtracting `ruleFrom` from `now`
   const now = moment();
@@ -188,8 +191,11 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
       } = getField(thresholdData, ALERT_THRESHOLD_RESULT);
 
       // timestamp representing when the alert was generated
-      const originalTimeStr = getField(thresholdData, ALERT_ORIGINAL_TIME);
-      const originalTime = moment(originalTimeStr);
+      const originalTimeValue = getField(thresholdData, ALERT_ORIGINAL_TIME);
+      const normalizedOriginalTimeValue = Array.isArray(originalTimeValue)
+        ? originalTimeValue[0]
+        : originalTimeValue;
+      const originalTime = moment(normalizedOriginalTimeValue);
 
       /*
        * Compute the fallback interval when `threshold_result.from` is not available
@@ -202,7 +208,7 @@ export const getThresholdAggregationData = (ecsData: Ecs | Ecs[]): ThresholdAggr
         : [threshold.field];
 
       return {
-        thresholdFrom: thresholdResult.from ?? fromOriginalTime,
+        thresholdFrom: thresholdResult.from ?? fromOriginalTime.toISOString(),
         thresholdTo: originalTime.toISOString(),
         dataProviders: [
           ...outerAcc.dataProviders,
