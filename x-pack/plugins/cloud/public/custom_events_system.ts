@@ -41,7 +41,7 @@ export class CustomEventsSystem {
     this.enabled = config.full_story?.enabled;
   }
 
-  async setup(coreSetup: CoreSetup, deps: SetupDeps) {
+  setup(coreSetup: CoreSetup, deps: SetupDeps) {
     if (!this.enabled) return;
 
     this.basePath = coreSetup.http.basePath;
