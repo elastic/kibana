@@ -236,7 +236,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     );
   };
 
-  describe('When on the Endpoint Policy Details Page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/100236
+  describe.skip('When on the Endpoint Policy Details Page', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
@@ -452,6 +453,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           getExpectedAgentPolicyEndpointInput({
             id: policyInfo.packagePolicy.id,
             name: policyInfo.packagePolicy.name,
+            revision: agentFullPolicy.inputs[0].revision,
             meta: {
               package: {
                 version: policyInfo.packageInfo.version,

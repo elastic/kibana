@@ -7,22 +7,23 @@
  */
 
 import { URL } from 'url';
-import { Observable } from 'rxjs';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import {
+import type { Observable } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
+import { take } from 'rxjs/operators';
+import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type {
   TelemetryCollectionManagerPluginSetup,
   TelemetryCollectionManagerPluginStart,
 } from 'src/plugins/telemetry_collection_manager/server';
-import { take } from 'rxjs/operators';
-import {
+import type {
   CoreSetup,
   PluginInitializerContext,
   ISavedObjectsRepository,
   CoreStart,
-  SavedObjectsClient,
   Plugin,
   Logger,
-} from '../../../core/server';
+} from 'src/core/server';
+import { SavedObjectsClient } from '../../../core/server';
 import { registerRoutes } from './routes';
 import { registerCollection } from './telemetry_collection';
 import {
@@ -77,7 +78,17 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   /**
    * @private Used to mark the completion of the old UI Settings migration
    */
-  private savedObjectsClient?: ISavedObjectsRepository;
+  private savedObjectsInternalRepository?: ISavedObjectsRepository;
+
+  /**
+   * @private
+   * Used to interact with the Telemetry Saved Object.
+   * Some users may not have access to the document but some queries
+   * are still relevant to them like fetching when was the last time it was reported.
+   *
+   * Using the internal client in all cases ensures the permissions to interact the document.
+   */
+  private savedObjectsInternalClient$ = new ReplaySubject<SavedObjectsClient>(1);
 
   constructor(initializerContext: PluginInitializerContext<TelemetryConfigType>) {
     this.logger = initializerContext.logger.get();
@@ -107,6 +118,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
       logger: this.logger,
       router,
       telemetryCollectionManager,
+      savedObjectsInternalClient$: this.savedObjectsInternalClient$,
     });
 
     this.registerMappings((opts) => savedObjects.registerType(opts));
@@ -128,15 +140,18 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   public start(core: CoreStart, { telemetryCollectionManager }: TelemetryPluginsDepsStart) {
     const { savedObjects } = core;
     const savedObjectsInternalRepository = savedObjects.createInternalRepository();
-    this.savedObjectsClient = savedObjectsInternalRepository;
+    this.savedObjectsInternalRepository = savedObjectsInternalRepository;
+    this.savedObjectsInternalClient$.next(new SavedObjectsClient(savedObjectsInternalRepository));
     this.startFetcher(core, telemetryCollectionManager);
 
     return {
       getIsOptedIn: async () => {
-        const internalRepository = new SavedObjectsClient(savedObjectsInternalRepository);
+        const internalRepositoryClient = await this.savedObjectsInternalClient$
+          .pipe(take(1))
+          .toPromise();
         let telemetrySavedObject: TelemetrySavedObject = false; // if an error occurs while fetching opt-in status, a `false` result indicates that Kibana cannot opt-in
         try {
-          telemetrySavedObject = await getTelemetrySavedObject(internalRepository);
+          telemetrySavedObject = await getTelemetrySavedObject(internalRepositoryClient);
         } catch (err) {
           this.logger.debug('Failed to check telemetry opt-in status: ' + err.message);
         }
@@ -202,7 +217,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
   }
 
   private registerUsageCollectors(usageCollection: UsageCollectionSetup) {
-    const getSavedObjectsClient = () => this.savedObjectsClient;
+    const getSavedObjectsClient = () => this.savedObjectsInternalRepository;
 
     registerTelemetryPluginUsageCollector(usageCollection, {
       currentKibanaVersion: this.currentKibanaVersion,
