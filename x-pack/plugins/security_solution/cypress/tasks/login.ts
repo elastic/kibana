@@ -288,10 +288,21 @@ export const getEnvAuth = (): User => {
  * Authenticates with Kibana, visits the specified `url`, and waits for the
  * Kibana global nav to be displayed before continuing
  */
-export const loginAndWaitForPage = (url: string, role?: ROLES) => {
+export const loginAndWaitForPage = (
+  url: string,
+  role?: ROLES,
+  onBeforeLoadCallback?: (win: Cypress.AUTWindow) => void
+) => {
   login(role);
   cy.visit(
-    `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`
+    `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`,
+    {
+      onBeforeLoad(win) {
+        if (onBeforeLoadCallback) {
+          onBeforeLoadCallback(win);
+        }
+      },
+    }
   );
   cy.get('[data-test-subj="headerGlobalNav"]');
 };
