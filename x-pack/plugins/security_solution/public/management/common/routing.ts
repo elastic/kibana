@@ -343,7 +343,7 @@ export const getPolicyDetailsArtifactsListPath = (
   )}`;
 };
 
-export const extractEventFiltetrsPageLocation = (
+export const extractEventFiltersPageLocation = (
   query: querystring.ParsedUrlQuery
 ): EventFiltersPageLocation => {
   const showParamValue = extractFirstParamValue(query, 'show') as EventFiltersPageLocation['show'];

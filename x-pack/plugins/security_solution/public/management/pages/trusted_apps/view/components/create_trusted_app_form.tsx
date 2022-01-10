@@ -33,7 +33,6 @@ import {
   hasSimpleExecutableName,
 } from '../../../../../../common/endpoint/service/trusted_apps/validations';
 
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import {
   isGlobalEffectScope,
   isMacosLinuxTrustedAppCondition,
@@ -216,6 +215,7 @@ export type CreateTrustedAppFormProps = Pick<
   trustedApp: MaybeImmutable<NewTrustedApp>;
   isEditMode: boolean;
   isDirty: boolean;
+  wasByPolicy: boolean;
   onChange: (state: TrustedAppFormState) => void;
   /** Setting passed on to the EffectedPolicySelect component */
   policies: Pick<EffectedPolicySelectProps, 'options' | 'isLoading'>;
@@ -227,6 +227,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     fullWidth,
     isEditMode,
     isDirty,
+    wasByPolicy,
     onChange,
     trustedApp: _trustedApp,
     policies = { options: [] },
@@ -236,19 +237,15 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
 
     const dataTestSubj = formProps['data-test-subj'];
 
-    const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
-      'trustedAppsByPolicyEnabled'
-    );
-
     const isPlatinumPlus = useLicense().isPlatinumPlus();
 
     const isGlobal = useMemo(() => {
       return isGlobalEffectScope(trustedApp.effectScope);
     }, [trustedApp]);
 
-    const hideAssignmentSection = useMemo(() => {
-      return !isPlatinumPlus && (!isEditMode || (isGlobal && !isDirty));
-    }, [isEditMode, isGlobal, isDirty, isPlatinumPlus]);
+    const showAssignmentSection = useMemo(() => {
+      return isPlatinumPlus || (isEditMode && (!isGlobal || (wasByPolicy && isGlobal && isDirty)));
+    }, [isEditMode, isGlobal, isDirty, isPlatinumPlus, wasByPolicy]);
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
       () => OPERATING_SYSTEMS.map((os) => ({ value: os, inputDisplay: OS_TITLES[os] })),
@@ -517,7 +514,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             value={trustedApp.description}
             onChange={handleDomChangeEvents}
             fullWidth
-            compressed={isTrustedAppsByPolicyEnabled}
+            compressed
             maxLength={256}
             data-test-subj={getTestId('descriptionField')}
           />
@@ -575,7 +572,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             data-test-subj={getTestId('conditionsBuilder')}
           />
         </EuiFormRow>
-        {isTrustedAppsByPolicyEnabled && !hideAssignmentSection ? (
+        {showAssignmentSection ? (
           <>
             <EuiHorizontalRule />
             <EuiFormRow fullWidth={fullWidth} data-test-subj={getTestId('policySelection')}>
