@@ -478,10 +478,10 @@ export class DocLinksService {
           updateTransform: `${ELASTICSEARCH_DOCS}update-transform.html`,
         },
         plugins: {
-          azureRepo: `${PLUGIN_DOCS}repository-azure.html`,
-          gcsRepo: `${PLUGIN_DOCS}repository-gcs.html`,
+          azureRepo: `${ELASTICSEARCH_DOCS}repository-azure.html`,
+          gcsRepo: `${ELASTICSEARCH_DOCS}repository-gcs.html`,
           hdfsRepo: `${PLUGIN_DOCS}repository-hdfs.html`,
-          s3Repo: `${PLUGIN_DOCS}repository-s3.html`,
+          s3Repo: `${ELASTICSEARCH_DOCS}repository-s3.html`,
           snapshotRestoreRepos: `${PLUGIN_DOCS}repository.html`,
           mapperSize: `${PLUGIN_DOCS}mapper-size-usage.html`,
         },
