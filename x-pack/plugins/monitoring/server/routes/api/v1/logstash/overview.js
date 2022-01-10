@@ -57,7 +57,7 @@ export function logstashOverviewRoute(server) {
               bool: {
                 should: [
                   { term: { type: 'logstash_stats' } },
-                  { term: { 'metricset.name': 'stats' } },
+                  { term: { 'metricset.name': 'node_stats' } },
                 ],
               },
             },
