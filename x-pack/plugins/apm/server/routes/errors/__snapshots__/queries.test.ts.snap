@@ -43,7 +43,9 @@ Object {
     "size": 1,
     "sort": Array [
       Object {
-        "_score": "desc",
+        "_score": Object {
+          "order": "desc",
+        },
       },
       Object {
         "@timestamp": Object {

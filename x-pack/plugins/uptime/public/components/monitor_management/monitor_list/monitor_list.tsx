@@ -5,12 +5,16 @@
  * 2.0.
  */
 import React, { useContext, useMemo, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiPanel, EuiSpacer, EuiLink } from '@elastic/eui';
+import { SyntheticsMonitorSavedObject } from '../../../../common/types';
 import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
-import { MonitorFields } from '../../../../common/runtime_types';
+import { MonitorFields, SyntheticsMonitor } from '../../../../common/runtime_types';
 import { UptimeSettingsContext } from '../../../contexts';
 import { Actions } from './actions';
+import { MonitorLocations } from './monitor_locations';
 import { MonitorTags } from './tags';
+import { MonitorEnabled } from './monitor_enabled';
 import * as labels from '../../overview/monitor_list/translations';
 
 interface Props {
@@ -30,7 +34,8 @@ export const MonitorManagementList = ({
   setPageSize,
   setPageIndex,
 }: Props) => {
-  const { monitors, total, perPage, page: pageIndex } = list as MonitorManagementListState['list'];
+  const { total, perPage, page: pageIndex } = list as MonitorManagementListState['list'];
+  const monitors = list.monitors as SyntheticsMonitorSavedObject[];
   const { basePath } = useContext(UptimeSettingsContext);
 
   const pagination = useMemo(
@@ -57,7 +62,9 @@ export const MonitorManagementList = ({
   const columns = [
     {
       align: 'left' as const,
-      name: 'Monitor name',
+      name: i18n.translate('xpack.uptime.monitorManagement.monitorList.monitorName', {
+        defaultMessage: 'Monitor name',
+      }),
       render: ({
         attributes: { name },
         id,
@@ -77,33 +84,61 @@ export const MonitorManagementList = ({
     {
       align: 'left' as const,
       field: 'attributes',
-      name: 'Monitor type',
-      render: ({ type }: Partial<MonitorFields>) => type,
+      name: i18n.translate('xpack.uptime.monitorManagement.monitorList.monitorType', {
+        defaultMessage: 'Monitor type',
+      }),
+      render: ({ type }: SyntheticsMonitor) => type,
     },
     {
       align: 'left' as const,
       field: 'attributes',
-      name: 'Tags',
-      render: ({ tags }: Partial<MonitorFields>) => (tags ? <MonitorTags tags={tags} /> : null),
+      name: i18n.translate('xpack.uptime.monitorManagement.monitorList.tags', {
+        defaultMessage: 'Tags',
+      }),
+      render: ({ tags }: SyntheticsMonitor) => (tags ? <MonitorTags tags={tags} /> : null),
     },
     {
       align: 'left' as const,
       field: 'attributes',
-      name: 'Schedule',
-      render: ({ schedule }: Partial<MonitorFields>) =>
-        `@every ${schedule?.number}${schedule?.unit}`,
+      name: i18n.translate('xpack.uptime.monitorManagement.monitorList.locations', {
+        defaultMessage: 'Locations',
+      }),
+      render: ({ locations }: SyntheticsMonitor) =>
+        locations ? <MonitorLocations locations={locations} /> : null,
     },
     {
       align: 'left' as const,
       field: 'attributes',
-      name: 'URL',
-      render: (attributes: Partial<MonitorFields>) => attributes.urls || attributes.hosts,
+      name: i18n.translate('xpack.uptime.monitorManagement.monitorList.schedule', {
+        defaultMessage: 'Schedule',
+      }),
+      render: ({ schedule }: SyntheticsMonitor) => `@every ${schedule?.number}${schedule?.unit}`,
+    },
+    {
+      align: 'left' as const,
+      field: 'attributes',
+      name: i18n.translate('xpack.uptime.monitorManagement.monitorList.URL', {
+        defaultMessage: 'URL',
+      }),
+      render: (attributes: MonitorFields) => attributes.urls || attributes.hosts,
       truncateText: true,
     },
     {
       align: 'left' as const,
+      field: 'attributes',
+      name: i18n.translate('xpack.uptime.monitorManagement.monitorList.enabled', {
+        defaultMessage: 'Enabled',
+      }),
+      render: (attributes: SyntheticsMonitor, record: SyntheticsMonitorSavedObject) => (
+        <MonitorEnabled id={record.id} monitor={attributes} setRefresh={setRefresh} />
+      ),
+    },
+    {
+      align: 'left' as const,
       field: 'id',
-      name: 'Actions',
+      name: i18n.translate('xpack.uptime.monitorManagement.monitorList.actions', {
+        defaultMessage: 'Actions',
+      }),
       render: (id: string) => <Actions id={id} setRefresh={setRefresh} />,
     },
   ];
@@ -112,7 +147,9 @@ export const MonitorManagementList = ({
     <EuiPanel hasBorder>
       <EuiSpacer size="m" />
       <EuiBasicTable
-        aria-label={'Monitor management list'}
+        aria-label={i18n.translate('xpack.uptime.monitorManagement.monitorList.title', {
+          defaultMessage: 'Monitor management list',
+        })}
         error={error?.message}
         loading={loading}
         isExpandable={true}
