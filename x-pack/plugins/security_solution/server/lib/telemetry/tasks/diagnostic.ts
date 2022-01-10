@@ -8,7 +8,7 @@
 import { Logger } from 'src/core/server';
 import { getPreviousDiagTaskTimestamp } from '../helpers';
 import { TelemetryEventsSender } from '../sender';
-import { TelemetryEvent } from '../types';
+import type { TelemetryEvent } from '../types';
 import { TelemetryReceiver } from '../receiver';
 import { TaskExecutionPeriod } from '../task';
 
