@@ -7,8 +7,8 @@
 import { EuiButtonEmpty } from '@elastic/eui';
 import React, { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
-import { ML_PAGES } from '../../../../common/constants/locator';
+import { useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 
 export const JobsActionMenu: FC = () => {
   const navigateToPath = useNavigateToPath();
