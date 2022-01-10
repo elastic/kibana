@@ -206,11 +206,12 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
 
     public async assertAnalyticsJobDisplayedInTable(
       analyticsId: string,
-      shouldBeDisplayed: boolean
+      shouldBeDisplayed: boolean,
+      refreshButtonTestSubj = 'mlRefreshPageButton'
     ) {
-      await this.waitForRefreshButtonLoaded('mlAnalyticsRefreshListButton');
-      await testSubjects.click('~mlAnalyticsRefreshListButton');
-      await this.waitForRefreshButtonLoaded('mlAnalyticsRefreshListButton');
+      await this.waitForRefreshButtonLoaded(refreshButtonTestSubj);
+      await testSubjects.click(`~${refreshButtonTestSubj}`);
+      await this.waitForRefreshButtonLoaded(refreshButtonTestSubj);
       await testSubjects.existOrFail('mlAnalyticsJobList', { timeout: 30 * 1000 });
 
       if (shouldBeDisplayed) {
