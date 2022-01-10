@@ -130,7 +130,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
         visData: context,
         visConfig,
         syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
-        visType: ChartTypes.PIE,
+        visType: args.isDonut ? ChartTypes.DONUT : ChartTypes.PIE,
         params: {
           listenOnChange: true,
         },

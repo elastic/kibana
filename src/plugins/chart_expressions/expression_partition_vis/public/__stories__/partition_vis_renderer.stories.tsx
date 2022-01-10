@@ -87,7 +87,6 @@ const config: RenderValue = {
     nestedLegend: false,
     truncateLegend: false,
     distinctColors: false,
-    isDonut: false,
     emptySizeRatio: 0.37,
     maxLegendLines: 1,
     labels: {

@@ -7,7 +7,7 @@
  */
 
 import { getColumns } from './get_columns';
-import { PartitionVisParams } from '../../common/types';
+import { LabelPositions, PartitionVisParams, ValueFormats } from '../../common/types';
 import { createMockPieParams, createMockVisData } from '../mocks';
 
 const visParams = createMockPieParams();
@@ -130,39 +130,38 @@ describe('getColumns', () => {
   });
 
   it('should return the first data column if no buckets specified', () => {
-    const visParamsOnlyMetric = {
+    const visParamsOnlyMetric: PartitionVisParams = {
       addLegend: true,
       addTooltip: true,
-      isDonut: true,
       labels: {
-        position: 'default',
+        position: LabelPositions.DEFAULT,
         show: true,
         truncate: 100,
         values: true,
-        valuesFormat: 'percent',
+        valuesFormat: ValueFormats.PERCENT,
         percentDecimals: 2,
+        last_level: false,
       },
       legendPosition: 'right',
       nestedLegend: false,
       maxLegendLines: 1,
       truncateLegend: false,
+      distinctColors: false,
       palette: {
         name: 'default',
         type: 'palette',
       },
-      type: 'pie',
       dimensions: {
         metric: {
+          type: 'vis_dimension',
           accessor: 1,
           format: {
             id: 'number',
+            params: {},
           },
-          params: {},
-          label: 'Count',
-          aggType: 'count',
         },
       },
-    } as unknown as PartitionVisParams;
+    };
     const { metricColumn } = getColumns(visParamsOnlyMetric, visData);
     expect(metricColumn).toEqual({
       id: 'col-1-1',
@@ -187,37 +186,39 @@ describe('getColumns', () => {
   });
 
   it('should return an object with the name of the metric if no buckets specified', () => {
-    const visParamsOnlyMetric = {
+    const visParamsOnlyMetric: PartitionVisParams = {
       addLegend: true,
       addTooltip: true,
       isDonut: true,
       labels: {
-        position: 'default',
+        position: LabelPositions.DEFAULT,
         show: true,
         truncate: 100,
         values: true,
-        valuesFormat: 'percent',
+        valuesFormat: ValueFormats.PERCENT,
         percentDecimals: 2,
+        last_level: false,
       },
+      truncateLegend: false,
+      maxLegendLines: 100,
+      distinctColors: false,
       legendPosition: 'right',
       nestedLegend: false,
       palette: {
         name: 'default',
         type: 'palette',
       },
-      type: 'pie',
       dimensions: {
         metric: {
+          type: 'vis_dimension',
           accessor: 1,
           format: {
             id: 'number',
+            params: {},
           },
-          params: {},
-          label: 'Count',
-          aggType: 'count',
         },
       },
-    } as unknown as PartitionVisParams;
+    };
     const { bucketColumns, metricColumn } = getColumns(visParamsOnlyMetric, visData);
     expect(bucketColumns).toEqual([{ name: metricColumn.name }]);
   });
