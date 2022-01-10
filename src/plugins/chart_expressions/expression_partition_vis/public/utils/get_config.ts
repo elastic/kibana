@@ -90,7 +90,7 @@ const getPieDonutWaffleCommonConfig: GetConfigFn = (
   return { ...config, ...usingOuterSizeRatio };
 };
 
-const getTreemapMosaicCommonConfig: GetConfigFn = (visParams, visData) => {
+const getTreemapMosaicCommonConfig: GetConfigFn = (visParams) => {
   if (!visParams.labels.show || visParams.labels.position === LabelPositions.HIDE) {
     return {
       fillLabel: { textColor: 'rgba(0,0,0,0)' },

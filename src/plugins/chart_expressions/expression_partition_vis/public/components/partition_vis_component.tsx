@@ -226,8 +226,10 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const layers = useMemo(
     () =>
       getLayers(
+        visType,
         bucketColumns,
         visParams,
+        visData,
         props.uiState?.get('vis.colors', {}),
         visData.rows,
         props.palettesRegistry,
@@ -235,11 +237,12 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         syncColors
       ),
     [
+      visType,
       bucketColumns,
       visParams,
+      visData,
       props.uiState,
       props.palettesRegistry,
-      visData.rows,
       services.fieldFormats,
       syncColors,
     ]

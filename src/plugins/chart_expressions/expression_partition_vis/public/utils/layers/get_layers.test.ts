@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 import { ShapeTreeNode } from '@elastic/charts';
-import { PaletteDefinition, SeriesLayer } from '../../../../charts/public';
-import { dataPluginMock } from '../../../../data/public/mocks';
-import type { DataPublicPluginStart } from '../../../../data/public';
+import { PaletteDefinition, SeriesLayer } from '../../../../../charts/public';
+import { dataPluginMock } from '../../../../../data/public/mocks';
+import type { DataPublicPluginStart } from '../../../../../data/public';
 import { computeColor } from './get_layers';
-import { createMockVisData, createMockBucketColumns, createMockPieParams } from '../mocks';
+import { createMockVisData, createMockBucketColumns, createMockPieParams } from '../../mocks';
 
 const visData = createMockVisData();
 const buckets = createMockBucketColumns();

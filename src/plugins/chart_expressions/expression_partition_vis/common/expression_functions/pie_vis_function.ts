@@ -75,6 +75,11 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
       help: strings.getDistinctColorsArgHelp(),
       default: false,
     },
+    respectSourceOrder: {
+      types: ['boolean'],
+      help: strings.getRespectSourceOrderArgHelp(),
+      default: true,
+    },
     isDonut: {
       types: ['boolean'],
       help: strings.getIsDonutArgHelp(),

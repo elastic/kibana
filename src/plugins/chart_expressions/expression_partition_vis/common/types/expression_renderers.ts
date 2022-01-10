@@ -67,6 +67,7 @@ export interface PartitionVisParams extends VisCommonParams {
   labels: LabelsParams;
   palette: PaletteOutput;
   isDonut?: boolean;
+  respectSourceOrder?: boolean;
   emptySizeRatio?: EmptySizeRatios;
 }
 
@@ -74,6 +75,7 @@ export interface PieVisConfig extends VisCommonConfig {
   buckets?: ExpressionValueVisDimension[];
   isDonut: boolean;
   emptySizeRatio?: EmptySizeRatios;
+  respectSourceOrder?: boolean;
 }
 
 export interface TreemapVisConfig extends VisCommonConfig {

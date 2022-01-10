@@ -66,6 +66,10 @@ export const strings = {
     i18n.translate('expressionPartitionVis.reusable.function.args.isDonutHelpText', {
       defaultMessage: 'Displays the pie chart as donut',
     }),
+  getRespectSourceOrderArgHelp: () =>
+    i18n.translate('expressionPartitionVis.reusable.function.args.respectSourceOrderHelpText', {
+      defaultMessage: 'Keeps an order of the elements, returned from the datasource',
+    }),
   getEmptySizeRatioArgHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.args.emptySizeRatioHelpText', {
       defaultMessage: 'Defines donut inner empty area size',

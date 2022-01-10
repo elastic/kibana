@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { getLayers } from './get_layers';
+export { getLayers } from './layers';
 export { getColorPicker } from './get_color_picker';
 export { getLegendActions } from './get_legend_actions';
 export { canFilter, getFilterClickData, getFilterEventData } from './filter_helpers';

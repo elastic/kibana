@@ -6,19 +6,14 @@
  * Side Public License, v 1.
  */
 
-import {
-  Datum,
-  PartitionFillLabel,
-  PartitionLayer,
-  ShapeTreeNode,
-  ArrayEntry,
-} from '@elastic/charts';
+import { Datum, PartitionFillLabel, PartitionLayer, ShapeTreeNode } from '@elastic/charts';
 import { isEqual } from 'lodash';
 import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
-import { SeriesLayer, PaletteRegistry, lightenColor } from '../../../../charts/public';
-import type { DatatableRow } from '../../../../expressions/public';
-import type { BucketColumns, PartitionVisParams, SplitDimensionParams } from '../../common/types';
-import { getDistinctSeries } from './get_distinct_series';
+import { SeriesLayer, PaletteRegistry, lightenColor } from '../../../../../charts/public';
+import type { Datatable, DatatableRow } from '../../../../../expressions/public';
+import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
+import { getDistinctSeries } from '../get_distinct_series';
+import { sortPredicateByType } from './sort_predicate';
 
 const EMPTY_SLICE = Symbol('empty_slice');
 
@@ -130,8 +125,10 @@ export const computeColor = (
 };
 
 export const getLayers = (
+  visType: ChartTypes,
   columns: Array<Partial<BucketColumns>>,
   visParams: PartitionVisParams,
+  visData: Datatable,
   overwriteColors: { [key: string]: string } = {},
   rows: DatatableRow[],
   palettes: PaletteRegistry | null,
@@ -151,40 +148,20 @@ export const getLayers = (
   return columns.map((col) => {
     return {
       groupByRollup: (d: Datum) => {
-        return col.id ? d[col.id] : col.name;
+        return col.id ? d[col.id] ?? EMPTY_SLICE : col.name;
       },
       showAccessor: (d: Datum) => d !== EMPTY_SLICE,
       nodeLabel: (d: unknown) => {
+        if (!visParams.labels.show || d === EMPTY_SLICE) {
+          return '';
+        }
         if (col.format) {
           return formatter.deserialize(col.format).convert(d) ?? '';
         }
         return String(d);
       },
-      sortPredicate: ([name1, node1]: ArrayEntry, [name2, node2]: ArrayEntry) => {
-        const params = col.meta?.sourceParams?.params as SplitDimensionParams | undefined;
-        const sort: string | undefined = params?.orderBy;
-        // unconditionally put "Other" to the end (as the "Other" slice may be larger than a regular slice, yet should be at the end)
-        if (name1 === '__other__' && name2 !== '__other__') return 1;
-        if (name2 === '__other__' && name1 !== '__other__') return -1;
-        // metric sorting
-        if (sort && sort !== '_key') {
-          if (params?.order === 'desc') {
-            return node2.value - node1.value;
-          } else {
-            return node1.value - node2.value;
-          }
-          // alphabetical sorting
-        } else {
-          if (name1 > name2) {
-            return params?.order === 'desc' ? -1 : 1;
-          }
-          if (name2 > name1) {
-            return params?.order === 'desc' ? 1 : -1;
-          }
-        }
-        return 0;
-      },
       fillLabel,
+      sortPredicate: sortPredicateByType(visType, visParams, visData, columns, col),
       shape: {
         fillColor: (d) => {
           const outputColor = computeColor(
