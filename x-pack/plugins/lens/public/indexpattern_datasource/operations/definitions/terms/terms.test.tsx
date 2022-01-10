@@ -67,7 +67,7 @@ describe('terms', () => {
       columnOrder: ['col1', 'col2'],
       columns: {
         col1: {
-          label: 'Top value of category',
+          label: 'Top values of source',
           dataType: 'string',
           isBucketed: true,
           operationType: 'terms',
@@ -79,7 +79,7 @@ describe('terms', () => {
           sourceField: 'source',
         } as TermsIndexPatternColumn,
         col2: {
-          label: 'Count',
+          label: 'Count of records',
           dataType: 'number',
           isBucketed: false,
           sourceField: 'Records',
@@ -1462,6 +1462,7 @@ describe('terms', () => {
       expect(select.prop('options')!.map(({ value }) => value)).toEqual([
         'column$$$col2',
         'alphabetical',
+        'rare',
       ]);
     });
 

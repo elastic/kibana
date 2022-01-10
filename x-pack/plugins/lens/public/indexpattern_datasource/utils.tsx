@@ -105,9 +105,9 @@ export function getPrecisionErrorWarningMessages(
         [] as Array<{ layerId: string; column: DatatableColumn }>
       )
       .forEach(({ layerId, column }) => {
-        if (checkColumnForPrecisionError(column)) {
-          const currentLayer = state.layers[layerId];
-          const currentColumn = currentLayer.columns[column.id];
+        const currentLayer = state.layers[layerId];
+        const currentColumn = currentLayer?.columns[column.id];
+        if (currentLayer && currentColumn && checkColumnForPrecisionError(column)) {
           const indexPattern = state.indexPatterns[currentLayer.indexPatternId];
           const isAscendingCountSorting =
             isColumnOfType<TermsIndexPatternColumn>('terms', currentColumn) &&

@@ -127,7 +127,7 @@ describe('Multi Terms Agg', () => {
                   5,
                 ],
               },
-              "function": "aggTerms",
+              "function": "aggMultiTerms",
               "type": "function",
             },
           ],

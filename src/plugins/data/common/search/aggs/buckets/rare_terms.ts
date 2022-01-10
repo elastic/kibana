@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 import { BucketAggType } from './bucket_agg_type';
@@ -51,10 +50,6 @@ export const getRareTermsBucketAgg = () => {
           KBN_FIELD_TYPES.IP,
           KBN_FIELD_TYPES.STRING,
         ],
-      },
-      {
-        name: 'orderBy',
-        write: noop, // prevent default write, it's handled by orderAgg
       },
       {
         name: 'max_doc_count',

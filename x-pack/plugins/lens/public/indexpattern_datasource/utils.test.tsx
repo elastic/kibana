@@ -17,12 +17,32 @@ describe('indexpattern_datasource utils', () => {
     let docLinks: DocLinksStart;
 
     beforeEach(() => {
-      state = {} as IndexPatternPrivateState;
+      state = {
+        layers: {
+          id: {
+            indexPatternId: 'one',
+            columns: {
+              col1: {
+                operationType: 'terms',
+                params: {
+                  orderBy: {
+                    type: 'alphabetical',
+                  },
+                },
+              },
+            },
+          },
+        },
+        indexPatterns: {
+          one: {},
+        },
+      } as unknown as IndexPatternPrivateState;
       framePublicAPI = {
         activeData: {
           id: {
             columns: [
               {
+                id: 'col1',
                 meta: {
                   sourceParams: {
                     hasPrecisionError: false,
@@ -43,19 +63,25 @@ describe('indexpattern_datasource utils', () => {
       } as DocLinksStart;
     });
     test('should not show precisionError if hasPrecisionError is false', () => {
-      expect(getPrecisionErrorWarningMessages(state, framePublicAPI, docLinks)).toHaveLength(0);
+      expect(
+        getPrecisionErrorWarningMessages(state, framePublicAPI, docLinks, () => {})
+      ).toHaveLength(0);
     });
 
     test('should not show precisionError if hasPrecisionError is not defined', () => {
       delete framePublicAPI.activeData!.id.columns[0].meta.sourceParams!.hasPrecisionError;
 
-      expect(getPrecisionErrorWarningMessages(state, framePublicAPI, docLinks)).toHaveLength(0);
+      expect(
+        getPrecisionErrorWarningMessages(state, framePublicAPI, docLinks, () => {})
+      ).toHaveLength(0);
     });
 
     test('should show precisionError if hasPrecisionError is true', () => {
       framePublicAPI.activeData!.id.columns[0].meta.sourceParams!.hasPrecisionError = true;
 
-      expect(getPrecisionErrorWarningMessages(state, framePublicAPI, docLinks)).toHaveLength(1);
+      expect(
+        getPrecisionErrorWarningMessages(state, framePublicAPI, docLinks, () => {})
+      ).toHaveLength(1);
     });
   });
 });

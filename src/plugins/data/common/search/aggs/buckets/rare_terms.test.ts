@@ -7,7 +7,6 @@
  */
 
 import { AggConfigs } from '../agg_configs';
-import { METRIC_TYPES } from '../metrics';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import type { IndexPatternField } from '../../..';
@@ -63,7 +62,7 @@ describe('rare terms Agg', () => {
         {
           id: 'test',
           params,
-          type: BUCKET_TYPES.MULTI_TERMS,
+          type: BUCKET_TYPES.RARE_TERMS,
         },
       ],
       { typesRegistry: mockAggTypesRegistry() }
@@ -71,12 +70,9 @@ describe('rare terms Agg', () => {
   };
 
   test('produces the expected expression ast', () => {
-    throw new Error();
     const aggConfigs = getAggConfigs({
-      fields: ['field', 'string_field'],
-      orderAgg: {
-        type: 'count',
-      },
+      field: 'field',
+      max_doc_count: 5,
     });
     expect(aggConfigs.aggs[0].toExpressionAst()).toMatchInlineSnapshot(`
         Object {
@@ -86,107 +82,22 @@ describe('rare terms Agg', () => {
                 "enabled": Array [
                   true,
                 ],
-                "fields": Array [
+                "field": Array [
                   "field",
-                  "string_field",
                 ],
                 "id": Array [
                   "test",
                 ],
-                "order": Array [
-                  "desc",
-                ],
-                "orderAgg": Array [
-                  Object {
-                    "chain": Array [
-                      Object {
-                        "arguments": Object {
-                          "enabled": Array [
-                            true,
-                          ],
-                          "id": Array [
-                            "test-orderAgg",
-                          ],
-                          "schema": Array [
-                            "orderAgg",
-                          ],
-                        },
-                        "function": "aggCount",
-                        "type": "function",
-                      },
-                    ],
-                    "type": "expression",
-                  },
-                ],
-                "otherBucket": Array [
-                  false,
-                ],
-                "otherBucketLabel": Array [
-                  "Other",
-                ],
-                "size": Array [
+                "max_doc_count": Array [
                   5,
                 ],
               },
-              "function": "aggTerms",
+              "function": "aggRareTerms",
               "type": "function",
             },
           ],
           "type": "expression",
         }
       `);
-  });
-
-  test('uses correct bucket path for sorting by median', () => {
-    const indexPattern = {
-      id: '1234',
-      title: 'logstash-*',
-      fields: [
-        {
-          name: 'string_field',
-          type: 'string',
-          esTypes: ['string'],
-          aggregatable: true,
-          filterable: true,
-          searchable: true,
-        },
-        {
-          name: 'number_field',
-          type: 'number',
-          esTypes: ['number'],
-          aggregatable: true,
-          filterable: true,
-          searchable: true,
-        },
-      ],
-    } as IndexPattern;
-
-    indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
-    indexPattern.fields.filter = () => indexPattern.fields;
-
-    const aggConfigs = new AggConfigs(
-      indexPattern,
-      [
-        {
-          id: 'test',
-          params: {
-            fields: ['string_field'],
-            orderAgg: {
-              type: METRIC_TYPES.MEDIAN,
-              params: {
-                field: {
-                  name: 'number_field',
-                  type: 'number',
-                },
-              },
-            },
-          },
-          type: BUCKET_TYPES.MULTI_TERMS,
-        },
-      ],
-      { typesRegistry: mockAggTypesRegistry() }
-    );
-    const { [BUCKET_TYPES.MULTI_TERMS]: params } = aggConfigs.aggs[0].toDsl();
-    expect(params.order).toEqual({ 'test-orderAgg.50': 'desc' });
   });
 });
