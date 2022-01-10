@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { SharedUXPlugin } from './plugin';
+import type { SharedUXServices } from '../.';
+import { PluginServiceFactory } from '../types';
+import { platformServiceFactory } from './platform';
 
 /**
- * Creates the Shared UX plugin.
+ * A factory function for creating a simple stubbed implemetation of `SharedUXServices`.
  */
-export function plugin() {
-  return new SharedUXPlugin();
-}
-
-export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
-export { ExitFullScreenButton, LazyExitFullScreenButton } from './components';
+export const servicesFactory: PluginServiceFactory<SharedUXServices> = () => ({
+  platform: platformServiceFactory(),
+});

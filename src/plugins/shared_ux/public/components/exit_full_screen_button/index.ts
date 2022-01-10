@@ -5,9 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+/* eslint-disable import/no-default-export */
 
-/** The ID of the Shared UX plugin. */
-export const PLUGIN_ID = 'sharedUX';
+import { ExitFullScreenButton } from './exit_full_screen_button';
+export { ExitFullScreenButton } from './exit_full_screen_button';
 
-/** The name of the Shared UX plugin. */
-export const PLUGIN_NAME = 'sharedUX';
+/**
+ * Exporting the ExitFullScreenButton component as a default export so it can be
+ * loaded by React.lazy.
+ */
+export default ExitFullScreenButton;

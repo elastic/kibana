@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
+/** @internal */
 export interface SharedUXPluginSetup {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+/** @internal */
 export interface SharedUXPluginStart {}
