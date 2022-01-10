@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-/** The ID of the Shared UX plugin. */
-export const PLUGIN_ID = 'sharedUX';
+import { addDecorator } from '@storybook/react';
+import { servicesDecorator } from './decorators';
 
-/** The name of the Shared UX plugin. */
-export const PLUGIN_NAME = 'sharedUX';
+addDecorator(servicesDecorator);

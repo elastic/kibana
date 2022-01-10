@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-/** The ID of the Shared UX plugin. */
-export const PLUGIN_ID = 'sharedUX';
-
-/** The name of the Shared UX plugin. */
-export const PLUGIN_NAME = 'sharedUX';
+// Importing MDX files requires a type definition not currently included in the stack.
+declare module '*.mdx' {
+  let MDXComponent: (props: any) => JSX.Element;
+  // eslint-disable-next-line import/no-default-export
+  export default MDXComponent;
+}
