@@ -67,7 +67,7 @@ export class UICapabilitiesService {
             `${credentials.username}:${credentials.password}`
           ).toString('base64')}`,
         }
-      : {};
+      : undefined;
     const response = await this.axios.post(
       `${spaceUrlPrefix}/api/core/capabilities`,
       { applications: [...applications, 'kibana:stack_management'] },
