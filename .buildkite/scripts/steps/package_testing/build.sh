@@ -4,6 +4,7 @@ set -euo pipefail
 
 .buildkite/scripts/bootstrap.sh
 
+echo "--- Build Kibana Distribution"
 node scripts/build --all-platforms --debug
 
 cd target
