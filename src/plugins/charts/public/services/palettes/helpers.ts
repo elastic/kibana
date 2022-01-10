@@ -37,7 +37,9 @@ function findColorsByStops(
 function getNormalizedValueByRange(
   value: number,
   { range }: CustomPaletteState,
-  minMax: { min: number; max: number }
+  minMax: { min: number; max: number },
+  isMaxContinuity: boolean,
+  rangeMax: number
 ) {
   let result = value;
   if (range === 'percent') {
@@ -45,7 +47,7 @@ function getNormalizedValueByRange(
   }
   // for a range of 1 value the formulas above will divide by 0, so here's a safety guard
   if (Number.isNaN(result)) {
-    return 1;
+    return isMaxContinuity ? 100 : rangeMax;
   }
   return result;
 }
@@ -92,14 +94,20 @@ export function workoutColorForValue(
     return;
   }
   const { colors, stops, range = 'percent', continuity = 'above', rangeMax, rangeMin } = params;
-  // ranges can be absolute numbers or percentages
-  // normalized the incoming value to the same format as range to make easier comparisons
-  const normalizedValue = getNormalizedValueByRange(value, params, minMax);
-
-  const [min, max]: [number, number] = range === 'percent' ? [0, 100] : [minMax.min, minMax.max];
 
   const isMinContinuity = checkIsMinContinuity(continuity);
   const isMaxContinuity = checkIsMaxContinuity(continuity);
+  // ranges can be absolute numbers or percentages
+  // normalized the incoming value to the same format as range to make easier comparisons
+  const normalizedValue = getNormalizedValueByRange(
+    value,
+    params,
+    minMax,
+    isMaxContinuity,
+    rangeMax
+  );
+
+  const [min, max]: [number, number] = range === 'percent' ? [0, 100] : [minMax.min, minMax.max];
 
   const minRange = getNormalizedMinRange({ stops, rangeMin }, isMinContinuity, min);
   const maxRange = getNormalizedMaxRange({ stops, colors, rangeMax }, isMaxContinuity, [min, max]);
