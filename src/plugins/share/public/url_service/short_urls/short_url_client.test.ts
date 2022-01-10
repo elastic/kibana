@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { KibanaLocation, LocatorGetUrlParams, UrlService } from '../../../common/url_service';
+import { of } from '../../../../kibana_utils';
+import {
+  KibanaLocation,
+  Locator,
+  LocatorGetUrlParams,
+  UrlService,
+} from '../../../common/url_service';
 import {
   LegacyShortUrlLocatorDefinition,
   LegacyShortUrlLocatorParams,
@@ -125,5 +131,246 @@ describe('create()', () => {
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     expect(shortUrl.data).toMatchObject(shortUrlData);
+  });
+
+  test('passes through error thrown by HTTP client', async () => {
+    const { service, http, legacyShortUrlLocator } = setup();
+    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const error = { message: 'Something went wrong...' };
+
+    fetchSpy.mockImplementation(async () => {
+      throw error;
+    });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(0);
+
+    const [, err] = await of(
+      service.shortUrls.get(null).create<LegacyShortUrlLocatorParams>({
+        locator: legacyShortUrlLocator!,
+        params: {
+          url: 'https://example.com/foo/bar',
+        },
+      })
+    );
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(err).toStrictEqual(error);
+  });
+});
+
+describe('createFromLongUrl()', () => {
+  test('calls HTTP short URL creation endpoint', async () => {
+    const { service, http } = setup();
+    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+
+    expect(fetchSpy).toHaveBeenCalledTimes(0);
+
+    await service.shortUrls.get(null).createFromLongUrl('https://www.example.com/a/b/c');
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(fetchSpy).toHaveBeenCalledWith('/api/short_url', {
+      method: 'POST',
+      body: expect.any(String),
+    });
+    expect(JSON.parse(fetchSpy.mock.calls[0][1].body)).toStrictEqual({
+      humanReadableSlug: true,
+      locatorId: LEGACY_SHORT_URL_LOCATOR_ID,
+      params: {
+        url: '/a/b/c',
+      },
+    });
+  });
+
+  test('returns the short URL object and additional data', async () => {
+    const { service, http } = setup();
+    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const shortUrlData = {
+      id: '123',
+      slug: 'yellow-orange-tomato',
+      accessCount: 0,
+      accessDate: 1600000000000,
+      createDate: 1600000000000,
+      locator: {
+        id: LEGACY_SHORT_URL_LOCATOR_ID,
+        state: {
+          url: 'https://example.com/foo/bar',
+        },
+      },
+    };
+
+    fetchSpy.mockImplementation(async () => {
+      return shortUrlData;
+    });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(0);
+
+    const shortUrl = await service.shortUrls
+      .get(null)
+      .createFromLongUrl('https://www.example.com/a/b/c');
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(shortUrl.data).toMatchObject(shortUrlData);
+    expect(shortUrl.locator).toBeInstanceOf(Locator);
+    expect(shortUrl.params).toStrictEqual({
+      slug: 'yellow-orange-tomato',
+    });
+    expect(shortUrl.url).toBe('https://example.com/xyz/r/s/yellow-orange-tomato');
+  });
+});
+
+describe('get()', () => {
+  test('calls HTTP "get" endpoint', async () => {
+    const { service, http } = setup();
+    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+
+    expect(fetchSpy).toHaveBeenCalledTimes(0);
+
+    await service.shortUrls.get(null).get('foobar');
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(fetchSpy).toHaveBeenCalledWith('/api/short_url/foobar', {
+      method: 'GET',
+    });
+  });
+
+  test('returns data returned by the "get" endpoint', async () => {
+    const { service, http } = setup();
+    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const shortUrlData = {
+      id: '123',
+      slug: 'yellow-orange-tomato',
+      accessCount: 0,
+      accessDate: 1600000000000,
+      createDate: 1600000000000,
+      locator: {
+        id: LEGACY_SHORT_URL_LOCATOR_ID,
+        state: {
+          url: 'https://example.com/foo/bar',
+        },
+      },
+    };
+
+    fetchSpy.mockImplementation(async () => {
+      return shortUrlData;
+    });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(0);
+
+    const shortUrl = await service.shortUrls.get(null).get('foobar');
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(shortUrl.data).toStrictEqual(shortUrlData);
+  });
+
+  test('passes through error thrown by HTTP client', async () => {
+    const { service, http } = setup();
+    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const error = { message: 'Something went wrong...' };
+
+    fetchSpy.mockImplementation(async () => {
+      throw error;
+    });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(0);
+
+    const [, err] = await of(service.shortUrls.get(null).get('foobar'));
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(err).toStrictEqual(error);
+  });
+});
+
+describe('resolve()', () => {
+  test('calls HTTP "resolve" endpoint', async () => {
+    const { service, http } = setup();
+    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+
+    expect(fetchSpy).toHaveBeenCalledTimes(0);
+
+    await service.shortUrls.get(null).resolve('pink-orange-tomato');
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(fetchSpy).toHaveBeenCalledWith('/api/short_url/_slug/pink-orange-tomato', {
+      method: 'GET',
+    });
+  });
+
+  test('returns data returned by the "resolve" endpoint', async () => {
+    const { service, http } = setup();
+    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const shortUrlData = {
+      id: '123',
+      slug: 'yellow-orange-tomato',
+      accessCount: 0,
+      accessDate: 1600000000000,
+      createDate: 1600000000000,
+      locator: {
+        id: LEGACY_SHORT_URL_LOCATOR_ID,
+        state: {
+          url: 'https://example.com/foo/bar',
+        },
+      },
+    };
+
+    fetchSpy.mockImplementation(async () => {
+      return shortUrlData;
+    });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(0);
+
+    const shortUrl = await service.shortUrls.get(null).resolve('pink-orange-tomato');
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(shortUrl.data).toStrictEqual(shortUrlData);
+  });
+
+  test('passes through error thrown by HTTP client', async () => {
+    const { service, http } = setup();
+    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const error = { message: 'Something went wrong...' };
+
+    fetchSpy.mockImplementation(async () => {
+      throw error;
+    });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(0);
+
+    const [, err] = await of(service.shortUrls.get(null).resolve('pink-orange-tomato'));
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(err).toStrictEqual(error);
+  });
+});
+
+describe('delete()', () => {
+  test('calls the HTTP endpoint', async () => {
+    const { service, http } = setup();
+    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+
+    expect(fetchSpy).toHaveBeenCalledTimes(0);
+
+    await service.shortUrls.get(null).delete('foobar');
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(fetchSpy).toHaveBeenCalledWith('/api/short_url/foobar', {
+      method: 'DELETE',
+    });
+  });
+
+  test('passes through error thrown by HTTP client', async () => {
+    const { service, http } = setup();
+    const fetchSpy = http.fetch as unknown as jest.SpyInstance;
+    const error = { message: 'Something went wrong...' };
+
+    fetchSpy.mockImplementation(async () => {
+      throw error;
+    });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(0);
+
+    const [, err] = await of(service.shortUrls.get(null).delete('foobar'));
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(err).toStrictEqual(error);
   });
 });
