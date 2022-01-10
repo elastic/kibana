@@ -14,6 +14,7 @@ import { tinymathFunctions } from './util';
 import { TermsIndexPatternColumn } from '../terms';
 import { MovingAverageIndexPatternColumn } from '../calculations';
 import { StaticValueIndexPatternColumn } from '../static_value';
+import { getFilter } from '../helpers';
 
 jest.mock('../../layer_helpers', () => {
   return {
@@ -23,6 +24,12 @@ jest.mock('../../layer_helpers', () => {
     getManagedColumnsFrom: jest.fn().mockReturnValue([]),
   };
 });
+
+interface PartialColumnParams {
+  kql?: string;
+  lucene?: string;
+  shift?: string;
+}
 
 const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
   average: {
@@ -60,7 +67,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
   count: {
     input: 'field',
     filterable: true,
-    buildColumn: ({ field }: { field: IndexPatternField }) => ({
+    buildColumn: ({ field }: { field: IndexPatternField }, columnsParams: PartialColumnParams) => ({
       label: 'avg',
       dataType: 'number',
       operationType: 'count',
@@ -68,6 +75,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       isBucketed: false,
       scale: 'ratio',
       timeScale: false,
+      filter: getFilter(undefined, columnsParams),
     }),
     getPossibleOperationForField: () => ({ scale: 'ratio' }),
   } as unknown as GenericOperationDefinition,
@@ -78,7 +86,10 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
   moving_average: {
     input: 'fullReference',
     operationParams: [{ name: 'window', type: 'number', required: true }],
-    buildColumn: ({ references }: { references: string[] }) => ({
+    buildColumn: (
+      { references }: { references: string[] },
+      columnsParams: PartialColumnParams
+    ) => ({
       label: 'moving_average',
       dataType: 'number',
       operationType: 'moving_average',
@@ -87,9 +98,11 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
       timeScale: false,
       params: { window: 5 },
       references,
+      filter: getFilter(undefined, columnsParams),
     }),
     getErrorMessage: () => ['mock error'],
     getPossibleOperationForField: () => ({ scale: 'ratio' }),
+    filterable: true,
   } as unknown as GenericOperationDefinition,
   cumulative_sum: {
     input: 'fullReference',
@@ -246,7 +259,7 @@ describe('formula', () => {
       });
     });
 
-    it('it should move over lucene arguments without', () => {
+    it('it should move over lucene arguments if set', () => {
       expect(
         formulaOperation.buildColumn({
           previousColumn: {
@@ -415,25 +428,30 @@ describe('formula', () => {
     let indexPattern: IndexPattern;
     let currentColumn: FormulaIndexPatternColumn;
 
-    function testIsBrokenFormula(formula: string) {
+    function testIsBrokenFormula(
+      formula: string,
+      columnParams: Partial<Pick<FormulaIndexPatternColumn, 'filter'>> = {}
+    ) {
+      const mergedColumn = { ...currentColumn, ...columnParams };
+      const mergedLayer = { ...layer, columns: { ...layer.columns, col1: mergedColumn } };
       expect(
         regenerateLayerFromAst(
           formula,
-          layer,
+          mergedLayer,
           'col1',
-          currentColumn,
+          mergedColumn,
           indexPattern,
           operationDefinitionMap
         ).newLayer
       ).toEqual({
-        ...layer,
+        ...mergedLayer,
         columns: {
-          ...layer.columns,
+          ...mergedLayer.columns,
           col1: {
-            ...currentColumn,
+            ...mergedColumn,
             label: formula,
             params: {
-              ...currentColumn.params,
+              ...mergedColumn.params,
               formula,
               isFormulaBroken: true,
             },
@@ -639,6 +657,19 @@ describe('formula', () => {
       testIsBrokenFormula(formula);
     });
 
+    it('returns a filter type error if query types mismatch between column filter and inner formula one', () => {
+      const formulas = [
+        `count(kql='bytes > 4000')`,
+        `count(lucene='bytes:[400 TO *]') + count(kql='bytes > 4000')`,
+        `moving_average(average(bytes), kql='bytes: *', window=7)`,
+        `moving_average(sum(bytes, kql='bytes: *'), window=7)`,
+      ];
+
+      for (const formula of formulas) {
+        testIsBrokenFormula(formula, { filter: { language: 'lucene', query: 'bytes:[400 TO *]' } });
+      }
+    });
+
     it('returns the locations of each function', () => {
       expect(
         regenerateLayerFromAst(
@@ -655,12 +686,99 @@ describe('formula', () => {
         col1X2: { min: 42, max: 50 },
       });
     });
+
+    it('add the formula filter to supported operations', () => {
+      const filter = { language: 'kuery', query: 'bytes > 4000' };
+      const mergedColumn = { ...currentColumn, filter };
+      const mergedLayer = { ...layer, columns: { ...layer.columns, col1: mergedColumn } };
+      const formula = 'moving_average(average(bytes), window=7) + count()';
+
+      const { newLayer } = regenerateLayerFromAst(
+        formula,
+        mergedLayer,
+        'col1',
+        mergedColumn,
+        indexPattern,
+        operationDefinitionMap
+      );
+      // average and math are not filterable in the mocks
+      expect(newLayer.columns).toEqual(
+        expect.objectContaining({
+          col1: expect.objectContaining({
+            label: formula,
+            filter,
+          }),
+          col1X1: expect.objectContaining({
+            operationType: 'moving_average',
+            filter,
+          }),
+          col1X2: expect.objectContaining({
+            operationType: 'count',
+            filter,
+          }),
+        })
+      );
+
+      expect(newLayer.columns).toEqual(
+        expect.objectContaining({
+          col1X0: expect.not.objectContaining({
+            filter,
+          }),
+          col1X3: expect.not.objectContaining({
+            filter,
+          }),
+        })
+      );
+    });
+    it('prepend formula filter to supported operations', () => {
+      const filter = { language: 'kuery', query: 'bytes > 4000' };
+      const innerFilter = 'bytes > 5000';
+      const mergedColumn = { ...currentColumn, filter };
+      const mergedLayer = { ...layer, columns: { ...layer.columns, col1: mergedColumn } };
+      const formula = `moving_average(average(bytes), window=7, kql='${innerFilter}') + count(kql='${innerFilter}')`;
+
+      const { newLayer } = regenerateLayerFromAst(
+        formula,
+        mergedLayer,
+        'col1',
+        mergedColumn,
+        indexPattern,
+        operationDefinitionMap
+      );
+      // average and math are not filterable in the mocks
+      expect(newLayer.columns).toEqual(
+        expect.objectContaining({
+          col1: expect.objectContaining({
+            label: formula,
+            filter,
+          }),
+          col1X1: expect.objectContaining({
+            operationType: 'moving_average',
+            filter: {
+              ...filter,
+              query: `(${filter.query}) AND (${innerFilter})`,
+            },
+          }),
+          col1X2: expect.objectContaining({
+            operationType: 'count',
+            filter: {
+              ...filter,
+              query: `(${filter.query}) AND (${innerFilter})`,
+            },
+          }),
+        })
+      );
+    });
   });
 
   describe('getErrorMessage', () => {
     let indexPattern: IndexPattern;
 
-    function getNewLayerWithFormula(formula: string, isBroken = true): IndexPatternLayer {
+    function getNewLayerWithFormula(
+      formula: string,
+      isBroken = true,
+      columnParams: Partial<Pick<FormulaIndexPatternColumn, 'filter'>> = {}
+    ): IndexPatternLayer {
       return {
         columns: {
           col1: {
@@ -671,6 +789,7 @@ describe('formula', () => {
             scale: 'ratio',
             params: { formula, isFormulaBroken: isBroken },
             references: [],
+            ...columnParams,
           } as FormulaIndexPatternColumn,
         },
         columnOrder: [],
@@ -1331,5 +1450,77 @@ invalid: "
         });
       });
     }
+
+    it('returns error if formula filter has not same type of inner operations filter', () => {
+      const formulas = [
+        { formula: `count(kql='bytes > 4000')`, operation: 'count' },
+        {
+          formula: `count(lucene='bytes:[400 TO *]') + sum(bytes, kql='bytes > 4000')`,
+          operation: 'sum',
+        },
+        {
+          formula: `moving_average(average(bytes), kql='bytes: *', window=7)`,
+          operation: 'moving_average',
+        },
+        { formula: `moving_average(sum(bytes, kql='bytes: *'), window=7)`, operation: 'sum' },
+      ];
+
+      for (const { formula, operation } of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula, true, {
+              filter: { language: 'lucene', query: 'bytes:[400 TO *]' },
+            }),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual([
+          `The Formula filter of type "lucene" is not compatible with the inner filter of type "kql" from the ${operation} operation.`,
+        ]);
+      }
+    });
+
+    it('return multiple errors if formula filter has not same type of multiple inner operations filter', () => {
+      expect(
+        formulaOperation.getErrorMessage!(
+          getNewLayerWithFormula(
+            `count(kql='bytes > 4000') + sum(bytes, kql='bytes > 4000')`,
+            true,
+            {
+              filter: { language: 'lucene', query: 'bytes:[400 TO *]' },
+            }
+          ),
+          'col1',
+          indexPattern,
+          operationDefinitionMap
+        )
+      ).toEqual([
+        `The Formula filter of type "lucene" is not compatible with the inner filter of type "kql" from the count operation.`,
+        `The Formula filter of type "lucene" is not compatible with the inner filter of type "kql" from the sum operation.`,
+      ]);
+    });
+
+    it('returns no error if formula filter and operation inner filters are compatible', () => {
+      const formulas = [
+        `count(kql='bytes > 4000')`,
+        `count(kql='bytes > 4000') + sum(bytes, kql='bytes > 4000')`,
+        `moving_average(average(bytes), kql='bytes: *', window=7)`,
+        `moving_average(sum(bytes, kql='bytes: *'), window=7)`,
+      ];
+
+      for (const formula of formulas) {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula, true, {
+              filter: { language: 'kuery', query: 'bytes > 4000' },
+            }),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual(undefined);
+      }
+    });
   });
 });
