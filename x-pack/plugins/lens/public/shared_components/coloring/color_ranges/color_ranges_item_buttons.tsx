@@ -83,7 +83,7 @@ export function ColorRangeEditButton({
       type: 'set',
       payload: { colorRanges: [...colorRanges], continuity: newContinuity },
     });
-  }, [colorRanges, isLast, index, dispatch, continuity]);
+  }, [colorRanges, isLast, index, dispatch, continuity, dataBounds, rangeType]);
 
   const title = i18n.translate('xpack.lens.dynamicColoring.customPalette.editButtonAriaLabel', {
     defaultMessage: 'Edit',
@@ -102,9 +102,7 @@ export function ColorRangeEditButton({
 
 export function ColorRangeAutoDetectButton({
   index,
-  dataBounds,
   colorRanges,
-  rangeType,
   continuity,
   dispatch,
   accessor,
@@ -120,7 +118,7 @@ export function ColorRangeAutoDetectButton({
       type: 'set',
       payload: { colorRanges: [...colorRanges], continuity: newContinuity },
     });
-  }, [continuity, colorRanges, dataBounds, dispatch, index, isLast, rangeType]);
+  }, [continuity, colorRanges, dispatch, index, isLast]);
 
   const title = isLast
     ? i18n.translate('xpack.lens.dynamicColoring.customPalette.autoDetectMaximumAriaLabel', {
