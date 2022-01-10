@@ -8,8 +8,12 @@
 
 import { SharedUXPlugin } from './plugin';
 
+/**
+ * Creates the Shared UX plugin.
+ */
 export function plugin() {
   return new SharedUXPlugin();
 }
 
 export type { SharedUXPluginSetup, SharedUXPluginStart } from './types';
+export { ExitFullScreenButton, LazyExitFullScreenButton } from './components';
