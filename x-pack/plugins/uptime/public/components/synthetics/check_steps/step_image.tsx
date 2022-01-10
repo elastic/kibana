@@ -16,14 +16,14 @@ interface Props {
 
 export const StepImage = ({ step }: Props) => {
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
       <EuiFlexItem grow={false}>
         <PingTimestamp
           checkGroup={step.monitor.check_group}
           initialStepNo={step.synthetics?.step?.index}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} style={{ minWidth: 80 }}>
         <EuiText>{step.synthetics?.step?.name}</EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
