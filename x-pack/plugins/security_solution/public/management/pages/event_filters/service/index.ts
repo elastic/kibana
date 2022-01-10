@@ -134,6 +134,11 @@ export class EventFiltersHttpService implements EventFiltersService {
       delete exceptionToUpdateCleaned[field as keyof UpdateExceptionListItemSchema];
     });
 
+    exceptionToUpdateCleaned.comments = exceptionToUpdateCleaned.comments?.map((comment) => ({
+      comment: comment.comment,
+      id: comment.id,
+    }));
+
     return exceptionToUpdateCleaned as UpdateExceptionListItemSchema;
   }
 }
