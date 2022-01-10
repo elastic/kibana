@@ -11,6 +11,7 @@ interface DataStreamConfig {
   type: DataStream;
   id: string;
   schedule: string;
+  enabled: boolean;
   data_stream: {
     namespace: 'default';
   };
@@ -30,6 +31,7 @@ export function convertToDataStreamFormat(monitor: Record<string, any>): DataStr
     id: monitor.id,
     // Schedule is needed by service at root level as well
     schedule: monitor.schedule,
+    enabled: monitor.enabled,
     data_stream: {
       namespace: monitor.namespace ?? 'default',
     },

@@ -39,6 +39,7 @@ describe('convertToDataStreamFormat', function () {
       data_stream: {
         namespace: 'default',
       },
+      enabled: true,
       id: 'testId',
       schedule: '@every 3m',
       streams: [
