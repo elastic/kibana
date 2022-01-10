@@ -8,12 +8,6 @@
 // View: Adding a Source flow
 // --------------------------------------------------
 
-.organizational-content-source-label {
-  padding: 0 $euiSizeM;
-  min-height: $euiButtonHeight;
-  line-height: $euiButtonHeight;
-}
-
 .adding-a-source {
   ul {
     padding: 0;
@@ -103,4 +97,10 @@
     margin: 0;
     background: transparent;
   }
+}
+
+.organizational-content-source-label {
+  padding: 0 $euiSizeM;
+  min-height: $euiButtonHeight;
+  line-height: $euiButtonHeight;
 }

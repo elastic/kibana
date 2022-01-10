@@ -51,7 +51,7 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
     // does this card need a disabled state?
     const card = (
       <>
-        <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false} gutterSize="m">
+        <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false} gutterSize="l">
           <EuiFlexItem grow={false}>
             <SourceIcon serviceType={serviceType} name={name} size="l" />
           </EuiFlexItem>
