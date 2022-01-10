@@ -21,7 +21,7 @@ describe('ThemeService', () => {
 
   describe('#setup', () => {
     it('exposes a `theme$` observable with the values provided by the injected metadata', async () => {
-      injectedMetadata.getTheme.mockReturnValue({ theme: 'dark', version: 'v8', darkMode: true });
+      injectedMetadata.getTheme.mockReturnValue({ theme: 'dark', version: 'v8' });
       const { theme$ } = themeService.setup({ injectedMetadata });
       const theme = await theme$.pipe(take(1)).toPromise();
       expect(theme).toEqual({
@@ -38,7 +38,7 @@ describe('ThemeService', () => {
     });
 
     it('exposes a `theme$` observable with the values provided by the injected metadata', async () => {
-      injectedMetadata.getTheme.mockReturnValue({ theme: 'dark', version: 'v8', darkMode: true });
+      injectedMetadata.getTheme.mockReturnValue({ theme: 'dark', version: 'v8' });
       themeService.setup({ injectedMetadata });
       const { theme$ } = themeService.start();
       const theme = await theme$.pipe(take(1)).toPromise();

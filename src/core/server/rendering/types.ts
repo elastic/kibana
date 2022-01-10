@@ -53,7 +53,6 @@ export interface InjectedMetadata {
     translationsUrl: string;
   };
   theme: {
-    darkMode: boolean;
     theme: string; // FIXME ThemeOption
     version: ThemeVersion;
   };

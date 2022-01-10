@@ -42,7 +42,7 @@ const createSetupContractMock = () => {
     },
   } as any);
   setupContract.getPlugins.mockReturnValue([]);
-  setupContract.getTheme.mockReturnValue({ theme: 'light', darkMode: false, version: 'v8' });
+  setupContract.getTheme.mockReturnValue({ theme: 'light', version: 'v8' });
   return setupContract;
 };
 

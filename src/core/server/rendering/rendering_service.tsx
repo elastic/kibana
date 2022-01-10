@@ -95,7 +95,6 @@ export class RenderingService {
     };
 
     const theme = getSettingValue('theme', settings, String);
-    const darkMode = getSettingValue('theme:darkMode', settings, Boolean);
     const themeVersion: ThemeVersion = 'v8';
 
     const stylesheetPaths = getStylesheetPaths({
@@ -129,7 +128,6 @@ export class RenderingService {
         },
         theme: {
           theme,
-          darkMode,
           version: themeVersion,
         },
         csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },

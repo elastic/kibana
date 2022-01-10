@@ -48,7 +48,6 @@ export interface InjectedMetadataParams {
     };
     theme: {
       theme: string; // FIXME ThemeOptions
-      darkMode: boolean;
       version: ThemeVersion;
     };
     env: {
@@ -168,7 +167,6 @@ export interface InjectedMetadataSetup {
   };
   getTheme: () => {
     theme: string; // FIXME ThemeOptions
-    darkMode: boolean;
     version: ThemeVersion;
   };
   /**
