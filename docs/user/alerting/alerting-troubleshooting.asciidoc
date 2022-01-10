@@ -199,3 +199,19 @@ In addition to the above methods, broadly used the next approaches and common is
 include::troubleshooting/alerting-common-issues.asciidoc[]
 include::troubleshooting/event-log-index.asciidoc[]
 include::troubleshooting/testing-connectors.asciidoc[]
+
+
+[float]
+[[alerting-kibana-disable]]
+=== Temporarily disable
+
+A cluster may become unresponsive or sluggish if too many or expensive {kib} rules 
+are attempting to run. As a stop gap measure, you may consider temporarily overriding
+the {kib} Task Manager to gain breathing room to resolve your situation by restarting 
+{kib} after updating its config to
+
+[source, txt]
+--------------------------------------------------
+xpack.task_manager.max_workers: 1
+xpack.task_manager.poll_interval: 1m
+--------------------------------------------------
