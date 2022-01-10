@@ -10,15 +10,15 @@ import { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from './constants'
 
 const POLICY_ID_START_POSITION = BY_POLICY_ARTIFACT_TAG_PREFIX.length;
 
-export const isArtifactGlobal = (item: ExceptionListItemSchema): boolean => {
+export const isArtifactGlobal = (item: Pick<ExceptionListItemSchema, 'tags'>): boolean => {
   return (item.tags ?? []).find((tag) => tag === GLOBAL_ARTIFACT_TAG) !== undefined;
 };
 
-export const isArtifactPerPolicy = (item: ExceptionListItemSchema): boolean => {
+export const isArtifactByPolicy = (item: Pick<ExceptionListItemSchema, 'tags'>): boolean => {
   return !isArtifactGlobal(item);
 };
 
-export const getPolicyIdsFromArtifact = (item: ExceptionListItemSchema): string[] => {
+export const getPolicyIdsFromArtifact = (item: Pick<ExceptionListItemSchema, 'tags'>): string[] => {
   const policyIds = [];
   const tags = item.tags ?? [];
 

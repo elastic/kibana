@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { isArtifactGlobal, isArtifactPerPolicy, getPolicyIdsFromArtifact } from './utils';
+export { isArtifactGlobal, isArtifactByPolicy, getPolicyIdsFromArtifact } from './utils';
 
 export { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from './constants';

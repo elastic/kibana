@@ -9,23 +9,20 @@ import {
   CreateExceptionListItemOptions,
   ExceptionsListPreCreateItemServerExtension,
 } from '../../../../../lists/server';
+import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
+import { TrustedAppValidator } from '../validators';
 
-export const getExceptionsPreCreateItemHandler =
-  (): ExceptionsListPreCreateItemServerExtension['callback'] => {
-    return async function (
-      data: CreateExceptionListItemOptions
-    ): Promise<CreateExceptionListItemOptions> {
-      console.log(`Request from: ${this.request?.url}`);
+export const getExceptionsPreCreateItemHandler = (
+  endpointAppContext: EndpointAppContextService
+): ExceptionsListPreCreateItemServerExtension['callback'] => {
+  return async function (
+    data: CreateExceptionListItemOptions
+  ): Promise<CreateExceptionListItemOptions> {
+    // Validate trusted apps
+    if (TrustedAppValidator.isTrustedApp(data)) {
+      return new TrustedAppValidator(endpointAppContext, this.request).validatePreCreateItem(data);
+    }
 
-      return data;
-      // FIXME:PT implement callback logic
-      // If Trusted app - validate
-      //
-      // if Event Filters - validate
-      //
-      // if Host Isolation Exceptions - validate
-      //
-      //
-      // --- else, just return
-    };
+    return data;
   };
+};

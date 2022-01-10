@@ -9,15 +9,20 @@ import {
   ExceptionsListPreUpdateItemServerExtension,
   UpdateExceptionListItemOptions,
 } from '../../../../../lists/server';
+import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
+import { TrustedAppValidator } from '../validators';
 
-export const getExceptionsPreUpdateItemHandler =
-  (): ExceptionsListPreUpdateItemServerExtension['callback'] => {
-    return async function (
-      data: UpdateExceptionListItemOptions
-    ): Promise<UpdateExceptionListItemOptions> {
-      console.log(`Request from: ${this.request?.url}`);
-      return data;
+export const getExceptionsPreUpdateItemHandler = (
+  endpointAppContext: EndpointAppContextService
+): ExceptionsListPreUpdateItemServerExtension['callback'] => {
+  return async function (
+    data: UpdateExceptionListItemOptions
+  ): Promise<UpdateExceptionListItemOptions> {
+    // Validate trusted apps
+    if (TrustedAppValidator.isTrustedApp(data)) {
+      return new TrustedAppValidator(endpointAppContext, this.request).validatePreUpdateItem(data);
+    }
 
-      // FIXME: implement method
-    };
+    return data;
   };
+};

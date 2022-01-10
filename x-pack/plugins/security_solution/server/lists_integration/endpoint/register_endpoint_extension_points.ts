@@ -17,12 +17,12 @@ export const registerListsPluginEndpointExtensionPoints = (
   // PRE-CREATE handler
   registerListsExtensionPoint({
     type: 'exceptionsListPreCreateItem',
-    callback: getExceptionsPreCreateItemHandler(),
+    callback: getExceptionsPreCreateItemHandler(endpointAppContextService),
   });
 
   // PRE-UPDATE handler
   registerListsExtensionPoint({
     type: 'exceptionsListPreUpdateItem',
-    callback: getExceptionsPreUpdateItemHandler(),
+    callback: getExceptionsPreUpdateItemHandler(endpointAppContextService),
   });
 };

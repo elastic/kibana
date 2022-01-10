@@ -5,31 +5,60 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { KibanaRequest } from 'kibana/server';
+import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
+import { ExceptionItemLikeOptions } from '../types';
+import { getEndpointAuthzInitialState } from '../../../../common/endpoint/service/authz';
+import { isArtifactByPolicy } from '../../../../common/endpoint/service/artifacts';
 
 /**
  * Provides base methods for doing validation that apply across endpoint exception entries
  */
 export class BaseValidator {
-  protected isItemByPolicy(item: ExceptionListItemSchema): boolean {
-    // FIXME:PT implement method
+  private readonly endpointAuthzPromise: ReturnType<EndpointAppContextService['getEndpointAuthz']>;
+
+  constructor(
+    private readonly endpointAppContext: EndpointAppContextService,
+    /**
+     * Request is optional only because it needs to be optional in the Lists ExceptionListClient
+     */
+    private readonly request?: KibanaRequest
+  ) {
+    if (this.request) {
+      this.endpointAuthzPromise = this.endpointAppContext.getEndpointAuthz(this.request);
+    } else {
+      this.endpointAuthzPromise = Promise.resolve(getEndpointAuthzInitialState());
+    }
+  }
+
+  protected isItemByPolicy(item: ExceptionItemLikeOptions): boolean {
+    return isArtifactByPolicy(item);
+  }
+
+  protected async validateCanManageEndpointArtifacts(): Promise<void> {
+    if (!(await this.endpointAuthzPromise).canAccessEndpointManagement) {
+      throw new Error('Not authorized');
+    }
+  }
+
+  protected async validateCanCreateByPolicyArtifacts(
+    item: ExceptionItemLikeOptions
+  ): Promise<void> {
+    if (
+      this.isItemByPolicy(item) &&
+      !(await this.endpointAuthzPromise).canCreateArtifactsByPolicy
+    ) {
+      throw new Error('Not authorized to create artifacts by policy');
+    }
   }
 
   /**
    * Validates that by-policy artifacts is permitted and that each policy referenced in the item is valid
    * @protected
    */
-  protected async validateByPolicyItem(item: ExceptionListItemSchema): Promise<void> {
+  protected async validateByPolicyItem(item: ExceptionItemLikeOptions): Promise<void> {
     if (this.isItemByPolicy(item)) {
       // FIXME:PT implement method
     }
-  }
-
-  async validatePreCreateItem(): Promise<void> {
-    // FIXME:PT implement method
-  }
-
-  async validatePreUpdateItem(): Promise<void> {
-    // FIXME:PT implement method
   }
 }
