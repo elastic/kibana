@@ -257,8 +257,7 @@ export class FleetPlugin
               `${INTEGRATIONS_PLUGIN_ID}-all`,
             ],
             app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID],
-            // TODO: uncomment after https://github.com/elastic/kibana/pull/118001 is merged
-            // requireAllSpaces: true,
+            requireAllSpaces: true,
             catalogue: ['fleet'],
             savedObject: {
               all: allSavedObjectTypes,
@@ -270,15 +269,13 @@ export class FleetPlugin
             api: [`${PLUGIN_ID}-read`, `${INTEGRATIONS_PLUGIN_ID}-read`],
             app: [PLUGIN_ID, INTEGRATIONS_PLUGIN_ID],
             catalogue: ['fleet'], // TODO: check if this is actually available to read user
-            // TODO: uncomment after https://github.com/elastic/kibana/pull/118001 is merged
-            // requireAllSpaces: true,
+            requireAllSpaces: true,
             savedObject: {
               all: [],
               read: allSavedObjectTypes,
             },
             ui: ['show', 'read'],
-            // TODO: uncomment after https://github.com/elastic/kibana/pull/118001 is merged
-            // disabled: true,
+            disabled: true,
           },
         },
       });
@@ -295,8 +292,7 @@ export class FleetPlugin
             api: [`${INTEGRATIONS_PLUGIN_ID}-read`, `${INTEGRATIONS_PLUGIN_ID}-all`],
             app: [INTEGRATIONS_PLUGIN_ID],
             catalogue: ['fleet'],
-            // TODO: uncomment after https://github.com/elastic/kibana/pull/118001 is merged
-            // requireAllSpaces: true,
+            requireAllSpaces: true,
             savedObject: {
               all: allSavedObjectTypes,
               read: [],
