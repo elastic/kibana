@@ -9,7 +9,13 @@ import moment from 'moment';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { PackagePolicy } from '../../../../fleet/common/types/models/package_policy';
 import { copyAllowlistedFields, exceptionListEventFields } from './filters';
-import { ExceptionListItem, ListTemplate, TelemetryEvent } from './types';
+import type {
+  ExceptionListItem,
+  ESClusterInfo,
+  ESLicense,
+  ListTemplate,
+  TelemetryEvent,
+} from './types';
 import {
   LIST_DETECTION_RULE_EXCEPTION,
   LIST_ENDPOINT_EXCEPTION,
@@ -160,10 +166,18 @@ export const ruleExceptionListItemToTelemetryEvent = (
  * @param listType
  * @returns lists telemetry schema
  */
-export const templateExceptionList = (listData: ExceptionListItem[], listType: string) => {
+export const templateExceptionList = (
+  listData: ExceptionListItem[],
+  clusterInfo: ESClusterInfo,
+  licenseInfo: ESLicense | undefined,
+  listType: string
+) => {
   return listData.map((item) => {
     const template: ListTemplate = {
       '@timestamp': moment().toISOString(),
+      cluster_uuid: clusterInfo.cluster_uuid,
+      cluster_name: clusterInfo.cluster_name,
+      license_id: licenseInfo?.uid,
     };
 
     // cast exception list type to a TelemetryEvent for allowlist filtering

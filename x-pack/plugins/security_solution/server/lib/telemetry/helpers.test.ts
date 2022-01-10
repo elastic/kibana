@@ -20,7 +20,7 @@ import {
   isPackagePolicyList,
   templateExceptionList,
 } from './helpers';
-import { ExceptionListItem } from './types';
+import type { ESClusterInfo, ESLicense, ExceptionListItem } from './types';
 
 describe('test diagnostic telemetry scheduled task timing helper', () => {
   test('test -5 mins is returned when there is no previous task run', async () => {
@@ -135,9 +135,20 @@ describe('test package policy type guard', () => {
 });
 
 describe('list telemetry schema', () => {
+  const clusterInfo = {
+    cluster_uuid: 'stub_cluster',
+    cluster_name: 'stub_cluster',
+  } as ESClusterInfo;
+  const licenseInfo = { uid: 'stub_license' } as ESLicense;
+
   test('detection rules document is correctly formed', () => {
     const data = [{ id: 'test_1' }] as ExceptionListItem[];
-    const templatedItems = templateExceptionList(data, LIST_DETECTION_RULE_EXCEPTION);
+    const templatedItems = templateExceptionList(
+      data,
+      clusterInfo,
+      licenseInfo,
+      LIST_DETECTION_RULE_EXCEPTION
+    );
 
     expect(templatedItems[0]?.detection_rule).not.toBeUndefined();
     expect(templatedItems[0]?.endpoint_exception).toBeUndefined();
@@ -147,7 +158,12 @@ describe('list telemetry schema', () => {
 
   test('detection rules document is correctly formed with multiple entries', () => {
     const data = [{ id: 'test_2' }, { id: 'test_2' }] as ExceptionListItem[];
-    const templatedItems = templateExceptionList(data, LIST_DETECTION_RULE_EXCEPTION);
+    const templatedItems = templateExceptionList(
+      data,
+      clusterInfo,
+      licenseInfo,
+      LIST_DETECTION_RULE_EXCEPTION
+    );
 
     expect(templatedItems[0]?.detection_rule).not.toBeUndefined();
     expect(templatedItems[1]?.detection_rule).not.toBeUndefined();
@@ -158,7 +174,12 @@ describe('list telemetry schema', () => {
 
   test('trusted apps document is correctly formed', () => {
     const data = [{ id: 'test_1' }] as ExceptionListItem[];
-    const templatedItems = templateExceptionList(data, LIST_TRUSTED_APPLICATION);
+    const templatedItems = templateExceptionList(
+      data,
+      clusterInfo,
+      licenseInfo,
+      LIST_TRUSTED_APPLICATION
+    );
 
     expect(templatedItems[0]?.detection_rule).toBeUndefined();
     expect(templatedItems[0]?.endpoint_exception).toBeUndefined();
@@ -168,7 +189,12 @@ describe('list telemetry schema', () => {
 
   test('trusted apps document is correctly formed with multiple entries', () => {
     const data = [{ id: 'test_2' }, { id: 'test_2' }] as ExceptionListItem[];
-    const templatedItems = templateExceptionList(data, LIST_TRUSTED_APPLICATION);
+    const templatedItems = templateExceptionList(
+      data,
+      clusterInfo,
+      licenseInfo,
+      LIST_TRUSTED_APPLICATION
+    );
 
     expect(templatedItems[0]?.detection_rule).toBeUndefined();
     expect(templatedItems[0]?.endpoint_exception).toBeUndefined();
@@ -179,7 +205,12 @@ describe('list telemetry schema', () => {
 
   test('endpoint exception document is correctly formed', () => {
     const data = [{ id: 'test_3' }] as ExceptionListItem[];
-    const templatedItems = templateExceptionList(data, LIST_ENDPOINT_EXCEPTION);
+    const templatedItems = templateExceptionList(
+      data,
+      clusterInfo,
+      licenseInfo,
+      LIST_ENDPOINT_EXCEPTION
+    );
 
     expect(templatedItems[0]?.detection_rule).toBeUndefined();
     expect(templatedItems[0]?.endpoint_exception).not.toBeUndefined();
@@ -189,7 +220,12 @@ describe('list telemetry schema', () => {
 
   test('endpoint exception document is correctly formed with multiple entries', () => {
     const data = [{ id: 'test_4' }, { id: 'test_4' }, { id: 'test_4' }] as ExceptionListItem[];
-    const templatedItems = templateExceptionList(data, LIST_ENDPOINT_EXCEPTION);
+    const templatedItems = templateExceptionList(
+      data,
+      clusterInfo,
+      licenseInfo,
+      LIST_ENDPOINT_EXCEPTION
+    );
 
     expect(templatedItems[0]?.detection_rule).toBeUndefined();
     expect(templatedItems[0]?.endpoint_event_filter).toBeUndefined();
@@ -201,7 +237,12 @@ describe('list telemetry schema', () => {
 
   test('endpoint event filters document is correctly formed', () => {
     const data = [{ id: 'test_5' }] as ExceptionListItem[];
-    const templatedItems = templateExceptionList(data, LIST_ENDPOINT_EVENT_FILTER);
+    const templatedItems = templateExceptionList(
+      data,
+      clusterInfo,
+      licenseInfo,
+      LIST_ENDPOINT_EVENT_FILTER
+    );
 
     expect(templatedItems[0]?.detection_rule).toBeUndefined();
     expect(templatedItems[0]?.endpoint_event_filter).not.toBeUndefined();
@@ -211,7 +252,12 @@ describe('list telemetry schema', () => {
 
   test('endpoint event filters document is correctly formed with multiple entries', () => {
     const data = [{ id: 'test_6' }, { id: 'test_6' }] as ExceptionListItem[];
-    const templatedItems = templateExceptionList(data, LIST_ENDPOINT_EVENT_FILTER);
+    const templatedItems = templateExceptionList(
+      data,
+      clusterInfo,
+      licenseInfo,
+      LIST_ENDPOINT_EVENT_FILTER
+    );
 
     expect(templatedItems[0]?.detection_rule).toBeUndefined();
     expect(templatedItems[0]?.endpoint_event_filter).not.toBeUndefined();
