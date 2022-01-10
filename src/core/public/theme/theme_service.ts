@@ -18,10 +18,19 @@ export interface SetupDeps {
 export class ThemeService {
   private theme$?: Observable<CoreTheme>;
   private stop$ = new Subject<void>();
+  private mq = window.matchMedia('(prefers-color-scheme: dark)');
 
-  public setup({ injectedMetadata }: SetupDeps): ThemeServiceSetup {
+  setup({ injectedMetadata }: SetupDeps): ThemeServiceSetup {
     const theme = injectedMetadata.getTheme();
-    this.theme$ = of({ darkMode: theme.darkMode });
+    this.theme$ = of({
+      darkMode: theme.theme === 'system' ? this.mq.matches : theme.theme === 'dark',
+    });
+
+    if (theme.theme === 'system') {
+      this.mq.addEventListener('change', (e) => {
+        // FIXME Update theme$
+      });
+    }
 
     return {
       theme$: this.theme$.pipe(takeUntil(this.stop$), shareReplay(1)),

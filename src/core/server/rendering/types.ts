@@ -31,7 +31,6 @@ export interface RenderingMetadata {
   i18n: typeof i18n.translate;
   locale: string;
   theme: string; // FIXME ThemeOption
-  darkMode: boolean;
   themeVersion: ThemeVersion;
   stylesheetPaths: StylesheetPaths;
   injectedMetadata: InjectedMetadata;
@@ -55,6 +54,7 @@ export interface InjectedMetadata {
   };
   theme: {
     darkMode: boolean;
+    theme: string; // FIXME ThemeOption
     version: ThemeVersion;
   };
   csp: Pick<ICspConfig, 'warnLegacyBrowsers'>;

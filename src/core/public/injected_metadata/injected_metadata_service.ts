@@ -47,6 +47,7 @@ export interface InjectedMetadataParams {
       [key: string]: unknown;
     };
     theme: {
+      theme: string; // FIXME ThemeOptions
       darkMode: boolean;
       version: ThemeVersion;
     };
@@ -166,6 +167,7 @@ export interface InjectedMetadataSetup {
     policy: IExternalUrlPolicy[];
   };
   getTheme: () => {
+    theme: string; // FIXME ThemeOptions
     darkMode: boolean;
     version: ThemeVersion;
   };

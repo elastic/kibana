@@ -113,7 +113,6 @@ export class RenderingService {
       i18n: i18n.translate,
       locale: i18n.getLocale(),
       theme,
-      darkMode,
       themeVersion,
       stylesheetPaths,
       injectedMetadata: {
@@ -129,6 +128,7 @@ export class RenderingService {
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
         },
         theme: {
+          theme,
           darkMode,
           version: themeVersion,
         },
