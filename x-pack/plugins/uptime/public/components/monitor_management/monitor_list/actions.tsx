@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexItem, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { UptimeSettingsContext } from '../../../contexts';
 import { useFetcher, FETCH_STATUS } from '../../../../../observability/public';
-import { deleteMonitor } from '../../../state/api/monitor_management';
+import { deleteMonitor } from '../../../state/api';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
