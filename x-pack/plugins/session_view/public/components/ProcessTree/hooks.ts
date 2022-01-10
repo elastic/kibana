@@ -173,5 +173,5 @@ export const useProcessTree = ({
   }, [searchQuery]);
 
   // return the root session leader process, and a list of orphans
-  return { sessionLeader: processMap[sessionEntityId], orphans, searchResults };
+  return { sessionLeader: processMap[sessionEntityId], processMap, orphans, searchResults };
 };

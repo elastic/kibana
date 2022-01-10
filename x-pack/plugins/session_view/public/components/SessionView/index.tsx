@@ -101,6 +101,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
             searchQuery={searchQuery}
             selectedProcess={selectedProcess}
             onProcessSelected={onProcessSelected}
+            jumpToEvent={jumpToEvent}
             isFetching={isFetching}
             hasPreviousPage={hasPreviousPage}
             hasNextPage={hasNextPage}

@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useRef, useLayoutEffect, useCallback } from 'react';
+import React, { useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { ProcessTreeNode } from '../ProcessTreeNode';
 import { useProcessTree } from './hooks';
-import { Process, ProcessEventsPage } from '../../../common/types/process_tree';
+import { Process, ProcessEventsPage, ProcessEvent } from '../../../common/types/process_tree';
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
 import { EuiButton } from '@elastic/eui';
@@ -20,6 +20,8 @@ interface ProcessTreeDeps {
   sessionEntityId: string;
 
   data: ProcessEventsPage[];
+
+  jumpToEvent: ProcessEvent;
   isFetching: boolean;
   hasNextPage: boolean | undefined;
   hasPreviousPage: boolean | undefined;
@@ -37,6 +39,7 @@ interface ProcessTreeDeps {
 export const ProcessTree = ({
   sessionEntityId,
   data,
+  jumpToEvent,
   isFetching,
   hasNextPage,
   hasPreviousPage,
@@ -48,7 +51,7 @@ export const ProcessTree = ({
 }: ProcessTreeDeps) => {
   const styles = useStyles();
 
-  const { sessionLeader, orphans, searchResults } = useProcessTree({
+  const { sessionLeader, processMap, orphans, searchResults } = useProcessTree({
     sessionEntityId,
     data,
     searchQuery,
@@ -98,19 +101,15 @@ export const ProcessTree = ({
     if (processEl) {
       processEl.prepend(selectionAreaEl);
 
-      const container = processEl.parentElement;
+      const cTop = scrollerRef.current.scrollTop;
+      const cBottom = cTop + scrollerRef.current.clientHeight;
 
-      if (container) {
-        const cTop = container.scrollTop;
-        const cBottom = cTop + container.clientHeight;
+      const eTop = processEl.offsetTop;
+      const eBottom = eTop + processEl.clientHeight;
+      const isVisible = eTop >= cTop && eBottom <= cBottom;
 
-        const eTop = processEl.offsetTop;
-        const eBottom = eTop + processEl.clientHeight;
-        const isVisible = eTop >= cTop && eBottom <= cBottom;
-
-        if (!isVisible) {
-          processEl.scrollIntoView();
-        }
+      if (!isVisible) {
+        processEl.scrollIntoView({ block: 'center' });
       }
     }
   }, []);
@@ -121,10 +120,21 @@ export const ProcessTree = ({
     }
   }, [selectedProcess, selectProcess]);
 
-  // TODO: bubble the results up to parent component session_view, and show results navigation
-  // navigating should
-  // eslint-disable-next-line no-console
-  console.log(searchResults);
+  useEffect(() => {
+    if (searchResults.length > 0) {
+      selectProcess(searchResults[0]);
+    }
+  }, [searchResults])
+
+  useEffect(() => {
+    if (jumpToEvent && data.length === 2) {
+      const process = processMap[jumpToEvent.process.entity_id];
+
+      if (process) {
+        selectProcess(process);
+      }
+    }
+  }, [jumpToEvent, processMap])
 
   function renderLoadMoreButton(text: JSX.Element, func: FetchFunction) {
     return <EuiButton
