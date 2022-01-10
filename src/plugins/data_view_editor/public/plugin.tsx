@@ -61,7 +61,7 @@ export class DataViewEditorPlugin
        */
       userPermissions: {
         editDataView: () => {
-          return application.capabilities.management.kibana.indexPatterns;
+          return application.capabilities.indexPatterns.save;
         },
       },
     };

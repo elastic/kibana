@@ -54,7 +54,7 @@ export class IndexPatternFieldEditorPlugin
       openDeleteModal,
       userPermissions: {
         editIndexPattern: () => {
-          return capabilities.management.kibana.indexPatterns;
+          return capabilities.indexPatterns.save;
         },
       },
       DeleteRuntimeFieldProvider: getDeleteFieldProvider(openDeleteModal),
