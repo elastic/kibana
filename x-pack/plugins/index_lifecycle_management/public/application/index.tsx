@@ -33,7 +33,9 @@ export const renderApp = (
   render(
     <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
       <I18nContext>
-        <KibanaContextProvider services={{ cloud, breadcrumbService, license, getUrlForApp, docLinks }}>
+        <KibanaContextProvider
+          services={{ cloud, breadcrumbService, license, getUrlForApp, docLinks }}
+        >
           <App history={history} />
         </KibanaContextProvider>
       </I18nContext>
