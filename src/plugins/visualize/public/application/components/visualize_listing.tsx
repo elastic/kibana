@@ -114,7 +114,6 @@ export const VisualizeListing = () => {
 
   const fetchItems = useCallback(
     (filter) => {
-      const reportTime = new Date().getTime();
       let searchTerm = filter;
       let references: SavedObjectsFindOptionsReference[] | undefined;
 
@@ -127,13 +126,6 @@ export const VisualizeListing = () => {
       const isLabsEnabled = uiSettings.get(VISUALIZE_ENABLE_LABS_SETTING);
       return visualizations
         .findListItems(searchTerm, listingLimit, references)
-        .then((v) => {
-          customEvents.reportCustomEvent('list-loaded', {
-            resHitCount: v.hits.length,
-            timeTookMs: new Date().getTime() - reportTime,
-          });
-          return v;
-        })
         .then(({ total, hits }: { total: number; hits: Array<Record<string, unknown>> }) => ({
           total,
           hits: hits.filter(

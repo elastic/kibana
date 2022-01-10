@@ -246,7 +246,6 @@ export const DashboardListing = ({
 
   const fetchItems = useCallback(
     (filter: string) => {
-      const reportTime = new Date().getTime();
       let searchTerm = filter;
       let references: SavedObjectsFindOptionsReference[] | undefined;
       if (savedObjectsTagging) {
@@ -261,13 +260,6 @@ export const DashboardListing = ({
         .find(searchTerm, {
           size: listingLimit,
           hasReference: references,
-        })
-        .then((v) => {
-          customEvents.reportCustomEvent('list-loaded', {
-            resHitCount: v.hits.length,
-            timeTookMs: new Date().getTime() - reportTime,
-          });
-          return v;
         });
     },
     [listingLimit, savedDashboards, savedObjectsTagging]

@@ -90,6 +90,7 @@ export const setupValueSuggestionProvider = (
           // need to make sure this only works on FE
           reportInfo.timeTookMs = new Date().getTime() - reportInfo.timeTookMs;
           reportInfo.resCount = r.length;
+          // consider sending a hash of the index being queried
           customEvents.reportCustomEvent('autocomplete-results', reportInfo);
 
           usageCollector?.trackResult();

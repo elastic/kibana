@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { customEvents } from '@kbn/custom-events';
 import {
   EuiBasicTableColumn,
   EuiButton,
@@ -120,7 +121,14 @@ class TableListView<V extends {}> extends React.Component<
 
   debouncedFetch = debounce(async (filter: string) => {
     try {
+      const reportTime = new Date().getTime();
+
       const response = await this.props.findItems(filter);
+
+      customEvents.reportCustomEvent('list-loaded', {
+        resHitCount: response.hits.length,
+        timeTookMs: new Date().getTime() - reportTime,
+      });
 
       if (!this._isMounted) {
         return;
