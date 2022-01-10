@@ -472,6 +472,7 @@ export async function installPackage(args: InstallPackageParams) {
   if (!('installSource' in args)) {
     throw new Error('installSource is required');
   }
+
   const logger = appContextService.getLogger();
   const { savedObjectsClient, esClient } = args;
 

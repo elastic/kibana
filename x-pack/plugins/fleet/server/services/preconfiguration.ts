@@ -23,6 +23,7 @@ import type {
   PreconfigurationError,
   PreconfiguredOutput,
   PackagePolicy,
+  InstallResult,
 } from '../../common';
 import { SO_SEARCH_LIMIT, normalizeHostsForAgents } from '../../common';
 import {
@@ -42,6 +43,7 @@ import { appContextService } from './app_context';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { outputService } from './output';
+import { getBundledPackages } from './epm/packages/get_bundled_packages';
 
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;
@@ -152,9 +154,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 ): Promise<PreconfigurationResult> {
   const logger = appContextService.getLogger();
 
-  // Install bundled packages first before we deal with anything from preconfiguration
-  await installBundledPackages(soClient, esClient, spaceId);
-
   // Validate configured packages to ensure there are no version conflicts
   const packageNames = groupBy(packages, (pkg) => pkg.name);
   const duplicatePackages = Object.entries(packageNames).filter(
@@ -178,6 +177,9 @@ export async function ensurePreconfiguredPackagesAndPolicies(
     );
   }
 
+  // Install bundled packages first before we install any preconfigured packages
+  const bundledInstallResults = await installBundledPackages(soClient, esClient, spaceId);
+
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await bulkInstallPackages({
     savedObjectsClient: soClient,
@@ -191,6 +193,22 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
   const fulfilledPackages = [];
   const rejectedPackages: PreconfigurationError[] = [];
+
+  for (const bundledInstallResult of bundledInstallResults) {
+    if (bundledInstallResult.error) {
+      logger.warn(
+        `Failed to install bundled package ${bundledInstallResult.name} due to error [${bundledInstallResult.error}]`
+      );
+
+      rejectedPackages.push({
+        package: { name: bundledInstallResult.name, version: '' },
+        error: bundledInstallResult.error,
+      });
+    } else {
+      fulfilledPackages.push(bundledInstallResult);
+    }
+  }
+
   for (let i = 0; i < preconfiguredPackages.length; i++) {
     const packageResult = preconfiguredPackages[i];
     if ('error' in packageResult) {
@@ -387,7 +405,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
             }),
           }
     ),
-    packages: fulfilledPackages.map((pkg) => pkgToPkgKey(pkg)),
+    packages: fulfilledPackages.map((pkg) => ('version' in pkg ? pkgToPkgKey(pkg) : pkg.name)),
     nonFatalErrors: [...rejectedPackages, ...rejectedPolicies, ...packagePolicyUpgradeResults],
   };
 }
@@ -445,6 +463,10 @@ async function addPreconfiguredPolicyPackages(
   }
 }
 
+interface BundledPackageInstallResult extends InstallResult {
+  name: string;
+}
+
 /**
  * Pulls bundled .zip archives of package from a directory and installs the packages. This facilitates
  * "stack-aligned" packages that are bundled with a given release of Kibana.
@@ -453,32 +475,34 @@ async function installBundledPackages(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   spaceId: string
-) {
-  const BUNDLED_PACKAGE_DIRECTORY = path.join(__dirname, '../bundled_packages');
+): Promise<BundledPackageInstallResult[]> {
   const logger = appContextService.getLogger();
 
-  const dirContents = await fs.readdir(BUNDLED_PACKAGE_DIRECTORY);
-  const zipFiles = dirContents.filter((file) => file.endsWith('.zip'));
+  const bundledPackages = await getBundledPackages();
 
-  for (const zipFile of zipFiles) {
-    logger.debug(`Installing bundled package ${zipFile}`);
+  const results: BundledPackageInstallResult[] = [];
 
-    const file = await fs.readFile(path.join(__dirname, '../bundled_packages/', zipFile));
+  for (const bundledPackage of bundledPackages) {
+    logger.debug(`Installing bundled package ${bundledPackage.name}`);
 
     // try/catch bundled package installs individually to avoid stopping the whole setup process
     // if a single package fails to install
     try {
-      await installPackage({
+      const result = await installPackage({
         savedObjectsClient: soClient,
         esClient,
         installSource: 'upload',
-        archiveBuffer: file,
+        archiveBuffer: bundledPackage.buffer,
         contentType: 'application/zip',
         spaceId,
       });
+
+      results.push({ name: bundledPackage.name, ...result });
     } catch (error) {
       logger.error(`Error installing bundled package`);
       logger.error(error);
     }
   }
+
+  return results;
 }
