@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export function MonitoringLogstashPipelineViewerProvider({ getService, getPageObjects }) {
+export function MonitoringLogstashPipelineViewerProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const find = getService('find');
