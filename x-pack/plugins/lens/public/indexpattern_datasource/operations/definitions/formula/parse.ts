@@ -14,7 +14,7 @@ import {
   GenericIndexPatternColumn,
   operationDefinitionMap,
 } from '../index';
-import { IndexPattern, IndexPatternLayer } from '../../../types';
+import type { IndexPattern, IndexPatternLayer } from '../../../types';
 import { mathOperation } from './math';
 import { documentField } from '../../../document_field';
 import { runASTValidation, shouldHaveFieldArgument, tryToParse } from './validation';
@@ -23,6 +23,7 @@ import {
   findVariables,
   getOperationParams,
   groupArgsByType,
+  mergeWithGlobalFilter,
 } from './util';
 import { FormulaIndexPatternColumn, isFormulaIndexPatternColumn } from './formula';
 import { getColumnOrder } from '../../layer_helpers';
@@ -45,7 +46,7 @@ function parseAndExtract(
     return { extracted: [], isValid: false };
   }
   // before extracting the data run the validation task and throw if invalid
-  const errors = runASTValidation(root, layer, indexPattern, operations);
+  const errors = runASTValidation(root, layer, indexPattern, operations, layer.columns[columnId]);
   if (errors.length) {
     return { extracted: [], isValid: false };
   }
@@ -75,6 +76,7 @@ function extractColumns(
   label: string
 ): Array<{ column: GenericIndexPatternColumn; location?: TinymathLocation }> {
   const columns: Array<{ column: GenericIndexPatternColumn; location?: TinymathLocation }> = [];
+  const globalFilter = layer.columns[idPrefix].filter;
 
   function parseNode(node: TinymathAST) {
     if (typeof node === 'number' || node.type !== 'function') {
@@ -105,7 +107,11 @@ function extractColumns(
         ? indexPattern.getFieldByName(fieldName.value)!
         : documentField;
 
-      const mappedParams = getOperationParams(nodeOperation, namedArguments || []);
+      const mappedParams = mergeWithGlobalFilter(
+        nodeOperation,
+        getOperationParams(nodeOperation, namedArguments || []),
+        globalFilter
+      );
 
       const newCol = (
         nodeOperation as OperationDefinition<GenericIndexPatternColumn, 'field'>
@@ -143,7 +149,11 @@ function extractColumns(
         mathColumn.label = label;
       }
 
-      const mappedParams = getOperationParams(nodeOperation, namedArguments || []);
+      const mappedParams = mergeWithGlobalFilter(
+        nodeOperation,
+        getOperationParams(nodeOperation, namedArguments || []),
+        globalFilter
+      );
       const newCol = (
         nodeOperation as OperationDefinition<GenericIndexPatternColumn, 'fullReference'>
       ).buildColumn(
@@ -187,15 +197,17 @@ function extractColumns(
   return columns;
 }
 
-/** @internal **/
-interface ColumnsWithFormulaMeta {
+interface ExpandColumnProperties {
+  indexPattern: IndexPattern;
+  operations?: Record<string, GenericOperationDefinition>;
+}
+
+const getEmptyColumnsWithFormulaMeta = (): {
   columns: Record<string, GenericIndexPatternColumn>;
   meta: {
     locations: Record<string, TinymathLocation>;
   };
-}
-
-const getEmptyColumnsWithFormulaMeta = (): ColumnsWithFormulaMeta => ({
+} => ({
   columns: {},
   meta: {
     locations: {},
@@ -206,14 +218,8 @@ function generateFormulaColumns(
   id: string,
   column: FormulaIndexPatternColumn,
   layer: IndexPatternLayer,
-  {
-    indexPattern,
-    operations = operationDefinitionMap,
-  }: {
-    indexPattern: IndexPattern;
-    operations?: Record<string, GenericOperationDefinition>;
-  }
-): ColumnsWithFormulaMeta {
+  { indexPattern, operations = operationDefinitionMap }: ExpandColumnProperties
+) {
   const { columns, meta } = getEmptyColumnsWithFormulaMeta();
   const formula = column.params.formula || '';
 
@@ -245,15 +251,13 @@ function generateFormulaColumns(
       : column.label,
     references: !isValid ? [] : [getManagedId(id, extracted.length - 1)],
     params: {
+      ...column.params,
       formula,
       isFormulaBroken: !isValid,
     },
   } as FormulaIndexPatternColumn;
 
-  return {
-    columns,
-    meta,
-  };
+  return { columns, meta };
 }
 
 /** @public **/
@@ -261,29 +265,23 @@ export function upsertFormulaColumn(
   id: string,
   column: FormulaIndexPatternColumn,
   baseLayer: IndexPatternLayer,
-  params: {
-    indexPattern: IndexPattern;
-    operations?: Record<string, GenericOperationDefinition>;
-  }
+  params: ExpandColumnProperties
 ) {
-  const layer = {
-    ...baseLayer,
-    columns: {
-      ...baseLayer.columns,
-      [id]: {
-        ...column,
-      },
+  const columns = {
+    ...baseLayer.columns,
+    [id]: {
+      ...column,
     },
   };
 
-  const { columns, meta } = Object.entries(layer.columns).reduce<ColumnsWithFormulaMeta>(
+  const { columns: updatedColumns, meta } = Object.entries(columns).reduce(
     (acc, [currentColumnId, currentColumn]) => {
       if (currentColumnId.startsWith(id)) {
         if (currentColumnId === id && isFormulaIndexPatternColumn(currentColumn)) {
           const formulaColumns = generateFormulaColumns(
             currentColumnId,
             currentColumn,
-            layer,
+            baseLayer,
             params
           );
 
@@ -300,11 +298,11 @@ export function upsertFormulaColumn(
 
   return {
     layer: {
-      ...layer,
-      columns,
+      ...baseLayer,
+      columns: updatedColumns,
       columnOrder: getColumnOrder({
-        ...layer,
-        columns,
+        ...baseLayer,
+        columns: updatedColumns,
       }),
     },
     meta,
