@@ -12,56 +12,63 @@ import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ProcessEvent, ProcessEventResults } from '../../../common/types/process_tree';
 import { PROCESS_EVENTS_ROUTE, PROCESS_EVENTS_PER_PAGE } from '../../../common/constants';
 
-export const useFetchSessionViewProcessEvents = (sessionEntityId: string, jumpToEvent: ProcessEvent | undefined) => {
+export const useFetchSessionViewProcessEvents = (
+  sessionEntityId: string,
+  jumpToEvent: ProcessEvent | undefined
+) => {
   const { http } = useKibana<CoreStart>().services;
 
   const jumpToCursor = jumpToEvent && jumpToEvent['@timestamp'].toISOString();
 
-  const query = useInfiniteQuery('sessionViewProcessEvents', async ({ pageParam = {} }) => {
-    let { cursor, forward } = pageParam;
+  const query = useInfiniteQuery(
+    'sessionViewProcessEvents',
+    async ({ pageParam = {} }) => {
+      let { cursor, forward } = pageParam;
 
-    if (!cursor && jumpToCursor) {
-      cursor = jumpToCursor;
-    }
+      if (!cursor && jumpToCursor) {
+        cursor = jumpToCursor;
+      }
 
-    const res = await http.get<ProcessEventResults>(PROCESS_EVENTS_ROUTE, {
-      query: {
-        sessionEntityId,
-        cursor,
-        forward,
+      const res = await http.get<ProcessEventResults>(PROCESS_EVENTS_ROUTE, {
+        query: {
+          sessionEntityId,
+          cursor,
+          forward,
+        },
+      });
+
+      const events = res.events.map((event: any) => event._source as ProcessEvent);
+
+      return { events, cursor };
+    },
+    {
+      getNextPageParam: (lastPage, pages) => {
+        if (lastPage.events.length === PROCESS_EVENTS_PER_PAGE) {
+          return {
+            cursor: lastPage.events[lastPage.events.length - 1]['@timestamp'],
+            forward: true,
+          };
+        }
       },
-    });
-
-    const events = res.events.map((event: any) => event._source as ProcessEvent);
-
-    return { events, cursor };
-  }, {
-    getNextPageParam: (lastPage, pages) => {
-      if (lastPage.events.length === PROCESS_EVENTS_PER_PAGE) {
-        return {
-          cursor: lastPage.events[lastPage.events.length - 1]['@timestamp'],
-          forward: true,
+      getPreviousPageParam: (firstPage, pages) => {
+        if (jumpToEvent && firstPage.events.length === PROCESS_EVENTS_PER_PAGE) {
+          return {
+            cursor: firstPage.events[0]['@timestamp'],
+            forward: false,
+          };
         }
-      }
-    },
-    getPreviousPageParam: (firstPage, pages) => {
-      if (jumpToEvent && firstPage.events.length === PROCESS_EVENTS_PER_PAGE) {
-        return {
-          cursor: firstPage.events[0]['@timestamp'],
-          forward: false,
-        }
-      }
-    },
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-    refetchOnReconnect: false
-  });
+      },
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
+    }
+  );
 
   useEffect(() => {
     if (jumpToEvent && query.data?.pages.length === 1) {
       query.fetchPreviousPage();
     }
-  }, [query.data])
+  }, [query.data]);
 
   return query;
 };

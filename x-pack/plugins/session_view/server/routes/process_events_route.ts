@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import type { Logger } from 'kibana/server';
 import { IRouter } from '../../../../../src/core/server';
 import { ElasticsearchClient } from '../../../../../src/core/server/elasticsearch';
 import { PROCESS_EVENTS_ROUTE, PROCESS_EVENTS_PER_PAGE } from '../../common/constants';
 import { expandDottedObject } from '../../common/utils/expand_dotted_object';
-import type { Logger } from 'kibana/server';
 
 export const registerProcessEventsRoute = (router: IRouter, logger: Logger) => {
   router.get(
@@ -31,9 +31,14 @@ export const registerProcessEventsRoute = (router: IRouter, logger: Logger) => {
       return response.ok({ body });
     }
   );
-}
+};
 
-const doSearch = async (client: ElasticsearchClient, sessionEntityId: string, cursor: string | undefined, forward = true) => {
+const doSearch = async (
+  client: ElasticsearchClient,
+  sessionEntityId: string,
+  cursor: string | undefined,
+  forward = true
+) => {
   // Temporary hack. Updates .siem-signals-default index to include a mapping for process.entry.entity_id
   // TODO: find out how to do proper index mapping migrations...
   let siemSignalsExists = true;
@@ -44,11 +49,11 @@ const doSearch = async (client: ElasticsearchClient, sessionEntityId: string, cu
       body: {
         properties: {
           'process.entry.entity_id': {
-            type: 'keyword'
-          }
-        }
-      }
-    })
+            type: 'keyword',
+          },
+        },
+      },
+    });
   } catch (err) {
     siemSignalsExists = false;
   }
@@ -85,6 +90,6 @@ const doSearch = async (client: ElasticsearchClient, sessionEntityId: string, cu
   }
 
   return {
-    events
-  }
+    events,
+  };
 };
