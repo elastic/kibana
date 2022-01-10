@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TelemetryEvent } from './types';
+import type { TelemetryEvent } from './types';
 
 export interface AllowlistFields {
   [key: string]: boolean | AllowlistFields;
