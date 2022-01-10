@@ -30,12 +30,10 @@ interface Props {
   mbProperties: GeoJsonProperties;
   loadFeatureProperties: ({
     layerId,
-    featureId,
-    mbProperties,
+    properties,
   }: {
     layerId: string;
-    featureId?: string | number;
-    mbProperties: GeoJsonProperties;
+    properties: GeoJsonProperties;
   }) => Promise<ITooltipProperty[]>;
   showFilterButtons: boolean;
   onCloseTooltip: () => void;
@@ -149,8 +147,7 @@ export class FeatureProperties extends Component<Props, State> {
     try {
       properties = await this.props.loadFeatureProperties({
         layerId: nextLayerId,
-        featureId: nextFeatureId,
-        mbProperties,
+        properties: mbProperties,
       });
     } catch (error) {
       if (this._isMounted) {
