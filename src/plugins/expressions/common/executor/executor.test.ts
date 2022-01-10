@@ -88,36 +88,6 @@ describe('Executor', () => {
       const executor = new Executor();
       expect(executor.context).toEqual({});
     });
-
-    test('can extend context', () => {
-      const executor = new Executor();
-      executor.extendContext({
-        foo: 'bar',
-      });
-      expect(executor.context).toEqual({
-        foo: 'bar',
-      });
-    });
-
-    test('can extend context multiple times with multiple keys', () => {
-      const executor = new Executor();
-      const abortSignal = {};
-      const env = {};
-
-      executor.extendContext({
-        foo: 'bar',
-      });
-      executor.extendContext({
-        abortSignal,
-        env,
-      });
-
-      expect(executor.context).toEqual({
-        foo: 'bar',
-        abortSignal,
-        env,
-      });
-    });
   });
 
   describe('execution', () => {
@@ -140,9 +110,8 @@ describe('Executor', () => {
       });
 
       test('Execution inherits context from Executor', () => {
-        const executor = new Executor();
         const foo = {};
-        executor.extendContext({ foo });
+        const executor = new Executor({ context: { foo }, functions: {}, types: {} });
         const execution = executor.createExecution('foo bar="baz"');
 
         expect(execution.context).toHaveProperty('foo', foo);
