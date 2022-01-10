@@ -22,6 +22,12 @@ interface Props {
   pageHeader?: EuiPageHeaderProps;
 }
 
+const StyledPageTemplateComponentWrapper = styled.div`
+  .euiPageHeaderContent > .euiFlexGroup {
+    flex-wrap: wrap;
+  }
+`;
+
 export const UptimePageTemplateComponent: React.FC<Props & EuiPageTemplateProps> = ({
   path,
   pageHeader,
@@ -34,14 +40,6 @@ export const UptimePageTemplateComponent: React.FC<Props & EuiPageTemplateProps>
   const [hasCompletedFirstLoad, setHasCompletedFirstLoad] = useState(false);
 
   const PageTemplateComponent = observability.navigation.PageTemplate;
-
-  const StyledPageTemplateComponent = useMemo(() => {
-    return styled(PageTemplateComponent)`
-      .euiPageHeaderContent > .euiFlexGroup {
-        flex-wrap: wrap;
-      }
-    `;
-  }, [PageTemplateComponent]);
 
   const noDataConfig = useNoDataConfig();
 
@@ -67,8 +65,8 @@ export const UptimePageTemplateComponent: React.FC<Props & EuiPageTemplateProps>
   const showLoading = loading && isMainRoute && !data;
 
   return (
-    <>
-      <StyledPageTemplateComponent
+    <StyledPageTemplateComponentWrapper>
+      <PageTemplateComponent
         pageHeader={hasCompletedFirstLoad ? pageHeader : undefined}
         data-test-subj={noDataConfig ? 'data-missing' : undefined}
         noDataConfig={isMainRoute && !loading ? noDataConfig : undefined}
@@ -81,7 +79,7 @@ export const UptimePageTemplateComponent: React.FC<Props & EuiPageTemplateProps>
         >
           {children}
         </div>
-      </StyledPageTemplateComponent>
-    </>
+      </PageTemplateComponent>
+    </StyledPageTemplateComponentWrapper>
   );
 };
