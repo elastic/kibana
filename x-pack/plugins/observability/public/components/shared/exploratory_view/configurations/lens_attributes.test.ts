@@ -526,8 +526,8 @@ describe('Lens Attribute', () => {
 
       expect(lnsAttr.layers.layer0).toEqual({
         columnOrder: [
-          'x-axis-column-layer0',
           'breakdown-column-layer0',
+          'x-axis-column-layer0',
           'y-axis-column-layer0',
           'y-axis-column-layer0X0',
           'y-axis-column-layer0X1',
