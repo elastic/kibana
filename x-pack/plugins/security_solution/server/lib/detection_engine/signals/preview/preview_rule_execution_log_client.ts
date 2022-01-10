@@ -19,10 +19,14 @@ import {
 } from '../../rule_execution_log';
 import { IRuleStatusSOAttributes } from '../../rules/types';
 
+interface PreviewRuleExecutionLogClient extends IRuleExecutionLogClient {
+  clearWarningsAndErrorsStore: () => void;
+}
+
 export const createWarningsAndErrors = () => {
   const warningsAndErrorsStore: LogStatusChangeArgs[] = [];
 
-  const previewRuleExecutionLogClient: IRuleExecutionLogClient = {
+  const previewRuleExecutionLogClient: PreviewRuleExecutionLogClient = {
     find(
       args: FindExecutionLogArgs
     ): Promise<Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>> {
@@ -63,6 +67,10 @@ export const createWarningsAndErrors = () => {
     logStatusChange(args: LogStatusChangeArgs): Promise<void> {
       warningsAndErrorsStore.push(args);
       return Promise.resolve();
+    },
+
+    clearWarningsAndErrorsStore() {
+      warningsAndErrorsStore.length = 0;
     },
   };
 

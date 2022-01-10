@@ -163,6 +163,7 @@
 /src/plugins/input_control_vis/ @elastic/kibana-presentation
 /src/plugins/vis_type_markdown/ @elastic/kibana-presentation
 /src/plugins/presentation_util/ @elastic/kibana-presentation
+/src/plugins/controls/ @elastic/kibana-presentation
 /test/functional/apps/dashboard/  @elastic/kibana-presentation
 /test/functional/apps/dashboard_elements/  @elastic/kibana-presentation
 /x-pack/plugins/canvas/  @elastic/kibana-presentation
@@ -476,3 +477,8 @@ x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 
 # EUI design
 /src/plugins/kibana_react/public/page_template/ @elastic/eui-design @elastic/kibana-app-services
+
+# Application Experience
+
+## Shared UX
+/src/plugins/shared_ux @elastic/shared-ux
