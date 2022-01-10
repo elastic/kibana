@@ -35,7 +35,6 @@ const waitForFleetSetup = async (root: Root) => {
 describe('Fleet preconfiguration rest', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let kbnServer: kbnTestServer.TestKibanaUtils;
-  // let esClient: Client;
 
   const startServers = async () => {
     const { startES } = kbnTestServer.createTestServers({
