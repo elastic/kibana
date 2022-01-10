@@ -65,7 +65,6 @@ export const renderApp = ({
 }) => {
   const { element, history, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
-  const isDarkMode = core.uiSettings.get('theme:darkMode');
 
   core.chrome.setHelpExtension({
     appName: i18n.translate('xpack.observability.feedbackMenu.appName', {
@@ -90,7 +89,7 @@ export const renderApp = ({
           }}
         >
           <Router history={history}>
-            <EuiThemeProvider darkMode={isDarkMode}>
+            <EuiThemeProvider theme$={theme$}>
               <i18nCore.Context>
                 <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
                   <DatePickerContextProvider>
