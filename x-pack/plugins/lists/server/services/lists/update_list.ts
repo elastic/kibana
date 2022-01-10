@@ -16,6 +16,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
+import { createEsClientCallWithHeaders } from '@kbn/securitysolution-utils';
 
 import { UpdateEsListSchema } from '../../schemas/elastic_query';
 
@@ -59,13 +60,18 @@ export const updateList = async ({
       updated_at: updatedAt,
       updated_by: user,
     };
-    const { body: response } = await esClient.update({
-      ...decodeVersion(_version),
-      body: { doc },
-      id,
-      index: listIndex,
-      refresh: 'wait_for',
-    });
+    const { body: response } = await esClient.update(
+      createEsClientCallWithHeaders({
+        addOriginHeader: true,
+        request: {
+          ...decodeVersion(_version),
+          doc,
+          id,
+          index: listIndex,
+          refresh: 'wait_for',
+        },
+      })
+    );
     return {
       _version: encodeHitVersion(response),
       created_at: list.created_at,

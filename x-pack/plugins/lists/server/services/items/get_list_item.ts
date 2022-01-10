@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import type { Id, ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { createEsClientCallWithHeaders } from '@kbn/securitysolution-utils';
 
 import { transformElasticToListItem } from '../utils';
 import { findSourceType } from '../utils/find_source_type';
@@ -26,18 +27,21 @@ export const getListItem = async ({
   // Note: This typing of response = await esClient<SearchResponse<SearchEsListSchema>>
   // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
   // to explicitly define the type <T>.
-  const { body: listItemES } = await esClient.search<SearchEsListItemSchema>({
-    body: {
-      query: {
-        term: {
-          _id: id,
+  const { body: listItemES } = await esClient.search<SearchEsListItemSchema>(
+    createEsClientCallWithHeaders({
+      addOriginHeader: true,
+      request: {
+        ignore_unavailable: true,
+        index: listItemIndex,
+        query: {
+          term: {
+            _id: id,
+          },
         },
+        seq_no_primary_term: true,
       },
-    },
-    ignore_unavailable: true,
-    index: listItemIndex,
-    seq_no_primary_term: true,
-  });
+    })
+  );
 
   if (listItemES.hits.hits.length) {
     // @ts-expect-error @elastic/elasticsearch _source is optional

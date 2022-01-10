@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient } from 'kibana/server';
 import type { ListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
+import { createEsClientCallWithHeaders } from '@kbn/securitysolution-utils';
 
 import {
   TransformElasticToListItemOptions,
@@ -30,18 +31,21 @@ export const getListItemByValues = async ({
   type,
   value,
 }: GetListItemByValuesOptions): Promise<ListItemArraySchema> => {
-  const { body: response } = await esClient.search<SearchEsListItemSchema>({
-    body: {
-      query: {
-        bool: {
-          filter: getQueryFilterFromTypeValue({ listId, type, value }),
+  const { body: response } = await esClient.search<SearchEsListItemSchema>(
+    createEsClientCallWithHeaders({
+      addOriginHeader: true,
+      request: {
+        ignore_unavailable: true,
+        index: listItemIndex,
+        query: {
+          bool: {
+            filter: getQueryFilterFromTypeValue({ listId, type, value }),
+          },
         },
+        size: 10000, // TODO: This has a limit on the number which is 10,000 the default of Elastic but we might want to provide a way to increase that number
       },
-    },
-    ignore_unavailable: true,
-    index: listItemIndex,
-    size: 10000, // TODO: This has a limit on the number which is 10,000 the default of Elastic but we might want to provide a way to increase that number
-  });
+    })
+  );
   return transformElasticToListItem({
     response,
     type,

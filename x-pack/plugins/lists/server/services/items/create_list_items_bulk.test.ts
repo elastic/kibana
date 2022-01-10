@@ -20,20 +20,24 @@ describe('crete_list_item_bulk', () => {
     jest.clearAllMocks();
   });
 
-  test('It calls "esClient" with body, index, and the bulk items', async () => {
+  test('It calls "esClient" with body, index, internal origin header and the bulk items', async () => {
     const options = getCreateListItemBulkOptionsMock();
     await createListItemsBulk(options);
     const firstRecord = getIndexESListItemMock();
     const secondRecord = getIndexESListItemMock(VALUE_2);
     [firstRecord.tie_breaker_id, secondRecord.tie_breaker_id] = TIE_BREAKERS;
     expect(options.esClient.bulk).toBeCalledWith({
-      body: [
+      // internal origin header used to suppress deprecation logs for users from system generated queries
+      headers: {
+        'x-elastic-product-origin': 'security',
+      },
+      index: LIST_ITEM_INDEX,
+      operations: [
         { create: { _index: LIST_ITEM_INDEX } },
         firstRecord,
         { create: { _index: LIST_ITEM_INDEX } },
         secondRecord,
       ],
-      index: LIST_ITEM_INDEX,
       refresh: 'wait_for',
     });
   });
@@ -53,7 +57,11 @@ describe('crete_list_item_bulk', () => {
     };
     await createListItemsBulk(options);
     expect(options.esClient.bulk).toBeCalledWith({
-      body: [
+      headers: {
+        'x-elastic-product-origin': 'security',
+      },
+      index: '.items',
+      operations: [
         { create: { _index: LIST_ITEM_INDEX } },
         {
           created_at: '2020-04-20T15:25:31.830Z',
@@ -71,7 +79,6 @@ describe('crete_list_item_bulk', () => {
           updated_by: 'some user',
         },
       ],
-      index: '.items',
       refresh: 'wait_for',
     });
   });

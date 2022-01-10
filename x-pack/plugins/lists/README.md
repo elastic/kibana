@@ -1,3 +1,50 @@
+The `lists` plugin contains logic for both large value lists and exception lists. 
+
+### Lists
+
+A list (sometimes referred to as large value lists) is made up of two parts: the container and the items. The container defines what Elasticsearch data type the list items are and the items are documents containing the values themselves. The lists plugin does not prescribe *how* the lists are used, just provides the services for creating, editing and maintaining them.
+
+The following data types can be used:
+- boolean
+- byte
+- date
+- date_nanos
+- date_range
+- double
+- double_range
+- float
+- float_range
+- half_float
+- integer
+- integer_range
+- ip
+- ip_range
+- keyword
+- long
+- long_range
+- short
+- text
+
+See Kibana documentation on lists [here](https://www.elastic.co/guide/en/security/current/lists-api-overview.html).
+
+### Exceptions
+
+An exception list is also made up of two parts: the container and the items. It's important to note that though the word "exceptions" may make you think of exclusion functionality, an exception list itself does not denote inclusion or exclusion - that logic is determined by the consumer of the exception list.
+
+Exception lists do however contain more built in logic than large value lists. They follow these rules:
+- exception items get `OR`-ed together
+- entries within an exception item get `AND`-ed together
+
+So let's say you have an exception list `My Exception List` and it contains two items:
+- Item 1 has `entries` of logic `A & B & C`
+- Item 2 has `entries` of logic `B & D`
+
+This exception list logic here would be `(A & B & C) || (B & D)`.
+
+See Kibana documentation on exceptions [here](https://www.elastic.co/guide/en/security/current/exceptions-api-overview.html).
+
+#### Getting Started
+
 README.md for developers working on the backend lists on how to get started
 using the CURL scripts in the scripts folder.
 
@@ -22,8 +69,6 @@ export ELASTICSEARCH_USERNAME=${user}
 export ELASTICSEARCH_PASSWORD=${password}
 export ELASTICSEARCH_URL=https://${ip}:9200
 export KIBANA_URL=http://localhost:5601
-export TASK_MANAGER_INDEX=.kibana-task-manager-${your user id}
-export KIBANA_INDEX=.kibana-${your user id}
 ```
 
 source `$HOME/.zshrc` or `${HOME}.bashrc` to ensure variables are set:

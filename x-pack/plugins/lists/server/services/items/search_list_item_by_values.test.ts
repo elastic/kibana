@@ -23,6 +23,37 @@ describe('search_list_item_by_values', () => {
     jest.clearAllMocks();
   });
 
+  test('It calls esClient with internal origin header to suppress deprecation logs for users from system generated queries', async () => {
+    const data = getSearchListItemMock();
+    data.hits.hits = [];
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(data)
+    );
+    await searchListItemByValues({
+      esClient,
+      listId: LIST_ID,
+      listItemIndex: LIST_ITEM_INDEX,
+      type: TYPE,
+      value: [],
+    });
+
+    expect(esClient.search).toHaveBeenCalledWith({
+      headers: { 'x-elastic-product-origin': 'security' },
+      ignore_unavailable: true,
+      index: '.items',
+      query: {
+        bool: {
+          filter: [
+            { term: { list_id: 'some-list-id' } },
+            { bool: { minimum_should_match: 1, should: [{ match_none: { _name: 'empty' } }] } },
+          ],
+        },
+      },
+      size: 10000,
+    });
+  });
+
   test('Returns a an empty array of items if the value is empty', async () => {
     const data = getSearchListItemMock();
     data.hits.hits = [];

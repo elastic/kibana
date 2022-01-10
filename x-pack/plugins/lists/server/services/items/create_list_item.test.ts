@@ -37,12 +37,16 @@ describe('crete_list_item', () => {
     expect(listItem).toEqual(expected);
   });
 
-  test('It calls "esClient" with body, index, and listIndex', async () => {
+  test('It calls "esClient" with body, index, internal origin header and listIndex', async () => {
     const options = getCreateListItemOptionsMock();
     await createListItem(options);
     const body = getIndexESListItemMock();
     const expected = {
-      body,
+      document: body,
+      // internal origin header used to suppress deprecation logs for users from system generated queries
+      headers: {
+        'x-elastic-product-origin': 'security',
+      },
       id: LIST_ITEM_ID,
       index: LIST_ITEM_INDEX,
       refresh: 'wait_for',

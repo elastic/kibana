@@ -28,6 +28,30 @@ describe('update_list_item', () => {
     jest.clearAllMocks();
   });
 
+  test('It calls esClient with internal origin header to suppress deprecation logs for users from system generated queries', async () => {
+    const listItem = getListItemResponseMock();
+    (getListItem as unknown as jest.Mock).mockResolvedValueOnce(listItem);
+    const options = getUpdateListItemOptionsMock();
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.update.mockReturnValue(
+      // @ts-expect-error not full response interface
+      elasticsearchClientMock.createSuccessTransportRequestPromise({ _id: 'elastic-id-123' })
+    );
+    await updateListItem({ ...options, esClient });
+    expect(esClient.update).toHaveBeenCalledWith({
+      doc: {
+        ip: '127.0.0.1',
+        meta: {},
+        updated_at: '2020-04-20T15:25:31.830Z',
+        updated_by: 'some user',
+      },
+      headers: { 'x-elastic-product-origin': 'security' },
+      id: 'some-list-item-id',
+      index: '.items',
+      refresh: 'wait_for',
+    });
+  });
+
   test('it returns a list item as expected with the id changed out for the elastic id when there is a list item to update', async () => {
     const listItem = getListItemResponseMock();
     (getListItem as unknown as jest.Mock).mockResolvedValueOnce(listItem);

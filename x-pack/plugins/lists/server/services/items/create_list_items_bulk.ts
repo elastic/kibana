@@ -13,6 +13,7 @@ import type {
   SerializerOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { createEsClientCallWithHeaders } from '@kbn/securitysolution-utils';
 
 import { transformListItemToElasticQuery } from '../utils';
 import { CreateEsBulkTypeSchema, IndexEsListItemSchema } from '../../schemas/elastic_query';
@@ -81,11 +82,16 @@ export const createListItemsBulk = async ({
     []
   );
   try {
-    await esClient.bulk({
-      body,
-      index: listItemIndex,
-      refresh: 'wait_for',
-    });
+    await esClient.bulk(
+      createEsClientCallWithHeaders({
+        addOriginHeader: true,
+        request: {
+          index: listItemIndex,
+          operations: body,
+          refresh: 'wait_for',
+        },
+      })
+    );
   } catch (error) {
     // TODO: Log out the error with return values from the bulk insert into another index or saved object
   }

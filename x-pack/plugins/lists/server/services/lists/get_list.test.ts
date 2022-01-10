@@ -23,6 +23,23 @@ describe('get_list', () => {
     jest.clearAllMocks();
   });
 
+  test('It calls esClient with internal origin header to suppress deprecation logs for users from system generated queries', async () => {
+    const data = getSearchListMock();
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    esClient.search.mockReturnValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(data)
+    );
+    await getList({ esClient, id: LIST_ID, listIndex: LIST_INDEX });
+
+    expect(esClient.search).toHaveBeenCalledWith({
+      headers: { 'x-elastic-product-origin': 'security' },
+      ignore_unavailable: true,
+      index: '.lists',
+      query: { term: { _id: 'some-list-id' } },
+      seq_no_primary_term: true,
+    });
+  });
+
   test('it returns a list as expected if the list is found', async () => {
     const data = getSearchListMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;

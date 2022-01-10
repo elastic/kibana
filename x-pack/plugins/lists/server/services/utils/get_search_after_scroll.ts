@@ -11,6 +11,7 @@ import type {
   SortFieldOrUndefined,
   SortOrderOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { createEsClientCallWithHeaders } from '@kbn/securitysolution-utils';
 
 import { Scroll } from '../lists/types';
 
@@ -43,17 +44,22 @@ export const getSearchAfterScroll = async <T>({
   const query = getQueryFilter({ filter });
   let newSearchAfter = searchAfter;
   for (let i = 0; i < hops; ++i) {
-    const { body: response } = await esClient.search<TieBreaker<T>>({
-      body: {
-        _source: getSourceWithTieBreaker({ sortField }),
-        query,
-        search_after: newSearchAfter,
-        sort: getSortWithTieBreaker({ sortField, sortOrder }),
-      },
-      ignore_unavailable: true,
-      index,
-      size: hopSize,
-    });
+    const { body: response } = await esClient.search<TieBreaker<T>>(
+      createEsClientCallWithHeaders({
+        addOriginHeader: true,
+        request: {
+          body: {
+            _source: getSourceWithTieBreaker({ sortField }),
+            query,
+            search_after: newSearchAfter,
+            sort: getSortWithTieBreaker({ sortField, sortOrder }),
+          },
+          ignore_unavailable: true,
+          index,
+          size: hopSize,
+        },
+      })
+    );
     if (response.hits.hits.length > 0) {
       newSearchAfter = getSearchAfterWithTieBreaker({ response, sortField });
     } else {

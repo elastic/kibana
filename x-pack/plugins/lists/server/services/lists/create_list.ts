@@ -20,6 +20,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { Version } from '@kbn/securitysolution-io-ts-types';
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
+import { createEsClientCallWithHeaders } from '@kbn/securitysolution-utils';
 
 import { IndexEsListSchema } from '../../schemas/elastic_query';
 
@@ -57,7 +58,7 @@ export const createList = async ({
   version,
 }: CreateListOptions): Promise<ListSchema> => {
   const createdAt = dateNow ?? new Date().toISOString();
-  const body: IndexEsListSchema = {
+  const document: IndexEsListSchema = {
     created_at: createdAt,
     created_by: user,
     description,
@@ -72,15 +73,20 @@ export const createList = async ({
     updated_by: user,
     version,
   };
-  const { body: response } = await esClient.index({
-    body,
-    id,
-    index: listIndex,
-    refresh: 'wait_for',
-  });
+  const { body: response } = await esClient.index(
+    createEsClientCallWithHeaders({
+      addOriginHeader: true,
+      request: {
+        document,
+        id,
+        index: listIndex,
+        refresh: 'wait_for',
+      },
+    })
+  );
   return {
     _version: encodeHitVersion(response),
     id: response._id,
-    ...body,
+    ...document,
   };
 };
