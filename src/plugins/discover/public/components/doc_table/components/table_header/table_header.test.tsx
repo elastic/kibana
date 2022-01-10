@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
-import type { IndexPattern, IndexPatternField } from 'src/plugins/data/common';
+import type { DataView, DataViewField } from 'src/plugins/data/common';
 import { TableHeader } from './table_header';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { SortOrder } from './helpers';
@@ -29,7 +29,7 @@ function getMockIndexPattern() {
           aggregatable: false,
           searchable: true,
           sortable: true,
-        } as IndexPatternField;
+        } as DataViewField;
       } else {
         return {
           name,
@@ -38,10 +38,10 @@ function getMockIndexPattern() {
           aggregatable: false,
           searchable: true,
           sortable: false,
-        } as IndexPatternField;
+        } as DataViewField;
       }
     },
-  } as unknown as IndexPattern;
+  } as unknown as DataView;
 }
 
 function getMockProps(props = {}) {

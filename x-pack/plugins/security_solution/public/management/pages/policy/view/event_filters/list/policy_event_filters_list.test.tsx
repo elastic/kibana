@@ -121,4 +121,16 @@ describe('Policy details event filters list', () => {
       )
     );
   });
+
+  it('should enable the "view full details" action', async () => {
+    mockedApi.responseProvider.eventFiltersList.mockReturnValue(
+      getFoundExceptionListItemSchemaMock()
+    );
+    await render();
+    // click the actions button
+    userEvent.click(
+      renderResult.getByTestId('eventFilters-collapsed-list-card-header-actions-button')
+    );
+    expect(renderResult.queryByTestId('view-full-details-action')).toBeTruthy();
+  });
 });

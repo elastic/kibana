@@ -17,7 +17,7 @@ import {
   DashboardContainerStateWithType,
   DashboardPanelState,
 } from '../types';
-import { CONTROL_GROUP_TYPE } from '../../../presentation_util/common/lib';
+import { CONTROL_GROUP_TYPE } from '../../../controls/common';
 
 const getPanelStatePrefix = (state: DashboardPanelState) => `${state.explicitInput.id}:`;
 
