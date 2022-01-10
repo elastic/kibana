@@ -5,7 +5,7 @@
  * 2.0.
  */
 import {
-  mockEvents,
+  mockData,
   mockProcessMap,
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { Process, ProcessMap } from '../../../common/types/process_tree';
@@ -19,6 +19,8 @@ import {
 const SESSION_ENTITY_ID = '3d0192c6-7c54-5ee6-a110-3539a7cf42bc';
 const SEARCH_QUERY = 'vi';
 const SEARCH_RESULT_PROCESS_ID = '8e4daeb2-4a4e-56c4-980e-f0dcfdbc3727';
+
+const mockEvents = mockData[0].events;
 
 describe('process tree hook helpers tests', () => {
   let processMap: ProcessMap;
@@ -37,18 +39,18 @@ describe('process tree hook helpers tests', () => {
   });
 
   it('buildProcessTree works', () => {
-    processMap = mockProcessMap;
-    const orphans: Process[] = [];
-    processMap = buildProcessTree(processMap, mockEvents, orphans, SESSION_ENTITY_ID);
+    const newOrphans = buildProcessTree(mockProcessMap, mockEvents, [], SESSION_ENTITY_ID);
 
     const sessionLeaderChildrenIds = new Set(
-      processMap[SESSION_ENTITY_ID].children.map((child) => child.id)
+      mockProcessMap[SESSION_ENTITY_ID].children.map((child: Process) => child.id)
     );
 
     // processes are added under their parent's childrean array in processMap
     mockEvents.forEach((event) => {
       expect(sessionLeaderChildrenIds.has(event.process.entity_id));
     });
+
+    expect(newOrphans.length).toBe(0);
   });
 
   it('searchProcessTree works', () => {

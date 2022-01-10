@@ -76,7 +76,7 @@ export const buildProcessTree = (
     }
   });
 
-  return [processMap, newOrphans];
+  return newOrphans;
 };
 
 export const searchProcessTree = (processMap: ProcessMap, searchQuery: string | undefined) => {
@@ -139,8 +139,7 @@ export const processNewEvents = (
   }
 
   const updatedProcessMap = updateProcessMap(eventsProcessMap, events);
-  const [builtProcessMap, newOrphans] = <[ProcessMap, Process[]]>(
-    buildProcessTree(updatedProcessMap, events, orphans, sessionEntityId, backwardDirection)
-  );
-  return [autoExpandProcessTree(builtProcessMap), newOrphans];
+  const newOrphans = buildProcessTree(updatedProcessMap, events, orphans, sessionEntityId, backwardDirection);
+
+  return [autoExpandProcessTree(updatedProcessMap), newOrphans];
 };

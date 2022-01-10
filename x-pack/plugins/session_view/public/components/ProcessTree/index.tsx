@@ -21,7 +21,7 @@ interface ProcessTreeDeps {
 
   data: ProcessEventsPage[];
 
-  jumpToEvent: ProcessEvent;
+  jumpToEvent?: ProcessEvent;
   isFetching: boolean;
   hasNextPage: boolean | undefined;
   hasPreviousPage: boolean | undefined;

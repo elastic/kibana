@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mockEvents } from '../../../common/mocks/constants/session_view_process.mock';
+import { mockData } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessTree } from './index';
 
@@ -21,43 +21,53 @@ describe('ProcessTree component', () => {
 
   describe('When ProcessTree is mounted', () => {
     it('should render given a valid sessionEntityId and Forward data', () => {
-      renderResult = mockedContext.render(<ProcessTree sessionEntityId="1" forward={mockEvents} />);
+      renderResult = mockedContext.render(
+        <ProcessTree
+          sessionEntityId="1"
+          data={mockData}
+          isFetching={false}
+          fetchNextPage={() => true}
+          hasNextPage={false}
+          fetchPreviousPage={() => true}
+          hasPreviousPage={false}
+        />);
       expect(renderResult.queryByTestId('sessionViewProcessTree')).toBeTruthy();
       expect(renderResult.queryByTestId('processTreeNode')).toBeTruthy();
     });
     describe('Orphaned childrens', () => {
+      const mockEvents = mockData[0].events;
+
       const orphanedProcess = {
         ...mockEvents[0],
         process: {
           ...mockEvents[0].process,
+          entity_id: 'orphaned-id',
+          args: ['orphaned'],
+          executable: 'orphaned',
+          working_directory: 'orphaned',
           parent: {
             ...mockEvents[0].process.parent,
-            entity_id: 'orphaned-id',
+            entity_id: 'orphaned-parent-id',
           },
         },
       } as unknown as typeof mockEvents[0];
 
-      it('should render orphaned childrens if hideOrphans set to false', () => {
+      it('should render orphaned children under the session leader', () => {
+        mockEvents.push(orphanedProcess);
+
         renderResult = mockedContext.render(
           <ProcessTree
             sessionEntityId="1"
-            forward={mockEvents.concat(orphanedProcess)}
-            hideOrphans={false}
+            data={mockData}
+            isFetching={false}
+            fetchNextPage={() => true}
+            hasNextPage={false}
+            fetchPreviousPage={() => true}
+            hasPreviousPage={false}
           />
         );
 
-        expect(renderResult.queryByText(/orphaned/i)).toBeTruthy();
-      });
-      it('should not render orphaned childrens if hideOrphans set to true', () => {
-        renderResult = mockedContext.render(
-          <ProcessTree
-            sessionEntityId="1"
-            forward={mockEvents.concat(orphanedProcess)}
-            hideOrphans={true}
-          />
-        );
-
-        expect(renderResult.queryByText(/orphaned/i)).toBeFalsy();
+        expect(renderResult.queryByText('orphaned')).toBeTruthy();
       });
     });
   });

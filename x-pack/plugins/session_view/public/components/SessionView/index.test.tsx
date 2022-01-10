@@ -30,14 +30,7 @@ describe('SessionView component', () => {
     describe('And no data exists', () => {
       beforeEach(async () => {
         mockedApi.mockResolvedValue({
-          events: {
-            hits: [],
-            total: 0,
-          },
-          alerts: {
-            hits: [],
-            total: 0,
-          },
+          events: []
         });
       });
 
@@ -87,7 +80,7 @@ describe('SessionView component', () => {
         render();
         await waitForApiCall();
 
-        expect(renderResult.getByTestId('processTreeNode')).toBeTruthy();
+        expect(renderResult.getAllByTestId('processTreeNode')).toBeTruthy();
       });
     });
   });

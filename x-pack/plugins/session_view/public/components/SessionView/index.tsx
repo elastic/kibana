@@ -56,6 +56,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
     hasPreviousPage,
   } = useFetchSessionViewProcessEvents(sessionEntityId, jumpToEvent);
 
+  const hasData = data && data.pages.length > 0 && data.pages[0].events.length > 0;
   const renderNoData = () => {
     return (
       <EuiEmptyPrompt
@@ -89,7 +90,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
         />
       );
     }
-    if (data && data.pages.length) {
+    if (hasData) {
       return (
         <div css={styles.processTree}>
           <ProcessTree
@@ -130,7 +131,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
     }
   };
 
-  if (!isFetching && (!data || data.pages.length === 0)) {
+  if (!isFetching && !hasData) {
     return renderNoData();
   }
 
