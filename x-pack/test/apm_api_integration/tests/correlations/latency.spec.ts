@@ -211,10 +211,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(finalRawResponse?.overallHistogram?.length).to.be(101);
         expect(finalRawResponse?.fieldStats?.length).to.be(fieldsToSample.size);
 
-        // Identified 13 significant correlations out of 379 field/value pairs.
-        expect(finalRawResponse?.latencyCorrelations?.length).to.eql(
-          13,
-          `Expected 13 identified correlations, got ${finalRawResponse?.latencyCorrelations?.length}.`
+        // Identified more than 10 significant correlations out of 379 field/value pairs.
+        expect(finalRawResponse?.latencyCorrelations?.length).to.greaterThan(
+          10,
+          `Expected more than 10 identified correlations, got ${finalRawResponse?.latencyCorrelations?.length}.`
         );
 
         const correlation = finalRawResponse?.latencyCorrelations?.sort(
