@@ -24,15 +24,11 @@ export interface Props {
   phase: 'hot' | 'cold' | 'frozen';
   canBeDisabled?: boolean;
 }
-export interface Links {
-  fullyMountedSearchableSnapshotLink: string;
-  partiallyMountedSearchableSnapshotLink: string;
-}
 
 const geti18nTexts = (
   phase: Props['phase'],
-  link1: Links['fullyMountedSearchableSnapshotLink'],
-  link2: Links['partiallyMountedSearchableSnapshotLink']
+  fullyMountedSearchableSnapshotLink: string,
+  partiallyMountedSearchableSnapshotLink: string
 ) => {
   switch (phase) {
     // Hot and cold phases both create fully mounted snapshots.
@@ -49,7 +45,9 @@ const geti18nTexts = (
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.fullyMountedSearchableSnapshotField.description"
             defaultMessage="Convert to a fully-mounted index that contains a complete copy of your data and is backed by a snapshot. You can reduce the number of replicas and rely on the snapshot for resiliency. {learnMoreLink}"
-            values={{ learnMoreLink: <LearnMoreLink docPath={link1} /> }}
+            values={{
+              learnMoreLink: <LearnMoreLink docPath={fullyMountedSearchableSnapshotLink} />,
+            }}
           />
         ),
         toggleLabel: i18n.translate(
@@ -72,7 +70,7 @@ const geti18nTexts = (
             id="xpack.indexLifecycleMgmt.editPolicy.frozenPhase.partiallyMountedSearchableSnapshotField.description"
             defaultMessage="Convert to a partially-mounted index that caches the index metadata. Data is retrieved from the snapshot as needed to process search requests. This minimizes the index footprint while keeping all of your data fully searchable. {learnMoreLink}"
             values={{
-              learnMoreLink: <LearnMoreLink docPath={link2} />,
+              learnMoreLink: <LearnMoreLink docPath={partiallyMountedSearchableSnapshotLink} />,
             }}
           />
         ),
