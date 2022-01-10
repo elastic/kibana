@@ -239,6 +239,7 @@ Reporting::
 * Updates the design of the *Reports* management UI, including the addition of a link to {kib} app where the report was generated {kibana-pull}111412[#111412]
 Security::
 Adds ability to clone role mappings {kibana-pull}118434[#118434]
+Adds user logout audit events {kibana-pull}121455[#121455]
 
 [float]
 [[fixes-v8.0.0-rc1]]
