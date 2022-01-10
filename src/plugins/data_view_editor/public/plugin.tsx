@@ -61,7 +61,7 @@ export class DataViewEditorPlugin
        */
       userPermissions: {
         editDataView: () => {
-          return application.capabilities.indexPatterns.save;
+          return !!application.capabilities.indexPatterns.save;
         },
       },
     };

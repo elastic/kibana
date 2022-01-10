@@ -54,7 +54,7 @@ export class IndexPatternFieldEditorPlugin
       openDeleteModal,
       userPermissions: {
         editIndexPattern: () => {
-          return capabilities.indexPatterns.save;
+          return !!capabilities.indexPatterns.save;
         },
       },
       DeleteRuntimeFieldProvider: getDeleteFieldProvider(openDeleteModal),
