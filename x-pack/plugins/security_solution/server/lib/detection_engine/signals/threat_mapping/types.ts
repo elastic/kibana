@@ -48,6 +48,8 @@ export interface UpdatePercolatorIndexOptions {
   logger: Logger;
   percolatorRuleDataClient: IRuleDataClient;
   perPage: number;
+  ruleId: string;
+  ruleVersion: number;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
   threatLanguage: ThreatLanguageOrUndefined;
@@ -167,6 +169,13 @@ export interface BuildEntriesMappingFilterOptions {
   threatMapping: ThreatMapping;
 }
 
+export interface CreatePercolateQueriesOptions {
+  ruleId: string;
+  ruleVersion: number;
+  threatList: IndicatorHit[];
+  threatMapping: ThreatMapping;
+}
+
 export interface SplitShouldClausesOptions {
   chunkSize: number;
   should: BooleanFilter[];
@@ -177,7 +186,7 @@ export interface BooleanFilter {
 }
 
 export interface PercolatorQuery {
-  bool: { filter?: unknown[]; should?: unknown[]; minimum_should_match: number };
+  bool: { must: unknown[]; filter?: unknown[]; should?: unknown[]; minimum_should_match: number };
   _name?: string;
   indicator?: IndicatorHit;
 }
@@ -205,6 +214,8 @@ export interface CreateThreatQueriesForPercolatorOptions {
   listClient: ListClient;
   logger: Logger;
   perPage?: number;
+  ruleId: string;
+  ruleVersion: number;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
   threatLanguage: ThreatLanguageOrUndefined;

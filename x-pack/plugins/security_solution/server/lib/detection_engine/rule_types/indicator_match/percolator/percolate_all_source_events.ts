@@ -8,15 +8,19 @@
 import { IRuleDataClient } from '../../../../../../../rule_registry/server';
 import { EventHit } from '../../../signals/threat_mapping/types';
 
-interface PercolateAllSourceEventsOptions {
-  percolatorRuleDataClient: IRuleDataClient;
+interface PercolateSourceEventsOptions {
   chunkedSourceEventHits: EventHit[][];
+  percolatorRuleDataClient: IRuleDataClient;
+  ruleId: string;
+  ruleVersion: number;
 }
 
 export const percolateSourceEvents = async ({
-  percolatorRuleDataClient,
   chunkedSourceEventHits,
-}: PercolateAllSourceEventsOptions) =>
+  percolatorRuleDataClient,
+  ruleId,
+  ruleVersion,
+}: PercolateSourceEventsOptions) =>
   Promise.all(
     chunkedSourceEventHits.map((hits) =>
       percolatorRuleDataClient.getReader().search({
@@ -26,7 +30,11 @@ export const percolateSourceEvents = async ({
               filter: {
                 percolate: {
                   field: 'query',
-                  documents: hits.map((event) => event._source),
+                  documents: hits.map((event) => ({
+                    ...event._source,
+                    rule_id: ruleId,
+                    rule_version: ruleVersion,
+                  })),
                 },
               },
             },

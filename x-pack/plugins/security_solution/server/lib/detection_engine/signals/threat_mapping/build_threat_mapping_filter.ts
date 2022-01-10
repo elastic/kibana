@@ -17,6 +17,7 @@ import {
   CreateInnerAndClausesOptions,
   FilterThreatMappingOptions,
   SplitShouldClausesOptions,
+  CreatePercolateQueriesOptions,
 } from './types';
 import { encodeThreatMatchNamedQuery } from './utils';
 
@@ -167,9 +168,12 @@ export const splitShouldClauses = ({
 };
 
 export const createPercolateQueries = ({
+  ruleId,
+  ruleVersion,
   threatMapping,
   threatList,
-}: Omit<BuildEntriesMappingFilterOptions, 'chunkSize'>): PercolatorQuery[] => {
+}: CreatePercolateQueriesOptions): PercolatorQuery[] => {
+  const must = [{ match: { rule_id: ruleId } }, { match: { rule_version: ruleVersion } }];
   return threatList.reduce<PercolatorQuery[]>((queries, indicator) => {
     const query = threatMapping.reduce<PercolatorQuery[]>((clauses, threatMapItem) => {
       const filters = threatMapItem.entries.reduce<PercolatorQuery[]>((clauseParts, entry) => {
@@ -177,6 +181,7 @@ export const createPercolateQueries = ({
         if (value != null && value.length === 1) {
           clauseParts.push({
             bool: {
+              must,
               should: [
                 {
                   match: {
@@ -203,7 +208,7 @@ export const createPercolateQueries = ({
         clauses.push({ ...filters[0] });
       } else if (filters.length > 1) {
         clauses.push({
-          bool: { filter: filters, minimum_should_match: 1 },
+          bool: { filter: filters, must, minimum_should_match: 2 },
           _name: filters.map(({ _name }) => _name).join('-'),
           indicator,
         });

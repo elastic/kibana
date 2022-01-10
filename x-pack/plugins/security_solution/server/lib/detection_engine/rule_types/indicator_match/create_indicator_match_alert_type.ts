@@ -71,8 +71,14 @@ export const createIndicatorMatchAlertType = (
 
       if (tupleIndex === 0) {
         console.log('____firstTuple');
-        const { threatFilters, threatIndex, threatLanguage, threatMapping, threatQuery } =
-          completeRule.ruleParams;
+        const {
+          threatFilters,
+          threatIndex,
+          threatLanguage,
+          threatMapping,
+          threatQuery,
+          version: ruleVersion,
+        } = completeRule.ruleParams;
         await updatePercolatorIndex({
           buildRuleMessage,
           esClient: services.search.asCurrentUser,
@@ -81,6 +87,8 @@ export const createIndicatorMatchAlertType = (
           logger,
           percolatorRuleDataClient,
           perPage: DETECTION_ENGINE_MAX_PER_PAGE,
+          ruleId: completeRule.alertId,
+          ruleVersion,
           threatFilters: threatFilters ?? [],
           threatIndex,
           threatLanguage,

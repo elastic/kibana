@@ -20,6 +20,8 @@ export const updatePercolatorIndex = async ({
   logger,
   percolatorRuleDataClient,
   perPage,
+  ruleId,
+  ruleVersion,
   threatFilters,
   threatIndex,
   threatLanguage,
@@ -36,6 +38,8 @@ export const updatePercolatorIndex = async ({
         listClient,
         logger,
         perPage,
+        ruleId,
+        ruleVersion,
         threatFilters,
         threatIndex,
         threatLanguage,
@@ -44,7 +48,6 @@ export const updatePercolatorIndex = async ({
       }),
     'createThreatQueriesForPercolator'
   );
-  console.log('____firstThreatQuery', JSON.stringify(threatQueriesToPersist[0]));
   await withTimeout<void>(
     () => persistThreatQueries({ threatQueriesToPersist, percolatorRuleDataClient }),
     'persistThreatQueries'

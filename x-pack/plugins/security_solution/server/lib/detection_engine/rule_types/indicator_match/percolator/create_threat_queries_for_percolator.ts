@@ -19,6 +19,8 @@ export const createThreatQueriesForPercolator = async ({
   listClient,
   logger,
   perPage,
+  ruleId,
+  ruleVersion,
   threatFilters,
   threatIndex,
   threatLanguage,
@@ -36,5 +38,6 @@ export const createThreatQueriesForPercolator = async ({
     perPage,
     query: threatQuery,
     filters: threatFilters,
-    transformHits: (hits) => createPercolateQueries({ threatMapping, threatList: hits }),
+    transformHits: (hits) =>
+      createPercolateQueries({ threatMapping, threatList: hits, ruleId, ruleVersion }),
   });

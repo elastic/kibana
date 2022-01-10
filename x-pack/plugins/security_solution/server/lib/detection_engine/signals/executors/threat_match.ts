@@ -121,6 +121,8 @@ export const threatMatchExecutor = async ({
       const chunkedSourceEventHits = chunk(sourceEventHits, ELASTICSEARCH_MAX_PER_PAGE);
 
       const matchedPercolateQueriesByChunk = await percolateSourceEvents({
+        ruleId,
+        ruleVersion,
         chunkedSourceEventHits,
         percolatorRuleDataClient,
       });

@@ -243,6 +243,12 @@ export class Plugin implements ISecuritySolutionPlugin {
               query: {
                 type: 'percolator',
               },
+              rule_id: {
+                type: 'keyword',
+              },
+              rule_version: {
+                type: 'long',
+              },
             },
             false
           ),
