@@ -21,7 +21,7 @@ import type {
 } from '../../../../src/core/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MapInspectorView } from './inspector/map_inspector_view';
-import { setMapAppConfig, setStartServices, setMapsEmsStart } from './kibana_services';
+import { setMapAppConfig, setStartServices } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
@@ -190,7 +190,6 @@ export class MapsPlugin
   public start(core: CoreStart, plugins: MapsPluginStartDependencies): MapsStartApi {
     setLicensingPluginStart(plugins.licensing);
     setStartServices(core, plugins);
-    setMapsEmsStart(plugins.mapsEms);
 
     if (core.application.capabilities.maps.show) {
       plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);

@@ -14,9 +14,13 @@ import { MapsEmsPluginPublicStart } from '../../../../src/plugins/maps_ems/publi
 
 let coreStart: CoreStart;
 let pluginsStart: MapsPluginStartDependencies;
+let mapsEms: MapsEmsPluginPublicStart;
+let emsSettings: EMSSettings;
 export function setStartServices(core: CoreStart, plugins: MapsPluginStartDependencies) {
   coreStart = core;
   pluginsStart = plugins;
+  mapsEms = plugins.mapsEms;
+  emsSettings = mapsEms.createEMSSettings();
 }
 
 export const getIndexNameFormComponent = () => pluginsStart.fileUpload.IndexNameFormComponent;
@@ -59,13 +63,6 @@ export const getMapAppConfig = () => mapAppConfig;
 export const getShowMapsInspectorAdapter = () => getMapAppConfig().showMapsInspectorAdapter;
 export const getPreserveDrawingBuffer = () => getMapAppConfig().preserveDrawingBuffer;
 
-let mapsEms: MapsEmsPluginPublicStart;
-let emsSettings: EMSSettings;
-export const setMapsEmsStart = (value: MapsEmsPluginPublicStart) => {
-  mapsEms = value;
-  emsSettings = mapsEms.createEMSSettings();
-};
-// map.* kibana.yml settings from maps_ems plugin that are shared between OSS map visualizations and maps app
 export const getMapsEmsStart: () => MapsEmsPluginPublicStart = () => {
   return mapsEms;
 };
@@ -74,14 +71,11 @@ export const getEMSSettings: () => EMSSettings = () => {
   return emsSettings;
 };
 
-export const getMapConfig = () => mapsEms.config;
-
-export const getEmsTileLayerId = () => getMapConfig().emsTileLayerId;
+export const getEmsTileLayerId = () => mapsEms.config.emsTileLayerId;
 
 export const getTilemap = () => {
-  const config = getMapConfig();
-  if (config.tilemap) {
-    return config.tilemap;
+  if (mapsEms.config.tilemap) {
+    return mapsEms.config.tilemap;
   } else {
     return {};
   }
