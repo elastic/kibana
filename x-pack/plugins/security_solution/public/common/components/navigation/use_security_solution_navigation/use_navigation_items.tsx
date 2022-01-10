@@ -114,6 +114,12 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
             },
           ]
         : [],
-    [uiCapabilities.siem.show, navTabs, hasCasesReadPermissions, canSeeHostIsolationExceptions]
+    [
+      uiCapabilities.siem.show,
+      navTabs,
+      hasCasesReadPermissions,
+      canSeeHostIsolationExceptions,
+      isPolicyListEnabled,
+    ]
   );
 }
