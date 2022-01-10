@@ -176,16 +176,16 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       await importSavedObjectsFromStream(options);
-      expect(mockValidateReferences).toHaveBeenCalledWith(
-        collectedObjects,
+      expect(mockValidateReferences).toHaveBeenCalledWith({
+        objects: collectedObjects,
         savedObjectsClient,
         namespace,
-        new Map([
+        importStateMap: new Map([
           // This importStateMap is a combination of the other two
           [`${collectedObjects[0].type}:${collectedObjects[0].id}`, {}],
           [`foo:bar`, { isOnlyReference: true, id: 'baz' }],
-        ])
-      );
+        ]),
+      });
     });
 
     test('executes import hooks', async () => {

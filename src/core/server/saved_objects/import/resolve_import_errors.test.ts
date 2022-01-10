@@ -215,17 +215,17 @@ describe('#importSavedObjectsFromStream', () => {
       });
 
       await resolveSavedObjectsImportErrors(options);
-      expect(mockValidateReferences).toHaveBeenCalledWith(
-        collectedObjects,
+      expect(mockValidateReferences).toHaveBeenCalledWith({
+        objects: collectedObjects,
         savedObjectsClient,
         namespace,
-        new Map([
+        importStateMap: new Map([
           // This importStateMap is a combination of the other two
           [`${collectedObjects[0].type}:${collectedObjects[0].id}`, {}],
           [`foo:bar`, { isOnlyReference: true, id: 'baz' }],
         ]),
-        retries
-      );
+        retries,
+      });
     });
 
     test('execute import hooks', async () => {
@@ -273,13 +273,13 @@ describe('#importSavedObjectsFromStream', () => {
         ...object,
         references: [{ ...object.references[0], id: 'def' }],
       };
-      expect(mockValidateReferences).toHaveBeenCalledWith(
-        [objectWithReplacedReferences],
+      expect(mockValidateReferences).toHaveBeenCalledWith({
+        objects: [objectWithReplacedReferences],
         savedObjectsClient,
         namespace,
-        new Map(), // doesn't matter
-        retries
-      );
+        importStateMap: new Map(), // doesn't matter
+        retries,
+      });
     });
 
     test('checks conflicts', async () => {

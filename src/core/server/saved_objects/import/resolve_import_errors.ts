@@ -122,13 +122,13 @@ export async function resolveSavedObjectsImportErrors({
   importStateMap = new Map([...importStateMap, ...checkReferenceOriginsResult.importStateMap]);
 
   // Validate references
-  const validateReferencesResult = await validateReferences(
-    collectSavedObjectsResult.collectedObjects,
+  const validateReferencesResult = await validateReferences({
+    objects: collectSavedObjectsResult.collectedObjects,
     savedObjectsClient,
     namespace,
     importStateMap,
-    retries
-  );
+    retries,
+  });
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult];
 
   if (createNewCopies) {

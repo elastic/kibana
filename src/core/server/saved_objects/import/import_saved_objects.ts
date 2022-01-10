@@ -88,12 +88,12 @@ export async function importSavedObjectsFromStream({
   importStateMap = new Map([...importStateMap, ...checkReferenceOriginsResult.importStateMap]);
 
   // Validate references
-  const validateReferencesResult = await validateReferences(
-    collectSavedObjectsResult.collectedObjects,
+  const validateReferencesResult = await validateReferences({
+    objects: collectSavedObjectsResult.collectedObjects,
     savedObjectsClient,
     namespace,
-    importStateMap
-  );
+    importStateMap,
+  });
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult];
 
   if (createNewCopies) {
@@ -101,7 +101,6 @@ export async function importSavedObjectsFromStream({
       ...importStateMap, // preserve any entries for references that aren't included in collectedObjects
       ...regenerateIds(collectSavedObjectsResult.collectedObjects),
     ]);
-    // TODO: check reference origins!
   } else {
     // Check single-namespace objects for conflicts in this namespace, and check multi-namespace objects for conflicts across all namespaces
     const checkConflictsParams = {
