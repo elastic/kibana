@@ -7,51 +7,34 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { filter } from 'rxjs/operators';
-import {
-  DataPublicPluginStart,
-  isCompleteResponse,
-  ISearchSource,
-} from '../../../../../data/public';
-import { Adapters } from '../../../../../inspector/common';
-import { FetchStatus } from '../../types';
-import { SavedSearchData } from './use_saved_search';
-import { sendErrorMsg, sendLoadingMsg } from './use_saved_search_messages';
+import { filter, map } from 'rxjs/operators';
+import { isCompleteResponse, ISearchSource } from '../../../../../data/public';
+import { DataViewType } from '../../../../../data_views/common';
+import { FetchDeps } from './fetch_all';
 
 export function fetchTotalHits(
-  data$: SavedSearchData,
   searchSource: ISearchSource,
-  {
-    abortController,
-    data,
-    inspectorAdapters,
-    onResults,
-    searchSessionId,
-  }: {
-    abortController: AbortController;
-    data: DataPublicPluginStart;
-    onResults: (foundDocuments: boolean) => void;
-    inspectorAdapters: Adapters;
-    searchSessionId: string;
-  }
+  { abortController, inspectorAdapters, searchSessionId, savedSearch }: FetchDeps
 ) {
-  const { totalHits$ } = data$;
-  const indexPattern = searchSource.getField('index');
   searchSource.setField('trackTotalHits', true);
-  searchSource.setField('filter', data.query.timefilter.timefilter.createFilter(indexPattern!));
   searchSource.setField('size', 0);
   searchSource.removeField('sort');
   searchSource.removeField('fields');
   searchSource.removeField('aggs');
-
-  sendLoadingMsg(totalHits$);
+  if (searchSource.getField('index')?.type === DataViewType.ROLLUP) {
+    // We treat that index pattern as "normal" even if it was a rollup index pattern,
+    // since the rollup endpoint does not support querying individual documents, but we
+    // can get them from the regular _search API that will be used if the index pattern
+    // not a rollup index pattern.
+    searchSource.setOverwriteDataViewType(undefined);
+  }
 
   const executionContext = {
     type: 'application',
     name: 'discover',
     description: 'fetch total hits',
     url: window.location.pathname,
-    id: '',
+    id: savedSearch.id ?? '',
   };
 
   const fetch$ = searchSource
@@ -69,21 +52,10 @@ export function fetchTotalHits(
       sessionId: searchSessionId,
       executionContext,
     })
-    .pipe(filter((res) => isCompleteResponse(res)));
+    .pipe(
+      filter((res) => isCompleteResponse(res)),
+      map((res) => res.rawResponse.hits.total as number)
+    );
 
-  fetch$.subscribe(
-    (res) => {
-      const totalHitsNr = res.rawResponse.hits.total as number;
-      totalHits$.next({ fetchStatus: FetchStatus.COMPLETE, result: totalHitsNr });
-      onResults(totalHitsNr > 0);
-    },
-    (error) => {
-      if (error instanceof Error && error.name === 'AbortError') {
-        return;
-      }
-      sendErrorMsg(totalHits$, error);
-    }
-  );
-
-  return fetch$;
+  return fetch$.toPromise();
 }

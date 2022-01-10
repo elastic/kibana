@@ -1674,7 +1674,8 @@ describe('migration visualization', () => {
       type = 'area',
       categoryAxes?: object[],
       valueAxes?: object[],
-      hasPalette = false
+      hasPalette = false,
+      hasCirclesRadius = false
     ) => ({
       attributes: {
         title: 'My Vis',
@@ -1692,6 +1693,21 @@ describe('migration visualization', () => {
             valueAxes: valueAxes ?? [
               {
                 labels: {},
+              },
+            ],
+            seriesParams: [
+              {
+                show: true,
+                type,
+                mode: 'stacked',
+                drawLinesBetweenPoints: true,
+                lineWidth: 2,
+                showCircles: true,
+                interpolate: 'linear',
+                valueAxis: 'ValueAxis-1',
+                ...(hasCirclesRadius && {
+                  circlesRadius: 3,
+                }),
               },
             ],
             ...(hasPalette && {
@@ -1730,6 +1746,20 @@ describe('migration visualization', () => {
       const { palette } = JSON.parse(migratedTestDoc.attributes.visState).params;
 
       expect(palette.name).toEqual('default');
+    });
+
+    it("should decorate existing docs with the circlesRadius attribute if it doesn't exist", () => {
+      const migratedTestDoc = migrate(getTestDoc());
+      const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.seriesParams;
+
+      expect(result.circlesRadius).toEqual(1);
+    });
+
+    it('should not decorate existing docs with the circlesRadius attribute if it exists', () => {
+      const migratedTestDoc = migrate(getTestDoc('area', undefined, undefined, true, true));
+      const [result] = JSON.parse(migratedTestDoc.attributes.visState).params.seriesParams;
+
+      expect(result.circlesRadius).toEqual(3);
     });
 
     describe('labels.filter', () => {
@@ -2342,6 +2372,64 @@ describe('migration visualization', () => {
 
       expect(params.mardwon_less).toBeUndefined();
       expect(params.markdown_css).toEqual('test { color: red }');
+    });
+  });
+
+  describe('7.17.0 tsvb - add drop last bucket into TSVB model', () => {
+    const migrate = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.14.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const migrateAgain = (doc: any) =>
+      visualizationSavedObjectTypeMigrations['7.17.0'](
+        doc as Parameters<SavedObjectMigrationFn>[0],
+        savedObjectMigrationContext
+      );
+
+    const createTestDocWithType = (params: any) => ({
+      attributes: {
+        title: 'My Vis',
+        description: 'This is my super cool vis.',
+        visState: `{
+          "type":"metrics",
+          "params": ${JSON.stringify(params)}
+        }`,
+      },
+    });
+
+    it('should add "drop_last_bucket" into model if it not exist and run twice', () => {
+      const params = {};
+      const migratedTestDoc = migrate(createTestDocWithType(params));
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      expect(migratedParams).toMatchInlineSnapshot(`
+        Object {
+          "drop_last_bucket": 1,
+        }
+      `);
+
+      const migratedTestDocNew = migrateAgain(migratedTestDoc);
+      const { params: migratedNewParams } = JSON.parse(migratedTestDocNew.attributes.visState);
+
+      expect(migratedNewParams).toMatchInlineSnapshot(`
+        Object {
+          "drop_last_bucket": 1,
+        }
+      `);
+    });
+
+    it('should not set "drop_last_bucket" to 1 into model if it exists', () => {
+      const params = { drop_last_bucket: 0 };
+      const migratedTestDoc = migrate(createTestDocWithType(params));
+      const { params: migratedParams } = JSON.parse(migratedTestDoc.attributes.visState);
+
+      expect(migratedParams).toMatchInlineSnapshot(`
+        Object {
+          "drop_last_bucket": 0,
+        }
+      `);
     });
   });
 });

@@ -34,12 +34,16 @@ export TEST_BROWSER_HEADLESS=1
 
 export ELASTIC_APM_ENVIRONMENT=ci
 export ELASTIC_APM_TRANSACTION_SAMPLE_RATE=0.1
+export ELASTIC_APM_SERVER_URL=https://kibana-ci-apm.apm.us-central1.gcp.cloud.es.io
+export ELASTIC_APM_SECRET_TOKEN=7YKhoXsO4MzjhXjx2c
 
 if is_pr; then
   if [[ "${GITHUB_PR_LABELS:-}" == *"ci:collect-apm"* ]]; then
     export ELASTIC_APM_ACTIVE=true
+    export ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=false
   else
-    export ELASTIC_APM_ACTIVE=false
+    export ELASTIC_APM_ACTIVE=true
+    export ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=true
   fi
 
   if [[ "${GITHUB_STEP_COMMIT_STATUS_ENABLED:-}" != "true" ]]; then
@@ -61,6 +65,7 @@ if is_pr; then
   export PR_TARGET_BRANCH="$GITHUB_PR_TARGET_BRANCH"
 else
   export ELASTIC_APM_ACTIVE=true
+  export ELASTIC_APM_CONTEXT_PROPAGATION_ONLY=false
   export CHECKS_REPORTER_ACTIVE=false
 fi
 
@@ -71,8 +76,14 @@ export GIT_BRANCH="${BUILDKITE_BRANCH:-}"
 export FLEET_PACKAGE_REGISTRY_PORT=6104
 export TEST_CORS_SERVER_PORT=6105
 
-export DETECT_CHROMEDRIVER_VERSION=true
-export CHROMEDRIVER_FORCE_DOWNLOAD=true
+# Mac agents currently don't have Chrome
+if [[ "$(which google-chrome-stable)" || "$(which google-chrome)" ]]; then
+  echo "Chrome detected, setting DETECT_CHROMEDRIVER_VERSION=true"
+  export DETECT_CHROMEDRIVER_VERSION=true
+  export CHROMEDRIVER_FORCE_DOWNLOAD=true
+else
+  echo "Chrome not detected, installing default chromedriver binary for the package version"
+fi
 
 export GCS_UPLOAD_PREFIX=FAKE_UPLOAD_PREFIX # TODO remove the need for this
 

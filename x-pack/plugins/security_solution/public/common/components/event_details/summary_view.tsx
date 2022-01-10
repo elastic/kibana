@@ -5,14 +5,24 @@
  * 2.0.
  */
 
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiTitle } from '@elastic/eui';
+import {
+  EuiInMemoryTable,
+  EuiBasicTableColumn,
+  EuiLink,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 
 import { SummaryRow } from './helpers';
+import { VIEW_ALL_DOCUMENT_FIELDS } from './translations';
 
 export const Indent = styled.div`
-  padding: 0 4px;
+  padding: 0 12px;
 `;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -43,18 +53,27 @@ export const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
 `;
 
 export const SummaryViewComponent: React.FC<{
-  title?: string;
+  goToTable: () => void;
+  title: string;
   summaryColumns: Array<EuiBasicTableColumn<SummaryRow>>;
   summaryRows: SummaryRow[];
   dataTestSubj?: string;
-}> = ({ summaryColumns, summaryRows, dataTestSubj = 'summary-view', title }) => {
+}> = ({ goToTable, summaryColumns, summaryRows, dataTestSubj = 'summary-view', title }) => {
   return (
-    <>
-      {title && (
-        <EuiTitle size="xxxs">
-          <h5>{title}</h5>
-        </EuiTitle>
-      )}
+    <div>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="xxxs">
+            <h5>{title}</h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiLink onClick={goToTable}>
+            <EuiText size="xs">{VIEW_ALL_DOCUMENT_FIELDS}</EuiText>
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
       <Indent>
         <StyledEuiInMemoryTable
           data-test-subj={dataTestSubj}
@@ -63,7 +82,7 @@ export const SummaryViewComponent: React.FC<{
           compressed
         />
       </Indent>
-    </>
+    </div>
   );
 };
 

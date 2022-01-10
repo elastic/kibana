@@ -120,8 +120,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
           return actualCount === expectedCount;
         });
-        const prevRowData = await PageObjects.discover.getDocTableField(1);
-        log.debug(`The first timestamp value in doc table before brushing: ${prevRowData}`);
+        let prevRowData = '';
+        // to make sure the table is already rendered
+        await retry.try(async () => {
+          prevRowData = await PageObjects.discover.getDocTableField(1);
+          log.debug(`The first timestamp value in doc table before brushing: ${prevRowData}`);
+        });
+
         await PageObjects.discover.brushHistogram();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await retry.waitFor('chart rendering complete after being brushed', async () => {

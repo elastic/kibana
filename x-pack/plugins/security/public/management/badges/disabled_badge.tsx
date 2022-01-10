@@ -9,7 +9,7 @@ import type { EuiToolTipProps } from '@elastic/eui';
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { OptionalToolTip } from './optional_tooltip';
 

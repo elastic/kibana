@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, SavedObjectsFindOptions } from 'src/core/server';
+import { IRouter, SavedObjectsCreatePointInTimeFinderOptions } from 'src/core/server';
 import { chain } from 'lodash';
 import { findAll } from '../lib';
 
@@ -42,7 +42,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
         .value();
 
       const client = getClient({ includedHiddenTypes });
-      const findOptions: SavedObjectsFindOptions = {
+      const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
         type: typesToInclude,
         perPage: 1000,
       };

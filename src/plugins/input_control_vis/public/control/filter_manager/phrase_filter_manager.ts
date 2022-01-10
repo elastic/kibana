@@ -97,8 +97,8 @@ export class PhraseFilterManager extends FilterManager {
     }
 
     // scripted field filter
-    if (_.has(kbnFilter, 'script')) {
-      return _.get(kbnFilter, 'script.script.params.value');
+    if (_.has(kbnFilter, 'query.script')) {
+      return _.get(kbnFilter, 'query.script.script.params.value');
     }
 
     // single phrase filter

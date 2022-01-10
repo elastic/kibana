@@ -10,7 +10,7 @@ import { Dispatch } from 'redux';
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { Query, Filter } from '../../../../../../../src/plugins/data/public';
+import type { Filter, Query } from '@kbn/es-query';
 import { inputsActions, sourcererActions } from '../../store/actions';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
 import {
@@ -64,7 +64,7 @@ export const useSetInitialStateFromUrl = () => {
               dispatch(
                 sourcererActions.setSelectedDataView({
                   id: scope,
-                  selectedDataViewId: sourcererState[scope]?.id ?? '',
+                  selectedDataViewId: sourcererState[scope]?.id ?? null,
                   selectedPatterns: sourcererState[scope]?.selectedPatterns ?? [],
                 })
               )

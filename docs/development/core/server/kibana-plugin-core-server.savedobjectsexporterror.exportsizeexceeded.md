@@ -14,9 +14,9 @@ static exportSizeExceeded(limit: number): SavedObjectsExportError;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  limit | <code>number</code> |  |
+|  limit | number |  |
 
 <b>Returns:</b>
 
-`SavedObjectsExportError`
+SavedObjectsExportError
 

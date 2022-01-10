@@ -5,38 +5,44 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { I18nProvider } from '@kbn/i18n/react';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
-import { OwnerProvider } from '../../components/owner_context';
-import {
-  createKibanaContextProviderMock,
-  createStartServicesMock,
-} from '../lib/kibana/kibana_react.mock';
+
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { CasesFeatures } from '../../../common/ui/types';
+import { CasesProvider } from '../../components/cases_context';
+import { createKibanaContextProviderMock } from '../lib/kibana/kibana_react.mock';
 import { FieldHook } from '../shared_imports';
 
 interface Props {
   children: React.ReactNode;
+  userCanCrud?: boolean;
+  features?: CasesFeatures;
+  owner?: string[];
 }
-
-export const kibanaObservable = new BehaviorSubject(createStartServicesMock());
 
 window.scrollTo = jest.fn();
 const MockKibanaContextProvider = createKibanaContextProviderMock();
 
 /** A utility for wrapping children in the providers required to run most tests */
-const TestProvidersComponent: React.FC<Props> = ({ children }) => (
-  <I18nProvider>
-    <MockKibanaContextProvider>
-      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <OwnerProvider owner={[SECURITY_SOLUTION_OWNER]}>{children}</OwnerProvider>
-      </ThemeProvider>
-    </MockKibanaContextProvider>
-  </I18nProvider>
-);
+const TestProvidersComponent: React.FC<Props> = ({
+  children,
+  features,
+  owner = [SECURITY_SOLUTION_OWNER],
+  userCanCrud = true,
+}) => {
+  return (
+    <I18nProvider>
+      <MockKibanaContextProvider>
+        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+          <CasesProvider value={{ features, owner, userCanCrud }}>{children}</CasesProvider>
+        </ThemeProvider>
+      </MockKibanaContextProvider>
+    </I18nProvider>
+  );
+};
 
 export const TestProviders = React.memo(TestProvidersComponent);
 

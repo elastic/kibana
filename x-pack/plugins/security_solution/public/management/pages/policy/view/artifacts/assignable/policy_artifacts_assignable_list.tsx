@@ -5,18 +5,22 @@
  * 2.0.
  */
 
+import { EuiProgress } from '@elastic/eui';
+import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import React, { useMemo } from 'react';
-
+import { GetTrustedAppsListResponse, Immutable } from '../../../../../../../common/endpoint/types';
 import {
-  GetTrustedAppsListResponse,
-  Immutable,
-  TrustedApp,
-} from '../../../../../../../common/endpoint/types';
-import { Loader } from '../../../../../../common/components/loader';
-import { ArtifactEntryCardMinified } from '../../../../../components/artifact_entry_card';
+  AnyArtifact,
+  ArtifactEntryCardMinified,
+} from '../../../../../components/artifact_entry_card';
 
 export interface PolicyArtifactsAssignableListProps {
-  artifacts: Immutable<GetTrustedAppsListResponse | undefined>; // Or other artifacts type like Event Filters or Endpoint Exceptions
+  // TrustedApps is still migrating to use FoundExceptionListItemSchema and the compatibility is
+  // not 100% gurantee in types even though in runtime they are the same data structure
+  artifacts:
+    | Immutable<GetTrustedAppsListResponse | undefined>
+    | FoundExceptionListItemSchema
+    | undefined;
   selectedArtifactIds: string[];
   selectedArtifactsUpdated: (id: string, selected: boolean) => void;
   isListLoading: boolean;
@@ -35,7 +39,7 @@ export const PolicyArtifactsAssignableList = React.memo<PolicyArtifactsAssignabl
 
     const assignableList = useMemo(() => {
       if (!artifacts || !artifacts.data.length) return null;
-      const items = Array.from(artifacts.data) as TrustedApp[];
+      const items = artifacts.data as AnyArtifact[];
       return (
         <div data-test-subj="artifactsList">
           {items.map((artifact) => (
@@ -52,7 +56,14 @@ export const PolicyArtifactsAssignableList = React.memo<PolicyArtifactsAssignabl
       );
     }, [artifacts, selectedArtifactIdsByKey, selectedArtifactsUpdated]);
 
-    return isListLoading ? <Loader size="xl" /> : <div>{assignableList}</div>;
+    return (
+      <>
+        {isListLoading && (
+          <EuiProgress size="xs" color="primary" data-test-subj="artifactsAssignableListLoader" />
+        )}
+        <div>{assignableList}</div>
+      </>
+    );
   }
 );
 

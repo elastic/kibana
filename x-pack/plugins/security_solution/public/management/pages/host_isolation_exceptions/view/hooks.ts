@@ -4,20 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import {
+  CreateExceptionListItemSchema,
+  FoundExceptionListItemSchema,
+  UpdateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { useCallback, useEffect, useState } from 'react';
+import { QueryObserverResult, useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { useHttp } from '../../../../common/lib/kibana/hooks';
 import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
+import { useHttp } from '../../../../common/lib/kibana/hooks';
 import { State } from '../../../../common/store';
+import { ServerApiError } from '../../../../common/types';
 import {
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_HOST_ISOLATION_EXCEPTIONS_NAMESPACE,
 } from '../../../common/constants';
 import { getHostIsolationExceptionsListPath } from '../../../common/routing';
-import { getHostIsolationExceptionSummary } from '../service';
+import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../../common/utils';
+import {
+  getHostIsolationExceptionItems,
+  getHostIsolationExceptionSummary,
+  getOneHostIsolationExceptionItem,
+} from '../service';
 import { getCurrentLocation } from '../store/selector';
 import { HostIsolationExceptionsPageLocation, HostIsolationExceptionsPageState } from '../types';
+import { createEmptyHostIsolationException } from '../utils';
 
 export function useHostIsolationExceptionsSelector<R>(
   selector: (state: HostIsolationExceptionsPageState) => R
@@ -44,7 +57,7 @@ export function useHostIsolationExceptionsNavigateCallback() {
  * Checks if the current user should be able to see the host isolation exceptions
  * menu item based on their current privileges
  */
-export function useCanSeeHostIsolationExceptionsMenu() {
+export function useCanSeeHostIsolationExceptionsMenu(): boolean {
   const http = useHttp();
   const privileges = useEndpointPrivileges();
 
@@ -64,8 +77,78 @@ export function useCanSeeHostIsolationExceptionsMenu() {
     }
     if (!privileges.canIsolateHost) {
       checkIfHasExceptions();
+    } else {
+      setCanSeeMenu(true);
     }
   }, [http, privileges.canIsolateHost]);
 
   return canSeeMenu;
+}
+
+const SEARCHABLE_FIELDS: Readonly<string[]> = [`item_id`, `name`, `description`, `entries.value`];
+
+export function useFetchHostIsolationExceptionsList({
+  filter,
+  page,
+  perPage,
+  policies,
+  excludedPolicies = [],
+  enabled = true,
+}: {
+  filter?: string;
+  page: number;
+  perPage: number;
+  policies?: string[];
+  excludedPolicies?: string[];
+  enabled?: boolean;
+}): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
+  const http = useHttp();
+
+  return useQuery<FoundExceptionListItemSchema, ServerApiError>(
+    ['hostIsolationExceptions', 'list', filter, perPage, page, policies, excludedPolicies],
+    () => {
+      const kql = parsePoliciesAndFilterToKql({
+        policies,
+        excludedPolicies,
+        kuery: filter ? parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) : undefined,
+      });
+
+      return getHostIsolationExceptionItems({
+        http,
+        page: page + 1,
+        perPage,
+        filter: kql,
+      });
+    },
+    { enabled }
+  );
+}
+
+export function useGetHostIsolationExceptionFormEntry({
+  id,
+  onSuccess,
+  onError,
+}: {
+  id?: string;
+  onSuccess: (data: CreateExceptionListItemSchema | UpdateExceptionListItemSchema) => void;
+  onError?: (error: ServerApiError) => void;
+}): QueryObserverResult {
+  const http = useHttp();
+  return useQuery<UpdateExceptionListItemSchema | CreateExceptionListItemSchema, ServerApiError>(
+    ['hostIsolationExceptions', 'form', id],
+    async () => {
+      // for editing, fetch from the API
+      if (id !== undefined) {
+        return getOneHostIsolationExceptionItem(http, id);
+      }
+      // for adding, return a new empty object
+      return createEmptyHostIsolationException();
+    },
+    {
+      refetchIntervalInBackground: false,
+      refetchOnWindowFocus: false,
+      onSuccess,
+      onError,
+    }
+  );
 }

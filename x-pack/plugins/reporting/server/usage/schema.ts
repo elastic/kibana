@@ -31,7 +31,6 @@ const layoutCountsSchema: MakeSchemaFrom<LayoutCounts> = {
 };
 
 const byAppCountsSchema: MakeSchemaFrom<ByAppCounts> = {
-  csv: appCountsSchema,
   csv_searchsource: appCountsSchema,
   csv_searchsource_immediate: appCountsSchema,
   PNG: appCountsSchema,
@@ -60,7 +59,6 @@ const availableTotalSchema: MakeSchemaFrom<AvailableTotal> = {
 };
 
 const jobTypesSchema: MakeSchemaFrom<JobTypes> = {
-  csv: availableTotalSchema,
   csv_searchsource: availableTotalSchema,
   csv_searchsource_immediate: availableTotalSchema,
   PNG: availableTotalSchema,
@@ -92,7 +90,6 @@ const rangeStatsSchema: MakeSchemaFrom<RangeStats> = {
 export const reportingSchema: MakeSchemaFrom<ReportingUsageType> = {
   ...rangeStatsSchema,
   available: { type: 'boolean' },
-  browser_type: { type: 'keyword' },
   enabled: { type: 'boolean' },
   last7Days: rangeStatsSchema,
 };

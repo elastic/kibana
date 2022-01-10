@@ -22,5 +22,4 @@ export { PackagePolicyDeleteProvider } from './package_policy_delete_provider';
 export { PackagePolicyActionsMenu } from './package_policy_actions_menu';
 export { AddAgentHelpPopover } from './add_agent_help_popover';
 export * from './link_and_revision';
-export * from './settings_flyout';
 export * from './agent_enrollment_flyout';

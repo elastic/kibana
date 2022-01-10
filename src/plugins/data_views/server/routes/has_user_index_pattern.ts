@@ -8,36 +8,48 @@
 
 import { handleErrors } from './util/handle_errors';
 import { IRouter, StartServicesAccessor } from '../../../../core/server';
-import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
+import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
+import { SERVICE_PATH, SERVICE_PATH_LEGACY } from '../constants';
 
-export const registerHasUserIndexPatternRoute = (
-  router: IRouter,
-  getStartServices: StartServicesAccessor<
-    DataViewsServerPluginStartDependencies,
-    DataViewsServerPluginStart
-  >
-) => {
-  router.get(
-    {
-      path: '/api/index_patterns/has_user_index_pattern',
-      validate: {},
-    },
-    router.handleLegacyErrors(
-      handleErrors(async (ctx, req, res) => {
-        const savedObjectsClient = ctx.core.savedObjects.client;
-        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-        const [, , { indexPatternsServiceFactory }] = await getStartServices();
-        const indexPatternsService = await indexPatternsServiceFactory(
-          savedObjectsClient,
-          elasticsearchClient
-        );
+const hasUserDataViewRouteFactory =
+  (path: string) =>
+  (
+    router: IRouter,
+    getStartServices: StartServicesAccessor<
+      DataViewsServerPluginStartDependencies,
+      DataViewsServerPluginStart
+    >
+  ) => {
+    router.get(
+      {
+        path,
+        validate: {},
+      },
+      router.handleLegacyErrors(
+        handleErrors(async (ctx, req, res) => {
+          const savedObjectsClient = ctx.core.savedObjects.client;
+          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const [, , { dataViewsServiceFactory }] = await getStartServices();
+          const indexPatternsService = await dataViewsServiceFactory(
+            savedObjectsClient,
+            elasticsearchClient,
+            req
+          );
 
-        return res.ok({
-          body: {
-            result: await indexPatternsService.hasUserDataView(),
-          },
-        });
-      })
-    )
-  );
-};
+          return res.ok({
+            body: {
+              result: await indexPatternsService.hasUserDataView(),
+            },
+          });
+        })
+      )
+    );
+  };
+
+export const registerHasUserDataViewRoute = hasUserDataViewRouteFactory(
+  `${SERVICE_PATH}/has_user_data_view`
+);
+
+export const registerHasUserDataViewRouteLegacy = hasUserDataViewRouteFactory(
+  `${SERVICE_PATH_LEGACY}/has_user_index_pattern`
+);

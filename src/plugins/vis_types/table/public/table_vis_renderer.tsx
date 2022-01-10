@@ -13,6 +13,7 @@ import { CoreStart } from 'kibana/public';
 import { VisualizationContainer } from '../../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../../expressions/common/expression_renderers';
 import { TableVisRenderValue } from './table_vis_fn';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 
 const TableVisualizationComponent = lazy(() => import('./components/table_visualization'));
 
@@ -30,18 +31,20 @@ export const getTableVisRenderer: (
       visData.table?.rows.length === 0 || (!visData.table && visData.tables.length === 0);
 
     render(
-      <VisualizationContainer
-        data-test-subj="tbvChartContainer"
-        handlers={handlers}
-        showNoResult={showNoResult}
-      >
-        <TableVisualizationComponent
-          core={core}
+      <KibanaThemeProvider theme$={core.theme.theme$}>
+        <VisualizationContainer
+          data-test-subj="tbvChartContainer"
           handlers={handlers}
-          visData={visData}
-          visConfig={visConfig}
-        />
-      </VisualizationContainer>,
+          showNoResult={showNoResult}
+        >
+          <TableVisualizationComponent
+            core={core}
+            handlers={handlers}
+            visData={visData}
+            visConfig={visConfig}
+          />
+        </VisualizationContainer>
+      </KibanaThemeProvider>,
       domNode
     );
   },

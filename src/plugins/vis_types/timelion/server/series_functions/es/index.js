@@ -13,6 +13,7 @@ import buildRequest from './lib/build_request';
 import toSeriesList from './lib/agg_response_to_series_list';
 
 export default new Datasource('es', {
+  hideFitArg: true,
   args: [
     {
       name: 'q',

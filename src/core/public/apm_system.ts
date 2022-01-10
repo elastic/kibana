@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ApmBase, AgentConfigOptions } from '@elastic/apm-rum';
+import type { ApmBase, AgentConfigOptions, Transaction } from '@elastic/apm-rum';
 import { modifyUrl } from '@kbn/std';
 import { CachedResourceObserver } from './apm_resource_counter';
 import type { InternalApplicationStart } from './application';
@@ -71,7 +71,7 @@ export class ApmSystem {
     start.application.currentAppId$.subscribe((appId) => {
       if (appId && this.apm) {
         this.closePageLoadTransaction();
-        this.apm.startTransaction(`/app/${appId}`, 'route-change', {
+        this.apm.startTransaction(appId, 'app-change', {
           managed: true,
           canReuse: true,
         });

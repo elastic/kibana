@@ -10,7 +10,7 @@ import React from 'react';
 
 import { GeoJsonProperties } from 'geojson';
 import { i18n } from '@kbn/i18n';
-import type { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import {
   EMPTY_FEATURE_COLLECTION,
   FIELD_ORIGIN,
@@ -318,7 +318,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
     };
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest) {
+  getSourceStatus(sourceDataRequest?: DataRequest) {
     const featureCollection = sourceDataRequest ? sourceDataRequest.getData() : null;
     const meta = sourceDataRequest
       ? (sourceDataRequest.getMeta() as ESGeoLineSourceResponseMeta)

@@ -8,7 +8,8 @@
 import { connect } from 'react-redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { AnyAction } from 'redux';
-import { Filter, Query, TimeRange } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { Query, TimeRange } from 'src/plugins/data/public';
 import { MapApp } from './map_app';
 import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selectors';
 import {

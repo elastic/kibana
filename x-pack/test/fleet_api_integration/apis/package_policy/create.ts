@@ -214,7 +214,7 @@ export default function (providerContext: FtrProviderContext) {
           package: {
             name: 'endpoint',
             title: 'Endpoint',
-            version: '0.13.0',
+            version: '1.3.0-dev.0',
           },
         })
         .expect(200);
@@ -232,7 +232,7 @@ export default function (providerContext: FtrProviderContext) {
           package: {
             name: 'endpoint',
             title: 'Endpoint',
-            version: '0.13.0',
+            version: '1.3.0-dev.0',
           },
         })
         .expect(400);

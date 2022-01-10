@@ -9,7 +9,7 @@ import './suggestion_panel.scss';
 
 import { camelCase, pick } from 'lodash';
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import {
   EuiIcon,
@@ -21,7 +21,7 @@ import {
   EuiAccordion,
 } from '@elastic/eui';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
-import { Ast, toExpression } from '@kbn/interpreter/common';
+import { Ast, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { ExecutionContextSearch } from 'src/plugins/data/public';

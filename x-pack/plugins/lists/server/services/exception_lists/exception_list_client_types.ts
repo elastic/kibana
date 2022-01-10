@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { Readable } from 'stream';
+
 import { SavedObjectsClientContract } from 'kibana/server';
 import type {
   CreateCommentsArray,
@@ -20,6 +22,8 @@ import type {
   Id,
   IdOrUndefined,
   Immutable,
+  ImportExceptionListItemSchema,
+  ImportExceptionsListSchema,
   ItemId,
   ItemIdOrUndefined,
   ListId,
@@ -46,9 +50,14 @@ import {
   VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-types';
 
+import { ExtensionPointStorageClientInterface } from '../extension_points';
+
 export interface ConstructorOptions {
   user: string;
   savedObjectsClient: SavedObjectsClientContract;
+  serverExtensionsClient: ExtensionPointStorageClientInterface;
+  /** Set to `false` if wanting to disable executing registered server extension points. Default is true. */
+  enableServerExtensionPoints?: boolean;
 }
 
 export interface GetExceptionListOptions {
@@ -231,4 +240,16 @@ export interface ExportExceptionListAndItemsOptions {
 export interface ExportExceptionListAndItemsReturn {
   exportData: string;
   exportDetails: ExportExceptionDetails;
+}
+
+export interface ImportExceptionListAndItemsOptions {
+  exceptionsToImport: Readable;
+  maxExceptionsImportSize: number;
+  overwrite: boolean;
+}
+
+export interface ImportExceptionListAndItemsAsArrayOptions {
+  exceptionsToImport: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema>;
+  maxExceptionsImportSize: number;
+  overwrite: boolean;
 }

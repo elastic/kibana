@@ -7,23 +7,7 @@ get:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              list:
-                type: array
-                items:
-                  $ref: ../components/schemas/agent.yaml
-              total:
-                type: number
-              page:
-                type: number
-              perPage:
-                type: number
-            required:
-              - list
-              - total
-              - page
-              - perPage
+            $ref: ../components/schemas/get_agents_response.yaml
   operationId: get-agents
   security:
     - basicAuth: []

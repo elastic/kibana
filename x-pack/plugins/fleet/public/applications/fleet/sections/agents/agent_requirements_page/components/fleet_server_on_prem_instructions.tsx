@@ -27,7 +27,7 @@ import {
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DownloadStep } from '../../../../components';
 import {
@@ -41,11 +41,12 @@ import {
   sendPutSettings,
   sendGetFleetStatus,
   useFleetStatus,
-  useUrlModal,
+  useLink,
 } from '../../../../hooks';
 import type { PLATFORM_TYPE } from '../../../../hooks';
 import type { PackagePolicy } from '../../../../types';
 import { FLEET_SERVER_PACKAGE } from '../../../../constants';
+import { FleetServerOnPremRequiredCallout } from '../../components';
 
 import { getInstallCommandForPlatform } from './install_command_utils';
 
@@ -244,6 +245,7 @@ export const useFleetServerInstructions = (policyId?: string) => {
   const { data: settings, resendRequest: refreshSettings } = useGetSettings();
   const fleetServerHost = settings?.item.fleet_server_hosts?.[0];
   const esHost = output?.hosts?.[0];
+  const sslCATrustedFingerprint: string | undefined = output?.ca_trusted_fingerprint;
 
   const installCommand = useMemo((): string => {
     if (!serviceToken || !esHost) {
@@ -256,9 +258,18 @@ export const useFleetServerInstructions = (policyId?: string) => {
       serviceToken,
       policyId,
       fleetServerHost,
-      deploymentMode === 'production'
+      deploymentMode === 'production',
+      sslCATrustedFingerprint
     );
-  }, [serviceToken, esHost, platform, policyId, fleetServerHost, deploymentMode]);
+  }, [
+    serviceToken,
+    esHost,
+    platform,
+    policyId,
+    fleetServerHost,
+    deploymentMode,
+    sslCATrustedFingerprint,
+  ]);
 
   const getServiceToken = useCallback(async () => {
     setIsLoadingServiceToken(true);
@@ -284,20 +295,15 @@ export const useFleetServerInstructions = (policyId?: string) => {
 
   const addFleetServerHost = useCallback(
     async (host: string) => {
-      try {
-        await sendPutSettings({
-          fleet_server_hosts: [host, ...(settings?.item.fleet_server_hosts || [])],
-        });
-        await refreshSettings();
-      } catch (err) {
-        notifications.toasts.addError(err, {
-          title: i18n.translate('xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle', {
-            defaultMessage: 'Error adding Fleet Server host',
-          }),
-        });
+      const res = await sendPutSettings({
+        fleet_server_hosts: [host, ...(settings?.item.fleet_server_hosts || [])],
+      });
+      if (res.error) {
+        throw res.error;
       }
+      await refreshSettings();
     },
-    [refreshSettings, notifications.toasts, settings?.item.fleet_server_hosts]
+    [refreshSettings, settings?.item.fleet_server_hosts]
   );
 
   return {
@@ -416,7 +422,9 @@ export const AddFleetServerHostStepContent = ({
   const [isLoading, setIsLoading] = useState(false);
   const [fleetServerHost, setFleetServerHost] = useState('');
   const [error, setError] = useState<undefined | string>();
-  const { getModalHref } = useUrlModal();
+  const { notifications } = useStartServices();
+
+  const { getHref } = useLink();
 
   const validate = useCallback(
     (host: string) => {
@@ -445,10 +453,16 @@ export const AddFleetServerHostStepContent = ({
       } else {
         setCalloutHost('');
       }
+    } catch (err) {
+      notifications.toasts.addError(err, {
+        title: i18n.translate('xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle', {
+          defaultMessage: 'Error adding Fleet Server host',
+        }),
+      });
     } finally {
       setIsLoading(false);
     }
-  }, [fleetServerHost, addFleetServerHost, validate]);
+  }, [fleetServerHost, addFleetServerHost, validate, notifications.toasts]);
 
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -519,7 +533,7 @@ export const AddFleetServerHostStepContent = ({
               values={{
                 host: calloutHost,
                 fleetSettingsLink: (
-                  <EuiLink href={getModalHref('settings')}>
+                  <EuiLink href={getHref('settings')}>
                     <FormattedMessage
                       id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
                       defaultMessage="Fleet Settings"
@@ -685,20 +699,11 @@ export const OnPremInstructions: React.FC = () => {
     installCommand,
     platform,
     setPlatform,
-    refresh,
     deploymentMode,
     setDeploymentMode,
     fleetServerHost,
     addFleetServerHost,
   } = useFleetServerInstructions(policyId);
-
-  const { modal } = useUrlModal();
-  useEffect(() => {
-    // Refresh settings when the settings modal is closed
-    if (!modal) {
-      refresh();
-    }
-  }, [modal, refresh]);
 
   const { docLinks } = useStartServices();
 
@@ -728,6 +733,8 @@ export const OnPremInstructions: React.FC = () => {
 
   return (
     <>
+      <FleetServerOnPremRequiredCallout />
+      <EuiSpacer size="xl" />
       <EuiText>
         <h2>
           <FormattedMessage
@@ -759,8 +766,8 @@ export const OnPremInstructions: React.FC = () => {
       <EuiSteps
         className="eui-textLeft"
         steps={[
-          DownloadStep(),
           AgentPolicySelectionStep({ policyId, setPolicyId }),
+          DownloadStep(true),
           deploymentModeStep({ deploymentMode, setDeploymentMode }),
           addFleetServerHostStep({ addFleetServerHost }),
           ServiceTokenStep({

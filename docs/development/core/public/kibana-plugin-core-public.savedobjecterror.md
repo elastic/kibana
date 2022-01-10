@@ -14,8 +14,8 @@ export interface SavedObjectError
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [error](./kibana-plugin-core-public.savedobjecterror.error.md) | <code>string</code> |  |
-|  [message](./kibana-plugin-core-public.savedobjecterror.message.md) | <code>string</code> |  |
-|  [metadata](./kibana-plugin-core-public.savedobjecterror.metadata.md) | <code>Record&lt;string, unknown&gt;</code> |  |
-|  [statusCode](./kibana-plugin-core-public.savedobjecterror.statuscode.md) | <code>number</code> |  |
+|  [error](./kibana-plugin-core-public.savedobjecterror.error.md) | string |  |
+|  [message](./kibana-plugin-core-public.savedobjecterror.message.md) | string |  |
+|  [metadata?](./kibana-plugin-core-public.savedobjecterror.metadata.md) | Record&lt;string, unknown&gt; | <i>(Optional)</i> |
+|  [statusCode](./kibana-plugin-core-public.savedobjecterror.statuscode.md) | number |  |
 

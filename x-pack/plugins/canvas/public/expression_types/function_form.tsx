@@ -8,7 +8,7 @@
 import React, { ReactElement } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { isPlainObject, uniq, last, compact } from 'lodash';
-import { Ast, fromExpression } from '@kbn/interpreter/common';
+import { Ast, fromExpression } from '@kbn/interpreter';
 import { ArgAddPopover } from '../components/arg_add_popover';
 // @ts-expect-error unconverted components
 import { SidebarSection } from '../components/sidebar/sidebar_section';
@@ -140,7 +140,6 @@ export class FunctionForm extends BaseForm {
 
     // Don't instaniate these until render time, to give the registries a chance to populate.
     const argInstances = this.args.map((argSpec) => new Arg(argSpec));
-
     if (args === null || !isPlainObject(args)) {
       throw new Error(`Form "${this.name}" expects "args" object`);
     }
@@ -153,7 +152,6 @@ export class FunctionForm extends BaseForm {
       // otherwise, leave the value alone (including if the arg is not defined)
       const isMulti = arg && arg.multi;
       const argValues = args[argName] && !isMulti ? [last(args[argName]) ?? null] : args[argName];
-
       return { arg, argValues };
     });
 

@@ -95,6 +95,16 @@ exports[`FieldIcon renders known field types geo_shape is rendered 1`] = `
 />
 `;
 
+exports[`FieldIcon renders known field types histogram is rendered 1`] = `
+<EuiToken
+  aria-label="histogram"
+  className="kbnFieldIcon"
+  iconType="tokenHistogram"
+  size="s"
+  title="histogram"
+/>
+`;
+
 exports[`FieldIcon renders known field types ip is rendered 1`] = `
 <EuiToken
   aria-label="ip"
@@ -112,6 +122,16 @@ exports[`FieldIcon renders known field types ip_range is rendered 1`] = `
   iconType="tokenIP"
   size="s"
   title="ip_range"
+/>
+`;
+
+exports[`FieldIcon renders known field types keyword is rendered 1`] = `
+<EuiToken
+  aria-label="keyword"
+  className="kbnFieldIcon"
+  iconType="tokenKeyword"
+  size="s"
+  title="keyword"
 />
 `;
 
@@ -162,6 +182,16 @@ exports[`FieldIcon renders known field types string is rendered 1`] = `
   iconType="tokenString"
   size="s"
   title="string"
+/>
+`;
+
+exports[`FieldIcon renders known field types text is rendered 1`] = `
+<EuiToken
+  aria-label="text"
+  className="kbnFieldIcon"
+  iconType="tokenString"
+  size="s"
+  title="text"
 />
 `;
 

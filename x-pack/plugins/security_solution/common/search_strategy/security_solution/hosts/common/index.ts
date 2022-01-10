@@ -45,6 +45,7 @@ export interface HostItem {
   endpoint?: Maybe<EndpointFields>;
   host?: Maybe<HostEcs>;
   lastSeen?: Maybe<string[]>;
+  risk?: string;
 }
 
 export interface HostValue {

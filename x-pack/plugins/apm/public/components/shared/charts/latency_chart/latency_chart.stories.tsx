@@ -28,7 +28,6 @@ import { Meta, Story } from '@storybook/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
@@ -106,6 +105,7 @@ const stories: Meta<Args> = {
                     serviceName,
                     transactionType,
                     transactionTypes: [],
+                    fallbackToTransactions: false,
                   }}
                 >
                   <ChartPointerEventContextProvider>
@@ -124,9 +124,7 @@ const stories: Meta<Args> = {
 export default stories;
 
 export const Example: Story<Args> = () => {
-  return (
-    <LatencyChart height={300} environment={ENVIRONMENT_ALL.value} kuery="" />
-  );
+  return <LatencyChart height={300} kuery="" />;
 };
 Example.args = {
   alertsResponse: {
@@ -207,17 +205,6 @@ Example.args = {
     ],
   },
   latencyChartResponse: {
-    anomalyTimeseries: {
-      jobId: 'apm-production-00aa-high_mean_transaction_duration',
-      anomalyScore: [
-        {
-          x0: 1622613600000,
-          x: 1622616000000,
-          y: 90.7449171687341,
-        },
-      ],
-      anomalyBoundaries: [],
-    },
     currentPeriod: {
       overallAvgDuration: 3912.628446632232,
       latencyTimeseries: [
@@ -816,18 +803,12 @@ Example.args = {
 };
 
 export const NoData: Story<Args> = () => {
-  return (
-    <LatencyChart height={300} environment={ENVIRONMENT_ALL.value} kuery="" />
-  );
+  return <LatencyChart height={300} kuery="" />;
 };
+
 NoData.args = {
   alertsResponse: { alerts: [] },
   latencyChartResponse: {
-    anomalyTimeseries: {
-      jobId: 'apm-production-00aa-high_mean_transaction_duration',
-      anomalyScore: [],
-      anomalyBoundaries: [],
-    },
     currentPeriod: { latencyTimeseries: [], overallAvgDuration: null },
     previousPeriod: { latencyTimeseries: [], overallAvgDuration: null },
   },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TelemetryEvent } from './types';
+import type { TelemetryEvent } from './types';
 
 export interface AllowlistFields {
   [key: string]: boolean | AllowlistFields;
@@ -67,6 +67,7 @@ const allowlistBaseEventFields: AllowlistFields = {
     hash: true,
     Ext: {
       code_signature: true,
+      header_bytes: true,
       header_data: true,
       malware_classification: true,
       malware_signature: true,

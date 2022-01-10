@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest, RequestHandlerContext } from 'kibana/server';
-import { ExceptionListClient } from '../../lists/server';
+import { Logger, KibanaRequest, RequestHandlerContext } from 'kibana/server';
 
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
@@ -17,7 +16,18 @@ import {
   SecuritySolutionPluginCoreSetupDependencies,
   SecuritySolutionPluginSetupDependencies,
 } from './plugin_contract';
-import { SecuritySolutionApiRequestHandlerContext } from './types';
+import {
+  SecuritySolutionApiRequestHandlerContext,
+  SecuritySolutionRequestHandlerContext,
+} from './types';
+import { Immutable } from '../common/endpoint/types';
+import { EndpointAuthz } from '../common/endpoint/types/authz';
+import {
+  calculateEndpointAuthz,
+  getEndpointAuthzInitialState,
+} from '../common/endpoint/service/authz';
+import { licenseService } from './lib/license';
+import { FleetAuthz } from '../../fleet/common';
 
 export interface IRequestContextFactory {
   create(
@@ -28,6 +38,7 @@ export interface IRequestContextFactory {
 
 interface ConstructorOptions {
   config: ConfigType;
+  logger: Logger;
   core: SecuritySolutionPluginCoreSetupDependencies;
   plugins: SecuritySolutionPluginSetupDependencies;
 }
@@ -36,28 +47,48 @@ export class RequestContextFactory implements IRequestContextFactory {
   private readonly appClientFactory: AppClientFactory;
 
   constructor(private readonly options: ConstructorOptions) {
-    const { config, plugins } = options;
-
     this.appClientFactory = new AppClientFactory();
-    this.appClientFactory.setup({
-      getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
-      config,
-    });
   }
 
   public async create(
-    context: RequestHandlerContext,
+    context: Omit<SecuritySolutionRequestHandlerContext, 'securitySolution'>,
     request: KibanaRequest
   ): Promise<SecuritySolutionApiRequestHandlerContext> {
     const { options, appClientFactory } = this;
-    const { config, core, plugins } = options;
-    const { lists, ruleRegistry, security, spaces } = plugins;
+    const { config, logger, core, plugins } = options;
+    const { lists, ruleRegistry, security } = plugins;
 
     const [, startPlugins] = await core.getStartServices();
     const frameworkRequest = await buildFrameworkRequest(context, security, request);
+    appClientFactory.setup({
+      getSpaceId: startPlugins.spaces?.spacesService?.getSpaceId,
+      config,
+    });
+
+    let endpointAuthz: Immutable<EndpointAuthz>;
+    let fleetAuthz: FleetAuthz;
+
+    // If Fleet is enabled, then get its Authz
+    if (startPlugins.fleet) {
+      fleetAuthz = context.fleet?.authz ?? (await startPlugins.fleet?.authz.fromRequest(request));
+    }
 
     return {
       core: context.core,
+
+      get endpointAuthz(): Immutable<EndpointAuthz> {
+        // Lazy getter of endpoint Authz. No point in defining it if it is never used.
+        if (!endpointAuthz) {
+          // If no fleet (fleet plugin is optional in the configuration), then just turn off all permissions
+          if (!startPlugins.fleet) {
+            endpointAuthz = getEndpointAuthzInitialState();
+          } else {
+            endpointAuthz = calculateEndpointAuthz(licenseService, fleetAuthz);
+          }
+        }
+
+        return endpointAuthz;
+      },
 
       getConfig: () => config,
 
@@ -65,7 +96,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAppClient: () => appClientFactory.create(request),
 
-      getSpaceId: () => spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID,
+      getSpaceId: () => startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID,
 
       getRuleDataService: () => ruleRegistry.ruleDataService,
 
@@ -75,6 +106,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           savedObjectsClient: context.core.savedObjects.client,
           eventLogService: plugins.eventLog,
           eventLogClient: startPlugins.eventLog.getClient(request),
+          logger,
         }),
 
       getExceptionListClient: () => {
@@ -83,10 +115,7 @@ export class RequestContextFactory implements IRequestContextFactory {
         }
 
         const username = security?.authc.getCurrentUser(request)?.username || 'elastic';
-        return new ExceptionListClient({
-          savedObjectsClient: context.core.savedObjects.client,
-          user: username,
-        });
+        return lists.getExceptionListClient(context.core.savedObjects.client, username);
       },
     };
   }

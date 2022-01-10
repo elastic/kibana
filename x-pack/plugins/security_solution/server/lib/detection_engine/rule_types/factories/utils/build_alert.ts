@@ -7,9 +7,12 @@
 
 import {
   ALERT_REASON,
+  ALERT_RISK_SCORE,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_NAMESPACE,
+  ALERT_RULE_PARAMETERS,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_WORKFLOW_STATUS,
@@ -20,7 +23,6 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { createHash } from 'crypto';
 
-import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response/rules_schema';
 import { Ancestor, BaseSignalHit, SimpleHit, ThresholdResult } from '../../../signals/types';
 import {
   getField,
@@ -35,8 +37,17 @@ import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
   ALERT_ORIGINAL_TIME,
+  ALERT_THRESHOLD_RESULT,
   ALERT_ORIGINAL_EVENT,
+  ALERT_BUILDING_BLOCK_TYPE,
 } from '../../../../../../common/field_maps/field_names';
+import { CompleteRule, RuleParams } from '../../../schemas/rule_schemas';
+import {
+  commonParamsCamelToSnake,
+  typeSpecificCamelToSnake,
+} from '../../../schemas/rule_converters';
+import { transformTags } from '../../../routes/rules/utils';
+import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 
 export const generateAlertId = (alert: RACAlert) => {
   return createHash('sha256')
@@ -59,10 +70,10 @@ export const buildParent = (doc: SimpleHit): Ancestor => {
     id: doc._id,
     type: isSignal ? 'signal' : 'event',
     index: doc._index,
-    depth: isSignal ? getField(doc, 'signal.depth') ?? 1 : 0,
+    depth: isSignal ? getField(doc, ALERT_DEPTH) ?? 1 : 0,
   };
   if (isSignal) {
-    parent.rule = getField(doc, 'signal.rule.id');
+    parent.rule = getField(doc, ALERT_RULE_UUID);
   }
   return parent;
 };
@@ -73,9 +84,8 @@ export const buildParent = (doc: SimpleHit): Ancestor => {
  * @param doc The parent event for which to extend the ancestry.
  */
 export const buildAncestors = (doc: SimpleHit): Ancestor[] => {
-  // TODO: handle alerts-on-legacy-alerts
   const newAncestor = buildParent(doc);
-  const existingAncestors: Ancestor[] = getField(doc, 'signal.ancestors') ?? [];
+  const existingAncestors: Ancestor[] = getField(doc, ALERT_ANCESTORS) ?? [];
   return [...existingAncestors, newAncestor];
 };
 
@@ -86,16 +96,40 @@ export const buildAncestors = (doc: SimpleHit): Ancestor[] => {
  */
 export const buildAlert = (
   docs: SimpleHit[],
-  rule: RulesSchema,
+  completeRule: CompleteRule<RuleParams>,
   spaceId: string | null | undefined,
-  reason: string
+  reason: string,
+  overrides?: {
+    nameOverride: string;
+    severityOverride: string;
+    riskScoreOverride: number;
+  }
 ): RACAlert => {
   const parents = docs.map(buildParent);
   const depth = parents.reduce((acc, parent) => Math.max(parent.depth, acc), 0) + 1;
   const ancestors = docs.reduce((acc: Ancestor[], doc) => acc.concat(buildAncestors(doc)), []);
 
-  const { id, output_index: outputIndex, ...mappedRule } = rule;
-  mappedRule.uuid = id;
+  const { output_index: outputIndex, ...commonRuleParams } = commonParamsCamelToSnake(
+    completeRule.ruleParams
+  );
+
+  const ruleParamsSnakeCase = {
+    ...commonRuleParams,
+    ...typeSpecificCamelToSnake(completeRule.ruleParams),
+  };
+
+  const {
+    actions,
+    schedule,
+    name,
+    tags,
+    enabled,
+    createdBy,
+    updatedBy,
+    throttle,
+    createdAt,
+    updatedAt,
+  } = completeRule.ruleConfig;
 
   return {
     [TIMESTAMP]: new Date().toISOString(),
@@ -106,7 +140,25 @@ export const buildAlert = (
     [ALERT_WORKFLOW_STATUS]: 'open',
     [ALERT_DEPTH]: depth,
     [ALERT_REASON]: reason,
-    ...flattenWithPrefix(ALERT_RULE_NAMESPACE, mappedRule as RulesSchema),
+    [ALERT_BUILDING_BLOCK_TYPE]: completeRule.ruleParams.buildingBlockType,
+    [ALERT_SEVERITY]: overrides?.severityOverride ?? completeRule.ruleParams.severity,
+    [ALERT_RISK_SCORE]: overrides?.riskScoreOverride ?? completeRule.ruleParams.riskScore,
+    [ALERT_RULE_PARAMETERS]: ruleParamsSnakeCase,
+    ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
+      uuid: completeRule.alertId,
+      actions: actions.map(transformAlertToRuleAction),
+      created_at: createdAt.toISOString(),
+      created_by: createdBy ?? '',
+      enabled,
+      interval: schedule.interval,
+      name: overrides?.nameOverride ?? name,
+      tags: transformTags(tags),
+      throttle: throttle ?? undefined,
+      updated_at: updatedAt.toISOString(),
+      updated_by: updatedBy ?? '',
+      type: completeRule.ruleParams.type,
+      ...commonRuleParams,
+    }),
   } as unknown as RACAlert;
 };
 
@@ -130,7 +182,7 @@ export const additionalAlertFields = (doc: BaseSignalHit) => {
   });
   const additionalFields: Record<string, unknown> = {
     [ALERT_ORIGINAL_TIME]: originalTime != null ? originalTime.toISOString() : undefined,
-    ...(thresholdResult != null ? { threshold_result: thresholdResult } : {}),
+    ...(thresholdResult != null ? { [ALERT_THRESHOLD_RESULT]: thresholdResult } : {}),
   };
 
   for (const [key, val] of Object.entries(doc._source ?? {})) {

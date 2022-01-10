@@ -15,6 +15,6 @@ export interface HttpInterceptorRequestError
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [error](./kibana-plugin-core-public.httpinterceptorrequesterror.error.md) | <code>Error</code> |  |
-|  [fetchOptions](./kibana-plugin-core-public.httpinterceptorrequesterror.fetchoptions.md) | <code>Readonly&lt;HttpFetchOptionsWithPath&gt;</code> |  |
+|  [error](./kibana-plugin-core-public.httpinterceptorrequesterror.error.md) | Error |  |
+|  [fetchOptions](./kibana-plugin-core-public.httpinterceptorrequesterror.fetchoptions.md) | Readonly&lt;HttpFetchOptionsWithPath&gt; |  |
 

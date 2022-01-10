@@ -9,9 +9,10 @@ import React, { useEffect } from 'react';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { Route, Router } from 'react-router-dom';
 import { render } from '@testing-library/react';
-import { UrlStorageContextProvider, useSeriesStorage } from './use_series_storage';
+import { UrlStorageContextProvider, useSeriesStorage, reportTypeKey } from './use_series_storage';
 import { getHistoryFromUrl } from '../rtl_helpers';
 import type { AppDataType } from '../types';
+import { ReportTypes } from '../configurations/constants';
 import * as useTrackMetric from '../../../../hooks/use_track_metric';
 
 const mockSingleSeries = [
@@ -161,6 +162,64 @@ describe('userSeriesStorage', function () {
         breakdown: undefined,
       },
     ]);
+  });
+
+  it('sets reportType when calling applyChanges', () => {
+    const setStorage = jest.fn();
+    function wrapper({ children }: { children: React.ReactElement }) {
+      return (
+        <UrlStorageContextProvider
+          storage={{
+            get: jest
+              .fn()
+              .mockImplementation((key: string) =>
+                key === 'sr' ? mockMultipleSeries : 'kpi-over-time'
+              ),
+            set: setStorage,
+          }}
+        >
+          {children}
+        </UrlStorageContextProvider>
+      );
+    }
+    const { result } = renderHook(() => useSeriesStorage(), { wrapper });
+
+    act(() => {
+      result.current.setReportType(ReportTypes.DISTRIBUTION);
+    });
+
+    act(() => {
+      result.current.applyChanges();
+    });
+
+    expect(setStorage).toBeCalledWith(reportTypeKey, ReportTypes.DISTRIBUTION);
+  });
+
+  it('returns reportType in state, not url storage, from hook', () => {
+    const setStorage = jest.fn();
+    function wrapper({ children }: { children: React.ReactElement }) {
+      return (
+        <UrlStorageContextProvider
+          storage={{
+            get: jest
+              .fn()
+              .mockImplementation((key: string) =>
+                key === 'sr' ? mockMultipleSeries : 'kpi-over-time'
+              ),
+            set: setStorage,
+          }}
+        >
+          {children}
+        </UrlStorageContextProvider>
+      );
+    }
+    const { result } = renderHook(() => useSeriesStorage(), { wrapper });
+
+    act(() => {
+      result.current.setReportType(ReportTypes.DISTRIBUTION);
+    });
+
+    expect(result.current.reportType).toEqual(ReportTypes.DISTRIBUTION);
   });
 
   it('ensures that telemetry is called', () => {

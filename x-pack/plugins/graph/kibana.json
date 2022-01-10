@@ -8,8 +8,7 @@
     "licensing",
     "data",
     "navigation",
-    "savedObjects",
-    "kibanaLegacy"
+    "savedObjects"
   ],
   "optionalPlugins": [
     "home",

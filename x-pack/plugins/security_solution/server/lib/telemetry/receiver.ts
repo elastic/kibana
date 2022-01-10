@@ -12,8 +12,8 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getTrustedAppsList } from '../../endpoint/routes/trusted_apps/service';
-import { AgentService, AgentPolicyServiceInterface } from '../../../../fleet/server';
+import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { AgentClient, AgentPolicyServiceInterface } from '../../../../fleet/server';
 import { ExceptionListClient } from '../../../../lists/server';
 import { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import { TELEMETRY_MAX_BUFFER_SIZE } from './constants';
@@ -22,7 +22,7 @@ import {
   trustedApplicationToTelemetryEntry,
   ruleExceptionListItemToTelemetryEvent,
 } from './helpers';
-import {
+import type {
   TelemetryEvent,
   ESLicense,
   ESClusterInfo,
@@ -32,7 +32,7 @@ import {
 
 export class TelemetryReceiver {
   private readonly logger: Logger;
-  private agentService?: AgentService;
+  private agentClient?: AgentClient;
   private agentPolicyService?: AgentPolicyServiceInterface;
   private esClient?: ElasticsearchClient;
   private exceptionListClient?: ExceptionListClient;
@@ -52,7 +52,7 @@ export class TelemetryReceiver {
     exceptionListClient?: ExceptionListClient
   ) {
     this.kibanaIndex = kibanaIndex;
-    this.agentService = endpointContextService?.getAgentService();
+    this.agentClient = endpointContextService?.getAgentService()?.asInternalUser;
     this.agentPolicyService = endpointContextService?.getAgentPolicyService();
     this.esClient = core?.elasticsearch.client.asInternalUser;
     this.exceptionListClient = exceptionListClient;
@@ -70,7 +70,7 @@ export class TelemetryReceiver {
       throw Error('elasticsearch client is unavailable: cannot retrieve fleet policy responses');
     }
 
-    return this.agentService?.listAgents(this.esClient, {
+    return this.agentClient?.listAgents({
       perPage: this.max_records,
       showInactive: true,
       sortField: 'enrolled_at',
@@ -86,7 +86,7 @@ export class TelemetryReceiver {
     }
 
     const query: SearchRequest = {
-      expand_wildcards: 'open,hidden',
+      expand_wildcards: ['open' as const, 'hidden' as const],
       index: `.ds-metrics-endpoint.policy*`,
       ignore_unavailable: false,
       size: 0, // no query results required - only aggregation quantity
@@ -133,7 +133,7 @@ export class TelemetryReceiver {
     }
 
     const query: SearchRequest = {
-      expand_wildcards: 'open,hidden',
+      expand_wildcards: ['open' as const, 'hidden' as const],
       index: `.ds-metrics-endpoint.metrics-*`,
       ignore_unavailable: false,
       size: 0, // no query results required - only aggregation quantity
@@ -180,7 +180,7 @@ export class TelemetryReceiver {
     }
 
     const query = {
-      expand_wildcards: 'open,hidden',
+      expand_wildcards: ['open' as const, 'hidden' as const],
       index: '.logs-endpoint.diagnostic.collection-*',
       ignore_unavailable: true,
       size: TELEMETRY_MAX_BUFFER_SIZE,
@@ -221,10 +221,16 @@ export class TelemetryReceiver {
       throw Error('exception list client is unavailable: cannot retrieve trusted applications');
     }
 
-    const results = await getTrustedAppsList(this.exceptionListClient, {
+    const results = await this.exceptionListClient.findExceptionListItem({
+      listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
       page: 1,
-      per_page: 10_000,
+      perPage: 10_000,
+      filter: undefined,
+      namespaceType: 'agnostic',
+      sortField: 'name',
+      sortOrder: 'asc',
     });
+
     return {
       data: results?.data.map(trustedApplicationToTelemetryEntry),
       total: results?.total ?? 0,
@@ -265,7 +271,7 @@ export class TelemetryReceiver {
     }
 
     const query: SearchRequest = {
-      expand_wildcards: 'open,hidden',
+      expand_wildcards: ['open' as const, 'hidden' as const],
       index: `${this.kibanaIndex}*`,
       ignore_unavailable: true,
       size: this.max_records,
@@ -310,7 +316,7 @@ export class TelemetryReceiver {
     };
   }
 
-  private async fetchClusterInfo(): Promise<ESClusterInfo> {
+  public async fetchClusterInfo(): Promise<ESClusterInfo> {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }
@@ -331,8 +337,6 @@ export class TelemetryReceiver {
           path: '/_license',
           querystring: {
             local: true,
-            // For versions >= 7.6 and < 8.0, this flag is needed otherwise 'platinum' is returned for 'enterprise' license.
-            accept_enterprise: 'true',
           },
         })
       ).body as Promise<{ license: ESLicense }>;

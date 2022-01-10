@@ -76,13 +76,9 @@ export const updateRulesRoute = (
         });
         const rule = await updateRules({
           defaultOutputIndex: siemClient.getSignalsIndex(),
-          isRuleRegistryEnabled,
           rulesClient,
-          ruleStatusClient,
-          existingRule,
-          migratedRule,
+          existingRule: migratedRule,
           ruleUpdate: request.body,
-          spaceId: context.securitySolution.getSpaceId(),
         });
 
         if (rule != null) {

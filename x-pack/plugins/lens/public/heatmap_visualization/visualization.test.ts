@@ -23,6 +23,7 @@ import type { HeatmapVisualizationState } from './types';
 import type { DatasourcePublicAPI, Operation } from '../types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { layerTypes } from '../../common';
+import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
 function exampleState(): HeatmapVisualizationState {
   return {
@@ -46,6 +47,7 @@ function exampleState(): HeatmapVisualizationState {
 }
 
 const paletteService = chartPluginMock.createPaletteRegistry();
+const theme = themeServiceMock.createStartContract();
 
 describe('heatmap', () => {
   let frame: ReturnType<typeof createMockFramePublicAPI>;
@@ -56,7 +58,7 @@ describe('heatmap', () => {
 
   describe('#intialize', () => {
     test('returns a default state', () => {
-      expect(getHeatmapVisualization({ paletteService }).initialize(() => 'l1')).toEqual({
+      expect(getHeatmapVisualization({ paletteService, theme }).initialize(() => 'l1')).toEqual({
         layerId: 'l1',
         layerType: layerTypes.DATA,
         title: 'Empty Heatmap chart',
@@ -66,7 +68,6 @@ describe('heatmap', () => {
           position: Position.Right,
           type: LEGEND_FUNCTION,
           maxLines: 1,
-          shouldTruncate: true,
         },
         gridConfig: {
           type: HEATMAP_GRID_FUNCTION,
@@ -79,7 +80,10 @@ describe('heatmap', () => {
 
     test('returns persisted state', () => {
       expect(
-        getHeatmapVisualization({ paletteService }).initialize(() => 'test-layer', exampleState())
+        getHeatmapVisualization({ paletteService, theme }).initialize(
+          () => 'test-layer',
+          exampleState()
+        )
       ).toEqual(exampleState());
     });
   });
@@ -117,6 +121,7 @@ describe('heatmap', () => {
       expect(
         getHeatmapVisualization({
           paletteService,
+          theme,
         }).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
@@ -174,6 +179,7 @@ describe('heatmap', () => {
       expect(
         getHeatmapVisualization({
           paletteService,
+          theme,
         }).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
@@ -226,6 +232,7 @@ describe('heatmap', () => {
       expect(
         getHeatmapVisualization({
           paletteService,
+          theme,
         }).getConfiguration({ state, frame, layerId: 'first' })
       ).toEqual({
         groups: [
@@ -280,6 +287,7 @@ describe('heatmap', () => {
       expect(
         getHeatmapVisualization({
           paletteService,
+          theme,
         }).setDimension({
           prevState,
           layerId: 'first',
@@ -304,6 +312,7 @@ describe('heatmap', () => {
       expect(
         getHeatmapVisualization({
           paletteService,
+          theme,
         }).removeDimension({
           prevState,
           layerId: 'first',
@@ -322,6 +331,7 @@ describe('heatmap', () => {
       expect(
         getHeatmapVisualization({
           paletteService,
+          theme,
         }).getSupportedLayers()
       ).toHaveLength(1);
     });
@@ -336,6 +346,7 @@ describe('heatmap', () => {
       };
       const instance = getHeatmapVisualization({
         paletteService,
+        theme,
       });
       expect(instance.getLayerType('test-layer', state)).toEqual(layerTypes.DATA);
       expect(instance.getLayerType('foo', state)).toBeUndefined();
@@ -365,14 +376,12 @@ describe('heatmap', () => {
         xAccessor: 'x-accessor',
         valueAccessor: 'value-accessor',
       };
-      const attributes = {
-        title: 'Test',
-      };
 
       expect(
         getHeatmapVisualization({
           paletteService,
-        }).toExpression(state, datasourceLayers, attributes)
+          theme,
+        }).toExpression(state, datasourceLayers)
       ).toEqual({
         type: 'expression',
         chain: [
@@ -380,8 +389,6 @@ describe('heatmap', () => {
             type: 'function',
             function: FUNCTION_NAME,
             arguments: {
-              title: ['Test'],
-              description: [''],
               xAccessor: ['x-accessor'],
               yAccessor: [''],
               valueAccessor: ['value-accessor'],
@@ -459,6 +466,7 @@ describe('heatmap', () => {
       expect(
         getHeatmapVisualization({
           paletteService,
+          theme,
         }).toExpression(state, datasourceLayers, attributes)
       ).toEqual(null);
     });
@@ -490,6 +498,7 @@ describe('heatmap', () => {
       expect(
         getHeatmapVisualization({
           paletteService,
+          theme,
         }).toPreviewExpression!(state, datasourceLayers)
       ).toEqual({
         type: 'expression',
@@ -498,8 +507,6 @@ describe('heatmap', () => {
             type: 'function',
             function: FUNCTION_NAME,
             arguments: {
-              title: [''],
-              description: [''],
               xAccessor: ['x-accessor'],
               yAccessor: [''],
               valueAccessor: [''],
@@ -568,6 +575,7 @@ describe('heatmap', () => {
       expect(
         getHeatmapVisualization({
           paletteService,
+          theme,
         }).getErrorMessages(mockState)
       ).toEqual(undefined);
     });
@@ -580,6 +588,7 @@ describe('heatmap', () => {
       expect(
         getHeatmapVisualization({
           paletteService,
+          theme,
         }).getErrorMessages(mockState)
       ).toEqual([
         {
@@ -612,6 +621,7 @@ describe('heatmap', () => {
       expect(
         getHeatmapVisualization({
           paletteService,
+          theme,
         }).getWarningMessages!(mockState, frame)
       ).toEqual(undefined);
     });
@@ -632,6 +642,7 @@ describe('heatmap', () => {
       expect(
         getHeatmapVisualization({
           paletteService,
+          theme,
         }).getWarningMessages!(mockState, frame)
       ).toEqual(undefined);
     });
@@ -657,6 +668,7 @@ describe('heatmap', () => {
       expect(
         getHeatmapVisualization({
           paletteService,
+          theme,
         }).getWarningMessages!(mockState, frame)
       ).toHaveLength(1);
     });

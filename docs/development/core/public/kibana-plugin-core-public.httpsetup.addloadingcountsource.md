@@ -16,9 +16,9 @@ addLoadingCountSource(countSource$: Observable<number>): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  countSource$ | <code>Observable&lt;number&gt;</code> |  |
+|  countSource$ | Observable&lt;number&gt; | an Observable to subscribe to for loading count updates. |
 
 <b>Returns:</b>
 
-`void`
+void
 

@@ -13,8 +13,8 @@ import {
   EuiLoadingSpinner,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { DocViewFilterFn, ElasticSearchHit } from '../../../../services/doc_views/doc_views_types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
 import { FetchStatus } from '../../../types';
 import {
@@ -24,7 +24,7 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../../../../common';
 import { useColumns } from '../../../../utils/use_data_grid_columns';
-import { IndexPattern } from '../../../../../../data/common';
+import { DataView } from '../../../../../../data/common';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { DataDocumentsMsg, DataDocuments$ } from '../../utils/use_saved_search';
 import { DiscoverServices } from '../../../../build_services';
@@ -32,6 +32,7 @@ import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../utils/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { SortPairArr } from '../../../../components/doc_table/lib/get_sort';
+import { ElasticSearchHit } from '../../../../types';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -49,12 +50,12 @@ function DiscoverDocumentsComponent({
 }: {
   documents$: DataDocuments$;
   expandedDoc?: ElasticSearchHit;
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   navigateTo: (url: string) => void;
   onAddFilter: DocViewFilterFn;
   savedSearch: SavedSearch;
   services: DiscoverServices;
-  setExpandedDoc: (doc: ElasticSearchHit | undefined) => void;
+  setExpandedDoc: (doc?: ElasticSearchHit) => void;
   state: AppState;
   stateContainer: GetStateReturn;
 }) {

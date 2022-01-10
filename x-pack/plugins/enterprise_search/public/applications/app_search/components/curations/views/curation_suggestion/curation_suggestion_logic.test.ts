@@ -16,6 +16,7 @@ import '../../../../__mocks__/engine_logic.mock';
 
 import { nextTick } from '@kbn/test/jest';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 import { HydratedCurationSuggestion } from '../../types';
 
 import { CurationSuggestionLogic } from './curation_suggestion_logic';
@@ -149,7 +150,7 @@ const MOCK_RESPONSE = {
 
 describe('CurationSuggestionLogic', () => {
   const { mount } = new LogicMounter(CurationSuggestionLogic);
-  const { flashAPIErrors, setQueuedErrorMessage } = mockFlashMessageHelpers;
+  const { setErrorMessage, setQueuedErrorMessage } = mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
 
   const mountLogic = (props: object = {}) => {
@@ -176,21 +177,7 @@ describe('CurationSuggestionLogic', () => {
       callback();
       await nextTick();
 
-      expect(flashAPIErrors).toHaveBeenCalledWith('error');
-    });
-  };
-
-  const itHandlesErrors = (httpMethod: any, callback: () => void) => {
-    it('handles errors', async () => {
-      httpMethod.mockReturnValueOnce(Promise.reject('error'));
-      mountLogic({
-        suggestion,
-      });
-
-      callback();
-      await nextTick();
-
-      expect(flashAPIErrors).toHaveBeenCalledWith('error');
+      expect(setErrorMessage).toHaveBeenCalledWith('error');
     });
   };
 
@@ -271,7 +258,7 @@ describe('CurationSuggestionLogic', () => {
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations');
       });
 
-      itHandlesErrors(http.get, () => {
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         CurationSuggestionLogic.actions.loadSuggestion();
       });
     });
@@ -350,7 +337,8 @@ describe('CurationSuggestionLogic', () => {
         });
       });
 
-      itHandlesErrors(http.put, () => {
+      itShowsServerErrorAsFlashMessage(http.put, () => {
+        jest.spyOn(global, 'confirm').mockReturnValueOnce(true);
         CurationSuggestionLogic.actions.acceptSuggestion();
       });
 
@@ -433,7 +421,8 @@ describe('CurationSuggestionLogic', () => {
         });
       });
 
-      itHandlesErrors(http.put, () => {
+      itShowsServerErrorAsFlashMessage(http.put, () => {
+        jest.spyOn(global, 'confirm').mockReturnValueOnce(true);
         CurationSuggestionLogic.actions.acceptAndAutomateSuggestion();
       });
 
@@ -478,7 +467,7 @@ describe('CurationSuggestionLogic', () => {
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations');
       });
 
-      itHandlesErrors(http.put, () => {
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         CurationSuggestionLogic.actions.rejectSuggestion();
       });
 
@@ -523,7 +512,7 @@ describe('CurationSuggestionLogic', () => {
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations');
       });
 
-      itHandlesErrors(http.put, () => {
+      itShowsServerErrorAsFlashMessage(http.put, () => {
         CurationSuggestionLogic.actions.rejectAndDisableSuggestion();
       });
 

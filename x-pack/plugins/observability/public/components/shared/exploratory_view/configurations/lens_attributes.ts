@@ -635,11 +635,17 @@ export class LensAttributes {
       time: { from },
     } = layerConfig;
 
-    const inDays = Math.abs(parseRelativeDate(mainFrom).diff(parseRelativeDate(from), 'days'));
+    const parsedMainFrom = parseRelativeDate(mainFrom);
+    const parsedFrom = parseRelativeDate(from);
+
+    const inDays =
+      parsedMainFrom && parsedFrom ? Math.abs(parsedMainFrom.diff(parsedFrom, 'days')) : 0;
     if (inDays > 1) {
       return inDays + 'd';
     }
-    const inHours = Math.abs(parseRelativeDate(mainFrom).diff(parseRelativeDate(from), 'hours'));
+
+    const inHours =
+      parsedMainFrom && parsedFrom ? Math.abs(parsedMainFrom?.diff(parsedFrom, 'hours')) : 0;
     if (inHours === 0) {
       return null;
     }
@@ -732,7 +738,19 @@ export class LensAttributes {
         seriesType: layerConfig.seriesType || layerConfig.seriesConfig.defaultSeriesType,
         palette: layerConfig.seriesConfig.palette,
         yConfig: layerConfig.seriesConfig.yConfig || [
-          { forAccessor: `y-axis-column-layer${index}`, color: layerConfig.color },
+          {
+            forAccessor: `y-axis-column-layer${index}`,
+            color: layerConfig.color,
+            /* if the fields format matches the field format of the first layer, use the default y axis (right)
+             * if not, use the secondary y axis (left) */
+            axisMode:
+              layerConfig.indexPattern.fieldFormatMap[layerConfig.selectedMetricField]?.id ===
+              this.layerConfigs[0].indexPattern.fieldFormatMap[
+                this.layerConfigs[0].selectedMetricField
+              ]?.id
+                ? 'left'
+                : 'right',
+          },
         ],
         xAccessor: `x-axis-column-layer${index}`,
         ...(layerConfig.breakdown &&

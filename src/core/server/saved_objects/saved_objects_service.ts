@@ -29,7 +29,12 @@ import {
   SavedObjectConfig,
 } from './saved_objects_config';
 import { KibanaRequest, InternalHttpServiceSetup } from '../http';
-import { SavedObjectsClientContract, SavedObjectsType, SavedObjectStatusMeta } from './types';
+import {
+  SavedObjectsClientContract,
+  SavedObjectsType,
+  SavedObjectStatusMeta,
+  SavedObjectAttributes,
+} from './types';
 import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/repository';
 import {
   SavedObjectsClientFactoryProvider,
@@ -112,6 +117,7 @@ export interface SavedObjectsServiceSetup {
    * // src/plugins/my_plugin/server/saved_objects/my_type.ts
    * import { SavedObjectsType } from 'src/core/server';
    * import * as migrations from './migrations';
+   * import * as schemas from './schemas';
    *
    * export const myType: SavedObjectsType = {
    *   name: 'MyType',
@@ -131,6 +137,10 @@ export interface SavedObjectsServiceSetup {
    *     '2.0.0': migrations.migrateToV2,
    *     '2.1.0': migrations.migrateToV2_1
    *   },
+   *   schemas: {
+   *     '2.0.0': schemas.v2,
+   *     '2.1.0': schemas.v2_1,
+   *   },
    * };
    *
    * // src/plugins/my_plugin/server/plugin.ts
@@ -144,7 +154,9 @@ export interface SavedObjectsServiceSetup {
    * }
    * ```
    */
-  registerType: <Attributes = any>(type: SavedObjectsType<Attributes>) => void;
+  registerType: <Attributes extends SavedObjectAttributes = any>(
+    type: SavedObjectsType<Attributes>
+  ) => void;
 
   /**
    * Returns the default index used for saved objects.
@@ -370,10 +382,10 @@ export class SavedObjectsService
     };
   }
 
-  public async start(
-    { elasticsearch, pluginsInitialized = true }: SavedObjectsStartDeps,
-    migrationsRetryDelay?: number
-  ): Promise<InternalSavedObjectsServiceStart> {
+  public async start({
+    elasticsearch,
+    pluginsInitialized = true,
+  }: SavedObjectsStartDeps): Promise<InternalSavedObjectsServiceStart> {
     if (!this.setupDeps || !this.config) {
       throw new Error('#setup() needs to be run first');
     }
@@ -384,8 +396,7 @@ export class SavedObjectsService
 
     const migrator = this.createMigrator(
       this.config.migration,
-      elasticsearch.client.asInternalUser,
-      migrationsRetryDelay
+      elasticsearch.client.asInternalUser
     );
 
     this.migrator$.next(migrator);
@@ -500,8 +511,7 @@ export class SavedObjectsService
 
   private createMigrator(
     soMigrationsConfig: SavedObjectsMigrationConfigType,
-    client: ElasticsearchClient,
-    migrationsRetryDelay?: number
+    client: ElasticsearchClient
   ): IKibanaMigrator {
     return new KibanaMigrator({
       typeRegistry: this.typeRegistry,
@@ -510,7 +520,6 @@ export class SavedObjectsService
       soMigrationsConfig,
       kibanaIndex,
       client,
-      migrationsRetryDelay,
     });
   }
 

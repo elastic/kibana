@@ -6,34 +6,22 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
-import compactStringify from 'json-stringify-pretty-compact';
+import { XJsonLang } from '@kbn/monaco';
+import useMount from 'react-use/lib/useMount';
 import hjson from 'hjson';
-import 'brace/mode/hjson';
+
+import React, { useCallback, useState } from 'react';
+import compactStringify from 'json-stringify-pretty-compact';
 import { i18n } from '@kbn/i18n';
 
 import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
-import { EuiCodeEditor } from '../../../../es_ui_shared/public';
+import { CodeEditor, HJsonLang } from '../../../../kibana_react/public';
 import { getNotifications } from '../services';
 import { VisParams } from '../vega_fn';
 import { VegaHelpMenu } from './vega_help_menu';
 import { VegaActionsMenu } from './vega_actions_menu';
 
 import './vega_editor.scss';
-
-const aceOptions = {
-  maxLines: Infinity,
-  highlightActiveLine: false,
-  showPrintMargin: false,
-  tabSize: 2,
-  useSoftTabs: true,
-  wrap: true,
-};
-
-const hjsonStringifyOptions = {
-  bracesSameLine: true,
-  keepWsc: true,
-};
 
 function format(
   value: string,
@@ -42,7 +30,11 @@ function format(
 ) {
   try {
     const spec = hjson.parse(value, { legacyRoot: false, keepWsc: true });
-    return stringify(spec, options);
+
+    return {
+      value: stringify(spec, options),
+      isValid: true,
+    };
   } catch (err) {
     // This is a common case - user tries to format an invalid HJSON text
     getNotifications().toasts.addError(err, {
@@ -51,44 +43,82 @@ function format(
       }),
     });
 
-    return value;
+    return { value, isValid: false };
   }
 }
 
 function VegaVisEditor({ stateParams, setValue }: VisEditorOptionsProps<VisParams>) {
-  const onChange = useCallback(
-    (value: string) => {
+  const [languageId, setLanguageId] = useState<string>();
+
+  useMount(() => {
+    let specLang = XJsonLang.ID;
+    try {
+      JSON.parse(stateParams.spec);
+    } catch {
+      specLang = HJsonLang;
+    }
+    setLanguageId(specLang);
+  });
+
+  const setSpec = useCallback(
+    (value: string, specLang?: string) => {
       setValue('spec', value);
+      if (specLang) {
+        setLanguageId(specLang);
+      }
     },
     [setValue]
   );
 
-  const formatJson = useCallback(
-    () => setValue('spec', format(stateParams.spec, compactStringify)),
-    [setValue, stateParams.spec]
-  );
+  const onChange = useCallback((value: string) => setSpec(value), [setSpec]);
 
-  const formatHJson = useCallback(
-    () => setValue('spec', format(stateParams.spec, hjson.stringify, hjsonStringifyOptions)),
-    [setValue, stateParams.spec]
-  );
+  const formatJson = useCallback(() => {
+    const { value, isValid } = format(stateParams.spec, compactStringify);
+
+    if (isValid) {
+      setSpec(value, XJsonLang.ID);
+    }
+  }, [setSpec, stateParams.spec]);
+
+  const formatHJson = useCallback(() => {
+    const { value, isValid } = format(stateParams.spec, hjson.stringify, {
+      bracesSameLine: true,
+      keepWsc: true,
+    });
+
+    if (isValid) {
+      setSpec(value, HJsonLang);
+    }
+  }, [setSpec, stateParams.spec]);
+
+  if (!languageId) {
+    return null;
+  }
 
   return (
-    <div className="vgaEditor">
-      <EuiCodeEditor
-        data-test-subj="vega-editor"
-        mode="hjson"
-        theme="textmate"
-        width="100%"
-        height="auto"
-        onChange={onChange}
-        value={stateParams.spec}
-        setOptions={aceOptions}
-      />
-      <div className="vgaEditor__aceEditorActions">
+    <div className="vgaEditor" data-test-subj="vega-editor">
+      <div className="vgaEditor__editorActions">
         <VegaHelpMenu />
         <VegaActionsMenu formatHJson={formatHJson} formatJson={formatJson} />
       </div>
+      <CodeEditor
+        width="100%"
+        height="100%"
+        languageId={languageId}
+        value={stateParams.spec}
+        onChange={onChange}
+        options={{
+          lineNumbers: 'on',
+          fontSize: 12,
+          minimap: {
+            enabled: false,
+          },
+          folding: true,
+          wordWrap: 'on',
+          wrappingIndent: 'indent',
+          automaticLayout: true,
+        }}
+      />
     </div>
   );
 }

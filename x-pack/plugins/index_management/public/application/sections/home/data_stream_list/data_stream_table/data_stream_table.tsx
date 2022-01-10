@@ -7,7 +7,7 @@
 
 import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
@@ -183,7 +183,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
       ) : undefined,
     toolsRight: [
       <EuiButton
-        color="secondary"
+        color="success"
         iconType="refresh"
         onClick={reload}
         data-test-subj="reloadButton"

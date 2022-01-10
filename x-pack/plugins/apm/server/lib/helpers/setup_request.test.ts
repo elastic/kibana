@@ -10,10 +10,9 @@ import { APMConfig } from '../..';
 import { APMRouteHandlerResources } from '../../routes/typings';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
-import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
-import { PromiseReturnType } from '../../../../observability/typings/common';
+import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
 
-jest.mock('../settings/apm_indices/get_apm_indices', () => ({
+jest.mock('../../routes/settings/apm_indices/get_apm_indices', () => ({
   getApmIndices: async () =>
     ({
       sourcemap: 'apm-*',
@@ -23,10 +22,10 @@ jest.mock('../settings/apm_indices/get_apm_indices', () => ({
       transaction: 'apm-*',
       metric: 'apm-*',
       apmAgentConfigurationIndex: 'apm-*',
-    } as PromiseReturnType<typeof getApmIndices>),
+    } as Awaited<ReturnType<typeof getApmIndices>>),
 }));
 
-jest.mock('../data_view/get_dynamic_data_view', () => ({
+jest.mock('../../routes/data_view/get_dynamic_data_view', () => ({
   getDynamicDataView: async () => {
     return;
   },
@@ -132,7 +131,6 @@ describe('setupRequest', () => {
             },
           },
           ignore_unavailable: true,
-          ignore_throttled: true,
           preference: 'any',
         },
         {
@@ -251,7 +249,7 @@ describe('without a bool filter', () => {
 });
 
 describe('with includeFrozen=false', () => {
-  it('sets `ignore_throttled=true`', async () => {
+  it('should NOT send "ignore_throttled:true" in the request', async () => {
     const mockResources = getMockResources();
 
     // mock includeFrozen to return false
@@ -268,7 +266,7 @@ describe('with includeFrozen=false', () => {
     const params =
       mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock
         .calls[0][0];
-    expect(params.ignore_throttled).toBe(true);
+    expect(params.ignore_throttled).toBe(undefined);
   });
 });
 

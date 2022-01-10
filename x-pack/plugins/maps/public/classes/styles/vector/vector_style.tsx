@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import React, { ReactElement } from 'react';
+import React, { CSSProperties, ReactElement } from 'react';
 import { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
 import { FeatureCollection } from 'geojson';
 import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
@@ -90,10 +90,12 @@ export interface IVectorStyle extends IStyle {
     previousFields: IField[],
     mapColors: string[]
   ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
+  getIsPointsOnly(): boolean;
   isTimeAware(): boolean;
-  getIcon(): ReactElement<any>;
+  getPrimaryColor(): string;
+  getIcon(showIncompleteIndicator: boolean): ReactElement;
   hasLegendDetails: () => Promise<boolean>;
-  renderLegendDetails: () => ReactElement<any>;
+  renderLegendDetails: () => ReactElement;
   clearFeatureState: (featureCollection: FeatureCollection, mbMap: MbMap, sourceId: string) => void;
   setFeatureStateAndStyleProps: (
     featureCollection: FeatureCollection,
@@ -478,7 +480,7 @@ export class VectorStyle implements IVectorStyle {
         handlePropertyChange={handlePropertyChange}
         styleProperties={styleProperties}
         layer={this._layer}
-        isPointsOnly={this._getIsPointsOnly()}
+        isPointsOnly={this.getIsPointsOnly()}
         isLinesOnly={this._getIsLinesOnly()}
         onIsTimeAwareChange={onIsTimeAwareChange}
         isTimeAware={this.isTimeAware()}
@@ -510,19 +512,15 @@ export class VectorStyle implements IVectorStyle {
     }
 
     dynamicProperties.forEach((dynamicProperty) => {
-      const ordinalStyleMeta =
-        dynamicProperty.pluckOrdinalStyleMetaFromTileMetaFeatures(metaFeatures);
-      const categoricalStyleMeta =
-        dynamicProperty.pluckCategoricalStyleMetaFromTileMetaFeatures(metaFeatures);
-
       const name = dynamicProperty.getFieldName();
       if (!styleMeta.fieldMeta[name]) {
-        styleMeta.fieldMeta[name] = {};
+        styleMeta.fieldMeta[name] = { categories: [] };
       }
-      if (categoricalStyleMeta) {
-        styleMeta.fieldMeta[name].categories = categoricalStyleMeta;
-      }
+      styleMeta.fieldMeta[name].categories =
+        dynamicProperty.pluckCategoricalStyleMetaFromTileMetaFeatures(metaFeatures);
 
+      const ordinalStyleMeta =
+        dynamicProperty.pluckOrdinalStyleMetaFromTileMetaFeatures(metaFeatures);
       if (ordinalStyleMeta) {
         styleMeta.fieldMeta[name].range = ordinalStyleMeta;
       }
@@ -594,17 +592,13 @@ export class VectorStyle implements IVectorStyle {
 
     dynamicProperties.forEach(
       (dynamicProperty: IDynamicStyleProperty<DynamicStylePropertyOptions>) => {
-        const categoricalStyleMeta =
-          dynamicProperty.pluckCategoricalStyleMetaFromFeatures(features);
-        const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromFeatures(features);
         const name = dynamicProperty.getFieldName();
         if (!styleMeta.fieldMeta[name]) {
-          styleMeta.fieldMeta[name] = {};
+          styleMeta.fieldMeta[name] = { categories: [] };
         }
-        if (categoricalStyleMeta) {
-          styleMeta.fieldMeta[name].categories = categoricalStyleMeta;
-        }
-
+        styleMeta.fieldMeta[name].categories =
+          dynamicProperty.pluckCategoricalStyleMetaFromFeatures(features);
+        const ordinalStyleMeta = dynamicProperty.pluckOrdinalStyleMetaFromFeatures(features);
         if (ordinalStyleMeta) {
           styleMeta.fieldMeta[name].range = ordinalStyleMeta;
         }
@@ -639,7 +633,7 @@ export class VectorStyle implements IVectorStyle {
     ) as Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
   }
 
-  _getIsPointsOnly = () => {
+  getIsPointsOnly = () => {
     return this._styleMeta.isPointsOnly();
   };
 
@@ -700,7 +694,17 @@ export class VectorStyle implements IVectorStyle {
       : (this._iconStyleProperty as StaticIconProperty).getOptions().value;
   }
 
-  _getIconFromGeometryTypes(isLinesOnly: boolean, isPointsOnly: boolean) {
+  getPrimaryColor() {
+    const primaryColorKey = this._getIsLinesOnly()
+      ? VECTOR_STYLES.LINE_COLOR
+      : VECTOR_STYLES.FILL_COLOR;
+    return extractColorFromStyleProperty(this._descriptor.properties[primaryColorKey], 'grey');
+  }
+
+  getIcon(showIncompleteIndicator: boolean) {
+    const isLinesOnly = this._getIsLinesOnly();
+    const isPointsOnly = this.getIsPointsOnly();
+
     let strokeColor;
     if (isLinesOnly) {
       strokeColor = extractColorFromStyleProperty(
@@ -720,8 +724,17 @@ export class VectorStyle implements IVectorStyle {
           'grey'
         );
 
+    const borderStyle: CSSProperties = showIncompleteIndicator
+      ? {
+          borderColor: this.getPrimaryColor(),
+          borderStyle: 'dashed',
+          borderWidth: '1px',
+        }
+      : {};
+
     return (
       <VectorIcon
+        borderStyle={borderStyle}
         isPointsOnly={isPointsOnly}
         isLinesOnly={isLinesOnly}
         symbolId={this._getSymbolId()}
@@ -729,12 +742,6 @@ export class VectorStyle implements IVectorStyle {
         fillColor={fillColor}
       />
     );
-  }
-
-  getIcon() {
-    const isLinesOnly = this._getIsLinesOnly();
-    const isPointsOnly = this._getIsPointsOnly();
-    return this._getIconFromGeometryTypes(isLinesOnly, isPointsOnly);
   }
 
   _getLegendDetailStyleProperties = () => {
@@ -764,7 +771,7 @@ export class VectorStyle implements IVectorStyle {
     return (
       <VectorStyleLegend
         styles={this._getLegendDetailStyleProperties()}
-        isPointsOnly={this._getIsPointsOnly()}
+        isPointsOnly={this.getIsPointsOnly()}
         isLinesOnly={this._getIsLinesOnly()}
         symbolId={this._getSymbolId()}
       />
@@ -885,11 +892,7 @@ export class VectorStyle implements IVectorStyle {
     mbMap.setPaintProperty(symbolLayerId, 'icon-opacity', alpha);
     mbMap.setLayoutProperty(symbolLayerId, 'icon-allow-overlap', true);
 
-    this._iconStyleProperty.syncIconWithMb(
-      symbolLayerId,
-      mbMap,
-      this._iconSizeStyleProperty.getIconPixelSize()
-    );
+    this._iconStyleProperty.syncIconWithMb(symbolLayerId, mbMap);
     // icon-color is only supported on SDF icons.
     this._fillColorStyleProperty.syncIconColorWithMb(symbolLayerId, mbMap);
     this._lineColorStyleProperty.syncHaloBorderColorWithMb(symbolLayerId, mbMap);

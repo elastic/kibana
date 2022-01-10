@@ -21,7 +21,7 @@ import { SiemSearchBar } from '../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../common/containers/use_global_time';
-import { TimelineId } from '../../../common';
+import { TimelineId } from '../../../common/types';
 import { LastEventIndexKey } from '../../../common/search_strategy';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/keury';
@@ -29,7 +29,7 @@ import { inputsSelectors } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { esQuery } from '../../../../../../src/plugins/data/public';
+import { getEsQueryConfig } from '../../../../../../src/plugins/data/common';
 import { OverviewEmpty } from '../../overview/components/overview_empty';
 import { Display } from './display';
 import { UebaTabs } from './ueba_tabs';
@@ -82,7 +82,7 @@ const UebaComponent = () => {
   const [filterQuery, kqlError] = useMemo(
     () =>
       convertToBuildEsQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
         filters,
@@ -92,7 +92,7 @@ const UebaComponent = () => {
   const [tabsFilterQuery] = useMemo(
     () =>
       convertToBuildEsQuery({
-        config: esQuery.getEsQueryConfig(uiSettings),
+        config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
         filters: tabsFilters,

@@ -10,6 +10,9 @@
 readonly links: {
         readonly settings: string;
         readonly elasticStackGetStarted: string;
+        readonly upgrade: {
+            readonly upgradingElasticStack: string;
+        };
         readonly apm: {
             readonly kibanaSettings: string;
             readonly supportedServiceMaps: string;
@@ -19,6 +22,12 @@ readonly links: {
             readonly metaData: string;
         };
         readonly canvas: {
+            readonly guide: string;
+        };
+        readonly cloud: {
+            readonly indexManagement: string;
+        };
+        readonly console: {
             readonly guide: string;
         };
         readonly dashboard: {
@@ -52,10 +61,61 @@ readonly links: {
             readonly install: string;
             readonly start: string;
         };
+        readonly appSearch: {
+            readonly apiRef: string;
+            readonly apiClients: string;
+            readonly apiKeys: string;
+            readonly authentication: string;
+            readonly crawlRules: string;
+            readonly curations: string;
+            readonly duplicateDocuments: string;
+            readonly entryPoints: string;
+            readonly guide: string;
+            readonly indexingDocuments: string;
+            readonly indexingDocumentsSchema: string;
+            readonly logSettings: string;
+            readonly metaEngines: string;
+            readonly precisionTuning: string;
+            readonly relevanceTuning: string;
+            readonly resultSettings: string;
+            readonly searchUI: string;
+            readonly security: string;
+            readonly synonyms: string;
+            readonly webCrawler: string;
+            readonly webCrawlerEventLogs: string;
+        };
         readonly enterpriseSearch: {
-            readonly base: string;
-            readonly appSearchBase: string;
-            readonly workplaceSearchBase: string;
+            readonly configuration: string;
+            readonly licenseManagement: string;
+            readonly mailService: string;
+            readonly usersAccess: string;
+        };
+        readonly workplaceSearch: {
+            readonly apiKeys: string;
+            readonly box: string;
+            readonly confluenceCloud: string;
+            readonly confluenceServer: string;
+            readonly customSources: string;
+            readonly customSourcePermissions: string;
+            readonly documentPermissions: string;
+            readonly dropbox: string;
+            readonly externalIdentities: string;
+            readonly gitHub: string;
+            readonly gettingStarted: string;
+            readonly gmail: string;
+            readonly googleDrive: string;
+            readonly indexingSchedule: string;
+            readonly jiraCloud: string;
+            readonly jiraServer: string;
+            readonly oneDrive: string;
+            readonly permissions: string;
+            readonly salesforce: string;
+            readonly security: string;
+            readonly serviceNow: string;
+            readonly sharePoint: string;
+            readonly slack: string;
+            readonly synch: string;
+            readonly zendesk: string;
         };
         readonly heartbeat: {
             readonly base: string;
@@ -86,6 +146,7 @@ readonly links: {
             readonly range: string;
             readonly significant_terms: string;
             readonly terms: string;
+            readonly terms_doc_count_error: string;
             readonly avg: string;
             readonly avg_bucket: string;
             readonly max_bucket: string;
@@ -133,7 +194,11 @@ readonly links: {
         };
         readonly addData: string;
         readonly kibana: string;
-        readonly upgradeAssistant: string;
+        readonly upgradeAssistant: {
+            readonly overview: string;
+            readonly batchReindex: string;
+            readonly remoteReindex: string;
+        };
         readonly rollupJobs: string;
         readonly elasticsearch: Record<string, string>;
         readonly siem: {
@@ -148,6 +213,7 @@ readonly links: {
         };
         readonly securitySolution: {
             readonly trustedApps: string;
+            readonly eventFilters: string;
         };
         readonly query: {
             readonly eql: string;
@@ -155,7 +221,6 @@ readonly links: {
             readonly luceneQuerySyntax: string;
             readonly percolate: string;
             readonly queryDsl: string;
-            readonly autocompleteChanges: string;
         };
         readonly date: {
             readonly dateMath: string;
@@ -204,7 +269,11 @@ readonly links: {
             uptimeDurationAnomaly: string;
         }>;
         readonly alerting: Record<string, string>;
-        readonly maps: Record<string, string>;
+        readonly maps: Readonly<{
+            guide: string;
+            importGeospatialPrivileges: string;
+            gdalTutorial: string;
+        }>;
         readonly monitoring: Record<string, string>;
         readonly security: Readonly<{
             apiKeyServiceSettings: string;
@@ -225,26 +294,35 @@ readonly links: {
         }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
-        readonly plugins: Record<string, string>;
+        readonly plugins: {
+            azureRepo: string;
+            gcsRepo: string;
+            hdfsRepo: string;
+            s3Repo: string;
+            snapshotRestoreRepos: string;
+            mapperSize: string;
+        };
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
-            datastreamsILM: string;
             beatsAgentComparison: string;
             guide: string;
             fleetServer: string;
             fleetServerAddFleetServer: string;
             settings: string;
             settingsFleetServerHostSettings: string;
+            settingsFleetServerProxySettings: string;
             troubleshooting: string;
             elasticAgent: string;
             datastreams: string;
             datastreamsNamingScheme: string;
             installElasticAgent: string;
+            installElasticAgentStandalone: string;
             upgradeElasticAgent: string;
             upgradeElasticAgent712lower: string;
             learnMoreBlog: string;
             apiKeysLearnMore: string;
+            onPremRegistry: string;
         }>;
         readonly ecs: {
             readonly guide: string;

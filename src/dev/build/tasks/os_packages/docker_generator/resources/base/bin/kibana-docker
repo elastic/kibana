@@ -199,6 +199,7 @@ kibana_vars=(
     xpack.alerting.invalidateApiKeysTask.interval
     xpack.alerting.invalidateApiKeysTask.removalDelay
     xpack.alerting.defaultRuleTaskTimeout
+    xpack.alerting.cancelAlertsOnRuleTimeout
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
@@ -253,6 +254,7 @@ kibana_vars=(
     xpack.fleet.agents.kibana.host
     xpack.fleet.agents.tlsCheckDisabled
     xpack.fleet.packages
+    xpack.fleet.registryProxyUrl
     xpack.fleet.registryUrl
     xpack.graph.canEditDrillDownUrls
     xpack.graph.savePolicy
@@ -353,8 +355,7 @@ kibana_vars=(
     xpack.security.showInsecureClusterWarning
     xpack.securitySolution.alertMergeStrategy
     xpack.securitySolution.alertIgnoreFields
-    xpack.securitySolution.endpointResultListDefaultFirstPageIndex
-    xpack.securitySolution.endpointResultListDefaultPageSize
+    xpack.securitySolution.maxExceptionsImportSize
     xpack.securitySolution.maxRuleImportExportSize
     xpack.securitySolution.maxRuleImportPayloadBytes
     xpack.securitySolution.maxTimelineImportExportSize

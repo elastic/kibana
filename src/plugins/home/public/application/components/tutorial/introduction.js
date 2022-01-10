@@ -18,7 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 
 function IntroductionUI({
   description,

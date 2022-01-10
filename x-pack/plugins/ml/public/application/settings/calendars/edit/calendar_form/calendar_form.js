@@ -25,7 +25,7 @@ import {
 import { EventsTable } from '../events_table';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 

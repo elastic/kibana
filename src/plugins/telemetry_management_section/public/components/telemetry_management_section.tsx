@@ -9,7 +9,7 @@
 import React, { Component, Fragment } from 'react';
 import { EuiCallOut, EuiForm, EuiLink, EuiSpacer, EuiSplitPanel, EuiTitle } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
 import type { DocLinksStart, ToastsStart } from 'src/core/public';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import axios, { AxiosError, AxiosResponse, AxiosInstance } from 'axios';
 
 import { createFailError } from '@kbn/dev-utils';
 
@@ -23,16 +23,18 @@ const isRateLimitError = (error: any) =>
   `${error.response.headers['X-RateLimit-Remaining']}` === '0';
 
 export class GithubApi {
-  private api = axios.create({
-    baseURL: 'https://api.github.com/',
-    headers: {
-      Accept: 'application/vnd.github.v3+json',
-      'User-Agent': 'kibana/update_prs_cli',
-      ...(this.accessToken ? { Authorization: `token ${this.accessToken} ` } : {}),
-    },
-  });
+  private api: AxiosInstance;
 
-  constructor(private accessToken?: string) {}
+  constructor(private accessToken?: string) {
+    this.api = axios.create({
+      baseURL: 'https://api.github.com/',
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+        'User-Agent': 'kibana/update_prs_cli',
+        ...(this.accessToken ? { Authorization: `token ${this.accessToken} ` } : {}),
+      },
+    });
+  }
 
   async getPrInfo(prNumber: number) {
     try {

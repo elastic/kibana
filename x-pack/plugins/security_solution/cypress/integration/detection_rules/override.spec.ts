@@ -99,7 +99,7 @@ describe('Detection rules, override', () => {
     });
   });
 
-  it.skip('Creates and activates a new custom rule with override option', function () {
+  it('Creates and activates a new custom rule with override option', function () {
     loginAndWaitForPageWithoutDateRange(ALERTS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
@@ -139,7 +139,7 @@ describe('Detection rules, override', () => {
       getDetails(RISK_SCORE_DETAILS).should('have.text', this.rule.riskScore);
       getDetails(RISK_SCORE_OVERRIDE_DETAILS).should(
         'have.text',
-        `${this.rule.riskOverride}signal.rule.risk_score`
+        `${this.rule.riskOverride}kibana.alert.risk_score`
       );
       getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', this.rule.nameOverride);
       getDetails(REFERENCE_URLS_DETAILS).should((details) => {
@@ -187,12 +187,8 @@ describe('Detection rules, override', () => {
     waitForAlertsToPopulate();
 
     cy.get(NUMBER_OF_ALERTS).should(($count) => expect(+$count.text().split(' ')[0]).to.be.gte(1));
-    cy.get(ALERT_GRID_CELL).eq(3).contains('auditbeat');
-    cy.get(ALERT_GRID_CELL).eq(4).contains('critical');
-
-    // TODO: Is this necessary?
-    // sortRiskScore();
-
-    cy.get(ALERT_GRID_CELL).eq(5).contains('80');
+    cy.get(ALERT_GRID_CELL).contains('auditbeat');
+    cy.get(ALERT_GRID_CELL).contains('critical');
+    cy.get(ALERT_GRID_CELL).contains('80');
   });
 });

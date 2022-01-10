@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import styled, { css } from 'styled-components';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ManagementEmptyStateWraper } from '../../../../../components/management_empty_state_wraper';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
@@ -38,7 +38,7 @@ export const EventFiltersListEmptyState = memo<{
         body={
           <FormattedMessage
             id="xpack.securitySolution.eventFilters.listEmpty.message"
-            defaultMessage="There are currently no event filters on your endpoint."
+            defaultMessage="Add an event filter to exclude high volume or unwanted events from being written to Elasticsearch."
           />
         }
         actions={

@@ -7,6 +7,7 @@
 
 import { Readable } from 'stream';
 import { createPromiseFromStreams } from '@kbn/utils';
+import { Action, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import {
   transformAlertToRule,
@@ -19,6 +20,8 @@ import {
   getDuplicates,
   getTupleDuplicateErrorsAndUniqueRules,
   getInvalidConnectors,
+  swapActionIds,
+  migrateLegacyActionsIds,
 } from './utils';
 import { getAlertMock } from '../__mocks__/request_responses';
 import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
@@ -26,11 +29,10 @@ import { PartialFilter } from '../../types';
 import { BulkError } from '../utils';
 import { getOutputRuleAlertForRest } from '../__mocks__/utils';
 import { PartialAlert } from '../../../../../../alerting/server';
-import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
+import { createRulesAndExceptionsStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { RuleAlertType } from '../../rules/types';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
-import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request';
 import {
   getMlRuleParams,
@@ -43,6 +45,7 @@ import { requestContextMock } from '../__mocks__';
 import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRuleAlertAction } from '../../rule_actions/legacy_types';
+import { RuleExceptionsPromiseFromStreams } from './utils/import_rules_utils';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -543,12 +546,11 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
       const isInstanceOfError = output[0] instanceof Error;
 
       expect(isInstanceOfError).toEqual(true);
@@ -565,12 +567,12 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
+
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
 
       expect(output.length).toEqual(1);
       expect(errors).toEqual([
@@ -596,12 +598,12 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
+
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
       const isInstanceOfError = output[0] instanceof Error;
 
       expect(isInstanceOfError).toEqual(true);
@@ -618,12 +620,12 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, true);
+
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, true);
 
       expect(output.length).toEqual(1);
       expect(errors.length).toEqual(0);
@@ -639,12 +641,12 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
-      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(parsedObjects, false);
+
+      const [errors, output] = getTupleDuplicateErrorsAndUniqueRules(rules, false);
       const isInstanceOfError = output[0] instanceof Error;
 
       expect(isInstanceOfError).toEqual(true);
@@ -652,6 +654,208 @@ describe.each([
     });
   });
 
+  describe('swapActionIds', () => {
+    const mockAction: Action = {
+      group: 'group string',
+      id: 'some-7.x-id',
+      action_type_id: '.slack',
+      params: {},
+    };
+    const soClient = clients.core.savedObjects.getClient();
+    beforeEach(() => {
+      soClient.find.mockReset();
+      soClient.find.mockClear();
+    });
+
+    test('returns original action if Elasticsearch query fails', async () => {
+      clients.core.savedObjects
+        .getClient()
+        .find.mockRejectedValueOnce(new Error('failed to query'));
+      const result = await swapActionIds(mockAction, soClient);
+      expect(result).toEqual(mockAction);
+    });
+
+    test('returns original action if Elasticsearch query returns no hits', async () => {
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [],
+      }));
+      const result = await swapActionIds(mockAction, soClient);
+      expect(result).toEqual(mockAction);
+    });
+
+    test('returns error if conflicting action connectors are found -> two hits found with same originId', async () => {
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'fake id 1', type: 'action', attributes: {}, references: [] },
+          { score: 0, id: 'fake id 2', type: 'action', attributes: {}, references: [] },
+        ],
+      }));
+      const result = await swapActionIds(mockAction, soClient);
+      expect(result instanceof Error).toBeTruthy();
+      expect((result as unknown as Error).message).toEqual(
+        'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details'
+      );
+    });
+
+    test('returns action with new migrated _id if a single hit is found when querying by action connector originId', async () => {
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'new-post-8.0-id', type: 'action', attributes: {}, references: [] },
+        ],
+      }));
+      const result = await swapActionIds(mockAction, soClient);
+      expect(result).toEqual({ ...mockAction, id: 'new-post-8.0-id' });
+    });
+  });
+
+  describe('migrateLegacyActionsIds', () => {
+    const mockAction: Action = {
+      group: 'group string',
+      id: 'some-7.x-id',
+      action_type_id: '.slack',
+      params: {},
+    };
+    const soClient = clients.core.savedObjects.getClient();
+    beforeEach(() => {
+      soClient.find.mockReset();
+      soClient.find.mockClear();
+    });
+    test('returns import rules schemas + migrated action', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [mockAction],
+      };
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'new-post-8.0-id', type: 'action', attributes: {}, references: [] },
+        ],
+      }));
+
+      const res = await migrateLegacyActionsIds(
+        // @ts-expect-error
+        [rule],
+        soClient
+      );
+      expect(res).toEqual([{ ...rule, actions: [{ ...mockAction, id: 'new-post-8.0-id' }] }]);
+    });
+
+    test('returns import rules schemas + multiple migrated action', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [mockAction, { ...mockAction, id: 'different-id' }],
+      };
+      soClient.find.mockImplementation(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'new-post-8.0-id', type: 'action', attributes: {}, references: [] },
+        ],
+      }));
+
+      const res = await migrateLegacyActionsIds(
+        // @ts-expect-error
+        [rule],
+        soClient
+      );
+      expect(res).toEqual([
+        {
+          ...rule,
+          actions: [
+            { ...mockAction, id: 'new-post-8.0-id' },
+            { ...mockAction, id: 'new-post-8.0-id' },
+          ],
+        },
+      ]);
+    });
+
+    test('returns import rules schemas + migrated action resulting in error', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [mockAction],
+      };
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'new-post-8.0-id', type: 'action', attributes: {}, references: [] },
+          { score: 0, id: 'new-post-8.0-id-2', type: 'action', attributes: {}, references: [] },
+        ],
+      }));
+
+      const res = await migrateLegacyActionsIds(
+        // @ts-expect-error
+        [rule],
+        soClient
+      );
+      expect(res[0] instanceof Error).toBeTruthy();
+      expect((res[0] as unknown as Error).message).toEqual(
+        JSON.stringify({
+          rule_id: 'rule-1',
+          error: {
+            status_code: 409,
+            message:
+              'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details',
+          },
+        })
+      );
+    });
+    test('returns import multiple rules schemas + migrated action, one success and one error', async () => {
+      const rule: ReturnType<typeof getCreateRulesSchemaMock> = {
+        ...getCreateRulesSchemaMock('rule-1'),
+        actions: [mockAction],
+      };
+
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'new-post-8.0-id', type: 'action', attributes: {}, references: [] },
+        ],
+      }));
+      soClient.find.mockImplementationOnce(async () => ({
+        total: 0,
+        per_page: 0,
+        page: 1,
+        saved_objects: [
+          { score: 0, id: 'new-post-8.0-id', type: 'action', attributes: {}, references: [] },
+          { score: 0, id: 'new-post-8.0-id-2', type: 'action', attributes: {}, references: [] },
+        ],
+      }));
+
+      const res = await migrateLegacyActionsIds(
+        // @ts-expect-error
+        [rule, rule],
+        soClient
+      );
+      expect(res[0]).toEqual({ ...rule, actions: [{ ...mockAction, id: 'new-post-8.0-id' }] });
+      expect(res[1] instanceof Error).toBeTruthy();
+      expect((res[1] as unknown as Error).message).toEqual(
+        JSON.stringify({
+          rule_id: 'rule-1',
+          error: {
+            status_code: 409,
+            message:
+              'Found two action connectors with originId or _id: some-7.x-id The upload cannot be completed unless the _id or the originId of the action connector is changed. See https://www.elastic.co/guide/en/kibana/current/sharing-saved-objects.html for more details',
+          },
+        })
+      );
+    });
+  });
   describe('getInvalidConnectors', () => {
     beforeEach(() => {
       clients.actionsClient.getAll.mockReset();
@@ -667,13 +871,13 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
+
       clients.actionsClient.getAll.mockResolvedValue([]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       const isInstanceOfError = output[0] instanceof Error;
 
       expect(isInstanceOfError).toEqual(true);
@@ -698,13 +902,12 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(output.length).toEqual(0);
       expect(errors).toEqual<BulkError[]>([
         {
@@ -735,10 +938,9 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([
         {
@@ -749,7 +951,7 @@ describe.each([
           isPreconfigured: false,
         },
       ]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(errors.length).toEqual(0);
       expect(output.length).toEqual(1);
       expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule));
@@ -779,10 +981,9 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([
         {
@@ -800,7 +1001,7 @@ describe.each([
           isPreconfigured: false,
         },
       ]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(errors.length).toEqual(0);
       expect(output.length).toEqual(1);
       expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule));
@@ -836,10 +1037,9 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([
         {
@@ -857,7 +1057,7 @@ describe.each([
           isPreconfigured: false,
         },
       ]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(errors.length).toEqual(0);
       expect(output.length).toEqual(2);
       expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule1));
@@ -900,10 +1100,9 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([
         {
@@ -921,7 +1120,7 @@ describe.each([
           isPreconfigured: false,
         },
       ]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(errors.length).toEqual(1);
       expect(output.length).toEqual(1);
       expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule1));
@@ -966,10 +1165,9 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([
         {
@@ -987,7 +1185,7 @@ describe.each([
           isPreconfigured: false,
         },
       ]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(errors.length).toEqual(1);
       expect(output.length).toEqual(0);
       expect(errors).toEqual<BulkError[]>([
@@ -1073,10 +1271,9 @@ describe.each([
           this.push(null);
         },
       });
-      const rulesObjectsStream = createRulesStreamFromNdJson(1000);
-      const parsedObjects = await createPromiseFromStreams<PromiseFromStreams[]>([
+      const [{ rules }] = await createPromiseFromStreams<RuleExceptionsPromiseFromStreams[]>([
         ndJsonStream,
-        ...rulesObjectsStream,
+        ...createRulesAndExceptionsStreamFromNdJson(1000),
       ]);
       clients.actionsClient.getAll.mockResolvedValue([
         {
@@ -1094,7 +1291,7 @@ describe.each([
           isPreconfigured: false,
         },
       ]);
-      const [errors, output] = await getInvalidConnectors(parsedObjects, clients.actionsClient);
+      const [errors, output] = await getInvalidConnectors(rules, clients.actionsClient);
       expect(errors.length).toEqual(2);
       expect(output.length).toEqual(1);
       expect(output[0]).toEqual<PromiseFromStreams[]>(expect.objectContaining(rule2));

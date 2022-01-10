@@ -7,9 +7,9 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiPageContent, EuiPage } from '@elastic/eui';
-import { IndexPattern } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data/common';
 import { getServices } from '../../../kibana_services';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { ElasticRequestState } from '../types';
@@ -25,9 +25,9 @@ export interface DocProps {
    */
   index: string;
   /**
-   * IndexPattern entity
+   * DataView entity
    */
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   /**
    * If set, will always request source, regardless of the global `fieldsFromSource` setting
    */

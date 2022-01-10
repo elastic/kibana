@@ -10,10 +10,11 @@
 ```typescript
 export interface Authenticated extends AuthResultParams 
 ```
+<b>Extends:</b> AuthResultParams
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [type](./kibana-plugin-core-server.authenticated.type.md) | <code>AuthResultType.authenticated</code> |  |
+|  [type](./kibana-plugin-core-server.authenticated.type.md) | AuthResultType.authenticated |  |
 

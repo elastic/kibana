@@ -10,13 +10,13 @@ import React, { useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DiscoverServices } from '../../../../build_services';
-import { IndexPattern } from '../../../../../../data/common';
+import { DataView } from '../../../../../../data/common';
 
 export interface DiscoverIndexPatternManagementProps {
   /**
    * Currently selected index pattern
    */
-  selectedIndexPattern?: IndexPattern;
+  selectedIndexPattern?: DataView;
   /**
    * Discover plugin services;
    */
@@ -33,14 +33,13 @@ export interface DiscoverIndexPatternManagementProps {
 }
 
 export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManagementProps) {
-  const { indexPatternFieldEditor, core } = props.services;
+  const { dataViewFieldEditor, core } = props.services;
   const { useNewFieldsApi, selectedIndexPattern, editField } = props;
-  const indexPatternFieldEditPermission =
-    indexPatternFieldEditor?.userPermissions.editIndexPattern();
-  const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
+  const dataViewEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
+  const canEditDataViewField = !!dataViewEditPermission && useNewFieldsApi;
   const [isAddIndexPatternFieldPopoverOpen, setIsAddIndexPatternFieldPopoverOpen] = useState(false);
 
-  if (!useNewFieldsApi || !selectedIndexPattern || !canEditIndexPatternField) {
+  if (!useNewFieldsApi || !selectedIndexPattern || !canEditDataViewField) {
     return null;
   }
 

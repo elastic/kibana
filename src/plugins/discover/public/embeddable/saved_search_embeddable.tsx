@@ -20,13 +20,12 @@ import { APPLY_FILTER_TRIGGER, esFilters, FilterManager } from '../../../data/pu
 import { DiscoverServices } from '../build_services';
 import {
   Filter,
-  IndexPattern,
-  IndexPatternField,
+  DataView,
+  DataViewField,
   ISearchSource,
   Query,
   TimeRange,
 } from '../../../data/common';
-import { ElasticSearchHit } from '../services/doc_views/doc_views_types';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { UiActionsStart } from '../../../ui_actions/public';
 import { getServices } from '../kibana_services';
@@ -45,9 +44,11 @@ import { DiscoverGridSettings } from '../components/discover_grid/types';
 import { DocTableProps } from '../components/doc_table/doc_table_wrapper';
 import { getDefaultSort } from '../components/doc_table';
 import { SortOrder } from '../components/doc_table/components/table_header/helpers';
-import { updateSearchSource } from './utils/update_search_source';
 import { VIEW_MODE } from '../components/view_mode_toggle';
-import { FieldStatsTableEmbeddable } from '../components/data_visualizer_grid/field_stats_table_embeddable';
+import { updateSearchSource } from './utils/update_search_source';
+import { FieldStatsTableSavedSearchEmbeddable } from '../application/main/components/field_stats_table';
+import { ElasticSearchHit } from '../types';
+import { KibanaThemeProvider } from '../../../kibana_react/public';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -56,7 +57,7 @@ export type SearchProps = Partial<DiscoverGridProps> &
     sharedItemTitle?: string;
     inspectorAdapters?: Adapters;
 
-    filter?: (field: IndexPatternField, value: string[], operator: string) => void;
+    filter?: (field: DataViewField, value: string[], operator: string) => void;
     hits?: ElasticSearchHit[];
     totalHitCount?: number;
     onMoveColumn?: (column: string, index: number) => void;
@@ -66,7 +67,7 @@ interface SearchEmbeddableConfig {
   savedSearch: SavedSearch;
   editUrl: string;
   editPath: string;
-  indexPatterns?: IndexPattern[];
+  indexPatterns?: DataView[];
   editable: boolean;
   filterManager: FilterManager;
   services: DiscoverServices;
@@ -391,15 +392,18 @@ export class SavedSearchEmbeddable
       Array.isArray(searchProps.columns)
     ) {
       ReactDOM.render(
-        <FieldStatsTableEmbeddable
-          services={searchProps.services}
-          indexPattern={searchProps.indexPattern}
-          columns={searchProps.columns}
-          savedSearch={this.savedSearch}
-          filters={this.input.filters}
-          query={this.input.query}
-          onAddFilter={searchProps.onFilter}
-        />,
+        <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
+          <FieldStatsTableSavedSearchEmbeddable
+            services={searchProps.services}
+            indexPattern={searchProps.indexPattern}
+            columns={searchProps.columns}
+            savedSearch={this.savedSearch}
+            filters={this.input.filters}
+            query={this.input.query}
+            onAddFilter={searchProps.onFilter}
+            searchSessionId={this.input.searchSessionId}
+          />
+        </KibanaThemeProvider>,
         domNode
       );
       return;
@@ -410,7 +414,14 @@ export class SavedSearchEmbeddable
       useLegacyTable,
       refs: domNode,
     };
-    ReactDOM.render(<SavedSearchEmbeddableComponent {...props} />, domNode);
+    if (searchProps.services) {
+      ReactDOM.render(
+        <KibanaThemeProvider theme$={searchProps.services.core.theme.theme$}>
+          <SavedSearchEmbeddableComponent {...props} />
+        </KibanaThemeProvider>,
+        domNode
+      );
+    }
   }
 
   public reload() {

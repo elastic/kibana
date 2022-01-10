@@ -30,7 +30,7 @@ function createXPackRoot(config: {} = {}) {
   });
 }
 
-describe('ingestManager', () => {
+describe('fleet', () => {
   describe('default. manager, EPM, and Fleet all disabled', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
 
@@ -64,11 +64,11 @@ describe('ingestManager', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
 
     beforeAll(async () => {
-      const ingestManagerConfig = {
+      const fleetConfig = {
         enabled: true,
       };
       root = createXPackRoot({
-        ingestManager: ingestManagerConfig,
+        fleet: fleetConfig,
       });
       await root.preboot();
       await root.setup();
@@ -103,12 +103,12 @@ describe('ingestManager', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
 
     beforeAll(async () => {
-      const ingestManagerConfig = {
+      const fleetConfig = {
         enabled: true,
         epm: { enabled: true },
       };
       root = createXPackRoot({
-        ingestManager: ingestManagerConfig,
+        fleet: fleetConfig,
       });
       await root.preboot();
       await root.setup();
@@ -138,12 +138,12 @@ describe('ingestManager', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
 
     beforeAll(async () => {
-      const ingestManagerConfig = {
+      const fleetConfig = {
         enabled: true,
         fleet: { enabled: true },
       };
       root = createXPackRoot({
-        ingestManager: ingestManagerConfig,
+        fleet: fleetConfig,
       });
       await root.preboot();
       await root.setup();
@@ -173,13 +173,13 @@ describe('ingestManager', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
 
     beforeAll(async () => {
-      const ingestManagerConfig = {
+      const fleetConfig = {
         enabled: true,
         epm: { enabled: true },
         fleet: { enabled: true },
       };
       root = createXPackRoot({
-        ingestManager: ingestManagerConfig,
+        fleet: fleetConfig,
       });
       await root.preboot();
       await root.setup();

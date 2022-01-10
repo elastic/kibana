@@ -24,15 +24,18 @@ import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../types';
 import { getSwitchIndexPatternAppState } from './get_switch_index_pattern_app_state';
 import { SortPairArr } from '../../../components/doc_table/lib/get_sort';
+import { ElasticSearchHit } from '../../../types';
 
 export function useDiscoverState({
   services,
   history,
   savedSearch,
+  setExpandedDoc,
 }: {
   services: DiscoverServices;
   savedSearch: SavedSearch;
   history: History;
+  setExpandedDoc: (doc?: ElasticSearchHit) => void;
 }) {
   const { uiSettings: config, data, filterManager, indexPatterns, storage } = services;
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);
@@ -89,6 +92,7 @@ export function useDiscoverState({
   const { data$, refetch$, reset, inspectorAdapters } = useSavedSearchData({
     initialFetchStatus,
     searchSessionManager,
+    savedSearch,
     searchSource,
     services,
     stateContainer,
@@ -186,8 +190,9 @@ export function useDiscoverState({
         );
         stateContainer.setAppState(nextAppState);
       }
+      setExpandedDoc(undefined);
     },
-    [config, indexPattern, indexPatterns, state.columns, state.sort, stateContainer]
+    [config, indexPattern, indexPatterns, setExpandedDoc, state.columns, state.sort, stateContainer]
   );
   /**
    * Function triggered when the user changes the query in the search bar

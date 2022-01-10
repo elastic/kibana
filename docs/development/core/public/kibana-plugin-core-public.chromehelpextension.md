@@ -15,7 +15,7 @@ export interface ChromeHelpExtension
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [appName](./kibana-plugin-core-public.chromehelpextension.appname.md) | <code>string</code> | Provide your plugin's name to create a header for separation |
-|  [content](./kibana-plugin-core-public.chromehelpextension.content.md) | <code>(element: HTMLDivElement) =&gt; () =&gt; void</code> | Custom content to occur below the list of links |
-|  [links](./kibana-plugin-core-public.chromehelpextension.links.md) | <code>ChromeHelpExtensionMenuLink[]</code> | Creates unified links for sending users to documentation, GitHub, Discuss, or a custom link/button |
+|  [appName](./kibana-plugin-core-public.chromehelpextension.appname.md) | string | Provide your plugin's name to create a header for separation |
+|  [content?](./kibana-plugin-core-public.chromehelpextension.content.md) | (element: HTMLDivElement) =&gt; () =&gt; void | <i>(Optional)</i> Custom content to occur below the list of links |
+|  [links?](./kibana-plugin-core-public.chromehelpextension.links.md) | ChromeHelpExtensionMenuLink\[\] | <i>(Optional)</i> Creates unified links for sending users to documentation, GitHub, Discuss, or a custom link/button |
 

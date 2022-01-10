@@ -18,7 +18,6 @@ import { ReorderableTable } from '../reorderable_table';
 
 import { ItemWithAnID } from '../types';
 
-import { EMPTY_ITEM } from './constants';
 import { getUpdatedColumns } from './get_updated_columns';
 import { InlineEditableTableLogic } from './inline_editable_table_logic';
 import { FormErrors, InlineEditableTableColumn } from './types';
@@ -95,23 +94,24 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
   uneditableItems,
   ...rest
 }: InlineEditableTableProps<Item>) => {
-  const { editingItemId, isEditing, isEditingUnsavedItem } = useValues(InlineEditableTableLogic);
+  const { editingItemId, isEditing, isEditingUnsavedItem, rowErrors } =
+    useValues(InlineEditableTableLogic);
   const { editNewItem, reorderItems } = useActions(InlineEditableTableLogic);
 
   // TODO These two things shoud just be selectors
   const isEditingItem = (item: Item) => item.id === editingItemId;
   const isActivelyEditing = (item: Item) => isEditing && isEditingItem(item);
 
+  const emptyItem = { id: null } as Item;
   const displayedItems = isEditingUnsavedItem
     ? uneditableItems
-      ? [EMPTY_ITEM, ...items]
-      : [...items, EMPTY_ITEM]
+      ? [emptyItem, ...items]
+      : [...items, emptyItem]
     : items;
 
   const updatedColumns = getUpdatedColumns({
     columns,
-    // TODO We shouldn't need this cast here
-    displayedItems: displayedItems as Item[],
+    displayedItems,
     isActivelyEditing,
     canRemoveLastItem,
     isLoading,
@@ -123,14 +123,16 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
     <>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h3>{title}</h3>
-          </EuiTitle>
+          {!!title && (
+            <EuiTitle size="xs" data-test-subj="inlineEditableTableTitle">
+              <h3>{title}</h3>
+            </EuiTitle>
+          )}
           {!!description && (
             <>
               <EuiSpacer size="s" />
               <EuiText
-                data-test-subj="description"
+                data-test-subj="inlineEditableTableDescription"
                 color="subdued"
                 size="s"
                 className="inlineEditableTable__descriptionText"
@@ -147,7 +149,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
             disabled={isEditing}
             onClick={editNewItem}
             color="success"
-            data-test-subj="actionButton"
+            data-test-subj="inlineEditableTableActionButton"
           >
             {addButtonText ||
               i18n.translate('xpack.enterpriseSearch.inlineEditableTable.newRowButtonLabel', {
@@ -159,8 +161,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
       <EuiSpacer size="m" />
       <ReorderableTable
         className={classNames(className, 'editableTable')}
-        // TODO don't cast
-        items={displayedItems as Item[]}
+        items={displayedItems}
         unreorderableItems={uneditableItems}
         columns={updatedColumns}
         rowProps={(item) => ({
@@ -168,6 +169,7 @@ export const InlineEditableTableContents = <Item extends ItemWithAnID>({
             'is-being-edited': isActivelyEditing(item),
           }),
         })}
+        rowErrors={(item) => (isActivelyEditing(item) ? rowErrors : undefined)}
         noItemsMessage={noItemsMessage(editNewItem)}
         onReorder={reorderItems}
         disableDragging={isEditing}

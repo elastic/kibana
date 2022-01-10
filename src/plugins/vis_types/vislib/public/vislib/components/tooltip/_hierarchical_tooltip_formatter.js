@@ -11,7 +11,7 @@ import _ from 'lodash';
 import numeral from '@elastic/numeral';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 
 import { collectBranch } from './_collect_branch';
 

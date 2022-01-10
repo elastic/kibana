@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
-import type { BrowserFields } from '../../../../../common';
+import type { BrowserFields } from '../../../../../common/search_strategy';
 
 import { getFieldBrowserSearchInputClassName, getFieldCount } from './helpers';
 
@@ -57,12 +57,15 @@ const CountRow = React.memo<Pick<Props, 'filteredBrowserFields'>>(({ filteredBro
 
 CountRow.displayName = 'CountRow';
 
+const inputRef = (node: HTMLInputElement | null) => node?.focus();
+
 export const Search = React.memo<Props>(
   ({ isSearching, filteredBrowserFields, onSearchInputChange, searchInput, timelineId }) => (
     <>
       <EuiFieldSearch
         className={getFieldBrowserSearchInputClassName(timelineId)}
         data-test-subj="field-search"
+        inputRef={inputRef}
         isLoading={isSearching}
         onChange={onSearchInputChange}
         placeholder={i18n.FILTER_PLACEHOLDER}

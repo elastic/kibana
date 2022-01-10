@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import bluebird from 'bluebird';
+import pMap from 'p-map';
 import { schema } from '@kbn/config-schema';
 import { filter, uniq, map } from 'lodash';
 import { satisfies } from 'semver';
@@ -30,7 +30,6 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
     },
     async (context, request, response) => {
       const soClient = context.core.savedObjects.client;
-      const esClient = context.core.elasticsearch.client.asInternalUser;
       const agentService = osqueryContext.service.getAgentService();
       const agentPolicyService = osqueryContext.service.getAgentPolicyService();
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
@@ -47,11 +46,11 @@ export const getAgentPoliciesRoute = (router: IRouter, osqueryContext: OsqueryAp
       const agentPolicies = await agentPolicyService?.getByIds(soClient, agentPolicyIds);
 
       if (agentPolicies?.length) {
-        await bluebird.map(
+        await pMap(
           agentPolicies,
           (agentPolicy: GetAgentPoliciesResponseItem) =>
-            agentService
-              ?.getAgentStatusForAgentPolicy(esClient, agentPolicy.id)
+            agentService?.asInternalUser
+              .getAgentStatusForAgentPolicy(agentPolicy.id)
               .then(({ total: agentTotal }) => (agentPolicy.agents = agentTotal)),
           { concurrency: 10 }
         );

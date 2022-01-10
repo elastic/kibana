@@ -7,9 +7,11 @@
  */
 
 import React, { Fragment, useContext, useEffect } from 'react';
-import themeLight from '@elastic/eui/dist/eui_theme_light.json';
-import themeDark from '@elastic/eui/dist/eui_theme_dark.json';
-import type { IndexPattern } from 'src/plugins/data/common';
+import {
+  euiLightVars as themeLight,
+  euiDarkVars as themeDark,
+} from '@kbn/ui-shared-deps-src/theme';
+import type { DataView } from 'src/plugins/data/common';
 
 import {
   EuiDataGridCellValueElementProps,
@@ -17,17 +19,17 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { ElasticSearchHit } from '../../services/doc_views/doc_views_types';
 import { DiscoverGridContext } from './discover_grid_context';
 import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
 import { EsHitRecord } from '../../application/types';
 import { formatFieldValue } from '../../utils/format_value';
 import { formatHit } from '../../utils/format_hit';
+import { ElasticSearchHit } from '../../types';
 
 export const getRenderCellValueFn =
   (
-    indexPattern: IndexPattern,
+    indexPattern: DataView,
     rows: ElasticSearchHit[] | undefined,
     rowsFlattened: Array<Record<string, unknown>>,
     useNewFieldsApi: boolean,

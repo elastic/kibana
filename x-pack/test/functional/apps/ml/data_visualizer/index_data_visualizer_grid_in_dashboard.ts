@@ -12,7 +12,14 @@ import { farequoteLuceneFiltersSearchTestData } from './index_test_data';
 const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings', 'dashboard']);
+  const PageObjects = getPageObjects([
+    'common',
+    'discover',
+    'timePicker',
+    'settings',
+    'dashboard',
+    'header',
+  ]);
   const ml = getService('ml');
   const retry = getService('retry');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -55,10 +62,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
         await dashboardAddPanel.addSavedSearch(savedSearchTitle);
-        await PageObjects.dashboard.waitForRenderComplete();
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
         await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
-        await PageObjects.dashboard.waitForRenderComplete();
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
         for (const fieldRow of testData.expected.metricFields as Array<
           Required<MetricFieldVisConfig>
@@ -91,13 +98,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardTitle);
-        await PageObjects.dashboard.waitForRenderComplete();
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
         await dashboardAddPanel.addSavedSearch(savedSearchTitle);
-        await PageObjects.dashboard.waitForRenderComplete();
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
         await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
-        await PageObjects.dashboard.waitForRenderComplete();
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
         await PageObjects.discover.assertFieldStatsTableNotExists();
         await PageObjects.dashboard.saveDashboard(dashboardTitle);
