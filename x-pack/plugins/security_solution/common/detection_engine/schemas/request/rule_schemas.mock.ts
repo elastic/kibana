@@ -57,6 +57,8 @@ export const getCreateThreatMatchRulesSchemaMock = (
   rule_id: ruleId,
   threat_query: '*:*',
   threat_index: ['list-index'],
+  interval: '5m',
+  from: 'now-6m',
   threat_indicator_path: DEFAULT_INDICATOR_SOURCE_PATH,
   threat_mapping: [
     {
