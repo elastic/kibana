@@ -90,7 +90,7 @@ export const configSchema = schema.object({
    * @example
    * xpack.securitySolution.enableExperimental:
    *   - someCrazyFeature
-   *   - trustedAppsByPolicyEnabled
+   *   - someEvenCrazierFeature
    */
   enableExperimental: schema.arrayOf(schema.string(), {
     defaultValue: () => [],

@@ -20,15 +20,10 @@ import { HttpFetchOptions, HttpFetchOptionsWithPath } from 'kibana/public';
 import { isFailedResourceState, isLoadedResourceState } from '../state';
 import { forceHTMLElementOffsetWidth } from '../../../components/effected_policy_select/test_utils';
 import { toUpdateTrustedApp } from '../../../../../common/endpoint/service/trusted_apps/to_update_trusted_app';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { licenseService } from '../../../../common/hooks/use_license';
 import { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 import { trustedAppsAllHttpMocks } from '../../mocks';
-
-// TODO: remove this mock when feature flag is removed
-jest.mock('../../../../common/hooks/use_experimental_features');
-const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 
 jest.mock('../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
@@ -173,7 +168,6 @@ describe('When on the Trusted Apps Page', () => {
       describe('the license is downgraded to gold or below and the user is editing a per policy TA', () => {
         beforeEach(async () => {
           (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
-          useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
 
           const originalFakeTrustedAppProvider = getFakeTrustedApp.getMockImplementation();
           getFakeTrustedApp.mockImplementation(() => {
@@ -198,7 +192,6 @@ describe('When on the Trusted Apps Page', () => {
       describe('the license is downgraded to gold or below and the user is adding a new TA', () => {
         beforeEach(async () => {
           (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
-          useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
 
           const originalFakeTrustedAppProvider = getFakeTrustedApp.getMockImplementation();
           getFakeTrustedApp.mockImplementation(() => {
@@ -467,7 +460,6 @@ describe('When on the Trusted Apps Page', () => {
     });
 
     it('should have list of policies populated', async () => {
-      useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
       const resetEnv = forceHTMLElementOffsetWidth();
       const renderResult = await renderAndClickAddButton();
       act(() => {
@@ -698,23 +690,6 @@ describe('When on the Trusted Apps Page', () => {
           'addTrustedAppFlyout-createButton'
         ) as HTMLButtonElement;
         expect(flyoutAddButton.disabled).toBe(true);
-      });
-    });
-
-    describe('and there is a feature flag for agents policy', () => {
-      it('should hide agents policy if feature flag is disabled', async () => {
-        useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
-        const renderResult = await renderAndClickAddButton();
-        expect(
-          renderResult.queryByTestId('addTrustedAppFlyout-createForm-policySelection')
-        ).toBeNull();
-      });
-      it('should display agents policy if feature flag is enabled', async () => {
-        useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
-        const renderResult = await renderAndClickAddButton();
-        expect(
-          renderResult.queryByTestId('addTrustedAppFlyout-createForm-policySelection')
-        ).toBeTruthy();
       });
     });
   });
