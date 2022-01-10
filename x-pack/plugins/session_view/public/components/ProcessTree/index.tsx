@@ -5,13 +5,13 @@
  * 2.0.
  */
 import React, { useRef, useEffect, useLayoutEffect, useCallback } from 'react';
+import { EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ProcessTreeNode } from '../ProcessTreeNode';
 import { useProcessTree } from './hooks';
 import { Process, ProcessEventsPage, ProcessEvent } from '../../../common/types/process_tree';
 import { useScroll } from '../../hooks/use_scroll';
 import { useStyles } from './styles';
-import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 
 type FetchFunction = () => void;
 
@@ -137,21 +137,20 @@ export const ProcessTree = ({
   }, [jumpToEvent, processMap])
 
   function renderLoadMoreButton(text: JSX.Element, func: FetchFunction) {
-    return <EuiButton
-      fullWidth
-      onClick={() => func()}
-      isLoading={isFetching}
-    >
-      {text}
-    </EuiButton>;
+    return (
+      <EuiButton fullWidth onClick={() => func()} isLoading={isFetching}>
+        {text}
+      </EuiButton>
+    );
   }
 
   return (
     <div ref={scrollerRef} css={styles.scroller} data-test-subj="sessionViewProcessTree">
-      {hasPreviousPage && renderLoadMoreButton(
-        <FormattedMessage id="xpack.sessionView.loadPrevious" defaultMessage="Load previous" />,
-        fetchPreviousPage
-      )}
+      {hasPreviousPage &&
+        renderLoadMoreButton(
+          <FormattedMessage id="xpack.sessionView.loadPrevious" defaultMessage="Load previous" />,
+          fetchPreviousPage
+        )}
       {sessionLeader && (
         <ProcessTreeNode
           isSessionLeader
@@ -161,10 +160,11 @@ export const ProcessTree = ({
         />
       )}
       <div ref={selectionAreaRef} css={styles.selectionArea} />
-      {hasNextPage && renderLoadMoreButton(
-        <FormattedMessage id="xpack.sessionView.loadNext" defaultMessage="Load next" />,
-        fetchNextPage
-      )}
+      {hasNextPage &&
+        renderLoadMoreButton(
+          <FormattedMessage id="xpack.sessionView.loadNext" defaultMessage="Load next" />,
+          fetchNextPage
+        )}
     </div>
   );
 };

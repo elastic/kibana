@@ -19,10 +19,7 @@ import { ProcessTree } from '../ProcessTree';
 import { Process, ProcessEvent } from '../../../common/types/process_tree';
 import { SessionViewDetailPanel } from '../SessionViewDetailPanel';
 import { useStyles } from './styles';
-import {
-  useSearchQuery,
-  useFetchSessionViewProcessEvents,
-} from './hooks';
+import { useSearchQuery, useFetchSessionViewProcessEvents } from './hooks';
 
 interface SessionViewDeps {
   // the root node of the process tree to render. e.g process.entry.entity_id or process.session.entity_id
@@ -56,7 +53,7 @@ export const SessionView = ({ sessionEntityId, height, jumpToEvent }: SessionVie
     hasNextPage,
     isFetching,
     fetchPreviousPage,
-    hasPreviousPage
+    hasPreviousPage,
   } = useFetchSessionViewProcessEvents(sessionEntityId, jumpToEvent);
 
   const renderNoData = () => {
