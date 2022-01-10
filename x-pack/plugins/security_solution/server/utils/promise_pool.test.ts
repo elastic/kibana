@@ -9,7 +9,7 @@ import { initPromisePool } from './promise_pool';
 
 const nextTick = () => new Promise((resolve) => setImmediate(resolve));
 
-const initPoolWithTasks = ({ concurrency = 1, items = [1, 2, 3] }) => {
+const initPoolWithTasks = ({ concurrency = 1, items = [1, 2, 3] }, abortSignal?: AbortSignal) => {
   const asyncTasks: Record<
     number,
     {
@@ -36,6 +36,7 @@ const initPoolWithTasks = ({ concurrency = 1, items = [1, 2, 3] }) => {
           },
         };
       }),
+    abortSignal,
   });
 
   return [promisePool, asyncTasks] as const;
@@ -112,7 +113,7 @@ describe('initPromisePool', () => {
 
     const { results, errors } = await promisePool;
 
-    // Check final reesuts
+    // Check final results
     expect(results).toEqual([1, 3]);
     expect(errors).toEqual([new Error(`Error processing 2`)]);
   });
@@ -167,8 +168,52 @@ describe('initPromisePool', () => {
 
     const { results, errors } = await promisePool;
 
-    // Check final reesuts
+    // Check final results
     expect(results).toEqual([1, 4, 5]);
     expect(errors).toEqual([new Error(`Error processing 2`), new Error(`Error processing 3`)]);
+  });
+
+  it('should not execute tasks if abortSignal is aborted', async () => {
+    const abortSignal = { aborted: true };
+    const [promisePool] = initPoolWithTasks(
+      {
+        concurrency: 2,
+        items: [1, 2, 3, 4, 5],
+      },
+      abortSignal as AbortSignal
+    );
+
+    const { results, errors, abortedExecutionsCount } = await promisePool;
+
+    // Check final results
+    expect(results).toEqual([]);
+    expect(errors).toEqual([]);
+    expect(abortedExecutionsCount).toEqual(5);
+  });
+
+  it('should abort executions of tasks if abortSignal was set to aborted during execution', async () => {
+    const abortSignal = { aborted: false };
+    const [promisePool, asyncTasks] = initPoolWithTasks(
+      {
+        concurrency: 1,
+        items: [1, 2, 3],
+      },
+      abortSignal as AbortSignal
+    );
+
+    // resolve first task, and abort execution
+    asyncTasks[1].resolve();
+    expect(asyncTasks).toEqual({
+      1: expect.objectContaining({ status: 'resolved' }),
+    });
+
+    abortSignal.aborted = true;
+
+    const { results, errors, abortedExecutionsCount } = await promisePool;
+
+    // Check final results
+    expect(results).toEqual([1]);
+    expect(errors).toEqual([]);
+    expect(abortedExecutionsCount).toEqual(2);
   });
 });
