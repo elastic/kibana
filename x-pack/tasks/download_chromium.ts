@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { download } from '../plugins/screenshotting/server/utils';
+import { download, paths } from '../plugins/screenshotting/server/utils';
 
 export const downloadChromium = async () => {
   // eslint-disable-next-line no-console
@@ -21,5 +21,6 @@ export const downloadChromium = async () => {
     log: consoleLogger('log'),
   };
 
-  await download(logger);
+  // Download Chromium for all platforms
+  await Promise.all(paths.packages.map((pkg) => download(pkg, logger)));
 };

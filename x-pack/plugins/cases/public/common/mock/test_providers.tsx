@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
 import React from 'react';
 import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
 
-import { DEFAULT_FEATURES, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CasesFeatures } from '../../../common/ui/types';
 import { CasesProvider } from '../../components/cases_context';
 import { createKibanaContextProviderMock } from '../lib/kibana/kibana_react.mock';
@@ -34,18 +33,11 @@ const TestProvidersComponent: React.FC<Props> = ({
   owner = [SECURITY_SOLUTION_OWNER],
   userCanCrud = true,
 }) => {
-  /**
-   * The empty object at the beginning avoids the mutation
-   * of the DEFAULT_FEATURES object
-   */
-  const featuresOptions = merge({}, DEFAULT_FEATURES, features);
   return (
     <I18nProvider>
       <MockKibanaContextProvider>
         <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <CasesProvider value={{ features: featuresOptions, owner, userCanCrud }}>
-            {children}
-          </CasesProvider>
+          <CasesProvider value={{ features, owner, userCanCrud }}>{children}</CasesProvider>
         </ThemeProvider>
       </MockKibanaContextProvider>
     </I18nProvider>
