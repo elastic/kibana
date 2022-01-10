@@ -74,7 +74,7 @@ export interface FleetSetup {}
  */
 export interface FleetStart {
   /** Authorization for the current user */
-  authz: Promise<FleetAuthz>;
+  authz: FleetAuthz;
   registerExtension: UIExtensionRegistrationCallback;
   isInitialized: () => Promise<true>;
 }
@@ -249,34 +249,21 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       view: 'package-detail-assets',
       Component: LazyCustomLogsAssetsExtension,
     });
+    const { capabilities } = core.application;
 
+    //  capabilities.fleetv2 returns fleet privileges and capabilities.fleet returns integrations privileges
     return {
-      // Temporarily rely on superuser check to calculate authz. Once Kibana RBAC is in place for Fleet this should
-      // switch to a sync calculation based on `core.application.capabilites` properties.
-      authz: getPermissions()
-        .catch((e) => {
-          // eslint-disable-next-line no-console
-          console.warn(`Could not load Fleet permissions due to error: ${e}`);
-          return { success: false };
-        })
-        .then((permissionsResponse) => {
-          if (permissionsResponse?.success) {
-            // If superuser, give access to everything
-            return calculateAuthz({
-              fleet: { all: true, setup: true },
-              integrations: { all: true, read: true },
-              isSuperuser: true,
-            });
-          } else {
-            // All other users only get access to read integrations if they have the read privilege
-            const { capabilities } = core.application;
-            return calculateAuthz({
-              fleet: { all: false, setup: false },
-              integrations: { all: false, read: capabilities.fleet.read as boolean },
-              isSuperuser: false,
-            });
-          }
-        }),
+      authz: calculateAuthz({
+        fleet: {
+          all: capabilities.fleetv2.write as boolean,
+          setup: false,
+        },
+        integrations: {
+          all: capabilities.fleet.write as boolean,
+          read: capabilities.fleet.read as boolean,
+        },
+        isSuperuser: false,
+      }),
 
       isInitialized: once(async () => {
         const permissionsResponse = await getPermissions();

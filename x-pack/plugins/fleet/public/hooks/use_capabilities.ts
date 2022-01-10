@@ -7,7 +7,14 @@
 
 import { useStartServices } from './use_core';
 
+// Expose fleet capabilities
 export function useCapabilities() {
+  const core = useStartServices();
+  return core.application.capabilities.fleetv2;
+}
+
+// Expose integrations capabilities
+export function useIntegrationsCapabilities() {
   const core = useStartServices();
   return core.application.capabilities.fleet;
 }

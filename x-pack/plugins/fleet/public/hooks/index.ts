@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { useCapabilities } from './use_capabilities';
+export { useCapabilities, useIntegrationsCapabilities } from './use_capabilities';
 export { useStartServices } from './use_core';
 export { useConfig, ConfigContext } from './use_config';
 export { useKibanaVersion, KibanaVersionContext } from './use_kibana_version';
