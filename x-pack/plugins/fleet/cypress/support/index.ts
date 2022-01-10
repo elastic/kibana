@@ -29,7 +29,7 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
-      getBySel(value: string): Chainable<any>;
+      getBySel(value: string, ...args: any[]): Chainable<any>;
     }
   }
 }

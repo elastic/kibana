@@ -727,13 +727,23 @@ class PackagePolicyService {
             })),
           } as NewPackagePolicyInput;
         });
+        let agentPolicyId;
+        // fallback to first agent policy id in case no policy_id is specified, BWC with 8.0
+        if (!newPolicy.policy_id) {
+          const { items: agentPolicies } = await agentPolicyService.list(soClient, {
+            perPage: 1,
+          });
+          if (agentPolicies.length > 0) {
+            agentPolicyId = agentPolicies[0].id;
+          }
+        }
         newPackagePolicy = {
           ...newPP,
           name: newPolicy.name,
           namespace: newPolicy.namespace ?? 'default',
           description: newPolicy.description ?? '',
           enabled: newPolicy.enabled ?? true,
-          policy_id: newPolicy.policy_id, // TODO BWC previously optional
+          policy_id: newPolicy.policy_id ?? agentPolicyId,
           output_id: newPolicy.output_id ?? '',
           inputs: newPolicy.inputs[0]?.streams ? newPolicy.inputs : inputs,
           vars: newPolicy.vars || newPP.vars,

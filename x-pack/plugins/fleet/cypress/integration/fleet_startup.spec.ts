@@ -81,7 +81,7 @@ describe('Fleet startup', () => {
       cy.getBySel('toastCloseButton').click();
       cy.getBySel('standaloneTab').click();
       cy.getBySel('createPolicyBtn').click();
-      cy.getBySel('euiToastHeader');
+      cy.getBySel('euiToastHeader', { timeout: 180000 });
       cy.get('.euiLoadingSpinner').should('not.exist');
       cy.getBySel('euiFlyoutCloseButton').click();
 

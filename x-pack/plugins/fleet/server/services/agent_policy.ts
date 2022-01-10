@@ -134,24 +134,16 @@ class AgentPolicyService {
       is_preconfigured: true,
     };
 
-    let searchParams;
+    if (!id) throw new Error('Missing ID');
 
-    if (id) {
-      searchParams = {
-        id: String(id),
-      };
-    }
-
-    if (!searchParams) throw new Error('Missing ID');
-
-    return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, searchParams);
+    return await this.ensureAgentPolicy(soClient, esClient, newAgentPolicy, id as string);
   }
 
   private async ensureAgentPolicy(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     newAgentPolicy: NewAgentPolicy,
-    searchParams: { id: string }
+    id: string
   ): Promise<{
     created: boolean;
     policy: AgentPolicy;
@@ -160,7 +152,7 @@ class AgentPolicyService {
     try {
       const agentPolicy = await soClient.get<AgentPolicySOAttributes>(
         AGENT_POLICY_SAVED_OBJECT_TYPE,
-        searchParams.id
+        id
       );
       return {
         created: false,
@@ -173,7 +165,7 @@ class AgentPolicyService {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         return {
           created: true,
-          policy: await this.create(soClient, esClient, newAgentPolicy, { id: searchParams.id }),
+          policy: await this.create(soClient, esClient, newAgentPolicy, { id }),
         };
       } else throw e;
     }

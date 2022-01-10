@@ -77,9 +77,10 @@ export default function (providerContext: FtrProviderContext) {
         .send({
           name: 'Fleet Server policy 1',
           namespace: 'default',
+          has_fleet_server: true,
         })
         .expect(200);
-      const defaultFleetServerPolicy = apiResponse.item;
+      const fleetServerPolicy = apiResponse.item;
 
       ({ body: apiResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
@@ -90,13 +91,13 @@ export default function (providerContext: FtrProviderContext) {
         })
         .expect(200));
 
-      const defaultServerPolicy = apiResponse.item;
+      const agentPolicy = apiResponse.item;
 
-      if (!defaultFleetServerPolicy) {
+      if (!fleetServerPolicy) {
         throw new Error('No Fleet server policy');
       }
 
-      if (!defaultServerPolicy) {
+      if (!agentPolicy) {
         throw new Error('No agent policy');
       }
 
@@ -107,16 +108,16 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
 
       // Default Fleet Server
-      await generateAgent('healthy', defaultFleetServerPolicy.id);
-      await generateAgent('healthy', defaultFleetServerPolicy.id);
-      await generateAgent('error', defaultFleetServerPolicy.id);
+      await generateAgent('healthy', fleetServerPolicy.id);
+      await generateAgent('healthy', fleetServerPolicy.id);
+      await generateAgent('error', fleetServerPolicy.id);
 
       // Default policy
-      await generateAgent('healthy', defaultServerPolicy.id);
-      await generateAgent('offline', defaultServerPolicy.id);
-      await generateAgent('error', defaultServerPolicy.id);
-      await generateAgent('degraded', defaultServerPolicy.id);
-      await generateAgent('error-unenrolling', defaultServerPolicy.id);
+      await generateAgent('healthy', agentPolicy.id);
+      await generateAgent('offline', agentPolicy.id);
+      await generateAgent('error', agentPolicy.id);
+      await generateAgent('degraded', agentPolicy.id);
+      await generateAgent('error-unenrolling', agentPolicy.id);
     });
 
     it('should return the correct telemetry values for fleet', async () => {
