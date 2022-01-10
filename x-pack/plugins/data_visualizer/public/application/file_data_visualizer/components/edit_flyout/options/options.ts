@@ -5,20 +5,21 @@
  * 2.0.
  */
 
+import { FILE_FORMATS } from '../../../../../../../file_upload/common';
+
 import {
-  FORMAT_OPTIONS,
   TIMESTAMP_OPTIONS,
   DELIMITER_OPTIONS,
   QUOTE_OPTIONS,
   CHARSET_OPTIONS,
 } from './option_lists';
 
-function getOptions(list) {
+function getOptions(list: string[]) {
   return list.map((o) => ({ label: o }));
 }
 
 export function getFormatOptions() {
-  return getOptions(FORMAT_OPTIONS);
+  return getOptions(Object.values(FILE_FORMATS));
 }
 
 export function getTimestampFormatOptions() {
