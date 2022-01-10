@@ -32,7 +32,7 @@ const INFERENCE_CONFIG_DOCS = {
       'xpack.ingestPipelines.pipelineEditor.inferenceForm.inferenceConfigField.documentationLinkLabel',
       { defaultMessage: 'documentation' }
     ),
-  }
+  },
 };
 
 const getInferenceConfigHelpText = (
