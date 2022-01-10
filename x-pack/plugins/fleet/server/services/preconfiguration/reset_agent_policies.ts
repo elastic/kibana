@@ -14,14 +14,16 @@ import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants
 import { agentPolicyService } from '../agent_policy';
 import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
 import { listEnrollmentApiKeys, deleteEnrollmentApiKey } from '../api_keys';
+import type { AgentPolicy } from '../../types';
 
 export async function resetPreconfiguredAgentPolicies(
   soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  agentPolicyId?: string
 ) {
   const logger = appContextService.getLogger();
   logger.warn('Reseting Fleet preconfigured agent policies');
-  await _deleteExistingData(soClient, esClient, logger);
+  await _deleteExistingData(soClient, esClient, logger, agentPolicyId);
 
   await setupFleet(soClient, esClient);
 }
@@ -29,17 +31,32 @@ export async function resetPreconfiguredAgentPolicies(
 async function _deleteExistingData(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
-  logger: Logger
+  logger: Logger,
+  agentPolicyId?: string
 ) {
-  const existingPolicies = await agentPolicyService.list(soClient, {
-    perPage: SO_SEARCH_LIMIT,
-    kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_preconfigured:true`,
-  });
+  let existingPolicies: AgentPolicy[];
+
+  if (agentPolicyId) {
+    const policy = await agentPolicyService.get(soClient, agentPolicyId);
+    if (!policy || !policy.is_preconfigured) {
+      throw new Error('Invalid policy');
+    }
+    existingPolicies = [policy];
+  }
+  {
+    existingPolicies = (
+      await agentPolicyService.list(soClient, {
+        perPage: SO_SEARCH_LIMIT,
+        kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_preconfigured:true`,
+      })
+    ).items;
+  }
+
   // unenroll all the agents enroled in this policies
   const { agents } = await getAgentsByKuery(esClient, {
     showInactive: false,
     perPage: SO_SEARCH_LIMIT,
-    kuery: existingPolicies.items.map((policy) => `policy_id:"${policy.id}"`).join(' or '),
+    kuery: existingPolicies.map((policy) => `policy_id:"${policy.id}"`).join(' or '),
   });
 
   // Delete
@@ -65,10 +82,10 @@ async function _deleteExistingData(
       }
     );
   }
-  if (existingPolicies.items.length > 0) {
-    logger.info(`Deleting ${existingPolicies.items.length} agent policies`);
+  if (existingPolicies.length > 0) {
+    logger.info(`Deleting ${existingPolicies.length} agent policies`);
     await pMap(
-      existingPolicies.items,
+      existingPolicies,
       (policy) =>
         agentPolicyService.delete(soClient, esClient, policy.id, {
           force: true,

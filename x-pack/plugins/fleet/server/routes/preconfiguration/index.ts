@@ -9,7 +9,11 @@ import { PRECONFIGURATION_API_ROUTES } from '../../constants';
 import { PutPreconfigurationSchema } from '../../types';
 import type { FleetAuthzRouter } from '../security';
 
-import { updatePreconfigurationHandler, resetPreconfigurationHandler } from './handler';
+import {
+  updatePreconfigurationHandler,
+  resetPreconfigurationHandler,
+  resetOnePreconfigurationHandler,
+} from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
   router.post(
@@ -22,6 +26,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     },
     resetPreconfigurationHandler
   );
+  router.post(
+    {
+      path: PRECONFIGURATION_API_ROUTES.RESET_ONE_PATTERN,
+      validate: false,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    },
+    resetOnePreconfigurationHandler
+  );
+
   router.put(
     {
       path: PRECONFIGURATION_API_ROUTES.UPDATE_PATTERN,
