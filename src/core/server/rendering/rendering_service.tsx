@@ -94,11 +94,11 @@ export class RenderingService {
       user: isAnonymousPage ? {} : await uiSettings.getUserProvided(),
     };
 
+    const theme = getSettingValue('theme', settings, String);
     const darkMode = getSettingValue('theme:darkMode', settings, Boolean);
     const themeVersion: ThemeVersion = 'v8';
 
     const stylesheetPaths = getStylesheetPaths({
-      darkMode,
       themeVersion,
       basePath: serverBasePath,
       buildNum,
@@ -112,6 +112,7 @@ export class RenderingService {
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       i18n: i18n.translate,
       locale: i18n.getLocale(),
+      theme,
       darkMode,
       themeVersion,
       stylesheetPaths,

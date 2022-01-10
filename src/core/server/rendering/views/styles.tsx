@@ -9,24 +9,88 @@
 /* eslint-disable react/no-danger */
 
 import React, { FC } from 'react';
+import type { StylesheetPaths } from '../types';
 
 interface Props {
-  darkMode: boolean;
-  stylesheetPaths: string[];
+  theme: string; // FIXME ThemeOptions
+  stylesheetPaths: StylesheetPaths;
 }
 
-export const Styles: FC<Props> = ({ darkMode, stylesheetPaths }) => {
+export const Styles: FC<Props> = ({ theme, stylesheetPaths }) => {
   return (
     <>
-      <InlineStyles darkMode={darkMode} />
-      {stylesheetPaths.map((path) => (
-        <link key={path} rel="stylesheet" type="text/css" href={path} />
-      ))}
+      <InlineStyles theme={theme} />
+      {theme === 'system'
+        ? Object.entries(stylesheetPaths).flatMap(([themeKey, paths]) =>
+            paths.map((path: string) => (
+              <link
+                key={path}
+                rel="stylesheet"
+                type="text/css"
+                href={path}
+                media={`(prefers-color-scheme: ${themeKey})`}
+              />
+            ))
+          )
+        : stylesheetPaths[theme as 'light' | 'dark'].map((path) => (
+            <link key={path} rel="stylesheet" type="text/css" href={path} />
+          ))}
+
+      {}
     </>
   );
 };
 
-const InlineStyles: FC<{ darkMode: boolean }> = ({ darkMode }) => {
+const InlineStyles: FC<{
+  theme: string; // FIXME ThemeOptions
+}> = ({ theme }) => {
+  let htmlBackgroundColor;
+  let kbnWelcomeTextColor;
+  let kbnProgressBackgroundColor;
+  let kbnProgressBeforeBackgroundColor;
+
+  switch (theme) {
+    case 'system':
+      htmlBackgroundColor = `
+        html { background-color: #F8FAFD }
+        @media (prefers-color-scheme: dark) {
+          html { background-color: #141519 }
+        }`;
+
+      kbnWelcomeTextColor = `
+        .kbnWelcomeText { color: #69707D }
+        @media (prefers-color-scheme: dark) {
+          .kbnWelcomeText { color: #98A2B3 }
+        }`;
+
+      kbnProgressBackgroundColor = `
+        .kbnProgress { background-color: #F5F7FA }
+        @media (prefers-color-scheme: dark) {
+          .kbnProgress { background-color: #25262E }
+        }`;
+
+      kbnProgressBeforeBackgroundColor = `
+        .kbnProgress:before { background-color: #006DE4 }
+        @media (prefers-color-scheme: dark) {
+          .kbnProgress:before { background-color: #1BA9F5 }
+        }`;
+      break;
+
+    case 'light':
+      htmlBackgroundColor = 'html { background-color: #F8FAFD }';
+      kbnWelcomeTextColor = '.kbnWelcomeText { color: #69707D }';
+      kbnProgressBackgroundColor = '.kbnProgress { background-color: #F5F7FA }';
+      kbnProgressBeforeBackgroundColor = '.kbnProgress:before { background-color: #006DE4 }';
+      break;
+
+    case 'dark':
+      htmlBackgroundColor = 'html { background-color: #141519 }';
+      kbnWelcomeTextColor = '.kbnWelcomeText { color: #98A2B3 }';
+      kbnProgressBackgroundColor = '.kbnProgress { background-color: #25262E }';
+      kbnProgressBeforeBackgroundColor = '.kbnProgress:before { background-color: #1BA9F5 }';
+      break;
+  }
+
   return (
     <style
       dangerouslySetInnerHTML={{
@@ -50,9 +114,7 @@ const InlineStyles: FC<{ darkMode: boolean }> = ({ darkMode }) => {
             display: block;
           }
 
-          html {
-            background-color: ${darkMode ? '#141519' : '#F8FAFD'}
-          }
+          ${htmlBackgroundColor}
 
           .kbnWelcomeView {
             line-height: 1.5;
@@ -97,9 +159,9 @@ const InlineStyles: FC<{ darkMode: boolean }> = ({ darkMode }) => {
             font-family: sans-serif;
             line-height: 40px !important;
             height: 40px !important;
-            color: #98a2b3;
-            color: ${darkMode ? '#98A2B3' : '#69707D'};
           }
+
+          ${kbnWelcomeTextColor}
 
           .kbnLoaderWrap {
             text-align: center;
@@ -130,9 +192,10 @@ const InlineStyles: FC<{ darkMode: boolean }> = ({ darkMode }) => {
             width: 32px;
             height: 4px;
             overflow: hidden;
-            background-color: ${darkMode ? '#25262E' : '#F5F7FA'};
             line-height: 1;
           }
+
+          ${kbnProgressBackgroundColor}
 
           .kbnProgress:before {
             position: absolute;
@@ -144,8 +207,9 @@ const InlineStyles: FC<{ darkMode: boolean }> = ({ darkMode }) => {
             left: 0;
             transform: scaleX(0) translateX(0%);
             animation: kbnProgress 1s cubic-bezier(.694, .0482, .335, 1) infinite;
-            background-color: ${darkMode ? '#1BA9F5' : '#006DE4'};
           }
+
+          ${kbnProgressBeforeBackgroundColor}
 
           @keyframes kbnProgress {
             0% {

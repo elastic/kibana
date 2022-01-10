@@ -18,15 +18,22 @@ import type { InternalStatusServiceSetup } from '../status';
 import { IExternalUrlPolicy } from '../external_url';
 
 /** @internal */
+export interface StylesheetPaths {
+  light: string[];
+  dark: string[];
+}
+
+/** @internal */
 export interface RenderingMetadata {
   strictCsp: ICspConfig['strict'];
   uiPublicUrl: string;
   bootstrapScriptUrl: string;
   i18n: typeof i18n.translate;
   locale: string;
+  theme: string; // FIXME ThemeOption
   darkMode: boolean;
   themeVersion: ThemeVersion;
-  stylesheetPaths: string[];
+  stylesheetPaths: StylesheetPaths;
   injectedMetadata: InjectedMetadata;
 }
 

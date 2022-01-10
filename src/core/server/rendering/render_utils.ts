@@ -9,6 +9,7 @@
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import { PublicUiSettingsParams, UserProvidedValues } from '../ui_settings';
+import type { StylesheetPaths } from './types';
 
 export const getSettingValue = <T>(
   settingName: string,
@@ -24,33 +25,30 @@ export const getSettingValue = <T>(
 
 export const getStylesheetPaths = ({
   themeVersion,
-  darkMode,
   basePath,
   buildNum,
 }: {
   themeVersion: UiSharedDepsNpm.ThemeVersion;
-  darkMode: boolean;
   buildNum: number;
   basePath: string;
-}) => {
+}): StylesheetPaths => {
   const regularBundlePath = `${basePath}/${buildNum}/bundles`;
-  return [
-    ...(darkMode
-      ? [
-          `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.darkCssDistFilename(
-            themeVersion
-          )}`,
-          `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
-          `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
-          `${basePath}/ui/legacy_dark_theme.css`,
-        ]
-      : [
-          `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightCssDistFilename(
-            themeVersion
-          )}`,
-          `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
-          `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
-          `${basePath}/ui/legacy_light_theme.css`,
-        ]),
-  ];
+  return {
+    light: [
+      `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightCssDistFilename(
+        themeVersion
+      )}`,
+      `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
+      `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.css`,
+      `${basePath}/ui/legacy_light_theme.css`,
+    ],
+    dark: [
+      `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.darkCssDistFilename(
+        themeVersion
+      )}`,
+      `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
+      `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.css`,
+      `${basePath}/ui/legacy_dark_theme.css`,
+    ],
+  };
 };
