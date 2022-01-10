@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment, useCallback, useState, ChangeEventHandler } from 'react';
+import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -23,22 +23,18 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSwitch,
-  EuiSelect,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiRadio,
-  EuiIconTip,
+  EuiSuperSelect,
 } from '@elastic/eui';
 
 import { DevToolsSettings } from '../../services';
 
 export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
 
-const PRESETS_IN_MINUTES = [1, 5, 10];
+const PRESETS_IN_MINUTES = [0, 10, 20, 60];
 const intervalOptions = PRESETS_IN_MINUTES.map((value) => ({
-  value: value * 60000,
-  text: i18n.translate('console.settingsPage.refreshInterval.timeInterval', {
-    defaultMessage: '{value} {value, plural, one {minute} other {minutes}}',
+  value: (value * 60000).toString(),
+  inputDisplay: i18n.translate('console.settingsPage.refreshInterval.timeInterval', {
+    defaultMessage: value === 0 ? 'Once, when console loads' : 'Every {value} minutes',
     values: { value },
   }),
 }));
@@ -114,20 +110,11 @@ export function DevToolsSettingsModal(props: Props) {
     });
   }
 
-  const onIntervalChange: ChangeEventHandler<HTMLSelectElement> = useCallback(
-    (e) => setPollInterval(parseInt(e.target.value, 10)),
-    []
-  );
+  const onChange = (value: string) => {
+    const sanitizedValue = parseInt(value, 10);
 
-  const renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) => {
-    return (
-      <EuiFlexGroup gutterSize="none" responsive={false}>
-        <EuiFlexItem grow={false}>{child}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip content={tipContent} position="bottom" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    setPolling(!!sanitizedValue);
+    setPollInterval(sanitizedValue);
   };
 
   // It only makes sense to show polling options if the user needs to fetch any data.
@@ -138,67 +125,22 @@ export function DevToolsSettingsModal(props: Props) {
           label={
             <FormattedMessage
               id="console.settingsPage.refreshingDataLabel"
-              defaultMessage="Refreshing autocomplete suggestions"
+              defaultMessage="Refresh frequency"
             />
           }
           helpText={
             <FormattedMessage
               id="console.settingsPage.refreshingDataDescription"
               defaultMessage="Console refreshes autocomplete suggestions by querying Elasticsearch.
-              Automatic refreshes may be an issue if you have a large cluster or if you have network limitations."
+              Less frequent refresh is recommended to reduce bandwith costs."
             />
           }
         >
-          <>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiRadio
-                  label={renderWithIconTip(
-                    <FormattedMessage
-                      id="console.settingsPage.pollingLabelText"
-                      defaultMessage="Refresh every"
-                    />,
-                    <FormattedMessage
-                      id="console.settingsPage.pollingDescription"
-                      defaultMessage="Configures autocomplete refresh frequency"
-                    />
-                  )}
-                  id="autocompletePolling"
-                  checked={polling}
-                  onChange={() => setPolling(true)}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiSelect
-                  fullWidth
-                  compressed
-                  options={intervalOptions}
-                  value={pollInterval}
-                  onChange={onIntervalChange}
-                  disabled={!polling}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiRadio
-                  label={renderWithIconTip(
-                    <FormattedMessage
-                      id="console.settingsPage.refreshOnceLabel"
-                      defaultMessage="Only refresh when Console is opened"
-                    />,
-                    <FormattedMessage
-                      id="console.settingsPage.refreshOnceDescription"
-                      defaultMessage="Reduces bandwidth costs"
-                    />
-                  )}
-                  id="autocompletePollingDisabled"
-                  checked={!polling}
-                  onChange={() => setPolling(false)}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
+          <EuiSuperSelect
+            options={intervalOptions}
+            valueOfSelected={pollInterval.toString()}
+            onChange={onChange}
+          />
         </EuiFormRow>
 
         <EuiButton
