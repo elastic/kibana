@@ -49,7 +49,7 @@ export function getContainerIcon(container?: ContainerType) {
 
 type Icons = 'service' | 'container' | 'cloud' | 'alerts';
 
-interface PopoverItem {
+export interface PopoverItem {
   key: Icons;
   icon: {
     type?: string;
