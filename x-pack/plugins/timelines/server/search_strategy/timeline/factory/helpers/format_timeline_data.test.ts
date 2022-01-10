@@ -150,11 +150,12 @@ describe('formatTimelineData', () => {
             _meta: {
               version: 14,
             },
+            severity: 'low',
+            risk_score: 21,
             rule: {
               note: null,
               throttle: null,
               references: [],
-              severity_mapping: [],
               description: 'asdasd',
               created_at: '2021-01-09T11:25:45.046Z',
               language: 'kuery',
@@ -174,9 +175,6 @@ describe('formatTimelineData', () => {
               uuid: '696c24e0-526d-11eb-836c-e1620268b945',
               timeline_id: null,
               max_signals: 100,
-              severity: 'low',
-              risk_score: 21,
-              risk_score_mapping: [],
               author: [],
               query: '_id :*',
               index: [
@@ -274,11 +272,11 @@ describe('formatTimelineData', () => {
         'kibana.alert.rule.query': ['_id :*'],
         'kibana.alert.rule.type': ['threshold'],
         'kibana.alert.rule.uuid': ['696c24e0-526d-11eb-836c-e1620268b945'],
-        'kibana.alert.rule.risk_score': [21],
+        'kibana.alert.risk_score': [21],
         'kibana.alert.workflow_status': ['open'],
         'event.kind': ['signal'],
         'kibana.alert.original_time': ['2021-01-09T13:39:32.595Z'],
-        'kibana.alert.rule.severity': ['low'],
+        'kibana.alert.severity': ['low'],
         'kibana.alert.rule.version': ['1'],
         'kibana.alert.rule.index': [
           'apm-*-transaction*',
@@ -293,7 +291,6 @@ describe('formatTimelineData', () => {
         'kibana.alert.rule.name': ['Threshold test'],
         'kibana.alert.rule.to': ['now'],
       },
-      _type: '',
       sort: ['1610199700517'],
     };
 
@@ -330,6 +327,8 @@ describe('formatTimelineData', () => {
               original_time: ['2021-01-09T13:39:32.595Z'],
               workflow_status: ['open'],
               threshold_result: ['{"count":10000,"value":"2a990c11-f61b-4c8e-b210-da2574e9f9db"}'],
+              severity: ['low'],
+              risk_score: ['21'],
               rule: {
                 building_block_type: [],
                 exceptions_list: [],
@@ -348,9 +347,7 @@ describe('formatTimelineData', () => {
                 language: ['kuery'],
                 name: ['Threshold test'],
                 output_index: ['.siem-signals-patrykkopycinski-default'],
-                risk_score: ['21'],
                 query: ['_id :*'],
-                severity: ['low'],
                 to: ['now'],
                 type: ['threshold'],
                 version: ['1'],

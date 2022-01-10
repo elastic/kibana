@@ -18,6 +18,7 @@ import {
   AlertTypeParams,
   AlertTypeState,
 } from '../../../alerting/server';
+import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {
   ALERT_DURATION,
@@ -32,6 +33,7 @@ import {
   ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
   EVENT_KIND,
+  TAGS,
   TIMESTAMP,
   VERSION,
 } from '../../common/technical_rule_data_field_names';
@@ -188,7 +190,7 @@ export const createLifecycleExecutor =
 
     const trackedAlertsDataMap: Record<
       string,
-      { indexName: string; fields: Partial<ParsedTechnicalFields> }
+      { indexName: string; fields: Partial<ParsedTechnicalFields & ParsedExperimentalFields> }
     > = {};
 
     if (trackedAlertStates.length) {
@@ -252,7 +254,7 @@ export const createLifecycleExecutor =
           started: commonRuleFields[TIMESTAMP],
         };
 
-        const event: ParsedTechnicalFields = {
+        const event: ParsedTechnicalFields & ParsedExperimentalFields = {
           ...alertData?.fields,
           ...commonRuleFields,
           ...currentAlertData,
@@ -266,6 +268,7 @@ export const createLifecycleExecutor =
           [EVENT_KIND]: 'signal',
           [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
           [VERSION]: ruleDataClient.kibanaVersion,
+          [TAGS]: options.tags,
           ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
         };
 

@@ -40,6 +40,7 @@ import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/
 import type { FleetConfigType, FleetAuthz } from '../common';
 import { INTEGRATIONS_PLUGIN_ID } from '../common';
 import type { CloudSetup } from '../../cloud/server';
+import type { SpacesPluginStart } from '../../spaces/server';
 
 import {
   PLUGIN_ID,
@@ -91,18 +92,19 @@ import { fetchFindLatestPackage } from './services/epm/registry';
 
 export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
-  security?: SecurityPluginSetup;
+  security: SecurityPluginSetup;
   features?: FeaturesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
+  spaces: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
 }
 
 export interface FleetStartDeps {
   data: DataPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-  security?: SecurityPluginStart;
+  security: SecurityPluginStart;
   telemetry?: TelemetryPluginStart;
 }
 
@@ -111,8 +113,8 @@ export interface FleetAppContext {
   data: DataPluginStart;
   encryptedSavedObjectsStart?: EncryptedSavedObjectsPluginStart;
   encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
-  securitySetup?: SecurityPluginSetup;
-  securityStart?: SecurityPluginStart;
+  securitySetup: SecurityPluginSetup;
+  securityStart: SecurityPluginStart;
   config$?: Observable<FleetConfigType>;
   configInitialValue: FleetConfigType;
   savedObjects: SavedObjectsServiceStart;
@@ -185,7 +187,7 @@ export class FleetPlugin
   private kibanaVersion: FleetAppContext['kibanaVersion'];
   private kibanaBranch: FleetAppContext['kibanaBranch'];
   private httpSetup?: HttpServiceSetup;
-  private securitySetup?: SecurityPluginSetup;
+  private securitySetup!: SecurityPluginSetup;
   private encryptedSavedObjectsSetup?: EncryptedSavedObjectsPluginSetup;
   private readonly telemetryEventsSender: TelemetryEventsSender;
   private readonly fleetStatus$: BehaviorSubject<ServiceStatus>;
@@ -297,6 +299,9 @@ export class FleetPlugin
                 .getScopedClient(request, { excludedWrappers: ['security'] });
             },
           },
+          get spaceId() {
+            return deps.spaces.spacesService.getSpaceId(request);
+          },
         };
       }
     );
@@ -320,21 +325,18 @@ export class FleetPlugin
     // The upload package route is only authorized for the superuser
     registerEPMRoutes(fleetAuthzRouter);
 
-    // Register rest of routes only if security is enabled
-    if (deps.security) {
-      registerSetupRoutes(fleetAuthzRouter, config);
-      registerAgentPolicyRoutes(fleetAuthzRouter);
-      registerPackagePolicyRoutes(fleetAuthzRouter);
-      registerOutputRoutes(fleetAuthzRouter);
-      registerSettingsRoutes(fleetAuthzRouter);
-      registerDataStreamRoutes(fleetAuthzRouter);
-      registerPreconfigurationRoutes(fleetAuthzRouter);
+    registerSetupRoutes(fleetAuthzRouter, config);
+    registerAgentPolicyRoutes(fleetAuthzRouter);
+    registerPackagePolicyRoutes(fleetAuthzRouter);
+    registerOutputRoutes(fleetAuthzRouter);
+    registerSettingsRoutes(fleetAuthzRouter);
+    registerDataStreamRoutes(fleetAuthzRouter);
+    registerPreconfigurationRoutes(fleetAuthzRouter);
 
-      // Conditional config routes
-      if (config.agents.enabled) {
-        registerAgentAPIRoutes(fleetAuthzRouter, config);
-        registerEnrollmentApiKeyRoutes(fleetAuthzRouter);
-      }
+    // Conditional config routes
+    if (config.agents.enabled) {
+      registerAgentAPIRoutes(fleetAuthzRouter, config);
+      registerEnrollmentApiKeyRoutes(fleetAuthzRouter);
     }
 
     this.telemetryEventsSender.setup(deps.telemetry);
