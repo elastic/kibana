@@ -64,19 +64,7 @@ export class ExtensionPointStorageClient implements ExtensionPointStorageClientI
         this.storage.getExtensionRegistrationSource(externalExtension);
 
       const callback = externalExtension.callback.bind(callbackContext);
-
-      try {
-        inputArgument = await callback(inputArgument as ExtensionPointCallbackArgument);
-      } catch (error) {
-        // Log the error that the external callback threw and keep going with the running of others
-        this.logger.error(
-          new ExtensionPointError(
-            `Extension point execution error for ${externalExtension.type}: ${extensionRegistrationSource}`,
-            error
-          )
-        );
-        this.logger.error(error);
-      }
+      inputArgument = await callback(inputArgument as ExtensionPointCallbackArgument);
 
       if (callbackResponseValidator) {
         // Before calling the next one, make sure the returned payload is valid
