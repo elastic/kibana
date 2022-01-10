@@ -130,7 +130,7 @@ const TrustedAppDataSchema = schema.object(
 );
 
 export class TrustedAppValidator extends BaseValidator {
-  static isTrustedApp(item: ExceptionItemLikeOptions): boolean {
+  static isTrustedApp(item: { listId: string }): boolean {
     return item.listId === ENDPOINT_TRUSTED_APPS_LIST_ID;
   }
 
@@ -151,14 +151,20 @@ export class TrustedAppValidator extends BaseValidator {
     await this.validateCanManageEndpointArtifacts();
     await this.validateTrustedAppData(item);
 
-    // FIXME:PT implement method
-    // await this.validateCanCreateByPolicyArtifacts(item);
-    // await this.validateByPolicyItem(item);
+    try {
+      await this.validateCanCreateByPolicyArtifacts(item);
+    } catch (e) {
+      // Not allowed to create by policy artifacts. Validate that the effective scope of the item
+      // remained unchanged with this update. If not, then throw the validation error that was catched
+      // FIXME:PT implement
+    }
+
+    await this.validateByPolicyItem(item);
 
     return item;
   }
 
-  private async validateTrustedAppData(item: CreateExceptionListItemOptions): Promise<void> {
+  private async validateTrustedAppData(item: ExceptionItemLikeOptions): Promise<void> {
     await this.validateBasicData(item);
     TrustedAppDataSchema.validate(item, { os: item.osTypes[0] });
   }

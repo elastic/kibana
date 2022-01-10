@@ -209,4 +209,11 @@ export class EndpointAppContextService {
     }
     return this.startDependencies.cases.getCasesClientWithRequest(req);
   }
+
+  public getExceptionListsClient(): ExceptionListClient {
+    if (!this.startDependencies?.exceptionListsClient) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+    return this.startDependencies.exceptionListsClient;
+  }
 }

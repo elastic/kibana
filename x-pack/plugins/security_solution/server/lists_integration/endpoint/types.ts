@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CreateExceptionListItemOptions } from '../../../../lists/server';
+import { UpdateExceptionListItemOptions } from '../../../../lists/server';
 
 /**
  * An Exception Like item is a structure used internally by several of the Exceptions api/service in that
@@ -14,6 +14,6 @@ import { CreateExceptionListItemOptions } from '../../../../lists/server';
  * those service methods.
  */
 export type ExceptionItemLikeOptions = Pick<
-  CreateExceptionListItemOptions,
-  'listId' | 'osTypes' | 'tags' | 'description' | 'name' | 'entries'
->;
+  UpdateExceptionListItemOptions,
+  'osTypes' | 'tags' | 'description' | 'name' | 'entries'
+> & { listId?: string };
