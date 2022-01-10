@@ -485,8 +485,7 @@ the infrastructure monitoring use-case within Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/lists/README.md[lists]
-|README.md for developers working on the backend lists on how to get started
-using the CURL scripts in the scripts folder.
+|The lists plugin contains logic for both large value lists and exception lists.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/logstash[logstash]
