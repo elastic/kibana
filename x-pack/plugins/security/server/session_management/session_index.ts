@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  BulkOperationContainer,
+  SearchTotalHits,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient, Logger } from 'src/core/server';
 
@@ -38,6 +41,11 @@ export type InvalidateSessionsFilter =
  * Version of the current session index template.
  */
 const SESSION_INDEX_TEMPLATE_VERSION = 1;
+
+/**
+ * Number of sessions to remove per batch during cleanup. Must be below 10,000 (maximum pagination size).
+ */
+const SESSION_INDEX_CLEANUP_BATCH_SIZE = 1_000;
 
 /**
  * Returns index template that is used for the current version of the session index.
@@ -490,16 +498,16 @@ export class SessionIndex {
     }
 
     const operations: Array<Required<Pick<BulkOperationContainer, 'delete'>>> = [];
+    let total = 0;
     try {
       const { body: searchResponse } =
-        await this.options.elasticsearchClient.search<SessionIndexValue>(
-          {
-            index: this.indexName,
-            body: { query: { bool: { should: deleteQueries } } },
-            _source_includes: 'usernameHash,provider',
-          },
-          { ignore: [409, 404] }
-        );
+        await this.options.elasticsearchClient.search<SessionIndexValue>({
+          index: this.indexName,
+          body: { query: { bool: { should: deleteQueries } } },
+          _source_includes: 'usernameHash,provider',
+          size: SESSION_INDEX_CLEANUP_BATCH_SIZE,
+        });
+      total = (searchResponse.hits.total as SearchTotalHits).value;
       searchResponse.hits.hits.forEach(({ _id, _source }) => {
         const { usernameHash, provider } = _source!;
         this.options.auditLogger.log(
@@ -514,10 +522,14 @@ export class SessionIndex {
 
     if (operations.length > 0) {
       try {
-        const { body: deleteResponse } = await this.options.elasticsearchClient.bulk({
-          index: this.indexName,
-          operations,
-        });
+        const { body: deleteResponse } = await this.options.elasticsearchClient.bulk(
+          {
+            index: this.indexName,
+            operations,
+            refresh: false,
+          },
+          { ignore: [409, 404] }
+        );
         if (deleteResponse.errors) {
           const errorCount = deleteResponse.items.reduce(
             (count, item) => (item.delete!.error ? count + 1 : count),
@@ -541,6 +553,10 @@ export class SessionIndex {
         this.options.logger.error(`Failed to clean up sessions: ${err.message}`);
         throw err;
       }
+    }
+
+    if (total > SESSION_INDEX_CLEANUP_BATCH_SIZE) {
+      await this.cleanUp();
     }
   }
 }
