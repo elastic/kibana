@@ -13,8 +13,13 @@ import { css } from '@emotion/react';
 import { ExitFullScreenButton as Component } from './exit_full_screen_button.component';
 import { usePlatformService } from '../../services';
 
+/**
+ * Props for the service-enabled Exit Full Screen button component.
+ */
 export interface Props {
-  onExit: () => void;
+  /** Optional handler to call when one exits full-screen mode. */
+  onExit?: () => void;
+  /** Should the button toggle the Chrome visibility? */
   toggleChrome?: boolean;
 }
 
@@ -25,7 +30,7 @@ export interface Props {
  *
  * See shared-ux/public/services for information.
  */
-export const ExitFullScreenButton = ({ onExit, toggleChrome = false }: Props) => {
+export const ExitFullScreenButton = ({ onExit = () => {}, toggleChrome = false }: Props) => {
   const { euiTheme } = useEuiTheme();
   const { setIsFullscreen } = usePlatformService();
 

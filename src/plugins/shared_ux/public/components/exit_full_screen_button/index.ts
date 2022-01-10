@@ -5,10 +5,13 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+/* eslint-disable import/no-default-export */
 
 import { ExitFullScreenButton } from './exit_full_screen_button';
 export { ExitFullScreenButton } from './exit_full_screen_button';
 
-// React.lazy requires default export
-// eslint-disable-next-line import/no-default-export
+/**
+ * Exporting the ExitFullScreenButton component as a default export so it can be
+ * loaded by React.lazy.
+ */
 export default ExitFullScreenButton;

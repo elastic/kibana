@@ -21,7 +21,7 @@ export interface SharedUXPluginStart {
   /**
    * A React component that provides a pre-wired `React.Context` which connects components to Shared UX services.
    */
-  ServicesContext: FC;
+  ServicesContext: FC<{}>;
 }
 
 /** @internal */

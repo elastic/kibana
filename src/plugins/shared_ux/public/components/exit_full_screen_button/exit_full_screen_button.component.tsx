@@ -32,6 +32,9 @@ const description = i18n.translate('sharedUX.exitFullScreenButton.fullScreenMode
   defaultMessage: 'In full screen mode, press ESC to exit.',
 });
 
+/**
+ * Props for the Exit Full Screen button component.
+ */
 export interface Props extends Pick<HTMLAttributes<HTMLDivElement>, 'className'> {
   onClick: MouseEventHandler<HTMLButtonElement>;
 }

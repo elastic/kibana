@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { MockPlatformServiceFactory, platformServiceFactory } from './platform.mock';
+export type { MockPlatformServiceFactory } from './platform.mock';
+export { platformServiceFactory } from './platform.mock';
 
 import type { SharedUXServices } from '../.';
 import { PluginServiceFactory } from '../types';
