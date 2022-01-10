@@ -32,7 +32,7 @@ export interface QueryLanguageSwitcherProps {
   nonKqlModeHelpText?: string;
 }
 
-export function QueryLanguageSwitcher({
+export const QueryLanguageSwitcher = React.memo(function QueryLanguageSwitcher({
   language,
   anchorPosition,
   onSelectLanguage,
@@ -148,4 +148,4 @@ export function QueryLanguageSwitcher({
       </div>
     </EuiPopover>
   );
-}
+});

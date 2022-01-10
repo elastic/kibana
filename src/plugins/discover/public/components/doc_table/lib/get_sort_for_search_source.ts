@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { EsQuerySortValue, IndexPattern } from 'src/plugins/data/common';
+import type { EsQuerySortValue, DataView } from 'src/plugins/data/common';
 import { SortOrder } from '../components/table_header/helpers';
 import { getSort } from './get_sort';
 
@@ -19,7 +19,7 @@ import { getSort } from './get_sort';
  */
 export function getSortForSearchSource(
   sort?: SortOrder[],
-  indexPattern?: IndexPattern,
+  indexPattern?: DataView,
   defaultDirection: string = 'desc'
 ): EsQuerySortValue[] {
   if (!sort || !indexPattern || (Array.isArray(sort) && sort.length === 0)) {
