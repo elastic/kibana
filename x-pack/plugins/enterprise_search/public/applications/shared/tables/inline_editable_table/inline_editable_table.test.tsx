@@ -89,7 +89,7 @@ describe('InlineEditableTable', () => {
     expect(reorderableTable.exists()).toBe(true);
     expect(reorderableTable.prop('items')).toEqual(items);
     expect(
-      wrapper.find('[data-test-subj="inlineEditableTableactionButton"]').children().text()
+      wrapper.find('[data-test-subj="inlineEditableTableActionButton"]').children().text()
     ).toEqual('New row');
   });
 
@@ -97,7 +97,7 @@ describe('InlineEditableTable', () => {
     const wrapper = shallow(
       <InlineEditableTableContents {...requiredParams} description={<p>Some Description</p>} />
     );
-    expect(wrapper.find('[data-test-subj="inlineEditableTabletitle"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="inlineEditableTableTitle"]').exists()).toBe(true);
   });
 
   it('does not render a title if none is provided', () => {
@@ -107,19 +107,19 @@ describe('InlineEditableTable', () => {
         description={<p>Some Description</p>}
       />
     );
-    expect(wrapper.find('[data-test-subj="inlineEditableTabletitle"]').exists()).toBe(false);
+    expect(wrapper.find('[data-test-subj="inlineEditableTableTitle"]').exists()).toBe(false);
   });
 
   it('renders a description if one is provided', () => {
     const wrapper = shallow(
       <InlineEditableTableContents {...requiredParams} description={<p>Some Description</p>} />
     );
-    expect(wrapper.find('[data-test-subj="inlineEditableTabledescription"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="inlineEditableTableDescription"]').exists()).toBe(true);
   });
 
   it('renders no description if none is provided', () => {
     const wrapper = shallow(<InlineEditableTableContents {...requiredParams} />);
-    expect(wrapper.find('[data-test-subj="inlineEditableTabledescription"]').exists()).toBe(false);
+    expect(wrapper.find('[data-test-subj="inlineEditableTableDescription"]').exists()).toBe(false);
   });
 
   it('can specify items in the table that are uneditable', () => {
@@ -142,7 +142,7 @@ describe('InlineEditableTable', () => {
       <InlineEditableTableContents {...requiredParams} addButtonText="Add a new row custom text" />
     );
     expect(
-      wrapper.find('[data-test-subj="inlineEditableTableactionButton"]').children().text()
+      wrapper.find('[data-test-subj="inlineEditableTableActionButton"]').children().text()
     ).toEqual('Add a new row custom text');
   });
 
