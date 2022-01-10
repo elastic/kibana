@@ -42,19 +42,18 @@ export type TooltipFeatureAction = {
 };
 
 export type TooltipFeature = {
-  
   /*
    * Feature id. Assigned by layer
    */
   id?: number | string;
-  
+
   /*
    * Id of layer that manages feature on the map
    */
   layerId: string;
 
   geometry?: Geometry;
-  
+
   /*
    * Feature properties. Retrieved from the map implemenation
    */
