@@ -40,7 +40,6 @@ import type {
   IndexPatternDatasource as IndexPatternDatasourceType,
   IndexPatternDatasourceSetupPlugins,
   ExpandFormulaColumnFn,
-  GenerateFormulaColumnsFn,
 } from './indexpattern_datasource';
 import type {
   XyVisualization as XyVisualizationType,
@@ -167,9 +166,6 @@ export interface LensPublicStart {
     expandFormulaColumn: (
       params: Parameters<ExpandFormulaColumnFn>[0]
     ) => Promise<ReturnType<ExpandFormulaColumnFn>>;
-    generateFormulaColumns: (
-      params: Parameters<GenerateFormulaColumnsFn>[0]
-    ) => Promise<ReturnType<GenerateFormulaColumnsFn>>;
   };
 }
 
@@ -401,10 +397,6 @@ export class LensPlugin {
         expandFormulaColumn: async (params) => {
           const { expandFormulaColumn } = await import('./indexpattern_datasource');
           return expandFormulaColumn(params);
-        },
-        generateFormulaColumns: async (params) => {
-          const { generateFormulaColumns } = await import('./indexpattern_datasource');
-          return generateFormulaColumns(params);
         },
       },
     };

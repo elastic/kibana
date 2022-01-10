@@ -240,8 +240,8 @@ export function expandFormulaColumn(params: {
   };
 }
 
-/** @public **/
-export function generateFormulaColumns({
+/** @internal **/
+function generateFormulaColumns({
   formula,
   layer,
   indexPattern,

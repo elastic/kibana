@@ -7,7 +7,7 @@
 
 import type { CoreSetup } from 'kibana/public';
 import { createStartServicesGetter, Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { expandFormulaColumn, generateFormulaColumns } from './operations/definitions/formula';
+import { expandFormulaColumn } from './operations/definitions/formula';
 import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
@@ -22,10 +22,9 @@ import type {
   FieldFormatsSetup,
 } from '../../../../../src/plugins/field_formats/public';
 
-export { expandFormulaColumn, generateFormulaColumns };
+export { expandFormulaColumn };
 
 export type ExpandFormulaColumnFn = typeof expandFormulaColumn;
-export type GenerateFormulaColumnsFn = typeof generateFormulaColumns;
 
 export interface IndexPatternDatasourceSetupPlugins {
   expressions: ExpressionsSetup;
