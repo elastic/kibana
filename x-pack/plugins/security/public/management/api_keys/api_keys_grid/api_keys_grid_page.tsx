@@ -22,6 +22,7 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { History } from 'history';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
@@ -393,8 +394,13 @@ export class APIKeysGridPage extends Component<Props, State> {
                         <EuiFlexItem grow={false}>
                           <EuiIcon type="user" />
                         </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiText>{username}</EuiText>
+                        <EuiFlexItem
+                          css={css`
+                            overflow: hidden;
+                          `}
+                          grow={false}
+                        >
+                          <EuiText className="eui-textTruncate">{username}</EuiText>
                         </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiToolTip>
