@@ -201,3 +201,63 @@ Here’s an example of what failed credentials from Google SMTP might look like 
 535 5.7.8  https://support.google.com/mail/?p=BadCredentials e207sm3359731pfh.171 - gsmtp"""
 },
 --------------------------------------------------
+
+[float]
+==== Most Expensive Rules
+
+Usually, the most expensive Rules also have the highest `event.duration`. You can check 
+top expensive rules by loading https://gist.github.com/pmuellr/e9ac5cda106589dc52477ede9accb20c[this dashboard] or running this query:
+
+[source, txt]
+--------------------------------------------------
+GET .kibana-event-log-*/_search
+{
+  "aggs": {
+    "rule_id": {
+      "aggs": {
+        "avg": {
+          "avg": {
+            "field": "event.duration"
+          }
+        },
+        "rule_name": {
+          "terms": {
+            "field": "rule.name",
+            "size": 1
+          }
+        }
+      },
+      "terms": {
+        "field": "rule.id",
+        "order": {
+          "avg": "desc"
+        },
+        "size": 20
+      }
+    }
+  },
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "@timestamp": {
+              "gte": "now-48h",
+              "lte": "now"
+            }
+          }
+        }
+      ],
+      "must": [
+        {
+          "query_string": {
+            "analyze_wildcard": true,
+            "query": "event.provider:alerting AND event.action:execute"
+          }
+        }
+      ]
+    }
+  },
+  "size": 0
+}
+--------------------------------------------------
