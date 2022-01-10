@@ -30,4 +30,10 @@ describe('StatusBadge', () => {
     expect(getByText('3.'));
     expect(getByText('Skipped'));
   });
+
+  it('hides the step number on mobile', () => {
+    const { queryByText } = render(<StatusBadge status="skipped" stepNo={3} isMobile />);
+    expect(queryByText('3.')).not.toBeInTheDocument();
+    expect(queryByText('Skipped')).toBeInTheDocument();
+  });
 });
