@@ -7,11 +7,10 @@
 
 import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON, EuiSpacer } from '@elastic/eui';
 import { StartAction } from './use_start_action';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
+import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
 
 export const StartActionModal: FC<StartAction> = ({ closeModal, items, startAndCloseModal }) => {
   const hasManagedTransforms = useMemo(() => items.some((t) => isManagedTransform(t)), [items]);
@@ -45,14 +44,14 @@ export const StartActionModal: FC<StartAction> = ({ closeModal, items, startAndC
       <p>
         {hasManagedTransforms ? (
           <>
-            <FormattedMessage
-              id="xpack.transform.transformList.startManagedTransformsDescription"
-              defaultMessage="{transformsCount, plural, one {This transform} other {At least one of these transforms}} is preconfigured by Elastic; starting {transformsCount, plural, one {it} other {them}} might impact other parts of the product."
-              values={{
-                transformsCount: items.length,
-              }}
+            <ManagedTransformsWarningCallout
+              count={items.length}
+              action={i18n.translate(
+                'xpack.transform.transformList.startManagedTransformsDescription',
+                { defaultMessage: 'starting' }
+              )}
             />
-            &nbsp;
+            <EuiSpacer />
           </>
         ) : null}
 

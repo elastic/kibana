@@ -14,12 +14,10 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiSwitch,
-  EuiText,
 } from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n-react';
 import { DeleteAction } from './use_delete_action';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
+import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
 
 export const DeleteActionModal: FC<DeleteAction> = ({
   closeModal,
@@ -52,16 +50,16 @@ export const DeleteActionModal: FC<DeleteAction> = ({
     <>
       <EuiFlexGroup direction="column" gutterSize="none">
         {hasManagedTransforms ? (
-          <p>
-            <>
-              <EuiText>
-                <FormattedMessage
-                  id="xpack.transform.transformList.deleteManagedBulkTransformsDescription"
-                  defaultMessage="At least one of these transforms is preconfigured by Elastic; deleting them might impact other parts of the product."
-                />
-              </EuiText>
-            </>
-          </p>
+          <>
+            <ManagedTransformsWarningCallout
+              count={items.length}
+              action={i18n.translate(
+                'xpack.transform.transformList.deleteManagedTransformDescription',
+                { defaultMessage: 'deleting' }
+              )}
+            />
+            <EuiSpacer />
+          </>
         ) : null}
 
         <EuiFlexItem>
@@ -104,16 +102,16 @@ export const DeleteActionModal: FC<DeleteAction> = ({
     <>
       <EuiFlexGroup direction="column" gutterSize="none">
         {hasManagedTransforms ? (
-          <p>
-            <>
-              <EuiText>
-                <FormattedMessage
-                  id="xpack.transform.transformList.deleteManagedTransformDescription"
-                  defaultMessage="This transform is preconfigured by Elastic; deleting it might impact other parts of the product."
-                />
-              </EuiText>
-            </>
-          </p>
+          <>
+            <ManagedTransformsWarningCallout
+              count={1}
+              action={i18n.translate(
+                'xpack.transform.transformList.deleteManagedTransformDescription',
+                { defaultMessage: 'deleting' }
+              )}
+            />
+            <EuiSpacer />
+          </>
         ) : null}
 
         <EuiFlexItem>

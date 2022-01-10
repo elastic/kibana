@@ -8,10 +8,9 @@
 import React, { FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal, EUI_MODAL_CONFIRM_BUTTON } from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n-react';
 import { StopAction } from './use_stop_action';
 import { isManagedTransform } from '../../../../common/managed_transforms_utils';
+import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
 
 export const StopActionModal: FC<StopAction> = ({ closeModal, items, stopAndCloseModal }) => {
   const hasManagedTransforms = useMemo(() => items.some((t) => isManagedTransform(t)), [items]);
@@ -43,18 +42,12 @@ export const StopActionModal: FC<StopAction> = ({ closeModal, items, stopAndClos
       buttonColor="primary"
     >
       {hasManagedTransforms ? (
-        <p>
-          <>
-            <FormattedMessage
-              id="xpack.transform.transformList.stopManagedTransformsDescription"
-              defaultMessage="{transformsCount, plural, one {This transform} other {At least one of these transforms}} is preconfigured by Elastic; stopping {transformsCount, plural, one {it} other {them}} might impact other parts of the product."
-              values={{
-                transformsCount: items.length,
-              }}
-            />
-            &nbsp;
-          </>
-        </p>
+        <ManagedTransformsWarningCallout
+          count={items.length}
+          action={i18n.translate('xpack.transform.transformList.stopManagedTransformsDescription', {
+            defaultMessage: 'stopping',
+          })}
+        />
       ) : null}
     </EuiConfirmModal>
   );
