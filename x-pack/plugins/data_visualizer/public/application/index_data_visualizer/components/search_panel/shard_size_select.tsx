@@ -41,7 +41,7 @@ const searchSizeOptions = [1000, 5000, 10000, 100000, -1].map((v) => {
 export const ShardSizeFilter: FC<Props> = ({ samplerShardSize, setSamplerShardSize }) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false} style={{ width: 270 }}>
+      <EuiFlexItem grow={false} style={{ width: 310 }}>
         <EuiSuperSelect
           options={searchSizeOptions}
           valueOfSelected={String(samplerShardSize)}
