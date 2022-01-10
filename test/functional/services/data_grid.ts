@@ -161,7 +161,7 @@ export class DataGridService extends FtrService {
     options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
   ): Promise<void> {
     const row = await this.getRow(options);
-    const toggle = await row[0];
+    const toggle = await row[0].findByTestSubject('~docTableExpandToggleColumn');
     await toggle.click();
   }
 
