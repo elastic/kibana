@@ -33,7 +33,6 @@ import {
   hasSimpleExecutableName,
 } from '../../../../../../common/endpoint/service/trusted_apps/validations';
 
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import {
   isGlobalEffectScope,
   isMacosLinuxTrustedAppCondition,
@@ -237,10 +236,6 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
     const trustedApp = _trustedApp as NewTrustedApp;
 
     const dataTestSubj = formProps['data-test-subj'];
-
-    const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
-      'trustedAppsByPolicyEnabled'
-    );
 
     const isPlatinumPlus = useLicense().isPlatinumPlus();
 
@@ -519,7 +514,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             value={trustedApp.description}
             onChange={handleDomChangeEvents}
             fullWidth
-            compressed={isTrustedAppsByPolicyEnabled}
+            compressed
             maxLength={256}
             data-test-subj={getTestId('descriptionField')}
           />
@@ -577,7 +572,7 @@ export const CreateTrustedAppForm = memo<CreateTrustedAppFormProps>(
             data-test-subj={getTestId('conditionsBuilder')}
           />
         </EuiFormRow>
-        {isTrustedAppsByPolicyEnabled && showAssignmentSection ? (
+        {showAssignmentSection ? (
           <>
             <EuiHorizontalRule />
             <EuiFormRow fullWidth={fullWidth} data-test-subj={getTestId('policySelection')}>
