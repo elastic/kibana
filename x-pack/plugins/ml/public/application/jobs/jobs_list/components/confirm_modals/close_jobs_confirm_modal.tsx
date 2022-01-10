@@ -73,7 +73,7 @@ export const CloseJobsConfirmModal: FC<Props> = ({
   if (hasManagedJob) {
     const title = (
       <FormattedMessage
-        id="xpack.ml.jobsList.startDatafeedsModal.startDatafeedsTitle"
+        id="xpack.ml.jobsList.startDatafeedsModal.closeDatafeedsTitle"
         defaultMessage="Close {jobsCount, plural, one {{jobId}} other {# jobs}}?"
         values={{
           jobsCount: jobIds.length,
