@@ -11,6 +11,9 @@ import React from 'react';
 import * as styledComponents from 'styled-components';
 import { ThemedStyledComponentsModule, ThemeProvider, ThemeProviderProps } from 'styled-components';
 import { euiThemeVars, euiLightVars, euiDarkVars } from '@kbn/ui-theme';
+import { CoreTheme } from '@kbn/core/public';
+import { BehaviorSubject, Observable } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 
 export interface EuiTheme {
   eui: typeof euiThemeVars;
@@ -21,19 +24,29 @@ const EuiThemeProvider = <
   OuterTheme extends styledComponents.DefaultTheme = styledComponents.DefaultTheme
 >({
   darkMode = false,
+  theme$,
   ...otherProps
 }: Omit<ThemeProviderProps<OuterTheme, OuterTheme & EuiTheme>, 'theme'> & {
   darkMode?: boolean;
-}) => (
-  <ThemeProvider
-    {...otherProps}
-    theme={(outerTheme?: OuterTheme) => ({
-      ...outerTheme,
-      eui: darkMode ? euiDarkVars : euiLightVars,
-      darkMode,
-    })}
-  />
-);
+  theme$?: Observable<CoreTheme>;
+}) => {
+  const theme = useObservable(theme$ || new BehaviorSubject({ darkMode }));
+
+  if (!theme) {
+    return null;
+  }
+
+  return (
+    <ThemeProvider
+      {...otherProps}
+      theme={(outerTheme?: OuterTheme) => ({
+        ...outerTheme,
+        eui: theme.darkMode ? euiDarkVars : euiLightVars,
+        darkMode: theme.darkMode,
+      })}
+    />
+  );
+};
 
 /**
  * Storybook decorator using the EUI theme provider. Uses the value from
