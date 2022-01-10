@@ -129,7 +129,7 @@ export function ColorRangeItem({
   );
 
   useUpdateEffect(() => {
-    if (isValid && value !== localValue) {
+    if (isValid && parseFloat(value) !== parseFloat(localValue)) {
       setLocalValue(value);
     }
   }, [isValid, localValue, value]);

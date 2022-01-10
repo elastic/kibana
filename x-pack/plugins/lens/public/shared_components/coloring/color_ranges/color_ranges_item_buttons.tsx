@@ -66,6 +66,8 @@ export function ColorRangeDeleteButton({ index, dispatch }: ColorRangesItemButto
 export function ColorRangeEditButton({
   index,
   colorRanges,
+  rangeType,
+  dataBounds,
   continuity,
   dispatch,
   accessor,
@@ -73,8 +75,9 @@ export function ColorRangeEditButton({
   const isLast = isLastItem(accessor);
 
   const onExecuteAction = useCallback(() => {
+    const { max: autoMax, min: autoMin } = getDataMinMax(rangeType, dataBounds);
     const newContinuity = switchContinuity(isLast, continuity);
-    colorRanges[index][isLast ? 'end' : 'start'] = isLast ? Infinity : -Infinity;
+    colorRanges[index][isLast ? 'end' : 'start'] = roundValue(isLast ? autoMax : autoMin);
 
     dispatch({
       type: 'set',
@@ -109,10 +112,9 @@ export function ColorRangeAutoDetectButton({
   const isLast = isLastItem(accessor);
 
   const onExecuteAction = useCallback(() => {
-    const { max: autoMax, min: autoMin } = getDataMinMax(rangeType, dataBounds);
     const newContinuity = switchContinuity(isLast, continuity);
 
-    colorRanges[index][isLast ? 'end' : 'start'] = roundValue(isLast ? autoMax : autoMin);
+    colorRanges[index][isLast ? 'end' : 'start'] = isLast ? Infinity : -Infinity;
 
     dispatch({
       type: 'set',
