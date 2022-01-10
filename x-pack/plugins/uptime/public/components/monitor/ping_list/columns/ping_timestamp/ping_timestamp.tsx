@@ -17,7 +17,7 @@ import {
 } from '../../../../../../common/runtime_types';
 import { useFetcher, FETCH_STATUS } from '../../../../../../../observability/public';
 import { getJourneyScreenshot } from '../../../../../state/api/journey';
-import { UptimeSettingsContext } from '../../../../../contexts';
+import { UptimeRefreshContext, UptimeSettingsContext } from '../../../../../contexts';
 
 import { NoImageDisplay } from './no_image_display';
 import { StepImageCaption } from './step_image_caption';
@@ -36,9 +36,15 @@ interface Props {
   checkGroup?: string;
   label?: string;
   initialStepNo?: number;
+  isMobileImage?: boolean;
 }
 
-export const PingTimestamp = ({ label, checkGroup, initialStepNo = 1 }: Props) => {
+export const PingTimestamp = ({
+  label,
+  checkGroup,
+  initialStepNo = 1,
+  isMobileImage = false,
+}: Props) => {
   const [stepNumber, setStepNumber] = useState(initialStepNo);
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
 
@@ -47,6 +53,7 @@ export const PingTimestamp = ({ label, checkGroup, initialStepNo = 1 }: Props) =
   const intersectionRef = React.useRef(null);
 
   const { basePath } = useContext(UptimeSettingsContext);
+  const { lastRefresh } = useContext(UptimeRefreshContext);
 
   const imgPath = `${basePath}/internal/uptime/journey/screenshot/${checkGroup}/${stepNumber}`;
 
@@ -59,7 +66,7 @@ export const PingTimestamp = ({ label, checkGroup, initialStepNo = 1 }: Props) =
   const { data, status } = useFetcher(() => {
     if (intersection && intersection.intersectionRatio === 1 && !stepImages[stepNumber - 1])
       return getJourneyScreenshot(imgPath);
-  }, [intersection?.intersectionRatio, stepNumber, imgPath]);
+  }, [intersection?.intersectionRatio, stepNumber, imgPath, lastRefresh]);
 
   const [screenshotRef, setScreenshotRef] = useState<ScreenshotRefImageData | undefined>(undefined);
   useEffect(() => {
@@ -120,6 +127,7 @@ export const PingTimestamp = ({ label, checkGroup, initialStepNo = 1 }: Props) =
               imgSrc={imgSrc}
               imgRef={screenshotRef}
               isImagePopoverOpen={isImagePopoverOpen}
+              isMobileImage={isMobileImage}
             />
           )}
           {!imgSrc && !screenshotRef && (

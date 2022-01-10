@@ -11,6 +11,7 @@ import { catchError, tap } from 'rxjs/operators';
 import { getServiceLocations } from './get_service_locations';
 import { Logger } from '../../../../../../src/core/server';
 import { MonitorFields, ServiceLocations } from '../../../common/runtime_types';
+import { convertToDataStreamFormat } from './formatters/convert_to_data_stream';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
 
@@ -20,6 +21,7 @@ export interface ServiceData {
     hosts: string[];
     api_key: string;
   };
+  runOnce?: boolean;
 }
 
 export class ServiceAPIClient {
@@ -51,7 +53,14 @@ export class ServiceAPIClient {
     return this.callAPI('DELETE', data);
   }
 
-  async callAPI(method: 'POST' | 'PUT' | 'DELETE', { monitors: allMonitors, output }: ServiceData) {
+  async runOnce(data: ServiceData) {
+    return this.callAPI('POST', { ...data, runOnce: true });
+  }
+
+  async callAPI(
+    method: 'POST' | 'PUT' | 'DELETE',
+    { monitors: allMonitors, output, runOnce }: ServiceData
+  ) {
     if (this.username === TEST_SERVICE_USERNAME) {
       // we don't want to call service while local integration tests are running
       return;
@@ -59,11 +68,14 @@ export class ServiceAPIClient {
 
     const callServiceEndpoint = (monitors: ServiceData['monitors'], url: string) => {
       // don't need to pass locations to heartbeat
-      monitors = monitors.map(({ locations, ...rest }) => rest);
+      const monitorsStreams = monitors.map(({ locations, ...rest }) =>
+        convertToDataStreamFormat(rest)
+      );
+
       return axios({
         method,
-        url: url + '/monitors',
-        data: { monitors, output },
+        url: (this.devUrl ?? url) + (runOnce ? '/run' : '/monitors'),
+        data: { monitors: monitorsStreams, output },
         headers: {
           Authorization: this.authorization,
         },

@@ -21,6 +21,7 @@ import {
   SETTINGS_ROUTE,
   STEP_DETAIL_ROUTE,
   SYNTHETIC_CHECK_STEPS_ROUTE,
+  PLAYGROUND_ROUTE,
 } from '../common/constants';
 import {
   MappingErrorPage,
@@ -57,6 +58,7 @@ import { apiService } from './state/api/utils';
 import { useInspectorContext } from '../../observability/public';
 import { UptimeConfig } from '../common/config';
 import { AddMonitorBtn } from './components/monitor_management/add_monitor_btn';
+import { PlaygroundPage } from './pages/monitor_management/playground';
 
 interface PageRouterProps {
   config: UptimeConfig;
@@ -206,6 +208,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
               ),
             },
             bottomBar: <MonitorManagementBottomBar />,
+            bottomBarProps: { paddingSize: 'm' as const },
           },
           {
             title: i18n.translate('xpack.uptime.editMonitorRoute.title', {
@@ -225,6 +228,7 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
               ),
             },
             bottomBar: <MonitorManagementBottomBar />,
+            bottomBarProps: { paddingSize: 'm' as const },
           },
           {
             title: i18n.translate('xpack.uptime.monitorManagementRoute.title', {
@@ -243,6 +247,25 @@ const getRoutes = (config: UptimeConfig): RouteProps[] => {
                 />
               ),
               rightSideItems: [<AddMonitorBtn />],
+            },
+          },
+          {
+            title: i18n.translate('xpack.uptime.monitorManagementRoute.playground.title', {
+              defaultMessage: 'Manage Monitors | {baseTitle}',
+              values: { baseTitle },
+            }),
+            path: PLAYGROUND_ROUTE,
+            component: PlaygroundPage,
+            dataTestSubj: 'uptimePlaygroundPage',
+            telemetryId: UptimePage.Playground,
+            pageHeader: {
+              pageTitle: (
+                <FormattedMessage
+                  id="xpack.uptime.monitorManagement.pageHeader.title"
+                  defaultMessage="Playground"
+                />
+              ),
+              rightSideItems: [],
             },
           },
         ]

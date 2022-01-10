@@ -55,9 +55,9 @@ export class SyntheticsService {
     this.server = server;
     this.config = server.config;
 
-    const { manifestUrl, username, password } = this.config.unsafe.service;
+    const { manifestUrl, username, password, devUrl } = this.config.unsafe.service;
 
-    this.apiClient = new ServiceAPIClient(manifestUrl, username, password, logger);
+    this.apiClient = new ServiceAPIClient(manifestUrl, username, password, logger, devUrl);
 
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
   }
@@ -194,6 +194,24 @@ export class SyntheticsService {
 
     try {
       return await this.apiClient.post(data);
+    } catch (e) {
+      this.logger.error(e);
+      throw e;
+    }
+  }
+
+  async runOnceConfigs(request?: KibanaRequest, configs?: SyntheticsMonitorWithId[]) {
+    const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
+    if (monitors.length === 0) {
+      return;
+    }
+    const data = {
+      monitors,
+      output: await this.getOutput(request),
+    };
+
+    try {
+      return await this.apiClient.runOnce(data);
     } catch (e) {
       this.logger.error(e);
       throw e;
