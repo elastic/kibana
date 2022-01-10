@@ -251,9 +251,9 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     category: ['discover'],
     description: i18n.translate('discover.advancedSettings.params.rowHeightText', {
       defaultMessage:
-        'The maximum lines that a cell in a table should occupy. Auto height might be enabled by setting value to zero.',
+        'The maximum lines that a cell in a table should occupy. Auto height might be enabled by setting value to -1. Single option could be enabled by setting value to 0.',
     }),
-    schema: schema.number({ min: 0 }),
+    schema: schema.number({ min: -1 }),
   },
   [TRUNCATE_MAX_HEIGHT]: {
     name: i18n.translate('discover.advancedSettings.params.truncateHeightTitle', {

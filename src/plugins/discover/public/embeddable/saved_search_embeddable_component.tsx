@@ -18,7 +18,6 @@ interface SavedSearchEmbeddableComponentProps {
   savedSearch: SavedSearch;
   searchProps: SearchProps;
   useLegacyTable: boolean;
-  refs: HTMLElement;
 }
 
 const DiscoverDocTableEmbeddableMemoized = React.memo(DiscoverDocTableEmbeddable);
@@ -28,17 +27,9 @@ export function SavedSearchEmbeddableComponent({
   savedSearch,
   searchProps,
   useLegacyTable,
-  refs,
 }: SavedSearchEmbeddableComponentProps) {
   if (useLegacyTable) {
-    return (
-      <DiscoverDocTableEmbeddableMemoized
-        {...({
-          ...searchProps,
-          refs,
-        } as DocTableEmbeddableProps)}
-      />
-    );
+    return <DiscoverDocTableEmbeddableMemoized {...(searchProps as DocTableEmbeddableProps)} />;
   }
   return (
     <DiscoverGridEmbeddableMemoized

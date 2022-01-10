@@ -14,7 +14,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useRowHeight } from '../../../../utils/use_row_height';
+import { SerializedRowHeight } from '../../../../utils/use_data_grid_options';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
 import { FetchStatus } from '../../../types';
@@ -34,6 +34,7 @@ import { useDataState } from '../../utils/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { SortPairArr } from '../../../../components/doc_table/lib/get_sort';
 import { ElasticSearchHit } from '../../../../types';
+import { isValidRowHeight } from '../../../../utils/validate_row_height';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -60,7 +61,7 @@ function DiscoverDocumentsComponent({
   state: AppState;
   stateContainer: GetStateReturn;
 }) {
-  const { capabilities, indexPatterns, uiSettings, storage } = services;
+  const { capabilities, indexPatterns, uiSettings } = services;
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
@@ -101,11 +102,15 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
-  const { defaultRowHeight, onRowHeightChange } = useRowHeight({
-    storage,
-    savedSearchRowHeight: state.rowHeight,
-    setAppState: stateContainer.setAppState,
-  });
+  const rowHeightFromState = useMemo(
+    () => (isValidRowHeight(state.rowHeight) ? state.rowHeight : undefined),
+    [state.rowHeight]
+  );
+
+  const onUpdateRowHeight = useCallback(
+    (rowHeight?: SerializedRowHeight) => stateContainer.setAppState({ rowHeight }),
+    [stateContainer]
+  );
 
   const showTimeCol = useMemo(
     () => !uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
@@ -176,8 +181,8 @@ function DiscoverDocumentsComponent({
             onSort={onSort}
             onResize={onResize}
             useNewFieldsApi={useNewFieldsApi}
-            defaultRowHeight={defaultRowHeight}
-            onRowHeightChange={onRowHeightChange}
+            rowHeightFromState={rowHeightFromState}
+            onUpdateRowHeight={onUpdateRowHeight}
           />
         </div>
       )}

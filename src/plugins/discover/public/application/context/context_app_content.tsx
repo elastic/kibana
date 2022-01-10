@@ -24,7 +24,6 @@ import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { EsHitRecordList } from '../types';
 import { SortPairArr } from '../../components/doc_table/lib/get_sort';
 import { ElasticSearchHit } from '../../types';
-import { useRowHeight } from '../../utils/use_row_height';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -77,7 +76,7 @@ export function ContextAppContent({
   setAppState,
   addFilter,
 }: ContextAppContentProps) {
-  const { uiSettings: config, storage } = services;
+  const { uiSettings: config } = services;
 
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>();
   const isAnchorLoading =
@@ -87,11 +86,6 @@ export function ContextAppContent({
     predecessorsStatus === LoadingStatus.UNINITIALIZED;
   const areSuccessorsLoading =
     successorsStatus === LoadingStatus.LOADING || successorsStatus === LoadingStatus.UNINITIALIZED;
-
-  const { defaultRowHeight, onRowHeightChange } = useRowHeight({
-    storage,
-    setAppState,
-  });
 
   const showTimeCol = useMemo(
     () => !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!indexPattern.timeFieldName,
@@ -170,8 +164,6 @@ export function ContextAppContent({
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
             onSetColumns={onSetColumns}
-            defaultRowHeight={defaultRowHeight}
-            onRowHeightChange={onRowHeightChange}
           />
         </div>
       )}

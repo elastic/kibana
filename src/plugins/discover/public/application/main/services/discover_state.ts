@@ -85,7 +85,7 @@ export interface AppState {
   /**
    * Document explorer row height option
    */
-  rowHeight?: 'auto' | number;
+  rowHeight?: number;
 }
 
 interface GetStateParams {

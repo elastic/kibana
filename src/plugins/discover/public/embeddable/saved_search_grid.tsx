@@ -12,7 +12,6 @@ import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/dis
 import { getServices } from '../kibana_services';
 import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
 import { ElasticSearchHit } from '../types';
-import { useRowHeight } from '../utils/use_row_height';
 import { SavedSearch } from '..';
 
 export interface DiscoverGridEmbeddableProps extends DiscoverGridProps {
@@ -27,11 +26,6 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
 
   const services = useMemo(() => getServices(), []);
 
-  const { defaultRowHeight, onRowHeightChange } = useRowHeight({
-    savedSearchRowHeight: props.savedSearch.rowHeight,
-    storage: services.storage,
-  });
-
   return (
     <I18nProvider>
       <EuiFlexGroup style={{ width: '100%' }} direction="column" gutterSize="xs" responsive={false}>
@@ -43,11 +37,9 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         <EuiFlexItem style={{ minHeight: 0 }}>
           <DataGridMemoized
             {...props}
+            services={services}
             setExpandedDoc={setExpandedDoc}
             expandedDoc={expandedDoc}
-            defaultRowHeight={defaultRowHeight}
-            onRowHeightChange={onRowHeightChange}
-            services={services}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
