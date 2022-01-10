@@ -107,7 +107,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show popover with expanded cell content by click on expand button on embeddable', async () => {
       log.debug('open popover with expanded cell content to get json from the editor');
-      await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.saveSearch('expand-cell-search');
