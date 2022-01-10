@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('lnsPalettePanel_dynamicColoring_stop_value_1', '21000', {
         clearWithKeyboard: true,
       });
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.waitForVisualization();
       const styleObj = await PageObjects.lens.getMetricStyle();
       expect(styleObj.color).to.be('rgb(32, 146, 128)');
     });
