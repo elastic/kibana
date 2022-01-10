@@ -114,3 +114,7 @@ export function DataViewPicker({
     </>
   );
 }
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default DataViewPicker;

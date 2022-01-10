@@ -44,7 +44,7 @@ interface Props {
   removeSelectedSavedQuery: (savedQuery: SavedQuery) => void;
 }
 
-function FilterBarUI(props: Props) {
+const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
   const groupRef = useRef<HTMLDivElement>(null);
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
   const kibana = useKibana<IDataPluginServices>();
@@ -246,6 +246,6 @@ function FilterBarUI(props: Props) {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-}
+});
 
 export const FilterBar = injectI18n(FilterBarUI);

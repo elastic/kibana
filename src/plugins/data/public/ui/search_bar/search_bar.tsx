@@ -20,6 +20,7 @@ import {
   EuiButton,
   EuiModalHeaderTitle,
 } from '@elastic/eui';
+import memoizeOne from 'memoize-one';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
@@ -221,6 +222,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       this.state.dateRangeTo !== this.props.dateRangeTo
     );
   };
+
+  componentWillUnmount() {
+    this.renderSavedQueryManagement.clear();
+  }
 
   private shouldRenderQueryBar() {
     const showDatePicker = this.props.showDatePicker || this.props.showAutoRefreshOnly;
@@ -580,6 +585,15 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           savedQueryManagement={savedQueryManagement}
           applySelectedSavedQueries={this.applyTimeFilterOverrideModal}
           fillSubmitButton={this.props.fillSubmitButton || false}
+          // prepend={
+          //   this.props.showFilterBar && this.state.query
+          //     ? this.renderSavedQueryManagement(
+          //         this.props.onClearSavedQuery,
+          //         this.props.showSaveQuery,
+          //         this.props.savedQuery
+          //       )
+          //     : undefined
+          // }
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}
@@ -703,6 +717,31 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       </div>
     );
   }
+
+  private renderSavedQueryManagement = memoizeOne(
+    (
+      onClearSavedQuery: SearchBarOwnProps['onClearSavedQuery'],
+      showSaveQuery: SearchBarOwnProps['showSaveQuery'],
+      savedQuery: SearchBarOwnProps['savedQuery']
+    ) => {
+      const savedQueryManagement = onClearSavedQuery && (
+        <SavedQueryManagementComponent
+          showSaveQuery={this.props.showSaveQuery}
+          loadedSavedQuery={this.props.savedQuery}
+          onSave={this.onInitiateSave}
+          onSaveAsNew={this.onInitiateSaveNew}
+          onLoad={this.onLoadSavedQuery}
+          savedQueryService={this.savedQueryService}
+          onClearSavedQuery={onClearSavedQuery}
+          selectedSavedQueries={this.state.finalSelectedSavedQueries}
+        >
+          {(list) => list}
+        </SavedQueryManagementComponent>
+      );
+
+      return savedQueryManagement;
+    }
+  );
 }
 
 // Needed for React.lazy

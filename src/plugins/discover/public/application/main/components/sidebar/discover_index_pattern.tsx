@@ -8,7 +8,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { SavedObject } from 'kibana/public';
-import { IndexPattern, IndexPatternAttributes } from 'src/plugins/data/public';
+import { DataView, DataViewAttributes } from 'src/plugins/data/common';
 import { IndexPatternRef } from './types';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { DiscoverServices } from '../../../../build_services';
@@ -17,15 +17,11 @@ export interface DiscoverIndexPatternProps {
   /**
    * list of available index patterns, if length > 1, component offers a "change" link
    */
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  indexPatternList: Array<SavedObject<DataViewAttributes>>;
   /**
    * Callback function when changing an index pattern
    */
   onChangeIndexPattern: (id: string) => void;
-  /**
-   * currently selected index pattern
-   */
-  selectedIndexPattern: IndexPattern;
   /**
    * Discover plugin services;
    */
@@ -39,6 +35,7 @@ export interface DiscoverIndexPatternProps {
    * @param fieldName
    */
   editField: (fieldName?: string) => void;
+  selectedIndexPattern: DataView;
 }
 
 /**
