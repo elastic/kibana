@@ -179,7 +179,7 @@ export const PolicyHostIsolationExceptionsList = ({
         placeholder={i18n.translate(
           'xpack.securitySolution.endpoint.policy.hostIsolationExceptions.list.search.placeholder',
           {
-            defaultMessage: 'Search on the fields below: name, description, value, ip',
+            defaultMessage: 'Search on the fields below: name, description, ip',
           }
         )}
         defaultValue={urlParams.filter}

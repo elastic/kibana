@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
+/** The ID of the Shared UX plugin. */
 export const PLUGIN_ID = 'sharedUX';
+
+/** The name of the Shared UX plugin. */
 export const PLUGIN_NAME = 'sharedUX';
