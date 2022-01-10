@@ -36,7 +36,7 @@ const INFERENCE_CONFIG_DOCS = {
 };
 
 const getInferenceConfigHelpText = (
-  documentationDocsLink: string,
+documentationDocsLink: string,
 ): React.ReactNode => {
   return (
     <FormattedMessage
