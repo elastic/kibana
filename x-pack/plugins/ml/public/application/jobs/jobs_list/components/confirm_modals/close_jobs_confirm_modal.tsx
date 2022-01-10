@@ -16,11 +16,12 @@ import {
   EuiModalFooter,
   EuiButtonEmpty,
   EuiButton,
-  EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { isManagedJob } from '../../../jobs_utils';
 import { closeJobs } from '../utils';
+import { ManagedJobsWarningCallout } from './managed_jobs_warning_callout';
 
 type ShowFunc = (jobs: MlSummaryJob[]) => void;
 
@@ -88,19 +89,15 @@ export const CloseJobsConfirmModal: FC<Props> = ({
           <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
-          <p>
-            <>
-              <EuiText>
-                <FormattedMessage
-                  id="xpack.ml.jobsList.startDatafeedsModal.closeManagedDatafeedsDescription"
-                  defaultMessage="{jobsCount, plural, one {This job} other {At least one of these jobs}} is preconfigured by Elastic; closing {jobsCount, plural, one {it} other {them}} might impact other parts of the product."
-                  values={{
-                    jobsCount: jobIds.length,
-                  }}
-                />
-              </EuiText>
-            </>
-          </p>
+          <ManagedJobsWarningCallout
+            jobsCount={jobIds.length}
+            action={i18n.translate(
+              'xpack.ml.jobsList.closeJobsModal.closeManagedDatafeedsDescription',
+              {
+                defaultMessage: 'closing',
+              }
+            )}
+          />
         </EuiModalBody>
         <>
           <EuiSpacer />

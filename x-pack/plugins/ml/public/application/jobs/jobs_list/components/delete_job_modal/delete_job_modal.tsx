@@ -20,11 +20,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { deleteJobs } from '../utils';
 import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import { DeleteJobCheckModal } from '../../../../components/delete_job_check_modal';
 import { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { isManagedJob } from '../../../jobs_utils';
+import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
 
 type ShowFunc = (jobs: MlSummaryJob[]) => void;
 
@@ -111,18 +113,27 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
             ) : (
               <>
                 {hasManagedJob ? (
-                  <EuiText>
-                    <FormattedMessage
-                      id="xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription"
-                      defaultMessage="{jobsCount, plural, one {This job} other {At least one of these jobs}} is preconfigured by Elastic; deleting {jobsCount, plural, one {it} other {them}} might impact other parts of the product.
+                  <>
+                    <ManagedJobsWarningCallout
+                      jobsCount={jobIds.length}
+                      action={i18n.translate('xpack.ml.jobsList.deleteJobModal.deleteAction', {
+                        defaultMessage: 'deleting',
+                      })}
+                    />
+                    <EuiSpacer />
+                  </>
+                ) : null}
+                <EuiText>
+                  <FormattedMessage
+                    id="xpack.ml.jobsList.deleteJobModal.deleteMultipleJobsDescription"
+                    defaultMessage="Deleting {jobsCount, plural, one {a job} other {multiple jobs}} can be time consuming.
                 {jobsCount, plural, one {It} other {They}} will be deleted in the background
                 and may not disappear from the jobs list instantly."
-                      values={{
-                        jobsCount: jobIds.length,
-                      }}
-                    />
-                  </EuiText>
-                ) : null}
+                    values={{
+                      jobsCount: jobIds.length,
+                    }}
+                  />
+                </EuiText>
               </>
             )}
           </p>
@@ -164,6 +175,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
           }}
           onCloseCallback={closeModal}
           refreshJobsCallback={refreshJobs}
+          hasManagedJob={hasManagedJob}
         />
       </>
     );

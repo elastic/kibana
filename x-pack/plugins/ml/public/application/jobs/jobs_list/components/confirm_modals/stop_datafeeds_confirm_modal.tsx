@@ -16,12 +16,13 @@ import {
   EuiModalFooter,
   EuiButtonEmpty,
   EuiButton,
-  EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { isManagedJob } from '../../../jobs_utils';
 // @ts-ignore
 import { stopDatafeeds } from '../utils';
+import { ManagedJobsWarningCallout } from './managed_jobs_warning_callout';
 
 type ShowFunc = (jobs: MlSummaryJob[]) => void;
 
@@ -90,19 +91,15 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
           <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
-          <p>
-            <>
-              <EuiText>
-                <FormattedMessage
-                  id="xpack.ml.jobsList.stopDatafeedsModal.stopManagedDatafeedsDescription"
-                  defaultMessage="{jobsCount, plural, one {This job} other {At least one of these jobs}} is preconfigured by Elastic; stopping {jobsCount, plural, one {it} other {them}} might impact other parts of the product."
-                  values={{
-                    jobsCount: jobIds.length,
-                  }}
-                />
-              </EuiText>
-            </>
-          </p>
+          <ManagedJobsWarningCallout
+            jobsCount={jobIds.length}
+            action={i18n.translate(
+              'xpack.ml.jobsList.stopDatafeedsModal.stopManagedDatafeedsDescription',
+              {
+                defaultMessage: 'stopping',
+              }
+            )}
+          />
         </EuiModalBody>
         <>
           <EuiSpacer />

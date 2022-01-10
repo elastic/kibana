@@ -22,7 +22,6 @@ import {
   EuiFlexItem,
   EuiTabbedContent,
   EuiConfirmModal,
-  EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -36,6 +35,7 @@ import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/
 import { collapseLiteralStrings } from '../../../../../../shared_imports';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../../../common/constants/states';
 import { isManagedJob } from '../../../jobs_utils';
+import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
 
 export class EditJobFlyoutUI extends Component {
   _initialJobFormState = null;
@@ -421,12 +421,15 @@ export class EditJobFlyoutUI extends Component {
             {isManagedJob(job) ? (
               <>
                 <EuiSpacer size="s" />
-                <EuiCallOut color="warning">
-                  <FormattedMessage
-                    id="xpack.ml.jobsList.editJobModal.editManagedJobDescription"
-                    defaultMessage="This job is preconfigured by Elastic; editing it may impact other parts of the product."
-                  />
-                </EuiCallOut>
+                <ManagedJobsWarningCallout
+                  jobsCount={1}
+                  action={i18n.translate(
+                    'xpack.ml.jobsList.editJobModal.editManagedJobDescription',
+                    {
+                      defaultMessage: 'editing',
+                    }
+                  )}
+                />
               </>
             ) : null}
           </EuiFlyoutHeader>

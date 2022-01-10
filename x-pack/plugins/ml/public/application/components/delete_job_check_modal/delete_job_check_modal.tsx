@@ -20,10 +20,12 @@ import {
   EuiButton,
   EuiLoadingSpinner,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { JobType, CanDeleteJobResponse } from '../../../../common/types/saved_objects';
 import { useMlApiContext } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
+import { ManagedJobsWarningCallout } from '../../jobs/jobs_list/components/confirm_modals/managed_jobs_warning_callout';
 
 const shouldUnTagLabel = i18n.translate('xpack.ml.deleteJobCheckModal.shouldUnTagLabel', {
   defaultMessage: 'Remove job from current space',
@@ -58,7 +60,8 @@ function getRespSummary(resp: CanDeleteJobResponse): JobCheckRespSummary {
 
 function getModalContent(
   jobIds: string[],
-  respSummary: JobCheckRespSummary
+  respSummary: JobCheckRespSummary,
+  hasManagedJob?: boolean
 ): ModalContentReturnType {
   const { canDelete, canRemoveFromSpace, canTakeAnyAction } = respSummary;
 
@@ -125,13 +128,27 @@ function getModalContent(
         />
       ),
       modalText: (
-        <EuiText>
-          <FormattedMessage
-            id="xpack.ml.deleteJobCheckModal.modalTextCanUnTag"
-            defaultMessage="{ids} cannot be deleted but can be removed from the current space."
-            values={{ ids: jobIds.join(', ') }}
-          />
-        </EuiText>
+        <>
+          {hasManagedJob ? (
+            <>
+              <EuiSpacer size="s" />
+              <ManagedJobsWarningCallout
+                jobsCount={jobIds.length}
+                action={i18n.translate('xpack.ml.jobsList.deleteJobCheckModal.removeAction', {
+                  defaultMessage: 'removing',
+                })}
+              />
+            </>
+          ) : null}
+
+          <EuiText>
+            <FormattedMessage
+              id="xpack.ml.deleteJobCheckModal.modalTextCanUnTag"
+              defaultMessage="{ids} cannot be deleted but can be removed from the current space."
+              values={{ ids: jobIds.join(', ') }}
+            />
+          </EuiText>
+        </>
       ),
     };
   } else {
@@ -146,6 +163,7 @@ interface Props {
   jobType: JobType;
   jobIds: string[];
   setDidUntag?: React.Dispatch<React.SetStateAction<boolean>>;
+  hasManagedJob?: boolean;
 }
 
 export const DeleteJobCheckModal: FC<Props> = ({
@@ -155,6 +173,7 @@ export const DeleteJobCheckModal: FC<Props> = ({
   jobType,
   jobIds,
   setDidUntag,
+  hasManagedJob,
 }) => {
   const [buttonContent, setButtonContent] = useState<JSX.Element | undefined>();
   const [modalContent, setModalContent] = useState<JSX.Element | undefined>();
@@ -180,7 +199,7 @@ export const DeleteJobCheckModal: FC<Props> = ({
         return;
       }
       setJobCheckRespSummary(respSummary);
-      const { buttonText, modalText } = getModalContent(jobIds, respSummary);
+      const { buttonText, modalText } = getModalContent(jobIds, respSummary, hasManagedJob);
       setButtonContent(buttonText);
       setModalContent(modalText);
     });
@@ -188,7 +207,7 @@ export const DeleteJobCheckModal: FC<Props> = ({
       setDidUntag(false);
     }
     setIsLoading(false);
-  }, []);
+  }, [hasManagedJob]);
 
   const onUntagClick = async () => {
     setIsUntagging(true);

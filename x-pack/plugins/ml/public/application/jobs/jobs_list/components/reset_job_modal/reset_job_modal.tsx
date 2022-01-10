@@ -17,14 +17,15 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiText,
-  EuiCallOut,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { resetJobs } from '../utils';
 import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';
 import { RESETTING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 import { OpenJobsWarningCallout } from './open_jobs_warning_callout';
 import { isManagedJob } from '../../../jobs_utils';
+import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
 
 type ShowFunc = (jobs: MlSummaryJob[]) => void;
 
@@ -98,15 +99,15 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
 
           {hasManagedJob === true ? (
             <>
-              <EuiCallOut color="warning">
-                <FormattedMessage
-                  id="xpack.ml.jobsList.startDatafeedsModal.resetManagedDatafeedsDescription"
-                  defaultMessage="{jobsCount, plural, one {This job} other {At least one of these jobs}} is preconfigured by Elastic; resetting {jobsCount, plural, one {it} other {them}} by specifying an end time impact other parts of the product."
-                  values={{
-                    jobsCount: jobIds.length,
-                  }}
-                />
-              </EuiCallOut>
+              <ManagedJobsWarningCallout
+                jobsCount={jobIds.length}
+                action={i18n.translate(
+                  'xpack.ml.jobsList.startDatafeedsModal.resetManagedDatafeedsDescription',
+                  {
+                    defaultMessage: 'resetting',
+                  }
+                )}
+              />
               <EuiSpacer />
             </>
           ) : null}
