@@ -64,38 +64,32 @@ export class Node extends React.PureComponent<Props, State> {
     const nodeBorder = this.state.isOverlayOpen ? { border: 'solid 4px #000' } : undefined;
 
     const button = (
-      <EuiToolTip
-        delay="regular"
-        position="right"
-        content={<ConditionalToolTip currentTime={currentTime} node={node} nodeType={nodeType} />}
+      <NodeContainer
+        data-test-subj="nodeContainer"
+        style={{ width: squareSize || 0, height: squareSize || 0 }}
+        onClick={this.togglePopover}
       >
-        <NodeContainer
-          data-test-subj="nodeContainer"
-          style={{ width: squareSize || 0, height: squareSize || 0 }}
-          onClick={this.togglePopover}
-        >
-          <SquareOuter color={color} style={nodeBorder}>
-            <SquareInner color={color}>
-              {valueMode ? (
+        <SquareOuter color={color} style={nodeBorder}>
+          <SquareInner color={color}>
+            {valueMode ? (
+              <ValueInner aria-label={nodeAriaLabel}>
+                <Label data-test-subj="nodeName" color={color}>
+                  {node.name}
+                </Label>
+                <Value data-test-subj="nodeValue" color={color}>
+                  {value}
+                </Value>
+              </ValueInner>
+            ) : (
+              ellipsisMode && (
                 <ValueInner aria-label={nodeAriaLabel}>
-                  <Label data-test-subj="nodeName" color={color}>
-                    {node.name}
-                  </Label>
-                  <Value data-test-subj="nodeValue" color={color}>
-                    {value}
-                  </Value>
+                  <Label color={color}>...</Label>
                 </ValueInner>
-              ) : (
-                ellipsisMode && (
-                  <ValueInner aria-label={nodeAriaLabel}>
-                    <Label color={color}>...</Label>
-                  </ValueInner>
-                )
-              )}
-            </SquareInner>
-          </SquareOuter>
-        </NodeContainer>
-      </EuiToolTip>
+              )
+            )}
+          </SquareInner>
+        </SquareOuter>
+      </NodeContainer>
     );
 
     return (
