@@ -24,5 +24,5 @@ export const createResultObject = <TState extends AlertTypeState>(state: TState)
   return result;
 };
 
-export * from './expand_dotted';
+export * from '../../../../../common/utils/expand_dotted';
 export * from './get_list_client';

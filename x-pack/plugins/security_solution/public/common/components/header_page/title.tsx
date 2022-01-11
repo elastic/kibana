@@ -21,6 +21,7 @@ StyledEuiBetaBadge.displayName = 'StyledEuiBetaBadge';
 
 const Badge = styled(EuiBadge)`
   letter-spacing: 0;
+  margin-left: 10px;
 ` as unknown as typeof EuiBadge;
 Badge.displayName = 'Badge';
 
