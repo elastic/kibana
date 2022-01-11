@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { parseInterval } from '../../../../common/utils/parse_interval';
+import { parseInterval } from './parse_interval';
 
-describe('ML parse interval util', () => {
+describe('parse interval util', () => {
   test('should correctly parse an interval containing a valid unit and value', () => {
     expect(parseInterval('1d')!.as('d')).toBe(1);
     expect(parseInterval('2y')!.as('y')).toBe(2);
