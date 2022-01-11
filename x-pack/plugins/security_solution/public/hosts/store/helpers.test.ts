@@ -36,6 +36,7 @@ export const mockHostsState: HostsModel = {
         activePage: 4,
         limit: DEFAULT_TABLE_LIMIT,
       },
+      [HostsTableType.risk]: null,
     },
   },
   details: {
@@ -63,6 +64,7 @@ export const mockHostsState: HostsModel = {
         activePage: 4,
         limit: DEFAULT_TABLE_LIMIT,
       },
+      [HostsTableType.risk]: null,
     },
   },
 };

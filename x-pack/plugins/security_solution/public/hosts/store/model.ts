@@ -40,6 +40,7 @@ export interface Queries {
   [HostsTableType.uncommonProcesses]: BasicQueryPaginated;
   [HostsTableType.anomalies]: null | undefined;
   [HostsTableType.alerts]: BasicQueryPaginated;
+  [HostsTableType.risk]: null | undefined;
 }
 
 export interface GenericHostsModel {
