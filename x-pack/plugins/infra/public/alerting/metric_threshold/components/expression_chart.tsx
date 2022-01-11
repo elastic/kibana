@@ -11,7 +11,9 @@ import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewBase } from '@kbn/es-query';
 import { first, last } from 'lodash';
+import useObservable from 'react-use/lib/useObservable';
 
+import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { Color } from '../../../../common/color_palette';
 import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
@@ -22,7 +24,6 @@ import { createFormatterForMetric } from '../../../pages/metrics/metrics_explore
 import { calculateDomain } from '../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
 import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart_data';
 import { getMetricId } from '../../../pages/metrics/metrics_explorer/components/helpers/get_metric_id';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import {
   ChartContainer,
   LoadingState,
@@ -32,6 +33,7 @@ import {
   getChartTheme,
 } from '../../common/criterion_preview_chart/criterion_preview_chart';
 import { ThresholdAnnotations } from '../../common/criterion_preview_chart/threshold_annotations';
+import { InfraClientCoreStart } from '../../../types';
 
 interface Props {
   expression: MetricExpression;
@@ -56,14 +58,16 @@ export const ExpressionChart: React.FC<Props> = ({
     groupBy
   );
 
-  const { uiSettings } = useKibanaContextForPlugin().services;
-
   const metric = {
     field: expression.metric,
     aggregation: expression.aggType as MetricsExplorerAggregation,
     color: Color.color0,
   };
-  const isDarkMode = uiSettings?.get('theme:darkMode') || false;
+
+  const { services } = useKibana<InfraClientCoreStart>();
+  const theme = useObservable(services.theme.theme$);
+  const isDarkMode = theme?.darkMode || false;
+
   const dateFormatter = useMemo(() => {
     const firstSeries = first(data?.series);
     const firstTimestamp = first(firstSeries?.rows)?.timestamp;

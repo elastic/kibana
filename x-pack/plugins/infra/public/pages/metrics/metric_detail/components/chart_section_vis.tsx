@@ -18,7 +18,9 @@ import {
   BrushEndListener,
 } from '@elastic/charts';
 import { EuiPageContentBody } from '@elastic/eui';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+
 import { getChartTheme } from '../../metrics_explorer/components/helpers/get_chart_theme';
 import { SeriesChart } from './series_chart';
 import {
@@ -32,6 +34,7 @@ import {
 import { ErrorMessage } from './error_message';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import { VisSectionProps } from '../types';
+import { InfraClientCoreStart } from '../../../../types';
 
 export const ChartSectionVis = ({
   id,
@@ -45,7 +48,10 @@ export const ChartSectionVis = ({
   seriesOverrides,
   type,
 }: VisSectionProps) => {
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const { services } = useKibana<InfraClientCoreStart>();
+  const theme = useObservable(services.theme.theme$);
+  const isDarkMode = theme?.darkMode || false;
+
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const valueFormatter = useCallback(getFormatter(formatter, formatterTemplate), [

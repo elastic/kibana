@@ -26,8 +26,9 @@ import {
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import useObservable from 'react-use/lib/useObservable';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
@@ -44,6 +45,7 @@ import { calculateDomain } from '../../../metrics_explorer/components/helpers/ca
 import { InfraFormatter } from '../../../../../lib/lib';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
 import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';
+import { InfraClientCoreStart } from '../../../../../types';
 
 interface Props {
   interval: string;
@@ -123,7 +125,10 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     return niceTimeFormatter([firstTimestamp, lastTimestamp]);
   }, [timeseries]);
 
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const { services } = useKibana<InfraClientCoreStart>();
+  const theme = useObservable(services.theme.theme$);
+  const isDarkMode = theme?.darkMode || false;
+
   const tooltipProps = {
     headerFormatter: (tooltipValue: TooltipValue) =>
       moment(tooltipValue.value).format('Y-MM-DD HH:mm:ss.SSS'),

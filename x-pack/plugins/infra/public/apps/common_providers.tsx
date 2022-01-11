@@ -17,7 +17,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { NavigationWarningPromptProvider } from '@kbn/observability-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibanaContextForPluginProvider } from '../hooks/use_kibana';
-import { InfraClientStartDeps, InfraClientStartExports } from '../types';
+import { InfraClientCoreStart, InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
 
@@ -28,11 +28,11 @@ export const CommonInfraProviders: React.FC<{
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme$: AppMountParameters['theme$'];
 }> = ({ children, triggersActionsUI, setHeaderActionMenu, appName, storage, theme$ }) => {
-  const { services } = useKibana();
+  const { services } = useKibana<InfraClientCoreStart>();
 
   return (
     <TriggersActionsProvider triggersActionsUI={triggersActionsUI}>
-      <EuiThemeProvider theme$={services.theme?.theme$}>
+      <EuiThemeProvider theme$={services.theme.theme$}>
         <DataUIProviders appName={appName} storage={storage}>
           <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
             <NavigationWarningPromptProvider>{children}</NavigationWarningPromptProvider>

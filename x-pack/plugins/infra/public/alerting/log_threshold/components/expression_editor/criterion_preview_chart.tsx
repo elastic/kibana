@@ -20,7 +20,9 @@ import {
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { InfraClientCoreStart } from '../../../../types';
 import {
   ChartContainer,
   LoadingState,
@@ -125,8 +127,9 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
   chartAlertParams,
   showThreshold,
 }) => {
-  const { uiSettings } = useKibana().services;
-  const isDarkMode = uiSettings?.get('theme:darkMode') || false;
+  const { services } = useKibana<InfraClientCoreStart>();
+  const theme = useObservable(services.theme.theme$);
+  const isDarkMode = theme?.darkMode || false;
   const timezone = useKibanaTimeZoneSetting();
 
   const {

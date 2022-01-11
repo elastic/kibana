@@ -18,8 +18,9 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { Axis, Chart, Settings, Position, TooltipValue, niceTimeFormatter } from '@elastic/charts';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import useObservable from 'react-use/lib/useObservable';
 import { createFormatter } from '../../../../../../../../common/formatters';
 import { getChartTheme } from '../../../../../metrics_explorer/components/helpers/get_chart_theme';
 import { calculateDomain } from '../../../../../metrics_explorer/components/helpers/calculate_domain';
@@ -29,6 +30,7 @@ import { MetricsExplorerAggregation } from '../../../../../../../../common/http_
 import { Color } from '../../../../../../../../common/color_palette';
 import { useProcessListRowChart } from '../../../../hooks/use_process_list_row_chart';
 import { Process } from './types';
+import { InfraClientCoreStart } from '../../../../../../../types';
 
 interface Props {
   command: string;
@@ -79,7 +81,9 @@ const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
     aggregation: 'avg' as MetricsExplorerAggregation,
     label,
   };
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const { services } = useKibana<InfraClientCoreStart>();
+  const theme = useObservable(services.theme.theme$);
+  const isDarkMode = theme?.darkMode || false;
 
   const dateFormatter = useMemo(() => {
     if (!timeseries) return () => '';

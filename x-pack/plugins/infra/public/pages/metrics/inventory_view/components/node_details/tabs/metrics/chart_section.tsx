@@ -17,7 +17,8 @@ import {
 } from '@elastic/charts';
 import React from 'react';
 import moment from 'moment';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MetricsExplorerSeries } from '../../../../../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../../../metrics_explorer/components/series_chart';
 import {
@@ -26,6 +27,7 @@ import {
 } from '../../../../../metrics_explorer/hooks/use_metrics_explorer_options';
 import { ChartHeader } from './chart_header';
 import { getTimelineChartTheme } from '../../../../../metrics_explorer/components/helpers/get_chart_theme';
+import { InfraClientCoreStart } from '../../../../../../../types';
 
 const CHART_SIZE: ChartSizeArray = ['100%', 160];
 
@@ -57,7 +59,10 @@ export const ChartSection = ({
   domain,
   stack = false,
 }: Props) => {
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const { services } = useKibana<InfraClientCoreStart>();
+  const theme = useObservable(services.theme.theme$);
+  const isDarkMode = theme?.darkMode || false;
+
   const metrics = series.map((chartSeries) => chartSeries.metric);
   const tooltipProps = {
     headerFormatter: (tooltipValue: TooltipValue) =>

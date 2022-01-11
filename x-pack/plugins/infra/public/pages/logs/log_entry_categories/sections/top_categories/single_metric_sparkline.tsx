@@ -12,9 +12,11 @@ import {
   EUI_SPARKLINE_THEME_PARTIAL,
   EUI_CHARTS_THEME_DARK,
 } from '@elastic/eui/dist/eui_charts_theme';
+import useObservable from 'react-use/lib/useObservable';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { useKibanaUiSetting } from '../../../../../utils/use_kibana_ui_setting';
 import { useKibanaTimeZoneSetting } from '../../../../../hooks/use_kibana_time_zone_setting';
+import { InfraClientCoreStart } from '../../../../../types';
 import { TimeRange } from '../../../../../../common/time';
 
 interface TimeSeriesPoint {
@@ -33,7 +35,9 @@ export const SingleMetricSparkline: React.FunctionComponent<{
   metric: TimeSeriesPoint[];
   timeRange: TimeRange;
 }> = ({ metric, timeRange }) => {
-  const [isDarkMode] = useKibanaUiSetting('theme:darkMode');
+  const { services } = useKibana<InfraClientCoreStart>();
+  const kibanaTheme = useObservable(services.theme.theme$);
+  const isDarkMode = kibanaTheme?.darkMode || false;
   const timeZone = useKibanaTimeZoneSetting();
 
   const theme = useMemo(

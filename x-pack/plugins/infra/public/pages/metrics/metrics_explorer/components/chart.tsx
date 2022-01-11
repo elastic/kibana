@@ -20,7 +20,9 @@ import {
 import { first, last } from 'lodash';
 import moment from 'moment';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import {
@@ -38,6 +40,7 @@ import { getChartTheme } from './helpers/get_chart_theme';
 import { useKibanaUiSetting } from '../../../../utils/use_kibana_ui_setting';
 import { calculateDomain } from './helpers/calculate_domain';
 import { ChartTitle } from './chart_title';
+import { InfraClientCoreStart } from '../../../../types';
 
 interface Props {
   title?: string | null;
@@ -65,7 +68,10 @@ export const MetricsExplorerChart = ({
   onTimeChange,
 }: Props) => {
   const uiCapabilities = useKibana().services.application?.capabilities;
-  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
+  const { services } = useKibana<InfraClientCoreStart>();
+  const theme = useObservable(services.theme.theme$);
+  const isDarkMode = theme?.darkMode || false;
+
   const { metrics } = options;
   const [dateFormat] = useKibanaUiSetting('dateFormat');
   const handleTimeChange: BrushEndListener = ({ x }) => {
