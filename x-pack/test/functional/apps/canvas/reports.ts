@@ -47,7 +47,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('Print PDF button', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/122137
+    describe.skip('Print PDF button', () => {
       it('downloaded PDF base64 string is correct with borders and logo', async function () {
         // Generating and then comparing reports can take longer than the default 60s timeout
         this.timeout(180000);

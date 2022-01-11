@@ -186,7 +186,7 @@
         "label": "repeatImageFunction",
         "description": [],
         "signature": [
-          "() => { name: \"repeatImage\"; aliases: never[]; type: \"render\"; inputTypes: \"number\"[]; help: string; args: { emptyImage: { types: (\"string\" | \"null\")[]; help: string; default: null; }; image: { types: (\"string\" | \"null\")[]; help: string; default: null; }; max: { types: (\"number\" | \"null\")[]; help: string; default: number; }; size: { types: \"number\"[]; default: number; help: string; }; }; fn: (count: number, args: Arguments) => Promise<{ type: \"render\"; as: string; value: { image: string | null; emptyImage: string | null; size: number; max: number | null; count: number; }; }>; }"
+          "() => { name: \"repeatImage\"; aliases: never[]; type: string; inputTypes: \"number\"[]; help: string; args: { emptyImage: { types: (\"string\" | \"null\")[]; help: string; default: null; }; image: { types: (\"string\" | \"null\")[]; help: string; default: null; }; max: { types: (\"number\" | \"null\")[]; help: string; default: number; }; size: { types: \"number\"[]; default: number; help: string; }; }; fn: (count: number, args: Arguments) => Promise<{ type: \"render\"; as: string; value: { image: string | null; emptyImage: string | null; size: number; max: number | null; count: number; }; }>; }"
         ],
         "path": "src/plugins/expression_repeat_image/common/expression_functions/repeat_image_function.ts",
         "deprecated": false,
@@ -430,13 +430,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",

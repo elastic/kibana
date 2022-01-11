@@ -40,7 +40,7 @@ export const renderApp = (
   { params, core, plugins }: { params: AppMountParameters; core: CoreStart; plugins: PluginsStart },
   { config, data }: { config: ClientConfigType; data: ClientData }
 ) => {
-  const { publicUrl, errorConnecting, ...initialData } = data;
+  const { publicUrl, errorConnectingMessage, ...initialData } = data;
   externalUrl.enterpriseSearchUrl = publicUrl || config.host || '';
 
   resetContext({ createStore: true });
@@ -65,7 +65,7 @@ export const renderApp = (
   });
   const unmountHttpLogic = mountHttpLogic({
     http: core.http,
-    errorConnecting,
+    errorConnectingMessage,
     readOnlyMode: initialData.readOnlyMode,
   });
   const unmountFlashMessagesLogic = mountFlashMessagesLogic();

@@ -237,7 +237,7 @@
         "label": "ImportQuerySchema",
         "description": [],
         "signature": [
-          "{ overwrite?: boolean | undefined; }"
+          "{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/import_query_schema/index.ts",
         "deprecated": false,
@@ -251,7 +251,7 @@
         "label": "ImportQuerySchemaDecoded",
         "description": [],
         "signature": [
-          "Omit<{ overwrite?: boolean | undefined; }, \"overwrite\"> & { overwrite: boolean; }"
+          "Omit<{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; }, \"overwrite\" | \"overwrite_exceptions\"> & { overwrite: boolean; overwrite_exceptions: boolean; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/import_query_schema/index.ts",
         "deprecated": false,
@@ -576,6 +576,8 @@
           "<",
           "PartialC",
           "<{ overwrite: ",
+          "Type",
+          "<boolean, string | boolean | undefined, unknown>; overwrite_exceptions: ",
           "Type",
           "<boolean, string | boolean | undefined, unknown>; }>>"
         ],
