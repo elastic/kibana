@@ -52,7 +52,7 @@ import {
   formatTimelineResultToModel,
 } from '../../../timelines/components/open_timeline/helpers';
 import { convertKueryToElasticSearchQuery } from '../../../common/lib/keury';
-import { getField } from '../../../helpers';
+import { getField, getFieldKey } from '../../../helpers';
 import {
   replaceTemplateFieldFromQuery,
   replaceTemplateFieldFromMatchFilters,
@@ -273,7 +273,7 @@ export const isThresholdRule = (ecsData: Ecs) => {
 };
 
 export const buildAlertsKqlFilter = (
-  key: '_id' | 'kibana.alert.group.id',
+  key: '_id' | 'signal.group.id' | 'kibana.alert.group.id',
   alertIds: string[]
 ): Filter[] => {
   return [
@@ -341,34 +341,35 @@ export const buildEqlDataProviderOrFilter = (
     return {
       dataProviders: [],
       filters: buildAlertsKqlFilter(
-        'kibana.alert.group.id',
+        'signal.group.id',
         ecs.reduce<string[]>((acc, ecsData) => {
-          const kibanaAlertGroupId = ecsData.kibana?.alert?.group?.id?.length
-            ? ecsData.kibana?.alert?.group?.id[0]
-            : 'unknown-kibana-alert-group-id';
-          if (!acc.includes(kibanaAlertGroupId)) {
-            return [...acc, kibanaAlertGroupId];
+          const alertGroupIdField = getField(ecsData, ALERT_GROUP_ID);
+          const alertGroupId = alertGroupIdField?.length
+            ? alertGroupIdField[0]
+            : 'unknown-group-id';
+          if (!acc.includes(alertGroupId)) {
+            return [...acc, alertGroupId];
           }
           return acc;
         }, [])
       ),
     };
   } else if (!Array.isArray(ecs)) {
-    const kibanaAlertGroupId = ecs.kibana?.alert?.group?.id?.length
-      ? ecs.kibana?.alert?.group?.id[0]
-      : 'unknown-kibana-alert-group-id';
+    const alertGroupIdField: string[] = getField(ecs, ALERT_GROUP_ID);
+    const queryMatchField = getFieldKey(ecs, ALERT_GROUP_ID);
+    const alertGroupId = alertGroupIdField?.length ? alertGroupIdField[0] : 'unknown-group-id';
     return {
       dataProviders: [
         {
           and: [],
-          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${kibanaAlertGroupId}`,
+          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${alertGroupId}`,
           name: ecs._id,
           enabled: true,
           excluded: false,
           kqlQuery: '',
           queryMatch: {
-            field: 'kibana.alert.group.id',
-            value: kibanaAlertGroupId,
+            field: queryMatchField,
+            value: alertGroupId,
             operator: ':' as const,
           },
         },

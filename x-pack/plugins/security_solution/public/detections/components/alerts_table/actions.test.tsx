@@ -334,20 +334,17 @@ describe('alert actions', () => {
     });
 
     describe('Eql', () => {
-      test(' with kibana.alert.group.id', async () => {
+      test(' with signal.group.id', async () => {
         const ecsDataMock: Ecs = {
           ...mockEcsDataWithAlert,
-          kibana: {
-            alert: {
-              rule: {
-                ...mockEcsDataWithAlert?.kibana?.alert?.rule,
-                uuid: ['test-uuid'],
-                type: ['eql'],
-                timeline_id: [''],
-              },
-              group: {
-                id: ['my-group-id'],
-              },
+          signal: {
+            rule: {
+              ...mockEcsDataWithAlert?.signal?.rule,
+              type: ['eql'],
+              timeline_id: [''],
+            },
+            group: {
+              id: ['my-group-id'],
             },
           },
         };
@@ -373,24 +370,21 @@ describe('alert actions', () => {
                 id: 'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-my-group-id',
                 kqlQuery: '',
                 name: '1',
-                queryMatch: { field: 'kibana.alert.group.id', operator: ':', value: 'my-group-id' },
+                queryMatch: { field: 'signal.group.id', operator: ':', value: 'my-group-id' },
               },
             ],
           },
         });
       });
 
-      test(' with NO  kibana.alert.group.id', async () => {
+      test(' with NO signal.group.id', async () => {
         const ecsDataMock: Ecs = {
           ...mockEcsDataWithAlert,
-          kibana: {
-            alert: {
-              rule: {
-                ...mockEcsDataWithAlert?.kibana?.alert?.rule,
-                uuid: ['test-uuid'],
-                type: ['eql'],
-                timeline_id: [''],
-              },
+          signal: {
+            rule: {
+              ...mockEcsDataWithAlert?.signal?.rule,
+              type: ['eql'],
+              timeline_id: [''],
             },
           },
         };

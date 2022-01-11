@@ -6,7 +6,7 @@
  */
 
 import { ALERT_RULE_UUID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
-import { get, isEmpty } from 'lodash/fp';
+import { has, get, isEmpty } from 'lodash/fp';
 import React from 'react';
 import { matchPath, RouteProps, Redirect } from 'react-router-dom';
 
@@ -219,6 +219,23 @@ const alertFieldMappings: Record<string, string> = {
   'signal.rule.filters': `${ALERT_RULE_PARAMETERS}.filters`,
   'signal.rule.language': `${ALERT_RULE_PARAMETERS}.language`,
   'signal.rule.query': `${ALERT_RULE_PARAMETERS}.query`,
+};
+
+/*
+ * Deprecation notice: This functionality should be removed when support for signal.* is no longer
+ * supported.
+ *
+ * Selectively returns the AAD field key (kibana.alert.*) or the legacy field
+ * (signal.*), whichever is present. For backwards compatibility.
+ */
+export const getFieldKey = (ecsData: Ecs, field: string): string => {
+  const aadField = (alertFieldMappings[field] ?? field).replace('signal', 'kibana.alert');
+  const siemSignalsField = (siemSignalsFieldMappings[field] ?? field).replace(
+    'kibana.alert',
+    'signal'
+  );
+  if (has(aadField, ecsData)) return aadField;
+  return siemSignalsField;
 };
 
 /*
