@@ -96,6 +96,7 @@ describe('Hosts redux store', () => {
           activePage: 0,
           limit: 10,
         },
+        [HostsTableType.risk]: null,
       });
     });
 
@@ -124,6 +125,7 @@ describe('Hosts redux store', () => {
           activePage: 0,
           limit: 10,
         },
+        [HostsTableType.risk]: null,
       });
     });
   });
