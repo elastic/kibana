@@ -97,7 +97,6 @@ export class SampleDataInstaller {
       throw new SampleDataInstallError(`Sample dataset ${datasetId} not found`, 404);
     }
 
-    // TODO
     for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
       const dataIndex = sampleDataset.dataIndices[i];
       await this.uninstallDataIndex(sampleDataset, dataIndex);
@@ -106,7 +105,21 @@ export class SampleDataInstaller {
   }
 
   private async uninstallDataIndex(dataset: SampleDatasetSchema, dataIndex: DataIndexSchema) {
-    const index = createIndexName(dataset.id, dataIndex.id);
+    let index = createIndexName(dataset.id, dataIndex.id);
+
+    try {
+      // if the sample data was reindexed using UA, the index name is actually an alias pointing to the reindexed
+      // index. In that case, we need to get rid of the alias and to delete the underlying index
+      const { body: response } = await this.esClient.asCurrentUser.indices.getAlias({
+        name: index,
+      });
+      const aliasName = index;
+      index = Object.keys(response)[0];
+      await this.esClient.asCurrentUser.indices.deleteAlias({ name: aliasName, index });
+    } catch (err) {
+      // ignore errors from missing alias
+    }
+
     try {
       await this.esClient.asCurrentUser.indices.delete({
         index,
