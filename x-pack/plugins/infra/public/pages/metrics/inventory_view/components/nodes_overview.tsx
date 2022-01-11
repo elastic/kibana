@@ -41,99 +41,101 @@ interface Props {
   showLoading: boolean;
 }
 
-export const NodesOverview = ({
-  autoBounds,
-  boundsOverride,
-  loading,
-  nodes,
-  nodeType,
-  reload,
-  view,
-  currentTime,
-  options,
-  formatter,
-  onDrilldown,
-  bottomMargin,
-  topMargin,
-  showLoading,
-}: Props) => {
-  const handleDrilldown = useCallback(
-    (filter: string) => {
-      onDrilldown({
-        kind: 'kuery',
-        expression: filter,
-      });
-      return;
-    },
-    [onDrilldown]
-  );
-
-  const noData = !loading && nodes && nodes.length === 0;
-  if (loading && showLoading) {
-    // Don't show loading screen when we're auto-reloading
-    return (
-      <InfraLoadingPanel
-        height="100%"
-        width="100%"
-        text={i18n.translate('xpack.infra.waffle.loadingDataText', {
-          defaultMessage: 'Loading data',
-        })}
-      />
+export const NodesOverview = React.memo(
+  ({
+    autoBounds,
+    boundsOverride,
+    loading,
+    nodes,
+    nodeType,
+    reload,
+    view,
+    currentTime,
+    options,
+    formatter,
+    onDrilldown,
+    bottomMargin,
+    topMargin,
+    showLoading,
+  }: Props) => {
+    const handleDrilldown = useCallback(
+      (filter: string) => {
+        onDrilldown({
+          kind: 'kuery',
+          expression: filter,
+        });
+        return;
+      },
+      [onDrilldown]
     );
-  } else if (noData) {
-    return (
-      <NoData
-        titleText={i18n.translate('xpack.infra.waffle.noDataTitle', {
-          defaultMessage: 'There is no data to display.',
-        })}
-        bodyText={i18n.translate('xpack.infra.waffle.noDataDescription', {
-          defaultMessage: 'Try adjusting your time or filter.',
-        })}
-        refetchText={i18n.translate('xpack.infra.waffle.checkNewDataButtonLabel', {
-          defaultMessage: 'Check for new data',
-        })}
-        onRefetch={() => {
-          reload();
-        }}
-        testString="noMetricsDataPrompt"
-      />
-    );
-  }
-  const dataBounds = calculateBoundsFromNodes(nodes);
-  const bounds = autoBounds ? dataBounds : boundsOverride;
-  const isStatic = ['xs', 's'].includes(getBreakpoint(window.innerWidth)!);
 
-  if (view === 'table') {
+    const noData = !loading && nodes && nodes.length === 0;
+    if (loading && showLoading) {
+      // Don't show loading screen when we're auto-reloading
+      return (
+        <InfraLoadingPanel
+          height="100%"
+          width="100%"
+          text={i18n.translate('xpack.infra.waffle.loadingDataText', {
+            defaultMessage: 'Loading data',
+          })}
+        />
+      );
+    } else if (noData) {
+      return (
+        <NoData
+          titleText={i18n.translate('xpack.infra.waffle.noDataTitle', {
+            defaultMessage: 'There is no data to display.',
+          })}
+          bodyText={i18n.translate('xpack.infra.waffle.noDataDescription', {
+            defaultMessage: 'Try adjusting your time or filter.',
+          })}
+          refetchText={i18n.translate('xpack.infra.waffle.checkNewDataButtonLabel', {
+            defaultMessage: 'Check for new data',
+          })}
+          onRefetch={() => {
+            reload();
+          }}
+          testString="noMetricsDataPrompt"
+        />
+      );
+    }
+    const dataBounds = calculateBoundsFromNodes(nodes);
+    const bounds = autoBounds ? dataBounds : boundsOverride;
+    const isStatic = ['xs', 's'].includes(getBreakpoint(window.innerWidth)!);
+
+    if (view === 'table') {
+      return (
+        <TableContainer>
+          <TableView
+            nodeType={nodeType}
+            nodes={nodes}
+            options={options}
+            formatter={formatter}
+            currentTime={currentTime}
+            onFilter={handleDrilldown}
+          />
+        </TableContainer>
+      );
+    }
     return (
-      <TableContainer>
-        <TableView
+      <MapContainer top={topMargin} positionStatic={isStatic}>
+        <Map
           nodeType={nodeType}
           nodes={nodes}
           options={options}
           formatter={formatter}
           currentTime={currentTime}
           onFilter={handleDrilldown}
+          bounds={bounds}
+          dataBounds={dataBounds}
+          bottomMargin={bottomMargin}
+          staticHeight={isStatic}
         />
-      </TableContainer>
+      </MapContainer>
     );
   }
-  return (
-    <MapContainer top={topMargin} positionStatic={isStatic}>
-      <Map
-        nodeType={nodeType}
-        nodes={nodes}
-        options={options}
-        formatter={formatter}
-        currentTime={currentTime}
-        onFilter={handleDrilldown}
-        bounds={bounds}
-        dataBounds={dataBounds}
-        bottomMargin={bottomMargin}
-        staticHeight={isStatic}
-      />
-    </MapContainer>
-  );
-};
+);
 
 const TableContainer = euiStyled.div`
   padding: ${(props) => props.theme.eui.paddingSizes.l};
