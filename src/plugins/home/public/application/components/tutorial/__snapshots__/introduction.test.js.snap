@@ -75,7 +75,11 @@ exports[`props Beats badge should show 1`] = `
         <React.Fragment>
            
           <EuiBadge>
-            Beats
+            <FormattedMessage
+              defaultMessage="Beats"
+              id="home.tutorial.introduction.beatsBadgeLabel"
+              values={Object {}}
+            />
           </EuiBadge>
         </React.Fragment>
       </React.Fragment>

@@ -85,7 +85,7 @@ describe('props', () => {
         category={TutorialsCategory.METRICS}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('Beats badge should not show', () => {
@@ -98,6 +98,6 @@ describe('props', () => {
         category={TutorialsCategory.SECURITY_SOLUTION}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 });

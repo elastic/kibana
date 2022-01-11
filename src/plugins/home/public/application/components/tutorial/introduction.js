@@ -105,7 +105,12 @@ function IntroductionUI({
             {category === TutorialsCategory.LOGGING || category === TutorialsCategory.METRICS ? (
               <>
                 &nbsp;
-                <EuiBadge>Beats</EuiBadge>
+                <EuiBadge>
+                  <FormattedMessage
+                    id="home.tutorial.introduction.beatsBadgeLabel"
+                    defaultMessage="Beats"
+                  />
+                </EuiBadge>
               </>
             ) : null}
           </>
