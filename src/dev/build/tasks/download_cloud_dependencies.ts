@@ -15,7 +15,7 @@ export const DownloadCloudDependencies: Task = {
   description: 'Downloading cloud dependencies',
 
   async run(config, log, build) {
-    const downloadBeat = async (beat: string, id) => {
+    const downloadBeat = async (beat: string, id: string) => {
       const subdomain = config.isRelease ? 'artifacts' : 'snapshots';
       const version = config.getBuildVersion();
       const buildId = id.match(/[0-9]\.[0-9]\.[0-9]-[0-9a-z]{8}/);
