@@ -8,7 +8,14 @@ import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
 import { Serializable } from '@kbn/utility-types';
 import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { flowRight, mapValues } from 'lodash';
-import { CanvasElement, CanvasTemplateElement, CanvasTemplate } from '../../../types';
+import {
+  CanvasElement,
+  CanvasTemplateElement,
+  CanvasTemplate,
+  CustomElement,
+  CustomElementContent,
+  CustomElementNode,
+} from '../../../types';
 import {
   MigrateFunction,
   MigrateFunctionsObject,
@@ -46,7 +53,7 @@ const migrateExpr = (expr: string, migrateFn: MigrateFunction<ExprAst, ExprAst>)
 
 const migrateWorkpadElement =
   (migrate: MigrateFunction<ExprAst, ExprAst>) =>
-  ({ filter, expression, ...element }: CanvasElement) => ({
+  ({ filter, expression, ...element }: CanvasElement | CustomElementNode) => ({
     ...element,
     filter: filter ? migrateExpr(filter, migrate) : filter,
     expression: expression ? migrateExpr(expression, migrate) : expression,
@@ -89,6 +96,30 @@ const migrateTemplateWorkpadExpressions: MigrationFn<CanvasTemplate['template']>
 const migrateWorkpadExpressionsAndFilters: MigrationFn<WorkpadAttributes> = (migrate) => (doc) =>
   migrateWorkpadElements(doc, migrateWorkpadElement(migrate));
 
+const migrateCustomElementExpressionsAndFilters: MigrationFn<CustomElement> =
+  (migrate) => (doc) => {
+    if (
+      typeof doc.attributes !== 'object' ||
+      doc.attributes === null ||
+      doc.attributes === undefined
+    ) {
+      return doc;
+    }
+
+    const { content } = doc.attributes;
+    const { selectedNodes = [] }: CustomElementContent = content
+      ? JSON.parse(content)
+      : { selectedNodes: [] };
+
+    const newSelectedNodes = selectedNodes.map((element) => {
+      const newElement = migrateWorkpadElement(migrate)(element);
+      return { ...element, ...newElement, ast: toAst(newElement.expression) };
+    });
+
+    const newContent = JSON.stringify({ selectedNodes: newSelectedNodes });
+    return { ...doc, attributes: { ...doc.attributes, content: newContent } };
+  };
+
 export const workpadExpressionsMigrationsFactory = ({
   expressions,
 }: CanvasSavedObjectTypeMigrationsDeps) =>
@@ -103,4 +134,12 @@ export const templateWorkpadExpressionsMigrationsFactory = ({
   mapValues<MigrateFunctionsObject, SavedObjectMigrationFn<CanvasTemplate['template']>>(
     expressions.getAllMigrations(),
     migrateTemplateWorkpadExpressions
+  ) as MigrateFunctionsObject;
+
+export const customElementExpressionsMigrationsFactory = ({
+  expressions,
+}: CanvasSavedObjectTypeMigrationsDeps) =>
+  mapValues<MigrateFunctionsObject, SavedObjectMigrationFn<CustomElement>>(
+    expressions.getAllMigrations(),
+    migrateCustomElementExpressionsAndFilters
   ) as MigrateFunctionsObject;

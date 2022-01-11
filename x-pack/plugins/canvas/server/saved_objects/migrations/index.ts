@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  customElementExpressionsMigrationsFactory,
   templateWorkpadExpressionsMigrationsFactory,
   workpadExpressionsMigrationsFactory,
 } from './expressions';
@@ -20,5 +21,8 @@ export const workpadMigrationsFactory = (deps: CanvasSavedObjectTypeMigrationsDe
 
 export const templateWorkpadMigrationsFactory = (deps: CanvasSavedObjectTypeMigrationsDeps) =>
   templateWorkpadExpressionsMigrationsFactory(deps);
+
+export const customElementMigrationsFactory = (deps: CanvasSavedObjectTypeMigrationsDeps) =>
+  customElementExpressionsMigrationsFactory(deps);
 
 export type { CanvasSavedObjectTypeMigrationsDeps } from './types';

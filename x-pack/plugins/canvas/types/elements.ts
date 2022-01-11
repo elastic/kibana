@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SerializableRecord } from '@kbn/utility-types';
 import { ExpressionAstExpression } from 'src/plugins/expressions';
 import { CanvasElement } from '.';
 
@@ -47,6 +48,12 @@ export interface CustomElement {
    * the element object stringified
    */
   content: string;
+}
+
+export type CustomElementNode = Omit<PositionedElement, 'type'>;
+
+export interface CustomElementContent {
+  selectedNodes: CustomElementNode[];
 }
 
 export interface ElementPosition {
