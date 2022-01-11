@@ -63,7 +63,7 @@ export async function getAlertSummary(
   loadAlertSummary: AlertApis['loadAlertSummary'],
   setAlertSummary: React.Dispatch<React.SetStateAction<AlertSummary | null>>,
   toasts: Pick<ToastsApi, 'addDanger'>,
-  executionDuration: number
+  executionDuration?: number
 ) {
   try {
     const loadedSummary = await loadAlertSummary(ruleId, executionDuration);

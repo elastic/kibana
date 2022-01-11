@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiEmptyPrompt,
-  EuiIconTip,
   EuiTitle,
   EuiSelect,
 } from '@elastic/eui';
