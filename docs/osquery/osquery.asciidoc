@@ -180,8 +180,6 @@ and the mapped ECS fields. For example, if you update a query to map `osquery.na
 
 . Map more fields, as needed.
 
-** To add a new row for additional fields to map, click the plus icon.
-
 ** To remove any mapped rows, click the trash icon.
 
 . Save your changes.
