@@ -230,7 +230,6 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
     const mockRequest: RequestMock = {
       method: 'get',
       path: addBasePath('snapshots/{repository}/{snapshot}'),
-      query: 'asd',
       params: {
         repository,
         snapshot,
