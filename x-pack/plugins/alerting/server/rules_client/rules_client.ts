@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import { omit, isEqual, map, uniq, pick, truncate, trim, mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SpanOptions, withSpan } from '@kbn/apm-utils';
 import {
   Logger,
   SavedObjectsClientContract,
@@ -150,6 +151,11 @@ export interface FindOptions extends IndexType {
   };
   fields?: string[];
   filter?: string;
+}
+
+export interface BulkUpateOptions<Params extends AlertTypeParams> {
+  filter?: string;
+  modifier: (p: RawRule) => RawRule;
 }
 
 export interface AggregateOptions extends IndexType {
@@ -839,7 +845,10 @@ export class RulesClient {
     return await retryIfConflicts(
       this.logger,
       `rulesClient.update('${id}')`,
-      async () => await this.updateWithOCC<Params>({ id, data })
+      async () =>
+        await withSpan({ type: 'sec_sol', name: 'updateWithOCC' }, () =>
+          this.updateWithOCC<Params>({ id, data })
+        )
     );
   }
 
@@ -894,7 +903,9 @@ export class RulesClient {
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(alertSavedObject.attributes.alertTypeId);
 
-    const updateResult = await this.updateAlert<Params>({ id, data }, alertSavedObject);
+    const updateResult = await withSpan({ type: 'sec_sol', name: 'updateAlert' }, () =>
+      this.updateAlert<Params>({ id, data }, alertSavedObject)
+    );
 
     await Promise.all([
       alertSavedObject.attributes.apiKey
@@ -1008,6 +1019,35 @@ export class RulesClient {
       updatedObject.attributes,
       updatedObject.references
     );
+  }
+
+  public async bulkUpdate<Params extends AlertTypeParams>({
+    filter,
+    modifier,
+  }: BulkUpateOptions<Params>) {
+    // const { data: rules } = await this.find({
+    //   options: {
+    //     filter,
+    //     page: 1,
+    //     per_page: 10000,
+    //   },
+    // });
+
+    const { saved_objects: savedObjects } = await this.unsecuredSavedObjectsClient.find<RawRule>({
+      filter,
+      type: 'alert',
+      perPage: 10_000,
+    });
+
+    const results = await this.unsecuredSavedObjectsClient.bulkUpdate(
+      savedObjects.map((so) => ({
+        id: so.id,
+        type: so.type,
+        attributes: { ...so.attributes, ...modifier(so.attributes) },
+      }))
+    );
+
+    return results;
   }
 
   private apiKeyAsAlertAttributes(
