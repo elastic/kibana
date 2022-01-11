@@ -17,7 +17,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { customEvents } from '@kbn/custom-events';
+import { useCustomEventContext } from '@kbn/custom-events';
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
 import {
