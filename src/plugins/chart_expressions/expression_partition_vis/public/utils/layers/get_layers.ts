@@ -6,123 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { Datum, PartitionFillLabel, PartitionLayer, ShapeTreeNode } from '@elastic/charts';
-import { isEqual } from 'lodash';
-import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
-import { SeriesLayer, PaletteRegistry, lightenColor } from '../../../../../charts/public';
+import { Datum, PartitionFillLabel, PartitionLayer } from '@elastic/charts';
+import type { FieldFormatsStart } from '../../../../../field_formats/public';
+import { PaletteRegistry } from '../../../../../charts/public';
 import type { Datatable, DatatableRow } from '../../../../../expressions/public';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
-import { getDistinctSeries } from '../get_distinct_series';
 import { sortPredicateByType } from './sort_predicate';
+import { getColor } from './get_color';
 
 const EMPTY_SLICE = Symbol('empty_slice');
-
-export const computeColor = (
-  d: ShapeTreeNode,
-  isSplitChart: boolean,
-  overwriteColors: { [key: string]: string } = {},
-  columns: Array<Partial<BucketColumns>>,
-  rows: DatatableRow[],
-  visParams: PartitionVisParams,
-  palettes: PaletteRegistry | null,
-  syncColors: boolean,
-  formatter: FieldFormatsStart,
-  format?: BucketColumns['format']
-) => {
-  const { parentSeries, allSeries } = getDistinctSeries(rows, columns);
-  const dataName = d.dataName;
-
-  let formattedLabel = '';
-  if (format) {
-    formattedLabel = formatter.deserialize(format).convert(dataName) ?? '';
-  }
-
-  if (visParams.distinctColors) {
-    let overwriteColor;
-    // this is for supporting old visualizations (created by vislib plugin)
-    // it seems that there for some aggs, the uiState saved from vislib is
-    // different than the es-charts handle it
-    if (overwriteColors.hasOwnProperty(formattedLabel)) {
-      overwriteColor = overwriteColors[formattedLabel];
-    }
-
-    if (Object.keys(overwriteColors).includes(dataName.toString())) {
-      overwriteColor = overwriteColors[dataName];
-    }
-
-    if (overwriteColor) {
-      return overwriteColor;
-    }
-
-    const index = allSeries.findIndex((name) => isEqual(name, dataName));
-    const isSplitParentLayer = isSplitChart && parentSeries.includes(dataName);
-    return palettes?.get(visParams.palette.name).getCategoricalColor(
-      [
-        {
-          name: dataName,
-          rankAtDepth: isSplitParentLayer
-            ? parentSeries.findIndex((name) => name === dataName)
-            : index > -1
-            ? index
-            : 0,
-          totalSeriesAtDepth: isSplitParentLayer ? parentSeries.length : allSeries.length || 1,
-        },
-      ],
-      {
-        maxDepth: 1,
-        totalSeries: allSeries.length || 1,
-        behindText: visParams.labels.show,
-        syncColors,
-      },
-      visParams.palette?.params ?? { colors: [] }
-    );
-  }
-
-  const seriesLayers: SeriesLayer[] = [];
-  let tempParent: typeof d | typeof d['parent'] = d;
-  while (tempParent.parent && tempParent.depth > 0) {
-    const seriesName = String(tempParent.parent.children[tempParent.sortIndex][0]);
-    const isSplitParentLayer = isSplitChart && parentSeries.includes(seriesName);
-    seriesLayers.unshift({
-      name: seriesName,
-      rankAtDepth: isSplitParentLayer
-        ? parentSeries.findIndex((name) => name === seriesName)
-        : tempParent.sortIndex,
-      totalSeriesAtDepth: isSplitParentLayer
-        ? parentSeries.length
-        : tempParent.parent.children.length,
-    });
-    tempParent = tempParent.parent;
-  }
-
-  let overwriteColor;
-  // this is for supporting old visualizations (created by vislib plugin)
-  // it seems that there for some aggs, the uiState saved from vislib is
-  // different than the es-charts handle it
-  if (overwriteColors.hasOwnProperty(formattedLabel)) {
-    overwriteColor = overwriteColors[formattedLabel];
-  }
-
-  seriesLayers.forEach((layer) => {
-    if (Object.keys(overwriteColors).includes(layer.name)) {
-      overwriteColor = overwriteColors[layer.name];
-    }
-  });
-
-  if (overwriteColor) {
-    return lightenColor(overwriteColor, seriesLayers.length, columns.length);
-  }
-  return palettes?.get(visParams.palette.name).getCategoricalColor(
-    seriesLayers,
-    {
-      behindText: visParams.labels.show,
-      maxDepth: columns.length,
-      totalSeries: rows.length,
-      syncColors,
-    },
-    visParams.palette?.params ?? { colors: [] }
-  );
-};
 
 export const getLayers = (
   visType: ChartTypes,
@@ -133,7 +25,8 @@ export const getLayers = (
   rows: DatatableRow[],
   palettes: PaletteRegistry | null,
   formatter: FieldFormatsStart,
-  syncColors: boolean
+  syncColors: boolean,
+  isDarkMode: boolean
 ): PartitionLayer[] => {
   const fillLabel: Partial<PartitionFillLabel> = {
     valueFont: {
@@ -164,7 +57,7 @@ export const getLayers = (
       sortPredicate: sortPredicateByType(visType, visParams, visData, columns, col),
       shape: {
         fillColor: (d) => {
-          const outputColor = computeColor(
+          const outputColor = getColor(
             d,
             isSplitChart,
             overwriteColors,
@@ -173,6 +66,7 @@ export const getLayers = (
             visParams,
             palettes,
             syncColors,
+            isDarkMode,
             formatter,
             col.format
           );

@@ -8,7 +8,15 @@
 import { DatatableRow } from '../../../../expressions/public';
 import { BucketColumns } from '../../common/types';
 
-export const getDistinctSeries = (rows: DatatableRow[], buckets: Array<Partial<BucketColumns>>) => {
+export interface DistinctSeries {
+  allSeries: string[];
+  parentSeries: string[];
+}
+
+export const getDistinctSeries = (
+  rows: DatatableRow[],
+  buckets: Array<Partial<BucketColumns>>
+): DistinctSeries => {
   const parentBucketId = buckets[0].id;
   const parentSeries: string[] = [];
   const allSeries: string[] = [];
@@ -24,8 +32,5 @@ export const getDistinctSeries = (rows: DatatableRow[], buckets: Array<Partial<B
       }
     });
   });
-  return {
-    allSeries,
-    parentSeries,
-  };
+  return { allSeries, parentSeries };
 };

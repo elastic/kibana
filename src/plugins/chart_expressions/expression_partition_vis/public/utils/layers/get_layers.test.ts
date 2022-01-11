@@ -9,7 +9,7 @@ import { ShapeTreeNode } from '@elastic/charts';
 import { PaletteDefinition, SeriesLayer } from '../../../../../charts/public';
 import { dataPluginMock } from '../../../../../data/public/mocks';
 import type { DataPublicPluginStart } from '../../../../../data/public';
-import { computeColor } from './get_layers';
+import { getColor } from './get_color';
 import { createMockVisData, createMockBucketColumns, createMockPieParams } from '../../mocks';
 
 const visData = createMockVisData();
@@ -68,7 +68,7 @@ describe('computeColor', () => {
         sortIndex: 0,
       },
     } as unknown as ShapeTreeNode;
-    const color = computeColor(
+    const color = getColor(
       d,
       false,
       {},
@@ -76,6 +76,7 @@ describe('computeColor', () => {
       visData.rows,
       visParams,
       getPaletteRegistry(),
+      false,
       false,
       dataMock.fieldFormats
     );
@@ -93,7 +94,7 @@ describe('computeColor', () => {
         sortIndex: 0,
       },
     } as unknown as ShapeTreeNode;
-    const color = computeColor(
+    const color = getColor(
       d,
       true,
       {},
@@ -101,6 +102,7 @@ describe('computeColor', () => {
       visData.rows,
       visParams,
       getPaletteRegistry(),
+      false,
       false,
       dataMock.fieldFormats
     );
@@ -117,7 +119,7 @@ describe('computeColor', () => {
         sortIndex: 0,
       },
     } as unknown as ShapeTreeNode;
-    const color = computeColor(
+    const color = getColor(
       d,
       true,
       { 'ES-Air': '#000028' },
@@ -125,6 +127,7 @@ describe('computeColor', () => {
       visData.rows,
       visParams,
       getPaletteRegistry(),
+      false,
       false,
       dataMock.fieldFormats
     );
@@ -162,7 +165,7 @@ describe('computeColor', () => {
       ...visParams,
       distinctColors: true,
     };
-    const color = computeColor(
+    const color = getColor(
       d,
       true,
       { '≥ 1000 and < 2000': '#3F6833' },
@@ -170,6 +173,7 @@ describe('computeColor', () => {
       visData.rows,
       visParamsNew,
       getPaletteRegistry(),
+      false,
       false,
       dataMock.fieldFormats,
       {

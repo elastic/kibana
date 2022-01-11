@@ -234,7 +234,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         visData.rows,
         props.palettesRegistry,
         services.fieldFormats,
-        syncColors
+        syncColors,
+        props.chartsThemeService.useDarkMode()
       ),
     [
       visType,
@@ -243,6 +244,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       visData,
       props.uiState,
       props.palettesRegistry,
+      props.chartsThemeService,
       services.fieldFormats,
       syncColors,
     ]
