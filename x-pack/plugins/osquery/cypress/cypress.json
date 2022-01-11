@@ -1,6 +1,6 @@
 {
   "baseUrl": "http://localhost:5620",
-  "defaultCommandTimeout": 6000,
+  "defaultCommandTimeout": 12000,
   "execTimeout": 12000,
   "pageLoadTimeout": 12000,
   "retries": {
@@ -8,7 +8,7 @@
   },
   "screenshotsFolder": "../../../target/kibana-osquery/cypress/screenshots",
   "trashAssetsBeforeRuns": false,
-  "video": false,
+  "video": true,
   "videosFolder": "../../../target/kibana-osquery/cypress/videos",
   "viewportHeight": 900,
   "viewportWidth": 1440,

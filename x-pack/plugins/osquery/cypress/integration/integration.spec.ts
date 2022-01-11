@@ -15,9 +15,15 @@ describe('Add Integration', () => {
 
   before(() => {
     login();
+    navigateTo('/app/osquery');
+    cy.window().its('__coverage__').should('be.a', 'object');
   });
 
-  it.skip('should open Osquery app', () => {
+  it('should display Osquery integration in the Policies list once installed ', () => {
+    addAndVerifyIntegration();
+  });
+
+  it('should open Osquery app', () => {
     cy.visit('/app/osquery/live_queries');
     cy.wait(3000);
     cy.contains('Live queries history', { timeout: 60000 });
@@ -33,10 +39,6 @@ describe('Add Integration', () => {
     cy.contains('Packs', { timeout: 60000 });
     cy.contains('Add pack').click();
     cy.wait(3000);
-  });
-
-  it('should display Osquery integration in the Policies list once installed ', () => {
-    addAndVerifyIntegration();
   });
 
   it.skip('should run live query', () => {

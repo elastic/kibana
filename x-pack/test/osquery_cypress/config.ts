@@ -33,6 +33,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     kbnTestServer: {
       ...xpackFunctionalTestsConfig.get('kbnTestServer'),
+      sourceArgs: [
+        ...xpackFunctionalTestsConfig.get('kbnTestServer.sourceArgs'),
+        '--env.CODE_COVERAGE=1',
+      ],
       serverArgs: [
         ...xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs'),
         '--csp.strict=false',
