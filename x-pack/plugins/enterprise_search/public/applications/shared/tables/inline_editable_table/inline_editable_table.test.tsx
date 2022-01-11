@@ -88,14 +88,38 @@ describe('InlineEditableTable', () => {
     const reorderableTable = wrapper.find(ReorderableTable);
     expect(reorderableTable.exists()).toBe(true);
     expect(reorderableTable.prop('items')).toEqual(items);
-    expect(wrapper.find('[data-test-subj="actionButton"]').children().text()).toEqual('New row');
+    expect(
+      wrapper.find('[data-test-subj="inlineEditableTableActionButton"]').children().text()
+    ).toEqual('New row');
+  });
+
+  it('renders a title if one is provided', () => {
+    const wrapper = shallow(
+      <InlineEditableTableContents {...requiredParams} description={<p>Some Description</p>} />
+    );
+    expect(wrapper.find('[data-test-subj="inlineEditableTableTitle"]').exists()).toBe(true);
+  });
+
+  it('does not render a title if none is provided', () => {
+    const wrapper = shallow(
+      <InlineEditableTableContents
+        {...{ ...requiredParams, title: '' }}
+        description={<p>Some Description</p>}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="inlineEditableTableTitle"]').exists()).toBe(false);
   });
 
   it('renders a description if one is provided', () => {
     const wrapper = shallow(
       <InlineEditableTableContents {...requiredParams} description={<p>Some Description</p>} />
     );
-    expect(wrapper.find('[data-test-subj="description"]').exists()).toBe(true);
+    expect(wrapper.find('[data-test-subj="inlineEditableTableDescription"]').exists()).toBe(true);
+  });
+
+  it('renders no description if none is provided', () => {
+    const wrapper = shallow(<InlineEditableTableContents {...requiredParams} />);
+    expect(wrapper.find('[data-test-subj="inlineEditableTableDescription"]').exists()).toBe(false);
   });
 
   it('can specify items in the table that are uneditable', () => {
@@ -117,9 +141,9 @@ describe('InlineEditableTable', () => {
     const wrapper = shallow(
       <InlineEditableTableContents {...requiredParams} addButtonText="Add a new row custom text" />
     );
-    expect(wrapper.find('[data-test-subj="actionButton"]').children().text()).toEqual(
-      'Add a new row custom text'
-    );
+    expect(
+      wrapper.find('[data-test-subj="inlineEditableTableActionButton"]').children().text()
+    ).toEqual('Add a new row custom text');
   });
 
   describe('when a user is editing an unsaved item', () => {

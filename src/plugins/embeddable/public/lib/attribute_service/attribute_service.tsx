@@ -15,8 +15,6 @@ import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,
   isSavedObjectEmbeddableInput,
-  IEmbeddable,
-  Container,
   EmbeddableFactoryNotFoundError,
   EmbeddableFactory,
 } from '../index';
@@ -133,11 +131,6 @@ export class AttributeService<
   inputIsRefType = (input: ValType | RefType): input is RefType => {
     return isSavedObjectEmbeddableInput(input);
   };
-
-  public getExplicitInputFromEmbeddable(embeddable: IEmbeddable): ValType | RefType {
-    return ((embeddable.getRoot() as Container).getInput()?.panels?.[embeddable.id]
-      ?.explicitInput ?? embeddable.getInput()) as ValType | RefType;
-  }
 
   getInputAsValueType = async (input: ValType | RefType): Promise<ValType> => {
     if (!this.inputIsRefType(input)) {

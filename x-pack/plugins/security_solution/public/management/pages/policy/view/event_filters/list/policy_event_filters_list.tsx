@@ -9,6 +9,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, Pagination } from '@elastic/eui';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { useAppUrl } from '../../../../../../common/lib/kibana';
+import { APP_UI_ID } from '../../../../../../../common/constants';
 import { useSearchAssignedEventFilters } from '../hooks';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
@@ -27,15 +29,24 @@ import {
 } from '../../policy_hooks';
 import { getCurrentArtifactsLocation } from '../../../store/policy_details/selectors';
 import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
+import { PolicyEventFiltersDeleteModal } from '../delete_modal';
+import { isGlobalPolicyEffected } from '../../../../../components/effected_policy_select/utils';
+import { getEventFiltersListPath } from '../../../../../common/routing';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 
 interface PolicyEventFiltersListProps {
   policy: ImmutableObject<PolicyData>;
 }
 export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({ policy }) => {
+  const { getAppUrl } = useAppUrl();
+  const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
   const policiesRequest = useGetEndpointSpecificPolicies();
   const navigateCallback = usePolicyDetailsEventFiltersNavigateCallback();
   const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const [expandedItemsMap, setExpandedItemsMap] = useState<Map<string, boolean>>(new Map());
+  const [exceptionItemToDelete, setExceptionItemToDelete] = useState<
+    ExceptionListItemSchema | undefined
+  >();
 
   const {
     data: eventFilters,
@@ -93,16 +104,64 @@ export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({
 
   const artifactCardPolicies = useEndpointPoliciesToArtifactPolicies(policiesRequest.data?.items);
   const provideCardProps: ArtifactCardGridProps['cardComponentProps'] = (artifact) => {
+    const viewUrlPath = getEventFiltersListPath({
+      filter: (artifact as ExceptionListItemSchema).item_id,
+    });
+    const fullDetailsAction = {
+      icon: 'controlsHorizontal',
+      children: i18n.translate(
+        'xpack.securitySolution.endpoint.policy.eventFilters.list.fullDetailsAction',
+        { defaultMessage: 'View full details' }
+      ),
+      href: getAppUrl({ appId: APP_UI_ID, path: viewUrlPath }),
+      navigateAppId: APP_UI_ID,
+      navigateOptions: { path: viewUrlPath },
+      'data-test-subj': 'view-full-details-action',
+    };
     const item = artifact as ExceptionListItemSchema;
+
+    const isGlobal = isGlobalPolicyEffected(item.tags);
+    const deleteAction = {
+      icon: 'trash',
+      children: i18n.translate(
+        'xpack.securitySolution.endpoint.policy.eventFilters.list.removeAction',
+        { defaultMessage: 'Remove from policy' }
+      ),
+      onClick: () => {
+        setExceptionItemToDelete(item);
+      },
+      disabled: isGlobal,
+      toolTipContent: isGlobal
+        ? i18n.translate(
+            'xpack.securitySolution.endpoint.policy.eventFilters.list.removeActionNotAllowed',
+            {
+              defaultMessage: 'Globally applied event filters cannot be removed from policy.',
+            }
+          )
+        : undefined,
+      toolTipPosition: 'top' as const,
+      'data-test-subj': 'remove-from-policy-action',
+    };
     return {
       expanded: expandedItemsMap.get(item.id) || false,
-      actions: [],
+      actions: canCreateArtifactsByPolicy ? [fullDetailsAction, deleteAction] : [fullDetailsAction],
       policies: artifactCardPolicies,
     };
   };
 
+  const handleDeleteModalClose = useCallback(() => {
+    setExceptionItemToDelete(undefined);
+  }, [setExceptionItemToDelete]);
+
   return (
     <>
+      {exceptionItemToDelete && (
+        <PolicyEventFiltersDeleteModal
+          policyId={policy.id}
+          exception={exceptionItemToDelete}
+          onCancel={handleDeleteModalClose}
+        />
+      )}
       <SearchExceptions
         placeholder={i18n.translate(
           'xpack.securitySolution.endpoint.policy.eventFilters.list.search.placeholder',
