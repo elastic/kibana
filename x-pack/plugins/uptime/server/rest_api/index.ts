@@ -37,7 +37,6 @@ import { addSyntheticsMonitorRoute } from './synthetics_service/add_monitor';
 import { editSyntheticsMonitorRoute } from './synthetics_service/edit_monitor';
 import { deleteSyntheticsMonitorRoute } from './synthetics_service/delete_monitor';
 import { runOnceSyntheticsMonitorRoute } from './synthetics_service/run_once_monitor';
-import { triggerNowSyntheticsMonitorRoute } from './synthetics_service/tigger_now_monitor';
 
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
@@ -70,5 +69,4 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   editSyntheticsMonitorRoute,
   deleteSyntheticsMonitorRoute,
   runOnceSyntheticsMonitorRoute,
-  triggerNowSyntheticsMonitorRoute,
 ];

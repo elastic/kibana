@@ -36,7 +36,6 @@ import { STATUS_ALERT_COLUMN } from './translations';
 import { MonitorNameColumn } from './columns/monitor_name_col';
 import { MonitorTags } from '../../common/monitor_tags';
 import { useMonitorHistogram } from './use_monitor_histogram';
-import { ActionsPopover } from './columns/actions_popover';
 
 interface Props extends MonitorListProps {
   pageSize: number;
@@ -181,13 +180,6 @@ export const MonitorListComponent: ({
         ),
       },
     ],
-    {
-      align: 'center' as const,
-      field: '',
-      name: '',
-      width: '100px',
-      render: (item: MonitorSummary) => <ActionsPopover item={item} />,
-    },
     ...(!hideExtraColumns
       ? [
           {

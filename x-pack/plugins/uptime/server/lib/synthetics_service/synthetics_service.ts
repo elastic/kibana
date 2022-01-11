@@ -182,15 +182,7 @@ export class SyntheticsService {
     };
   }
 
-  async pushConfigs(
-    request?: KibanaRequest,
-    configs?: Array<
-      SyntheticsMonitorWithId & {
-        fields_under_root?: boolean;
-        fields?: { config_id: string };
-      }
-    >
-  ) {
+  async pushConfigs(request?: KibanaRequest, configs?: SyntheticsMonitorWithId[]) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
       return;

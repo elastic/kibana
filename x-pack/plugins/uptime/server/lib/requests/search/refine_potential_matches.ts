@@ -83,7 +83,6 @@ export const summaryPingsToSummary = (summaryPings: Ping[]): MonitorSummary => {
   const latest = summaryPings[summaryPings.length - 1];
   return {
     monitor_id: latest.monitor.id,
-    config_id: latest.config_id,
     state: {
       timestamp: latest.timestamp,
       monitor: {
