@@ -42,7 +42,7 @@ export interface ReindexService {
    * Resolves to null if index does not exist.
    * @param indexName
    */
-  detectReindexWarnings(indexName: string): Promise<ReindexWarning[] | null>;
+  detectReindexWarnings(indexName: string): Promise<ReindexWarning[] | undefined>;
 
   /**
    * Creates a new reindex operation for a given index.
@@ -115,6 +115,8 @@ export interface ReindexService {
    * @param indexName
    */
   cancelReindexing(indexName: string): Promise<ReindexSavedObject>;
+
+  getIndexAliases(indexName: string): any;
 }
 
 export const reindexServiceFactory = (
@@ -311,6 +313,14 @@ export const reindexServiceFactory = (
     return reindexOp;
   };
 
+  const getIndexAliases = async (indexName: string) => {
+    const { body: response } = await esClient.indices.getAlias({
+      index: indexName,
+    });
+
+    return response[indexName]?.aliases ?? {};
+  };
+
   /**
    * Creates an alias that points the old index to the new index, deletes the old index.
    * @param reindexOp
@@ -318,11 +328,7 @@ export const reindexServiceFactory = (
   const switchAlias = async (reindexOp: ReindexSavedObject) => {
     const { indexName, newIndexName, reindexOptions } = reindexOp.attributes;
 
-    const { body: response } = await esClient.indices.getAlias({
-      index: indexName,
-    });
-
-    const existingAliases = response[indexName].aliases;
+    const existingAliases = await getIndexAliases(indexName);
 
     const extraAliases = Object.keys(existingAliases).map((aliasName) => ({
       add: { index: newIndexName, alias: aliasName, ...existingAliases[aliasName] },
@@ -402,12 +408,21 @@ export const reindexServiceFactory = (
       return resp.has_all_requested;
     },
 
-    async detectReindexWarnings(indexName: string) {
+    async detectReindexWarnings(indexName: string): Promise<ReindexWarning[] | undefined> {
       const flatSettings = await actions.getFlatSettings(indexName);
+
       if (!flatSettings) {
-        return null;
+        return undefined;
       } else {
-        return getReindexWarnings(flatSettings);
+        return [
+          // By default all reindexing operations will replace an index with an alias (with the same name)
+          // pointing to a newly created "reindexed" index. This is destructive as delete operations originally
+          // done on the index itself will now need to be done to the "reindexed-{indexName}"
+          {
+            warningType: 'replaceIndexWithAlias',
+          },
+          ...getReindexWarnings(flatSettings),
+        ];
       }
     },
 
@@ -602,5 +617,7 @@ export const reindexServiceFactory = (
 
       return reindexOp;
     },
+
+    getIndexAliases,
   };
 };
