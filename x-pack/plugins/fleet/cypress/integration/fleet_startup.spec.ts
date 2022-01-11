@@ -43,7 +43,8 @@ describe('Fleet startup', () => {
     cy.get('.euiTableCellContent').contains(name);
   }
 
-  describe('Fleet Server', () => {
+  // skipping Fleet Server enroll, to enable, comment out runner.ts line 23
+  describe.skip('Fleet Server', () => {
     it('should display Add agent button and Healthy agent once Fleet Agent page loaded', () => {
       cy.get('.euiBadge').contains('Healthy');
 
@@ -62,6 +63,7 @@ describe('Fleet startup', () => {
     });
 
     before(() => {
+      // hosts needed to be set so that UI shows fleet server instructions
       cy.request({
         method: 'PUT',
         url: '/api/fleet/settings',

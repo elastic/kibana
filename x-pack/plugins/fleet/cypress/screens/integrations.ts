@@ -10,6 +10,7 @@ export const CREATE_PACKAGE_POLICY_SAVE_BTN = 'createPackagePolicySaveButton';
 export const INTEGRATIONS_CARD = '.euiCard__titleAnchor';
 
 export const INTEGRATION_NAME_LINK = 'integrationNameLink';
+export const AGENT_POLICY_NAME_LINK = 'agentPolicyNameLink';
 
 export const CONFIRM_MODAL_BTN = 'confirmModalConfirmButton';
 export const CONFIRM_MODAL_BTN_SEL = `[data-test-subj=${CONFIRM_MODAL_BTN}]`;

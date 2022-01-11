@@ -13,6 +13,7 @@ import {
   clickIfVisible,
 } from '../tasks/integrations';
 import {
+  AGENT_POLICY_NAME_LINK,
   CONFIRM_MODAL_BTN,
   FLYOUT_CLOSE_BTN_SEL,
   INTEGRATIONS_CARD,
@@ -38,6 +39,7 @@ describe('Add Integration', () => {
     });
     it('should display Apache integration in the Policies list once installed ', () => {
       addAndVerifyIntegration();
+      cy.getBySel(AGENT_POLICY_NAME_LINK).contains('Agent policy 1');
     });
 
     it('should upgrade policies with integration update', () => {
@@ -74,6 +76,6 @@ describe('Add Integration', () => {
     cy.get('input[placeholder="Search for integrations"]').type('Apache');
     cy.get(INTEGRATIONS_CARD).contains(integration).click();
     addIntegration();
-    cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-');
+    cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-1');
   }
 });

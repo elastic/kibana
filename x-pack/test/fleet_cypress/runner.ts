@@ -19,6 +19,9 @@ async function withFleetAgent(
   { getService }: FtrProviderContext,
   runner: (runnerEnv: Record<string, string>) => Promise<void>
 ) {
+  // skipping fleet server enroll for now, as it is not a functionality of Fleet UI itself. are there any existing e2e tests for enroll?
+  return await runner({});
+
   const log = getService('log');
   const config = getService('config');
 
