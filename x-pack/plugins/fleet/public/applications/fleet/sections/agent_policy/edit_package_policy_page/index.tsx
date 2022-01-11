@@ -28,6 +28,7 @@ import {
   EuiErrorBoundary,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import semverGt from 'semver/functions/gt';
 
 import type { AgentPolicy, PackageInfo, UpdatePackagePolicy, PackagePolicy } from '../../../types';
 import {
@@ -84,16 +85,16 @@ export const EditPackagePolicyPage = memo(() => {
       // the edit form in an "upgrade" state regardless of whether the user intended to
       // "edit" their policy or "upgrade" it. This ensures the new policy generated will be
       // set to use the latest version of the package, not its current version.
-      isUpgrade={extensionView?.useLatestPackageVersion}
+      forceUpgrade={extensionView?.useLatestPackageVersion}
     />
   );
 });
 
 export const EditPackagePolicyForm = memo<{
   packagePolicyId: string;
-  isUpgrade?: boolean;
+  forceUpgrade?: boolean;
   from?: EditPackagePolicyFrom;
-}>(({ packagePolicyId, isUpgrade = false, from = 'edit' }) => {
+}>(({ packagePolicyId, forceUpgrade = false, from = 'edit' }) => {
   const { application, notifications } = useStartServices();
   const {
     agents: { enabled: isFleetEnabled },
@@ -118,6 +119,14 @@ export const EditPackagePolicyForm = memo<{
   const [originalPackagePolicy, setOriginalPackagePolicy] =
     useState<GetOnePackagePolicyResponse['item']>();
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse>();
+
+  const [isUpgrade, setIsUpgrade] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (forceUpgrade) {
+      setIsUpgrade(true);
+    }
+  }, [forceUpgrade]);
 
   const policyId = agentPolicy?.id ?? '';
 
@@ -150,7 +159,21 @@ export const EditPackagePolicyForm = memo<{
           packagePolicyId,
         ]);
 
-        if (upgradePackagePolicyDryRunData) {
+        const hasUpgradeAvailable =
+          upgradePackagePolicyDryRunData &&
+          upgradePackagePolicyDryRunData[0].diff &&
+          semverGt(
+            upgradePackagePolicyDryRunData[0].diff[1].package?.version ?? '',
+            upgradePackagePolicyDryRunData[0].diff[0].package?.version ?? ''
+          );
+
+        // If the dry run data doesn't indicate a difference in version numbers, flip the form back
+        // to its non-upgrade state, even if we were initially set to the upgrade view
+        if (!hasUpgradeAvailable) {
+          setIsUpgrade(false);
+        }
+
+        if (upgradePackagePolicyDryRunData && hasUpgradeAvailable) {
           setDryRunData(upgradePackagePolicyDryRunData);
         }
 
@@ -425,7 +448,7 @@ export const EditPackagePolicyForm = memo<{
   const [selectedTab, setSelectedTab] = useState(0);
 
   const layoutProps = {
-    from: extensionView?.useLatestPackageVersion ? 'upgrade-from-extension' : from,
+    from: extensionView?.useLatestPackageVersion && isUpgrade ? 'upgrade-from-extension' : from,
     cancelUrl,
     agentPolicy,
     packageInfo,
