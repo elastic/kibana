@@ -10,6 +10,7 @@ import { Redirect, Route, Switch, useLocation, useParams, useHistory } from 'rea
 import styled from 'styled-components';
 import type { EuiToolTipProps } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
@@ -209,11 +210,22 @@ export function Detail() {
             </FlexItemWithMaxHeight>
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="m">
-                <FlexItemWithMinWidth grow={false}>
-                  <EuiText>
-                    {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
-                    <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
-                  </EuiText>
+                <FlexItemWithMinWidth grow={true}>
+                  <EuiFlexGroup alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiText>
+                        {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
+                        <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="default">
+                        {i18n.translate('xpack.fleet.epm.elasticAgentBadgeLabel', {
+                          defaultMessage: 'Elastic Agent',
+                        })}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </FlexItemWithMinWidth>
                 {packageInfo?.release && packageInfo.release !== 'ga' ? (
                   <EuiFlexItem grow={false}>
