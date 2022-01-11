@@ -121,6 +121,8 @@ export function PageLoadDistChart({
             fit={Fit.Linear}
             id={'PagesPercentage'}
             name={I18LABELS.overall}
+            xAccessor="x"
+            yAccessors={['y']}
             xScaleType={ScaleType.Linear}
             yScaleType={ScaleType.Linear}
             data={data?.pageLoadDistribution ?? []}
