@@ -143,7 +143,6 @@ export const transformRuleFromAlertHit = (data: AlertSearchResponse): Rule | und
       ? {
           ...expandedRule?.kibana?.alert?.rule,
           ...expandedRule?.kibana?.alert?.rule?.parameters,
-          parameters: undefined,
         }
       : undefined;
   }
