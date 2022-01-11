@@ -165,10 +165,13 @@ export interface LensPublicStart {
   formula: {
     upsertFormulaColumn: (
       id: string,
-      formula: string,
+      column: {
+        formula: string;
+        label?: string;
+      },
       layer: PersistedIndexPatternLayer,
       params: { indexPatternId: string }
-    ) => Promise<PersistedIndexPatternLayer>;
+    ) => Promise<PersistedIndexPatternLayer | undefined>;
   };
 }
 
@@ -397,31 +400,32 @@ export class LensPlugin {
         return visualizationTypes;
       },
       formula: {
-        upsertFormulaColumn: async (id, formula, layer, { indexPatternId }) => {
-          const { loadIndexPatterns, upsertFormulaColumn } = await import(
-            './indexpattern_datasource'
-          );
+        upsertFormulaColumn: async (id, { formula, label }, layer, { indexPatternId }) => {
+          const { loadIndexPatterns, upsertFormulaColumn } = await import('./async_services');
+
           const indexPatterns = await loadIndexPatterns({
             cache: {},
             patterns: [indexPatternId],
             indexPatternsService: startDependencies.data.indexPatterns,
           });
 
-          return upsertFormulaColumn(
-            id,
-            {
-              operationType: 'formula',
-              dataType: 'number',
-              label: formula,
-              references: [],
-              isBucketed: false,
-              params: {
-                formula,
-              },
-            },
-            { ...layer, indexPatternId },
-            { indexPattern: indexPatterns[indexPatternId] }
-          ).layer;
+          return indexPatterns[indexPatternId]
+            ? upsertFormulaColumn(
+                id,
+                {
+                  label: label ?? formula,
+                  operationType: 'formula',
+                  dataType: 'number',
+                  references: [],
+                  isBucketed: false,
+                  params: {
+                    formula,
+                  },
+                },
+                { ...layer, indexPatternId },
+                { indexPattern: indexPatterns[indexPatternId] }
+              ).layer
+            : undefined;
         },
       },
     };

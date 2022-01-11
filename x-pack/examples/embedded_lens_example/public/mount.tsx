@@ -27,7 +27,7 @@ export const mount =
 
     const reactElement = (
       <i18nCore.Context>
-        <App {...deps} defaultIndexPattern={defaultIndexPattern} />
+        <App {...deps} defaultDataView={defaultIndexPattern} />
       </i18nCore.Context>
     );
     render(reactElement, element);

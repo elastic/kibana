@@ -28,6 +28,9 @@ export * from './visualizations/gauge/gauge_visualization';
 export * from './visualizations/gauge';
 
 export * from './indexpattern_datasource/indexpattern';
+export { loadIndexPatterns } from './indexpattern_datasource/loader';
+export { upsertFormulaColumn } from './indexpattern_datasource/operations/definitions/formula';
+
 export * from './indexpattern_datasource';
 
 export * from './editor_frame_service/editor_frame';

@@ -267,24 +267,26 @@ export function upsertFormulaColumn(
   baseLayer: IndexPatternLayer,
   params: ExpandColumnProperties
 ) {
-  const columns = {
-    ...baseLayer.columns,
-    [id]: {
-      ...column,
+  const layer = {
+    ...baseLayer,
+    columns: {
+      ...baseLayer.columns,
+      [id]: {
+        ...column,
+      },
     },
   };
 
-  const { columns: updatedColumns, meta } = Object.entries(columns).reduce(
+  const { columns: updatedColumns, meta } = Object.entries(layer.columns).reduce(
     (acc, [currentColumnId, currentColumn]) => {
       if (currentColumnId.startsWith(id)) {
         if (currentColumnId === id && isFormulaIndexPatternColumn(currentColumn)) {
           const formulaColumns = generateFormulaColumns(
             currentColumnId,
             currentColumn,
-            baseLayer,
+            layer,
             params
           );
-
           acc.columns = { ...acc.columns, ...formulaColumns.columns };
           acc.meta = { ...acc.meta, ...formulaColumns.meta };
         }
@@ -298,10 +300,10 @@ export function upsertFormulaColumn(
 
   return {
     layer: {
-      ...baseLayer,
+      ...layer,
       columns: updatedColumns,
       columnOrder: getColumnOrder({
-        ...baseLayer,
+        ...layer,
         columns: updatedColumns,
       }),
     },

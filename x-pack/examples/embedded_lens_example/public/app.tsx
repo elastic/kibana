@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -19,7 +19,7 @@ import {
   EuiTitle,
   EuiCallOut,
 } from '@elastic/eui';
-import { IndexPattern } from 'src/plugins/data/public';
+import { DataView } from 'src/plugins/data_views/public';
 import { CoreStart } from 'kibana/public';
 import { ViewMode } from '../../../../src/plugins/embeddable/public';
 import {
@@ -34,32 +34,10 @@ import { StartDependencies } from './plugin';
 // Generate a Lens state based on some app-specific input parameters.
 // `TypedLensByValueInput` can be used for type-safety - it uses the same interfaces as Lens-internal code.
 function getLensAttributes(
-  defaultIndexPattern: IndexPattern,
-  color: string
+  color: string,
+  dataLayer: PersistedIndexPatternLayer,
+  dataView: DataView
 ): TypedLensByValueInput['attributes'] {
-  const dataLayer: PersistedIndexPatternLayer = {
-    columnOrder: ['col1', 'col2'],
-    columns: {
-      col2: {
-        dataType: 'number',
-        isBucketed: false,
-        label: 'Count of records',
-        operationType: 'count',
-        scale: 'ratio',
-        sourceField: 'Records',
-      },
-      col1: {
-        dataType: 'date',
-        isBucketed: true,
-        label: '@timestamp',
-        operationType: 'date_histogram',
-        params: { interval: 'auto' },
-        scale: 'interval',
-        sourceField: defaultIndexPattern.timeFieldName!,
-      } as DateHistogramIndexPatternColumn,
-    },
-  };
-
   const xyConfig: XYState = {
     axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
     fittingFunction: 'None',
@@ -85,12 +63,12 @@ function getLensAttributes(
     title: 'Prefilled from example app',
     references: [
       {
-        id: defaultIndexPattern.id!,
+        id: dataView.id!,
         name: 'indexpattern-datasource-current-indexpattern',
         type: 'index-pattern',
       },
       {
-        id: defaultIndexPattern.id!,
+        id: dataView.id!,
         name: 'indexpattern-datasource-layer-layer1',
         type: 'index-pattern',
       },
@@ -113,18 +91,57 @@ function getLensAttributes(
 export const App = (props: {
   core: CoreStart;
   plugins: StartDependencies;
-  defaultIndexPattern: IndexPattern | null;
+  defaultDataView: DataView | null;
 }) => {
   const [color, setColor] = useState('green');
+  const [dataLayer, setDataLayer] = useState<PersistedIndexPatternLayer>();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const LensComponent = props.plugins.lens.EmbeddableComponent;
   const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
 
+  useEffect(() => {
+    const getDataLayer = async (dataView: DataView) => {
+      const baseLayer: PersistedIndexPatternLayer = {
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            dataType: 'date',
+            isBucketed: true,
+            label: '@timestamp',
+            operationType: 'date_histogram',
+            params: { interval: 'auto' },
+            scale: 'interval',
+            sourceField: dataView.timeFieldName!,
+          } as DateHistogramIndexPatternColumn,
+        },
+      };
+
+      setDataLayer(
+        await props.plugins.lens.formula.upsertFormulaColumn(
+          'col2',
+          { formula: 'count()', label: 'Count' },
+          baseLayer,
+          {
+            indexPatternId: dataView.id!,
+          }
+        )
+      );
+    };
+
+    if (props.defaultDataView) {
+      getDataLayer(props.defaultDataView);
+    }
+  }, [props.defaultDataView, props.plugins.lens.formula]);
+
   const [time, setTime] = useState({
     from: 'now-5d',
     to: 'now',
   });
+
+  if (!dataLayer) {
+    return null;
+  }
 
   return (
     <EuiPage>
@@ -147,7 +164,7 @@ export const App = (props: {
               the series which causes Lens to re-render. The Edit button will take the current
               configuration and navigate to a prefilled editor.
             </p>
-            {props.defaultIndexPattern && props.defaultIndexPattern.isTimeBased() ? (
+            {props.defaultDataView && props.defaultDataView.isTimeBased() ? (
               <>
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false}>
@@ -172,7 +189,7 @@ export const App = (props: {
                           {
                             id: '',
                             timeRange: time,
-                            attributes: getLensAttributes(props.defaultIndexPattern!, color),
+                            attributes: getLensAttributes(color, dataLayer, props.defaultDataView!),
                           },
                           {
                             openInNewTab: true,
@@ -196,7 +213,7 @@ export const App = (props: {
                           {
                             id: '',
                             timeRange: time,
-                            attributes: getLensAttributes(props.defaultIndexPattern!, color),
+                            attributes: getLensAttributes(color, dataLayer, props.defaultDataView!),
                           },
                           {
                             openInNewTab: false,
@@ -211,7 +228,7 @@ export const App = (props: {
                     <EuiButton
                       aria-label="Save visualization into library or embed directly into any dashboard"
                       data-test-subj="lns-example-save"
-                      isDisabled={!getLensAttributes(props.defaultIndexPattern, color)}
+                      isDisabled={!getLensAttributes(color, dataLayer, props.defaultDataView!)}
                       onClick={() => {
                         setIsSaveModalVisible(true);
                       }}
@@ -223,7 +240,7 @@ export const App = (props: {
                     <EuiButton
                       aria-label="Change time range"
                       data-test-subj="lns-example-change-time-range"
-                      isDisabled={!getLensAttributes(props.defaultIndexPattern, color)}
+                      isDisabled={!getLensAttributes(color, dataLayer, props.defaultDataView!)}
                       onClick={() => {
                         setTime({
                           from: '2015-09-18T06:31:44.000Z',
@@ -240,7 +257,7 @@ export const App = (props: {
                   withActions
                   style={{ height: 500 }}
                   timeRange={time}
-                  attributes={getLensAttributes(props.defaultIndexPattern, color)}
+                  attributes={getLensAttributes(color, dataLayer, props.defaultDataView!)}
                   onLoad={(val) => {
                     setIsLoading(val);
                   }}
@@ -262,8 +279,9 @@ export const App = (props: {
                   <LensSaveModalComponent
                     initialInput={
                       getLensAttributes(
-                        props.defaultIndexPattern,
-                        color
+                        color,
+                        dataLayer,
+                        props.defaultDataView!
                       ) as unknown as LensEmbeddableInput
                     }
                     onSave={() => {}}

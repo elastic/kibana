@@ -22,8 +22,6 @@ import type {
 } from '../../../../../src/plugins/field_formats/public';
 
 export type { PersistedIndexPatternLayer } from './types';
-export { upsertFormulaColumn } from './operations/definitions/formula';
-export { loadIndexPatterns } from './loader';
 
 export interface IndexPatternDatasourceSetupPlugins {
   expressions: ExpressionsSetup;
