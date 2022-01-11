@@ -72,6 +72,10 @@ export const useAllResults = ({
         )
         .toPromise();
 
+      if (!responseData?.edges?.length && responseData.totalCount) {
+        throw new Error('Empty edges while positive totalCount');
+      }
+
       return {
         ...responseData,
         inspect: getInspectResponse(responseData, {} as InspectResponse),

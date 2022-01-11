@@ -57,7 +57,7 @@ const OsqueryAppComponent = () => {
   }
 
   return (
-    <Container>
+    <Container id="osquery-app">
       <Wrapper>
         <Nav>
           <EuiFlexGroup gutterSize="l" alignItems="center">
