@@ -25,12 +25,13 @@ exports[`AlertSummaryView Behavior event code renders additional summary rows 1`
 }
 
 .c2 {
-  min-width: 138px;
-  padding: 0 8px;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  min-width: 138px;
+  padding: 0 8px;
+  position: relative;
 }
 
 .c2:focus-within .timelines__hoverActionButton,
@@ -717,12 +718,13 @@ exports[`AlertSummaryView Memory event code renders additional summary rows 1`] 
 }
 
 .c2 {
-  min-width: 138px;
-  padding: 0 8px;
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  min-width: 138px;
+  padding: 0 8px;
+  position: relative;
 }
 
 .c2:focus-within .timelines__hoverActionButton,
