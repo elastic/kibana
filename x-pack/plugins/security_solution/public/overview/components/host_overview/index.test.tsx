@@ -6,13 +6,24 @@
  */
 
 import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import React from 'react';
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
 
 import { HostOverview } from './index';
+import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
 import { mockData } from './mock';
 import { mockAnomalies } from '../../../common/components/ml/mock';
+
+jest.mock('../../../common/containers/hosts_risk/use_hosts_risk_score', () => ({
+  useHostsRiskScore: jest.fn().mockReturnValue({
+    result: [],
+    isModuleEnabled: false,
+    loading: true,
+  }),
+}));
+
 describe('Host Summary Component', () => {
   describe('rendering', () => {
     const mockProps = {
@@ -27,6 +38,7 @@ describe('Host Summary Component', () => {
       loading: false,
       narrowDateRange: jest.fn(),
       startDate: '2019-06-15T06:00:00.000Z',
+      hostName: 'testHostName',
     };
 
     test('it renders the default Host Summary', () => {
@@ -52,6 +64,41 @@ describe('Host Summary Component', () => {
       );
 
       expect(wrapper.find('HostOverview')).toMatchSnapshot();
+    });
+
+    test('it renders host risk score and level', () => {
+      const panelViewProps = {
+        ...mockProps,
+        isInDetailsSidePanel: true,
+      };
+      const risk = 'very high hos risk';
+      const riskScore = 9999999;
+
+      (useHostsRiskScore as jest.Mock).mockReturnValue({
+        result: [
+          {
+            host: {
+              name: 'testHostmame',
+            },
+            risk,
+            risk_stats: {
+              rule_risks: [],
+              risk_score: riskScore,
+            },
+          },
+        ],
+        isModuleEnabled: true,
+        loading: false,
+      });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <HostOverview {...panelViewProps} />
+        </TestProviders>
+      );
+
+      expect(getByTestId('host-risk-overview')).toHaveTextContent(risk);
+      expect(getByTestId('host-risk-overview')).toHaveTextContent(riskScore.toString());
     });
   });
 });
