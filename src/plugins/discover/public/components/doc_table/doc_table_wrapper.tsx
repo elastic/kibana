@@ -8,7 +8,7 @@
 
 import React, { forwardRef, useCallback, useMemo } from 'react';
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-import type { IndexPattern, IndexPatternField } from 'src/plugins/data/common';
+import type { DataView, DataViewField } from 'src/plugins/data/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TableHeader } from './components/table_header/table_header';
 import { FORMATS_UI_SETTINGS } from '../../../../field_formats/common';
@@ -34,9 +34,9 @@ export interface DocTableProps {
    */
   columns: string[];
   /**
-   * Current IndexPattern
+   * Current DataView
    */
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   /**
    * Current sorting
    */
@@ -158,7 +158,7 @@ export const DocTableWrapper = forwardRef(
     const fieldsToShow = useMemo(
       () =>
         getFieldsToShow(
-          indexPattern.fields.map((field: IndexPatternField) => field.name),
+          indexPattern.fields.map((field: DataViewField) => field.name),
           indexPattern,
           showMultiFields
         ),
