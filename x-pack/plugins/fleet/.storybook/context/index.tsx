@@ -116,6 +116,7 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
   } as unknown as FleetConfigType;
 
   const extensions = {};
+  const theme$ = EMPTY;
   const kibanaVersion = '1.2.3';
   const setHeaderActionMenu = useCallback(() => {}, []);
 
@@ -129,6 +130,7 @@ export const StorybookContext: React.FC<{ storyContext?: StoryContext }> = ({
         startServices,
         extensions,
         setHeaderActionMenu,
+        theme$,
       }}
     >
       {storyChildren}
