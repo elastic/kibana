@@ -40,6 +40,14 @@ describe('Add Integration', () => {
     it('should display Apache integration in the Policies list once installed ', () => {
       addAndVerifyIntegration();
       cy.getBySel(AGENT_POLICY_NAME_LINK).contains('Agent policy 1');
+
+      clickIfVisible(FLYOUT_CLOSE_BTN_SEL);
+      // test add integration using existing policy
+      addIntegration({ useExistingPolicy: true });
+      cy.getBySel(INTEGRATION_NAME_LINK).contains('apache-2');
+      cy.getBySel(AGENT_POLICY_NAME_LINK)
+        .should('have.length', 2)
+        .each((el) => el.text().includes('Agent policy 1'));
     });
 
     it('should upgrade policies with integration update', () => {

@@ -13,8 +13,12 @@ import {
   INTEGRATION_NAME_LINK,
 } from '../screens/integrations';
 
-export const addIntegration = () => {
+export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: false }) => {
   cy.getBySel(ADD_POLICY_BTN).click();
+  cy.getBySel('toastCloseButton').click();
+  if (useExistingPolicy) {
+    cy.get('#existing').click();
+  }
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
   // sometimes agent is assigned to default policy, sometimes not
   cy.getBySel(CONFIRM_MODAL_BTN).click();

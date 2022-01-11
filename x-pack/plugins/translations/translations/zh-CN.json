@@ -10426,7 +10426,6 @@
     "xpack.fleet.enrollmentStepAgentPolicy.enrollmentTokenSelectLabel": "注册令牌",
     "xpack.fleet.enrollmentStepAgentPolicy.noEnrollmentTokensForSelectedPolicyCallout": "选定的代理策略没有注册令牌",
     "xpack.fleet.enrollmentStepAgentPolicy.policySelectAriaLabel": "代理策略",
-    "xpack.fleet.enrollmentStepAgentPolicy.policySelectLabel": "代理策略",
     "xpack.fleet.enrollmentStepAgentPolicy.setUpAgentsLink": "创建注册令牌",
     "xpack.fleet.enrollmentStepAgentPolicy.showAuthenticationSettingsButton": "身份验证设置",
     "xpack.fleet.enrollmentTokenDeleteModal.cancelButton": "取消",

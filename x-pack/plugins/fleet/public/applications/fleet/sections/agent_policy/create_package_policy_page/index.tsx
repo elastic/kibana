@@ -656,7 +656,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
                   <EuiButton
                     onClick={onSubmit}
                     isLoading={formState === 'LOADING'}
-                    disabled={formState !== 'VALID' || hasAgentPolicyError}
+                    disabled={formState !== 'VALID' || hasAgentPolicyError || !validationResults}
                     iconType="save"
                     color="primary"
                     fill

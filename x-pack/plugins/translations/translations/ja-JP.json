@@ -10325,7 +10325,6 @@
     "xpack.fleet.enrollmentStepAgentPolicy.enrollmentTokenSelectLabel": "登録トークン",
     "xpack.fleet.enrollmentStepAgentPolicy.noEnrollmentTokensForSelectedPolicyCallout": "選択したエージェントポリシーの登録トークンはありません",
     "xpack.fleet.enrollmentStepAgentPolicy.policySelectAriaLabel": "エージェントポリシー",
-    "xpack.fleet.enrollmentStepAgentPolicy.policySelectLabel": "エージェントポリシー",
     "xpack.fleet.enrollmentStepAgentPolicy.setUpAgentsLink": "登録トークンを作成",
     "xpack.fleet.enrollmentStepAgentPolicy.showAuthenticationSettingsButton": "認証設定",
     "xpack.fleet.enrollmentTokenDeleteModal.cancelButton": "キャンセル",
