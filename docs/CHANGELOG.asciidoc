@@ -267,7 +267,7 @@ Machine Learning::
 * Fixes data view search based on title {kibana-pull}120737[#120737]
 * Data frame analytics wizard: Only allow data view creation if job will be started immediately {kibana-pull}120042[#120042]
 * Fixes anomaly detection module manifest queries to ignore frozen and cold data tiers {kibana-pull}119635[#119635]
-* Catching error for syntax error in job wizard editor {kibana-pull}119457[#119457]
+* Catches syntax error in job wizard editor {kibana-pull}119457[#119457]
 * Fixes error handling for missing data view in data frame analytics wizard {kibana-pull}119455[#119455]
 * Data Frame Analytics list - ensure refresh works as expected {kibana-pull}117959[#117959]
 * Set data recognizer to ignore frozen indices {kibana-pull}117208[#117208]
