@@ -334,8 +334,11 @@ export class ExecuteReportTask implements ReportingTask {
           this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
 
           const eventLog = this.reporting.getEventLogger({
-            event: { id: task.id, timezone: task.payload.browserTimezone },
-            kibana: { reporting: { jobType: task.jobtype }, task: { id: context.taskInstance.id } },
+            event: { timezone: task.payload.browserTimezone },
+            kibana: {
+              reporting: { id: task.id, jobType: task.jobtype },
+              task: { id: context.taskInstance.id },
+            },
             ...(task.created_by && { user: { name: task.created_by } }),
           });
 

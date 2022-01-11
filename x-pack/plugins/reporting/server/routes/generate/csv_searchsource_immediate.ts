@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { KibanaRequest } from 'src/core/server';
 import { Writable } from 'stream';
-import uuid from 'uuid';
 import { ReportingCore } from '../../';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
 import { runTaskFnFactory } from '../../export_types/csv_searchsource_immediate/execute_job';
@@ -71,7 +70,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
 
         const eventLog = reporting.getEventLogger({
-          event: { id: uuid.v1(), timezone: req.body.browserTimezone },
+          event: { timezone: req.body.browserTimezone },
           kibana: { reporting: { jobType: CSV_SEARCHSOURCE_IMMEDIATE_TYPE } },
           ...(user && { name: user.username }),
         });

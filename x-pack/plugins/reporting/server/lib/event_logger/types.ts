@@ -21,7 +21,6 @@ interface ActionBase<
     kind: K;
     outcome?: O;
     provider: 'reporting';
-    id: string;
     timezone: string;
   };
   kibana: EventProvider & { task?: { id: string } };
@@ -43,8 +42,19 @@ export interface ErrorAction {
 type ReportingAction<
   A extends ActionType,
   K extends ActionKind,
-  O extends 'success' | 'failure' = 'success'
-> = ActionBase<A, K, O, { reporting: { jobType: string; byteSize?: number } }>;
+  O extends ActionOutcome = 'success'
+> = ActionBase<
+  A,
+  K,
+  O,
+  {
+    reporting: {
+      id?: string; // "immediate download" exports have no ID
+      jobType: string;
+      byteSize?: number;
+    };
+  }
+>;
 
 export type ScheduledTask = ReportingAction<ActionType.SCHEDULE_TASK, 'event'>;
 export type StartedExecution = ReportingAction<ActionType.EXECUTE_START, 'event'>;

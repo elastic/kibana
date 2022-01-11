@@ -95,12 +95,18 @@ export class RequestHandler {
 
     // 5. Schedule the report with Task Manager
     const task = await reporting.scheduleTask(report.toReportTaskJSON());
+    logger.info(
+      `Scheduled ${exportType.name} reporting task. Task ID: task:${task.id}. Report ID: ${report._id}`
+    );
 
     // 6. Log the action with event log
     reporting
       .getEventLogger({
-        event: { id: report._id, timezone: job.browserTimezone },
-        kibana: { reporting: { jobType: exportType.jobType }, task: { id: task.id } },
+        event: { timezone: job.browserTimezone },
+        kibana: {
+          reporting: { id: report._id, jobType: exportType.jobType },
+          task: { id: task.id },
+        },
         ...(report.created_by && { user: { name: report.created_by } }),
       })
       .logScheduleTask(

@@ -91,6 +91,9 @@ exports.EcsCustomPropertyMappings = {
       // reporting specific fields
       reporting: {
         properties: {
+          id: {
+            type: 'keyword',
+          },
           jobType: {
             type: 'keyword',
           },

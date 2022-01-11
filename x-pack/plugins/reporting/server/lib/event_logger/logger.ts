@@ -22,7 +22,7 @@ import {
 } from './types';
 
 export interface ReportingEventLoggerOpts {
-  event: Pick<StartedExecution['event'], 'id' | 'timezone'>;
+  event: Pick<StartedExecution['event'], 'timezone'>;
   kibana: Pick<StartedExecution['kibana'], 'reporting' | 'task'>;
   user?: StartedExecution['user'];
 }
@@ -34,7 +34,6 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
   return class ReportingEventLogger {
     readonly eventObj: {
       event: {
-        id: string;
         timezone: string;
         provider: 'reporting';
       };
