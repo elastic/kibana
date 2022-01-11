@@ -186,6 +186,7 @@ test('Gets a unique title ', async () => {
   expect(await action.getUniqueTitle('testFirstTitle', genericEmbeddable.type)).toEqual(
     'testFirstTitle (copy)'
   );
+  // @ts-ignore
   expect(await action.getUniqueTitle('testSecondTitle (copy 39)', genericEmbeddable.type)).toEqual(
     'testSecondTitle (copy 40)'
   );
