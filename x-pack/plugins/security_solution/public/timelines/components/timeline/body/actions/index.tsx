@@ -68,6 +68,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const alertIds = useMemo(() => [ecsData._id], [ecsData]);
 
   const onPinEvent: OnPinEvent = useCallback(
     (evtId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId: evtId })),
@@ -166,6 +167,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           <InvestigateInTimelineAction
             ariaLabel={i18n.SEND_ALERT_TO_TIMELINE_FOR_ROW({ ariaRowindex, columnValues })}
             key="investigate-in-timeline"
+            alertIds={alertIds}
             ecsRowData={ecsData}
           />
         )}
