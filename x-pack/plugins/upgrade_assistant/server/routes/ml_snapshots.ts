@@ -260,7 +260,7 @@ export function registerMlSnapshotRoutes({
                     'xpack.upgradeAssistant.ml_snapshots.modelSnapshotUpgradeFailed',
                     {
                       defaultMessage:
-                        "The upgrade process for this model snapshot failed. Check the Elasticsearch logs for more details.",
+                        'The upgrade process for this model snapshot failed. Check the Elasticsearch logs for more details.',
                     }
                   ),
                 },
