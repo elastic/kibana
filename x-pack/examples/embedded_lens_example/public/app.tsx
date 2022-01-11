@@ -120,11 +120,9 @@ export const App = (props: {
       setDataLayer(
         await props.plugins.lens.formula.insertOrReplaceFormulaColumn(
           'col2',
-          { formula: 'count()', label: 'Count' },
+          { formula: 'count()' },
           baseLayer,
-          {
-            indexPatternId: dataView.id!,
-          }
+          dataView.id!
         )
       );
     };

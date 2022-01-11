@@ -29,6 +29,7 @@ export * from './visualizations/gauge';
 
 export * from './indexpattern_datasource/indexpattern';
 export { loadIndexPatterns } from './indexpattern_datasource/loader';
+export { operationDefinitionMap } from './indexpattern_datasource/operations';
 export { insertOrReplaceFormulaColumn } from './indexpattern_datasource/operations/definitions/formula';
 
 export * from './indexpattern_datasource';

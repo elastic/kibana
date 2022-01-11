@@ -170,7 +170,8 @@ export interface LensPublicStart {
         label?: string;
       },
       layer: PersistedIndexPatternLayer,
-      params: { indexPatternId: string }
+      indexPatternId: string,
+      params?: { operations?: string[] }
     ) => Promise<PersistedIndexPatternLayer | undefined>;
   };
 }
@@ -400,10 +401,15 @@ export class LensPlugin {
         return visualizationTypes;
       },
       formula: {
-        insertOrReplaceFormulaColumn: async (id, { formula, label }, layer, { indexPatternId }) => {
-          const { loadIndexPatterns, insertOrReplaceFormulaColumn } = await import(
-            './async_services'
-          );
+        insertOrReplaceFormulaColumn: async (
+          id,
+          { formula, label },
+          layer,
+          indexPatternId,
+          params
+        ) => {
+          const { loadIndexPatterns, insertOrReplaceFormulaColumn, operationDefinitionMap } =
+            await import('./async_services');
 
           const indexPatterns = await loadIndexPatterns({
             cache: {},
@@ -426,7 +432,17 @@ export class LensPlugin {
                   },
                 },
                 { ...layer, indexPatternId },
-                { indexPattern: indexPatterns[indexPatternId] }
+                {
+                  indexPattern: indexPatterns[indexPatternId],
+                  operations:
+                    params?.operations?.reduce(
+                      (operationsMap, item) => ({
+                        ...operationsMap,
+                        [item]: operationDefinitionMap[item],
+                      }),
+                      {}
+                    ) ?? undefined,
+                }
               ).layer
             : undefined;
         },
