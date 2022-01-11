@@ -1555,7 +1555,7 @@
             "tags": [],
             "label": "patterns",
             "description": [
-              "IndexPatternBase containing available fields on rule index"
+              "DataViewBase containing available fields on rule index"
             ],
             "signature": [
               "DataViewBase"
