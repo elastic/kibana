@@ -15,7 +15,6 @@ import {
 
 export const addIntegration = ({ useExistingPolicy } = { useExistingPolicy: false }) => {
   cy.getBySel(ADD_POLICY_BTN).click();
-  cy.getBySel('toastCloseButton').click();
   if (useExistingPolicy) {
     cy.get('#existing').click();
   }
