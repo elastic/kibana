@@ -227,6 +227,7 @@ export const getDetectionRuleMetrics = async (
       fields: [],
       page: 1,
       perPage: MAX_RESULTS_WINDOW,
+      namespaces: ['*'],
       filter: 'cases-comments.attributes.type: alert',
     });
 
