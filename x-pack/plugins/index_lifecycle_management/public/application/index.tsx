@@ -15,6 +15,7 @@ import {
   UnmountCallback,
   CoreTheme,
 } from 'src/core/public';
+import { DocLinksStart } from 'kibana/public';
 
 import {
   CloudSetup,
@@ -35,6 +36,7 @@ export const renderApp = (
   breadcrumbService: BreadcrumbService,
   license: ILicense,
   theme$: Observable<CoreTheme>,
+  docLinks: DocLinksStart,
   cloud?: CloudSetup
 ): UnmountCallback => {
   const { getUrlForApp } = application;
@@ -42,7 +44,9 @@ export const renderApp = (
     <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
       <I18nContext>
         <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider services={{ cloud, breadcrumbService, license, getUrlForApp }}>
+          <KibanaContextProvider
+            services={{ cloud, breadcrumbService, license, getUrlForApp, docLinks }}
+          >
             <App history={history} />
           </KibanaContextProvider>
         </KibanaThemeProvider>

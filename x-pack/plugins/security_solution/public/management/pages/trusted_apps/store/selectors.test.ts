@@ -95,7 +95,6 @@ describe('selectors', () => {
         view_type: 'grid',
         filter: '',
         included_policies: '',
-        excluded_policies: '',
       };
 
       expect(needsRefreshOfListData({ ...initialState, listView, active: true, location })).toBe(
@@ -179,7 +178,6 @@ describe('selectors', () => {
         view_type: 'grid',
         filter: '',
         included_policies: '',
-        excluded_policies: '',
       };
 
       expect(getCurrentLocationPageIndex({ ...initialState, location })).toBe(3);
@@ -194,7 +192,6 @@ describe('selectors', () => {
         view_type: 'grid',
         filter: '',
         included_policies: '',
-        excluded_policies: '',
       };
 
       expect(getCurrentLocationPageSize({ ...initialState, location })).toBe(20);
