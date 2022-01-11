@@ -180,11 +180,18 @@ export class JobsList extends Component {
                 <>
                   <span>
                     {id} &nbsp;
-                    <EuiBadge color="hollow" data-test-subj="mlJobListRowManagedLabel" size="xs">
-                      {i18n.translate('xpack.ml.jobsList.managedBadgeLabel', {
-                        defaultMessage: 'Managed',
+                    <EuiToolTip
+                      content={i18n.translate('xpack.ml.jobsList.managedBadgeTooltip', {
+                        defaultMessage:
+                          'This job is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
                       })}
-                    </EuiBadge>
+                    >
+                      <EuiBadge color="hollow" data-test-subj="mlJobListRowManagedLabel" size="xs">
+                        {i18n.translate('xpack.ml.jobsList.managedBadgeLabel', {
+                          defaultMessage: 'Managed',
+                        })}
+                      </EuiBadge>
+                    </EuiToolTip>
                   </span>
                 </>
               );

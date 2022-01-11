@@ -151,11 +151,18 @@ export const useColumns = (
           <>
             {transformId}
             &nbsp;
-            <EuiBadge color="hollow" data-test-subj="transformListRowIsManagedBadge">
-              {i18n.translate('xpack.transform.transformList.managedBadgeLabel', {
-                defaultMessage: 'Managed',
+            <EuiToolTip
+              content={i18n.translate('xpack.transform.transformList.managedBadgeTooltip', {
+                defaultMessage:
+                  'This transform is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
               })}
-            </EuiBadge>
+            >
+              <EuiBadge color="hollow" data-test-subj="transformListRowIsManagedBadge">
+                {i18n.translate('xpack.transform.transformList.managedBadgeLabel', {
+                  defaultMessage: 'Managed',
+                })}
+              </EuiBadge>
+            </EuiToolTip>
           </>
         );
       },
