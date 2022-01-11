@@ -41,7 +41,6 @@ import { inspectorPluginMock } from '../../../../../../../src/plugins/inspector/
 const defaultPermissions: Record<string, Record<string, boolean | Record<string, boolean>>> = {
   navLinks: { management: true },
   management: { kibana: { indexPatterns: true } },
-  indexPatterns: { save: true },
 };
 
 function createCoreStartWithPermissions(newCapabilities = defaultPermissions) {
