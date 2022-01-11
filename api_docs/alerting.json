@@ -25,13 +25,7 @@
             "text": "SanitizedAlert"
           },
           "<never>) => string | ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.JsonObject",
-            "text": "JsonObject"
-          }
+          "JsonObject"
         ],
         "path": "x-pack/plugins/alerting/public/alert_navigation_registry/types.ts",
         "deprecated": false,
@@ -510,13 +504,7 @@
               ") => Promise<{ filter?: ",
               "KueryNode",
               " | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.JsonObject",
-                "text": "JsonObject"
-              },
+              "JsonObject",
               " | undefined; ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void; }>"
             ],
             "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
@@ -596,13 +584,7 @@
               ") => Promise<{ filter?: ",
               "KueryNode",
               " | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.JsonObject",
-                "text": "JsonObject"
-              },
+              "JsonObject",
               " | undefined; ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void; }>"
             ],
             "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
@@ -1492,7 +1474,9 @@
             "label": "search",
             "description": [],
             "signature": [
-              "<TDocument = unknown, TContext = unknown>(query: ",
+              "<TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(query: ",
               "SearchRequest",
               " | ",
               "SearchRequest",
@@ -1502,7 +1486,7 @@
               "TransportResult",
               "<",
               "SearchResponse",
-              "<TDocument>, TContext>>"
+              "<TDocument, TAggregations>, unknown>>"
             ],
             "path": "x-pack/plugins/alerting/server/lib/create_abortable_es_client_factory.ts",
             "deprecated": false,
@@ -1711,13 +1695,7 @@
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.PublicMethodsOf",
-                "text": "PublicMethodsOf"
-              },
+              "PublicMethodsOf",
               "<",
               {
                 "pluginId": "alerting",
@@ -1772,13 +1750,7 @@
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.PublicMethodsOf",
-                "text": "PublicMethodsOf"
-              },
+              "PublicMethodsOf",
               "<",
               {
                 "pluginId": "alerting",
@@ -3564,13 +3536,7 @@
             "label": "state",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.JsonObject",
-                "text": "JsonObject"
-              }
+              "JsonObject"
             ],
             "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
             "deprecated": false

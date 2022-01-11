@@ -6400,21 +6400,9 @@
         "description": [],
         "signature": [
           "{ [K in keyof T]: ReturnType<",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Ensure",
-            "text": "Ensure"
-          },
+          "Ensure",
           "<",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Ensure",
-            "text": "Ensure"
-          },
+          "Ensure",
           "<T[K], ",
           {
             "pluginId": "kibanaUtils",
@@ -6445,13 +6433,7 @@
         "label": "PureSelectorToSelector",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Ensure",
-            "text": "Ensure"
-          },
+          "Ensure",
           "<T, ",
           {
             "pluginId": "kibanaUtils",
@@ -9466,13 +9448,7 @@
             "text": "VersionedState"
           },
           "<",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Serializable",
-            "text": "Serializable"
-          },
+          "Serializable",
           ">) => S"
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/migrate_to_latest.ts",
@@ -9514,13 +9490,7 @@
                 "text": "VersionedState"
               },
               "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.Serializable",
-                "text": "Serializable"
-              },
+              "Serializable",
               ">"
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/migrate_to_latest.ts",
@@ -10323,13 +10293,7 @@
                 "text": "VersionedState"
               },
               "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.Serializable",
-                "text": "Serializable"
-              },
+              "Serializable",
               ">) => P) | undefined"
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
@@ -10353,13 +10317,7 @@
                     "text": "VersionedState"
                   },
                   "<",
-                  {
-                    "pluginId": "@kbn/utility-types",
-                    "scope": "server",
-                    "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.Serializable",
-                    "text": "Serializable"
-                  },
+                  "Serializable",
                   ">"
                 ],
                 "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
@@ -11282,21 +11240,9 @@
         ],
         "signature": [
           "(state: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ", version: string) => ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          }
+          "SerializableRecord"
         ],
         "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
         "deprecated": false,
@@ -11310,13 +11256,7 @@
             "label": "state",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              }
+              "SerializableRecord"
             ],
             "path": "src/plugins/kibana_utils/common/persistable_state/types.ts",
             "deprecated": false
@@ -11381,21 +11321,9 @@
         "description": [],
         "signature": [
           "{ [K in keyof T]: ReturnType<",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Ensure",
-            "text": "Ensure"
-          },
+          "Ensure",
           "<",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Ensure",
-            "text": "Ensure"
-          },
+          "Ensure",
           "<T[K], ",
           {
             "pluginId": "kibanaUtils",
@@ -11426,13 +11354,7 @@
         "label": "PureSelectorToSelector",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Ensure",
-            "text": "Ensure"
-          },
+          "Ensure",
           "<T, ",
           {
             "pluginId": "kibanaUtils",

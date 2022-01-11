@@ -315,13 +315,7 @@
         ],
         "signature": [
           "(object: T) => ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.RecursiveReadonly",
-            "text": "RecursiveReadonly"
-          },
+          "RecursiveReadonly",
           "<T>"
         ],
         "path": "packages/kbn-std/src/deep_freeze.ts",

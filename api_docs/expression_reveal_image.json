@@ -174,7 +174,7 @@
         "label": "revealImageFunction",
         "description": [],
         "signature": [
-          "() => { name: \"revealImage\"; aliases: never[]; type: \"render\"; inputTypes: \"number\"[]; help: string; args: { image: { types: (\"string\" | \"null\")[]; help: string; default: null; }; emptyImage: { types: (\"string\" | \"null\")[]; help: string; default: null; }; origin: { types: \"string\"[]; help: string; default: string; options: ",
+          "() => { name: \"revealImage\"; aliases: never[]; type: string; inputTypes: \"number\"[]; help: string; args: { image: { types: (\"string\" | \"null\")[]; help: string; default: null; }; emptyImage: { types: (\"string\" | \"null\")[]; help: string; default: null; }; origin: { types: \"string\"[]; help: string; default: string; options: ",
           "Origin",
           "[]; }; }; fn: (percent: number, args: Arguments) => Promise<{ type: \"render\"; as: string; value: { image: string; emptyImage: string; origin: ",
           "Origin",

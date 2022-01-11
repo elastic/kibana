@@ -715,6 +715,31 @@
             "deprecated": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.TimeHistory.get$",
+            "type": "Function",
+            "tags": [],
+            "label": "get$",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataQueryPluginApi",
+                "section": "def-common.TimeRange",
+                "text": "TimeRange"
+              },
+              "[]>"
+            ],
+            "path": "src/plugins/data/public/query/timefilter/time_history.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2631,7 +2656,17 @@
         "label": "TimeHistoryContract",
         "description": [],
         "signature": [
-          "{ add: (time: ",
+          "{ get$: () => ",
+          "Observable",
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          "[]>; add: (time: ",
           {
             "pluginId": "data",
             "scope": "common",

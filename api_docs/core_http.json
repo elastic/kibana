@@ -343,13 +343,7 @@
                 "text": "IHttpInterceptController"
               },
               ") => void | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.MaybePromise",
-                "text": "MaybePromise"
-              },
+              "MaybePromise",
               "<Partial<",
               {
                 "pluginId": "core",
@@ -437,13 +431,7 @@
                 "text": "IHttpInterceptController"
               },
               ") => void | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.MaybePromise",
-                "text": "MaybePromise"
-              },
+              "MaybePromise",
               "<Partial<",
               {
                 "pluginId": "core",
@@ -531,13 +519,7 @@
                 "text": "IHttpInterceptController"
               },
               ") => void | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.MaybePromise",
-                "text": "MaybePromise"
-              },
+              "MaybePromise",
               "<",
               {
                 "pluginId": "core",
@@ -626,13 +608,7 @@
                 "text": "IHttpInterceptController"
               },
               ") => void | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.MaybePromise",
-                "text": "MaybePromise"
-              },
+              "MaybePromise",
               "<",
               {
                 "pluginId": "core",
@@ -2309,21 +2285,9 @@
             ],
             "signature": [
               "{ readonly path: string; readonly method: ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.RecursiveReadonly",
-                "text": "RecursiveReadonly"
-              },
+              "RecursiveReadonly",
               "<Method>; readonly options: ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.RecursiveReadonly",
-                "text": "RecursiveReadonly"
-              },
+              "RecursiveReadonly",
               "<",
               {
                 "pluginId": "core",

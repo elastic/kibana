@@ -70,9 +70,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "presentationUtil",
+                "pluginId": "controls",
                 "scope": "public",
-                "docId": "kibPresentationUtilPluginApi",
+                "docId": "kibControlsPluginApi",
                 "section": "def-public.ControlGroupContainer",
                 "text": "ControlGroupContainer"
               },
@@ -189,9 +189,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "presentationUtil",
+                    "pluginId": "controls",
                     "scope": "public",
-                    "docId": "kibPresentationUtilPluginApi",
+                    "docId": "kibControlsPluginApi",
                     "section": "def-public.ControlGroupContainer",
                     "text": "ControlGroupContainer"
                   },
@@ -1798,7 +1798,9 @@
               },
               "<",
               "SearchResponse",
-              "<any>>>; fetch: (options?: ",
+              "<any, Record<string, ",
+              "AggregationsAggregate",
+              ">>>>; fetch: (options?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -1808,7 +1810,9 @@
               },
               ") => Promise<",
               "SearchResponse",
-              "<any>>; onRequestStart: (handler: (searchSource: ",
+              "<any, Record<string, ",
+              "AggregationsAggregate",
+              ">>>; onRequestStart: (handler: (searchSource: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -2310,7 +2314,7 @@
             "section": "def-common.RawSavedDashboardPanel730ToLatest",
             "text": "RawSavedDashboardPanel730ToLatest"
           },
-          ", \"type\" | \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
+          ", \"title\" | \"type\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,
@@ -2619,13 +2623,7 @@
             "text": "ISavedObjectsRepository"
           },
           ", \"find\">, embeddableType: string) => Promise<{ [key: string]: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.Serializable",
-            "text": "Serializable"
-          },
+          "Serializable",
           "; }[]>"
         ],
         "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts",
@@ -2755,13 +2753,7 @@
             "text": "SavedDashboardPanel630"
           },
           ")[], version: string, useMargins: boolean, uiState: { [key: string]: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           "; } | undefined) => ",
           {
             "pluginId": "dashboard",
@@ -2876,13 +2868,7 @@
                 "description": [],
                 "signature": [
                   "[key: string]:  ",
-                  {
-                    "pluginId": "@kbn/utility-types",
-                    "scope": "server",
-                    "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-server.SerializableRecord",
-                    "text": "SerializableRecord"
-                  }
+                  "SerializableRecord"
                 ],
                 "path": "src/plugins/dashboard/common/migrate_to_730_panels.ts",
                 "deprecated": false
@@ -3117,7 +3103,7 @@
             "section": "def-common.RawSavedDashboardPanel730ToLatest",
             "text": "RawSavedDashboardPanel730ToLatest"
           },
-          ", \"type\" | \"title\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
+          ", \"title\" | \"type\" | \"panelIndex\" | \"gridData\" | \"version\" | \"embeddableConfig\" | \"panelRefName\"> & { readonly id?: string | undefined; readonly type: string; }"
         ],
         "path": "src/plugins/dashboard/common/types.ts",
         "deprecated": false,

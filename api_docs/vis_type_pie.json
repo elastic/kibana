@@ -22,7 +22,13 @@
             "text": "VisTypeDefinition"
           },
           "<",
-          "PieVisParams",
+          {
+            "pluginId": "expressionPie",
+            "scope": "common",
+            "docId": "kibExpressionPiePluginApi",
+            "section": "def-common.PieVisParams",
+            "text": "PieVisParams"
+          },
           ">"
         ],
         "path": "src/plugins/vis_types/pie/public/vis_type/index.ts",

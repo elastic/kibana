@@ -2617,9 +2617,9 @@
           },
           "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; id: string; title: string; filters?: ",
+          " | undefined; type?: string | undefined; })[]; title: string; id: string; filters?: ",
           "Filter",
-          "[] | undefined; sort: ",
+          "[] | undefined; dataViewId: string | null; sort: ",
           "SortColumnTimeline",
           "[]; version: string | null; isLoading: boolean; filterManager?: ",
           {
@@ -2645,7 +2645,7 @@
           },
           "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; savedObjectId: string | null; dataViewId: string | null; unit?: ((n: number) => React.ReactNode) | undefined; dataProviders: ",
+          " | undefined; type?: string | undefined; })[]; savedObjectId: string | null; unit?: ((n: number) => React.ReactNode) | undefined; dataProviders: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -5403,13 +5403,7 @@
             "label": "authFilter",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.JsonObject",
-                "text": "JsonObject"
-              },
+              "JsonObject",
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
@@ -5731,13 +5725,7 @@
             "label": "authFilter",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.JsonObject",
-                "text": "JsonObject"
-              },
+              "JsonObject",
               " | undefined"
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
@@ -6558,7 +6546,7 @@
         "label": "DataProvidersAnd",
         "description": [],
         "signature": [
-          "{ type?: ",
+          "{ id: string; type?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -6566,7 +6554,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | undefined; id: string; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
+          " | undefined; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -6602,7 +6590,7 @@
         "label": "DocValueFields",
         "description": [],
         "signature": [
-          "SearchDocValueField"
+          "QueryDslFieldAndFormat"
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
         "deprecated": false,
@@ -6616,7 +6604,7 @@
         "label": "EMPTY_DOCVALUE_FIELD",
         "description": [],
         "signature": [
-          "SearchDocValueField",
+          "QueryDslFieldAndFormat",
           "[]"
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
@@ -6913,7 +6901,7 @@
           "; filterQuery: string | ",
           "ESQuery",
           " | undefined; docValueFields?: ",
-          "SearchDocValueField",
+          "QueryDslFieldAndFormat",
           "[] | undefined; factoryQueryType?: ",
           "TimelineEventsQueries",
           " | undefined; entityType?: ",

@@ -916,9 +916,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"heatmap_grid\""
-            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_grid.ts",
             "deprecated": false
           },
@@ -1450,9 +1447,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": [
-              "\"heatmap_legend\""
-            ],
             "path": "src/plugins/chart_expressions/expression_heatmap/common/expression_functions/heatmap_legend.ts",
             "deprecated": false
           },
