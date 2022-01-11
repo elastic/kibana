@@ -22,24 +22,31 @@ export const AgentPolicyCreatedCallOut: React.FunctionComponent<Props> = ({ crea
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiCallOut
-        data-test-subj="agentPolicyCreateStatusCallOut"
-        title={
-          createStatus === CREATE_STATUS.CREATED ? (
+      {createStatus === CREATE_STATUS.CREATED ? (
+        <EuiCallOut
+          data-test-subj="agentPolicyCreateStatusCallOut"
+          title={
             <FormattedMessage
               id="xpack.fleet.agentPolicyCreation.created"
               defaultMessage="Agent policy created"
             />
-          ) : (
+          }
+          color="success"
+          iconType="check"
+        />
+      ) : (
+        <EuiCallOut
+          data-test-subj="agentPolicyCreateStatusCallOut"
+          title={
             <FormattedMessage
               id="xpack.fleet.agentPolicyCreation.failed"
               defaultMessage="Agent policy creation failed"
             />
-          )
-        }
-        color={createStatus === CREATE_STATUS.CREATED ? 'success' : 'danger'}
-        iconType={createStatus === CREATE_STATUS.CREATED ? 'check' : 'cross'}
-      />
+          }
+          color="danger"
+          iconType="cross"
+        />
+      )}
     </>
   );
 };
