@@ -16,7 +16,6 @@ import {
   epochToKbnDateFormat,
   getInterval,
   getTicks,
-  newTicks,
   getCustomLabel,
   getCustomInterval,
 } from './time_utils';
@@ -82,16 +81,13 @@ class KeyedTimeslider extends Component<Props, State> {
     const max = timeRangeBounds.max.valueOf();
     const interval = getInterval(min, max);
     const timeslice: [number, number] = [min, max];
-    const ticks =
-      props.timeRangeStep > 1
-        ? newTicks(min, max, props.timeRangeStep)
-        : getTicks(min, max, interval);
+    const ticks = getTicks(min, max, props.timeRangeStep > 1 ? props.timeRangeStep : interval);
 
     this.defaultRange = {
       timeRangeBounds,
       min,
       max,
-      ticks: getTicks(min, max, interval),
+      ticks: getTicks(min, max, props.timeRangeStep > 1 ? props.timeRangeStep : interval),
       step: 1,
     };
 
@@ -99,7 +95,7 @@ class KeyedTimeslider extends Component<Props, State> {
       isPaused: true,
       max,
       min,
-      range: interval,
+      range: props.timeRangeStep > 1 ? props.timeRangeStep : interval,
       ticks,
       timeslice,
       isPopoverOpen: false,
@@ -116,7 +112,6 @@ class KeyedTimeslider extends Component<Props, State> {
     this._isMounted = true;
     // auto-select range between first tick and second tick
     this._onChange([this.state.ticks[0].value, this.state.ticks[1].value]);
-    // this._onChange([this.state.min, this.state.max]);
   }
 
   _doesTimesliceCoverTimerange() {
@@ -200,7 +195,7 @@ class KeyedTimeslider extends Component<Props, State> {
 
   _updateTimeRange = (data: { label: string; ms: number; default?: boolean }) => {
     if (!data.default) {
-      const updatedTicks = newTicks(this.defaultRange.min, this.defaultRange.max, data.ms);
+      const updatedTicks = getTicks(this.defaultRange.min, this.defaultRange.max, data.ms);
 
       if (updatedTicks.length > 1) {
         this.setState({
@@ -311,7 +306,7 @@ class KeyedTimeslider extends Component<Props, State> {
             value={this.state.timeslice}
             onChange={this._onDualControlChange}
             showTicks={true}
-            min={this.state.ticks[0].value}
+            min={this.state.min}
             max={this.state.ticks[this.state.ticks.length - 1].value}
             step={this.state.step}
             ticks={this.state.ticks}

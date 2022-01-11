@@ -70,25 +70,8 @@ export function getInterval(min: number, max: number, steps = 6): number {
 export function getTicks(min: number, max: number, interval: number): EuiRangeTick[] {
   const format = getScaledDateFormat(interval);
   const timezone = getTimezone();
-
-  let tick = Math.ceil(min / interval) * interval;
-  const ticks: EuiRangeTick[] = [];
-  while (tick < max) {
-    ticks.push({
-      value: tick,
-      label: moment.tz(tick, timezone).format(format),
-    });
-    tick += interval;
-  }
-
-  return ticks;
-}
-
-export function newTicks(min: number, max: number, interval: number): EuiRangeTick[] {
-  const format = getScaledDateFormat(interval);
-  const timezone = getTimezone();
   let ticks = [];
-  for (let i = min; i <= max + interval / 2; i += interval) {
+  for (let i = min; i <= max; i += interval) {
     ticks.push({
       value: i,
       label: moment.tz(i, timezone).format(format),
@@ -102,17 +85,14 @@ export function newTicks(min: number, max: number, interval: number): EuiRangeTi
     });
   }
 
-  const maxTicks = 20;
+  const maxTicks = 19;
   let filteredArr: Array<{ value: number; label: string }> = [];
   if (ticks.length > maxTicks) {
     const nth = Math.ceil(ticks.length / maxTicks);
     filteredArr = ticks.filter((_value, index) => {
       return index % nth === 0;
     });
-
-    if (filteredArr.length === maxTicks - 1) {
-      filteredArr.push(ticks[ticks.length - 1]);
-    }
+    filteredArr.push(ticks[ticks.length - 1]);
     ticks = filteredArr;
   }
 
