@@ -40,6 +40,10 @@ as uiSettings within the code.
 |Console provides the user with tools for storing and executing requests against Elasticsearch.
 
 
+|{kib-repo}blob/{branch}/src/plugins/controls/README.mdx[controls]
+|The Controls plugin contains Embeddables which can be used to add user-friendly interactivity to apps.
+
+
 |{kib-repo}blob/{branch}/src/plugins/custom_integrations/README.md[customIntegrations]
 |Register add-data cards
 
@@ -234,6 +238,10 @@ oss plugins.
 |{kib-repo}blob/{branch}/src/plugins/share/README.md[share]
 |The share plugin contains various utilities for displaying sharing context menu,
 generating deep links to other apps, and creating short URLs.
+
+
+|{kib-repo}blob/{branch}/src/plugins/shared_ux/README.md[sharedUX]
+|Our mission is to make consistency in our user experience a product.
 
 
 |{kib-repo}blob/{branch}/src/plugins/telemetry/README.md[telemetry]
