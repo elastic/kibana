@@ -6,7 +6,8 @@
  */
 
 import { createAlertServiceMock } from '../../../services/mocks';
-import { AggregationBuilder, Hosts, Users } from './aggregations';
+import { AggregationBuilder } from '../types';
+import { AlertHosts, AlertUsers } from './aggregations';
 
 export function mockAlertsService() {
   const alertsService = createAlertServiceMock();
@@ -15,13 +16,13 @@ export function mockAlertsService() {
       let result = {};
       for (const builder of aggregationBuilders) {
         switch (builder.constructor) {
-          case Hosts:
+          case AlertHosts:
             result = {
               ...result,
               ...createHostsAggsResponse(),
             };
             break;
-          case Users:
+          case AlertUsers:
             result = {
               ...result,
               ...createUsersAggsResponse(),
