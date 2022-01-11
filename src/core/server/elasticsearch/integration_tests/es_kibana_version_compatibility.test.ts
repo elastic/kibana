@@ -44,6 +44,7 @@ describe('esVersionCompatibleWithKibana', () => {
     const { startKibana } = await start({ version: '8.0.0' });
     const startWithCleanup = async () => {
       kibanaServer = await startKibana();
+      return kibanaServer;
     };
     await expect(startWithCleanup()).resolves.toBeDefined();
   });
