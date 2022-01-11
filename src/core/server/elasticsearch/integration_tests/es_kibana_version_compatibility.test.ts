@@ -25,10 +25,7 @@ describe('esVersionCompatibleWithKibana', () => {
     }
   });
 
-  const start = async ({
-    esArgs = [],
-    version,
-  }: { esArgs?: string[]; version?: string } = {}) => {
+  const start = async ({ esArgs = [], version }: { esArgs?: string[]; version?: string } = {}) => {
     const { startES, startKibana } = createTestServers({
       adjustTimeout: jest.setTimeout,
       settings: {
