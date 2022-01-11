@@ -118,7 +118,6 @@ export function AddFilterModal({
     },
   ]);
   const [groupsCount, setGroupsCount] = useState<number>(1);
-  const [filtersDepth, setFilterDepth] = useState<number>(1);
 
   const onIndexPatternChange = ([selectedPattern]: IIndexPattern[]) => {
     setSelectedIndexPattern(selectedPattern);
@@ -397,7 +396,7 @@ export function AddFilterModal({
       const filtersInGroup = groupedFilters.length;
       const groupBySubgroups = groupBy(groupedFilters, 'subGroupId');
       const subGroups = [];
-      for (const [subGroupId, subGroupedFilters] of Object.entries(groupBySubgroups)) {
+      for (const [_, subGroupedFilters] of Object.entries(groupBySubgroups)) {
         subGroups.push(subGroupedFilters);
       }
 
@@ -405,139 +404,165 @@ export function AddFilterModal({
         <div className={classNames(filtersInGroup > 1 ? 'kbnQueryBar__filterModalGroups' : '')}>
           {subGroups.map((subGroup, subGroupIdx) => {
             return (
-              <div
-                className={classNames(
-                  subGroup.length > 1 ? 'kbnQueryBar__filterModalSubGroups' : ''
-                )}
-              >
-                {subGroup.map((localfilter, index) => {
-                  return (
-                    <>
-                      <EuiFlexGroup className="stratoula">
-                        {renderFieldInput(localfilter.id)}
-                        {renderOperatorInput(localfilter.id)}
-                        <EuiSpacer size="s" />
-                        <EuiFlexItem data-test-subj="filterParams">
-                          {renderParamsEditor(localfilter.id)}
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonIcon
-                            onClick={() => {
-                              // const filtersOnSubGroup = localFilters.filter(
-                              //   (f) => f.groupId === Number(groupId)
-                              // );
-                              const updatedLocalFilter = { ...localfilter, relationship: 'OR' };
-                              const idx = localFilters.findIndex(
-                                (f) => f.id === localfilter.id && f.groupId === Number(groupId)
-                              );
-                              const subGroupId = (localfilter?.subGroupId ?? 0) + 1;
-                              localFilters[idx] = updatedLocalFilter;
-                              setLocalFilters([
-                                ...localFilters,
-                                {
-                                  field: undefined,
-                                  operator: undefined,
-                                  value: undefined,
-                                  relationship: undefined,
-                                  groupId: localfilter.groupId,
-                                  id: localFilters.length,
-                                  subGroupId,
-                                },
-                              ]);
-                            }}
-                            iconType="returnKey"
-                            size="s"
-                            aria-label="Add filter group with OR"
-                          />
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiButtonIcon
-                            display="base"
-                            onClick={() => {
-                              const filtersOnGroup = localFilters.filter(
-                                (f) => f.groupId === Number(groupId)
-                              );
-                              const subGroupId =
-                                filtersOnGroup.length > 2
-                                  ? localfilter?.subGroupId ?? 0
-                                  : (localfilter?.subGroupId ?? 0) + 1;
-                              const updatedLocalFilter = {
-                                ...localfilter,
-                                relationship: 'AND',
-                                subGroupId: filtersOnGroup.length > 1 ? subGroupId : 1,
-                              };
-                              const idx = localFilters.findIndex(
-                                (f) => f.id === localfilter.id && f.groupId === Number(groupId)
-                              );
-                              localFilters[idx] = updatedLocalFilter;
-                              setLocalFilters([
-                                ...localFilters,
-                                {
-                                  field: undefined,
-                                  operator: undefined,
-                                  value: undefined,
-                                  relationship: undefined,
-                                  groupId:
-                                    filtersOnGroup.length > 1 ? groupsCount : groupsCount + 1,
-                                  subGroupId,
-                                  id: localFilters.length,
-                                },
-                              ]);
-                              if (filtersOnGroup.length <= 1) {
-                                setGroupsCount(groupsCount + 1);
-                              }
-                            }}
-                            iconType="plus"
-                            size="s"
-                            aria-label="Add filter group with AND"
-                          />
-                        </EuiFlexItem>
-                        {localFilters.length > 1 && (
+              <>
+                <div
+                  className={classNames(
+                    subGroup.length > 1 ? 'kbnQueryBar__filterModalSubGroups' : ''
+                  )}
+                >
+                  {subGroup.map((localfilter, index) => {
+                    return (
+                      <>
+                        <EuiFlexGroup>
+                          {renderFieldInput(localfilter.id)}
+                          {renderOperatorInput(localfilter.id)}
+                          <EuiSpacer size="s" />
+                          <EuiFlexItem data-test-subj="filterParams">
+                            {renderParamsEditor(localfilter.id)}
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiButtonIcon
+                              onClick={() => {
+                                const updatedLocalFilter = { ...localfilter, relationship: 'OR' };
+                                const idx = localFilters.findIndex(
+                                  (f) => f.id === localfilter.id && f.groupId === Number(groupId)
+                                );
+                                const subGroupId = (localfilter?.subGroupId ?? 0) + 1;
+                                if (subGroup.length < 2) {
+                                  localFilters[idx] = updatedLocalFilter;
+                                }
+                                setLocalFilters([
+                                  ...localFilters,
+                                  {
+                                    field: undefined,
+                                    operator: undefined,
+                                    value: undefined,
+                                    relationship: undefined,
+                                    groupId: localfilter.groupId,
+                                    id: localFilters.length,
+                                    subGroupId,
+                                  },
+                                ]);
+                              }}
+                              iconType="returnKey"
+                              size="s"
+                              aria-label="Add filter group with OR"
+                            />
+                          </EuiFlexItem>
                           <EuiFlexItem grow={false}>
                             <EuiButtonIcon
                               display="base"
                               onClick={() => {
-                                const currentIdx = localFilters.findIndex(
-                                  (f) => f.id === localfilter.id
+                                const filtersOnGroup = localFilters.filter(
+                                  (f) => f.groupId === Number(groupId)
                                 );
-                                if (currentIdx > 0) {
-                                  localFilters[currentIdx - 1].relationship = 'AND';
+                                const subGroupId =
+                                  filtersOnGroup.length > 2
+                                    ? localfilter?.subGroupId ?? 0
+                                    : (localfilter?.subGroupId ?? 0) + 1;
+                                const updatedLocalFilter = {
+                                  ...localfilter,
+                                  relationship: 'AND',
+                                  subGroupId: filtersOnGroup.length > 1 ? subGroupId : 1,
+                                };
+                                const idx = localFilters.findIndex(
+                                  (f) => f.id === localfilter.id && f.groupId === Number(groupId)
+                                );
+                                localFilters[idx] = updatedLocalFilter;
+                                setLocalFilters([
+                                  ...localFilters,
+                                  {
+                                    field: undefined,
+                                    operator: undefined,
+                                    value: undefined,
+                                    relationship: undefined,
+                                    groupId:
+                                      filtersOnGroup.length > 1 ? groupsCount : groupsCount + 1,
+                                    subGroupId,
+                                    id: localFilters.length,
+                                  },
+                                ]);
+                                if (filtersOnGroup.length <= 1) {
+                                  setGroupsCount(groupsCount + 1);
                                 }
-                                const updatedFilters = localFilters.filter(
-                                  (_, idx) => idx !== localfilter.id
-                                );
-                                setLocalFilters(updatedFilters);
                               }}
-                              iconType="trash"
+                              iconType="plus"
                               size="s"
-                              color="danger"
-                              aria-label="Delete filter group"
+                              aria-label="Add filter group with AND"
                             />
                           </EuiFlexItem>
-                        )}
-                      </EuiFlexGroup>
-                      {localfilter.relationship && localfilter.relationship === 'OR' && (
-                        <>
-                          <EuiFlexGroup gutterSize="none">
-                            <EuiFlexItem>
-                              <EuiHorizontalRule margin="s" />
-                            </EuiFlexItem>
+                          {localFilters.length > 1 && (
                             <EuiFlexItem grow={false}>
-                              <EuiText color="subdued" className="kbnQueryBar__filterModalORText">
-                                {' '}
-                                OR{' '}
-                              </EuiText>
+                              <EuiButtonIcon
+                                display="base"
+                                onClick={() => {
+                                  const currentIdx = localFilters.findIndex(
+                                    (f) => f.id === localfilter.id
+                                  );
+                                  if (currentIdx > 0) {
+                                    localFilters[currentIdx - 1].relationship = 'AND';
+                                  }
+                                  const updatedFilters = localFilters.filter(
+                                    (_, idx) => idx !== localfilter.id
+                                  );
+                                  setLocalFilters(updatedFilters);
+                                }}
+                                iconType="trash"
+                                size="s"
+                                color="danger"
+                                aria-label="Delete filter group"
+                              />
                             </EuiFlexItem>
-                            <EuiFlexItem>
-                              <EuiHorizontalRule margin="s" />
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </>
-                      )}
+                          )}
+                        </EuiFlexGroup>
+                        {localfilter.relationship &&
+                          localfilter.relationship === 'OR' &&
+                          subGroup.length === 0 && (
+                            <>
+                              <EuiFlexGroup gutterSize="none">
+                                <EuiFlexItem>
+                                  <EuiHorizontalRule margin="s" />
+                                </EuiFlexItem>
+                                <EuiFlexItem grow={false}>
+                                  <EuiText
+                                    color="subdued"
+                                    className="kbnQueryBar__filterModalORText"
+                                  >
+                                    {' '}
+                                    OR{' '}
+                                  </EuiText>
+                                </EuiFlexItem>
+                                <EuiFlexItem>
+                                  <EuiHorizontalRule margin="s" />
+                                </EuiFlexItem>
+                              </EuiFlexGroup>
+                            </>
+                          )}
+                      </>
+                    );
+                  })}
+                </div>
+                <>
+                  {subGroup.length > 0 && subGroupIdx !== subGroups.length - 1 && (
+                    <>
+                      <EuiFlexGroup gutterSize="none">
+                        <EuiFlexItem>
+                          <EuiHorizontalRule margin="s" />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText color="subdued" className="kbnQueryBar__filterModalORText">
+                            {' '}
+                            OR{' '}
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiHorizontalRule margin="s" />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     </>
-                  );
-                })}
-              </div>
+                  )}
+                </>
+              </>
             );
           })}
         </div>
