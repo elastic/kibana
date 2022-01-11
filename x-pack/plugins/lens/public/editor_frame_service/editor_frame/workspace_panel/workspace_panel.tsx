@@ -549,7 +549,8 @@ export const VisualizationWrapper = ({
   if (localState.missingRefsErrors?.length) {
     // Check for access to both Management app && specific indexPattern section
     const { management: isManagementEnabled } = application.capabilities.navLinks;
-    const isIndexPatternManagementEnabled = application.capabilities.indexPatterns.save;
+    const isIndexPatternManagementEnabled =
+      application.capabilities.management.kibana.indexPatterns;
     return (
       <EuiFlexGroup data-test-subj="configuration-failure">
         <EuiFlexItem>
