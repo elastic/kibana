@@ -19,8 +19,6 @@ Review important information about the {kib} 8.0.0 releases.
 [[release-notes-8.0.0-rc1]]
 == {kib} 8.0.0-rc1
 
-coming::[8.0.0-rc1]
-
 Review the {kib} 8.0.0-rc1 changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
 
 [float]
