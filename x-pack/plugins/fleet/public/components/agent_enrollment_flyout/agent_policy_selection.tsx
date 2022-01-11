@@ -17,7 +17,6 @@ import {
   EuiPortal,
   EuiSelect,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 
 import type { AgentPolicy } from '../../types';
@@ -134,14 +133,6 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
       >
         <EuiSelect
           fullWidth
-          prepend={
-            <EuiText>
-              <FormattedMessage
-                id="xpack.fleet.enrollmentStepAgentPolicy.policySelectLabel"
-                defaultMessage="Agent policy"
-              />
-            </EuiText>
-          }
           isLoading={!agentPolicies}
           options={agentPolicyList.map((agentPolicy: AgentPolicy) => ({
             value: agentPolicy.id,
