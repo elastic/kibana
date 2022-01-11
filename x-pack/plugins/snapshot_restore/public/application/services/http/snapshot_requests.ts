@@ -28,13 +28,21 @@ export const useLoadSnapshots = (query: SnapshotListParams) =>
     query: query as unknown as HttpFetchQuery,
   });
 
-export const useLoadSnapshot = (repositoryName: string, snapshotId: string) =>
-  useRequest({
+export const useLoadSnapshot = (
+  repositoryName: string,
+  snapshotId: string,
+  ignoreSystemIndices?: boolean
+) => {
+  const query = { ...(ignoreSystemIndices ? { ignoreSystemIndices } : {}) };
+
+  return useRequest({
     path: `${API_BASE_PATH}snapshots/${encodeURIComponent(repositoryName)}/${encodeURIComponent(
       snapshotId
     )}`,
+    query,
     method: 'get',
   });
+};
 
 export const deleteSnapshots = async (
   snapshotIds: Array<{ snapshot: string; repository: string }>

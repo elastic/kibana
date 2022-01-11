@@ -40,11 +40,12 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
   const [snapshotDetails, setSnapshotDetails] = useState<SnapshotDetails | {}>({});
 
   // Load snapshot
+  const IGNORE_SYSTEM_INDICES = true;
   const {
     error: snapshotError,
     isLoading: loadingSnapshot,
     data: snapshotData,
-  } = useLoadSnapshot(repositoryName, snapshotId);
+  } = useLoadSnapshot(repositoryName, snapshotId, IGNORE_SYSTEM_INDICES);
 
   // Update repository state when data is loaded
   useEffect(() => {

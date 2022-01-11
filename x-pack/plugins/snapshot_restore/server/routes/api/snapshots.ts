@@ -196,16 +196,22 @@ export function registerSnapshotsRoutes({
     snapshot: schema.string(),
   });
 
+  const getOneQuerySchema = schema.object({
+    ignoreSystemIndices: schema.maybe(schema.boolean()),
+  });
+
   // GET one snapshot
   router.get(
     {
       path: addBasePath('snapshots/{repository}/{snapshot}'),
-      validate: { params: getOneParamsSchema },
+      validate: { params: getOneParamsSchema, query: getOneQuerySchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
       const { client: clusterClient } = ctx.core.elasticsearch;
       const { repository, snapshot } = req.params as TypeOf<typeof getOneParamsSchema>;
       const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
+      const ignoreSystemIndices = (req.query as TypeOf<typeof getOneQuerySchema>)
+        .ignoreSystemIndices;
 
       try {
         const response = await clusterClient.asCurrentUser.snapshot.get({
@@ -237,8 +243,12 @@ export function registerSnapshotsRoutes({
 
         // We need to ignore system indices/ds from the UI since in the resulting snapshot they wont be present.
         // Also the restore snapshot wizard lets you select system indices to restore, but that will result in an error from ES.
-        const systemIndices = await getSystemIndicesByName(clusterClient);
-        const systemDataStreams = await getSystemDataStreamsByName(clusterClient);
+        let systemIndices;
+        let systemDataStreams;
+        if (ignoreSystemIndices) {
+          systemIndices = await getSystemIndicesByName(clusterClient);
+          systemDataStreams = await getSystemDataStreamsByName(clusterClient);
+        }
 
         return res.ok({
           body: deserializeSnapshotDetails(
