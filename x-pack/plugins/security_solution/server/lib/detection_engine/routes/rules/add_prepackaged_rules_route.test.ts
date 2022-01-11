@@ -11,7 +11,6 @@ import {
   getFindResultWithSingleHit,
   getAlertMock,
   getBasicEmptySearchResponse,
-  getBasicNoShardsSearchResponse,
 } from '../__mocks__/request_responses';
 import { configMock, requestContextMock, serverMock } from '../__mocks__';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
