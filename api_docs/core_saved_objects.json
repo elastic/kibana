@@ -4390,6 +4390,51 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError",
+            "type": "Function",
+            "tags": [],
+            "label": "createGenericNotFoundEsUnavailableError",
+            "description": [],
+            "signature": [
+              "(type?: string | null, id?: string | null) => ",
+              "DecoratedError"
+            ],
+            "path": "src/core/server/saved_objects/service/lib/errors.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string | null"
+                ],
+                "path": "src/core/server/saved_objects/service/lib/errors.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string | null"
+                ],
+                "path": "src/core/server/saved_objects/service/lib/errors.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -11823,7 +11868,7 @@
             "label": "sortOrder",
             "description": [],
             "signature": [
-              "SearchSortOrder",
+              "SortOrder",
               " | undefined"
             ],
             "path": "src/core/server/saved_objects/types.ts",
@@ -14203,7 +14248,9 @@
               "\nRegister a {@link SavedObjectsType | savedObjects type} definition.\n\nSee the {@link SavedObjectsTypeMappingDefinition | mappings format} and\n{@link SavedObjectMigrationMap | migration format} for more details about these.\n"
             ],
             "signature": [
-              "<Attributes = any>(type: ",
+              "<Attributes extends ",
+              "SavedObjectAttributes",
+              " = any>(type: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -14809,6 +14856,36 @@
                 "docId": "kibCoreSavedObjectsPluginApi",
                 "section": "def-server.SavedObjectMigrationMap",
                 "text": "SavedObjectMigrationMap"
+              },
+              ") | undefined"
+            ],
+            "path": "src/core/server/saved_objects/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsType.schemas",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "schemas",
+            "description": [
+              "\nAn optional schema that can be used to validate the attributes of the type.\n\nWhen provided, calls to {@link SavedObjectsClient.create | create} will be validated against this schema.\n\nSee {@link SavedObjectsValidationMap} for more details."
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsValidationMap",
+                "text": "SavedObjectsValidationMap"
+              },
+              " | (() => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsValidationMap",
+                "text": "SavedObjectsValidationMap"
               },
               ") | undefined"
             ],
@@ -15520,6 +15597,41 @@
               "[] | undefined"
             ],
             "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.SavedObjectsValidationMap",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsValidationMap",
+        "description": [
+          "\nA map of {@link SavedObjectsValidationSpec | validation specs} to be used for a given type.\nThe map's keys must be valid semver versions.\n\nAny time you change the schema of a {@link SavedObjectsType}, you should add a new entry\nto this map for the Kibana version the change was introduced in.\n"
+        ],
+        "path": "src/core/server/saved_objects/validation/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsValidationMap.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[version: string]: SavedObjectsValidationSpec",
+            "description": [],
+            "signature": [
+              "[version: string]:  ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsValidationSpec",
+                "text": "SavedObjectsValidationSpec"
+              }
+            ],
+            "path": "src/core/server/saved_objects/validation/types.ts",
             "deprecated": false
           }
         ],
@@ -16653,7 +16765,7 @@
           "{ filter?: any; search?: string | undefined; type: string | string[]; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
           "> | undefined; fields?: string[] | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
-          "SearchSortOrder",
+          "SortOrder",
           " | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; hasReference?: ",
           {
             "pluginId": "core",
@@ -16853,6 +16965,23 @@
           "\"multiple\" | \"single\" | \"multiple-isolated\" | \"agnostic\""
         ],
         "path": "src/core/server/saved_objects/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.SavedObjectsValidationSpec",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsValidationSpec",
+        "description": [
+          "\nAllows for validating properties using @kbn/config-schema validations.\n"
+        ],
+        "signature": [
+          "ObjectType",
+          "<any>"
+        ],
+        "path": "src/core/server/saved_objects/validation/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
