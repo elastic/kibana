@@ -25,7 +25,7 @@ describe('esVersionCompatibleWithKibana', () => {
     }
   });
 
-  const startES = async ({
+  const start = async ({
     esArgs = [],
     version,
   }: { esArgs?: string[]; version?: string } = {}) => {
@@ -44,7 +44,7 @@ describe('esVersionCompatibleWithKibana', () => {
   };
 
   it('successfully starts Kibana 7.17.x against Elasticsearch 8.0.0', async () => {
-    const { startKibana } = await startES({ version: '8.0.0' });
+    const { startKibana } = await start({ version: '8.0.0' });
     await expect(startKibana()).resolves.toBeDefined();
   });
 });
