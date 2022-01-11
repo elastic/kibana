@@ -85,6 +85,7 @@ import {
   formatMillisForDisplay,
   shouldShowDurationWarning,
 } from '../../../lib/execution_duration_utils';
+import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
 
 const ENTER_KEY = 13;
 
@@ -581,6 +582,32 @@ export const AlertsList: React.FunctionComponent = () => {
             )}
           </>
         );
+      },
+    },
+    {
+      field: 'monitoring.execution.stats.success_to_failure_ratio',
+      width: '12%',
+      name: (
+        <EuiToolTip
+          data-test-subj="alertsTableCell-successRatioTooltip"
+          content={i18n.translate(
+            'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.successRatioTitle',
+            {
+              defaultMessage: 'How often this rule executes successfully',
+            }
+          )}
+        >
+          <span>
+            Success ratio{' '}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
+      sortable: true,
+      truncateText: false,
+      'data-test-subj': 'alertsTableCell-successRatio',
+      render: (value: number) => {
+        return <span>{getFormattedSuccessRatio(value)}</span>;
       },
     },
     {

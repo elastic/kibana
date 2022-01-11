@@ -93,6 +93,27 @@
           }
         }
       },
+      "monitoring": {
+        "properties": {
+          "execution": {
+            "properties": {
+              "stats": {
+                "properties": {
+                  "success": {
+                    "type": "long"
+                  },
+                  "failure": {
+                    "type": "long"
+                  },
+                  "success_to_failure_ratio": {
+                    "type": "float"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "executionStatus": {
         "properties": {
           "status": {

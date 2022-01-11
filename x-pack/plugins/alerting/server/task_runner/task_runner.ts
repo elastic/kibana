@@ -33,6 +33,7 @@ import {
   AlertExecutionStatus,
   AlertExecutionStatusErrorReasons,
   RuleTypeRegistry,
+  RuleMonitoring,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -62,8 +63,19 @@ const FALLBACK_RETRY_INTERVAL = '5m';
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
 
+const DEFAULT_MONITORING = {
+  execution: {
+    stats: {
+      success: 0,
+      failure: 0,
+      success_to_failure_ratio: 0,
+    },
+  },
+};
+
 interface RuleTaskRunResult {
   state: RuleTaskState;
+  monitoring: RuleMonitoring | undefined;
   schedule: IntervalSchedule | undefined;
 }
 
@@ -230,6 +242,29 @@ export class TaskRunner<
     } catch (err) {
       this.logger.error(
         `error updating rule execution status for ${this.ruleType.id}:${ruleId} ${err.message}`
+      );
+    }
+  }
+
+  private async updateMonitoring(
+    ruleId: string,
+    namespace: string | undefined,
+    monitoring: RuleMonitoring
+  ) {
+    const client = this.context.internalSavedObjectsRepository;
+    const attributes = {
+      monitoring,
+    };
+
+    try {
+      await partiallyUpdateAlert(client, ruleId, attributes, {
+        ignore404: true,
+        namespace,
+        refresh: false,
+      });
+    } catch (err) {
+      this.logger.error(
+        `error updating rule monitoring for ${this.ruleType.id}:${ruleId} ${err.message}`
       );
     }
   }
@@ -557,6 +592,7 @@ export class TaskRunner<
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.License, err);
     }
     return {
+      monitoring: asOk(rule.monitoring),
       state: await promiseResult<RuleTaskState, Error>(
         this.validateAndExecuteRule(services, apiKey, rule, event)
       ),
@@ -622,9 +658,14 @@ export class TaskRunner<
     });
     eventLogger.logEvent(startEvent);
 
-    const { state, schedule } = await errorAsRuleTaskRunResult(
+    const { state, schedule, monitoring } = await errorAsRuleTaskRunResult(
       this.loadRuleAttributesAndRun(event)
     );
+
+    const ruleMonitoring =
+      resolveErr<RuleMonitoring | undefined, Error>(monitoring, () => {
+        return DEFAULT_MONITORING;
+      }) ?? DEFAULT_MONITORING;
 
     const executionStatus: AlertExecutionStatus = map(
       state,
@@ -670,8 +711,17 @@ export class TaskRunner<
       if (!event.message) {
         event.message = `${this.ruleType.id}:${ruleId}: execution failed`;
       }
+      ruleMonitoring.execution.stats.failure = ruleMonitoring.execution.stats.failure ?? 0;
+      ruleMonitoring.execution.stats.failure += 1;
+    } else {
+      ruleMonitoring.execution.stats.success = ruleMonitoring.execution.stats.success ?? 0;
+      ruleMonitoring.execution.stats.success += 1;
     }
 
+    ruleMonitoring.execution.stats.success_to_failure_ratio =
+      ruleMonitoring.execution.stats.success /
+      (ruleMonitoring.execution.stats.success + ruleMonitoring.execution.stats.failure);
+    await this.updateMonitoring(ruleId, namespace, ruleMonitoring);
     eventLogger.logEvent(event);
 
     if (!this.cancelled) {
@@ -714,6 +764,7 @@ export class TaskRunner<
         }
         return { interval: taskSchedule?.interval ?? FALLBACK_RETRY_INTERVAL };
       }),
+      monitoring: ruleMonitoring,
     };
   }
 
@@ -1104,6 +1155,7 @@ async function errorAsRuleTaskRunResult(
     return {
       state: asErr(e),
       schedule: asErr(e),
+      monitoring: asErr(e),
     };
   }
 }

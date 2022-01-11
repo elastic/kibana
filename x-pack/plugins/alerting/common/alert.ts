@@ -82,6 +82,7 @@ export interface Alert<Params extends AlertTypeParams = never> {
   muteAll: boolean;
   mutedInstanceIds: string[];
   executionStatus: AlertExecutionStatus;
+  monitoring?: RuleMonitoring;
 }
 
 export type SanitizedAlert<Params extends AlertTypeParams = never> = Omit<Alert<Params>, 'apiKey'>;
@@ -134,4 +135,14 @@ export interface ActionVariable {
   description: string;
   deprecated?: boolean;
   useWithTripleBracesInTemplates?: boolean;
+}
+
+export interface RuleMonitoring extends SavedObjectAttributes {
+  execution: {
+    stats: {
+      success: number;
+      failure: number;
+      success_to_failure_ratio: number;
+    };
+  };
 }
