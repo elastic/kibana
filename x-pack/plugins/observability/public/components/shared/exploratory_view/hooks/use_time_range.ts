@@ -34,10 +34,13 @@ export const combineTimeRanges = (
       const seriesFrom = parseRelativeDate(series.time.from)!;
       const seriesTo = parseRelativeDate(series.time.to, { roundUp: true })!;
 
-      if (!to || seriesTo > parseRelativeDate(to, { roundUp: true })) {
+      const currentLatest = parseRelativeDate(to, { roundUp: true });
+      if (!to || (currentLatest && seriesTo > currentLatest)) {
         to = series.time.to;
       }
-      if (!from || seriesFrom < parseRelativeDate(from)) {
+
+      const currentEarliest = parseRelativeDate(from);
+      if (!from || (currentEarliest && seriesFrom < currentEarliest)) {
         from = series.time.from;
       }
     }
