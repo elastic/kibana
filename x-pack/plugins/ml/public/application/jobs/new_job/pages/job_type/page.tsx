@@ -8,7 +8,6 @@
 import React, { FC, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiPageBody,
   EuiTitle,
   EuiSpacer,
   EuiCallOut,
@@ -215,109 +214,49 @@ export const Page: FC = () => {
 
   return (
     <div data-test-subj="mlPageJobTypeSelection">
-      <EuiPageBody restrictWidth={1200}>
-        <MlPageHeader>
-          <FormattedMessage
-            id="xpack.ml.newJob.wizard.jobType.createJobFromTitle"
-            defaultMessage="Create a job from the {pageTitleLabel}"
-            values={{ pageTitleLabel }}
-          />
-        </MlPageHeader>
+      <MlPageHeader>
+        <FormattedMessage
+          id="xpack.ml.newJob.wizard.jobType.createJobFromTitle"
+          defaultMessage="Create a job from the {pageTitleLabel}"
+          values={{ pageTitleLabel }}
+        />
+      </MlPageHeader>
 
-        {isTimeBasedIndex === false && (
-          <>
-            <EuiCallOut title={indexWarningTitle} color="warning" iconType="alert">
-              <FormattedMessage
-                id="xpack.ml.newJob.wizard.jobType.howToRunAnomalyDetectionDescription"
-                defaultMessage="Anomaly detection can only be run over indices which are time based."
-              />
-              <br />
-              <EuiLink onClick={onSelectDifferentIndex}>
-                <FormattedMessage
-                  id="xpack.ml.newJob.wizard.jobType.selectDifferentIndexLinkText"
-                  defaultMessage="Select a different data view or saved search"
-                />
-              </EuiLink>
-            </EuiCallOut>
-            <EuiSpacer size="xxl" />
-          </>
-        )}
-
-        <div hidden={recognizerResultsCount === 0}>
-          <EuiTitle size="s">
-            <h2>
-              <FormattedMessage
-                id="xpack.ml.newJob.wizard.jobType.useSuppliedConfigurationTitle"
-                defaultMessage="Use preconfigured jobs"
-              />
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="xpack.ml.newJob.wizard.jobType.useSuppliedConfigurationDescription"
-                defaultMessage="The fields in your data match known configurations.
-                Create a set of preconfigured jobs."
-              />
-            </p>
-          </EuiText>
-
-          <EuiSpacer size="m" />
-
-          <EuiFlexGrid gutterSize="l" columns={4}>
-            <DataRecognizer
-              indexPattern={currentDataView}
-              savedSearch={currentSavedSearch}
-              results={recognizerResults}
+      {isTimeBasedIndex === false && (
+        <>
+          <EuiCallOut title={indexWarningTitle} color="warning" iconType="alert">
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.jobType.howToRunAnomalyDetectionDescription"
+              defaultMessage="Anomaly detection can only be run over indices which are time based."
             />
-          </EuiFlexGrid>
-
+            <br />
+            <EuiLink onClick={onSelectDifferentIndex}>
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.jobType.selectDifferentIndexLinkText"
+                defaultMessage="Select a different data view or saved search"
+              />
+            </EuiLink>
+          </EuiCallOut>
           <EuiSpacer size="xxl" />
-        </div>
+        </>
+      )}
 
+      <div hidden={recognizerResultsCount === 0}>
         <EuiTitle size="s">
           <h2>
             <FormattedMessage
-              id="xpack.ml.newJob.wizard.jobType.useWizardTitle"
-              defaultMessage="Use a wizard"
+              id="xpack.ml.newJob.wizard.jobType.useSuppliedConfigurationTitle"
+              defaultMessage="Use preconfigured jobs"
             />
           </h2>
         </EuiTitle>
-        <EuiSpacer size="m" />
-
-        <EuiFlexGrid gutterSize="l" columns={4}>
-          {jobTypes.map(({ onClick, icon, title, description, id }) => (
-            <EuiFlexItem key={id}>
-              <LinkCard
-                data-test-subj={id}
-                onClick={onClick}
-                icon={icon.type}
-                iconAreaLabel={icon.ariaLabel}
-                title={title}
-                description={description}
-                isDisabled={!isTimeBasedIndex}
-              />
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGrid>
-
-        <EuiSpacer size="xxl" />
-
+        <EuiSpacer size="s" />
         <EuiText>
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.ml.newJob.wizard.jobType.learnMoreAboutDataTitle"
-                defaultMessage="Learn more about your data"
-              />
-            </h3>
-          </EuiTitle>
-
           <p>
             <FormattedMessage
-              id="xpack.ml.newJob.wizard.jobType.learnMoreAboutDataDescription"
-              defaultMessage="If you're not sure what type of job to create, first explore the fields and metrics in your data."
+              id="xpack.ml.newJob.wizard.jobType.useSuppliedConfigurationDescription"
+              defaultMessage="The fields in your data match known configurations.
+                Create a set of preconfigured jobs."
             />
           </p>
         </EuiText>
@@ -325,32 +264,90 @@ export const Page: FC = () => {
         <EuiSpacer size="m" />
 
         <EuiFlexGrid gutterSize="l" columns={4}>
-          <EuiFlexItem>
+          <DataRecognizer
+            indexPattern={currentDataView}
+            savedSearch={currentSavedSearch}
+            results={recognizerResults}
+          />
+        </EuiFlexGrid>
+
+        <EuiSpacer size="xxl" />
+      </div>
+
+      <EuiTitle size="s">
+        <h2>
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.jobType.useWizardTitle"
+            defaultMessage="Use a wizard"
+          />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+
+      <EuiFlexGrid gutterSize="l" columns={4}>
+        {jobTypes.map(({ onClick, icon, title, description, id }) => (
+          <EuiFlexItem key={id}>
             <LinkCard
-              icon="dataVisualizer"
-              iconAreaLabel={i18n.translate(
-                'xpack.ml.newJob.wizard.jobType.dataVisualizerAriaLabel',
-                {
-                  defaultMessage: 'Data Visualizer',
-                }
-              )}
-              title={
-                <FormattedMessage
-                  id="xpack.ml.newJob.wizard.jobType.dataVisualizerTitle"
-                  defaultMessage="Data Visualizer"
-                />
-              }
-              description={
-                <FormattedMessage
-                  id="xpack.ml.newJob.wizard.jobType.dataVisualizerDescription"
-                  defaultMessage="Learn more about the characteristics of your data and identify the fields for analysis with machine learning."
-                />
-              }
-              onClick={addSelectionToRecentlyAccessed}
+              data-test-subj={id}
+              onClick={onClick}
+              icon={icon.type}
+              iconAreaLabel={icon.ariaLabel}
+              title={title}
+              description={description}
+              isDisabled={!isTimeBasedIndex}
             />
           </EuiFlexItem>
-        </EuiFlexGrid>
-      </EuiPageBody>
+        ))}
+      </EuiFlexGrid>
+
+      <EuiSpacer size="xxl" />
+
+      <EuiText>
+        <EuiTitle size="s">
+          <h3>
+            <FormattedMessage
+              id="xpack.ml.newJob.wizard.jobType.learnMoreAboutDataTitle"
+              defaultMessage="Learn more about your data"
+            />
+          </h3>
+        </EuiTitle>
+
+        <p>
+          <FormattedMessage
+            id="xpack.ml.newJob.wizard.jobType.learnMoreAboutDataDescription"
+            defaultMessage="If you're not sure what type of job to create, first explore the fields and metrics in your data."
+          />
+        </p>
+      </EuiText>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGrid gutterSize="l" columns={4}>
+        <EuiFlexItem>
+          <LinkCard
+            icon="dataVisualizer"
+            iconAreaLabel={i18n.translate(
+              'xpack.ml.newJob.wizard.jobType.dataVisualizerAriaLabel',
+              {
+                defaultMessage: 'Data Visualizer',
+              }
+            )}
+            title={
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.jobType.dataVisualizerTitle"
+                defaultMessage="Data Visualizer"
+              />
+            }
+            description={
+              <FormattedMessage
+                id="xpack.ml.newJob.wizard.jobType.dataVisualizerDescription"
+                defaultMessage="Learn more about the characteristics of your data and identify the fields for analysis with machine learning."
+              />
+            }
+            onClick={addSelectionToRecentlyAccessed}
+          />
+        </EuiFlexItem>
+      </EuiFlexGrid>
     </div>
   );
 };
