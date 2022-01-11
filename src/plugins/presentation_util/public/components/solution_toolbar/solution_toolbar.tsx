@@ -57,9 +57,15 @@ export const SolutionToolbar = ({ isDarkModeEnabled, children }: Props) => {
       gutterSize="s"
     >
       <EuiFlexItem grow={false}>{primaryActionButton}</EuiFlexItem>
-      {quickButtonGroup ? <EuiFlexItem grow={false}>{quickButtonGroup}</EuiFlexItem> : null}
-      {extra}
-      {addFromLibraryButton ? <EuiFlexItem grow={false}>{addFromLibraryButton}</EuiFlexItem> : null}
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
+          {quickButtonGroup ? <EuiFlexItem grow={false}>{quickButtonGroup}</EuiFlexItem> : null}
+          {extra}
+          {addFromLibraryButton ? (
+            <EuiFlexItem grow={false}>{addFromLibraryButton}</EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
