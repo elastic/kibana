@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -13,13 +13,18 @@ import {
   EuiButton,
   EuiFlexItem,
   EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
+  EuiRadioGroup,
+  EuiPanel,
+  EuiToolTip,
   EuiPopover,
+  EuiRadioGroupOption,
 } from '@elastic/eui';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { i18n } from '@kbn/i18n';
 import type { DataView } from '../../../../../../../src/plugins/data_views/public';
 import { setFullTimeRange } from './full_time_range_selector_service';
+import { useStorage } from '../../contexts/ml/use_storage';
+import { ML_FROZEN_TIER_PREFERENCE } from '../../../../common/types/storage';
 
 interface Props {
   dataView: DataView;
@@ -27,6 +32,13 @@ interface Props {
   disabled: boolean;
   callback?: (a: any) => void;
 }
+
+const FROZEN_TIER_PREFERENCE = {
+  EXCLUDE: 'exclude-frozen',
+  INCLUDE: 'include-frozen',
+} as const;
+
+type FrozenTierPreference = typeof FROZEN_TIER_PREFERENCE[keyof typeof FROZEN_TIER_PREFERENCE];
 
 // Component for rendering a button which automatically sets the range of the time filter
 // to the time range of data in the index(es) mapped to the supplied Kibana index pattern or query.
@@ -40,6 +52,10 @@ export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, ca
   }
 
   const [isPopoverOpen, setPopover] = useState(false);
+  const [frozenDataPreference, setFrozenDataPreference] = useStorage<FrozenTierPreference>(
+    ML_FROZEN_TIER_PREFERENCE,
+    FROZEN_TIER_PREFERENCE.EXCLUDE
+  );
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -49,49 +65,72 @@ export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, ca
     setPopover(false);
   };
 
-  const items = [
-    <EuiContextMenuItem
-      key="exclude-frozen"
-      onClick={() => {
-        setRange(dataView, query, true);
-        closePopover();
-      }}
-    >
-      <FormattedMessage
-        id="xpack.ml.fullTimeRangeSelector.useFullDataExcludingFrozenMenuLabel"
-        defaultMessage="Exclude frozen data tier"
-      />
-    </EuiContextMenuItem>,
+  const sortOptions: EuiRadioGroupOption[] = useMemo(() => {
+    return [
+      {
+        id: FROZEN_TIER_PREFERENCE.EXCLUDE,
+        label: i18n.translate(
+          'xpack.ml.fullTimeRangeSelector.useFullDataExcludingFrozenMenuLabel',
+          {
+            defaultMessage: 'Exclude frozen data tier',
+          }
+        ),
+      },
+      {
+        id: FROZEN_TIER_PREFERENCE.INCLUDE,
+        label: i18n.translate(
+          'xpack.ml.fullTimeRangeSelector.useFullDataIncludingFrozenMenuLabel',
+          {
+            defaultMessage: 'Include frozen data tier',
+          }
+        ),
+      },
+    ];
+  }, []);
 
-    <EuiContextMenuItem
-      key="include-frozen"
-      onClick={() => {
-        setRange(dataView, query, false);
-        closePopover();
-      }}
-    >
-      <FormattedMessage
-        id="xpack.ml.fullTimeRangeSelector.useFullDataIncludingFrozenMenuLabel"
-        defaultMessage="Include frozen data tier"
+  const popoverContent = (
+    <EuiPanel>
+      <EuiRadioGroup
+        options={sortOptions}
+        idSelected={frozenDataPreference}
+        onChange={(id) => {
+          setFrozenDataPreference(id as FrozenTierPreference);
+          setRange(dataView, query, id === FROZEN_TIER_PREFERENCE.EXCLUDE);
+          closePopover();
+        }}
+        compressed
       />
-    </EuiContextMenuItem>,
-  ];
+    </EuiPanel>
+  );
+
+  const buttonTooltip =
+    frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE ? (
+      <FormattedMessage
+        id="xpack.ml.fullTimeRangeSelector.useFullDataButtonTooltip"
+        defaultMessage="Use full range of data excluding frozen data tier."
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.ml.fullTimeRangeSelector.useFullDataButtonTooltip"
+        defaultMessage="Use full range of data including frozen data tier. Including frozen data can be time consuming."
+      />
+    );
 
   return (
     <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-      <EuiButton
-        isDisabled={disabled}
-        onClick={() => setRange(dataView, query, true)}
-        data-test-subj="mlButtonUseFullData"
-      >
-        <FormattedMessage
-          id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
-          defaultMessage="Use full {dataViewTitle} data"
-          values={{
-            dataViewTitle: dataView.title,
-          }}
-        />
-      </EuiButton>
+      <EuiToolTip content={buttonTooltip}>
+        <EuiButton
+          isDisabled={disabled}
+          onClick={() => setRange(dataView, query, true)}
+          data-test-subj="mlButtonUseFullData"
+        >
+          <FormattedMessage
+            id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
+            defaultMessage="Use full data" // @todo update snapshot and translations
+          />
+        </EuiButton>
+      </EuiToolTip>
+
       <EuiFlexItem grow={false}>
         <EuiPopover
           id={'mlFullTimeRangeSelectorOption'}
@@ -109,7 +148,7 @@ export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, ca
           panelPaddingSize="none"
           anchorPosition="downRight"
         >
-          <EuiContextMenuPanel size="s" items={items} />
+          {popoverContent}
         </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
