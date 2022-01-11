@@ -93,9 +93,10 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
 
   const { search } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
-  const queryParamsPolicyId = useMemo(() => queryParams.get('policyId') ?? undefined, [
-    queryParams,
-  ]);
+  const queryParamsPolicyId = useMemo(
+    () => queryParams.get('policyId') ?? undefined,
+    [queryParams]
+  );
 
   /**
    * Please note: policyId can come from one of two sources. The URL param (in the URL path) or
@@ -320,7 +321,14 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         history.push(packagePolicyPath);
       }
     },
-    [packagePolicy.policy_id, getPath, navigateToApp, history, routeState, wasNewAgentPolicyCreated]
+    [
+      packagePolicy.policy_id,
+      getPath,
+      handleNavigateTo,
+      history,
+      routeState,
+      wasNewAgentPolicyCreated,
+    ]
   );
 
   const onSubmit = useCallback(async () => {
