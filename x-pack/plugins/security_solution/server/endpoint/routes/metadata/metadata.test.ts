@@ -75,7 +75,7 @@ describe('test endpoint routes', () => {
   let mockClusterClient: ClusterClientMock;
   let mockScopedClient: ScopedClusterClientMock;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockPackageService: jest.Mocked<PackageService>;
+  let mockPackageService: PackageService;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let routeHandler: RequestHandler<any, any, any, any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

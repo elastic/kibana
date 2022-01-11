@@ -15,8 +15,8 @@ const createClientMock = (): jest.Mocked<PackageClient> => ({
   reinstallEsAssets: jest.fn(),
 });
 
-const createServiceMock = (): jest.Mocked<PackageService> => ({
-  asScoped: jest.fn().mockReturnValue(createClientMock()),
+const createServiceMock = (): PackageService => ({
+  asScoped: jest.fn(createClientMock),
   asInternalUser: createClientMock(),
 });
 

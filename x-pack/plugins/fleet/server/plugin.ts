@@ -19,6 +19,7 @@ import type {
   KibanaRequest,
   ServiceStatus,
   ElasticsearchClient,
+  SavedObjectsClientContract,
 } from 'kibana/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
@@ -445,7 +446,7 @@ export class FleetPlugin
 
   private setupPackageService(
     internalEsClient: ElasticsearchClient,
-    internalSoClient: any
+    internalSoClient: SavedObjectsClientContract
   ): PackageService {
     if (this.packageService) {
       return this.packageService;
