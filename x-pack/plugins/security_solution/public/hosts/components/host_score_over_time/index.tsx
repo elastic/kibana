@@ -97,7 +97,7 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
 
   return (
     <InspectButtonContainer>
-      <EuiPanel hasBorder>
+      <EuiPanel hasBorder data-test-subj="hostRiskScoreOverTime">
         <EuiFlexGroup gutterSize={'none'}>
           <EuiFlexItem grow={1}>
             <HeaderSection title={i18n.HOST_RISK_SCORE_OVER_TIME} hideSubtitle />

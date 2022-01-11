@@ -5,15 +5,47 @@
  * 2.0.
  */
 
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import React from 'react';
-
+import { HostRiskScoreOverTime } from '.';
 import { TestProviders } from '../../../common/mock';
+import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
+
+jest.mock('../../../common/containers/hosts_risk/use_hosts_risk_score');
+const useHostsRiskScoreMock = useHostsRiskScore as jest.Mock;
 
 describe('Host Risk Flyout', () => {
   it('renders', () => {
-    const { queryByTestId } = render(<HostRiskInformation />);
+    const { queryByTestId } = render(
+      <TestProviders>
+        <HostRiskScoreOverTime
+          hostName={'test-host-name'}
+          from={'2020-07-07T08:20:18.966Z'}
+          to={'2020-07-08T08:20:18.966Z'}
+        />
+      </TestProviders>
+    );
 
-    expect(queryByTestId('?????')).toBeInTheDocument();
+    expect(queryByTestId('hostRiskScoreOverTime')).toBeInTheDocument();
+  });
+
+  it('renders loader when HostsRiskScore is laoding', () => {
+    useHostsRiskScoreMock.mockReturnValueOnce({
+      loading: true,
+      isModuleEnabled: true,
+      result: [],
+    });
+
+    const { queryByTestId } = render(
+      <TestProviders>
+        <HostRiskScoreOverTime
+          hostName={'test-host-name'}
+          from={'2020-07-07T08:20:18.966Z'}
+          to={'2020-07-08T08:20:18.966Z'}
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('HostRiskScoreOverTime-loading')).toBeInTheDocument();
   });
 });

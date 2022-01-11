@@ -96,7 +96,7 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
 
   return (
     <InspectButtonContainer>
-      <EuiPanel hasBorder>
+      <EuiPanel hasBorder data-test-subj="topHostScoreContributors">
         <EuiFlexGroup gutterSize={'none'}>
           <EuiFlexItem grow={1}>
             <HeaderSection title={i18n.TOP_RISK_SCORE_CONTRIBUTORS} hideSubtitle />
