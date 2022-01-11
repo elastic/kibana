@@ -39,7 +39,7 @@ export interface FormulaIndexPatternColumn extends ReferenceBasedIndexPatternCol
 export function isFormulaIndexPatternColumn(
   column: BaseIndexPatternColumn
 ): column is FormulaIndexPatternColumn {
-  return 'formula' in (column.params! || {});
+  return 'params' in column && 'formula' in (column as FormulaIndexPatternColumn).params;
 }
 
 export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'managedReference'> =
