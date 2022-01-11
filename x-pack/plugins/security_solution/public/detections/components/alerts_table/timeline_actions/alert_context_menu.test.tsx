@@ -20,6 +20,7 @@ const ecsRowData: Ecs = {
     alert: {
       workflow_status: ['open'],
       rule: {
+        parameters: {},
         uuid: ['testId'],
       },
     },
