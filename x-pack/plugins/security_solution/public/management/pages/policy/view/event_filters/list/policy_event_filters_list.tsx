@@ -32,12 +32,14 @@ import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoin
 import { PolicyEventFiltersDeleteModal } from '../delete_modal';
 import { isGlobalPolicyEffected } from '../../../../../components/effected_policy_select/utils';
 import { getEventFiltersListPath } from '../../../../../common/routing';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 
 interface PolicyEventFiltersListProps {
   policy: ImmutableObject<PolicyData>;
 }
 export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({ policy }) => {
   const { getAppUrl } = useAppUrl();
+  const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
   const policiesRequest = useGetEndpointSpecificPolicies();
   const navigateCallback = usePolicyDetailsEventFiltersNavigateCallback();
   const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
@@ -142,7 +144,7 @@ export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({
     };
     return {
       expanded: expandedItemsMap.get(item.id) || false,
-      actions: [fullDetailsAction, deleteAction],
+      actions: canCreateArtifactsByPolicy ? [fullDetailsAction, deleteAction] : [fullDetailsAction],
       policies: artifactCardPolicies,
     };
   };

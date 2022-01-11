@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { EuiEmptyPrompt, EuiPageTemplate, EuiLink } from '@elastic/eui';
+import React, { memo, useCallback } from 'react';
+import { EuiButton, EuiEmptyPrompt, EuiPageTemplate, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-// TODO: Uncomment this when assign functionality through the flyout is done
-// import { usePolicyDetailsNavigateCallback } from '../../policy_hooks';
+import { usePolicyDetailsNavigateCallback } from '../../policy_hooks';
 import { useGetLinkTo } from './use_policy_event_filters_empty_hooks';
 import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 
@@ -22,15 +21,14 @@ export const PolicyEventFiltersEmptyUnassigned = memo<CommonProps>(({ policyId, 
   const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
   const { onClickHandler, toRouteUrl } = useGetLinkTo(policyId, policyName);
 
-  // TODO: Uncomment this when assign functionality through the flyout is done
-  // const navigateCallback = usePolicyDetailsNavigateCallback();
-  // const onClickPrimaryButtonHandler = useCallback(
-  //   () =>
-  //     navigateCallback({
-  //       show: 'list',
-  //     }),
-  //   [navigateCallback]
-  // );
+  const navigateCallback = usePolicyDetailsNavigateCallback();
+  const onClickPrimaryButtonHandler = useCallback(
+    () =>
+      navigateCallback({
+        show: 'list',
+      }),
+    [navigateCallback]
+  );
   return (
     <EuiPageTemplate template="centeredContent">
       <EuiEmptyPrompt
@@ -54,18 +52,17 @@ export const PolicyEventFiltersEmptyUnassigned = memo<CommonProps>(({ policyId, 
         actions={[
           ...(canCreateArtifactsByPolicy
             ? [
-                // TODO: Uncomment this when assign functionality through the flyout is done
-                // <EuiButton
-                //   color="primary"
-                //   fill
-                //   onClick={onClickPrimaryButtonHandler}
-                //   data-test-subj="assign-ta-button"
-                // >
-                //   <FormattedMessage
-                //     id="xpack.securitySolution.endpoint.policy.eventFilters.empty.unassigned.primaryAction"
-                //     defaultMessage="Assign event filters"
-                //   />
-                // </EuiButton>,
+                <EuiButton
+                  color="primary"
+                  fill
+                  onClick={onClickPrimaryButtonHandler}
+                  data-test-subj="assign-event-filter-button"
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.endpoint.policy.eventFilters.empty.unassigned.primaryAction"
+                    defaultMessage="Assign event filters"
+                  />
+                </EuiButton>,
               ]
             : []),
           // eslint-disable-next-line @elastic/eui/href-or-on-click
