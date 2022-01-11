@@ -37,6 +37,12 @@ export const POLYGON_STYLES = [
   VECTOR_STYLES.LINE_COLOR,
   VECTOR_STYLES.LINE_WIDTH,
 ];
+export const LABEL_STYLES = [
+  VECTOR_STYLES.LABEL_SIZE,
+  VECTOR_STYLES.LABEL_COLOR,
+  VECTOR_STYLES.LABEL_BORDER_COLOR,
+  VECTOR_STYLES.LABEL_BORDER_SIZE,
+];
 
 export function getDefaultStaticProperties(
   mapColors: string[] = []
