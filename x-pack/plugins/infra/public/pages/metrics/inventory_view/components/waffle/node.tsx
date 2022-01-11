@@ -11,14 +11,13 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { first } from 'lodash';
-import { EuiPopover, EuiToolTip } from '@elastic/eui';
+import { EuiPopover } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapNode,
   InfraWaffleMapOptions,
 } from '../../../../../lib/lib';
-import { ConditionalToolTip } from './conditional_tooltip';
 import { colorFromValue } from '../../lib/color_from_value';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { NodeContextPopover } from '../node_details/overlay';
