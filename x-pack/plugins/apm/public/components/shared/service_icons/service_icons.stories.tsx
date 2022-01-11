@@ -37,7 +37,6 @@ const stories: Meta<Args> = {
       const coreMock = {
         http: {
           get: (endpoint: string) => {
-            console.log('### caue ~ endpoint', endpoint);
             switch (endpoint) {
               case `/internal/apm/services/${serviceName}/metadata/icons`:
                 return icons;
