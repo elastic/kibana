@@ -241,8 +241,10 @@ export function registerSnapshotsRoutes({
             return +new Date(b.end_time!) - +new Date(a.end_time!);
           }) as SnapshotDetailsEs[];
 
-        // We need to ignore system indices/ds from the UI since in the resulting snapshot they wont be present.
-        // Also the restore snapshot wizard lets you select system indices to restore, but that will result in an error from ES.
+        // We need to ignore system indices/ds from the UI since in the resulting snapshot they wont be present. Also the restore
+        // snapshot wizard lets you select system indices to restore, but that will result in an error from ES.
+        // So when the UI requires it, we can collect these system indices and DS and pass them to the deserializator
+        // in order to ignore them from the response.
         let systemIndices;
         let systemDataStreams;
         if (ignoreSystemIndices) {

@@ -24,8 +24,8 @@ export function deserializeSnapshotDetails(
   snapshotDetailsEs: SnapshotDetailsEs,
   managedRepository?: string,
   successfulSnapshots?: SnapshotDetailsEs[],
-  systemIndices?: string[],
-  systemDataStreams?: string[]
+  systemIndicesToIgnore?: string[],
+  systemDataStreamsToIgnore?: string[]
 ): SnapshotDetails {
   if (!snapshotDetailsEs || typeof snapshotDetailsEs !== 'object') {
     throw new Error('Unable to deserialize snapshot details');
@@ -104,14 +104,16 @@ export function deserializeSnapshotDetails(
     snapshotDetails.policyName = policyName;
   }
 
-  if (systemDataStreams && systemDataStreams.length) {
+  if (systemDataStreamsToIgnore && systemDataStreamsToIgnore.length) {
     snapshotDetails.dataStreams = dataStreams
-      .filter((index) => !systemDataStreams.includes(index))
+      .filter((index) => !systemDataStreamsToIgnore.includes(index))
       .sort();
   }
 
-  if (systemIndices && systemIndices.length) {
-    snapshotDetails.indices = indices.filter((index) => !systemIndices.includes(index)).sort();
+  if (systemIndicesToIgnore && systemIndicesToIgnore.length) {
+    snapshotDetails.indices = indices
+      .filter((index) => !systemIndicesToIgnore.includes(index))
+      .sort();
   }
 
   return snapshotDetails;
