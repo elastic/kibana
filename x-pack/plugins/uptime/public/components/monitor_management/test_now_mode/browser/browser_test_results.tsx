@@ -8,7 +8,6 @@
 import * as React from 'react';
 import { EuiAccordion, EuiText } from '@elastic/eui';
 import styled from 'styled-components';
-import { Dispatch, SetStateAction } from 'react';
 import { StepsList } from '../../../synthetics/check_steps/steps_list';
 import { JourneyStep } from '../../../../../common/runtime_types';
 import { useBrowserRunOnceMonitors } from './use_browser_run_once_monitors';
@@ -16,14 +15,10 @@ import { TestResultHeader } from '../test_result_header';
 
 interface Props {
   monitorId: string;
-  refresh: number;
-  setRefresh: Dispatch<SetStateAction<number>>;
 }
-export const BrowserTestRunResult = ({ monitorId, refresh, setRefresh }: Props) => {
+export const BrowserTestRunResult = ({ monitorId }: Props) => {
   const { data, loading, stepEnds, journeyStarted, summaryDoc } = useBrowserRunOnceMonitors({
-    refresh,
     monitorId,
-    setRefresh,
   });
 
   const hits = data?.hits.hits;

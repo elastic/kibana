@@ -6,45 +6,16 @@
  */
 
 import { useSelector } from 'react-redux';
-import { useEffect, Dispatch, SetStateAction, useState, useContext } from 'react';
-import { UptimeRefreshContext } from '../../../../contexts';
+import { useMemo } from 'react';
 import { selectDynamicSettings } from '../../../../state/selectors';
 import { Ping } from '../../../../../common/runtime_types';
 import { createEsParams, useEsSearch } from '../../../../../../observability/public';
+import { useTickTick } from '../use_tick_tick';
 
-export const useSimpleRunOnceMonitors = ({
-  monitorId,
-  refresh,
-  setRefresh,
-}: {
-  monitorId: string;
-  refresh: number;
-  setRefresh: Dispatch<SetStateAction<number>>;
-}) => {
-  const [summaryDoc, setSummaryDoc] = useState<Ping | null>(null);
-  const [tickTick, setTickTick] = useState<NodeJS.Timer | null>(null);
-
-  const { refreshApp } = useContext(UptimeRefreshContext);
+export const useSimpleRunOnceMonitors = ({ monitorId }: { monitorId: string }) => {
+  const { refreshTimer, lastRefresh } = useTickTick();
 
   const { settings } = useSelector(selectDynamicSettings);
-  useEffect(() => {
-    if (summaryDoc && tickTick) {
-      clearInterval(tickTick);
-    }
-    if (!tickTick) {
-      setTickTick(
-        setInterval(() => {
-          setRefresh(Date.now());
-          refreshApp();
-        }, 5 * 1000)
-      );
-    }
-
-    return () => {
-      if (tickTick) clearInterval(tickTick);
-    };
-    // eslint-ignore-next-line react-hooks/exhaustive-deps
-  }, [setRefresh, summaryDoc]);
 
   const { data, loading } = useEsSearch(
     createEsParams({
@@ -74,26 +45,30 @@ export const useSimpleRunOnceMonitors = ({
       },
       size: 10,
     }),
-    [monitorId, settings?.heartbeatIndices, refresh],
+    [monitorId, settings?.heartbeatIndices, lastRefresh],
     { name: 'TestRunData' }
   );
 
-  useEffect(() => {
+  return useMemo(() => {
     const doc = data?.hits.hits?.[0];
-    setSummaryDoc(
-      doc
-        ? {
-            ...(doc?._source as Ping),
-            timestamp: (doc?._source as Record<string, string>)?.['@timestamp'],
-            docId: doc?._id,
-          }
-        : null
-    );
-  }, [data]);
 
-  return {
-    data,
-    loading,
-    summaryDoc,
-  };
+    if (doc) {
+      clearInterval(refreshTimer);
+      return {
+        data,
+        loading,
+        summaryDoc: {
+          ...(doc._source as Ping),
+          timestamp: (doc._source as Record<string, string>)?.['@timestamp'],
+          docId: doc._id,
+        },
+      };
+    }
+
+    return {
+      data,
+      loading,
+      summaryDoc: null,
+    };
+  }, [data, loading, refreshTimer]);
 };

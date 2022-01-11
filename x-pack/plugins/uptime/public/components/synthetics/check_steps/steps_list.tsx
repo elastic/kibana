@@ -37,7 +37,6 @@ interface Props {
   error?: Error;
   loading: boolean;
   compactView?: boolean;
-  isMobileImage?: boolean;
 }
 
 interface StepStatusCount {
@@ -86,7 +85,7 @@ function reduceStepStatus(prev: StepStatusCount, cur: JourneyStep): StepStatusCo
   return prev;
 }
 
-export const StepsList = ({ data, error, loading, compactView = false, isMobileImage }: Props) => {
+export const StepsList = ({ data, error, loading, compactView = false }: Props) => {
   const steps: JourneyStep[] = data.filter(isStepEnd);
 
   const { expandedRows, toggleExpand } = useExpandedRow({ steps, allSteps: data, loading });
@@ -120,7 +119,7 @@ export const StepsList = ({ data, error, loading, compactView = false, isMobileI
       align: 'left',
       field: 'timestamp',
       name: STEP_NAME_LABEL,
-      render: (_timestamp: string, item) => <StepImage step={item} />,
+      render: (_timestamp: string, item) => <StepImage step={item} compactView={compactView} />,
       mobileOptions: {
         render: (item: JourneyStep) => (
           <EuiText>
@@ -132,9 +131,6 @@ export const StepsList = ({ data, error, loading, compactView = false, isMobileI
         header: 'Step',
         enlarge: true,
       },
-      render: (_timestamp: string, item) => (
-        <StepImage step={item} compactView={compactView} isMobileImage={isMobileImage} />
-      ),
     },
     {
       name: 'Step duration',
@@ -228,7 +224,6 @@ export const StepsList = ({ data, error, loading, compactView = false, isMobileI
         </EuiTitle>
       )}
       <EuiBasicTable
-        className={isMobileImage ? 'mobileImagesViewTable' : undefined}
         compressed={compactView}
         loading={loading}
         columns={columns}

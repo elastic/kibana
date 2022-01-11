@@ -6,45 +6,15 @@
  */
 
 import { useSelector } from 'react-redux';
-import { useEffect, Dispatch, SetStateAction, useState, useContext } from 'react';
-import { UptimeRefreshContext } from '../../../../contexts';
 import { selectDynamicSettings } from '../../../../state/selectors';
 import { JourneyStep } from '../../../../../common/runtime_types';
 import { createEsParams, useEsSearch } from '../../../../../../observability/public';
+import { useTickTick } from '../use_tick_tick';
 
-export const useBrowserRunOnceMonitors = ({
-  monitorId,
-  refresh,
-  setRefresh,
-}: {
-  monitorId: string;
-  refresh: number;
-  setRefresh: Dispatch<SetStateAction<number>>;
-}) => {
-  const [summaryDoc, setSummaryDoc] = useState<JourneyStep | null>(null);
-  const [tickTick, setTickTick] = useState<NodeJS.Timer | null>(null);
-
-  const { refreshApp } = useContext(UptimeRefreshContext);
-
+export const useBrowserRunOnceMonitors = ({ monitorId }: { monitorId: string }) => {
   const { settings } = useSelector(selectDynamicSettings);
-  useEffect(() => {
-    if (summaryDoc && tickTick) {
-      clearInterval(tickTick);
-    }
-    if (!tickTick) {
-      setTickTick(
-        setInterval(() => {
-          setRefresh(Date.now());
-          refreshApp();
-        }, 5 * 1000)
-      );
-    }
 
-    return () => {
-      if (tickTick) clearInterval(tickTick);
-    };
-    // eslint-ignore-next-line react-hooks/exhaustive-deps
-  }, [setRefresh, summaryDoc]);
+  const { refreshTimer, lastRefresh } = useTickTick();
 
   const { data, loading } = useEsSearch(
     createEsParams({
@@ -74,7 +44,7 @@ export const useBrowserRunOnceMonitors = ({
       },
       size: 10,
     }),
-    [monitorId, settings?.heartbeatIndices, refresh],
+    [monitorId, settings?.heartbeatIndices, lastRefresh],
     { name: 'TestRunData' }
   );
 
@@ -90,9 +60,9 @@ export const useBrowserRunOnceMonitors = ({
       if (doc.synthetics?.type === 'journey/start') {
         journeyStarted = true;
       }
-      if (doc.synthetics?.type === 'heartbeat/summary' && !summaryDoc) {
+      if (doc.synthetics?.type === 'heartbeat/summary') {
         summaryDocument = doc;
-        setSummaryDoc(doc);
+        clearInterval(refreshTimer);
       }
       if (doc.synthetics?.type === 'step/end') {
         stepEnds.push(doc);
@@ -103,7 +73,7 @@ export const useBrowserRunOnceMonitors = ({
     data,
     loading,
     journeyStarted,
-    summaryDoc: summaryDocument || summaryDoc,
+    summaryDoc: summaryDocument,
     stepEnds: stepEnds.sort((stepA, stepB) => stepA.synthetics.index! - stepB.synthetics.index!),
   };
 };

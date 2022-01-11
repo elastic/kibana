@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSimpleRunOnceMonitors } from './use_simple_run_once_monitors';
 import { Ping } from '../../../../../common/runtime_types';
 import { PingListTable } from '../../../monitor/ping_list/ping_list_table';
@@ -12,12 +12,10 @@ import { TestResultHeader } from '../test_result_header';
 
 interface Props {
   monitorId: string;
-  refresh: number;
-  setRefresh: Dispatch<SetStateAction<number>>;
 }
-export function SimpleTestResults({ monitorId, refresh, setRefresh }: Props) {
+export function SimpleTestResults({ monitorId }: Props) {
   const [summaryDocs, setSummaryDocs] = useState<Ping[]>([]);
-  const { summaryDoc, loading } = useSimpleRunOnceMonitors({ monitorId, refresh, setRefresh });
+  const { summaryDoc, loading } = useSimpleRunOnceMonitors({ monitorId });
 
   useEffect(() => {
     if (summaryDoc) {

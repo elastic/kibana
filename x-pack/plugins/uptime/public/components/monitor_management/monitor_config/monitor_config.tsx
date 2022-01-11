@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import { EuiResizableContainer } from '@elastic/eui';
 import { defaultConfig, usePolicyConfigContext } from '../../fleet_package/contexts';
@@ -15,7 +15,7 @@ import { validate } from '../validation';
 import { ActionBarPortal } from '../action_bar/action_bar_portal';
 import { useFormatMonitor } from '../hooks/use_format_monitor';
 import { MonitorFields } from './monitor_fields';
-import { TestNowMode, TestRun } from '../test_now_mode/test_now_mode';
+import { TestNowMode } from '../test_now_mode/test_now_mode';
 import { MonitorFields as MonitorFieldsType } from '../../../../common/runtime_types';
 
 export const MonitorConfig = () => {

@@ -6,7 +6,6 @@
  */
 
 import * as React from 'react';
-import { useState } from 'react';
 import { SyntheticsMonitor } from '../../../../common/runtime_types';
 import { BrowserTestRunResult } from './browser/browser_test_results';
 import { SimpleTestResults } from './simple/simple_test_results';
@@ -16,11 +15,9 @@ interface Props {
   monitor: SyntheticsMonitor;
 }
 export const TestRunResult = ({ monitorId, monitor }: Props) => {
-  const [refresh, setRefresh] = useState(Date.now());
-
   return monitor.type === 'browser' ? (
-    <BrowserTestRunResult refresh={refresh} setRefresh={setRefresh} monitorId={monitorId} />
+    <BrowserTestRunResult monitorId={monitorId} />
   ) : (
-    <SimpleTestResults refresh={refresh} setRefresh={setRefresh} monitorId={monitorId} />
+    <SimpleTestResults monitorId={monitorId} />
   );
 };

@@ -11,10 +11,6 @@ export const STATUS_LABEL = i18n.translate('xpack.uptime.pingList.statusColumnLa
   defaultMessage: 'Status',
 });
 
-export const NAME_LABEL = i18n.translate('xpack.uptime.pingList.nameLabel', {
-  defaultMessage: 'Name',
-});
-
 export const RES_CODE_LABEL = i18n.translate('xpack.uptime.pingList.responseCodeColumnLabel', {
   defaultMessage: 'Response code',
 });

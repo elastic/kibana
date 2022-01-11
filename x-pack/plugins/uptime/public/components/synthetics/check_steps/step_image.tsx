@@ -13,17 +13,15 @@ import { PingTimestamp } from '../../monitor/ping_list/columns/ping_timestamp';
 interface Props {
   step: JourneyStep;
   compactView?: boolean;
-  isMobileImage?: boolean;
 }
 
-export const StepImage = ({ step, compactView, isMobileImage }: Props) => {
+export const StepImage = ({ step, compactView }: Props) => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap>
       <EuiFlexItem grow={false}>
         <PingTimestamp
           checkGroup={step.monitor.check_group}
           initialStepNo={step.synthetics?.step?.index}
-          isMobileImage={isMobileImage}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ minWidth: 80 }}>

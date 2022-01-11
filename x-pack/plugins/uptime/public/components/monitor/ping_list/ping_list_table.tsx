@@ -14,13 +14,7 @@ import { useDispatch } from 'react-redux';
 import * as I18LABELS from './translations';
 import { FailedStepsApiResponse, Ping } from '../../../../common/runtime_types';
 import { PingStatusColumn } from './columns/ping_status';
-import {
-  ERROR_LABEL,
-  LOCATION_LABEL,
-  NAME_LABEL,
-  RES_CODE_LABEL,
-  TIMESTAMP_LABEL,
-} from './translations';
+import { ERROR_LABEL, LOCATION_LABEL, RES_CODE_LABEL, TIMESTAMP_LABEL } from './translations';
 import { LocationName } from './location_name';
 import { MONITOR_TYPES } from '../../../../common/constants';
 import { PingTimestamp } from './columns/ping_timestamp';
