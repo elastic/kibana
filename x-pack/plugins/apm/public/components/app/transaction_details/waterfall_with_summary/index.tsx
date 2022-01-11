@@ -88,8 +88,8 @@ export function WaterfallWithSummary({
 
   return (
     <>
-      <EuiFlexGroup>
-        <EuiFlexItem style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h5>
               {i18n.translate('xpack.apm.transactionDetails.traceSampleTitle', {
@@ -97,6 +97,8 @@ export function WaterfallWithSummary({
               })}
             </h5>
           </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem>
           {traceSamples && (
             <EuiPagination
               pageCount={traceSamples.length}

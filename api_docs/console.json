@@ -215,13 +215,7 @@
             "text": "ConsoleUILocatorParams"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          }
+          "SerializableRecord"
         ],
         "path": "src/plugins/console/public/types/locator.ts",
         "deprecated": false,
