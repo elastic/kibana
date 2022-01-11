@@ -276,17 +276,17 @@ export const hostsTemplates = [
     visualizationType: 'lnsXY',
     references: [
       {
-        id: 'security_apm_transaction_traces_apm_auditbeat_endgame_filebeat_logs_packetbeat_winlogbeat_alerts_security_alerts_default',
+        id: 'security-solution-default',
         name: 'indexpattern-datasource-current-indexpattern',
         type: 'index-pattern',
       },
       {
-        id: 'security_apm_transaction_traces_apm_auditbeat_endgame_filebeat_logs_packetbeat_winlogbeat_alerts_security_alerts_default',
+        id: 'security-solution-default',
         name: 'indexpattern-datasource-layer-layer0',
         type: 'index-pattern',
       },
       {
-        id: 'security_apm_transaction_traces_apm_auditbeat_endgame_filebeat_logs_packetbeat_winlogbeat_alerts_security_alerts_default',
+        id: 'security-solution-default',
         name: 'indexpattern-datasource-layer-layer1',
         type: 'index-pattern',
       },
@@ -444,17 +444,17 @@ export const hostsTemplates = [
     visualizationType: 'lnsXY',
     references: [
       {
-        id: 'security_apm_transaction_traces_apm_auditbeat_endgame_filebeat_logs_packetbeat_winlogbeat_alerts_security_alerts_default',
+        id: 'security-solution-default',
         name: 'indexpattern-datasource-current-indexpattern',
         type: 'index-pattern',
       },
       {
-        id: 'security_apm_transaction_traces_apm_auditbeat_endgame_filebeat_logs_packetbeat_winlogbeat_alerts_security_alerts_default',
+        id: 'security-solution-default',
         name: 'indexpattern-datasource-layer-layer0',
         type: 'index-pattern',
       },
       {
-        id: 'security_apm_transaction_traces_apm_auditbeat_endgame_filebeat_logs_packetbeat_winlogbeat_alerts_security_alerts_default',
+        id: 'security-solution-default',
         name: 'indexpattern-datasource-layer-layer1',
         type: 'index-pattern',
       },
@@ -612,17 +612,17 @@ export const hostsTemplates = [
     visualizationType: 'lnsXY',
     references: [
       {
-        id: 'security_apm_transaction_traces_apm_auditbeat_endgame_filebeat_logs_packetbeat_winlogbeat_alerts_security_alerts_default',
+        id: 'security-solution-default',
         name: 'indexpattern-datasource-current-indexpattern',
         type: 'index-pattern',
       },
       {
-        id: 'security_apm_transaction_traces_apm_auditbeat_endgame_filebeat_logs_packetbeat_winlogbeat_alerts_security_alerts_default',
+        id: 'security-solution-default',
         name: 'indexpattern-datasource-layer-layer0',
         type: 'index-pattern',
       },
       {
-        id: 'security_apm_transaction_traces_apm_auditbeat_endgame_filebeat_logs_packetbeat_winlogbeat_alerts_security_alerts_default',
+        id: 'security-solution-default',
         name: 'indexpattern-datasource-layer-layer1',
         type: 'index-pattern',
       },
@@ -785,17 +785,17 @@ export const hostsTemplates = [
     references: [
       {
         type: 'index-pattern',
-        id: 'security_apm_transaction_traces_apm_auditbeat_endgame_filebeat_logs_packetbeat_winlogbeat_alerts_security_alerts_default',
+        id: 'security-solution-default',
         name: 'indexpattern-datasource-current-indexpattern',
       },
       {
         type: 'index-pattern',
-        id: 'security_apm_transaction_traces_apm_auditbeat_endgame_filebeat_logs_packetbeat_winlogbeat_alerts_security_alerts_default',
+        id: 'security-solution-default',
         name: 'indexpattern-datasource-layer-4141917b-8c32-4864-9d43-82cb1da73134',
       },
       {
         type: 'index-pattern',
-        id: 'security_apm_transaction_traces_apm_auditbeat_endgame_filebeat_logs_packetbeat_winlogbeat_alerts_security_alerts_default',
+        id: 'security-solution-default',
         name: 'indexpattern-datasource-layer-4b3f318b-85e3-497d-a233-219e3d42da89',
       },
       {
@@ -854,12 +854,12 @@ export const hostsTemplates = [
     references: [
       {
         type: 'index-pattern',
-        id: 'security_apm_transaction_traces_apm_auditbeat_endgame_filebeat_logs_packetbeat_winlogbeat_alerts_security_alerts_default',
+        id: 'security-solution-default',
         name: 'indexpattern-datasource-current-indexpattern',
       },
       {
         type: 'index-pattern',
-        id: 'security_apm_transaction_traces_apm_auditbeat_endgame_filebeat_logs_packetbeat_winlogbeat_alerts_security_alerts_default',
+        id: 'security-solution-default',
         name: 'indexpattern-datasource-layer-717e94c1-74b7-4aef-9260-619162fdc680',
       },
       {
@@ -918,12 +918,12 @@ export const hostsTemplates = [
     references: [
       {
         type: 'index-pattern',
-        id: 'security_apm_transaction_traces_apm_auditbeat_endgame_filebeat_logs_packetbeat_winlogbeat_alerts_security_alerts_default',
+        id: 'security-solution-default',
         name: 'indexpattern-datasource-current-indexpattern',
       },
       {
         type: 'index-pattern',
-        id: 'security_apm_transaction_traces_apm_auditbeat_endgame_filebeat_logs_packetbeat_winlogbeat_alerts_security_alerts_default',
+        id: 'security-solution-default',
         name: 'indexpattern-datasource-layer-717e94c1-74b7-4aef-9260-619162fdc680',
       },
       {
