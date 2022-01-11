@@ -171,7 +171,7 @@ export const commonRenameFilterReferences = (attributes: LensDocShape715<VisStat
   return newAttributes;
 };
 
-const getApplyFilterMigrationToLens = (filterMigration: MigrateFunction<Filter>) => {
+const getApplyFilterMigrationToLens = (filterMigration: MigrateFunction<Filter[]>) => {
   return (savedObject: { attributes: LensDocShape }) => {
     return {
       ...savedObject,
@@ -179,7 +179,7 @@ const getApplyFilterMigrationToLens = (filterMigration: MigrateFunction<Filter>)
         ...savedObject.attributes,
         state: {
           ...savedObject.attributes.state,
-          filters: savedObject.attributes.state.filters.map((filter) => filterMigration(filter)),
+          filters: filterMigration(savedObject.attributes.state.filters as unknown as Filter[]),
         },
       },
     };
