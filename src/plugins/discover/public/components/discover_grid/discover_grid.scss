@@ -38,7 +38,7 @@
 
 .expandedDensityGrid {
   & .euiDataGridRowCell.euiDataGridRowCell--controlColumn:nth-child(even) {
-    padding-top: $euiSize / 4 + 3;
+    padding-top: $euiSize / 4 + 2;
     padding-left: $euiSize / 4;
   }
 }
