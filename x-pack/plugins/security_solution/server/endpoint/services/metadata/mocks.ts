@@ -18,7 +18,7 @@ import { AgentPolicyServiceInterface, AgentService } from '../../../../../fleet/
 import {
   EndpointFleetServicesFactory,
   EndpointFleetServicesInterface,
-} from '../endpoint_fleet_services';
+} from '../fleet/endpoint_fleet_services_factory';
 
 const createCustomizedPackagePolicyService = () => {
   const service = createPackagePolicyServiceMock();

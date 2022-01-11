@@ -12,7 +12,7 @@ import type {
   FleetStartContract,
   PackagePolicyServiceInterface,
   PackageService,
-} from '../../../../fleet/server';
+} from '../../../../../fleet/server';
 
 export interface EndpointFleetServicesFactoryInterface {
   asScoped(req: KibanaRequest): EndpointScopedFleetServicesInterface;

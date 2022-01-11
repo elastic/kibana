@@ -38,7 +38,7 @@ import {
   EndpointFleetServicesFactory,
   EndpointInternalFleetServicesInterface,
   EndpointScopedFleetServicesInterface,
-} from './services/endpoint_fleet_services';
+} from './services/fleet/endpoint_fleet_services_factory';
 import type { ListsServerExtensionRegistrar } from '../../../lists/server';
 import { registerListsPluginEndpointExtensionPoints } from '../lists_integration';
 import { EndpointAuthz } from '../../common/endpoint/types/authz';
