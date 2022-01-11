@@ -219,7 +219,11 @@ export function Detail() {
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiBadge color="default">Elastic Agent</EuiBadge>
+                      <EuiBadge color="default">
+                        {i18n.translate('xpack.fleet.epm.elasticAgentBadgeLabel', {
+                          defaultMessage: 'Elastic Agent',
+                        })}
+                      </EuiBadge>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </FlexItemWithMinWidth>
