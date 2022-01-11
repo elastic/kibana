@@ -23,25 +23,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
 
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_apache');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_auditbeat');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_apm_transaction');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_heartbeat');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_logs');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_nginx');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_ecommerce');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_logs');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_siem_auditbeat');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_siem_packetbeat');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_siem_winlogbeat');
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
-      await ml.testResources.deleteIndexPatternByTitle('ft_logs-endpoint.events.*');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_metricbeat');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_siem_cloudtrail');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_metrics_ui');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_apache_data_stream');
-      await ml.testResources.deleteIndexPatternByTitle('ft_module_nginx_data_stream');
-
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/categorization');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/categorization_small');

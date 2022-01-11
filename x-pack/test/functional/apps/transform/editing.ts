@@ -57,6 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
       await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
       await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
       await transform.api.cleanTransformIndices();
+      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
 
     const testDataList = [

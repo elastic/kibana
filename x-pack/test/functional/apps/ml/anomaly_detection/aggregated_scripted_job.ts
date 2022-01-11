@@ -376,6 +376,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
     for (const testData of supportedTestSuites) {
       describe(testData.suiteTitle, function () {

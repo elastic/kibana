@@ -107,6 +107,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async function () {
       await ml.testResources.clearAdvancedSettingProperty(SHOW_FIELD_STATISTICS);
+      await ml.testResources.deleteSavedSearches();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_module_sample_logs');
     });
 
     describe('when enabled', function () {

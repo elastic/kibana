@@ -32,6 +32,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await transform.api.cleanTransformIndices();
+      await transform.testResources.deleteSavedSearches();
+      await transform.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     const testDataList: Array<PivotTransformTestData | LatestTransformTestData> = [

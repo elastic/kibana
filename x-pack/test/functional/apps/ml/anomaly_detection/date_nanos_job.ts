@@ -128,6 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_event_rate_gen_trend_nanos');
     });
 
     for (const testData of testDataList) {

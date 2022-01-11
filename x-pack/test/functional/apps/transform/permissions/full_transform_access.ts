@@ -68,6 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         await transform.api.deleteIndices(transformConfigWithPivot.dest.index);
         await transform.api.cleanTransformIndices();
+        await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
       });
 
       it('should display elements in the Transform list page correctly', async () => {
