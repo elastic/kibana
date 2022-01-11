@@ -94,7 +94,6 @@ exports[`should enable sort order select when sort field provided 1`] = `
     <ScalingForm
       clusteringDisabledReason={null}
       filterByMapBounds={true}
-      hasJoins={false}
       indexPatternId="indexPattern1"
       onChange={[Function]}
       scalingType="LIMIT"
@@ -200,7 +199,6 @@ exports[`should render update source editor 1`] = `
     <ScalingForm
       clusteringDisabledReason={null}
       filterByMapBounds={true}
-      hasJoins={false}
       indexPatternId="indexPattern1"
       onChange={[Function]}
       scalingType="LIMIT"
