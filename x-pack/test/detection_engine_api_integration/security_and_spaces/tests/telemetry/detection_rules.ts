@@ -20,7 +20,6 @@ import {
   deleteAllAlerts,
   deleteSignalsIndex,
   getEqlRuleForSignalTesting,
-  getInitialDetectionMetrics,
   getRuleForSignalTesting,
   getSimpleMlRule,
   getSimpleThreatMatch,
@@ -30,6 +29,7 @@ import {
   waitForRuleSuccessOrStatus,
   waitForSignalsToBePresent,
 } from '../../../utils';
+import { getInitialDetectionMetrics } from '../../../../../plugins/security_solution/server/usage/detections/detection_rule_helpers';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
