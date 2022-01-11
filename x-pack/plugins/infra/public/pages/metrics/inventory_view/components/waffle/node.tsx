@@ -91,10 +91,19 @@ export class Node extends React.PureComponent<Props, State> {
       </NodeContainer>
     );
 
+    const smallButton = (
+      <NodeContainerSmall
+        data-test-subj="nodeContainer"
+        style={{ width: squareSize || 0, height: squareSize || 0, ...nodeBorder }}
+        onClick={this.togglePopover}
+        color={color}
+      />
+    );
+
     return (
       <>
         <EuiPopover
-          button={button}
+          button={valueMode || ellipsisMode ? button : smallButton}
           isOpen={isPopoverOpen}
           closePopover={this.closePopover}
           anchorPosition="downCenter"
@@ -170,6 +179,15 @@ export class Node extends React.PureComponent<Props, State> {
 
 const NodeContainer = euiStyled.div`
   position: relative;
+  cursor: pointer;
+`;
+const NodeContainerSmall = euiStyled.div<ColorProps>`
+  cursor: pointer;
+  position: relative;
+  background-color: ${(props) => darken(0.1, props.color)};
+  border-radius: 3px;
+  margin: 2px;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
 `;
 
 interface ColorProps {
@@ -188,7 +206,6 @@ const SquareOuter = euiStyled.div<ColorProps>`
 `;
 
 const SquareInner = euiStyled.div<ColorProps>`
-  cursor: pointer;
   position: absolute;
   top: 0;
   right: 0;
