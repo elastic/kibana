@@ -39,7 +39,7 @@ function getInferenceConfigHelpText(documentationDocsLink: string): React.ReactN
   return (
     <FormattedMessage
       id="xpack.ingestPipelines.pipelineEditor.inferenceForm.inferenceConfigurationHelpText"
-      defaultMessage="Contains the inference type and its options. Refer to the {documentation} for the available types."
+      defaultMessage="Contains the inference type and its options. Refer to the {documentation} for the available configuration options."
       values={{
         documentation: (
           <EuiLink external target="_blank" href={documentationDocsLink}>
