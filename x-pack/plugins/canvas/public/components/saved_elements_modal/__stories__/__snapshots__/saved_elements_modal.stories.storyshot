@@ -38,7 +38,9 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          My elements
+          <h1>
+            My elements
+          </h1>
         </div>
       </div>
       <div
@@ -201,7 +203,9 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          My elements
+          <h1>
+            My elements
+          </h1>
         </div>
       </div>
       <div
@@ -650,7 +654,9 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          My elements
+          <h1>
+            My elements
+          </h1>
         </div>
       </div>
       <div
