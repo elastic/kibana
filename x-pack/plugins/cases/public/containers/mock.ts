@@ -550,11 +550,9 @@ export const getUserActionSnake = (
 };
 
 export const caseUserActionsSnake: CaseUserActionsResponse = [
-  getUserActionSnake('description', Actions.create, { description: 'a desc' }),
-  getUserActionSnake('comment', Actions.create, {
-    comment: { comment: 'a comment', type: CommentType.user, owner: SECURITY_SOLUTION_OWNER },
-  }),
-  getUserActionSnake('description', Actions.update, { description: 'a desc updated' }),
+  getUserActionSnake('description', Actions.create),
+  getUserActionSnake('comment', Actions.create),
+  getUserActionSnake('description', Actions.update),
 ];
 
 export const getJiraConnector = (overrides?: Partial<CaseConnector>): CaseConnector => {
