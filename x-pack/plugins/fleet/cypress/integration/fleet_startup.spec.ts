@@ -30,11 +30,13 @@ describe('Fleet startup', () => {
     cy.get('.euiButtonIcon--danger'); // wait for trash icon
   }
 
-  function verifyFleetServerPolicy(name: string, integration: string) {
+  function verifyPolicy(name: string, integrations: string[]) {
     navigateToAgentPolicies();
 
     navigateToAgentPolicy(name);
-    cy.get('.euiLink').contains(integration);
+    integrations.forEach((integration) => {
+      cy.get('.euiLink').contains(integration);
+    });
 
     cy.get('.euiButtonEmpty').contains('View all agent policies').click();
 
@@ -43,12 +45,17 @@ describe('Fleet startup', () => {
     cy.get('.euiTableCellContent').contains(name);
   }
 
+  function verifyAgentPackage() {
+    cy.visit('/app/integrations/installed');
+    cy.getBySel('integration-card:epr:elastic_agent');
+  }
+
   // skipping Fleet Server enroll, to enable, comment out runner.ts line 23
   describe.skip('Fleet Server', () => {
     it('should display Add agent button and Healthy agent once Fleet Agent page loaded', () => {
       cy.get('.euiBadge').contains('Healthy');
 
-      verifyFleetServerPolicy('Fleet Server policy', 'Fleet Server');
+      verifyPolicy('Fleet Server policy', ['Fleet Server']);
     });
 
     after(() => {
@@ -79,7 +86,7 @@ describe('Fleet startup', () => {
     });
 
     it('should create agent policy', () => {
-      cy.getBySel('addAgentButton').click();
+      cy.getBySel('addAgentBtnTop').click();
       cy.getBySel('toastCloseButton').click();
       cy.getBySel('standaloneTab').click();
 
@@ -97,24 +104,18 @@ describe('Fleet startup', () => {
 
       cy.getBySel('euiFlyoutCloseButton').click();
 
-      verifyFleetServerPolicy('Agent policy 1', 'System');
+      verifyPolicy('Agent policy 1', ['System']);
 
-      cy.visit('/app/integrations/installed');
-      // wait for elastic-agent if not visible at first
-      cy.getBySel('integration-card:epr:elastic_agent');
+      verifyAgentPackage();
     });
 
     it('should create Fleet Server policy', () => {
-      cy.getBySel(AGENTS_TAB).click();
-      cy.getBySel('addAgentButton').click();
       cy.getBySel('toastCloseButton').click();
 
       cy.getBySel('createFleetServerPolicyBtn').click();
       cy.getBySel('euiToastHeader');
 
-      cy.getBySel('euiFlyoutCloseButton').click();
-
-      verifyFleetServerPolicy('Fleet Server policy 1', 'Fleet Server');
+      verifyPolicy('Fleet Server policy 1', ['Fleet Server', 'System']);
     });
   });
 });
