@@ -104,10 +104,10 @@ export const getCurlScriptEnvVars = () => ({
 
 export const postRoleAndUser = (role: ROLES) => {
   const env = getCurlScriptEnvVars();
-  const detectionsRoleScriptPath = `./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_role.sh`;
-  const detectionsRoleJsonPath = `./server/lib/detection_engine/scripts/roles_users/${role}/detections_role.json`;
-  const detectionsUserScriptPath = `./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_user.sh`;
-  const detectionsUserJsonPath = `./server/lib/detection_engine/scripts/roles_users/${role}/detections_user.json`;
+  const detectionsRoleScriptPath = `./scripts/roles_users/${role}/post_role.sh`;
+  const detectionsRoleJsonPath = `./scripts/roles_users/${role}/role.json`;
+  const detectionsUserScriptPath = `./scripts/roles_users/${role}/post_user.sh`;
+  const detectionsUserJsonPath = `./scripts/roles_users/${role}/user.json`;
 
   // post the role
   cy.exec(`bash ${detectionsRoleScriptPath} ${detectionsRoleJsonPath}`, {
@@ -122,7 +122,7 @@ export const postRoleAndUser = (role: ROLES) => {
 
 export const deleteRoleAndUser = (role: ROLES) => {
   const env = getCurlScriptEnvVars();
-  const detectionsUserDeleteScriptPath = `./server/lib/detection_engine/scripts/roles_users/${role}/delete_detections_user.sh`;
+  const detectionsUserDeleteScriptPath = `./scripts/roles_users/${role}/delete_user.sh`;
 
   // delete the role
   cy.exec(`bash ${detectionsUserDeleteScriptPath}`, {
