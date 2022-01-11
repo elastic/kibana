@@ -64,6 +64,10 @@ export interface CreateTestEsClusterOptions {
   basePath?: string;
   clusterName?: string;
   /**
+   * The ES version to start
+   */
+  version?: string;
+  /**
    * Path to data archive snapshot to run Elasticsearch with.
    * To prepare the the snapshot:
    * - run Elasticsearch server
@@ -150,6 +154,7 @@ export function createTestEsCluster<
     log,
     basePath = Path.resolve(KIBANA_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
+    version = esTestConfig.getVersion(),
     dataArchive,
     nodes = [{ name: 'node-01' }],
     esArgs: customEsArgs = [],
@@ -173,7 +178,7 @@ export function createTestEsCluster<
   const esArgs = assignArgs(defaultEsArgs, customEsArgs);
 
   const config = {
-    version: esTestConfig.getVersion(),
+    version,
     installPath: Path.resolve(basePath, clusterName),
     sourcePath: Path.resolve(KIBANA_ROOT, '../elasticsearch'),
     password,
