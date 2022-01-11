@@ -43,7 +43,7 @@ interface AlertHit {
   };
 }
 
-// TODO: Is there an existing type that can be used here?
+// TODO: Create proper types for nested/flattened RACRule once contract w/ Fields API is finalized.
 interface RACRule {
   kibana: {
     alert: {
