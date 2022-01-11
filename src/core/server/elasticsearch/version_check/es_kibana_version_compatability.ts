@@ -26,7 +26,7 @@ export function esVersionCompatibleWithKibana(esVersion: string, kibanaVersion: 
     patch: semver.patch(kibanaVersion),
   };
 
-  // Accept the next major version of ES.
+  // On 7.17: Accept the next major version of ES.
   if (esVersionNumbers.major === kibanaVersionNumbers.major + 1) {
     return true;
   }
