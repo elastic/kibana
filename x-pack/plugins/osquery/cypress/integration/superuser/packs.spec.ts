@@ -76,19 +76,19 @@ describe('SuperUser - Packs', () => {
     findAndClickButton('Save and deploy changes');
   });
   // THIS TESTS TAKES TOO LONG FOR NOW - LET ME THINK IT THROUGH
-  it('to click the icon and visit discover', () => {
-    preparePack(PACK_NAME, SAVED_QUERY_ID);
-    cy.react('CustomItemAction', {
-      props: { index: 0, item: { id: SAVED_QUERY_ID } },
-    }).click();
-    cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"').click();
-    cy.get('[data-test-subj="superDatePickerToggleRefreshButton"').click();
-    cy.get('[data-test-subj="superDatePickerRefreshIntervalInput"').clear().type('10');
-    cy.get('button').contains('Apply').click();
-    cy.get('[data-test-subj="discoverDocTable"]', { timeout: 60000 }).contains(
-      `pack_${PACK_NAME}_${SAVED_QUERY_ID}`
-    );
-  });
+  // it('to click the icon and visit discover', () => {
+  //   preparePack(PACK_NAME, SAVED_QUERY_ID);
+  //   cy.react('CustomItemAction', {
+  //     props: { index: 0, item: { id: SAVED_QUERY_ID } },
+  //   }).click();
+  //   cy.get('[data-test-subj="superDatePickerToggleQuickMenuButton"').click();
+  //   cy.get('[data-test-subj="superDatePickerToggleRefreshButton"').click();
+  //   cy.get('[data-test-subj="superDatePickerRefreshIntervalInput"').clear().type('10');
+  //   cy.get('button').contains('Apply').click();
+  //   cy.get('[data-test-subj="discoverDocTable"]', { timeout: 60000 }).contains(
+  //     `pack_${PACK_NAME}_${SAVED_QUERY_ID}`
+  //   );
+  // });
   // it('by clicking in Lens button', () => {
   // preparePack(PACK_NAME, SAVED_QUERY_ID);
   //   cy.react('CustomItemAction', {
