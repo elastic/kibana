@@ -109,7 +109,12 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
 
         <EuiFlexGroup gutterSize="none" direction="column">
           <EuiFlexItem grow={1}>
-            <EuiInMemoryTable items={items} columns={columns} pagination={pagination} />
+            <EuiInMemoryTable
+              items={items}
+              columns={columns}
+              pagination={pagination}
+              loading={hostRisk?.loading}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>

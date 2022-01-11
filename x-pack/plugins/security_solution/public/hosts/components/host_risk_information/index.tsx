@@ -74,7 +74,7 @@ export const HostRiskInformationButtonIcon = () => {
         aria-label={i18n.INFORMATION_ARIA_LABEL}
         onClick={handleOnOpen}
         className={HOST_RISK_INFO_BUTTON_CLASS}
-        data-test-subj="open-risk-information-flyout"
+        data-test-subj="open-risk-information-flyout-trigger"
       />
       {isFlyoutVisible && <HostRiskInformationFlyout handleOnClose={handleOnClose} />}
     </>
@@ -86,7 +86,7 @@ export const HostRiskInformationButtonEmpty = () => {
 
   return (
     <>
-      <EuiButtonEmpty onClick={handleOnOpen} data-test-subj="open-risk-information-flyout">
+      <EuiButtonEmpty onClick={handleOnOpen} data-test-subj="open-risk-information-flyout-trigger">
         {i18n.INFO_BUTTON_TEXT}
       </EuiButtonEmpty>
       {isFlyoutVisible && <HostRiskInformationFlyout handleOnClose={handleOnClose} />}
@@ -113,7 +113,13 @@ const HostRiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => voi
   });
 
   return (
-    <EuiFlyout ownFocus onClose={handleOnClose} aria-labelledby={simpleFlyoutTitleId} size={450}>
+    <EuiFlyout
+      ownFocus
+      onClose={handleOnClose}
+      aria-labelledby={simpleFlyoutTitleId}
+      size={450}
+      data-test-subj="open-risk-information-flyout"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={simpleFlyoutTitleId}>{i18n.TITLE}</h2>

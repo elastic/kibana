@@ -15,7 +15,7 @@ describe('Host Risk Flyout', () => {
     it('renders', () => {
       const { queryByTestId } = render(<HostRiskInformationButtonIcon />);
 
-      expect(queryByTestId('open-risk-information-flyout')).toBeInTheDocument();
+      expect(queryByTestId('open-risk-information-flyout-trigger')).toBeInTheDocument();
     });
   });
 
@@ -23,7 +23,7 @@ describe('Host Risk Flyout', () => {
     it('renders', () => {
       const { queryByTestId } = render(<HostRiskInformationButtonEmpty />);
 
-      expect(queryByTestId('open-risk-information-flyout')).toBeInTheDocument();
+      expect(queryByTestId('open-risk-information-flyout-trigger')).toBeInTheDocument();
     });
   });
 
@@ -35,7 +35,7 @@ describe('Host Risk Flyout', () => {
       </TestProviders>
     );
 
-    fireEvent.click(getByTestId('open-risk-information-flyout'));
+    fireEvent.click(getByTestId('open-risk-information-flyout-trigger'));
 
     expect(queryByTestId('risk-information-table')).toBeInTheDocument();
     expect(queryAllByRole('row')).toHaveLength(NUMBER_OF_ROWS);
