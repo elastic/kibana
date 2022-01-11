@@ -54,7 +54,7 @@
         ],
         "signature": [
           "(sortIds: ",
-          "SearchSortResults",
+          "SortResults",
           " | null | undefined) => (string | number)[] | null | undefined"
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
@@ -67,10 +67,10 @@
             "tags": [],
             "label": "sortIds",
             "description": [
-              "estypes.SearchSortResults | undefined"
+              "estypes.SortResults | undefined"
             ],
             "signature": [
-              "SearchSortResults",
+              "SortResults",
               " | null | undefined"
             ],
             "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",

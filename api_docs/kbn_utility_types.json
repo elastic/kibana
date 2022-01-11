@@ -533,38 +533,6 @@
       },
       {
         "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.UnwrapPromise",
-        "type": "Type",
-        "tags": [],
-        "label": "UnwrapPromise",
-        "description": [
-          "\nReturns wrapped type of a `Promise`."
-        ],
-        "signature": [
-          "T extends Promise<infer U> ? U : never"
-        ],
-        "path": "packages/kbn-utility-types/src/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/utility-types",
-        "id": "def-server.UnwrapPromiseOrReturn",
-        "type": "Type",
-        "tags": [],
-        "label": "UnwrapPromiseOrReturn",
-        "description": [
-          "\nReturns wrapped type of a promise, or returns type as is, if it is not a promise."
-        ],
-        "signature": [
-          "T extends Promise<infer U> ? U : T"
-        ],
-        "path": "packages/kbn-utility-types/src/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/utility-types",
         "id": "def-server.Values",
         "type": "Type",
         "tags": [],

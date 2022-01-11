@@ -9,7 +9,7 @@ import { httpServiceMock } from 'src/core/public/mocks';
 
 export const mockHttpValues = {
   http: httpServiceMock.createSetupContract(),
-  errorConnecting: false,
+  errorConnectingMessage: '',
   readOnlyMode: false,
 };
 
