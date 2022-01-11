@@ -541,7 +541,7 @@ describe('indicator match', () => {
           }${accessibilityText}matched${getNewThreatIndicatorRule().indicatorMappingField}${
             getNewThreatIndicatorRule().atomic
           }${accessibilityText}threat.enrichments.matched.typeindicator_match_rule${accessibilityText}provided` +
-            ` by feed.nameAbuseCH malware${accessibilityText}`
+            ` byfeed.nameAbuseCH malware${accessibilityText}`
         );
       });
     });
