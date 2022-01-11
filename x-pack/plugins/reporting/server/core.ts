@@ -28,14 +28,18 @@ import type { ScreenshotResult, ScreenshottingStart } from '../../screenshotting
 import { SecurityPluginSetup } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import { SpacesPluginSetup } from '../../spaces/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+import {
+  ConcreteTaskInstance,
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '../../task_manager/server';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { durationToNumber } from '../common/schema_utils';
 import { ReportingConfig, ReportingSetup } from './';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
-import { reportingEventLoggerFactory, ReportingEventLoggerOpts } from './lib/event_logger/logger';
-import { ReportingStore } from './lib/store';
+import { reportingEventLoggerFactory } from './lib/event_logger/logger';
+import { Report, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
 import { ReportingPluginRouter, ScreenshotOptions } from './types';
 
@@ -385,8 +389,8 @@ export class ReportingCore {
     return this.executing.size;
   }
 
-  public getEventLogger(opts: ReportingEventLoggerOpts) {
+  public getEventLogger(report: Report, task?: ConcreteTaskInstance) {
     const ReportingEventLogger = reportingEventLoggerFactory(this.pluginSetupDeps!.eventLog);
-    return new ReportingEventLogger(opts);
+    return new ReportingEventLogger(report, task);
   }
 }

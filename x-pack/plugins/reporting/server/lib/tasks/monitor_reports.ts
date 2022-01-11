@@ -12,7 +12,7 @@ import { TaskManagerStartContract, TaskRunCreatorFunction } from '../../../../ta
 import { numberToDuration } from '../../../common/schema_utils';
 import { ReportingConfigType } from '../../config';
 import { statuses } from '../statuses';
-import { SavedReport } from '../store';
+import { Report, SavedReport } from '../store';
 import { ReportingTask, ReportingTaskStatus, REPORTING_MONITOR_TYPE, ReportTaskParams } from './';
 
 /*
@@ -152,15 +152,10 @@ export class MonitorReportsTask implements ReportingTask {
     logger.info(`Rescheduling task:${task.id} to retry.`);
 
     const newTask = await this.reporting.scheduleTask(task);
-    const { id, payload, jobtype } = task;
 
     this.reporting
-      .getEventLogger({
-        event: { timezone: payload.browserTimezone },
-        kibana: { reporting: { id, jobType: jobtype }, task: { id: newTask.id } },
-        ...(task.created_by && { user: { name: task.created_by } }),
-      })
-      .logRetry(`Scheduled retry for report ${id}`);
+      .getEventLogger(new Report({ ...task, _id: task.id, _index: task.index }), newTask)
+      .logRetry(`Scheduled retry for report ${task.id}`);
 
     return newTask;
   }

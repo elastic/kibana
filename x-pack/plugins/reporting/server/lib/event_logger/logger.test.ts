@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { ConcreteTaskInstance } from '../../../../task_manager/server';
 import { eventLogServiceMock } from '../../../../event_log/server/mocks';
-import {
-  ReportingEventLogger,
-  reportingEventLoggerFactory,
-  ReportingEventLoggerOpts,
-} from './logger';
+import { BasePayload } from '../../types';
+import { Report } from '../store';
+import { ReportingEventLogger, reportingEventLoggerFactory } from './logger';
 
 describe('Event Logger', () => {
-  const mockEventObject: ReportingEventLoggerOpts = {
-    event: { timezone: 'UTC' },
-    kibana: { reporting: { id: '12348', jobType: 'csv' } },
-  };
+  const mockReport = new Report({
+    _id: '12348',
+    payload: { browserTimezone: 'UTC' } as BasePayload,
+    jobtype: 'csv',
+  });
 
   let factory: ReportingEventLogger;
 
@@ -25,16 +25,16 @@ describe('Event Logger', () => {
   });
 
   it(`should construct with an internal seed object`, () => {
-    const logger = new factory(mockEventObject);
+    const logger = new factory(mockReport);
     expect(logger.eventObj).toMatchInlineSnapshot(`
       Object {
         "event": Object {
-          "id": "12348",
           "provider": "reporting",
           "timezone": "UTC",
         },
         "kibana": Object {
           "reporting": Object {
+            "id": "12348",
             "jobType": "csv",
           },
         },
@@ -47,16 +47,16 @@ describe('Event Logger', () => {
   });
 
   it(`allows optional user name`, () => {
-    const logger = new factory({ ...mockEventObject, user: { name: 'thundercat' } });
+    const logger = new factory(new Report({ ...mockReport, created_by: 'thundercat' }));
     expect(logger.eventObj).toMatchInlineSnapshot(`
       Object {
         "event": Object {
-          "id": "12348",
           "provider": "reporting",
           "timezone": "UTC",
         },
         "kibana": Object {
           "reporting": Object {
+            "id": "12348",
             "jobType": "csv",
           },
         },
@@ -70,13 +70,41 @@ describe('Event Logger', () => {
     `);
   });
 
+  it(`allows optional task.id`, () => {
+    const logger = new factory(new Report({ ...mockReport, created_by: 'thundercat' }), {
+      id: 'some-task-id-123',
+    } as ConcreteTaskInstance);
+    expect(logger.eventObj).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "provider": "reporting",
+          "timezone": "UTC",
+        },
+        "kibana": Object {
+          "reporting": Object {
+            "id": "12348",
+            "jobType": "csv",
+          },
+          "task": Object {
+            "id": "some-task-id-123",
+          },
+        },
+        "log": Object {
+          "logger": "reporting",
+        },
+        "user": Object {
+          "name": "thundercat",
+        },
+      }
+    `);
+  });
+
   it(`logExecutionStart should create a 'start' event`, () => {
-    const logger = new factory(mockEventObject);
+    const logger = new factory(mockReport);
     const result = logger.logExecutionStart('starting the event');
     expect(result.event).toMatchInlineSnapshot(`
       Object {
         "action": "execute-start",
-        "id": "12348",
         "kind": "event",
         "provider": "reporting",
         "timezone": "UTC",
@@ -87,14 +115,13 @@ describe('Event Logger', () => {
   });
 
   it(`logExecutionComplete should create a 'complete' event`, () => {
-    const logger = new factory(mockEventObject);
+    const logger = new factory(mockReport);
     logger.logExecutionStart('starting the event');
 
     const result = logger.logExecutionComplete('completed the event', 444);
     expect(result.event).toMatchInlineSnapshot(`
       Object {
         "action": "execute-complete",
-        "id": "12348",
         "kind": "metrics",
         "outcome": "success",
         "provider": "reporting",
@@ -104,6 +131,7 @@ describe('Event Logger', () => {
     expect(result.kibana.reporting).toMatchInlineSnapshot(`
       Object {
         "byteSize": 444,
+        "id": "12348",
         "jobType": "csv",
       }
     `);
@@ -113,12 +141,11 @@ describe('Event Logger', () => {
   });
 
   it(`logError should create an 'error' event`, () => {
-    const logger = new factory(mockEventObject);
+    const logger = new factory(mockReport);
     const result = logger.logError(new Error('an error occurred'));
     expect(result.event).toMatchInlineSnapshot(`
       Object {
         "action": "execute-complete",
-        "id": "12348",
         "kind": "error",
         "outcome": "failure",
         "provider": "reporting",

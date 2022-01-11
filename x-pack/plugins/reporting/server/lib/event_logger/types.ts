@@ -23,7 +23,7 @@ interface ActionBase<
     provider: 'reporting';
     timezone: string;
   };
-  kibana: EventProvider & { task?: { id: string } };
+  kibana: EventProvider & { task?: { id?: string } };
   user?: { name: string };
   log: {
     logger: 'reporting';

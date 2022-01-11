@@ -7,25 +7,21 @@
 
 import deepMerge from 'deepmerge';
 import { IEventLogger, IEventLogService } from '../../../../event_log/server';
+import { ConcreteTaskInstance } from '../../../../task_manager/server';
 import { PLUGIN_ID } from '../../../common/constants';
+import { Report } from '../store';
 import { ActionType } from './';
 import {
   ClaimedTask,
-  ErrorAction,
   CompletedExecution,
+  ErrorAction,
   ExecuteError,
-  StartedExecution,
   FailedReport,
   SavedReport,
-  ScheduledTask,
   ScheduledRetry,
+  ScheduledTask,
+  StartedExecution,
 } from './types';
-
-export interface ReportingEventLoggerOpts {
-  event: Pick<StartedExecution['event'], 'timezone'>;
-  kibana: Pick<StartedExecution['kibana'], 'reporting' | 'task'>;
-  user?: StartedExecution['user'];
-}
 
 /** @internal */
 export function reportingEventLoggerFactory(eventLog: IEventLogService) {
@@ -37,19 +33,22 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
         timezone: string;
         provider: 'reporting';
       };
-      kibana: { reporting: StartedExecution['kibana']['reporting'] };
+      kibana: { reporting: StartedExecution['kibana']['reporting']; task?: { id: string } };
       log: { logger: 'reporting' };
       user?: { name: string };
     };
 
     completionLogger: IEventLogger;
 
-    constructor(eventObj: ReportingEventLoggerOpts) {
+    constructor(report: Report, task?: ConcreteTaskInstance) {
       this.eventObj = {
-        event: { provider: 'reporting', ...eventObj.event },
-        kibana: { ...eventObj.kibana },
+        event: { timezone: report.payload.browserTimezone, provider: 'reporting' },
+        kibana: {
+          reporting: { id: report._id, jobType: report.jobtype },
+          ...(task?.id ? { task: { id: task.id } } : undefined),
+        },
         log: { logger: 'reporting' },
-        user: eventObj.user,
+        user: report.created_by ? { name: report.created_by } : undefined,
       };
 
       // create a "complete" logger that will use EventLog helpers to calculate timings

@@ -71,14 +71,6 @@ const jobDebugMessage = (report: Report) =>
   `[attempts: ${report.attempts}] ` +
   `[process_expiration: ${report.process_expiration}]`;
 
-const getEventLogger = (reporting: ReportingCore, report: Report) => {
-  return reporting.getEventLogger({
-    event: { timezone: report.payload.browserTimezone },
-    kibana: { reporting: { id: report._id, jobType: report.jobtype } },
-    ...(report.created_by && { user: { name: report.created_by } }),
-  });
-};
-
 /*
  * A class to give an interface to historical reports in the reporting.index
  * - track the state: pending, processing, completed, etc
@@ -308,7 +300,7 @@ export class ReportingStore {
       throw err;
     }
 
-    getEventLogger(this.reportingCore, report).logClaimTask(`Report ${report._id} claimed.`);
+    this.reportingCore.getEventLogger(report).logClaimTask(`Report ${report._id} claimed.`);
     return body;
   }
 
@@ -340,7 +332,7 @@ export class ReportingStore {
       throw err;
     }
 
-    getEventLogger(this.reportingCore, report).logReportFailure(`Report ${report._id} failed.`);
+    this.reportingCore.getEventLogger(report).logReportFailure(`Report ${report._id} failed.`);
     return body;
   }
 
@@ -377,7 +369,7 @@ export class ReportingStore {
       throw err;
     }
 
-    getEventLogger(this.reportingCore, report).logReportSaved(`Report ${report._id} saved.`);
+    this.reportingCore.getEventLogger(report).logReportSaved(`Report ${report._id} saved.`);
     return body;
   }
 
