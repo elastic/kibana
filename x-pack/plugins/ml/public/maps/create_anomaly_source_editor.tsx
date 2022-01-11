@@ -14,6 +14,7 @@ import { LayerSelector } from './layer_selector';
 
 interface Props {
   onSourceConfigChange: (sourceConfig: Partial<AnomalySourceDescriptor> | null) => void;
+  mlJobsService: any; // todo: update types
 }
 
 interface State {
@@ -75,7 +76,10 @@ export class CreateAnomalySourceEditor extends Component<Props, State> {
     ) : null;
     return (
       <EuiPanel>
-        <AnomalyJobSelector onJobChange={this.previewLayer} />
+        <AnomalyJobSelector
+          onJobChange={this.previewLayer}
+          mlJobsService={this.props.mlJobsService}
+        />
         {selector}
       </EuiPanel>
     );

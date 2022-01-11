@@ -43,7 +43,6 @@ import {
 } from '../../triggers_actions_ui/public';
 import type { DataVisualizerPluginStart } from '../../data_visualizer/public';
 import type { PluginSetupContract as AlertingSetup } from '../../alerting/public';
-import { registerWithMaps } from './maps/register_with_maps';
 import { registerManagementSection } from './application/management';
 import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import type {
@@ -129,10 +128,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
       },
     });
 
-    if (pluginsSetup.maps) {
-      registerWithMaps(pluginsSetup.maps);
-    }
-
     if (pluginsSetup.share) {
       this.locator = pluginsSetup.share.url.locators.create(new MlLocatorDefinition());
     }
@@ -162,11 +157,23 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
       // register various ML plugin features which require a full license
       // note including registerFeature in register_helper would cause the page bundle size to increase significantly
-      const { registerEmbeddables, registerMlUiActions, registerSearchLinks, registerMlAlerts } =
-        await import('./register_helper');
+      const {
+        registerEmbeddables,
+        registerMlUiActions,
+        registerSearchLinks,
+        registerMlAlerts,
+        registerMapExtension,
+      } = await import('./register_helper');
 
       const mlEnabled = isMlEnabled(license);
       const fullLicense = isFullLicense(license);
+
+      if (pluginsSetup.maps) {
+        // Pass capabilites.ml.canGetJobs as minimum permission to show anomalies card in maps layers
+        const canGetJobs = capabilities.ml?.canGetJobs || false;
+        await registerMapExtension(pluginsSetup.maps, core, canGetJobs);
+      }
+
       if (mlEnabled) {
         registerSearchLinks(this.appUpdater$, fullLicense);
 

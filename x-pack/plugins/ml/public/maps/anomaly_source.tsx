@@ -18,7 +18,7 @@ import type { Attribution, ImmutableSourceProperty, PreIndexedShape } from '../.
 import type { SourceEditorArgs } from '../../../maps/public';
 import type { DataRequest } from '../../../maps/public';
 import type { IVectorSource, SourceStatus } from '../../../maps/public';
-import { ML_ANOMALY } from './register_with_maps';
+import { ML_ANOMALY } from './anomaly_source_factory';
 import { getResultsForJobId } from './util';
 import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';
 
@@ -28,8 +28,11 @@ export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
 }
 
 export class AnomalySource implements IVectorSource {
+  static services: any; // TODO fix these types
+  static canGetJobs: any;
+
   static createDescriptor(descriptor: Partial<AnomalySourceDescriptor>) {
-    // Fill in all the defaults
+    // TODO: Fill in all the defaults
     return {
       type: ML_ANOMALY,
       jobId: typeof descriptor.jobId === 'string' ? descriptor.jobId : 'foobar',
@@ -42,7 +45,7 @@ export class AnomalySource implements IVectorSource {
   constructor(sourceDescriptor: Partial<AnomalySourceDescriptor>, adapters?: Adapters) {
     this._descriptor = AnomalySource.createDescriptor(sourceDescriptor);
   }
-
+  // TODO: implement Time filter functionality and query awareness
   async getGeoJsonWithMeta(
     layerName: string,
     searchFilters: any & {
@@ -57,6 +60,7 @@ export class AnomalySource implements IVectorSource {
     isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta> {
     const results = await getResultsForJobId(
+      AnomalySource.services[2].mlResultsService,
       this._descriptor.jobId,
       this._descriptor.typicalActual
     );
@@ -64,7 +68,8 @@ export class AnomalySource implements IVectorSource {
     return {
       data: results,
       meta: {
-        areResultsTrimmed: false, // only set this if data is incomplete (e.g. capping number of results to first 10k)
+        // Set this to true if data is incomplete (e.g. capping number of results to first 10k)
+        areResultsTrimmed: false,
       },
     };
   }

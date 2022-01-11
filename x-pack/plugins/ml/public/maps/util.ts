@@ -8,46 +8,9 @@
 import { FeatureCollection, Feature } from 'geojson';
 import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
 import { MLAnomalyDoc } from '../../common/types/anomalies';
-import { ml } from '../application/services/ml_api_service';
-
-const DUMMY_JOB_LIST = [
-  {
-    jobId: 'Nigeria incidents',
-    results: [
-      {
-        typical: [10, 12],
-        actual: [14, 16],
-        record_score: 0.7,
-      },
-      {
-        typical: [9, 11],
-        actual: [14, 16],
-        record_score: 0.6,
-      },
-    ],
-  },
-  {
-    jobId: 'USA incidents',
-    results: [
-      {
-        typical: [-80, 40],
-        actual: [-81, 42],
-        record_score: 0.7,
-      },
-      {
-        typical: [-79, 35],
-        actual: [-78, 34],
-        record_score: 0.3,
-      },
-    ],
-  },
-];
-
-export async function getAnomalyJobList(): Promise<Array<{ jobId: string }>> {
-  return DUMMY_JOB_LIST;
-}
 
 export async function getResultsForJobId(
+  mlResultsService: any,
   jobId: string,
   locationType: 'typical' | 'actual'
 ): Promise<FeatureCollection> {
@@ -68,7 +31,7 @@ export async function getResultsForJobId(
   let hits: Array<{ typical: number[]; actual: number[]; record_score: number }> = [];
 
   try {
-    resp = await ml.results.anomalySearch(
+    resp = await mlResultsService.anomalySearch(
       {
         body,
       },
