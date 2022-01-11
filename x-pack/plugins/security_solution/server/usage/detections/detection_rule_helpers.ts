@@ -255,6 +255,7 @@ export const getDetectionRuleMetrics = async (
       type: CASE_COMMENT_SAVED_OBJECT,
       page: 1,
       perPage: MAX_RESULTS_WINDOW,
+      namespaces: ['*'],
       filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: alert`,
     });
 
