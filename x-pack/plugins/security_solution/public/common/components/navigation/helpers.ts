@@ -21,6 +21,7 @@ import {
 
 import { SearchNavTab } from './types';
 import { SourcererUrlState } from '../../store/sourcerer/model';
+import { ToggleDetailPanel } from '../../../../common/types';
 
 export const getSearch = (tab: SearchNavTab, urlState: UrlState): string => {
   if (tab && tab.urlKey != null && !isAdministration(tab.urlKey)) {
@@ -32,6 +33,7 @@ export const getSearch = (tab: SearchNavTab, urlState: UrlState): string => {
           | SourcererUrlState
           | TimelineUrl
           | UrlInputsModel
+          | ToggleDetailPanel
           | string = '';
 
         if (urlKey === CONSTANTS.appQuery && urlState.query != null) {
@@ -56,6 +58,13 @@ export const getSearch = (tab: SearchNavTab, urlState: UrlState): string => {
             urlStateToReplace = '';
           } else {
             urlStateToReplace = timeline;
+          }
+        } else if (urlKey === CONSTANTS.detailPanel && urlState[CONSTANTS.detailPanel] != null) {
+          const detailPanel = urlState[CONSTANTS.detailPanel];
+          if (!detailPanel?.panelView) {
+            urlStateToReplace = '';
+          } else {
+            urlStateToReplace = detailPanel;
           }
         }
         return replaceQueryStringInLocation(

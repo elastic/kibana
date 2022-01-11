@@ -23,14 +23,60 @@ import { timelineSelectors } from '../../../timelines/store/timeline';
 import { formatDate } from '../super_date_picker';
 import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
-import { ReplaceStateInLocation, KeyUrlState, ValueUrlState } from './types';
+import {
+  ReplaceStateInLocation,
+  KeyUrlState,
+  ValueUrlState,
+  UrlState,
+  UrlStateProps,
+  UrlStateStateToPropsType,
+} from './types';
 import { sourcererSelectors } from '../../store/sourcerer';
 import { SourcererScopeName, SourcererUrlState } from '../../store/sourcerer/model';
+import {
+  CASES_PATH,
+  DETECTIONS_PATH,
+  ALERTS_PATH,
+  RULES_PATH,
+  HOSTS_PATH,
+  NETWORK_PATH,
+} from '../../../../common/constants';
 
 export const isDetectionsPages = (pageName: string) =>
   pageName === SecurityPageName.alerts ||
   pageName === SecurityPageName.rules ||
   pageName === SecurityPageName.exceptions;
+
+// This list provides all the pages that display the security solution alert/events table which
+// launches the flyout when clicking expanded details
+
+const HOST_PAGE_EVENTS_PATH = `${HOSTS_PATH}/events`;
+const HOST_PAGE_EXTERNAL_ALERTS_PATH = `${HOSTS_PATH}/externalAlerts`;
+const DETECTION_RULES_DETAILS_PATH = `${RULES_PATH}/id`;
+const NETWORK_PAGE_EXTERNAL_ALERTS_PATH = `${NETWORK_PATH}/external-alerts`;
+
+const getTimelineIdForPathname = (path?: string, isFlyoutTimelineOpen?: boolean) => {
+  if (isFlyoutTimelineOpen) return TimelineId.active;
+  if (!path) return null;
+
+  if (path.startsWith(CASES_PATH) && path !== CASES_PATH) {
+    return TimelineId.casePage;
+  } else if (path === DETECTIONS_PATH || path === ALERTS_PATH) {
+    return TimelineId.detectionsPage;
+  } else if (
+    path.startsWith(DETECTION_RULES_DETAILS_PATH) &&
+    path !== DETECTION_RULES_DETAILS_PATH
+  ) {
+    return TimelineId.detectionsRulesDetailsPage;
+  } else if (path === HOST_PAGE_EVENTS_PATH) {
+    return TimelineId.hostsPageEvents;
+  } else if (path === HOST_PAGE_EXTERNAL_ALERTS_PATH) {
+    return TimelineId.hostsPageExternalAlerts;
+  } else if (path === NETWORK_PAGE_EXTERNAL_ALERTS_PATH) {
+    return TimelineId.networkPageExternalAlerts;
+  }
+  return null;
+};
 
 export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
   try {
@@ -125,7 +171,7 @@ export const makeMapStateToProps = () => {
   const getGlobalSavedQuerySelector = inputsSelectors.globalSavedQuerySelector();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getSourcererScopes = sourcererSelectors.scopesSelector();
-  const mapStateToProps = (state: State) => {
+  const mapStateToProps = (state: State, ownProps?: UrlStateProps & UrlStateStateToPropsType) => {
     const inputState = getInputsSelector(state);
     const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
     const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
@@ -140,6 +186,23 @@ export const makeMapStateToProps = () => {
             graphEventId: flyoutTimeline.graphEventId ?? '',
           }
         : { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' };
+
+    const timelineId = getTimelineIdForPathname(ownProps?.pathName, flyoutTimeline?.show);
+    let detailPanel = {};
+
+    if (timelineId) {
+      const activeTimelineById =
+        timelineId === TimelineId.active ? flyoutTimeline : getTimeline(state, timelineId);
+
+      const expandedDetail = activeTimelineById?.expandedDetail[activeTimelineById.activeTab];
+      if (activeTimelineById && expandedDetail) {
+        detailPanel = {
+          ...expandedDetail,
+          timelineId,
+          tabType: activeTimelineById.activeTab,
+        };
+      }
+    }
 
     let searchAttr: {
       [CONSTANTS.appQuery]?: Query;
@@ -185,7 +248,8 @@ export const makeMapStateToProps = () => {
           },
         },
         [CONSTANTS.timeline]: timeline,
-      },
+        [CONSTANTS.detailPanel]: detailPanel,
+      } as UrlState,
     };
   };
 

@@ -78,9 +78,9 @@ export const tGridReducer = reducerWithInitialState(initialTGridState)
     timelineById: {
       ...state.timelineById,
       [action.timelineId]: {
-        ...state.timelineById[action.timelineId],
+        ...(state.timelineById[action.timelineId] ?? {}),
         expandedDetail: {
-          ...state.timelineById[action.timelineId].expandedDetail,
+          ...(state.timelineById[action.timelineId]?.expandedDetail ?? {}),
           ...updateTimelineDetailsPanel(action),
         },
       },

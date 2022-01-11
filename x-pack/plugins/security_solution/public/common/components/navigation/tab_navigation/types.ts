@@ -13,12 +13,14 @@ import { TimelineUrl } from '../../../../timelines/store/timeline/model';
 
 import { SecuritySolutionTabNavigationProps } from '../types';
 import { SiemRouteType } from '../../../utils/route/types';
+import { ToggleDetailPanel } from '../../../../../common/types';
 
 export interface TabNavigationProps extends SecuritySolutionTabNavigationProps {
   pathName: string;
   pageName: string;
   tabName: SiemRouteType | undefined;
   [CONSTANTS.appQuery]?: Query;
+  [CONSTANTS.detailPanel]?: ToggleDetailPanel;
   [CONSTANTS.filters]?: Filter[];
   [CONSTANTS.savedQuery]?: string;
   [CONSTANTS.sourcerer]: SourcererUrlState;

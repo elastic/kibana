@@ -14,9 +14,11 @@ import { SecurityNav } from '../navigation/types';
 
 import { CONSTANTS, UrlStateType } from './constants';
 import { SourcererUrlState } from '../../store/sourcerer/model';
+import { ToggleDetailPanel } from '../../../../common/types';
 
 export const ALL_URL_STATE_KEYS: KeyUrlState[] = [
   CONSTANTS.appQuery,
+  CONSTANTS.detailPanel,
   CONSTANTS.filters,
   CONSTANTS.savedQuery,
   CONSTANTS.sourcerer,
@@ -40,6 +42,7 @@ export type LocationTypes =
 
 export interface UrlState {
   [CONSTANTS.appQuery]?: Query;
+  [CONSTANTS.detailPanel]?: ToggleDetailPanel;
   [CONSTANTS.filters]?: Filter[];
   [CONSTANTS.savedQuery]?: string;
   [CONSTANTS.sourcerer]: SourcererUrlState;
@@ -51,6 +54,7 @@ export type KeyUrlState = keyof UrlState;
 export type ValueUrlState = UrlState[keyof UrlState];
 
 export interface UrlStateProps {
+  pathName?: string;
   navTabs: SecurityNav;
   indexPattern?: DataViewBase;
   mapToUrlState?: (value: string) => UrlState;

@@ -163,6 +163,7 @@ export const addTimelineToStore = ({
       filterManager: timelineById[id].filterManager,
       isLoading: timelineById[id].isLoading,
       initialized: timelineById[id].initialized,
+      expandedDetail: timelineById[id].expandedDetail ?? {},
       resolveTimelineConfig,
       dateRange:
         timeline.status === TimelineStatus.immutable &&
@@ -207,6 +208,7 @@ export const addNewTimeline = ({
       ...timelineDefaults,
       ...timelineProps,
       dateRange,
+      expandedDetail: timeline?.expandedDetail ?? {},
       savedObjectId: null,
       version: null,
       isSaving: false,
@@ -254,7 +256,6 @@ export const updateTimelineShowTimeline = ({
   timelineById,
 }: UpdateShowTimelineProps): TimelineById => {
   const timeline = timelineById[id];
-
   return {
     ...timelineById,
     [id]: {

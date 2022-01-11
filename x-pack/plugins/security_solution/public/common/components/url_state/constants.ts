@@ -10,6 +10,7 @@ export enum CONSTANTS {
   alertsPage = 'alerts.page',
   caseDetails = 'case.details',
   casePage = 'case.page',
+  detailPanel = 'detailPanel',
   filters = 'filters',
   hostsDetails = 'hosts.details',
   hostsPage = 'hosts.page',

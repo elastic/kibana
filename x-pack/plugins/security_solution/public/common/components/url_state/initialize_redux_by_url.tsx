@@ -10,7 +10,9 @@ import { Dispatch } from 'redux';
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import type { Filter, Query } from '@kbn/es-query';
+import { ToggleDetailPanel } from '../../../../common/types/timeline';
 import { inputsActions, sourcererActions } from '../../store/actions';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
 import {
@@ -21,7 +23,12 @@ import {
 } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { CONSTANTS } from './constants';
-import { decodeRisonUrlState, isDetectionsPages } from './helpers';
+import {
+  decodeRisonUrlState,
+  getParamFromQueryString,
+  getQueryStringFromLocation,
+  isDetectionsPages,
+} from './helpers';
 import { normalizeTimeRange } from './normalize_time_range';
 import { SetInitialStateFromUrl } from './types';
 import {
@@ -29,7 +36,29 @@ import {
   dispatchUpdateTimeline,
 } from '../../../timelines/components/open_timeline/helpers';
 import { SourcererScopeName, SourcererUrlState } from '../../store/sourcerer/model';
-import { timelineActions } from '../../../timelines/store/timeline';
+import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
+import { useDeepEqualSelector } from '../../hooks/use_selector';
+
+const getQueryStringKeyValue = ({ search, urlKey }: { search: string; urlKey: string }) =>
+  getParamFromQueryString(getQueryStringFromLocation(search), urlKey);
+
+const useInitializeDetailPanel = () => {
+  const { search } = useLocation();
+  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
+  const urlDetailPanel = useMemo(
+    () =>
+      decodeRisonUrlState<ToggleDetailPanel>(
+        getQueryStringKeyValue({
+          search,
+          urlKey: CONSTANTS.detailPanel,
+        }) ?? undefined
+      ),
+    [search]
+  );
+  const timelineId = urlDetailPanel?.timelineId ?? '';
+  const existingTimeline = useDeepEqualSelector((state) => getTimeline(state, timelineId));
+  return { detailPanel: urlDetailPanel, wasTimelineCreated: existingTimeline != null };
+};
 
 export const useSetInitialStateFromUrl = () => {
   const dispatch = useDispatch();
@@ -41,6 +70,8 @@ export const useSetInitialStateFromUrl = () => {
       dispatch(timelineActions.updateIsLoading(status)),
     [dispatch]
   );
+
+  const { detailPanel, wasTimelineCreated } = useInitializeDetailPanel();
 
   const setInitialStateFromUrl = useCallback(
     ({
@@ -120,9 +151,33 @@ export const useSetInitialStateFromUrl = () => {
             });
           }
         }
+
+        if (urlKey === CONSTANTS.detailPanel) {
+          if (detailPanel != null && detailPanel.panelView && detailPanel.timelineId) {
+            if (!wasTimelineCreated) {
+              /**
+               * Within a few views, the timeline is not created before the detail panel can be added,
+               * So we create a default timeline to load the detail panel, which is then merged with
+               * The accurate props required for the timeline when createTimeline is called from that component
+               * Details on the merge are in addNewTimeline: x-pack/plugins/security_solution/public/timelines/store/timeline/helpers.ts
+               * There is one scenario where the timelineById is created beforehand, and that is the flyout.
+               * To prevent overriding any timelineById, we first check if it has been created before running the dispatch below
+               */
+              dispatch(
+                timelineActions.createTimeline({
+                  id: detailPanel.timelineId,
+                  columns: [],
+                  dataViewId: null,
+                  indexNames: [],
+                })
+              );
+            }
+            dispatch(timelineActions.toggleDetailPanel({ ...detailPanel }));
+          }
+        }
       });
     },
-    [dispatch, updateTimeline, updateTimelineIsLoading]
+    [dispatch, updateTimeline, updateTimelineIsLoading, wasTimelineCreated, detailPanel]
   );
 
   return Object.freeze({ setInitialStateFromUrl, updateTimeline, updateTimelineIsLoading });
