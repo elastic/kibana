@@ -22,46 +22,53 @@ import { CaseMetrics, CaseMetricsFeature } from '../../../common/ui';
 import {
   ASSOCIATED_HOSTS_METRIC,
   ASSOCIATED_USERS_METRIC,
+  CASE_CREATED,
+  CASE_IN_PROGRESS_DURATION,
+  CASE_OPEN_DURATION,
+  CASE_OPEN_TO_CLOSE_DURATION,
   ISOLATED_HOSTS_METRIC,
   TOTAL_ALERTS_METRIC,
   TOTAL_CONNECTORS_METRIC,
 } from './translations';
 import { getMaybeDate } from '../formatted_date/maybe_date';
+import { FormattedRelativePreferenceDate } from '../formatted_date';
+import { getEmptyTagValue } from '../empty_value';
 
-const MetricValue = styled(EuiFlexItem)`
-  font-size: ${({ theme }) => theme.eui.euiSizeL};
-  font-weight: bold;
-`;
-
-const CaseStatusMetrics: React.FC<{ statusMetrics?: CaseMetrics['lifespan'] }> = React.memo(
-  ({ statusMetrics }) => {
-    if (!statusMetrics) {
+const CaseStatusMetrics: React.FC<{ lifespanMetrics?: CaseMetrics['lifespan'] }> = React.memo(
+  ({ lifespanMetrics }) => {
+    if (!lifespanMetrics) {
       return null;
     }
 
-    // TODO: translate
     const items = [
-      { title: 'Case created', value: statusMetrics.creationDate },
       {
-        title: 'Case in progress duration',
-        value: getInProgressDuration(statusMetrics.statusInfo.inProgressDuration),
+        title: CASE_CREATED,
+        value: getCaseCreationDate(lifespanMetrics.creationDate),
+        dataTestSubject: 'case-metrics-lifespan-item-creation-date',
       },
       {
-        title: 'Case open duration',
-        value: formatDuration(statusMetrics.statusInfo.openDuration),
+        title: CASE_IN_PROGRESS_DURATION,
+        value: getInProgressDuration(lifespanMetrics.statusInfo.inProgressDuration),
+        dataTestSubject: 'case-metrics-lifespan-item-inProgress-duration',
       },
       {
-        title: 'Duration from case creation to close',
-        value: getOpenCloseDuration(statusMetrics.creationDate, statusMetrics.closeDate),
+        title: CASE_OPEN_DURATION,
+        value: formatDuration(lifespanMetrics.statusInfo.openDuration),
+        dataTestSubject: 'case-metrics-lifespan-item-open-duration',
+      },
+      {
+        title: CASE_OPEN_TO_CLOSE_DURATION,
+        value: getOpenCloseDuration(lifespanMetrics.creationDate, lifespanMetrics.closeDate),
+        dataTestSubject: 'case-metrics-lifespan-item-open-to-close-duration',
       },
     ];
 
     return (
       <EuiFlexItem grow={4}>
         <EuiFlexGrid columns={2} gutterSize="s" responsive={false}>
-          {items.map(({ title, value }) => (
-            <EuiFlexItem>
-              <EuiDescriptionList>
+          {items.map(({ title, value, dataTestSubject }) => (
+            <EuiFlexItem data-test-subj={dataTestSubject} key={title}>
+              <EuiDescriptionList compressed>
                 <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>{value}</EuiDescriptionListDescription>
               </EuiDescriptionList>
@@ -74,14 +81,27 @@ const CaseStatusMetrics: React.FC<{ statusMetrics?: CaseMetrics['lifespan'] }> =
 );
 CaseStatusMetrics.displayName = 'CaseStatusMetrics';
 
+const getCaseCreationDate = (date: string) => {
+  const creationDate = getMaybeDate(date);
+  if (!creationDate.isValid()) {
+    return getEmptyTagValue();
+  }
+
+  return (
+    <FormattedRelativePreferenceDate
+      data-test-subj={'case-metrics-lifespan-creation-date'}
+      value={date}
+    />
+  );
+};
+
 const formatDuration = (milliseconds: number) => {
   return prettyMilliseconds(milliseconds, { compact: true, verbose: true });
 };
 
-// TODO: determine the error values
 const getInProgressDuration = (duration: number) => {
   if (duration <= 0) {
-    return 'None';
+    return getEmptyTagValue();
   }
 
   return formatDuration(duration);
@@ -89,24 +109,29 @@ const getInProgressDuration = (duration: number) => {
 
 const getOpenCloseDuration = (openDate: string, closeDate: string | null) => {
   if (closeDate == null) {
-    return 'N/A';
+    return getEmptyTagValue();
   }
 
   const openDateObject = getMaybeDate(openDate);
   const closeDateObject = getMaybeDate(closeDate);
 
   if (!openDateObject.isValid() || !closeDateObject.isValid()) {
-    return 'Unknown';
+    return getEmptyTagValue();
   }
 
   return formatDuration(closeDateObject.diff(openDateObject));
 };
 
+const MetricValue = styled(EuiFlexItem)`
+  font-size: ${({ theme }) => theme.eui.euiSizeL};
+  font-weight: bold;
+`;
+
 const CaseViewMetricItems: React.FC<{ metricItems: MetricItems }> = React.memo(
   ({ metricItems }) => (
     <>
-      {metricItems.map(({ title, value }, index) => (
-        <EuiFlexItem key={index}>
+      {metricItems.map(({ title, value }) => (
+        <EuiFlexItem key={title}>
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
             <EuiFlexItem>{title}</EuiFlexItem>
             <MetricValue>{value}</MetricValue>
@@ -131,7 +156,7 @@ export const CaseViewMetrics: React.FC<CaseViewMetricsProps> = React.memo(
 
     return (
       <EuiPanel data-test-subj="case-view-metrics-panel" hasShadow={false} hasBorder={true}>
-        <EuiFlexGroup gutterSize="xl" wrap={true} responsive={false}>
+        <EuiFlexGroup gutterSize="xl" wrap={true} responsive={false} alignItems="center">
           {isLoading ? (
             <EuiFlexItem>
               <EuiLoadingSpinner data-test-subj="case-view-metrics-spinner" size="l" />
@@ -139,7 +164,7 @@ export const CaseViewMetrics: React.FC<CaseViewMetricsProps> = React.memo(
           ) : (
             <>
               <CaseViewMetricItems metricItems={metricItems} />
-              <CaseStatusMetrics statusMetrics={statusMetrics} />
+              <CaseStatusMetrics lifespanMetrics={statusMetrics} />
             </>
           )}
         </EuiFlexGroup>
@@ -199,6 +224,7 @@ const calculateTotalIsolatedHosts = (actions: CaseMetrics['actions']) => {
     return 0;
   }
 
+  // prevent the metric from being negative
   return Math.max(actions.isolateHost.isolate.total - actions.isolateHost.unisolate.total, 0);
 };
 
@@ -206,15 +232,17 @@ const useGetLifespanMetrics = (
   metrics: CaseMetrics | null,
   features: CaseMetricsFeature[]
 ): CaseMetrics['lifespan'] | undefined => {
-  const { lifespan } = metrics ?? {};
+  return useMemo<CaseMetrics['lifespan']>(() => {
+    const lifespan = metrics?.lifespan ?? {
+      closeDate: '',
+      creationDate: '',
+      statusInfo: { inProgressDuration: 0, numberOfReopens: 0, openDuration: 0 },
+    };
 
-  const metricItems = useMemo<CaseMetrics['lifespan']>(() => {
     if (!features.includes('lifespan')) {
       return;
     }
 
     return lifespan;
-  }, [features, lifespan]);
-
-  return metricItems;
+  }, [features, metrics]);
 };

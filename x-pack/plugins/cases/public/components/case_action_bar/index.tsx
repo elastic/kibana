@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import styled, { css } from 'styled-components';
 import {
   EuiButtonEmpty,
@@ -19,11 +19,9 @@ import {
 import { Case } from '../../../common/ui/types';
 import { CaseStatuses, CaseType } from '../../../common/api';
 import * as i18n from '../case_view/translations';
-import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { Actions } from './actions';
 import { CaseService } from '../../containers/use_get_case_user_actions';
 import { StatusContextMenu } from './status_context_menu';
-import { getStatusDate, getStatusTitle } from './helpers';
 import { SyncAlertsSwitch } from '../case_settings/sync_alerts_switch';
 import type { OnUpdateFields } from '../case_view/types';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
@@ -58,8 +56,6 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   onUpdateField,
 }) => {
   const { isSyncAlertsEnabled } = useCasesFeatures();
-  const date = useMemo(() => getStatusDate(caseData), [caseData]);
-  const title = useMemo(() => getStatusTitle(caseData.status), [caseData.status]);
   const onStatusChanged = useCallback(
     (status: CaseStatuses) =>
       onUpdateField({
@@ -95,15 +91,6 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                 </EuiDescriptionListDescription>
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false}>
-              <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-              <EuiDescriptionListDescription>
-                <FormattedRelativePreferenceDate
-                  data-test-subj={'case-action-bar-status-date'}
-                  value={date}
-                />
-              </EuiDescriptionListDescription>
-            </EuiFlexItem>
           </EuiFlexGroup>
         </MyDescriptionList>
       </EuiFlexItem>

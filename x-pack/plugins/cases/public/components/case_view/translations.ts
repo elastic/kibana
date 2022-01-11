@@ -164,3 +164,28 @@ export const TOTAL_CONNECTORS_METRIC = i18n.translate(
     defaultMessage: 'Total Connectors',
   }
 );
+
+export const CASE_CREATED = i18n.translate('xpack.cases.caseView.metrics.lifespan.caseCreated', {
+  defaultMessage: 'Case created',
+});
+
+export const CASE_IN_PROGRESS_DURATION = i18n.translate(
+  'xpack.cases.caseView.metrics.lifespan.inProgressDuration',
+  {
+    defaultMessage: 'Case in progress duration',
+  }
+);
+
+export const CASE_OPEN_DURATION = i18n.translate(
+  'xpack.cases.caseView.metrics.lifespan.openDuration',
+  {
+    defaultMessage: 'Case open duration',
+  }
+);
+
+export const CASE_OPEN_TO_CLOSE_DURATION = i18n.translate(
+  'xpack.cases.caseView.metrics.lifespan.openToCloseDuration',
+  {
+    defaultMessage: 'Duration from case creation to close',
+  }
+);

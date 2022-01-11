@@ -7,14 +7,18 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { basicCaseMetrics, basicCaseMetricsFeatures } from '../../containers/mock';
+import {
+  basicCaseMetrics,
+  basicCaseNumericValueFeatures,
+  basicCaseStatusFeatures,
+} from '../../containers/mock';
 import { CaseViewMetrics } from './case_view_metrics';
 import { CaseMetrics, CaseMetricsFeature } from '../../../common/ui';
 import { TestProviders } from '../../common/mock';
 
 const renderCaseMetrics = ({
   metrics = basicCaseMetrics,
-  features = basicCaseMetricsFeatures,
+  features = [...basicCaseNumericValueFeatures, ...basicCaseStatusFeatures],
   isLoading = false,
 }: {
   metrics?: CaseMetrics;
@@ -28,17 +32,63 @@ const renderCaseMetrics = ({
   );
 };
 
-const metricsFeaturesTests: Array<[CaseMetricsFeature, string, number]> = [
-  ['alerts.count', 'Total Alerts', basicCaseMetrics.alerts!.count!],
-  ['alerts.users', 'Associated Users', basicCaseMetrics.alerts!.users!.total!],
-  ['alerts.hosts', 'Associated Hosts', basicCaseMetrics.alerts!.hosts!.total!],
-  [
-    'actions.isolateHost',
-    'Isolated Hosts',
-    basicCaseMetrics.actions!.isolateHost!.isolate.total -
-      basicCaseMetrics.actions!.isolateHost!.unisolate.total,
-  ],
-  ['connectors', 'Total Connectors', basicCaseMetrics.connectors!.total!],
+interface FeatureTest {
+  feature: CaseMetricsFeature;
+  items: Array<{
+    title: string;
+    value: string | number;
+  }>;
+}
+
+const metricsFeaturesTests: FeatureTest[] = [
+  {
+    feature: 'alerts.count',
+    items: [{ title: 'Total Alerts', value: basicCaseMetrics.alerts!.count! }],
+  },
+  {
+    feature: 'alerts.users',
+    items: [{ title: 'Associated Users', value: basicCaseMetrics.alerts!.users!.total! }],
+  },
+  {
+    feature: 'alerts.hosts',
+    items: [{ title: 'Associated Hosts', value: basicCaseMetrics.alerts!.hosts!.total! }],
+  },
+  {
+    feature: 'actions.isolateHost',
+    items: [
+      {
+        title: 'Isolated Hosts',
+        value:
+          basicCaseMetrics.actions!.isolateHost!.isolate.total -
+          basicCaseMetrics.actions!.isolateHost!.unisolate.total,
+      },
+    ],
+  },
+  {
+    feature: 'connectors',
+    items: [{ title: 'Total Connectors', value: basicCaseMetrics.connectors!.total! }],
+  },
+  {
+    feature: 'lifespan',
+    items: [
+      {
+        title: 'Case created',
+        value: '2020-02-19T23:06:33Z',
+      },
+      {
+        title: 'Case in progress duration',
+        value: '20 milliseconds',
+      },
+      {
+        title: 'Case open duration',
+        value: '10 milliseconds',
+      },
+      {
+        title: 'Duration from case creation to close',
+        value: '1 day',
+      },
+    ],
+  },
 ];
 
 describe('CaseViewMetrics', () => {
@@ -52,23 +102,18 @@ describe('CaseViewMetrics', () => {
     expect(getByTestId('case-view-metrics-spinner')).toBeInTheDocument();
   });
 
-  it('should render metrics', () => {
-    const { getByText } = renderCaseMetrics();
-    expect(getByText('Total Alerts')).toBeInTheDocument();
-    expect(getByText('Associated Users')).toBeInTheDocument();
-    expect(getByText('Associated Hosts')).toBeInTheDocument();
-    expect(getByText('Isolated Hosts')).toBeInTheDocument();
-    expect(getByText('Total Connectors')).toBeInTheDocument();
+  it('should render metrics with default value 0', () => {
+    const { getAllByText } = renderCaseMetrics({
+      metrics: {},
+      features: basicCaseNumericValueFeatures,
+    });
+    expect(getAllByText('0')).toHaveLength(basicCaseNumericValueFeatures.length);
   });
 
-  it('should render metrics with default value 0', () => {
-    const { getByText, getAllByText } = renderCaseMetrics({ metrics: {} });
-    expect(getByText('Total Alerts')).toBeInTheDocument();
-    expect(getByText('Associated Users')).toBeInTheDocument();
-    expect(getByText('Associated Hosts')).toBeInTheDocument();
-    expect(getByText('Isolated Hosts')).toBeInTheDocument();
-    expect(getByText('Total Connectors')).toBeInTheDocument();
-    expect(getAllByText('0')).toHaveLength(basicCaseMetricsFeatures.length);
+  it('should render metrics with default value of a dash', () => {
+    const { getAllByText } = renderCaseMetrics({ metrics: {} });
+    // \u2014 is the unicode for a long dash
+    expect(getAllByText('\u2014')).toHaveLength(3);
   });
 
   it('should prevent negative value for isolateHost actions', () => {
@@ -88,19 +133,23 @@ describe('CaseViewMetrics', () => {
     expect(getByText('0')).toBeInTheDocument();
   });
 
-  describe.each(metricsFeaturesTests)('Metrics feature: %s ', (feature, text, total) => {
-    it('should render metric', () => {
-      const { getByText } = renderCaseMetrics({ features: [feature] });
-      expect(getByText(text)).toBeInTheDocument();
-      expect(getByText(total)).toBeInTheDocument();
+  describe.each(metricsFeaturesTests)('Metrics feature tests', ({ feature, items }) => {
+    it(`should not render other metrics when rendering feature: ${feature}`, () => {
+      const { queryByText } = renderCaseMetrics({ features: [feature] });
+      metricsFeaturesTests.forEach(({ feature: otherFeature, items: otherItems }) => {
+        if (feature !== otherFeature) {
+          otherItems.forEach(({ title }) => {
+            expect(queryByText(title)).toBeNull();
+          });
+        }
+      });
     });
 
-    it('should not render other metrics', () => {
-      const { queryByText } = renderCaseMetrics({ features: [feature] });
-      metricsFeaturesTests.forEach(([_, otherMetricText]) => {
-        if (otherMetricText !== text) {
-          expect(queryByText(otherMetricText)).toBeNull();
-        }
+    describe.each(items)(`Metric feature: ${feature} item: %s`, ({ title, value }) => {
+      it('should render metric', () => {
+        const { getByText } = renderCaseMetrics({ features: [feature] });
+        expect(getByText(title)).toBeInTheDocument();
+        expect(getByText(value)).toBeInTheDocument();
       });
     });
   });
