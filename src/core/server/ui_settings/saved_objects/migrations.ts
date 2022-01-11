@@ -89,6 +89,8 @@ export const migrations = {
             'telemetry:optIn',
             'xPackMonitoring:allowReport',
             'theme:version',
+            // owner: Team:AppServices
+            'courier:batchSearches',
           ].includes(key)
             ? {
                 ...acc,
