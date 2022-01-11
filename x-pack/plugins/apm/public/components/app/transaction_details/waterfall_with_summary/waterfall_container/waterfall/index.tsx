@@ -13,8 +13,8 @@ import { useHistory } from 'react-router-dom';
 import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 import { Timeline } from '../../../../../shared/charts/Timeline';
 import { fromQuery, toQuery } from '../../../../../shared/Links/url_helpers';
-import { getAgentMarks } from '../Marks/get_agent_marks';
-import { getErrorMarks } from '../Marks/get_error_marks';
+import { getAgentMarks } from '../marks/get_agent_marks';
+import { getErrorMarks } from '../marks/get_error_marks';
 import { AccordionWaterfall } from './accordion_waterfall';
 import { WaterfallFlyout } from './waterfall_flyout';
 import {

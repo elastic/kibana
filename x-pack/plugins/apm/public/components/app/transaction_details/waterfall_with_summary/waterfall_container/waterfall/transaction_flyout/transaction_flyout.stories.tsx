@@ -14,7 +14,7 @@ import { TransactionFlyout } from './';
 type Args = ComponentProps<typeof TransactionFlyout>;
 
 export default {
-  title: 'app/TransactionDetails/Waterfall/TransactionFlyout',
+  title: 'app/TransactionDetails/waterfall/TransactionFlyout',
   component: TransactionFlyout,
   decorators: [
     (StoryComponent: ComponentType) => {

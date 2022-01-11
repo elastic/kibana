@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash';
 import { ErrorRaw } from '../../../../../../../typings/es_schemas/raw/error_raw';
-import { IWaterfallError } from '../Waterfall/waterfall_helpers/waterfall_helpers';
+import { IWaterfallError } from '../waterfall/waterfall_helpers/waterfall_helpers';
 import { Mark } from '.';
 
 export interface ErrorMark extends Mark {
