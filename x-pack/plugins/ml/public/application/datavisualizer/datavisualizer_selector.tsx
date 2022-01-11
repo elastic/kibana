@@ -17,7 +17,6 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiPageContentBody,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -75,7 +74,7 @@ export const DatavisualizerSelector: FC = () => {
 
   return (
     <>
-      <EuiPageContentBody data-test-subj="mlPageDataVisualizerSelector" restrictWidth={1000}>
+      <div data-test-subj="mlPageDataVisualizerSelector">
         <MlPageHeader>
           <FormattedMessage
             id="xpack.ml.datavisualizer.selector.dataVisualizerTitle"
@@ -95,7 +94,7 @@ export const DatavisualizerSelector: FC = () => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="xl" />
-        <EuiFlexGrid gutterSize="xl" justifyContent="center" columns={2}>
+        <EuiFlexGrid gutterSize="xl" columns={2} style={{ maxWidth: '1000px' }}>
           <EuiFlexItem>
             <EuiCard
               hasBorder
@@ -193,7 +192,7 @@ export const DatavisualizerSelector: FC = () => {
             </EuiFlexGroup>
           </Fragment>
         )}
-      </EuiPageContentBody>
+      </div>
       <HelpMenu docLink={helpLink} />
     </>
   );
