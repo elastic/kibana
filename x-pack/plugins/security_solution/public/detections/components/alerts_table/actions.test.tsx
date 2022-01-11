@@ -340,7 +340,8 @@ describe('alert actions', () => {
           kibana: {
             alert: {
               rule: {
-                ...mockEcsDataWithAlert.signal?.rule,
+                ...mockEcsDataWithAlert?.kibana?.alert?.rule,
+                uuid: ['test-uuid'],
                 type: ['eql'],
                 timeline_id: [''],
               },
@@ -385,7 +386,8 @@ describe('alert actions', () => {
           kibana: {
             alert: {
               rule: {
-                ...mockEcsDataWithAlert.signal?.rule,
+                ...mockEcsDataWithAlert?.kibana?.alert?.rule,
+                uuid: ['test-uuid'],
                 type: ['eql'],
                 timeline_id: [''],
               },
