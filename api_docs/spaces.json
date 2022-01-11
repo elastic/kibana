@@ -1,7 +1,699 @@
 {
   "id": "spaces",
   "client": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "spaces",
+        "id": "def-public.SpacesManager",
+        "type": "Class",
+        "tags": [],
+        "label": "SpacesManager",
+        "description": [],
+        "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesManager.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "http",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCoreHttpPluginApi",
+                    "section": "def-public.HttpSetup",
+                    "text": "HttpSetup"
+                  }
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesManager.onActiveSpaceChange$",
+            "type": "Object",
+            "tags": [],
+            "label": "onActiveSpaceChange$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "spaces",
+                "scope": "common",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesManager.getSpaces",
+            "type": "Function",
+            "tags": [],
+            "label": "getSpaces",
+            "description": [],
+            "signature": [
+              "(options?: ",
+              {
+                "pluginId": "spaces",
+                "scope": "common",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.GetAllSpacesOptions",
+                "text": "GetAllSpacesOptions"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "spaces",
+                "scope": "common",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.GetSpaceResult",
+                "text": "GetSpaceResult"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.getSpaces.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "spaces",
+                    "scope": "common",
+                    "docId": "kibSpacesPluginApi",
+                    "section": "def-common.GetAllSpacesOptions",
+                    "text": "GetAllSpacesOptions"
+                  }
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesManager.getSpace",
+            "type": "Function",
+            "tags": [],
+            "label": "getSpace",
+            "description": [],
+            "signature": [
+              "(id: string) => Promise<",
+              {
+                "pluginId": "spaces",
+                "scope": "common",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.getSpace.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesManager.getActiveSpace",
+            "type": "Function",
+            "tags": [],
+            "label": "getActiveSpace",
+            "description": [],
+            "signature": [
+              "({ forceRefresh }?: { forceRefresh?: boolean | undefined; }) => Promise<",
+              {
+                "pluginId": "spaces",
+                "scope": "common",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.getActiveSpace.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ forceRefresh = false }",
+                "description": [],
+                "signature": [
+                  "{ forceRefresh?: boolean | undefined; }"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesManager.createSpace",
+            "type": "Function",
+            "tags": [],
+            "label": "createSpace",
+            "description": [],
+            "signature": [
+              "(space: ",
+              {
+                "pluginId": "spaces",
+                "scope": "common",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.createSpace.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "space",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "spaces",
+                    "scope": "common",
+                    "docId": "kibSpacesPluginApi",
+                    "section": "def-common.Space",
+                    "text": "Space"
+                  }
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesManager.updateSpace",
+            "type": "Function",
+            "tags": [],
+            "label": "updateSpace",
+            "description": [],
+            "signature": [
+              "(space: ",
+              {
+                "pluginId": "spaces",
+                "scope": "common",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.updateSpace.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "space",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "spaces",
+                    "scope": "common",
+                    "docId": "kibSpacesPluginApi",
+                    "section": "def-common.Space",
+                    "text": "Space"
+                  }
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesManager.deleteSpace",
+            "type": "Function",
+            "tags": [],
+            "label": "deleteSpace",
+            "description": [],
+            "signature": [
+              "(space: ",
+              {
+                "pluginId": "spaces",
+                "scope": "common",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.Space",
+                "text": "Space"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.deleteSpace.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "space",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "spaces",
+                    "scope": "common",
+                    "docId": "kibSpacesPluginApi",
+                    "section": "def-common.Space",
+                    "text": "Space"
+                  }
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesManager.disableLegacyUrlAliases",
+            "type": "Function",
+            "tags": [],
+            "label": "disableLegacyUrlAliases",
+            "description": [],
+            "signature": [
+              "(aliases: ",
+              {
+                "pluginId": "spaces",
+                "scope": "common",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-common.LegacyUrlAliasTarget",
+                "text": "LegacyUrlAliasTarget"
+              },
+              "[]) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.disableLegacyUrlAliases.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "aliases",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "spaces",
+                    "scope": "common",
+                    "docId": "kibSpacesPluginApi",
+                    "section": "def-common.LegacyUrlAliasTarget",
+                    "text": "LegacyUrlAliasTarget"
+                  },
+                  "[]"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesManager.copySavedObjects",
+            "type": "Function",
+            "tags": [],
+            "label": "copySavedObjects",
+            "description": [],
+            "signature": [
+              "(objects: SavedObjectTarget[], spaces: string[], includeReferences: boolean, createNewCopies: boolean, overwrite: boolean) => Promise<",
+              {
+                "pluginId": "spaces",
+                "scope": "public",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-public.CopySavedObjectsToSpaceResponse",
+                "text": "CopySavedObjectsToSpaceResponse"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.copySavedObjects.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectTarget[]"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.copySavedObjects.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "spaces",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.copySavedObjects.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "includeReferences",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.copySavedObjects.$4",
+                "type": "boolean",
+                "tags": [],
+                "label": "createNewCopies",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.copySavedObjects.$5",
+                "type": "boolean",
+                "tags": [],
+                "label": "overwrite",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesManager.resolveCopySavedObjectsErrors",
+            "type": "Function",
+            "tags": [],
+            "label": "resolveCopySavedObjectsErrors",
+            "description": [],
+            "signature": [
+              "(objects: SavedObjectTarget[], retries: unknown, includeReferences: boolean, createNewCopies: boolean) => Promise<",
+              {
+                "pluginId": "spaces",
+                "scope": "public",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-public.CopySavedObjectsToSpaceResponse",
+                "text": "CopySavedObjectsToSpaceResponse"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.resolveCopySavedObjectsErrors.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectTarget[]"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.resolveCopySavedObjectsErrors.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "retries",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.resolveCopySavedObjectsErrors.$3",
+                "type": "boolean",
+                "tags": [],
+                "label": "includeReferences",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.resolveCopySavedObjectsErrors.$4",
+                "type": "boolean",
+                "tags": [],
+                "label": "createNewCopies",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesManager.getShareSavedObjectPermissions",
+            "type": "Function",
+            "tags": [],
+            "label": "getShareSavedObjectPermissions",
+            "description": [],
+            "signature": [
+              "(type: string) => Promise<{ shareToAllSpaces: boolean; }>"
+            ],
+            "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.getShareSavedObjectPermissions.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesManager.getShareableReferences",
+            "type": "Function",
+            "tags": [],
+            "label": "getShareableReferences",
+            "description": [],
+            "signature": [
+              "(objects: SavedObjectTarget[]) => Promise<",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsCollectMultiNamespaceReferencesResponse",
+                "text": "SavedObjectsCollectMultiNamespaceReferencesResponse"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.getShareableReferences.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectTarget[]"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesManager.updateSavedObjectsSpaces",
+            "type": "Function",
+            "tags": [],
+            "label": "updateSavedObjectsSpaces",
+            "description": [],
+            "signature": [
+              "(objects: SavedObjectTarget[], spacesToAdd: string[], spacesToRemove: string[]) => Promise<void>"
+            ],
+            "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.updateSavedObjectsSpaces.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "objects",
+                "description": [],
+                "signature": [
+                  "SavedObjectTarget[]"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.updateSavedObjectsSpaces.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "spacesToAdd",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "spaces",
+                "id": "def-public.SpacesManager.updateSavedObjectsSpaces.$3",
+                "type": "Array",
+                "tags": [],
+                "label": "spacesToRemove",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.SpacesManager.redirectToSpaceSelector",
+            "type": "Function",
+            "tags": [],
+            "label": "redirectToSpaceSelector",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/plugins/spaces/public/spaces_manager/spaces_manager.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
       {
         "parentPluginId": "spaces",
@@ -158,6 +850,39 @@
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "spaces",
+        "id": "def-public.CopySavedObjectsToSpaceResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "CopySavedObjectsToSpaceResponse",
+        "description": [],
+        "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "spaces",
+            "id": "def-public.CopySavedObjectsToSpaceResponse.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[spaceId: string]: SavedObjectsImportResponse",
+            "description": [],
+            "signature": [
+              "[spaceId: string]:  ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsImportResponse",
+                "text": "SavedObjectsImportResponse"
+              }
+            ],
+            "path": "x-pack/plugins/spaces/public/copy_saved_objects_to_space/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "spaces",
         "id": "def-public.CopyToSpaceFlyoutProps",
@@ -1679,7 +2404,13 @@
             "label": "spacesManager",
             "description": [],
             "signature": [
-              "SpacesManager"
+              {
+                "pluginId": "spaces",
+                "scope": "public",
+                "docId": "kibSpacesPluginApi",
+                "section": "def-public.SpacesManager",
+                "text": "SpacesManager"
+              }
             ],
             "path": "x-pack/plugins/spaces/public/spaces_context/types.ts",
             "deprecated": false
