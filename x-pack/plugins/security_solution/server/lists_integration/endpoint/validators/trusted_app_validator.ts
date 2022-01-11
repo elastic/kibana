@@ -8,7 +8,6 @@
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { schema } from '@kbn/config-schema';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { isEqual } from 'lodash/fp';
 import { BaseValidator } from './base_validator';
 import { ExceptionItemLikeOptions } from '../types';
 import {
@@ -24,7 +23,6 @@ import {
   getDuplicateFields,
   isValidHash,
 } from '../../../../common/endpoint/service/trusted_apps/validations';
-import { getPolicyIdsFromArtifact } from '../../../../common/endpoint/service/artifacts';
 
 const ConditionEntryTypeSchema = schema.conditional(
   schema.siblingRef('field'),

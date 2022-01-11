@@ -99,7 +99,29 @@ export class BaseValidator {
    */
   protected async validateByPolicyItem(item: ExceptionItemLikeOptions): Promise<void> {
     if (this.isItemByPolicy(item)) {
-      // FIXME:PT implement method
+      const { packagePolicy, internalReadonlySoClient } =
+        this.endpointAppContext.getInternalFleetServices();
+      const policyIds = getPolicyIdsFromArtifact(item);
+
+      if (policyIds.length === 0) {
+        return;
+      }
+
+      const policiesFromFleet = await packagePolicy.getByIDs(internalReadonlySoClient, policyIds);
+
+      if (!policiesFromFleet) {
+        // TODO:PT Error
+        throw new Error(`invalid policy ids: ${policyIds.join(', ')}`);
+      }
+
+      const invalidPolicyIds = policiesFromFleet
+        .filter((policy) => policy.version === undefined)
+        .map((policy) => policy.id);
+
+      if (invalidPolicyIds.length) {
+        // TODO:PT Error
+        throw new Error(`invalid policy ids: ${invalidPolicyIds.join(', ')}`);
+      }
     }
   }
 
