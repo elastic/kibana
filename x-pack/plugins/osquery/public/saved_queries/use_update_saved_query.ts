@@ -29,6 +29,7 @@ export const useUpdateSavedQuery = ({ savedQueryId }: UseUpdateSavedQueryProps) 
 
   return useMutation(
     (payload) =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       http.put<any>(`/internal/osquery/saved_query/${savedQueryId}`, {
         body: JSON.stringify(payload),
       }),
