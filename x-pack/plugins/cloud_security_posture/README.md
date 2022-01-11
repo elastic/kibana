@@ -1,6 +1,6 @@
-# CSP
+# Cloud Security Posture Kibana Plugin
 
-A Kibana plugin
+Cloud Posture automates the identification and remediation of risks across cloud infrastructures
 
 ---
 
