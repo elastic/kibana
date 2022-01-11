@@ -308,6 +308,8 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
 
         if (options?.path) {
           const pathWithQueryString = appendOnSaveQueryParamsToPath({
+            // In cases where we created a new agent policy inline, we need to override the initial `path`
+            // value and navigate to the newly-created agent policy instead
             path: wasNewAgentPolicyCreated ? packagePolicyPath : options.path,
             policy,
             mappingOptions: routeState.onSaveQueryParams,
