@@ -16,7 +16,7 @@ describe('DocLinksService#start()', () => {
     const service = new DocLinksService();
     const api = service.start({ injectedMetadata });
     expect(api.DOC_LINK_VERSION).toEqual('test-branch');
-    expect(api.links.kibana).toEqual(
+    expect(api.links.kibana.guide).toEqual(
       'https://www.elastic.co/guide/en/kibana/test-branch/index.html'
     );
   });

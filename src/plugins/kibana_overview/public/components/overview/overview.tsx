@@ -101,7 +101,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         }),
       },
     },
-    docsLink: docLinks.links.kibana,
+    docsLink: docLinks.links.kibana.guide,
   };
 
   // Show card for console if none of the manage data plugins are available, most likely in OSS
