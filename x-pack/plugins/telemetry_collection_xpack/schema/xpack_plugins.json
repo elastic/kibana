@@ -7329,6 +7329,16 @@
                         }
                       }
                     },
+                    "legacy_notifications": {
+                      "properties": {
+                        "total": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications still in use"
+                          }
+                        }
+                      }
+                    },
                     "elastic_total": {
                       "properties": {
                         "enabled": {
