@@ -232,7 +232,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   );
 
   useEffect(() => {
-    if (!allResultsData?.edges) {
+    if (!allResultsData?.edges?.length) {
       return;
     }
 

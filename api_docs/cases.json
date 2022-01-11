@@ -551,6 +551,45 @@
       "children": [
         {
           "parentPluginId": "cases",
+          "id": "def-public.CasesUiStart.canUseCases",
+          "type": "Function",
+          "tags": [],
+          "label": "canUseCases",
+          "description": [
+            "\nReturns an object denoting the current user's ability to read and crud cases.\nIf any owner(securitySolution, Observability) is found with crud or read capability respectively,\nthen crud or read is set to true.\nPermissions for specific owners can be found by passing an owner array"
+          ],
+          "signature": [
+            "(owners?: ",
+            "CasesOwners",
+            "[] | undefined) => { crud: boolean; read: boolean; }"
+          ],
+          "path": "x-pack/plugins/cases/public/types.ts",
+          "deprecated": false,
+          "children": [
+            {
+              "parentPluginId": "cases",
+              "id": "def-public.CasesUiStart.canUseCases.$1",
+              "type": "Array",
+              "tags": [],
+              "label": "owners",
+              "description": [
+                "an array of CaseOwners that should be queried for permission"
+              ],
+              "signature": [
+                "CasesOwners",
+                "[] | undefined"
+              ],
+              "path": "x-pack/plugins/cases/public/types.ts",
+              "deprecated": false,
+              "isRequired": false
+            }
+          ],
+          "returnComment": [
+            "An object denoting the case permissions of the current user"
+          ]
+        },
+        {
+          "parentPluginId": "cases",
           "id": "def-public.CasesUiStart.getCases",
           "type": "Function",
           "tags": [
@@ -1157,19 +1196,19 @@
             "label": "connector",
             "description": [],
             "signature": [
-              "{ id: string; } & ({ name: string; } & ({ type: ",
+              "{ id: string; } & (({ type: ",
               "ConnectorTypes",
-              ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; } | { type: ",
+              ".jira; fields: { issueType: string | null; priority: string | null; parent: string | null; } | null; } & { name: string; }) | ({ type: ",
               "ConnectorTypes",
-              ".none; fields: null; } | { type: ",
+              ".none; fields: null; } & { name: string; }) | ({ type: ",
               "ConnectorTypes",
-              ".resilient; fields: { incidentTypes: string[] | null; severityCode: string | null; } | null; } | { type: ",
+              ".resilient; fields: { incidentTypes: string[] | null; severityCode: string | null; } | null; } & { name: string; }) | ({ type: ",
               "ConnectorTypes",
-              ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; } | { type: ",
+              ".serviceNowITSM; fields: { impact: string | null; severity: string | null; urgency: string | null; category: string | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
               "ConnectorTypes",
-              ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; } | { type: ",
+              ".serviceNowSIR; fields: { category: string | null; destIp: boolean | null; malwareHash: boolean | null; malwareUrl: boolean | null; priority: string | null; sourceIp: boolean | null; subcategory: string | null; } | null; } & { name: string; }) | ({ type: ",
               "ConnectorTypes",
-              ".swimlane; fields: { caseId: string | null; } | null; }))"
+              ".swimlane; fields: { caseId: string | null; } | null; } & { name: string; }))"
             ],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
@@ -1192,8 +1231,7 @@
             "label": "externalService",
             "description": [],
             "signature": [
-              "CaseExternalService",
-              " | null"
+              "{ connectorId: string; connectorName: string; externalId: string; externalTitle: string; externalUrl: string; pushedAt: string; pushedBy: { email: string | null | undefined; fullName: string | null | undefined; username: string | null | undefined; }; } | null"
             ],
             "path": "x-pack/plugins/cases/common/ui/types.ts",
             "deprecated": false
