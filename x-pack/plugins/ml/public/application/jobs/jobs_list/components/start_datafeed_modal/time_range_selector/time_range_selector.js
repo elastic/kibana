@@ -167,10 +167,14 @@ export class TimeRangeSelector extends Component {
           <>
             <ManagedJobsWarningCallout
               jobsCount={this.props.jobsCount}
-              action={i18n.translate(
+              message={i18n.translate(
                 'xpack.ml.jobsList.startDatafeedsModal.startManagedDatafeedsDescription',
                 {
-                  defaultMessage: 'starting',
+                  defaultMessage:
+                    '{jobsCount, plural, one {This job} other {At least one of these jobs}} is preconfigured by Elastic; starting {jobsCount, plural, one {it} other {them}} with a specific end time might impact other parts of the product.',
+                  values: {
+                    jobsCount: this.props.jobsCount,
+                  },
                 }
               )}
             />

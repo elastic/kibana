@@ -12,22 +12,26 @@ import React from 'react';
 export const ManagedJobsWarningCallout = ({
   jobsCount,
   action,
+  message,
 }: {
   jobsCount: number;
-  action: string;
+  action?: string;
+  message?: string;
 }) => {
   return (
     <>
       <EuiSpacer size="s" />
       <EuiCallOut color="warning">
-        <FormattedMessage
-          id="xpack.ml.managedJobsWarningCallout"
-          defaultMessage="{jobsCount, plural, one {This job} other {At least one of these jobs}} is preconfigured by Elastic; {action} {jobsCount, plural, one {it} other {them}} might impact other parts of the product."
-          values={{
-            jobsCount,
-            action,
-          }}
-        />
+        {message ?? (
+          <FormattedMessage
+            id="xpack.ml.managedJobsWarningCallout"
+            defaultMessage="{jobsCount, plural, one {This job} other {At least one of these jobs}} is preconfigured by Elastic; {action} {jobsCount, plural, one {it} other {them}} might impact other parts of the product."
+            values={{
+              jobsCount,
+              action,
+            }}
+          />
+        )}
       </EuiCallOut>
     </>
   );
