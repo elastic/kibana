@@ -101,7 +101,7 @@ export const App = (props: {
   const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
 
   useEffect(() => {
-    const getDataLayer = async (dataView: DataView) => {
+    const updateDataLayer = async (dataView: DataView) => {
       const baseLayer: PersistedIndexPatternLayer = {
         columnOrder: ['col1'],
         columns: {
@@ -128,7 +128,7 @@ export const App = (props: {
     };
 
     if (props.defaultDataView) {
-      getDataLayer(props.defaultDataView);
+      updateDataLayer(props.defaultDataView);
     }
   }, [props.defaultDataView, props.plugins.lens.formula]);
 

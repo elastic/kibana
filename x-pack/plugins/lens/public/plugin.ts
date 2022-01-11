@@ -171,6 +171,7 @@ export interface LensPublicStart {
      * @param column.formula - String representation of a formula
      * @param [column.label] - Custom formula label
      * @param layer - The layer to which the formula columns will be added
+     * @param dataViewId - The id of dataView
      * @param [params.operations] - Use this parameter if you only need to include specific operations.
      *
      * See `x-pack/examples/embedded_lens_example` for exemplary usage.
@@ -182,7 +183,7 @@ export interface LensPublicStart {
         label?: string;
       },
       layer: PersistedIndexPatternLayer,
-      indexPatternId: string,
+      dataViewId: string,
       params?: { operations?: string[] }
     ) => Promise<PersistedIndexPatternLayer | undefined>;
   };
@@ -413,23 +414,17 @@ export class LensPlugin {
         return visualizationTypes;
       },
       formula: {
-        insertOrReplaceFormulaColumn: async (
-          id,
-          { formula, label },
-          layer,
-          indexPatternId,
-          params
-        ) => {
+        insertOrReplaceFormulaColumn: async (id, { formula, label }, layer, dataViewId, params) => {
           const { loadIndexPatterns, insertOrReplaceFormulaColumn, operationDefinitionMap } =
             await import('./async_services');
 
           const indexPatterns = await loadIndexPatterns({
             cache: {},
-            patterns: [indexPatternId],
+            patterns: [dataViewId],
             indexPatternsService: startDependencies.data.indexPatterns,
           });
 
-          return indexPatterns[indexPatternId]
+          return indexPatterns[dataViewId]
             ? insertOrReplaceFormulaColumn(
                 id,
                 {
@@ -443,9 +438,9 @@ export class LensPlugin {
                     formula,
                   },
                 },
-                { ...layer, indexPatternId },
+                { ...layer, indexPatternId: dataViewId },
                 {
-                  indexPattern: indexPatterns[indexPatternId],
+                  indexPattern: indexPatterns[dataViewId],
                   operations:
                     params?.operations?.reduce(
                       (operationsMap, item) => ({
