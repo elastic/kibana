@@ -78,6 +78,8 @@ const verifySnapshotUpgrade = async (
 
     const isSuccessful = Boolean(
       mlSnapshotDeprecations.find((snapshotDeprecation) => {
+        // This regex will match all the bracket pairs from the deprecation message, at the moment
+        // that should match 3 pairs: snapshotId, jobId and version in which the snapshot was made.
         const regex = /(?<=\[).*?(?=\])/g;
         const matches = snapshotDeprecation.message.match(regex);
 
