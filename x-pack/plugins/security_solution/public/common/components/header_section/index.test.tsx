@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiDarkVars } from '@kbn/ui-shared-deps-src';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 

@@ -13,7 +13,7 @@ import { LineAnnotation, AnnotationDomainType, LineAnnotationStyle } from '@elas
 import {
   euiLightVars as lightEuiTheme,
   euiDarkVars as darkEuiTheme,
-} from '@kbn/ui-shared-deps-src/theme';
+} from '@kbn/ui-shared-deps-src';
 
 interface CurrentTimeProps {
   isDarkMode: boolean;

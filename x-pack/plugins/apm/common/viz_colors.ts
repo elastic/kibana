@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiLightVars as lightTheme } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as lightTheme } from '@kbn/ui-shared-deps-src';
 
 function getVizColorsForTheme(theme = lightTheme) {
   return [

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars, euiDarkVars } from '@kbn/ui-shared-deps-src';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from 'kibana/public';
 import React from 'react';

@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 import {
   euiLightVars as euiThemeLight,
   euiDarkVars as euiThemeDark,
-} from '@kbn/ui-shared-deps-src/theme';
+} from '@kbn/ui-shared-deps-src';
 
 import { i18n } from '@kbn/i18n';
 

@@ -9,7 +9,7 @@
 // @ts-ignore
 import type { TopLevelSpec } from 'vega-lite/build/vega-lite';
 
-import { euiLightVars as euiThemeLight } from '@kbn/ui-shared-deps-src/theme';
+import { euiLightVars as euiThemeLight } from '@kbn/ui-shared-deps-src';
 
 import { euiPaletteColorBlind, euiPaletteNegative, euiPalettePositive } from '@elastic/eui';
 

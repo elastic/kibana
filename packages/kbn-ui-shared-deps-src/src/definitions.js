@@ -29,7 +29,6 @@ const externals = {
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
   'styled-components': '__kbnSharedDeps__.StyledComponents',
   '@kbn/monaco': '__kbnSharedDeps__.KbnMonaco',
-  '@kbn/ui-shared-deps-src/theme': '__kbnSharedDeps__.Theme',
   // this is how plugins/consumers from npm load monaco
   'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBarePluginApi',
 

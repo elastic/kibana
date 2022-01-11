@@ -20,7 +20,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import {
   euiLightVars as lightEuiTheme,
   euiDarkVars as darkEuiTheme,
-} from '@kbn/ui-shared-deps-src/theme';
+} from '@kbn/ui-shared-deps-src';
 
 interface EndzonesProps {
   isDarkMode: boolean;
