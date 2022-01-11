@@ -339,32 +339,8 @@
 #CC# /x-pack/plugins/stack_alerts @elastic/kibana-alerting-services
 
 # Enterprise Search
-# Shared
-/x-pack/plugins/enterprise_search/* @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/common/ @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/public/* @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/public/applications/* @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/public/applications/enterprise_search/ @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/public/applications/shared/ @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/public/applications/__mocks__/ @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/server/* @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/server/lib/ @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/server/__mocks__/ @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/server/collectors/enterprise_search/ @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/server/collectors/lib/ @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/server/routes/enterprise_search/ @elastic/enterprise-search-frontend
-/x-pack/plugins/enterprise_search/server/saved_objects/enterprise_search/ @elastic/enterprise-search-frontend
+/x-pack/plugins/enterprise_search @elastic/enterprise-search-frontend
 /x-pack/test/functional_enterprise_search/ @elastic/enterprise-search-frontend
-# App Search
-/x-pack/plugins/enterprise_search/public/applications/app_search/ @elastic/app-search-frontend
-/x-pack/plugins/enterprise_search/server/routes/app_search/ @elastic/app-search-frontend
-/x-pack/plugins/enterprise_search/server/collectors/app_search/ @elastic/app-search-frontend
-/x-pack/plugins/enterprise_search/server/saved_objects/app_search/ @elastic/app-search-frontend
-# Workplace Search
-/x-pack/plugins/enterprise_search/public/applications/workplace_search/ @elastic/workplace-search-frontend
-/x-pack/plugins/enterprise_search/server/routes/workplace_search/ @elastic/workplace-search-frontend
-/x-pack/plugins/enterprise_search/server/collectors/workplace_search/ @elastic/workplace-search-frontend
-/x-pack/plugins/enterprise_search/server/saved_objects/workplace_search/ @elastic/workplace-search-frontend
 
 # Management Experience - Deployment Management
 /src/plugins/dev_tools/ @elastic/platform-deployment-management
