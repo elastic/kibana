@@ -129,28 +129,6 @@ export function getStopsFromColorRangesByNewInterval(
   });
 }
 
-export function getColorPaletteParams<
-  T extends {
-    stops: number[];
-    colors: string[];
-    rangeMax?: number;
-  }
->(params: T) {
-  let stops = params.stops;
-  let colorsForStops = params.colors;
-
-  if (params.rangeMax && isFinite(params.rangeMax) && stops.length > 0) {
-    stops = [...params.stops, params.rangeMax];
-    colorsForStops = [...colorsForStops, ''];
-  }
-
-  return {
-    ...params,
-    stops,
-    colors: colorsForStops,
-  };
-}
-
 function getOverallMinMax(
   params: CustomPaletteParams | undefined,
   dataBounds: { min: number; max: number }

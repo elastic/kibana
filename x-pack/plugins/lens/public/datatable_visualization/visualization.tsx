@@ -22,7 +22,6 @@ import type {
 import { LensIconChartDatatable } from '../assets/chart_datatable';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { CUSTOM_PALETTE } from '../shared_components/coloring/constants';
-import { getColorPaletteParams } from '../shared_components';
 import { LayerType, layerTypes } from '../../common';
 import { getDefaultSummaryLabel, PagingState } from '../../common/expressions';
 import type { ColumnState, SortingState } from '../../common/expressions';
@@ -381,11 +380,7 @@ export const getDatatableVisualization = ({
                       ],
                       alignment: typeof column.alignment === 'undefined' ? [] : [column.alignment],
                       colorMode: [column.colorMode ?? 'none'],
-                      palette: [
-                        paletteService
-                          .get(CUSTOM_PALETTE)
-                          .toExpression(getColorPaletteParams(paletteParams)),
-                      ],
+                      palette: [paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams)],
                       summaryRow: hasNoSummaryRow ? [] : [column.summaryRow!],
                       summaryLabel: hasNoSummaryRow
                         ? []
