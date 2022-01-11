@@ -77,6 +77,7 @@ filegroup(
   srcs = [
       "//packages/elastic-apm-synthtrace:build_types",
       "//packages/elastic-datemath:build_types",
+      "//packages/elastic-safer-lodash-set:build_types",
       "//packages/kbn-ace:build_types",
       "//packages/kbn-alerts:build_types",
       "//packages/kbn-analytics:build_types",
