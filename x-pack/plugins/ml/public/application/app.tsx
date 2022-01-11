@@ -157,5 +157,6 @@ export const renderApp = (
     mlLicense.unsubscribe();
     clearCache();
     ReactDOM.unmountComponentAtNode(appMountParams.element);
+    deps.data.search.session.clear();
   };
 };

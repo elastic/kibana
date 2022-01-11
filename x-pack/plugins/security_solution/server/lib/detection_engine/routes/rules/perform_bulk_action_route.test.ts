@@ -19,13 +19,16 @@ import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { performBulkActionRoute } from './perform_bulk_action_route';
 import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { loggingSystemMock } from 'src/core/server/mocks';
+import { isElasticRule } from '../../../../usage/detections';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
+jest.mock('../../../../usage/detections', () => ({ isElasticRule: jest.fn() }));
 
 describe.each([
   ['Legacy', false],
   ['RAC', true],
 ])('perform_bulk_action - %s', (_, isRuleRegistryEnabled) => {
+  const isElasticRuleMock = isElasticRule as jest.Mock;
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -37,7 +40,7 @@ describe.each([
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
-
+    isElasticRuleMock.mockReturnValue(false);
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
 
     performBulkActionRoute(server.router, ml, logger, isRuleRegistryEnabled);
@@ -77,7 +80,44 @@ describe.each([
     });
   });
 
-  describe('partial failures', () => {
+  describe('rules execution failures', () => {
+    it('returns error if rule is immutable/elastic', async () => {
+      isElasticRuleMock.mockReturnValue(true);
+      clients.rulesClient.find.mockResolvedValue(
+        getFindResultWithMultiHits({
+          data: [mockRule],
+          total: 1,
+        })
+      );
+
+      const response = await server.inject(getBulkActionEditRequest(), context);
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: 'Bulk edit failed',
+        status_code: 500,
+        attributes: {
+          errors: [
+            {
+              message: 'Elastic rule can`t be edited',
+              status_code: 403,
+              rules: [
+                {
+                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
+          rules: {
+            failed: 1,
+            succeeded: 0,
+            total: 1,
+          },
+        },
+      });
+    });
+
     it('returns error if disable rule throws error', async () => {
       clients.rulesClient.disable.mockImplementation(async () => {
         throw new Error('Test error');
@@ -85,20 +125,26 @@ describe.each([
       const response = await server.inject(getBulkActionRequest(), context);
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
-        message: 'Bulk edit partially failed',
+        message: 'Bulk edit failed',
         status_code: 500,
-        errors: [
-          {
-            error_message: 'Test error',
-            error_status_code: 500,
-            rule_id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-            rule_name: 'Detect Root/Admin Users',
+        attributes: {
+          errors: [
+            {
+              message: 'Test error',
+              status_code: 500,
+              rules: [
+                {
+                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
+          rules: {
+            failed: 1,
+            succeeded: 0,
+            total: 1,
           },
-        ],
-        rules: {
-          failed: 1,
-          succeeded: 0,
-          total: 1,
         },
       });
     });
@@ -113,31 +159,41 @@ describe.each([
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
-        errors: [
-          {
-            error_message: 'mocked validation message',
-            error_status_code: 403,
-            rule_id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-            rule_name: 'Detect Root/Admin Users',
+        attributes: {
+          errors: [
+            {
+              message: 'mocked validation message',
+              status_code: 403,
+              rules: [
+                {
+                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
+          rules: {
+            failed: 1,
+            succeeded: 0,
+            total: 1,
           },
-        ],
-        message: 'Bulk edit partially failed',
-        rules: {
-          failed: 1,
-          succeeded: 0,
-          total: 1,
         },
+        message: 'Bulk edit failed',
         status_code: 500,
       });
     });
 
-    it('returns error if one of rule validations fails and the rest are successfull', async () => {
-      const failedRuleId = 'fail-rule-id';
-      const failedRuleName = 'Rule that fails';
+    it('returns partial failure error if couple of rule validations fail and the rest are successfull', async () => {
       clients.rulesClient.find.mockResolvedValue(
         getFindResultWithMultiHits({
-          data: [{ ...mockRule, id: failedRuleId, name: failedRuleName }, mockRule, mockRule],
-          total: 3,
+          data: [
+            { ...mockRule, id: 'failed-rule-id-1' },
+            { ...mockRule, id: 'failed-rule-id-2' },
+            { ...mockRule, id: 'failed-rule-id-3' },
+            mockRule,
+            mockRule,
+          ],
+          total: 5,
         })
       );
 
@@ -145,6 +201,8 @@ describe.each([
         validateRuleType: jest
           .fn()
           .mockImplementationOnce(() => ({ valid: false, message: 'mocked validation message' }))
+          .mockImplementationOnce(() => ({ valid: false, message: 'mocked validation message' }))
+          .mockImplementationOnce(() => ({ valid: false, message: 'test failure' }))
           .mockImplementationOnce(() => ({ valid: true }))
           .mockImplementationOnce(() => ({ valid: true })),
       });
@@ -152,22 +210,51 @@ describe.each([
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
-        errors: [
-          {
-            error_message: 'mocked validation message',
-            error_status_code: 403,
-            rule_id: 'fail-rule-id',
-            rule_name: 'Rule that fails',
+        attributes: {
+          rules: {
+            failed: 3,
+            succeeded: 2,
+            total: 5,
           },
-        ],
-        message: 'Bulk edit partially failed',
-        rules: {
-          failed: 1,
-          succeeded: 2,
-          total: 3,
+          errors: [
+            {
+              message: 'mocked validation message',
+              status_code: 403,
+              rules: [
+                {
+                  id: 'failed-rule-id-1',
+                  name: 'Detect Root/Admin Users',
+                },
+                {
+                  id: 'failed-rule-id-2',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+            {
+              message: 'test failure',
+              status_code: 403,
+              rules: [
+                {
+                  id: 'failed-rule-id-3',
+                  name: 'Detect Root/Admin Users',
+                },
+              ],
+            },
+          ],
         },
+        message: 'Bulk edit partially failed',
         status_code: 500,
       });
+    });
+
+    it('return error message limited to length of 1000, to prevent large response size', async () => {
+      clients.rulesClient.disable.mockImplementation(async () => {
+        throw new Error('a'.repeat(1_300));
+      });
+      const response = await server.inject(getBulkActionRequest(), context);
+      expect(response.status).toEqual(500);
+      expect(response.body.attributes.errors[0].message.length).toEqual(1000);
     });
   });
 

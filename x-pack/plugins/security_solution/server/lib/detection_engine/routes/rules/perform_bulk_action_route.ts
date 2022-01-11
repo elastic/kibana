@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { Logger } from 'src/core/server';
 
@@ -19,7 +20,9 @@ import { performBulkActionSchema } from '../../../../../common/detection_engine/
 import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
+import { routeLimitedConcurrencyTag } from '../../../../utils/route_limited_concurrency_tag';
 import { initPromisePool } from '../../../../utils/promise_pool';
+import { isElasticRule } from '../../../../usage/detections';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { throwHttpError } from '../../../machine_learning/validation';
 import { deleteRules } from '../../rules/delete_rules';
@@ -32,6 +35,8 @@ import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
+const MAX_ERROR_MESSAGE_LENGTH = 1000;
+const MAX_ROUTE_CONCURRENCY = 5;
 
 type RuleActionFn = (rule: Rule) => Promise<void>;
 
@@ -50,6 +55,57 @@ interface RuleActionError {
   };
 }
 
+interface NormalizedRuleError {
+  message: string;
+  status_code: number;
+  rules: Array<{
+    id: string;
+    name: string;
+  }>;
+}
+
+const normalizeErrorResponse = (errors: RuleActionError[]): NormalizedRuleError[] => {
+  const errorsMap = new Map();
+
+  errors.forEach((ruleError) => {
+    const { message } = ruleError.error;
+    if (errorsMap.has(message)) {
+      errorsMap.get(message).rules.push(ruleError.rule);
+    } else {
+      const { error, rule } = ruleError;
+      errorsMap.set(message, {
+        message: error.message,
+        status_code: error.statusCode,
+        rules: [rule],
+      });
+    }
+  });
+
+  return Array.from(errorsMap, ([_, normalizedError]) => normalizedError);
+};
+
+const getErrorResponseBody = (errors: RuleActionError[], rulesCount: number) => {
+  const errorsCount = errors.length;
+  return {
+    message: errorsCount === rulesCount ? 'Bulk edit failed' : 'Bulk edit partially failed',
+    status_code: 500,
+    attributes: {
+      errors: normalizeErrorResponse(errors).map(({ message, ...error }) => ({
+        ...error,
+        message:
+          message.length > MAX_ERROR_MESSAGE_LENGTH
+            ? `${message.slice(0, MAX_ERROR_MESSAGE_LENGTH - 3)}...`
+            : message,
+      })),
+      rules: {
+        total: rulesCount,
+        failed: errorsCount,
+        succeeded: rulesCount - errorsCount,
+      },
+    },
+  };
+};
+
 const executeActionAndHandleErrors = async (
   rule: Rule,
   action: RuleActionFn
@@ -65,11 +121,12 @@ const executeActionAndHandleErrors = async (
   }
 };
 
-const executeBulkAction = async (rules: Rule[], action: RuleActionFn) =>
+const executeBulkAction = async (rules: Rule[], action: RuleActionFn, abortSignal: AbortSignal) =>
   initPromisePool({
     concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
     items: rules,
     executor: async (rule) => executeActionAndHandleErrors(rule, action),
+    abortSignal,
   });
 
 export const performBulkActionRoute = (
@@ -85,12 +142,20 @@ export const performBulkActionRoute = (
         body: buildRouteValidation<typeof performBulkActionSchema>(performBulkActionSchema),
       },
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
+        timeout: {
+          idleSocket: moment.duration(15, 'minutes').asMilliseconds(),
+        },
       },
     },
     async (context, request, response) => {
       const { body } = request;
       const siemResponse = buildSiemResponse(response);
+      const abortController = new AbortController();
+
+      // subscribing to completed$, because it handles both cases when request was completed and aborted.
+      // when route is finished by timeout, aborted$ is not getting fired
+      request.events.completed$.subscribe(() => abortController.abort());
 
       try {
         const rulesClient = context.alerting?.getRulesClient();
@@ -134,41 +199,57 @@ export const performBulkActionRoute = (
         };
         switch (body.action) {
           case BulkAction.enable:
-            processingResponse = await executeBulkAction(rules.data, async (rule) => {
-              if (!rule.enabled) {
-                throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
-                await enableRule({
-                  rule,
-                  rulesClient,
-                });
-              }
-            });
+            processingResponse = await executeBulkAction(
+              rules.data,
+              async (rule) => {
+                if (!rule.enabled) {
+                  throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
+                  await enableRule({
+                    rule,
+                    rulesClient,
+                  });
+                }
+              },
+              abortController.signal
+            );
             break;
           case BulkAction.disable:
-            processingResponse = await executeBulkAction(rules.data, async (rule) => {
-              if (rule.enabled) {
-                throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
-                await rulesClient.disable({ id: rule.id });
-              }
-            });
+            processingResponse = await executeBulkAction(
+              rules.data,
+              async (rule) => {
+                if (rule.enabled) {
+                  throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
+                  await rulesClient.disable({ id: rule.id });
+                }
+              },
+              abortController.signal
+            );
             break;
           case BulkAction.delete:
-            processingResponse = await executeBulkAction(rules.data, async (rule) => {
-              await deleteRules({
-                ruleId: rule.id,
-                rulesClient,
-                ruleStatusClient,
-              });
-            });
+            processingResponse = await executeBulkAction(
+              rules.data,
+              async (rule) => {
+                await deleteRules({
+                  ruleId: rule.id,
+                  rulesClient,
+                  ruleStatusClient,
+                });
+              },
+              abortController.signal
+            );
             break;
           case BulkAction.duplicate:
-            processingResponse = await executeBulkAction(rules.data, async (rule) => {
-              throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
+            processingResponse = await executeBulkAction(
+              rules.data,
+              async (rule) => {
+                throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
-              await rulesClient.create({
-                data: duplicateRule(rule, isRuleRegistryEnabled),
-              });
-            });
+                await rulesClient.create({
+                  data: duplicateRule(rule, isRuleRegistryEnabled),
+                });
+              },
+              abortController.signal
+            );
             break;
           case BulkAction.export:
             const exported = await getExportByObjectIds(
@@ -190,50 +271,48 @@ export const performBulkActionRoute = (
               body: responseBody,
             });
           case BulkAction.edit:
-            processingResponse = await executeBulkAction(rules.data, async (rule) => {
-              throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
+            processingResponse = await executeBulkAction(
+              rules.data,
+              async (rule) => {
+                throwHttpError({
+                  valid: !isElasticRule(rule.tags),
+                  message: 'Elastic rule can`t be edited',
+                });
 
-              const editedRule = body[BulkAction.edit].reduce(
-                (acc, action) => appplyBulkActionEditToRule(acc, action),
-                rule
-              );
+                throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
 
-              const { tags, params: { timelineTitle, timelineId } = {} } = editedRule;
-              const index = 'index' in editedRule.params ? editedRule.params.index : undefined;
+                const editedRule = body[BulkAction.edit].reduce(
+                  (acc, action) => appplyBulkActionEditToRule(acc, action),
+                  rule
+                );
 
-              await patchRules({
-                rulesClient,
-                rule,
-                tags,
-                index,
-                timelineTitle,
-                timelineId,
-              });
-            });
+                const { tags, params: { timelineTitle, timelineId } = {} } = editedRule;
+                const index = 'index' in editedRule.params ? editedRule.params.index : undefined;
+
+                await patchRules({
+                  rulesClient,
+                  rule,
+                  tags,
+                  index,
+                  timelineTitle,
+                  timelineId,
+                });
+              },
+              abortController.signal
+            );
+        }
+
+        if (abortController.signal.aborted === true) {
+          throw Error('Bulk action was aborted');
         }
 
         const errors = processingResponse.results.filter(
           (resp): resp is RuleActionError => resp?.error !== undefined
         );
         const rulesCount = rules.data.length;
-        const errorsCount = errors.length;
 
-        if (errorsCount > 0) {
-          const responseBody = {
-            message: 'Bulk edit partially failed',
-            status_code: 500,
-            errors: errors.map(({ error, rule }) => ({
-              rule_id: rule.id,
-              rule_name: rule.name,
-              error_message: error.message,
-              error_status_code: error.statusCode,
-            })),
-            rules: {
-              total: rulesCount,
-              failed: errorsCount,
-              succeeded: rulesCount - errorsCount,
-            },
-          };
+        if (errors.length > 0) {
+          const responseBody = getErrorResponseBody(errors, rulesCount);
 
           return response.custom({
             headers: {

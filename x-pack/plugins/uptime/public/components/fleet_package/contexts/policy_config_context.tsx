@@ -6,7 +6,7 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { ServiceLocations } from '../../../../common/runtime_types/monitor_management';
+import { ScheduleUnit, ServiceLocations } from '../../../../common/runtime_types';
 import { DataStream } from '../types';
 
 interface IPolicyConfigContext {
@@ -19,6 +19,7 @@ interface IPolicyConfigContext {
   defaultMonitorType: DataStream;
   isTLSEnabled?: boolean;
   isZipUrlTLSEnabled?: boolean;
+  isZipUrlSourceEnabled?: boolean;
   defaultIsTLSEnabled?: boolean;
   defaultIsZipUrlTLSEnabled?: boolean;
   isEditable?: boolean;
@@ -26,6 +27,7 @@ interface IPolicyConfigContext {
   name?: string;
   defaultLocations?: ServiceLocations;
   locations?: ServiceLocations;
+  allowedScheduleUnits?: ScheduleUnit[];
 }
 
 export interface IPolicyConfigContextProvider {
@@ -36,6 +38,8 @@ export interface IPolicyConfigContextProvider {
   defaultName?: string;
   defaultLocations?: ServiceLocations;
   isEditable?: boolean;
+  isZipUrlSourceEnabled?: boolean;
+  allowedScheduleUnits?: ScheduleUnit[];
 }
 
 export const initialValue = DataStream.HTTP;
@@ -65,6 +69,8 @@ const defaultContext: IPolicyConfigContext = {
   defaultName: '',
   defaultLocations: [],
   isEditable: false,
+  isZipUrlSourceEnabled: true,
+  allowedScheduleUnits: [ScheduleUnit.MINUTES, ScheduleUnit.SECONDS],
 };
 
 export const PolicyConfigContext = createContext(defaultContext);
@@ -77,6 +83,8 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
   defaultName = '',
   defaultLocations = [],
   isEditable = false,
+  isZipUrlSourceEnabled = true,
+  allowedScheduleUnits = [ScheduleUnit.MINUTES, ScheduleUnit.SECONDS],
 }: IPolicyConfigContextProvider) {
   const [monitorType, setMonitorType] = useState<DataStream>(defaultMonitorType);
   const [name, setName] = useState<string>(defaultName);
@@ -102,11 +110,14 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
       defaultLocations,
       locations,
       setLocations,
-    };
+      isZipUrlSourceEnabled,
+      allowedScheduleUnits,
+    } as IPolicyConfigContext;
   }, [
     monitorType,
     defaultMonitorType,
     isTLSEnabled,
+    isZipUrlSourceEnabled,
     isZipUrlTLSEnabled,
     defaultIsTLSEnabled,
     defaultIsZipUrlTLSEnabled,
@@ -115,6 +126,7 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
     defaultName,
     locations,
     defaultLocations,
+    allowedScheduleUnits,
   ]);
 
   return <PolicyConfigContext.Provider value={value} children={children} />;

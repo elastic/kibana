@@ -73,16 +73,16 @@ services you should consider:
 
 * {kib-repo}tree/{branch}/src/plugins/data/README.md[Data
 services]
-** {kib-repo}tree/{branch}/src/plugins/data/public/search/README.md[Search
+** {kib-repo}tree/{branch}/src/plugins/data/README.mdx#search[Search
 strategies]
 *** Use the `esSearchStrategy` to make raw queries to ES that will
 support async searching and partial results, as well as injecting the
 right advanced settings like whether to include frozen indices or not.
-* {kib-repo}tree/{branch}/src/plugins/embeddable/README.md[Embeddables]
+* {kib-repo}tree/{branch}/src/plugins/embeddable/README.asciidoc[Embeddables]
 ** Rendering maps, visualizations, dashboards in your application
 ** Register new widgets that will can be added to a dashboard or Canvas
 workpad, or rendered in another plugin.
-* {kib-repo}tree/{branch}/src/plugins/ui_actions/README.md[UiActions]
+* {kib-repo}tree/{branch}/src/plugins/ui_actions/README.asciidoc[UiActions]
 ** Let other plugins inject functionality into your application
 ** Inject custom functionality into other plugins
 * Stateless helper utilities

@@ -275,7 +275,7 @@ export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged` as const;
 
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
-export const SOURCERER_API_URL = '/api/sourcerer' as const;
+export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -400,3 +400,5 @@ export const WARNING_TRANSFORM_STATES = new Set([
  * https://github.com/elastic/kibana/issues/94418
  */
 export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 50;
+
+export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrency`;
