@@ -48,7 +48,7 @@ interface RACRule {
   kibana: {
     alert: {
       rule: {
-        parameters: {};
+        parameters?: {};
       };
     };
   };
@@ -138,13 +138,13 @@ export const transformRuleFromAlertHit = (data: AlertSearchResponse): Rule | und
 
   // If rule undefined, response likely flattened
   if (rule == null) {
-    const expandedRule = expandDottedObject(hit?._source ?? {}) as RACRule;
-    return expandedRule?.kibana?.alert?.rule
-      ? {
-          ...expandedRule?.kibana?.alert?.rule,
-          ...expandedRule?.kibana?.alert?.rule?.parameters,
-        }
-      : undefined;
+    const expandedRuleWithParams = expandDottedObject(hit?._source ?? {}) as RACRule;
+    const expandedRule = {
+      ...expandedRuleWithParams?.kibana?.alert?.rule,
+      ...expandedRuleWithParams?.kibana?.alert?.rule?.parameters,
+    };
+    delete expandedRule.parameters;
+    return expandedRule as Rule;
   }
 
   return rule;
