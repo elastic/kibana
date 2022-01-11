@@ -1,10 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ExitFullScreenButton /> is rendered 1`] = `
-.emotion-0 {
-  line-height: 1.2;
-}
-
 <ServicesProvider
   platform={
     Object {
@@ -32,9 +28,7 @@ exports[`<ExitFullScreenButton /> is rendered 1`] = `
       }
       onClick={[Function]}
     >
-      <div
-        className="exitFullScreenButton"
-      >
+      <div>
         <EuiScreenReaderOnly>
           <p
             aria-live="polite"
@@ -44,7 +38,8 @@ exports[`<ExitFullScreenButton /> is rendered 1`] = `
           </p>
         </EuiScreenReaderOnly>
         <button
-          aria-label="Exit full screen mode"
+          className="exitFullScreenButton"
+          data-test-subj="exitFullScreenModeButton"
           onClick={[Function]}
         >
           <EuiFlexGroup
@@ -57,88 +52,52 @@ exports[`<ExitFullScreenButton /> is rendered 1`] = `
               className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
             >
               <EuiFlexItem
+                component="span"
                 grow={false}
               >
-                <div
+                <span
                   className="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <EuiIcon
-                    size="l"
+                    size="m"
                     type="logoElastic"
                   >
                     <span
                       data-euiicon-type="logoElastic"
-                      size="l"
+                      size="m"
                     />
                   </EuiIcon>
-                </div>
+                </span>
               </EuiFlexItem>
               <EuiFlexItem
+                component="span"
                 data-test-subj="exitFullScreenModeText"
                 grow={false}
               >
-                <div
+                <span
                   className="euiFlexItem euiFlexItem--flexGrowZero"
                   data-test-subj="exitFullScreenModeText"
                 >
-                  <EuiText
-                    css={
-                      Object {
-                        "map": undefined,
-                        "name": "bouowd",
-                        "next": undefined,
-                        "styles": "
-    line-height: 1.2;
-    #98a2b3;
-  ",
-                        "toString": [Function],
-                      }
-                    }
-                    size="s"
-                  >
-                    <div
-                      css="unknown styles"
-                    >
-                      <div
-                        className="euiText euiText--small emotion-0"
-                      >
-                        Exit full screen
-                      </div>
-                    </div>
-                  </EuiText>
-                </div>
+                  Exit full screen
+                </span>
               </EuiFlexItem>
               <EuiFlexItem
+                component="span"
                 grow={false}
               >
-                <div
+                <span
                   className="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <EuiIcon
-                    css={
-                      Object {
-                        "map": undefined,
-                        "name": "1xgac5z",
-                        "next": undefined,
-                        "styles": "
-    #98a2b3;
-  ",
-                        "toString": [Function],
-                      }
-                    }
-                    type="fullScreen"
+                    size="s"
+                    type="fullScreenExit"
                   >
                     <span
-                      css="unknown styles"
-                      data-euiicon-type="fullScreen"
-                    >
-                      <span
-                        className="emotion-1"
-                        data-euiicon-type="fullScreen"
-                      />
-                    </span>
+                      data-euiicon-type="fullScreenExit"
+                      size="s"
+                    />
                   </EuiIcon>
-                </div>
+                </span>
               </EuiFlexItem>
             </span>
           </EuiFlexGroup>
