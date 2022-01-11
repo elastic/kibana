@@ -38,7 +38,6 @@ describe(`GET ${API_GET_ILM_POLICY_STATUS}`, () => {
           timeout: 10000,
           pollEnabled: true,
         },
-        index: '.reporting',
       }),
       createMockPluginSetup({
         security,

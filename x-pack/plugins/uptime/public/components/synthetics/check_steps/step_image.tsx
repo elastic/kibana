@@ -26,7 +26,7 @@ export const StepImage = ({ step, compactView, isMobileImage }: Props) => {
           isMobileImage={isMobileImage}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} style={{ minWidth: 80 }}>
         <EuiText size={compactView ? 's' : 'm'}>{step.synthetics?.step?.name}</EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
