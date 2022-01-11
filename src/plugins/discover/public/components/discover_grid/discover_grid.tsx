@@ -21,7 +21,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { flattenHit, IndexPattern } from '../../../../data/common';
+import { flattenHit, DataView } from '../../../../data/common';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -77,7 +77,7 @@ export interface DiscoverGridProps {
   /**
    * The used index pattern
    */
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   /**
    * Determines if data is currently loaded
    */
