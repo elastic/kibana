@@ -230,6 +230,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
     const mockRequest: RequestMock = {
       method: 'get',
       path: addBasePath('snapshots/{repository}/{snapshot}'),
+      query: 'asd',
       params: {
         repository,
         snapshot,
@@ -244,7 +245,32 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
 
     test('returns snapshot object with repository name if returned from ES', async () => {
       const mockGetSnapshotEsResponse = {
-        snapshots: [{ snapshot, repository }],
+        snapshots: [{ snapshot, repository, indices: ['.system_index', 'normal_index'] }],
+      };
+
+      getClusterSettingsFn.mockResolvedValue({
+        body: mockSnapshotGetManagedRepositoryEsResponse,
+      });
+      getSnapshotFn.mockResolvedValue({ body: mockGetSnapshotEsResponse });
+
+      const expectedResponse = {
+        ...defaultSnapshot,
+        snapshot,
+        repository,
+        indices: ['.system_index', 'normal_index'],
+        managedRepository:
+          mockSnapshotGetManagedRepositoryEsResponse.defaults[
+            'cluster.metadata.managed_repository'
+          ],
+      };
+
+      const response = await router.runRequest(mockRequest);
+      expect(response).toEqual({ body: expectedResponse });
+    });
+
+    test('knows how to return snapshot object without system indices', async () => {
+      const mockGetSnapshotEsResponse = {
+        snapshots: [{ snapshot, repository, indices: ['.system_index', 'normal_index'] }],
       };
 
       getDataStreamFn.mockResolvedValue({
@@ -254,7 +280,15 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
       });
 
       getIndicesFn.mockResolvedValue({
-        body: {},
+        body: {
+          '.system_index': {
+            settings: {
+              index: {
+                hidden: true,
+              },
+            },
+          },
+        },
       });
 
       getClusterSettingsFn.mockResolvedValue({
@@ -266,13 +300,19 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         ...defaultSnapshot,
         snapshot,
         repository,
+        indices: ['normal_index'],
         managedRepository:
           mockSnapshotGetManagedRepositoryEsResponse.defaults[
             'cluster.metadata.managed_repository'
           ],
       };
 
-      const response = await router.runRequest(mockRequest);
+      const response = await router.runRequest({
+        ...mockRequest,
+        query: {
+          ignoreSystemIndices: true,
+        },
+      });
       expect(response).toEqual({ body: expectedResponse });
     });
 

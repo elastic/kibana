@@ -211,7 +211,7 @@ export function registerSnapshotsRoutes({
       const { repository, snapshot } = req.params as TypeOf<typeof getOneParamsSchema>;
       const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
       const ignoreSystemIndices = (req.query as TypeOf<typeof getOneQuerySchema>)
-        .ignoreSystemIndices;
+        ?.ignoreSystemIndices;
 
       try {
         const response = await clusterClient.asCurrentUser.snapshot.get({
