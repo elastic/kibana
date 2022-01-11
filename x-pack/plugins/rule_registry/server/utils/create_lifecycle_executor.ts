@@ -10,6 +10,7 @@ import type { PublicContract } from '@kbn/utility-types';
 import { getOrElse } from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';
 import { v4 } from 'uuid';
+import { difference } from 'lodash';
 import {
   AlertExecutorOptions,
   AlertInstance,
@@ -178,7 +179,7 @@ export const createLifecycleExecutor =
 
     const currentAlertIds = Object.keys(currentAlerts);
     const trackedAlertIds = Object.keys(state.trackedAlerts);
-    const newAlertIds = currentAlertIds.filter((alertId) => !trackedAlertIds.includes(alertId));
+    const newAlertIds = difference(currentAlertIds, trackedAlertIds);
     const allAlertIds = [...new Set(currentAlertIds.concat(trackedAlertIds))];
 
     const trackedAlertStates = Object.values(state.trackedAlerts);
