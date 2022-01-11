@@ -362,7 +362,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     it('8.0 migrates and disables pre-existing rules', async () => {
-      const response = await es.get<{ alert: RawRule }>(
+      const response = await es.get<{ alert: RawAlert }>(
         {
           index: '.kibana',
           id: 'alert:38482620-ef1b-11eb-ad71-7de7959be71c',
