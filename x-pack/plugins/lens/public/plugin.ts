@@ -39,7 +39,7 @@ import { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_
 import type {
   IndexPatternDatasource as IndexPatternDatasourceType,
   IndexPatternDatasourceSetupPlugins,
-  IndexPatternLayer,
+  PersistedIndexPatternLayer,
 } from './indexpattern_datasource';
 import type {
   XyVisualization as XyVisualizationType,
@@ -163,8 +163,12 @@ export interface LensPublicStart {
   getXyVisTypes: () => Promise<VisualizationType[]>;
 
   formula: {
-    // @todo:
-    upsertFormulaColumn: (id: string, column: string, params: any) => any;
+    upsertFormulaColumn: (
+      id: string,
+      formula: string,
+      layer: PersistedIndexPatternLayer,
+      params: { indexPatternId: string }
+    ) => Promise<PersistedIndexPatternLayer>;
   };
 }
 
@@ -393,10 +397,31 @@ export class LensPlugin {
         return visualizationTypes;
       },
       formula: {
-        // @todo:
-        upsertFormulaColumn: async (id) => {
-          // const { upsertFormulaColumn } = await import('./indexpattern_datasource');
-          return 1;
+        upsertFormulaColumn: async (id, formula, layer, { indexPatternId }) => {
+          const { loadIndexPatterns, upsertFormulaColumn } = await import(
+            './indexpattern_datasource'
+          );
+          const indexPatterns = await loadIndexPatterns({
+            cache: {},
+            patterns: [indexPatternId],
+            indexPatternsService: startDependencies.data.indexPatterns,
+          });
+
+          return upsertFormulaColumn(
+            id,
+            {
+              operationType: 'formula',
+              dataType: 'number',
+              label: formula,
+              references: [],
+              isBucketed: false,
+              params: {
+                formula,
+              },
+            },
+            { ...layer, indexPatternId },
+            { indexPattern: indexPatterns[indexPatternId] }
+          ).layer;
         },
       },
     };

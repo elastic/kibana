@@ -7,7 +7,6 @@
 
 import type { CoreSetup } from 'kibana/public';
 import { createStartServicesGetter, Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { upsertFormulaColumn } from './operations/definitions/formula';
 import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
 import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
 import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
@@ -22,7 +21,9 @@ import type {
   FieldFormatsSetup,
 } from '../../../../../src/plugins/field_formats/public';
 
-export { upsertFormulaColumn };
+export type { PersistedIndexPatternLayer } from './types';
+export { upsertFormulaColumn } from './operations/definitions/formula';
+export { loadIndexPatterns } from './loader';
 
 export interface IndexPatternDatasourceSetupPlugins {
   expressions: ExpressionsSetup;
