@@ -190,6 +190,38 @@
           },
           {
             "parentPluginId": "@kbn/storybook",
+            "id": "def-server.defaultConfig.babel",
+            "type": "Function",
+            "tags": [],
+            "label": "babel",
+            "description": [
+              "// @ts-expect-error StorybookConfig type is incomplete\n// https://storybook.js.org/docs/react/configure/babel#custom-configuration"
+            ],
+            "signature": [
+              "(options: any) => Promise<any>"
+            ],
+            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/storybook",
+                "id": "def-server.defaultConfig.babel.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "packages/kbn-storybook/src/lib/default_config.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/storybook",
             "id": "def-server.defaultConfig.webpackFinal",
             "type": "Function",
             "tags": [],
