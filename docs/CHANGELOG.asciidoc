@@ -270,7 +270,7 @@ Machine Learning::
 * Catches syntax error in job wizard editor {kibana-pull}119457[#119457]
 * Fixes error handling for missing data view in data frame analytics wizard {kibana-pull}119455[#119455]
 * Data Frame Analytics list - ensure refresh works as expected {kibana-pull}117959[#117959]
-* Set data recognizer to ignore frozen indices {kibana-pull}117208[#117208]
+* Ignores frozen indices in data recognizer {kibana-pull}117208[#117208]
 * Data view loading refactor {kibana-pull}116455[#116455]
 Management::
 * Fixes data grid column actions button when histogram charts are visible {kibana-pull}120202[#120202]
