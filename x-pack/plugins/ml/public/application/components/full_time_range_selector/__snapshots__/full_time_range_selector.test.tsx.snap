@@ -6,21 +6,30 @@ exports[`FullTimeRangeSelector renders the selector 1`] = `
   gutterSize="xs"
   responsive={false}
 >
-  <EuiButton
-    data-test-subj="mlButtonUseFullData"
-    isDisabled={false}
-    onClick={[Function]}
+  <EuiToolTip
+    content={
+      <FormattedMessage
+        defaultMessage="Use full range of data including frozen data tier. Searches with frozen data may take longer."
+        id="xpack.ml.fullTimeRangeSelector.useFullDataButtonTooltip"
+        values={Object {}}
+      />
+    }
+    delay="regular"
+    display="inlineBlock"
+    position="top"
   >
-    <FormattedMessage
-      defaultMessage="Use full {dataViewTitle} data"
-      id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
-      values={
-        Object {
-          "dataViewTitle": "test-data-view",
-        }
-      }
-    />
-  </EuiButton>
+    <EuiButton
+      data-test-subj="mlButtonUseFullData"
+      isDisabled={false}
+      onClick={[Function]}
+    >
+      <FormattedMessage
+        defaultMessage="Use full data"
+        id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
+        values={Object {}}
+      />
+    </EuiButton>
+  </EuiToolTip>
   <EuiFlexItem
     grow={false}
   >
@@ -43,32 +52,25 @@ exports[`FullTimeRangeSelector renders the selector 1`] = `
       ownFocus={true}
       panelPaddingSize="none"
     >
-      <EuiContextMenuPanel
-        hasFocus={true}
-        items={
-          Array [
-            <EuiContextMenuItem
-              onClick={[Function]}
-            >
-              <FormattedMessage
-                defaultMessage="Exclude frozen data tier"
-                id="xpack.ml.fullTimeRangeSelector.useFullDataExcludingFrozenMenuLabel"
-                values={Object {}}
-              />
-            </EuiContextMenuItem>,
-            <EuiContextMenuItem
-              onClick={[Function]}
-            >
-              <FormattedMessage
-                defaultMessage="Include frozen data tier"
-                id="xpack.ml.fullTimeRangeSelector.useFullDataIncludingFrozenMenuLabel"
-                values={Object {}}
-              />
-            </EuiContextMenuItem>,
-          ]
-        }
-        size="s"
-      />
+      <EuiPanel>
+        <EuiRadioGroup
+          compressed={true}
+          idSelected="t"
+          onChange={[Function]}
+          options={
+            Array [
+              Object {
+                "id": "exclude-frozen",
+                "label": "Exclude frozen data tier",
+              },
+              Object {
+                "id": "include-frozen",
+                "label": "Include frozen data tier",
+              },
+            ]
+          }
+        />
+      </EuiPanel>
     </EuiPopover>
   </EuiFlexItem>
 </EuiFlexGroup>

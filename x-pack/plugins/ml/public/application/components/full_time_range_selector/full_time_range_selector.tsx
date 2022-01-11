@@ -112,7 +112,7 @@ export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, ca
     ) : (
       <FormattedMessage
         id="xpack.ml.fullTimeRangeSelector.useFullDataButtonTooltip"
-        defaultMessage="Use full range of data including frozen data tier. Including frozen data can be time consuming."
+        defaultMessage="Use full range of data including frozen data tier. Searches with frozen data may take longer."
       />
     );
 
@@ -126,7 +126,7 @@ export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, ca
         >
           <FormattedMessage
             id="xpack.ml.fullTimeRangeSelector.useFullDataButtonLabel"
-            defaultMessage="Use full data" // @todo update snapshot and translations
+            defaultMessage="Use full data"
           />
         </EuiButton>
       </EuiToolTip>
