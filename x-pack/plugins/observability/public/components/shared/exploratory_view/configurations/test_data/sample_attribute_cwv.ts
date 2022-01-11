@@ -95,7 +95,8 @@ export const sampleAttributeCoreWebVital = {
     filters: [],
     query: {
       language: 'kuery',
-      query: 'transaction.type: "page-load"',
+      query:
+        'transaction.type: page-load and processor.event: transaction and transaction.type: "page-load"',
     },
     visualization: {
       axisTitlesVisibilitySettings: {
