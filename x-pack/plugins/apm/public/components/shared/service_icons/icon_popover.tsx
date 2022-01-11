@@ -36,8 +36,7 @@ const StyledPanel = styled(EuiPanel)`
       0px 1.9px 4px ${rgba(shadowColor, 0.05)},
       0px 4.5px 10px ${rgba(shadowColor, 0.05)} !important;`;
     }};
-    height: 56px;
-    padding: 0 16px;
+    padding: 0 8px;
   }
 `;
 export function IconPopover({
@@ -62,6 +61,7 @@ export function IconPopover({
           onClick={onClick}
           data-test-subj={`popover_${title}`}
           className="serviceIcon"
+          paddingSize="none"
         >
           <EuiIcon
             type={icon.type}
