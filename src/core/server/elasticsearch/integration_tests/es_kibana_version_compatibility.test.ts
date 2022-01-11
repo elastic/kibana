@@ -45,6 +45,6 @@ describe('esVersionCompatibleWithKibana', () => {
     const startWithCleanup = async () => {
       kibanaServer = await startKibana();
     };
-    await expect(startWithCleanup).resolves.toBeDefined();
+    await expect(startWithCleanup()).resolves.toBeDefined();
   });
 });
