@@ -49,13 +49,12 @@ describe('WorkplaceSearch', () => {
   });
 
   it('renders ErrorState', () => {
-    setMockValues({ errorConnecting: true });
+    setMockValues({ errorConnectingMessage: '502 Bad Gateway' });
 
-    const wrapper = shallow(<WorkplaceSearch errorConnectingMessage="I am an error" />);
+    const wrapper = shallow(<WorkplaceSearch />);
 
     const errorState = wrapper.find(ErrorState);
     expect(errorState).toHaveLength(1);
-    expect(errorState.prop('errorConnectingMessage')).toEqual('I am an error');
   });
 });
 
