@@ -12,6 +12,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
+import { rgba } from 'polished';
 import React from 'react';
 import styled from 'styled-components';
 import { PopoverItem } from '.';
@@ -30,10 +31,12 @@ interface IconPopoverProps {
 const StyledPanel = styled(EuiPanel)`
   &.serviceIcon {
     box-shadow: ${({ theme }) => {
-      const shadowColor = `${theme.eui.euiShadowColor}${60}`;
-      return `0 2px 2px -1px ${shadowColor}, 0 1px 5px -2px ${shadowColor} !important;`;
+      const shadowColor = theme.eui.euiShadowColor;
+      return `0px 0.7px 1.4px ${rgba(shadowColor, 0.07)},
+      0px 1.9px 4px ${rgba(shadowColor, 0.05)},
+      0px 4.5px 10px ${rgba(shadowColor, 0.05)} !important;`;
     }};
-    height: 50px;
+    height: 56px;
     padding: 0 16px;
   }
 `;
