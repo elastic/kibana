@@ -77,7 +77,7 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
     return calculateAuthz({
       fleet: { all: fleetAllAuth, setup: fleetSetupAuth },
       integrations: { all: intAllAuth, read: intReadAuth },
-      isSuperuser: false,
+      isSuperuser: checkSuperuser(req),
     });
   }
 
