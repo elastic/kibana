@@ -46,7 +46,11 @@ import {
 import type { PLATFORM_TYPE } from '../../../../hooks';
 import type { AgentPolicy, PackagePolicy } from '../../../../types';
 import { FLEET_SERVER_PACKAGE } from '../../../../constants';
-import { FleetServerOnPremRequiredCallout } from '../../components';
+import {
+  AgentPolicyCreatedCallOut,
+  CREATE_STATUS,
+  FleetServerOnPremRequiredCallout,
+} from '../../components';
 
 import { AgentPolicyCreateInlineForm } from '../../../agent_policy/components';
 
@@ -364,8 +368,15 @@ const AgentPolicySelectionStep = ({
     [setPolicyId]
   );
 
+  const [createStatus, setCreateStatus] = useState(CREATE_STATUS.INITIAL);
+
   const onAgentPolicyCreated = useCallback(
-    (policy: AgentPolicy) => {
+    (policy: AgentPolicy | null) => {
+      if (!policy) {
+        setCreateStatus(CREATE_STATUS.FAILED);
+        return;
+      }
+      setCreateStatus(CREATE_STATUS.CREATED);
       setPolicyId(policy.id);
       refreshAgentPolicies();
     },
@@ -417,6 +428,9 @@ const AgentPolicySelectionStep = ({
             defaultMessage: 'Agent policy',
           })}
         />
+        {createStatus !== CREATE_STATUS.INITIAL && (
+          <AgentPolicyCreatedCallOut createStatus={createStatus} />
+        )}
       </>
     ),
   };

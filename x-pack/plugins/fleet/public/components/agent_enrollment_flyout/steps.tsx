@@ -20,6 +20,11 @@ import { AgentPolicyCreateInlineForm } from '../../applications/fleet/sections/a
 
 import { policyHasFleetServer } from '../../applications/fleet/sections/agents/services/has_fleet_server';
 
+import {
+  AgentPolicyCreatedCallOut,
+  CREATE_STATUS,
+} from '../../applications/fleet/sections/agents/components';
+
 import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
 import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
 
@@ -108,8 +113,15 @@ export const AgentPolicySelectionStep = ({
     [setSelectedPolicyId]
   );
 
+  const [createStatus, setCreateStatus] = useState(CREATE_STATUS.INITIAL);
+
   const onAgentPolicyCreated = useCallback(
-    async (policy: AgentPolicy) => {
+    async (policy: AgentPolicy | null) => {
+      if (!policy) {
+        setCreateStatus(CREATE_STATUS.FAILED);
+        return;
+      }
+      setCreateStatus(CREATE_STATUS.CREATED);
       setAgentPolicyList([...agentPolicyList, policy]);
       if (setSelectedPolicyId) {
         setSelectedPolicyId(policy.id);
@@ -124,14 +136,19 @@ export const AgentPolicySelectionStep = ({
     }),
     children:
       regularAgentPolicies.length > 0 ? (
-        <EnrollmentStepAgentPolicy
-          agentPolicies={regularAgentPolicies}
-          withKeySelection={setSelectedAPIKeyId ? true : false}
-          selectedApiKeyId={selectedApiKeyId}
-          onKeyChange={setSelectedAPIKeyId}
-          onAgentPolicyChange={onAgentPolicyChange}
-          excludeFleetServer={excludeFleetServer}
-        />
+        <>
+          <EnrollmentStepAgentPolicy
+            agentPolicies={regularAgentPolicies}
+            withKeySelection={setSelectedAPIKeyId ? true : false}
+            selectedApiKeyId={selectedApiKeyId}
+            onKeyChange={setSelectedAPIKeyId}
+            onAgentPolicyChange={onAgentPolicyChange}
+            excludeFleetServer={excludeFleetServer}
+          />
+          {createStatus !== CREATE_STATUS.INITIAL && (
+            <AgentPolicyCreatedCallOut createStatus={createStatus} />
+          )}
+        </>
       ) : (
         <AgentPolicyCreateInlineForm updateAgentPolicy={onAgentPolicyCreated} />
       ),

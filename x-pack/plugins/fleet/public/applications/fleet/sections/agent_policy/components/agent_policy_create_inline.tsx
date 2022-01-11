@@ -27,7 +27,7 @@ import { agentPolicyFormValidation } from '../components';
 
 import type { AgentPolicy, NewAgentPolicy } from '../../../types';
 
-import { sendCreateAgentPolicy, useStartServices } from '../../../hooks';
+import { sendCreateAgentPolicy } from '../../../hooks';
 
 import { AgentPolicyAdvancedOptionsContent } from './agent_policy_advanced_fields';
 import { AgentPolicyFormSystemMonitoringCheckbox } from './agent_policy_system_monitoring_field';
@@ -39,7 +39,7 @@ const StyledEuiAccordion = styled(EuiAccordion)`
 `;
 
 interface Props {
-  updateAgentPolicy: (u: AgentPolicy) => void;
+  updateAgentPolicy: (u: AgentPolicy | null) => void;
   isFleetServerPolicy?: boolean;
 }
 
@@ -72,32 +72,20 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const { notifications } = useStartServices();
-
   const createAgentPolicy = useCallback(async () => {
     try {
       setIsLoading(true);
       const resp = await sendCreateAgentPolicy(newAgentPolicy, { withSysMonitoring });
       if (resp.error) throw resp.error;
       if (resp.data) {
-        notifications.toasts.addSuccess(
-          i18n.translate('xpack.fleet.createAgentPolicy.successNotificationTitle', {
-            defaultMessage: "Agent policy '{name}' created",
-            values: { name: newAgentPolicy.name },
-          })
-        );
         updateAgentPolicy(resp.data.item);
       }
     } catch (e) {
-      notifications.toasts.addDanger(
-        i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
-          defaultMessage: 'Unable to create agent policy',
-        })
-      );
+      updateAgentPolicy(null);
     } finally {
       setIsLoading(false);
     }
-  }, [newAgentPolicy, withSysMonitoring, notifications, updateAgentPolicy]);
+  }, [newAgentPolicy, withSysMonitoring, updateAgentPolicy]);
 
   return (
     <EuiForm>

@@ -11,3 +11,4 @@ export * from './agent_health';
 export * from './agent_unenroll_modal';
 export * from './agent_upgrade_modal';
 export * from './fleet_server_callouts';
+export * from './agent_policy_created_callout';
