@@ -146,13 +146,18 @@ export const rulesFieldMap = {
     array: true,
     required: false,
   },
-  'kibana.alert.rule.threshold.field': {
-    type: 'keyword',
+  'kibana.alert.rule.threshold': {
+    type: 'object',
     array: true,
     required: false,
   },
+  'kibana.alert.rule.threshold.field': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   'kibana.alert.rule.threshold.value': {
-    type: 'float', // TODO: should be 'long' (eventually, after we stabilize)
+    type: 'float',
     array: false,
     required: false,
   },

@@ -1893,6 +1893,50 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "fileUpload",
+        "id": "def-common.FILE_FORMATS",
+        "type": "Object",
+        "tags": [],
+        "label": "FILE_FORMATS",
+        "description": [],
+        "path": "x-pack/plugins/file_upload/common/constants.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fileUpload",
+            "id": "def-common.FILE_FORMATS.DELIMITED",
+            "type": "string",
+            "tags": [],
+            "label": "DELIMITED",
+            "description": [],
+            "path": "x-pack/plugins/file_upload/common/constants.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fileUpload",
+            "id": "def-common.FILE_FORMATS.NDJSON",
+            "type": "string",
+            "tags": [],
+            "label": "NDJSON",
+            "description": [],
+            "path": "x-pack/plugins/file_upload/common/constants.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fileUpload",
+            "id": "def-common.FILE_FORMATS.SEMI_STRUCTURED_TEXT",
+            "type": "string",
+            "tags": [],
+            "label": "SEMI_STRUCTURED_TEXT",
+            "description": [],
+            "path": "x-pack/plugins/file_upload/common/constants.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }
