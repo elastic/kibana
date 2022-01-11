@@ -39,6 +39,7 @@ export type {
   IAbortableEsClient,
   IAbortableClusterClient,
 } from './lib/create_abortable_es_client_factory';
+export { createAbortableEsClientFactory } from './lib/create_abortable_es_client_factory';
 export {
   ReadOperations,
   AlertingAuthorizationFilterType,
