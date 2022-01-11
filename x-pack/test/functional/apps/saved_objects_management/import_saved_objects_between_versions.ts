@@ -27,17 +27,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       if (parts.length !== 3) {
         throw new Error('text not loaded yet');
       }
-      return Number.parseInt(parts[1], 10);
+      const count = Number.parseInt(parts[1], 10);
+      if (count === 0) {
+        throw new Error('text not loaded yet');
+      }
+      return count;
     });
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/121968
-  describe.skip('FOO Export import saved objects between versions', function () {
+  describe('Export import saved objects between versions', function () {
     before(async function () {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
+    });
+
+    beforeEach(async () => {
+      await PageObjects.savedObjects.waitTableIsLoaded();
     });
 
     after(async () => {
