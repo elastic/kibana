@@ -334,17 +334,19 @@ describe('alert actions', () => {
     });
 
     describe('Eql', () => {
-      test(' with signal.group.id', async () => {
+      test(' with kibana.alert.group.id', async () => {
         const ecsDataMock: Ecs = {
           ...mockEcsDataWithAlert,
-          signal: {
-            rule: {
-              ...mockEcsDataWithAlert.signal?.rule,
-              type: ['eql'],
-              timeline_id: [''],
-            },
-            group: {
-              id: ['my-group-id'],
+          kibana: {
+            alert: {
+              rule: {
+                ...mockEcsDataWithAlert.signal?.rule,
+                type: ['eql'],
+                timeline_id: [''],
+              },
+              group: {
+                id: ['my-group-id'],
+              },
             },
           },
         };
@@ -370,21 +372,23 @@ describe('alert actions', () => {
                 id: 'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-my-group-id',
                 kqlQuery: '',
                 name: '1',
-                queryMatch: { field: 'signal.group.id', operator: ':', value: 'my-group-id' },
+                queryMatch: { field: 'kibana.alert.group.id', operator: ':', value: 'my-group-id' },
               },
             ],
           },
         });
       });
 
-      test(' with NO  signal.group.id', async () => {
+      test(' with NO  kibana.alert.group.id', async () => {
         const ecsDataMock: Ecs = {
           ...mockEcsDataWithAlert,
-          signal: {
-            rule: {
-              ...mockEcsDataWithAlert.signal?.rule,
-              type: ['eql'],
-              timeline_id: [''],
+          kibana: {
+            alert: {
+              rule: {
+                ...mockEcsDataWithAlert.signal?.rule,
+                type: ['eql'],
+                timeline_id: [''],
+              },
             },
           },
         };

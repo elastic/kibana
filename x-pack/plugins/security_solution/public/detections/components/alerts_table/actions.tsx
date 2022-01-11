@@ -273,7 +273,7 @@ export const isThresholdRule = (ecsData: Ecs) => {
 };
 
 export const buildAlertsKqlFilter = (
-  key: '_id' | 'signal.group.id' | 'kibana.alert.group.id',
+  key: '_id' | 'kibana.alert.group.id',
   alertIds: string[]
 ): Filter[] => {
   return [
@@ -341,34 +341,34 @@ export const buildEqlDataProviderOrFilter = (
     return {
       dataProviders: [],
       filters: buildAlertsKqlFilter(
-        'signal.group.id',
+        'kibana.alert.group.id',
         ecs.reduce<string[]>((acc, ecsData) => {
-          const signalGroupId = ecsData.signal?.group?.id?.length
-            ? ecsData.signal?.group?.id[0]
-            : 'unknown-signal-group-id';
-          if (!acc.includes(signalGroupId)) {
-            return [...acc, signalGroupId];
+          const kibanaAlertGroupId = ecsData.kibana?.alert?.group?.id?.length
+            ? ecsData.kibana?.alert?.group?.id[0]
+            : 'unknown-kibana-alert-group-id';
+          if (!acc.includes(kibanaAlertGroupId)) {
+            return [...acc, kibanaAlertGroupId];
           }
           return acc;
         }, [])
       ),
     };
   } else if (!Array.isArray(ecs)) {
-    const signalGroupId = ecs.signal?.group?.id?.length
-      ? ecs.signal?.group?.id[0]
-      : 'unknown-signal-group-id';
+    const kibanaAlertGroupId = ecs.kibana?.alert?.group?.id?.length
+      ? ecs.kibana?.alert?.group?.id[0]
+      : 'unknown-kibana-alert-group-id';
     return {
       dataProviders: [
         {
           and: [],
-          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${signalGroupId}`,
+          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${kibanaAlertGroupId}`,
           name: ecs._id,
           enabled: true,
           excluded: false,
           kqlQuery: '',
           queryMatch: {
-            field: 'signal.group.id',
-            value: signalGroupId,
+            field: 'kibana.alert.group.id',
+            value: kibanaAlertGroupId,
             operator: ':' as const,
           },
         },
