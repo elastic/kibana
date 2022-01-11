@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { SavedObject } from 'kibana/server';
 import { CaseStatuses, CaseUserActionResponse } from '../../../common/api';
 import { getStatusInfo } from './lifespan';
@@ -20,6 +19,14 @@ describe('lifespan', () => {
       jest.useRealTimers();
     });
 
+    it('throws an error when the open date is invalid', () => {
+      jest.setSystemTime(new Date(0));
+
+      expect(() => getStatusInfo([], new Date('blah'))).toThrowErrorMatchingInlineSnapshot(
+        `"Supplied dates were invalid date1: Wed Dec 31 1969 19:00:00 GMT-0500 (Eastern Standard Time) date2: Invalid Date"`
+      );
+    });
+
     it('sets reopen to 1 when status goes from open -> closed -> open', () => {
       expect(
         getStatusInfo(
@@ -27,7 +34,7 @@ describe('lifespan', () => {
             createStatusChangeSavedObject(CaseStatuses.closed, new Date()),
             createStatusChangeSavedObject(CaseStatuses.open, new Date()),
           ],
-          moment(0)
+          new Date(0)
         ).numberOfReopens
       ).toBe(1);
     });
@@ -39,7 +46,7 @@ describe('lifespan', () => {
             createStatusChangeSavedObject(CaseStatuses.closed, new Date()),
             createStatusChangeSavedObject(CaseStatuses['in-progress'], new Date()),
           ],
-          moment(0)
+          new Date(0)
         ).numberOfReopens
       ).toBe(1);
     });
@@ -51,7 +58,7 @@ describe('lifespan', () => {
             createStatusChangeSavedObject(CaseStatuses.closed, new Date()),
             createStatusChangeSavedObject(CaseStatuses.closed, new Date()),
           ],
-          moment(0)
+          new Date(0)
         ).numberOfReopens
       ).toBe(0);
     });
@@ -60,7 +67,7 @@ describe('lifespan', () => {
       expect(
         getStatusInfo(
           [createStatusChangeSavedObject(CaseStatuses['in-progress'], new Date())],
-          moment(0)
+          new Date(0)
         ).numberOfReopens
       ).toBe(0);
     });
@@ -74,7 +81,7 @@ describe('lifespan', () => {
             createStatusChangeSavedObject(CaseStatuses.closed, new Date()),
             createStatusChangeSavedObject(CaseStatuses.open, new Date()),
           ],
-          moment(0)
+          new Date(0)
         ).numberOfReopens
       ).toBe(2);
     });
@@ -82,7 +89,7 @@ describe('lifespan', () => {
     it('sets the openDuration to 1 and inProgressDuration to 0 when open -> close', () => {
       const { inProgressDuration, openDuration } = getStatusInfo(
         [createStatusChangeSavedObject(CaseStatuses.closed, new Date(1))],
-        moment(0)
+        new Date(0)
       );
 
       expect(openDuration).toBe(1);
@@ -91,7 +98,7 @@ describe('lifespan', () => {
 
     it('sets the openDuration to 10 when the case has stayed in open', () => {
       jest.setSystemTime(new Date(10));
-      const { inProgressDuration, openDuration } = getStatusInfo([], moment(0));
+      const { inProgressDuration, openDuration } = getStatusInfo([], new Date(0));
 
       expect(openDuration).toBe(10);
       expect(inProgressDuration).toBe(0);
@@ -101,7 +108,7 @@ describe('lifespan', () => {
       jest.setSystemTime(new Date(12));
       const { inProgressDuration, openDuration } = getStatusInfo(
         [createStatusChangeSavedObject(CaseStatuses['in-progress'], new Date(2))],
-        moment(0)
+        new Date(0)
       );
 
       expect(openDuration).toBe(2);
@@ -115,7 +122,7 @@ describe('lifespan', () => {
             attributes: { payload: { hello: 1, status: CaseStatuses.closed }, type: 'status' },
           } as unknown as SavedObject<CaseUserActionResponse>,
         ],
-        moment(0)
+        new Date(0)
       );
 
       expect(numberOfReopens).toBe(0);
@@ -128,7 +135,7 @@ describe('lifespan', () => {
             attributes: { payload: { status: CaseStatuses.closed }, type: 'awesome' },
           } as unknown as SavedObject<CaseUserActionResponse>,
         ],
-        moment(0)
+        new Date(0)
       );
 
       expect(numberOfReopens).toBe(0);
@@ -144,7 +151,7 @@ describe('lifespan', () => {
             },
           } as unknown as SavedObject<CaseUserActionResponse>,
         ],
-        moment(0)
+        new Date(0)
       );
 
       expect(numberOfReopens).toBe(0);
@@ -155,7 +162,7 @@ describe('lifespan', () => {
 
       const { openDuration, inProgressDuration } = getStatusInfo(
         [createStatusChangeSavedObject(CaseStatuses.closed, new Date(1))],
-        moment(0)
+        new Date(0)
       );
 
       expect(openDuration).toBe(1);

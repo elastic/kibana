@@ -6,7 +6,6 @@
  */
 
 import { SavedObject } from 'kibana/server';
-import moment from 'moment';
 import {
   CaseMetricsResponse,
   CaseStatuses,
@@ -40,8 +39,8 @@ export class Lifespan implements MetricsHandler {
     try {
       const caseInfo = await this.casesClient.cases.get({ id: this.caseId });
 
-      const caseOpenTimestamp = moment(caseInfo.created_at);
-      if (!caseOpenTimestamp.isValid()) {
+      const caseOpenTimestamp = new Date(caseInfo.created_at);
+      if (!isDateValid(caseOpenTimestamp)) {
         throw new Error(
           `The case created_at value is not a valid timestamp: ${caseInfo.created_at}`
         );
@@ -76,20 +75,24 @@ export class Lifespan implements MetricsHandler {
   }
 }
 
+function isDateValid(date: Date): boolean {
+  return date.toString() !== 'Invalid Date' && !isNaN(date.getTime());
+}
+
 interface StatusCalculations {
   durations: Map<CaseStatuses, number>;
   numberOfReopens: number;
   lastStatus: CaseStatuses;
-  lastStatusChangeTimestamp: moment.Moment;
+  lastStatusChangeTimestamp: Date;
 }
 
 export function getStatusInfo(
   statusUserActions: Array<SavedObject<CaseUserActionResponse>>,
-  caseOpenTimestamp: moment.Moment
+  caseOpenTimestamp: Date
 ): StatusInfo {
   const accStatusInfo = statusUserActions.reduce<StatusCalculations>(
     (acc, userAction) => {
-      const newStatusChangeTimestamp = moment(userAction.attributes.created_at);
+      const newStatusChangeTimestamp = new Date(userAction.attributes.created_at);
 
       if (!isValidStatusChangeUserAction(userAction.attributes, newStatusChangeTimestamp)) {
         return acc;
@@ -104,7 +107,7 @@ export function getStatusInfo(
         durations: updateStatusDuration({
           durations,
           status: lastStatus,
-          additionalDuration: newStatusChangeTimestamp.diff(lastStatusChangeTimestamp),
+          additionalDuration: datesDiff(newStatusChangeTimestamp, lastStatusChangeTimestamp),
         }),
         lastStatus: newStatus,
         lastStatusChangeTimestamp: newStatusChangeTimestamp,
@@ -118,7 +121,7 @@ export function getStatusInfo(
       ]),
       numberOfReopens: 0,
       lastStatus: CaseStatuses.open,
-      lastStatusChangeTimestamp: moment(caseOpenTimestamp),
+      lastStatusChangeTimestamp: caseOpenTimestamp,
     }
   );
 
@@ -126,7 +129,7 @@ export function getStatusInfo(
   const accumulatedDurations = updateStatusDuration({
     durations: accStatusInfo.durations,
     status: accStatusInfo.lastStatus,
-    additionalDuration: moment().diff(accStatusInfo.lastStatusChangeTimestamp),
+    additionalDuration: datesDiff(new Date(), accStatusInfo.lastStatusChangeTimestamp),
   });
 
   return {
@@ -138,14 +141,22 @@ export function getStatusInfo(
 
 function isValidStatusChangeUserAction(
   attributes: CaseUserActionResponse,
-  newStatusChangeTimestamp: moment.Moment
+  newStatusChangeTimestamp: Date
 ): attributes is UserActionWithResponse<StatusUserAction> {
-  return StatusUserActionRt.is(attributes) && newStatusChangeTimestamp.isValid();
+  return StatusUserActionRt.is(attributes) && isDateValid(newStatusChangeTimestamp);
 }
 
 function isReopen(newStatus: CaseStatuses, lastStatus: CaseStatuses): boolean {
   // if the new status is going from close to anything other than closed then we are reopening the issue
   return newStatus !== CaseStatuses.closed && lastStatus === CaseStatuses.closed;
+}
+
+function datesDiff(date1: Date, date2: Date): number {
+  if (!isDateValid(date1) || !isDateValid(date2)) {
+    throw new Error(`Supplied dates were invalid date1: ${date1} date2: ${date2}`);
+  }
+
+  return Math.abs(date1.getTime() - date2.getTime());
 }
 
 function updateStatusDuration({
