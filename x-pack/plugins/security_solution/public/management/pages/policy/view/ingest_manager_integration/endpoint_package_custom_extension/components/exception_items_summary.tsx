@@ -46,8 +46,8 @@ export const StyledEuiFlexGridGroup = styled(EuiFlexGroup)`
 const StyledEuiFlexGroup = styled(EuiFlexGroup)<{
   isSmall: boolean;
 }>`
-  font-size: ${({ isSmall, theme }) => (isSmall ? theme.eui.euiFontSizeXS : 'innherit')};
-  font-weight: ${({ isSmall }) => (isSmall ? '1px' : 'innherit')};
+  font-size: ${({ isSmall, theme }) => (isSmall ? theme.eui.euiFontSizeXS : 'inherit')};
+  font-weight: ${({ isSmall }) => (isSmall ? '1px' : 'inherit')};
 `;
 
 const CSS_BOLD: Readonly<React.CSSProperties> = { fontWeight: 'bold' };
