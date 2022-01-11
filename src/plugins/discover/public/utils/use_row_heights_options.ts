@@ -8,19 +8,13 @@
 
 import type { EuiDataGridRowHeightOption } from '@elastic/eui';
 import { useEffect, useMemo } from 'react';
-import {
-  EuiDataGridRowHeightsOptions,
-  EuiDataGridStyle,
-} from '@elastic/eui/src/components/datagrid/data_grid_types';
+import { EuiDataGridRowHeightsOptions } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { Storage } from '../../../kibana_utils/public';
 import { getServices } from '../kibana_services';
 import { ROW_HEIGHT_OPTION } from '../../common';
-import { DENSITY_STYLES, GRID_STYLE } from '../components/discover_grid/constants';
 import { isValidRowHeight } from './validate_row_height';
 
 export type SerializedRowHeight = number;
-
-type RowDensity = 'compact' | 'normal' | 'expanded';
 
 interface UseRowHeightProps {
   rowHeightFromState?: SerializedRowHeight;
@@ -33,10 +27,8 @@ interface DataGridOptionsRecord {
 }
 
 const ROW_HEIGHT_KEY = 'discover:dataGridRowHeight';
-const DENSITY_KEY = 'discover:dataGridRowDensity';
 const SINGLE_ROW_HEIGHT_OPTION = 0;
 const AUTO_ROW_HEIGHT_OPTION = -1;
-const ROW_DENSITY = ['compact', 'normal', 'expanded'];
 
 const serializeRowHeight = (rowHeight?: EuiDataGridRowHeightOption): SerializedRowHeight => {
   if (rowHeight === 'auto') {
@@ -78,21 +70,6 @@ const updateStoredRowHeight = (newRowHeight: number, configRowHeight: number, st
   });
 };
 
-const getStoredRowDensity = (storage: Storage): RowDensity | null => {
-  const density = storage.get(DENSITY_KEY);
-  if (density !== null && Object.values(ROW_DENSITY).includes(density)) {
-    return density;
-  }
-  return null;
-};
-
-const convertGridStylesToSelection = (gridStyles: EuiDataGridStyle): RowDensity => {
-  if (gridStyles?.fontSize === 's' && gridStyles?.cellPadding === 's') return 'compact';
-  if (gridStyles?.fontSize === 'm' && gridStyles?.cellPadding === 'm') return 'normal';
-  if (gridStyles?.fontSize === 'l' && gridStyles?.cellPadding === 'l') return 'expanded';
-  return 'normal';
-};
-
 const chooseRowHeight = ({
   rowHeightFromState,
   rowHeightFromLS,
@@ -121,26 +98,11 @@ const chooseRowHeight = ({
   return defaultRowHeight;
 };
 
-export const useDataGridOptions = ({
+export const useRowHeightsOptions = ({
   rowHeightFromState,
   onUpdateRowHeight,
 }: UseRowHeightProps) => {
   const { storage, uiSettings } = getServices();
-
-  const gridStyle: EuiDataGridStyle = useMemo(() => {
-    const initialRowDensity = getStoredRowDensity(storage);
-    const overridingStyles =
-      initialRowDensity !== null ? DENSITY_STYLES[initialRowDensity] : DENSITY_STYLES.normal;
-
-    return {
-      ...GRID_STYLE,
-      ...overridingStyles,
-      onChange: (newStyles) => {
-        const newRowDensity = convertGridStylesToSelection(newStyles);
-        storage.set(DENSITY_KEY, newRowDensity);
-      },
-    };
-  }, [storage]);
 
   const configRowHeight = useMemo(() => uiSettings.get(ROW_HEIGHT_OPTION), [uiSettings]);
 
@@ -177,8 +139,5 @@ export const useDataGridOptions = ({
     };
   }, [storage, rowHeightFromState, configRowHeight, onUpdateRowHeight]);
 
-  return {
-    rowHeightsOptions,
-    gridStyle,
-  };
+  return rowHeightsOptions;
 };

@@ -9,7 +9,7 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test/jest';
-import { setHeaderActionMenuMounter } from '../../../../kibana_services';
+import { setHeaderActionMenuMounter, setServices } from '../../../../kibana_services';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { GetStateReturn } from '../../services/discover_state';
@@ -20,11 +20,6 @@ import { DiscoverDocuments } from './discover_documents';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { ElasticSearchHit } from 'src/plugins/discover/public/types';
 
-jest.mock('../../../../kibana_services', () => ({
-  ...jest.requireActual('../../../../kibana_services'),
-  getServices: () => jest.requireActual('../../../../__mocks__/services').discoverServiceMock,
-}));
-
 setHeaderActionMenuMounter(jest.fn());
 
 function getProps(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {
@@ -32,6 +27,7 @@ function getProps(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {
   services.data.query.timefilter.timefilter.getTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
+  setServices(services);
 
   const documents$ = new BehaviorSubject({
     fetchStatus,
@@ -48,7 +44,7 @@ function getProps(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {
     services,
     setExpandedDoc: jest.fn(),
     state: { columns: [] },
-    stateContainer: {} as GetStateReturn,
+    stateContainer: { setAppState: () => {} } as unknown as GetStateReturn,
     navigateTo: jest.fn(),
   };
 }

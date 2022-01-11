@@ -20,6 +20,7 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
 } from '@elastic/eui';
+import classNames from 'classnames';
 import { flattenHit, IndexPattern } from '../../../../data/common';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
@@ -48,7 +49,8 @@ import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_docume
 import { SortPairArr } from '../doc_table/lib/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
 import { ElasticSearchHit } from '../../types';
-import { SerializedRowHeight, useDataGridOptions } from '../../utils/use_data_grid_options';
+import { SerializedRowHeight, useRowHeightsOptions } from '../../utils/use_row_heights_options';
+import { useGridStyle } from '../../utils/use_grid_style';
 
 interface SortObj {
   id: string;
@@ -392,7 +394,9 @@ export const DiscoverGrid = ({
     [showDisplaySelector, defaultColumns, additionalControls, isSortEnabled]
   );
 
-  const dataGridOptions = useDataGridOptions({ rowHeightFromState, onUpdateRowHeight });
+  const rowHeightsOptions = useRowHeightsOptions({ rowHeightFromState, onUpdateRowHeight });
+
+  const { gridStyle, gridDensityClass } = useGridStyle();
 
   if (!rowCount && isLoading) {
     return (
@@ -418,6 +422,7 @@ export const DiscoverGrid = ({
     );
   }
 
+  const gridClassNames = classNames(className, gridDensityClass);
   return (
     <DiscoverGridContext.Provider
       value={{
@@ -443,7 +448,7 @@ export const DiscoverGrid = ({
         data-title={searchTitle}
         data-description={searchDescription}
         data-document-number={displayedRows.length}
-        className={className}
+        className={gridClassNames}
       >
         <EuiDataGridMemoized
           aria-describedby={randomId}
@@ -459,7 +464,8 @@ export const DiscoverGrid = ({
           schemaDetectors={schemaDetectors}
           sorting={sorting as EuiDataGridSorting}
           toolbarVisibility={toolbarVisibility}
-          {...dataGridOptions}
+          rowHeightsOptions={rowHeightsOptions}
+          gridStyle={gridStyle}
         />
 
         {showDisclaimer && (

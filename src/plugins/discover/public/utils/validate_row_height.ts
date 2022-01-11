@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SerializedRowHeight } from './use_data_grid_options';
+import { SerializedRowHeight } from './use_row_heights_options';
 
 const MIN_ROW_HEIGHT = -1;
 const MAX_ROW_HEIGHT = 20;

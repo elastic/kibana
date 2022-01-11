@@ -9,7 +9,7 @@
 import React from 'react';
 import { Subject, BehaviorSubject } from 'rxjs';
 import { mountWithIntl } from '@kbn/test/jest';
-import { setHeaderActionMenuMounter } from '../../../../kibana_services';
+import { setHeaderActionMenuMounter, setServices } from '../../../../kibana_services';
 import { DiscoverLayout, SIDEBAR_CLOSED_KEY } from './discover_layout';
 import { esHits } from '../../../../__mocks__/es_hits';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
@@ -32,33 +32,25 @@ import { RequestAdapter } from '../../../../../../inspector';
 import { Chart } from '../chart/point_series';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
 import { ElasticSearchHit } from '../../../../types';
-
-jest.mock('../../../../kibana_services', () => ({
-  ...jest.requireActual('../../../../kibana_services'),
-  getServices: () => ({
-    fieldFormats: {
-      getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
-      getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-    },
-    uiSettings: {
-      get: jest.fn((key: string) => key === 'discover:maxDocFieldsDisplayed' && 50),
-    },
-  }),
-}));
+import { DiscoverServices } from 'src/plugins/discover/public/build_services';
+import { LocalStorageMock } from 'src/plugins/discover/public/__mocks__/local_storage_mock';
 
 setHeaderActionMenuMounter(jest.fn());
 
 function getProps(indexPattern: IndexPattern, wasSidebarClosed?: boolean): DiscoverLayoutProps {
   const searchSourceMock = createSearchSourceMock({});
-  const services = discoverServiceMock;
+  const services = {
+    ...discoverServiceMock,
+    fieldFormats: {
+      getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => value })),
+      getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+    },
+    storage: new LocalStorageMock({ [SIDEBAR_CLOSED_KEY]: wasSidebarClosed }) as unknown as Storage,
+  } as unknown as DiscoverServices;
   services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
     return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
   };
-  services.storage.get = (key: string) => {
-    if (key === SIDEBAR_CLOSED_KEY) {
-      return wasSidebarClosed;
-    }
-  };
+  setServices(services);
 
   const indexPatternList = [indexPattern].map((ip) => {
     return { ...ip, ...{ attributes: { title: ip.title } } };
@@ -149,7 +141,7 @@ function getProps(indexPattern: IndexPattern, wasSidebarClosed?: boolean): Disco
     searchSource: searchSourceMock,
     services,
     state: { columns: [] },
-    stateContainer: {} as GetStateReturn,
+    stateContainer: { setAppState: () => {} } as unknown as GetStateReturn,
     setExpandedDoc: jest.fn(),
   };
 }

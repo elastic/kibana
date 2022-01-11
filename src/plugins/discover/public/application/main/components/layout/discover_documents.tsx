@@ -14,7 +14,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SerializedRowHeight } from '../../../../utils/use_data_grid_options';
+import { SerializedRowHeight } from '../../../../utils/use_row_heights_options';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
 import { FetchStatus } from '../../../types';
