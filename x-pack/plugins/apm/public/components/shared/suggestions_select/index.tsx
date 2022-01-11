@@ -12,10 +12,12 @@ import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 
 interface SuggestionsSelectProps {
   allOption?: EuiComboBoxOptionOption<string>;
-  customOptionText: string;
+  customOptionText?: string;
   defaultValue?: string;
   field: string;
   onChange: (value?: string) => void;
+  allowCustomOption?: boolean;
+  isClearable?: boolean;
   placeholder: string;
 }
 
@@ -26,13 +28,11 @@ export function SuggestionsSelect({
   field,
   onChange,
   placeholder,
+  isClearable = true,
+  allowCustomOption = true,
 }: SuggestionsSelectProps) {
-  const allowAll = !!allOption;
   let defaultOption: EuiComboBoxOptionOption<string> | undefined;
 
-  if (allowAll && !defaultValue) {
-    defaultOption = allOption;
-  }
   if (defaultValue) {
     defaultOption = { label: defaultValue, value: defaultValue };
   }
@@ -91,17 +91,18 @@ export function SuggestionsSelect({
   return (
     <EuiComboBox
       async={true}
-      compressed={true}
+      compressed={false}
       customOptionText={customOptionText}
+      isClearable={isClearable}
       isLoading={status === FETCH_STATUS.LOADING}
       onChange={handleChange}
-      onCreateOption={handleCreateOption}
       onSearchChange={debounce(setSearchValue, 500)}
       options={options}
       placeholder={placeholder}
       selectedOptions={selectedOptions}
       singleSelection={{ asPlainText: true }}
       style={{ minWidth: '256px' }}
+      onCreateOption={allowCustomOption ? handleCreateOption : undefined}
     />
   );
 }

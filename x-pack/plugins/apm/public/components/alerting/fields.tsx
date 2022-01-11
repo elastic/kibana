@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiComboBoxOptionOption, EuiFieldNumber } from '@elastic/eui';
+import { EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
@@ -13,24 +13,13 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import {
-  ENVIRONMENT_ALL,
-  getEnvironmentLabel,
-} from '../../../common/environment_filter_values';
+import { getEnvironmentLabel } from '../../../common/environment_filter_values';
 import { SuggestionsSelect } from '../shared/suggestions_select';
 import { PopoverExpression } from './service_alert_trigger/popover_expression';
-
-const allOptionText = i18n.translate('xpack.apm.alerting.fields.allOption', {
-  defaultMessage: 'All',
-});
-const allOption: EuiComboBoxOptionOption<string> = {
-  label: allOptionText,
-  value: allOptionText,
-};
-const environmentAllOption: EuiComboBoxOptionOption<string> = {
-  label: ENVIRONMENT_ALL.text,
-  value: ENVIRONMENT_ALL.value,
-};
+import {
+  allOption,
+  environmentAllOption,
+} from '../../../common/select_all_option';
 
 export function ServiceField({
   allowAll = true,
