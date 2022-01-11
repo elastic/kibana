@@ -17,14 +17,20 @@ export const useFetchParams = () => {
 
   const {
     query: {
+      // @ts-ignore
       kuery,
+      // @ts-ignore
       environment,
+      // @ts-ignore
       rangeFrom,
+      // @ts-ignore
       rangeTo,
+      // @ts-ignore
       transactionName,
+      // @ts-ignore
       transactionType,
     },
-  } = useApmParams('/services/{serviceName}/transactions/view');
+  } = useApmParams('/*');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
