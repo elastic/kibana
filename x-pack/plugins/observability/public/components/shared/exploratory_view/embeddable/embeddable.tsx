@@ -39,7 +39,7 @@ export interface ExploratoryEmbeddableProps {
     timeFieldName?: string | undefined;
   }) => void;
   reportConfigMap?: ReportConfigMap;
-  reportType: ReportViewType;
+  reportType: ReportViewType | string;
   showCalculationMethod?: boolean;
   showExploreButton?: boolean;
   metricIcon?: string;

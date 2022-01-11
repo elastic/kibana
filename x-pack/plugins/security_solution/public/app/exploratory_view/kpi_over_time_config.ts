@@ -271,113 +271,93 @@ export function getSingleMetricConfig(_config: ConfigProps): SeriesConfig {
         id: 'auth_success',
         field: 'Records_auth_success',
         label: 'Success',
-        columnFilters: [
-          {
-            language: 'kuery',
-            query: `event.outcome: "success" and event.category: "authentication"`,
-          },
-        ],
+        columnFilter: {
+          language: 'kuery',
+          query: `event.outcome: "success" and event.category: "authentication"`,
+        },
       },
       {
         id: 'auth_failure',
         field: 'Records_auth_failure',
         label: 'Failure',
-        columnFilters: [
-          {
-            language: 'kuery',
-            query: `event.outcome: "failure" and event.category: "authentication"`,
-          },
-        ],
+        columnFilter: {
+          language: 'kuery',
+          query: `event.outcome: "failure" and event.category: "authentication"`,
+        },
       },
       {
         id: 'source.ip',
         field: 'source.ip',
         label: 'Source',
-        columnFilters: [
-          {
-            language: 'kuery',
-            query: `source.ip: *`,
-          },
-        ],
+        columnFilter: {
+          language: 'kuery',
+          query: `source.ip: *`,
+        },
       },
       {
         id: 'destination.ip',
         field: 'destination.ip',
         label: 'Destination',
-        columnFilters: [
-          {
-            language: 'kuery',
-            query: `destination.ip: *`,
-          },
-        ],
+        columnFilter: {
+          language: 'kuery',
+          query: `destination.ip: *`,
+        },
       },
       {
         id: 'network_events',
         field: 'Records_network_events',
         label: 'Network events',
-        columnFilters: [
-          {
-            language: 'kuery',
-            query: `destination.ip: * or source.ip: *`,
-          },
-        ],
+        columnFilter: {
+          language: 'kuery',
+          query: `destination.ip: * or source.ip: *`,
+        },
       },
       {
-        id: 'dns_queries',
-        field: 'records_dns_queries',
+        id: 'records_dns_queries',
+        field: 'Records_dns_queries',
         label: 'DNS queries',
-        columnFilters: [
-          {
-            language: 'kuery',
-            query: `dns.question.name: * or suricata.eve.dns.type: "query" or zeek.dns.query: *`,
-          },
-        ],
+        columnFilter: {
+          language: 'kuery',
+          query: `dns.question.name: * or suricata.eve.dns.type: "query" or zeek.dns.query: *`,
+        },
       },
       {
         id: 'unique_flow_ids',
         field: 'network.community_id',
         label: 'Unique flow IDs',
-        columnFilters: [
-          {
-            language: 'kuery',
-            query: `source.ip: * or destination.ip: *`,
-          },
-        ],
+        columnFilter: {
+          language: 'kuery',
+          query: `source.ip: * or destination.ip: *`,
+        },
       },
       {
         id: 'TLS handshakes',
-        field: 'record_tls_handshakes',
+        field: 'Records_tls_handshakes',
         label: 'TLS handshakes',
-        columnFilters: [
-          {
-            language: 'kuery',
-            query: `(source.ip: * or destination.ip: *) and (tls.version: * or suricata.eve.tls.version: * or zeek.ssl.version: *)`,
-          },
-        ],
+        columnFilter: {
+          language: 'kuery',
+          query: `(source.ip: * or destination.ip: *) and (tls.version: * or suricata.eve.tls.version: * or zeek.ssl.version: *)`,
+        },
       },
       {
         id: 'source_private_ips',
         field: 'records_source_private_ips',
         label: 'Source',
-        columnFilters: [
-          {
-            language: 'kuery',
-            query:
-              'source.ip: "10.0.0.0/8" or source.ip: "192.168.0.0/16" or source.ip: "172.16.0.0/12" or source.ip: "fd00::/8"',
-          },
-        ],
+        columnFilter: {
+          language: 'kuery',
+          query:
+            'source.ip: "10.0.0.0/8" or source.ip: "192.168.0.0/16" or source.ip: "172.16.0.0/12" or source.ip: "fd00::/8"',
+        },
       },
       {
         id: 'destination_private_ips',
         field: 'records_destination_private_ips',
         label: 'Destination',
-        columnFilters: [
-          {
-            language: 'kuery',
-            query:
-              'destination.ip: "10.0.0.0/8" or destination.ip: "192.168.0.0/16" or destination.ip: "172.16.0.0/12" or destination.ip: "fd00::/8"',
-          },
-        ],
+        columnFilter: {
+          language: 'kuery',
+          query:
+            'destination.ip: "10.0.0.0/8" or destination.ip: "192.168.0.0/16" or destination.ip: "172.16.0.0/12" or destination.ip: "fd00::/8"',
+        },
       },
     ],
     labels: {},

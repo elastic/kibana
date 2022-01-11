@@ -239,7 +239,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   }, []);
 
   // always show sourcerer in timeline
-  return indicesExist || scopeId === SourcererScopeName.timeline ? (
+  return (
     <EuiPopover
       panelClassName="sourcererPopoverPanel"
       button={
@@ -353,6 +353,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
         </PopoverContent>
       </EuiOutsideClickDetector>
     </EuiPopover>
-  ) : null;
+  );
 });
 Sourcerer.displayName = 'Sourcerer';

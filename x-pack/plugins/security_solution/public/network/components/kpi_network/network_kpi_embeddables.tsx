@@ -109,16 +109,15 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                   attributes={[
                     {
                       reportDefinitions: {
-                        records_dns_queries: ['ALL_VALUES'],
+                        'host.name': ['ALL_VALUES'],
                       },
                       name: 'DNS queries',
                       dataType: 'security',
-                      selectedMetricField: 'records_dns_queries',
+                      selectedMetricField: 'Records_dns_queries',
                       operationType: 'count',
                       time: timerange,
                     },
                   ]}
-                  showExploreButton={false}
                   compressed
                   disableBorder
                   disableShadow
@@ -147,11 +146,10 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                       name: 'Unique flow IDs',
                       dataType: 'security',
                       selectedMetricField: 'network.community_id',
-                      operationType: 'count',
+                      operationType: 'unique_count',
                       time: timerange,
                     },
                   ]}
-                  showExploreButton={false}
                   compressed
                   disableBorder
                   disableShadow
@@ -176,7 +174,7 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                       },
                       name: 'TLS handshakes',
                       dataType: 'security',
-                      selectedMetricField: 'record_tls_handshakes',
+                      selectedMetricField: 'Records_tls_handshakes',
                       operationType: 'count',
                       time: timerange,
                     },
@@ -217,12 +215,11 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                         },
                         name: 'Source IPs',
                         dataType: 'security', // number (?)
-                        selectedMetricField: 'records_source_private_ips',
+                        selectedMetricField: 'source.ip',
                         time: timerange,
                         operationType: 'count', // unique_count(?)
                       },
                     ]}
-                    showExploreButton={false}
                     compressed
                     disableBorder
                     disableShadow
@@ -294,9 +291,9 @@ export const NetworkKpiEmbeddablesComponent = React.memo<NetworkKpiEmbessablesPr
                         },
                         name: 'Destination IPs',
                         dataType: 'security',
-                        selectedMetricField: 'Records_destination_ips',
+                        selectedMetricField: 'destination.ip',
                         time: timerange,
-                        operationType: 'count',
+                        operationType: 'unique_count',
                       },
                     ]}
                     showExploreButton={false}

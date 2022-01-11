@@ -49,6 +49,7 @@ export interface MetricOption {
   description?: string;
   columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN' | 'unique_count';
   columnFilters?: ColumnFilter[];
+  columnFilter?: ColumnFilter;
   paramFilters?: ParamFilter[];
   timeScale?: string;
 }

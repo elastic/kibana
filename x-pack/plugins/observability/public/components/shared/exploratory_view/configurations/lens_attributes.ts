@@ -788,7 +788,10 @@ export class LensAttributes {
     );
 
     const getSourceField = () => {
-      if (layerConfig.selectedMetricField.startsWith('Records')) {
+      if (
+        layerConfig.selectedMetricField.startsWith('Records') ||
+        layerConfig.selectedMetricField.startsWith('records')
+      ) {
         return 'Records';
       }
       return layerConfig.selectedMetricField;

@@ -86,9 +86,7 @@ export const GlobalHeader = React.memo(
               >
                 {BUTTON_ADD_DATA}
               </EuiHeaderLink>
-              {showSourcerer && !showTimeline && (
-                <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />
-              )}
+              <Sourcerer scope={sourcererScope} data-test-subj="sourcerer" />
             </EuiHeaderLinks>
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
