@@ -6,10 +6,9 @@
  */
 
 import del from 'del';
-import os from 'os';
 import path from 'path';
 import type { Logger } from 'src/core/server';
-import { ChromiumArchivePaths } from './chromium';
+import { ChromiumArchivePaths, PackageInfo } from './chromium';
 import { download } from './download';
 import { md5 } from './download/checksum';
 import { extract } from './extract';
@@ -21,23 +20,16 @@ import { extract } from './extract';
 export async function install(
   paths: ChromiumArchivePaths,
   logger: Logger,
-  chromiumPath: string = path.resolve(__dirname, '../../chromium'),
-  platform: string = process.platform,
-  architecture: string = os.arch()
+  pkg: PackageInfo,
+  chromiumPath: string = path.resolve(__dirname, '../../chromium')
 ): Promise<string> {
-  const pkg = paths.find(platform, architecture);
-
-  if (!pkg) {
-    throw new Error(`Unsupported platform: ${platform}-${architecture}`);
-  }
-
-  const binaryPath = paths.getBinaryPath(pkg);
-  const binaryChecksum = await md5(binaryPath).catch(() => '');
+  const binaryPath = paths.getBinaryPath(pkg, chromiumPath);
+  const binaryChecksum = await md5(binaryPath).catch(() => 'MISSING');
 
   if (binaryChecksum !== pkg.binaryChecksum) {
     logger?.warn(
-      `Found browser binary checksum for ${pkg.platform}/${pkg.architecture} ` +
-        `is ${binaryChecksum} but ${pkg.binaryChecksum} was expected. Re-installing...`
+      `Found browser binary checksum for ${pkg.platform}/${pkg.architecture} in ${binaryPath}` +
+        ` is ${binaryChecksum} but ${pkg.binaryChecksum} was expected. Re-installing...`
     );
     try {
       await del(chromiumPath);
@@ -46,7 +38,7 @@ export async function install(
     }
 
     try {
-      await download(paths, logger);
+      await download(paths, pkg, logger);
       const archive = path.join(paths.archivesPath, pkg.architecture, pkg.archiveFilename);
       logger.info(`Extracting [${archive}] to [${chromiumPath}]`);
       await extract(archive, chromiumPath);
