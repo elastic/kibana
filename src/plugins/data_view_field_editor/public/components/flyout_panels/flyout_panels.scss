@@ -33,6 +33,7 @@
 
   &__header {
     padding: 0 !important;
+    overflow-wrap: break-word;
   }
 
   &__content {
@@ -47,6 +48,3 @@
   }
 }
 
-.fieldEditor__flyoutPanel__header {
-  overflow-wrap: break-word;
-}
