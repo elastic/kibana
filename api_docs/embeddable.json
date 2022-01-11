@@ -6186,7 +6186,7 @@
                 "section": "def-public.ContainerOutput",
                 "text": "ContainerOutput"
               },
-              "> | undefined) => Promise<",
+              "> | undefined) => Promise<TEmbeddable | ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -6194,7 +6194,7 @@
                 "section": "def-public.ErrorEmbeddable",
                 "text": "ErrorEmbeddable"
               },
-              " | TEmbeddable>"
+              ">"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
@@ -6303,7 +6303,7 @@
                 "section": "def-public.ContainerOutput",
                 "text": "ContainerOutput"
               },
-              "> | undefined) => Promise<",
+              "> | undefined) => Promise<TEmbeddable | ",
               {
                 "pluginId": "embeddable",
                 "scope": "public",
@@ -6311,7 +6311,7 @@
                 "section": "def-public.ErrorEmbeddable",
                 "text": "ErrorEmbeddable"
               },
-              " | TEmbeddable | undefined>"
+              " | undefined>"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_factory.ts",
             "deprecated": false,
@@ -8342,7 +8342,7 @@
             "section": "def-public.EmbeddableFactory",
             "text": "EmbeddableFactory"
           },
-          "<I, O, E, T>, \"type\" | \"create\" | \"isEditable\" | \"getDisplayName\"> & Partial<Pick<",
+          "<I, O, E, T>, \"create\" | \"type\" | \"isEditable\" | \"getDisplayName\"> & Partial<Pick<",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -8373,13 +8373,7 @@
             "text": "ViewMode"
           },
           " | undefined; title?: string | undefined; id: string; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; executionContext?: ",
           "KibanaExecutionContext",
           " | undefined; }"
@@ -8799,13 +8793,7 @@
               "text": "EnhancementRegistryDefinition"
             },
             "<",
-            {
-              "pluginId": "@kbn/utility-types",
-              "scope": "server",
-              "docId": "kibKbnUtilityTypesPluginApi",
-              "section": "def-server.SerializableRecord",
-              "text": "SerializableRecord"
-            },
+            "SerializableRecord",
             ">) => void"
           ],
           "path": "src/plugins/embeddable/public/plugin.tsx",
@@ -8827,13 +8815,7 @@
                   "text": "EnhancementRegistryDefinition"
                 },
                 "<",
-                {
-                  "pluginId": "@kbn/utility-types",
-                  "scope": "server",
-                  "docId": "kibKbnUtilityTypesPluginApi",
-                  "section": "def-server.SerializableRecord",
-                  "text": "SerializableRecord"
-                },
+                "SerializableRecord",
                 ">"
               ],
               "path": "src/plugins/embeddable/public/plugin.tsx",
@@ -9490,13 +9472,7 @@
               "text": "EnhancementRegistryDefinition"
             },
             "<",
-            {
-              "pluginId": "@kbn/utility-types",
-              "scope": "server",
-              "docId": "kibKbnUtilityTypesPluginApi",
-              "section": "def-server.SerializableRecord",
-              "text": "SerializableRecord"
-            },
+            "SerializableRecord",
             ">) => void"
           ],
           "path": "src/plugins/embeddable/server/plugin.ts",
@@ -9518,13 +9494,7 @@
                   "text": "EnhancementRegistryDefinition"
                 },
                 "<",
-                {
-                  "pluginId": "@kbn/utility-types",
-                  "scope": "server",
-                  "docId": "kibKbnUtilityTypesPluginApi",
-                  "section": "def-server.SerializableRecord",
-                  "text": "SerializableRecord"
-                },
+                "SerializableRecord",
                 ">"
               ],
               "path": "src/plugins/embeddable/server/plugin.ts",
@@ -9684,13 +9654,7 @@
                 "text": "PersistableState"
               },
               "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               "> & { isContainerType: boolean; }"
             ],
             "path": "src/plugins/embeddable/common/types.ts",
@@ -9730,13 +9694,7 @@
                 "text": "PersistableState"
               },
               "<",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ">"
             ],
             "path": "src/plugins/embeddable/common/types.ts",
@@ -9880,13 +9838,7 @@
             "text": "ViewMode"
           },
           " | undefined; title?: string | undefined; id: string; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           " | undefined; disabledActions?: string[] | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; executionContext?: ",
           "KibanaExecutionContext",
           " | undefined; }"

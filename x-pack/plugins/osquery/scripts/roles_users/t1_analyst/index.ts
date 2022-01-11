@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export const EMPTY_ITEM = { id: null };
+import * as t1AnalystUser from './user.json';
+import * as t1AnalystRole from './role.json';
+
+export { t1AnalystUser, t1AnalystRole };
