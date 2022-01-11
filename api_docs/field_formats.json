@@ -2929,6 +2929,137 @@
       },
       {
         "parentPluginId": "fieldFormats",
+        "id": "def-common.GeoPointFormat",
+        "type": "Class",
+        "tags": [],
+        "label": "GeoPointFormat",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.GeoPointFormat",
+            "text": "GeoPointFormat"
+          },
+          " extends ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.FieldFormat",
+            "text": "FieldFormat"
+          }
+        ],
+        "path": "src/plugins/field_formats/common/converters/geo_point.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fieldFormats",
+            "id": "def-common.GeoPointFormat.id",
+            "type": "Enum",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FIELD_FORMAT_IDS",
+                "text": "FIELD_FORMAT_IDS"
+              }
+            ],
+            "path": "src/plugins/field_formats/common/converters/geo_point.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fieldFormats",
+            "id": "def-common.GeoPointFormat.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "src/plugins/field_formats/common/converters/geo_point.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fieldFormats",
+            "id": "def-common.GeoPointFormat.fieldType",
+            "type": "Array",
+            "tags": [],
+            "label": "fieldType",
+            "description": [],
+            "signature": [
+              "KBN_FIELD_TYPES",
+              "[]"
+            ],
+            "path": "src/plugins/field_formats/common/converters/geo_point.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fieldFormats",
+            "id": "def-common.GeoPointFormat.transformOptions",
+            "type": "Array",
+            "tags": [],
+            "label": "transformOptions",
+            "description": [],
+            "signature": [
+              "{ kind: string; text: string; }[]"
+            ],
+            "path": "src/plugins/field_formats/common/converters/geo_point.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fieldFormats",
+            "id": "def-common.GeoPointFormat.getParamDefaults",
+            "type": "Function",
+            "tags": [],
+            "label": "getParamDefaults",
+            "description": [],
+            "signature": [
+              "() => { transform: string; }"
+            ],
+            "path": "src/plugins/field_formats/common/converters/geo_point.ts",
+            "deprecated": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fieldFormats",
+            "id": "def-common.GeoPointFormat.textConvert",
+            "type": "Function",
+            "tags": [],
+            "label": "textConvert",
+            "description": [],
+            "signature": [
+              "(val: string | GeoJSON.Point | { lat: number; lon: number; }) => string"
+            ],
+            "path": "src/plugins/field_formats/common/converters/geo_point.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "fieldFormats",
+                "id": "def-common.GeoPointFormat.textConvert.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "val",
+                "description": [],
+                "signature": [
+                  "string | GeoJSON.Point | { lat: number; lon: number; }"
+                ],
+                "path": "src/plugins/field_formats/common/converters/geo_point.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fieldFormats",
         "id": "def-common.HistogramFormat",
         "type": "Class",
         "tags": [],
