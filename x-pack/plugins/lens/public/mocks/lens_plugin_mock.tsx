@@ -26,7 +26,7 @@ export const lensPluginMock = {
         .fn()
         .mockReturnValue(new Promise((resolve) => resolve(visualizationTypes))),
       formula: {
-        expandFormulaColumn: jest.fn(),
+        insertOrReplaceFormulaColumn: jest.fn(),
       },
     };
     return startContract;
