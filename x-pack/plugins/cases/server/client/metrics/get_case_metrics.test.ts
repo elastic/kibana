@@ -104,7 +104,7 @@ describe('getMetrics', () => {
       );
     } catch (error) {
       expect(error.message).toMatchInlineSnapshot(
-        `"Failed to retrieve metrics within client for case id: 1: Error: invalid features: [bananas], please only provide valid features: [alerts.count, alerts.hosts, alerts.users, connectors, lifespan]"`
+        `"Failed to retrieve metrics within client for case id: 1: Error: invalid features: [bananas], please only provide valid features: [actions.isolateHost, alerts.count, alerts.hosts, alerts.users, connectors, lifespan]"`
       );
     }
   });

@@ -1305,13 +1305,7 @@
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>) => Promise<",
-            {
-              "pluginId": "@kbn/utility-types",
-              "scope": "server",
-              "docId": "kibKbnUtilityTypesPluginApi",
-              "section": "def-server.PublicMethodsOf",
-              "text": "PublicMethodsOf"
-            },
+            "PublicMethodsOf",
             "<",
             {
               "pluginId": "actions",
@@ -1366,13 +1360,7 @@
               "text": "KibanaRequest"
             },
             "<unknown, unknown, unknown, any>) => ",
-            {
-              "pluginId": "@kbn/utility-types",
-              "scope": "server",
-              "docId": "kibKbnUtilityTypesPluginApi",
-              "section": "def-server.PublicMethodsOf",
-              "text": "PublicMethodsOf"
-            },
+            "PublicMethodsOf",
             "<",
             {
               "pluginId": "actions",

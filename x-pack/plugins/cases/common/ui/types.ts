@@ -150,6 +150,7 @@ export type CaseMetricsFeature =
   | 'alerts.count'
   | 'alerts.users'
   | 'alerts.hosts'
+  | 'actions.isolateHost'
   | 'connectors'
   | 'lifespan';
 
@@ -260,7 +261,7 @@ export interface SignalEcs {
 }
 
 export type SignalEcsAAD = Exclude<SignalEcs, 'rule' | 'status'> & {
-  rule?: Exclude<RuleEcs, 'id'> & { uuid: string[] };
+  rule?: Exclude<RuleEcs, 'id'> & { parameters: Record<string, unknown>; uuid: string[] };
   building_block_type?: string[];
   workflow_status?: string[];
 };

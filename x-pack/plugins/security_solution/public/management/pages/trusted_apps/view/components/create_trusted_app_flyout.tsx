@@ -51,7 +51,6 @@ import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_gen
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { isGlobalEffectScope } from '../../state/type_guards';
 import { NewTrustedApp } from '../../../../../../common/endpoint/types';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 export type CreateTrustedAppFlyoutProps = Omit<EuiFlyoutProps, 'hideCloseButton'>;
 export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
@@ -116,10 +115,6 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
       [dispatch, formValues]
     );
 
-    const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
-      'trustedAppsByPolicyEnabled'
-    );
-
     const [wasByPolicy, setWasByPolicy] = useState(!isGlobalEffectScope(formValues.effectScope));
     // set initial state of `wasByPolicy` that checks if the initial state of the exception was by policy or not
     useEffect(() => {
@@ -133,21 +128,8 @@ export const CreateTrustedAppFlyout = memo<CreateTrustedAppFlyoutProps>(
     }, [formValues]);
 
     const showExpiredLicenseBanner = useMemo(() => {
-      return (
-        isTrustedAppsByPolicyEnabled &&
-        !isPlatinumPlus &&
-        isEditMode &&
-        wasByPolicy &&
-        (!isGlobal || isFormDirty)
-      );
-    }, [
-      isTrustedAppsByPolicyEnabled,
-      isPlatinumPlus,
-      isEditMode,
-      isGlobal,
-      isFormDirty,
-      wasByPolicy,
-    ]);
+      return !isPlatinumPlus && isEditMode && wasByPolicy && (!isGlobal || isFormDirty);
+    }, [isPlatinumPlus, isEditMode, isGlobal, isFormDirty, wasByPolicy]);
 
     // If there was a failure trying to retrieve the Trusted App for edit item,
     // then redirect back to the list ++ show toast message.
