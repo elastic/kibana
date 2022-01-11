@@ -24,12 +24,14 @@ interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;
   isSingleColumn?: boolean;
   link?: ReactNode;
+  hidePerPageOptions?: boolean;
 }
 
 export function ServiceOverviewDependenciesTable({
   fixedHeight,
   isSingleColumn = true,
   link,
+  hidePerPageOptions = true,
 }: ServiceOverviewDependenciesTableProps) {
   const {
     urlParams: { comparisonEnabled, comparisonType, latencyAggregationType },
@@ -139,6 +141,7 @@ export function ServiceOverviewDependenciesTable({
       )}
       status={status}
       link={link}
+      hidePerPageOptions={hidePerPageOptions}
     />
   );
 }

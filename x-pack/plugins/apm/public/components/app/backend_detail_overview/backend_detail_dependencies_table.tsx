@@ -104,6 +104,8 @@ export function BackendDetailDependenciesTable() {
       )}
       status={status}
       compact={false}
+      pageSizeOptions={[10, 25, 50]}
+      hidePerPageOptions={false}
     />
   );
 }

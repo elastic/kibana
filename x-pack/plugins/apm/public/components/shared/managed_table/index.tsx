@@ -34,6 +34,7 @@ interface Props<T> {
   initialSortField?: ITableColumn<T>['field'];
   initialSortDirection?: 'asc' | 'desc';
   hidePerPageOptions?: boolean;
+  pageSizeOptions?: number[];
   noItemsMessage?: React.ReactNode;
   sortItems?: boolean;
   sortFn?: (
@@ -65,6 +66,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     initialSortField = props.columns[0]?.field || '',
     initialSortDirection = 'asc',
     hidePerPageOptions = true,
+    pageSizeOptions,
     noItemsMessage,
     sortItems = true,
     sortFn = defaultSortFn,
@@ -128,8 +130,9 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
       totalItemCount: items.length,
       pageIndex: page,
       pageSize,
+      pageSizeOptions,
     };
-  }, [hidePerPageOptions, items, page, pageSize, pagination]);
+  }, [hidePerPageOptions, items, page, pageSize, pageSizeOptions, pagination]);
 
   const showNoItemsMessage = useMemo(() => {
     return isLoading

@@ -245,7 +245,9 @@ export function AgentConfigurationList({
         items={configurations}
         initialSortField="service.name"
         initialSortDirection="asc"
-        initialPageSize={20}
+        initialPageSize={25}
+        pageSizeOptions={[10, 25, 50]}
+        hidePerPageOptions={false}
       />
     </>
   );

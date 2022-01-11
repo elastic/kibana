@@ -60,6 +60,8 @@ interface Props {
   hideViewTransactionsLink?: boolean;
   isSingleColumn?: boolean;
   numberOfTransactionsPerPage?: number;
+  pageSizeOptions?: number[];
+  hidePerPageOptions?: boolean;
   showAggregationAccurateCallout?: boolean;
   environment: string;
   fixedHeight?: boolean;
@@ -73,6 +75,8 @@ export function TransactionsTable({
   hideViewTransactionsLink = false,
   isSingleColumn = true,
   numberOfTransactionsPerPage = 5,
+  pageSizeOptions,
+  hidePerPageOptions = true,
   showAggregationAccurateCallout = false,
   environment,
   kuery,
@@ -232,7 +236,8 @@ export function TransactionsTable({
     pageIndex,
     pageSize: numberOfTransactionsPerPage,
     totalItemCount: transactionGroupsTotalItems,
-    hidePerPageOptions: true,
+    hidePerPageOptions,
+    pageSizeOptions,
   };
 
   return (

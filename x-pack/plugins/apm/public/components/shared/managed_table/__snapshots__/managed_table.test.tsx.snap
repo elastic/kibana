@@ -47,6 +47,7 @@ exports[`ManagedTable should render a page-full of items, with defaults 1`] = `
       "hidePerPageOptions": true,
       "pageIndex": 0,
       "pageSize": 10,
+      "pageSizeOptions": undefined,
       "totalItemCount": 3,
     }
   }
@@ -102,6 +103,7 @@ exports[`ManagedTable should render when specifying initial values 1`] = `
       "hidePerPageOptions": false,
       "pageIndex": 1,
       "pageSize": 2,
+      "pageSizeOptions": undefined,
       "totalItemCount": 3,
     }
   }
