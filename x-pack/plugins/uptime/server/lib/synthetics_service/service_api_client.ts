@@ -74,7 +74,7 @@ export class ServiceAPIClient {
 
       return axios({
         method,
-        url: (this.devUrl ?? url) + (runOnce ? '/run' : '/monitors'),
+        url: url + (runOnce ? '/run' : '/monitors'),
         data: { monitors: monitorsStreams, output },
         headers: {
           Authorization: this.authorization,

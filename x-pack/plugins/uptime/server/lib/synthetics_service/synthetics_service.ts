@@ -55,9 +55,9 @@ export class SyntheticsService {
     this.server = server;
     this.config = server.config;
 
-    const { manifestUrl, username, password, devUrl } = this.config.unsafe.service;
+    const { manifestUrl, username, password } = this.config.unsafe.service;
 
-    this.apiClient = new ServiceAPIClient(manifestUrl, username, password, logger, devUrl);
+    this.apiClient = new ServiceAPIClient(manifestUrl, username, password, logger);
 
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
   }
@@ -182,7 +182,15 @@ export class SyntheticsService {
     };
   }
 
-  async pushConfigs(request?: KibanaRequest, configs?: SyntheticsMonitorWithId[]) {
+  async pushConfigs(
+    request?: KibanaRequest,
+    configs?: Array<
+      SyntheticsMonitorWithId & {
+        fields_under_root?: boolean;
+        fields?: { config_id: string };
+      }
+    >
+  ) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
       return;
@@ -200,7 +208,15 @@ export class SyntheticsService {
     }
   }
 
-  async runOnceConfigs(request?: KibanaRequest, configs?: SyntheticsMonitorWithId[]) {
+  async runOnceConfigs(
+    request?: KibanaRequest,
+    configs?: Array<
+      SyntheticsMonitorWithId & {
+        fields_under_root?: boolean;
+        fields?: { run_once: boolean; config_id: string };
+      }
+    >
+  ) {
     const monitors = this.formatConfigs(configs || (await this.getMonitorConfigs()));
     if (monitors.length === 0) {
       return;
@@ -240,6 +256,8 @@ export class SyntheticsService {
     return (findResult.saved_objects ?? []).map(({ attributes, id }) => ({
       ...attributes,
       id,
+      fields_under_root: true,
+      fields: { config_id: id },
     })) as SyntheticsMonitorWithId[];
   }
 

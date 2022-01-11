@@ -15,7 +15,7 @@ import { validate } from '../validation';
 import { ActionBarPortal } from '../action_bar/action_bar_portal';
 import { useFormatMonitor } from '../hooks/use_format_monitor';
 import { MonitorFields } from './monitor_fields';
-import { Playground, TestRun } from '../playground/playground';
+import { TestNowMode, TestRun } from '../test_now_mode/test_now_mode';
 import { MonitorFields as MonitorFieldsType } from '../../../../common/runtime_types';
 
 export const MonitorConfig = () => {
@@ -35,9 +35,6 @@ export const MonitorConfig = () => {
     defaultConfig: defaultConfig[monitorType],
   });
 
-  const [testDevices, setTestDevices] = useState(['laptop']);
-  const [testRuns, setTestRuns] = useState<TestRun[]>([]);
-
   return (
     <>
       <EuiResizableContainer>
@@ -50,15 +47,7 @@ export const MonitorConfig = () => {
             <EuiResizableButton />
 
             <EuiResizablePanel initialSize={50} minSize="200px" mode="main">
-              {config && (
-                <Playground
-                  monitor={config as MonitorFieldsType}
-                  testDevices={testDevices}
-                  setTestDevices={setTestDevices}
-                  testRuns={testRuns}
-                  setTestRuns={setTestRuns}
-                />
-              )}
+              {config && <TestNowMode monitor={config as MonitorFieldsType} />}
             </EuiResizablePanel>
           </>
         )}

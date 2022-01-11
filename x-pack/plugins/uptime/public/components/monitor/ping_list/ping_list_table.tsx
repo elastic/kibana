@@ -100,10 +100,6 @@ export function PingListTable({ loading, error, pings, pagination, onChange, fai
 
   const columns: any[] = [
     {
-      field: 'name',
-      name: I18LABELS.NAME_LABEL,
-    },
-    {
       field: 'monitor.status',
       name: I18LABELS.STATUS_LABEL,
       render: (pingStatus: string, item: Ping) => (

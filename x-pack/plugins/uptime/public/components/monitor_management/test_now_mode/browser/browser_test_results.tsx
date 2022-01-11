@@ -16,12 +16,10 @@ import { TestResultHeader } from '../test_result_header';
 
 interface Props {
   monitorId: string;
-  index: number;
-  device: string;
   refresh: number;
   setRefresh: Dispatch<SetStateAction<number>>;
 }
-export const BrowserTestRunResult = ({ monitorId, index, device, refresh, setRefresh }: Props) => {
+export const BrowserTestRunResult = ({ monitorId, refresh, setRefresh }: Props) => {
   const { data, loading, stepEnds, journeyStarted, summaryDoc } = useBrowserRunOnceMonitors({
     refresh,
     monitorId,
@@ -38,10 +36,7 @@ export const BrowserTestRunResult = ({ monitorId, index, device, refresh, setRef
         summaryDocs={summaryDoc ? [summaryDoc] : []}
         doc={doc}
         journeyStarted={journeyStarted}
-        index={index}
-        device={device}
         isCompleted={Boolean(summaryDoc)}
-        monitorType={'browser'}
       />
       <EuiText size="s">
         <p>
@@ -72,7 +67,6 @@ export const BrowserTestRunResult = ({ monitorId, index, device, refresh, setRef
           compactView={true}
           loading={Boolean(loading)}
           error={undefined}
-          isMobileImage={device === 'smartphone'}
         />
       )}
     </AccordionWrapper>

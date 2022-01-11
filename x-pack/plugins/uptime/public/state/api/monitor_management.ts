@@ -60,7 +60,6 @@ export const fetchServiceLocations = async (): Promise<ServiceLocations> => {
   return locations;
 };
 
-// TODO: Type the return type from runtime types
 export const runOnceMonitor = async ({
   monitor,
   id,
@@ -68,5 +67,9 @@ export const runOnceMonitor = async ({
   monitor: SyntheticsMonitor;
   id: string;
 }): Promise<void> => {
-  return await apiService.post(API_URLS.RUN_ONCE_MONITOR, { ...monitor, id });
+  return await apiService.post(API_URLS.RUN_ONCE_MONITOR + `/${id}`, monitor);
+};
+
+export const triggerNowMonitor = async ({ id }: { id: string }): Promise<void> => {
+  return await apiService.get(API_URLS.TRIGGER_NOW_MONITOR + `/${id}`);
 };

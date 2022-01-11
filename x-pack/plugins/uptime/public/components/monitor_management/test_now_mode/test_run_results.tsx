@@ -13,29 +13,14 @@ import { SimpleTestResults } from './simple/simple_test_results';
 
 interface Props {
   monitorId: string;
-  index: number;
   monitor: SyntheticsMonitor;
-  device: string;
 }
-export const TestRunResult = ({ monitorId, monitor, index, device }: Props) => {
+export const TestRunResult = ({ monitorId, monitor }: Props) => {
   const [refresh, setRefresh] = useState(Date.now());
 
   return monitor.type === 'browser' ? (
-    <BrowserTestRunResult
-      device={device}
-      index={index}
-      refresh={refresh}
-      setRefresh={setRefresh}
-      monitorId={monitorId}
-    />
+    <BrowserTestRunResult refresh={refresh} setRefresh={setRefresh} monitorId={monitorId} />
   ) : (
-    <SimpleTestResults
-      refresh={refresh}
-      setRefresh={setRefresh}
-      monitorId={monitorId}
-      device={device}
-      index={index}
-      monitorType={monitor.type}
-    />
+    <SimpleTestResults refresh={refresh} setRefresh={setRefresh} monitorId={monitorId} />
   );
 };

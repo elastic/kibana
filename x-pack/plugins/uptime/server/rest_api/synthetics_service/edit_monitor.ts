@@ -47,6 +47,8 @@ export const editSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
         {
           ...(editMonitor.attributes as SyntheticsMonitor),
           id: editMonitor.id,
+          fields_under_root: true,
+          fields: { config_id: editMonitor.id },
         },
       ]);
 

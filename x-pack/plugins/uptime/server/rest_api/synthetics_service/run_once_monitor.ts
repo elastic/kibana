@@ -5,21 +5,25 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { MonitorFields, SyntheticsMonitor } from '../../../common/runtime_types';
+import { MonitorFields } from '../../../common/runtime_types';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
 import { validateMonitor } from './monitor_validation';
 
 export const runOnceSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'POST',
-  path: API_URLS.RUN_ONCE_MONITOR,
+  path: API_URLS.RUN_ONCE_MONITOR + '/{monitorId}',
   validate: {
     body: schema.any(),
+    params: schema.object({
+      monitorId: schema.string({ minLength: 1, maxLength: 1024 }),
+    }),
   },
   handler: async ({ request, response, server }): Promise<any> => {
-    const monitor: SyntheticsMonitor = request.body as SyntheticsMonitor;
+    const monitor = request.body as MonitorFields;
+    const { monitorId } = request.params;
 
-    const validationResult = validateMonitor(monitor as MonitorFields);
+    const validationResult = validateMonitor(monitor);
 
     if (!validationResult.valid) {
       const { reason: message, details, payload } = validationResult;
@@ -29,7 +33,12 @@ export const runOnceSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     const { syntheticsService } = server;
 
     const errors = await syntheticsService.runOnceConfigs(request, [
-      { ...monitor, fields_under_root: true, fields: { run_once: true, config_id: monitor.id } },
+      {
+        ...monitor,
+        id: monitorId,
+        fields_under_root: true,
+        fields: { run_once: true, config_id: monitorId },
+      },
     ]);
 
     if (errors) {

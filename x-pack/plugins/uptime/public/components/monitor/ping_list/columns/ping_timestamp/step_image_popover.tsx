@@ -82,7 +82,6 @@ export interface StepImagePopoverProps {
   imgSrc?: string;
   imgRef?: ScreenshotRefImageData;
   isImagePopoverOpen: boolean;
-  isMobileImage?: boolean;
 }
 
 const StepImageComponent: React.FC<
@@ -119,7 +118,6 @@ export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
   imgRef,
   imgSrc,
   isImagePopoverOpen,
-  isMobileImage,
 }) => {
   const [imageData, setImageData] = React.useState<string | undefined>(imgSrc || undefined);
 
@@ -154,12 +152,7 @@ export const StepImagePopover: React.FC<StepImagePopoverProps> = ({
         <EuiImage
           alt={fullSizeImageAlt}
           url={imageData}
-          size={isMobileImage ? 'l' : undefined}
-          style={
-            !isMobileImage
-              ? { height: POPOVER_IMG_HEIGHT, width: POPOVER_IMG_WIDTH, objectFit: 'contain' }
-              : undefined
-          }
+          style={{ height: POPOVER_IMG_HEIGHT, width: POPOVER_IMG_WIDTH, objectFit: 'contain' }}
         />
       ) : (
         <EuiLoadingSpinner size="l" />

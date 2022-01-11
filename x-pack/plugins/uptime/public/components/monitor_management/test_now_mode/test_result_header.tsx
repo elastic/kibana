@@ -9,70 +9,38 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import * as React from 'react';
-import { deviceMap } from './test_devices';
 import { formatDuration } from '../../monitor/ping_list/ping_list';
 import { JourneyStep, Ping } from '../../../../common/runtime_types';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
-import tabletSvg from './tablet-svgrepo-com.svg';
-import mobileSvg from './mobile-svg.svg';
-import laptopSvg from './laptop-svg.svg';
-
-const deviceIcons: Record<string, string> = {
-  smartphone: mobileSvg,
-  tablet: tabletSvg,
-  laptop: laptopSvg,
-};
 
 interface Props {
   doc?: JourneyStep;
   summaryDocs?: Ping[] | JourneyStep[] | null;
   journeyStarted?: boolean;
-  index?: number;
-  device?: string;
-  monitorType: string;
   title?: string;
   isCompleted: boolean;
 }
 
-export function TestResultHeader({
-  index,
-  device,
-  doc,
-  title,
-  summaryDocs,
-  journeyStarted,
-  monitorType,
-  isCompleted,
-}: Props) {
+export function TestResultHeader({ doc, title, summaryDocs, journeyStarted, isCompleted }: Props) {
   const { basePath } = useUptimeSettingsContext();
-
-  let testTitle = title;
-
-  if (!testTitle) {
-    testTitle = 'Test run ' + index || '';
-    if (device !== 'laptop' && device) {
-      testTitle += '-' + deviceMap[device];
-    }
+  let duration = 0;
+  if (summaryDocs && summaryDocs.length > 0) {
+    summaryDocs.forEach((sDoc) => {
+      duration += sDoc.monitor.duration!.us;
+    });
   }
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
-      {monitorType === 'browser' && (
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={deviceIcons[device]} size="m" />
-        </EuiFlexItem>
-      )}
-
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
-          <h3>{testTitle}</h3>
+          <h3>{title ?? 'Test run'}</h3>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
@@ -83,10 +51,7 @@ export function TestResultHeader({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="xs" color="subdued">
-                Took{' '}
-                {formatDuration(
-                  (summaryDocs ?? []).reduce((prev, curr) => curr.monitor.duration!.us + prev, 0)
-                )}
+                Took {formatDuration(duration)}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>

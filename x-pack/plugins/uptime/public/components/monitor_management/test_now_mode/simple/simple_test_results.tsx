@@ -12,20 +12,10 @@ import { TestResultHeader } from '../test_result_header';
 
 interface Props {
   monitorId: string;
-  monitorType: string;
-  index: number;
-  device: string;
   refresh: number;
   setRefresh: Dispatch<SetStateAction<number>>;
 }
-export function SimpleTestResults({
-  monitorId,
-  refresh,
-  setRefresh,
-  index,
-  device,
-  monitorType,
-}: Props) {
+export function SimpleTestResults({ monitorId, refresh, setRefresh }: Props) {
   const [summaryDocs, setSummaryDocs] = useState<Ping[]>([]);
   const { summaryDoc, loading } = useSimpleRunOnceMonitors({ monitorId, refresh, setRefresh });
 
@@ -37,12 +27,7 @@ export function SimpleTestResults({
 
   return (
     <>
-      <TestResultHeader
-        summaryDoc={summaryDoc}
-        index={index}
-        device={device}
-        monitorType={monitorType}
-      />
+      <TestResultHeader summaryDocs={summaryDocs} isCompleted={Boolean(summaryDoc)} />
       {summaryDoc && <PingListTable pings={summaryDocs} loading={loading} />}
     </>
   );
