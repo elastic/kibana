@@ -66,8 +66,8 @@ export const PolicyTabs = React.memo(() => {
 
   const canSeeHostIsolationExceptions =
     privileges.canIsolateHost ||
-    (typeof allPolicyHostIsolationExceptionsListRequest.data !== 'undefined' &&
-      allPolicyHostIsolationExceptionsListRequest.data.total !== 0);
+    (allPolicyHostIsolationExceptionsListRequest.isFetched &&
+      allPolicyHostIsolationExceptionsListRequest.data?.total !== 0);
 
   // move the use out of this route if they can't access it
   useEffect(() => {
