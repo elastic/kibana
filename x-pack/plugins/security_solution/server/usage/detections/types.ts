@@ -65,6 +65,7 @@ export interface DetectionRulesTypeUsage {
   threat_match: FeatureTypeUsage;
   elastic_total: FeatureTypeUsage;
   custom_total: FeatureTypeUsage;
+  legacy_notifications: LegacyNotifications;
 }
 
 export interface MlJobsUsage {
@@ -121,6 +122,7 @@ export interface DetectionRuleMetric {
   rule_name: string;
   rule_id: string;
   rule_type: string;
+  rule_version: number;
   enabled: boolean;
   elastic_rule: boolean;
   created_on: string;
@@ -159,4 +161,12 @@ export interface MlJobUsage {
 export interface DetectionRuleAdoption {
   detection_rule_detail: DetectionRuleMetric[];
   detection_rule_usage: DetectionRulesTypeUsage;
+}
+
+/**
+ * The legacy notifications that are still in use.
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ */
+export interface LegacyNotifications {
+  total: number;
 }
