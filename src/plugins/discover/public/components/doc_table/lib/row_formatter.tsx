@@ -8,7 +8,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { Fragment } from 'react';
-import type { IndexPattern } from 'src/plugins/data/common';
+import type { DataView } from 'src/plugins/data/common';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
 import { getServices } from '../../../kibana_services';
 import { formatHit } from '../../../utils/format_hit';
@@ -40,7 +40,7 @@ const TemplateComponent = ({ defPairs }: Props) => {
 
 export const formatRow = (
   hit: estypes.SearchHit,
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   fieldsToShow: string[]
 ) => {
   const pairs = formatHit(hit, indexPattern, fieldsToShow);
@@ -52,7 +52,7 @@ export const formatTopLevelObject = (
   row: Record<string, any>,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fields: Record<string, any>,
-  indexPattern: IndexPattern
+  indexPattern: DataView
 ) => {
   const highlights = row.highlight ?? {};
   const highlightPairs: Array<[string, string]> = [];

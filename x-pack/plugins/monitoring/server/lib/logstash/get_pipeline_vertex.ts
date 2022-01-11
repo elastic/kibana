@@ -86,7 +86,7 @@ export function _enrichVertexStateWithStatsAggregation(
   vertexId: string,
   timeseriesIntervalInSeconds: number
 ) {
-  const logstashState = stateDocument.logstash_state;
+  const logstashState = stateDocument.logstash?.node?.state || stateDocument.logstash_state;
   const vertices = logstashState?.pipeline?.representation?.graph?.vertices;
 
   // First, filter out the vertex we care about
@@ -98,13 +98,21 @@ export function _enrichVertexStateWithStatsAggregation(
   // Next, iterate over timeseries metrics and attach them to vertex
   const timeSeriesBuckets = vertexStatsAggregation.aggregations?.timeseries.buckets ?? [];
   timeSeriesBuckets.forEach((timeSeriesBucket: any) => {
-    // each bucket calculates stats for total pipeline CPU time for the associated timeseries
-    const totalDurationStats = timeSeriesBucket.pipelines.scoped.total_processor_duration_stats;
+    // each bucket calculates stats for total pipeline CPU time for the associated timeseries.
+    // we could have data in both legacy and metricbeat collection, we pick the bucket most filled
+    const bucketCount = (aggregationKey: string) =>
+      get(timeSeriesBucket, `${aggregationKey}.scoped.total_processor_duration_stats.count`);
+
+    const pipelineBucket =
+      bucketCount('pipelines_mb') > bucketCount('pipelines')
+        ? timeSeriesBucket.pipelines_mb
+        : timeSeriesBucket.pipelines;
+    const totalDurationStats = pipelineBucket.scoped.total_processor_duration_stats;
     const totalProcessorsDurationInMillis = totalDurationStats.max - totalDurationStats.min;
 
     const timestamp = timeSeriesBucket.key;
 
-    const vertexStatsBucket = timeSeriesBucket.pipelines.scoped.vertices.vertex_id;
+    const vertexStatsBucket = pipelineBucket.scoped.vertices.vertex_id;
     if (vertex) {
       const vertexStats = _vertexStats(
         vertex,
@@ -138,7 +146,7 @@ export async function getPipelineVertex(
   checkParam(lsIndexPattern, 'lsIndexPattern in getPipeline');
 
   // Determine metrics' timeseries interval based on version's timespan
-  const minIntervalSeconds = config.get('monitoring.ui.min_interval_seconds');
+  const minIntervalSeconds = Math.max(Number(config.get('monitoring.ui.min_interval_seconds')), 30);
   const timeseriesInterval = calculateTimeseriesInterval(
     Number(version.firstSeen),
     Number(version.lastSeen),
