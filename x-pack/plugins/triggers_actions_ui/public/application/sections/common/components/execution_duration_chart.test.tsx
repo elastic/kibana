@@ -15,7 +15,11 @@ describe('execution duration chart', () => {
     const executionDuration = mockExecutionDuration();
 
     const wrapper = mountWithIntl(
-      <ExecutionDurationChart executionDuration={executionDuration} numberOfExecutions={60} />
+      <ExecutionDurationChart
+        executionDuration={executionDuration}
+        numberOfExecutions={60}
+        onChangeDuration={() => {}}
+      />
     );
 
     await act(async () => {
@@ -35,7 +39,11 @@ describe('execution duration chart', () => {
     });
 
     const wrapper = mountWithIntl(
-      <ExecutionDurationChart executionDuration={executionDuration} numberOfExecutions={60} />
+      <ExecutionDurationChart
+        executionDuration={executionDuration}
+        numberOfExecutions={60}
+        onChangeDuration={() => {}}
+      />
     );
 
     await act(async () => {
