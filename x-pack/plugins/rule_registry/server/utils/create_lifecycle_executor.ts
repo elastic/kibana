@@ -200,8 +200,8 @@ export const createLifecycleExecutor =
         commonRuleFields
       );
       result.forEach((hit) => {
-        const alertId = hit._source[ALERT_INSTANCE_ID];
-        if (alertId) {
+        const alertId = hit._source ? hit._source[ALERT_INSTANCE_ID] : void 0;
+        if (alertId && hit._source) {
           trackedAlertsDataMap[alertId] = {
             indexName: hit._index,
             fields: hit._source,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { times } from 'lodash';
+import { chunk } from 'lodash';
 import { PublicContract } from '@kbn/utility-types';
 import { IRuleDataClient } from '../rule_data_client';
 import {
@@ -14,7 +14,7 @@ import {
   TIMESTAMP,
 } from '../../common/technical_rule_data_field_names';
 
-const PAGE_SIZE = 10000;
+const CHUNK_SIZE = 10000;
 
 interface TrackedAlertState {
   alertId: string;
@@ -23,14 +23,12 @@ interface TrackedAlertState {
 }
 type RuleDataClient = PublicContract<IRuleDataClient>;
 
-const fetchAlerts = async (
+const fetchAlertsForStates = async (
   ruleDataClient: RuleDataClient,
   states: TrackedAlertState[],
-  commonRuleFields: any,
-  from = 0,
-  size = 10000
+  commonRuleFields: any
 ) => {
-  const { hits } = await ruleDataClient.getReader().search({
+  const request = {
     body: {
       query: {
         bool: {
@@ -48,8 +46,7 @@ const fetchAlerts = async (
           ],
         },
       },
-      from,
-      size,
+      size: states.length,
       collapse: {
         field: ALERT_UUID,
       },
@@ -58,7 +55,8 @@ const fetchAlerts = async (
       },
     },
     allow_no_indices: true,
-  });
+  } as any;
+  const { hits } = await ruleDataClient.getReader().search(request);
   return hits.hits;
 };
 
@@ -67,12 +65,10 @@ export const fetchExistingAlerts = async (
   trackedAlertStates: TrackedAlertState[],
   commonRuleFields: any
 ) => {
-  const totalPages = Math.ceil(trackedAlertStates.length / PAGE_SIZE);
   const results = await Promise.all(
-    times(totalPages).map((n) => {
-      const from = n !== 0 ? n * PAGE_SIZE + 1 : 0;
-      return fetchAlerts(ruleDataClient, trackedAlertStates, commonRuleFields, from, PAGE_SIZE);
-    })
+    chunk(trackedAlertStates, CHUNK_SIZE).map((states) =>
+      fetchAlertsForStates(ruleDataClient, states, commonRuleFields)
+    )
   );
   return results.flat();
 };
