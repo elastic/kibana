@@ -48,10 +48,10 @@ export class ExtensionPointStorageClient implements ExtensionPointStorageClientI
     P extends Parameters<D['callback']> = Parameters<D['callback']>
   >(
     extensionType: T,
-    initialCallbackInput: P,
+    initialCallbackInput: P[0]['data'],
     callbackContext: ServerExtensionCallbackContext,
-    callbackResponseValidator?: (data: P) => Error | undefined
-  ): Promise<P> {
+    callbackResponseValidator?: (data: P[0]['data']) => Error | undefined
+  ): Promise<P[0]['data']> {
     let inputArgument = initialCallbackInput;
     const externalExtensions = this.get(extensionType);
 
@@ -63,8 +63,10 @@ export class ExtensionPointStorageClient implements ExtensionPointStorageClientI
       const extensionRegistrationSource =
         this.storage.getExtensionRegistrationSource(externalExtension);
 
-      const callback = externalExtension.callback.bind(callbackContext);
-      inputArgument = await callback(inputArgument as ExtensionPointCallbackArgument);
+      inputArgument = await externalExtension.callback({
+        context: callbackContext,
+        data: inputArgument as ExtensionPointCallbackArgument,
+      });
 
       if (callbackResponseValidator) {
         // Before calling the next one, make sure the returned payload is valid

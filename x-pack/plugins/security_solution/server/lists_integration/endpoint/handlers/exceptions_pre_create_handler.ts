@@ -15,12 +15,10 @@ import { TrustedAppValidator } from '../validators';
 export const getExceptionsPreCreateItemHandler = (
   endpointAppContext: EndpointAppContextService
 ): ExceptionsListPreCreateItemServerExtension['callback'] => {
-  return async function (
-    data: CreateExceptionListItemOptions
-  ): Promise<CreateExceptionListItemOptions> {
+  return async function ({ data, context: { request } }): Promise<CreateExceptionListItemOptions> {
     // Validate trusted apps
     if (TrustedAppValidator.isTrustedApp(data)) {
-      return new TrustedAppValidator(endpointAppContext, this.request).validatePreCreateItem(data);
+      return new TrustedAppValidator(endpointAppContext, request).validatePreCreateItem(data);
     }
 
     return data;

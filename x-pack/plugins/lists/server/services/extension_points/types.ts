@@ -26,15 +26,15 @@ export interface ServerExtensionCallbackContext {
   request?: KibanaRequest;
 }
 
-export type ServerExtensionCallback<A extends object | void = void, R = unknown> = (
-  this: ServerExtensionCallbackContext,
-  args: A
-) => Promise<R>;
+export type ServerExtensionCallback<A extends object | void = void, R = A> = (args: {
+  context: ServerExtensionCallbackContext;
+  data: A;
+}) => Promise<R>;
 
 interface ServerExtensionPointDefinition<
   T extends string,
   Args extends object | void = void,
-  Response = void
+  Response = Args
 > {
   type: T;
   /**
@@ -60,7 +60,6 @@ interface ServerExtensionPointDefinition<
  */
 export type ExceptionsListPreCreateItemServerExtension = ServerExtensionPointDefinition<
   'exceptionsListPreCreateItem',
-  CreateExceptionListItemOptions,
   CreateExceptionListItemOptions
 >;
 
@@ -70,7 +69,6 @@ export type ExceptionsListPreCreateItemServerExtension = ServerExtensionPointDef
  */
 export type ExceptionsListPreUpdateItemServerExtension = ServerExtensionPointDefinition<
   'exceptionsListPreUpdateItem',
-  UpdateExceptionListItemOptions,
   UpdateExceptionListItemOptions
 >;
 
@@ -109,10 +107,10 @@ export interface ExtensionPointStorageClientInterface {
     P extends Parameters<D['callback']> = Parameters<D['callback']>
   >(
     extensionType: T,
-    initialCallbackInput: P[0],
+    initialCallbackInput: P[0]['data'],
     callbackContext: ServerExtensionCallbackContext,
-    callbackResponseValidator?: (data: P[0]) => Error | undefined
-  ): Promise<P[0]>;
+    callbackResponseValidator?: (data: P[0]['data']) => Error | undefined
+  ): Promise<P[0]['data']>;
 }
 
 export interface ExtensionPointStorageInterface {

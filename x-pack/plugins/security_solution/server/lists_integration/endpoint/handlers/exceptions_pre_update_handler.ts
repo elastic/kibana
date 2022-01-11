@@ -15,9 +15,7 @@ import { TrustedAppValidator } from '../validators';
 export const getExceptionsPreUpdateItemHandler = (
   endpointAppContextService: EndpointAppContextService
 ): ExceptionsListPreUpdateItemServerExtension['callback'] => {
-  return async function (
-    data: UpdateExceptionListItemOptions
-  ): Promise<UpdateExceptionListItemOptions> {
+  return async function ({ data, context: { request } }): Promise<UpdateExceptionListItemOptions> {
     const currentSavedItem = await endpointAppContextService
       .getExceptionListsClient()
       .getExceptionListItem({
@@ -34,7 +32,7 @@ export const getExceptionsPreUpdateItemHandler = (
 
     // Validate trusted apps
     if (TrustedAppValidator.isTrustedApp({ listId: currentSavedItem.list_id })) {
-      return new TrustedAppValidator(endpointAppContextService, this.request).validatePreUpdateItem(
+      return new TrustedAppValidator(endpointAppContextService, request).validatePreUpdateItem(
         data,
         currentSavedItem
       );
