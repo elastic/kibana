@@ -35,7 +35,7 @@ import {
   EndpointAppContentServicesNotStartedError,
 } from './errors';
 import {
-  EndpointFleetServicesFactory,
+  EndpointFleetServicesFactoryInterface,
   EndpointInternalFleetServicesInterface,
   EndpointScopedFleetServicesInterface,
 } from './services/fleet/endpoint_fleet_services_factory';
@@ -57,6 +57,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   fleetAuthzService?: FleetStartContract['authz'];
   logger: Logger;
   endpointMetadataService: EndpointMetadataService;
+  endpointFleetServicesFactory: EndpointFleetServicesFactoryInterface;
   manifestManager?: ManifestManager;
   security: SecurityPluginStart;
   alerting: AlertsPluginStartContract;
@@ -75,7 +76,7 @@ export type EndpointAppContextServiceStartContract = Partial<
 export class EndpointAppContextService {
   private setupDependencies: EndpointAppContextServiceSetupContract | null = null;
   private startDependencies: EndpointAppContextServiceStartContract | null = null;
-  private fleetServicesFactory: EndpointFleetServicesFactory | null = null;
+  private fleetServicesFactory: EndpointFleetServicesFactoryInterface | null = null;
   public security: SecurityPluginStart | undefined;
 
   public setup(dependencies: EndpointAppContextServiceSetupContract) {
@@ -89,17 +90,7 @@ export class EndpointAppContextService {
 
     this.startDependencies = dependencies;
     this.security = dependencies.security;
-
-    // let's try to avoid turning off eslint's Forbidden non-null assertion rule
-    const { agentService, agentPolicyService, packagePolicyService, packageService } =
-      dependencies as Required<EndpointAppContextServiceStartContract>;
-
-    this.fleetServicesFactory = new EndpointFleetServicesFactory({
-      agentService,
-      agentPolicyService,
-      packagePolicyService,
-      packageService,
-    });
+    this.fleetServicesFactory = dependencies.endpointFleetServicesFactory;
 
     if (dependencies.registerIngestCallback && dependencies.manifestManager) {
       dependencies.registerIngestCallback(

@@ -42,6 +42,7 @@ import { EndpointMetadataService } from './services/metadata';
 import { createFleetAuthzMock } from '../../../fleet/common';
 import { createMockClients } from '../lib/detection_engine/routes/__mocks__/request_context';
 import type { EndpointAuthz } from '../../common/endpoint/types/authz';
+import { EndpointFleetServicesFactory } from './services/fleet';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -96,11 +97,21 @@ export const createMockEndpointAppContextServiceStartContract =
     const agentService = createMockAgentService();
     const agentPolicyService = createMockAgentPolicyService();
     const packagePolicyService = createPackagePolicyServiceMock();
+    const packageService = createMockPackageService();
     const endpointMetadataService = new EndpointMetadataService(
       savedObjectsStart,
       agentPolicyService,
       packagePolicyService,
       logger
+    );
+    const endpointFleetServicesFactory = new EndpointFleetServicesFactory(
+      {
+        packageService,
+        packagePolicyService,
+        agentPolicyService,
+        agentService,
+      },
+      savedObjectsStart
     );
 
     packagePolicyService.list.mockImplementation(async (_, options) => {
@@ -116,9 +127,10 @@ export const createMockEndpointAppContextServiceStartContract =
       agentService,
       agentPolicyService,
       endpointMetadataService,
+      endpointFleetServicesFactory,
       packagePolicyService,
       logger,
-      packageService: createMockPackageService(),
+      packageService,
       fleetAuthzService: createFleetAuthzServiceMock(),
       manifestManager: getManifestManagerMock(),
       security: securityMock.createStart(),
