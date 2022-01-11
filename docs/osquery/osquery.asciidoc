@@ -151,7 +151,7 @@ How to add or edit saved queries from the *Saved queries* tab:
 
 * From the *Test query* panel, select agents or groups to test the query, then click *Submit* to run a live query. Result columns with the image:images/mapped-icon.png[mapping] icon are mapped. Hover over the icon to see the mapped ECS field.
 
-. Click **Save query**.
+. Click the button to *Save* or *Update* the query. 
 
 [float]
 [[osquery-map-fields]]
