@@ -147,9 +147,11 @@ export class TrustedAppValidator extends BaseValidator {
   }
 
   async validatePreUpdateItem(
-    updatedItem: UpdateExceptionListItemOptions,
+    _updatedItem: UpdateExceptionListItemOptions,
     currentItem: ExceptionListItemSchema
   ): Promise<UpdateExceptionListItemOptions> {
+    const updatedItem = _updatedItem as ExceptionItemLikeOptions;
+
     await this.validateCanManageEndpointArtifacts();
     await this.validateTrustedAppData(updatedItem);
 
@@ -166,7 +168,7 @@ export class TrustedAppValidator extends BaseValidator {
 
     await this.validateByPolicyItem(updatedItem);
 
-    return updatedItem;
+    return updatedItem as UpdateExceptionListItemOptions;
   }
 
   private async validateTrustedAppData(item: ExceptionItemLikeOptions): Promise<void> {

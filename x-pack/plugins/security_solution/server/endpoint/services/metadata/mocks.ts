@@ -55,12 +55,15 @@ export const createEndpointMetadataServiceTestContextMock = (
   > = createCustomizedPackagePolicyService(),
   packageService: ReturnType<typeof createMockPackageService> = createMockPackageService()
 ): EndpointMetadataServiceTestContextMock => {
-  const fleetServices = new EndpointFleetServicesFactory({
-    agentService,
-    packageService,
-    packagePolicyService,
-    agentPolicyService,
-  }).asInternalUser();
+  const fleetServices = new EndpointFleetServicesFactory(
+    {
+      agentService,
+      packageService,
+      packagePolicyService,
+      agentPolicyService,
+    },
+    savedObjectsStart
+  ).asInternalUser();
 
   const endpointMetadataService = new EndpointMetadataService(
     savedObjectsStart,
