@@ -96,12 +96,13 @@ export class Plugin implements PluginType {
         key: path.join(__filename, config?.unsafe?.service?.tls.key),
         certificate: path.join(__filename, config?.unsafe?.service?.tls.certificate),
       } as any);
-      // eslint-disable-next-line no-console
+      // eslint-disable-next-li-=ne no-console
       console.log('with path');
       // eslint-disable-next-line no-console
       console.log(tlsConfig.key);
       // eslint-disable-next-line no-console
       console.log(tlsConfig.certificate);
+      this.server.pathTls = tlsConfig;
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log(e);
@@ -116,6 +117,7 @@ export class Plugin implements PluginType {
       console.log(tlsConfig1.key);
       // eslint-disable-next-line no-console
       console.log(tlsConfig1.certificate);
+      this.server.withoutPathTls = tlsConfig1;
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log(e);
