@@ -53,7 +53,7 @@ export const RuleStatus: React.FC<Props> = ({ rule }) => {
       label: i18n.translate('xpack.monitoring.kibana.ruleStatus.lastExecutionTimeoutLabel', {
         defaultMessage: 'Last execution timeout',
       }),
-      value: formatMetric(rule?.lastExecutionTimeout, 'time'),
+      value: rule?.lastExecutionTimeout ? formatMetric(rule?.lastExecutionTimeout, 'time') : 'N/A',
       'data-test-subj': 'lastExecutionTimeout',
     },
   ];

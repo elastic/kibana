@@ -35,6 +35,7 @@ export async function getRules(
         rules: {
           terms: {
             field: 'kibana_rule.rule.id',
+            size: 1000,
           },
           aggs: {
             first: {

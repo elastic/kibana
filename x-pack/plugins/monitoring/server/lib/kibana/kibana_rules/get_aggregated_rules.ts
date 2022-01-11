@@ -40,6 +40,7 @@ export async function getAggregatedRules(
             rule_ids: {
               terms: {
                 field: 'kibana_rule.rule.id',
+                size: 1000,
               },
             },
             average_duration: {

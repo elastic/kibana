@@ -14,4 +14,7 @@ export interface RuleMetric extends MetricResult {
   averageDuration: number;
   totalExecutions: number;
   lastExecutionTimeout: number;
+  lastErrorDate: string;
+  lastErrorMessage: string;
+  lastErrorReason: string;
 }

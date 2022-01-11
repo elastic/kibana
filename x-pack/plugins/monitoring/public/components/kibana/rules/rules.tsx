@@ -49,15 +49,15 @@ const getColumns = (alerts: AlertsByName) => {
         );
       },
     },
-    {
-      name: i18n.translate('xpack.monitoring.kibana.rules.alertsColumnTitle', {
-        defaultMessage: 'Alerts',
-      }),
-      field: 'isOnline',
-      width: '175px',
-      sortable: true,
-      render: () => <AlertsStatus showBadge={true} alerts={alerts} />,
-    },
+    // {
+    //   name: i18n.translate('xpack.monitoring.kibana.rules.alertsColumnTitle', {
+    //     defaultMessage: 'Alerts',
+    //   }),
+    //   field: 'isOnline',
+    //   width: '175px',
+    //   sortable: true,
+    //   render: () => <AlertsStatus showBadge={true} alerts={alerts} />,
+    // },
     {
       name: i18n.translate('xpack.monitoring.kibana.rules.averageDriftColumnTitle', {
         defaultMessage: 'Average drift',
@@ -85,18 +85,25 @@ const getColumns = (alerts: AlertsByName) => {
       },
     },
     {
-      name: i18n.translate('xpack.monitoring.kibana.rules.totalExecutionsColumnTitle', {
-        defaultMessage: 'Total executions',
-      }),
-      field: 'totalExecutions',
-      render: (value: string) => <span>{formatNumber(value, 'int_commas')}</span>,
-    },
-    {
       name: i18n.translate('xpack.monitoring.kibana.rules.lastDurationColumnTitle', {
         defaultMessage: 'Last duration',
       }),
       field: 'lastExecutionDuration',
       render: (value: string) => <span>{formatNumber(value, 'duration')}</span>,
+    },
+    {
+      name: i18n.translate('xpack.monitoring.kibana.rules.lastExecutionFailureColumnTitle', {
+        defaultMessage: 'Last execution failure',
+      }),
+      field: 'lastErrorDate',
+      render: (value: string) => <span>{value ? formatMetric(value, 'time') : 'N/A'}</span>,
+    },
+    {
+      name: i18n.translate('xpack.monitoring.kibana.rules.lastExecutionTimeoutColumnTitle', {
+        defaultMessage: 'Last execution timeout',
+      }),
+      field: 'lastExecutionTimeout',
+      render: (value: string) => <span>{value ? formatMetric(value, 'time') : 'N/A'}</span>,
     },
   ];
 

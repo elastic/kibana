@@ -68,7 +68,7 @@ export function registerCollector({
           }
           const eventLogClient = services[1].eventLog.getClient(fakeRequest);
 
-          const [aggResult, executeEvents, timeoutEvents] = await Promise.all([
+          const [aggResult, executeEvents, timeoutEvents, failureEvents] = await Promise.all([
             eventLogClient.getAggregatedData(
               'alert',
               [id],
@@ -96,6 +96,12 @@ export function registerCollector({
               per_page: 1,
               sort_order: 'desc',
               filter: `(event.action: "${EVENT_LOG_ACTIONS.executeTimeout}")`,
+            }),
+            eventLogClient.findEventsBySavedObjectIds('alert', [id], {
+              page: 1,
+              per_page: 1,
+              sort_order: 'desc',
+              filter: `(event.action: "${EVENT_LOG_ACTIONS.execute}") and (event.outcome: "failure")`,
             }),
           ]);
 
@@ -129,6 +135,7 @@ export function registerCollector({
 
           const lastExecute = executeEvents?.data[0];
           const lastTimeout = timeoutEvents?.data[0];
+          const lastFailure = failureEvents?.data[0];
 
           const metrics = services[1].taskManager.getHealthMetrics(id);
           const ruleMetric = {
@@ -142,6 +149,12 @@ export function registerCollector({
                 : 0,
             averageDrift: isNaN(metrics.drift) ? 0 : metrics.drift,
             averageDuration: isNaN(metrics.duration) ? 0 : metrics.duration,
+            lastErrorDate:
+              lastFailure && lastFailure['@timestamp']
+                ? Date.parse(lastFailure['@timestamp']).valueOf()
+                : 0,
+            lastErrorMessage: lastFailure?.message,
+            lastErrorReason: lastFailure?.error?.message,
             totalExecutions,
           };
 

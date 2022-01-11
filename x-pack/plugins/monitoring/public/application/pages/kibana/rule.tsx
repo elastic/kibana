@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useContext, useState, useCallback, useEffect } from 'react';
+import React, { useContext, useState, useCallback, useEffect, Fragment } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
@@ -17,6 +17,7 @@ import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiPanel,
+  EuiCallOut,
 } from '@elastic/eui';
 import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../contexts/global_state_context';
@@ -38,6 +39,25 @@ import { RuleStatus } from '../../../components/kibana/rule_status';
 const KibanaRule = ({ data, alerts }: { data: any; alerts: any }) => {
   const { zoomInfo, onBrush } = useCharts();
 
+  function getLastError() {
+    if (data.rule.lastErrorDate) {
+      return (
+        <Fragment>
+          <EuiCallOut
+            title={`The most recent error occurred at ${data.rule.lastErrorDate}`}
+            color="danger"
+            iconType="alert"
+          >
+            <p>
+              {data.rule.lastErrorMessage} because of `{data.rule.lastErrorReason}`
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </Fragment>
+      );
+    }
+  }
+
   return (
     <EuiPage>
       <EuiPageBody>
@@ -45,6 +65,7 @@ const KibanaRule = ({ data, alerts }: { data: any; alerts: any }) => {
           <RuleStatus rule={data.rule} />
         </EuiPanel>
         <EuiSpacer size="m" />
+        {getLastError()}
         <AlertsCallout alerts={alerts} />
         <EuiPageContent>
           <EuiFlexGrid columns={2} gutterSize="s">

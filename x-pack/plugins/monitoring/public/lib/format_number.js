@@ -33,7 +33,7 @@ export function formatNumber(num, which) {
     case 'time_since':
       return moment(moment() - num).from(moment(), true);
     case 'time':
-      return moment(num).format('H:mm:ss');
+      return moment(num).format('D MMM YYYY @ HH:mm:ss');
     case 'int_commas':
       format = '0,0';
       break;
