@@ -25,7 +25,6 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "flot_charts/package.json",
-  "theme/package.json",
   "package.json",
   "README.md"
 ]

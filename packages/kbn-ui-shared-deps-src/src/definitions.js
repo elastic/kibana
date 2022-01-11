@@ -64,22 +64,4 @@ const externals = {
   classnames: '__kbnSharedDeps__.Classnames',
 };
 
-/**
- * Absolute path to the distributable directory
- */
-exports.distDir = distDir;
-
-/**
- * Filename of the main bundle file in the distributable directory
- */
-exports.jsFilename = jsFilename;
-
-/**
- * Filename of the main bundle file in the distributable directory
- */
-exports.cssDistFilename = cssDistFilename;
-
-/**
- * Externals mapping inteded to be used in a webpack config
- */
-exports.externals = externals;
+module.exports = { distDir, jsFilename, cssDistFilename, externals };

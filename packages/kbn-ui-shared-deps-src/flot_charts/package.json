@@ -1,4 +1,3 @@
 {
-  "main": "../target_node/flot_charts/index.js",
-  "types": "../target_types/flot_charts/index.d.ts"
+  "main": "../target_node/flot_charts/index.js"
 }
