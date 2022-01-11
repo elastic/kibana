@@ -265,7 +265,7 @@ Lens & Visualizations::
 * Fixes focus on legend action popovers in *Lens* {kibana-pull}115066[#115066]
 Machine Learning::
 * Fixes data view search based on title {kibana-pull}120737[#120737]
-* Data frame analytics wizard: Only allow data view creation if job will be started {kibana-pull}120042[#120042]
+* Data frame analytics wizard: Only allow data view creation if job will be started immediately {kibana-pull}120042[#120042]
 * Fixes anomaly detection module manifest queries to ignore frozen and cold data tiers {kibana-pull}119635[#119635]
 * Catching error for syntax error in job wizard editor {kibana-pull}119457[#119457]
 * Fixes error handling for missing data view in data frame analytics wizard {kibana-pull}119455[#119455]
