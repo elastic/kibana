@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const screenshot = getService('screenshots');
+  const security = getService('security');
   const PageObjects = getPageObjects(['security', 'common', 'header', 'discover', 'settings']);
 
   describe('dls', function () {
@@ -75,9 +76,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData).to.contain('EAST');
     });
+
     after('logout', async () => {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
+      await security.user.delete('userEast');
+      await security.role.delete('myroleEast');
     });
   });
 }

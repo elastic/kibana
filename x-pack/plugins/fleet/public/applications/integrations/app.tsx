@@ -22,6 +22,8 @@ import {
 } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 
+import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
+
 import { AgentPolicyContextProvider } from './hooks';
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
 
@@ -43,6 +45,7 @@ export const IntegrationsAppContext: React.FC<{
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  theme$: AppMountParameters['theme$'];
   /** For testing purposes only */
   routerHistory?: History<any>; // TODO remove
 }> = memo(
@@ -54,6 +57,7 @@ export const IntegrationsAppContext: React.FC<{
     kibanaVersion,
     extensions,
     setHeaderActionMenu,
+    theme$,
   }) => {
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
 
@@ -64,22 +68,27 @@ export const IntegrationsAppContext: React.FC<{
             <EuiErrorBoundary>
               <ConfigContext.Provider value={config}>
                 <KibanaVersionContext.Provider value={kibanaVersion}>
-                  <EuiThemeProvider darkMode={isDarkMode}>
-                    <UIExtensionsContext.Provider value={extensions}>
-                      <FleetStatusProvider>
-                        <startServices.customIntegrations.ContextProvider>
-                          <Router history={history}>
-                            <AgentPolicyContextProvider>
-                              <PackageInstallProvider notifications={startServices.notifications}>
-                                <IntegrationsHeader {...{ setHeaderActionMenu }} />
-                                {children}
-                              </PackageInstallProvider>
-                            </AgentPolicyContextProvider>
-                          </Router>
-                        </startServices.customIntegrations.ContextProvider>
-                      </FleetStatusProvider>
-                    </UIExtensionsContext.Provider>
-                  </EuiThemeProvider>
+                  <KibanaThemeProvider theme$={theme$}>
+                    <EuiThemeProvider darkMode={isDarkMode}>
+                      <UIExtensionsContext.Provider value={extensions}>
+                        <FleetStatusProvider>
+                          <startServices.customIntegrations.ContextProvider>
+                            <Router history={history}>
+                              <AgentPolicyContextProvider>
+                                <PackageInstallProvider
+                                  notifications={startServices.notifications}
+                                  theme$={theme$}
+                                >
+                                  <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
+                                  {children}
+                                </PackageInstallProvider>
+                              </AgentPolicyContextProvider>
+                            </Router>
+                          </startServices.customIntegrations.ContextProvider>
+                        </FleetStatusProvider>
+                      </UIExtensionsContext.Provider>
+                    </EuiThemeProvider>
+                  </KibanaThemeProvider>
                 </KibanaVersionContext.Provider>
               </ConfigContext.Provider>
             </EuiErrorBoundary>
