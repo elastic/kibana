@@ -9,13 +9,10 @@
 import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { useEffect, useGlobals } from '@storybook/addons';
 import { DataView } from '../../../../../../../data_views/common';
 import { fieldSpecMap } from './fields';
-import { DiscoverFieldVisualize } from '../discover_field_visualize';
+import { DiscoverFieldVisualizeInner } from '../discover_field_visualize_inner';
 import { numericField as field } from './fields';
-
-const details = { buckets: [], error: '', exists: 1, total: 2, columns: [] };
 
 const fieldFormatInstanceType = {};
 const defaultMap = {
@@ -32,19 +29,19 @@ const fieldFormat = {
   defaultMap,
 };
 
-const dataView = new DataView({
-  spec: {
-    id: 'logstash-*',
-    fields: fieldSpecMap,
-    title: 'logstash-*',
-    timeFieldName: '@timestamp',
-  },
-  metaFields: ['_id', '_type', '_source'],
-  shortDotsEnable: false,
-  // @ts-expect-error
-  fieldFormats: fieldFormat,
-});
+const visualizeInfo = {
+  href: 'http://localhost:9001/',
+  field,
+};
 
-storiesOf('components/sidebar/DiscoverFieldVisualize', module).add('default', () => (
-  <DiscoverFieldVisualize field={field} indexPattern={dataView} details={details} />
+const handleVisualizeLinkClick = () => {
+  alert('Clicked');
+};
+
+storiesOf('components/sidebar/DiscoverFieldVisualizeInner', module).add('default', () => (
+  <DiscoverFieldVisualizeInner
+    field={field}
+    visualizeInfo={visualizeInfo}
+    handleVisualizeLinkClick={handleVisualizeLinkClick}
+  />
 ));
