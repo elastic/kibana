@@ -260,7 +260,7 @@ export function registerMlSnapshotRoutes({
                     'xpack.upgradeAssistant.ml_snapshots.modelSnapshotUpgradeFailed',
                     {
                       defaultMessage:
-                        "The upgrade that was started for this model snapshot doesn't exist anymore.",
+                        "The upgrade process for this model snapshot failed. Check the Elasticsearch logs for more details.",
                     }
                   ),
                 },
@@ -290,7 +290,7 @@ export function registerMlSnapshotRoutes({
                 body: {
                   message:
                     upgradeSnapshotError?.body?.error?.reason ||
-                    'There was an error upgrading your snapshot. Check the Elasticsearch logs for more details.',
+                    'The upgrade process for this model snapshot stopped yet the snapshot is not upgraded. Check the Elasticsearch logs for more details.',
                 },
               });
             }
@@ -322,7 +322,7 @@ export function registerMlSnapshotRoutes({
               body: {
                 message:
                   upgradeSnapshotError?.body?.error?.reason ||
-                  'There was an error upgrading your snapshot. Check the Elasticsearch logs for more details.',
+                  'The upgrade process for this model snapshot completed yet the snapshot is not upgraded. Check the Elasticsearch logs for more details.',
               },
             });
           }
