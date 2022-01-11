@@ -8,6 +8,7 @@
 import type {
   BulkOperationContainer,
   SearchTotalHits,
+  SortResults,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient, Logger } from 'src/core/server';
@@ -43,9 +44,14 @@ export type InvalidateSessionsFilter =
 const SESSION_INDEX_TEMPLATE_VERSION = 1;
 
 /**
- * Number of sessions to remove per batch during cleanup. Must be below 10,000 (maximum pagination size).
+ * Number of sessions to remove per batch during cleanup.
  */
-const SESSION_INDEX_CLEANUP_BATCH_SIZE = 1_000;
+const SESSION_INDEX_CLEANUP_BATCH_SIZE = 10_000;
+
+/**
+ * Number of sessions to remove per batch during cleanup.
+ */
+const SESSION_INDEX_CLEANUP_KEEP_ALIVE = '5m';
 
 /**
  * Returns index template that is used for the current version of the session index.
@@ -438,6 +444,56 @@ export class SessionIndex {
   async cleanUp() {
     this.options.logger.debug(`Running cleanup routine.`);
 
+    try {
+      for await (const sessionValues of this.getSessionValuesInBatches()) {
+        const operations: Array<Required<Pick<BulkOperationContainer, 'delete'>>> = [];
+        sessionValues.forEach(({ _id, _source }) => {
+          const { usernameHash, provider } = _source!;
+          this.options.auditLogger.log(
+            sessionCleanupEvent({ sessionId: _id, usernameHash, provider })
+          );
+          operations.push({ delete: { _id } });
+        });
+        if (operations.length > 0) {
+          const { body: bulkResponse } = await this.options.elasticsearchClient.bulk(
+            {
+              index: this.indexName,
+              operations,
+              refresh: false,
+            },
+            { ignore: [409, 404] }
+          );
+          if (bulkResponse.errors) {
+            const errorCount = bulkResponse.items.reduce(
+              (count, item) => (item.delete!.error ? count + 1 : count),
+              0
+            );
+            if (errorCount < bulkResponse.items.length) {
+              this.options.logger.warn(
+                `Failed to clean up ${errorCount} of ${bulkResponse.items.length} invalid or expired sessions. The remaining sessions were cleaned up successfully.`
+              );
+            } else {
+              this.options.logger.error(
+                `Failed to clean up ${bulkResponse.items.length} invalid or expired sessions.`
+              );
+            }
+          } else {
+            this.options.logger.debug(
+              `Cleaned up ${bulkResponse.items.length} invalid or expired sessions.`
+            );
+          }
+        }
+      }
+    } catch (err) {
+      this.options.logger.error(`Failed to clean up sessions: ${err.message}`);
+      throw err;
+    }
+  }
+
+  /**
+   * Fetches session values from session index in batches of 10,000.
+   */
+  private async *getSessionValuesInBatches() {
     const now = Date.now();
     const providersSessionConfig = this.options.config.authc.sortedProviders.map((provider) => {
       return {
@@ -497,66 +553,30 @@ export class SessionIndex {
       });
     }
 
-    const operations: Array<Required<Pick<BulkOperationContainer, 'delete'>>> = [];
-    let total = 0;
-    try {
+    // Create point in time snapshot to paginate through sessions
+    const { body: pitResponse } = await this.options.elasticsearchClient.openPointInTime({
+      index: this.indexName,
+      keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
+    });
+
+    // We don't know the total number of sessions until we fetched the first batch so assume we have at least one session to clean.
+    let total = 1;
+    let searchAfter: SortResults | undefined;
+    for (let i = 0; i < total / SESSION_INDEX_CLEANUP_BATCH_SIZE; i++) {
       const { body: searchResponse } =
         await this.options.elasticsearchClient.search<SessionIndexValue>({
-          index: this.indexName,
-          body: { query: { bool: { should: deleteQueries } } },
+          pit: { id: pitResponse.id, keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE },
           _source_includes: 'usernameHash,provider',
+          query: { bool: { should: deleteQueries } },
+          search_after: searchAfter,
           size: SESSION_INDEX_CLEANUP_BATCH_SIZE,
+          sort: '_shard_doc',
         });
-      total = (searchResponse.hits.total as SearchTotalHits).value;
-      searchResponse.hits.hits.forEach(({ _id, _source }) => {
-        const { usernameHash, provider } = _source!;
-        this.options.auditLogger.log(
-          sessionCleanupEvent({ sessionId: _id, usernameHash, provider })
-        );
-        operations.push({ delete: { _id } });
-      });
-    } catch (err) {
-      this.options.logger.error(`Failed to look up invalid or expired sessions: ${err.message}`);
-      throw err;
-    }
-
-    if (operations.length > 0) {
-      try {
-        const { body: deleteResponse } = await this.options.elasticsearchClient.bulk(
-          {
-            index: this.indexName,
-            operations,
-            refresh: false,
-          },
-          { ignore: [409, 404] }
-        );
-        if (deleteResponse.errors) {
-          const errorCount = deleteResponse.items.reduce(
-            (count, item) => (item.delete!.error ? count + 1 : count),
-            0
-          );
-          if (errorCount < deleteResponse.items.length) {
-            this.options.logger.warn(
-              `Failed to clean up ${errorCount} of ${deleteResponse.items.length} invalid or expired sessions. The remaining sessions were cleaned up successfully.`
-            );
-          } else {
-            this.options.logger.error(
-              `Failed to clean up ${deleteResponse.items.length} invalid or expired sessions.`
-            );
-          }
-        } else {
-          this.options.logger.debug(
-            `Cleaned up ${deleteResponse.items.length} invalid or expired sessions.`
-          );
-        }
-      } catch (err) {
-        this.options.logger.error(`Failed to clean up sessions: ${err.message}`);
-        throw err;
+      if (searchResponse.hits.hits.length > 0) {
+        yield searchResponse.hits.hits;
+        total = (searchResponse.hits.total as SearchTotalHits).value;
+        searchAfter = searchResponse.hits.hits[searchResponse.hits.hits.length - 1].sort;
       }
-    }
-
-    if (total > SESSION_INDEX_CLEANUP_BATCH_SIZE) {
-      await this.cleanUp();
     }
   }
 }
