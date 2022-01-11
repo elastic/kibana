@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
 import { ExpressionAstExpression } from 'src/plugins/expressions';
 import { CanvasElement } from '.';
 
