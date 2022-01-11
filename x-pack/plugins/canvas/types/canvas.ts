@@ -66,15 +66,19 @@ export interface CanvasWorkpad {
   width: number;
 }
 
-type CanvasTemplateElement = Omit<CanvasElement, 'filter' | 'type'>;
-type CanvasTemplatePage = Omit<CanvasPage, 'elements'> & { elements: CanvasTemplateElement[] };
+export type CanvasTemplateElement = Omit<CanvasElement, 'filter' | 'type'>;
+export type CanvasTemplatePage = Omit<CanvasPage, 'elements'> & {
+  elements: CanvasTemplateElement[];
+};
 export interface CanvasTemplate {
   id: string;
   name: string;
   help: string;
   tags: string[];
   template_key: string;
-  template?: Omit<CanvasWorkpad, 'id' | 'isWriteable' | 'pages'> & { pages: CanvasTemplatePage[] };
+  template?: Omit<CanvasWorkpad, 'id' | 'isWriteable' | 'pages'> & {
+    pages: CanvasTemplatePage[] | undefined;
+  };
 }
 
 export interface CanvasWorkpadBoundingBox {

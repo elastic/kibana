@@ -8,6 +8,7 @@ import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
 import { Serializable } from '@kbn/utility-types';
 import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
 import { flowRight, mapValues } from 'lodash';
+import { CanvasElement, CanvasTemplateElement, CanvasTemplate } from '../../../types';
 import {
   MigrateFunction,
   MigrateFunctionsObject,
@@ -25,40 +26,81 @@ type ToSerializable<Type> = {
 
 type ExprAst = ToSerializable<Ast>;
 
+interface CommonPage<T> {
+  elements?: T[];
+}
+interface CommonWorkpad<T extends CommonPage<U>, U> {
+  pages?: T[];
+}
+
+type MigrationFn<T> = (
+  migrate: MigrateFunction<ExprAst, ExprAst>,
+  version: string
+) => SavedObjectMigrationFn<T>;
+
 const toAst = (expression: string): ExprAst => fromExpression(expression);
 const fromAst = (ast: Ast): string => toExpression(ast);
 
 const migrateExpr = (expr: string, migrateFn: MigrateFunction<ExprAst, ExprAst>) =>
   flowRight<string[], ExprAst, ExprAst, string>(fromAst, migrateFn, toAst)(expr);
 
-const migrateExpressionsAndFilters =
-  (
-    migrate: MigrateFunction<ExprAst, ExprAst>,
-    version: string
-  ): SavedObjectMigrationFn<WorkpadAttributes> =>
-  (doc: SavedObjectUnsanitizedDoc<WorkpadAttributes>) => {
-    if (typeof doc.attributes !== 'object' || doc.attributes === null) {
-      return doc;
-    }
-    const { pages } = doc.attributes;
+const migrateWorkpadElement =
+  (migrate: MigrateFunction<ExprAst, ExprAst>) =>
+  ({ filter, expression, ...element }: CanvasElement) => ({
+    ...element,
+    filter: filter ? migrateExpr(filter, migrate) : filter,
+    expression: expression ? migrateExpr(expression, migrate) : expression,
+  });
 
-    const newPages = pages.map((page) => {
-      const { elements } = page;
-      const newElements = elements.map(({ filter, expression, ...element }) => ({
-        ...element,
-        filter: filter ? migrateExpr(filter, migrate) : filter,
-        expression: expression ? migrateExpr(expression, migrate) : expression,
-      }));
-      return { ...page, elements: newElements };
-    });
+const migrateTemplateElement =
+  (migrate: MigrateFunction<ExprAst, ExprAst>) =>
+  ({ expression, ...element }: CanvasTemplateElement) => ({
+    ...element,
+    expression: expression ? migrateExpr(expression, migrate) : expression,
+  });
 
-    return { ...doc, attributes: { ...doc.attributes, pages: newPages } };
-  };
+const migrateWorkpadElements = <T extends CommonPage<U>, U>(
+  doc: SavedObjectUnsanitizedDoc<CommonWorkpad<T, U> | undefined>,
+  migrateElementFn: any
+) => {
+  if (
+    typeof doc.attributes !== 'object' ||
+    doc.attributes === null ||
+    doc.attributes === undefined
+  ) {
+    return doc;
+  }
 
-export const expressionsMigrationsFactory = ({
+  const { pages } = doc.attributes;
+
+  const newPages = pages?.map((page) => {
+    const { elements } = page;
+    const newElements = elements?.map(migrateElementFn);
+    return { ...page, elements: newElements };
+  });
+
+  return { ...doc, attributes: { ...doc.attributes, pages: newPages } };
+};
+
+const migrateTemplateWorkpadExpressions: MigrationFn<CanvasTemplate['template']> =
+  (migrate) => (doc) =>
+    migrateWorkpadElements(doc, migrateTemplateElement(migrate));
+
+const migrateWorkpadExpressionsAndFilters: MigrationFn<WorkpadAttributes> = (migrate) => (doc) =>
+  migrateWorkpadElements(doc, migrateWorkpadElement(migrate));
+
+export const workpadExpressionsMigrationsFactory = ({
   expressions,
 }: CanvasSavedObjectTypeMigrationsDeps) =>
   mapValues<MigrateFunctionsObject, SavedObjectMigrationFn<WorkpadAttributes>>(
     expressions.getAllMigrations(),
-    migrateExpressionsAndFilters
+    migrateWorkpadExpressionsAndFilters
+  ) as MigrateFunctionsObject;
+
+export const templateWorkpadExpressionsMigrationsFactory = ({
+  expressions,
+}: CanvasSavedObjectTypeMigrationsDeps) =>
+  mapValues<MigrateFunctionsObject, SavedObjectMigrationFn<CanvasTemplate['template']>>(
+    expressions.getAllMigrations(),
+    migrateTemplateWorkpadExpressions
   ) as MigrateFunctionsObject;

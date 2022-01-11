@@ -24,6 +24,7 @@ import { registerCanvasUsageCollector } from './collectors';
 import { loadSampleData } from './sample_data';
 import { setupInterpreter } from './setup_interpreter';
 import { customElementType, workpadTypeFactory, workpadTemplateType } from './saved_objects';
+import type { CanvasSavedObjectTypeMigrationsDeps } from './saved_objects/migrations';
 import { initializeTemplates } from './templates';
 import { essqlSearchStrategyProvider } from './lib/essql_strategy';
 import { getUISettings } from './ui_settings';
@@ -60,10 +61,11 @@ export class CanvasPlugin implements Plugin {
       },
     });
 
+    const deps: CanvasSavedObjectTypeMigrationsDeps = { expressions: expressionsFork };
     coreSetup.uiSettings.register(getUISettings());
     coreSetup.savedObjects.registerType(customElementType);
-    coreSetup.savedObjects.registerType(workpadTypeFactory({ expressions: expressionsFork }));
-    coreSetup.savedObjects.registerType(workpadTemplateType);
+    coreSetup.savedObjects.registerType(workpadTypeFactory(deps));
+    coreSetup.savedObjects.registerType(workpadTemplateType(deps));
 
     plugins.features.registerKibanaFeature(getCanvasFeature(plugins));
 

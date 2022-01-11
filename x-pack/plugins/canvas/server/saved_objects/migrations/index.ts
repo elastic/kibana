@@ -4,12 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { expressionsMigrationsFactory } from './expressions';
+import {
+  templateWorkpadExpressionsMigrationsFactory,
+  workpadExpressionsMigrationsFactory,
+} from './expressions';
 import { CanvasSavedObjectTypeMigrationsDeps } from './types';
-import { workpadMigrationsFactory } from './workpad';
+import { workpadMigrationsFactory as workpadMigrationsFactoryFn } from './workpad';
 import { mergeMigrationFunctionMaps } from '../../../../../../src/plugins/kibana_utils/common';
 
-export const migrationsFactory = (deps: CanvasSavedObjectTypeMigrationsDeps) =>
-  mergeMigrationFunctionMaps(workpadMigrationsFactory(deps), expressionsMigrationsFactory(deps));
+export const workpadMigrationsFactory = (deps: CanvasSavedObjectTypeMigrationsDeps) =>
+  mergeMigrationFunctionMaps(
+    workpadMigrationsFactoryFn(deps),
+    workpadExpressionsMigrationsFactory(deps)
+  );
+
+export const templateWorkpadMigrationsFactory = (deps: CanvasSavedObjectTypeMigrationsDeps) =>
+  templateWorkpadExpressionsMigrationsFactory(deps);
 
 export type { CanvasSavedObjectTypeMigrationsDeps } from './types';
