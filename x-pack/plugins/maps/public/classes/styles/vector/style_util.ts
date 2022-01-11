@@ -8,6 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { MB_LOOKUP_FUNCTION, VECTOR_SHAPE_TYPE, VECTOR_STYLES } from '../../../../common/constants';
 import { Category } from '../../../../common/descriptor_types';
+import { StaticTextProperty } from './properties/static_text_property';
+import { DynamicTextProperty } from './properties/dynamic_text_property';
 
 export function getOtherCategoryLabel() {
   return i18n.translate('xpack.maps.styles.categorical.otherCategoryLabel', {
@@ -106,4 +108,11 @@ export function makeMbClampedNumberExpression({
     ],
     fallback,
   ];
+}
+
+export function getHasLabel(label: StaticTextProperty | DynamicTextProperty) {
+  return label.isDynamic()
+    ? label.isComplete()
+    : (label as StaticTextProperty).getOptions().value != null &&
+        (label as StaticTextProperty).getOptions().value.length;
 }
