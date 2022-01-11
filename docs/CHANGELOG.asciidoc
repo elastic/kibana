@@ -10,11 +10,303 @@
 
 Review important information about the {kib} 8.0.0 releases.
 
+* <<release-notes-8.0.0-rc1>>
 * <<release-notes-8.0.0-beta1>>
 * <<release-notes-8.0.0-alpha2>>
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.0.0-rc1]]
+== {kib} 8.0.0-rc1
+
+coming::[8.0.0-rc1]
+
+Review the {kib} 8.0.0-rc1 changes, then use the <<upgrade-assistant,Upgrade Assistant>> to complete the upgrade.
+
+[float]
+[[breaking-changes-8.0.0-rc1]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking changes, then mitigate the impact to your application.
+
+// tag::notable-breaking-changes[]
+
+[discrete]
+[[breaking-118854]]
+.Splits package policy `upgrade` endpoint for Fleet
+[%collapsible]
+====
+*Details* +
+For package policy upgrades, the packagePolicy `upgrade` endpoint format supports a mutative upgrade operation (when `dryRun: false`) and a read-only dry run operation (when `dryRun: true`):
+
+[source,text]
+--
+ POST /package_policies/upgrade
+ {
+   packagePolicyIds: [...],
+   dryRun: false
+ }
+--
+
+For more information, refer to {kibana-pull}118854[#118854].
+
+*Impact* +
+The endpoint is now split into two separate endpoints:
+
+[source,text]
+--
+ POST /package_policies/upgrade
+ {
+   packagePolicyIds: [...]
+ }
+
+ POST /package_policies/upgrade/dry_run
+ {
+   packagePolicyIds: [...]
+ }
+--
+====
+      
+[discrete]
+[[breaking-119945]]
+.Removes APM jobs from Machine Learning
+[%collapsible]
+====
+*Details* +
+APM Node.js and RUM JavaScript anomaly detection job modules have been removed. For more information, refer to {kibana-pull}119945[#119945].
+
+*Impact* +
+When you upgrade to 8.0.0, you are unable to create and view the APM Node.js and RUM JavaScript jobs in Machine Learning.
+====
+
+[discrete]
+[[breaking-118300]]
+.Fails migrations for unknown types
+[%collapsible]
+====
+*Details* +
+Unknown saved object types now cause {kib} migrations to fail. For more information, refer to {kibana-issue}107678[#107678].
+
+*Impact* +
+To complete the migration, re enable plugins or delete documents from the index in the previous version.
+====
+
+[discrete]
+[[breaking-116821]]
+.Removes deprecated config fields from Logs and Metrics APIs and saved objects
+[%collapsible]
+====
+*Details* +
+On the Logs and Metrics UIs, references to the following API and saved object deprecated fields have been removed: 
+
+* `timestamp`
+* `tiebreaker`
+* `container`
+* `pod`
+* `host`
+
+For more information, refer to {kibana-pull}116821[#116821] and {kibana-pull}115874[#115874].
+
+*Impact* +
+When you upgrade to 8.0.0, you are unable to use references to the deprecated fields.
+====
+
+// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following: 
+
+<<breaking-changes-8.0.0-beta1,8.0.0-beta1>> | <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | 
+<<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
+
+[float]
+[[deprecations-8.0.0-rc1]]
+=== Deprecations
+
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend you make the necessary updates after you complete the upgrade.
+
+[discrete]
+[[deprecation-120689]]
+.Renames the `autocreate` data view APM setting
+[%collapsible]
+====
+*Details* +
+The `xpack.apm.autocreateApmIndexPattern` APM setting has been removed. For more information, refer to {kibana-pull}120689[#120689].
+
+*Impact* +
+To automatically create data views in APM, use `xpack.apm.autoCreateApmDataView`.
+====
+      
+[discrete]
+[[deprecation-119494]]
+.Updates Fleet API responses for consistency
+[%collapsible]
+====
+*Details* +
+To make sure all Fleet API GET resposes return `items`, the following have been updated:
+
+* `/api/fleet/enrollment-api-keys`
+* `/api/fleet/agents`
+
+For more information, refer to {kibana-pull}119494[#119494].
+
+*Impact* +
+When you upgrade to 8.0.0, use the following API changes:
+
+* Use `enrollment_api_keys` instead of `enrollment-api-keys`.
+
+* Use `agent_status` instead of `agent-status`.
+
+* Use `service_tokens` instead of `service-tokens`.
+
+* `check-permissions` is no longer supported.
+
+* Use `/epm/packages/{packageName}/{version}` instead of `/epm/packages/{pkgkey}`.
+
+* Use `items[]` or `item` instead of `response[]` in the following:
+
+[source,text]
+--
+/epm/packages/
+/epm/packages/{pkgkey}
+/epm/categories
+/epm/packages/_bulk
+/epm/packages/limited
+--
+====
+
+To review the depcrecations in previous versions, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
+      
+[float]
+[[features-8.0.0-rc1]]
+=== Features
+{kib} 8.0.0-rc1 adds the following new and notable features.
+
+Elastic Security::
+For the Elastic Security 8.0.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Management::
+Display managed badge for transforms {kibana-pull}117679[#117679]
+Monitoring::
+Enterprise Search Stack Monitoring {kibana-pull}114303[#114303]
+Observability::
+* Adds ability to create agent keys in APM settings {kibana-pull}120373[#120373]
+* Adds Agent key table in APM settings {kibana-pull}119543[#119543]
+* Allows users to set Download Speed, Upload Speed, and Latency for their synthetic monitors {kibana-pull}118594[#118594]
+
+[[enhancements-and-bug-fixes-v8.0.0-rc1]]
+=== Enhancements and bug fixes
+
+For detailed information about the 8.0.0-rc1 release, review the enhancements and bug fixes.
+
+[float]
+[[enhancement-v8.0.0-rc1]]
+=== Enhancements
+Canvas::
+Reverts By-Value Embeddables {kibana-pull}117613[#117613]
+Discover::
+Adds multi-layer time axis for opt-out only {kibana-pull}115853[#115853]
+Elastic Security::
+For the Elastic Security 8.0.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+Adds consistent `_meta` property to all Fleet ES assets {kibana-pull}119380[#119380]
+Kibana Home & Add Data::
+Moves overview page and link to the accordion solution title {kibana-pull}114018[#114018]
+Lens & Visualizations::
+* Handle removal of deprecated date histogram interval in *Vega* {kibana-pull}109090[#109090]
+* Adds value labels to Heatmap in *Lens* {kibana-pull}106406[#106406]
+Machine Learning::
+* Adds support for `force` stop deployment {kibana-pull}118563[#118563]
+* Refactors data view loading to remove unnecessary searches {kibana-pull}116455[#116455]
+Observability::
+* Service maps: Adds sparklines to the detail popover {kibana-pull}120021[#120021]
+* Offer users upgrade to multi-metric job {kibana-pull}119980[#119980]
+* Display relevant anomalies from multi-metric job {kibana-pull}119709[#119709]
+* Adds service icon for the originating service in traces table {kibana-pull}119421[#119421]
+* Auto attachment for java agent beta in APM integration settings {kibana-pull}119131[#119131]
+* Errors: Enhancements to the Errors list page (part II) {kibana-pull}118878[#118878]
+* Store Alerts View table state in localStorage {kibana-pull}118207[#118207]
+* Handle other values popup when correlated value is not in top 10 {kibana-pull}118069[#118069]
+* Adds links to navigate from alerts table to rule {kibana-pull}118035[#118035]
+* Reinstates ML multi-metric job {kibana-pull}117836[#117836]
+* Re-enables metric-based UI {kibana-pull}117021[#117021]
+* Make Alerts page use shared {kib} time range {kibana-pull}115192[#115192]
+* Adds enabled toggle {kibana-pull}119994[#119994]
+* Adds missing tooltip to the report metric badge in *Exploratory View* {kibana-pull}119940[#119940]
+* Adds step duration in step list {kibana-pull}116266[#116266]
+Platform::
+Moves developer architecture docs to user docs {kibana-pull}119125[#119125]
+Reporting::
+* Decouples screenshotting plugin from the reporting {kibana-pull}120110[#120110]
+* Updates the design of the *Reports* management UI, including the addition of a link to {kib} app where the report was generated {kibana-pull}111412[#111412]
+Security::
+Adds ability to clone role mappings {kibana-pull}118434[#118434]
+Adds user logout audit events {kibana-pull}121455[#121455]
+
+[float]
+[[fixes-v8.0.0-rc1]]
+=== Bug Fixes
+Canvas::
+* Fixes Error overflow {kibana-pull}122158[#122158]
+* Fixes expression input {kibana-pull}121490[#121490]
+* Hides edit menu when in view-only mode {kibana-pull}118779[#118779]
+Dashboard::
+* Allow text wrapping for panel titles and dashboard descriptions for PDF generation {kibana-pull}121360[#121360]
+* Page now resets to zero when rows per page is changed on *Add from Library* window {kibana-pull}118627[#118627]
+* Fixes full screen error when pressing back arrow in browser {kibana-pull}118113[#118113]
+Elastic Security::
+For the Elastic Security 8.0.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Adds `installed_kibana_space_id` to `epm-packages` saved objects {kibana-pull}120517[#120517]
+* Handle Saved Object ID changes {kibana-pull}119527[#119527]
+* Fixes upgradeable agents filter {kibana-pull}119338[#119338]
+Lens & Visualizations::
+* Enables normal mode for percentage charts in *Lens* {kibana-pull}120197[#120197]
+* Fixes existing fields query for epoch_millis dates in *Lens* {kibana-pull}119508[#119508]
+* Include frozen indices in *Lens* {kibana-pull}118555[#118555]
+* Fixes focus on legend action popovers in *Lens* {kibana-pull}115066[#115066]
+Machine Learning::
+* Fixes data view search based on title {kibana-pull}120737[#120737]
+* Data frame analytics wizard: Only allow data view creation if job will be started immediately {kibana-pull}120042[#120042]
+* Fixes anomaly detection module manifest queries to ignore frozen and cold data tiers {kibana-pull}119635[#119635]
+* Catches syntax error in job wizard editor {kibana-pull}119457[#119457]
+* Fixes error handling for missing data view in data frame analytics wizard {kibana-pull}119455[#119455]
+* Ensures auto refresh interval is used in Data Frame Analytics list {kibana-pull}117959[#117959]
+* Ignores frozen indices in data recognizer {kibana-pull}117208[#117208]
+Management::
+* Fixes data grid column actions button when histogram charts are visible {kibana-pull}120202[#120202]
+* Disables delete data view for data frame analytics and transforms wizards {kibana-pull}119732[#119732]
+* Check {kib} capabilities for all saving, editing, and deleting {kibana-pull}118480[#118480]
+* Adds autocomplete for search_after and pit in search query {kibana-pull}117864[#117864]
+* Autocomplete for t_test aggregation {kibana-pull}117782[#117782]
+* Disables create data view for data frame analytics and transforms wizards {kibana-pull}117690[#117690]
+Maps::
+* Fixes an issue where drawings do not show when there is a global filter {kibana-pull}121239[#121239]
+* Use minimum symbol size if meta is not loaded {kibana-pull}119119[#119119]
+* Do not fail migration when JSON.parse fails {kibana-pull}117342[#117342]
+* Do not allow label overlap {kibana-pull}116190[#116190]
+Monitoring::
+Correct linear regression formula {kibana-pull}120222[#120222]
+Observability::
+* Renames alerting types in Infra {kibana-pull}121061[#121061]
+* Renames occurrences of `alert_type` to `rule_type` in Infra {kibana-pull}120455[#120455]
+* Fixes failing alerts table pagination functional tests {kibana-pull}119985[#119985]
+* Switch to _source for updating documents instead of fields API {kibana-pull}118245[#118245]
+* Fixes an issue where search terms with certain characters caused the APM UI to crash {kibana-pull}118063[#118063]
+* Ignore unavailable indices for ML jobs {kibana-pull}117632[#117632]
+* Disables the actions button when users have inadequate privileges {kibana-pull}117488[#117488]
+* Replaces manual rate calculation with `rate` agg {kibana-pull}115651[#115651]
+* Adds migration to fix incorrect action group spelling {kibana-pull}119626[#119626]
+* Fixes bug with manage views button {kibana-pull}118547[#118547]
+* Disables No Data checkboxes for doc count alerts {kibana-pull}117194[#117194]
+* Prevent event propagation on step_duration {kibana-pull}122039[#122039]
+* Disables the button to create alerts in Uptime when users do not have permissions to do so {kibana-pull}120379[#120379]
+* Fixes a bug that prevented users from saving Uptime configurations when the `inspect` option was turned on {kibana-pull}119142[#119142]
+* Adds a callout to informs users that they do not have permissions to create ML jobs for Uptime monitors {kibana-pull}117684[#117684]
+Platform::
+Fixes font glitches in code editor {kibana-pull}121392[#121392]
+Reporting::
+Fixes an issue where PDF and PNG reports break on Windows operating systems when the {kib} server hostname is `0.0.0.0` {kibana-pull}117022[#117022]
+
 [[release-notes-8.0.0-beta1]]
 == {kib} 8.0.0-beta1
 
@@ -29,8 +321,6 @@ Breaking changes can prevent your application from optimal operation and perform
 To review the breaking changes in previous versions, refer to the following: 
 
 <<breaking-changes-8.0.0-alpha2,8.0.0-alpha2>> | <<breaking-changes-8.0.0-alpha1,8.0.0-alpha1>>
-
-// tag::notable-breaking-changes[]
 
 [float]
 [[alerting-breaking-changes-8.0.0-beta1]]
@@ -481,8 +771,6 @@ The legacy audit logger has been removed. For more information, refer to {kibana
 Audit logs will be written to the default location in the new ECS format. To change the output file, filter events, and more, use the <<audit-logging-settings, audit logging settings>>.
 ====
 
-// end::notable-breaking-changes[]
-
 [float]
 [[deprecations-8.0.0-beta1]]
 === Deprecations
@@ -492,7 +780,7 @@ Deprecated functionality does not have an immediate impact on your application, 
 To review the 8.0.0 depcrecations, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
   
 [float]
-[[features-8.0.0]]
+[[features-8.0.0-beta1]]
 === Features
 The 8.0.0-beta1 release adds the following new and notable features.
 
