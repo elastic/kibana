@@ -118,7 +118,7 @@ export const App = (props: {
       };
 
       setDataLayer(
-        await props.plugins.lens.formula.upsertFormulaColumn(
+        await props.plugins.lens.formula.insertOrReplaceFormulaColumn(
           'col2',
           { formula: 'count()', label: 'Count' },
           baseLayer,

@@ -261,7 +261,7 @@ function generateFormulaColumns(
 }
 
 /** @public **/
-export function upsertFormulaColumn(
+export function insertOrReplaceFormulaColumn(
   id: string,
   column: FormulaIndexPatternColumn,
   baseLayer: IndexPatternLayer,

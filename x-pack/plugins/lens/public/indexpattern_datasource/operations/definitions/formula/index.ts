@@ -8,7 +8,7 @@
 export type { FormulaIndexPatternColumn } from './formula';
 export { formulaOperation } from './formula';
 
-export { upsertFormulaColumn } from './parse';
+export { insertOrReplaceFormulaColumn } from './parse';
 
 export type { MathIndexPatternColumn } from './math';
 export { mathOperation } from './math';

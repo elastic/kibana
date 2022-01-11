@@ -45,7 +45,7 @@ import { trackUiEvent } from '../../../../../lens_ui_telemetry';
 
 import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
-import { upsertFormulaColumn } from '../parse';
+import { insertOrReplaceFormulaColumn } from '../parse';
 import { filterByVisibleOperation } from '../util';
 import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
 
@@ -153,7 +153,7 @@ export function FormulaEditor({
     if (text !== currentColumn.params.formula) {
       updateLayer(
         (prevLayer) =>
-          upsertFormulaColumn(
+          insertOrReplaceFormulaColumn(
             columnId,
             {
               ...currentColumn,
@@ -182,7 +182,7 @@ export function FormulaEditor({
         if (currentColumn.params.formula) {
           // Only submit if valid
           updateLayer(
-            upsertFormulaColumn(
+            insertOrReplaceFormulaColumn(
               columnId,
               {
                 ...currentColumn,
@@ -231,7 +231,7 @@ export function FormulaEditor({
           // If the formula is already broken, show the latest error message in the workspace
           if (currentColumn.params.formula !== text) {
             updateLayer(
-              upsertFormulaColumn(
+              insertOrReplaceFormulaColumn(
                 columnId,
                 {
                   ...currentColumn,
@@ -296,7 +296,7 @@ export function FormulaEditor({
         const {
           layer: newLayer,
           meta: { locations },
-        } = upsertFormulaColumn(
+        } = insertOrReplaceFormulaColumn(
           columnId,
           {
             ...currentColumn,

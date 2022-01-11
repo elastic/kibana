@@ -8,7 +8,7 @@
 import { createMockedIndexPattern } from '../../../mocks';
 import { formulaOperation, GenericOperationDefinition, GenericIndexPatternColumn } from '../index';
 import { FormulaIndexPatternColumn } from './formula';
-import { upsertFormulaColumn } from './parse';
+import { insertOrReplaceFormulaColumn } from './parse';
 import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../../types';
 import { tinymathFunctions } from './util';
 import { TermsIndexPatternColumn } from '../terms';
@@ -424,7 +424,7 @@ describe('formula', () => {
     });
   });
 
-  describe('upsertFormulaColumn()', () => {
+  describe('insertOrReplaceFormulaColumn()', () => {
     let indexPattern: IndexPattern;
     let currentColumn: FormulaIndexPatternColumn;
 
@@ -439,7 +439,7 @@ describe('formula', () => {
       const mergedLayer = { ...layer, columns: { ...layer.columns, col1: mergedColumn } };
 
       expect(
-        upsertFormulaColumn(
+        insertOrReplaceFormulaColumn(
           'col1',
           {
             ...mergedColumn,
@@ -486,7 +486,7 @@ describe('formula', () => {
 
     it('should mutate the layer with new columns for valid formula expressions', () => {
       expect(
-        upsertFormulaColumn(
+        insertOrReplaceFormulaColumn(
           'col1',
           {
             ...currentColumn,
@@ -532,7 +532,7 @@ describe('formula', () => {
 
     it('should create a valid formula expression for numeric literals', () => {
       expect(
-        upsertFormulaColumn(
+        insertOrReplaceFormulaColumn(
           'col1',
           {
             ...currentColumn,
@@ -697,7 +697,7 @@ describe('formula', () => {
 
     it('returns the locations of each function', () => {
       expect(
-        upsertFormulaColumn(
+        insertOrReplaceFormulaColumn(
           'col1',
           {
             ...currentColumn,
@@ -725,7 +725,7 @@ describe('formula', () => {
       const mergedLayer = { ...layer, columns: { ...layer.columns, col1: mergedColumn } };
       const formula = 'moving_average(average(bytes), window=7) + count()';
 
-      const { layer: newLayer } = upsertFormulaColumn(
+      const { layer: newLayer } = insertOrReplaceFormulaColumn(
         'col1',
         {
           ...mergedColumn,
@@ -777,7 +777,7 @@ describe('formula', () => {
       const mergedLayer = { ...layer, columns: { ...layer.columns, col1: mergedColumn } };
       const formula = `moving_average(average(bytes), window=7, kql='${innerFilter}') + count(kql='${innerFilter}')`;
 
-      const { layer: newLayer } = upsertFormulaColumn(
+      const { layer: newLayer } = insertOrReplaceFormulaColumn(
         'col1',
         {
           ...mergedColumn,

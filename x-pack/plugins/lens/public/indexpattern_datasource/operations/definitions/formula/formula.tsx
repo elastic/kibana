@@ -11,7 +11,7 @@ import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { IndexPattern } from '../../../types';
 import { runASTValidation, tryToParse } from './validation';
 import { WrappedFormulaEditor } from './editor';
-import { upsertFormulaColumn } from './parse';
+import { insertOrReplaceFormulaColumn } from './parse';
 import { generateFormula } from './generate';
 import { filterByVisibleOperation } from './util';
 import { getManagedColumnsFrom } from '../../layer_helpers';
@@ -157,7 +157,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
     createCopy(layer, sourceId, targetId, indexPattern, operationDefinitionMap) {
       const currentColumn = layer.columns[sourceId] as FormulaIndexPatternColumn;
 
-      return upsertFormulaColumn(targetId, currentColumn, layer, {
+      return insertOrReplaceFormulaColumn(targetId, currentColumn, layer, {
         indexPattern,
         operations: operationDefinitionMap,
       }).layer;

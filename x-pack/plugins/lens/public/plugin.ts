@@ -163,7 +163,7 @@ export interface LensPublicStart {
   getXyVisTypes: () => Promise<VisualizationType[]>;
 
   formula: {
-    upsertFormulaColumn: (
+    insertOrReplaceFormulaColumn: (
       id: string,
       column: {
         formula: string;
@@ -400,8 +400,10 @@ export class LensPlugin {
         return visualizationTypes;
       },
       formula: {
-        upsertFormulaColumn: async (id, { formula, label }, layer, { indexPatternId }) => {
-          const { loadIndexPatterns, upsertFormulaColumn } = await import('./async_services');
+        insertOrReplaceFormulaColumn: async (id, { formula, label }, layer, { indexPatternId }) => {
+          const { loadIndexPatterns, insertOrReplaceFormulaColumn } = await import(
+            './async_services'
+          );
 
           const indexPatterns = await loadIndexPatterns({
             cache: {},
@@ -410,10 +412,11 @@ export class LensPlugin {
           });
 
           return indexPatterns[indexPatternId]
-            ? upsertFormulaColumn(
+            ? insertOrReplaceFormulaColumn(
                 id,
                 {
                   label: label ?? formula,
+                  customLabel: Boolean(label),
                   operationType: 'formula',
                   dataType: 'number',
                   references: [],
