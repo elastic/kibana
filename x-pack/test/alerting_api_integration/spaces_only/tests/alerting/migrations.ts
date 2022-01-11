@@ -360,5 +360,18 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         'metrics.inventory_threshold.fired'
       );
     });
+
+    it('8.0 migrates and disables pre-existing rules', async () => {
+      const response = await es.get<{ alert: RawRule }>(
+        {
+          index: '.kibana',
+          id: 'alert:38482620-ef1b-11eb-ad71-7de7959be71c',
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.alert?.alertTypeId).to.be('siem.queryRule');
+      expect(response.body._source?.alert?.enabled).to.be(false);
+    });
   });
 }

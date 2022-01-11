@@ -6,9 +6,7 @@
     "declaration": true,
     "declarationMap": true
   },
-  "extraPublicDirs": [
-    "common"
-  ],
+  "extraPublicDirs": ["common"],
   "include": [
     "common/**/*",
     "public/**/*",
@@ -20,9 +18,8 @@
   "references": [
     { "path": "../../core/tsconfig.json" },
     { "path": "../saved_objects/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json" },
     { "path": "../embeddable/tsconfig.json" },
-    { "path": "../kibana_react/tsconfig.json"},
+    { "path": "../kibana_react/tsconfig.json" },
     { "path": "../data/tsconfig.json" }
   ]
 }
