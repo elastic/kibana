@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export { PackagePoliciesTable } from './package_policies/package_policies_table';
-export { PackagePoliciesView } from './package_policies';
-export { SettingsView } from './settings';
-export * from './header';
+export { HeaderLeftContent } from './left_content';
+export { HeaderRightContent } from './right_content';
