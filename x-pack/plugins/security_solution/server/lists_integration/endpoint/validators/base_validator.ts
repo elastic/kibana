@@ -7,10 +7,15 @@
 
 import { KibanaRequest } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
+import { isEqual } from 'lodash/fp';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import { ExceptionItemLikeOptions } from '../types';
 import { getEndpointAuthzInitialState } from '../../../../common/endpoint/service/authz';
-import { isArtifactByPolicy } from '../../../../common/endpoint/service/artifacts';
+import {
+  getPolicyIdsFromArtifact,
+  isArtifactByPolicy,
+} from '../../../../common/endpoint/service/artifacts';
 import { OperatingSystem } from '../../../../common/endpoint/types';
 
 const BasicEndpointExceptionDataSchema = schema.object(
@@ -34,7 +39,7 @@ const BasicEndpointExceptionDataSchema = schema.object(
     ),
   },
   // Because we are only validating some fields from the Exception Item, we set `unknowns` to `true` here
-  { unknowns: 'allow' }
+  { unknowns: 'ignore' }
 );
 
 /**
@@ -61,6 +66,10 @@ export class BaseValidator {
     return isArtifactByPolicy(item);
   }
 
+  protected async isAllowedToCreateArtifactsByPolicy(): Promise<boolean> {
+    return (await this.endpointAuthzPromise).canCreateArtifactsByPolicy;
+  }
+
   protected async validateCanManageEndpointArtifacts(): Promise<void> {
     if (!(await this.endpointAuthzPromise).canAccessEndpointManagement) {
       throw new Error('Not authorized');
@@ -79,11 +88,8 @@ export class BaseValidator {
   protected async validateCanCreateByPolicyArtifacts(
     item: ExceptionItemLikeOptions
   ): Promise<void> {
-    if (
-      this.isItemByPolicy(item) &&
-      !(await this.endpointAuthzPromise).canCreateArtifactsByPolicy
-    ) {
-      throw new Error('Not authorized to create artifacts by policy');
+    if (this.isItemByPolicy(item) && !(await this.isAllowedToCreateArtifactsByPolicy())) {
+      throw new Error('Not authorized to create or update artifacts by policy');
     }
   }
 
@@ -95,5 +101,32 @@ export class BaseValidator {
     if (this.isItemByPolicy(item)) {
       // FIXME:PT implement method
     }
+  }
+
+  /**
+   * If the item being updated is `by policy`, method validates if anyting was changes in regard to
+   * the effected scope of the by policy settings.
+   *
+   * @param updatedItem
+   * @param currentItem
+   * @protected
+   */
+  protected wasByPolicyEffectScopeChanged(
+    updatedItem: ExceptionItemLikeOptions,
+    currentItem: ExceptionListItemSchema
+  ): boolean {
+    // if global, then return. Nothing to validate and setting the trusted app to global is allowed
+    if (!this.isItemByPolicy(updatedItem)) {
+      return false;
+    }
+
+    if (updatedItem.tags) {
+      return !isEqual(
+        getPolicyIdsFromArtifact({ tags: updatedItem.tags }),
+        getPolicyIdsFromArtifact(currentItem)
+      );
+    }
+
+    return false;
   }
 }

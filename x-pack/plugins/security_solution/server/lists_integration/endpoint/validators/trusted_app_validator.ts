@@ -7,6 +7,8 @@
 
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import { schema } from '@kbn/config-schema';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { isEqual } from 'lodash/fp';
 import { BaseValidator } from './base_validator';
 import { ExceptionItemLikeOptions } from '../types';
 import {
@@ -22,6 +24,7 @@ import {
   getDuplicateFields,
   isValidHash,
 } from '../../../../common/endpoint/service/trusted_apps/validations';
+import { getPolicyIdsFromArtifact } from '../../../../common/endpoint/service/artifacts';
 
 const ConditionEntryTypeSchema = schema.conditional(
   schema.siblingRef('field'),
@@ -126,7 +129,7 @@ const TrustedAppDataSchema = schema.object(
   },
 
   // Because we are only validating some fields from the Exception Item, we set `unknowns` to `true` here
-  { unknowns: 'allow' }
+  { unknowns: 'ignore' }
 );
 
 export class TrustedAppValidator extends BaseValidator {
@@ -146,22 +149,26 @@ export class TrustedAppValidator extends BaseValidator {
   }
 
   async validatePreUpdateItem(
-    item: UpdateExceptionListItemOptions
+    updatedItem: UpdateExceptionListItemOptions,
+    currentItem: ExceptionListItemSchema
   ): Promise<UpdateExceptionListItemOptions> {
     await this.validateCanManageEndpointArtifacts();
-    await this.validateTrustedAppData(item);
+    await this.validateTrustedAppData(updatedItem);
 
     try {
-      await this.validateCanCreateByPolicyArtifacts(item);
-    } catch (e) {
-      // Not allowed to create by policy artifacts. Validate that the effective scope of the item
-      // remained unchanged with this update. If not, then throw the validation error that was catched
-      // FIXME:PT implement
+      await this.validateCanCreateByPolicyArtifacts(updatedItem);
+    } catch (noByPolicyAuthzError) {
+      // Not allowed to create/update by policy data. Validate that the effective scope of the item
+      // remained unchanged with this update or was set to `global` (only allowed update). If not,
+      // then throw the validation error that was catch'ed
+      if (this.wasByPolicyEffectScopeChanged(updatedItem, currentItem)) {
+        throw noByPolicyAuthzError;
+      }
     }
 
-    await this.validateByPolicyItem(item);
+    await this.validateByPolicyItem(updatedItem);
 
-    return item;
+    return updatedItem;
   }
 
   private async validateTrustedAppData(item: ExceptionItemLikeOptions): Promise<void> {

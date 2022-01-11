@@ -35,7 +35,8 @@ export const getExceptionsPreUpdateItemHandler = (
     // Validate trusted apps
     if (TrustedAppValidator.isTrustedApp({ listId: currentSavedItem.list_id })) {
       return new TrustedAppValidator(endpointAppContextService, this.request).validatePreUpdateItem(
-        data
+        data,
+        currentSavedItem
       );
     }
 

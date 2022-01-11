@@ -23,7 +23,7 @@ export const getPolicyIdsFromArtifact = (item: Pick<ExceptionListItemSchema, 'ta
   const tags = item.tags ?? [];
 
   for (const tag of tags) {
-    if (tag.startsWith(BY_POLICY_ARTIFACT_TAG_PREFIX)) {
+    if (tag !== GLOBAL_ARTIFACT_TAG && tag.startsWith(BY_POLICY_ARTIFACT_TAG_PREFIX)) {
       policyIds.push(tag.substring(POLICY_ID_START_POSITION));
     }
   }
