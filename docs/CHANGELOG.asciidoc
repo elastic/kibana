@@ -215,7 +215,7 @@ Lens & Visualizations::
 * Handle removal of deprecated date histogram interval in *Vega* {kibana-pull}109090[#109090]
 * Adds value labels to Heatmap in *Lens* {kibana-pull}106406[#106406]
 Machine Learning::
-Adds support for `force` stop deployment {kibana-pull}118563[#118563]
+* Adds support for `force` stop deployment {kibana-pull}118563[#118563]
 Observability::
 * Service maps: Adds sparklines to the detail popover {kibana-pull}120021[#120021]
 * Offer users upgrade to multi-metric job {kibana-pull}119980[#119980]
