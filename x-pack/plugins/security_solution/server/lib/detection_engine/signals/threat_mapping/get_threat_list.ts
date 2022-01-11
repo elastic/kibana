@@ -21,7 +21,7 @@ import {
 import { buildEventsSearchQuery } from '../build_events_query';
 
 export const getNextPage = async ({
-  esClient,
+  abortableEsClient,
   query,
   language,
   index,
@@ -46,7 +46,7 @@ export const getNextPage = async ({
       `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
     )
   );
-  const { body: response } = await esClient.search<
+  const { body: response } = await abortableEsClient.search<
     ThreatListDoc,
     Record<string, estypes.AggregationsAggregate>
   >({
@@ -136,13 +136,3 @@ export const getEventCount = async ({
   });
   return response.count;
 };
-
-export const getFirstPage = (
-  params: Omit<GetEventsPageOptions, 'searchAfter' | 'sortField' | 'sortOrder'>
-) =>
-  getNextPage({
-    ...params,
-    searchAfter: undefined,
-    sortField: undefined,
-    sortOrder: undefined,
-  });

@@ -70,7 +70,6 @@ export const createIndicatorMatchAlertType = (
       } = execOptions;
 
       if (tupleIndex === 0) {
-        console.log('____firstTuple');
         const {
           threatFilters,
           threatIndex,
@@ -79,9 +78,11 @@ export const createIndicatorMatchAlertType = (
           threatQuery,
           version: ruleVersion,
         } = completeRule.ruleParams;
+
         await updatePercolatorIndex({
+          abortableEsClient: services.search.asCurrentUser,
           buildRuleMessage,
-          esClient: services.search.asCurrentUser,
+          esClient: services.scopedClusterClient.asCurrentUser,
           exceptionItems,
           listClient,
           logger,

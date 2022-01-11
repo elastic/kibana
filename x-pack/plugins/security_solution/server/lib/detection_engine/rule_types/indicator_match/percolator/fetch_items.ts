@@ -5,43 +5,49 @@
  * 2.0.
  */
 
-import { getFirstPage, getNextPage } from '../../../signals/threat_mapping/get_threat_list';
+import { getNextPage } from '../../../signals/threat_mapping/get_threat_list';
 import { FetchEventsOptions } from '../../../signals/threat_mapping/types';
 
 export const fetchItems = async <T>({
+  abortableEsClient,
   buildRuleMessage,
-  esClient,
   exceptionItems,
-  listClient,
-  logger,
-  perPage,
   filters,
   index,
   language,
+  listClient,
+  logger,
+  perPage,
   query,
+  searchAfter,
   transformHits,
 }: FetchEventsOptions<T>) => {
   let items: T[] = [];
 
-  let eventPage = await getFirstPage({
+  let eventPage = await getNextPage({
+    abortableEsClient,
     buildRuleMessage,
-    esClient,
     exceptionItems,
+    filters,
     index,
     language,
     listClient,
     logger,
     perPage,
     query,
-    filters,
+    searchAfter: searchAfter ? [searchAfter[0] as string] : undefined,
+    sortField: undefined,
+    sortOrder: undefined,
   });
+
+  console.log('____hitLength', eventPage.hits.hits.length);
 
   while (eventPage.hits.hits.length) {
     items = items.concat(transformHits(eventPage.hits.hits));
 
     eventPage = await getNextPage({
+      abortableEsClient,
       buildRuleMessage,
-      esClient,
       exceptionItems,
       index,
       language,

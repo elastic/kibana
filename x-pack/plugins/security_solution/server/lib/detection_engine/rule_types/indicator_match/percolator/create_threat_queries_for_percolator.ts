@@ -13,14 +13,15 @@ import {
 import { fetchItems as createPercolatorQueries } from './fetch_items';
 
 export const createThreatQueriesForPercolator = async ({
+  abortableEsClient,
   buildRuleMessage,
-  esClient,
   exceptionItems,
   listClient,
   logger,
   perPage,
   ruleId,
   ruleVersion,
+  searchAfter,
   threatFilters,
   threatIndex,
   threatLanguage,
@@ -28,8 +29,8 @@ export const createThreatQueriesForPercolator = async ({
   threatQuery,
 }: CreateThreatQueriesForPercolatorOptions) =>
   createPercolatorQueries<PercolatorQuery>({
+    abortableEsClient,
     buildRuleMessage,
-    esClient,
     exceptionItems,
     index: threatIndex,
     language: threatLanguage,
@@ -37,6 +38,7 @@ export const createThreatQueriesForPercolator = async ({
     logger,
     perPage,
     query: threatQuery,
+    searchAfter,
     filters: threatFilters,
     transformHits: (hits) =>
       createPercolateQueries({ threatMapping, threatList: hits, ruleId, ruleVersion }),

@@ -13,11 +13,15 @@ import { ELASTICSEARCH_MAX_PER_PAGE } from '../../../../../../common/cti/constan
 interface PersistThreatQueriesOptions {
   percolatorRuleDataClient: IRuleDataClient;
   threatQueriesToPersist: PercolatorQuery[];
+  ruleId: string;
+  ruleVersion: number;
 }
 
 export const persistThreatQueries = async ({
   percolatorRuleDataClient,
   threatQueriesToPersist,
+  ruleId,
+  ruleVersion,
 }: PersistThreatQueriesOptions) => {
   const chunkedThreatQueries = chunk(threatQueriesToPersist, ELASTICSEARCH_MAX_PER_PAGE);
   const writeRequests = chunkedThreatQueries.map((queries) =>
@@ -35,7 +39,7 @@ export const persistThreatQueries = async ({
               _id: id,
             },
           },
-          { query, ...indicator?._source },
+          { query, ...indicator?._source, rule_id: ruleId, rule_version: ruleVersion },
         ];
       }),
     })

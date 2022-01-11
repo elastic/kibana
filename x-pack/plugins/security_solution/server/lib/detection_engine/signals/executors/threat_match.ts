@@ -106,8 +106,8 @@ export const threatMatchExecutor = async ({
 
     if (matchableSourceEventCount) {
       const sourceEventHits: EventHit[] = await fetchSourceEvents({
+        abortableEsClient: services.search.asCurrentUser,
         buildRuleMessage,
-        esClient: services.search.asCurrentUser,
         exceptionItems,
         listClient,
         logger,
@@ -121,8 +121,8 @@ export const threatMatchExecutor = async ({
       const chunkedSourceEventHits = chunk(sourceEventHits, ELASTICSEARCH_MAX_PER_PAGE);
 
       const matchedPercolateQueriesByChunk = await percolateSourceEvents({
-        ruleId,
-        ruleVersion,
+        ruleId: completeRule.alertId,
+        ruleVersion: completeRule.ruleParams.version,
         chunkedSourceEventHits,
         percolatorRuleDataClient,
       });

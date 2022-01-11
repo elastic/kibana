@@ -10,8 +10,8 @@ import { fetchItems as fetchEvents } from './fetch_items';
 
 // todo: add searchAfter
 export const fetchSourceEvents = async ({
+  abortableEsClient,
   buildRuleMessage,
-  esClient,
   exceptionItems,
   listClient,
   logger,
@@ -23,7 +23,7 @@ export const fetchSourceEvents = async ({
 }: Omit<FetchEventsOptions<EventHit>, 'transformHits'>) =>
   fetchEvents({
     buildRuleMessage,
-    esClient,
+    abortableEsClient,
     exceptionItems,
     index,
     language,

@@ -5,14 +5,18 @@
  * 2.0.
  */
 
+import { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import {
   PercolatorQuery,
   UpdatePercolatorIndexOptions,
 } from '../../../signals/threat_mapping/types';
 import { createThreatQueriesForPercolator } from './create_threat_queries_for_percolator';
 import { persistThreatQueries } from './persist_threat_queries';
+import { cleanOutdatedPercolatorQueries } from './clean_outdated_percolator_queries';
+import { findIndicatorSearchAfter } from './find_indicator_search_after';
 
 export const updatePercolatorIndex = async ({
+  abortableEsClient,
   buildRuleMessage,
   esClient,
   exceptionItems,
@@ -29,17 +33,36 @@ export const updatePercolatorIndex = async ({
   threatQuery,
   withTimeout,
 }: UpdatePercolatorIndexOptions) => {
+  const percolatorIndexName = percolatorRuleDataClient.indexNameWithNamespace('default');
+
+  await withTimeout<void>(
+    () =>
+      cleanOutdatedPercolatorQueries({
+        esClient,
+        percolatorIndexName,
+        ruleId,
+        ruleVersion,
+      }),
+    'cleanOutdatedPercolatorQueries'
+  );
+
+  const searchAfter = await withTimeout<SortResults | undefined>(
+    () => findIndicatorSearchAfter({ percolatorRuleDataClient, ruleId, ruleVersion }),
+    'findIndicatorSearchAfter'
+  );
+
   const threatQueriesToPersist = await withTimeout<PercolatorQuery[]>(
     () =>
       createThreatQueriesForPercolator({
+        abortableEsClient,
         buildRuleMessage,
-        esClient,
         exceptionItems,
         listClient,
         logger,
         perPage,
         ruleId,
         ruleVersion,
+        searchAfter,
         threatFilters,
         threatIndex,
         threatLanguage,
@@ -48,8 +71,15 @@ export const updatePercolatorIndex = async ({
       }),
     'createThreatQueriesForPercolator'
   );
+
   await withTimeout<void>(
-    () => persistThreatQueries({ threatQueriesToPersist, percolatorRuleDataClient }),
+    () =>
+      persistThreatQueries({
+        percolatorRuleDataClient,
+        ruleId,
+        ruleVersion,
+        threatQueriesToPersist,
+      }),
     'persistThreatQueries'
   );
 };

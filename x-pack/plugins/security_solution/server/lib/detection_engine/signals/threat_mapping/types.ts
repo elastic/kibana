@@ -18,6 +18,7 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { ListClient } from '../../../../../../lists/server';
 import {
   AlertInstanceContext,
@@ -41,8 +42,9 @@ import { IRuleDataClient } from '../../../../../../rule_registry/server';
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
 
 export interface UpdatePercolatorIndexOptions {
+  abortableEsClient: IAbortableEsClient;
   buildRuleMessage: BuildRuleMessage;
-  esClient: IAbortableEsClient;
+  esClient: ElasticsearchClient;
   exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;
   logger: Logger;
@@ -192,8 +194,8 @@ export interface PercolatorQuery {
 }
 
 export interface GetEventsPageOptions {
+  abortableEsClient: IAbortableEsClient;
   buildRuleMessage: BuildRuleMessage;
-  esClient: IAbortableEsClient;
   exceptionItems: ExceptionListItemSchema[];
   filters: unknown[];
   index: string[];
@@ -208,14 +210,15 @@ export interface GetEventsPageOptions {
 }
 
 export interface CreateThreatQueriesForPercolatorOptions {
+  abortableEsClient: IAbortableEsClient;
   buildRuleMessage: BuildRuleMessage;
-  esClient: IAbortableEsClient;
   exceptionItems: ExceptionListItemSchema[];
   listClient: ListClient;
   logger: Logger;
   perPage?: number;
   ruleId: string;
   ruleVersion: number;
+  searchAfter: SortResults | undefined;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
   threatLanguage: ThreatLanguageOrUndefined;
@@ -224,17 +227,20 @@ export interface CreateThreatQueriesForPercolatorOptions {
 }
 
 export interface FetchEventsOptions<T> {
+  abortableEsClient: IAbortableEsClient;
   buildRuleMessage: BuildRuleMessage;
-  esClient: IAbortableEsClient;
   exceptionItems: ExceptionListItemSchema[];
-  listClient: ListClient;
-  logger: Logger;
-  perPage?: number;
   filters: unknown[];
   index: ThreatIndex;
   language: ThreatLanguageOrUndefined;
+  listClient: ListClient;
+  logger: Logger;
+  perPage?: number;
   query: ThreatQuery;
+  searchAfter?: SortResults;
   transformHits: (hits: EventHit[]) => T[];
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface EventCountOptions {
