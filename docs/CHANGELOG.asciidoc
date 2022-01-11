@@ -216,6 +216,7 @@ Lens & Visualizations::
 * Adds value labels to Heatmap in *Lens* {kibana-pull}106406[#106406]
 Machine Learning::
 * Adds support for `force` stop deployment {kibana-pull}118563[#118563]
+* Refactors data view loading to remove unnecessary searches {kibana-pull}116455[#116455]
 Observability::
 * Service maps: Adds sparklines to the detail popover {kibana-pull}120021[#120021]
 * Offer users upgrade to multi-metric job {kibana-pull}119980[#119980]
@@ -269,9 +270,8 @@ Machine Learning::
 * Fixes anomaly detection module manifest queries to ignore frozen and cold data tiers {kibana-pull}119635[#119635]
 * Catches syntax error in job wizard editor {kibana-pull}119457[#119457]
 * Fixes error handling for missing data view in data frame analytics wizard {kibana-pull}119455[#119455]
-* Data Frame Analytics list - ensure refresh works as expected {kibana-pull}117959[#117959]
+* Ensures auto refresh interval is used in Data Frame Analytics list {kibana-pull}117959[#117959]
 * Ignores frozen indices in data recognizer {kibana-pull}117208[#117208]
-* Data view loading refactor {kibana-pull}116455[#116455]
 Management::
 * Fixes data grid column actions button when histogram charts are visible {kibana-pull}120202[#120202]
 * Disables delete data view for data frame analytics and transforms wizards {kibana-pull}119732[#119732]
