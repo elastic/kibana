@@ -26,9 +26,9 @@ const getStoredRowDensity = (storage: Storage): RowDensity | null => {
 };
 
 const convertGridStylesToSelection = (gridStyles: EuiDataGridStyle): RowDensity => {
-  if (gridStyles?.fontSize === 's' && gridStyles?.cellPadding === 's') return 'compact';
-  if (gridStyles?.fontSize === 'm' && gridStyles?.cellPadding === 'm') return 'normal';
-  if (gridStyles?.fontSize === 'l' && gridStyles?.cellPadding === 'l') return 'expanded';
+  if (gridStyles.fontSize === 's' && gridStyles.cellPadding === 's') return 'compact';
+  if (gridStyles.fontSize === 'm' && gridStyles.cellPadding === 'm') return 'normal';
+  if (gridStyles.fontSize === 'l' && gridStyles.cellPadding === 'l') return 'expanded';
   return 'normal';
 };
 
