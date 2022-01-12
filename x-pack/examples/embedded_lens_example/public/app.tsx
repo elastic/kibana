@@ -27,6 +27,7 @@ import {
   PersistedIndexPatternLayer,
   XYState,
   LensEmbeddableInput,
+  FormulaHelper,
   DateHistogramIndexPatternColumn,
 } from '../../../plugins/lens/public';
 import { StartDependencies } from './plugin';
@@ -92,50 +93,62 @@ export const App = (props: {
   core: CoreStart;
   plugins: StartDependencies;
   defaultDataView: DataView | null;
+  lensFormulaHelper: FormulaHelper;
 }) => {
   const [color, setColor] = useState('green');
   const [dataLayer, setDataLayer] = useState<PersistedIndexPatternLayer>();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
-  const LensComponent = props.plugins.lens.EmbeddableComponent;
-  const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
-
-  useEffect(() => {
-    const updateDataLayer = async (dataView: DataView) => {
-      const baseLayer: PersistedIndexPatternLayer = {
-        columnOrder: ['col1'],
-        columns: {
-          col1: {
-            dataType: 'date',
-            isBucketed: true,
-            label: '@timestamp',
-            operationType: 'date_histogram',
-            params: { interval: 'auto' },
-            scale: 'interval',
-            sourceField: dataView.timeFieldName!,
-          } as DateHistogramIndexPatternColumn,
-        },
-      };
-
-      setDataLayer(
-        await props.plugins.lens.formula.insertOrReplaceFormulaColumn(
-          'col2',
-          { formula: 'count()' },
-          baseLayer,
-          dataView.id!
-        )
-      );
-    };
-
-    if (props.defaultDataView) {
-      updateDataLayer(props.defaultDataView);
-    }
-  }, [props.defaultDataView, props.plugins.lens.formula]);
-
   const [time, setTime] = useState({
     from: 'now-5d',
     to: 'now',
   });
+
+  const LensComponent = props.plugins.lens.EmbeddableComponent;
+  const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
+
+  useEffect(() => {
+    const dataView = props.defaultDataView;
+
+    if (!dataView) {
+      return;
+    }
+
+    const baseLayer: PersistedIndexPatternLayer = {
+      columnOrder: ['col1'],
+      columns: {
+        col1: {
+          dataType: 'date',
+          isBucketed: true,
+          label: '@timestamp',
+          operationType: 'date_histogram',
+          params: { interval: 'auto' },
+          scale: 'interval',
+          sourceField: dataView.timeFieldName!,
+        } as DateHistogramIndexPatternColumn,
+      },
+    };
+    setDataLayer(
+      props.lensFormulaHelper.insertOrReplaceFormulaColumn(
+        'col2',
+        { formula: 'count()' },
+        baseLayer,
+        dataView
+      )
+    );
+  }, [props, props.defaultDataView, props.lensFormulaHelper]);
+
+  if (!props.defaultDataView || !props.defaultDataView.isTimeBased()) {
+    return (
+      <EuiCallOut
+        title="Please define a default index pattern to use this demo"
+        color="danger"
+        iconType="alert"
+      >
+        <p>This demo only works if your default index pattern is set and time based</p>
+      </EuiCallOut>
+    );
+  }
 
   if (!dataLayer) {
     return null;
@@ -162,139 +175,128 @@ export const App = (props: {
               the series which causes Lens to re-render. The Edit button will take the current
               configuration and navigate to a prefilled editor.
             </p>
-            {props.defaultDataView && props.defaultDataView.isTimeBased() ? (
-              <>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="lns-example-change-color"
-                      isLoading={isLoading}
-                      onClick={() => {
-                        // eslint-disable-next-line no-bitwise
-                        const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
-                        setColor(newColor);
-                      }}
-                    >
-                      Change color
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      aria-label="Open lens in new tab"
-                      isDisabled={!props.plugins.lens.canUseEditor()}
-                      onClick={() => {
-                        props.plugins.lens.navigateToPrefilledEditor(
-                          {
-                            id: '',
-                            timeRange: time,
-                            attributes: getLensAttributes(color, dataLayer, props.defaultDataView!),
-                          },
-                          {
-                            openInNewTab: true,
-                          }
-                        );
-                        // eslint-disable-next-line no-bitwise
-                        const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
-                        setColor(newColor);
-                      }}
-                    >
-                      Edit in Lens (new tab)
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      aria-label="Open lens in same tab"
-                      data-test-subj="lns-example-open-editor"
-                      isDisabled={!props.plugins.lens.canUseEditor()}
-                      onClick={() => {
-                        props.plugins.lens.navigateToPrefilledEditor(
-                          {
-                            id: '',
-                            timeRange: time,
-                            attributes: getLensAttributes(color, dataLayer, props.defaultDataView!),
-                          },
-                          {
-                            openInNewTab: false,
-                          }
-                        );
-                      }}
-                    >
-                      Edit in Lens (same tab)
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      aria-label="Save visualization into library or embed directly into any dashboard"
-                      data-test-subj="lns-example-save"
-                      isDisabled={!getLensAttributes(color, dataLayer, props.defaultDataView!)}
-                      onClick={() => {
-                        setIsSaveModalVisible(true);
-                      }}
-                    >
-                      Save Visualization
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      aria-label="Change time range"
-                      data-test-subj="lns-example-change-time-range"
-                      isDisabled={!getLensAttributes(color, dataLayer, props.defaultDataView!)}
-                      onClick={() => {
-                        setTime({
-                          from: '2015-09-18T06:31:44.000Z',
-                          to: '2015-09-23T18:31:44.000Z',
-                        });
-                      }}
-                    >
-                      Change time range
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <LensComponent
-                  id=""
-                  withActions
-                  style={{ height: 500 }}
-                  timeRange={time}
-                  attributes={getLensAttributes(color, dataLayer, props.defaultDataView!)}
-                  onLoad={(val) => {
-                    setIsLoading(val);
+
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  data-test-subj="lns-example-change-color"
+                  isLoading={isLoading}
+                  onClick={() => {
+                    // eslint-disable-next-line no-bitwise
+                    const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
+                    setColor(newColor);
                   }}
-                  onBrushEnd={({ range }) => {
+                >
+                  Change color
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  aria-label="Open lens in new tab"
+                  isDisabled={!props.plugins.lens.canUseEditor()}
+                  onClick={() => {
+                    props.plugins.lens.navigateToPrefilledEditor(
+                      {
+                        id: '',
+                        timeRange: time,
+                        attributes: getLensAttributes(color, dataLayer, props.defaultDataView!),
+                      },
+                      {
+                        openInNewTab: true,
+                      }
+                    );
+                    // eslint-disable-next-line no-bitwise
+                    const newColor = '#' + ((Math.random() * 0xffffff) << 0).toString(16);
+                    setColor(newColor);
+                  }}
+                >
+                  Edit in Lens (new tab)
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  aria-label="Open lens in same tab"
+                  data-test-subj="lns-example-open-editor"
+                  isDisabled={!props.plugins.lens.canUseEditor()}
+                  onClick={() => {
+                    props.plugins.lens.navigateToPrefilledEditor(
+                      {
+                        id: '',
+                        timeRange: time,
+                        attributes: getLensAttributes(color, dataLayer, props.defaultDataView!),
+                      },
+                      {
+                        openInNewTab: false,
+                      }
+                    );
+                  }}
+                >
+                  Edit in Lens (same tab)
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  aria-label="Save visualization into library or embed directly into any dashboard"
+                  data-test-subj="lns-example-save"
+                  isDisabled={!getLensAttributes(color, dataLayer, props.defaultDataView!)}
+                  onClick={() => {
+                    setIsSaveModalVisible(true);
+                  }}
+                >
+                  Save Visualization
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  aria-label="Change time range"
+                  data-test-subj="lns-example-change-time-range"
+                  isDisabled={!getLensAttributes(color, dataLayer, props.defaultDataView!)}
+                  onClick={() => {
                     setTime({
-                      from: new Date(range[0]).toISOString(),
-                      to: new Date(range[1]).toISOString(),
+                      from: '2015-09-18T06:31:44.000Z',
+                      to: '2015-09-23T18:31:44.000Z',
                     });
                   }}
-                  onFilter={(_data) => {
-                    // call back event for on filter event
-                  }}
-                  onTableRowClick={(_data) => {
-                    // call back event for on table row click event
-                  }}
-                  viewMode={ViewMode.VIEW}
-                />
-                {isSaveModalVisible && (
-                  <LensSaveModalComponent
-                    initialInput={
-                      getLensAttributes(
-                        color,
-                        dataLayer,
-                        props.defaultDataView!
-                      ) as unknown as LensEmbeddableInput
-                    }
-                    onSave={() => {}}
-                    onClose={() => setIsSaveModalVisible(false)}
-                  />
-                )}
-              </>
-            ) : (
-              <EuiCallOut
-                title="Please define a default index pattern to use this demo"
-                color="danger"
-                iconType="alert"
-              >
-                <p>This demo only works if your default index pattern is set and time based</p>
-              </EuiCallOut>
+                >
+                  Change time range
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <LensComponent
+              id=""
+              withActions
+              style={{ height: 500 }}
+              timeRange={time}
+              attributes={getLensAttributes(color, dataLayer, props.defaultDataView!)}
+              onLoad={(val) => {
+                setIsLoading(val);
+              }}
+              onBrushEnd={({ range }) => {
+                setTime({
+                  from: new Date(range[0]).toISOString(),
+                  to: new Date(range[1]).toISOString(),
+                });
+              }}
+              onFilter={(_data) => {
+                // call back event for on filter event
+              }}
+              onTableRowClick={(_data) => {
+                // call back event for on table row click event
+              }}
+              viewMode={ViewMode.VIEW}
+            />
+            {isSaveModalVisible && (
+              <LensSaveModalComponent
+                initialInput={
+                  getLensAttributes(
+                    color,
+                    dataLayer,
+                    props.defaultDataView!
+                  ) as unknown as LensEmbeddableInput
+                }
+                onSave={() => {}}
+                onClose={() => setIsSaveModalVisible(false)}
+              />
             )}
           </EuiPageContentBody>
         </EuiPageContent>

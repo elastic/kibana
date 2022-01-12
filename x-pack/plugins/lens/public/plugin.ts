@@ -39,7 +39,7 @@ import { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_
 import type {
   IndexPatternDatasource as IndexPatternDatasourceType,
   IndexPatternDatasourceSetupPlugins,
-  PersistedIndexPatternLayer,
+  FormulaHelper,
 } from './indexpattern_datasource';
 import type {
   XyVisualization as XyVisualizationType,
@@ -162,31 +162,10 @@ export interface LensPublicStart {
    */
   getXyVisTypes: () => Promise<VisualizationType[]>;
 
-  formula: {
-    /**
-     * Method which Lens consumer can import and given a formula string,
-     * return a parsed result as list of columns to use as Embeddable attributes.
-     *
-     * @param id - Formula column id
-     * @param column.formula - String representation of a formula
-     * @param [column.label] - Custom formula label
-     * @param layer - The layer to which the formula columns will be added
-     * @param dataViewId - The id of dataView
-     * @param [params.operations] - Use this parameter if you only need to include specific operations.
-     *
-     * See `x-pack/examples/embedded_lens_example` for exemplary usage.
-     */
-    insertOrReplaceFormulaColumn: (
-      id: string,
-      column: {
-        formula: string;
-        label?: string;
-      },
-      layer: PersistedIndexPatternLayer,
-      dataViewId: string,
-      params?: { operations?: string[] }
-    ) => Promise<PersistedIndexPatternLayer | undefined>;
-  };
+  /**
+   * Method which returns formula helper keeping this async as to not impact page load bundle
+   */
+  createFormulaHelper: () => Promise<FormulaHelper>;
 }
 
 export class LensPlugin {
@@ -413,46 +392,10 @@ export class LensPlugin {
         const { visualizationTypes } = await import('./xy_visualization/types');
         return visualizationTypes;
       },
-      formula: {
-        insertOrReplaceFormulaColumn: async (id, { formula, label }, layer, dataViewId, params) => {
-          const { loadIndexPatterns, insertOrReplaceFormulaColumn, operationDefinitionMap } =
-            await import('./async_services');
 
-          const indexPatterns = await loadIndexPatterns({
-            cache: {},
-            patterns: [dataViewId],
-            indexPatternsService: startDependencies.data.indexPatterns,
-          });
-
-          return indexPatterns[dataViewId]
-            ? insertOrReplaceFormulaColumn(
-                id,
-                {
-                  label: label ?? formula,
-                  customLabel: Boolean(label),
-                  operationType: 'formula',
-                  dataType: 'number',
-                  references: [],
-                  isBucketed: false,
-                  params: {
-                    formula,
-                  },
-                },
-                { ...layer, indexPatternId: dataViewId },
-                {
-                  indexPattern: indexPatterns[dataViewId],
-                  operations:
-                    params?.operations?.reduce(
-                      (operationsMap, item) => ({
-                        ...operationsMap,
-                        [item]: operationDefinitionMap[item],
-                      }),
-                      {}
-                    ) ?? undefined,
-                }
-              ).layer
-            : undefined;
-        },
+      createFormulaHelper: async () => {
+        const { createFormulaHelper } = await import('./async_services');
+        return await createFormulaHelper();
       },
     };
   }

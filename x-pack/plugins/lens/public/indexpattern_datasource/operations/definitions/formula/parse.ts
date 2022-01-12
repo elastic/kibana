@@ -260,7 +260,7 @@ function generateFormulaColumns(
   return { columns, meta };
 }
 
-/** @public **/
+/** @internal **/
 export function insertOrReplaceFormulaColumn(
   id: string,
   column: FormulaIndexPatternColumn,

@@ -16,18 +16,19 @@ export const mount =
     const [core, plugins] = await coreSetup.getStartServices();
     const { App } = await import('./app');
 
-    const deps = {
-      core,
-      plugins,
-    };
-
     const defaultIndexPattern = await plugins.data.indexPatterns.getDefault();
+    const lensFormulaHelper = await plugins.lens.createFormulaHelper();
 
     const i18nCore = core.i18n;
 
     const reactElement = (
       <i18nCore.Context>
-        <App {...deps} defaultDataView={defaultIndexPattern} />
+        <App
+          core={core}
+          plugins={plugins}
+          defaultDataView={defaultIndexPattern}
+          lensFormulaHelper={lensFormulaHelper}
+        />
       </i18nCore.Context>
     );
     render(reactElement, element);
