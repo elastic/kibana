@@ -87,7 +87,6 @@ active in case of failure from the currently used instance.
 [[reporting-load-balanced-kibana]]
 === Reporting and multiple load-balanced {kib} clusters
 
-Depending on the load balancing configuration, you might need to specify 
 
 [float]
 [[high-availability]]
