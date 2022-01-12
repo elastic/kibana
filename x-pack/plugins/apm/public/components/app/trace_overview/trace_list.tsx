@@ -169,8 +169,6 @@ export function TraceList({ items = [], isLoading, isFailure }: Props) {
       initialSortField="impact"
       initialSortDirection="desc"
       noItemsMessage={noItemsMessage}
-      initialPageSize={25}
-      pageSizeOptions={[10, 25, 50]}
       hidePerPageOptions={false}
     />
   );

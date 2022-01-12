@@ -214,9 +214,7 @@ export function DependenciesTable(props: Props) {
             noItemsMessage={noItemsMessage}
             initialSortField="impactValue"
             initialSortDirection="desc"
-            initialPageSize={25}
             pagination={true}
-            pageSizeOptions={pageSizeOptions}
             hidePerPageOptions={hidePerPageOptions}
           />
         </OverviewTableContainer>
