@@ -22,9 +22,7 @@ describe('lifespan', () => {
     it('throws an error when the open date is invalid', () => {
       jest.setSystemTime(new Date(0));
 
-      expect(() => getStatusInfo([], new Date('blah'))).toThrowErrorMatchingInlineSnapshot(
-        `"Supplied dates were invalid date1: Wed Dec 31 1969 19:00:00 GMT-0500 (Eastern Standard Time) date2: Invalid Date"`
-      );
+      expect(() => getStatusInfo([], new Date('blah'))).toThrowError('Invalid Date');
     });
 
     it('sets reopen to 1 when status goes from open -> closed -> open', () => {
