@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_UUID } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_RULE_UUID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { get, isEmpty } from 'lodash/fp';
 import React from 'react';
 import { matchPath, RouteProps, Redirect } from 'react-router-dom';
@@ -17,7 +17,6 @@ import {
   EXCEPTIONS_PATH,
   RULES_PATH,
   UEBA_PATH,
-  RISKY_HOSTS_INDEX_PREFIX,
   SERVER_APP_ID,
   CASES_FEATURE_ID,
   OVERVIEW_PATH,
@@ -164,10 +163,6 @@ export const isDetectionsPath = (pathname: string): boolean => {
   });
 };
 
-export const getHostRiskIndex = (spaceId: string): string => {
-  return `${RISKY_HOSTS_INDEX_PREFIX}${spaceId}`;
-};
-
 export const getSubPluginRoutesByCapabilities = (
   subPlugins: StartedSubPlugins,
   capabilities: Capabilities
@@ -214,10 +209,16 @@ RedirectRoute.displayName = 'RedirectRoute';
 
 const siemSignalsFieldMappings: Record<string, string> = {
   [ALERT_RULE_UUID]: 'signal.rule.id',
+  [`${ALERT_RULE_PARAMETERS}.filters`]: 'signal.rule.filters',
+  [`${ALERT_RULE_PARAMETERS}.language`]: 'signal.rule.language',
+  [`${ALERT_RULE_PARAMETERS}.query`]: 'signal.rule.query',
 };
 
 const alertFieldMappings: Record<string, string> = {
   'signal.rule.id': ALERT_RULE_UUID,
+  'signal.rule.filters': `${ALERT_RULE_PARAMETERS}.filters`,
+  'signal.rule.language': `${ALERT_RULE_PARAMETERS}.language`,
+  'signal.rule.query': `${ALERT_RULE_PARAMETERS}.query`,
 };
 
 /*
@@ -233,5 +234,19 @@ export const getField = (ecsData: Ecs, field: string) => {
     'kibana.alert',
     'signal'
   );
-  return get(aadField, ecsData) ?? get(siemSignalsField, ecsData);
+  const parts = aadField.split('.');
+  if (parts.includes('parameters') && parts[parts.length - 1] !== 'parameters') {
+    const paramsField = parts.slice(0, parts.length - 1).join('.');
+    const params = get(paramsField, ecsData);
+    const value = get(parts[parts.length - 1], params);
+    if (isEmpty(value)) {
+      return [];
+    }
+    return value;
+  }
+  const value = get(aadField, ecsData) ?? get(siemSignalsField, ecsData);
+  if (isEmpty(value)) {
+    return [];
+  }
+  return value;
 };

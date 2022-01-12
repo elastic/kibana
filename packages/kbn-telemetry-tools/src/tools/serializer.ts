@@ -7,7 +7,7 @@
  */
 
 import * as ts from 'typescript';
-import { uniqBy, pick } from 'lodash';
+import { uniqBy, pick, omit } from 'lodash';
 import {
   getResolvedModuleSourceFile,
   getIdentifierDeclarationFromSource,
@@ -235,6 +235,12 @@ export function getDescriptor(node: ts.Node, program: ts.Program): Descriptor | 
       const parentDescriptor = getDescriptor(node.typeArguments![0], program);
       const pickPropNames = getConstraints(node.typeArguments![1], program);
       return pick(parentDescriptor, pickPropNames);
+    }
+    // Support `Omit<SOMETHING, 'prop1' | 'prop2'>`
+    if (symbolName === 'Omit') {
+      const parentDescriptor = getDescriptor(node.typeArguments![0], program);
+      const omitPropNames = getConstraints(node.typeArguments![1], program);
+      return omit(parentDescriptor, omitPropNames);
     }
 
     const declaration = (symbol?.getDeclarations() || [])[0];

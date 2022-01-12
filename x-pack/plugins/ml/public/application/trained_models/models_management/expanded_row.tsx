@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { ModelItemFull } from './models_list';
 import { timeFormatter } from '../../../../common/util/date_utils';
 import { isDefined } from '../../../../common/types/guards';
@@ -122,13 +122,15 @@ export const ExpandedRow: FC<ExpandedRowProps> = ({ item }) => {
     function updateModelItems() {
       (async function () {
         const deploymentStats = stats.deployment_stats;
+        const modelSizeStats = stats.model_size_stats;
 
-        if (!deploymentStats) return;
+        if (!deploymentStats || !modelSizeStats) return;
 
         const items: AllocatedModel[] = deploymentStats.nodes.map((n) => {
           const nodeName = Object.values(n.node)[0].name;
           return {
             ...deploymentStats,
+            ...modelSizeStats,
             node: {
               ...pick(n, [
                 'average_inference_time_ms',

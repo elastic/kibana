@@ -32,10 +32,7 @@ import React, {
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 
 import styled, { ThemeContext } from 'styled-components';
-import {
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_PRODUCER,
-} from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { Filter } from '@kbn/es-query';
 import {
   TGridCellAction,
@@ -68,7 +65,8 @@ import type { BrowserFields } from '../../../../common/search_strategy/index_fie
 import type { OnRowSelected, OnSelectAll } from '../types';
 import type { Refetch } from '../../../store/t_grid/inputs';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
-import { StatefulEventContext, StatefulFieldsBrowser } from '../../../';
+import { StatefulEventContext } from '../../../components/stateful_event_context';
+import { StatefulFieldsBrowser } from '../../../components/t_grid/toolbar/fields_browser';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
@@ -88,6 +86,7 @@ const StatefulAlertStatusBulkActions = lazy(
 interface OwnProps {
   activePage: number;
   additionalControls?: React.ReactNode;
+  appId?: string;
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
   createFieldComponent?: CreateFieldComponentType;
@@ -122,6 +121,7 @@ interface OwnProps {
     ruleProducer?: string;
   }) => boolean;
   totalSelectAllAlerts?: number;
+  showCheckboxes?: boolean;
 }
 
 const defaultUnit = (n: number) => i18n.ALERTS_UNIT(n);
@@ -297,6 +297,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
   ({
     activePage,
     additionalControls,
+    appId = '',
     browserFields,
     bulkActions = true,
     clearSelected,
@@ -505,7 +506,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               showSortSelector: true,
               showFullScreenSelector: true,
             }),
-        showStyleSelector: false,
+        showDisplaySelector: false,
       }),
       [
         alertCountText,
@@ -828,6 +829,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           )}
           {tableView === 'eventRenderedView' && (
             <EventRenderedView
+              appId={appId}
               alertToolbar={alertToolbar}
               browserFields={browserFields}
               events={data}

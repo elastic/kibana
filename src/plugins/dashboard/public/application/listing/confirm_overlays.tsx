@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 
-import { OverlayStart } from '../../../../../core/public';
+import { CoreStart, OverlayStart } from '../../../../../core/public';
 import { toMountPoint } from '../../services/kibana_react';
 import { createConfirmStrings, discardConfirmStrings } from '../../dashboard_strings';
 
@@ -43,6 +43,7 @@ export const confirmDiscardUnsavedChanges = (overlays: OverlayStart, discardCall
 
 export const confirmCreateWithUnsaved = (
   overlays: OverlayStart,
+  theme: CoreStart['theme'],
   startBlankCallback: () => void,
   contineCallback: () => void
 ) => {
@@ -105,7 +106,8 @@ export const confirmCreateWithUnsaved = (
             </EuiModalFooter>
           </div>
         </EuiOutsideClickDetector>
-      </EuiFocusTrap>
+      </EuiFocusTrap>,
+      { theme$: theme.theme$ }
     ),
     {
       'data-test-subj': 'dashboardCreateConfirmModal',

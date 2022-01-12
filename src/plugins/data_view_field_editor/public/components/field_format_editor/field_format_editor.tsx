@@ -9,7 +9,7 @@
 import React, { PureComponent } from 'react';
 import { EuiCode, EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   IndexPattern,
@@ -109,7 +109,6 @@ export class FormatSelectEditor extends PureComponent<
   render() {
     const { fieldFormatEditors, onError, value, fieldFormats, esTypes } = this.props;
     const fieldFormatId = value?.id;
-    const fieldFormatParams = value?.params;
     const { kbnType } = this.state;
 
     const { fieldTypeFormats } = this.state;
@@ -120,6 +119,8 @@ export class FormatSelectEditor extends PureComponent<
     const format = value?.id
       ? fieldFormats.getInstance(value?.id, value?.params)
       : fieldFormats.getDefaultInstance(kbnType, esTypes);
+
+    const fieldFormatParams = format.params();
 
     const label = defaultFormat ? (
       <FormattedMessage
@@ -151,7 +152,7 @@ export class FormatSelectEditor extends PureComponent<
             fieldType={kbnType}
             fieldFormat={format}
             fieldFormatId={fieldFormatId}
-            fieldFormatParams={fieldFormatParams || {}}
+            fieldFormatParams={fieldFormatParams}
             fieldFormatEditors={fieldFormatEditors}
             onChange={(params) => {
               this.onFormatChange(fieldFormatId, params);

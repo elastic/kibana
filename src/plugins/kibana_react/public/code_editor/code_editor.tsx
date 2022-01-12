@@ -12,9 +12,10 @@ import ReactMonacoEditor from 'react-monaco-editor';
 import { htmlIdGenerator, EuiToolTip, keys } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import './register_languages';
+import './remeasure_fonts';
 
 import {
   DARK_THEME,
@@ -22,6 +23,8 @@ import {
   DARK_THEME_TRANSPARENT,
   LIGHT_THEME_TRANSPARENT,
 } from './editor_theme';
+
+import { PlaceholderWidget } from './placeholder_widget';
 
 import './editor.scss';
 
@@ -105,6 +108,8 @@ export interface Props {
    * Should the editor be rendered using the fullWidth EUI attribute
    */
   fullWidth?: boolean;
+
+  placeholder?: string;
   /**
    * Accessible name for the editor. (Defaults to "Code editor")
    */
@@ -126,6 +131,7 @@ export const CodeEditor: React.FC<Props> = ({
   suggestionProvider,
   signatureProvider,
   hoverProvider,
+  placeholder,
   languageConfiguration,
   'aria-label': ariaLabel = i18n.translate('kibana-react.kibanaCodeEditor.ariaLabel', {
     defaultMessage: 'Code Editor',
@@ -144,6 +150,7 @@ export const CodeEditor: React.FC<Props> = ({
   const isReadOnly = options?.readOnly ?? false;
 
   const _editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const _placeholderWidget = useRef<PlaceholderWidget | null>(null);
   const isSuggestionMenuOpen = useRef(false);
   const editorHint = useRef<HTMLDivElement>(null);
   const textboxMutationObserver = useRef<MutationObserver | null>(null);
@@ -376,6 +383,17 @@ export const CodeEditor: React.FC<Props> = ({
     };
   }, []);
 
+  useEffect(() => {
+    if (placeholder && !value && _editor.current) {
+      // Mounts editor inside constructor
+      _placeholderWidget.current = new PlaceholderWidget(placeholder, _editor.current);
+    }
+    return () => {
+      _placeholderWidget.current?.dispose();
+      _placeholderWidget.current = null;
+    };
+  }, [placeholder, value]);
+
   return (
     <div className="kibanaCodeEditor">
       {renderPrompt()}
@@ -397,6 +415,10 @@ export const CodeEditor: React.FC<Props> = ({
           },
           scrollbar: {
             useShadows: false,
+            // Scroll events are handled only when there is scrollable content. When there is scrollable content, the
+            // editor should scroll to the bottom then break out of that scroll context and continue scrolling on any
+            // outer scrollbars.
+            alwaysConsumeMouseWheel: false,
           },
           wordBasedSuggestions: false,
           wordWrap: 'on',

@@ -8,7 +8,8 @@
 
 import Path from 'path';
 
-import { REPO_ROOT, createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { getServerWatchPaths } from './get_server_watch_paths';
 
@@ -65,7 +66,7 @@ it('produces the right watch and ignore list', () => {
       <absolute path>/x-pack/test/plugin_functional/plugins/resolver_test/target/**,
       <absolute path>/x-pack/test/plugin_functional/plugins/resolver_test/scripts/**,
       <absolute path>/x-pack/test/plugin_functional/plugins/resolver_test/docs/**,
-      <absolute path>/x-pack/plugins/reporting/chromium,
+      <absolute path>/x-pack/plugins/screenshotting/chromium,
       <absolute path>/x-pack/plugins/security_solution/cypress,
       <absolute path>/x-pack/plugins/apm/scripts,
       <absolute path>/x-pack/plugins/apm/ftr_e2e,

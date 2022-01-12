@@ -6,16 +6,17 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TypeOf } from '@kbn/config-schema';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import {
+  ENDPOINT_DEFAULT_PAGE,
+  ENDPOINT_DEFAULT_PAGE_SIZE,
   metadataCurrentIndexPattern,
   METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
 import { KibanaRequest } from '../../../../../../../src/core/server';
 import { EndpointAppContext } from '../../types';
 import { buildStatusesKuery } from './support/agent_status';
-import { GetMetadataListRequestSchemaV2 } from '.';
+import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/metadata';
 
 /**
  * 00000000-0000-0000-0000-000000000000 is initial Elastic Agent id sent by Endpoint before policy is configured
@@ -39,7 +40,7 @@ export interface QueryBuilderOptions {
 // using unmapped_type avoids errors when the given field doesn't exist, and sets to the 0-value for that type
 // effectively ignoring it
 // https://www.elastic.co/guide/en/elasticsearch/reference/current/sort-search-results.html#_ignoring_unmapped_fields
-export const MetadataSortMethod: estypes.SearchSortContainer[] = [
+export const MetadataSortMethod: estypes.SortCombinations[] = [
   {
     'event.created': {
       order: 'desc',
@@ -79,7 +80,6 @@ export async function getPagingProperties(
   request: KibanaRequest<any, any, any>,
   endpointAppContext: EndpointAppContext
 ) {
-  const config = await endpointAppContext.config();
   const pagingProperties: { page_size?: number; page_index?: number } = {};
   if (request?.body?.paging_properties) {
     for (const property of request.body.paging_properties) {
@@ -90,8 +90,8 @@ export async function getPagingProperties(
     }
   }
   return {
-    pageSize: pagingProperties.page_size || config.endpointResultListDefaultPageSize,
-    pageIndex: pagingProperties.page_index ?? config.endpointResultListDefaultFirstPageIndex,
+    pageSize: pagingProperties.page_size || ENDPOINT_DEFAULT_PAGE_SIZE,
+    pageIndex: pagingProperties.page_index || ENDPOINT_DEFAULT_PAGE,
   };
 }
 
@@ -226,7 +226,7 @@ interface BuildUnitedIndexQueryResponse {
   body: {
     query: Record<string, unknown>;
     track_total_hits: boolean;
-    sort: estypes.SearchSortContainer[];
+    sort: estypes.SortCombinations[];
   };
   from: number;
   size: number;
@@ -234,14 +234,16 @@ interface BuildUnitedIndexQueryResponse {
 }
 
 export async function buildUnitedIndexQuery(
-  {
-    page = 0,
-    pageSize = 10,
-    hostStatuses = [],
-    kuery = '',
-  }: TypeOf<typeof GetMetadataListRequestSchemaV2.query>,
+  queryOptions: GetMetadataListRequestQuery,
   endpointPolicyIds: string[] = []
 ): Promise<BuildUnitedIndexQueryResponse> {
+  const {
+    page = ENDPOINT_DEFAULT_PAGE,
+    pageSize = ENDPOINT_DEFAULT_PAGE_SIZE,
+    hostStatuses = [],
+    kuery = '',
+  } = queryOptions || {};
+
   const statusesKuery = buildStatusesKuery(hostStatuses);
 
   const filterIgnoredAgents = {

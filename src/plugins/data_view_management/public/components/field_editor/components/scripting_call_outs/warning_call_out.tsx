@@ -10,7 +10,7 @@ import React, { Fragment } from 'react';
 
 import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../../../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../../../types';

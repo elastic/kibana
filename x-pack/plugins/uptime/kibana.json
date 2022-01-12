@@ -6,21 +6,25 @@
   "id": "uptime",
   "kibanaVersion": "kibana",
   "optionalPlugins": [
+    "cloud",
     "data",
+    "fleet",
     "home",
-    "ml",
-    "fleet"
+    "ml"
   ],
   "requiredPlugins": [
     "alerting",
     "embeddable",
+    "encryptedSavedObjects",
     "inspector",
     "features",
     "licensing",
+    "observability",
+    "ruleRegistry",
+    "security",
     "triggersActionsUi",
     "usageCollection",
-    "ruleRegistry",
-    "observability"
+    "taskManager"
   ],
   "server": true,
   "ui": true,

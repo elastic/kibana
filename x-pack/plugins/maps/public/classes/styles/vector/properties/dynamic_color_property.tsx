@@ -263,8 +263,8 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       };
     }
 
-    const fieldMeta = this.getCategoryFieldMeta();
-    if (!fieldMeta || !fieldMeta.categories) {
+    const categories = this.getCategoryFieldMeta();
+    if (categories.length === 0) {
       return EMPTY_STOPS;
     }
 
@@ -275,14 +275,14 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       return EMPTY_STOPS;
     }
 
-    const maxLength = Math.min(colors.length, fieldMeta.categories.length + 1);
+    const maxLength = Math.min(colors.length, categories.length + 1);
     const stops = [];
 
     for (let i = 0; i < maxLength - 1; i++) {
       stops.push({
-        stop: fieldMeta.categories[i].key,
+        stop: categories[i].key,
         color: this._chartsPaletteServiceGetColor
-          ? this._chartsPaletteServiceGetColor(fieldMeta.categories[i].key)
+          ? this._chartsPaletteServiceGetColor(categories[i].key)
           : colors[i],
       });
     }

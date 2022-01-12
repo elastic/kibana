@@ -277,6 +277,20 @@
     "misc": [
       {
         "parentPluginId": "interactiveSetup",
+        "id": "def-common.ERROR_COMPATIBILITY_FAILURE",
+        "type": "string",
+        "tags": [],
+        "label": "ERROR_COMPATIBILITY_FAILURE",
+        "description": [],
+        "signature": [
+          "\"compatibility_failure\""
+        ],
+        "path": "src/plugins/interactive_setup/common/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "interactiveSetup",
         "id": "def-common.ERROR_CONFIGURE_FAILURE",
         "type": "string",
         "tags": [],

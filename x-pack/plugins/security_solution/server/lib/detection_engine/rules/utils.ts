@@ -15,6 +15,7 @@ import type {
   ItemsPerSearchOrUndefined,
   ThreatFiltersOrUndefined,
   ThreatIndexOrUndefined,
+  ThreatIndicatorPathOrUndefined,
   ThreatLanguageOrUndefined,
   ThreatMappingOrUndefined,
   ThreatQueryOrUndefined,
@@ -97,7 +98,7 @@ export interface UpdateProperties {
   timelineTitle: TimelineTitleOrUndefined;
   meta: MetaOrUndefined;
   machineLearningJobId: MachineLearningJobIdOrUndefined;
-  filters: PartialFilter[];
+  filters: PartialFilter[] | undefined;
   index: IndexOrUndefined;
   interval: IntervalOrUndefined;
   maxSignals: MaxSignalsOrUndefined;
@@ -113,6 +114,7 @@ export interface UpdateProperties {
   threshold: ThresholdOrUndefined;
   threatFilters: ThreatFiltersOrUndefined;
   threatIndex: ThreatIndexOrUndefined;
+  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatQuery: ThreatQueryOrUndefined;
   threatMapping: ThreatMappingOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;

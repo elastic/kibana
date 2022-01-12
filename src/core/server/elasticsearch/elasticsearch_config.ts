@@ -250,11 +250,11 @@ const deprecations: ConfigDeprecationProvider = () => [
     if (es.logQueries === true) {
       addDeprecation({
         configPath: `${fromPath}.logQueries`,
-        message: `Setting [${fromPath}.logQueries] is deprecated and no longer used. You should set the log level to "debug" for the "elasticsearch.queries" context in "logging.loggers".`,
+        message: `Setting [${fromPath}.logQueries] is deprecated and no longer used. You should set the log level to "debug" for the "elasticsearch.query" context in "logging.loggers".`,
         correctiveActions: {
           manualSteps: [
             `Remove Setting [${fromPath}.logQueries] from your kibana configs`,
-            `Set the log level to "debug" for the "elasticsearch.queries" context in "logging.loggers".`,
+            `Set the log level to "debug" for the "elasticsearch.query" context in "logging.loggers".`,
           ],
         },
       });

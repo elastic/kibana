@@ -708,7 +708,7 @@
         "label": "WithPrivileges",
         "description": [],
         "signature": [
-          "({ privileges: requiredPrivileges, children }: Props) => JSX.Element"
+          "({ privileges: requiredPrivileges, children }: Props) => JSX.Element | null"
         ],
         "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/components/with_privileges.tsx",
         "deprecated": false,
@@ -853,9 +853,9 @@
             "section": "def-public.EuiCodeEditorProps",
             "text": "EuiCodeEditorProps"
           },
-          " extends Pick<React.AriaAttributes, SupportedAriaAttribute>,Pick<",
+          " extends SupportedAriaAttributes,Omit<",
           "IAceEditorProps",
-          ", \"name\" | \"onChange\" | \"defaultValue\" | \"className\" | \"placeholder\" | \"style\" | \"onCopy\" | \"onPaste\" | \"onFocus\" | \"onBlur\" | \"onInput\" | \"onLoad\" | \"onScroll\" | \"value\" | \"height\" | \"width\" | \"fontSize\" | \"theme\" | \"showGutter\" | \"showPrintMargin\" | \"highlightActiveLine\" | \"focus\" | \"cursorStart\" | \"wrapEnabled\" | \"readOnly\" | \"minLines\" | \"maxLines\" | \"navigateToFileEnd\" | \"debounceChangePeriod\" | \"enableBasicAutocompletion\" | \"enableLiveAutocompletion\" | \"tabSize\" | \"scrollMargin\" | \"enableSnippets\" | \"onSelectionChange\" | \"onCursorChange\" | \"onValidate\" | \"onBeforeLoad\" | \"onSelection\" | \"editorProps\" | \"setOptions\" | \"keyboardHandler\" | \"commands\" | \"annotations\" | \"markers\">"
+          ", \"mode\">"
         ],
         "path": "src/plugins/es_ui_shared/public/components/code_editor/code_editor.tsx",
         "deprecated": false,
@@ -1092,12 +1092,12 @@
           {
             "parentPluginId": "esUiShared",
             "id": "def-public.MissingPrivileges.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: string[] | undefined",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  string[] | undefined"
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
             "deprecated": false
@@ -1739,12 +1739,12 @@
           {
             "parentPluginId": "esUiShared",
             "id": "def-common.MissingPrivileges.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: string[] | undefined",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  string[] | undefined"
             ],
             "path": "src/plugins/es_ui_shared/__packages_do_not_import__/authorization/types.ts",
             "deprecated": false

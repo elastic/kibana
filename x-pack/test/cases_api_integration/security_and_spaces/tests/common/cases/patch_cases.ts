@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -125,14 +125,11 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(statusUserAction).to.eql({
-          action_field: ['status'],
+          type: 'status',
           action: 'update',
-          action_by: defaultUser,
-          new_value: CaseStatuses.closed,
-          new_val_connector_id: null,
-          old_val_connector_id: null,
-          old_value: CaseStatuses.open,
-          case_id: `${postedCase.id}`,
+          created_by: defaultUser,
+          payload: { status: CaseStatuses.closed },
+          case_id: postedCase.id,
           comment_id: null,
           sub_case_id: '',
           owner: 'securitySolutionFixture',
@@ -165,14 +162,11 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         expect(statusUserAction).to.eql({
-          action_field: ['status'],
+          type: 'status',
           action: 'update',
-          action_by: defaultUser,
-          new_value: CaseStatuses['in-progress'],
-          old_value: CaseStatuses.open,
-          old_val_connector_id: null,
-          new_val_connector_id: null,
-          case_id: `${postedCase.id}`,
+          created_by: defaultUser,
+          payload: { status: CaseStatuses['in-progress'] },
+          case_id: postedCase.id,
           comment_id: null,
           sub_case_id: '',
           owner: 'securitySolutionFixture',
@@ -724,6 +718,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           await es.indices.refresh({ index: defaultSignalsIndex });
+          await es.indices.refresh({ index: signalsIndex2 });
 
           let signals = await getSignals();
           // There should be no change in their status since syncing is disabled
@@ -747,6 +742,7 @@ export default ({ getService }: FtrProviderContext): void => {
           })) as CasesResponse;
 
           await es.indices.refresh({ index: defaultSignalsIndex });
+          await es.indices.refresh({ index: signalsIndex2 });
 
           signals = await getSignals();
 
@@ -772,6 +768,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
           await es.indices.refresh({ index: defaultSignalsIndex });
+          await es.indices.refresh({ index: signalsIndex2 });
 
           signals = await getSignals();
 

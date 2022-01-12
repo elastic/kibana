@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { run, createFlagError, REPO_ROOT } from '@kbn/dev-utils';
+import { run, createFlagError } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { parse } from './parse_owners';
 import { flush } from './flush';
 import { enumeratePatterns } from './enumerate_patterns';

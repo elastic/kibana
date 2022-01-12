@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
+import { cloneDeep } from 'lodash';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
 import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
 import { usePageUrlState } from '../../util/url_state';
@@ -43,7 +44,11 @@ export const getDefaultNodesListState = (): ListingPageUrlState => ({
   sortDirection: 'asc',
 });
 
-export const NodesList: FC = () => {
+export interface NodesListProps {
+  compactView?: boolean;
+}
+
+export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
   const trainedModelsApiService = useTrainedModelsApiService();
 
   const refresh = useRefresh();
@@ -87,7 +92,7 @@ export const NodesList: FC = () => {
   }, [itemIdToExpandedRowMap]);
 
   const toggleDetails = (item: NodeItem) => {
-    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+    const itemIdToExpandedRowMapValues = cloneDeep(itemIdToExpandedRowMap);
     if (itemIdToExpandedRowMapValues[item.id]) {
       delete itemIdToExpandedRowMapValues[item.id];
     } else {
@@ -162,11 +167,7 @@ export const NodesList: FC = () => {
     };
   }, [items]);
 
-  const { onTableChange, pagination, sorting } = useTableSettings<NodeItem>(
-    items,
-    pageState,
-    updatePageState
-  );
+  let tableSettings: object = useTableSettings<NodeItem>(items, pageState, updatePageState);
 
   const search: EuiSearchBarProps = {
     query: searchQueryText,
@@ -195,6 +196,10 @@ export const NodesList: FC = () => {
     [refresh]
   );
 
+  if (compactView) {
+    tableSettings = {};
+  }
+
   return (
     <>
       <EuiSpacer size="m" />
@@ -210,20 +215,18 @@ export const NodesList: FC = () => {
         <EuiInMemoryTable<NodeItem>
           allowNeutralSort={false}
           columns={columns}
-          hasActions={true}
+          hasActions={false}
           isExpandable={true}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isSelectable={false}
           items={items}
           itemId={'id'}
           loading={isLoading}
-          search={search}
+          search={compactView ? undefined : search}
+          {...tableSettings}
           rowProps={(item) => ({
             'data-test-subj': `mlNodesTableRow row-${item.id}`,
           })}
-          pagination={pagination}
-          onTableChange={onTableChange}
-          sorting={sorting}
           data-test-subj={isLoading ? 'mlNodesTable loading' : 'mlNodesTable loaded'}
         />
       </div>

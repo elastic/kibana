@@ -11,12 +11,14 @@ import type { AppMountParameters } from 'kibana/public';
 import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel } from '@elastic/eui';
 import type { History } from 'history';
 import { Router, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { TopNavMenuData } from 'src/plugins/navigation/public';
+
+import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 import {
@@ -209,10 +211,20 @@ export const FleetAppContext: React.FC<{
   history: AppMountParameters['history'];
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
+  theme$: AppMountParameters['theme$'];
   /** For testing purposes only */
   routerHistory?: History<any>;
 }> = memo(
-  ({ children, startServices, config, history, kibanaVersion, extensions, routerHistory }) => {
+  ({
+    children,
+    startServices,
+    config,
+    history,
+    kibanaVersion,
+    extensions,
+    routerHistory,
+    theme$,
+  }) => {
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
 
     return (
@@ -222,17 +234,22 @@ export const FleetAppContext: React.FC<{
             <EuiErrorBoundary>
               <ConfigContext.Provider value={config}>
                 <KibanaVersionContext.Provider value={kibanaVersion}>
-                  <EuiThemeProvider darkMode={isDarkMode}>
-                    <UIExtensionsContext.Provider value={extensions}>
-                      <FleetStatusProvider>
-                        <Router history={history}>
-                          <PackageInstallProvider notifications={startServices.notifications}>
-                            {children}
-                          </PackageInstallProvider>
-                        </Router>
-                      </FleetStatusProvider>
-                    </UIExtensionsContext.Provider>
-                  </EuiThemeProvider>
+                  <KibanaThemeProvider theme$={theme$}>
+                    <EuiThemeProvider darkMode={isDarkMode}>
+                      <UIExtensionsContext.Provider value={extensions}>
+                        <FleetStatusProvider>
+                          <Router history={history}>
+                            <PackageInstallProvider
+                              notifications={startServices.notifications}
+                              theme$={theme$}
+                            >
+                              {children}
+                            </PackageInstallProvider>
+                          </Router>
+                        </FleetStatusProvider>
+                      </UIExtensionsContext.Provider>
+                    </EuiThemeProvider>
+                  </KibanaThemeProvider>
                 </KibanaVersionContext.Provider>
               </ConfigContext.Provider>
             </EuiErrorBoundary>

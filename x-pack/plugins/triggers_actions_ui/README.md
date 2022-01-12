@@ -62,38 +62,38 @@ ID: `threshold`
 In the Kibana UI, this alert type is available as a select card on the Create Alert flyout:
 ![Index Threshold select card](https://i.imgur.com/a0bqLwC.png)
 
-AlertTypeModel:
+RuleTypeModel:
 
 ```
-export function getAlertType(): AlertTypeModel {
+export function getAlertType(): RuleTypeModel {
   return {
     id: '.index-threshold',
     name: 'Index threshold',
     iconClass: 'alert',
-    alertParamsExpression: lazy(() => import('./index_threshold_expression')),
+    ruleParamsExpression: lazy(() => import('./index_threshold_expression')),
     validate: validateAlertType,
     requiresAppContext: false,
   };
 }
 ```
 
-alertParamsExpression should be a lazy loaded React component extending an expression using `EuiExpression` components:
+ruleParamsExpression should be a lazy loaded React component extending an expression using `EuiExpression` components:
 ![Index Threshold Alert expression form](https://i.imgur.com/Ysk1ljY.png)
 
 ```
 interface IndexThresholdProps {
-  alertParams: IndexThresholdAlertParams;
-  setAlertParams: (property: string, value: any) => void;
-  setAlertProperty: (key: string, value: any) => void;
+  ruleParams: IndexThresholdAlertParams;
+  setRuleParams: (property: string, value: any) => void;
+  setRuleProperty: (key: string, value: any) => void;
   errors: { [key: string]: string[] };
 }
 ```
 
 |Property|Description|
 |---|---|
-|alertParams|Set of Alert params relevant for the index threshold alert type.|
-|setAlertParams|Alert reducer method, which is used to create a new copy of alert object with the changed params property any subproperty value.|
-|setAlertProperty|Alert reducer method, which is used to create a new copy of alert object with the changed any direct alert property value.|
+|ruleParams|Set of Alert params relevant for the index threshold alert type.|
+|setRuleParams|Alert reducer method, which is used to create a new copy of alert object with the changed params property any subproperty value.|
+|setRuleProperty|Alert reducer method, which is used to create a new copy of alert object with the changed any direct alert property value.|
 |errors|Alert level errors tracking object.|
 
 
@@ -104,12 +104,12 @@ const [{ alert }, dispatch] = useReducer(alertReducer, { alert: initialAlert });
 
 ...
 
-const setAlertProperty = (key: string, value: any) => {
+const setRuleProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
   };
 
-  const setAlertParams = (key: string, value: any) => {
-    dispatch({ command: { type: 'setAlertParams' }, payload: { key, value } });
+  const setRuleParams = (key: string, value: any) => {
+    dispatch({ command: { type: 'setRuleParams' }, payload: { key, value } });
   };
 
   const setScheduleProperty = (key: string, value: any) => {
@@ -146,7 +146,7 @@ export const alertReducer = (state: any, action: AlertReducerAction) => {
     case 'setAlertActionParams': {   //
     ....
     // create a new alert state with set new value to any subproperty for a 'params' alert property
-    case 'setAlertParams': {
+    case 'setRuleParams': {
       const { key, value } = payload;
       if (isEqual(alert.params[key], value)) {
         return state;
@@ -175,9 +175,9 @@ The Expression component should be lazy loaded which means it'll have to be the 
 
 ```
 export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThresholdProps> = ({
-  alertParams,
-  setAlertParams,
-  setAlertProperty,
+  ruleParams,
+  setRuleParams,
+  setRuleProperty,
   errors,
 }) => {
 
@@ -188,7 +188,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<IndexThr
     errorKey =>
       expressionFieldsWithValidation.includes(errorKey) &&
       errors[errorKey].length >= 1 &&
-      (alertParams as { [key: string]: any })[errorKey] !== undefined
+      (ruleParams as { [key: string]: any })[errorKey] !== undefined
   );
 
   ....
@@ -234,14 +234,14 @@ Index Threshold Alert form with validation:
 
 ## Alert type model definition
 
-Each alert type should be defined as `AlertTypeModel` object with the these properties:
+Each alert type should be defined as `RuleTypeModel` object with the these properties:
 ```
   id: string;
   name: string;
   iconClass: string;
-  validate: (alertParams: any) => ValidationResult;
-  alertParamsExpression: React.LazyExoticComponent<
-        ComponentType<AlertTypeParamsExpressionProps<AlertParamsType>>
+  validate: (ruleParams: any) => ValidationResult;
+  ruleParamsExpression: React.LazyExoticComponent<
+        ComponentType<RuleTypeParamsExpressionProps<AlertParamsType>>
       >;
   defaultActionMessage?: string;
 ```
@@ -251,7 +251,7 @@ Each alert type should be defined as `AlertTypeModel` object with the these prop
 |name|Name of the alert type that will be displayed on the select card in the UI.|
 |iconClass|Icon of the alert type that will be displayed on the select card in the UI.|
 |validate|Validation function for the alert params.|
-|alertParamsExpression| A lazy loaded React component for building UI of the current alert type params.|
+|ruleParamsExpression| A lazy loaded React component for building UI of the current alert type params.|
 |defaultActionMessage|Optional property for providing default message for all added actions with `message` property.|
 |requiresAppContext|Define if alert type is enabled for create and edit in the alerting management UI.|
 
@@ -259,7 +259,7 @@ IMPORTANT: The current UI supports a single action group only.
 Action groups are mapped from the server API result for [GET /api/alerts/list_alert_types: List alert types](https://github.com/elastic/kibana/tree/main/x-pack/plugins/alerting#get-apialerttypes-list-alert-types).
 Server side alert type model:
 ```
-export interface AlertType {
+export interface RuleType {
   id: string;
   name: string;
   validate?: {
@@ -286,7 +286,7 @@ It should be done by importing dependency `TriggersAndActionsUIPublicPluginSetup
 
 ```
 function getSomeNewAlertType() {
-  return { ... } as AlertTypeModel;
+  return { ... } as RuleTypeModel;
 }
 
 triggersActionsUi.ruleTypeRegistry.register(getSomeNewAlertType());
@@ -296,31 +296,31 @@ triggersActionsUi.ruleTypeRegistry.register(getSomeNewAlertType());
 
 Before registering a UI for a new Alert Type, you should first register the type on the server-side by following the Alerting guide: https://github.com/elastic/kibana/tree/main/x-pack/plugins/alerting#example 
 
-Alert type UI is expected to be defined as `AlertTypeModel` object.
+Alert type UI is expected to be defined as `RuleTypeModel` object.
 
 Below is a list of steps that should be done to build and register a new alert type with the name `Example Alert Type`:
 
-1. At any suitable place in Kibana, create a file, which will expose an object implementing interface [AlertTypeModel](https://github.com/elastic/kibana/blob/55b7905fb5265b73806006e7265739545d7521d0/x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/types.ts#L83). Example:
+1. At any suitable place in Kibana, create a file, which will expose an object implementing interface [RuleTypeModel](https://github.com/elastic/kibana/blob/55b7905fb5265b73806006e7265739545d7521d0/x-pack/legacy/plugins/triggers_actions_ui/np_ready/public/types.ts#L83). Example:
 ```
 import { lazy } from 'react';
-import { AlertTypeModel } from '../../../../types';
+import { RuleTypeModel } from '../../../../types';
 import { validateExampleAlertType } from './validation';
 
-export function getAlertType(): AlertTypeModel {
+export function getAlertType(): RuleTypeModel {
   return {
     id: 'example',
     name: 'Example Alert Type',
     iconClass: 'bell',
-    alertParamsExpression: lazy(() => import('./expression')),
+    ruleParamsExpression: lazy(() => import('./expression')),
     validate: validateExampleAlertType,
     defaultActionMessage: 'Alert [{{ctx.metadata.name}}] has exceeded the threshold',
     requiresAppContext: false,
   };
 }
 ```
-Fields of this object `AlertTypeModel` will be mapped properly in the UI below.
+Fields of this object `RuleTypeModel` will be mapped properly in the UI below.
 
-2. Define `alertParamsExpression` as `React.FunctionComponent` - this is the form for filling Alert params based on the current Alert type.
+2. Define `ruleParamsExpression` as `React.FunctionComponent` - this is the form for filling Alert params based on the current Alert type.
 ```
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -377,7 +377,7 @@ This alert type form becomes available, when the card of `Example Alert Type` is
 Each expression word here is `EuiExpression` component and implements the basic aggregation, grouping and comparison methods.
 Expression components, which can be embedded to different alert types, are described here [Common expression components](#common-expression-components).
 
-3. Define alert type params validation using the property of `AlertTypeModel` `validate`: 
+3. Define alert type params validation using the property of `RuleTypeModel` `validate`: 
 ```
 import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '../../../../types';
@@ -428,7 +428,7 @@ Click on the select card for `Example Alert Type` to open the expression form th
 <WhenExpression
   aggType={aggType ?? DEFAULT_VALUES.AGGREGATION_TYPE}
   onChangeSelectedAggType={(selectedAggType: string) =>
-    setAlertParams('aggType', selectedAggType)
+    setRuleParams('aggType', selectedAggType)
   }
 />
 ```
@@ -464,7 +464,7 @@ OF expression is available, if aggregation type requires selecting data fields f
   aggType={aggType}
   errors={errors}
   onChangeSelectedAggField={(selectedAggField?: string) =>
-    setAlertParams('aggField', selectedAggField)
+    setRuleParams('aggField', selectedAggField)
   }
 />
 ```
@@ -506,12 +506,12 @@ interface OfExpressionProps {
   termSize={termSize}
   errors={errors}
   fields={esFields}
-  onChangeSelectedGroupBy={selectedGroupBy => setAlertParams('groupBy', selectedGroupBy)}
+  onChangeSelectedGroupBy={selectedGroupBy => setRuleParams('groupBy', selectedGroupBy)}
   onChangeSelectedTermField={selectedTermField =>
-    setAlertParams('termField', selectedTermField)
+    setRuleParams('termField', selectedTermField)
   }
   onChangeSelectedTermSize={selectedTermSize =>
-    setAlertParams('termSize', selectedTermSize)
+    setRuleParams('termSize', selectedTermSize)
   }
 />
 ```
@@ -558,10 +558,10 @@ interface GroupByExpressionProps {
   timeWindowUnit={timeWindowUnit || ''}
   errors={errors}
   onChangeWindowSize={(selectedWindowSize: any) =>
-    setAlertParams('timeWindowSize', selectedWindowSize)
+    setRuleParams('timeWindowSize', selectedWindowSize)
   }
   onChangeWindowUnit={(selectedWindowUnit: any) =>
-    setAlertParams('timeWindowUnit', selectedWindowUnit)
+    setRuleParams('timeWindowUnit', selectedWindowUnit)
   }
 />
 ```
@@ -598,10 +598,10 @@ interface ForLastExpressionProps {
   threshold={threshold}
   errors={errors}
   onChangeSelectedThreshold={selectedThresholds =>
-    setAlertParams('threshold', selectedThresholds)
+    setRuleParams('threshold', selectedThresholds)
   }
   onChangeSelectedThresholdComparator={selectedThresholdComparator =>
-    setAlertParams('thresholdComparator', selectedThresholdComparator)
+    setRuleParams('thresholdComparator', selectedThresholdComparator)
   }
 />
 ```
@@ -675,7 +675,7 @@ const ThresholdSpecifier = (
 ```
 
 This component takes two props, one which is required (`actionGroup`) and one which is alert type specific (`setThreshold`).
-The `actionGroup` will be populated by the `AlertConditions` component, but `setThreshold` will have to be provided by the AlertType itself.
+The `actionGroup` will be populated by the `AlertConditions` component, but `setThreshold` will have to be provided by the RuleType itself.
 
 To understand how this is used, lets take a closer look at `actionGroup`:
 
@@ -738,7 +738,7 @@ const DEFAULT_THRESHOLDS: ThresholdAlertTypeParams['threshold] = {
     },
   ]}
   onInitializeConditionsFor={(actionGroup) => {
-    setAlertParams('thresholds', {
+    setRuleParams('thresholds', {
       ...thresholds,
       ...pick(DEFAULT_THRESHOLDS, actionGroup.id),
     });
@@ -746,12 +746,12 @@ const DEFAULT_THRESHOLDS: ThresholdAlertTypeParams['threshold] = {
 >
   <AlertConditionsGroup
     onResetConditionsFor={(actionGroup) => {
-      setAlertParams('thresholds', omit(thresholds, actionGroup.id));
+      setRuleParams('thresholds', omit(thresholds, actionGroup.id));
     }}
   >
     <TShirtSelector
       setTShirtThreshold={(actionGroup) => {
-        setAlertParams('thresholds', {
+        setRuleParams('thresholds', {
           ...thresholds,
           [actionGroup.id]: actionGroup.conditions,
         });
@@ -1117,6 +1117,7 @@ Each action type should be defined as an `ActionTypeModel` object with the follo
   validateParams: (actionParams: any) => Promise<ValidationResult>;
   actionConnectorFields: React.FunctionComponent<any> | null;
   actionParamsFields: React.LazyExoticComponent<ComponentType<ActionParamsProps<ActionParams>>>;
+  customConnectorSelectItem?: CustomConnectorSelectionItem;
 ```
 |Property|Description|
 |---|---|
@@ -1127,6 +1128,20 @@ Each action type should be defined as an `ActionTypeModel` object with the follo
 |validateParams|Validation function for action params.|
 |actionConnectorFields|A lazy loaded React component for building UI of current action type connector.|
 |actionParamsFields|A lazy loaded React component for building UI of current action type params. Displayed as a part of Create Alert flyout.|
+|customConnectorSelectItem|Optional, an object for customizing the selection row of the action connector form.|
+
+### CustomConnectorSelectionItem Properties
+
+```
+  getText: (connector: ActionConnector) => string;
+  getComponent: (connector: ActionConnector) => React.
+    LazyExoticComponent<ComponentType<{ actionConnector: ActionConnector }> | undefined;
+```
+
+|Property|Description|
+|---|---|
+|getText|Function for returning the text to display for the row.|
+|getComponent|Function for returning a lazy loaded React component for customizing the selection row of the action connector form. Or undefined if if no customization is needed.|
 
 ## Register action type model
 
@@ -1413,7 +1428,7 @@ Then this dependencies will be used to embed Actions form or register your own a
           setActionIdByIndex={(id: string, index: number) => {
             initialAlert.actions[index].id = id;
           }}
-          setAlertProperty={(_updatedActions: AlertAction[]) => {}}
+          setRuleProperty={(_updatedActions: AlertAction[]) => {}}
           setActionParamsProperty={(key: string, value: any, index: number) =>
             (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
           }
@@ -1436,7 +1451,7 @@ interface ActionAccordionFormProps {
   actionGroups?: ActionGroup[];
   setActionIdByIndex: (id: string, index: number) => void;
   setActionGroupIdByIndex?: (group: string, index: number) => void;
-  setAlertProperty: (actions: AlertAction[]) => void;
+  setRuleProperty: (actions: AlertAction[]) => void;
   setActionParamsProperty: (key: string, value: any, index: number) => void;
   http: HttpSetup;
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -1457,7 +1472,7 @@ interface ActionAccordionFormProps {
 |actionGroups|Optional. List of action groups to which new action can be assigned. The RunWhen field is only displayed when these action groups are specified|
 |setActionIdByIndex|Function for changing action 'id' by the proper index in alert.actions array.|
 |setActionGroupIdByIndex|Function for changing action 'group' by the proper index in alert.actions array.|
-|setAlertProperty|Function for changing alert property 'actions'. Used when deleting action from the array to reset it.|
+|setRuleProperty|Function for changing alert property 'actions'. Used when deleting action from the array to reset it.|
 |setActionParamsProperty|Function for changing action key/value property by index in alert.actions array.|
 |http|HttpSetup needed for executing API calls.|
 |actionTypeRegistry|Registry for action types.|

@@ -7,15 +7,14 @@
  */
 
 import React, { useState, Fragment, useMemo, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHorizontalRule, EuiText } from '@elastic/eui';
 import { CONTEXT_STEP_SETTING, DOC_HIDE_TIME_COLUMN_SETTING } from '../../../common';
-import { IndexPattern } from '../../../../data/common';
-import { SortDirection } from '../../../../data/public';
+import { DataView, SortDirection } from '../../../../data/common';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
 import { DiscoverGrid } from '../../components/discover_grid/discover_grid';
-import { DocViewFilterFn, ElasticSearchHit } from '../../services/doc_views/doc_views_types';
+import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { AppState } from './services/context_state';
 import { SurrDocType } from './services/context';
 import { DiscoverServices } from '../../build_services';
@@ -23,6 +22,7 @@ import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { EsHitRecordList } from '../types';
 import { SortPairArr } from '../../components/doc_table/lib/get_sort';
+import { ElasticSearchHit } from '../../types';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -30,7 +30,7 @@ export interface ContextAppContentProps {
   onRemoveColumn: (columnsName: string) => void;
   onSetColumns: (columnsNames: string[], hideTimeColumn: boolean) => void;
   services: DiscoverServices;
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   predecessorCount: number;
   successorCount: number;
   rows: EsHitRecordList;

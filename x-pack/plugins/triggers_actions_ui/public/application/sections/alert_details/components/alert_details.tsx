@@ -26,12 +26,12 @@ import {
   EuiEmptyPrompt,
   EuiPageTemplate,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertExecutionStatusErrorReasons } from '../../../../../../alerting/common';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
-import { Alert, AlertType, ActionType, ActionConnector } from '../../../../types';
+import { Rule, RuleType, ActionType, ActionConnector } from '../../../../types';
 import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkAlertOperations,
@@ -46,8 +46,8 @@ import { alertReducer } from '../../alert_form/alert_reducer';
 import { loadAllActions as loadConnectors } from '../../../lib/action_connector_api';
 
 export type AlertDetailsProps = {
-  alert: Alert;
-  alertType: AlertType;
+  alert: Rule;
+  alertType: RuleType;
   actionTypes: ActionType[];
   requestRefresh: () => Promise<void>;
 } & Pick<BulkOperationsComponentOpts, 'disableAlert' | 'enableAlert' | 'unmuteAlert' | 'muteAlert'>;
@@ -72,7 +72,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     http,
   } = useKibana().services;
   const [{}, dispatch] = useReducer(alertReducer, { alert });
-  const setInitialAlert = (value: Alert) => {
+  const setInitialAlert = (value: Rule) => {
     dispatch({ command: { type: 'setAlert' }, payload: { key: 'alert', value } });
   };
 

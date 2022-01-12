@@ -10,7 +10,7 @@ import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { ToastsApi } from 'kibana/public';
 import { AlertsRoute, getAlertSummary } from './alerts_route';
-import { Alert, AlertSummary, AlertType } from '../../../../types';
+import { Rule, AlertSummary, RuleType } from '../../../../types';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 jest.mock('../../../../common/lib/kibana');
 
@@ -101,7 +101,7 @@ function mockStateSetter() {
   };
 }
 
-function mockRule(overloads: Partial<Alert> = {}): Alert {
+function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
     id: uuid.v4(),
     enabled: true,
@@ -129,7 +129,7 @@ function mockRule(overloads: Partial<Alert> = {}): Alert {
   };
 }
 
-function mockRuleType(overloads: Partial<AlertType> = {}): AlertType {
+function mockRuleType(overloads: Partial<RuleType> = {}): RuleType {
   return {
     id: 'test.testRuleType',
     name: 'My Test Rule Type',

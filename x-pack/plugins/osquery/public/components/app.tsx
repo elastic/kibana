@@ -8,7 +8,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 
 import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -57,7 +57,7 @@ const OsqueryAppComponent = () => {
   }
 
   return (
-    <Container>
+    <Container id="osquery-app">
       <Wrapper>
         <Nav>
           <EuiFlexGroup gutterSize="l" alignItems="center">

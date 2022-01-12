@@ -17,7 +17,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 import type { IBasePath } from 'src/core/server';

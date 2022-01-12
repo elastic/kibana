@@ -10,7 +10,7 @@ import { isEqual } from 'lodash';
 
 import { EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { WATCH_TYPES } from '../../../../../common/constants';
 import { BaseWatch } from '../../../../../common/types/watch_types';

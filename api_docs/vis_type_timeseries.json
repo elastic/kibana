@@ -120,7 +120,13 @@
           "description": [],
           "signature": [
             "(requestContext: ",
-            "DataRequestHandlerContext",
+            {
+              "pluginId": "data",
+              "scope": "server",
+              "docId": "kibDataSearchPluginApi",
+              "section": "def-server.DataRequestHandlerContext",
+              "text": "DataRequestHandlerContext"
+            },
             ", fakeRequest: ",
             {
               "pluginId": "core",
@@ -144,7 +150,13 @@
               "label": "requestContext",
               "description": [],
               "signature": [
-                "DataRequestHandlerContext"
+                {
+                  "pluginId": "data",
+                  "scope": "server",
+                  "docId": "kibDataSearchPluginApi",
+                  "section": "def-server.DataRequestHandlerContext",
+                  "text": "DataRequestHandlerContext"
+                }
               ],
               "path": "src/plugins/vis_types/timeseries/server/plugin.ts",
               "deprecated": false,

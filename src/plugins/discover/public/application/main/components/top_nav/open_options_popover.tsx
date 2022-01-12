@@ -8,9 +8,9 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nStart } from 'kibana/public';
+import { CoreTheme, I18nStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
   EuiButton,
@@ -22,8 +22,10 @@ import {
   EuiTextAlign,
 } from '@elastic/eui';
 import './open_options_popover.scss';
+import { Observable } from 'rxjs';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
 import { getServices } from '../../../../kibana_services';
+import { KibanaThemeProvider } from '../../../../../../kibana_react/public';
 
 const container = document.createElement('div');
 let isOpen = false;
@@ -125,9 +127,11 @@ function onClose() {
 export function openOptionsPopover({
   I18nContext,
   anchorElement,
+  theme$,
 }: {
   I18nContext: I18nStart['Context'];
   anchorElement: HTMLElement;
+  theme$: Observable<CoreTheme>;
 }) {
   if (isOpen) {
     onClose();
@@ -139,7 +143,9 @@ export function openOptionsPopover({
 
   const element = (
     <I18nContext>
-      <OptionsPopover onClose={onClose} anchorElement={anchorElement} />
+      <KibanaThemeProvider theme$={theme$}>
+        <OptionsPopover onClose={onClose} anchorElement={anchorElement} />
+      </KibanaThemeProvider>
     </I18nContext>
   );
   ReactDOM.render(element, container);

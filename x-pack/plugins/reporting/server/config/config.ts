@@ -52,10 +52,20 @@ interface KbnServerConfigType {
   };
 }
 
+/**
+ * @internal
+ */
 export interface ReportingConfig extends Config<ReportingConfigType> {
   kbnConfig: Config<KbnServerConfigType>;
 }
 
+/**
+ * @internal
+ * @param {PluginInitializerContext<ReportingConfigType>} initContext
+ * @param {CoreSetup} core
+ * @param {LevelLogger} logger
+ * @returns {Promise<ReportingConfig>}
+ */
 export const buildConfig = async (
   initContext: PluginInitializerContext<ReportingConfigType>,
   core: CoreSetup,

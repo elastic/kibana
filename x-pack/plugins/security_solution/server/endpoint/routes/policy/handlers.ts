@@ -11,10 +11,13 @@ import { policyIndexPattern } from '../../../../common/endpoint/constants';
 import {
   GetPolicyResponseSchema,
   GetAgentPolicySummaryRequestSchema,
+  GetEndpointPackagePolicyRequestSchema,
 } from '../../../../common/endpoint/schema/policy';
 import { EndpointAppContext } from '../../types';
 import { getAgentPolicySummary, getPolicyResponseByAgentId } from './service';
 import { GetAgentSummaryResponse } from '../../../../common/endpoint/types';
+import { wrapErrorIfNeeded } from '../../utils';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../fleet/common';
 
 export const getHostPolicyResponseHandler = function (): RequestHandler<
   undefined,
@@ -39,11 +42,10 @@ export const getHostPolicyResponseHandler = function (): RequestHandler<
 export const getAgentPolicySummaryHandler = function (
   endpointAppContext: EndpointAppContext
 ): RequestHandler<undefined, TypeOf<typeof GetAgentPolicySummaryRequestSchema.query>, undefined> {
-  return async (context, request, response) => {
+  return async (_, request, response) => {
     const result = await getAgentPolicySummary(
       endpointAppContext,
-      context.core.savedObjects.client,
-      context.core.elasticsearch.client.asCurrentUser,
+      request,
       request.query.package_name,
       request.query?.policy_id || undefined
     );
@@ -61,5 +63,35 @@ export const getAgentPolicySummaryHandler = function (
     return response.ok({
       body,
     });
+  };
+};
+
+export const getPolicyListHandler = function (
+  endpointAppContext: EndpointAppContext
+): RequestHandler<
+  undefined,
+  TypeOf<typeof GetEndpointPackagePolicyRequestSchema.query>,
+  undefined
+> {
+  return async (context, request, response) => {
+    const soClient = context.core.savedObjects.client;
+    const fleetServices = endpointAppContext.service.getScopedFleetServices(request);
+    const endpointFilteredKuery = `${
+      request?.query?.kuery ? `(${request.query.kuery}) and ` : ''
+    }${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`;
+    try {
+      const listResponse = await fleetServices.packagePolicy.list(soClient, {
+        ...request.query,
+        perPage: request.query.pageSize,
+        sortField: request.query.sort,
+        kuery: endpointFilteredKuery,
+      });
+
+      return response.ok({
+        body: listResponse,
+      });
+    } catch (error) {
+      throw wrapErrorIfNeeded(error);
+    }
   };
 };

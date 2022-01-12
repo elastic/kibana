@@ -7,7 +7,7 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { Store } from 'redux';
 import { Provider } from 'react-redux';
 import type { Storage } from '../../../../../src/plugins/kibana_utils/public';

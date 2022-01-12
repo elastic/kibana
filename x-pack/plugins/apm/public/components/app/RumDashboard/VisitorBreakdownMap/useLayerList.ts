@@ -155,7 +155,7 @@ export function useLayerList() {
     maxZoom: 24,
     alpha: 0.75,
     visible: true,
-    type: LAYER_TYPE.VECTOR,
+    type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 
   ES_TERM_SOURCE_REGION.whereQuery = getWhereQuery(serviceName!);
@@ -179,7 +179,7 @@ export function useLayerList() {
     maxZoom: 24,
     alpha: 0.75,
     visible: true,
-    type: LAYER_TYPE.VECTOR,
+    type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 
   return [

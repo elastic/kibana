@@ -10,7 +10,12 @@ import { Type, Node } from 'ts-morph';
 import { TypeKind } from '../types';
 
 export function getTypeKind(node: Node): TypeKind {
-  if (Node.isTypeAliasDeclaration(node)) {
+  if (Node.isIndexSignatureDeclaration(node)) {
+    return TypeKind.IndexSignature;
+  } else if (Node.isConstructorDeclaration(node)) {
+    // For some reason constructors come back as Any type.
+    return TypeKind.FunctionKind;
+  } else if (Node.isTypeAliasDeclaration(node)) {
     return TypeKind.TypeKind;
   } else {
     return getTypeKindForType(node.getType());

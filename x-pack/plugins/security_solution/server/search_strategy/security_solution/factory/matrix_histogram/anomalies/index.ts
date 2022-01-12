@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MatrixHistogramTypeToAggName } from '../../../../../../common';
+import { MatrixHistogramTypeToAggName } from '../../../../../../common/search_strategy';
 import { buildAnomaliesHistogramQuery } from './query.anomalies_histogram.dsl';
 
 export const anomaliesMatrixHistogramConfig = {

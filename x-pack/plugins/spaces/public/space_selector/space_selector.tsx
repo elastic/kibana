@@ -26,9 +26,10 @@ import React, { Component, Fragment } from 'react';
 import ReactDOM from 'react-dom';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { CoreStart } from 'src/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { AppMountParameters, CoreStart } from 'src/core/public';
 
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import type { Space } from '../../common';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../common/constants';
 import type { SpacesManager } from '../spaces_manager';
@@ -213,12 +214,18 @@ export class SpaceSelector extends Component<Props, State> {
   };
 }
 
-export const renderSpaceSelectorApp = (i18nStart: CoreStart['i18n'], el: Element, props: Props) => {
+export const renderSpaceSelectorApp = (
+  i18nStart: CoreStart['i18n'],
+  { element, theme$ }: Pick<AppMountParameters, 'element' | 'theme$'>,
+  props: Props
+) => {
   ReactDOM.render(
     <i18nStart.Context>
-      <SpaceSelector {...props} />
+      <KibanaThemeProvider theme$={theme$}>
+        <SpaceSelector {...props} />
+      </KibanaThemeProvider>
     </i18nStart.Context>,
-    el
+    element
   );
-  return () => ReactDOM.unmountComponentAtNode(el);
+  return () => ReactDOM.unmountComponentAtNode(element);
 };

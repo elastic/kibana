@@ -7,7 +7,7 @@
 
 import React, { Fragment, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiLink, EuiButton } from '@elastic/eui';
 import { ApplicationStart } from 'kibana/public';
 import { useHistory, useLocation } from 'react-router-dom';

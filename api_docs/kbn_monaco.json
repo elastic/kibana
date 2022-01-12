@@ -415,7 +415,7 @@
             "label": "kind",
             "description": [],
             "signature": [
-              "\"type\" | \"field\" | \"keyword\" | \"property\" | \"method\" | \"class\" | \"constructor\""
+              "\"keyword\" | \"type\" | \"field\" | \"property\" | \"method\" | \"class\" | \"constructor\""
             ],
             "path": "packages/kbn-monaco/src/painless/types.ts",
             "deprecated": false
@@ -512,12 +512,20 @@
           {
             "parentPluginId": "@kbn/monaco",
             "id": "def-common.SyntaxErrors.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[modelId: string]: EditorError[]",
             "description": [],
             "signature": [
-              "any"
+              "[modelId: string]:  ",
+              {
+                "pluginId": "@kbn/monaco",
+                "scope": "common",
+                "docId": "kibKbnMonacoPluginApi",
+                "section": "def-common.EditorError",
+                "text": "EditorError"
+              },
+              "[]"
             ],
             "path": "packages/kbn-monaco/src/types.ts",
             "deprecated": false
@@ -536,7 +544,7 @@
         "label": "PainlessCompletionKind",
         "description": [],
         "signature": [
-          "\"type\" | \"field\" | \"keyword\" | \"property\" | \"method\" | \"class\" | \"constructor\""
+          "\"keyword\" | \"type\" | \"field\" | \"property\" | \"method\" | \"class\" | \"constructor\""
         ],
         "path": "packages/kbn-monaco/src/painless/types.ts",
         "deprecated": false,
@@ -558,6 +566,43 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/monaco",
+        "id": "def-common.EsqlLang",
+        "type": "Object",
+        "tags": [],
+        "label": "EsqlLang",
+        "description": [],
+        "path": "packages/kbn-monaco/src/esql/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.EsqlLang.ID",
+            "type": "string",
+            "tags": [],
+            "label": "ID",
+            "description": [],
+            "path": "packages/kbn-monaco/src/esql/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.EsqlLang.lexerRules",
+            "type": "Object",
+            "tags": [],
+            "label": "lexerRules",
+            "description": [],
+            "signature": [
+              "languages",
+              ".IMonarchLanguage"
+            ],
+            "path": "packages/kbn-monaco/src/esql/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/monaco",
         "id": "def-common.PainlessLang",

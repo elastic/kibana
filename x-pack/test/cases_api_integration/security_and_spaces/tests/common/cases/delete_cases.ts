@@ -92,25 +92,13 @@ export default ({ getService }: FtrProviderContext): void => {
       const creationUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
 
       expect(creationUserAction).to.eql({
-        action_field: [
-          'description',
-          'status',
-          'tags',
-          'title',
-          'connector',
-          'settings',
-          'owner',
-          'comment',
-        ],
         action: 'delete',
-        action_by: defaultUser,
-        old_value: null,
-        new_value: null,
-        new_val_connector_id: null,
-        old_val_connector_id: null,
-        case_id: `${postedCase.id}`,
+        type: 'delete_case',
+        created_by: defaultUser,
+        case_id: postedCase.id,
         comment_id: null,
         sub_case_id: '',
+        payload: {},
         owner: 'securitySolutionFixture',
       });
     });

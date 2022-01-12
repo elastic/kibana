@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { getESAssetMetadata } from '../services/epm/elasticsearch/meta';
+
+const meta = getESAssetMetadata();
+
 export const FLEET_FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
 export const FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME = '.fleet_component_template-1';
 
 export const FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT = {
-  _meta: {},
+  _meta: meta,
   template: {
     settings: {
       index: {
@@ -36,10 +40,14 @@ export const FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT = {
   },
 };
 
-export const FLEET_FINAL_PIPELINE_VERSION = 1;
+export const FLEET_FINAL_PIPELINE_VERSION = 2;
+
 // If the content is updated you probably need to update the FLEET_FINAL_PIPELINE_VERSION too to allow upgrade of the pipeline
 export const FLEET_FINAL_PIPELINE_CONTENT = `---
 version: ${FLEET_FINAL_PIPELINE_VERSION}
+_meta:
+  managed_by: ${meta.managed_by}
+  managed: ${meta.managed}
 description: >
   Final pipeline for processing all incoming Fleet Agent documents.
 processors:

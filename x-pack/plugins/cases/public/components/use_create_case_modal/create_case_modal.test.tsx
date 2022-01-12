@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 
 import { CreateCaseModal } from './create_case_modal';
 import { TestProviders } from '../../common/mock';
-import { SECURITY_SOLUTION_OWNER } from '../../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CreateCase } from '../create';
 
 jest.mock('../create', () => ({

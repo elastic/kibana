@@ -7,7 +7,8 @@
 
 import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
 import { EmbeddableEditorState } from 'src/plugins/embeddable/public';
-import { Filter, Query, SavedQuery } from '../../../../../src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { Query, SavedQuery } from '../../../../../src/plugins/data/public';
 import { Document } from '../persistence';
 
 import { TableInspectorAdapter } from '../editor_frame_service/types';

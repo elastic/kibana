@@ -358,12 +358,12 @@
                   {
                     "parentPluginId": "mapsEms",
                     "id": "def-public.IServiceSettings.setQueryParams.$1.Unnamed",
-                    "type": "Any",
+                    "type": "IndexSignature",
                     "tags": [],
-                    "label": "Unnamed",
+                    "label": "[p: string]: string",
                     "description": [],
                     "signature": [
-                      "any"
+                      "[p: string]:  string"
                     ],
                     "path": "src/plugins/maps_ems/public/service_settings/service_settings_types.ts",
                     "deprecated": false

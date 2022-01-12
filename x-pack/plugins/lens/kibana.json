@@ -18,7 +18,9 @@
     "embeddable",
     "share",
     "presentationUtil",
-    "dataViewFieldEditor"
+    "dataViewFieldEditor",
+    "expressionGauge",
+    "expressionHeatmap"
   ],
   "optionalPlugins": [
     "usageCollection",

@@ -76,7 +76,7 @@
             "label": "component",
             "description": [],
             "signature": [
-              "React.ComponentClass<{}, any> | React.FunctionComponent<{}> | undefined"
+              "React.ComponentType<{}> | undefined"
             ],
             "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/classes.ts",
             "deprecated": false
@@ -987,6 +987,32 @@
       },
       {
         "parentPluginId": "pluginA",
+        "id": "def-public.InterfaceWithIndexSignature",
+        "type": "Interface",
+        "tags": [],
+        "label": "InterfaceWithIndexSignature",
+        "description": [],
+        "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "pluginA",
+            "id": "def-public.InterfaceWithIndexSignature.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string}]: { foo: string; }",
+            "description": [],
+            "signature": [
+              "[key: string]:  { foo: string; }"
+            ],
+            "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "pluginA",
         "id": "def-public.IReturnAReactComponent",
         "type": "Interface",
         "tags": [],
@@ -1215,7 +1241,7 @@
             "section": "def-public.MyProps",
             "text": "MyProps"
           },
-          ">"
+          ", string | React.JSXElementConstructor<any>>"
         ],
         "path": "packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/types.ts",
         "deprecated": false,
@@ -2330,7 +2356,7 @@
           "deprecated": false,
           "children": [],
           "returnComment": [
-            "The currently selected {@link SearchLanguage}"
+            "The currently selected {@link SearchLanguage }"
           ]
         }
       ],

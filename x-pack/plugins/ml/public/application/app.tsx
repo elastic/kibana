@@ -16,6 +16,7 @@ import { Storage } from '../../../../../src/plugins/kibana_utils/public';
 
 import {
   KibanaContextProvider,
+  KibanaThemeProvider,
   RedirectAppLinks,
 } from '../../../../../src/plugins/kibana_react/public';
 import { setDependencyCache, clearCache } from './util/dependency_cache';
@@ -99,14 +100,16 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams }) => {
     <RedirectAppLinks application={coreStart.application}>
       <ApplicationUsageTrackingProvider>
         <I18nContext>
-          <KibanaContextProvider
-            services={{
-              ...services,
-              mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
-            }}
-          >
-            <MlRouter pageDeps={pageDeps} />
-          </KibanaContextProvider>
+          <KibanaThemeProvider theme$={appMountParams.theme$}>
+            <KibanaContextProvider
+              services={{
+                ...services,
+                mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
+              }}
+            >
+              <MlRouter pageDeps={pageDeps} />
+            </KibanaContextProvider>
+          </KibanaThemeProvider>
         </I18nContext>
       </ApplicationUsageTrackingProvider>
     </RedirectAppLinks>
@@ -119,15 +122,15 @@ export const renderApp = (
   appMountParams: AppMountParameters
 ) => {
   setDependencyCache({
-    indexPatterns: deps.data.indexPatterns,
     timefilter: deps.data.query.timefilter,
-    fieldFormats: deps.data.fieldFormats,
+    fieldFormats: deps.fieldFormats,
     autocomplete: deps.data.autocomplete,
     config: coreStart.uiSettings!,
     chrome: coreStart.chrome!,
     docLinks: coreStart.docLinks!,
     toastNotifications: coreStart.notifications.toasts,
     overlays: coreStart.overlays,
+    theme: coreStart.theme,
     recentlyAccessed: coreStart.chrome!.recentlyAccessed,
     basePath: coreStart.http.basePath,
     savedObjectsClient: coreStart.savedObjects.client,
@@ -154,5 +157,6 @@ export const renderApp = (
     mlLicense.unsubscribe();
     clearCache();
     ReactDOM.unmountComponentAtNode(appMountParams.element);
+    deps.data.search.session.clear();
   };
 };

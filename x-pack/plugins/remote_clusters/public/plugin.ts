@@ -43,7 +43,7 @@ export class RemoteClustersUIPlugin
           defaultMessage: 'Remote Clusters',
         }),
         order: 7,
-        mount: async ({ element, setBreadcrumbs, history }) => {
+        mount: async ({ element, setBreadcrumbs, history, theme$ }) => {
           const [core] = await getStartServices();
           const {
             chrome: { docTitle },
@@ -69,7 +69,8 @@ export class RemoteClustersUIPlugin
             element,
             i18nContext,
             { isCloudEnabled, cloudBaseUrl },
-            history
+            history,
+            theme$
           );
 
           return () => {

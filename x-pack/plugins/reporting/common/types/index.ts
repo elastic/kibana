@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import type { Size, LayoutParams } from './layout';
-import type { JobId, BaseParams, BaseParamsV2, BasePayload, BasePayloadV2 } from './base';
+import type { BaseParams, BaseParamsV2, BasePayload, BasePayloadV2, JobId } from './base';
 
-export type { JobId, BaseParams, BaseParamsV2, BasePayload, BasePayloadV2 };
-export type { Size, LayoutParams };
+export type { JobParamsPNG } from './export_types/png';
+export type { JobParamsPNGV2 } from './export_types/png_v2';
+export type { JobAppParamsPDF, JobParamsPDF } from './export_types/printable_pdf';
+export type { JobAppParamsPDFV2, JobParamsPDFV2 } from './export_types/printable_pdf_v2';
 export type {
   DownloadReportFn,
   IlmPolicyMigrationStatus,
@@ -18,21 +19,7 @@ export type {
   ManagementLinkFn,
   UrlOrUrlLocatorTuple,
 } from './url';
-export * from './export_types';
-
-export interface PageSizeParams {
-  pageMarginTop: number;
-  pageMarginBottom: number;
-  pageMarginWidth: number;
-  tableBorderWidth: number;
-  headingHeight: number;
-  subheadingHeight: number;
-}
-
-export interface PdfImageSize {
-  width: number;
-  height?: number;
-}
+export type { JobId, BaseParams, BaseParamsV2, BasePayload, BasePayloadV2 };
 
 export interface ReportDocumentHead {
   _id: string;
@@ -83,7 +70,6 @@ export interface ReportSource {
    */
   kibana_name?: string; // for troubleshooting
   kibana_id?: string; // for troubleshooting
-  browser_type?: string; // no longer used since chromium is the only option (used to allow phantomjs)
   timeout?: number; // for troubleshooting: the actual comparison uses the config setting xpack.reporting.queue.timeout
   max_attempts?: number; // for troubleshooting: the actual comparison uses the config setting xpack.reporting.capture.maxAttempts
   started_at?: string; // timestamp in UTC

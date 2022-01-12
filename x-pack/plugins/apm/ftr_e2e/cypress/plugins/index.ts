@@ -6,8 +6,7 @@
  */
 import Fs from 'fs';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
-import { SynthtraceEsClient } from '@elastic/apm-synthtrace';
-import { createLogger, LogLevel } from '@elastic/apm-synthtrace';
+import { apm, createLogger, LogLevel } from '@elastic/apm-synthtrace';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 
 // ***********************************************************
@@ -41,7 +40,7 @@ const plugin: Cypress.PluginConfig = (on, config) => {
     ...(isCloud ? { tls: { ca: Fs.readFileSync(CA_CERT_PATH, 'utf-8') } } : {}),
   });
 
-  const synthtraceEsClient = new SynthtraceEsClient(
+  const synthtraceEsClient = new apm.ApmSynthtraceEsClient(
     client,
     createLogger(LogLevel.info)
   );

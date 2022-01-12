@@ -74,8 +74,8 @@ export class ScreenshotsService extends FtrService {
     }
   }
 
-  async take(name: string, el?: WebElementWrapper) {
-    const path = resolve(this.SESSION_DIRECTORY, `${name}.png`);
+  async take(name: string, el?: WebElementWrapper, subDirectories: string[] = []) {
+    const path = resolve(this.SESSION_DIRECTORY, ...subDirectories, `${name}.png`);
     await this.capture(path, el);
     this.failureMetadata.addScreenshot(name, path);
   }

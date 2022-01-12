@@ -28,21 +28,153 @@
       },
       {
         "parentPluginId": "expressionShape",
+        "id": "def-public.getProgressRenderer",
+        "type": "Function",
+        "tags": [],
+        "label": "getProgressRenderer",
+        "description": [],
+        "signature": [
+          "(theme$?: ",
+          "Observable",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.CoreTheme",
+            "text": "CoreTheme"
+          },
+          ">) => () => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionRenderDefinition",
+            "text": "ExpressionRenderDefinition"
+          },
+          "<",
+          {
+            "pluginId": "expressionShape",
+            "scope": "common",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-common.ProgressOutput",
+            "text": "ProgressOutput"
+          },
+          ">"
+        ],
+        "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.getProgressRenderer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "theme$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreTheme",
+                "text": "CoreTheme"
+              },
+              ">"
+            ],
+            "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
+        "id": "def-public.getShapeRenderer",
+        "type": "Function",
+        "tags": [],
+        "label": "getShapeRenderer",
+        "description": [],
+        "signature": [
+          "(theme$?: ",
+          "Observable",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.CoreTheme",
+            "text": "CoreTheme"
+          },
+          ">) => () => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionRenderDefinition",
+            "text": "ExpressionRenderDefinition"
+          },
+          "<",
+          {
+            "pluginId": "expressionShape",
+            "scope": "common",
+            "docId": "kibExpressionShapePluginApi",
+            "section": "def-common.ShapeRendererConfig",
+            "text": "ShapeRendererConfig"
+          },
+          ">"
+        ],
+        "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.getShapeRenderer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "theme$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreTheme",
+                "text": "CoreTheme"
+              },
+              ">"
+            ],
+            "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "expressionShape",
         "id": "def-public.LazyProgressDrawer",
         "type": "Function",
         "tags": [],
         "label": "LazyProgressDrawer",
         "description": [],
         "signature": [
-          "React.ExoticComponent<Pick<Pick<",
+          "React.ExoticComponent<Pick<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
             "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeDrawerProps",
-            "text": "ShapeDrawerProps"
+            "section": "def-public.ShapeDrawerComponentProps",
+            "text": "ShapeDrawerComponentProps"
           },
-          ", \"children\" | \"ref\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\">, \"children\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\"> & React.RefAttributes<",
+          ", \"children\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\"> & React.RefAttributes<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -50,15 +182,15 @@
             "section": "def-public.ShapeRef",
             "text": "ShapeRef"
           },
-          ">> & { readonly _result: React.ForwardRefExoticComponent<Pick<Pick<",
+          ">> & { readonly _result: React.ForwardRefExoticComponent<Pick<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
             "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeDrawerProps",
-            "text": "ShapeDrawerProps"
+            "section": "def-public.ShapeDrawerComponentProps",
+            "text": "ShapeDrawerComponentProps"
           },
-          ", \"children\" | \"ref\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\">, \"children\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\"> & React.RefAttributes<",
+          ", \"children\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\"> & React.RefAttributes<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -96,15 +228,15 @@
         "label": "LazyShapeDrawer",
         "description": [],
         "signature": [
-          "React.ExoticComponent<Pick<Pick<",
+          "React.ExoticComponent<Pick<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
             "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeDrawerProps",
-            "text": "ShapeDrawerProps"
+            "section": "def-public.ShapeDrawerComponentProps",
+            "text": "ShapeDrawerComponentProps"
           },
-          ", \"children\" | \"ref\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\">, \"children\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\"> & React.RefAttributes<",
+          ", \"children\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\"> & React.RefAttributes<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -112,15 +244,15 @@
             "section": "def-public.ShapeRef",
             "text": "ShapeRef"
           },
-          ">> & { readonly _result: React.ForwardRefExoticComponent<Pick<Pick<",
+          ">> & { readonly _result: React.ForwardRefExoticComponent<Pick<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
             "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeDrawerProps",
-            "text": "ShapeDrawerProps"
+            "section": "def-public.ShapeDrawerComponentProps",
+            "text": "ShapeDrawerComponentProps"
           },
-          ", \"children\" | \"ref\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\">, \"children\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\"> & React.RefAttributes<",
+          ", \"children\" | \"shapeType\" | \"shapeAttributes\" | \"shapeContentAttributes\" | \"textAttributes\"> & React.RefAttributes<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -152,13 +284,21 @@
       },
       {
         "parentPluginId": "expressionShape",
-        "id": "def-public.progressRenderer",
+        "id": "def-public.progressRendererFactory",
         "type": "Function",
         "tags": [],
-        "label": "progressRenderer",
+        "label": "progressRendererFactory",
         "description": [],
         "signature": [
-          "() => ",
+          "(core: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.CoreSetup",
+            "text": "CoreSetup"
+          },
+          "<object, unknown>) => () => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -178,19 +318,49 @@
         ],
         "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx",
         "deprecated": false,
-        "children": [],
+        "children": [
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.progressRendererFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>"
+            ],
+            "path": "src/plugins/expression_shape/public/expression_renderers/progress_renderer.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "expressionShape",
-        "id": "def-public.shapeRenderer",
+        "id": "def-public.shapeRendererFactory",
         "type": "Function",
         "tags": [],
-        "label": "shapeRenderer",
+        "label": "shapeRendererFactory",
         "description": [],
         "signature": [
-          "() => ",
+          "(core: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.CoreSetup",
+            "text": "CoreSetup"
+          },
+          "<object, unknown>) => () => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -210,7 +380,29 @@
         ],
         "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx",
         "deprecated": false,
-        "children": [],
+        "children": [
+          {
+            "parentPluginId": "expressionShape",
+            "id": "def-public.shapeRendererFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>"
+            ],
+            "path": "src/plugins/expression_shape/public/expression_renderers/shape_renderer.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -444,7 +636,7 @@
             "label": "strokeLinecap",
             "description": [],
             "signature": [
-              "\"inherit\" | \"butt\" | \"round\" | \"square\" | undefined"
+              "\"square\" | \"inherit\" | \"butt\" | \"round\" | undefined"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false
@@ -1081,7 +1273,6 @@
             "label": "shapeProps",
             "description": [],
             "signature": [
-              "(",
               {
                 "pluginId": "expressionShape",
                 "scope": "public",
@@ -1094,58 +1285,10 @@
                 "pluginId": "expressionShape",
                 "scope": "public",
                 "docId": "kibExpressionShapePluginApi",
-                "section": "def-public.CircleParams",
-                "text": "CircleParams"
+                "section": "def-public.SpecificShapeContentAttributes",
+                "text": "SpecificShapeContentAttributes"
               },
-              " & Readonly<{}> & Readonly<{ children?: React.ReactNode; }> & { ref?: React.RefObject<any> | undefined; }) | (",
-              {
-                "pluginId": "expressionShape",
-                "scope": "public",
-                "docId": "kibExpressionShapePluginApi",
-                "section": "def-public.ShapeContentAttributes",
-                "text": "ShapeContentAttributes"
-              },
-              " & ",
-              {
-                "pluginId": "expressionShape",
-                "scope": "public",
-                "docId": "kibExpressionShapePluginApi",
-                "section": "def-public.RectParams",
-                "text": "RectParams"
-              },
-              " & Readonly<{}> & Readonly<{ children?: React.ReactNode; }> & { ref?: React.RefObject<any> | undefined; }) | (",
-              {
-                "pluginId": "expressionShape",
-                "scope": "public",
-                "docId": "kibExpressionShapePluginApi",
-                "section": "def-public.ShapeContentAttributes",
-                "text": "ShapeContentAttributes"
-              },
-              " & ",
-              {
-                "pluginId": "expressionShape",
-                "scope": "public",
-                "docId": "kibExpressionShapePluginApi",
-                "section": "def-public.PathParams",
-                "text": "PathParams"
-              },
-              " & Readonly<{}> & Readonly<{ children?: React.ReactNode; }> & { ref?: React.RefObject<any> | undefined; }) | (",
-              {
-                "pluginId": "expressionShape",
-                "scope": "public",
-                "docId": "kibExpressionShapePluginApi",
-                "section": "def-public.ShapeContentAttributes",
-                "text": "ShapeContentAttributes"
-              },
-              " & ",
-              {
-                "pluginId": "expressionShape",
-                "scope": "public",
-                "docId": "kibExpressionShapePluginApi",
-                "section": "def-public.PolygonParams",
-                "text": "PolygonParams"
-              },
-              " & Readonly<{}> & Readonly<{ children?: React.ReactNode; }> & { ref?: React.RefObject<any> | undefined; })"
+              " & Readonly<{}> & Readonly<{ children?: React.ReactNode; }> & { ref?: React.RefObject<any> | undefined; }"
             ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false
@@ -1292,10 +1435,10 @@
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionValueBoxed",
-            "text": "ExpressionValueBoxed"
+            "section": "def-common.ExpressionValueRender",
+            "text": "ExpressionValueRender"
           },
-          "<\"render\", { as: string; value: ",
+          "<",
           {
             "pluginId": "expressionShape",
             "scope": "common",
@@ -1303,7 +1446,7 @@
             "section": "def-common.ProgressArguments",
             "text": "ProgressArguments"
           },
-          "; }>, ",
+          ">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -1320,13 +1463,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
@@ -1376,13 +1513,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
@@ -1399,7 +1530,7 @@
         "label": "OriginString",
         "description": [],
         "signature": [
-          "\"top\" | \"left\" | \"bottom\" | \"right\""
+          "\"top\" | \"bottom\" | \"left\" | \"right\""
         ],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
@@ -1449,59 +1580,13 @@
       },
       {
         "parentPluginId": "expressionShape",
-        "id": "def-public.renderers",
-        "type": "Array",
-        "tags": [],
-        "label": "renderers",
-        "description": [],
-        "signature": [
-          "((() => ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionRenderDefinition",
-            "text": "ExpressionRenderDefinition"
-          },
-          "<",
-          {
-            "pluginId": "expressionShape",
-            "scope": "common",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-common.ShapeRendererConfig",
-            "text": "ShapeRendererConfig"
-          },
-          ">) | (() => ",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionRenderDefinition",
-            "text": "ExpressionRenderDefinition"
-          },
-          "<",
-          {
-            "pluginId": "expressionShape",
-            "scope": "common",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-common.ProgressOutput",
-            "text": "ProgressOutput"
-          },
-          ">))[]"
-        ],
-        "path": "src/plugins/expression_shape/public/expression_renderers/index.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "expressionShape",
         "id": "def-public.ShapeDrawerComponentProps",
         "type": "Type",
         "tags": [],
         "label": "ShapeDrawerComponentProps",
         "description": [],
         "signature": [
-          "{ readonly children?: React.ReactNode; ref: (((instance: ",
+          "{ readonly children?: React.ReactNode; ref: React.Ref<",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -1509,15 +1594,7 @@
             "section": "def-public.ShapeRef",
             "text": "ShapeRef"
           },
-          " | null) => void) & React.RefObject<any>) | (React.RefObject<",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeRef",
-            "text": "ShapeRef"
-          },
-          "> & React.RefObject<any>); shapeType: string; shapeAttributes?: ",
+          "> & (React.RefObject<any> | undefined); shapeType: string; shapeAttributes?: ",
           {
             "pluginId": "expressionShape",
             "scope": "public",
@@ -1538,56 +1615,8 @@
             "pluginId": "expressionShape",
             "scope": "public",
             "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.CircleParams",
-            "text": "CircleParams"
-          },
-          " & { ref?: React.RefObject<any> | undefined; }) | (",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeContentAttributes",
-            "text": "ShapeContentAttributes"
-          },
-          " & ",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.RectParams",
-            "text": "RectParams"
-          },
-          " & { ref?: React.RefObject<any> | undefined; }) | (",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeContentAttributes",
-            "text": "ShapeContentAttributes"
-          },
-          " & ",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.PathParams",
-            "text": "PathParams"
-          },
-          " & { ref?: React.RefObject<any> | undefined; }) | (",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeContentAttributes",
-            "text": "ShapeContentAttributes"
-          },
-          " & ",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.PolygonParams",
-            "text": "PolygonParams"
+            "section": "def-public.SpecificShapeContentAttributes",
+            "text": "SpecificShapeContentAttributes"
           },
           " & { ref?: React.RefObject<any> | undefined; }) | undefined; textAttributes?: ",
           {
@@ -1656,56 +1685,8 @@
             "pluginId": "expressionShape",
             "scope": "public",
             "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.CircleParams",
-            "text": "CircleParams"
-          },
-          " & { ref?: React.RefObject<any> | undefined; }) | (",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeContentAttributes",
-            "text": "ShapeContentAttributes"
-          },
-          " & ",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.RectParams",
-            "text": "RectParams"
-          },
-          " & { ref?: React.RefObject<any> | undefined; }) | (",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeContentAttributes",
-            "text": "ShapeContentAttributes"
-          },
-          " & ",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.PathParams",
-            "text": "PathParams"
-          },
-          " & { ref?: React.RefObject<any> | undefined; }) | (",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeContentAttributes",
-            "text": "ShapeContentAttributes"
-          },
-          " & ",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.PolygonParams",
-            "text": "PolygonParams"
+            "section": "def-public.SpecificShapeContentAttributes",
+            "text": "SpecificShapeContentAttributes"
           },
           " & { ref?: React.RefObject<any> | undefined; }) | undefined; textAttributes?: ",
           {
@@ -1750,56 +1731,8 @@
             "pluginId": "expressionShape",
             "scope": "public",
             "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.CircleParams",
-            "text": "CircleParams"
-          },
-          " & { ref?: React.RefObject<any> | undefined; }) | (",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeContentAttributes",
-            "text": "ShapeContentAttributes"
-          },
-          " & ",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.RectParams",
-            "text": "RectParams"
-          },
-          " & { ref?: React.RefObject<any> | undefined; }) | (",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeContentAttributes",
-            "text": "ShapeContentAttributes"
-          },
-          " & ",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.PathParams",
-            "text": "PathParams"
-          },
-          " & { ref?: React.RefObject<any> | undefined; }) | (",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.ShapeContentAttributes",
-            "text": "ShapeContentAttributes"
-          },
-          " & ",
-          {
-            "pluginId": "expressionShape",
-            "scope": "public",
-            "docId": "kibExpressionShapePluginApi",
-            "section": "def-public.PolygonParams",
-            "text": "PolygonParams"
+            "section": "def-public.SpecificShapeContentAttributes",
+            "text": "SpecificShapeContentAttributes"
           },
           " & { ref?: React.RefObject<any> | undefined; }) | undefined; textAttributes?: ",
           {
@@ -2445,10 +2378,10 @@
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionValueBoxed",
-            "text": "ExpressionValueBoxed"
+            "section": "def-common.ExpressionValueRender",
+            "text": "ExpressionValueRender"
           },
-          "<\"render\", { as: string; value: ",
+          "<",
           {
             "pluginId": "expressionShape",
             "scope": "common",
@@ -2456,7 +2389,7 @@
             "section": "def-common.ProgressArguments",
             "text": "ProgressArguments"
           },
-          "; }>, ",
+          ">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -2473,13 +2406,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
@@ -2529,13 +2456,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
@@ -2580,7 +2501,7 @@
         "label": "OriginString",
         "description": [],
         "signature": [
-          "\"top\" | \"left\" | \"bottom\" | \"right\""
+          "\"top\" | \"bottom\" | \"left\" | \"right\""
         ],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,

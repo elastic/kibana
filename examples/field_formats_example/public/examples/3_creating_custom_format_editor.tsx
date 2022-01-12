@@ -13,7 +13,7 @@ import {
   FieldFormatEditorFactory,
   IndexPatternFieldEditorSetup,
 } from '../../../../src/plugins/data_view_field_editor/public';
-import { ExampleCurrencyFormat } from './2_creating_custom_formatter';
+import { ExampleCurrencyFormat } from '../../common';
 
 // 1. Create an editor component
 // NOTE: the `params` field is not type checked and a consumer has to know the `param` format that a particular `formatId` expects,

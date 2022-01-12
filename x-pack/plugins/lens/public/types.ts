@@ -9,6 +9,7 @@ import type { IconType } from '@elastic/eui/src/components/icon/icon';
 import type { CoreSetup, SavedObjectReference } from 'kibana/public';
 import type { PaletteOutput } from 'src/plugins/charts/public';
 import type { MutableRefObject } from 'react';
+import { Filter } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
   ExpressionRendererEvent,
@@ -17,7 +18,7 @@ import type {
 } from '../../../../src/plugins/expressions/public';
 import { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType } from '../common';
-import type { Query, Filter } from '../../../../src/plugins/data/public';
+import type { Query } from '../../../../src/plugins/data/public';
 import type {
   RangeSelectContext,
   ValueClickContext,
@@ -216,6 +217,7 @@ export interface Datasource<T = unknown, P = unknown> {
     props: DatasourceDimensionDropProps<T> & {
       groupId: string;
       dragging: DragContextState['dragging'];
+      prioritizedOperation?: string;
     }
   ) => { dropTypes: DropType[]; nextLabel?: string } | undefined;
   onDrop: (props: DatasourceDimensionDropHandlerProps<T>) => false | true | { deleted: string };
@@ -301,6 +303,10 @@ export interface DatasourcePublicAPI {
   datasourceId: string;
   getTableSpec: () => Array<{ columnId: string }>;
   getOperationForColumnId: (columnId: string) => Operation | null;
+  /**
+   * Collect all default visual values given the current state
+   */
+  getVisualDefaults: () => Record<string, Record<string, unknown>>;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {
@@ -337,6 +343,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   onRemove?: (accessor: string) => void;
   state: T;
   activeData?: Record<string, Datatable>;
+  hideTooltip?: boolean;
   invalid?: boolean;
   invalidMessage?: string;
 };
@@ -430,6 +437,8 @@ export interface OperationMetadata {
   // TODO currently it's not possible to differentiate between a field from a raw
   // document and an aggregated metric which might be handy in some cases. Once we
   // introduce a raw document datasource, this should be considered here.
+
+  isStaticValue?: boolean;
 }
 
 export interface VisualizationConfigProps<T = unknown> {
@@ -474,6 +483,8 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   required?: boolean;
   requiredMinDimensionCount?: number;
   dataTestSubj?: string;
+  prioritizedOperation?: string;
+  suggestedValue?: () => number | undefined;
 
   /**
    * When the dimension editor is enabled for this group, all dimensions in the group

@@ -14,6 +14,7 @@ import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks'
 import { PaletteOutput } from 'src/plugins/charts/public';
 import { layerTypes } from '../../common';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
 jest.mock('../id_generator');
 
@@ -21,6 +22,7 @@ const xyVisualization = getXyVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   useLegacyTimeAxis: false,
+  kibanaTheme: themeServiceMock.createStartContract(),
 });
 
 describe('xy_suggestions', () => {
@@ -32,6 +34,18 @@ describe('xy_suggestions', () => {
         label: `Avg ${columnId}`,
         isBucketed: false,
         scale: 'ratio',
+      },
+    };
+  }
+
+  function staticValueCol(columnId: string): TableSuggestionColumn {
+    return {
+      columnId,
+      operation: {
+        dataType: 'number',
+        label: `Static value: ${columnId}`,
+        isBucketed: false,
+        isStaticValue: true,
       },
     };
   }
@@ -116,6 +130,21 @@ describe('xy_suggestions', () => {
         expect(suggestions).toHaveLength(10);
       })
     );
+  });
+
+  test('rejects the configuration when metric isStaticValue', () => {
+    (generateId as jest.Mock).mockReturnValueOnce('aaa');
+    const suggestions = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [staticValueCol('value'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+    });
+
+    expect(suggestions).toHaveLength(0);
   });
 
   test('rejects incomplete configurations if there is a state already but no sub visualization id', () => {

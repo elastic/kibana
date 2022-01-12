@@ -18,7 +18,7 @@ import {
   EuiTitle,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -101,7 +101,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         }),
       },
     },
-    docsLink: docLinks.links.kibana,
+    docsLink: docLinks.links.kibana.guide,
   };
 
   // Show card for console if none of the manage data plugins are available, most likely in OSS

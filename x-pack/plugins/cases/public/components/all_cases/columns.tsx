@@ -22,16 +22,15 @@ import {
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
+import { Case, DeleteCase, SubCase } from '../../../common/ui/types';
 import {
   CaseStatuses,
   CaseType,
   CommentType,
   CommentRequestAlertType,
-  DeleteCase,
-  Case,
-  SubCase,
   ActionConnector,
-} from '../../../common';
+} from '../../../common/api';
+import { OWNER_INFO } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsLink } from '../links';
@@ -47,6 +46,7 @@ import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
 import { PostComment } from '../../containers/use_post_comment';
+import type { CasesOwners } from '../../methods/can_use_cases';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -69,7 +69,6 @@ const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
 export interface GetCasesColumn {
-  disableAlerts?: boolean;
   dispatchUpdateCaseProperty: (u: UpdateCase) => void;
   filterStatus: string;
   handleIsLoading: (a: boolean) => void;
@@ -82,9 +81,9 @@ export interface GetCasesColumn {
   alertData?: Omit<CommentRequestAlertType, 'type'>;
   postComment?: (args: PostComment) => Promise<void>;
   updateCase?: (newCase: Case) => void;
+  showSolutionColumn?: boolean;
 }
 export const useCasesColumns = ({
-  disableAlerts = false,
   dispatchUpdateCaseProperty,
   filterStatus,
   handleIsLoading,
@@ -97,6 +96,7 @@ export const useCasesColumns = ({
   alertData,
   postComment,
   updateCase,
+  showSolutionColumn,
 }: GetCasesColumn): CasesColumns[] => {
   // Delete case
   const {
@@ -215,7 +215,7 @@ export const useCasesColumns = ({
                 size="s"
               />
               <Spacer data-test-subj="case-table-column-createdBy">
-                {createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN}
+                {createdBy.username ?? i18n.UNKNOWN}
               </Spacer>
             </>
           );
@@ -246,16 +246,29 @@ export const useCasesColumns = ({
       },
       truncateText: true,
     },
-    ...(!disableAlerts
+    {
+      align: RIGHT_ALIGNMENT,
+      field: 'totalAlerts',
+      name: ALERTS,
+      render: (totalAlerts: Case['totalAlerts']) =>
+        totalAlerts != null
+          ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
+          : getEmptyTagValue(),
+    },
+    ...(showSolutionColumn
       ? [
           {
             align: RIGHT_ALIGNMENT,
-            field: 'totalAlerts',
-            name: ALERTS,
-            render: (totalAlerts: Case['totalAlerts']) =>
-              totalAlerts != null
-                ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
-                : getEmptyTagValue(),
+            field: 'owner',
+            name: i18n.SOLUTION,
+            render: (caseOwner: CasesOwners) => {
+              const ownerInfo = OWNER_INFO[caseOwner];
+              return ownerInfo ? (
+                <EuiIcon size="s" type={ownerInfo.iconType} title={ownerInfo.label} />
+              ) : (
+                getEmptyTagValue()
+              );
+            },
           },
         ]
       : []),

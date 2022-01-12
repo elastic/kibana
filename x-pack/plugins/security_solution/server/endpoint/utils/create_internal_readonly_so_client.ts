@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest, SavedObjectsClientContract, SavedObjectsServiceStart } from 'kibana/server';
-import { EndpointError } from '../errors';
+import { EndpointError } from '../../../common/endpoint/errors';
 
 type SavedObjectsClientContractKeys = keyof SavedObjectsClientContract;
 

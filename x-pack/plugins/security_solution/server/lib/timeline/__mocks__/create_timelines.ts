@@ -163,7 +163,7 @@ export const mockTemplate = {
       and: [],
     },
   ],
-  dataViewId: '',
+  dataViewId: null,
   description: '',
   eventType: 'all',
   excludedRowRendererIds: [],

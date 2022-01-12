@@ -8,11 +8,11 @@
 import { getOr } from 'lodash/fp';
 import { SecuritySolutionFactory } from '../../types';
 import {
+  UebaQueries,
   HostTacticsEdges,
   HostTacticsRequestOptions,
   HostTacticsStrategyResponse,
-  UebaQueries,
-} from '../../../../../../common';
+} from '../../../../../../common/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import { buildHostTacticsQuery } from './query.host_tactics.dsl';
 import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';

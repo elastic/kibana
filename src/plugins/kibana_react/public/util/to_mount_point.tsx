@@ -9,7 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Observable } from 'rxjs';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { MountPoint, CoreTheme } from 'kibana/public';
 import { KibanaThemeProvider } from '../theme';
 

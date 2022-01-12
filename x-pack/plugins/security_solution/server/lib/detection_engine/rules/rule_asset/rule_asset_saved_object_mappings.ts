@@ -27,6 +27,10 @@ export const ruleAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
 export const ruleAssetType: SavedObjectsType = {
   name: ruleAssetSavedObjectType,
   hidden: false,
+  management: {
+    importableAndExportable: true,
+    visibleInManagement: false,
+  },
   namespaceType: 'agnostic',
   mappings: ruleAssetSavedObjectMappings,
 };

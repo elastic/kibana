@@ -16,7 +16,7 @@ import {
   EuiHealth,
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isPolicyOutOfDate } from '../../utils';
 import { HostInfo, HostMetadata, HostStatus } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from '../hooks';
@@ -31,7 +31,10 @@ import { EndpointAgentStatus } from '../components/endpoint_agent_status';
 
 const EndpointDetailsContentStyled = styled.div`
   dl dt {
-    max-width: 220px;
+    max-width: 27%;
+  }
+  dl dd {
+    max-width: 73%;
   }
   .policyLineText {
     padding-right: 5px;

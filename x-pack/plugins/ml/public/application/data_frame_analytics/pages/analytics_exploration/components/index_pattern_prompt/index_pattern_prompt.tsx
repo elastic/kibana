@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { useMlKibana } from '../../../../../contexts/kibana';
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { NewPackagePolicy, PackagePolicy, DeletePackagePoliciesResponse } from './types';
+import type { DeletePackagePoliciesResponse, NewPackagePolicy, PackagePolicy } from './types';
+import type { FleetAuthz } from './authz';
 
 export const createNewPackagePolicyMock = (): NewPackagePolicy => {
   return {
@@ -55,4 +56,30 @@ export const deletePackagePolicyMock = (): DeletePackagePoliciesResponse => {
       package: newPackagePolicy.package,
     },
   ];
+};
+
+/**
+ * Creates mock `authz` object
+ */
+export const createFleetAuthzMock = (): FleetAuthz => {
+  return {
+    fleet: {
+      all: true,
+      setup: true,
+      readEnrollmentTokens: true,
+      readAgentPolicies: true,
+    },
+    integrations: {
+      readPackageInfo: true,
+      readInstalledPackages: true,
+      installPackages: true,
+      upgradePackages: true,
+      uploadPackages: true,
+      removePackages: true,
+      readPackageSettings: true,
+      writePackageSettings: true,
+      readIntegrationPolicies: true,
+      writeIntegrationPolicies: true,
+    },
+  };
 };

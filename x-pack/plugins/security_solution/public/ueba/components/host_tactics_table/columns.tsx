@@ -17,7 +17,7 @@ import { Provider } from '../../../timelines/components/timeline/data_providers/
 import { HostTacticsColumns } from './';
 
 import * as i18n from './translations';
-import { HostTacticsFields } from '../../../../common';
+import { HostTacticsFields } from '../../../../common/search_strategy';
 
 export const getHostTacticsColumns = (): HostTacticsColumns => [
   {

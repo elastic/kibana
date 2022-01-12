@@ -20,7 +20,7 @@ import {
 import type { ReactNode } from 'react';
 import React, { Component, Fragment } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   iconType?: IconType;

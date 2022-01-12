@@ -23,7 +23,7 @@ import { EnterpriseSearch } from './';
 describe('EnterpriseSearch', () => {
   it('renders the Setup Guide and Product Selector', () => {
     setMockValues({
-      errorConnecting: false,
+      errorConnectingMessage: '',
       config: { host: 'localhost' },
     });
     const wrapper = shallow(<EnterpriseSearch />);
@@ -34,17 +34,18 @@ describe('EnterpriseSearch', () => {
 
   it('renders the error connecting prompt only if host is configured', () => {
     setMockValues({
-      errorConnecting: true,
+      errorConnectingMessage: '502 Bad Gateway',
       config: { host: 'localhost' },
     });
     const wrapper = shallow(<EnterpriseSearch />);
 
     expect(wrapper.find(VersionMismatchPage)).toHaveLength(0);
-    expect(wrapper.find(ErrorConnecting)).toHaveLength(1);
+    const errorConnecting = wrapper.find(ErrorConnecting);
+    expect(errorConnecting).toHaveLength(1);
     expect(wrapper.find(ProductSelector)).toHaveLength(0);
 
     setMockValues({
-      errorConnecting: true,
+      errorConnectingMessage: '502 Bad Gateway',
       config: { host: '' },
     });
     rerender(wrapper);
@@ -56,7 +57,7 @@ describe('EnterpriseSearch', () => {
 
   it('renders the version error message if versions mismatch and the host is configured', () => {
     setMockValues({
-      errorConnecting: false,
+      errorConnectingMessage: '',
       config: { host: 'localhost' },
     });
     const wrapper = shallow(

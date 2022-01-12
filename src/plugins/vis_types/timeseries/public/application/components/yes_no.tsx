@@ -8,7 +8,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiRadio, htmlIdGenerator } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TimeseriesVisParams } from '../../types';
 
 interface YesNoProps {

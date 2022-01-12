@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useMlContext } from '../../../contexts/ml';
 import { ml } from '../../../services/ml_api_service';
 import { useCreateAnalyticsForm } from '../analytics_management/hooks/use_create_analytics_form';

@@ -17,6 +17,7 @@ import {
   commonAddEmptyValueColorRule,
   commonMigrateTagCloud,
   commonAddDropLastBucketIntoTSVBModel,
+  commonAddDropLastBucketIntoTSVBModel714Above,
   commonRemoveMarkdownLessFromTSVB,
 } from '../migrations/visualization_common_migrations';
 
@@ -38,6 +39,13 @@ const byValueAddDropLastBucketIntoTSVBModel = (state: SerializableRecord) => {
   return {
     ...state,
     savedVis: commonAddDropLastBucketIntoTSVBModel(state.savedVis),
+  };
+};
+
+const byValueAddDropLastBucketIntoTSVBModel714Above = (state: SerializableRecord) => {
+  return {
+    ...state,
+    savedVis: commonAddDropLastBucketIntoTSVBModel714Above(state.savedVis),
   };
 };
 
@@ -94,6 +102,7 @@ export const visualizeEmbeddableFactory = (): EmbeddableRegistryDefinition => {
           byValueMigrateTagcloud,
           byValueAddDropLastBucketIntoTSVBModel
         )(state),
+      '7.17.0': (state) => flow(byValueAddDropLastBucketIntoTSVBModel714Above)(state),
       '8.0.0': (state) => flow(byValueRemoveMarkdownLessFromTSVB)(state),
     },
   };

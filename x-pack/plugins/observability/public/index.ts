@@ -26,7 +26,11 @@ export type {
 export { enableInspectEsQueries } from '../common/ui_settings_keys';
 
 export interface ConfigSchema {
-  unsafe: { alertingExperience: { enabled: boolean }; cases: { enabled: boolean } };
+  unsafe: {
+    alertingExperience: { enabled: boolean };
+    cases: { enabled: boolean };
+    overviewNext: { enabled: boolean };
+  };
 }
 
 export const plugin: PluginInitializer<
@@ -47,6 +51,7 @@ export {
   FieldValueSuggestions,
   FilterValueLabel,
   SelectableUrlList,
+  ExploratoryView,
 } from './components/shared/';
 
 export type { LazyObservabilityPageTemplateProps } from './components/shared';
@@ -59,7 +64,9 @@ export {
   METRIC_TYPE,
 } from './hooks/use_track_metric';
 
-export const LazyAlertsFlyout = lazy(() => import('./pages/alerts/alerts_flyout'));
+export const LazyAlertsFlyout = lazy(
+  () => import('./pages/alerts/components/alerts_flyout/alerts_flyout')
+);
 export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
 export { useEsSearch, createEsParams } from './hooks/use_es_search';
 
@@ -87,3 +94,9 @@ export { InspectorContextProvider } from './context/inspector/inspector_context'
 export { useInspectorContext } from './context/inspector/use_inspector_context';
 
 export { enableComparisonByDefault } from '../common/ui_settings_keys';
+export type { SeriesConfig, ConfigProps } from './components/shared/exploratory_view/types';
+export {
+  ReportTypes,
+  REPORT_METRIC_FIELD,
+} from './components/shared/exploratory_view/configurations/constants';
+export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';

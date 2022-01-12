@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
+export type { Formats } from './formats';
 export { formats } from './formats';
 export * from './i18n';
+export * from './pseudo_locale';

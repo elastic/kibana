@@ -12,6 +12,7 @@ import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
@@ -21,7 +22,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { OVERALL_LABEL, SWIMLANE_TYPE, VIEW_BY_JOB_LABEL } from './explorer_constants';
 import { AddSwimlaneToDashboardControl } from './dashboard_controls/add_swimlane_to_dashboard_controls';
@@ -30,7 +31,6 @@ import { TimeBuckets } from '../util/time_buckets';
 import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
 import { explorerService } from './explorer_dashboard_service';
 import { ExplorerState } from './reducers/explorer_reducer';
-import { hasMatchingPoints } from './has_matching_points';
 import { ExplorerNoInfluencersFound } from './components/explorer_no_influencers_found/explorer_no_influencers_found';
 import { SwimlaneContainer } from './swimlane_container';
 import { AppStateSelectedCells, OverallSwimlaneData, ViewBySwimLaneData } from './explorer_utils';
@@ -79,8 +79,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
 
     const {
       filterActive,
-      filteredFields,
-      maskAll,
       selectedCells,
       viewByLoadedForTimeFormatted,
       viewBySwimlaneDataLoading,
@@ -295,7 +293,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             id="overall"
             data-test-subj="mlAnomalyExplorerSwimlaneOverall"
             filterActive={filterActive}
-            maskAll={maskAll}
             timeBuckets={timeBuckets}
             swimlaneData={overallSwimlaneData as OverallSwimlaneData}
             swimlaneType={SWIMLANE_TYPE.OVERALL}
@@ -303,9 +300,18 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
             onCellsSelection={setSelectedCells}
             onResize={explorerService.setSwimlaneContainerWidth}
             isLoading={loading}
-            noDataWarning={<NoOverallData />}
+            noDataWarning={
+              <EuiEmptyPrompt
+                titleSize="xxs"
+                style={{ padding: 0 }}
+                title={
+                  <h2>
+                    <NoOverallData />
+                  </h2>
+                }
+              />
+            }
             showTimeline={false}
-            annotationsData={annotations}
             showLegend={false}
           />
 
@@ -315,13 +321,6 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               id="view_by"
               data-test-subj="mlAnomalyExplorerSwimlaneViewBy"
               filterActive={filterActive}
-              maskAll={
-                maskAll &&
-                !hasMatchingPoints({
-                  filteredFields,
-                  swimlaneData: viewBySwimlaneData,
-                })
-              }
               timeBuckets={timeBuckets}
               showLegend={false}
               swimlaneData={viewBySwimlaneData as ViewBySwimLaneData}
@@ -342,20 +341,28 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               }}
               isLoading={loading || viewBySwimlaneDataLoading}
               noDataWarning={
-                typeof viewBySwimlaneFieldName === 'string' ? (
-                  viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL ? (
-                    <FormattedMessage
-                      id="xpack.ml.explorer.noResultForSelectedJobsMessage"
-                      defaultMessage="No results found for selected {jobsCount, plural, one {job} other {jobs}}"
-                      values={{ jobsCount: selectedJobs?.length ?? 1 }}
-                    />
-                  ) : (
-                    <ExplorerNoInfluencersFound
-                      viewBySwimlaneFieldName={viewBySwimlaneFieldName}
-                      showFilterMessage={filterActive === true}
-                    />
-                  )
-                ) : null
+                <EuiEmptyPrompt
+                  titleSize="xxs"
+                  style={{ padding: 0 }}
+                  title={
+                    <h2>
+                      {typeof viewBySwimlaneFieldName === 'string' ? (
+                        viewBySwimlaneFieldName === VIEW_BY_JOB_LABEL ? (
+                          <FormattedMessage
+                            id="xpack.ml.explorer.noResultForSelectedJobsMessage"
+                            defaultMessage="No results found for selected {jobsCount, plural, one {job} other {jobs}}"
+                            values={{ jobsCount: selectedJobs?.length ?? 1 }}
+                          />
+                        ) : (
+                          <ExplorerNoInfluencersFound
+                            viewBySwimlaneFieldName={viewBySwimlaneFieldName}
+                            showFilterMessage={filterActive === true}
+                          />
+                        )
+                      ) : null}
+                    </h2>
+                  }
+                />
               }
             />
           )}

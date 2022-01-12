@@ -23,8 +23,16 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       const datePickerInput = await find.byCssSelector(
         `${testSubjSelector('waffleDatePicker')} .euiDatePicker.euiFieldText`
       );
-      await datePickerInput.clearValueWithKeyboard({ charByChar: true });
-      await datePickerInput.type([time, browser.keys.RETURN]);
+
+      // explicitly focus to trigger tooltip
+      await datePickerInput.focus();
+
+      await datePickerInput.clearValueWithKeyboard();
+      await datePickerInput.type(time);
+
+      // dismiss the tooltip, which won't be hidden because blur doesn't happen reliably
+      await testSubjects.click('waffleDatePickerIntervalTooltip');
+
       await this.waitForLoading();
     },
 
@@ -105,13 +113,22 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async enterSearchTerm(query: string) {
       const input = await this.clearSearchTerm();
-      await input.type([query, browser.keys.RETURN]);
+      await input.type(query);
+
+      // wait for input value to echo the input before submitting
+      // this ensures the React state has caught up with the events
+      await retry.try(async () => {
+        const value = await input.getAttribute('value');
+        expect(value).to.eql(query);
+      });
+
+      await input.type(browser.keys.RETURN);
       await this.waitForLoading();
     },
 
     async clearSearchTerm() {
       const input = await testSubjects.find('infraSearchField');
-      await input.clearValueWithKeyboard({ charByChar: true });
+      await input.clearValueWithKeyboard();
       return input;
     },
 
@@ -267,7 +284,6 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
     async setAnomaliesDate(date: string) {
       await testSubjects.click('superDatePickerShowDatesButton');
-      await testSubjects.click('superDatePickerstartDatePopoverButton');
       await testSubjects.click('superDatePickerAbsoluteTab');
       const datePickerInput = await testSubjects.find('superDatePickerAbsoluteDateInput');
       await datePickerInput.clearValueWithKeyboard();

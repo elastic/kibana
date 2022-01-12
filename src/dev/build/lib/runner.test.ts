@@ -50,6 +50,8 @@ const setup = async () => {
     isRelease: true,
     targetAllPlatforms: true,
     versionQualifier: '-SNAPSHOT',
+    dockerPush: false,
+    dockerTagQualifier: '',
   });
 
   const run = createRunner({

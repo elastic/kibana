@@ -7,10 +7,19 @@
  */
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { Observable } from 'rxjs';
+import { CoreTheme } from 'kibana/public';
 import { ExpressionRenderDefinition, IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { i18n } from '@kbn/i18n';
-import { getElasticOutline, isValidUrl, withSuspense } from '../../../presentation_util/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaThemeProvider } from '../../../kibana_react/public';
+import { CoreSetup } from '../../../../core/public';
+import {
+  defaultTheme$,
+  getElasticOutline,
+  isValidUrl,
+  withSuspense,
+} from '../../../presentation_util/public';
 import { RepeatImageRendererConfig } from '../../common/types';
 
 const strings = {
@@ -27,32 +36,39 @@ const strings = {
 const LazyRepeatImageComponent = lazy(() => import('../components/repeat_image_component'));
 const RepeatImageComponent = withSuspense(LazyRepeatImageComponent, null);
 
-export const repeatImageRenderer = (): ExpressionRenderDefinition<RepeatImageRendererConfig> => ({
-  name: 'repeatImage',
-  displayName: strings.getDisplayName(),
-  help: strings.getHelpDescription(),
-  reuseDomNode: true,
-  render: async (
-    domNode: HTMLElement,
-    config: RepeatImageRendererConfig,
-    handlers: IInterpreterRenderHandlers
-  ) => {
-    const { elasticOutline } = await getElasticOutline();
-    const settings = {
-      ...config,
-      image: isValidUrl(config.image) ? config.image : elasticOutline,
-      emptyImage: config.emptyImage || '',
-    };
+export const getRepeatImageRenderer =
+  (theme$: Observable<CoreTheme> = defaultTheme$) =>
+  (): ExpressionRenderDefinition<RepeatImageRendererConfig> => ({
+    name: 'repeatImage',
+    displayName: strings.getDisplayName(),
+    help: strings.getHelpDescription(),
+    reuseDomNode: true,
+    render: async (
+      domNode: HTMLElement,
+      config: RepeatImageRendererConfig,
+      handlers: IInterpreterRenderHandlers
+    ) => {
+      const { elasticOutline } = await getElasticOutline();
+      const settings = {
+        ...config,
+        image: isValidUrl(config.image) ? config.image : elasticOutline,
+        emptyImage: config.emptyImage || '',
+      };
 
-    handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
-    });
+      handlers.onDestroy(() => {
+        unmountComponentAtNode(domNode);
+      });
 
-    render(
-      <I18nProvider>
-        <RepeatImageComponent onLoaded={handlers.done} {...settings} parentNode={domNode} />
-      </I18nProvider>,
-      domNode
-    );
-  },
-});
+      render(
+        <KibanaThemeProvider theme$={theme$}>
+          <I18nProvider>
+            <RepeatImageComponent onLoaded={handlers.done} {...settings} parentNode={domNode} />
+          </I18nProvider>
+        </KibanaThemeProvider>,
+        domNode
+      );
+    },
+  });
+
+export const repeatImageRendererFactory = (core: CoreSetup) =>
+  getRepeatImageRenderer(core.theme.theme$);

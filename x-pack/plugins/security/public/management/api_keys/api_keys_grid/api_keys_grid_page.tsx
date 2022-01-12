@@ -22,13 +22,14 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { History } from 'history';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import { Route } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { NotificationsStart } from 'src/core/public';
 
@@ -388,14 +389,21 @@ export class APIKeysGridPage extends Component<Props, State> {
                 return {
                   value: username,
                   view: (
-                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type="user" />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText>{username}</EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    <EuiToolTip delay="long" position="left" content={username}>
+                      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon type="user" />
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          css={css`
+                            overflow: hidden;
+                          `}
+                          grow={false}
+                        >
+                          <EuiText className="eui-textTruncate">{username}</EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiToolTip>
                   ),
                 };
               }),

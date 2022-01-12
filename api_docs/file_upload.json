@@ -293,21 +293,9 @@
             "label": "geoFieldType",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".GEO_POINT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".GEO_SHAPE"
             ],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
@@ -1113,253 +1101,67 @@
             "description": [],
             "signature": [
               "{ properties: { [fieldName: string]: { type: ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".STRING | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".TEXT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".KEYWORD | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".VERSION | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".BOOLEAN | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".OBJECT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".DATE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".DATE_NANOS | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".DATE_RANGE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".GEO_POINT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".GEO_SHAPE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".FLOAT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".HALF_FLOAT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".SCALED_FLOAT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".DOUBLE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".INTEGER | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".LONG | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".SHORT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".UNSIGNED_LONG | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".FLOAT_RANGE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".DOUBLE_RANGE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".INTEGER_RANGE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".LONG_RANGE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".NESTED | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".BYTE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".IP | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".IP_RANGE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".ATTACHMENT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".TOKEN_COUNT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".MURMUR3 | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "server",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-server.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
+              "ES_FIELD_TYPES",
               ".HISTOGRAM; format?: string | undefined; }; }; }"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
@@ -1822,12 +1624,12 @@
           {
             "parentPluginId": "fileUpload",
             "id": "def-common.InputOverrides.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: string | undefined",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  string | undefined"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
             "deprecated": false
@@ -1923,12 +1725,12 @@
           {
             "parentPluginId": "fileUpload",
             "id": "def-common.Settings.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  any"
             ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
             "deprecated": false
@@ -2091,6 +1893,50 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "fileUpload",
+        "id": "def-common.FILE_FORMATS",
+        "type": "Object",
+        "tags": [],
+        "label": "FILE_FORMATS",
+        "description": [],
+        "path": "x-pack/plugins/file_upload/common/constants.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "fileUpload",
+            "id": "def-common.FILE_FORMATS.DELIMITED",
+            "type": "string",
+            "tags": [],
+            "label": "DELIMITED",
+            "description": [],
+            "path": "x-pack/plugins/file_upload/common/constants.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fileUpload",
+            "id": "def-common.FILE_FORMATS.NDJSON",
+            "type": "string",
+            "tags": [],
+            "label": "NDJSON",
+            "description": [],
+            "path": "x-pack/plugins/file_upload/common/constants.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "fileUpload",
+            "id": "def-common.FILE_FORMATS.SEMI_STRUCTURED_TEXT",
+            "type": "string",
+            "tags": [],
+            "label": "SEMI_STRUCTURED_TEXT",
+            "description": [],
+            "path": "x-pack/plugins/file_upload/common/constants.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

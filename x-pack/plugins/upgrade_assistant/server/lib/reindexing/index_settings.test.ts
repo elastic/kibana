@@ -64,6 +64,7 @@ describe('transformFlatSettings', () => {
           'index.verified_before_close': 'true',
           'index.version.created': '123123',
           'index.version.upgraded': '123123',
+          'index.mapper.dynamic': 'true',
 
           // Deprecated settings
           'index.force_memory_term_dictionary': '1024',

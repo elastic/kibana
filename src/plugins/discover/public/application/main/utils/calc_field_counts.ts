@@ -6,18 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { flattenHit, IndexPattern } from '../../../../../data/common';
-import { ElasticSearchHit } from '../../../services/doc_views/doc_views_types';
+import { flattenHit, DataView } from '../../../../../data/common';
+import { ElasticSearchHit } from '../../../types';
 
 /**
- * This function is recording stats of the available fields, for usage in sidebar and sharing
+ * This function is calculating stats of the available fields, for usage in sidebar and sharing
  * Note that this values aren't displayed, but used for internal calculations
  */
-export function calcFieldCounts(
-  counts = {} as Record<string, number>,
-  rows?: ElasticSearchHit[],
-  indexPattern?: IndexPattern
-) {
+export function calcFieldCounts(rows?: ElasticSearchHit[], indexPattern?: DataView) {
+  const counts: Record<string, number> = {};
   if (!rows || !indexPattern) {
     return {};
   }

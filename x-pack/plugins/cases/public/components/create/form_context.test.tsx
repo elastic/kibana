@@ -10,7 +10,7 @@ import { mount, ReactWrapper } from 'enzyme';
 import { act, waitFor } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
-import { ConnectorTypes } from '../../../common';
+import { ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
 import { TestProviders } from '../../common/mock';
 import { usePostCase } from '../../containers/use_post_case';
@@ -80,7 +80,6 @@ const defaultPostCase = {
 const defaultCreateCaseForm: CreateCaseFormFieldsProps = {
   isLoadingConnectors: false,
   connectors: [],
-  disableAlerts: false,
   withSteps: true,
   hideConnectorServiceNowSir: false,
 };
@@ -243,16 +242,16 @@ describe('Create case', () => {
       );
     });
 
-    it('should set sync alerts to false when the sync setting is passed in as false and alerts are disabled', async () => {
+    it('should set sync alerts to false when the sync feature setting is false', async () => {
       useConnectorsMock.mockReturnValue({
         ...sampleConnectorData,
         connectors: connectorsMock,
       });
 
       const wrapper = mount(
-        <TestProviders>
-          <FormContext onSuccess={onFormSubmitSuccess} syncAlertsDefaultValue={false}>
-            <CreateCaseFormFields {...defaultCreateCaseForm} disableAlerts={true} />
+        <TestProviders features={{ alerts: { sync: false } }}>
+          <FormContext onSuccess={onFormSubmitSuccess}>
+            <CreateCaseFormFields {...defaultCreateCaseForm} />
             <SubmitCaseButton />
           </FormContext>
         </TestProviders>

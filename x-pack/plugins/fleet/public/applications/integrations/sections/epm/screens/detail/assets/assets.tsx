@@ -7,9 +7,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { Redirect } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { groupBy } from 'lodash';
+
+import type { ResolvedSimpleSavedObject } from 'src/core/public';
 
 import { Loading, Error, ExtensionWrapper } from '../../../../../components';
 
@@ -27,6 +29,7 @@ import type { AssetSavedObject } from './types';
 import { allowedAssetTypes } from './constants';
 import { AssetsAccordion } from './assets_accordion';
 
+const allowedAssetTypesLookup = new Set<string>(allowedAssetTypes);
 interface AssetsPanelProps {
   packageInfo: PackageInfo;
 }
@@ -74,19 +77,32 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
           const objectsByType = await Promise.all(
             Object.entries(groupBy(objectsToGet, 'type')).map(([type, objects]) =>
               savedObjectsClient
-                .bulkGet(objects)
+                .bulkResolve(objects)
                 // Ignore privilege errors
                 .catch((e: any) => {
                   if (e?.body?.statusCode === 403) {
-                    return { savedObjects: [] };
+                    return { resolved_objects: [] };
                   } else {
                     throw e;
                   }
                 })
-                .then(({ savedObjects }) => savedObjects as AssetSavedObject[])
+                .then(
+                  ({
+                    resolved_objects: resolvedObjects,
+                  }: {
+                    resolved_objects: ResolvedSimpleSavedObject[];
+                  }) => {
+                    return resolvedObjects
+                      .map(({ saved_object: savedObject }) => savedObject)
+                      .filter(
+                        (savedObject) =>
+                          savedObject?.error?.statusCode !== 404 &&
+                          allowedAssetTypesLookup.has(savedObject.type)
+                      ) as AssetSavedObject[];
+                  }
+                )
             )
           );
-
           setAssetsSavedObjects(objectsByType.flat());
         } catch (e) {
           setFetchError(e);
@@ -107,7 +123,6 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   }
 
   let content: JSX.Element | Array<JSX.Element | null>;
-
   if (isLoading) {
     content = <Loading />;
   } else if (fetchError) {
@@ -122,7 +137,7 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
         error={fetchError}
       />
     );
-  } else if (assetSavedObjects === undefined) {
+  } else if (assetSavedObjects === undefined || assetSavedObjects.length === 0) {
     if (customAssetsExtension) {
       // If a UI extension for custom asset entries is defined, render the custom component here depisite
       // there being no saved objects found

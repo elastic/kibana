@@ -43,7 +43,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
 
         '--server.requestId.allowFromAnyIp=true',
-        '--execution_context.enabled=true',
         '--logging.appenders.file.type=file',
         `--logging.appenders.file.fileName=${logFilePath}`,
         '--logging.appenders.file.layout.type=json',
@@ -55,6 +54,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--logging.loggers[1].name=execution_context',
         '--logging.loggers[1].level=debug',
         `--logging.loggers[1].appenders=${JSON.stringify(['file'])}`,
+
+        '--logging.loggers[2].name=http.server.response',
+        '--logging.loggers[2].level=all',
+        `--logging.loggers[2].appenders=${JSON.stringify(['file'])}`,
       ],
     },
   };

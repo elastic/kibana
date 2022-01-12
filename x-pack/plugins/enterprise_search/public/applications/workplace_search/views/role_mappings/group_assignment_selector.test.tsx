@@ -30,7 +30,6 @@ describe('GroupAssignmentSelector', () => {
   const handleAttributeSelectorChange = jest.fn();
   const handleDeleteMapping = jest.fn();
   const handleRoleChange = jest.fn();
-  const handleAuthProviderChange = jest.fn();
   const resetState = jest.fn();
   const groups = [
     {
@@ -53,9 +52,6 @@ describe('GroupAssignmentSelector', () => {
     availableGroups: groups,
     selectedGroups: new Set(),
     includeInAllGroups: false,
-    availableAuthProviders: [],
-    multipleAuthProvidersConfig: true,
-    selectedAuthProviders: [],
     roleMappingErrors: [],
   };
 
@@ -70,7 +66,6 @@ describe('GroupAssignmentSelector', () => {
       handleAttributeSelectorChange,
       handleDeleteMapping,
       handleRoleChange,
-      handleAuthProviderChange,
       resetState,
     });
     setMockValues(mockValues);

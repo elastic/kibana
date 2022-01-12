@@ -20,11 +20,9 @@ import {
   mountWithProvider,
   mockStoreDeps,
 } from '../mocks';
-import { I18nProvider } from '@kbn/i18n/react';
-import {
-  SavedObjectSaveModal,
-  checkForDuplicateTitle,
-} from '../../../../../src/plugins/saved_objects/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { SavedObjectSaveModal } from '../../../../../src/plugins/saved_objects/public';
+import { checkForDuplicateTitle } from '../persistence';
 import { createMemoryHistory } from 'history';
 import {
   esFilters,
@@ -42,17 +40,9 @@ import moment from 'moment';
 import { setState, LensAppState } from '../state_management/index';
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');
-jest.mock('../../../../../src/plugins/saved_objects/public', () => {
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  const { SavedObjectSaveModal, SavedObjectSaveModalOrigin } = jest.requireActual(
-    '../../../../../src/plugins/saved_objects/public'
-  );
-  return {
-    SavedObjectSaveModal,
-    SavedObjectSaveModalOrigin,
-    checkForDuplicateTitle: jest.fn(),
-  };
-});
+jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
+  checkForDuplicateTitle: jest.fn(),
+}));
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -400,14 +390,18 @@ describe('Lens App', () => {
             savedObjectId: savedObjectId || 'aaa',
           }));
         services.attributeService.unwrapAttributes = jest.fn().mockResolvedValue({
-          sharingSavedObjectProps: {
-            outcome: 'exactMatch',
+          metaInfo: {
+            sharingSavedObjectProps: {
+              outcome: 'exactMatch',
+            },
           },
-          savedObjectId: initialSavedObjectId ?? 'aaa',
-          references: [],
-          state: {
-            query: 'fake query',
-            filters: [],
+          attributes: {
+            savedObjectId: initialSavedObjectId ?? 'aaa',
+            references: [],
+            state: {
+              query: 'fake query',
+              filters: [],
+            },
           },
         } as jest.ResolvedValue<Document>);
 

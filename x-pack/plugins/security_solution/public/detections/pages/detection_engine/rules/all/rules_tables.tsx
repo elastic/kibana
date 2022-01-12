@@ -13,6 +13,7 @@ import {
   EuiProgress,
   EuiConfirmModal,
   EuiWindowEvent,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { debounce } from 'lodash/fp';
@@ -20,11 +21,10 @@ import { History } from 'history';
 
 import {
   useRulesTable,
-  useRulesStatuses,
   CreatePreBuiltRules,
   FilterOptions,
-  Rule,
   RulesSortingFields,
+  Rule,
 } from '../../../../containers/detection_engine/rules';
 
 import { FormatUrl } from '../../../../../common/components/link_to';
@@ -33,12 +33,11 @@ import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
 import { useStateToaster } from '../../../../../common/components/toasters';
 import { Loader } from '../../../../../common/components/loader';
 import { PrePackagedRulesPrompt } from '../../../../components/rules/pre_packaged_rules/load_empty_prompt';
-import { AllRulesTables, SortingType } from '../../../../components/rules/all_rules_tables';
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
 import { getBatchItems } from './batch_actions';
-import { getColumns, getMonitoringColumns } from './columns';
+import { getRulesColumns, getMonitoringColumns } from './columns';
 import { showRulesTable } from './helpers';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
@@ -145,7 +144,6 @@ export const RulesTables = React.memo<RulesTableProps>(
       reFetchRules,
     } = rulesTable;
 
-    const { loading: isLoadingRulesStatuses, rulesStatuses } = useRulesStatuses(rules);
     const [, dispatchToaster] = useStateToaster();
     const mlCapabilities = useMlCapabilities();
     const { navigateToApp } = useKibana().services.application;
@@ -167,7 +165,7 @@ export const RulesTables = React.memo<RulesTableProps>(
     }, [loadingRuleIds, loadingRulesAction]);
 
     const sorting = useMemo(
-      (): SortingType => ({
+      () => ({
         sort: {
           field: filterOptions.sortField,
           direction: filterOptions.sortOrder,
@@ -265,12 +263,10 @@ export const RulesTables = React.memo<RulesTableProps>(
       [updateOptions, setLastRefreshDate]
     );
 
-    const rulesColumns = useMemo(() => {
-      return getColumns({
+    const [rulesColumns, monitoringColumns] = useMemo(() => {
+      const props = {
         dispatch,
-        dispatchToaster,
         formatUrl,
-        history,
         hasMlPermissions,
         hasPermissions,
         loadingRuleIds:
@@ -279,10 +275,14 @@ export const RulesTables = React.memo<RulesTableProps>(
             ? loadingRuleIds
             : [],
         navigateToApp,
+        hasReadActionsPrivileges: hasActionsPrivileges,
+        dispatchToaster,
+        history,
         reFetchRules,
         refetchPrePackagedRulesStatus,
-        hasReadActionsPrivileges: hasActionsPrivileges,
-      });
+        docLinks,
+      };
+      return [getRulesColumns(props), getMonitoringColumns(props)];
     }, [
       dispatch,
       dispatchToaster,
@@ -296,22 +296,18 @@ export const RulesTables = React.memo<RulesTableProps>(
       loadingRulesAction,
       navigateToApp,
       reFetchRules,
+      docLinks,
     ]);
-
-    const monitoringColumns = useMemo(
-      () => getMonitoringColumns(navigateToApp, formatUrl, docLinks),
-      [navigateToApp, formatUrl, docLinks]
-    );
 
     useEffect(() => {
       setRefreshRulesData(reFetchRules);
     }, [reFetchRules, setRefreshRulesData]);
 
     useEffect(() => {
-      if (initLoading && !loading && !isLoadingRules && !isLoadingRulesStatuses) {
+      if (initLoading && !loading && !isLoadingRules) {
         setInitLoading(false);
       }
-    }, [initLoading, loading, isLoadingRules, isLoadingRulesStatuses]);
+    }, [initLoading, loading, isLoadingRules]);
 
     const handleCreatePrePackagedRules = useCallback(async () => {
       if (createPrePackagedRules != null) {
@@ -447,6 +443,14 @@ export const RulesTables = React.memo<RulesTableProps>(
       [initLoading, prePackagedRuleStatus, rulesCustomInstalled]
     );
 
+    const tableProps =
+      selectedTab === AllRulesTabs.rules
+        ? {
+            'data-test-subj': 'rules-table',
+            columns: rulesColumns,
+          }
+        : { 'data-test-subj': 'monitoring-table', columns: monitoringColumns };
+
     return (
       <>
         <EuiWindowEvent event="mousemove" handler={debounceResetIdleTimer} />
@@ -468,7 +472,7 @@ export const RulesTables = React.memo<RulesTableProps>(
           growLeftSplit={false}
           title={i18n.ALL_RULES}
           subtitle={timelines.getLastUpdated({
-            showUpdating: loading || isLoadingRules || isLoadingRulesStatuses,
+            showUpdating: loading || isLoadingRules,
             updatedAt: lastUpdated,
           })}
         >
@@ -535,18 +539,23 @@ export const RulesTables = React.memo<RulesTableProps>(
               onToggleSelectAll={toggleSelectAll}
               showBulkActions
             />
-            <AllRulesTables
-              selectedTab={selectedTab}
-              euiBasicTableSelectionProps={euiBasicTableSelectionProps}
-              hasPermissions={hasPermissions}
-              monitoringColumns={monitoringColumns}
+            <EuiBasicTable
+              itemId="id"
+              items={rules}
+              isSelectable={hasPermissions}
+              noItemsMessage={
+                <EuiEmptyPrompt
+                  title={<h3>{i18n.NO_RULES}</h3>}
+                  titleSize="xs"
+                  body={i18n.NO_RULES_BODY}
+                />
+              }
+              onChange={tableOnChangeCallback}
               pagination={paginationMemo}
-              rules={rules}
-              rulesColumns={rulesColumns}
-              rulesStatuses={rulesStatuses}
+              ref={tableRef}
+              selection={euiBasicTableSelectionProps}
               sorting={sorting}
-              tableOnChangeCallback={tableOnChangeCallback}
-              tableRef={tableRef}
+              {...tableProps}
             />
           </>
         )}

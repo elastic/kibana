@@ -11,8 +11,8 @@ import {
   CasesConfigureResponse,
   CasesConfigureRequest,
   ConnectorTypes,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../common';
+} from '../../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CaseConfigure, CaseConnectorMapping } from './types';
 
 export const mappings: CaseConnectorMapping[] = [

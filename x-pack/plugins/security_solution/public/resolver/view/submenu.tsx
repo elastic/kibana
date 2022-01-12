@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useContext, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useDispatch } from 'react-redux';
 import { EuiI18nNumber } from '@elastic/eui';
 import { EventStats } from '../../../common/endpoint/types';

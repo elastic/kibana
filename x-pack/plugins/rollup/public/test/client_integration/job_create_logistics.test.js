@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { indexPatterns } from '../../../../../../src/plugins/data/public';
-import { setHttp, init as initDocumentation } from '../../crud_app/services';
 import { mockHttpRequest, pageHelpers } from './helpers';
-import { coreMock, docLinksServiceMock } from '../../../../../../src/core/public/mocks';
 
-jest.mock('lodash', () => ({
-  ...jest.requireActual('lodash'),
-  debounce: (fn) => fn,
-}));
+import { act } from 'react-dom/test-utils';
+import { indexPatterns } from '../../../../../../src/plugins/data/public';
+import { coreMock, docLinksServiceMock } from '../../../../../../src/core/public/mocks';
+import { setHttp, init as initDocumentation } from '../../crud_app/services';
 
 const { setup } = pageHelpers.jobCreate;
 
@@ -26,9 +23,14 @@ describe('Create Rollup Job, step 1: Logistics', () => {
   let startMock;
 
   beforeAll(() => {
+    jest.useFakeTimers();
     startMock = coreMock.createStart();
     setHttp(startMock.http);
     initDocumentation(docLinksServiceMock.createStartContract());
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   beforeEach(() => {
@@ -87,21 +89,27 @@ describe('Create Rollup Job, step 1: Logistics', () => {
       });
 
       it('should not allow spaces', async () => {
-        await form.setInputValue('rollupIndexPattern', 'with space', true);
+        await act(async () => {
+          form.setInputValue('rollupIndexPattern', 'with space');
+        });
         actions.clickNextStep();
         expect(form.getErrorsMessages()).toContain('Remove the spaces from your index pattern.');
       });
 
       it('should not allow an unknown index pattern', async () => {
         mockHttpRequest(startMock.http, { indxPatternVldtResp: { doesMatchIndices: false } });
-        await form.setInputValue('rollupIndexPattern', 'unknown', true);
+        await act(async () => {
+          form.setInputValue('rollupIndexPattern', 'unknown');
+        });
         actions.clickNextStep();
         expect(form.getErrorsMessages()).toContain("Index pattern doesn't match any indices.");
       });
 
       it('should not allow an index pattern without time fields', async () => {
         mockHttpRequest(startMock.http, { indxPatternVldtResp: { dateFields: [] } });
-        await form.setInputValue('rollupIndexPattern', 'abc', true);
+        await act(async () => {
+          form.setInputValue('rollupIndexPattern', 'abc');
+        });
         actions.clickNextStep();
         expect(form.getErrorsMessages()).toContain(
           'Index pattern must match indices that contain time fields.'
@@ -112,14 +120,21 @@ describe('Create Rollup Job, step 1: Logistics', () => {
         mockHttpRequest(startMock.http, {
           indxPatternVldtResp: { doesMatchRollupIndices: true },
         });
-        await form.setInputValue('rollupIndexPattern', 'abc', true);
+        await act(async () => {
+          form.setInputValue('rollupIndexPattern', 'abc');
+        });
         actions.clickNextStep();
         expect(form.getErrorsMessages()).toContain('Index pattern must not match rollup indices.');
       });
 
       it('should not be the same as the rollup index name', async () => {
-        await form.setInputValue('rollupIndexPattern', 'abc', true);
-        await form.setInputValue('rollupIndexName', 'abc', true);
+        await act(async () => {
+          form.setInputValue('rollupIndexPattern', 'abc');
+        });
+
+        await act(async () => {
+          form.setInputValue('rollupIndexName', 'abc');
+        });
 
         actions.clickNextStep();
 

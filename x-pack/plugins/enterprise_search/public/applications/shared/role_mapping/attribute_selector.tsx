@@ -7,50 +7,21 @@
 
 import React from 'react';
 
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFieldText,
-  EuiFormRow,
-  EuiSelect,
-} from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { AttributeName, AttributeExamples } from '../types';
 
-import {
-  ANY_AUTH_PROVIDER,
-  ANY_AUTH_PROVIDER_OPTION_LABEL,
-  ATTRIBUTE_VALUE_LABEL,
-  REQUIRED_LABEL,
-  AUTH_ANY_PROVIDER_LABEL,
-  AUTH_INDIVIDUAL_PROVIDER_LABEL,
-  AUTH_PROVIDER_LABEL,
-  EXTERNAL_ATTRIBUTE_LABEL,
-} from './constants';
+import { ATTRIBUTE_VALUE_LABEL, REQUIRED_LABEL, EXTERNAL_ATTRIBUTE_LABEL } from './constants';
 
 interface Props {
   attributeName: AttributeName;
   attributeValue?: string;
   attributeValueInvalid: boolean;
   attributes: string[];
-  selectedAuthProviders?: string[];
-  availableAuthProviders?: string[];
   elasticsearchRoles: string[];
   disabled?: boolean;
-  multipleAuthProvidersConfig: boolean;
   handleAttributeSelectorChange(value: string, elasticsearchRole: string): void;
   handleAttributeValueChange(value: string): void;
-  handleAuthProviderChange?(value: string[]): void;
-}
-
-interface ParentOption extends EuiComboBoxOptionOption<string> {
-  label: string;
-  options: ChildOption[];
-}
-
-interface ChildOption extends EuiComboBoxOptionOption<string> {
-  value: string;
-  label: string;
 }
 
 const attributeValueExamples: AttributeExamples = {
@@ -59,59 +30,18 @@ const attributeValueExamples: AttributeExamples = {
   metadata: '{"_reserved": true}',
 };
 
-const getAuthProviderOptions = (availableAuthProviders: string[]) => {
-  return [
-    {
-      label: AUTH_ANY_PROVIDER_LABEL,
-      options: [{ value: ANY_AUTH_PROVIDER, label: ANY_AUTH_PROVIDER_OPTION_LABEL }],
-    },
-    {
-      label: AUTH_INDIVIDUAL_PROVIDER_LABEL,
-      options: availableAuthProviders.map((authProvider) => ({
-        value: authProvider,
-        label: authProvider,
-      })),
-    },
-  ];
-};
-
-const getSelectedOptions = (selectedAuthProviders: string[], availableAuthProviders: string[]) => {
-  const groupedOptions: ParentOption[] = getAuthProviderOptions(availableAuthProviders);
-  const childOptions: ChildOption[] = [];
-  const options = groupedOptions.reduce((acc, n) => [...acc, ...n.options], childOptions);
-  return options.filter((o) => o.value && selectedAuthProviders.includes(o.value));
-};
-
 export const AttributeSelector: React.FC<Props> = ({
   attributeName,
   attributeValue = '',
   attributeValueInvalid,
   attributes,
-  availableAuthProviders,
-  selectedAuthProviders = [ANY_AUTH_PROVIDER],
   elasticsearchRoles,
   disabled,
-  multipleAuthProvidersConfig,
   handleAttributeSelectorChange,
   handleAttributeValueChange,
-  handleAuthProviderChange = () => null,
 }) => {
   return (
     <div data-test-subj="AttributeSelector">
-      {availableAuthProviders && multipleAuthProvidersConfig && (
-        <EuiFormRow label={AUTH_PROVIDER_LABEL} fullWidth>
-          <EuiComboBox
-            data-test-subj="AuthProviderSelect"
-            selectedOptions={getSelectedOptions(selectedAuthProviders, availableAuthProviders)}
-            options={getAuthProviderOptions(availableAuthProviders)}
-            onChange={(options) => {
-              handleAuthProviderChange(options.map((o) => o.value || ''));
-            }}
-            fullWidth
-            isDisabled={disabled}
-          />
-        </EuiFormRow>
-      )}
       <EuiFormRow label={EXTERNAL_ATTRIBUTE_LABEL} fullWidth>
         <EuiSelect
           name="external-attribute"

@@ -15,6 +15,8 @@ import { getLayerConfigs } from '../hooks/use_lens_attributes';
 import { LensPublicStart, XYState } from '../../../../../../lens/public';
 import { OperationTypeComponent } from '../series_editor/columns/operation_type_select';
 import { IndexPatternState } from '../hooks/use_app_index_pattern';
+import { ReportConfigMap } from '../contexts/exploratory_view_config';
+import { obsvReportConfigMap } from '../obsv_exploratory_view';
 
 export interface ExploratoryEmbeddableProps {
   reportType: ReportViewType;
@@ -24,7 +26,8 @@ export interface ExploratoryEmbeddableProps {
   showCalculationMethod?: boolean;
   axisTitlesVisibility?: XYState['axisTitlesVisibilitySettings'];
   legendIsVisible?: boolean;
-  dataTypesIndexPatterns?: Record<AppDataType, string>;
+  dataTypesIndexPatterns?: Partial<Record<AppDataType, string>>;
+  reportConfigMap?: ReportConfigMap;
 }
 
 export interface ExploratoryEmbeddableComponentProps extends ExploratoryEmbeddableProps {
@@ -42,6 +45,7 @@ export default function Embeddable({
   lens,
   axisTitlesVisibility,
   legendIsVisible,
+  reportConfigMap = {},
   showCalculationMethod = false,
 }: ExploratoryEmbeddableComponentProps) {
   const LensComponent = lens?.EmbeddableComponent;
@@ -51,7 +55,13 @@ export default function Embeddable({
   const [operationType, setOperationType] = useState(series?.operationType);
   const theme = useTheme();
 
-  const layerConfigs: LayerConfig[] = getLayerConfigs(attributes, reportType, theme, indexPatterns);
+  const layerConfigs: LayerConfig[] = getLayerConfigs(
+    attributes,
+    reportType,
+    theme,
+    indexPatterns,
+    { ...reportConfigMap, ...obsvReportConfigMap }
+  );
 
   if (layerConfigs.length < 1) {
     return null;

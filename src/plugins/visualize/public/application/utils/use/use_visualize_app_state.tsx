@@ -12,7 +12,11 @@ import { map } from 'rxjs/operators';
 import { EventEmitter } from 'events';
 import { i18n } from '@kbn/i18n';
 
-import { MarkdownSimple, toMountPoint } from '../../../../../kibana_react/public';
+import {
+  KibanaThemeProvider,
+  MarkdownSimple,
+  toMountPoint,
+} from '../../../../../kibana_react/public';
 import { migrateLegacyQuery } from '../migrate_legacy_query';
 import { esFilters, connectToQueryState } from '../../../../../data/public';
 import {
@@ -99,13 +103,17 @@ export const useVisualizeAppState = (
         const { aggs, ...visState } = currentAppState.vis;
         const query = currentAppState.query;
         const filter = currentAppState.filters;
-        const visSearchSource = instance.vis.data.searchSource?.getFields() || {};
+        const visSearchSource = instance.vis.data.searchSource?.getSerializedFields() || {};
         instance.vis
           .setState({
             ...visState,
             data: {
               aggs,
-              searchSource: { ...visSearchSource, query, filter },
+              searchSource: {
+                ...visSearchSource,
+                query,
+                filter,
+              },
               savedSearchId: instance.vis.data.savedSearchId,
             },
           })
@@ -121,7 +129,11 @@ export const useVisualizeAppState = (
               title: i18n.translate('visualize.visualizationLoadingFailedErrorMessage', {
                 defaultMessage: 'Failed to load the visualization',
               }),
-              text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
+              text: toMountPoint(
+                <KibanaThemeProvider theme$={services.theme.theme$}>
+                  <MarkdownSimple>{error.message}</MarkdownSimple>
+                </KibanaThemeProvider>
+              ),
             });
 
             services.history.replace(

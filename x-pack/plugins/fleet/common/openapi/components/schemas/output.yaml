@@ -18,6 +18,8 @@ properties:
       type: string
   ca_sha256:
     type: string
+  ca_trusted_fingerprint:
+    type: string
   api_key:
     type: string
   config:

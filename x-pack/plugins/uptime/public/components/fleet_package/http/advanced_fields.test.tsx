@@ -9,7 +9,13 @@ import React from 'react';
 import { fireEvent } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
 import { HTTPAdvancedFields } from './advanced_fields';
-import { ConfigKeys, DataStream, HTTPMethod, IHTTPAdvancedFields, Validation } from '../types';
+import {
+  ConfigKey,
+  DataStream,
+  HTTPMethod,
+  HTTPAdvancedFields as HTTPAdvancedFieldsType,
+  Validation,
+} from '../types';
 import {
   HTTPAdvancedFieldsContextProvider,
   defaultHTTPAdvancedFields as defaultConfig,
@@ -44,7 +50,7 @@ describe('<HTTPAdvancedFields />', () => {
     defaultValues,
     validate = defaultValidation,
   }: {
-    defaultValues?: IHTTPAdvancedFields;
+    defaultValues?: HTTPAdvancedFieldsType;
     validate?: Validation;
   }) => {
     return (
@@ -73,25 +79,25 @@ describe('<HTTPAdvancedFields />', () => {
     const username = getByLabelText('Username') as HTMLInputElement;
     const password = getByLabelText('Password') as HTMLInputElement;
     expect(requestMethod).toBeInTheDocument();
-    expect(requestMethod.value).toEqual(defaultConfig[ConfigKeys.REQUEST_METHOD_CHECK]);
+    expect(requestMethod.value).toEqual(defaultConfig[ConfigKey.REQUEST_METHOD_CHECK]);
     expect(requestHeaders).toBeInTheDocument();
     expect(requestBody).toBeInTheDocument();
     expect(indexResponseBody).toBeInTheDocument();
     expect(indexResponseBody.checked).toBe(true);
     expect(indexResponseBodySelect).toBeInTheDocument();
-    expect(indexResponseBodySelect.value).toEqual(defaultConfig[ConfigKeys.RESPONSE_BODY_INDEX]);
+    expect(indexResponseBodySelect.value).toEqual(defaultConfig[ConfigKey.RESPONSE_BODY_INDEX]);
     expect(indexResponseHeaders).toBeInTheDocument();
     expect(indexResponseHeaders.checked).toBe(true);
     expect(proxyUrl).toBeInTheDocument();
-    expect(proxyUrl.value).toEqual(defaultConfig[ConfigKeys.PROXY_URL]);
+    expect(proxyUrl.value).toEqual(defaultConfig[ConfigKey.PROXY_URL]);
     expect(responseStatusEquals).toBeInTheDocument();
     expect(responseBodyContains).toBeInTheDocument();
     expect(responseBodyDoesNotContain).toBeInTheDocument();
     expect(responseHeadersContain).toBeInTheDocument();
     expect(username).toBeInTheDocument();
-    expect(username.value).toBe(defaultConfig[ConfigKeys.USERNAME]);
+    expect(username.value).toBe(defaultConfig[ConfigKey.USERNAME]);
     expect(password).toBeInTheDocument();
-    expect(password.value).toBe(defaultConfig[ConfigKeys.PASSWORD]);
+    expect(password.value).toBe(defaultConfig[ConfigKey.PASSWORD]);
   });
 
   it('handles changing fields', () => {

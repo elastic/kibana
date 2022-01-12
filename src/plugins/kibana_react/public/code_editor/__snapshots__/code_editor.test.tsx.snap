@@ -199,6 +199,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
           "renderLineHighlight": "none",
           "scrollBeyondLastLine": false,
           "scrollbar": Object {
+            "alwaysConsumeMouseWheel": false,
             "useShadows": false,
           },
           "wordBasedSuggestions": false,
@@ -214,6 +215,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
 "
     >
       <div>
+        <div />
         <textarea
           data-test-subj="monacoEditorTextarea"
           onKeyDown={[Function]}

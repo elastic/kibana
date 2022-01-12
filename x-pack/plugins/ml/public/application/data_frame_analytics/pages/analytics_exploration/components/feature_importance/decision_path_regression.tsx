@@ -7,7 +7,7 @@
 
 import React, { FC, useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import d3 from 'd3';
 import type {
   FeatureImportance,

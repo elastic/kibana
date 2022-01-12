@@ -9,13 +9,12 @@
 import React, { useState, useEffect, useRef, ReactElement } from 'react';
 import { act } from 'react-test-renderer';
 import { Story } from '@storybook/react';
-import { StoryFnReactReturnType } from '@storybook/react/dist/client/preview/types';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
 export const waitFor =
   (waitTarget: Promise<any>, spinner: ReactElement | null = <EuiLoadingSpinner />) =>
   (CurrentStory: Story) => {
-    const [storyComponent, setStory] = useState<StoryFnReactReturnType>();
+    const [storyComponent, setStory] = useState<ReactElement>();
     const componentIsMounted = useRef(false);
 
     useEffect(() => {

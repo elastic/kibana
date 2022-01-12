@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import uuid from 'uuid';
 import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from 'src/core/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
@@ -36,16 +36,18 @@ import {
   KibanaContextProvider,
   KibanaReactContext,
   KibanaReactContextValue,
+  KibanaThemeProvider,
 } from '../../services/kibana_react';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { DashboardAppCapabilities, DashboardContainerInput } from '../../types';
 import { PresentationUtilPluginStart } from '../../services/presentation_util';
+import type { ScreenshotModePluginStart } from '../../services/screenshot_mode';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 import {
   combineDashboardFiltersWithControlGroupFilters,
   syncDashboardControlGroup,
 } from '../lib/dashboard_control_group';
-import { ControlGroupContainer } from '../../../../presentation_util/public';
+import { ControlGroupContainer } from '../../../../controls/public';
 
 export interface DashboardContainerServices {
   ExitFullScreenButton: React.ComponentType<any>;
@@ -55,9 +57,11 @@ export interface DashboardContainerServices {
   application: CoreStart['application'];
   inspector: InspectorStartContract;
   overlays: CoreStart['overlays'];
+  screenshotMode: ScreenshotModePluginStart;
   uiSettings: IUiSettingsClient;
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
+  theme: CoreStart['theme'];
   http: CoreStart['http'];
 }
 
@@ -97,6 +101,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   private onDestroyControlGroup?: () => void;
   public controlGroup?: ControlGroupContainer;
+  private domNode?: HTMLElement;
 
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
@@ -254,12 +259,18 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   public render(dom: HTMLElement) {
+    if (this.domNode) {
+      ReactDOM.unmountComponentAtNode(this.domNode);
+    }
+    this.domNode = dom;
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
-          <this.services.presentationUtil.ContextProvider>
-            <DashboardViewport container={this} controlGroup={this.controlGroup} />
-          </this.services.presentationUtil.ContextProvider>
+          <KibanaThemeProvider theme$={this.services.theme.theme$}>
+            <this.services.presentationUtil.ContextProvider>
+              <DashboardViewport container={this} controlGroup={this.controlGroup} />
+            </this.services.presentationUtil.ContextProvider>
+          </KibanaThemeProvider>
         </KibanaContextProvider>
       </I18nProvider>,
       dom
@@ -269,6 +280,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public destroy() {
     super.destroy();
     this.onDestroyControlGroup?.();
+    if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {

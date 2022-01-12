@@ -102,6 +102,63 @@
       },
       {
         "parentPluginId": "charts",
+        "id": "def-public.EmptyPlaceholder",
+        "type": "Function",
+        "tags": [],
+        "label": "EmptyPlaceholder",
+        "description": [],
+        "signature": [
+          "({ icon, message, }: { icon: ",
+          "IconType",
+          "; message?: JSX.Element | undefined; }) => JSX.Element"
+        ],
+        "path": "src/plugins/charts/public/static/components/empty_placeholder.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "charts",
+            "id": "def-public.EmptyPlaceholder.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  icon,\n  message = <FormattedMessage id=\"charts.noDataLabel\" defaultMessage=\"No results found\" />,\n}",
+            "description": [],
+            "path": "src/plugins/charts/public/static/components/empty_placeholder.tsx",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.EmptyPlaceholder.$1.icon",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "icon",
+                "description": [],
+                "signature": [
+                  "string | React.ComponentType<{}>"
+                ],
+                "path": "src/plugins/charts/public/static/components/empty_placeholder.tsx",
+                "deprecated": false
+              },
+              {
+                "parentPluginId": "charts",
+                "id": "def-public.EmptyPlaceholder.$1.message",
+                "type": "Object",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "JSX.Element | undefined"
+                ],
+                "path": "src/plugins/charts/public/static/components/empty_placeholder.tsx",
+                "deprecated": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "charts",
         "id": "def-public.Endzones",
         "type": "Function",
         "tags": [],
@@ -226,7 +283,9 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          ", xAccessor: string | number | ",
+          ", xAccessor: ",
+          "Accessor",
+          " | ",
           "AccessorFn",
           ") => ({ x: selectedRange }: ",
           "XYBrushEvent",
@@ -270,7 +329,8 @@
             "label": "xAccessor",
             "description": [],
             "signature": [
-              "string | number | ",
+              "Accessor",
+              " | ",
               "AccessorFn"
             ],
             "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
@@ -299,11 +359,15 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          ", xAccessor: string | number | ",
+          ", xAccessor: ",
+          "Accessor",
+          " | ",
           "AccessorFn",
-          ", splitSeriesAccessorFnMap?: Map<React.ReactText, ",
+          ", splitSeriesAccessorFnMap?: Map<string | number, ",
           "AccessorFn",
-          "> | undefined, splitChartAccessor?: string | number | ",
+          "> | undefined, splitChartAccessor?: ",
+          "Accessor",
+          " | ",
           "AccessorFn",
           " | undefined, negate?: boolean) => (points: [",
           "GeometryValue",
@@ -349,7 +413,8 @@
             "label": "xAccessor",
             "description": [],
             "signature": [
-              "string | number | ",
+              "Accessor",
+              " | ",
               "AccessorFn"
             ],
             "path": "src/plugins/charts/public/static/utils/transform_click_event.ts",
@@ -366,7 +431,7 @@
               "needed when using `splitSeriesAccessors` as `AccessorFn`"
             ],
             "signature": [
-              "Map<React.ReactText, ",
+              "Map<string | number, ",
               "AccessorFn",
               "> | undefined"
             ],
@@ -382,7 +447,8 @@
             "label": "splitChartAccessor",
             "description": [],
             "signature": [
-              "string | number | ",
+              "Accessor",
+              " | ",
               "AccessorFn",
               " | undefined"
             ],
@@ -428,9 +494,11 @@
           },
           ") => ({ splitAccessors, ...rest }: ",
           "XYChartSeriesIdentifier",
-          ", splitSeriesAccessorFnMap?: Map<React.ReactText, ",
+          ", splitSeriesAccessorFnMap?: Map<string | number, ",
           "AccessorFn",
-          "> | undefined, splitChartAccessor?: string | number | ",
+          "> | undefined, splitChartAccessor?: ",
+          "Accessor",
+          " | ",
           "AccessorFn",
           " | undefined, negate?: boolean) => ",
           {
@@ -942,12 +1010,19 @@
           {
             "parentPluginId": "charts",
             "id": "def-public.ColorMap.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: RawColorSchema",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  ",
+              {
+                "pluginId": "charts",
+                "scope": "common",
+                "docId": "kibChartsPluginApi",
+                "section": "def-common.RawColorSchema",
+                "text": "RawColorSchema"
+              }
             ],
             "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
             "deprecated": false
@@ -2677,7 +2752,7 @@
           "signature": [
             "{ readonly seedColors: string[]; readonly mappedColors: ",
             "MappedColors",
-            "; createColorLookupFunction: (arrayOfStringsOrNumbers?: React.ReactText[] | undefined, colorMapping?: Partial<Record<string, string>>) => (value: React.ReactText) => any; }"
+            "; createColorLookupFunction: (arrayOfStringsOrNumbers?: (string | number)[] | undefined, colorMapping?: Partial<Record<string, string>>) => (value: string | number) => any; }"
           ],
           "path": "src/plugins/charts/public/plugin.ts",
           "deprecated": false
@@ -3189,13 +3264,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/charts/common/palette.ts",
@@ -3253,13 +3322,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/charts/common/palette.ts",
@@ -3283,12 +3346,19 @@
           {
             "parentPluginId": "charts",
             "id": "def-common.ColorMap.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: RawColorSchema",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  ",
+              {
+                "pluginId": "charts",
+                "scope": "common",
+                "docId": "kibChartsPluginApi",
+                "section": "def-common.RawColorSchema",
+                "text": "RawColorSchema"
+              }
             ],
             "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
             "deprecated": false

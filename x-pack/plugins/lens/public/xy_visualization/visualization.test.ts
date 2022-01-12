@@ -16,6 +16,7 @@ import { LensIconChartBar } from '../assets/chart_bar';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { Datatable } from 'src/plugins/expressions';
+import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
 function exampleState(): State {
   return {
@@ -41,6 +42,7 @@ const xyVisualization = getXyVisualization({
   paletteService: paletteServiceMock,
   fieldFormats: fieldFormatsMock,
   useLegacyTimeAxis: false,
+  kibanaTheme: themeServiceMock.createStartContract(),
 });
 
 describe('xy_visualization', () => {
@@ -1037,6 +1039,21 @@ describe('xy_visualization', () => {
             expect.objectContaining({ groupId: 'yReferenceLineRight' }),
           ])
         );
+      });
+
+      it('should be excluded and not crash when a custom palette is used for data layer', () => {
+        const state = getStateWithBaseReferenceLine();
+        // now add a breakdown on the data layer with a custom palette
+        state.layers[0].palette = { type: 'palette', name: 'custom', params: {} };
+        state.layers[0].splitAccessor = 'd';
+
+        const options = xyVisualization.getConfiguration({
+          state,
+          frame,
+          layerId: 'referenceLine',
+        }).groups;
+        // it should not crash basically
+        expect(options).toHaveLength(1);
       });
     });
 

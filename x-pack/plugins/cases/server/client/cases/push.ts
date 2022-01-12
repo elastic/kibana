@@ -15,17 +15,19 @@ import {
   CaseStatuses,
   ExternalServiceResponse,
   CaseType,
-  ENABLE_CASE_CONNECTOR,
   CasesConfigureAttributes,
   CaseAttributes,
-} from '../../../common';
-import { buildCaseUserActionItem } from '../../services/user_actions/helpers';
+  ActionTypes,
+} from '../../../common/api';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 
 import { createIncident, getCommentContextFromAttributes } from './utils';
-import { createCaseError, flattenCaseSavedObject, getAlertInfoFromComments } from '../../common';
+import { createCaseError } from '../../common/error';
+import { flattenCaseSavedObject, getAlertInfoFromComments } from '../../common/utils';
 import { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
+import { getAlerts } from '../alerts/get';
 
 /**
  * Returns true if the case should be closed based on the configuration settings and whether the case
@@ -106,9 +108,7 @@ export const push = async (
 
     const alertsInfo = getAlertInfoFromComments(theCase?.comments);
 
-    const alerts = await casesClientInternal.alerts.get({
-      alertsInfo,
-    });
+    const alerts = await getAlerts(alertsInfo, clientArgs);
 
     const getMappingsResponse = await casesClientInternal.configuration.getMappings({
       connector: theCase.connector,
@@ -217,36 +217,27 @@ export const push = async (
             version: comment.version,
           })),
       }),
-
-      userActionService.bulkCreate({
-        unsecuredSavedObjectsClient,
-        actions: [
-          ...(shouldMarkAsClosed
-            ? [
-                buildCaseUserActionItem({
-                  action: 'update',
-                  actionAt: pushedDate,
-                  actionBy: { username, full_name, email },
-                  caseId,
-                  fields: ['status'],
-                  newValue: CaseStatuses.closed,
-                  oldValue: myCase.attributes.status,
-                  owner: myCase.attributes.owner,
-                }),
-              ]
-            : []),
-          buildCaseUserActionItem({
-            action: 'push-to-service',
-            actionAt: pushedDate,
-            actionBy: { username, full_name, email },
-            caseId,
-            fields: ['pushed'],
-            newValue: externalService,
-            owner: myCase.attributes.owner,
-          }),
-        ],
-      }),
     ]);
+
+    if (shouldMarkAsClosed) {
+      await userActionService.createUserAction({
+        type: ActionTypes.status,
+        unsecuredSavedObjectsClient,
+        payload: { status: CaseStatuses.closed },
+        user,
+        caseId,
+        owner: myCase.attributes.owner,
+      });
+    }
+
+    await userActionService.createUserAction({
+      type: ActionTypes.pushed,
+      unsecuredSavedObjectsClient,
+      payload: { externalService },
+      user,
+      caseId,
+      owner: myCase.attributes.owner,
+    });
 
     /* End of update case with push information */
 

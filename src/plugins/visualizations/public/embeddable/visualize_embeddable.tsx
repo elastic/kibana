@@ -12,13 +12,14 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
+import { KibanaThemeProvider } from '../../../kibana_react/public';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import {
   IndexPattern,
   TimeRange,
   Query,
   esFilters,
-  Filter,
   TimefilterContract,
 } from '../../../../plugins/data/public';
 import {
@@ -38,13 +39,14 @@ import {
   ExpressionAstExpression,
 } from '../../../../plugins/expressions/public';
 import { Vis, SerializedVis } from '../vis';
-import { getExpressions, getUiActions } from '../services';
+import { getExpressions, getTheme, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { SavedObjectAttributes } from '../../../../core/types';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
+import type { RenderMode } from '../../../expressions';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
@@ -62,6 +64,7 @@ export interface VisualizeInput extends EmbeddableInput {
     colors?: { [key: string]: string };
   };
   savedVis?: SerializedVis;
+  renderMode?: RenderMode;
   table?: unknown;
   query?: Query;
   filters?: Filter[];
@@ -303,14 +306,17 @@ export class VisualizeEmbeddable
     super.render(this.domNode);
 
     render(
-      <div className="visChart__spinner">
-        <EuiLoadingChart mono size="l" />
-      </div>,
+      <KibanaThemeProvider theme$={getTheme().theme$}>
+        <div className="visChart__spinner">
+          <EuiLoadingChart mono size="l" />
+        </div>
+      </KibanaThemeProvider>,
       this.domNode
     );
 
     const expressions = getExpressions();
     this.handler = await expressions.loader(this.domNode, undefined, {
+      renderMode: this.input.renderMode || 'view',
       onRenderError: (element: HTMLElement, error: ExpressionRenderError) => {
         this.onContainerError(error);
       },

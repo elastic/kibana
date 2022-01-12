@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { buildExpression } from '../../../../../src/plugins/expressions/public';
 import { createMockDatasource, createMockFramePublicAPI, DatasourceMock } from '../mocks';
 import { DatatableVisualizationState, getDatatableVisualization } from './visualization';
@@ -18,6 +18,7 @@ import {
 } from '../types';
 import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 import { layerTypes } from '../../common';
+import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
 function mockFrame(): FramePublicAPI {
   return {
@@ -28,6 +29,7 @@ function mockFrame(): FramePublicAPI {
 
 const datatableVisualization = getDatatableVisualization({
   paletteService: chartPluginMock.createPaletteRegistry(),
+  theme: themeServiceMock.createStartContract(),
 });
 
 describe('Datatable Visualization', () => {
@@ -134,6 +136,36 @@ describe('Datatable Visualization', () => {
       });
 
       expect(suggestions.length).toBeGreaterThan(0);
+    });
+
+    it('should reject suggestion with static value', () => {
+      function staticValueCol(columnId: string): TableSuggestionColumn {
+        return {
+          columnId,
+          operation: {
+            dataType: 'number',
+            label: `Static value: ${columnId}`,
+            isBucketed: false,
+            isStaticValue: true,
+          },
+        };
+      }
+      const suggestions = datatableVisualization.getSuggestions({
+        state: {
+          layerId: 'first',
+          layerType: layerTypes.DATA,
+          columns: [{ columnId: 'col1' }],
+        },
+        table: {
+          isMultiRow: true,
+          layerId: 'first',
+          changeType: 'initial',
+          columns: [staticValueCol('col1'), strCol('col2')],
+        },
+        keptLayerIds: [],
+      });
+
+      expect(suggestions).toHaveLength(0);
     });
 
     it('should retain width and hidden config from existing state', () => {

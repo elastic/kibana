@@ -17,7 +17,7 @@ import {
   EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTableProps, useDashboardTable } from './use_dashboards_table';
 
 export const columns: EuiTableProps['columns'] = [
@@ -85,7 +85,10 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
             search={search}
             pagination={true}
             sorting={true}
-            data-test-subj="mlDashboardSelectionTable"
+            data-test-subj={`mlDashboardSelectionTable${isLoading ? ' loading' : ' loaded'}`}
+            rowProps={(item) => ({
+              'data-test-subj': `mlDashboardSelectionTableRow row-${item.id}`,
+            })}
           />
         </EuiFormRow>
       </EuiModalBody>

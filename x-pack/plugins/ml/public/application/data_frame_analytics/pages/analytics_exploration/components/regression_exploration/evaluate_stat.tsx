@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiStat, EuiIconTip, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { REGRESSION_STATS } from '../../../../common/analytics';
 

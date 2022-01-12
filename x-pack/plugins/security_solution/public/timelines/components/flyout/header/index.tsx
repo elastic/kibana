@@ -19,7 +19,7 @@ import React, { MouseEventHandler, MouseEvent, useCallback, useMemo } from 'reac
 import { isEmpty, get, pick } from 'lodash/fp';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { FormattedRelative } from '@kbn/i18n/react';
+import { FormattedRelative } from '@kbn/i18n-react';
 
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import {

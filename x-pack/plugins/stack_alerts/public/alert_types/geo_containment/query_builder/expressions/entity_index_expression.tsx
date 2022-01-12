@@ -7,14 +7,14 @@
 
 import React, { Fragment, FunctionComponent, useEffect, useRef } from 'react';
 import { EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { HttpSetup } from 'kibana/public';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
   IErrorObject,
-  AlertTypeParamsExpressionProps,
+  RuleTypeParamsExpressionProps,
 } from '../../../../../../triggers_actions_ui/public';
 import { ES_GEO_FIELD_TYPES } from '../../types';
 import { GeoIndexPatternSelect } from '../util_components/geo_index_pattern_select';
@@ -29,7 +29,7 @@ interface Props {
   errors: IErrorObject;
   setAlertParamsDate: (date: string) => void;
   setAlertParamsGeoField: (geoField: string) => void;
-  setAlertProperty: AlertTypeParamsExpressionProps['setAlertProperty'];
+  setRuleProperty: RuleTypeParamsExpressionProps['setRuleProperty'];
   setIndexPattern: (indexPattern: IIndexPattern) => void;
   indexPattern: IIndexPattern;
   isInvalid: boolean;

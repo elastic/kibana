@@ -23,6 +23,7 @@ import {
   ViewMode,
 } from '../../../../../../../../src/plugins/embeddable/public';
 import { useDataVisualizerKibana } from '../../../kibana_context';
+import './_embedded_map.scss';
 
 export function EmbeddedMapComponent({
   layerList,

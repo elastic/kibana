@@ -5,19 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
-import { i18n } from '@kbn/i18n';
-
 import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
-import { ConfigKeys, ICustomFields, ScheduleUnit } from './types';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { usePolicyConfigContext } from './contexts';
+import { ConfigKey, MonitorFields, ScheduleUnit } from './types';
 
 interface Props {
   number: string;
-  onChange: (schedule: ICustomFields[ConfigKeys.SCHEDULE]) => void;
+  onChange: (schedule: MonitorFields[ConfigKey.SCHEDULE]) => void;
   unit: ScheduleUnit;
 }
 
 export const ScheduleField = ({ number, onChange, unit }: Props) => {
+  const { allowedScheduleUnits } = usePolicyConfigContext();
+  const options = !allowedScheduleUnits?.length
+    ? allOptions
+    : allOptions.filter((opt) => allowedScheduleUnits.includes(opt.value));
+
+  // When only minutes are allowed, don't allow user to input fractional value
+  const allowedStep = options.length === 1 && options[0].value === ScheduleUnit.MINUTES ? 1 : 'any';
+
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
@@ -30,12 +38,19 @@ export const ScheduleField = ({ number, onChange, unit }: Props) => {
           )}
           id="syntheticsFleetScheduleField--number"
           data-test-subj="scheduleFieldInput"
-          step={'any'}
+          step={allowedStep}
           min={1}
           value={number}
           onChange={(event) => {
             const updatedNumber = event.target.value;
             onChange({ number: updatedNumber, unit });
+          }}
+          onBlur={(event) => {
+            // Enforce whole number
+            if (allowedStep === 1) {
+              const updatedNumber = `${Math.ceil(+event.target.value)}`;
+              onChange({ number: updatedNumber, unit });
+            }
           }}
         />
       </EuiFlexItem>
@@ -61,7 +76,7 @@ export const ScheduleField = ({ number, onChange, unit }: Props) => {
   );
 };
 
-const options = [
+const allOptions = [
   {
     text: i18n.translate('xpack.uptime.createPackagePolicy.stepConfigure.scheduleField.seconds', {
       defaultMessage: 'Seconds',

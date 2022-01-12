@@ -75,11 +75,11 @@ exports[`EPM template tests loading base.yml: base.yml 1`] = `
         }
       },
       "_meta": {
+        "managed_by": "fleet",
+        "managed": true,
         "package": {
           "name": "nginx"
-        },
-        "managed_by": "ingest-manager",
-        "managed": true
+        }
       }
     }
   },
@@ -88,11 +88,11 @@ exports[`EPM template tests loading base.yml: base.yml 1`] = `
     ".fleet_component_template-1"
   ],
   "_meta": {
+    "managed_by": "fleet",
+    "managed": true,
     "package": {
       "name": "nginx"
-    },
-    "managed_by": "ingest-manager",
-    "managed": true
+    }
   }
 }
 `;
@@ -168,11 +168,11 @@ exports[`EPM template tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
         }
       },
       "_meta": {
+        "managed_by": "fleet",
+        "managed": true,
         "package": {
           "name": "coredns"
-        },
-        "managed_by": "ingest-manager",
-        "managed": true
+        }
       }
     }
   },
@@ -181,11 +181,11 @@ exports[`EPM template tests loading coredns.logs.yml: coredns.logs.yml 1`] = `
     ".fleet_component_template-1"
   ],
   "_meta": {
+    "managed_by": "fleet",
+    "managed": true,
     "package": {
       "name": "coredns"
-    },
-    "managed_by": "ingest-manager",
-    "managed": true
+    }
   }
 }
 `;
@@ -1645,11 +1645,11 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
         }
       },
       "_meta": {
+        "managed_by": "fleet",
+        "managed": true,
         "package": {
           "name": "system"
-        },
-        "managed_by": "ingest-manager",
-        "managed": true
+        }
       }
     }
   },
@@ -1658,11 +1658,11 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
     ".fleet_component_template-1"
   ],
   "_meta": {
+    "managed_by": "fleet",
+    "managed": true,
     "package": {
       "name": "system"
-    },
-    "managed_by": "ingest-manager",
-    "managed": true
+    }
   }
 }
 `;

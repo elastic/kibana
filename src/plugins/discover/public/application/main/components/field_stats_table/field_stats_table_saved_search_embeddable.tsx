@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { FieldStatisticsTable, FieldStatisticsTableProps } from './field_stats_table';
 
 export function FieldStatsTableSavedSearchEmbeddable(renderProps: FieldStatisticsTableProps) {
@@ -22,6 +22,7 @@ export function FieldStatsTableSavedSearchEmbeddable(renderProps: FieldStatistic
         columns={renderProps.columns}
         stateContainer={renderProps.stateContainer}
         onAddFilter={renderProps.onAddFilter}
+        searchSessionId={renderProps.searchSessionId}
       />
     </I18nProvider>
   );

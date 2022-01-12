@@ -8,7 +8,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import React, { useContext, useCallback, useMemo, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import type { Query } from '../../../../../../../src/plugins/data/public';
+import type { Query } from '@kbn/es-query';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import { LogEntry } from '../../../../common/log_entry';
 import { TimeKey } from '../../../../common/time';

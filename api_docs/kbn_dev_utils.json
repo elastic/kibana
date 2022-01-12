@@ -468,7 +468,7 @@
               "\n Close the ProcRunner and stop all running\n processes with `signal`\n"
             ],
             "signature": [
-              "(signal?: \"exit\" | \"SIGABRT\" | \"SIGALRM\" | \"SIGBUS\" | \"SIGCHLD\" | \"SIGCONT\" | \"SIGFPE\" | \"SIGHUP\" | \"SIGILL\" | \"SIGINT\" | \"SIGIO\" | \"SIGIOT\" | \"SIGKILL\" | \"SIGPIPE\" | \"SIGPOLL\" | \"SIGPROF\" | \"SIGPWR\" | \"SIGQUIT\" | \"SIGSEGV\" | \"SIGSTKFLT\" | \"SIGSTOP\" | \"SIGSYS\" | \"SIGTERM\" | \"SIGTRAP\" | \"SIGTSTP\" | \"SIGTTIN\" | \"SIGTTOU\" | \"SIGUNUSED\" | \"SIGURG\" | \"SIGUSR1\" | \"SIGUSR2\" | \"SIGVTALRM\" | \"SIGWINCH\" | \"SIGXCPU\" | \"SIGXFSZ\" | \"SIGBREAK\" | \"SIGLOST\" | \"SIGINFO\") => Promise<void>"
+              "(signal?: \"exit\" | NodeJS.Signals) => Promise<void>"
             ],
             "path": "packages/kbn-dev-utils/src/proc_runner/proc_runner.ts",
             "deprecated": false,
@@ -481,7 +481,7 @@
                 "label": "signal",
                 "description": [],
                 "signature": [
-                  "\"exit\" | \"SIGABRT\" | \"SIGALRM\" | \"SIGBUS\" | \"SIGCHLD\" | \"SIGCONT\" | \"SIGFPE\" | \"SIGHUP\" | \"SIGILL\" | \"SIGINT\" | \"SIGIO\" | \"SIGIOT\" | \"SIGKILL\" | \"SIGPIPE\" | \"SIGPOLL\" | \"SIGPROF\" | \"SIGPWR\" | \"SIGQUIT\" | \"SIGSEGV\" | \"SIGSTKFLT\" | \"SIGSTOP\" | \"SIGSYS\" | \"SIGTERM\" | \"SIGTRAP\" | \"SIGTSTP\" | \"SIGTTIN\" | \"SIGTTOU\" | \"SIGUNUSED\" | \"SIGURG\" | \"SIGUSR1\" | \"SIGUSR2\" | \"SIGVTALRM\" | \"SIGWINCH\" | \"SIGXCPU\" | \"SIGXFSZ\" | \"SIGBREAK\" | \"SIGLOST\" | \"SIGINFO\""
+                  "\"exit\" | NodeJS.Signals"
                 ],
                 "path": "packages/kbn-dev-utils/src/proc_runner/proc_runner.ts",
                 "deprecated": false,
@@ -1185,7 +1185,7 @@
                 "label": "level",
                 "description": [],
                 "signature": [
-                  "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\""
+                  "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\""
                 ],
                 "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log_collecting_writer.ts",
                 "deprecated": false,
@@ -1278,7 +1278,7 @@
             "label": "level",
             "description": [],
             "signature": [
-              "{ name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\"; flags: { info: boolean; error: boolean; success: boolean; warning: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
+              "{ name: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\"; flags: { error: boolean; info: boolean; success: boolean; warning: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
             ],
             "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log_text_writer.ts",
             "deprecated": false
@@ -1486,67 +1486,6 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.concatStreamProviders",
-        "type": "Function",
-        "tags": [
-          "return"
-        ],
-        "label": "concatStreamProviders",
-        "description": [
-          "\n Write the data and errors from a list of stream providers\n to a single stream in order. Stream providers are only\n called right before they will be consumed, and only one\n provider will be active at a time.\n"
-        ],
-        "signature": [
-          "(sourceProviders: (() => ",
-          "Readable",
-          ")[], options: ",
-          "TransformOptions",
-          " | undefined) => ",
-          "PassThrough"
-        ],
-        "path": "node_modules/@kbn/utils/target_types/streams/concat_stream_providers.d.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.concatStreamProviders.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "sourceProviders",
-            "description": [],
-            "signature": [
-              "(() => ",
-              "Readable",
-              ")[]"
-            ],
-            "path": "node_modules/@kbn/utils/target_types/streams/concat_stream_providers.d.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.concatStreamProviders.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "options",
-            "description": [
-              "options passed to the PassThrough constructor"
-            ],
-            "signature": [
-              "TransformOptions",
-              " | undefined"
-            ],
-            "path": "node_modules/@kbn/utils/target_types/streams/concat_stream_providers.d.ts",
-            "deprecated": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [
-          "combined stream"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.createAbsolutePathSerializer",
         "type": "Function",
         "tags": [],
@@ -1637,44 +1576,6 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.createConcatStream",
-        "type": "Function",
-        "tags": [
-          "return"
-        ],
-        "label": "createConcatStream",
-        "description": [
-          "\n Creates a Transform stream that consumes all provided\n values and concatenates them using each values `concat`\n method.\n\n Concatenate strings:\n   createListStream(['f', 'o', 'o'])\n     .pipe(createConcatStream())\n     .on('data', console.log)\n     // logs \"foo\"\n\n Concatenate values into an array:\n   createListStream([1,2,3])\n     .pipe(createConcatStream([]))\n     .on('data', console.log)\n     // logs \"[1,2,3]\"\n\n"
-        ],
-        "signature": [
-          "(initial: T | undefined) => ",
-          "Transform"
-        ],
-        "path": "node_modules/@kbn/utils/target_types/streams/concat_stream.d.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.createConcatStream.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "initial",
-            "description": [
-              "The initial value that subsequent\nitems will concat with"
-            ],
-            "signature": [
-              "T | undefined"
-            ],
-            "path": "node_modules/@kbn/utils/target_types/streams/concat_stream.d.ts",
-            "deprecated": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.createFailError",
         "type": "Function",
         "tags": [],
@@ -1720,38 +1621,6 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.createFilterStream",
-        "type": "Function",
-        "tags": [],
-        "label": "createFilterStream",
-        "description": [],
-        "signature": [
-          "(fn: (obj: T) => boolean) => ",
-          "Transform"
-        ],
-        "path": "node_modules/@kbn/utils/target_types/streams/filter_stream.d.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.createFilterStream.$1",
-            "type": "Function",
-            "tags": [],
-            "label": "fn",
-            "description": [],
-            "signature": [
-              "(obj: T) => boolean"
-            ],
-            "path": "node_modules/@kbn/utils/target_types/streams/filter_stream.d.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.createFlagError",
         "type": "Function",
         "tags": [],
@@ -1774,151 +1643,6 @@
               "string"
             ],
             "path": "packages/kbn-dev-utils/src/run/fail.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.createIntersperseStream",
-        "type": "Function",
-        "tags": [
-          "return"
-        ],
-        "label": "createIntersperseStream",
-        "description": [
-          "\n Create a Transform stream that receives values in object mode,\n and intersperses a chunk between each object received.\n\n This is useful for writing lists:\n\n   createListStream(['foo', 'bar'])\n     .pipe(createIntersperseStream('\\n'))\n     .pipe(process.stdout) // outputs \"foo\\nbar\"\n\n Combine with a concat stream to get \"join\" like functionality:\n\n   await createPromiseFromStreams([\n     createListStream(['foo', 'bar']),\n     createIntersperseStream(' '),\n     createConcatStream()\n   ]) // produces a single value \"foo bar\"\n"
-        ],
-        "signature": [
-          "(intersperseChunk: string | Buffer) => ",
-          "Transform"
-        ],
-        "path": "node_modules/@kbn/utils/target_types/streams/intersperse_stream.d.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.createIntersperseStream.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "intersperseChunk",
-            "description": [],
-            "signature": [
-              "string | Buffer"
-            ],
-            "path": "node_modules/@kbn/utils/target_types/streams/intersperse_stream.d.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.createListStream",
-        "type": "Function",
-        "tags": [
-          "return"
-        ],
-        "label": "createListStream",
-        "description": [
-          "\n Create a Readable stream that provides the items\n from a list as objects to subscribers\n"
-        ],
-        "signature": [
-          "(items: T | T[] | undefined) => ",
-          "Readable"
-        ],
-        "path": "node_modules/@kbn/utils/target_types/streams/list_stream.d.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.createListStream.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "items",
-            "description": [
-              "- the list of items to provide"
-            ],
-            "signature": [
-              "T | T[] | undefined"
-            ],
-            "path": "node_modules/@kbn/utils/target_types/streams/list_stream.d.ts",
-            "deprecated": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.createMapStream",
-        "type": "Function",
-        "tags": [],
-        "label": "createMapStream",
-        "description": [],
-        "signature": [
-          "(fn: (value: T, i: number) => void) => ",
-          "Transform"
-        ],
-        "path": "node_modules/@kbn/utils/target_types/streams/map_stream.d.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.createMapStream.$1",
-            "type": "Function",
-            "tags": [],
-            "label": "fn",
-            "description": [],
-            "signature": [
-              "(value: T, i: number) => void"
-            ],
-            "path": "node_modules/@kbn/utils/target_types/streams/map_stream.d.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.createPromiseFromStreams",
-        "type": "Function",
-        "tags": [],
-        "label": "createPromiseFromStreams",
-        "description": [],
-        "signature": [
-          "(streams: [",
-          "Readable",
-          ", ...",
-          "Writable",
-          "[]]) => Promise<T>"
-        ],
-        "path": "node_modules/@kbn/utils/target_types/streams/promise_from_streams.d.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.createPromiseFromStreams.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "streams",
-            "description": [],
-            "signature": [
-              "[",
-              "Readable",
-              ", ...",
-              "Writable",
-              "[]]"
-            ],
-            "path": "node_modules/@kbn/utils/target_types/streams/promise_from_streams.d.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -1973,58 +1697,6 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.createReduceStream",
-        "type": "Function",
-        "tags": [
-          "return"
-        ],
-        "label": "createReduceStream",
-        "description": [
-          "\n Create a transform stream that consumes each chunk it receives\n and passes it to the reducer, which will return the new value\n for the stream. Once all chunks have been received the reduce\n stream provides the result of final call to the reducer to\n subscribers.\n"
-        ],
-        "signature": [
-          "(reducer: (value: any, chunk: T, enc: string) => T, initial: T | undefined) => ",
-          "Transform"
-        ],
-        "path": "node_modules/@kbn/utils/target_types/streams/reduce_stream.d.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.createReduceStream.$1",
-            "type": "Function",
-            "tags": [],
-            "label": "reducer",
-            "description": [],
-            "signature": [
-              "(value: any, chunk: T, enc: string) => T"
-            ],
-            "path": "node_modules/@kbn/utils/target_types/streams/reduce_stream.d.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.createReduceStream.$2",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "initial",
-            "description": [
-              "Initial value for the stream, if undefined\nthen the first chunk provided is used as the\ninitial value."
-            ],
-            "signature": [
-              "T | undefined"
-            ],
-            "path": "node_modules/@kbn/utils/target_types/streams/reduce_stream.d.ts",
-            "deprecated": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.createReplaceSerializer",
         "type": "Function",
         "tags": [],
@@ -2061,88 +1733,6 @@
               "string | Replacer"
             ],
             "path": "packages/kbn-dev-utils/src/serializers/replace_serializer.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.createReplaceStream",
-        "type": "Function",
-        "tags": [],
-        "label": "createReplaceStream",
-        "description": [],
-        "signature": [
-          "(toReplace: string, replacement: string | Buffer) => ",
-          "Transform"
-        ],
-        "path": "node_modules/@kbn/utils/target_types/streams/replace_stream.d.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.createReplaceStream.$1",
-            "type": "string",
-            "tags": [],
-            "label": "toReplace",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "node_modules/@kbn/utils/target_types/streams/replace_stream.d.ts",
-            "deprecated": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.createReplaceStream.$2",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "replacement",
-            "description": [],
-            "signature": [
-              "string | Buffer"
-            ],
-            "path": "node_modules/@kbn/utils/target_types/streams/replace_stream.d.ts",
-            "deprecated": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.createSplitStream",
-        "type": "Function",
-        "tags": [
-          "return"
-        ],
-        "label": "createSplitStream",
-        "description": [
-          "\n Creates a Transform stream that consumes a stream of Buffers\n and produces a stream of strings (in object mode) by splitting\n the received bytes using the splitChunk.\n\n Ways this is behaves like String#split:\n   - instances of splitChunk are removed from the input\n   - splitChunk can be on any size\n   - if there are no bytes found after the last splitChunk\n     a final empty chunk is emitted\n\n Ways this deviates from String#split:\n   - splitChunk cannot be a regexp\n   - an empty string or Buffer will not produce a stream of individual\n     bytes like `string.split('')` would\n"
-        ],
-        "signature": [
-          "(splitChunk: string | Uint8Array) => ",
-          "Transform"
-        ],
-        "path": "node_modules/@kbn/utils/target_types/streams/split_stream.d.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.createSplitStream.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "splitChunk",
-            "description": [],
-            "signature": [
-              "string | Uint8Array"
-            ],
-            "path": "node_modules/@kbn/utils/target_types/streams/split_stream.d.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -2197,36 +1787,6 @@
           }
         ],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.fromRoot",
-        "type": "Function",
-        "tags": [],
-        "label": "fromRoot",
-        "description": [],
-        "signature": [
-          "(...paths: string[]) => string"
-        ],
-        "path": "node_modules/@kbn/utils/target_types/repo_root.d.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/dev-utils",
-            "id": "def-server.fromRoot.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "paths",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "node_modules/@kbn/utils/target_types/repo_root.d.ts",
-            "deprecated": false
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -2479,22 +2039,6 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.isKibanaDistributable",
-        "type": "Function",
-        "tags": [],
-        "label": "isKibanaDistributable",
-        "description": [],
-        "signature": [
-          "() => any"
-        ],
-        "path": "node_modules/@kbn/utils/target_types/package_json/index.d.ts",
-        "deprecated": false,
-        "returnComment": [],
-        "children": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.mergeFlagOptions",
         "type": "Function",
         "tags": [],
@@ -2695,7 +2239,7 @@
         "label": "parseLogLevel",
         "description": [],
         "signature": [
-          "(name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\") => { name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\"; flags: { info: boolean; error: boolean; success: boolean; warning: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
+          "(name: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\") => { name: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\"; flags: { error: boolean; info: boolean; success: boolean; warning: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
         ],
         "path": "packages/kbn-dev-utils/src/tooling_log/log_levels.ts",
         "deprecated": false,
@@ -2708,7 +2252,7 @@
             "label": "name",
             "description": [],
             "signature": [
-              "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\""
+              "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\""
             ],
             "path": "packages/kbn-dev-utils/src/tooling_log/log_levels.ts",
             "deprecated": false,
@@ -2726,7 +2270,7 @@
         "label": "pickLevelFromFlags",
         "description": [],
         "signature": [
-          "(flags: Record<string, string | boolean | string[] | undefined>, options: { default?: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\" | undefined; }) => \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\""
+          "(flags: Record<string, string | boolean | string[] | undefined>, options: { default?: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\" | undefined; }) => \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\""
         ],
         "path": "packages/kbn-dev-utils/src/tooling_log/log_levels.ts",
         "deprecated": false,
@@ -2763,7 +2307,7 @@
                 "label": "default",
                 "description": [],
                 "signature": [
-                  "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\" | undefined"
+                  "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\" | undefined"
                 ],
                 "path": "packages/kbn-dev-utils/src/tooling_log/log_levels.ts",
                 "deprecated": false
@@ -3198,14 +2742,14 @@
           {
             "parentPluginId": "@kbn/dev-utils",
             "id": "def-server.CiStatsMetadata.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: string | number | boolean | string[] | undefined",
             "description": [
               "\nArbitrary key-value pairs which can be attached to CiStatsTiming and CiStatsMetric\nobjects stored in the ci-stats service"
             ],
             "signature": [
-              "any"
+              "[key: string]:  string | number | boolean | string[] | undefined"
             ],
             "path": "packages/kbn-dev-utils/src/ci_stats_reporter/ci_stats_reporter.ts",
             "deprecated": false
@@ -3740,12 +3284,12 @@
           {
             "parentPluginId": "@kbn/dev-utils",
             "id": "def-server.Flags.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: string | boolean | string[] | undefined",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  string | boolean | string[] | undefined"
             ],
             "path": "packages/kbn-dev-utils/src/run/flags.ts",
             "deprecated": false
@@ -3821,7 +3365,7 @@
               "level/type of message"
             ],
             "signature": [
-              "\"write\" | \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"verbose\""
+              "\"error\" | \"write\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"verbose\""
             ],
             "path": "packages/kbn-dev-utils/src/tooling_log/message.ts",
             "deprecated": false
@@ -3981,9 +3525,7 @@
             "label": "statsMeta",
             "description": [],
             "signature": [
-              "Map<string, ",
-              "PhraseFilterValue",
-              ">"
+              "Map<string, string | number | boolean>"
             ],
             "path": "packages/kbn-dev-utils/src/run/run.ts",
             "deprecated": false
@@ -4079,7 +3621,7 @@
             "label": "log",
             "description": [],
             "signature": [
-              "{ defaultLevel?: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
+              "{ defaultLevel?: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
             ],
             "path": "packages/kbn-dev-utils/src/run/run.ts",
             "deprecated": false
@@ -4135,7 +3677,7 @@
             "label": "log",
             "description": [],
             "signature": [
-              "{ defaultLevel?: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
+              "{ defaultLevel?: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\" | undefined; } | undefined"
             ],
             "path": "packages/kbn-dev-utils/src/run/run_with_commands.ts",
             "deprecated": false
@@ -4368,7 +3910,7 @@
               "\nLog level, messages below this level will be ignored"
             ],
             "signature": [
-              "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\""
+              "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\""
             ],
             "path": "packages/kbn-dev-utils/src/tooling_log/tooling_log_text_writer.ts",
             "deprecated": false
@@ -4664,27 +4206,13 @@
       },
       {
         "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.kibanaPackageJson",
-        "type": "Any",
-        "tags": [],
-        "label": "kibanaPackageJson",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "node_modules/@kbn/utils/target_types/package_json/index.d.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
         "id": "def-server.LogLevel",
         "type": "Type",
         "tags": [],
         "label": "LogLevel",
         "description": [],
         "signature": [
-          "\"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\""
+          "\"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\""
         ],
         "path": "packages/kbn-dev-utils/src/tooling_log/log_levels.ts",
         "deprecated": false,
@@ -4698,34 +4226,9 @@
         "label": "ParsedLogLevel",
         "description": [],
         "signature": [
-          "{ name: \"info\" | \"error\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\"; flags: { info: boolean; error: boolean; success: boolean; warning: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
+          "{ name: \"error\" | \"info\" | \"success\" | \"warning\" | \"debug\" | \"silent\" | \"verbose\"; flags: { error: boolean; info: boolean; success: boolean; warning: boolean; debug: boolean; silent: boolean; verbose: boolean; }; }"
         ],
         "path": "packages/kbn-dev-utils/src/tooling_log/log_levels.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.PathConfigType",
-        "type": "Type",
-        "tags": [],
-        "label": "PathConfigType",
-        "description": [],
-        "signature": [
-          "{ readonly data: string; }"
-        ],
-        "path": "node_modules/@kbn/utils/target_types/path/index.d.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.REPO_ROOT",
-        "type": "string",
-        "tags": [],
-        "label": "REPO_ROOT",
-        "description": [],
-        "path": "node_modules/@kbn/utils/target_types/repo_root.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4771,17 +4274,6 @@
             "deprecated": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/dev-utils",
-        "id": "def-server.UPSTREAM_BRANCH",
-        "type": "string",
-        "tags": [],
-        "label": "UPSTREAM_BRANCH",
-        "description": [],
-        "path": "node_modules/@kbn/utils/target_types/repo_root.d.ts",
-        "deprecated": false,
         "initialIsOpen": false
       }
     ],

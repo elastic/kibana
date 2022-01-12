@@ -7,6 +7,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { i18n } from '@kbn/i18n';
 import { DataView, flattenHit } from '../../../data/common';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../common';
 import { getServices } from '../kibana_services';
@@ -14,7 +15,7 @@ import { formatFieldValue } from './format_value';
 
 const formattedHitCache = new WeakMap<estypes.SearchHit, FormattedHit>();
 
-type FormattedHit = Array<[fieldName: string, formattedValue: string]>;
+type FormattedHit = Array<readonly [fieldName: string, formattedValue: string]>;
 
 /**
  * Returns a formatted document in form of key/value pairs of the fields name and a formatted value.
@@ -61,7 +62,22 @@ export function formatHit(
     }
   });
   const maxEntries = getServices().uiSettings.get<number>(MAX_DOC_FIELDS_DISPLAYED);
-  const formatted = [...highlightPairs, ...sourcePairs].slice(0, maxEntries);
+  const pairs = [...highlightPairs, ...sourcePairs];
+  const formatted =
+    // If document has more formatted fields than configured via MAX_DOC_FIELDS_DISPLAYED we cut
+    // off additional fields and instead show a summary how many more field exists.
+    pairs.length <= maxEntries
+      ? pairs
+      : [
+          ...pairs.slice(0, maxEntries),
+          [
+            i18n.translate('discover.utils.formatHit.moreFields', {
+              defaultMessage: 'and {count} more {count, plural, one {field} other {fields}}',
+              values: { count: pairs.length - maxEntries },
+            }),
+            '',
+          ] as const,
+        ];
   formattedHitCache.set(hit, formatted);
   return formatted;
 }

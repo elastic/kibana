@@ -30,7 +30,7 @@ import React, { Component, Fragment } from 'react';
 import ReactMarkdown from 'react-markdown';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { HttpStart, IHttpFetchError, NotificationsStart } from 'src/core/public';
 
 import type { LoginSelector, LoginSelectorProvider } from '../../../../../common/login_state';

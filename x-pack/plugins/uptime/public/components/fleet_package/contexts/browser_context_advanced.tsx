@@ -6,29 +6,34 @@
  */
 
 import React, { createContext, useContext, useMemo, useState } from 'react';
-import { IBrowserAdvancedFields, ConfigKeys, ScreenshotOption } from '../types';
+import { BrowserAdvancedFields, ConfigKey, ScreenshotOption } from '../types';
 
-interface IBrowserAdvancedFieldsContext {
-  setFields: React.Dispatch<React.SetStateAction<IBrowserAdvancedFields>>;
-  fields: IBrowserAdvancedFields;
-  defaultValues: IBrowserAdvancedFields;
+interface BrowserAdvancedFieldsContext {
+  setFields: React.Dispatch<React.SetStateAction<BrowserAdvancedFields>>;
+  fields: BrowserAdvancedFields;
+  defaultValues: BrowserAdvancedFields;
 }
 
-interface IBrowserAdvancedFieldsContextProvider {
+interface BrowserAdvancedFieldsContextProvider {
   children: React.ReactNode;
-  defaultValues?: IBrowserAdvancedFields;
+  defaultValues?: BrowserAdvancedFields;
 }
 
-export const initialValues: IBrowserAdvancedFields = {
-  [ConfigKeys.SCREENSHOTS]: ScreenshotOption.ON,
-  [ConfigKeys.SYNTHETICS_ARGS]: [],
-  [ConfigKeys.JOURNEY_FILTERS_MATCH]: '',
-  [ConfigKeys.JOURNEY_FILTERS_TAGS]: [],
-  [ConfigKeys.IGNORE_HTTPS_ERRORS]: false,
+export const initialValues: BrowserAdvancedFields = {
+  [ConfigKey.SCREENSHOTS]: ScreenshotOption.ON,
+  [ConfigKey.SYNTHETICS_ARGS]: [],
+  [ConfigKey.JOURNEY_FILTERS_MATCH]: '',
+  [ConfigKey.JOURNEY_FILTERS_TAGS]: [],
+  [ConfigKey.IGNORE_HTTPS_ERRORS]: false,
+  [ConfigKey.IS_THROTTLING_ENABLED]: true,
+  [ConfigKey.DOWNLOAD_SPEED]: '5',
+  [ConfigKey.UPLOAD_SPEED]: '3',
+  [ConfigKey.LATENCY]: '20',
+  [ConfigKey.THROTTLING_CONFIG]: '5d/3u/20l',
 };
 
-const defaultContext: IBrowserAdvancedFieldsContext = {
-  setFields: (_fields: React.SetStateAction<IBrowserAdvancedFields>) => {
+const defaultContext: BrowserAdvancedFieldsContext = {
+  setFields: (_fields: React.SetStateAction<BrowserAdvancedFields>) => {
     throw new Error(
       'setFields was not initialized for Browser Advanced Fields, set it when you invoke the context'
     );
@@ -42,8 +47,8 @@ export const BrowserAdvancedFieldsContext = createContext(defaultContext);
 export const BrowserAdvancedFieldsContextProvider = ({
   children,
   defaultValues = initialValues,
-}: IBrowserAdvancedFieldsContextProvider) => {
-  const [fields, setFields] = useState<IBrowserAdvancedFields>(defaultValues);
+}: BrowserAdvancedFieldsContextProvider) => {
+  const [fields, setFields] = useState<BrowserAdvancedFields>(defaultValues);
 
   const value = useMemo(() => {
     return { fields, setFields, defaultValues };

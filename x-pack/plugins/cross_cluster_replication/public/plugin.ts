@@ -41,7 +41,7 @@ export class CrossClusterReplicationPlugin implements Plugin {
       id: MANAGEMENT_ID,
       title: PLUGIN.TITLE,
       order: 6,
-      mount: async ({ element, setBreadcrumbs, history }) => {
+      mount: async ({ element, setBreadcrumbs, history, theme$ }) => {
         const { mountApp } = await import('./app');
 
         const [coreStart] = await getStartServices();
@@ -61,6 +61,7 @@ export class CrossClusterReplicationPlugin implements Plugin {
           docLinks,
           history,
           getUrlForApp,
+          theme$,
         });
 
         return () => {

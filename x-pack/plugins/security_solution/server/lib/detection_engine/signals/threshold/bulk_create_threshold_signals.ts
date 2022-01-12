@@ -144,7 +144,7 @@ const getTransformedHits = (
     const source = {
       [TIMESTAMP]: bucket.maxTimestamp,
       ...bucket.terms.reduce<object>((termAcc, term) => {
-        if (!term.field.startsWith('signal.')) {
+        if (!term.field.startsWith('signal.') && !term.field.startsWith('kibana.alert.')) {
           // We don't want to overwrite `signal.*` fields.
           // See: https://github.com/elastic/kibana/issues/83218
           return {

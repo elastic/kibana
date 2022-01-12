@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash';
 import { createElement } from 'react';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 // @ts-expect-error unconverted components
 import { ArgForm } from '../components/arg_form';
 import { argTypeRegistry } from './arg_type_registry';

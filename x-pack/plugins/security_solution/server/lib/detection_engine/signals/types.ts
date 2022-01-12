@@ -12,7 +12,7 @@ import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-t
 import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
 import {
-  AlertType,
+  RuleType,
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
@@ -196,7 +196,7 @@ export type RuleExecutorOptions = AlertExecutorOptions<
 // since we are only increasing the strictness of params.
 export const isAlertExecutor = (
   obj: SignalRuleAlertTypeDefinition
-): obj is AlertType<
+): obj is RuleType<
   RuleParams,
   RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
   AlertTypeState,
@@ -207,7 +207,7 @@ export const isAlertExecutor = (
   return true;
 };
 
-export type SignalRuleAlertTypeDefinition = AlertType<
+export type SignalRuleAlertTypeDefinition = RuleType<
   RuleParams,
   RuleParams, // This type is used for useSavedObjectReferences, use an Omit here if you want to remove any values.
   AlertTypeState,
@@ -321,7 +321,7 @@ export interface SearchAfterAndBulkCreateParams {
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
   trackTotalHits?: boolean;
-  sortOrder?: estypes.SearchSortOrder;
+  sortOrder?: estypes.SortOrder;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {

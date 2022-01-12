@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { service, timerange } from '@elastic/apm-synthtrace';
+import { apm, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
 import { first, isEmpty, last, meanBy } from 'lodash';
 import moment from 'moment';
@@ -84,9 +84,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const GO_PROD_RATE = 75;
         const GO_PROD_ERROR_RATE = 25;
         before(async () => {
-          const serviceGoProdInstance = service(serviceName, 'production', 'go').instance(
-            'instance-a'
-          );
+          const serviceGoProdInstance = apm
+            .service(serviceName, 'production', 'go')
+            .instance('instance-a');
 
           const transactionName = 'GET /api/product/list';
 

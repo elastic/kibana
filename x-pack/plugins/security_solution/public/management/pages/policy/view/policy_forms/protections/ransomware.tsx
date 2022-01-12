@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { SecurityPageName } from '../../../../../../app/types';

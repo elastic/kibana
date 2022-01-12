@@ -17,10 +17,16 @@ import { asOk, asErr } from '../lib/result_type';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import type { MustNotCondition } from '../queries/query_clauses';
 import { mockLogger } from '../test_utils';
-import { TaskClaiming, OwnershipClaimingOpts, TaskClaimingOpts } from './task_claiming';
+import {
+  TaskClaiming,
+  OwnershipClaimingOpts,
+  TaskClaimingOpts,
+  TASK_MANAGER_MARK_AS_CLAIMED,
+} from './task_claiming';
 import { Observable } from 'rxjs';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
+import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 
 const taskManagerLogger = mockLogger();
 
@@ -190,8 +196,8 @@ describe('TaskClaiming', () => {
       const results = await getAllAsPromise(taskClaiming.claimAvailableTasks(claimingOpts));
 
       expect(apm.startTransaction).toHaveBeenCalledWith(
-        'markAvailableTasksAsClaimed',
-        'taskManager markAvailableTasksAsClaimed'
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
       );
       expect(mockApmTrans.end).toHaveBeenCalledWith('success');
 
@@ -250,8 +256,8 @@ describe('TaskClaiming', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: Oh no]`);
 
       expect(apm.startTransaction).toHaveBeenCalledWith(
-        'markAvailableTasksAsClaimed',
-        'taskManager markAvailableTasksAsClaimed'
+        TASK_MANAGER_MARK_AS_CLAIMED,
+        TASK_MANAGER_TRANSACTION_TYPE
       );
       expect(mockApmTrans.end).toHaveBeenCalledWith('failure');
     });

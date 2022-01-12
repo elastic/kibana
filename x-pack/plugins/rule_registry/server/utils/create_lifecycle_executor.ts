@@ -18,7 +18,8 @@ import {
   AlertTypeParams,
   AlertTypeState,
 } from '../../../alerting/server';
-import { ParsedTechnicalFields, parseTechnicalFields } from '../../common/parse_technical_fields';
+import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
+import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {
   ALERT_DURATION,
   ALERT_END,
@@ -32,6 +33,7 @@ import {
   ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
   EVENT_KIND,
+  TAGS,
   TIMESTAMP,
   VERSION,
 } from '../../common/technical_rule_data_field_names';
@@ -140,7 +142,7 @@ export const createLifecycleExecutor =
     >
   ): Promise<WrappedLifecycleRuleState<State>> => {
     const {
-      services: { alertInstanceFactory },
+      services: { alertInstanceFactory, shouldWriteAlerts },
       state: previousState,
     } = options;
 
@@ -188,7 +190,7 @@ export const createLifecycleExecutor =
 
     const trackedAlertsDataMap: Record<
       string,
-      { indexName: string; fields: Partial<ParsedTechnicalFields> }
+      { indexName: string; fields: Partial<ParsedTechnicalFields & ParsedExperimentalFields> }
     > = {};
 
     if (trackedAlertStates.length) {
@@ -216,8 +218,6 @@ export const createLifecycleExecutor =
           collapse: {
             field: ALERT_UUID,
           },
-          _source: false,
-          fields: [{ field: '*', include_unmapped: true }],
           sort: {
             [TIMESTAMP]: 'desc' as const,
           },
@@ -226,13 +226,13 @@ export const createLifecycleExecutor =
       });
 
       hits.hits.forEach((hit) => {
-        const fields = parseTechnicalFields(hit.fields);
-        const indexName = hit._index;
-        const alertId = fields[ALERT_INSTANCE_ID];
-        trackedAlertsDataMap[alertId] = {
-          indexName,
-          fields,
-        };
+        const alertId = hit._source[ALERT_INSTANCE_ID];
+        if (alertId) {
+          trackedAlertsDataMap[alertId] = {
+            indexName: hit._index,
+            fields: hit._source,
+          };
+        }
       });
     }
 
@@ -254,7 +254,7 @@ export const createLifecycleExecutor =
           started: commonRuleFields[TIMESTAMP],
         };
 
-        const event: ParsedTechnicalFields = {
+        const event: ParsedTechnicalFields & ParsedExperimentalFields = {
           ...alertData?.fields,
           ...commonRuleFields,
           ...currentAlertData,
@@ -268,6 +268,7 @@ export const createLifecycleExecutor =
           [EVENT_KIND]: 'signal',
           [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
           [VERSION]: ruleDataClient.kibanaVersion,
+          [TAGS]: options.tags,
           ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
         };
 
@@ -281,7 +282,15 @@ export const createLifecycleExecutor =
     const newEventsToIndex = makeEventsDataMapFor(newAlertIds);
     const allEventsToIndex = [...trackedEventsToIndex, ...newEventsToIndex];
 
-    if (allEventsToIndex.length > 0 && ruleDataClient.isWriteEnabled()) {
+    // Only write alerts if:
+    // - writing is enabled
+    //   AND
+    //   - rule execution has not been cancelled due to timeout
+    //     OR
+    //   - if execution has been cancelled due to timeout, if feature flags are configured to write alerts anyway
+    const writeAlerts = ruleDataClient.isWriteEnabled() && shouldWriteAlerts();
+
+    if (allEventsToIndex.length > 0 && writeAlerts) {
       logger.debug(`Preparing to index ${allEventsToIndex.length} alerts.`);
 
       await ruleDataClient.getWriter().bulk({
@@ -307,6 +316,6 @@ export const createLifecycleExecutor =
 
     return {
       wrapped: nextWrappedState ?? ({} as State),
-      trackedAlerts: ruleDataClient.isWriteEnabled() ? nextTrackedAlerts : {},
+      trackedAlerts: writeAlerts ? nextTrackedAlerts : {},
     };
   };

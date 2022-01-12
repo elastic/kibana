@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
 
 import { KibanaPageTemplate } from '../../../../../src/plugins/kibana_react/public';

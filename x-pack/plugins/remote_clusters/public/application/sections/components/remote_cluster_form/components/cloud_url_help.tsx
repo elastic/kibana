@@ -6,7 +6,7 @@
  */
 
 import React, { FunctionComponent, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import { useAppContext } from '../../../../app_context';
 

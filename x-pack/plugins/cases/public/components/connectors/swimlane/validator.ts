@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SwimlaneConnectorType } from '../../../../common';
+import { SwimlaneConnectorType } from '../../../../common/api';
 import { ValidationConfig } from '../../../common/shared_imports';
 import { CaseActionConnector } from '../../types';
 

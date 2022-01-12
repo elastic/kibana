@@ -23,7 +23,7 @@ import {
 
 import { ProgressIcon } from './progress_icon';
 import { PROGRESS_STATES } from './progress_states';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export function ForecastProgress({ forecastProgress, jobOpeningState, jobClosingState }) {
   return (

@@ -9,7 +9,8 @@
 import React, { lazy, Suspense } from 'react';
 import ReactDOM from 'react-dom';
 import { EuiPortal, EuiProgress } from '@elastic/eui';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaThemeProvider } from '../../../kibana_react/public';
 import {
   getHttp,
   getSavedObjects,
@@ -19,6 +20,7 @@ import {
   getApplication,
   getEmbeddable,
   getDocLinks,
+  getTheme,
 } from '../services';
 import type { BaseVisType } from '../vis_types';
 
@@ -61,33 +63,35 @@ export function showNewVisModal({
 
   document.body.appendChild(container);
   const element = (
-    <I18nProvider>
-      <Suspense
-        fallback={
-          <EuiPortal>
-            <EuiProgress size="xs" position="fixed" />
-          </EuiPortal>
-        }
-      >
-        <NewVisModal
-          isOpen={true}
-          onClose={handleClose}
-          originatingApp={originatingApp}
-          stateTransfer={getEmbeddable().getStateTransfer()}
-          outsideVisualizeApp={outsideVisualizeApp}
-          editorParams={editorParams}
-          visTypesRegistry={getTypes()}
-          addBasePath={getHttp().basePath.prepend}
-          uiSettings={getUISettings()}
-          savedObjects={getSavedObjects()}
-          usageCollection={getUsageCollector()}
-          application={getApplication()}
-          docLinks={getDocLinks()}
-          showAggsSelection={showAggsSelection}
-          selectedVisType={selectedVisType}
-        />
-      </Suspense>
-    </I18nProvider>
+    <KibanaThemeProvider theme$={getTheme().theme$}>
+      <I18nProvider>
+        <Suspense
+          fallback={
+            <EuiPortal>
+              <EuiProgress size="xs" position="fixed" />
+            </EuiPortal>
+          }
+        >
+          <NewVisModal
+            isOpen={true}
+            onClose={handleClose}
+            originatingApp={originatingApp}
+            stateTransfer={getEmbeddable().getStateTransfer()}
+            outsideVisualizeApp={outsideVisualizeApp}
+            editorParams={editorParams}
+            visTypesRegistry={getTypes()}
+            addBasePath={getHttp().basePath.prepend}
+            uiSettings={getUISettings()}
+            savedObjects={getSavedObjects()}
+            usageCollection={getUsageCollector()}
+            application={getApplication()}
+            docLinks={getDocLinks()}
+            showAggsSelection={showAggsSelection}
+            selectedVisType={selectedVisType}
+          />
+        </Suspense>
+      </I18nProvider>
+    </KibanaThemeProvider>
   );
   ReactDOM.render(element, container);
 

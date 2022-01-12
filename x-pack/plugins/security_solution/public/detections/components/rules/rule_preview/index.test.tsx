@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../common/mock';
 import { RulePreview, RulePreviewProps } from './';
@@ -45,6 +45,16 @@ const defaultProps: RulePreviewProps = {
     filters: [],
     query: { query: 'threat.indicator.file.hash.md5:*', language: 'kuery' },
   },
+  threshold: {
+    field: ['agent.hostname'],
+    value: '200',
+    cardinality: {
+      field: ['user.name'],
+      value: '2',
+    },
+  },
+  anomalyThreshold: 50,
+  machineLearningJobId: ['test-ml-job-id'],
 };
 
 describe('PreviewQuery', () => {
@@ -61,13 +71,13 @@ describe('PreviewQuery', () => {
     ]);
 
     (usePreviewRoute as jest.Mock).mockReturnValue({
+      hasNoiseWarning: false,
       addNoiseWarning: jest.fn(),
       createPreview: jest.fn(),
       clearPreview: jest.fn(),
-      errors: [],
+      logs: [],
       isPreviewRequestInProgress: false,
       previewId: undefined,
-      warnings: [],
     });
   });
 
@@ -76,43 +86,43 @@ describe('PreviewQuery', () => {
   });
 
   test('it renders timeframe select and preview button on render', () => {
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <RulePreview {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="rule-preview"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="preview-time-frame"]').exists()).toBeTruthy();
+    expect(wrapper.findByTestId('rule-preview')).toBeTruthy();
+    expect(wrapper.findByTestId('preview-time-frame')).toBeTruthy();
   });
 
   test('it renders preview button disabled if "isDisabled" is true', () => {
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <RulePreview {...defaultProps} isDisabled={true} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="preview-button"] button').props().disabled).toBeTruthy();
+    expect(wrapper.getByTestId('queryPreviewButton').closest('button')).toBeDisabled();
   });
 
   test('it renders preview button enabled if "isDisabled" is false', () => {
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <RulePreview {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="preview-button"] button').props().disabled).toBeFalsy();
+    expect(wrapper.getByTestId('queryPreviewButton').closest('button')).not.toBeDisabled();
   });
 
   test('does not render histogram when there is no previewId', () => {
-    const wrapper = mount(
+    const wrapper = render(
       <TestProviders>
         <RulePreview {...defaultProps} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="preview-histogram-panel"]').exists()).toBeFalsy();
+    expect(wrapper.queryByTestId('[data-test-subj="preview-histogram-panel"]')).toBeNull();
   });
 });

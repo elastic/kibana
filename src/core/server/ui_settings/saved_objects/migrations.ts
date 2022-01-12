@@ -102,4 +102,28 @@ export const migrations = {
     }),
     references: doc.references || [],
   }),
+  '8.1.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
+    ...doc,
+    ...(doc.attributes && {
+      attributes: Object.keys(doc.attributes).reduce((acc, key) => {
+        if (key === 'format:defaultTypeMap') {
+          const initial = JSON.parse(doc.attributes[key]);
+          const updated = {
+            ...initial,
+            geo_point: { id: 'geo_point', params: { transform: 'wkt' } },
+          };
+          return {
+            ...acc,
+            'format:defaultTypeMap': JSON.stringify(updated, null, 2),
+          };
+        } else {
+          return {
+            ...acc,
+            [key]: doc.attributes[key],
+          };
+        }
+      }, {}),
+    }),
+    references: doc.references || [],
+  }),
 };

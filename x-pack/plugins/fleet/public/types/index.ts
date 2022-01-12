@@ -75,6 +75,7 @@ export type {
   GetOutputsResponse,
   PutOutputRequest,
   PutOutputResponse,
+  PostOutputRequest,
   GetSettingsResponse,
   PutSettingsRequest,
   PutSettingsResponse,

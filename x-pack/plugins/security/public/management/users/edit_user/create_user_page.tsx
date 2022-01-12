@@ -10,7 +10,7 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { UserForm } from './user_form';
 

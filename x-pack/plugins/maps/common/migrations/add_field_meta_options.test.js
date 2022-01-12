@@ -41,7 +41,7 @@ describe('addFieldMetaOptions', () => {
   test('Should ignore static style properties', () => {
     const layerListJSON = JSON.stringify([
       {
-        type: LAYER_TYPE.VECTOR,
+        type: 'VECTOR',
         style: {
           type: 'VECTOR',
           properties: {
@@ -68,7 +68,7 @@ describe('addFieldMetaOptions', () => {
   test('Should add field meta options to dynamic style properties', () => {
     const layerListJSON = JSON.stringify([
       {
-        type: LAYER_TYPE.VECTOR,
+        type: 'VECTOR',
         style: {
           type: 'VECTOR',
           properties: {
@@ -94,7 +94,7 @@ describe('addFieldMetaOptions', () => {
       title: 'my map',
       layerListJSON: JSON.stringify([
         {
-          type: LAYER_TYPE.VECTOR,
+          type: 'VECTOR',
           style: {
             type: 'VECTOR',
             properties: {

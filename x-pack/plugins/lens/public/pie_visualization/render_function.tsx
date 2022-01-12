@@ -7,7 +7,7 @@
 
 import { uniq } from 'lodash';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 import {
   Chart,
@@ -25,7 +25,8 @@ import {
 import { RenderMode } from 'src/plugins/expressions';
 import type { LensFilterEvent } from '../types';
 import { VisualizationContainer } from '../visualization_container';
-import { CHART_NAMES, DEFAULT_PERCENT_DECIMALS } from './constants';
+import { DEFAULT_PERCENT_DECIMALS } from './constants';
+import { PartitionChartsMeta } from './partition_charts_meta';
 import type { FormatFactory } from '../../common';
 import type { PieExpressionProps } from '../../common/expressions';
 import {
@@ -35,7 +36,7 @@ import {
   byDataColorPaletteMap,
   extractUniqTermsMap,
 } from './render_helpers';
-import { EmptyPlaceholder } from '../shared_components';
+import { EmptyPlaceholder } from '../../../../../src/plugins/charts/public';
 import './visualization.scss';
 import {
   ChartsPluginSetup,
@@ -81,10 +82,12 @@ export function PieComponent(
     legendPosition,
     nestedLegend,
     percentDecimals,
+    emptySizeRatio,
     legendMaxLines,
     truncateLegend,
     hideLabels,
     palette,
+    showValuesInLegend,
   } = props.args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
@@ -126,7 +129,7 @@ export function PieComponent(
     );
   }
 
-  let sortingMap: Record<string, number>;
+  let sortingMap: Record<string, number> = {};
   if (shape === 'mosaic') {
     sortingMap = extractUniqTermsMap(firstTable, bucketColumns[0].id);
   }
@@ -145,17 +148,7 @@ export function PieComponent(
         return String(d);
       },
       fillLabel,
-      sortPredicate:
-        shape === 'mosaic'
-          ? ([name1, node1], [, node2]) => {
-              // Sorting for first group
-              if (bucketColumns.length === 1 || (node1.children.length && name1 in sortingMap)) {
-                return sortingMap[name1];
-              }
-              // Sorting for second group
-              return node2.value - node1.value;
-            }
-          : undefined,
+      sortPredicate: PartitionChartsMeta[shape].sortPredicate?.(bucketColumns, sortingMap),
       shape: {
         fillColor: (d) => {
           const seriesLayers: SeriesLayer[] = [];
@@ -195,7 +188,7 @@ export function PieComponent(
           const outputColor = paletteService.get(palette.name).getCategoricalColor(
             seriesLayers,
             {
-              behindText: categoryDisplay !== 'hide',
+              behindText: categoryDisplay !== 'hide' || isTreemapOrMosaicShape(shape),
               maxDepth: bucketColumns.length,
               totalSeries: totalSeriesCount,
               syncColors,
@@ -209,8 +202,10 @@ export function PieComponent(
     };
   });
 
+  const { legend, partitionType: partitionLayout, label: chartType } = PartitionChartsMeta[shape];
+
   const config: RecursivePartial<PartitionConfig> = {
-    partitionLayout: CHART_NAMES[shape].partitionType,
+    partitionLayout,
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
     outerSizeRatio: 1,
     specialFirstInnermostSector: true,
@@ -235,7 +230,7 @@ export function PieComponent(
       config.fillLabel = { textColor: 'rgba(0,0,0,0)' };
     }
   } else {
-    config.emptySizeRatio = shape === 'donut' ? 0.3 : 0;
+    config.emptySizeRatio = shape === 'donut' ? emptySizeRatio : 0;
 
     if (hideLabels || categoryDisplay === 'hide') {
       // Force all labels to be linked, then prevent links from showing
@@ -292,7 +287,7 @@ export function PieComponent(
           id="xpack.lens.pie.pieWithNegativeWarningLabel"
           defaultMessage="{chartType} charts can't render with negative values."
           values={{
-            chartType: CHART_NAMES[shape].label,
+            chartType,
           }}
         />
       </EuiText>
@@ -319,9 +314,10 @@ export function PieComponent(
             !hideLabels &&
             (legendDisplay === 'show' ||
               (legendDisplay === 'default' &&
-                bucketColumns.length > 1 &&
-                !isTreemapOrMosaicShape(shape)))
+                (legend.getShowLegendDefault?.(bucketColumns) ?? false)))
           }
+          flatLegend={legend.flat}
+          showLegendExtra={showValuesInLegend}
           legendPosition={legendPosition || Position.Right}
           legendMaxDepth={nestedLegend ? undefined : 1 /* Color is based only on first layer */}
           onElementClick={props.interactive ?? true ? onElementClickHandler : undefined}

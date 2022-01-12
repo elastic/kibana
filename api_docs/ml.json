@@ -512,6 +512,33 @@
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.customUrls",
+            "type": "Array",
+            "tags": [],
+            "label": "customUrls",
+            "description": [],
+            "signature": [
+              "KibanaUrlConfig",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.AnomaliesTableRecord.isTimeSeriesViewRecord",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isTimeSeriesViewRecord",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -723,7 +750,7 @@
             "label": "capabilities",
             "description": [],
             "signature": [
-              "{ canAccessML: boolean; canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; }"
+              "{ canAccessML: boolean; canGetJobs: boolean; canGetDatafeeds: boolean; canGetCalendars: boolean; canFindFileStructure: boolean; canGetDataFrameAnalytics: boolean; canGetAnnotations: boolean; canCreateAnnotation: boolean; canDeleteAnnotation: boolean; canUseMlAlerts: boolean; } & { canCreateJob: boolean; canDeleteJob: boolean; canOpenJob: boolean; canCloseJob: boolean; canResetJob: boolean; canUpdateJob: boolean; canForecastJob: boolean; canCreateDatafeed: boolean; canDeleteDatafeed: boolean; canStartStopDatafeed: boolean; canUpdateDatafeed: boolean; canPreviewDatafeed: boolean; canGetFilters: boolean; canCreateCalendar: boolean; canDeleteCalendar: boolean; canCreateFilter: boolean; canDeleteFilter: boolean; canCreateDataFrameAnalytics: boolean; canDeleteDataFrameAnalytics: boolean; canStartStopDataFrameAnalytics: boolean; canCreateMlAlerts: boolean; canUseMlAlerts: boolean; canViewMlNodes: boolean; }"
             ],
             "path": "x-pack/plugins/ml/common/types/capabilities.ts",
             "deprecated": false
@@ -1045,17 +1072,8 @@
             "label": "alertingRules",
             "description": [],
             "signature": [
-              "Pick<",
-              {
-                "pluginId": "alerting",
-                "scope": "common",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-common.Alert",
-                "text": "Alert"
-              },
-              "<",
-              "MlAnomalyDetectionAlertParams",
-              ">, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
+              "MlAnomalyDetectionAlertRule",
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
@@ -1070,6 +1088,16 @@
             "signature": [
               "{ [x: string]: string; }"
             ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlSummaryJob.bucketSpanSeconds",
+            "type": "number",
+            "tags": [],
+            "label": "bucketSpanSeconds",
+            "description": [],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           }
@@ -1533,9 +1561,9 @@
           },
           ", indexPattern: string, query: any, fields: ",
           "HistogramField",
-          "[], samplerShardSize: number, runtimeMappings?: Record<string, ",
-          "MappingRuntimeField",
-          "> | undefined) => Promise<ChartData[]>"
+          "[], samplerShardSize: number, runtimeMappings?: ",
+          "MappingRuntimeFields",
+          " | undefined) => Promise<ChartData[]>"
         ],
         "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
         "deprecated": false,
@@ -1625,9 +1653,8 @@
             "label": "runtimeMappings",
             "description": [],
             "signature": [
-              "Record<string, ",
-              "MappingRuntimeField",
-              "> | undefined"
+              "MappingRuntimeFields",
+              " | undefined"
             ],
             "path": "x-pack/plugins/ml/server/models/data_visualizer/data_visualizer.ts",
             "deprecated": false,
@@ -1846,6 +1873,33 @@
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.customUrls",
+            "type": "Array",
+            "tags": [],
+            "label": "customUrls",
+            "description": [],
+            "signature": [
+              "KibanaUrlConfig",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.AnomaliesTableRecord.isTimeSeriesViewRecord",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isTimeSeriesViewRecord",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/ml/common/types/anomalies.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1863,12 +1917,12 @@
           {
             "parentPluginId": "ml",
             "id": "def-server.AnomalyCategorizerStatsDoc.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  any"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
@@ -2031,12 +2085,12 @@
           {
             "parentPluginId": "ml",
             "id": "def-server.AnomalyRecordDoc.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: any",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  any"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
@@ -2303,7 +2357,7 @@
             "label": "causes",
             "description": [],
             "signature": [
-              "any[] | undefined"
+              "{ function: string; function_description: string; probability: number; actual: number[]; typical: number[]; field_name?: string | undefined; over_field_name?: string | undefined; over_field_value?: string | undefined; by_field_name?: string | undefined; by_field_value?: string | undefined; partition_field_name?: string | undefined; partition_field_value?: string | number | undefined; }[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomalies.ts",
             "deprecated": false
@@ -2880,17 +2934,8 @@
             "label": "alertingRules",
             "description": [],
             "signature": [
-              "Pick<",
-              {
-                "pluginId": "alerting",
-                "scope": "common",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-common.Alert",
-                "text": "Alert"
-              },
-              "<",
-              "MlAnomalyDetectionAlertParams",
-              ">, \"name\" | \"tags\" | \"id\" | \"enabled\" | \"params\" | \"actions\" | \"alertTypeId\" | \"consumer\" | \"schedule\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"throttle\" | \"notifyWhen\" | \"muteAll\" | \"mutedInstanceIds\" | \"executionStatus\">[] | undefined"
+              "MlAnomalyDetectionAlertRule",
+              "[] | undefined"
             ],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
@@ -2905,6 +2950,16 @@
             "signature": [
               "{ [x: string]: string; }"
             ],
+            "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ml",
+            "id": "def-server.MlSummaryJob.bucketSpanSeconds",
+            "type": "number",
+            "tags": [],
+            "label": "bucketSpanSeconds",
+            "description": [],
             "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/summary_job.ts",
             "deprecated": false
           }
@@ -3061,7 +3116,7 @@
         "label": "CustomSettings",
         "description": [],
         "signature": [
-          "MlCustomSettings"
+          "any"
         ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
@@ -3202,9 +3257,6 @@
         "tags": [],
         "label": "IndicesOptions",
         "description": [],
-        "signature": [
-          "MlDatafeedIndicesOptions"
-        ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/datafeed.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -3290,9 +3342,6 @@
         "tags": [],
         "label": "MlJobBlocked",
         "description": [],
-        "signature": [
-          "MlJobBlocked"
-        ],
         "path": "x-pack/plugins/ml/common/types/anomaly_detection_jobs/job.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -3362,7 +3411,7 @@
         "label": "ModuleSetupPayload",
         "description": [],
         "signature": [
-          "Readonly<{} & { moduleId: string; }> & Readonly<{ query?: any; start?: number | undefined; prefix?: string | undefined; end?: number | undefined; groups?: string[] | undefined; indexPatternName?: string | undefined; useDedicatedIndex?: boolean | undefined; startDatafeed?: boolean | undefined; jobOverrides?: any; datafeedOverrides?: any; estimateModelMemory?: boolean | undefined; applyToAllSpaces?: boolean | undefined; } & {}>"
+          "Readonly<{} & { moduleId: string; }> & Readonly<{ start?: number | undefined; query?: any; prefix?: string | undefined; end?: number | undefined; groups?: string[] | undefined; indexPatternName?: string | undefined; useDedicatedIndex?: boolean | undefined; startDatafeed?: boolean | undefined; jobOverrides?: any; datafeedOverrides?: any; estimateModelMemory?: boolean | undefined; applyToAllSpaces?: boolean | undefined; } & {}>"
         ],
         "path": "x-pack/plugins/ml/server/shared_services/providers/modules.ts",
         "deprecated": false,
@@ -3429,15 +3478,15 @@
         "ModulesProvider",
         " & ",
         "ResultsServiceProvider",
-        " & { alertingServiceProvider(savedObjectsClient: Pick<",
+        " & { alertingServiceProvider(savedObjectsClient: ",
         {
           "pluginId": "core",
           "scope": "server",
           "docId": "kibCoreSavedObjectsPluginApi",
-          "section": "def-server.SavedObjectsClient",
-          "text": "SavedObjectsClient"
+          "section": "def-server.SavedObjectsClientContract",
+          "text": "SavedObjectsClientContract"
         },
-        ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">, request: ",
+        ", request: ",
         {
           "pluginId": "core",
           "scope": "server",
@@ -3536,6 +3585,23 @@
             "isRequired": false
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.getDefaultCapabilities",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultCapabilities",
+        "description": [],
+        "signature": [
+          "() => ",
+          "MlCapabilities"
+        ],
+        "path": "x-pack/plugins/ml/common/types/capabilities.ts",
+        "deprecated": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -3770,6 +3836,28 @@
         "label": "ANOMALY_THRESHOLD",
         "description": [],
         "path": "x-pack/plugins/ml/common/constants/anomalies.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.DATAFEED_STATE",
+        "type": "Enum",
+        "tags": [],
+        "label": "DATAFEED_STATE",
+        "description": [],
+        "path": "x-pack/plugins/ml/common/constants/states.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-common.JOB_STATE",
+        "type": "Enum",
+        "tags": [],
+        "label": "JOB_STATE",
+        "description": [],
+        "path": "x-pack/plugins/ml/common/constants/states.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

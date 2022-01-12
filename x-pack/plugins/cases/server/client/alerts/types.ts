@@ -6,7 +6,7 @@
  */
 
 import { CaseStatuses } from '../../../common/api';
-import { AlertInfo } from '../../common';
+import { AlertInfo } from '../../common/types';
 
 interface Alert {
   id: string;

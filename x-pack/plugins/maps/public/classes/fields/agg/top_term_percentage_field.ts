@@ -72,6 +72,11 @@ export class TopTermPercentageField implements IESAggField {
   getBucketCount(): number {
     return 0;
   }
+
+  isCount() {
+    return false;
+  }
+
   async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
     return null;
   }

@@ -10,11 +10,16 @@ import { PluginSetupContract, PluginStartContract, renderActionParameterTemplate
 import { Services } from './types';
 import {
   elasticsearchServiceMock,
+  loggingSystemMock,
   savedObjectsClientMock,
 } from '../../../../src/core/server/mocks';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
+import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
+import { ConnectorTokenClient } from './builtin_action_types/lib/connector_token_client';
+import { Logger } from '../../../../src/core/server';
 export { actionsAuthorizationMock };
 export { actionsClientMock };
+const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 const createSetupMock = () => {
   const mock: jest.Mocked<PluginSetupContract> = {
@@ -56,6 +61,11 @@ const createServicesMock = () => {
   > = {
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
+    connectorTokenClient: new ConnectorTokenClient({
+      unsecuredSavedObjectsClient: savedObjectsClientMock.create(),
+      encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
+      logger,
+    }),
   };
   return mock;
 };

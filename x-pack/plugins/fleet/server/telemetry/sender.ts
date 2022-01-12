@@ -34,6 +34,7 @@ export class TelemetryEventsSender {
   private queuesPerChannel: { [channel: string]: TelemetryQueue<any> } = {};
   private isOptedIn?: boolean = true; // Assume true until the first check
   private esClient?: ElasticsearchClient;
+  private clusterInfo?: InfoResponse;
 
   constructor(logger: Logger) {
     this.logger = logger;
@@ -46,6 +47,7 @@ export class TelemetryEventsSender {
   public async start(telemetryStart?: TelemetryPluginStart, core?: CoreStart) {
     this.telemetryStart = telemetryStart;
     this.esClient = core?.elasticsearch.client.asInternalUser;
+    this.clusterInfo = await this.fetchClusterInfo();
 
     this.logger.debug(`Starting local task`);
     setTimeout(() => {
@@ -92,12 +94,10 @@ export class TelemetryEventsSender {
       return;
     }
 
-    const clusterInfo = await this.fetchClusterInfo();
-
     for (const channel of Object.keys(this.queuesPerChannel)) {
       await this.sendEvents(
         await this.fetchTelemetryUrl(channel),
-        clusterInfo,
+        this.clusterInfo,
         this.queuesPerChannel[channel]
       );
     }

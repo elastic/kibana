@@ -11,6 +11,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./feature_controls'));
 
     loadTestFile(require.resolve('./cluster/list'));
+    loadTestFile(require.resolve('./cluster/list_mb'));
     loadTestFile(require.resolve('./cluster/overview'));
     // loadTestFile(require.resolve('./cluster/license'));
 
@@ -46,6 +47,9 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./beats/overview'));
     loadTestFile(require.resolve('./beats/listing'));
     loadTestFile(require.resolve('./beats/beat_detail'));
+
+    loadTestFile(require.resolve('./enterprise_search/cluster'));
+    loadTestFile(require.resolve('./enterprise_search/overview'));
 
     loadTestFile(require.resolve('./time_filter'));
     loadTestFile(require.resolve('./enable_monitoring'));

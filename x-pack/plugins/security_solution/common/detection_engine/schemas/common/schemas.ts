@@ -344,6 +344,15 @@ export type LastFailureAt = t.TypeOf<typeof last_failure_at>;
 export const last_failure_message = t.string;
 export type LastFailureMessage = t.TypeOf<typeof last_failure_message>;
 
+export const last_gap = t.string;
+export type LastGap = t.TypeOf<typeof last_gap>;
+
+export const bulk_create_time_durations = t.array(t.string);
+export type BulkCreateTimeDurations = t.TypeOf<typeof bulk_create_time_durations>;
+
+export const search_after_time_durations = t.array(t.string);
+export type SearchAfterTimeDurations = t.TypeOf<typeof search_after_time_durations>;
+
 export const status_date = IsoDateString;
 export type StatusDate = t.TypeOf<typeof status_date>;
 
@@ -444,6 +453,53 @@ export enum BulkAction {
   'export' = 'export',
   'delete' = 'delete',
   'duplicate' = 'duplicate',
+  'edit' = 'edit',
 }
 
 export const bulkAction = enumeration('BulkAction', BulkAction);
+
+export enum BulkActionEditType {
+  'add_tags' = 'add_tags',
+  'delete_tags' = 'delete_tags',
+  'set_tags' = 'set_tags',
+  'add_index_patterns' = 'add_index_patterns',
+  'delete_index_patterns' = 'delete_index_patterns',
+  'set_index_patterns' = 'set_index_patterns',
+  'set_timeline' = 'set_timeline',
+}
+
+export const bulkActionEditType = enumeration('BulkActionEditType', BulkActionEditType);
+
+const bulkActionEditPayloadTags = t.type({
+  type: t.union([
+    t.literal(BulkActionEditType.add_tags),
+    t.literal(BulkActionEditType.delete_tags),
+    t.literal(BulkActionEditType.set_tags),
+  ]),
+  value: tags,
+});
+
+const bulkActionEditPayloadIndexPatterns = t.type({
+  type: t.union([
+    t.literal(BulkActionEditType.add_index_patterns),
+    t.literal(BulkActionEditType.delete_index_patterns),
+    t.literal(BulkActionEditType.set_index_patterns),
+  ]),
+  value: index,
+});
+
+const bulkActionEditPayloadTimeline = t.type({
+  type: t.literal(BulkActionEditType.set_timeline),
+  value: t.type({
+    timeline_id,
+    timeline_title,
+  }),
+});
+
+export const bulkActionEditPayload = t.union([
+  bulkActionEditPayloadTags,
+  bulkActionEditPayloadIndexPatterns,
+  bulkActionEditPayloadTimeline,
+]);
+
+export type BulkActionEditPayload = t.TypeOf<typeof bulkActionEditPayload>;

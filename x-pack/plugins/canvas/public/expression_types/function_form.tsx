@@ -8,7 +8,7 @@
 import React, { ReactElement } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { isPlainObject, uniq, last, compact } from 'lodash';
-import { Ast, fromExpression } from '@kbn/interpreter/common';
+import { Ast, fromExpression } from '@kbn/interpreter';
 import { ArgAddPopover } from '../components/arg_add_popover';
 // @ts-expect-error unconverted components
 import { SidebarSection } from '../components/sidebar/sidebar_section';

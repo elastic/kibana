@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import { Router, Switch, Route, Redirect } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { StartServicesAccessor } from 'src/core/public';
 
 import { KibanaContextProvider } from '../../../kibana_react/public';
@@ -40,7 +40,7 @@ export async function mountManagementSection(
 ) {
   const [
     { chrome, application, uiSettings, notifications, overlays, http, docLinks },
-    { data, dataViewFieldEditor, indexPatternEditor },
+    { data, dataViewFieldEditor, dataViewEditor },
     indexPatternManagementStart,
   ] = await getStartServices();
   const canSave = Boolean(application.capabilities.indexPatterns.save);
@@ -62,7 +62,7 @@ export async function mountManagementSection(
     indexPatternManagementStart: indexPatternManagementStart as IndexPatternManagementStart,
     setBreadcrumbs: params.setBreadcrumbs,
     fieldFormatEditors: dataViewFieldEditor.fieldFormatEditors,
-    IndexPatternEditor: indexPatternEditor.IndexPatternEditorComponent,
+    IndexPatternEditor: dataViewEditor.IndexPatternEditorComponent,
   };
 
   ReactDOM.render(

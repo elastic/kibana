@@ -8,7 +8,7 @@
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCode } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FieldsConfig, from, to } from './shared';
 import { TargetField } from './common_fields/target_field';

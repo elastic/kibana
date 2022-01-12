@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { LevelLogger } from '../plugins/reporting/server/lib';
-import { ensureBrowserDownloaded } from '../plugins/reporting/server/browsers/download';
+import { download, paths } from '../plugins/screenshotting/server/utils';
 
 export const downloadChromium = async () => {
   // eslint-disable-next-line no-console
   const consoleLogger = (tag: string) => (message: unknown) => console.log(tag, message);
-  const innerLogger = {
-    get: () => innerLogger,
+  const logger = {
+    get: () => logger,
     debug: consoleLogger('debug'),
     info: consoleLogger('info'),
     warn: consoleLogger('warn'),
@@ -22,6 +21,6 @@ export const downloadChromium = async () => {
     log: consoleLogger('log'),
   };
 
-  const levelLogger = new LevelLogger(innerLogger);
-  await ensureBrowserDownloaded(levelLogger);
+  // Download Chromium for all platforms
+  await Promise.all(paths.packages.map((pkg) => download(pkg, logger)));
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import { toMountPoint, useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
@@ -31,6 +31,7 @@ export function AddToCaseAction({ lensAttributes, timeRange }: AddToCaseProps) {
   const {
     cases,
     application: { getUrlForApp },
+    theme,
   } = kServices;
 
   const getToastText = useCallback(
@@ -41,9 +42,10 @@ export function AddToCaseAction({ lensAttributes, timeRange }: AddToCaseProps) {
             deepLinkId: CasesDeepLinkId.cases,
             path: generateCaseViewPath({ detailName: theCase.id }),
           })}
-        />
+        />,
+        { theme$: theme?.theme$ }
       ),
-    [getUrlForApp]
+    [getUrlForApp, theme?.theme$]
   );
 
   const absoluteFromDate = parseRelativeDate(timeRange.from);
@@ -52,7 +54,10 @@ export function AddToCaseAction({ lensAttributes, timeRange }: AddToCaseProps) {
   const { onCaseClicked, isCasesOpen, setIsCasesOpen, isSaving } = useAddToCase({
     lensAttributes,
     getToastText,
-    timeRange: { from: absoluteFromDate.toISOString(), to: absoluteToDate.toISOString() },
+    timeRange: {
+      from: absoluteFromDate?.toISOString() ?? '',
+      to: absoluteToDate?.toISOString() ?? '',
+    },
   });
 
   const getAllCasesSelectorModalProps: GetAllCasesSelectorModalProps = {
@@ -66,10 +71,9 @@ export function AddToCaseAction({ lensAttributes, timeRange }: AddToCaseProps) {
 
   return (
     <>
-      <EuiButton
+      <EuiButtonEmpty
         size="s"
         isLoading={isSaving}
-        fullWidth={false}
         isDisabled={lensAttributes === null}
         onClick={() => {
           if (lensAttributes) {
@@ -80,7 +84,7 @@ export function AddToCaseAction({ lensAttributes, timeRange }: AddToCaseProps) {
         {i18n.translate('xpack.observability.expView.heading.addToCase', {
           defaultMessage: 'Add to case',
         })}
-      </EuiButton>
+      </EuiButtonEmpty>
       {isCasesOpen &&
         lensAttributes &&
         cases.getAllCasesSelectorModal(getAllCasesSelectorModalProps)}

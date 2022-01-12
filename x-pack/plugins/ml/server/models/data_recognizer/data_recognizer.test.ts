@@ -35,7 +35,7 @@ describe('ML - data recognizer', () => {
     } as unknown as SavedObjectsClientContract,
     { find: jest.fn() } as unknown as DataViewsService,
     {} as JobSavedObjectService,
-    { headers: { authorization: '' } } as KibanaRequest
+    { headers: { authorization: '' } } as unknown as KibanaRequest
   );
 
   describe('jobOverrides', () => {

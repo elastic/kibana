@@ -10,7 +10,7 @@ import { GroupBySelect } from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 

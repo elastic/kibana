@@ -266,15 +266,7 @@
               "\nSearch for objects\n"
             ],
             "signature": [
-              "<T = unknown, A = unknown>(options: Pick<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
-              ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"page\" | \"perPage\" | \"sortField\" | \"search\" | \"searchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"preference\">) => Promise<",
+              "<T = unknown, A = unknown>(options: SavedObjectsFindOptions) => Promise<",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -295,15 +287,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Pick<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsFindOptions",
-                    "text": "SavedObjectsFindOptions"
-                  },
-                  ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"page\" | \"perPage\" | \"sortField\" | \"search\" | \"searchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"preference\">"
+                  "SavedObjectsFindOptions"
                 ],
                 "path": "src/core/public/saved_objects/saved_objects_client.ts",
                 "deprecated": false,
@@ -839,15 +823,13 @@
                 "label": "client",
                 "description": [],
                 "signature": [
-                  "Pick<",
                   {
                     "pluginId": "core",
                     "scope": "public",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsClient",
-                    "text": "SavedObjectsClient"
-                  },
-                  ", \"create\" | \"bulkCreate\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
+                    "section": "def-public.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "src/core/public/saved_objects/simple_saved_object.ts",
                 "deprecated": false,
@@ -1555,15 +1537,7 @@
               },
               "<unknown>>; delete: (type: string, id: string, options?: ",
               "SavedObjectsDeleteOptions",
-              " | undefined) => Promise<{}>; find: <T = unknown, A = unknown>(options: Pick<",
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
-              },
-              ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"page\" | \"perPage\" | \"sortField\" | \"search\" | \"searchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"preference\">) => Promise<",
+              " | undefined) => Promise<{}>; find: <T = unknown, A = unknown>(options: SavedObjectsFindOptions) => Promise<",
               {
                 "pluginId": "core",
                 "scope": "public",
@@ -1761,15 +1735,7 @@
           },
           "<unknown>>; delete: (type: string, id: string, options?: ",
           "SavedObjectsDeleteOptions",
-          " | undefined) => Promise<{}>; find: <T = unknown, A = unknown>(options: Pick<",
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsFindOptions",
-            "text": "SavedObjectsFindOptions"
-          },
-          ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"page\" | \"perPage\" | \"sortField\" | \"search\" | \"searchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"preference\">) => Promise<",
+          " | undefined) => Promise<{}>; find: <T = unknown, A = unknown>(options: SavedObjectsFindOptions) => Promise<",
           {
             "pluginId": "core",
             "scope": "public",
@@ -3026,15 +2992,15 @@
               "\nReturns a {@link ISavedObjectsPointInTimeFinder} to help page through\nlarge sets of saved objects. We strongly recommend using this API for\nany `find` queries that might return more than 1000 saved objects,\nhowever this API is only intended for use in server-side \"batch\"\nprocessing of objects where you are collecting all objects in memory\nor streaming them back to the client.\n\nDo NOT use this API in a route handler to facilitate paging through\nsaved objects on the client-side unless you are streaming all of the\nresults back to the client at once. Because the returned generator is\nstateful, you cannot rely on subsequent http requests retrieving new\npages from the same Kibana server in multi-instance deployments.\n\nThe generator wraps calls to {@link SavedObjectsClient.find} and iterates\nover multiple pages of results using `_pit` and `search_after`. This will\nopen a new Point-In-Time (PIT), and continue paging until a set of\nresults is received that's smaller than the designated `perPage`.\n\nOnce you have retrieved all of the results you need, it is recommended\nto call `close()` to clean up the PIT and prevent Elasticsearch from\nconsuming resources unnecessarily. This is only required if you are\ndone iterating and have not yet paged through all of the results: the\nPIT will automatically be closed for you once you reach the last page\nof results, or if the underlying call to `find` fails for any reason.\n"
             ],
             "signature": [
-              "<T = unknown, A = unknown>(findOptions: Pick<",
+              "<T = unknown, A = unknown>(findOptions: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
+                "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+                "text": "SavedObjectsCreatePointInTimeFinderOptions"
               },
-              ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: ",
+              ", dependencies?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -3063,15 +3029,13 @@
                 "label": "findOptions",
                 "description": [],
                 "signature": [
-                  "Pick<",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsFindOptions",
-                    "text": "SavedObjectsFindOptions"
-                  },
-                  ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">"
+                    "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+                    "text": "SavedObjectsCreatePointInTimeFinderOptions"
+                  }
                 ],
                 "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
                 "deprecated": false,
@@ -4426,6 +4390,51 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError",
+            "type": "Function",
+            "tags": [],
+            "label": "createGenericNotFoundEsUnavailableError",
+            "description": [],
+            "signature": [
+              "(type?: string | null, id?: string | null) => ",
+              "DecoratedError"
+            ],
+            "path": "src/core/server/saved_objects/service/lib/errors.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string | null"
+                ],
+                "path": "src/core/server/saved_objects/service/lib/errors.ts",
+                "deprecated": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "core",
+                "id": "def-server.SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string | null"
+                ],
+                "path": "src/core/server/saved_objects/service/lib/errors.ts",
+                "deprecated": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4740,15 +4749,15 @@
                 "section": "def-server.SavedObjectsClosePointInTimeResponse",
                 "text": "SavedObjectsClosePointInTimeResponse"
               },
-              ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
+              ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
+                "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+                "text": "SavedObjectsCreatePointInTimeFinderOptions"
               },
-              ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: ",
+              ", dependencies?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -5174,15 +5183,15 @@
                         "section": "def-server.SavedObjectsClosePointInTimeResponse",
                         "text": "SavedObjectsClosePointInTimeResponse"
                       },
-                      ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
+                      ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: ",
                       {
                         "pluginId": "core",
                         "scope": "server",
                         "docId": "kibCoreSavedObjectsPluginApi",
-                        "section": "def-server.SavedObjectsFindOptions",
-                        "text": "SavedObjectsFindOptions"
+                        "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+                        "text": "SavedObjectsCreatePointInTimeFinderOptions"
                       },
-                      ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: ",
+                      ", dependencies?: ",
                       {
                         "pluginId": "core",
                         "scope": "server",
@@ -5956,15 +5965,15 @@
                 "section": "def-server.SavedObjectsClosePointInTimeResponse",
                 "text": "SavedObjectsClosePointInTimeResponse"
               },
-              ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
+              ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
+                "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+                "text": "SavedObjectsCreatePointInTimeFinderOptions"
               },
-              ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: ",
+              ", dependencies?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -6392,15 +6401,15 @@
                         "section": "def-server.SavedObjectsClosePointInTimeResponse",
                         "text": "SavedObjectsClosePointInTimeResponse"
                       },
-                      ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
+                      ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: ",
                       {
                         "pluginId": "core",
                         "scope": "server",
                         "docId": "kibCoreSavedObjectsPluginApi",
-                        "section": "def-server.SavedObjectsFindOptions",
-                        "text": "SavedObjectsFindOptions"
+                        "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+                        "text": "SavedObjectsCreatePointInTimeFinderOptions"
                       },
-                      ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: ",
+                      ", dependencies?: ",
                       {
                         "pluginId": "core",
                         "scope": "server",
@@ -8176,7 +8185,7 @@
                 "tags": [],
                 "label": "counterFields",
                 "description": [
-                  "- An array of field names to increment or an array of {@link SavedObjectsIncrementCounterField}"
+                  "- An array of field names to increment or an array of {@link SavedObjectsIncrementCounterField }"
                 ],
                 "signature": [
                   "(string | ",
@@ -8200,7 +8209,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- {@link SavedObjectsIncrementCounterOptions}"
+                  "- {@link SavedObjectsIncrementCounterOptions }"
                 ],
                 "signature": [
                   {
@@ -8346,7 +8355,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "- {@link SavedObjectsClosePointInTimeOptions}"
+                  "- {@link SavedObjectsClosePointInTimeOptions }"
                 ],
                 "signature": [
                   {
@@ -8364,7 +8373,7 @@
               }
             ],
             "returnComment": [
-              "- {@link SavedObjectsClosePointInTimeResponse}"
+              "- {@link SavedObjectsClosePointInTimeResponse }"
             ]
           },
           {
@@ -8377,15 +8386,15 @@
               "\nReturns a {@link ISavedObjectsPointInTimeFinder} to help page through\nlarge sets of saved objects. We strongly recommend using this API for\nany `find` queries that might return more than 1000 saved objects,\nhowever this API is only intended for use in server-side \"batch\"\nprocessing of objects where you are collecting all objects in memory\nor streaming them back to the client.\n\nDo NOT use this API in a route handler to facilitate paging through\nsaved objects on the client-side unless you are streaming all of the\nresults back to the client at once. Because the returned generator is\nstateful, you cannot rely on subsequent http requests retrieving new\npages from the same Kibana server in multi-instance deployments.\n\nThis generator wraps calls to {@link SavedObjectsRepository.find} and\niterates over multiple pages of results using `_pit` and `search_after`.\nThis will open a new Point-In-Time (PIT), and continue paging until a\nset of results is received that's smaller than the designated `perPage`.\n\nOnce you have retrieved all of the results you need, it is recommended\nto call `close()` to clean up the PIT and prevent Elasticsearch from\nconsuming resources unnecessarily. This is only required if you are\ndone iterating and have not yet paged through all of the results: the\nPIT will automatically be closed for you once you reach the last page\nof results, or if the underlying call to `find` fails for any reason.\n"
             ],
             "signature": [
-              "<T = unknown, A = unknown>(findOptions: Pick<",
+              "<T = unknown, A = unknown>(findOptions: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
+                "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+                "text": "SavedObjectsCreatePointInTimeFinderOptions"
               },
-              ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: ",
+              ", dependencies?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -8414,15 +8423,13 @@
                 "label": "findOptions",
                 "description": [],
                 "signature": [
-                  "Pick<",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsFindOptions",
-                    "text": "SavedObjectsFindOptions"
-                  },
-                  ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">"
+                    "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+                    "text": "SavedObjectsCreatePointInTimeFinderOptions"
+                  }
                 ],
                 "path": "src/core/server/saved_objects/service/lib/repository.ts",
                 "deprecated": false,
@@ -9732,12 +9739,20 @@
           {
             "parentPluginId": "core",
             "id": "def-server.SavedObjectMigrationMap.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[version: string]: SavedObjectMigrationFn<any, any>",
             "description": [],
             "signature": [
-              "any"
+              "[version: string]:  ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectMigrationFn",
+                "text": "SavedObjectMigrationFn"
+              },
+              "<any, any>"
             ],
             "path": "src/core/server/saved_objects/migrations/types.ts",
             "deprecated": false
@@ -10372,7 +10387,14 @@
               "The Elasticsearch Refresh setting for this operation"
             ],
             "signature": [
-              "boolean | \"wait_for\" | undefined"
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.MutatingOperationRefreshSetting",
+                "text": "MutatingOperationRefreshSetting"
+              },
+              " | undefined"
             ],
             "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
             "deprecated": false
@@ -10843,15 +10865,15 @@
                 "section": "def-server.SavedObjectsClosePointInTimeResponse",
                 "text": "SavedObjectsClosePointInTimeResponse"
               },
-              ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
+              ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
+                "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+                "text": "SavedObjectsCreatePointInTimeFinderOptions"
               },
-              ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: ",
+              ", dependencies?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -11231,7 +11253,14 @@
               "The Elasticsearch Refresh setting for this operation"
             ],
             "signature": [
-              "boolean | \"wait_for\" | undefined"
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.MutatingOperationRefreshSetting",
+                "text": "MutatingOperationRefreshSetting"
+              },
+              " | undefined"
             ],
             "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
             "deprecated": false
@@ -11429,7 +11458,14 @@
               "The Elasticsearch Refresh setting for this operation"
             ],
             "signature": [
-              "boolean | \"wait_for\" | undefined"
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.MutatingOperationRefreshSetting",
+                "text": "MutatingOperationRefreshSetting"
+              },
+              " | undefined"
             ],
             "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
             "deprecated": false
@@ -11832,7 +11868,8 @@
             "label": "sortOrder",
             "description": [],
             "signature": [
-              "\"asc\" | \"desc\" | \"_doc\" | undefined"
+              "SortOrder",
+              " | undefined"
             ],
             "path": "src/core/server/saved_objects/types.ts",
             "deprecated": false
@@ -13211,7 +13248,14 @@
               "\n(default='wait_for') The Elasticsearch refresh setting for this\noperation. See {@link MutatingOperationRefreshSetting}"
             ],
             "signature": [
-              "boolean | \"wait_for\" | undefined"
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.MutatingOperationRefreshSetting",
+                "text": "MutatingOperationRefreshSetting"
+              },
+              " | undefined"
             ],
             "path": "src/core/server/saved_objects/service/lib/repository.ts",
             "deprecated": false
@@ -13249,12 +13293,19 @@
           {
             "parentPluginId": "core",
             "id": "def-server.SavedObjectsMappingProperties.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[field: string]: SavedObjectsFieldMapping",
             "description": [],
             "signature": [
-              "any"
+              "[field: string]:  ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsFieldMapping",
+                "text": "SavedObjectsFieldMapping"
+              }
             ],
             "path": "src/core/server/saved_objects/mappings/types.ts",
             "deprecated": false
@@ -13809,15 +13860,14 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>, includedHiddenTypes?: string[] | undefined) => Pick<",
+              "<unknown, unknown, unknown, any>, includedHiddenTypes?: string[] | undefined) => ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsRepository",
-                "text": "SavedObjectsRepository"
-              },
-              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+                "section": "def-server.ISavedObjectsRepository",
+                "text": "ISavedObjectsRepository"
+              }
             ],
             "path": "src/core/server/saved_objects/saved_objects_service.ts",
             "deprecated": false,
@@ -13872,15 +13922,14 @@
               "\nCreates a {@link ISavedObjectsRepository | Saved Objects repository} that\nuses the internal Kibana user for authenticating with Elasticsearch.\n"
             ],
             "signature": [
-              "(includedHiddenTypes?: string[] | undefined) => Pick<",
+              "(includedHiddenTypes?: string[] | undefined) => ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsRepository",
-                "text": "SavedObjectsRepository"
-              },
-              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+                "section": "def-server.ISavedObjectsRepository",
+                "text": "ISavedObjectsRepository"
+              }
             ],
             "path": "src/core/server/saved_objects/saved_objects_service.ts",
             "deprecated": false,
@@ -14199,7 +14248,9 @@
               "\nRegister a {@link SavedObjectsType | savedObjects type} definition.\n\nSee the {@link SavedObjectsTypeMappingDefinition | mappings format} and\n{@link SavedObjectMigrationMap | migration format} for more details about these.\n"
             ],
             "signature": [
-              "<Attributes = any>(type: ",
+              "<Attributes extends ",
+              "SavedObjectAttributes",
+              " = any>(type: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -14294,15 +14345,14 @@
                 "section": "def-server.SavedObjectsClientProviderOptions",
                 "text": "SavedObjectsClientProviderOptions"
               },
-              " | undefined) => Pick<",
+              " | undefined) => ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClient",
-                "text": "SavedObjectsClient"
-              },
-              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              }
             ],
             "path": "src/core/server/saved_objects/saved_objects_service.ts",
             "deprecated": false,
@@ -14370,15 +14420,14 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>, includedHiddenTypes?: string[] | undefined) => Pick<",
+              "<unknown, unknown, unknown, any>, includedHiddenTypes?: string[] | undefined) => ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsRepository",
-                "text": "SavedObjectsRepository"
-              },
-              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+                "section": "def-server.ISavedObjectsRepository",
+                "text": "ISavedObjectsRepository"
+              }
             ],
             "path": "src/core/server/saved_objects/saved_objects_service.ts",
             "deprecated": false,
@@ -14435,15 +14484,14 @@
               "\nCreates a {@link ISavedObjectsRepository | Saved Objects repository} that\nuses the internal Kibana user for authenticating with Elasticsearch.\n"
             ],
             "signature": [
-              "(includedHiddenTypes?: string[] | undefined) => Pick<",
+              "(includedHiddenTypes?: string[] | undefined) => ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsRepository",
-                "text": "SavedObjectsRepository"
-              },
-              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"deleteByNamespace\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"incrementCounter\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\">"
+                "section": "def-server.ISavedObjectsRepository",
+                "text": "ISavedObjectsRepository"
+              }
             ],
             "path": "src/core/server/saved_objects/saved_objects_service.ts",
             "deprecated": false,
@@ -14501,23 +14549,22 @@
               "\nCreates an {@link ISavedObjectsExporter | exporter} bound to given client."
             ],
             "signature": [
-              "(client: Pick<",
+              "(client: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClient",
-                "text": "SavedObjectsClient"
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
               },
-              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Pick<",
+              ") => ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsExporter",
-                "text": "SavedObjectsExporter"
-              },
-              ", \"exportByTypes\" | \"exportByObjects\">"
+                "section": "def-server.ISavedObjectsExporter",
+                "text": "ISavedObjectsExporter"
+              }
             ],
             "path": "src/core/server/saved_objects/saved_objects_service.ts",
             "deprecated": false,
@@ -14530,15 +14577,13 @@
                 "label": "client",
                 "description": [],
                 "signature": [
-                  "Pick<",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsClient",
-                    "text": "SavedObjectsClient"
-                  },
-                  ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "src/core/server/saved_objects/saved_objects_service.ts",
                 "deprecated": false,
@@ -14557,23 +14602,22 @@
               "\nCreates an {@link ISavedObjectsImporter | importer} bound to given client."
             ],
             "signature": [
-              "(client: Pick<",
+              "(client: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsClient",
-                "text": "SavedObjectsClient"
+                "section": "def-server.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
               },
-              ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">) => Pick<",
+              ") => ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsImporter",
-                "text": "SavedObjectsImporter"
-              },
-              ", \"import\" | \"resolveImportErrors\">"
+                "section": "def-server.ISavedObjectsImporter",
+                "text": "ISavedObjectsImporter"
+              }
             ],
             "path": "src/core/server/saved_objects/saved_objects_service.ts",
             "deprecated": false,
@@ -14586,15 +14630,13 @@
                 "label": "client",
                 "description": [],
                 "signature": [
-                  "Pick<",
                   {
                     "pluginId": "core",
                     "scope": "server",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsClient",
-                    "text": "SavedObjectsClient"
-                  },
-                  ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+                    "section": "def-server.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "src/core/server/saved_objects/saved_objects_service.ts",
                 "deprecated": false,
@@ -14613,15 +14655,14 @@
               "\nReturns the {@link ISavedObjectTypeRegistry | registry} containing all registered\n{@link SavedObjectsType | saved object types}"
             ],
             "signature": [
-              "() => Pick<",
+              "() => ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectTypeRegistry",
-                "text": "SavedObjectTypeRegistry"
-              },
-              ", \"getType\" | \"getVisibleTypes\" | \"getAllTypes\" | \"getImportableAndExportableTypes\" | \"isNamespaceAgnostic\" | \"isSingleNamespace\" | \"isMultiNamespace\" | \"isShareable\" | \"isHidden\" | \"getIndex\" | \"isImportableAndExportable\">"
+                "section": "def-server.ISavedObjectTypeRegistry",
+                "text": "ISavedObjectTypeRegistry"
+              }
             ],
             "path": "src/core/server/saved_objects/saved_objects_service.ts",
             "deprecated": false,
@@ -14815,6 +14856,36 @@
                 "docId": "kibCoreSavedObjectsPluginApi",
                 "section": "def-server.SavedObjectMigrationMap",
                 "text": "SavedObjectMigrationMap"
+              },
+              ") | undefined"
+            ],
+            "path": "src/core/server/saved_objects/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsType.schemas",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "schemas",
+            "description": [
+              "\nAn optional schema that can be used to validate the attributes of the type.\n\nWhen provided, calls to {@link SavedObjectsClient.create | create} will be validated against this schema.\n\nSee {@link SavedObjectsValidationMap} for more details."
+            ],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsValidationMap",
+                "text": "SavedObjectsValidationMap"
+              },
+              " | (() => ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsValidationMap",
+                "text": "SavedObjectsValidationMap"
               },
               ") | undefined"
             ],
@@ -15257,7 +15328,14 @@
               "The Elasticsearch Refresh setting for this operation"
             ],
             "signature": [
-              "boolean | \"wait_for\" | undefined"
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.MutatingOperationRefreshSetting",
+                "text": "MutatingOperationRefreshSetting"
+              },
+              " | undefined"
             ],
             "path": "src/core/server/saved_objects/service/lib/update_objects_spaces.ts",
             "deprecated": false
@@ -15440,7 +15518,14 @@
               "The Elasticsearch Refresh setting for this operation"
             ],
             "signature": [
-              "boolean | \"wait_for\" | undefined"
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.MutatingOperationRefreshSetting",
+                "text": "MutatingOperationRefreshSetting"
+              },
+              " | undefined"
             ],
             "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
             "deprecated": false
@@ -15480,9 +15565,9 @@
             "section": "def-server.SavedObjectsUpdateResponse",
             "text": "SavedObjectsUpdateResponse"
           },
-          "<T> extends Pick<",
+          "<T> extends Omit<",
           "SavedObject",
-          "<T>, \"version\" | \"type\" | \"id\" | \"namespaces\" | \"migrationVersion\" | \"coreMigrationVersion\" | \"error\" | \"updated_at\" | \"originId\">"
+          "<T>, \"references\" | \"attributes\">"
         ],
         "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
         "deprecated": false,
@@ -15512,6 +15597,41 @@
               "[] | undefined"
             ],
             "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.SavedObjectsValidationMap",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsValidationMap",
+        "description": [
+          "\nA map of {@link SavedObjectsValidationSpec | validation specs} to be used for a given type.\nThe map's keys must be valid semver versions.\n\nAny time you change the schema of a {@link SavedObjectsType}, you should add a new entry\nto this map for the Kibana version the change was introduced in.\n"
+        ],
+        "path": "src/core/server/saved_objects/validation/types.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "core",
+            "id": "def-server.SavedObjectsValidationMap.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[version: string]: SavedObjectsValidationSpec",
+            "description": [],
+            "signature": [
+              "[version: string]:  ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCoreSavedObjectsPluginApi",
+                "section": "def-server.SavedObjectsValidationSpec",
+                "text": "SavedObjectsValidationSpec"
+              }
+            ],
+            "path": "src/core/server/saved_objects/validation/types.ts",
             "deprecated": false
           }
         ],
@@ -15928,15 +16048,15 @@
             "section": "def-server.SavedObjectsClosePointInTimeResponse",
             "text": "SavedObjectsClosePointInTimeResponse"
           },
-          ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
+          ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: ",
           {
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsFindOptions",
-            "text": "SavedObjectsFindOptions"
+            "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+            "text": "SavedObjectsCreatePointInTimeFinderOptions"
           },
-          ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: ",
+          ", dependencies?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -16415,15 +16535,15 @@
             "section": "def-server.SavedObjectsClosePointInTimeResponse",
             "text": "SavedObjectsClosePointInTimeResponse"
           },
-          ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
+          ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: ",
           {
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsFindOptions",
-            "text": "SavedObjectsFindOptions"
+            "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+            "text": "SavedObjectsCreatePointInTimeFinderOptions"
           },
-          ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: ",
+          ", dependencies?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -16471,15 +16591,14 @@
             "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
-          "<unknown, unknown, unknown, any>; includedHiddenTypes?: string[] | undefined; }) => Pick<",
+          "<unknown, unknown, unknown, any>; includedHiddenTypes?: string[] | undefined; }) => ",
           {
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsClient",
-            "text": "SavedObjectsClient"
-          },
-          ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+            "section": "def-server.SavedObjectsClientContract",
+            "text": "SavedObjectsClientContract"
+          }
         ],
         "path": "src/core/server/saved_objects/service/lib/scoped_client_provider.ts",
         "deprecated": false,
@@ -16580,15 +16699,14 @@
             "section": "def-server.SavedObjectsClientWrapperOptions",
             "text": "SavedObjectsClientWrapperOptions"
           },
-          ") => Pick<",
+          ") => ",
           {
             "pluginId": "core",
             "scope": "server",
             "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsClient",
-            "text": "SavedObjectsClient"
-          },
-          ", \"create\" | \"bulkCreate\" | \"checkConflicts\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"collectMultiNamespaceReferences\" | \"updateObjectsSpaces\" | \"bulkUpdate\" | \"removeReferencesTo\" | \"openPointInTimeForType\" | \"closePointInTime\" | \"createPointInTimeFinder\" | \"errors\">"
+            "section": "def-server.SavedObjectsClientContract",
+            "text": "SavedObjectsClientContract"
+          }
         ],
         "path": "src/core/server/saved_objects/service/lib/scoped_client_provider.ts",
         "deprecated": false,
@@ -16644,9 +16762,11 @@
         "label": "SavedObjectsCreatePointInTimeFinderOptions",
         "description": [],
         "signature": [
-          "{ type: string | string[]; filter?: any; aggs?: Record<string, ",
+          "{ filter?: any; search?: string | undefined; type: string | string[]; aggs?: Record<string, ",
           "AggregationsAggregationContainer",
-          "> | undefined; fields?: string[] | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | \"_doc\" | undefined; search?: string | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; hasReference?: ",
+          "> | undefined; fields?: string[] | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: ",
+          "SortOrder",
+          " | undefined; searchFields?: string[] | undefined; rootSearchFields?: string[] | undefined; hasReference?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -16744,97 +16864,8 @@
           "\nDescribe a {@link SavedObjectsTypeMappingDefinition | saved object type mapping} field.\n\nPlease refer to {@link https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html | elasticsearch documentation}\nFor the mapping documentation\n"
         ],
         "signature": [
-          "(",
-          "MappingFlattenedProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingJoinProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingPercolatorProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingRankFeatureProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingRankFeaturesProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingConstantKeywordProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingFieldAliasProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingHistogramProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingDenseVectorProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingAggregateMetricDoubleProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingObjectProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingNestedProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingSearchAsYouTypeProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingTextProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingBinaryProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingBooleanProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingDateProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingDateNanosProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingKeywordProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingFloatNumberProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingHalfFloatNumberProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingDoubleNumberProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingIntegerNumberProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingLongNumberProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingShortNumberProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingByteNumberProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingUnsignedLongNumberProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingScaledFloatNumberProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingLongRangeProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingIpRangeProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingIntegerRangeProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingFloatRangeProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingDoubleRangeProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingDateRangeProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingGeoPointProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingGeoShapeProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingCompletionProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingGenericProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingIpProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingMurmur3HashProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingShapeProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingTokenCountProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingVersionProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingWildcardProperty",
-          " & { dynamic?: false | \"strict\" | undefined; }) | (",
-          "MappingPointProperty",
-          " & { dynamic?: false | \"strict\" | undefined; })"
+          "MappingProperty",
+          " & { dynamic?: false | \"strict\" | undefined; }"
         ],
         "path": "src/core/server/saved_objects/mappings/types.ts",
         "deprecated": false,
@@ -16934,6 +16965,23 @@
           "\"multiple\" | \"single\" | \"multiple-isolated\" | \"agnostic\""
         ],
         "path": "src/core/server/saved_objects/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "core",
+        "id": "def-server.SavedObjectsValidationSpec",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsValidationSpec",
+        "description": [
+          "\nAllows for validating properties using @kbn/config-schema validations.\n"
+        ],
+        "signature": [
+          "ObjectType",
+          "<any>"
+        ],
+        "path": "src/core/server/saved_objects/validation/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

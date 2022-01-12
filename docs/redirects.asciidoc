@@ -15,6 +15,10 @@ Refer to {ref}/snapshot-restore.html[Snapshot and Restore].
 == Tutorial: Snapshot and Restore
 Refer to {ref}/snapshot-restore.html[Snapshot and Restore].
 
+[role="exclude",id="configuring-tls-communication"]
+== Encrypt communications in {kib}
+Refer to <<using-kibana-with-security,Configure security in {kib}>>.
+
 [role="exclude",id="configuring-tls"]
 == Encrypt TLS communications in {kib}
 Refer to {ref}/security-basic-setup-https.html#encrypt-kibana-http[Encrypt HTTP client communications for {kib}].
@@ -376,3 +380,68 @@ This content has moved. Refer to <<data-views>>.
 == Index patterns has been renamed to data views.
 
 This content has moved. Refer to <<managing-data-views>>.
+
+[role="exclude",id="index-patterns-api"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-api>>.
+
+[role="exclude",id="index-patterns-api-create"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-api-create>>.
+
+[role="exclude",id="index-patterns-api-default-get"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-api-default-get>>.
+
+[role="exclude",id="index-patterns-api-default-set"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-api-default-set>>.
+
+[role="exclude",id="index-patterns-api-delete"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-api-delete>>.
+
+[role="exclude",id="index-patterns-api-get"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-api-get>>.
+
+[role="exclude",id="index-patterns-runtime-field-api-create"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-runtime-field-api-create>>.
+
+[role="exclude",id="index-patterns-runtime-field-api-delete"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-runtime-field-api-delete>>.
+
+[role="exclude",id="index-patterns-runtime-field-api-get"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-runtime-field-api-get>>.
+
+[role="exclude",id="index-patterns-runtime-field-api-update"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-runtime-field-api-update>>.
+
+[role="exclude",id="index-patterns-runtime-field-api-upsert"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-runtime-field-api-upsert>>.
+
+[role="exclude",id="index-patterns-api-update"]
+== Index patterns has been renamed to data views.
+
+This content has moved. Refer to <<data-views-api-update>>.
+
+[role="exclude",id="xpack-kibana-role-management"]
+== Kibana role management.
+
+This content has moved. Refer to <<kibana-role-management>>.

@@ -7,7 +7,7 @@
 
 import './feature_table.scss';
 
-import type { EuiAccordionProps } from '@elastic/eui';
+import type { EuiAccordionProps, EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButtonGroup,
@@ -25,7 +25,7 @@ import type { ReactElement } from 'react';
 import React, { Component } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { AppCategory } from 'src/core/public';
 
 import type { Role } from '../../../../../../../common/model';
@@ -44,6 +44,7 @@ interface Props {
   onChange: (featureId: string, privileges: string[]) => void;
   onChangeAll: (privileges: string[]) => void;
   canCustomizeSubFeaturePrivileges: boolean;
+  allSpacesSelected: boolean;
   disabled?: boolean;
 }
 
@@ -84,7 +85,8 @@ export class FeatureTable extends Component<Props, {}> {
         (feature) =>
           this.props.privilegeCalculator.getEffectivePrimaryFeaturePrivilege(
             feature.id,
-            this.props.privilegeIndex
+            this.props.privilegeIndex,
+            this.props.allSpacesSelected
           ) != null
       ).length;
 
@@ -269,28 +271,33 @@ export class FeatureTable extends Component<Props, {}> {
     const selectedPrivilegeId =
       this.props.privilegeCalculator.getDisplayedPrimaryFeaturePrivilegeId(
         feature.id,
-        this.props.privilegeIndex
+        this.props.privilegeIndex,
+        this.props.allSpacesSelected
       );
-
-    const options = primaryFeaturePrivileges.map((privilege) => {
-      return {
-        id: `${feature.id}_${privilege.id}`,
-        label: privilege.name,
-        isDisabled: this.props.disabled,
-      };
-    });
+    const options: EuiButtonGroupOptionProps[] = primaryFeaturePrivileges
+      .filter((privilege) => !privilege.disabled) // Don't show buttons for privileges that are disabled
+      .map((privilege) => {
+        const disabledDueToSpaceSelection =
+          privilege.requireAllSpaces && !this.props.allSpacesSelected;
+        return {
+          id: `${feature.id}_${privilege.id}`,
+          label: privilege.name,
+          isDisabled: this.props.disabled || disabledDueToSpaceSelection,
+        };
+      });
 
     options.push({
       id: `${feature.id}_${NO_PRIVILEGE_VALUE}`,
       label: 'None',
-      isDisabled: this.props.disabled,
+      isDisabled: this.props.disabled ?? false,
     });
 
     let warningIcon = <EuiIconTip type="empty" content={null} />;
     if (
       this.props.privilegeCalculator.hasCustomizedSubFeaturePrivileges(
         feature.id,
-        this.props.privilegeIndex
+        this.props.privilegeIndex,
+        this.props.allSpacesSelected
       )
     ) {
       warningIcon = (

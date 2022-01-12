@@ -5,5 +5,12 @@
  * 2.0.
  */
 
+import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
+
 /** actions are disabled for these fields in tables and popovers */
-export const FIELDS_WITHOUT_CELL_ACTIONS = ['signal.rule.risk_score', 'signal.reason'];
+export const FIELDS_WITHOUT_CELL_ACTIONS = [
+  'signal.rule.risk_score',
+  'signal.reason',
+  ALERT_RISK_SCORE,
+  'kibana.alert.reason',
+];

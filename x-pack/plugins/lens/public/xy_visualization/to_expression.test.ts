@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 import { getXyVisualization } from './xy_visualization';
@@ -14,11 +14,13 @@ import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { layerTypes } from '../../common';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
 import { defaultReferenceLineColor } from './color_assignment';
+import { themeServiceMock } from '../../../../../src/core/public/mocks';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({
     paletteService: chartPluginMock.createPaletteRegistry(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
+    kibanaTheme: themeServiceMock.createStartContract(),
     useLegacyTimeAxis: false,
   });
   let mockDatasource: ReturnType<typeof createMockDatasource>;

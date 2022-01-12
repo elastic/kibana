@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 
 import { useAppContext } from '../../app_context';
@@ -88,7 +88,7 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
           ]}
         >
           <EuiText data-test-subj="whatsNewLink">
-            <EuiLink href={docLinks.links.elasticsearch.releaseHighlights} target="_blank">
+            <EuiLink href={docLinks.links.elasticsearch.version8ReleaseHighlights} target="_blank">
               <FormattedMessage
                 id="xpack.upgradeAssistant.overview.whatsNewLink"
                 defaultMessage="What's new in 8.x?"

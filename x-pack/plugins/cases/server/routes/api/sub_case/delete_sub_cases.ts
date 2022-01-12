@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { RouteDeps } from '../types';
 import { wrapError } from '../utils';
-import { SUB_CASES_PATCH_DEL_URL } from '../../../../common';
+import { SUB_CASES_PATCH_DEL_URL } from '../../../../common/constants';
 
 export function initDeleteSubCasesApi({ router, logger }: RouteDeps) {
   router.delete(

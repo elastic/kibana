@@ -22,11 +22,11 @@ import {
   DiscoverSidebarResponsiveProps,
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../build_services';
-import { ElasticSearchHit } from '../../../../services/doc_views/doc_views_types';
 import { FetchStatus } from '../../../types';
 import { DataDocuments$ } from '../../utils/use_saved_search';
 import { stubLogstashIndexPattern } from '../../../../../../data/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
+import { ElasticSearchHit } from '../../../../types';
 
 const mockServices = {
   history: () => ({
@@ -122,7 +122,7 @@ describe('discover responsive sidebar', function () {
     const selected = findTestSubject(comp, 'fieldList-selected');
     const unpopular = findTestSubject(comp, 'fieldList-unpopular');
     expect(popular.children().length).toBe(1);
-    expect(unpopular.children().length).toBe(7);
+    expect(unpopular.children().length).toBe(6);
     expect(selected.children().length).toBe(1);
     expect(mockCalcFieldCounts.mock.calls.length).toBe(1);
   });
@@ -140,7 +140,7 @@ describe('discover responsive sidebar', function () {
     expect(props.onAddFilter).toHaveBeenCalled();
   });
   it('should allow filtering by string, and calcFieldCount should just be executed once', function () {
-    expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(7);
+    expect(findTestSubject(comp, 'fieldList-unpopular').children().length).toBe(6);
     act(() => {
       findTestSubject(comp, 'fieldFilterSearchInput').simulate('change', {
         target: { value: 'abc' },

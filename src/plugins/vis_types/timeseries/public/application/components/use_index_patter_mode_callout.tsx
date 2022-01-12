@@ -7,7 +7,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiLink } from '@elastic/eui';
 import { getCoreStart } from '../../services';

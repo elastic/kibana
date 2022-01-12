@@ -471,7 +471,29 @@ export function getMlClient(
     },
     async updateDatafeed(...p: Parameters<MlClient['updateDatafeed']>) {
       await datafeedIdsCheck(p);
-      return mlClient.updateDatafeed(...p);
+
+      // Temporary workaround for the incorrect updateDatafeed function in the esclient
+      if (
+        // @ts-expect-error TS complains it's always false
+        p.length === 0 ||
+        p[0] === undefined
+      ) {
+        // Temporary generic error message. This should never be triggered
+        // but is added for type correctness below
+        throw new Error('Incorrect arguments supplied');
+      }
+      // @ts-expect-error body doesn't exist in the type
+      const { datafeed_id: id, body } = p[0];
+
+      return client.asInternalUser.transport.request({
+        method: 'POST',
+        path: `/_ml/datafeeds/${id}/_update`,
+        body,
+      });
+
+      // this should be reinstated once https://github.com/elastic/elasticsearch-js/issues/1601
+      // is fixed
+      // return mlClient.updateDatafeed(...p);
     },
     async updateFilter(...p: Parameters<MlClient['updateFilter']>) {
       return mlClient.updateFilter(...p);

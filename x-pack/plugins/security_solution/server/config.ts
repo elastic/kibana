@@ -90,7 +90,7 @@ export const configSchema = schema.object({
    * @example
    * xpack.securitySolution.enableExperimental:
    *   - someCrazyFeature
-   *   - trustedAppsByPolicyEnabled
+   *   - someEvenCrazierFeature
    */
   enableExperimental: schema.arrayOf(schema.string(), {
     defaultValue: () => [],
@@ -117,12 +117,6 @@ export const configSchema = schema.object({
       { defaultValue: UnderlyingLogClient.eventLog }
     ),
   }),
-
-  /**
-   * Host Endpoint Configuration
-   */
-  endpointResultListDefaultFirstPageIndex: schema.number({ defaultValue: 0 }),
-  endpointResultListDefaultPageSize: schema.number({ defaultValue: 10 }),
 
   /**
    * Artifacts Configuration

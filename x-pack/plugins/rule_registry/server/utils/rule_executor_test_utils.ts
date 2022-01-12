@@ -31,6 +31,7 @@ export const createDefaultAlertExecutorOptions = <
   createdAt = new Date(),
   startedAt = new Date(),
   updatedAt = new Date(),
+  shouldWriteAlerts = true,
 }: {
   alertId?: string;
   ruleName?: string;
@@ -39,6 +40,7 @@ export const createDefaultAlertExecutorOptions = <
   createdAt?: Date;
   startedAt?: Date;
   updatedAt?: Date;
+  shouldWriteAlerts?: boolean;
 }): AlertExecutorOptions<Params, State, InstanceState, InstanceContext, ActionGroupIds> => ({
   alertId,
   createdBy: 'CREATED_BY',
@@ -69,6 +71,9 @@ export const createDefaultAlertExecutorOptions = <
       .alertInstanceFactory,
     savedObjectsClient: savedObjectsClientMock.create(),
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
+    shouldWriteAlerts: () => shouldWriteAlerts,
+    shouldStopExecution: () => false,
+    search: alertsMock.createAlertServices<InstanceState, InstanceContext>().search,
   },
   state,
   updatedBy: null,

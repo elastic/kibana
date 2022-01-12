@@ -26,7 +26,7 @@ import { ml } from '../../../services/ml_api_service';
 import { mlJobService } from '../../../services/job_service';
 import { mlForecastService } from '../../../services/forecast_service';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 export const FORECAST_DURATION_MAX_DAYS = 3650; // Max forecast duration allowed by analytics.

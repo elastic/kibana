@@ -6,7 +6,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiDescribedFormGroup, EuiTitle, EuiFormRow, EuiSwitch, EuiSpacer } from '@elastic/eui';
 

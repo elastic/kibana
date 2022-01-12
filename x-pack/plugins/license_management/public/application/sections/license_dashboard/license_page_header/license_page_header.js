@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
 import { getLicenseState } from '../../../store/reducers/license_management';

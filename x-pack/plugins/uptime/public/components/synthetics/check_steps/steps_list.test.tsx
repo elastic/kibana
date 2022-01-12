@@ -8,7 +8,8 @@
 import React from 'react';
 import { JourneyStep } from '../../../../common/runtime_types/ping';
 import { StepsList } from './steps_list';
-import { render } from '../../../lib/helper/rtl_helpers';
+import { render, forDesktopOnly, forMobileOnly } from '../../../lib/helper/rtl_helpers';
+import { VIEW_PERFORMANCE } from '../../monitor/synthetics/translations';
 
 describe('StepList component', () => {
   let steps: JourneyStep[];
@@ -35,6 +36,10 @@ describe('StepList component', () => {
           step: {
             name: 'load page',
             index: 1,
+            status: 'succeeded',
+            duration: {
+              us: 9999,
+            },
           },
         },
       },
@@ -58,6 +63,10 @@ describe('StepList component', () => {
           step: {
             name: 'go to login',
             index: 2,
+            status: 'succeeded',
+            duration: {
+              us: 9999,
+            },
           },
         },
       },
@@ -72,7 +81,7 @@ describe('StepList component', () => {
   it('renders a link to the step detail view', () => {
     const { getByTitle, getByTestId } = render(<StepsList data={[steps[0]]} loading={false} />);
     expect(getByTestId('step-detail-link')).toHaveAttribute('href', '/journey/fake-group/step/1');
-    expect(getByTitle(`Failed`));
+    expect(forDesktopOnly(getByTitle, 'title')(`Failed`));
   });
 
   it.each([
@@ -83,7 +92,7 @@ describe('StepList component', () => {
     const step = steps[0];
     step.synthetics!.payload!.status = status;
     const { getByText } = render(<StepsList data={[step]} loading={false} />);
-    expect(getByText(expectedStatus));
+    expect(forDesktopOnly(getByText)(expectedStatus));
   });
 
   it('creates expected message for all succeeded', () => {
@@ -140,5 +149,32 @@ describe('StepList component', () => {
     const { getByTestId } = render(<StepsList data={steps} loading={false} />);
     expect(getByTestId('row-fake-group'));
     expect(getByTestId('row-fake-group-1'));
+  });
+
+  describe('Mobile Designs', () => {
+    // We don't need to resize the window here because EUI
+    // does all the manipulation of what is displayed through
+    // CSS. Therefore, it's enough to check what's actually
+    // rendered and its classes.
+
+    it('renders the step name and index', () => {
+      const { getByText } = render(<StepsList data={steps} loading={false} />);
+      expect(forMobileOnly(getByText)('1. load page')).toBeInTheDocument();
+      expect(forMobileOnly(getByText)('2. go to login')).toBeInTheDocument();
+    });
+
+    it('does not render the link to view step details', async () => {
+      const { queryByText } = render(<StepsList data={steps} loading={false} />);
+      expect(forMobileOnly(queryByText)(VIEW_PERFORMANCE)).not.toBeInTheDocument();
+    });
+
+    it('renders the status label', () => {
+      steps[0].synthetics!.payload!.status = 'succeeded';
+      steps[1].synthetics!.payload!.status = 'skipped';
+
+      const { getByText } = render(<StepsList data={steps} loading={false} />);
+      expect(forMobileOnly(getByText)('Succeeded')).toBeInTheDocument();
+      expect(forMobileOnly(getByText)('Skipped')).toBeInTheDocument();
+    });
   });
 });

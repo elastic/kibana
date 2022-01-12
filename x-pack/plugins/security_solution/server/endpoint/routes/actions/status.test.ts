@@ -114,7 +114,7 @@ describe('Endpoint Action Status', () => {
         responses: MockResponse[],
         endpointResponses?: MockEndpointResponse[]
       ) => {
-        esClientMock.asCurrentUser.search = jest.fn().mockImplementation((req) => {
+        esClientMock.asInternalUser.search = jest.fn().mockImplementation((req) => {
           const size = req.size ? req.size : 10;
           const items: any[] =
             req.index === '.fleet-actions'
@@ -505,7 +505,7 @@ describe('Endpoint Action Status', () => {
         responses: MockResponse[],
         endpointResponses?: MockEndpointResponse[]
       ) => {
-        esClientMock.asCurrentUser.search = jest.fn().mockImplementation((req) => {
+        esClientMock.asInternalUser.search = jest.fn().mockImplementation((req) => {
           const size = req.size ? req.size : 10;
           const items: any[] =
             req.index === '.fleet-actions'

@@ -10,7 +10,7 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { first } from 'rxjs/operators';
 import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiLink, EuiCode } from '@elastic/eui';
 import { PainlessLang, PainlessContext, monaco } from '@kbn/monaco';
 import { firstValueFrom } from '@kbn/std';
@@ -218,6 +218,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links }: Props) => {
           <>
             <EuiFormRow
               label={label}
+              hasChildLabel={false}
               id="runtimeFieldScript"
               error={errorMessage}
               isInvalid={!isValid}

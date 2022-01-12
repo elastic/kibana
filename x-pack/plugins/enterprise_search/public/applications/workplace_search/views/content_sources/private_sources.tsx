@@ -10,7 +10,7 @@ import React, { useEffect } from 'react';
 import { useActions, useValues } from 'kea';
 
 import { EuiCallOut, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LicensingLogic } from '../../../shared/licensing';
 import { EuiButtonTo } from '../../../shared/react_router_helpers';

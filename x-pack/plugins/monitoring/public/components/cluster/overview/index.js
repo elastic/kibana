@@ -12,7 +12,8 @@ import { LogstashPanel } from './logstash_panel';
 import { BeatsPanel } from './beats_panel';
 import { EuiPage, EuiPageBody, EuiScreenReaderOnly } from '@elastic/eui';
 import { ApmPanel } from './apm_panel';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EnterpriseSearchPanel } from './enterprise_search_panel';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../../common/constants';
 
 export function Overview(props) {
@@ -57,6 +58,12 @@ export function Overview(props) {
         <BeatsPanel {...props.cluster.beats} setupMode={props.setupMode} alerts={props.alerts} />
 
         <ApmPanel {...props.cluster.apm} setupMode={props.setupMode} alerts={props.alerts} />
+
+        <EnterpriseSearchPanel
+          {...props.cluster.enterpriseSearch}
+          setupMode={props.setupMode}
+          alerts={props.alerts}
+        />
       </EuiPageBody>
     </EuiPage>
   );

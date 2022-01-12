@@ -47,6 +47,7 @@ export function DataViewPicker({
     return (
       <ToolbarButton
         title={title}
+        data-test-subj="open-data-view-picker"
         onClick={() => setPopoverIsOpen(!isPopoverOpen)}
         fullWidth
         {...colorProp}
@@ -68,7 +69,7 @@ export function DataViewPicker({
         ownFocus
       >
         <div style={{ width: 368 }}>
-          <EuiPopoverTitle>
+          <EuiPopoverTitle data-test-subj="data-view-picker-title">
             {i18n.translate('presentationUtil.dataViewPicker.changeDataViewTitle', {
               defaultMessage: 'Data view',
             })}
@@ -86,6 +87,7 @@ export function DataViewPicker({
               key: id,
               label: title,
               value: id,
+              'data-test-subj': `data-view-picker-${title}`,
               checked: id === selectedDataViewId ? 'on' : undefined,
             }))}
             onChange={(choices) => {
@@ -112,3 +114,7 @@ export function DataViewPicker({
     </>
   );
 }
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default DataViewPicker;

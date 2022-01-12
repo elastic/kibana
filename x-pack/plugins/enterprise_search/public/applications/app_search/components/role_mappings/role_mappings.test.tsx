@@ -35,7 +35,6 @@ describe('RoleMappings', () => {
   const mockValues = {
     roleMappings: [asRoleMapping],
     dataLoading: false,
-    multipleAuthProvidersConfig: false,
     singleUserRoleMappings: [asSingleUserRoleMapping],
     singleUserRoleMappingFlyoutOpen: false,
   };

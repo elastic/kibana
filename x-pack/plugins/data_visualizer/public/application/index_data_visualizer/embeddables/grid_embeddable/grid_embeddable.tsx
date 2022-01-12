@@ -13,14 +13,17 @@ import useObservable from 'react-use/lib/useObservable';
 import { EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { Required } from 'utility-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
   IContainer,
 } from '../../../../../../../../src/plugins/embeddable/public';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import {
+  KibanaContextProvider,
+  KibanaThemeProvider,
+} from '../../../../../../../../src/plugins/kibana_react/public';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
 import { DataVisualizerStartDependencies } from '../../../../plugin';
@@ -49,10 +52,12 @@ export interface DataVisualizerGridInput {
   visibleFieldNames?: string[];
   filters?: Filter[];
   showPreviewByDefault?: boolean;
+  allowEditDataView?: boolean;
   /**
    * Callback to add a filter to filter bar
    */
   onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  sessionId?: string;
 }
 export type DataVisualizerGridEmbeddableInput = EmbeddableInput & DataVisualizerGridInput;
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
@@ -203,16 +208,18 @@ export class DataVisualizerGridEmbeddable extends Embeddable<
 
     ReactDOM.render(
       <I18nContext>
-        <KibanaContextProvider services={{ ...this.services[0], ...this.services[1] }}>
-          <Suspense fallback={<EmbeddableLoading />}>
-            <IndexDataVisualizerViewWrapper
-              id={this.input.id}
-              embeddableContext={this}
-              embeddableInput={this.getInput$()}
-              onOutputChange={(output) => this.updateOutput(output)}
-            />
-          </Suspense>
-        </KibanaContextProvider>
+        <KibanaThemeProvider theme$={this.services[0].theme.theme$}>
+          <KibanaContextProvider services={{ ...this.services[0], ...this.services[1] }}>
+            <Suspense fallback={<EmbeddableLoading />}>
+              <IndexDataVisualizerViewWrapper
+                id={this.input.id}
+                embeddableContext={this}
+                embeddableInput={this.getInput$()}
+                onOutputChange={(output) => this.updateOutput(output)}
+              />
+            </Suspense>
+          </KibanaContextProvider>
+        </KibanaThemeProvider>
       </I18nContext>,
       node
     );

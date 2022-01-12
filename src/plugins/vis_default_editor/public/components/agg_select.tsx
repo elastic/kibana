@@ -11,7 +11,7 @@ import React, { useEffect, useCallback, useState } from 'react';
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { IAggType, IndexPattern } from 'src/plugins/data/public';
 
 import { DocLinksStart } from '../../../../core/public';

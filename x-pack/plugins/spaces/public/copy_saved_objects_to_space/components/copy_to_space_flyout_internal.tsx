@@ -23,7 +23,7 @@ import { mapValues } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useSpaces } from '../../spaces_context';
 import type { SpacesDataEntry } from '../../types';

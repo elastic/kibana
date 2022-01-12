@@ -8,7 +8,7 @@
 import { SavedObjectsFindResponse } from 'kibana/server';
 
 import { rulesClientMock } from '../../../../../alerting/server/mocks';
-import { IRuleSavedAttributesSavedObjectAttributes, IRuleStatusSOAttributes } from '../rules/types';
+import { IRuleStatusSOAttributes } from '../rules/types';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import {
   transformBulkError,
@@ -20,7 +20,7 @@ import {
 } from './utils';
 import { responseMock } from './__mocks__';
 import { exampleRuleStatus } from '../signals/__mocks__/es_results';
-import { getAlertMock } from './__mocks__/request_responses';
+import { resolveAlertMock } from './__mocks__/request_responses';
 import { AlertExecutionStatusErrorReasons } from '../../../../../alerting/common';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
@@ -94,7 +94,7 @@ describe.each([
       // Array accessors can result in undefined but
       // this is not represented in typescript for some reason,
       // https://github.com/Microsoft/TypeScript/issues/11122
-      const values: SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> = {
+      const values: SavedObjectsFindResponse<IRuleStatusSOAttributes> = {
         page: 0,
         per_page: 5,
         total: 0,
@@ -223,12 +223,14 @@ describe.each([
       rulesClient = rulesClientMock.create();
     });
     it('getFailingRules finds no failing rules', async () => {
-      rulesClient.get.mockResolvedValue(getAlertMock(isRuleRegistryEnabled, getQueryRuleParams()));
+      rulesClient.resolve.mockResolvedValue(
+        resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
+      );
       const res = await getFailingRules(['my-fake-id'], rulesClient);
       expect(res).toEqual({});
     });
     it('getFailingRules finds a failing rule', async () => {
-      const foundRule = getAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
+      const foundRule = resolveAlertMock(isRuleRegistryEnabled, getQueryRuleParams());
       foundRule.executionStatus = {
         status: 'error',
         lastExecutionDate: foundRule.executionStatus.lastExecutionDate,
@@ -237,12 +239,12 @@ describe.each([
           message: 'oops',
         },
       };
-      rulesClient.get.mockResolvedValue(foundRule);
+      rulesClient.resolve.mockResolvedValue(foundRule);
       const res = await getFailingRules([foundRule.id], rulesClient);
       expect(res).toEqual({ [foundRule.id]: foundRule });
     });
     it('getFailingRules throws an error', async () => {
-      rulesClient.get.mockImplementation(() => {
+      rulesClient.resolve.mockImplementation(() => {
         throw new Error('my test error');
       });
       let error;

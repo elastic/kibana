@@ -289,13 +289,7 @@
         "description": [],
         "signature": [
           "<P extends ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">(locator: ",
           {
             "pluginId": "share",
@@ -629,7 +623,11 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/overview/components/anomaly_detection_panel/anomaly_detection_panel.tsx"
+                "path": "x-pack/plugins/ml/public/application/overview/components/anomaly_detection_panel/actions.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/overview/components/anomaly_detection_panel/actions.tsx"
               },
               {
                 "plugin": "ml",
@@ -645,7 +643,15 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/overview/components/analytics_panel/analytics_panel.tsx"
+                "path": "x-pack/plugins/ml/public/application/overview/components/analytics_panel/actions.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
               },
               {
                 "plugin": "ml",
@@ -693,18 +699,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/expanded_row.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/app.tsx"
               },
               {
@@ -729,7 +723,7 @@
               },
               {
                 "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/public/application/components/overview/fix_logs_step/external_links.tsx"
+                "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
               },
               {
                 "plugin": "upgradeAssistant",
@@ -1134,9 +1128,9 @@
             "section": "def-public.ShareContextMenuPanelItem",
             "text": "ShareContextMenuPanelItem"
           },
-          " extends Pick<",
+          " extends Omit<",
           "EuiContextMenuPanelItemDescriptorEntry",
-          ", \"size\" | \"className\" | \"aria-label\" | \"onClick\" | \"disabled\" | \"data-test-subj\" | \"target\" | \"href\" | \"icon\" | \"key\" | \"rel\" | \"buttonRef\" | \"toolTipContent\" | \"toolTipTitle\" | \"toolTipPosition\" | \"layoutAlign\" | \"panel\">"
+          ", \"name\">"
         ],
         "path": "src/plugins/share/public/types.ts",
         "deprecated": false,
@@ -1302,7 +1296,7 @@
             "section": "def-public.ShowShareMenuOptions",
             "text": "ShowShareMenuOptions"
           },
-          " extends Pick<",
+          " extends Omit<",
           {
             "pluginId": "share",
             "scope": "public",
@@ -1310,7 +1304,7 @@
             "section": "def-public.ShareContext",
             "text": "ShareContext"
           },
-          ", \"objectType\" | \"objectId\" | \"shareableUrl\" | \"sharingData\" | \"isDirty\" | \"showPublicUrlSwitch\">"
+          ", \"onClose\">"
         ],
         "path": "src/plugins/share/public/types.ts",
         "deprecated": false,
@@ -1686,12 +1680,20 @@
           {
             "parentPluginId": "share",
             "id": "def-public.UrlGeneratorStateMapping.Unnamed",
-            "type": "Any",
+            "type": "IndexSignature",
             "tags": [],
-            "label": "Unnamed",
+            "label": "[key: string]: UrlGeneratorState<any, string | undefined, object | undefined>",
             "description": [],
             "signature": [
-              "any"
+              "[key: string]:  ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.UrlGeneratorState",
+                "text": "UrlGeneratorState"
+              },
+              "<any, string | undefined, object | undefined>"
             ],
             "path": "src/plugins/share/public/url_generators/url_generator_definition.ts",
             "deprecated": false
@@ -1783,13 +1785,7 @@
         "<unknown>; navigate(options: ",
         "RedirectOptions",
         "<",
-        {
-          "pluginId": "@kbn/utility-types",
-          "scope": "server",
-          "docId": "kibKbnUtilityTypesPluginApi",
-          "section": "def-server.SerializableRecord",
-          "text": "SerializableRecord"
-        },
+        "SerializableRecord",
         ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
         {
           "pluginId": "share",
@@ -1828,13 +1824,7 @@
         "<unknown>; navigate(options: ",
         "RedirectOptions",
         "<",
-        {
-          "pluginId": "@kbn/utility-types",
-          "scope": "server",
-          "docId": "kibKbnUtilityTypesPluginApi",
-          "section": "def-server.SerializableRecord",
-          "text": "SerializableRecord"
-        },
+        "SerializableRecord",
         ">): void; }"
       ],
       "path": "src/plugins/share/public/plugin.ts",
@@ -1952,13 +1942,7 @@
         "description": [],
         "signature": [
           "<P extends ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">(locator: ",
           {
             "pluginId": "share",
@@ -2335,7 +2319,11 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/overview/components/anomaly_detection_panel/anomaly_detection_panel.tsx"
+                "path": "x-pack/plugins/ml/public/application/overview/components/anomaly_detection_panel/actions.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/overview/components/anomaly_detection_panel/actions.tsx"
               },
               {
                 "plugin": "ml",
@@ -2351,7 +2339,15 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/overview/components/analytics_panel/analytics_panel.tsx"
+                "path": "x-pack/plugins/ml/public/application/overview/components/analytics_panel/actions.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
               },
               {
                 "plugin": "ml",
@@ -2399,18 +2395,6 @@
               },
               {
                 "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/expanded_row.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/trained_models/models_management/models_list.tsx"
-              },
-              {
-                "plugin": "ml",
                 "path": "x-pack/plugins/ml/public/application/app.tsx"
               },
               {
@@ -2435,7 +2419,7 @@
               },
               {
                 "plugin": "upgradeAssistant",
-                "path": "x-pack/plugins/upgrade_assistant/public/application/components/overview/fix_logs_step/external_links.tsx"
+                "path": "x-pack/plugins/upgrade_assistant/public/application/components/es_deprecation_logs/fix_deprecation_logs/external_links.tsx"
               },
               {
                 "plugin": "upgradeAssistant",

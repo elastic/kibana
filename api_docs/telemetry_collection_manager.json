@@ -72,9 +72,9 @@
             "label": "esClient",
             "description": [],
             "signature": [
-              "Pick<",
+              "Omit<",
               "KibanaClient",
-              ", \"name\" | \"create\" | \"index\" | \"delete\" | \"get\" | \"update\" | \"closePointInTime\" | \"search\" | \"security\" | \"transform\" | \"eql\" | \"helpers\" | \"asyncSearch\" | \"autoscaling\" | \"bulk\" | \"cat\" | \"ccr\" | \"clearScroll\" | \"cluster\" | \"count\" | \"danglingIndices\" | \"deleteByQuery\" | \"deleteByQueryRethrottle\" | \"deleteScript\" | \"enrich\" | \"exists\" | \"existsSource\" | \"explain\" | \"features\" | \"fieldCaps\" | \"fleet\" | \"getScript\" | \"getScriptContext\" | \"getScriptLanguages\" | \"getSource\" | \"graph\" | \"ilm\" | \"indices\" | \"info\" | \"ingest\" | \"knnSearch\" | \"license\" | \"logstash\" | \"mget\" | \"migration\" | \"ml\" | \"monitoring\" | \"msearch\" | \"msearchTemplate\" | \"mtermvectors\" | \"nodes\" | \"openPointInTime\" | \"ping\" | \"putScript\" | \"rankEval\" | \"reindex\" | \"reindexRethrottle\" | \"renderSearchTemplate\" | \"rollup\" | \"scriptsPainlessExecute\" | \"scroll\" | \"searchMvt\" | \"searchShards\" | \"searchTemplate\" | \"searchableSnapshots\" | \"shutdown\" | \"slm\" | \"snapshot\" | \"sql\" | \"ssl\" | \"tasks\" | \"termsEnum\" | \"termvectors\" | \"textStructure\" | \"updateByQuery\" | \"updateByQueryRethrottle\" | \"watcher\" | \"xpack\"> & { transport: { request<TResponse = unknown>(params: ",
+              ", \"extend\" | \"connectionPool\" | \"transport\" | \"serializer\" | \"child\" | \"close\" | \"diagnostic\"> & { transport: { request<TResponse = unknown>(params: ",
               "TransportRequestParams",
               ", options?: ",
               "TransportRequestOptions",
@@ -385,15 +385,15 @@
                 "section": "def-server.SavedObjectsClosePointInTimeResponse",
                 "text": "SavedObjectsClosePointInTimeResponse"
               },
-              ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: Pick<",
+              ">; createPointInTimeFinder: <T = unknown, A = unknown>(findOptions: ",
               {
                 "pluginId": "core",
                 "scope": "server",
                 "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsFindOptions",
-                "text": "SavedObjectsFindOptions"
+                "section": "def-server.SavedObjectsCreatePointInTimeFinderOptions",
+                "text": "SavedObjectsCreatePointInTimeFinderOptions"
               },
-              ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"perPage\" | \"sortField\" | \"sortOrder\" | \"search\" | \"searchFields\" | \"rootSearchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"typeToNamespacesMap\" | \"preference\">, dependencies?: ",
+              ", dependencies?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -439,6 +439,16 @@
               },
               "<unknown, unknown, unknown, any> | undefined"
             ],
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "telemetryCollectionManager",
+            "id": "def-server.StatsCollectionConfig.refreshCache",
+            "type": "boolean",
+            "tags": [],
+            "label": "refreshCache",
+            "description": [],
             "path": "src/plugins/telemetry_collection_manager/server/types.ts",
             "deprecated": false
           }
@@ -509,6 +519,19 @@
         "path": "src/plugins/telemetry_collection_manager/server/types.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "telemetryCollectionManager",
+            "id": "def-server.UsageStatsPayload.cacheDetails",
+            "type": "Object",
+            "tags": [],
+            "label": "cacheDetails",
+            "description": [],
+            "signature": [
+              "CacheDetails"
+            ],
+            "path": "src/plugins/telemetry_collection_manager/server/types.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "telemetryCollectionManager",
             "id": "def-server.UsageStatsPayload.collectionSource",
@@ -809,21 +832,6 @@
           ],
           "path": "src/plugins/telemetry_collection_manager/server/types.ts",
           "deprecated": false
-        },
-        {
-          "parentPluginId": "telemetryCollectionManager",
-          "id": "def-server.TelemetryCollectionManagerPluginSetup.areAllCollectorsReady",
-          "type": "Function",
-          "tags": [],
-          "label": "areAllCollectorsReady",
-          "description": [],
-          "signature": [
-            "() => Promise<boolean | undefined>"
-          ],
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-          "deprecated": false,
-          "returnComment": [],
-          "children": []
         }
       ],
       "lifecycle": "setup",
@@ -882,21 +890,6 @@
           ],
           "path": "src/plugins/telemetry_collection_manager/server/types.ts",
           "deprecated": false
-        },
-        {
-          "parentPluginId": "telemetryCollectionManager",
-          "id": "def-server.TelemetryCollectionManagerPluginStart.areAllCollectorsReady",
-          "type": "Function",
-          "tags": [],
-          "label": "areAllCollectorsReady",
-          "description": [],
-          "signature": [
-            "() => Promise<boolean | undefined>"
-          ],
-          "path": "src/plugins/telemetry_collection_manager/server/types.ts",
-          "deprecated": false,
-          "returnComment": [],
-          "children": []
         }
       ],
       "lifecycle": "start",
@@ -909,6 +902,17 @@
     "interfaces": [],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "telemetryCollectionManager",
+        "id": "def-common.CACHE_DURATION_MS",
+        "type": "number",
+        "tags": [],
+        "label": "CACHE_DURATION_MS",
+        "description": [],
+        "path": "src/plugins/telemetry_collection_manager/common/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "telemetryCollectionManager",
         "id": "def-common.PLUGIN_ID",

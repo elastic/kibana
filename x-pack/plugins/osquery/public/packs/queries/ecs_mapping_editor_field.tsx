@@ -44,7 +44,7 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 import sqlParser from 'js-sql-parser';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -264,6 +264,7 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
         options={ECSSchemaOptions}
         selectedOptions={selectedOptions}
         onChange={handleChange}
+        data-test-subj="ECS-field-input"
         renderOption={renderOption}
         rowHeight={32}
         isClearable
@@ -1103,7 +1104,7 @@ export const ECSMappingEditorField = React.memo(
         {Object.entries(value).map(([ecsKey, ecsValue]) => (
           <ECSMappingEditorForm
             // eslint-disable-next-line
-          ref={(formRef) => {
+            ref={(formRef) => {
               if (formRef) {
                 formRefs.current[ecsKey] = formRef;
               }
@@ -1123,7 +1124,7 @@ export const ECSMappingEditorField = React.memo(
         {!euiFieldProps?.isDisabled && (
           <ECSMappingEditorForm
             // eslint-disable-next-line
-          ref={(formRef) => {
+            ref={(formRef) => {
               if (formRef) {
                 formRefs.current.new = formRef;
               }

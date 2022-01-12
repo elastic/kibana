@@ -452,7 +452,7 @@
               "Extend the bounds to include a given LngLat or LngLatBounds."
             ],
             "signature": [
-              "(obj: maplibregl.LngLatBoundsLike) => this"
+              "(obj: [number, number] | [number, number, number, number] | maplibregl.LngLatBounds | [maplibregl.LngLatLike, maplibregl.LngLatLike] | maplibregl.LngLat | { lng: number; lat: number; } | { lon: number; lat: number; }) => this"
             ],
             "path": "node_modules/maplibre-gl/src/index.d.ts",
             "deprecated": false,
@@ -465,7 +465,7 @@
                 "label": "obj",
                 "description": [],
                 "signature": [
-                  "maplibregl.LngLatBoundsLike"
+                  "[number, number] | [number, number, number, number] | maplibregl.LngLatBounds | [maplibregl.LngLatLike, maplibregl.LngLatLike] | maplibregl.LngLat | { lng: number; lat: number; } | { lon: number; lat: number; }"
                 ],
                 "path": "node_modules/maplibre-gl/src/index.d.ts",
                 "deprecated": false,
@@ -854,7 +854,7 @@
                 "tags": [],
                 "label": "control",
                 "description": [
-                  "The {@link IControl} to check."
+                  "The {@link IControl } to check."
                 ],
                 "signature": [
                   "maplibregl.IControl"
@@ -936,7 +936,7 @@
             "label": "setMaxBounds",
             "description": [],
             "signature": [
-              "(lnglatbounds?: [number, number] | [number, number, number, number] | maplibregl.LngLatBounds | [maplibregl.LngLatLike, maplibregl.LngLatLike] | maplibregl.LngLat | { lng: number; lat: number; } | { lon: number; lat: number; } | undefined) => this"
+              "(lnglatbounds?: maplibregl.LngLatBoundsLike | undefined) => this"
             ],
             "path": "node_modules/maplibre-gl/src/index.d.ts",
             "deprecated": false,
@@ -949,7 +949,7 @@
                 "label": "lnglatbounds",
                 "description": [],
                 "signature": [
-                  "[number, number] | [number, number, number, number] | maplibregl.LngLatBounds | [maplibregl.LngLatLike, maplibregl.LngLatLike] | maplibregl.LngLat | { lng: number; lat: number; } | { lon: number; lat: number; } | undefined"
+                  "maplibregl.LngLatBoundsLike | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/src/index.d.ts",
                 "deprecated": false,
@@ -1298,7 +1298,7 @@
               "\nReturns an array of GeoJSON Feature objects representing visible features that satisfy the query parameters.\n\nThe properties value of each returned feature object contains the properties of its source feature. For GeoJSON sources, only string and numeric property values are supported (i.e. null, Array, and Object values are not supported).\n\nEach feature includes top-level layer, source, and sourceLayer properties. The layer property is an object representing the style layer to which the feature belongs. Layout and paint properties in this object contain values which are fully evaluated for the given zoom level and feature.\n\nOnly features that are currently rendered are included. Some features will not be included, like:\n\n- Features from layers whose visibility property is \"none\".\n- Features from layers whose zoom range excludes the current zoom level.\n- Symbol features that have been hidden due to text or icon collision.\n\nFeatures from all other layers are included, including features that may have no visible contribution to the rendered result; for example, because the layer's opacity or color alpha component is set to 0.\n\nThe topmost rendered feature appears first in the returned array, and subsequent features are sorted by descending z-order. Features that are rendered multiple times (due to wrapping across the antimeridian at low zoom levels) are returned only once (though subject to the following caveat).\n\nBecause features come from tiled vector data or GeoJSON data that is converted to tiles internally, feature geometries may be split or duplicated across tile boundaries and, as a result, features may appear multiple times in query results. For example, suppose there is a highway running through the bounding rectangle of a query. The results of the query will be those parts of the highway that lie within the map tiles covering the bounding rectangle, even if the highway extends into other tiles, and the portion of the highway within each map tile will be returned as a separate feature. Similarly, a point feature near a tile boundary may appear in multiple tiles due to tile buffering.\n"
             ],
             "signature": [
-              "(pointOrBox?: [number, number] | maplibregl.Point | [maplibregl.PointLike, maplibregl.PointLike] | undefined, options?: ({ layers?: string[] | undefined; filter?: any[] | undefined; } & maplibregl.FilterOptions) | undefined) => maplibregl.MapboxGeoJSONFeature[]"
+              "(pointOrBox?: maplibregl.PointLike | [maplibregl.PointLike, maplibregl.PointLike] | undefined, options?: ({ layers?: string[] | undefined; filter?: any[] | undefined; } & maplibregl.FilterOptions) | undefined) => maplibregl.MapboxGeoJSONFeature[]"
             ],
             "path": "node_modules/maplibre-gl/src/index.d.ts",
             "deprecated": false,
@@ -1313,7 +1313,7 @@
                   "The geometry of the query region: either a single point or southwest and northeast points describing a bounding box. Omitting this parameter (i.e. calling Map#queryRenderedFeatures with zero arguments, or with only a  options argument) is equivalent to passing a bounding box encompassing the entire map viewport."
                 ],
                 "signature": [
-                  "[number, number] | maplibregl.Point | [maplibregl.PointLike, maplibregl.PointLike] | undefined"
+                  "maplibregl.PointLike | [maplibregl.PointLike, maplibregl.PointLike] | undefined"
                 ],
                 "path": "node_modules/maplibre-gl/src/index.d.ts",
                 "deprecated": false,
@@ -2473,12 +2473,12 @@
                   {
                     "parentPluginId": "@kbn/mapbox-gl",
                     "id": "def-server.Map.setFeatureState.$2.Unnamed",
-                    "type": "Any",
+                    "type": "IndexSignature",
                     "tags": [],
-                    "label": "Unnamed",
+                    "label": "[key: string]: any",
                     "description": [],
                     "signature": [
-                      "any"
+                      "[key: string]:  any"
                     ],
                     "path": "node_modules/maplibre-gl/src/index.d.ts",
                     "deprecated": false
@@ -3822,7 +3822,7 @@
             "label": "on",
             "description": [],
             "signature": [
-              "{ <T extends \"click\" | \"dblclick\" | \"mousedown\" | \"mouseup\" | \"mousemove\" | \"mouseenter\" | \"mouseleave\" | \"mouseover\" | \"mouseout\" | \"contextmenu\" | \"touchstart\" | \"touchend\" | \"touchcancel\">(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & maplibregl.EventData) => void): this; <T extends \"rotate\" | \"data\" | \"error\" | \"remove\" | \"move\" | \"render\" | \"idle\" | \"zoom\" | \"click\" | \"dblclick\" | \"mousedown\" | \"mouseup\" | \"mousemove\" | \"mouseover\" | \"mouseout\" | \"contextmenu\" | \"touchstart\" | \"touchend\" | \"touchcancel\" | \"load\" | \"resize\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"dataloading\" | \"tiledataloading\" | \"sourcedataloading\" | \"styledataloading\" | \"sourcedata\" | \"styledata\" | \"boxzoomcancel\" | \"boxzoomstart\" | \"boxzoomend\" | \"touchmove\" | \"movestart\" | \"moveend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"wheel\">(type: T, listener: (ev: maplibregl.MapEventType[T] & maplibregl.EventData) => void): this; (type: string, listener: (ev: any) => void): this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & maplibregl.EventData) => void): this; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & maplibregl.EventData) => void): this; (type: string, listener: (ev: any) => void): this; }"
             ],
             "path": "node_modules/maplibre-gl/src/index.d.ts",
             "deprecated": false,
@@ -3880,7 +3880,7 @@
             "label": "on",
             "description": [],
             "signature": [
-              "{ <T extends \"click\" | \"dblclick\" | \"mousedown\" | \"mouseup\" | \"mousemove\" | \"mouseenter\" | \"mouseleave\" | \"mouseover\" | \"mouseout\" | \"contextmenu\" | \"touchstart\" | \"touchend\" | \"touchcancel\">(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & maplibregl.EventData) => void): this; <T extends \"rotate\" | \"data\" | \"error\" | \"remove\" | \"move\" | \"render\" | \"idle\" | \"zoom\" | \"click\" | \"dblclick\" | \"mousedown\" | \"mouseup\" | \"mousemove\" | \"mouseover\" | \"mouseout\" | \"contextmenu\" | \"touchstart\" | \"touchend\" | \"touchcancel\" | \"load\" | \"resize\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"dataloading\" | \"tiledataloading\" | \"sourcedataloading\" | \"styledataloading\" | \"sourcedata\" | \"styledata\" | \"boxzoomcancel\" | \"boxzoomstart\" | \"boxzoomend\" | \"touchmove\" | \"movestart\" | \"moveend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"wheel\">(type: T, listener: (ev: maplibregl.MapEventType[T] & maplibregl.EventData) => void): this; (type: string, listener: (ev: any) => void): this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & maplibregl.EventData) => void): this; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & maplibregl.EventData) => void): this; (type: string, listener: (ev: any) => void): this; }"
             ],
             "path": "node_modules/maplibre-gl/src/index.d.ts",
             "deprecated": false,
@@ -3924,7 +3924,7 @@
             "label": "on",
             "description": [],
             "signature": [
-              "{ <T extends \"click\" | \"dblclick\" | \"mousedown\" | \"mouseup\" | \"mousemove\" | \"mouseenter\" | \"mouseleave\" | \"mouseover\" | \"mouseout\" | \"contextmenu\" | \"touchstart\" | \"touchend\" | \"touchcancel\">(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & maplibregl.EventData) => void): this; <T extends \"rotate\" | \"data\" | \"error\" | \"remove\" | \"move\" | \"render\" | \"idle\" | \"zoom\" | \"click\" | \"dblclick\" | \"mousedown\" | \"mouseup\" | \"mousemove\" | \"mouseover\" | \"mouseout\" | \"contextmenu\" | \"touchstart\" | \"touchend\" | \"touchcancel\" | \"load\" | \"resize\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"dataloading\" | \"tiledataloading\" | \"sourcedataloading\" | \"styledataloading\" | \"sourcedata\" | \"styledata\" | \"boxzoomcancel\" | \"boxzoomstart\" | \"boxzoomend\" | \"touchmove\" | \"movestart\" | \"moveend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"wheel\">(type: T, listener: (ev: maplibregl.MapEventType[T] & maplibregl.EventData) => void): this; (type: string, listener: (ev: any) => void): this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & maplibregl.EventData) => void): this; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & maplibregl.EventData) => void): this; (type: string, listener: (ev: any) => void): this; }"
             ],
             "path": "node_modules/maplibre-gl/src/index.d.ts",
             "deprecated": false,
@@ -3968,7 +3968,7 @@
             "label": "once",
             "description": [],
             "signature": [
-              "{ <T extends \"click\" | \"dblclick\" | \"mousedown\" | \"mouseup\" | \"mousemove\" | \"mouseenter\" | \"mouseleave\" | \"mouseover\" | \"mouseout\" | \"contextmenu\" | \"touchstart\" | \"touchend\" | \"touchcancel\">(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & maplibregl.EventData) => void): this; <T extends \"rotate\" | \"data\" | \"error\" | \"remove\" | \"move\" | \"render\" | \"idle\" | \"zoom\" | \"click\" | \"dblclick\" | \"mousedown\" | \"mouseup\" | \"mousemove\" | \"mouseover\" | \"mouseout\" | \"contextmenu\" | \"touchstart\" | \"touchend\" | \"touchcancel\" | \"load\" | \"resize\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"dataloading\" | \"tiledataloading\" | \"sourcedataloading\" | \"styledataloading\" | \"sourcedata\" | \"styledata\" | \"boxzoomcancel\" | \"boxzoomstart\" | \"boxzoomend\" | \"touchmove\" | \"movestart\" | \"moveend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"wheel\">(type: T, listener: (ev: maplibregl.MapEventType[T] & maplibregl.EventData) => void): this; (type: string, listener: (ev: any) => void): this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & maplibregl.EventData) => void): this; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & maplibregl.EventData) => void): this; (type: string, listener: (ev: any) => void): this; }"
             ],
             "path": "node_modules/maplibre-gl/src/index.d.ts",
             "deprecated": false,
@@ -4026,7 +4026,7 @@
             "label": "once",
             "description": [],
             "signature": [
-              "{ <T extends \"click\" | \"dblclick\" | \"mousedown\" | \"mouseup\" | \"mousemove\" | \"mouseenter\" | \"mouseleave\" | \"mouseover\" | \"mouseout\" | \"contextmenu\" | \"touchstart\" | \"touchend\" | \"touchcancel\">(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & maplibregl.EventData) => void): this; <T extends \"rotate\" | \"data\" | \"error\" | \"remove\" | \"move\" | \"render\" | \"idle\" | \"zoom\" | \"click\" | \"dblclick\" | \"mousedown\" | \"mouseup\" | \"mousemove\" | \"mouseover\" | \"mouseout\" | \"contextmenu\" | \"touchstart\" | \"touchend\" | \"touchcancel\" | \"load\" | \"resize\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"dataloading\" | \"tiledataloading\" | \"sourcedataloading\" | \"styledataloading\" | \"sourcedata\" | \"styledata\" | \"boxzoomcancel\" | \"boxzoomstart\" | \"boxzoomend\" | \"touchmove\" | \"movestart\" | \"moveend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"wheel\">(type: T, listener: (ev: maplibregl.MapEventType[T] & maplibregl.EventData) => void): this; (type: string, listener: (ev: any) => void): this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & maplibregl.EventData) => void): this; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & maplibregl.EventData) => void): this; (type: string, listener: (ev: any) => void): this; }"
             ],
             "path": "node_modules/maplibre-gl/src/index.d.ts",
             "deprecated": false,
@@ -4070,7 +4070,7 @@
             "label": "once",
             "description": [],
             "signature": [
-              "{ <T extends \"click\" | \"dblclick\" | \"mousedown\" | \"mouseup\" | \"mousemove\" | \"mouseenter\" | \"mouseleave\" | \"mouseover\" | \"mouseout\" | \"contextmenu\" | \"touchstart\" | \"touchend\" | \"touchcancel\">(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & maplibregl.EventData) => void): this; <T extends \"rotate\" | \"data\" | \"error\" | \"remove\" | \"move\" | \"render\" | \"idle\" | \"zoom\" | \"click\" | \"dblclick\" | \"mousedown\" | \"mouseup\" | \"mousemove\" | \"mouseover\" | \"mouseout\" | \"contextmenu\" | \"touchstart\" | \"touchend\" | \"touchcancel\" | \"load\" | \"resize\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"dataloading\" | \"tiledataloading\" | \"sourcedataloading\" | \"styledataloading\" | \"sourcedata\" | \"styledata\" | \"boxzoomcancel\" | \"boxzoomstart\" | \"boxzoomend\" | \"touchmove\" | \"movestart\" | \"moveend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"wheel\">(type: T, listener: (ev: maplibregl.MapEventType[T] & maplibregl.EventData) => void): this; (type: string, listener: (ev: any) => void): this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & maplibregl.EventData) => void): this; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & maplibregl.EventData) => void): this; (type: string, listener: (ev: any) => void): this; }"
             ],
             "path": "node_modules/maplibre-gl/src/index.d.ts",
             "deprecated": false,
@@ -4114,7 +4114,7 @@
             "label": "off",
             "description": [],
             "signature": [
-              "{ <T extends \"click\" | \"dblclick\" | \"mousedown\" | \"mouseup\" | \"mousemove\" | \"mouseenter\" | \"mouseleave\" | \"mouseover\" | \"mouseout\" | \"contextmenu\" | \"touchstart\" | \"touchend\" | \"touchcancel\">(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & maplibregl.EventData) => void): this; <T extends \"rotate\" | \"data\" | \"error\" | \"remove\" | \"move\" | \"render\" | \"idle\" | \"zoom\" | \"click\" | \"dblclick\" | \"mousedown\" | \"mouseup\" | \"mousemove\" | \"mouseover\" | \"mouseout\" | \"contextmenu\" | \"touchstart\" | \"touchend\" | \"touchcancel\" | \"load\" | \"resize\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"dataloading\" | \"tiledataloading\" | \"sourcedataloading\" | \"styledataloading\" | \"sourcedata\" | \"styledata\" | \"boxzoomcancel\" | \"boxzoomstart\" | \"boxzoomend\" | \"touchmove\" | \"movestart\" | \"moveend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"wheel\">(type: T, listener: (ev: maplibregl.MapEventType[T] & maplibregl.EventData) => void): this; (type: string, listener: (ev: any) => void): this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & maplibregl.EventData) => void): this; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & maplibregl.EventData) => void): this; (type: string, listener: (ev: any) => void): this; }"
             ],
             "path": "node_modules/maplibre-gl/src/index.d.ts",
             "deprecated": false,
@@ -4172,7 +4172,7 @@
             "label": "off",
             "description": [],
             "signature": [
-              "{ <T extends \"click\" | \"dblclick\" | \"mousedown\" | \"mouseup\" | \"mousemove\" | \"mouseenter\" | \"mouseleave\" | \"mouseover\" | \"mouseout\" | \"contextmenu\" | \"touchstart\" | \"touchend\" | \"touchcancel\">(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & maplibregl.EventData) => void): this; <T extends \"rotate\" | \"data\" | \"error\" | \"remove\" | \"move\" | \"render\" | \"idle\" | \"zoom\" | \"click\" | \"dblclick\" | \"mousedown\" | \"mouseup\" | \"mousemove\" | \"mouseover\" | \"mouseout\" | \"contextmenu\" | \"touchstart\" | \"touchend\" | \"touchcancel\" | \"load\" | \"resize\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"dataloading\" | \"tiledataloading\" | \"sourcedataloading\" | \"styledataloading\" | \"sourcedata\" | \"styledata\" | \"boxzoomcancel\" | \"boxzoomstart\" | \"boxzoomend\" | \"touchmove\" | \"movestart\" | \"moveend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"wheel\">(type: T, listener: (ev: maplibregl.MapEventType[T] & maplibregl.EventData) => void): this; (type: string, listener: (ev: any) => void): this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & maplibregl.EventData) => void): this; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & maplibregl.EventData) => void): this; (type: string, listener: (ev: any) => void): this; }"
             ],
             "path": "node_modules/maplibre-gl/src/index.d.ts",
             "deprecated": false,
@@ -4216,7 +4216,7 @@
             "label": "off",
             "description": [],
             "signature": [
-              "{ <T extends \"click\" | \"dblclick\" | \"mousedown\" | \"mouseup\" | \"mousemove\" | \"mouseenter\" | \"mouseleave\" | \"mouseover\" | \"mouseout\" | \"contextmenu\" | \"touchstart\" | \"touchend\" | \"touchcancel\">(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & maplibregl.EventData) => void): this; <T extends \"rotate\" | \"data\" | \"error\" | \"remove\" | \"move\" | \"render\" | \"idle\" | \"zoom\" | \"click\" | \"dblclick\" | \"mousedown\" | \"mouseup\" | \"mousemove\" | \"mouseover\" | \"mouseout\" | \"contextmenu\" | \"touchstart\" | \"touchend\" | \"touchcancel\" | \"load\" | \"resize\" | \"webglcontextlost\" | \"webglcontextrestored\" | \"dataloading\" | \"tiledataloading\" | \"sourcedataloading\" | \"styledataloading\" | \"sourcedata\" | \"styledata\" | \"boxzoomcancel\" | \"boxzoomstart\" | \"boxzoomend\" | \"touchmove\" | \"movestart\" | \"moveend\" | \"zoomstart\" | \"zoomend\" | \"rotatestart\" | \"rotateend\" | \"dragstart\" | \"drag\" | \"dragend\" | \"pitchstart\" | \"pitch\" | \"pitchend\" | \"wheel\">(type: T, listener: (ev: maplibregl.MapEventType[T] & maplibregl.EventData) => void): this; (type: string, listener: (ev: any) => void): this; }"
+              "{ <T extends keyof maplibregl.MapLayerEventType>(type: T, layer: string, listener: (ev: maplibregl.MapLayerEventType[T] & maplibregl.EventData) => void): this; <T extends keyof maplibregl.MapEventType>(type: T, listener: (ev: maplibregl.MapEventType[T] & maplibregl.EventData) => void): this; (type: string, listener: (ev: any) => void): this; }"
             ],
             "path": "node_modules/maplibre-gl/src/index.d.ts",
             "deprecated": false,
@@ -5610,7 +5610,7 @@
             "label": "source",
             "description": [],
             "signature": [
-              "string | maplibregl.GeoJSONSourceRaw | maplibregl.VideoSourceRaw | maplibregl.ImageSourceRaw | maplibregl.CanvasSourceRaw | maplibregl.VectorSource | maplibregl.RasterSource | maplibregl.RasterDemSource | undefined"
+              "string | maplibregl.AnySourceData | undefined"
             ],
             "path": "node_modules/maplibre-gl/src/index.d.ts",
             "deprecated": false
@@ -5790,7 +5790,7 @@
               "The initial bounds of the map. If bounds is specified, it overrides center and zoom constructor options."
             ],
             "signature": [
-              "[number, number] | [number, number, number, number] | maplibregl.LngLatBounds | [maplibregl.LngLatLike, maplibregl.LngLatLike] | maplibregl.LngLat | { lng: number; lat: number; } | { lon: number; lat: number; } | undefined"
+              "maplibregl.LngLatBoundsLike | undefined"
             ],
             "path": "node_modules/maplibre-gl/src/index.d.ts",
             "deprecated": false
@@ -5820,7 +5820,7 @@
               "initial map center"
             ],
             "signature": [
-              "[number, number] | maplibregl.LngLat | { lng: number; lat: number; } | { lon: number; lat: number; } | undefined"
+              "maplibregl.LngLatLike | undefined"
             ],
             "path": "node_modules/maplibre-gl/src/index.d.ts",
             "deprecated": false
@@ -6102,7 +6102,7 @@
               "If set, the map is constrained to the given bounds."
             ],
             "signature": [
-              "[number, number] | [number, number, number, number] | maplibregl.LngLatBounds | [maplibregl.LngLatLike, maplibregl.LngLatLike] | maplibregl.LngLat | { lng: number; lat: number; } | { lon: number; lat: number; } | undefined"
+              "maplibregl.LngLatBoundsLike | undefined"
             ],
             "path": "node_modules/maplibre-gl/src/index.d.ts",
             "deprecated": false
@@ -6750,7 +6750,7 @@
             "label": "scheme",
             "description": [],
             "signature": [
-              "\"tms\" | \"xyz\" | undefined"
+              "\"xyz\" | \"tms\" | undefined"
             ],
             "path": "node_modules/maplibre-gl/src/index.d.ts",
             "deprecated": false
@@ -6802,7 +6802,7 @@
             "label": "promoteId",
             "description": [],
             "signature": [
-              "string | { [key: string]: string; } | undefined"
+              "maplibregl.PromoteIdSpecification | undefined"
             ],
             "path": "node_modules/maplibre-gl/src/index.d.ts",
             "deprecated": false
@@ -6813,34 +6813,6 @@
     ],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.maplibregldistmaplibreglcsp",
-        "type": "Any",
-        "tags": [],
-        "label": "'maplibre-gl/dist/maplibre-gl-csp'",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "node_modules/@kbn/mapbox-gl/target_types/typings.d.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/mapbox-gl",
-        "id": "def-server.maplibregldistmaplibreglcsp",
-        "type": "Any",
-        "tags": [],
-        "label": "'maplibre-gl/dist/maplibre-gl-csp'",
-        "description": [],
-        "signature": [
-          "any"
-        ],
-        "path": "packages/kbn-mapbox-gl/src/typings.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/mapbox-gl",
         "id": "def-server.AnyLayer",
@@ -6866,6 +6838,20 @@
           "GeoJSON.Feature<GeoJSON.Geometry, GeoJSON.GeoJsonProperties> & { layer: maplibregl.Layer; source: string; sourceLayer: string; state: { [key: string]: any; }; }"
         ],
         "path": "node_modules/maplibre-gl/src/index.d.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/mapbox-gl",
+        "id": "def-server.mapboxgl",
+        "type": "Any",
+        "tags": [],
+        "label": "mapboxgl",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "packages/kbn-mapbox-gl/src/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

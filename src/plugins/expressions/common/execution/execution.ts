@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { isPromise } from '@kbn/std';
-import { ObservableLike, UnwrapObservable, UnwrapPromiseOrReturn } from '@kbn/utility-types';
+import { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
 import { keys, last, mapValues, reduce, zipObject } from 'lodash';
 import {
   combineLatest,
@@ -47,7 +47,7 @@ import { createDefaultInspectorAdapters } from '../util/create_default_inspector
 type UnwrapReturnType<Function extends (...args: any[]) => unknown> =
   ReturnType<Function> extends ObservableLike<unknown>
     ? UnwrapObservable<ReturnType<Function>>
-    : UnwrapPromiseOrReturn<ReturnType<Function>>;
+    : Awaited<ReturnType<Function>>;
 
 /**
  * The result returned after an expression function execution.
@@ -63,23 +63,6 @@ export interface ExecutionResult<Output> {
    */
   result: Output;
 }
-
-/**
- * AbortController is not available in Node until v15, so we
- * need to temporarily mock it for plugins using expressions
- * on the server.
- *
- * TODO: Remove this once Kibana is upgraded to Node 15.
- */
-const getNewAbortController = (): AbortController => {
-  try {
-    return new AbortController();
-  } catch (error) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const polyfill = require('abortcontroller-polyfill/dist/cjs-ponyfill');
-    return new polyfill.AbortController();
-  }
-};
 
 const createAbortErrorValue = () =>
   createError({
@@ -173,7 +156,7 @@ export class Execution<
   /**
    * AbortController to cancel this Execution.
    */
-  private readonly abortController = getNewAbortController();
+  private readonly abortController = new AbortController();
 
   /**
    * Whether .start() method has been called.
@@ -241,7 +224,7 @@ export class Execution<
         inspectorAdapters.tables[name] = datatable;
       },
       isSyncColorsEnabled: () => execution.params.syncColors!,
-      ...execution.params.extraContext,
+      ...execution.executor.context,
       getExecutionContext: () => execution.params.executionContext,
     };
 
@@ -559,10 +542,10 @@ export class Execution<
   interpret<T>(ast: ExpressionAstNode, input: T): Observable<ExecutionResult<unknown>> {
     switch (getType(ast)) {
       case 'expression':
-        const execution = this.execution.executor.createExecution(
-          ast as ExpressionAstExpression,
-          this.execution.params
-        );
+        const execution = this.execution.executor.createExecution(ast as ExpressionAstExpression, {
+          ...this.execution.params,
+          variables: this.context.variables,
+        });
         this.childExecutions.push(execution);
 
         return execution.start(input, true);

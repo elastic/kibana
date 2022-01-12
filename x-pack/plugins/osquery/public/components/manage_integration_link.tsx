@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 
 import { INTEGRATIONS_PLUGIN_ID } from '../../../fleet/common';

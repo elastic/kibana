@@ -30,14 +30,14 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CANCEL_BUTTON_LABEL, START_BUTTON_LABEL } from '../../../../shared/constants';
+import { docLinks } from '../../../../shared/doc_links';
 import { EuiListGroupItemTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
 import aclImage from '../../../assets/supports_acl.svg';
 import { ComponentLoader } from '../../../components/shared/component_loader';
-import { CredentialItem } from '../../../components/shared/credential_item';
 import { LicenseBadge } from '../../../components/shared/license_badge';
 import { StatusItem } from '../../../components/shared/status_item';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
@@ -47,10 +47,6 @@ import {
   DOCUMENTATION_LINK_TITLE,
 } from '../../../constants';
 import {
-  CUSTOM_SOURCE_DOCS_URL,
-  DOCUMENT_PERMISSIONS_DOCS_URL,
-  ENT_SEARCH_LICENSE_MANAGEMENT,
-  EXTERNAL_IDENTITIES_DOCS_URL,
   SYNC_FREQUENCY_PATH,
   BLOCKED_TIME_WINDOWS_PATH,
   getGroupPath,
@@ -78,8 +74,6 @@ import {
   STATUS_TEXT,
   ADDITIONAL_CONFIG_HEADING,
   EXTERNAL_IDENTITIES_LINK,
-  ACCESS_TOKEN_LABEL,
-  ID_LABEL,
   LEARN_CUSTOM_FEATURES_BUTTON,
   DOC_PERMISSIONS_DESCRIPTION,
   CUSTOM_CALLOUT_TITLE,
@@ -92,6 +86,7 @@ import {
 } from '../constants';
 import { SourceLogic } from '../source_logic';
 
+import { SourceIdentifier } from './source_identifier';
 import { SourceLayout } from './source_layout';
 
 export const Overview: React.FC = () => {
@@ -106,7 +101,6 @@ export const Overview: React.FC = () => {
     groups,
     details,
     custom,
-    accessToken,
     licenseSupportsPermissions,
     serviceTypeSupportsPermissions,
     indexPermissions,
@@ -222,11 +216,11 @@ export const Overview: React.FC = () => {
           {activities.map(({ details: activityDetails, event, time, status }, i) => (
             <EuiTableRow key={i}>
               <EuiTableRowCell>
-                <EuiText size="xs">{event}</EuiText>
+                <EuiText size="s">{event}</EuiText>
               </EuiTableRowCell>
               {!custom && (
                 <EuiTableRowCell>
-                  <EuiText size="xs">
+                  <EuiText size="s">
                     <small>
                       {status} {activityDetails && <StatusItem details={activityDetails} />}
                     </small>
@@ -234,7 +228,7 @@ export const Overview: React.FC = () => {
                 </EuiTableRowCell>
               )}
               <EuiTableRowCell align="right">
-                <EuiText size="xs">
+                <EuiText size="s">
                   <small>{time}</small>
                 </EuiText>
               </EuiTableRowCell>
@@ -257,6 +251,7 @@ export const Overview: React.FC = () => {
 
   const groupsSummary = (
     <>
+      <EuiSpacer />
       <EuiTitle size="xs">
         <h5>{GROUP_ACCESS_TITLE}</h5>
       </EuiTitle>
@@ -349,7 +344,7 @@ export const Overview: React.FC = () => {
                   defaultMessage="{learnMoreLink} about permissions"
                   values={{
                     learnMoreLink: (
-                      <EuiLink target="_blank" href={DOCUMENT_PERMISSIONS_DOCS_URL}>
+                      <EuiLink target="_blank" href={docLinks.workplaceSearchDocumentPermissions}>
                         {LEARN_MORE_LINK}
                       </EuiLink>
                     ),
@@ -410,7 +405,7 @@ export const Overview: React.FC = () => {
                 defaultMessage="The {externalIdentitiesLink} must be used to configure user access mappings. Read the guide to learn more."
                 values={{
                   externalIdentitiesLink: (
-                    <EuiLink target="_blank" href={EXTERNAL_IDENTITIES_DOCS_URL}>
+                    <EuiLink target="_blank" href={docLinks.workplaceSearchExternalIdentities}>
                       {EXTERNAL_IDENTITIES_LINK}
                     </EuiLink>
                   ),
@@ -431,9 +426,7 @@ export const Overview: React.FC = () => {
         </h6>
       </EuiText>
       <EuiSpacer size="s" />
-      <CredentialItem label={ID_LABEL} value={id} testSubj="ContentSourceId" />
-      <EuiSpacer size="s" />
-      <CredentialItem label={ACCESS_TOKEN_LABEL} value={accessToken} testSubj="AccessToken" />
+      <SourceIdentifier id={id} />
     </EuiPanel>
   );
 
@@ -470,7 +463,7 @@ export const Overview: React.FC = () => {
       </EuiText>
       <EuiSpacer size="s" />
       <EuiText size="s">
-        <EuiLink target="_blank" href={ENT_SEARCH_LICENSE_MANAGEMENT}>
+        <EuiLink target="_blank" href={docLinks.licenseManagement}>
           {LEARN_CUSTOM_FEATURES_BUTTON}
         </EuiLink>
       </EuiText>
@@ -479,7 +472,6 @@ export const Overview: React.FC = () => {
 
   const syncTriggerCallout = (
     <EuiFlexItem>
-      <EuiSpacer />
       <EuiTitle size="xs">
         <h5>{SOURCE_SYNCHRONIZATION_TITLE}</h5>
       </EuiTitle>
@@ -544,6 +536,7 @@ export const Overview: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
           <EuiFlexGroup gutterSize="m" direction="column">
+            {showSyncTriggerCallout && syncTriggerCallout}
             <EuiFlexItem>{groups.length > 0 && groupsSummary}</EuiFlexItem>
             {details.length > 0 && <EuiFlexItem>{detailsSummary}</EuiFlexItem>}
             {!custom && serviceTypeSupportsPermissions && (
@@ -555,7 +548,6 @@ export const Overview: React.FC = () => {
                 {!indexPermissions && isOrganization && (
                   <EuiFlexItem>{documentPermissionsDisabled}</EuiFlexItem>
                 )}
-                {indexPermissions && <EuiFlexItem>{credentials}</EuiFlexItem>}
               </>
             )}
             {custom && (
@@ -573,7 +565,7 @@ export const Overview: React.FC = () => {
                         defaultMessage="{learnMoreLink} about custom sources."
                         values={{
                           learnMoreLink: (
-                            <EuiLink target="_blank" href={CUSTOM_SOURCE_DOCS_URL}>
+                            <EuiLink target="_blank" href={docLinks.workplaceSearchCustomSources}>
                               {LEARN_MORE_LINK}
                             </EuiLink>
                           ),
@@ -587,7 +579,6 @@ export const Overview: React.FC = () => {
                 )}
               </>
             )}
-            {showSyncTriggerCallout && syncTriggerCallout}
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

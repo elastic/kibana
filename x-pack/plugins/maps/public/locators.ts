@@ -9,9 +9,9 @@
 
 import rison from 'rison-node';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { Filter } from '@kbn/es-query';
 import type {
   TimeRange,
-  Filter,
   Query,
   QueryState,
   RefreshInterval,

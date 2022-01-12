@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -91,14 +90,6 @@ export default ({ getService }: FtrProviderContext) => {
         const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, true, rule);
         const updatedRule = await updateRule(supertest, log, ruleToUpdate);
         await waitForRuleSuccessOrStatus(supertest, log, updatedRule.id);
-
-        // expected result for status should be 'succeeded'
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
-          .set('kbn-xsrf', 'true')
-          .send({ ids: [updatedRule.id] })
-          .expect(200);
-        expect(body[updatedRule.id].current_status.status).to.eql('succeeded');
       });
 
       it('should be able to create a new webhook action and attach it to a rule with a meta field and run it correctly', async () => {
@@ -111,14 +102,6 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const updatedRule = await updateRule(supertest, log, ruleToUpdate);
         await waitForRuleSuccessOrStatus(supertest, log, updatedRule.id);
-
-        // expected result for status should be 'succeeded'
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
-          .set('kbn-xsrf', 'true')
-          .send({ ids: [updatedRule.id] })
-          .expect(200);
-        expect(body[updatedRule.id].current_status.status).to.eql('succeeded');
       });
 
       it('should be able to create a new webhook action and attach it to an immutable rule', async () => {

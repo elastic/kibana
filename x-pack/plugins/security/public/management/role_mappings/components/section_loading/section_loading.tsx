@@ -8,7 +8,7 @@
 import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface Props {
   children?: React.ReactChild;

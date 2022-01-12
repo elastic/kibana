@@ -24,7 +24,7 @@ import { sendGetPackages } from './hooks';
 
 const mockSendGetPackages = sendGetPackages as jest.Mock;
 
-const testResponse: GetPackagesResponse['response'] = [
+const testResponse: GetPackagesResponse['items'] = [
   {
     description: 'test',
     download: 'test',

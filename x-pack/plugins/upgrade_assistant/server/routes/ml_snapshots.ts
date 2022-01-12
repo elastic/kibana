@@ -6,8 +6,11 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import { i18n } from '@kbn/i18n';
+import type { TransportResult } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import { IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
+
 import { API_BASE_PATH } from '../../common/constants';
 import { MlOperation, ML_UPGRADE_OP_TYPE } from '../../common/types';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
@@ -63,7 +66,7 @@ const verifySnapshotUpgrade = async (
     const { body: deprecations } = await esClient.asCurrentUser.migration.deprecations();
 
     const mlSnapshotDeprecations = deprecations.ml_settings.filter((deprecation) => {
-      return /model snapshot/.test(deprecation.message);
+      return /[Mm]odel snapshot/.test(deprecation.message);
     });
 
     // If there are no ML deprecations, we assume the deprecation was resolved successfully
@@ -95,6 +98,35 @@ const verifySnapshotUpgrade = async (
       isSuccessful: false,
       error: e,
     };
+  }
+};
+
+interface ModelSnapshotUpgradeStatus {
+  model_snapshot_upgrades: Array<{
+    state: 'saving_new_state' | 'loading_old_state' | 'stopped' | 'failed';
+  }>;
+}
+
+const getModelSnapshotUpgradeStatus = async (
+  esClient: IScopedClusterClient,
+  jobId: string,
+  snapshotId: string
+) => {
+  try {
+    const { body } = (await esClient.asCurrentUser.transport.request({
+      method: 'GET',
+      path: `/_ml/anomaly_detectors/${jobId}/model_snapshots/${snapshotId}/_upgrade/_stats`,
+    })) as TransportResult<ModelSnapshotUpgradeStatus>;
+
+    return body && body.model_snapshot_upgrades[0];
+  } catch (err) {
+    // If the api returns a 404 then it means that the model snapshot upgrade that was started
+    // doesn't exist. Since the start migration call returned success, this means the upgrade must have
+    // completed, so the upgrade assistant can continue to use its current logic. Otherwise we re-throw
+    // the exception so that it can be caught at route level.
+    if (err.statusCode !== 404) {
+      throw err;
+    }
   }
 };
 
@@ -198,41 +230,35 @@ export function registerMlSnapshotRoutes({ router, lib: { handleEsError } }: Rou
             });
           }
 
+          const upgradeStatus = await getModelSnapshotUpgradeStatus(esClient, jobId, snapshotId);
+          // Create snapshotInfo payload to send back in the response
           const snapshotOp = foundSnapshots.saved_objects[0];
-          const { nodeId } = snapshotOp.attributes;
-
-          // Now that we have the node ID, check the upgrade snapshot task progress
-          const { body: taskResponse } = await esClient.asCurrentUser.tasks.list({
-            nodes: [nodeId],
-            actions: 'xpack/ml/job/snapshot/upgrade',
-            detailed: true, // necessary in order to filter if there are more than 1 snapshot upgrades in progress
-          });
-
-          const nodeTaskInfo = taskResponse?.nodes && taskResponse!.nodes[nodeId];
           const snapshotInfo: MlOperation = {
             ...snapshotOp.attributes,
           };
 
-          if (nodeTaskInfo) {
-            // Find the correct snapshot task ID based on the task description
-            const snapshotTaskId = Object.keys(nodeTaskInfo.tasks).find((task) => {
-              // The description is in the format of "job-snapshot-upgrade-<job_id>-<snapshot_id>"
-              const taskDescription = nodeTaskInfo.tasks[task].description;
-              const taskSnapshotAndJobIds = taskDescription!.replace('job-snapshot-upgrade-', '');
-              const taskSnapshotAndJobIdParts = taskSnapshotAndJobIds.split('-');
-              const taskSnapshotId =
-                taskSnapshotAndJobIdParts[taskSnapshotAndJobIdParts.length - 1];
-              const taskJobId = taskSnapshotAndJobIdParts.slice(0, 1).join('-');
-
-              return taskSnapshotId === snapshotId && taskJobId === jobId;
-            });
-
-            // If the snapshot task exists, assume the upgrade is in progress
-            if (snapshotTaskId && nodeTaskInfo.tasks[snapshotTaskId]) {
+          if (upgradeStatus) {
+            if (
+              upgradeStatus.state === 'loading_old_state' ||
+              upgradeStatus.state === 'saving_new_state'
+            ) {
               return response.ok({
                 body: {
                   ...snapshotInfo,
                   status: 'in_progress',
+                },
+              });
+            } else if (upgradeStatus.state === 'failed') {
+              return response.customError({
+                statusCode: 500,
+                body: {
+                  message: i18n.translate(
+                    'xpack.upgradeAssistant.ml_snapshots.modelSnapshotUpgradeFailed',
+                    {
+                      defaultMessage:
+                        "The upgrade that was started for this model snapshot doesn't exist anymore.",
+                    }
+                  ),
                 },
               });
             } else {

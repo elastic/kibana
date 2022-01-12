@@ -8,7 +8,7 @@
 import './solution_nav.scss';
 
 import React, { FunctionComponent, useState, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiFlyout,
@@ -53,107 +53,108 @@ const setTabIndex = (items: Array<EuiSideNavItemType<{}>>, isHidden: boolean) =>
 /**
  * A wrapper around EuiSideNav but also creates the appropriate title with optional solution logo
  */
-export const KibanaPageTemplateSolutionNav: FunctionComponent<KibanaPageTemplateSolutionNavProps> =
-  ({ name, icon, items, isOpenOnDesktop = false, onCollapse, ...rest }) => {
-    // The EuiShowFor and EuiHideFor components are not in sync with the euiBreakpoint() function :(
-    const isSmallerBreakpoint = useIsWithinBreakpoints(['xs', 's']);
-    const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
-    const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
+export const KibanaPageTemplateSolutionNav: FunctionComponent<
+  KibanaPageTemplateSolutionNavProps
+> = ({ name, icon, items, isOpenOnDesktop = false, onCollapse, ...rest }) => {
+  // The EuiShowFor and EuiHideFor components are not in sync with the euiBreakpoint() function :(
+  const isSmallerBreakpoint = useIsWithinBreakpoints(['xs', 's']);
+  const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
+  const isLargerBreakpoint = useIsWithinBreakpoints(['l', 'xl']);
 
-    // This is used for both the EuiSideNav and EuiFlyout toggling
-    const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
-    const toggleOpenOnMobile = () => {
-      setIsSideNavOpenOnMobile(!isSideNavOpenOnMobile);
-    };
+  // This is used for both the EuiSideNav and EuiFlyout toggling
+  const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
+  const toggleOpenOnMobile = () => {
+    setIsSideNavOpenOnMobile(!isSideNavOpenOnMobile);
+  };
 
-    const isHidden = isLargerBreakpoint && !isOpenOnDesktop;
+  const isHidden = isLargerBreakpoint && !isOpenOnDesktop;
 
-    /**
-     * Create the avatar
-     */
-    let solutionAvatar;
-    if (icon) {
-      solutionAvatar = <KibanaPageTemplateSolutionNavAvatar iconType={icon} name={name} />;
-    }
+  /**
+   * Create the avatar
+   */
+  let solutionAvatar;
+  if (icon) {
+    solutionAvatar = <KibanaPageTemplateSolutionNavAvatar iconType={icon} name={name} />;
+  }
 
-    /**
-     * Create the titles
-     */
-    const titleText = (
-      <Fragment>
-        {solutionAvatar}
-        <strong>{name}</strong>
-      </Fragment>
-    );
-    const mobileTitleText = (
-      <FormattedMessage
-        id="kibana-react.solutionNav.mobileTitleText"
-        defaultMessage="{solutionName} Menu"
-        values={{ solutionName: name || 'Navigation' }}
+  /**
+   * Create the titles
+   */
+  const titleText = (
+    <Fragment>
+      {solutionAvatar}
+      <strong>{name}</strong>
+    </Fragment>
+  );
+  const mobileTitleText = (
+    <FormattedMessage
+      id="kibana-react.solutionNav.mobileTitleText"
+      defaultMessage="{solutionName} Menu"
+      values={{ solutionName: name || 'Navigation' }}
+    />
+  );
+
+  /**
+   * Create the side nav component
+   */
+  let sideNav;
+  if (items) {
+    const sideNavClasses = classNames('kbnPageTemplateSolutionNav', {
+      'kbnPageTemplateSolutionNav--hidden': isHidden,
+    });
+
+    sideNav = (
+      <EuiSideNav
+        aria-hidden={isHidden}
+        className={sideNavClasses}
+        heading={titleText}
+        mobileTitle={
+          <Fragment>
+            {solutionAvatar}
+            {mobileTitleText}
+          </Fragment>
+        }
+        toggleOpenOnMobile={toggleOpenOnMobile}
+        isOpenOnMobile={isSideNavOpenOnMobile}
+        items={setTabIndex(items, isHidden)}
+        {...rest}
       />
     );
+  }
 
-    /**
-     * Create the side nav component
-     */
-    let sideNav;
-    if (items) {
-      const sideNavClasses = classNames('kbnPageTemplateSolutionNav', {
-        'kbnPageTemplateSolutionNav--hidden': isHidden,
-      });
-
-      sideNav = (
-        <EuiSideNav
-          aria-hidden={isHidden}
-          className={sideNavClasses}
-          heading={titleText}
-          mobileTitle={
-            <Fragment>
-              {solutionAvatar}
-              {mobileTitleText}
-            </Fragment>
-          }
-          toggleOpenOnMobile={toggleOpenOnMobile}
-          isOpenOnMobile={isSideNavOpenOnMobile}
-          items={setTabIndex(items, isHidden)}
-          {...rest}
-        />
-      );
-    }
-
-    return (
-      <Fragment>
-        {isSmallerBreakpoint && sideNav}
-        {isMediumBreakpoint && (
-          <Fragment>
-            {isSideNavOpenOnMobile && (
-              <EuiFlyout
-                ownFocus={false}
-                outsideClickCloses
-                onClose={() => setIsSideNavOpenOnMobile(false)}
-                side="left"
-                size={248}
-                closeButtonPosition="outside"
-                className="kbnPageTemplateSolutionNav__flyout"
-              >
-                {sideNav}
-              </EuiFlyout>
-            )}
-            <KibanaPageTemplateSolutionNavCollapseButton
-              isCollapsed={true}
-              onClick={toggleOpenOnMobile}
-            />
-          </Fragment>
-        )}
-        {isLargerBreakpoint && (
-          <Fragment>
-            {sideNav}
-            <KibanaPageTemplateSolutionNavCollapseButton
-              isCollapsed={!isOpenOnDesktop}
-              onClick={onCollapse}
-            />
-          </Fragment>
-        )}
-      </Fragment>
-    );
-  };
+  return (
+    <Fragment>
+      {isSmallerBreakpoint && sideNav}
+      {isMediumBreakpoint && (
+        <Fragment>
+          {isSideNavOpenOnMobile && (
+            <EuiFlyout
+              ownFocus={false}
+              outsideClickCloses
+              onClose={() => setIsSideNavOpenOnMobile(false)}
+              side="left"
+              size={248}
+              closeButtonPosition="outside"
+              className="kbnPageTemplateSolutionNav__flyout"
+            >
+              {sideNav}
+            </EuiFlyout>
+          )}
+          <KibanaPageTemplateSolutionNavCollapseButton
+            isCollapsed={true}
+            onClick={toggleOpenOnMobile}
+          />
+        </Fragment>
+      )}
+      {isLargerBreakpoint && (
+        <Fragment>
+          {sideNav}
+          <KibanaPageTemplateSolutionNavCollapseButton
+            isCollapsed={!isOpenOnDesktop}
+            onClick={onCollapse}
+          />
+        </Fragment>
+      )}
+    </Fragment>
+  );
+};

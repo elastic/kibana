@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_PRODUCER,
-} from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 
 import { EuiDataGridCellValueElementProps } from '@elastic/eui';
@@ -191,10 +188,10 @@ export const allowSorting = ({
     'kibana.alert.rule.output_index',
     'kibana.alert.rule.query',
     'kibana.alert.rule.references',
-    'kibana.alert.rule.risk_score',
+    'kibana.alert.risk_score',
     'kibana.alert.rule.rule_id',
     'kibana.alert.rule.saved_id',
-    'kibana.alert.rule.severity',
+    'kibana.alert.severity',
     'kibana.alert.rule.size',
     'kibana.alert.rule.tags',
     'kibana.alert.rule.threat',

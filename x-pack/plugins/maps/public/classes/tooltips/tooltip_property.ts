@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import { ReactNode } from 'react';
 import { GeoJsonProperties, Geometry } from 'geojson';
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { RawValue } from '../../../../../plugins/maps/common/constants';
 import type { TooltipFeature } from '../../../../../plugins/maps/common/descriptor_types';

@@ -14,8 +14,10 @@ import {
   getRecentCasesLazy,
   getAllCasesSelectorModalLazy,
   getCreateCaseFlyoutLazy,
+  canUseCases,
 } from './methods';
-import { CasesUiConfigType, ENABLE_CASE_CONNECTOR } from '../common';
+import { CasesUiConfigType } from '../common/ui/types';
+import { ENABLE_CASE_CONNECTOR } from '../common/constants';
 
 /**
  * @public
@@ -37,6 +39,7 @@ export class CasesUiPlugin implements Plugin<void, CasesUiStart, SetupPlugins, S
     const config = this.initializerContext.config.get<CasesUiConfigType>();
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion, config });
     return {
+      canUseCases: canUseCases(core.application.capabilities),
       getCases: getCasesLazy,
       getRecentCases: getRecentCasesLazy,
       getCreateCaseFlyout: getCreateCaseFlyoutLazy,

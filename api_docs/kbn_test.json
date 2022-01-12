@@ -178,12 +178,19 @@
                   {
                     "parentPluginId": "@kbn/test",
                     "id": "def-server.DockerServersService.Unnamed.$1.Unnamed",
-                    "type": "Any",
+                    "type": "IndexSignature",
                     "tags": [],
-                    "label": "Unnamed",
+                    "label": "[name: string]: DockerServerSpec",
                     "description": [],
                     "signature": [
-                      "any"
+                      "[name: string]:  ",
+                      {
+                        "pluginId": "@kbn/test",
+                        "scope": "server",
+                        "docId": "kibKbnTestPluginApi",
+                        "section": "def-server.DockerServerSpec",
+                        "text": "DockerServerSpec"
+                      }
                     ],
                     "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
                     "deprecated": false
@@ -198,13 +205,7 @@
                 "label": "log",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/dev-utils",
-                    "scope": "server",
-                    "docId": "kibKbnDevUtilsPluginApi",
-                    "section": "def-server.ToolingLog",
-                    "text": "ToolingLog"
-                  }
+                  "ToolingLog"
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/lib/docker_servers/docker_servers_service.ts",
                 "deprecated": false,
@@ -594,13 +595,7 @@
                 "label": "log",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/dev-utils",
-                    "scope": "server",
-                    "docId": "kibKbnDevUtilsPluginApi",
-                    "section": "def-server.ToolingLog",
-                    "text": "ToolingLog"
-                  }
+                  "ToolingLog"
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/functional_test_runner.ts",
                 "deprecated": false,
@@ -1398,13 +1393,7 @@
         "description": [],
         "signature": [
           "(log: ",
-          {
-            "pluginId": "@kbn/dev-utils",
-            "scope": "server",
-            "docId": "kibKbnDevUtilsPluginApi",
-            "section": "def-server.ToolingLog",
-            "text": "ToolingLog"
-          },
+          "ToolingLog",
           ", path: string, settingOverrides: any) => Promise<",
           {
             "pluginId": "@kbn/test",
@@ -1426,13 +1415,7 @@
             "label": "log",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.ToolingLog",
-                "text": "ToolingLog"
-              }
+              "ToolingLog"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/lib/config/read_config_file.ts",
             "deprecated": false,
@@ -1635,9 +1618,7 @@
         "label": "uriencode",
         "description": [],
         "signature": [
-          "(strings: TemplateStringsArray, ...values: ",
-          "PhraseFilterValue",
-          "[]) => string"
+          "(strings: TemplateStringsArray, ...values: (string | number | boolean)[]) => string"
         ],
         "path": "packages/kbn-test/src/kbn_client/kbn_client_requester.ts",
         "deprecated": false,
@@ -1664,8 +1645,7 @@
             "label": "values",
             "description": [],
             "signature": [
-              "PhraseFilterValue",
-              "[]"
+              "(string | number | boolean)[]"
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client_requester.ts",
             "deprecated": false,
@@ -1832,13 +1812,7 @@
             "label": "log",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.ToolingLog",
-                "text": "ToolingLog"
-              }
+              "ToolingLog"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false
@@ -2116,13 +2090,7 @@
             "label": "log",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.ToolingLog",
-                "text": "ToolingLog"
-              }
+              "ToolingLog"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false
@@ -2198,7 +2166,7 @@
               "\nDetermine if a service is avaliable"
             ],
             "signature": [
-              "{ (serviceName: \"config\" | \"log\" | \"lifecycle\" | \"failureMetadata\" | \"dockerServers\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
+              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"failureMetadata\" | \"dockerServers\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
@@ -2211,7 +2179,7 @@
                 "label": "serviceName",
                 "description": [],
                 "signature": [
-                  "\"config\" | \"log\" | \"lifecycle\" | \"failureMetadata\" | \"dockerServers\""
+                  "\"log\" | \"config\" | \"lifecycle\" | \"failureMetadata\" | \"dockerServers\""
                 ],
                 "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
                 "deprecated": false,
@@ -2228,7 +2196,7 @@
             "label": "hasService",
             "description": [],
             "signature": [
-              "{ (serviceName: \"config\" | \"log\" | \"lifecycle\" | \"failureMetadata\" | \"dockerServers\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
+              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"failureMetadata\" | \"dockerServers\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
@@ -2258,7 +2226,7 @@
             "label": "hasService",
             "description": [],
             "signature": [
-              "{ (serviceName: \"config\" | \"log\" | \"lifecycle\" | \"failureMetadata\" | \"dockerServers\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
+              "{ (serviceName: \"log\" | \"config\" | \"lifecycle\" | \"failureMetadata\" | \"dockerServers\"): true; <K extends keyof ServiceMap>(serviceName: K): serviceName is K; (serviceName: string): serviceName is Extract<keyof ServiceMap, string>; }"
             ],
             "path": "packages/kbn-test/src/functional_test_runner/public_types.ts",
             "deprecated": false,
@@ -2299,13 +2267,7 @@
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.ToolingLog",
-                "text": "ToolingLog"
-              },
+              "ToolingLog",
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
@@ -2369,13 +2331,7 @@
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.ToolingLog",
-                "text": "ToolingLog"
-              },
+              "ToolingLog",
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
@@ -2439,13 +2395,7 @@
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.ToolingLog",
-                "text": "ToolingLog"
-              },
+              "ToolingLog",
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
@@ -2509,13 +2459,7 @@
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.ToolingLog",
-                "text": "ToolingLog"
-              },
+              "ToolingLog",
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
@@ -2579,13 +2523,7 @@
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.ToolingLog",
-                "text": "ToolingLog"
-              },
+              "ToolingLog",
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
@@ -2649,13 +2587,7 @@
                 "text": "Config"
               },
               "; (serviceName: \"log\"): ",
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.ToolingLog",
-                "text": "ToolingLog"
-              },
+              "ToolingLog",
               "; (serviceName: \"lifecycle\"): ",
               {
                 "pluginId": "@kbn/test",
@@ -2988,13 +2920,7 @@
             "label": "log",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/dev-utils",
-                "scope": "server",
-                "docId": "kibKbnDevUtilsPluginApi",
-                "section": "def-server.ToolingLog",
-                "text": "ToolingLog"
-              }
+              "ToolingLog"
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false
@@ -3007,9 +2933,8 @@
             "label": "uiSettingDefaults",
             "description": [],
             "signature": [
-              "Record<string, ",
-              "PhraseFilterValue",
-              "> | undefined"
+              "UiSettingValues",
+              " | undefined"
             ],
             "path": "packages/kbn-test/src/kbn_client/kbn_client.ts",
             "deprecated": false

@@ -192,7 +192,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
                     })
               }
               disableAutoFocus={true}
-              dataTestSubj="transformQueryInput"
+              dataTestSubj="mlDFAnalyticsQueryInput"
               languageSwitcherPopoverAnchorPosition="rightDown"
             />
           </EuiFlexItem>

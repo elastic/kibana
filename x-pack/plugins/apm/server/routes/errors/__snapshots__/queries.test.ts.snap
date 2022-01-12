@@ -43,7 +43,9 @@ Object {
     "size": 1,
     "sort": Array [
       Object {
-        "_score": "desc",
+        "_score": Object {
+          "order": "desc",
+        },
       },
       Object {
         "@timestamp": Object {
@@ -78,11 +80,9 @@ Object {
                 "@timestamp",
               ],
               "size": 1,
-              "sort": Array [
-                Object {
-                  "@timestamp": "desc",
-                },
-              ],
+              "sort": Object {
+                "@timestamp": "desc",
+              },
             },
           },
         },
@@ -104,6 +104,11 @@ Object {
             },
           },
           Object {
+            "term": Object {
+              "transaction.type": "request",
+            },
+          },
+          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -120,7 +125,7 @@ Object {
 }
 `;
 
-exports[`error queries fetches multiple error groups when sortField = latestOccurrenceAt 1`] = `
+exports[`error queries fetches multiple error groups when sortField = lastSeen 1`] = `
 Object {
   "apm": Object {
     "events": Array [
@@ -148,11 +153,9 @@ Object {
                 "@timestamp",
               ],
               "size": 1,
-              "sort": Array [
-                Object {
-                  "@timestamp": "desc",
-                },
-              ],
+              "sort": Object {
+                "@timestamp": "desc",
+              },
             },
           },
         },
@@ -171,6 +174,11 @@ Object {
           Object {
             "term": Object {
               "service.name": "serviceName",
+            },
+          },
+          Object {
+            "term": Object {
+              "transaction.type": "request",
             },
           },
           Object {

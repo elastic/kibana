@@ -9,7 +9,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { EuiSelect, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { sortBy } from 'lodash';
-import { getType } from '@kbn/interpreter/common';
+import { getType } from '@kbn/interpreter';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../../i18n';
 import { SimpleMathFunction } from './simple_math_function';

@@ -70,7 +70,7 @@ export interface DrilldownDefinition<
   createConfig: ActionFactoryDefinition<Config, ExecutionContext, FactoryContext>['createConfig'];
 
   /**
-   * `UiComponent` that collections config for this drilldown. You can create
+   * `UiComponent` that collects config for this drilldown. You can create
    * a React component and transform it `UiComponent` using `uiToReactComponent`
    * helper from `kibana_utils` plugin.
    *

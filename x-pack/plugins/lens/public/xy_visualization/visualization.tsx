@@ -9,10 +9,12 @@ import React from 'react';
 import { groupBy, uniq } from 'lodash';
 import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { ThemeServiceStart } from 'kibana/public';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar, DimensionEditor } from './xy_config_panel';
 import { LayerHeader } from './xy_config_panel/layer_header';
@@ -44,7 +46,9 @@ import { groupAxesByType } from './axes_configuration';
 
 const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
+
 const isNumericMetric = (op: OperationMetadata) => !op.isBucketed && op.dataType === 'number';
+const isNumericDynamicMetric = (op: OperationMetadata) => isNumericMetric(op) && !op.isStaticValue;
 const isBucketed = (op: OperationMetadata) => op.isBucketed;
 
 function getVisualizationType(state: State): VisualizationType | 'mixed' {
@@ -99,10 +103,12 @@ export const getXyVisualization = ({
   paletteService,
   fieldFormats,
   useLegacyTimeAxis,
+  kibanaTheme,
 }: {
   paletteService: PaletteRegistry;
   fieldFormats: FieldFormatsStart;
   useLegacyTimeAxis: boolean;
+  kibanaTheme: ThemeServiceStart;
 }): Visualization<State> => ({
   id: 'lnsXY',
 
@@ -434,7 +440,7 @@ export const getXyVisualization = ({
           groupId: 'y',
           groupLabel: getAxisName('y', { isHorizontal }),
           accessors: mappedAccessors,
-          filterOperations: isNumericMetric,
+          filterOperations: isNumericDynamicMetric,
           supportsMoreColumns: true,
           required: true,
           dataTestSubj: 'lnsXY_yDimensionPanel',
@@ -565,31 +571,37 @@ export const getXyVisualization = ({
 
   renderLayerHeader(domElement, props) {
     render(
-      <I18nProvider>
-        <LayerHeader {...props} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <LayerHeader {...props} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
 
   renderToolbar(domElement, props) {
     render(
-      <I18nProvider>
-        <XyToolbar {...props} useLegacyTimeAxis={useLegacyTimeAxis} />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <XyToolbar {...props} useLegacyTimeAxis={useLegacyTimeAxis} />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
 
   renderDimensionEditor(domElement, props) {
     render(
-      <I18nProvider>
-        <DimensionEditor
-          {...props}
-          formatFactory={fieldFormats.deserialize}
-          paletteService={paletteService}
-        />
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={kibanaTheme.theme$}>
+        <I18nProvider>
+          <DimensionEditor
+            {...props}
+            formatFactory={fieldFormats.deserialize}
+            paletteService={paletteService}
+          />
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domElement
     );
   },
@@ -694,8 +706,7 @@ export const getXyVisualization = ({
       <FormattedMessage
         key={label}
         id="xpack.lens.xyVisualization.arrayValues"
-        defaultMessage="{label} contains array values. Your visualization may not render as
-        expected."
+        defaultMessage="{label} contains array values. Your visualization may not render as expected."
         values={{
           label: <strong>{label}</strong>,
         }}

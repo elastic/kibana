@@ -136,6 +136,7 @@ describe('When using the Trusted App Form', () => {
       trustedApp: latestUpdatedTrustedApp,
       isEditMode: false,
       isDirty: false,
+      wasByPolicy: false,
       onChange: jest.fn((updates) => {
         latestUpdatedTrustedApp = updates.item;
       }),

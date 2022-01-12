@@ -8,7 +8,7 @@
 import React from 'react';
 import { includes, isFunction } from 'lodash';
 import { EuiFlexItem, EuiFlexGroup, EuiIcon } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import './horizontal_legend.scss';
 

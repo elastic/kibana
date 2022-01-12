@@ -8,7 +8,7 @@
 
 import React, { Fragment, memo, useCallback, useEffect, useRef, useState } from 'react';
 import './index.scss';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';

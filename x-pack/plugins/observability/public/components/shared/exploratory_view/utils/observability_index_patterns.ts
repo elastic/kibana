@@ -17,10 +17,11 @@ import { syntheticsFieldFormats } from '../configurations/synthetics/field_forma
 import { AppDataType, FieldFormat, FieldFormatParams } from '../types';
 import { apmFieldFormats } from '../configurations/apm/field_formats';
 import { getDataHandler } from '../../../../data_handler';
+import { infraMetricsFieldFormats } from '../configurations/infra_metrics/field_formats';
 
 const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
   infra_logs: null,
-  infra_metrics: null,
+  infra_metrics: infraMetricsFieldFormats,
   ux: rumFieldFormats,
   apm: apmFieldFormats,
   synthetics: syntheticsFieldFormats,
@@ -45,19 +46,19 @@ const appToPatternMap: Record<AppDataType, string> = {
   apm: 'apm-*',
   ux: '(rum-data-view)*',
   infra_logs: '',
-  infra_metrics: '',
+  infra_metrics: '(infra-metrics-data-view)*',
   mobile: '(mobile-data-view)*',
 };
 
 const getAppIndicesWithPattern = (app: AppDataType, indices: string) => {
-  return `${appToPatternMap[app]},${indices}`;
+  return `${appToPatternMap?.[app] ?? app},${indices}`;
 };
 
 const getAppIndexPatternId = (app: AppDataType, indices: string) => {
   // Replace characters / ? , " < > | * with _
   const postfix = indices.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
 
-  return `${indexPatternList[app]}_${postfix}`;
+  return `${indexPatternList?.[app] ?? app}_${postfix}`;
 };
 
 export function isParamsSame(param1: IFieldFormat['_params'], param2: FieldFormatParams) {
@@ -104,7 +105,7 @@ export class ObservabilityIndexPatterns {
         if (fieldByName) {
           const fieldFormat = indexPattern.getFormatterForField(fieldByName);
           const params = fieldFormat.params();
-          if (!isParamsSame(params, format.params)) {
+          if (!isParamsSame(params, format.params) || format.id !== fieldFormat.type.id) {
             indexPattern.setFieldFormat(field, format);
             isParamsDifferent = true;
           }

@@ -9,9 +9,9 @@ import { isEqual, uniqBy } from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { Filter } from '@kbn/es-query';
 import type {
   ExecutionContextSearch,
-  Filter,
   Query,
   TimefilterContract,
   TimeRange,
@@ -21,12 +21,13 @@ import type { PaletteOutput } from 'src/plugins/charts/public';
 import type { Start as InspectorStart } from 'src/plugins/inspector/public';
 
 import { Subscription } from 'rxjs';
-import { toExpression, Ast } from '@kbn/interpreter/common';
+import { toExpression, Ast } from '@kbn/interpreter';
 import { RenderMode } from 'src/plugins/expressions';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
@@ -58,7 +59,7 @@ import {
 
 import { IndexPatternsContract } from '../../../../../src/plugins/data/public';
 import { getEditPath, DOC_TYPE, PLUGIN_ID } from '../../common';
-import { IBasePath } from '../../../../../src/core/public';
+import { IBasePath, ThemeServiceStart } from '../../../../../src/core/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
@@ -66,8 +67,14 @@ import { SharingSavedObjectProps } from '../types';
 import type { SpacesPluginStart } from '../../../spaces/public';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
-export interface ResolvedLensSavedObjectAttributes extends LensSavedObjectAttributes {
+
+export interface LensUnwrapMetaInfo {
   sharingSavedObjectProps?: SharingSavedObjectProps;
+}
+
+export interface LensUnwrapResult {
+  attributes: LensSavedObjectAttributes;
+  metaInfo?: LensUnwrapMetaInfo;
 }
 
 interface LensBaseEmbeddableInput extends EmbeddableInput {
@@ -85,7 +92,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
 }
 
 export type LensByValueInput = {
-  attributes: ResolvedLensSavedObjectAttributes;
+  attributes: LensSavedObjectAttributes;
 } & LensBaseEmbeddableInput;
 
 export type LensByReferenceInput = SavedObjectEmbeddableInput & LensBaseEmbeddableInput;
@@ -111,6 +118,7 @@ export interface LensEmbeddableDeps {
   capabilities: { canSaveVisualizations: boolean; canSaveDashboards: boolean };
   usageCollection?: UsageCollectionSetup;
   spaces?: SpacesPluginStart;
+  theme: ThemeServiceStart;
 }
 
 const getExpressionFromDocument = async (
@@ -276,10 +284,10 @@ export class Embeddable
   }
 
   private maybeAddConflictError(
-    errors: ErrorMessage[],
+    errors?: ErrorMessage[],
     sharingSavedObjectProps?: SharingSavedObjectProps
   ) {
-    const ret = [...errors];
+    const ret = [...(errors || [])];
 
     if (sharingSavedObjectProps?.outcome === 'conflict' && !!this.deps.spaces) {
       ret.push({
@@ -295,21 +303,21 @@ export class Embeddable
       });
     }
 
-    return ret;
+    return ret?.length ? ret : undefined;
   }
 
   async initializeSavedVis(input: LensEmbeddableInput) {
-    const attrs: ResolvedLensSavedObjectAttributes | false = await this.deps.attributeService
+    const unwrapResult: LensUnwrapResult | false = await this.deps.attributeService
       .unwrapAttributes(input)
       .catch((e: Error) => {
         this.onFatalError(e);
         return false;
       });
-    if (!attrs || this.isDestroyed) {
+    if (!unwrapResult || this.isDestroyed) {
       return;
     }
 
-    const { sharingSavedObjectProps, ...attributes } = attrs;
+    const { metaInfo, attributes } = unwrapResult;
 
     this.savedVis = {
       ...attributes,
@@ -322,7 +330,7 @@ export class Embeddable
       this.deps.documentToExpression
     );
     this.expression = expression;
-    this.errors = errors && this.maybeAddConflictError(errors, sharingSavedObjectProps);
+    this.errors = this.maybeAddConflictError(errors, metaInfo?.sharingSavedObjectProps);
 
     if (this.errors) {
       this.logError('validation');
@@ -399,29 +407,31 @@ export class Embeddable
     const input = this.getInput();
 
     render(
-      <ExpressionWrapper
-        ExpressionRenderer={this.expressionRenderer}
-        expression={this.expression || null}
-        errors={this.errors}
-        lensInspector={this.lensInspector}
-        searchContext={this.getMergedSearchContext()}
-        variables={input.palette ? { theme: { palette: input.palette } } : {}}
-        searchSessionId={this.externalSearchContext.searchSessionId}
-        handleEvent={this.handleEvent}
-        onData$={this.updateActiveData}
-        onRender$={this.onRender}
-        interactive={!input.disableTriggers}
-        renderMode={input.renderMode}
-        syncColors={input.syncColors}
-        hasCompatibleActions={this.hasCompatibleActions}
-        className={input.className}
-        style={input.style}
-        executionContext={executionContext}
-        canEdit={this.getIsEditable() && input.viewMode === 'edit'}
-        onRuntimeError={() => {
-          this.logError('runtime');
-        }}
-      />,
+      <KibanaThemeProvider theme$={this.deps.theme.theme$}>
+        <ExpressionWrapper
+          ExpressionRenderer={this.expressionRenderer}
+          expression={this.expression || null}
+          errors={this.errors}
+          lensInspector={this.lensInspector}
+          searchContext={this.getMergedSearchContext()}
+          variables={input.palette ? { theme: { palette: input.palette } } : {}}
+          searchSessionId={this.externalSearchContext.searchSessionId}
+          handleEvent={this.handleEvent}
+          onData$={this.updateActiveData}
+          onRender$={this.onRender}
+          interactive={!input.disableTriggers}
+          renderMode={input.renderMode}
+          syncColors={input.syncColors}
+          hasCompatibleActions={this.hasCompatibleActions}
+          className={input.className}
+          style={input.style}
+          executionContext={executionContext}
+          canEdit={this.getIsEditable() && input.viewMode === 'edit'}
+          onRuntimeError={() => {
+            this.logError('runtime');
+          }}
+        />
+      </KibanaThemeProvider>,
       domNode
     );
   }
@@ -600,16 +610,14 @@ export class Embeddable
   };
 
   public getInputAsRefType = async (): Promise<LensByReferenceInput> => {
-    const input = this.deps.attributeService.getExplicitInputFromEmbeddable(this);
-    return this.deps.attributeService.getInputAsRefType(input, {
+    return this.deps.attributeService.getInputAsRefType(this.getExplicitInput(), {
       showSaveModal: true,
       saveModalTitle: this.getTitle(),
     });
   };
 
   public getInputAsValueType = async (): Promise<LensByValueInput> => {
-    const input = this.deps.attributeService.getExplicitInputFromEmbeddable(this);
-    return this.deps.attributeService.getInputAsValueType(input);
+    return this.deps.attributeService.getInputAsValueType(this.getExplicitInput());
   };
 
   // same API as Visualize

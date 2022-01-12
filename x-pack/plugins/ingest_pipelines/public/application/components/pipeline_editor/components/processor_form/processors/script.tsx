@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { PainlessLang } from '@kbn/monaco';
 import { EuiCode, EuiSwitch, EuiFormRow } from '@elastic/eui';
 

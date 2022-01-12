@@ -10,7 +10,7 @@ import React from 'react';
 import SearchBar from './search_bar';
 
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { coreMock } from '../../../../../core/public/mocks';
 const startMock = coreMock.createStart();

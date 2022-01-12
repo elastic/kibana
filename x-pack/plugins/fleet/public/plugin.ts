@@ -24,6 +24,8 @@ import type {
 
 import type { SharePluginStart } from 'src/plugins/share/public';
 
+import { once } from 'lodash';
+
 import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
@@ -38,8 +40,14 @@ import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import type { LicensingPluginSetup } from '../../licensing/public';
 import type { CloudSetup } from '../../cloud/public';
 import type { GlobalSearchPluginSetup } from '../../global_search/public';
-import { PLUGIN_ID, INTEGRATIONS_PLUGIN_ID, setupRouteService, appRoutesService } from '../common';
-import type { CheckPermissionsResponse, PostFleetSetupResponse } from '../common';
+import {
+  PLUGIN_ID,
+  INTEGRATIONS_PLUGIN_ID,
+  setupRouteService,
+  appRoutesService,
+  calculateAuthz,
+} from '../common';
+import type { CheckPermissionsResponse, PostFleetSetupResponse, FleetAuthz } from '../common';
 
 import type { FleetConfigType } from '../common/types';
 
@@ -65,6 +73,8 @@ export interface FleetSetup {}
  * Describes public Fleet plugin contract returned at the `start` stage.
  */
 export interface FleetStart {
+  /** Authorization for the current user */
+  authz: Promise<FleetAuthz>;
   registerExtension: UIExtensionRegistrationCallback;
   isInitialized: () => Promise<true>;
 }
@@ -90,6 +100,7 @@ export interface FleetStartServices extends CoreStart, FleetStartDeps {
   storage: Storage;
   share: SharePluginStart;
   cloud?: CloudSetup;
+  authz: FleetAuthz;
 }
 
 export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDeps, FleetStartDeps> {
@@ -103,7 +114,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup, deps: FleetSetupDeps) {
+  public setup(core: CoreSetup<FleetStartDeps, FleetStart>, deps: FleetSetupDeps) {
     const config = this.config;
     const kibanaVersion = this.kibanaVersion;
     const extensions = this.extensions;
@@ -129,16 +140,13 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       order: 9019,
       euiIconType: 'logoElastic',
       mount: async (params: AppMountParameters) => {
-        const [coreStartServices, startDepsServices] = (await core.getStartServices()) as [
-          CoreStart,
-          FleetStartDeps,
-          FleetStart
-        ];
+        const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
         const startServices: FleetStartServices = {
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
           cloud: deps.cloud,
+          authz: await fleetStart.authz,
         };
         const { renderApp, teardownIntegrations } = await import('./applications/integrations');
 
@@ -169,16 +177,13 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       euiIconType: 'logoElastic',
       appRoute: '/app/fleet',
       mount: async (params: AppMountParameters) => {
-        const [coreStartServices, startDepsServices] = (await core.getStartServices()) as [
-          CoreStart,
-          FleetStartDeps,
-          FleetStart
-        ];
+        const [coreStartServices, startDepsServices, fleetStart] = await core.getStartServices();
         const startServices: FleetStartServices = {
           ...coreStartServices,
           ...startDepsServices,
           storage: this.storage,
           cloud: deps.cloud,
+          authz: await fleetStart.authz,
         };
         const { renderApp, teardownFleet } = await import('./applications/fleet');
         const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);
@@ -233,9 +238,11 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     return {};
   }
 
-  public start(core: CoreStart): FleetStart {
-    let successPromise: ReturnType<FleetStart['isInitialized']>;
+  public start(core: CoreStart, deps: FleetStartDeps): FleetStart {
     const registerExtension = createExtensionRegistrationCallback(this.extensions);
+    const getPermissions = once(() =>
+      core.http.get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath())
+    );
 
     registerExtension({
       package: CUSTOM_LOGS_INTEGRATION_NAME,
@@ -244,29 +251,50 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     });
 
     return {
-      isInitialized: () => {
-        if (!successPromise) {
-          successPromise = Promise.resolve().then(async () => {
-            const permissionsResponse = await core.http.get<CheckPermissionsResponse>(
-              appRoutesService.getCheckPermissionsPath()
-            );
+      // Temporarily rely on superuser check to calculate authz. Once Kibana RBAC is in place for Fleet this should
+      // switch to a sync calculation based on `core.application.capabilites` properties.
+      authz: getPermissions()
+        .catch((e) => {
+          // eslint-disable-next-line no-console
+          console.warn(`Could not load Fleet permissions due to error: ${e}`);
+          return { success: false };
+        })
+        .then((permissionsResponse) => {
+          if (permissionsResponse?.success) {
+            // If superuser, give access to everything
+            return calculateAuthz({
+              fleet: { all: true, setup: true },
+              integrations: { all: true, read: true },
+              isSuperuser: true,
+            });
+          } else {
+            // All other users only get access to read integrations if they have the read privilege
+            const { capabilities } = core.application;
+            return calculateAuthz({
+              fleet: { all: false, setup: false },
+              integrations: { all: false, read: capabilities.fleet.read as boolean },
+              isSuperuser: false,
+            });
+          }
+        }),
 
-            if (permissionsResponse?.success) {
-              return core.http
-                .post<PostFleetSetupResponse>(setupRouteService.getSetupPath())
-                .then(({ isInitialized }) =>
-                  isInitialized
-                    ? Promise.resolve(true)
-                    : Promise.reject(new Error('Unknown setup error'))
-                );
-            } else {
-              throw new Error(permissionsResponse?.error || 'Unknown permissions error');
-            }
-          });
+      isInitialized: once(async () => {
+        const permissionsResponse = await getPermissions();
+
+        if (permissionsResponse?.success) {
+          const { isInitialized } = await core.http.post<PostFleetSetupResponse>(
+            setupRouteService.getSetupPath()
+          );
+          if (!isInitialized) {
+            throw new Error('Unknown setup error');
+          }
+
+          return true;
+        } else {
+          throw new Error(permissionsResponse?.error || 'Unknown permissions error');
         }
+      }),
 
-        return successPromise;
-      },
       registerExtension,
     };
   }

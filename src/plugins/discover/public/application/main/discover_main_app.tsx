@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { History } from 'history';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
@@ -15,6 +15,7 @@ import { useUrl } from './utils/use_url';
 import { IndexPatternAttributes, SavedObject } from '../../../../data/common';
 import { DiscoverServices } from '../../build_services';
 import { SavedSearch } from '../../services/saved_searches';
+import { ElasticSearchHit } from '../../types';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -40,6 +41,7 @@ export interface DiscoverMainProps {
 export function DiscoverMainApp(props: DiscoverMainProps) {
   const { savedSearch, services, history, indexPatternList } = props;
   const { chrome, docLinks, uiSettings: config, data } = services;
+  const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const navigateTo = useCallback(
     (path: string) => {
       history.push(path);
@@ -65,6 +67,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     services,
     history,
     savedSearch,
+    setExpandedDoc,
   });
 
   /**
@@ -100,9 +103,11 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
       indexPattern={indexPattern}
       indexPatternList={indexPatternList}
       inspectorAdapters={inspectorAdapters}
+      expandedDoc={expandedDoc}
       onChangeIndexPattern={onChangeIndexPattern}
       onUpdateQuery={onUpdateQuery}
       resetSavedSearch={resetCurrentSavedSearch}
+      setExpandedDoc={setExpandedDoc}
       navigateTo={navigateTo}
       savedSearch={savedSearch}
       savedSearchData$={data$}

@@ -28,6 +28,7 @@ import { MlJobsResponse } from '../../../common/types/job_service';
 import type { MlClient } from '../../lib/ml_client';
 import { datafeedsProvider } from '../job_service/datafeeds';
 import { annotationServiceProvider } from '../annotation_service';
+import { showActualForFunction, showTypicalForFunction } from '../../../common/util/anomaly_utils';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.
@@ -43,6 +44,39 @@ export interface CriteriaField {
 interface Influencer {
   fieldName: string;
   fieldValue: any;
+}
+
+/**
+ * Extracts typical and actual values from the anomaly record.
+ * @param source
+ */
+export function getTypicalAndActualValues(source: AnomalyRecordDoc) {
+  const result: { actual?: number[]; typical?: number[] } = {};
+
+  const functionDescription = source.function_description || '';
+  const causes = source.causes || [];
+
+  if (showActualForFunction(functionDescription)) {
+    if (source.actual !== undefined) {
+      result.actual = source.actual;
+    } else {
+      if (causes.length === 1) {
+        result.actual = causes[0].actual;
+      }
+    }
+  }
+
+  if (showTypicalForFunction(functionDescription)) {
+    if (source.typical !== undefined) {
+      result.typical = source.typical;
+    } else {
+      if (causes.length === 1) {
+        result.typical = causes[0].typical;
+      }
+    }
+  }
+
+  return result;
 }
 
 export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClusterClient) {
@@ -638,7 +672,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     }
 
     const jobConfig = jobsResponse.jobs[0];
-    const timefield = jobConfig.data_description.time_field;
+    const timefield = jobConfig.data_description.time_field!;
     const bucketSpan = jobConfig.analysis_config.bucket_span;
 
     if (datafeedConfig === undefined) {
@@ -746,6 +780,8 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
             x1: endTimestamp,
           },
           details: annotation.annotation,
+          // Added for custom RectAnnotation tooltip with formatted timestamp
+          header: timestamp,
         });
       }
     });

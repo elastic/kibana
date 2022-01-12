@@ -48,7 +48,7 @@ Choose the data you want to visualize.
 
 . If you want to learn more about the data a field contains, click the field.
 
-. To visualize more than one index pattern, click *Add layer > Add visualization layer*, then select the index pattern.
+. To visualize more than one {data-source}, click *Add layer > Add visualization layer*, then select the {data-source}.
 
 Edit and delete.
 
@@ -60,18 +60,18 @@ Edit and delete.
 [[change-the-fields]]
 ==== Change the fields list
 
-Change the fields list to display a different index pattern, different time range, or add your own fields.
+Change the fields list to display a different {data-source}, different time range, or add your own fields.
 
-* To create a visualization with fields in a different index pattern, open the *Index pattern* dropdown, then select the index pattern. 
+* To create a visualization with fields in a different {data-source}, open the *Data view* dropdown, then select the {data-source}. 
 
 * If the fields list is empty, change the <<set-time-filter,time filter>>.
 
-* To add fields, open the action menu (*...*) next to the *Index pattern* dropdown, then select *Add field to index pattern*.
+* To add fields, open the action menu (*...*) next to the *Data view* dropdown, then select *Add field to {data-source}*.
 +
 [role="screenshot"]
-image:images/runtime-field-menu.png[Dropdown menu located next to index pattern field with items for adding and managing fields, width=50%]
+image:images/runtime-field-menu.png[Dropdown menu located next to {data-source} field with items for adding and managing fields, width=50%]
 +
-For more information about adding fields to index patterns and examples, refer to <<runtime-fields>>.
+For more information about adding fields to {data-sources} and examples, refer to <<runtime-fields>>.
 
 [float]
 [[create-custom-tables]]
@@ -249,7 +249,7 @@ In the legend, click the field, then choose one of the following options:
 [[configure-the-visualization-components]]
 ==== Configure the visualization components
 
-Each visualiztion type comes with a set of components that you access from the editor toolbar.
+Each visualization type comes with a set of components that you access from the editor toolbar.
 
 The following component menus are available:
 
@@ -453,7 +453,7 @@ To configure the bounds, use the menus in the editor toolbar. Bar and area chart
 .*Is it possible to display icons in data tables?*
 [%collapsible]
 ====
-You can display icons with <<managing-index-patterns, field formatters>> in data tables.
+You can display icons with <<managing-data-views, field formatters>> in data tables.
 ====
 
 [discrete]

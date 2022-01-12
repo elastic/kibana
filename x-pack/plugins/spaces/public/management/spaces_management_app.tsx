@@ -16,6 +16,7 @@ import type { RegisterManagementAppArgs } from 'src/plugins/management/public';
 import { APP_WRAPPER_CLASS } from '../../../../../src/core/public';
 import {
   KibanaContextProvider,
+  KibanaThemeProvider,
   RedirectAppLinks,
 } from '../../../../../src/plugins/kibana_react/public';
 import type { Space } from '../../common';
@@ -39,7 +40,7 @@ export const spacesManagementApp = Object.freeze({
       order: 2,
       title,
 
-      async mount({ element, setBreadcrumbs, history }) {
+      async mount({ element, theme$, setBreadcrumbs, history }) {
         const [[coreStart, { features }], { SpacesGridPage }, { ManageSpacePage }] =
           await Promise.all([getStartServices(), import('./spaces_grid'), import('./edit_space')]);
 
@@ -114,21 +115,23 @@ export const spacesManagementApp = Object.freeze({
         render(
           <KibanaContextProvider services={coreStart}>
             <i18nStart.Context>
-              <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
-                <Router history={history}>
-                  <Switch>
-                    <Route path={['', '/']} exact>
-                      <SpacesGridPageWithBreadcrumbs />
-                    </Route>
-                    <Route path="/create">
-                      <CreateSpacePageWithBreadcrumbs />
-                    </Route>
-                    <Route path="/edit/:spaceId">
-                      <EditSpacePageWithBreadcrumbs />
-                    </Route>
-                  </Switch>
-                </Router>
-              </RedirectAppLinks>
+              <KibanaThemeProvider theme$={theme$}>
+                <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
+                  <Router history={history}>
+                    <Switch>
+                      <Route path={['', '/']} exact>
+                        <SpacesGridPageWithBreadcrumbs />
+                      </Route>
+                      <Route path="/create">
+                        <CreateSpacePageWithBreadcrumbs />
+                      </Route>
+                      <Route path="/edit/:spaceId">
+                        <EditSpacePageWithBreadcrumbs />
+                      </Route>
+                    </Switch>
+                  </Router>
+                </RedirectAppLinks>
+              </KibanaThemeProvider>
             </i18nStart.Context>
           </KibanaContextProvider>,
           element

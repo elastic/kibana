@@ -20,7 +20,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 
 import { pagePathGetters } from '../../../fleet/public';
@@ -232,7 +232,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   );
 
   useEffect(() => {
-    if (!allResultsData?.edges) {
+    if (!allResultsData?.edges?.length) {
       return;
     }
 
@@ -302,7 +302,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const toolbarVisibility = useMemo(
     () => ({
-      showStyleSelector: false,
+      showDisplaySelector: false,
       additionalControls: (
         <>
           <ViewResultsInDiscoverAction

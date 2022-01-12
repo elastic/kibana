@@ -27,7 +27,7 @@ import { KibanaFramework } from './lib/adapters/framework/kibana_framework_adapt
 import { InfraKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_log_entries_adapter';
 import { KibanaMetricsAdapter } from './lib/adapters/metrics/kibana_metrics_adapter';
 import { InfraElasticsearchSourceStatusAdapter } from './lib/adapters/source_status';
-import { registerAlertTypes } from './lib/alerting';
+import { registerRuleTypes } from './lib/alerting';
 import { InfraFieldsDomain } from './lib/domains/fields_domain';
 import { InfraLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { InfraMetricsDomain } from './lib/domains/metrics_domain';
@@ -161,7 +161,7 @@ export class InfraServerPlugin implements Plugin<InfraPluginSetup> {
     ]);
 
     initInfraServer(this.libs);
-    registerAlertTypes(plugins.alerting, this.libs, plugins.ml);
+    registerRuleTypes(plugins.alerting, this.libs, plugins.ml);
 
     core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(
       'infra',

@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import type { MlSummaryJob } from '../../../../../../common/types/anomaly_detection_jobs';

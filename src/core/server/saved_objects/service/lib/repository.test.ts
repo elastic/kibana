@@ -22,6 +22,7 @@ import {
 
 import type { Payload } from '@hapi/boom';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { schema } from '@kbn/config-schema';
 import {
   SavedObjectsType,
   SavedObject,
@@ -225,7 +226,16 @@ describe('SavedObjectsRepository', () => {
   const registry = new SavedObjectTypeRegistry();
   registry.registerType(createType('config'));
   registry.registerType(createType('index-pattern'));
-  registry.registerType(createType('dashboard'));
+  registry.registerType(
+    createType('dashboard', {
+      schemas: {
+        '8.0.0-testing': schema.object({
+          title: schema.maybe(schema.string()),
+          otherField: schema.maybe(schema.string()),
+        }),
+      },
+    })
+  );
   registry.registerType(createType(CUSTOM_INDEX_TYPE, { indexPattern: 'custom' }));
   registry.registerType(createType(NAMESPACE_AGNOSTIC_TYPE, { namespaceType: 'agnostic' }));
   registry.registerType(createType(MULTI_NAMESPACE_TYPE, { namespaceType: 'multiple' }));
@@ -971,13 +981,38 @@ describe('SavedObjectsRepository', () => {
         };
         await bulkCreateError(obj3, true, expectedErrorResult);
       });
+
+      it(`returns errors for any bulk objects with invalid schemas`, async () => {
+        const response = getMockBulkCreateResponse([obj3]);
+        client.bulk.mockResolvedValueOnce(
+          elasticsearchClientMock.createSuccessTransportRequestPromise(response)
+        );
+
+        const result = await savedObjectsRepository.bulkCreate([
+          obj3,
+          // @ts-expect-error - Title should be a string and is intentionally malformed for testing
+          { ...obj3, id: 'three-again', attributes: { title: 123 } },
+        ]);
+        expect(client.bulk).toHaveBeenCalledTimes(1); // only called once for the valid object
+        expect(result.saved_objects).toEqual([
+          expect.objectContaining(obj3),
+          expect.objectContaining({
+            error: new Error(
+              '[attributes.title]: expected value of type [string] but got [number]: Bad Request'
+            ),
+            id: 'three-again',
+            type: 'dashboard',
+          }),
+        ]);
+      });
     });
 
     describe('migration', () => {
       it(`migrates the docs and serializes the migrated docs`, async () => {
         migrator.migrateDocument.mockImplementation(mockMigrateDocument);
-        await bulkCreateSuccess([obj1, obj2]);
-        const docs = [obj1, obj2].map((x) => ({ ...x, ...mockTimestampFields }));
+        const modifiedObj1 = { ...obj1, coreMigrationVersion: '8.0.0' };
+        await bulkCreateSuccess([modifiedObj1, obj2]);
+        const docs = [modifiedObj1, obj2].map((x) => ({ ...x, ...mockTimestampFields }));
         expectMigrationArgs(docs[0], true, 1);
         expectMigrationArgs(docs[1], true, 2);
 
@@ -1327,7 +1362,7 @@ describe('SavedObjectsRepository', () => {
     describe('returns', () => {
       const expectSuccessResult = (
         { type, id }: TypeIdTuple,
-        doc: estypes.MgetHit<SavedObjectsRawDocSource>
+        doc: estypes.GetGetResult<SavedObjectsRawDocSource>
       ) => ({
         type,
         id,
@@ -1355,8 +1390,14 @@ describe('SavedObjectsRepository', () => {
         expect(client.mget).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
           saved_objects: [
-            expectSuccessResult(obj1, response.docs[0]),
-            expectSuccessResult(obj2, response.docs[1]),
+            expectSuccessResult(
+              obj1,
+              response.docs[0] as estypes.GetGetResult<SavedObjectsRawDocSource>
+            ),
+            expectSuccessResult(
+              obj2,
+              response.docs[1] as estypes.GetGetResult<SavedObjectsRawDocSource>
+            ),
           ],
         });
       });
@@ -1376,9 +1417,15 @@ describe('SavedObjectsRepository', () => {
         expect(client.mget).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
           saved_objects: [
-            expectSuccessResult(obj1, response.docs[0]),
+            expectSuccessResult(
+              obj1,
+              response.docs[0] as estypes.GetGetResult<SavedObjectsRawDocSource>
+            ),
             expectError(obj),
-            expectSuccessResult(obj2, response.docs[1]),
+            expectSuccessResult(
+              obj2,
+              response.docs[1] as estypes.GetGetResult<SavedObjectsRawDocSource>
+            ),
           ],
         });
       });
@@ -2271,7 +2318,16 @@ describe('SavedObjectsRepository', () => {
 
       it(`self-generates an id if none is provided`, async () => {
         await createSuccess(type, attributes);
-        expect(client.create).toHaveBeenCalledWith(
+        expect(client.create).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
+          }),
+          expect.anything()
+        );
+        await createSuccess(type, attributes, { id: '' });
+        expect(client.create).toHaveBeenNthCalledWith(
+          2,
           expect.objectContaining({
             id: expect.objectContaining(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/),
           }),
@@ -2530,6 +2586,15 @@ describe('SavedObjectsRepository', () => {
         expect(client.create).not.toHaveBeenCalled();
       });
 
+      it(`throws when schema validation fails`, async () => {
+        await expect(
+          savedObjectsRepository.create('dashboard', { title: 123 })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"[attributes.title]: expected value of type [string] but got [number]: Bad Request"`
+        );
+        expect(client.create).not.toHaveBeenCalled();
+      });
+
       it(`throws when there is a conflict from preflightCheckForCreate`, async () => {
         mockPreflightCheckForCreate.mockResolvedValueOnce([
           { type: MULTI_NAMESPACE_ISOLATED_TYPE, id, error: { type: 'unresolvableConflict' } }, // error type and metadata dont matter
@@ -2556,8 +2621,22 @@ describe('SavedObjectsRepository', () => {
 
       it(`migrates a document and serializes the migrated doc`, async () => {
         const migrationVersion = mockMigrationVersion;
-        await createSuccess(type, attributes, { id, references, migrationVersion });
-        const doc = { type, id, attributes, references, migrationVersion, ...mockTimestampFields };
+        const coreMigrationVersion = '8.0.0';
+        await createSuccess(type, attributes, {
+          id,
+          references,
+          migrationVersion,
+          coreMigrationVersion,
+        });
+        const doc = {
+          type,
+          id,
+          attributes,
+          references,
+          migrationVersion,
+          coreMigrationVersion,
+          ...mockTimestampFields,
+        };
         expectMigrationArgs(doc);
 
         const migratedDoc = migrator.migrateDocument(doc);
@@ -3543,6 +3622,20 @@ describe('SavedObjectsRepository', () => {
         });
       });
 
+      it('search for the right fields when typeToNamespacesMap is set', async () => {
+        const relevantOpts = {
+          ...commonOptions,
+          fields: ['title'],
+          type: '',
+          namespaces: [],
+          typeToNamespacesMap: new Map([[type, [namespace]]]),
+        };
+
+        await findSuccess(relevantOpts, namespace);
+        const esOptions = client.search.mock.calls[0][0];
+        expect(esOptions?._source ?? []).toContain('index-pattern.title');
+      });
+
       it(`accepts hasReferenceOperator`, async () => {
         const relevantOpts: SavedObjectsFindOptions = {
           ...commonOptions,
@@ -4132,6 +4225,13 @@ describe('SavedObjectsRepository', () => {
         await test({});
       });
 
+      it(`throws when id is empty`, async () => {
+        await expect(
+          savedObjectsRepository.incrementCounter(type, '', counterFields)
+        ).rejects.toThrowError(createBadRequestError('id cannot be empty'));
+        expect(client.update).not.toHaveBeenCalled();
+      });
+
       it(`throws when counterField is not CounterField type`, async () => {
         const test = async (field: unknown[]) => {
           await expect(
@@ -4655,6 +4755,13 @@ describe('SavedObjectsRepository', () => {
 
       it(`throws when type is hidden`, async () => {
         await expectNotFoundError(HIDDEN_TYPE, id);
+        expect(client.update).not.toHaveBeenCalled();
+      });
+
+      it(`throws when id is empty`, async () => {
+        await expect(savedObjectsRepository.update(type, '', attributes)).rejects.toThrowError(
+          createBadRequestError('id cannot be empty')
+        );
         expect(client.update).not.toHaveBeenCalled();
       });
 

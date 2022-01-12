@@ -38,19 +38,11 @@ export const METADATA_UNITED_INDEX = '.metrics-endpoint.metadata_united_default'
 
 export const policyIndexPattern = 'metrics-endpoint.policy-*';
 export const telemetryIndexPattern = 'metrics-endpoint.telemetry-*';
-export const LIMITED_CONCURRENCY_ENDPOINT_ROUTE_TAG = 'endpoint:limited-concurrency';
-export const LIMITED_CONCURRENCY_ENDPOINT_COUNT = 100;
 
 export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
 export const HOST_METADATA_LIST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;
 export const HOST_METADATA_GET_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata/{id}`;
-
-export const TRUSTED_APPS_GET_API = `${BASE_ENDPOINT_ROUTE}/trusted_apps/{id}`;
-export const TRUSTED_APPS_LIST_API = `${BASE_ENDPOINT_ROUTE}/trusted_apps`;
-export const TRUSTED_APPS_CREATE_API = `${BASE_ENDPOINT_ROUTE}/trusted_apps`;
-export const TRUSTED_APPS_UPDATE_API = `${BASE_ENDPOINT_ROUTE}/trusted_apps/{id}`;
-export const TRUSTED_APPS_DELETE_API = `${BASE_ENDPOINT_ROUTE}/trusted_apps/{id}`;
-export const TRUSTED_APPS_SUMMARY_API = `${BASE_ENDPOINT_ROUTE}/trusted_apps/summary`;
+export const METADATA_TRANSFORMS_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata/transforms`;
 
 export const BASE_POLICY_RESPONSE_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy_response`;
 export const BASE_POLICY_ROUTE = `${BASE_ENDPOINT_ROUTE}/policy`;
@@ -65,3 +57,6 @@ export const ENDPOINT_ACTION_LOG_ROUTE = `/api/endpoint/action_log/{agent_id}`;
 export const ACTION_STATUS_ROUTE = `/api/endpoint/action_status`;
 
 export const failedFleetActionErrorCode = '424';
+
+export const ENDPOINT_DEFAULT_PAGE = 0;
+export const ENDPOINT_DEFAULT_PAGE_SIZE = 10;

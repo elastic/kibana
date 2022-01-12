@@ -10,14 +10,13 @@ import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
 import * as i18n from '../translations';
-import { Case } from '../../../../common';
+import { Case } from '../../../../common/ui/types';
 import { CreateCaseForm } from '../form';
 
 export interface CreateCaseFlyoutProps {
   afterCaseCreated?: (theCase: Case) => Promise<void>;
   onClose: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
-  disableAlerts?: boolean;
 }
 
 const StyledFlyout = styled(EuiFlyout)`
@@ -50,7 +49,7 @@ const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
         overflow-y: auto;
         overflow-x: hidden;
       }
-  
+
       && .euiFlyoutBody__overflowContent {
         display: block;
         padding: ${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} 70px;
@@ -64,7 +63,7 @@ const FormWrapper = styled.div`
 `;
 
 export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
-  ({ afterCaseCreated, onClose, onSuccess, disableAlerts }) => (
+  ({ afterCaseCreated, onClose, onSuccess }) => (
     <>
       <GlobalStyle />
       <StyledFlyout
@@ -75,7 +74,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2>{i18n.CREATE_TITLE}</h2>
+            <h2>{i18n.CREATE_CASE_TITLE}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <StyledEuiFlyoutBody>
@@ -85,7 +84,6 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
               onCancel={onClose}
               onSuccess={onSuccess}
               withSteps={false}
-              disableAlerts={disableAlerts}
             />
           </FormWrapper>
         </StyledEuiFlyoutBody>

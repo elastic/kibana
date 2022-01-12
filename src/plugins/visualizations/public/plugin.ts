@@ -25,6 +25,7 @@ import {
   setEmbeddable,
   setDocLinks,
   setSpaces,
+  setTheme,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -147,6 +148,7 @@ export class VisualizationsPlugin
 
     setUISettings(core.uiSettings);
     setUsageCollector(usageCollection);
+    setTheme(core.theme);
 
     expressions.registerFunction(rangeExpressionFunction);
     expressions.registerFunction(visDimensionExpressionFunction);
