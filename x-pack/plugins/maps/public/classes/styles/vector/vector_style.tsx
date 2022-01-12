@@ -10,7 +10,12 @@ import React, { ReactElement } from 'react';
 import { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
 import { FeatureCollection } from 'geojson';
 import { StyleProperties, VectorStyleEditor } from './components/vector_style_editor';
-import { getDefaultStaticProperties, LINE_STYLES, POLYGON_STYLES } from './vector_style_defaults';
+import {
+  getDefaultStaticProperties,
+  LABEL_STYLES,
+  LINE_STYLES,
+  POLYGON_STYLES,
+} from './vector_style_defaults';
 import {
   DEFAULT_ICON,
   FIELD_ORIGIN,
@@ -25,7 +30,7 @@ import {
 import { StyleMeta } from './style_meta';
 import { VectorIcon } from './components/legend/vector_icon';
 import { VectorStyleLegend } from './components/legend/vector_style_legend';
-import { isOnlySingleFeatureType } from './style_util';
+import { isOnlySingleFeatureType, getHasLabel } from './style_util';
 import { StaticStyleProperty } from './properties/static_style_property';
 import { DynamicStyleProperty, IDynamicStyleProperty } from './properties/dynamic_style_property';
 import { DynamicSizeProperty } from './properties/dynamic_size_property';
@@ -738,9 +743,15 @@ export class VectorStyle implements IVectorStyle {
   }
 
   _getLegendDetailStyleProperties = () => {
+    const hasLabel = getHasLabel(this._labelStyleProperty);
     return this.getDynamicPropertiesArray().filter((styleProperty) => {
       const styleName = styleProperty.getStyleName();
       if ([VECTOR_STYLES.ICON_ORIENTATION, VECTOR_STYLES.LABEL_TEXT].includes(styleName)) {
+        return false;
+      }
+
+      if (!hasLabel && LABEL_STYLES.includes(styleName)) {
+        // do not render legend for label styles when there is no label
         return false;
       }
 

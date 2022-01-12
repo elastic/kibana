@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nStart, ScopedHistory, ApplicationStart } from 'kibana/public';
+import { I18nStart, ScopedHistory, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { UnmountCallback } from 'src/core/public';
 import { CloudSetup } from '../../../cloud/public';
 import { ILicense } from '../../../licensing/public';
@@ -26,13 +26,16 @@ export const renderApp = (
   application: ApplicationStart,
   breadcrumbService: BreadcrumbService,
   license: ILicense,
+  docLinks: DocLinksStart,
   cloud?: CloudSetup
 ): UnmountCallback => {
   const { getUrlForApp } = application;
   render(
     <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
       <I18nContext>
-        <KibanaContextProvider services={{ cloud, breadcrumbService, license, getUrlForApp }}>
+        <KibanaContextProvider
+          services={{ cloud, breadcrumbService, license, getUrlForApp, docLinks }}
+        >
           <App history={history} />
         </KibanaContextProvider>
       </I18nContext>

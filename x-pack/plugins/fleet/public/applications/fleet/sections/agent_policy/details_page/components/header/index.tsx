@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export const EMPTY_ITEM = { id: null };
+export { HeaderLeftContent } from './left_content';
+export { HeaderRightContent } from './right_content';
