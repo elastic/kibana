@@ -25,7 +25,7 @@ const clientArgs = {
   authorization: { getAuthorizationFilter },
 } as unknown as CasesClientArgs;
 
-const constructorOptions = { caseId: '', casesClient: clientMock, clientArgs };
+const constructorOptions = { caseId: 'test-id', casesClient: clientMock, clientArgs };
 
 describe('Actions', () => {
   beforeAll(() => {
