@@ -63,7 +63,7 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
         const { hits, aggregations } = response.rawResponse;
         reportInfo.resHitCount = hits?.hits?.length ?? 0;
         reportInfo.resAggCount = aggregations ? Object.keys(aggregations).length : 0;
-        customEvents.reportCustomEvent('search-done', reportInfo);
+        customEvents?.reportCustomEvent('search-done', reportInfo);
       }),
       takeUntil<Response>(aborted$)
     );
