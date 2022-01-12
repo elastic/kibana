@@ -1,7 +1,6 @@
 env:
   GITHUB_COMMIT_STATUS_ENABLED: 'true'
   GITHUB_COMMIT_STATUS_CONTEXT: 'buildkite/kibana-pull-request'
-  ES_SNAPSHOT_MANIFEST: https://storage.googleapis.com/kibana-ci-es-snapshots-daily/8.0.0/manifest-latest-verified.json
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
