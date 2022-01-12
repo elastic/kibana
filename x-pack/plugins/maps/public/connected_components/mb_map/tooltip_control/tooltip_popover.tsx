@@ -88,31 +88,16 @@ export class TooltipPopover extends Component<Props, State> {
 
   _loadFeatureProperties = async ({
     layerId,
-    featureId,
-    mbProperties,
+    properties,
   }: {
     layerId: string;
-    featureId?: string | number;
-    mbProperties?: GeoJsonProperties;
+    properties: GeoJsonProperties;
   }) => {
     const tooltipLayer = this.props.findLayerById(layerId);
     if (!tooltipLayer) {
       return [];
     }
 
-    let targetFeature;
-    if (typeof featureId !== 'undefined') {
-      targetFeature = tooltipLayer.getFeatureById(featureId);
-    }
-
-    let properties: GeoJsonProperties | undefined;
-    if (mbProperties) {
-      properties = mbProperties;
-    } else if (targetFeature?.properties) {
-      properties = targetFeature?.properties;
-    } else {
-      properties = {};
-    }
     return await tooltipLayer.getPropertiesForTooltip(properties);
   };
 
