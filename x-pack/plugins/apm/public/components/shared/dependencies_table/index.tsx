@@ -45,7 +45,6 @@ interface Props {
   nameColumnTitle: React.ReactNode;
   status: FETCH_STATUS;
   compact?: boolean;
-  pageSizeOptions?: number[];
   hidePerPageOptions?: boolean;
 }
 
@@ -59,7 +58,6 @@ export function DependenciesTable(props: Props) {
     nameColumnTitle,
     status,
     compact = true,
-    pageSizeOptions = [],
     hidePerPageOptions = true,
   } = props;
 

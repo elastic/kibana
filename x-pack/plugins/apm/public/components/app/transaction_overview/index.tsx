@@ -68,7 +68,6 @@ export function TransactionOverview() {
         <TransactionsTable
           hideViewTransactionsLink
           numberOfTransactionsPerPage={25}
-          pageSizeOptions={[10, 25, 50]}
           hidePerPageOptions={false}
           showAggregationAccurateCallout
           environment={environment}
