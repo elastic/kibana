@@ -13,6 +13,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     describe('', function () {
       this.tags('ciGroup11');
       loadTestFile(require.resolve('./detection_rules'));
+      loadTestFile(require.resolve('./legacy_notifications'));
     });
   });
 };
