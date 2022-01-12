@@ -318,15 +318,6 @@ describe('throws when config is invalid', () => {
 });
 
 describe('deprecations', () => {
-  it('logs a warning if elasticsearch.username is set to "elastic"', () => {
-    const { messages } = applyElasticsearchDeprecations({ username: 'elastic' });
-    expect(messages).toMatchInlineSnapshot(`
-      Array [
-        "Kibana is configured to authenticate to Elasticsearch with the \\"elastic\\" user. Use a service account token instead.",
-      ]
-    `);
-  });
-
   it('logs a warning if elasticsearch.username is set to "kibana"', () => {
     const { messages } = applyElasticsearchDeprecations({ username: 'kibana' });
     expect(messages).toMatchInlineSnapshot(`
@@ -370,19 +361,17 @@ describe('deprecations', () => {
   });
 });
 
-test('#username throws if equal to "elastic", only while running from source', () => {
+test('#username throws if equal to "elastic"', () => {
   const obj = {
     username: 'elastic',
   };
-  expect(() => config.schema.validate(obj, { dist: false })).toThrowErrorMatchingInlineSnapshot(
-    `"[username]: value of \\"elastic\\" is forbidden. This is a superuser account that can obfuscate privilege-related issues. You should use the \\"kibana_system\\" user instead."`
-  );
-  expect(() => config.schema.validate(obj, { dist: true })).not.toThrow();
+
+  expect(() => config.schema.validate(obj)).toThrow('[username]: value of "elastic" is forbidden');
 });
 
 test('serviceAccountToken throws if username is also set', () => {
   const obj = {
-    username: 'elastic',
+    username: 'kibana',
     serviceAccountToken: 'abc123',
   };
 

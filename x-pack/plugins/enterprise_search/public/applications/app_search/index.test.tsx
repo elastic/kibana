@@ -56,16 +56,15 @@ describe('AppSearch', () => {
   });
 
   it('renders ErrorConnecting when Enterprise Search is unavailable', () => {
-    setMockValues({ errorConnecting: true });
-    const wrapper = shallow(<AppSearch errorConnectingMessage="I am an error" />);
+    setMockValues({ errorConnectingMessage: '502 Bad Gateway' });
+    const wrapper = shallow(<AppSearch />);
 
     const errorConnection = wrapper.find(ErrorConnecting);
     expect(errorConnection).toHaveLength(1);
-    expect(errorConnection.prop('errorConnectingMessage')).toEqual('I am an error');
   });
 
   it('renders AppSearchConfigured when config.host is set & available', () => {
-    setMockValues({ errorConnecting: false, config: { host: 'some.url' } });
+    setMockValues({ errorConnectingMessage: '', config: { host: 'some.url' } });
     const wrapper = shallow(<AppSearch />);
 
     expect(wrapper.find(AppSearchConfigured)).toHaveLength(1);
