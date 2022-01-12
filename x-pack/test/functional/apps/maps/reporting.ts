@@ -6,25 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import fs from 'fs';
 import path from 'path';
-import { promisify } from 'util';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-const writeFileAsync = promisify(fs.writeFile);
-const mkdirAsync = promisify(fs.mkdir);
 const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 
-const writeSessionReport = async (name: string, rawPdf: Buffer, reportExt: string) => {
-  const sessionDirectory = path.resolve(REPORTS_FOLDER, 'session');
-  await mkdirAsync(sessionDirectory, { recursive: true });
-  const sessionReportPath = path.resolve(sessionDirectory, `${name}.${reportExt}`);
-  await writeFileAsync(sessionReportPath, rawPdf);
-  return sessionReportPath;
-};
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
+  const config = getService('config');
   const log = getService('log');
+  const reporting = getService('reporting');
 
   describe('dashboard reporting', () => {
     it('creates a map report', async function () {
@@ -38,10 +29,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const url = await PageObjects.reporting.getReportURL(60000);
       const reportData = await PageObjects.reporting.getRawPdfReportData(url);
 
-      const sessionReportPath = await writeSessionReport('example_report', reportData, 'png');
-      log.info(`session report path: ${sessionReportPath}`);
+      const sessionReportPath = await PageObjects.reporting.writeSessionReport(
+        'example_map_report',
+        'png',
+        reportData,
+        REPORTS_FOLDER
+      );
+      log.debug(`session report path: ${sessionReportPath}`);
 
       expect(sessionReportPath).not.to.be(null);
+      const percentDiff = await reporting.checkIfPngsMatch(
+        sessionReportPath,
+        PageObjects.reporting.getBaselineReportPath('example_map_report', 'png', REPORTS_FOLDER),
+        config.get('screenshots.directory'),
+        log
+      );
+
+      expect(percentDiff).to.be.lessThan(0.09);
     });
   });
 }
