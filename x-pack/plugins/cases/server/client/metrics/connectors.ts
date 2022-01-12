@@ -6,11 +6,12 @@
  */
 
 import { CaseMetricsResponse } from '../../../common/api';
-import { MetricsHandler } from './types';
+import { BaseHandler } from './base_handler';
+import { BaseHandlerCommonOptions } from './types';
 
-export class Connectors implements MetricsHandler {
-  public getFeatures(): Set<string> {
-    return new Set(['connectors']);
+export class Connectors extends BaseHandler {
+  constructor(options: BaseHandlerCommonOptions) {
+    super(options, ['connectors']);
   }
 
   public async compute(): Promise<CaseMetricsResponse> {

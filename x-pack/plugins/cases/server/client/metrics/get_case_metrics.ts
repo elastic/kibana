@@ -66,13 +66,9 @@ const buildHandlers = (
   casesClient: CasesClient,
   clientArgs: CasesClientArgs
 ): Set<MetricsHandler> => {
-  const handlers: MetricsHandler[] = [
-    new Lifespan(params.caseId, casesClient, clientArgs),
-    new AlertsCount(params.caseId, casesClient, clientArgs),
-    new AlertDetails(params.caseId, casesClient, clientArgs),
-    new Actions(params.caseId, casesClient, clientArgs),
-    new Connectors(),
-  ];
+  const handlers: MetricsHandler[] = [AlertsCount, AlertDetails, Actions, Connectors, Lifespan].map(
+    (ClassName) => new ClassName({ caseId: params.caseId, casesClient, clientArgs })
+  );
 
   const uniqueFeatures = new Set(params.features);
   const handlerFeatures = new Set<string>();
