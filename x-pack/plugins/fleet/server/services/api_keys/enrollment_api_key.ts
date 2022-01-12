@@ -213,7 +213,7 @@ export async function generateEnrollmentAPIKey(
             index: [],
             applications: [
               {
-                application: '.fleet',
+                application: 'fleet',
                 privileges: ['no-privileges'],
                 resources: ['*'],
               },
