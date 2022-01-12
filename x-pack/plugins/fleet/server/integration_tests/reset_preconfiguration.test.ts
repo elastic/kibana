@@ -149,12 +149,12 @@ describe('Fleet preconfiguration rest', () => {
 
   describe('Reset all policy', () => {
     it('Works and reset all preconfigured policies', async () => {
-      const statusApi = kbnTestServer.getSupertest(
+      const resetAPI = kbnTestServer.getSupertest(
         kbnServer.root,
         'post',
         '/internal/fleet/reset_preconfigured_agent_policies'
       );
-      await statusApi.set('kbn-sxrf', 'xx').send();
+      await resetAPI.set('kbn-sxrf', 'xx').send();
 
       const agentPolicies = await kbnServer.coreStart.savedObjects
         .createInternalRepository()
@@ -181,12 +181,12 @@ describe('Fleet preconfiguration rest', () => {
 
       await soClient.delete('ingest-agent-policies', POLICY_ID);
 
-      const statusApi = kbnTestServer.getSupertest(
+      const resetAPI = kbnTestServer.getSupertest(
         kbnServer.root,
         'post',
         '/internal/fleet/reset_preconfigured_agent_policies/test-12345'
       );
-      await statusApi.set('kbn-sxrf', 'xx').send();
+      await resetAPI.set('kbn-sxrf', 'xx').send();
 
       const agentPolicies = await kbnServer.coreStart.savedObjects
         .createInternalRepository()
@@ -211,12 +211,12 @@ describe('Fleet preconfiguration rest', () => {
         package_policies: [],
       });
 
-      const statusApi = kbnTestServer.getSupertest(
+      const resetAPI = kbnTestServer.getSupertest(
         kbnServer.root,
         'post',
         '/internal/fleet/reset_preconfigured_agent_policies/test-12345'
       );
-      await statusApi.set('kbn-sxrf', 'xx').send();
+      await resetAPI.set('kbn-sxrf', 'xx').send();
 
       const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
         type: 'ingest-agent-policies',
