@@ -92,35 +92,29 @@ export class Plugin implements PluginType {
     );
 
     try {
+      this.logger.info('with path');
+
       const tlsConfig = new SslConfig({
         key: path.join(__filename, config?.unsafe?.service?.tls.key),
         certificate: path.join(__filename, config?.unsafe?.service?.tls.certificate),
       } as any);
-      // eslint-disable-next-li-=ne no-console
-      console.log('with path');
-      // eslint-disable-next-line no-console
-      console.log(tlsConfig.key);
-      // eslint-disable-next-line no-console
-      console.log(tlsConfig.certificate);
+      this.logger.info(tlsConfig.key!);
+      this.logger.info(tlsConfig.certificate!);
       this.server.pathTls = tlsConfig;
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(e);
+      this.logger.error(e);
     }
 
     try {
-      // eslint-disable-next-line no-console
-      console.log('without path');
+      this.logger.info('without path');
 
       const tlsConfig1 = new SslConfig(config?.unsafe?.service?.tls);
-      // eslint-disable-next-line no-console
-      console.log(tlsConfig1.key);
-      // eslint-disable-next-line no-console
-      console.log(tlsConfig1.certificate);
+
+      this.logger.info(tlsConfig1.key!);
+      this.logger.info(tlsConfig1.certificate!);
       this.server.withoutPathTls = tlsConfig1;
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(e);
+      this.logger.error(e);
     }
 
     return {
