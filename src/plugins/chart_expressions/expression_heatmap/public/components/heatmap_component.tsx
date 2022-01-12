@@ -259,7 +259,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         const percentageNumber = (Math.abs(value - min) / (max - min)) * 100;
         value = parseInt(percentageNumber.toString(), 10) / 100;
       }
-      return metricFormatter.convert(value);
+      return `${metricFormatter.convert(value) ?? ''}`;
     };
 
     const { colors, ranges } = computeColorRanges(
@@ -485,9 +485,11 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
             xSortPredicate={xAxisColumn ? getSortPredicate(xAxisColumn) : 'dataIndex'}
             xAxisLabelName={xAxisColumn?.name}
             yAxisLabelName={yAxisColumn?.name}
-            xAxisLabelFormatter={(v) => xValuesFormatter.convert(v)} // requires binding
+            xAxisLabelFormatter={(v) => `${xValuesFormatter.convert(v) ?? ''}`}
             yAxisLabelFormatter={
-              yAxisColumn ? formatFactory(yAxisColumn.meta.params).convert : undefined
+              yAxisColumn
+                ? (v) => `${formatFactory(yAxisColumn.meta.params).convert(v) ?? ''}`
+                : undefined
             }
           />
         </Chart>

@@ -201,7 +201,7 @@ management section itself.
 
 
 |{kib-repo}blob/{branch}/src/plugins/maps_ems/README.md[mapsEms]
-|Configuration of kibana-wide EMS settings and some higher level utilities.
+|Utility plugin:
 
 
 |{kib-repo}blob/{branch}/src/plugins/navigation/README.md[navigation]
@@ -339,10 +339,6 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 
 |{kib-repo}blob/{branch}/src/plugins/visualizations[visualizations]
-|WARNING: Missing README.
-
-
-|{kib-repo}blob/{branch}/src/plugins/visualize[visualize]
 |WARNING: Missing README.
 
 
