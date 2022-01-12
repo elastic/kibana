@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
-import { addIntegration } from '../../tasks/integrations';
+import { FLEET_AGENT_POLICIES, navigateTo, OLD_OSQUERY_MANAGER } from '../../tasks/navigation';
+import {
+  addIntegration,
+  clickButtonIfVisible,
+  closeModalIfVisible,
+} from '../../tasks/integrations';
 
 import { login } from '../../tasks/login';
 import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
@@ -25,6 +29,45 @@ describe('Super User - Add Integration', () => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
   });
 
+  it('should add the old integration and be able to upgrade it', () => {
+    cy.visit(OLD_OSQUERY_MANAGER);
+    cy.contains(integration).click();
+    addIntegration();
+    cy.contains('osquery_manager-1');
+    cy.visit('app/fleet/policies');
+    cy.contains(/^Default policy$/).click();
+    cy.contains('Actions').click();
+    cy.contains('View policy').click();
+    cy.contains('name: osquery_manager-1');
+    cy.contains(`version: 0.7.4`);
+    cy.contains('Close').click();
+    cy.contains(/^Osquery Manager$/).click();
+    cy.contains(/^Settings$/).click();
+    cy.contains(/^Upgrade to latest version$/).click();
+    closeModalIfVisible();
+
+    cy.contains('Updated Osquery Manager and upgraded policies');
+    cy.visit('app/fleet/policies');
+    cy.contains(/^Default Fleet Server policy$/).click();
+    cy.contains('Actions').click();
+    cy.contains('View policy').click();
+    // TODO Uncomment to check if we fixed the issue
+    // cy.contains('name: osquery_manager-1');
+    // cy.contains(`version: 0.8.0`);
+    cy.visit('app/integrations/detail/osquery_manager/policies');
+    cy.contains('Loading integration policies').should('exist');
+    cy.contains('Loading integration policies').should('not.exist');
+    cy.getBySel('integrationPolicyTable')
+      .get('.euiTableRow', { timeout: 60000 })
+      .should('have.lengthOf.above', 0);
+    cy.get('.euiTableCellContent').get('.euiPopover__anchor').get(`[aria-label="Open"]`).click();
+    cy.contains(/^Delete integration$/).click();
+    closeModalIfVisible();
+    cy.contains(/^Settings$/).click();
+    cy.contains(/^Uninstall Osquery Manager$/).click();
+    closeModalIfVisible();
+    cy.contains(/^Successfully uninstalled Osquery Manager$/);
+  });
   it('should display Osquery integration in the Policies list once installed ', () => {
     cy.visit(FLEET_AGENT_POLICIES);
     cy.contains('Default Fleet Server policy').click();
@@ -42,7 +85,8 @@ describe('Super User - Add Integration', () => {
     cy.visit(`app/integrations/detail/${packageName}-${oldVersion}/overview`);
     cy.contains('Add Osquery Manager').click();
     cy.contains('Save and continue').click();
-    cy.contains('Add Elastic Agent later').click();
+    closeModalIfVisible();
+    clickButtonIfVisible('Add Elastic Agent later');
     cy.contains('Upgrade');
     cy.contains('Default policy').click();
     cy.get('tr')

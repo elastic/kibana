@@ -23,10 +23,18 @@ export const addIntegration = () => {
   cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN, { timeout: 60000 }).should('not.exist');
 };
 
-function closeModalIfVisible() {
+export function closeModalIfVisible() {
   cy.get('body').then(($body) => {
     if ($body.find(CONFIRM_MODAL_BTN_SEL).length) {
       cy.getBySel(CONFIRM_MODAL_BTN).click();
+    }
+  });
+}
+
+export function clickButtonIfVisible(text: string) {
+  cy.get('body').then(($body) => {
+    if ($body.find(text).length) {
+      cy.contains(text).click();
     }
   });
 }
