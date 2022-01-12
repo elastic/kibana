@@ -34,12 +34,13 @@ export const getColumns = (
 
     const lastBucketId = bucketColumns[bucketColumns.length - 1].id;
     const matchingIndex = visData.columns.findIndex((col) => col.id === lastBucketId);
+
     return {
       bucketColumns,
       metricColumn: getMetricColumn(metric?.accessor ?? matchingIndex + 1, visData),
     };
   }
-  const metricColumn = getMetricColumn(metric.accessor ?? 0, visData);
+  const metricColumn = getMetricColumn(metric?.accessor ?? 0, visData);
   return {
     metricColumn,
     bucketColumns: [{ name: metricColumn.name }],

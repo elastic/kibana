@@ -28,7 +28,7 @@ export interface Dimension {
 }
 
 export interface Dimensions {
-  metric: ExpressionValueVisDimension;
+  metric?: ExpressionValueVisDimension;
   buckets?: ExpressionValueVisDimension[];
   splitRow?: ExpressionValueVisDimension[];
   splitColumn?: ExpressionValueVisDimension[];

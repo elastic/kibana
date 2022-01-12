@@ -46,7 +46,7 @@ const getPieDonutWaffleCommonConfig: GetConfigFn = (
   const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
   const preventLinksFromShowing =
     (visParams.labels.position === LabelPositions.INSIDE || isSplitChart) && visParams.labels.show;
-  const saveRescaleFactor = visParams.labels.show && !preventLinksFromShowing;
+  const saveRescaleFactor = !preventLinksFromShowing;
 
   const usingOuterSizeRatio =
     dimensions && !isSplitChart && !saveRescaleFactor
@@ -55,7 +55,7 @@ const getPieDonutWaffleCommonConfig: GetConfigFn = (
             // Cap the ratio to 1 and then rescale
             rescaleFactor * Math.min(MAX_SIZE / Math.min(dimensions?.width, dimensions?.height), 1),
         }
-      : {};
+      : { outerSizeRatio: undefined };
 
   const config: Config = { ...usingOuterSizeRatio };
 
@@ -76,7 +76,7 @@ const getPieDonutWaffleCommonConfig: GetConfigFn = (
     config.linkLabel = { maxCount: 0 };
   }
 
-  if (saveRescaleFactor) {
+  if (saveRescaleFactor && dimensions && !isSplitChart) {
     // shrink up to 20% to give some room for the linked values
     config.outerSizeRatio = rescaleFactor;
   }
@@ -159,6 +159,7 @@ export const getConfig: GetConfigByTypeFn = (
           },
         }
       : null;
+
   return {
     fontFamily: chartTheme.barSeriesStyle?.displayValue?.fontFamily,
     outerSizeRatio: 1,

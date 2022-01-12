@@ -108,7 +108,16 @@ describe('getColumns', () => {
   });
 
   it('should return the correct metric column if visParams returns dimensions', () => {
-    const { metricColumn } = getColumns(visParams, visData);
+    const { metricColumn } = getColumns(
+      {
+        ...visParams,
+        dimensions: {
+          ...visParams.dimensions,
+          metric: undefined,
+        },
+      },
+      visData
+    );
     expect(metricColumn).toEqual({
       id: 'col-3-1',
       meta: {

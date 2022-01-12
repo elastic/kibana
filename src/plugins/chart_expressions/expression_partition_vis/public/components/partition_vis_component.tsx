@@ -204,7 +204,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
 
   // formatters
   const metricFieldFormatter = services.fieldFormats.deserialize(
-    visParams.dimensions.metric.format
+    visParams.dimensions.metric?.format
   );
   const splitChartFormatter = visParams.dimensions.splitColumn
     ? services.fieldFormats.deserialize(visParams.dimensions.splitColumn[0].format)

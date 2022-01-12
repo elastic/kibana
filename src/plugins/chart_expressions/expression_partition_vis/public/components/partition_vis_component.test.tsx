@@ -133,12 +133,12 @@ describe('PartitionVisComponent', function () {
       type: 'datatable',
       columns: [
         {
-          id: 'col-1-1',
-          name: 'Count',
-        },
-        {
           id: 'col-0-2',
           name: 'filters',
+        },
+        {
+          id: 'col-1-1',
+          name: 'Count',
         },
       ],
       rows: [
@@ -162,12 +162,12 @@ describe('PartitionVisComponent', function () {
       type: 'datatable',
       columns: [
         {
-          id: 'col-1-1',
-          name: 'Count',
-        },
-        {
           id: 'col-0-2',
           name: 'filters',
+        },
+        {
+          id: 'col-1-1',
+          name: 'Count',
         },
       ],
       rows: [
