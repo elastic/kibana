@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { ArgAddPopover } from './arg_add_popover';
-export type { ArgOptions } from './arg_add_popover';
+export { withDebounceArg } from './with_debounce_arg';

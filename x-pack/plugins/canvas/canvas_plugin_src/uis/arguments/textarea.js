@@ -9,18 +9,22 @@ import React, { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFormRow, EuiTextArea, EuiSpacer, EuiButton } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { withDebounceArg } from '../../../public/components/with_debounce_arg';
 import { ArgumentStrings } from '../../../i18n';
 
 const { Textarea: strings } = ArgumentStrings;
 
 const TextAreaArgInput = ({ argValue, typeInstance, onValueChange, renderError, argId }) => {
   const confirm = typeInstance?.options?.confirm;
-  const [value, setValue] = useState();
+  const [value, setValue] = useState(argValue);
 
   const onChange = useCallback(
     (ev) => {
-      const onChangeFn = confirm ? setValue : onValueChange;
-      onChangeFn(ev.target.value);
+      const { value } = ev.target;
+      setValue(value);
+      if (!confirm) {
+        onValueChange(value);
+      }
     },
     [confirm, onValueChange]
   );
@@ -68,5 +72,5 @@ export const textarea = () => ({
   name: 'textarea',
   displayName: strings.getDisplayName(),
   help: strings.getHelp(),
-  template: templateFromReactComponent(TextAreaArgInput),
+  template: templateFromReactComponent(withDebounceArg(TextAreaArgInput)),
 });

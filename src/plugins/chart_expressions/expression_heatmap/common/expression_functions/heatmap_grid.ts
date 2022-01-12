@@ -20,7 +20,7 @@ export const heatmapGridConfig: ExpressionFunctionDefinition<
   name: EXPRESSION_HEATMAP_GRID_NAME,
   aliases: [],
   type: EXPRESSION_HEATMAP_GRID_NAME,
-  help: `Configure the heatmap layout `,
+  help: `Configure the heatmap layout`,
   inputTypes: ['null'],
   args: {
     // grid
@@ -38,20 +38,6 @@ export const heatmapGridConfig: ExpressionFunctionDefinition<
       }),
       required: false,
     },
-    cellHeight: {
-      types: ['number'],
-      help: i18n.translate('expressionHeatmap.function.args.grid.cellHeight.help', {
-        defaultMessage: 'Specifies the grid cell height',
-      }),
-      required: false,
-    },
-    cellWidth: {
-      types: ['number'],
-      help: i18n.translate('expressionHeatmap.function.args.grid.cellWidth.help', {
-        defaultMessage: 'Specifies the grid cell width',
-      }),
-      required: false,
-    },
     // cells
     isCellLabelVisible: {
       types: ['boolean'],
@@ -65,20 +51,6 @@ export const heatmapGridConfig: ExpressionFunctionDefinition<
       help: i18n.translate('expressionHeatmap.function.args.grid.isYAxisLabelVisible.help', {
         defaultMessage: 'Specifies whether or not the Y-axis labels are visible.',
       }),
-    },
-    yAxisLabelWidth: {
-      types: ['number'],
-      help: i18n.translate('expressionHeatmap.function.args.grid.yAxisLabelWidth.help', {
-        defaultMessage: 'Specifies the width of the Y-axis labels.',
-      }),
-      required: false,
-    },
-    yAxisLabelColor: {
-      types: ['string'],
-      help: i18n.translate('expressionHeatmap.function.args.grid.yAxisLabelColor.help', {
-        defaultMessage: 'Specifies the color of the Y-axis labels.',
-      }),
-      required: false,
     },
     // X-axis
     isXAxisLabelVisible: {
