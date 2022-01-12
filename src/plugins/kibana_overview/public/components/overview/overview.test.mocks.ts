@@ -23,7 +23,9 @@ jest.doMock('../../../../../../src/plugins/kibana_react/public', () => ({
       uiSettings: { get: jest.fn() },
       docLinks: {
         links: {
-          kibana: 'kibana_docs_url',
+          kibana: {
+            guide: 'kibana_docs_url',
+          },
         },
       },
     },
