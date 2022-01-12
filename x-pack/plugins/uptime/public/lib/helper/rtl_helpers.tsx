@@ -37,6 +37,7 @@ import { ClientPluginsStart } from '../../apps/plugin';
 import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
 import { UptimeRefreshContextProvider, UptimeStartupPluginsContextProvider } from '../../contexts';
+import { kibanaService } from '../../state/kibana_service';
 
 type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
@@ -143,6 +144,8 @@ export function MockKibanaProvider<ExtraCore>({
   kibanaProps,
 }: MockKibanaProviderProps<ExtraCore>) {
   const coreOptions = merge({}, mockCore(), core);
+
+  kibanaService.core = coreOptions as any;
 
   return (
     <KibanaContextProvider services={{ ...coreOptions }} {...kibanaProps}>
