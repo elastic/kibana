@@ -58,7 +58,7 @@ export const savedQueryType: SavedObjectsType = {
     getTitle: (savedObject) => savedObject.attributes.id,
     getEditUrl: (savedObject) => `/saved_queries/${savedObject.id}/edit`,
     getInAppUrl: (savedObject) => ({
-      path: `/app/saved_queries/${savedObject.id}`,
+      path: `/app/osquery/saved_queries/${savedObject.id}`,
       uiCapabilitiesPath: 'osquery.read',
     }),
   },
@@ -124,7 +124,7 @@ export const packType: SavedObjectsType = {
     getTitle: (savedObject) => `Pack: ${savedObject.attributes.name}`,
     getEditUrl: (savedObject) => `/packs/${savedObject.id}/edit`,
     getInAppUrl: (savedObject) => ({
-      path: `/app/packs/${savedObject.id}`,
+      path: `/app/osquery/packs/${savedObject.id}`,
       uiCapabilitiesPath: 'osquery.read',
     }),
     onExport: (context, objects) =>
