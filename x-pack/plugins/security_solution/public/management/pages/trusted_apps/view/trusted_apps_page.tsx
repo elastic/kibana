@@ -31,7 +31,7 @@ import { AppAction } from '../../../../common/store/actions';
 import { ABOUT_TRUSTED_APPS, SEARCH_TRUSTED_APP_PLACEHOLDER } from './translations';
 import { EmptyState } from './components/empty_state';
 import { SearchExceptions } from '../../../components/search_exceptions';
-import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
+import { BackToExternalAppSecondaryButton } from '../../../components/back_to_external_app_secondary_button';
 import { ListPageRouteState } from '../../../../../common/endpoint/types';
 import { ManagementPageLoader } from '../../../components/management_page_loader';
 
@@ -77,7 +77,7 @@ export const TrustedAppsPage = memo(() => {
 
   const backButton = useMemo(() => {
     if (routeState && routeState.onBackButtonNavigateTo) {
-      return <BackToExternalAppButton {...routeState} />;
+      return <BackToExternalAppSecondaryButton {...routeState} />;
     }
     return null;
   }, [routeState]);
@@ -142,7 +142,11 @@ export const TrustedAppsPage = memo(() => {
           </EuiFlexGroup>
         </>
       ) : (
-        <EmptyState onAdd={handleAddButtonClick} isAddDisabled={showCreateFlyout} />
+        <EmptyState
+          onAdd={handleAddButtonClick}
+          isAddDisabled={showCreateFlyout}
+          backComponent={backButton}
+        />
       )}
     </>
   );
@@ -156,7 +160,6 @@ export const TrustedAppsPage = memo(() => {
           defaultMessage="Trusted applications"
         />
       }
-      headerBackComponent={backButton}
       subtitle={ABOUT_TRUSTED_APPS}
       actions={addButton}
       hideHeader={!canDisplayContent()}

@@ -24,7 +24,7 @@ import { getLoadPoliciesError } from '../../../common/translations';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { ArtifactEntryCard, ArtifactEntryCardProps } from '../../../components/artifact_entry_card';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
-import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
+import { BackToExternalAppSecondaryButton } from '../../../components/back_to_external_app_secondary_button';
 import { ManagementPageLoader } from '../../../components/management_page_loader';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
 import { SearchExceptions } from '../../../components/search_exceptions';
@@ -157,7 +157,7 @@ export const HostIsolationExceptionsList = () => {
 
   const backButton = useMemo(() => {
     if (routeState && routeState.onBackButtonNavigateTo) {
-      return <BackToExternalAppButton {...routeState} />;
+      return <BackToExternalAppSecondaryButton {...routeState} />;
     }
     return null;
   }, [routeState]);
@@ -272,7 +272,12 @@ export const HostIsolationExceptionsList = () => {
         contentClassName="host-isolation-exceptions-container"
         data-test-subj="hostIsolationExceptionsContent"
         noItemsMessage={
-          !hasDataToShow && <HostIsolationExceptionsEmptyState onAdd={handleAddButtonClick} />
+          !hasDataToShow && (
+            <HostIsolationExceptionsEmptyState
+              onAdd={handleAddButtonClick}
+              backComponent={backButton}
+            />
+          )
         }
       />
     </AdministrationListPage>

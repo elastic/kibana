@@ -21,7 +21,8 @@ export const EventFiltersListEmptyState = memo<{
   onAdd: () => void;
   /** Should the Add button be disabled */
   isAddDisabled?: boolean;
-}>(({ onAdd, isAddDisabled = false }) => {
+  backComponent?: React.ReactNode;
+}>(({ onAdd, isAddDisabled = false, backComponent }) => {
   return (
     <ManagementEmptyStateWraper>
       <EmptyPrompt
@@ -41,7 +42,7 @@ export const EventFiltersListEmptyState = memo<{
             defaultMessage="Add an event filter to exclude high volume or unwanted events from being written to Elasticsearch."
           />
         }
-        actions={
+        actions={[
           <EuiButton
             fill
             isDisabled={isAddDisabled}
@@ -52,8 +53,9 @@ export const EventFiltersListEmptyState = memo<{
               id="xpack.securitySolution.eventFilters.listEmpty.addButton"
               defaultMessage="Add event filter"
             />
-          </EuiButton>
-        }
+          </EuiButton>,
+          ...(backComponent ? [backComponent] : []),
+        ]}
       />
     </ManagementEmptyStateWraper>
   );

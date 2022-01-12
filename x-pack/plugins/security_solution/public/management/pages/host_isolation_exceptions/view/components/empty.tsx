@@ -17,7 +17,10 @@ const EmptyPrompt = styled(EuiEmptyPrompt)`
   `}
 `;
 
-export const HostIsolationExceptionsEmptyState = memo<{ onAdd: () => void }>(({ onAdd }) => {
+export const HostIsolationExceptionsEmptyState = memo<{
+  onAdd: () => void;
+  backComponent?: React.ReactNode;
+}>(({ onAdd, backComponent }) => {
   return (
     <ManagementEmptyStateWraper>
       <EmptyPrompt
@@ -37,7 +40,7 @@ export const HostIsolationExceptionsEmptyState = memo<{ onAdd: () => void }>(({ 
             defaultMessage="Add a Host isolation exception to allow isolated hosts to communicate with specific IPs."
           />
         }
-        actions={
+        actions={[
           <EuiButton
             fill
             onClick={onAdd}
@@ -47,8 +50,10 @@ export const HostIsolationExceptionsEmptyState = memo<{ onAdd: () => void }>(({ 
               id="xpack.securitySolution.hostIsolationExceptions.listEmpty.addButton"
               defaultMessage="Add Host isolation exception"
             />
-          </EuiButton>
-        }
+          </EuiButton>,
+
+          ...(backComponent ? [backComponent] : []),
+        ]}
       />
     </ManagementEmptyStateWraper>
   );

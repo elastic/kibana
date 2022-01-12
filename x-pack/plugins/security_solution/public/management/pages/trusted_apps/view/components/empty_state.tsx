@@ -14,7 +14,8 @@ export const EmptyState = memo<{
   onAdd: () => void;
   /** Should the Add button be disabled */
   isAddDisabled?: boolean;
-}>(({ onAdd, isAddDisabled = false }) => {
+  backComponent?: React.ReactNode;
+}>(({ onAdd, isAddDisabled = false, backComponent }) => {
   return (
     <ManagementEmptyStateWraper>
       <EuiEmptyPrompt
@@ -34,7 +35,7 @@ export const EmptyState = memo<{
             defaultMessage="Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts."
           />
         }
-        actions={
+        actions={[
           <EuiButton
             fill
             isDisabled={isAddDisabled}
@@ -45,8 +46,9 @@ export const EmptyState = memo<{
               id="xpack.securitySolution.trustedapps.list.addButton"
               defaultMessage="Add trusted application"
             />
-          </EuiButton>
-        }
+          </EuiButton>,
+          ...(backComponent ? [backComponent] : []),
+        ]}
       />
     </ManagementEmptyStateWraper>
   );

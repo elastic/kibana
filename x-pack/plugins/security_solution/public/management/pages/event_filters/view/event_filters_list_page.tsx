@@ -45,7 +45,7 @@ import {
 import { EventFilterDeleteModal } from './components/event_filter_delete_modal';
 
 import { SearchExceptions } from '../../../components/search_exceptions';
-import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
+import { BackToExternalAppSecondaryButton } from '../../../components/back_to_external_app_secondary_button';
 import { ABOUT_EVENT_FILTERS } from './translations';
 import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
 import { useToasts } from '../../../../common/lib/kibana';
@@ -143,7 +143,7 @@ export const EventFiltersListPage = memo(() => {
 
   const backButton = useMemo(() => {
     if (routeState && routeState.onBackButtonNavigateTo) {
-      return <BackToExternalAppButton {...routeState} />;
+      return <BackToExternalAppSecondaryButton {...routeState} />;
     }
     return null;
   }, [routeState]);
@@ -240,7 +240,6 @@ export const EventFiltersListPage = memo(() => {
 
   return (
     <AdministrationListPage
-      headerBackComponent={backButton}
       title={
         <FormattedMessage
           id="xpack.securitySolution.eventFilters.list.pageTitle"
@@ -312,7 +311,11 @@ export const EventFiltersListPage = memo(() => {
         data-test-subj="eventFiltersContent"
         noItemsMessage={
           !doesDataExist && (
-            <EventFiltersListEmptyState onAdd={handleAddButtonClick} isAddDisabled={showFlyout} />
+            <EventFiltersListEmptyState
+              onAdd={handleAddButtonClick}
+              isAddDisabled={showFlyout}
+              backComponent={backButton}
+            />
           )
         }
       />
