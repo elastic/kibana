@@ -40,6 +40,7 @@ interface Props {
   packageInfo?: PackageInfo;
   setHasAgentPolicyError: (hasError: boolean) => void;
   updateSelectedTab: (tab: SelectedPolicyTab) => void;
+  onNewAgentPolicyCreate: () => void;
 }
 
 export const StepSelectHosts: React.FunctionComponent<Props> = ({
@@ -53,6 +54,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
   packageInfo,
   setHasAgentPolicyError,
   updateSelectedTab,
+  onNewAgentPolicyCreate,
 }) => {
   let agentPolicies: AgentPolicy[] = [];
   const { data: agentPoliciesData, error: err } = useGetAgentPolicies({
@@ -103,7 +105,7 @@ export const StepSelectHosts: React.FunctionComponent<Props> = ({
           agentPolicy={agentPolicy}
           updateAgentPolicy={updateAgentPolicy}
           setHasAgentPolicyError={setHasAgentPolicyError}
-          onNewAgentPolicyCreate={() => {}}
+          onNewAgentPolicyCreate={onNewAgentPolicyCreate}
         />
       ),
     },
