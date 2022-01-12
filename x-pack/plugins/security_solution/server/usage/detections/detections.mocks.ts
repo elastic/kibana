@@ -291,7 +291,7 @@ export const getMockMlDatafeedStatsResponse = () => ({
 
 export const getMockRuleSearchResponse = (
   immutableTag: string = '__internal_immutable:true'
-): SearchResponse<unknown, unknown> => ({
+): SearchResponse<unknown> => ({
   took: 2,
   timed_out: false,
   _shards: {
@@ -391,36 +391,37 @@ export const getMockRuleSearchResponse = (
   },
 });
 
-export const getMockRuleAlertsResponse = (docCount: number): SearchResponse<unknown, unknown> => ({
-  took: 7,
-  timed_out: false,
-  _shards: {
-    total: 1,
-    successful: 1,
-    skipped: 0,
-    failed: 0,
-  },
-  hits: {
-    total: {
-      value: 7322,
-      relation: 'eq',
+export const getMockRuleAlertsResponse = (docCount: number): SearchResponse<unknown> =>
+  ({
+    took: 7,
+    timed_out: false,
+    _shards: {
+      total: 1,
+      successful: 1,
+      skipped: 0,
+      failed: 0,
     },
-    max_score: null,
-    hits: [],
-  },
-  aggregations: {
-    detectionAlerts: {
-      doc_count_error_upper_bound: 0,
-      sum_other_doc_count: 0,
-      buckets: [
-        {
-          key: '6eecd8c2-8bfb-11eb-afbe-1b7a66309c6d',
-          doc_count: docCount,
-        },
-      ],
+    hits: {
+      total: {
+        value: 7322,
+        relation: 'eq',
+      },
+      max_score: null,
+      hits: [],
     },
-  },
-});
+    aggregations: {
+      detectionAlerts: {
+        doc_count_error_upper_bound: 0,
+        sum_other_doc_count: 0,
+        buckets: [
+          {
+            key: '6eecd8c2-8bfb-11eb-afbe-1b7a66309c6d',
+            doc_count: docCount,
+          },
+        ],
+      },
+    },
+  } as unknown as SearchResponse<unknown>);
 
 export const getMockAlertCasesResponse = () => ({
   page: 1,
