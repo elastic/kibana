@@ -8,26 +8,8 @@
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { DataView } from '../../../../../../../data_views/common';
-import { fieldSpecMap } from './fields';
 import { DiscoverFieldVisualizeInner } from '../discover_field_visualize_inner';
 import { numericField as field } from './fields';
-
-const fieldFormatInstanceType = {};
-const defaultMap = {
-  [KBN_FIELD_TYPES.NUMBER]: { id: KBN_FIELD_TYPES.NUMBER, params: {} },
-};
-
-const fieldFormat = {
-  getByFieldType: (fieldType: KBN_FIELD_TYPES) => {
-    return [fieldFormatInstanceType];
-  },
-  getDefaultConfig: () => {
-    return defaultMap.number;
-  },
-  defaultMap,
-};
 
 const visualizeInfo = {
   href: 'http://localhost:9001/',
