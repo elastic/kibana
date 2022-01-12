@@ -9,7 +9,7 @@ import { Logger } from 'kibana/server';
 
 import type {
   ExtensionPoint,
-  ExtensionPointCallbackArgument,
+  ExtensionPointCallbackDataArgument,
   ExtensionPointStorageClientInterface,
   ExtensionPointStorageInterface,
   NarrowExtensionPointToType,
@@ -65,7 +65,7 @@ export class ExtensionPointStorageClient implements ExtensionPointStorageClientI
 
       inputArgument = await externalExtension.callback({
         context: callbackContext,
-        data: inputArgument as ExtensionPointCallbackArgument,
+        data: inputArgument as ExtensionPointCallbackDataArgument,
       });
 
       if (callbackResponseValidator) {
@@ -73,7 +73,7 @@ export class ExtensionPointStorageClient implements ExtensionPointStorageClientI
         const validationError = callbackResponseValidator(inputArgument);
 
         if (validationError) {
-          this.logger?.error(
+          this.logger.error(
             new ExtensionPointError(
               `Extension point for ${externalExtension.type} returned data that failed validation: ${extensionRegistrationSource}`,
               {

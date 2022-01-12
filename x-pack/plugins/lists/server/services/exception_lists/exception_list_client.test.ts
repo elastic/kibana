@@ -11,7 +11,7 @@ import {
   ExtensionPointStorageContextMock,
   createExtensionPointStorageMock,
 } from '../extension_points/extension_point_storage.mock';
-import type { ExtensionPointCallbackArgument } from '../extension_points';
+import type { ExtensionPointCallbackDataArgument } from '../extension_points';
 
 import {
   getCreateExceptionListItemOptionsMock,
@@ -112,10 +112,12 @@ describe('exception_list_client', () => {
           it('should validate extension point callback returned data and throw if not valid', async () => {
             const extensionPointCallback = getExtensionPointCallback();
             extensionPointCallback.mockImplementation(async (args) => {
-              const { entries, ...rest } = args as ExtensionPointCallbackArgument;
+              const {
+                data: { entries, ...rest },
+              } = args as { data: ExtensionPointCallbackDataArgument };
 
               expect(entries).toBeTruthy(); // Test entries to exist since we exclude it.
-              return rest as ExtensionPointCallbackArgument;
+              return rest as ExtensionPointCallbackDataArgument;
             });
 
             const methodResponsePromise = callExceptionListClientMethod();
@@ -126,6 +128,8 @@ describe('exception_list_client', () => {
                 reason: ['Invalid value "undefined" supplied to "entries"'],
               })
             );
+
+            // FIXME:PT add check for logger.error()
           });
 
           it('should use data returned from extension point callbacks when saving', async () => {

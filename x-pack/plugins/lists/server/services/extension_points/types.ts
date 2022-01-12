@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { PromiseType } from 'utility-types';
 import { UnionToIntersection } from '@kbn/utility-types';
 import { KibanaRequest } from 'kibana/server';
 
@@ -92,8 +91,8 @@ export type NarrowExtensionPointToType<T extends ExtensionPoint['type']> = {
  * An intersection of all callback arguments for use internally when
  * casting (ex. in `ExtensionPointStorageClient#pipeRun()`
  */
-export type ExtensionPointCallbackArgument = UnionToIntersection<
-  PromiseType<ReturnType<ExtensionPoint['callback']>>
+export type ExtensionPointCallbackDataArgument = UnionToIntersection<
+  Parameters<ExtensionPoint['callback']>[0]['data']
 >;
 
 export interface ExtensionPointStorageClientInterface {
