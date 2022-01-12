@@ -8,6 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type {
   BulkResponse,
+  ClosePointInTimeResponse,
   OpenPointInTimeResponse,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -238,10 +239,15 @@ describe('Session index', () => {
           body: { id: 'PIT_ID' } as OpenPointInTimeResponse,
         })
       );
+      mockElasticsearchClient.closePointInTime.mockResolvedValue(
+        securityMock.createApiResponse({
+          body: { succeeded: true, num_freed: 1 } as ClosePointInTimeResponse,
+        })
+      );
       mockElasticsearchClient.search.mockResolvedValue(
         securityMock.createApiResponse({
           body: {
-            hits: { total: { value: 1, relation: 'eq' }, hits: [sessionValue] },
+            hits: { hits: [sessionValue] },
           } as SearchResponse,
         })
       );
@@ -260,6 +266,10 @@ describe('Session index', () => {
       mockElasticsearchClient.search.mockRejectedValue(failureReason);
 
       await expect(sessionIndex.cleanUp()).rejects.toBe(failureReason);
+      expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.bulk).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
     });
 
     it('throws if bulk delete call to Elasticsearch fails', async () => {
@@ -269,15 +279,21 @@ describe('Session index', () => {
       mockElasticsearchClient.bulk.mockRejectedValue(failureReason);
 
       await expect(sessionIndex.cleanUp()).rejects.toBe(failureReason);
+      expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
     });
 
     it('when neither `lifespan` nor `idleTimeout` is configured', async () => {
       await sessionIndex.cleanUp();
 
+      expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledWith({
         _source_includes: 'usernameHash,provider',
         sort: '_shard_doc',
+        track_total_hits: false,
         search_after: undefined,
         size: 10_000,
         pit: {
@@ -324,7 +340,6 @@ describe('Session index', () => {
           },
         },
       });
-
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith(
         {
@@ -336,6 +351,7 @@ describe('Session index', () => {
           ignore: [409, 404],
         }
       );
+      expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
     });
 
     it('when only `lifespan` is configured', async () => {
@@ -353,10 +369,12 @@ describe('Session index', () => {
 
       await sessionIndex.cleanUp();
 
+      expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledWith({
         _source_includes: 'usernameHash,provider',
         sort: '_shard_doc',
+        track_total_hits: false,
         search_after: undefined,
         size: 10_000,
         pit: {
@@ -413,7 +431,6 @@ describe('Session index', () => {
           },
         },
       });
-
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith(
         {
@@ -425,6 +442,7 @@ describe('Session index', () => {
           ignore: [409, 404],
         }
       );
+      expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
     });
 
     it('when only `idleTimeout` is configured', async () => {
@@ -443,10 +461,12 @@ describe('Session index', () => {
 
       await sessionIndex.cleanUp();
 
+      expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledWith({
         _source_includes: 'usernameHash,provider',
         sort: '_shard_doc',
+        track_total_hits: false,
         search_after: undefined,
         size: 10_000,
         pit: {
@@ -497,7 +517,6 @@ describe('Session index', () => {
           },
         },
       });
-
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith(
         {
@@ -509,6 +528,7 @@ describe('Session index', () => {
           ignore: [409, 404],
         }
       );
+      expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
     });
 
     it('when both `lifespan` and `idleTimeout` are configured', async () => {
@@ -527,10 +547,12 @@ describe('Session index', () => {
 
       await sessionIndex.cleanUp();
 
+      expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledWith({
         _source_includes: 'usernameHash,provider',
         sort: '_shard_doc',
+        track_total_hits: false,
         search_after: undefined,
         size: 10_000,
         pit: {
@@ -591,7 +613,6 @@ describe('Session index', () => {
           },
         },
       });
-
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith(
         {
@@ -603,6 +624,7 @@ describe('Session index', () => {
           ignore: [409, 404],
         }
       );
+      expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
     });
 
     it('when both `lifespan` and `idleTimeout` are configured and multiple providers are enabled', async () => {
@@ -636,10 +658,12 @@ describe('Session index', () => {
 
       await sessionIndex.cleanUp();
 
+      expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledWith({
         _source_includes: 'usernameHash,provider',
         sort: '_shard_doc',
+        track_total_hits: false,
         search_after: undefined,
         size: 10_000,
         pit: {
@@ -733,7 +757,6 @@ describe('Session index', () => {
           },
         },
       });
-
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.bulk).toHaveBeenCalledWith(
         {
@@ -745,21 +768,43 @@ describe('Session index', () => {
           ignore: [409, 404],
         }
       );
+      expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
     });
 
     it('should clean up sessions in batches of 10,000', async () => {
+      for (const count of [10_000, 1]) {
+        mockElasticsearchClient.search.mockResolvedValueOnce(
+          securityMock.createApiResponse({
+            body: {
+              hits: { hits: new Array(count).fill(sessionValue, 0) },
+            } as SearchResponse,
+          })
+        );
+      }
+
+      await sessionIndex.cleanUp();
+
+      expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(2);
+      expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(2);
+      expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
+    });
+
+    it('should limit number of batches to 10', async () => {
       mockElasticsearchClient.search.mockResolvedValue(
         securityMock.createApiResponse({
           body: {
-            hits: { total: { value: 3 * 10_000, relation: 'eq' }, hits: [sessionValue] },
+            hits: { hits: new Array(10_000).fill(sessionValue, 0) },
           } as SearchResponse,
         })
       );
 
       await sessionIndex.cleanUp();
 
-      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(3);
-      expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(3);
+      expect(mockElasticsearchClient.openPointInTime).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(10);
+      expect(mockElasticsearchClient.bulk).toHaveBeenCalledTimes(10);
+      expect(mockElasticsearchClient.closePointInTime).toHaveBeenCalledTimes(1);
     });
 
     it('should log audit event', async () => {

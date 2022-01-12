@@ -7,7 +7,6 @@
 
 import type {
   BulkOperationContainer,
-  SearchTotalHits,
   SortResults,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -49,7 +48,13 @@ const SESSION_INDEX_TEMPLATE_VERSION = 1;
 const SESSION_INDEX_CLEANUP_BATCH_SIZE = 10_000;
 
 /**
- * Number of sessions to remove per batch during cleanup.
+ * Maximum number of batches per cleanup.
+ * If the batch size is 10,000 and this limit is 10, then Kibana will remove up to 100k sessions per cleanup.
+ */
+const SESSION_INDEX_CLEANUP_BATCH_LIMIT = 10;
+
+/**
+ * How long the session cleanup search point-in-time should be kept alive.
  */
 const SESSION_INDEX_CLEANUP_KEEP_ALIVE = '5m';
 
@@ -553,30 +558,37 @@ export class SessionIndex {
       });
     }
 
-    // Create point in time snapshot to paginate through sessions
-    const { body: pitResponse } = await this.options.elasticsearchClient.openPointInTime({
+    const { body: openPitResponse } = await this.options.elasticsearchClient.openPointInTime({
       index: this.indexName,
       keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
     });
 
-    // We don't know the total number of sessions until we fetched the first batch so assume we have at least one session to clean.
-    let total = 1;
-    let searchAfter: SortResults | undefined;
-    for (let i = 0; i < total / SESSION_INDEX_CLEANUP_BATCH_SIZE; i++) {
-      const { body: searchResponse } =
-        await this.options.elasticsearchClient.search<SessionIndexValue>({
-          pit: { id: pitResponse.id, keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE },
-          _source_includes: 'usernameHash,provider',
-          query: { bool: { should: deleteQueries } },
-          search_after: searchAfter,
-          size: SESSION_INDEX_CLEANUP_BATCH_SIZE,
-          sort: '_shard_doc',
-        });
-      if (searchResponse.hits.hits.length > 0) {
-        yield searchResponse.hits.hits;
-        total = (searchResponse.hits.total as SearchTotalHits).value;
-        searchAfter = searchResponse.hits.hits[searchResponse.hits.hits.length - 1].sort;
+    try {
+      let searchAfter: SortResults | undefined;
+      for (let i = 0; i < SESSION_INDEX_CLEANUP_BATCH_LIMIT; i++) {
+        const { body: searchResponse } =
+          await this.options.elasticsearchClient.search<SessionIndexValue>({
+            pit: { id: openPitResponse.id, keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE },
+            _source_includes: 'usernameHash,provider',
+            query: { bool: { should: deleteQueries } },
+            search_after: searchAfter,
+            size: SESSION_INDEX_CLEANUP_BATCH_SIZE,
+            sort: '_shard_doc',
+            track_total_hits: false, // for performance
+          });
+        const { hits } = searchResponse.hits;
+        if (hits.length > 0) {
+          yield hits;
+          searchAfter = hits[hits.length - 1].sort;
+        }
+        if (hits.length < SESSION_INDEX_CLEANUP_BATCH_SIZE) {
+          break;
+        }
       }
+    } finally {
+      await this.options.elasticsearchClient.closePointInTime({
+        id: openPitResponse.id,
+      });
     }
   }
 }
