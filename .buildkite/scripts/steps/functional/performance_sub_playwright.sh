@@ -13,10 +13,10 @@ node scripts/es snapshot&
 
 esPid=$!
 
-export PERF_TEST_PHASE=WARMUP
+export TEST_PERFORMANCE_PHASE=WARMUP
 export TEST_ES_URL=http://elastic:changeme@localhost:9200
-export DONT_START_ES=true
-export DISABLE_APM=true
+export TEST_ES_DISABLE_STARTUP=true
+export ELASTIC_APM_ACTIVE=false
 
 sleep 120
 
@@ -29,8 +29,8 @@ checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (P
     --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
     --config "test/performance/config.playwright.ts";
 
-export DISABLE_APM=false
-export PERF_TEST_PHASE=TEST
+export TEST_PERFORMANCE_PHASE=TEST
+export ELASTIC_APM_ACTIVE=true
 
 checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Phase: TEST)" \
   node scripts/functional_tests \
