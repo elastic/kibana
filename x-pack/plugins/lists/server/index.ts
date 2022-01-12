@@ -30,5 +30,8 @@ export type { ExportExceptionListAndItemsReturn } from './services/exception_lis
 export const config: PluginConfigDescriptor = {
   schema: ConfigSchema,
 };
+
+export { ErrorWithStatusCode as ListsErrorWithStatusCode } from './error_with_status_code';
+
 export const plugin = (initializerContext: PluginInitializerContext): ListPlugin =>
   new ListPlugin(initializerContext);

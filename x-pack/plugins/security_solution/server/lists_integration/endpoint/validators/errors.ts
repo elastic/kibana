@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export class EndpointArtifactExceptionValidationError extends Error {}
+import { ListsErrorWithStatusCode } from '../../../../../lists/server';
+
+export class EndpointArtifactExceptionValidationError extends ListsErrorWithStatusCode {
+  constructor(message: string, statusCode: number = 400) {
+    super(`EndpointArtifactError: ${message}`, statusCode);
+  }
+}

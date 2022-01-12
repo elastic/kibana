@@ -17,6 +17,7 @@ import {
   isArtifactByPolicy,
 } from '../../../../common/endpoint/service/artifacts';
 import { OperatingSystem } from '../../../../common/endpoint/types';
+import { EndpointArtifactExceptionValidationError } from './errors';
 
 const BasicEndpointExceptionDataSchema = schema.object(
   {
@@ -72,7 +73,7 @@ export class BaseValidator {
 
   protected async validateCanManageEndpointArtifacts(): Promise<void> {
     if (!(await this.endpointAuthzPromise).canAccessEndpointManagement) {
-      throw new Error('Not authorized');
+      throw new EndpointArtifactExceptionValidationError('Endpoint authorization failure', 401);
     }
   }
 
@@ -82,14 +83,21 @@ export class BaseValidator {
    * @protected
    */
   protected async validateBasicData(item: ExceptionItemLikeOptions) {
-    BasicEndpointExceptionDataSchema.validate(item);
+    try {
+      BasicEndpointExceptionDataSchema.validate(item);
+    } catch (error) {
+      throw new EndpointArtifactExceptionValidationError(error.message);
+    }
   }
 
   protected async validateCanCreateByPolicyArtifacts(
     item: ExceptionItemLikeOptions
   ): Promise<void> {
     if (this.isItemByPolicy(item) && !(await this.isAllowedToCreateArtifactsByPolicy())) {
-      throw new Error('Not authorized to create or update artifacts by policy');
+      throw new EndpointArtifactExceptionValidationError(
+        'Your license level does not allow create/update of by policy artifacts',
+        401
+      );
     }
   }
 
@@ -110,8 +118,9 @@ export class BaseValidator {
       const policiesFromFleet = await packagePolicy.getByIDs(internalReadonlySoClient, policyIds);
 
       if (!policiesFromFleet) {
-        // TODO:PT Error
-        throw new Error(`invalid policy ids: ${policyIds.join(', ')}`);
+        throw new EndpointArtifactExceptionValidationError(
+          `invalid policy ids: ${policyIds.join(', ')}`
+        );
       }
 
       const invalidPolicyIds = policiesFromFleet
@@ -119,8 +128,9 @@ export class BaseValidator {
         .map((policy) => policy.id);
 
       if (invalidPolicyIds.length) {
-        // TODO:PT Error
-        throw new Error(`invalid policy ids: ${invalidPolicyIds.join(', ')}`);
+        throw new EndpointArtifactExceptionValidationError(
+          `invalid policy ids: ${invalidPolicyIds.join(', ')}`
+        );
       }
     }
   }

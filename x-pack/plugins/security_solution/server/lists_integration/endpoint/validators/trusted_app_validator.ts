@@ -16,7 +16,6 @@ import {
 } from '../../../../../lists/server';
 import {
   ConditionEntry,
-  ConditionEntryField,
   OperatingSystem,
   TrustedAppEntryTypes,
 } from '../../../../common/endpoint/types';
@@ -24,6 +23,7 @@ import {
   getDuplicateFields,
   isValidHash,
 } from '../../../../common/endpoint/service/trusted_apps/validations';
+import { EndpointArtifactExceptionValidationError } from './errors';
 
 const ProcessHashField = schema.oneOf([
   schema.literal('process.hash.md5'),
@@ -67,19 +67,18 @@ const CommonEntrySchema = {
     schema.siblingRef('field'),
     ProcessHashField,
     schema.string({
-      validate: (hash: string) =>
-        isValidHash(hash) ? undefined : `invalidField.${ConditionEntryField.HASH}`,
+      validate: (hash: string) => (isValidHash(hash) ? undefined : `invalid hash value [${hash}]`),
     }),
     schema.conditional(
       schema.siblingRef('field'),
       ProcessExecutablePath,
       schema.string({
-        validate: (field: string) =>
-          field.length > 0 ? undefined : `invalidField.${ConditionEntryField.PATH}`,
+        validate: (pathValue: string) =>
+          pathValue.length > 0 ? undefined : `invalid path value [${pathValue}]`,
       }),
       schema.string({
-        validate: (field: string) =>
-          field.length > 0 ? undefined : `invalidField.${ConditionEntryField.SIGNER}`,
+        validate: (signerValue: string) =>
+          signerValue.length > 0 ? undefined : `invalid signer value [${signerValue}]`,
       })
     )
   ),
@@ -102,7 +101,7 @@ const entriesSchemaOptions = {
   minSize: 1,
   validate(entries: TrustedAppConditionEntry[]) {
     const dups = getDuplicateFields(entries as ConditionEntry[]);
-    return dups.map((field) => `duplicatedEntry.${field}`).join(', ') || undefined;
+    return dups.map((field) => `Duplicated entry: ${field}`).join(', ') || undefined;
   },
 };
 
@@ -186,6 +185,11 @@ export class TrustedAppValidator extends BaseValidator {
 
   private async validateTrustedAppData(item: ExceptionItemLikeOptions): Promise<void> {
     await this.validateBasicData(item);
-    TrustedAppDataSchema.validate(item, { os: item.osTypes[0] });
+
+    try {
+      TrustedAppDataSchema.validate(item, { os: item.osTypes[0] });
+    } catch (error) {
+      throw new EndpointArtifactExceptionValidationError(error.message);
+    }
   }
 }
