@@ -74,6 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         await kibanaServer.importExport.load(ecommerceSOPath);
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.discover.selectIndexPattern('ecommerce');
       });
 
       it('generates a report from a new search with data: default', async () => {
@@ -102,7 +103,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const fromTime = 'Apr 27, 2019 @ 23:56:51.374';
         const toTime = 'Aug 23, 2019 @ 16:18:51.821';
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-        await PageObjects.discover.selectIndexPattern('ecommerce');
         await PageObjects.discover.clickNewSearchButton();
         await retry.try(async () => {
           expect(await PageObjects.discover.getHitCount()).to.equal('4,675');

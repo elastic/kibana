@@ -13,6 +13,7 @@ Review important information about the {kib} 7.16.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.16.2>>
 * <<release-notes-7.16.1>>
 * <<release-notes-7.16.0>>
 //* <<release-notes-7.15.2>>
@@ -68,6 +69,38 @@ Review important information about the {kib} 7.16.x releases.
 
 --
 
+[[release-notes-7.16.2]]
+== {kib} 7.16.2
+
+Review the following information about the 7.16.2 release.
+
+[float]
+[[breaking-changes-v7.16.2]]
+=== Breaking changes
+Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.16.2, review the <<breaking-changes-7.16.0,7.16.0 breaking changes>>.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[fixes-v7.16.2]]
+=== Bug Fixes
+
+The 7.16.2 release includes the following bug fixes.
+
+Fleet::
+* Omits `elasticsearch` field for policy update API (partial backport of {kibana-pull}121412[#121412])
+Lens & Visualizations::
+* Fixes the broken chart when an agg is placed in another axis and then is hidden {kibana-pull}121488[#121488]
+Metrics::
+* Adds migrations for saved object references {kibana-pull}121214[#121214]
+
 [[release-notes-7.16.1]]
 == {kib} 7.16.1
 
@@ -77,6 +110,15 @@ Review the following information about the 7.16.1 release.
 [[breaking-changes-v7.16.1]]
 === Breaking changes
 Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.16.1, review the <<breaking-changes-7.16.0,7.16.0 breaking changes>>.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
 
 [float]
 [[fixes-v7.16.1]]
@@ -133,6 +175,15 @@ For information about the {kib} 7.16.0 release, review the following information
 
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade to 7.16.0, review the breaking changes, then mitigate the impact to your application.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
 
 // tag::notable-breaking-changes[]
       

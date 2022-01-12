@@ -139,6 +139,7 @@ to `false` in your `kibana.yml` configuration file. Changing this setting
 causes the server to regenerate assets on the next startup,
 which might cause a delay before pages start being served.
 
+[float]
 === Disable Console (before 8.0)
 
 deprecated:[7.16.0,"In 8.0 and later, this setting will no longer be supported."]

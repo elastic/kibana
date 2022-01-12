@@ -502,7 +502,7 @@ export class DocLinksService {
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
           learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
           apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
-          onPremRegistry: `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/current/air-gapped.html`,
+          onPremRegistry: `${FLEET_DOCS}air-gapped.html`,
         },
         ecs: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,

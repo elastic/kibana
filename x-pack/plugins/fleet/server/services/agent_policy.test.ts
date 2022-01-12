@@ -5,9 +5,18 @@
  * 2.0.
  */
 
+import uuidv5 from 'uuid/v5';
+
 import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
 
-import type { AgentPolicy, FullAgentPolicy, NewAgentPolicy } from '../types';
+import type {
+  AgentPolicy,
+  FullAgentPolicy,
+  NewAgentPolicy,
+  PreconfiguredAgentPolicy,
+} from '../types';
+
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
 import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
@@ -56,6 +65,7 @@ jest.mock('./agents');
 jest.mock('./package_policy');
 jest.mock('./app_context');
 jest.mock('./agent_policies/full_agent_policy');
+jest.mock('uuid/v5');
 
 const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
@@ -283,6 +293,91 @@ describe('agent policy', () => {
             revision_idx: 1,
           }),
         })
+      );
+    });
+
+    describe('ensurePreconfiguredAgentPolicy', () => {
+      it('should use preconfigured id if provided for default policy', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        const preconfiguredAgentPolicy: PreconfiguredAgentPolicy = {
+          id: 'my-unique-id',
+          name: 'My Preconfigured Policy',
+          is_default: true,
+          package_policies: [
+            {
+              name: 'my-package-policy',
+              id: 'my-package-policy-id',
+              package: {
+                name: 'test-package',
+              },
+            },
+          ],
+        };
+
+        soClient.find.mockResolvedValueOnce({ total: 0, saved_objects: [], page: 1, per_page: 10 });
+
+        soClient.create.mockResolvedValueOnce({
+          id: 'my-unique-id',
+          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          attributes: {},
+          references: [],
+        });
+
+        await agentPolicyService.ensurePreconfiguredAgentPolicy(
+          soClient,
+          esClient,
+          preconfiguredAgentPolicy
+        );
+
+        expect(soClient.create).toHaveBeenCalledWith(
+          AGENT_POLICY_SAVED_OBJECT_TYPE,
+          expect.anything(),
+          expect.objectContaining({ id: 'my-unique-id' })
+        );
+      });
+    });
+
+    it('should generate uuid if no id is provided for default policy', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const preconfiguredAgentPolicy = {
+        name: 'My Preconfigured Policy',
+        is_default: true,
+        package_policies: [
+          {
+            name: 'my-package-policy',
+            id: 'my-package-policy-id',
+            package: {
+              name: 'test-package',
+            },
+          },
+        ],
+      };
+
+      (uuidv5 as unknown as jest.Mock).mockReturnValueOnce('fake-uuid');
+
+      soClient.find.mockResolvedValueOnce({ total: 0, saved_objects: [], page: 1, per_page: 10 });
+
+      soClient.create.mockResolvedValueOnce({
+        id: 'my-unique-id',
+        type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        attributes: {},
+        references: [],
+      });
+
+      await agentPolicyService.ensurePreconfiguredAgentPolicy(
+        soClient,
+        esClient,
+        preconfiguredAgentPolicy as any
+      );
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        AGENT_POLICY_SAVED_OBJECT_TYPE,
+        expect.anything(),
+        expect.objectContaining({ id: 'fake-uuid' })
       );
     });
   });

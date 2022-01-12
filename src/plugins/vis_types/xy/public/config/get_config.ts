@@ -50,15 +50,17 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
     params.dimensions.x?.aggType === BUCKET_TYPES.DATE_HISTOGRAM
   );
   const tooltip = getTooltip(aspects, params);
-  const yAxes = params.valueAxes.map((a) => {
-    // find the correct aspect for each value axis
-    const aspectsIdx = params.seriesParams.findIndex((s) => s.valueAxis === a.id);
-    return getAxis<YScaleType>(
-      a,
-      params.grid,
-      aspects.y[aspectsIdx > -1 ? aspectsIdx : 0],
-      params.seriesParams
-    );
+
+  const yAxes: Array<AxisConfig<ScaleContinuousType>> = [];
+
+  params.dimensions.y.forEach((y) => {
+    const accessor = y.accessor;
+    const aspect = aspects.y.find(({ column }) => column === accessor);
+    const serie = params.seriesParams.find(({ data: { id } }) => id === aspect?.aggId);
+    const valueAxis = params.valueAxes.find(({ id }) => id === serie?.valueAxis);
+    if (aspect && valueAxis) {
+      yAxes.push(getAxis<YScaleType>(valueAxis, params.grid, aspect, params.seriesParams));
+    }
   });
   const enableHistogramMode =
     (params.dimensions.x?.aggType === BUCKET_TYPES.DATE_HISTOGRAM ||
