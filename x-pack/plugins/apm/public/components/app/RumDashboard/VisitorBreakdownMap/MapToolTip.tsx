@@ -42,7 +42,7 @@ function MapToolTipComponent({
   features = [],
   loadFeatureProperties,
 }: MapToolTipProps) {
-  const { id: featureId, layerId } = features[0] ?? {};
+  const { id: featureId, layerId, mbProperties } = features[0] ?? {};
 
   const [regionName, setRegionName] = useState<string>(featureId as string);
   const [pageLoadDuration, setPageLoadDuration] = useState<string>('');
@@ -61,8 +61,7 @@ function MapToolTipComponent({
       if (loadFeatureProperties) {
         const items = await loadFeatureProperties({
           layerId,
-          featureId,
-          mbProperties: {},
+          properties: mbProperties,
         });
         items.forEach((item) => {
           if (
