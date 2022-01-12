@@ -76,7 +76,7 @@ export function _enrichStateWithStatsAggregation(
   statsAggregation: any,
   timeseriesIntervalInSeconds: number
 ) {
-  const logstashState = stateDocument.logstash_state;
+  const logstashState = stateDocument.logstash_state || stateDocument.logstash?.node?.state;
   const vertices = logstashState?.pipeline?.representation?.graph?.vertices ?? [];
 
   const verticesById: any = {};
@@ -90,7 +90,9 @@ export function _enrichStateWithStatsAggregation(
   const totalProcessorsDurationInMillis = totalDurationStats.max - totalDurationStats.min;
 
   const verticesWithStatsBuckets =
-    statsAggregation.aggregations?.pipelines.scoped.vertices.vertex_id.buckets ?? [];
+    statsAggregation.aggregations?.pipelines.scoped.vertices?.vertex_id.buckets ??
+    statsAggregation.aggregations?.pipelines_mb.scoped.vertices?.vertex_id.buckets ??
+    [];
   verticesWithStatsBuckets.forEach((vertexStatsBucket: any) => {
     // Each vertexStats bucket contains a list of stats for a single vertex within a single timeseries interval
     const vertexId = vertexStatsBucket.key;
@@ -107,7 +109,7 @@ export function _enrichStateWithStatsAggregation(
     }
   });
 
-  return stateDocument.logstash_state?.pipeline;
+  return logstashState?.pipeline;
 }
 
 export async function getPipeline(
@@ -121,7 +123,7 @@ export async function getPipeline(
   checkParam(lsIndexPattern, 'lsIndexPattern in getPipeline');
 
   // Determine metrics' timeseries interval based on version's timespan
-  const minIntervalSeconds = config.get('monitoring.ui.min_interval_seconds');
+  const minIntervalSeconds = Math.max(Number(config.get('monitoring.ui.min_interval_seconds')), 30);
   const timeseriesInterval = calculateTimeseriesInterval(
     Number(version.firstSeen),
     Number(version.lastSeen),

@@ -12,8 +12,9 @@ import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { CasesClient } from '../client';
 import { CasesClientArgs } from '../types';
-import { AlertsCount } from './alerts_count';
-import { AlertDetails } from './alert_details';
+import { AlertsCount } from './alerts/count';
+import { AlertDetails } from './alerts/details';
+import { Actions } from './actions';
 import { Connectors } from './connectors';
 import { Lifespan } from './lifespan';
 import { MetricsHandler } from './types';
@@ -37,15 +38,12 @@ export const getCaseMetrics = async (
   const { logger } = clientArgs;
 
   try {
-    const handlers = buildHandlers(params, casesClient, clientArgs);
     await checkAuthorization(params, clientArgs);
-    checkAndThrowIfInvalidFeatures(params, handlers);
+    const handlers = buildHandlers(params, casesClient, clientArgs);
 
     const computedMetrics = await Promise.all(
-      params.features.map(async (feature) => {
-        const handler = handlers.get(feature);
-
-        return handler?.compute();
+      Array.from(handlers).map(async (handler) => {
+        return handler.compute();
       })
     );
 
@@ -53,7 +51,7 @@ export const getCaseMetrics = async (
       return merge(acc, metric);
     }, {});
 
-    return CaseMetricsResponseRt.encode(mergedResults ?? {});
+    return CaseMetricsResponseRt.encode(mergedResults);
   } catch (error) {
     throw createCaseError({
       logger,
@@ -67,31 +65,42 @@ const buildHandlers = (
   params: CaseMetricsParams,
   casesClient: CasesClient,
   clientArgs: CasesClientArgs
-): Map<string, MetricsHandler> => {
-  const handlers = [
+): Set<MetricsHandler> => {
+  const handlers: MetricsHandler[] = [
     new Lifespan(params.caseId, casesClient),
     new AlertsCount(params.caseId, casesClient, clientArgs),
-    new AlertDetails(),
+    new AlertDetails(params.caseId, casesClient, clientArgs),
+    new Actions(params.caseId, casesClient, clientArgs),
     new Connectors(),
   ];
 
-  const handlersByFeature = new Map<string, MetricsHandler>();
+  const uniqueFeatures = new Set(params.features);
+  const handlerFeatures = new Set<string>();
+  const handlersToExecute = new Set<MetricsHandler>();
   for (const handler of handlers) {
-    // assign each feature to the handler that owns that feature
-    handler.getFeatures().forEach((value) => handlersByFeature.set(value, handler));
+    for (const handlerFeature of handler.getFeatures()) {
+      if (uniqueFeatures.has(handlerFeature)) {
+        handler.setupFeature?.(handlerFeature);
+        handlersToExecute.add(handler);
+      }
+
+      handlerFeatures.add(handlerFeature);
+    }
   }
 
-  return handlersByFeature;
+  checkAndThrowIfInvalidFeatures(params, handlerFeatures);
+
+  return handlersToExecute;
 };
 
 const checkAndThrowIfInvalidFeatures = (
   params: CaseMetricsParams,
-  handlers: Map<string, MetricsHandler>
+  handlerFeatures: Set<string>
 ) => {
-  const invalidFeatures = params.features.filter((feature) => !handlers.has(feature));
+  const invalidFeatures = params.features.filter((feature) => !handlerFeatures.has(feature));
   if (invalidFeatures.length > 0) {
     const invalidFeaturesAsString = invalidFeatures.join(', ');
-    const validFeaturesAsString = [...handlers.keys()].join(', ');
+    const validFeaturesAsString = [...handlerFeatures.keys()].sort().join(', ');
 
     throw Boom.badRequest(
       `invalid features: [${invalidFeaturesAsString}], please only provide valid features: [${validFeaturesAsString}]`

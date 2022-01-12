@@ -6,15 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { getPostCaseRequest, postCommentAlertReq } from '../../../../common/lib/mock';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import {
-  createCase,
-  createComment,
-  deleteAllCaseItems,
-  getCaseMetrics,
-} from '../../../../common/lib/utils';
+import { deleteAllCaseItems, getCaseMetrics } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -64,66 +58,6 @@ export default ({ getService }: FtrProviderContext): void => {
         })) as unknown as { message: string };
 
         expect(errorResponse.message).to.contain('invalid features');
-      });
-    });
-
-    describe('alerts', () => {
-      afterEach(async () => {
-        await deleteAllCaseItems(es);
-      });
-
-      it('counts the alerts attached to a case in two different comments', async () => {
-        const theCase = await createCase(supertest, getPostCaseRequest());
-
-        await createComment({ supertest, caseId: theCase.id, params: postCommentAlertReq });
-        await createComment({
-          supertest,
-          caseId: theCase.id,
-          params: {
-            ...postCommentAlertReq,
-            alertId: ['test-id-2', 'test-id-3'],
-            index: ['test-index-2', 'test-index-2'],
-          },
-        });
-
-        const metrics = await getCaseMetrics({
-          supertest,
-          caseId: theCase.id,
-          features: ['alerts.count'],
-        });
-
-        expect(metrics).to.eql({
-          alerts: {
-            count: 3,
-          },
-        });
-      });
-
-      it('counts unique alert ids', async () => {
-        const theCase = await createCase(supertest, getPostCaseRequest());
-
-        await createComment({ supertest, caseId: theCase.id, params: postCommentAlertReq });
-        await createComment({
-          supertest,
-          caseId: theCase.id,
-          params: {
-            ...postCommentAlertReq,
-            alertId: ['test-id-2', 'test-id-2'],
-            index: ['test-index-2', 'test-index-2'],
-          },
-        });
-
-        const metrics = await getCaseMetrics({
-          supertest,
-          caseId: theCase.id,
-          features: ['alerts.count'],
-        });
-
-        expect(metrics).to.eql({
-          alerts: {
-            count: 2,
-          },
-        });
       });
     });
   });
