@@ -112,7 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.clickNewSearchButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.discover.loadSavedSearch('persisted hidden histogram');
+      await PageObjects.discover.loadSavedSearch(savedSearch);
       await PageObjects.header.waitUntilLoadingHasFinished();
       canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(false);
@@ -123,11 +123,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return canvasExists;
       });
 
-      await PageObjects.discover.saveSearch('persisted hidden histogram');
+      await PageObjects.discover.saveSearch(savedSearch);
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.discover.clickNewSearchButton();
-      await PageObjects.discover.loadSavedSearch('persisted hidden histogram');
+      await PageObjects.discover.loadSavedSearch(savedSearch);
       await PageObjects.header.waitUntilLoadingHasFinished();
       canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(true);

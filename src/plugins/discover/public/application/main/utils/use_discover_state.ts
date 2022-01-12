@@ -67,7 +67,6 @@ export function useDiscoverState({
   );
 
   const { appStateContainer } = stateContainer;
-
   const [state, setState] = useState(appStateContainer.getState());
 
   /**
@@ -98,55 +97,6 @@ export function useDiscoverState({
     stateContainer,
     useNewFieldsApi,
   });
-
-  useEffect(() => {
-    const stopSync = stateContainer.initializeAndSync(indexPattern, filterManager, data);
-
-    return () => stopSync();
-  }, [stateContainer, filterManager, data, indexPattern]);
-
-  /**
-   * Track state changes that should trigger a fetch
-   */
-  useEffect(() => {
-    const unsubscribe = appStateContainer.subscribe(async (nextState) => {
-      const { hideChart, interval, sort, index } = state;
-      // chart was hidden, now it should be displayed, so data is needed
-      const chartDisplayChanged = nextState.hideChart !== hideChart && hideChart;
-      const chartIntervalChanged = nextState.interval !== interval;
-      const docTableSortChanged = !isEqual(nextState.sort, sort);
-      const indexPatternChanged = !isEqual(nextState.index, index);
-      // NOTE: this is also called when navigating from discover app to context app
-      if (nextState.index && indexPatternChanged) {
-        /**
-         *  Without resetting the fetch state, e.g. a time column would be displayed when switching
-         *  from a index pattern without to a index pattern with time filter for a brief moment
-         *  That's because appState is updated before savedSearchData$
-         *  The following line of code catches this, but should be improved
-         */
-        const nextIndexPattern = await loadIndexPattern(nextState.index, indexPatterns, config);
-        savedSearch.searchSource.setField('index', nextIndexPattern.loaded);
-
-        reset();
-      }
-
-      if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
-        refetch$.next();
-      }
-      setState(nextState);
-    });
-    return () => unsubscribe();
-  }, [
-    config,
-    indexPatterns,
-    appStateContainer,
-    setState,
-    state,
-    refetch$,
-    data$,
-    reset,
-    savedSearch.searchSource,
-  ]);
 
   /**
    * function to revert any changes to a given saved search
@@ -207,20 +157,15 @@ export function useDiscoverState({
     [refetch$, searchSessionManager]
   );
 
+  /**
+   * Update state on dataView or saved search
+   */
   useEffect(() => {
-    if (!savedSearch || !savedSearch.id) {
-      return;
-    }
-    // handling pushing to state of a persisted saved object
-    const newAppState = getStateDefaults({
-      config,
-      data,
-      savedSearch,
-      storage,
-    });
-    stateContainer.replaceUrlAppState(newAppState);
-    setState(newAppState);
-  }, [config, data, savedSearch, reset, stateContainer, storage]);
+    const stopSync = stateContainer.initializeAndSync(indexPattern, filterManager, data);
+    setState(stateContainer.appStateContainer.getState());
+
+    return () => stopSync();
+  }, [stateContainer, filterManager, data, indexPattern]);
 
   /**
    * Trigger data fetching on indexPattern or savedSearch changes
@@ -231,6 +176,49 @@ export function useDiscoverState({
     }
   }, [initialFetchStatus, refetch$, indexPattern, savedSearch.id]);
 
+  /**
+   * Track state changes that should trigger a fetch
+   */
+  useEffect(() => {
+    const unsubscribe = appStateContainer.subscribe(async (nextState) => {
+      const { hideChart, interval, sort, index } = state;
+      // chart was hidden, now it should be displayed, so data is needed
+      const chartDisplayChanged = nextState.hideChart !== hideChart && hideChart;
+      const chartIntervalChanged = nextState.interval !== interval;
+      const docTableSortChanged = !isEqual(nextState.sort, sort);
+      const indexPatternChanged = !isEqual(nextState.index, index);
+      // NOTE: this is also called when navigating from discover app to context app
+      if (nextState.index && indexPatternChanged) {
+        /**
+         *  Without resetting the fetch state, e.g. a time column would be displayed when switching
+         *  from a index pattern without to a index pattern with time filter for a brief moment
+         *  That's because appState is updated before savedSearchData$
+         *  The following line of code catches this, but should be improved
+         */
+        const nextIndexPattern = await loadIndexPattern(nextState.index, indexPatterns, config);
+        savedSearch.searchSource.setField('index', nextIndexPattern.loaded);
+
+        reset();
+      }
+
+      if (chartDisplayChanged || chartIntervalChanged || docTableSortChanged) {
+        refetch$.next();
+      }
+      setState(nextState);
+    });
+    return () => unsubscribe();
+  }, [
+    config,
+    indexPatterns,
+    appStateContainer,
+    setState,
+    state,
+    refetch$,
+    data$,
+    reset,
+    savedSearch.searchSource,
+  ]);
+
   return {
     data$,
     indexPattern,
@@ -240,7 +228,6 @@ export function useDiscoverState({
     onChangeIndexPattern,
     onUpdateQuery,
     searchSource,
-    setState,
     state,
     stateContainer,
   };

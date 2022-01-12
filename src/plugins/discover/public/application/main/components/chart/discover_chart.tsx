@@ -82,7 +82,7 @@ export function DiscoverChart({
     const newHideChart = !hideChartState;
     chartRef.current.moveFocus = !newHideChart;
     storage.set(CHART_HIDDEN_KEY, newHideChart);
-    stateContainer.setAppState({ hideChart: !!newHideChart ? true : undefined });
+    stateContainer.setAppState({ hideChart: newHideChart });
   }, [hideChartState, stateContainer, storage]);
 
   const timefilterUpdateHandler = useCallback(
