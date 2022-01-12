@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
 import { CoreStart } from '../../../../../../../src/core/public';
@@ -64,7 +65,36 @@ const stories: Meta<Args> = {
 export default stories;
 
 export const Example: Story<Args> = ({ serviceName, start, end }) => {
-  return <ServiceIcons serviceName={serviceName} start={start} end={end} />;
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiTitle size="l">
+          <h1 data-test-subj="apmMainTemplateHeaderServiceName">
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="l">
+                      <h1 data-test-subj="apmMainTemplateHeaderServiceName">
+                        {serviceName}
+                      </h1>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <ServiceIcons
+                      serviceName={serviceName}
+                      start={start}
+                      end={end}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </h1>
+        </EuiTitle>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };
 Example.args = {
   serviceName: 'opbeans-java',

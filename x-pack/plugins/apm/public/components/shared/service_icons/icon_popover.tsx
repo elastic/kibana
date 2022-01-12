@@ -6,9 +6,8 @@
  */
 
 import {
-  EuiIcon,
+  EuiButtonIcon,
   EuiLoadingContent,
-  EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
@@ -28,16 +27,14 @@ interface IconPopoverProps {
   icon: PopoverItem['icon'];
 }
 
-const StyledPanel = styled(EuiPanel)`
-  &.serviceIcon {
+const StyledButtonIcon = styled(EuiButtonIcon)`
+  &.serviceIcon_button {
     box-shadow: ${({ theme }) => {
       const shadowColor = theme.eui.euiShadowColor;
       return `0px 0.7px 1.4px ${rgba(shadowColor, 0.07)},
       0px 1.9px 4px ${rgba(shadowColor, 0.05)},
       0px 4.5px 10px ${rgba(shadowColor, 0.05)} !important;`;
-    }};
-    padding: 0 8px;
-  }
+    }}
 `;
 export function IconPopover({
   icon,
@@ -57,18 +54,16 @@ export function IconPopover({
       anchorPosition="downCenter"
       ownFocus={false}
       button={
-        <StyledPanel
+        <StyledButtonIcon
+          display="fill"
+          color="ghost"
           onClick={onClick}
+          iconType={icon.type}
+          iconSize={icon.size ?? 'l'}
+          className="serviceIcon_button"
           data-test-subj={`popover_${title}`}
-          className="serviceIcon"
-          paddingSize="none"
-        >
-          <EuiIcon
-            type={icon.type}
-            size={icon.size ?? 'l'}
-            color={icon.color}
-          />
-        </StyledPanel>
+          size="m"
+        />
       }
       isOpen={isOpen}
       closePopover={onClose}

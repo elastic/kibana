@@ -53,7 +53,6 @@ export interface PopoverItem {
   key: Icons;
   icon: {
     type?: string;
-    color?: string;
     size?: 's' | 'm' | 'l';
   };
   isVisible: boolean;
