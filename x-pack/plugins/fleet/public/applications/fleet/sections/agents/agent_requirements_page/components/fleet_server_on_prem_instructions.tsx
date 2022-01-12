@@ -116,6 +116,7 @@ export const ServiceTokenStep = ({
                 onClick={() => {
                   getServiceToken();
                 }}
+                data-test-subj="fleetServerGenerateServiceTokenBtn"
               >
                 <FormattedMessage
                   id="xpack.fleet.fleetServerSetup.generateServiceTokenButton"
@@ -427,6 +428,7 @@ const AgentPolicySelectionStep = ({
           aria-label={i18n.translate('xpack.fleet.fleetServerSetup.agentPolicySelectAraiLabel', {
             defaultMessage: 'Agent policy',
           })}
+          data-test-subj="agentPolicyDropdown"
         />
         {createStatus !== CREATE_STATUS.INITIAL && (
           <AgentPolicyCreatedCallOut createStatus={createStatus} />
@@ -538,11 +540,16 @@ export const AddFleetServerHostStepContent = ({
                 />
               </EuiText>
             }
+            data-test-subj="fleetServerHostInput"
           />
           {error && <EuiFormErrorText>{error}</EuiFormErrorText>}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton isLoading={isLoading} onClick={onSubmit}>
+          <EuiButton
+            isLoading={isLoading}
+            onClick={onSubmit}
+            data-test-subj="fleetServerAddHostBtn"
+          >
             <FormattedMessage
               id="xpack.fleet.fleetServerSetup.addFleetServerHostButton"
               defaultMessage="Add host"

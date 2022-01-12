@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AGENT_POLICIES_TAB, ENROLLMENT_TOKENS_TAB } from '../screens/fleet';
+import { AGENTS_TAB, AGENT_POLICIES_TAB, ENROLLMENT_TOKENS_TAB } from '../screens/fleet';
 import { cleanupAgentPolicies, unenrollAgent } from '../tasks/cleanup';
 import { FLEET, navigateTo } from '../tasks/navigation';
 
@@ -14,8 +14,8 @@ describe('Fleet startup', () => {
     navigateTo(FLEET);
   });
 
-  function navigateToAgentPolicies() {
-    cy.getBySel(AGENT_POLICIES_TAB).click();
+  function navigateToTab(tab: string) {
+    cy.getBySel(tab).click();
     cy.get('.euiBasicTable-loading').should('not.exist');
   }
 
@@ -31,7 +31,7 @@ describe('Fleet startup', () => {
   }
 
   function verifyPolicy(name: string, integrations: string[]) {
-    navigateToAgentPolicies();
+    navigateToTab(AGENT_POLICIES_TAB);
 
     navigateToAgentPolicy(name);
     integrations.forEach((integration) => {
@@ -69,15 +69,7 @@ describe('Fleet startup', () => {
       cleanupAgentPolicies();
     });
 
-    before(() => {
-      // hosts needed to be set so that UI shows fleet server instructions
-      cy.request({
-        method: 'PUT',
-        url: '/api/fleet/settings',
-        body: { fleet_server_hosts: ['http://localhost:8220'] },
-        headers: { 'kbn-xsrf': 'kibana' },
-      });
-    });
+    before(() => {});
 
     it('should have no agent policy by default', () => {
       cy.request('/api/fleet/agent_policies?full=true').then((response: any) => {
@@ -93,26 +85,44 @@ describe('Fleet startup', () => {
 
       cy.getBySel('createPolicyBtn').click();
 
+      let agentPolicyId;
       const startTime = Date.now();
       cy.wait('@createAgentPolicy', { timeout: 180000 }).then((xhr: any) => {
         cy.log('Create agent policy took: ' + (Date.now() - startTime) / 1000 + ' s');
+        agentPolicyId = xhr.response.body.item.id;
+
+        cy.getBySel('agentPolicyCreateStatusCallOut').contains('Agent policy created');
+
+        // verify create button changed to dropdown
+        cy.getBySel('agentPolicyDropdown');
+        // verify agent.yml code block has new policy id
+        cy.get('.euiCodeBlock__code').contains(`id: ${agentPolicyId}`);
+
+        cy.getBySel('euiFlyoutCloseButton').click();
+
+        // verify policy is created and has system package
+        verifyPolicy('Agent policy 1', ['System']);
+
+        verifyAgentPackage();
       });
-
-      cy.getBySel('agentPolicyCreateStatusCallOut').contains('Agent policy created');
-      cy.get('.euiLoadingSpinner').should('not.exist');
-
-      cy.getBySel('euiFlyoutCloseButton').click();
-
-      verifyPolicy('Agent policy 1', ['System']);
-
-      verifyAgentPackage();
     });
 
     it('should create Fleet Server policy', () => {
       cy.getBySel('createFleetServerPolicyBtn').click();
       cy.getBySel('agentPolicyCreateStatusCallOut').contains('Agent policy created');
 
+      // verify policy is created and has fleet server and system package
       verifyPolicy('Fleet Server policy 1', ['Fleet Server', 'System']);
+
+      navigateToTab(AGENTS_TAB);
+      // verify create button changed to dropdown
+      cy.getBySel('agentPolicyDropdown');
+
+      // verify fleet server enroll command contains created policy id
+      cy.getBySel('fleetServerHostInput').type('http://localhost:8220');
+      cy.getBySel('fleetServerAddHostBtn').click();
+      cy.getBySel('fleetServerGenerateServiceTokenBtn').click();
+      cy.get('.euiCodeBlock__code').contains('--fleet-server-policy=fleet-server-policy');
     });
   });
 });

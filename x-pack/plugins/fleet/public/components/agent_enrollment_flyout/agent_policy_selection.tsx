@@ -147,6 +147,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
             }
           )}
           hasNoInitialSelection={agentPolicyList.length > 1}
+          data-test-subj="agentPolicyDropdown"
         />
       </AgentPolicyFormRow>
       <EuiSpacer size="m" />
