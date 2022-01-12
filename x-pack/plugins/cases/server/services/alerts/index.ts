@@ -18,7 +18,7 @@ import {
   ALERT_WORKFLOW_STATUS,
   STATUS_VALUES,
 } from '../../../../rule_registry/common/technical_rule_data_field_names';
-import { AggregationBuilder, AggregationResponse } from '../../client/metrics/alerts/aggregations';
+import { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 
 export class AlertService {
   constructor(

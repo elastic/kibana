@@ -14,6 +14,7 @@ import { CasesClient } from '../client';
 import { CasesClientArgs } from '../types';
 import { AlertsCount } from './alerts/count';
 import { AlertDetails } from './alerts/details';
+import { Actions } from './actions';
 import { Connectors } from './connectors';
 import { Lifespan } from './lifespan';
 import { MetricsHandler } from './types';
@@ -69,6 +70,7 @@ const buildHandlers = (
     new Lifespan(params.caseId, casesClient),
     new AlertsCount(params.caseId, casesClient, clientArgs),
     new AlertDetails(params.caseId, casesClient, clientArgs),
+    new Actions(params.caseId, casesClient, clientArgs),
     new Connectors(),
   ];
 

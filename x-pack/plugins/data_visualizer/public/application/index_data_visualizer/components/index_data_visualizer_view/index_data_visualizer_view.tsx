@@ -110,6 +110,7 @@ export const getDefaultDataVisualizerListState = (
 export interface IndexDataVisualizerViewProps {
   currentIndexPattern: IndexPattern;
   currentSavedSearch: SavedSearchSavedObject | null;
+  currentSessionId?: string;
   additionalLinks?: ResultLink[];
 }
 const restorableDefaults = getDefaultDataVisualizerListState();
@@ -129,7 +130,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     dataVisualizerProps.currentSavedSearch
   );
 
-  const { currentIndexPattern, additionalLinks } = dataVisualizerProps;
+  const { currentIndexPattern, additionalLinks, currentSessionId } = dataVisualizerProps;
 
   useEffect(() => {
     if (dataVisualizerProps?.currentSavedSearch !== undefined) {
@@ -228,11 +229,12 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     return {
       indexPattern: currentIndexPattern,
       savedSearch: currentSavedSearch,
+      sessionId: currentSessionId,
       visibleFieldNames,
       allowEditDataView: true,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndexPattern.id, currentSavedSearch?.id, visibleFieldNames]);
+  }, [currentIndexPattern.id, currentSavedSearch?.id, visibleFieldNames, currentSessionId]);
 
   const {
     configs,
@@ -477,6 +479,8 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                     getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
                     extendedColumns={extendedColumns}
                     loading={progress < 100}
+                    showPreviewByDefault={dataVisualizerListState.showDistributions ?? true}
+                    onChange={setDataVisualizerListState}
                   />
                 </EuiPanel>
               </EuiFlexItem>

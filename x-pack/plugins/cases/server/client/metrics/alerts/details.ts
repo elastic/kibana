@@ -12,14 +12,14 @@ import { createCaseError } from '../../../common/error';
 
 import { CasesClient } from '../../client';
 import { CasesClientArgs } from '../../types';
-import { MetricsHandler } from '../types';
-import { Hosts, Users, AggregationBuilder, AggregationResponse } from './aggregations';
+import { MetricsHandler, AggregationBuilder, AggregationResponse } from '../types';
+import { AlertHosts, AlertUsers } from './aggregations';
 
 export class AlertDetails implements MetricsHandler {
   private aggregationsToBuild: AggregationBuilder[] = [];
   private readonly aggregations = new Map<string, AggregationBuilder>([
-    ['alerts.hosts', new Hosts()],
-    ['alerts.users', new Users()],
+    ['alerts.hosts', new AlertHosts()],
+    ['alerts.users', new AlertUsers()],
   ]);
 
   constructor(

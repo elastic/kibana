@@ -74,7 +74,7 @@ pageLoadAssetSize:
   watcher: 43598
   runtimeFields: 41752
   stackAlerts: 29684
-  presentationUtil: 84606
+  presentationUtil: 58834
   osquery: 107090
   fileUpload: 25664
   dataVisualizer: 27530
@@ -118,4 +118,6 @@ pageLoadAssetSize:
   visTypeHeatmap: 25340
   screenshotting: 17017
   expressionGauge: 25000
+  controls: 34788
   expressionPie: 26338
+  sharedUX: 16225

@@ -11,7 +11,7 @@ import {
   euiLightVars as themeLight,
   euiDarkVars as themeDark,
 } from '@kbn/ui-shared-deps-src/theme';
-import type { IndexPattern } from 'src/plugins/data/common';
+import type { DataView } from 'src/plugins/data/common';
 
 import {
   EuiDataGridCellValueElementProps,
@@ -29,7 +29,7 @@ import { ElasticSearchHit } from '../../types';
 
 export const getRenderCellValueFn =
   (
-    indexPattern: IndexPattern,
+    indexPattern: DataView,
     rows: ElasticSearchHit[] | undefined,
     rowsFlattened: Array<Record<string, unknown>>,
     useNewFieldsApi: boolean,

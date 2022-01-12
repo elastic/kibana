@@ -54,6 +54,11 @@ describe('ChecklistFlyout', () => {
       errorMessage: null,
       reindexWarnings: [],
       hasRequiredPrivileges: true,
+      meta: {
+        indexName: 'myIndex',
+        reindexName: 'reindexed-myIndex',
+        aliases: [],
+      },
     } as ReindexState,
   };
 
