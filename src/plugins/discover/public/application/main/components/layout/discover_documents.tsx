@@ -14,7 +14,6 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SerializedRowHeight } from '../../../../utils/use_row_heights_options';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
 import { FetchStatus } from '../../../types';
@@ -34,7 +33,6 @@ import { useDataState } from '../../utils/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { SortPairArr } from '../../../../components/doc_table/lib/get_sort';
 import { ElasticSearchHit } from '../../../../types';
-import { isValidRowHeight } from '../../../../utils/validate_row_height';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -102,13 +100,8 @@ function DiscoverDocumentsComponent({
     [stateContainer]
   );
 
-  const rowHeightFromState = useMemo(
-    () => (isValidRowHeight(state.rowHeight) ? state.rowHeight : undefined),
-    [state.rowHeight]
-  );
-
   const onUpdateRowHeight = useCallback(
-    (rowHeight?: SerializedRowHeight) => stateContainer.setAppState({ rowHeight }),
+    (rowHeight: number) => stateContainer.setAppState({ rowHeight }),
     [stateContainer]
   );
 
@@ -181,7 +174,7 @@ function DiscoverDocumentsComponent({
             onSort={onSort}
             onResize={onResize}
             useNewFieldsApi={useNewFieldsApi}
-            rowHeightFromState={rowHeightFromState}
+            rowHeightState={state.rowHeight}
             onUpdateRowHeight={onUpdateRowHeight}
           />
         </div>

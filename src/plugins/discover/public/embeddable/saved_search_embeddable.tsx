@@ -293,7 +293,7 @@ export class SavedSearchEmbeddable
       useNewFieldsApi: !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false),
       showTimeCol: !this.services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false),
       ariaLabelledBy: 'documentsAriaLabel',
-      rowHeightFromState: this.input.rowHeight || this.savedSearch.rowHeight,
+      rowHeightState: this.input.rowHeight || this.savedSearch.rowHeight,
       onUpdateRowHeight: (rowHeight) => {
         this.updateInput({ rowHeight });
       },
@@ -346,7 +346,7 @@ export class SavedSearchEmbeddable
           );
     searchProps.sort = this.input.sort || savedSearchSort;
     searchProps.sharedItemTitle = this.panelTitle;
-    searchProps.rowHeightFromState = this.input.rowHeight || this.savedSearch.rowHeight;
+    searchProps.rowHeightState = this.input.rowHeight || this.savedSearch.rowHeight;
     if (forceFetch || isFetchRequired) {
       this.filtersSearchSource.setField('filter', this.input.filters);
       this.filtersSearchSource.setField('query', this.input.query);

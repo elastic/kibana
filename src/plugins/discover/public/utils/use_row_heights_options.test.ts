@@ -23,7 +23,7 @@ describe('useRowHeightsOptions', () => {
       storage: new LocalStorageMock({}) as unknown as Storage,
     } as unknown as DiscoverServices);
     const { result } = renderHook(() => {
-      return useRowHeightsOptions({ rowHeightFromState: 2 });
+      return useRowHeightsOptions({ rowHeightState: 2 });
     });
 
     expect(result.current.defaultHeight).toEqual({ lineCount: 2 });

@@ -7,7 +7,7 @@
  */
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
-import { EuiCopy, EuiDataGridRowHeightOption } from '@elastic/eui';
+import { EuiCopy } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { esHits } from '../../__mocks__/es_hits';
@@ -50,8 +50,6 @@ function getProps() {
     showTimeCol: true,
     sort: [],
     useNewFieldsApi: true,
-    defaultRowHeight: 'auto' as EuiDataGridRowHeightOption,
-    onRowHeightChange: () => {},
   };
 }
 

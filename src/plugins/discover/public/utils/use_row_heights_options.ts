@@ -9,28 +9,19 @@
 import type { EuiDataGridRowHeightOption } from '@elastic/eui';
 import { useEffect, useMemo } from 'react';
 import { EuiDataGridRowHeightsOptions } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import { Storage } from '../../../kibana_utils/public';
 import { getServices } from '../kibana_services';
 import { ROW_HEIGHT_OPTION } from '../../common';
-import { isValidRowHeight } from './validate_row_height';
-
-export type SerializedRowHeight = number;
+import { getDefaultRowHeight, updateStoredRowHeight } from './row_heights';
 
 interface UseRowHeightProps {
-  rowHeightFromState?: SerializedRowHeight;
-  onUpdateRowHeight?: (rowHeight?: SerializedRowHeight) => void;
+  rowHeightState?: number;
+  onUpdateRowHeight?: (rowHeight: number) => void;
 }
 
-interface DataGridOptionsRecord {
-  previousRowHeight: SerializedRowHeight;
-  previousConfigRowHeight: SerializedRowHeight;
-}
-
-const ROW_HEIGHT_KEY = 'discover:dataGridRowHeight';
 const SINGLE_ROW_HEIGHT_OPTION = 0;
 const AUTO_ROW_HEIGHT_OPTION = -1;
 
-const serializeRowHeight = (rowHeight?: EuiDataGridRowHeightOption): SerializedRowHeight => {
+const serializeRowHeight = (rowHeight?: EuiDataGridRowHeightOption): number => {
   if (rowHeight === 'auto') {
     return AUTO_ROW_HEIGHT_OPTION;
   } else if (typeof rowHeight === 'object' && rowHeight.lineCount) {
@@ -39,69 +30,17 @@ const serializeRowHeight = (rowHeight?: EuiDataGridRowHeightOption): SerializedR
 
   return SINGLE_ROW_HEIGHT_OPTION;
 };
-const deserializeRowHeight = (
-  serializedRowHeight: SerializedRowHeight
-): EuiDataGridRowHeightOption | undefined => {
-  if (serializedRowHeight === AUTO_ROW_HEIGHT_OPTION) {
+const deserializeRowHeight = (number: number): EuiDataGridRowHeightOption | undefined => {
+  if (number === AUTO_ROW_HEIGHT_OPTION) {
     return 'auto';
-  } else if (serializedRowHeight === SINGLE_ROW_HEIGHT_OPTION) {
+  } else if (number === SINGLE_ROW_HEIGHT_OPTION) {
     return undefined;
   }
 
-  return { lineCount: serializedRowHeight }; // custom
+  return { lineCount: number }; // custom
 };
 
-const getStoredRowHeight = (storage: Storage): DataGridOptionsRecord | null => {
-  const entry = storage.get(ROW_HEIGHT_KEY);
-  if (
-    typeof entry === 'object' &&
-    entry !== null &&
-    isValidRowHeight(entry.previousRowHeight) &&
-    isValidRowHeight(entry.previousConfigRowHeight)
-  ) {
-    return entry;
-  }
-  return null;
-};
-const updateStoredRowHeight = (newRowHeight: number, configRowHeight: number, storage: Storage) => {
-  storage.set(ROW_HEIGHT_KEY, {
-    previousRowHeight: newRowHeight,
-    previousConfigRowHeight: configRowHeight,
-  });
-};
-
-const chooseRowHeight = ({
-  rowHeightFromState,
-  rowHeightFromLS,
-  configRowHeight,
-}: {
-  rowHeightFromState?: SerializedRowHeight;
-  rowHeightFromLS: DataGridOptionsRecord | null;
-  configRowHeight: SerializedRowHeight;
-}) => {
-  const configHasNotChanged = (
-    localStorageRecord: DataGridOptionsRecord | null
-  ): localStorageRecord is DataGridOptionsRecord =>
-    localStorageRecord !== null && configRowHeight === localStorageRecord.previousConfigRowHeight;
-
-  // select rowHeight
-  let defaultRowHeight: SerializedRowHeight;
-  if (typeof rowHeightFromState === 'number') {
-    defaultRowHeight = rowHeightFromState;
-  } else if (configHasNotChanged(rowHeightFromLS)) {
-    // if advanced setting has not been changed, use value from local storage
-    defaultRowHeight = rowHeightFromLS.previousRowHeight;
-  } else {
-    defaultRowHeight = configRowHeight;
-  }
-
-  return defaultRowHeight;
-};
-
-export const useRowHeightsOptions = ({
-  rowHeightFromState,
-  onUpdateRowHeight,
-}: UseRowHeightProps) => {
+export const useRowHeightsOptions = ({ rowHeightState, onUpdateRowHeight }: UseRowHeightProps) => {
   const { storage, uiSettings } = getServices();
 
   const configRowHeight = useMemo(() => uiSettings.get(ROW_HEIGHT_OPTION), [uiSettings]);
@@ -110,34 +49,25 @@ export const useRowHeightsOptions = ({
    * This effect should be removed after fixing https://github.com/elastic/eui/issues/5524
    */
   useEffect(() => {
-    const rowHeightFromLS = getStoredRowHeight(storage);
-    const newRowHeight = chooseRowHeight({
-      rowHeightFromState,
-      rowHeightFromLS,
-      configRowHeight,
-    });
+    if (rowHeightState) {
+      updateStoredRowHeight(rowHeightState, configRowHeight, storage);
+      onUpdateRowHeight?.(rowHeightState);
+    }
+  }, [rowHeightState, onUpdateRowHeight, storage, uiSettings, configRowHeight]);
 
-    updateStoredRowHeight(newRowHeight, configRowHeight, storage);
-    onUpdateRowHeight?.(newRowHeight);
-  }, [rowHeightFromState, onUpdateRowHeight, storage, uiSettings, configRowHeight]);
-
-  const rowHeightsOptions = useMemo((): EuiDataGridRowHeightsOptions => {
-    const rowHeightFromLS = getStoredRowHeight(storage);
-    const defaultRowHeight = chooseRowHeight({
-      rowHeightFromState,
-      rowHeightFromLS,
-      configRowHeight,
-    });
-
-    return {
-      defaultHeight: deserializeRowHeight(defaultRowHeight),
+  const rowHeightsOptions = useMemo(
+    (): EuiDataGridRowHeightsOptions => ({
+      defaultHeight: deserializeRowHeight(
+        rowHeightState ? rowHeightState : getDefaultRowHeight(uiSettings, storage)
+      ),
       onChange: ({ defaultHeight: newRowHeight }: EuiDataGridRowHeightsOptions) => {
         const newSerializedRowHeight = serializeRowHeight(newRowHeight);
         updateStoredRowHeight(newSerializedRowHeight, configRowHeight, storage);
         onUpdateRowHeight?.(newSerializedRowHeight);
       },
-    };
-  }, [storage, rowHeightFromState, configRowHeight, onUpdateRowHeight]);
+    }),
+    [rowHeightState, uiSettings, storage, configRowHeight, onUpdateRowHeight]
+  );
 
   return rowHeightsOptions;
 };

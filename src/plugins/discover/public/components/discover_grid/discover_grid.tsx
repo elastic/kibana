@@ -49,7 +49,7 @@ import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_docume
 import { SortPairArr } from '../doc_table/lib/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
 import { ElasticSearchHit } from '../../types';
-import { SerializedRowHeight, useRowHeightsOptions } from '../../utils/use_row_heights_options';
+import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
 import { useGridStyle } from '../../utils/use_grid_style';
 
 interface SortObj {
@@ -162,11 +162,11 @@ export interface DiscoverGridProps {
   /**
    * Row height from URL state / savedSearch / local embeddable state
    */
-  rowHeightFromState?: SerializedRowHeight;
+  rowHeightState?: number;
   /**
    * On row height update callback
    */
-  onUpdateRowHeight?: (rowHeight?: SerializedRowHeight) => void;
+  onUpdateRowHeight?: (rowHeight: number) => void;
 }
 
 export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
@@ -201,7 +201,7 @@ export const DiscoverGrid = ({
   isPaginationEnabled = true,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
   className,
-  rowHeightFromState,
+  rowHeightState,
   onUpdateRowHeight,
 }: DiscoverGridProps) => {
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
@@ -394,7 +394,7 @@ export const DiscoverGrid = ({
     [showDisplaySelector, defaultColumns, additionalControls, isSortEnabled]
   );
 
-  const rowHeightsOptions = useRowHeightsOptions({ rowHeightFromState, onUpdateRowHeight });
+  const rowHeightsOptions = useRowHeightsOptions({ rowHeightState, onUpdateRowHeight });
 
   const { gridStyle, gridDensityClass } = useGridStyle();
 
