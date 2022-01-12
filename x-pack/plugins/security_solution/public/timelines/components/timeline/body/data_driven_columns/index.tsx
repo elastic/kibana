@@ -448,3 +448,13 @@ export const getMappedNonEcsValue = ({
   }
   return undefined;
 };
+
+export const useGetMappedNonEcsValue = ({
+  data,
+  fieldName,
+}: {
+  data: TimelineNonEcsData[];
+  fieldName: string;
+}): string[] | undefined => {
+  return getMappedNonEcsValue({ data, fieldName });
+};

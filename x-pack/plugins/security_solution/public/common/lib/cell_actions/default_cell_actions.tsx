@@ -17,7 +17,7 @@ import {
 } from '../../../../../timelines/common/types';
 import { getPageRowIndex } from '../../../../../timelines/public';
 import { Ecs } from '../../../../common/ecs';
-import { getMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
+import { useGetMappedNonEcsValue } from '../../../timelines/components/timeline/body/data_driven_columns';
 import { FormattedFieldValue } from '../../../timelines/components/timeline/body/renderers/formatted_field';
 import { parseValue } from '../../../timelines/components/timeline/body/renderers/parse_value';
 import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
@@ -64,10 +64,14 @@ const useFormattedFieldProps = ({
   const linkField = header?.linkField ? header?.linkField : link?.linkField;
   const linkValues = header && getOr([], linkField ?? '', ecs);
   const eventId = (header && get('_id' ?? '', ecs)) || '';
-  const values = getMappedNonEcsValue({
-    data: data[pageRowIndex],
-    fieldName: columnId,
-  });
+  const rowData = useMemo(() => {
+    return {
+      data: data[pageRowIndex],
+      fieldName: columnId,
+    };
+  }, [pageRowIndex, columnId, data]);
+
+  const values = useGetMappedNonEcsValue(rowData);
   const value = parseValue(head(values));
   const title = values && values.length > 1 ? `${link?.label}: ${value}` : link?.label;
   // if linkField is defined but link values is empty, it's possible we are trying to look for a column definition for an old event set
@@ -110,77 +114,96 @@ const useFormattedFieldProps = ({
 
 export const cellActions: TGridCellAction[] = [
   ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
-    ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
+    function FilterFor({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) {
       const { timelines, filterManager } = useKibanaServices();
 
       const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+      const rowData = useMemo(() => {
+        return {
+          data: data[pageRowIndex],
+          fieldName: columnId,
+        };
+      }, [pageRowIndex, columnId]);
+
+      const value = useGetMappedNonEcsValue(rowData);
+      const filterForButton = useMemo(
+        () => timelines.getHoverActions().getFilterForValueButton,
+        [timelines]
+      );
+
+      const filterForProps = useMemo(() => {
+        return {
+          Component,
+          field: columnId,
+          filterManager,
+          onFilterAdded,
+          ownFocus: false,
+          showTooltip: false,
+          value,
+        };
+      }, [Component, columnId, filterManager, value]);
       if (pageRowIndex >= data.length) {
         // data grid expects each cell action always return an element, it crashes if returns null
         return <></>;
       }
 
-      const value = getMappedNonEcsValue({
-        data: data[pageRowIndex],
-        fieldName: columnId,
-      });
-
-      return (
-        <>
-          {timelines.getHoverActions().getFilterForValueButton({
-            Component,
-            field: columnId,
-            filterManager,
-            onFilterAdded,
-            ownFocus: false,
-            showTooltip: false,
-            value,
-          })}
-        </>
-      );
+      return <>{filterForButton(filterForProps)}</>;
     },
   ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
-    ({ rowIndex, columnId, Component }) => {
+    function FilterOut({ rowIndex, columnId, Component }) {
       const { timelines, filterManager } = useKibanaServices();
-
       const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+
+      const rowData = useMemo(() => {
+        return {
+          data: data[pageRowIndex],
+          fieldName: columnId,
+        };
+      }, [pageRowIndex, columnId]);
+
+      const value = useGetMappedNonEcsValue(rowData);
+
+      const filterOutButton = useMemo(
+        () => timelines.getHoverActions().getFilterOutValueButton,
+        [timelines]
+      );
+
+      const filterOutProps = useMemo(() => {
+        return {
+          Component,
+          field: columnId,
+          filterManager,
+          onFilterAdded,
+          ownFocus: false,
+          showTooltip: false,
+          value,
+        };
+      }, [Component, columnId, filterManager, value]);
       if (pageRowIndex >= data.length) {
         // data grid expects each cell action always return an element, it crashes if returns null
         return <></>;
       }
 
-      const value = getMappedNonEcsValue({
-        data: data[pageRowIndex],
-        fieldName: columnId,
-      });
-
-      return (
-        <>
-          {timelines.getHoverActions().getFilterOutValueButton({
-            Component,
-            field: columnId,
-            filterManager,
-            onFilterAdded,
-            ownFocus: false,
-            showTooltip: false,
-            value,
-          })}
-        </>
-      );
+      return <>{filterOutButton(filterOutProps)}</>;
     },
   ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
-    ({ rowIndex, columnId, Component }) => {
+    function AddToTimeline({ rowIndex, columnId, Component }) {
       const { timelines } = useKibanaServices();
 
       const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
-      if (pageRowIndex >= data.length) {
-        // data grid expects each cell action always return an element, it crashes if returns null
-        return <></>;
-      }
+      const rowData = useMemo(() => {
+        return {
+          data: data[pageRowIndex],
+          fieldName: columnId,
+        };
+      }, [pageRowIndex, columnId]);
 
-      const value = getMappedNonEcsValue({
-        data: data[pageRowIndex],
-        fieldName: columnId,
-      });
+      const value = useGetMappedNonEcsValue(rowData);
+
+      const addToTimelineButton = useMemo(
+        () => timelines.getHoverActions().getAddToTimelineButton,
+        [timelines]
+      );
 
       const dataProvider: DataProvider[] = useMemo(
         () =>
@@ -199,46 +222,55 @@ export const cellActions: TGridCellAction[] = [
           })) ?? [],
         [columnId, rowIndex, value]
       );
-
-      return (
-        <>
-          {timelines.getHoverActions().getAddToTimelineButton({
-            Component,
-            dataProvider,
-            field: columnId,
-            ownFocus: false,
-            showTooltip: false,
-          })}
-        </>
-      );
-    },
-  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
-    ({ rowIndex, columnId, Component }) => {
-      const { timelines } = useKibanaServices();
-
-      const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+      const addToTimelineProps = useMemo(() => {
+        return {
+          Component,
+          dataProvider,
+          field: columnId,
+          ownFocus: false,
+          showTooltip: false,
+        };
+      }, [Component, columnId, dataProvider]);
       if (pageRowIndex >= data.length) {
         // data grid expects each cell action always return an element, it crashes if returns null
         return <></>;
       }
 
-      const value = getMappedNonEcsValue({
-        data: data[pageRowIndex],
-        fieldName: columnId,
-      });
+      return <>{addToTimelineButton(addToTimelineProps)}</>;
+    },
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
+    function CopyButton({ rowIndex, columnId, Component }) {
+      const { timelines } = useKibanaServices();
 
-      return (
-        <>
-          {timelines.getHoverActions().getCopyButton({
-            Component,
-            field: columnId,
-            isHoverAction: false,
-            ownFocus: false,
-            showTooltip: false,
-            value,
-          })}
-        </>
-      );
+      const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+
+      const copyButton = useMemo(() => timelines.getHoverActions().getCopyButton, [timelines]);
+
+      const rowData = useMemo(() => {
+        return {
+          data: data[pageRowIndex],
+          fieldName: columnId,
+        };
+      }, [pageRowIndex, columnId]);
+
+      const value = useGetMappedNonEcsValue(rowData);
+
+      const copyButtonProps = useMemo(() => {
+        return {
+          Component,
+          field: columnId,
+          isHoverAction: false,
+          ownFocus: false,
+          showTooltip: false,
+          value,
+        };
+      }, [Component, columnId, value]);
+      if (pageRowIndex >= data.length) {
+        // data grid expects each cell action always return an element, it crashes if returns null
+        return <></>;
+      }
+
+      return <>{copyButton(copyButtonProps)}</>;
     },
   ({
     data,
@@ -254,12 +286,12 @@ export const cellActions: TGridCellAction[] = [
     pageSize: number;
   }) => {
     if (header !== undefined) {
-      return ({
+      return function FieldValue({
         rowIndex,
         columnId,
         Component,
         closePopover,
-      }: EuiDataGridColumnCellActionProps) => {
+      }: EuiDataGridColumnCellActionProps) {
         const {
           pageRowIndex,
           link,

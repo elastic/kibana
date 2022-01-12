@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 
-import { getMappedNonEcsValue } from '../body/data_driven_columns';
+import { useGetMappedNonEcsValue } from '../body/data_driven_columns';
 import { columnRenderers } from '../body/renderers';
 import { getColumnRenderer } from '../body/renderers/get_column_renderer';
 
@@ -39,16 +39,16 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   timelineId,
   truncate,
 }) => {
-  const values = getMappedNonEcsValue({
+  const asPlainText = useMemo(() => {
+    return getLinkColumnDefinition(header.id, header.type) !== undefined && !isTimeline;
+  }, [header.id, header.type, isTimeline]);
+  const values = useGetMappedNonEcsValue({
     data,
     fieldName: header.id,
   });
   const styledContentClassName = isDetails
     ? 'eui-textBreakWord'
     : 'eui-displayInlineBlock eui-textTruncate';
-  const asPlainText = useMemo(() => {
-    return getLinkColumnDefinition(header.id, header.type) !== undefined && !isTimeline;
-  }, [header.id, header.type, isTimeline]);
   return (
     <>
       <StyledContent className={styledContentClassName} $isDetails={isDetails}>
