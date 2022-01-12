@@ -79,7 +79,7 @@ export default function ({ loadTestFile, getService }) {
     });
 
     describe('', function () {
-      loadTestFile(require.resolve('./reporting'));
+      loadTestFile(require.resolve('./reports'));
     });
 
     describe('', function () {
