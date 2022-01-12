@@ -46,7 +46,7 @@ function getScaledDateFormat(interval: number): string {
 }
 
 export function epochToKbnDateFormat(epoch: number): string {
-  const dateFormat = getUiSettings().get('dateFormat', 'MMM D, YYYY @ HH:mm:ss');
+  const dateFormat = getUiSettings().get('dateFormat', 'MMM D, YYYY @ HH:mm:ss.SSS');
   const timezone = getTimezone();
   return moment.tz(epoch, timezone).format(dateFormat);
 }
