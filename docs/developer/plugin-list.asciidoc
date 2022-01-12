@@ -342,10 +342,6 @@ The plugin exposes the static DefaultEditorController class to consume.
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/visualize[visualize]
-|WARNING: Missing README.
-
-
 |===
 
 [discrete]
