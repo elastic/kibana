@@ -7,26 +7,31 @@
 
 import { ActionLicense, AllCases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
-import { isCreateConnector, isPush, isUpdateConnector } from '../../common/utils/user_actions';
-import { ResolvedCase } from '../../common/ui/types';
+import type { ResolvedCase, CaseMetrics, CaseMetricsFeature } from '../../common/ui/types';
 import {
+  Actions,
+  ActionTypes,
   AssociationType,
-  CaseUserActionConnector,
+  CaseConnector,
   CaseResponse,
   CasesFindResponse,
   CasesResponse,
   CasesStatusResponse,
   CaseStatuses,
   CaseType,
+  CaseUserActionResponse,
   CaseUserActionsResponse,
   CommentResponse,
   CommentType,
   ConnectorTypes,
   UserAction,
-  UserActionField,
+  UserActionTypes,
+  UserActionWithResponse,
+  CommentUserAction,
 } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
+import { SnakeToCamelCase } from '../../common/types';
 export { connectorsMock } from './configure/mock';
 
 export const basicCaseId = 'basic-case-id';
@@ -34,6 +39,7 @@ export const basicSubCaseId = 'basic-sub-case-id';
 const basicCommentId = 'basic-comment-id';
 const basicCreatedAt = '2020-02-19T23:06:33.798Z';
 const basicUpdatedAt = '2020-02-20T15:02:57.995Z';
+const basicClosedAt = '2020-02-21T15:02:57.995Z';
 const laterTime = '2020-02-28T15:02:57.995Z';
 
 export const elasticUser = {
@@ -168,6 +174,47 @@ export const basicResolvedCase: ResolvedCase = {
   aliasTargetId: `${basicCase.id}_2`,
 };
 
+export const basicCaseMetricsFeatures: CaseMetricsFeature[] = [
+  'alerts.count',
+  'alerts.users',
+  'alerts.hosts',
+  'actions.isolateHost',
+  'connectors',
+];
+
+export const basicCaseMetrics: CaseMetrics = {
+  alerts: {
+    count: 12,
+    hosts: {
+      total: 2,
+      values: [
+        { name: 'foo', count: 2, id: 'foo' },
+        { name: 'bar', count: 10, id: 'bar' },
+      ],
+    },
+    users: {
+      total: 1,
+      values: [{ name: 'Jon', count: 12 }],
+    },
+  },
+  actions: {
+    isolateHost: {
+      isolate: { total: 5 },
+      unisolate: { total: 3 },
+    },
+  },
+  connectors: { total: 1 },
+  lifespan: {
+    creationDate: basicCreatedAt,
+    closeDate: basicClosedAt,
+    statusInfo: {
+      inProgressDuration: 20,
+      openDuration: 10,
+      numberOfReopens: 1,
+    },
+  },
+};
+
 export const collectionCase: Case = {
   type: CaseType.collection,
   owner: SECURITY_SOLUTION_OWNER,
@@ -247,15 +294,13 @@ export const pushedCase: Case = {
 };
 
 const basicAction = {
-  actionAt: basicCreatedAt,
-  actionBy: elasticUser,
-  oldValConnectorId: null,
-  oldValue: null,
-  newValConnectorId: null,
-  newValue: 'what a cool value',
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
   caseId: basicCaseId,
   commentId: null,
   owner: SECURITY_SOLUTION_OWNER,
+  payload: { title: 'a title' },
+  type: 'title',
 };
 
 export const cases: Case[] = [
@@ -336,6 +381,7 @@ export const casesStatusSnake: CasesStatusResponse = {
 
 export const pushConnectorId = '123';
 export const pushSnake = {
+  connector_id: pushConnectorId,
   connector_name: 'connector name',
   external_id: 'external_id',
   external_title: 'external title',
@@ -383,130 +429,114 @@ export const allCasesSnake: CasesFindResponse = {
 };
 
 const basicActionSnake = {
-  action_at: basicCreatedAt,
-  action_by: elasticUserSnake,
-  old_value: null,
-  new_value: 'what a cool value',
+  created_at: basicCreatedAt,
+  created_by: elasticUserSnake,
   case_id: basicCaseId,
   comment_id: null,
   owner: SECURITY_SOLUTION_OWNER,
 };
-export const getUserActionSnake = (af: UserActionField, a: UserAction) => {
-  const isPushToService = a === 'push-to-service' && af[0] === 'pushed';
+
+export const getUserActionSnake = (
+  type: UserActionTypes,
+  action: UserAction,
+  payload?: Record<string, unknown>
+): CaseUserActionResponse => {
+  const isPushToService = type === ActionTypes.pushed;
 
   return {
     ...basicActionSnake,
-    action_id: `${af[0]}-${a}`,
-    action_field: af,
-    action: a,
-    comment_id: af[0] === 'comment' ? basicCommentId : null,
-    new_value: isPushToService ? JSON.stringify(basicPushSnake) : basicAction.newValue,
-    new_val_connector_id: isPushToService ? pushConnectorId : null,
-    old_val_connector_id: null,
-  };
+    action_id: `${type}-${action}`,
+    type,
+    action,
+    comment_id: type === 'comment' ? basicCommentId : null,
+    payload: isPushToService ? { externalService: basicPushSnake } : payload ?? basicAction.payload,
+  } as unknown as CaseUserActionResponse;
 };
 
 export const caseUserActionsSnake: CaseUserActionsResponse = [
-  getUserActionSnake(['description'], 'create'),
-  getUserActionSnake(['comment'], 'create'),
-  getUserActionSnake(['description'], 'update'),
+  getUserActionSnake('description', Actions.create, { description: 'a desc' }),
+  getUserActionSnake('comment', Actions.create, {
+    comment: { comment: 'a comment', type: CommentType.user, owner: SECURITY_SOLUTION_OWNER },
+  }),
+  getUserActionSnake('description', Actions.update, { description: 'a desc updated' }),
 ];
 
-// user actions
-
 export const getUserAction = (
-  af: UserActionField,
-  a: UserAction,
-  overrides?: Partial<CaseUserActions>
+  type: UserActionTypes,
+  action: UserAction,
+  overrides?: Record<string, unknown>
 ): CaseUserActions => {
   return {
     ...basicAction,
-    actionId: `${af[0]}-${a}`,
-    actionField: af,
-    action: a,
-    commentId: af[0] === 'comment' ? basicCommentId : null,
-    ...getValues(a, af, overrides),
-  };
+    actionId: `${type}-${action}`,
+    type,
+    action,
+    commentId: type === 'comment' ? basicCommentId : null,
+    payload: type === 'pushed' ? { externalService: basicPush } : basicAction.payload,
+    ...overrides,
+  } as CaseUserActions;
 };
 
-const getValues = (
-  userAction: UserAction,
-  actionFields: UserActionField,
-  overrides?: Partial<CaseUserActions>
-): Partial<CaseUserActions> => {
-  if (isCreateConnector(userAction, actionFields)) {
-    return {
-      newValue:
-        overrides?.newValue === undefined ? JSON.stringify(basicCaseSnake) : overrides.newValue,
-      newValConnectorId: overrides?.newValConnectorId ?? null,
-      oldValue: null,
-      oldValConnectorId: null,
-    };
-  } else if (isUpdateConnector(userAction, actionFields)) {
-    return {
-      newValue:
-        overrides?.newValue === undefined
-          ? JSON.stringify({ name: 'My Connector', type: ConnectorTypes.none, fields: null })
-          : overrides.newValue,
-      newValConnectorId: overrides?.newValConnectorId ?? null,
-      oldValue:
-        overrides?.oldValue === undefined
-          ? JSON.stringify({ name: 'My Connector2', type: ConnectorTypes.none, fields: null })
-          : overrides.oldValue,
-      oldValConnectorId: overrides?.oldValConnectorId ?? null,
-    };
-  } else if (isPush(userAction, actionFields)) {
-    return {
-      newValue:
-        overrides?.newValue === undefined ? JSON.stringify(basicPushSnake) : overrides?.newValue,
-      newValConnectorId:
-        overrides?.newValConnectorId === undefined ? pushConnectorId : overrides.newValConnectorId,
-      oldValue: overrides?.oldValue ?? null,
-      oldValConnectorId: overrides?.oldValConnectorId ?? null,
-    };
-  } else {
-    return {
-      newValue: overrides?.newValue === undefined ? basicAction.newValue : overrides.newValue,
-      newValConnectorId: overrides?.newValConnectorId ?? null,
-      oldValue: overrides?.oldValue ?? null,
-      oldValConnectorId: overrides?.oldValConnectorId ?? null,
-    };
-  }
-};
-
-export const getJiraConnectorWithoutId = (overrides?: Partial<CaseUserActionConnector>) => {
-  return JSON.stringify({
+export const getJiraConnector = (overrides?: Partial<CaseConnector>): CaseConnector => {
+  return {
+    id: '123',
     name: 'jira1',
-    type: ConnectorTypes.jira,
     ...jiraFields,
     ...overrides,
-  });
+    type: ConnectorTypes.jira as const,
+  } as CaseConnector;
 };
 
 export const jiraFields = { fields: { issueType: '10006', priority: null, parent: null } };
 
-export const getAlertUserAction = () => ({
+export const getAlertUserAction = (): SnakeToCamelCase<
+  UserActionWithResponse<CommentUserAction>
+> => ({
   ...basicAction,
   actionId: 'alert-action-id',
-  actionField: ['comment'],
-  action: 'create',
+  action: Actions.create,
   commentId: 'alert-comment-id',
-  newValue: '{"type":"alert","alertId":"alert-id-1","index":"index-id-1"}',
+  type: ActionTypes.comment,
+  payload: {
+    comment: {
+      type: CommentType.alert,
+      alertId: 'alert-id-1',
+      index: 'index-id-1',
+      owner: SECURITY_SOLUTION_OWNER,
+      rule: {
+        id: 'rule-id-1',
+        name: 'Awesome rule',
+      },
+    },
+  },
 });
 
-export const getHostIsolationUserAction = () => ({
+export const getHostIsolationUserAction = (): SnakeToCamelCase<
+  UserActionWithResponse<CommentUserAction>
+> => ({
   ...basicAction,
   actionId: 'isolate-action-id',
-  actionField: ['comment'] as UserActionField,
-  action: 'create' as UserAction,
+  type: ActionTypes.comment,
+  action: Actions.create,
   commentId: 'isolate-comment-id',
-  newValue: 'some value',
+  payload: {
+    comment: {
+      type: CommentType.actions,
+      comment: 'a comment',
+      actions: { targets: [], type: 'test' },
+      owner: SECURITY_SOLUTION_OWNER,
+    },
+  },
 });
 
 export const caseUserActions: CaseUserActions[] = [
-  getUserAction(['description'], 'create'),
-  getUserAction(['comment'], 'create'),
-  getUserAction(['description'], 'update'),
+  getUserAction('description', Actions.create, { payload: { description: 'a desc' } }),
+  getUserAction('comment', Actions.create, {
+    payload: {
+      comment: { comment: 'a comment', type: CommentType.user, owner: SECURITY_SOLUTION_OWNER },
+    },
+  }),
+  getUserAction('description', Actions.update, { payload: { description: 'a desc updated' } }),
 ];
 
 // components tests

@@ -16,7 +16,8 @@ import { processBucket } from './table/process_bucket';
 import { createFieldsFetcher } from '../search_strategies/lib/fields_fetcher';
 import { extractFieldLabel } from '../../../common/fields_utils';
 import { isAggSupported } from './helpers/check_aggs';
-import { isEntireTimeRangeMode } from './helpers/get_timerange_mode';
+import { isConfigurationFeatureEnabled } from '../../../common/check_ui_restrictions';
+import { FilterCannotBeAppliedError, PivotNotSelectedForTableError } from '../../../common/errors';
 
 import type {
   VisTypeTimeseriesRequestHandlerContext,
@@ -76,10 +77,15 @@ export async function getTableData(
   const handleError = handleErrorResponse(panel);
 
   try {
-    if (isEntireTimeRangeMode(panel)) {
-      panel.series.forEach((column) => {
-        isAggSupported(column.metrics);
-      });
+    panel.series.forEach((series) => {
+      isAggSupported(series.metrics, capabilities);
+      if (series.filter?.query && !isConfigurationFeatureEnabled('filter', capabilities)) {
+        throw new FilterCannotBeAppliedError();
+      }
+    });
+
+    if (!panel.pivot_id) {
+      throw new PivotNotSelectedForTableError();
     }
 
     const body = await buildTableRequest({

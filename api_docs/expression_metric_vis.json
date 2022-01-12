@@ -63,21 +63,13 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "expressions",
+                "pluginId": "visualizations",
                 "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionValueBoxed",
-                "text": "ExpressionValueBoxed"
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
               },
-              "<\"vis_dimension\", { accessor: number | ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              "; format: { id?: string | undefined; params: Record<string, any>; }; }>[]"
+              "[]"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false
@@ -91,21 +83,13 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "expressions",
+                "pluginId": "visualizations",
                 "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionValueBoxed",
-                "text": "ExpressionValueBoxed"
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
               },
-              "<\"vis_dimension\", { accessor: number | ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              "; format: { id?: string | undefined; params: Record<string, any>; }; }> | undefined"
+              " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false
@@ -141,7 +125,7 @@
             "label": "colorMode",
             "description": [],
             "signature": [
-              "\"None\" | \"Background\" | \"Labels\""
+              "\"Background\" | \"Labels\" | \"None\""
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false
@@ -212,21 +196,13 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "expressions",
+                "pluginId": "visualizations",
                 "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionValueBoxed",
-                "text": "ExpressionValueBoxed"
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
               },
-              "<\"vis_dimension\", { accessor: number | ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              "; format: { id?: string | undefined; params: Record<string, any>; }; }>[]"
+              "[]"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false
@@ -240,21 +216,13 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "expressions",
+                "pluginId": "visualizations",
                 "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.ExpressionValueBoxed",
-                "text": "ExpressionValueBoxed"
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.ExpressionValueVisDimension",
+                "text": "ExpressionValueVisDimension"
               },
-              "<\"vis_dimension\", { accessor: number | ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumn",
-                "text": "DatatableColumn"
-              },
-              "; format: { id?: string | undefined; params: Record<string, any>; }; }> | undefined"
+              " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",
             "deprecated": false
@@ -372,7 +340,7 @@
             "label": "metricColorMode",
             "description": [],
             "signature": [
-              "\"None\" | \"Background\" | \"Labels\""
+              "\"Background\" | \"Labels\" | \"None\""
             ],
             "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_renderers.ts",
             "deprecated": false
@@ -678,10 +646,10 @@
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionValueBoxed",
-            "text": "ExpressionValueBoxed"
+            "section": "def-common.ExpressionValueRender",
+            "text": "ExpressionValueRender"
           },
-          "<\"render\", { as: string; value: ",
+          "<",
           {
             "pluginId": "expressionMetricVis",
             "scope": "common",
@@ -689,7 +657,7 @@
             "section": "def-common.MetricVisRenderConfig",
             "text": "MetricVisRenderConfig"
           },
-          "; }>, ",
+          ">, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -706,13 +674,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/chart_expressions/expression_metric/common/types/expression_functions.ts",

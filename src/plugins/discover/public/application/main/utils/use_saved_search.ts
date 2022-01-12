@@ -23,6 +23,7 @@ import { useBehaviorSubject } from './use_behavior_subject';
 import { sendResetMsg } from './use_saved_search_messages';
 import { getFetch$ } from './get_fetch_observable';
 import { ElasticSearchHit } from '../../../types';
+import { SavedSearch } from '../../../services/saved_searches';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -83,6 +84,7 @@ export interface DataChartsMessage extends DataMsg {
  */
 export const useSavedSearch = ({
   initialFetchStatus,
+  savedSearch,
   searchSessionManager,
   searchSource,
   services,
@@ -90,6 +92,7 @@ export const useSavedSearch = ({
   useNewFieldsApi,
 }: {
   initialFetchStatus: FetchStatus;
+  savedSearch: SavedSearch;
   searchSessionManager: DiscoverSearchSessionManager;
   searchSource: ISearchSource;
   services: DiscoverServices;
@@ -172,9 +175,10 @@ export const useSavedSearch = ({
       await fetchAll(dataSubjects, searchSource, val === 'reset', {
         abortController: refs.current.abortController,
         appStateContainer: stateContainer.appStateContainer,
-        inspectorAdapters,
         data,
         initialFetchStatus,
+        inspectorAdapters,
+        savedSearch,
         searchSessionId: searchSessionManager.getNextSearchSessionId(),
         services,
         useNewFieldsApi,
@@ -200,6 +204,7 @@ export const useSavedSearch = ({
     inspectorAdapters,
     main$,
     refetch$,
+    savedSearch,
     searchSessionManager,
     searchSessionManager.newSearchSessionIdFromURL$,
     searchSource,

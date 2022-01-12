@@ -161,7 +161,7 @@ export const createThreatSignals = async ({
       language: threatLanguage,
       threatFilters,
       index: threatIndex,
-      // @ts-expect-error@elastic/elasticsearch SearchSortResults might contain null
+      // @ts-expect-error@elastic/elasticsearch SortResults might contain null
       searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
       sortField: undefined,
       sortOrder: undefined,

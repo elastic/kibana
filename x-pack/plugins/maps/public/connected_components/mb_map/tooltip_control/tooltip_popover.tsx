@@ -9,7 +9,7 @@ import React, { Component, RefObject } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { GeoJsonProperties, Geometry } from 'geojson';
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { FeaturesTooltip } from './features_tooltip';
 import { LAT_INDEX, LON_INDEX, RawValue } from '../../../../common/constants';

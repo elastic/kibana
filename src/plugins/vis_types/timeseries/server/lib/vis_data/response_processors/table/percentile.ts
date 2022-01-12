@@ -15,7 +15,7 @@ import type { TableResponseProcessorsFunction } from './types';
 import type { PanelDataArray } from '../../../../../common/types/vis_data';
 
 export const percentile: TableResponseProcessorsFunction =
-  ({ bucket, panel, series, meta, extractFields }) =>
+  ({ response, panel, series, meta, extractFields }) =>
   (next) =>
   async (results) => {
     const metric = getLastMetric(series);
@@ -24,11 +24,7 @@ export const percentile: TableResponseProcessorsFunction =
       return next(results);
     }
 
-    const fakeResp = {
-      aggregations: bucket,
-    };
-
-    (await getSplits(fakeResp, panel, series, meta, extractFields)).forEach((split) => {
+    (await getSplits(response, panel, series, meta, extractFields)).forEach((split) => {
       // table allows only one percentile in a series (the last one will be chosen in case of several)
       const lastPercentile = last(metric.percentiles)?.value ?? 0;
       const percentileKey = toPercentileNumber(lastPercentile);

@@ -9,7 +9,7 @@
 import { get, omit } from 'lodash';
 import { getConvertedValueForField } from '../filters';
 import { Filter } from '../filters';
-import { IndexPatternBase } from './types';
+import { DataViewBase } from './types';
 
 /** @internal */
 export interface DeprecatedMatchPhraseFilter extends Filter {
@@ -32,7 +32,7 @@ function isDeprecatedMatchPhraseFilter(filter: Filter): filter is DeprecatedMatc
 }
 
 /** @internal */
-export function migrateFilter(filter: Filter, indexPattern?: IndexPatternBase) {
+export function migrateFilter(filter: Filter, indexPattern?: DataViewBase) {
   if (isDeprecatedMatchPhraseFilter(filter)) {
     // @ts-ignore
     const match = filter.match || filter.query.match;

@@ -9,8 +9,9 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { render } from '../../../lib/helper/rtl_helpers';
-import { DataStream, ScheduleUnit } from '../../fleet_package/types';
+import { DataStream, HTTPFields, ScheduleUnit } from '../../../../common/runtime_types';
 import { MonitorManagementList } from './monitor_list';
+import { MonitorManagementList as MonitorManagementListState } from '../../../state/reducers/monitor_management';
 
 describe('<ActionBar />', () => {
   const setRefresh = jest.fn();
@@ -29,7 +30,7 @@ describe('<ActionBar />', () => {
         urls: `https://test-${i}.co`,
         type: DataStream.HTTP,
         tags: [`tag-${i}`],
-      },
+      } as HTTPFields,
     });
   }
   const state = {
@@ -49,7 +50,7 @@ describe('<ActionBar />', () => {
         monitorList: true,
         serviceLocations: false,
       },
-    },
+    } as MonitorManagementListState,
   };
 
   it.each(monitors)('navigates to edit monitor flow on edit pencil', (monitor) => {

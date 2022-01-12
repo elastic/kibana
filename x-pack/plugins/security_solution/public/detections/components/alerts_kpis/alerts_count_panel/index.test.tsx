@@ -13,6 +13,11 @@ import { TestProviders } from '../../../../common/mock';
 
 import { AlertsCountPanel } from './index';
 
+jest.mock('react-router-dom', () => {
+  const actual = jest.requireActual('react-router-dom');
+  return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
+});
+
 describe('AlertsCountPanel', () => {
   const defaultProps = {
     signalIndexName: 'signalIndexName',

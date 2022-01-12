@@ -41,7 +41,7 @@ import { LinkButton } from '../../../../common/components/links';
 import { SecurityPageName } from '../../../../app/types';
 import { DEFAULT_STACK_BY_FIELD, PANEL_HEIGHT } from '../common/config';
 import type { AlertsStackByField } from '../common/types';
-import { KpiPanel, StackBySelect } from '../common/components';
+import { KpiPanel, StackByComboBox } from '../common/components';
 
 import { useInspectButton } from '../common/hooks';
 
@@ -109,7 +109,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const [isInspectDisabled, setIsInspectDisabled] = useState(false);
     const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
     const [totalAlertsObj, setTotalAlertsObj] = useState<AlertsTotal>(defaultTotalAlertsObj);
-    const [selectedStackByOption, setSelectedStackByOption] = useState<AlertsStackByField>(
+    const [selectedStackByOption, setSelectedStackByOption] = useState<string>(
       onlyField == null ? defaultStackByOption : onlyField
     );
 
@@ -263,8 +263,13 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     );
 
     return (
-      <InspectButtonContainer data-test-subj="alerts-histogram-panel" show={!isInitialLoading}>
-        <KpiPanel height={PANEL_HEIGHT} hasBorder paddingSize={paddingSize}>
+      <InspectButtonContainer show={!isInitialLoading}>
+        <KpiPanel
+          height={PANEL_HEIGHT}
+          hasBorder
+          paddingSize={paddingSize}
+          data-test-subj="alerts-histogram-panel"
+        >
           <HeaderSection
             id={uniqueQueryId}
             title={titleText}
@@ -276,10 +281,12 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
                 {showStackBy && (
-                  <StackBySelect
-                    selected={selectedStackByOption}
-                    onSelect={setSelectedStackByOption}
-                  />
+                  <>
+                    <StackByComboBox
+                      selected={selectedStackByOption}
+                      onSelect={setSelectedStackByOption}
+                    />
+                  </>
                 )}
                 {headerChildren != null && headerChildren}
               </EuiFlexItem>

@@ -8,7 +8,7 @@
 import type { Capabilities, HttpSetup, ThemeServiceStart } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { IndexPatternsContract, TimefilterContract } from '../../../../../src/plugins/data/public';
 import { ReactExpressionRendererType } from '../../../../../src/plugins/expressions/public';

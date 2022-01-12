@@ -4,7 +4,6 @@
   "private": true,
   "browser": "target_web/index.js",
   "main": "target_node/index.js",
-  "types": "target_types/index.d.ts",
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "scripts": {
     "build:antlr4ts": "../../node_modules/antlr4ts-cli/antlr4ts ./src/painless/antlr/painless_lexer.g4 ./src/painless/antlr/painless_parser.g4 && node ./scripts/fix_generated_antlr.js"

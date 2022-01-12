@@ -6,6 +6,7 @@
  */
 
 import rison from 'rison-node';
+import { Stream } from 'stream';
 import { schema } from '@kbn/config-schema';
 import { KibanaRequest, KibanaResponseFactory, Logger } from 'src/core/server';
 import { IRouter } from 'src/core/server';
@@ -52,14 +53,11 @@ export function initMVTRoutes({
     ) => {
       const { query, params } = request;
 
-      const abortController = new AbortController();
-      request.events.aborted$.subscribe(() => {
-        abortController.abort();
-      });
+      const abortController = makeAbortController(request);
 
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
-      const tile = await getEsTile({
+      const gzippedTile = await getEsTile({
         logger,
         context,
         geometryFieldName: query.geometryFieldName as string,
@@ -71,7 +69,7 @@ export function initMVTRoutes({
         abortController,
       });
 
-      return sendResponse(response, tile);
+      return sendResponse(response, gzippedTile);
     }
   );
 
@@ -101,14 +99,11 @@ export function initMVTRoutes({
     ) => {
       const { query, params } = request;
 
-      const abortController = new AbortController();
-      request.events.aborted$.subscribe(() => {
-        abortController.abort();
-      });
+      const abortController = makeAbortController(request);
 
       const requestBodyDSL = rison.decode(query.requestBody as string);
 
-      const tile = await getEsGridTile({
+      const gzipTileStream = await getEsGridTile({
         logger,
         context,
         geometryFieldName: query.geometryFieldName as string,
@@ -122,28 +117,44 @@ export function initMVTRoutes({
         abortController,
       });
 
-      return sendResponse(response, tile);
+      return sendResponse(response, gzipTileStream);
     }
   );
 }
 
-function sendResponse(response: KibanaResponseFactory, tile: any) {
-  const headers = {
-    'content-disposition': 'inline',
-    'content-length': tile ? `${tile.length}` : `0`,
-    'Content-Type': 'application/x-protobuf',
-    'Cache-Control': `public, max-age=${CACHE_TIMEOUT_SECONDS}`,
-    'Last-Modified': `${new Date().toUTCString()}`,
-  };
-
-  if (tile) {
+function sendResponse(response: KibanaResponseFactory, gzipTileStream: Stream | null) {
+  const cacheControl = `public, max-age=${CACHE_TIMEOUT_SECONDS}`;
+  const lastModified = `${new Date().toUTCString()}`;
+  if (gzipTileStream) {
     return response.ok({
-      body: tile,
-      headers,
+      body: gzipTileStream,
+      headers: {
+        'content-disposition': 'inline',
+        'content-encoding': 'gzip',
+        'Content-Type': 'application/x-protobuf',
+        'Cache-Control': cacheControl,
+        'Last-Modified': lastModified,
+      },
     });
   } else {
     return response.ok({
-      headers,
+      headers: {
+        'content-length': `0`,
+        'content-disposition': 'inline',
+        'Content-Type': 'application/x-protobuf',
+        'Cache-Control': cacheControl,
+        'Last-Modified': lastModified,
+      },
     });
   }
+}
+
+function makeAbortController(
+  request: KibanaRequest<unknown, Record<string, any>, unknown>
+): AbortController {
+  const abortController = new AbortController();
+  request.events.aborted$.subscribe(() => {
+    abortController.abort();
+  });
+  return abortController;
 }

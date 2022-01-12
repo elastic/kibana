@@ -10,7 +10,8 @@ import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { getServiceLocations } from './get_service_locations';
 import { Logger } from '../../../../../../src/core/server';
-import { MonitorFields, ServiceLocations } from '../../../common/runtime_types/monitor_management';
+import { MonitorFields, ServiceLocations } from '../../../common/runtime_types';
+import { convertToDataStreamFormat } from './formatters/convert_to_data_stream';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
 
@@ -59,11 +60,14 @@ export class ServiceAPIClient {
 
     const callServiceEndpoint = (monitors: ServiceData['monitors'], url: string) => {
       // don't need to pass locations to heartbeat
-      monitors = monitors.map(({ locations, ...rest }) => rest);
+      const monitorsStreams = monitors.map(({ locations, ...rest }) =>
+        convertToDataStreamFormat(rest)
+      );
+
       return axios({
         method,
         url: url + '/monitors',
-        data: { monitors, output },
+        data: { monitors: monitorsStreams, output },
         headers: {
           Authorization: this.authorization,
         },

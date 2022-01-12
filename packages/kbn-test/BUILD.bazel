@@ -77,7 +77,7 @@ RUNTIME_DEPS = [
 TYPES_DEPS = [
   "//packages/kbn-dev-utils:npm_module_types",
   "//packages/kbn-i18n-react:npm_module_types",
-  "//packages/kbn-std",
+  "//packages/kbn-std:npm_module_types",
   "//packages/kbn-utils",
   "@npm//@elastic/elasticsearch",
   "@npm//axios",

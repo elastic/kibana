@@ -7,7 +7,7 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { toExpression } from '@kbn/interpreter/common';
+import { toExpression } from '@kbn/interpreter';
 import { UI_SETTINGS } from '../../../../../../../src/plugins/data/public';
 import { KibanaThemeProvider } from '../../../../../../../src/plugins/kibana_react/public';
 import { syncFilterExpression } from '../../../../public/lib/sync_filter_expression';

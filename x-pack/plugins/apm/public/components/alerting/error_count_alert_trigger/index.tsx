@@ -20,7 +20,7 @@ import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
 import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 
-export interface AlertParams {
+export interface RuleParams {
   windowSize?: number;
   windowUnit?: TimeUnit;
   threshold?: number;
@@ -29,22 +29,22 @@ export interface AlertParams {
 }
 
 interface Props {
-  alertParams: AlertParams;
+  ruleParams: RuleParams;
   metadata?: AlertMetadata;
-  setAlertParams: (key: string, value: any) => void;
-  setAlertProperty: (key: string, value: any) => void;
+  setRuleParams: (key: string, value: any) => void;
+  setRuleProperty: (key: string, value: any) => void;
 }
 
 export function ErrorCountAlertTrigger(props: Props) {
   const { services } = useKibana();
-  const { alertParams, metadata, setAlertParams, setAlertProperty } = props;
+  const { ruleParams, metadata, setRuleParams, setRuleProperty } = props;
 
   useEffect(() => {
     createCallApmApi(services as CoreStart);
   }, [services]);
 
   const params = defaults(
-    { ...omit(metadata, ['start', 'end']), ...alertParams },
+    { ...omit(metadata, ['start', 'end']), ...ruleParams },
     {
       threshold: 25,
       windowSize: 1,
@@ -86,25 +86,25 @@ export function ErrorCountAlertTrigger(props: Props) {
   const fields = [
     <ServiceField
       currentValue={params.serviceName}
-      onChange={(value) => setAlertParams('serviceName', value)}
+      onChange={(value) => setRuleParams('serviceName', value)}
     />,
     <EnvironmentField
       currentValue={params.environment}
-      onChange={(value) => setAlertParams('environment', value)}
+      onChange={(value) => setRuleParams('environment', value)}
     />,
     <IsAboveField
       value={params.threshold}
       unit={i18n.translate('xpack.apm.errorCountAlertTrigger.errors', {
         defaultMessage: ' errors',
       })}
-      onChange={(value) => setAlertParams('threshold', value || 0)}
+      onChange={(value) => setRuleParams('threshold', value || 0)}
     />,
     <ForLastExpression
       onChangeWindowSize={(timeWindowSize) =>
-        setAlertParams('windowSize', timeWindowSize || '')
+        setRuleParams('windowSize', timeWindowSize || '')
       }
       onChangeWindowUnit={(timeWindowUnit) =>
-        setAlertParams('windowUnit', timeWindowUnit)
+        setRuleParams('windowUnit', timeWindowUnit)
       }
       timeWindowSize={params.windowSize}
       timeWindowUnit={params.windowUnit}
@@ -128,8 +128,8 @@ export function ErrorCountAlertTrigger(props: Props) {
     <ServiceAlertTrigger
       defaults={params}
       fields={fields}
-      setAlertParams={setAlertParams}
-      setAlertProperty={setAlertProperty}
+      setRuleParams={setRuleParams}
+      setRuleProperty={setRuleProperty}
       chartPreview={chartPreview}
     />
   );

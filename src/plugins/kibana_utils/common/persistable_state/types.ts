@@ -106,9 +106,6 @@ export type PersistableStateMigrateFn = (
   version: string
 ) => SerializableRecord;
 
-/**
- * @todo Shall we remove this?
- */
 export type PersistableStateDefinition<P extends SerializableRecord = SerializableRecord> = Partial<
   PersistableState<P>
 >;

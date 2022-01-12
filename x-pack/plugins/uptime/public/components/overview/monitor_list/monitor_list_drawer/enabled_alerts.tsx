@@ -18,10 +18,10 @@ import { EuiListGroupItemProps } from '@elastic/eui/src/components/list_group/li
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { UptimeSettingsContext } from '../../../../contexts';
-import { Alert } from '../../../../../../triggers_actions_ui/public';
+import { Rule } from '../../../../../../triggers_actions_ui/public';
 
 interface Props {
-  monitorAlerts: Alert[];
+  monitorAlerts: Rule[];
   loading: boolean;
 }
 

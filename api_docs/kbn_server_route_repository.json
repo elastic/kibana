@@ -19,9 +19,15 @@
         "label": "createServerRouteFactory",
         "description": [],
         "signature": [
-          "() => <TEndpoint extends string, TReturnType, TRouteParamsRT extends WithoutIncompatibleMethods<",
-          "Type",
-          "<{ path?: any; query?: any; body?: any; }, { path?: any; query?: any; body?: any; }, unknown>> | undefined = undefined>(route: ",
+          "() => <TEndpoint extends string, TReturnType, TRouteParamsRT extends ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "server",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-server.RouteParamsRT",
+            "text": "RouteParamsRT"
+          },
+          " | undefined = undefined>(route: ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "server",
@@ -196,6 +202,32 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/server-route-repository",
+        "id": "def-server.RouteState",
+        "type": "Interface",
+        "tags": [],
+        "label": "RouteState",
+        "description": [],
+        "path": "packages/kbn-server-route-repository/src/typings.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/server-route-repository",
+            "id": "def-server.RouteState.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[endpoint: string]: any",
+            "description": [],
+            "signature": [
+              "[endpoint: string]:  any"
+            ],
+            "path": "packages/kbn-server-route-repository/src/typings.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-route-repository",
         "id": "def-server.ServerRouteRepository",
         "type": "Interface",
         "tags": [],
@@ -222,9 +254,15 @@
             "label": "add",
             "description": [],
             "signature": [
-              "<TEndpoint extends string, TReturnType, TRouteParamsRT extends WithoutIncompatibleMethods<",
-              "Type",
-              "<{ path?: any; query?: any; body?: any; }, { path?: any; query?: any; body?: any; }, unknown>> | undefined = undefined>(route: ",
+              "<TEndpoint extends string, TReturnType, TRouteParamsRT extends ",
+              {
+                "pluginId": "@kbn/server-route-repository",
+                "scope": "server",
+                "docId": "kibKbnServerRouteRepositoryPluginApi",
+                "section": "def-server.RouteParamsRT",
+                "text": "RouteParamsRT"
+              },
+              " | undefined = undefined>(route: ",
               {
                 "pluginId": "@kbn/server-route-repository",
                 "scope": "server",
@@ -294,7 +332,13 @@
                 "text": "ServerRouteRepository"
               },
               "<TRouteHandlerResources, TRouteCreateOptions, ",
-              "RouteState",
+              {
+                "pluginId": "@kbn/server-route-repository",
+                "scope": "server",
+                "docId": "kibKbnServerRouteRepositoryPluginApi",
+                "section": "def-server.RouteState",
+                "text": "RouteState"
+              },
               ">>(repository: TServerRouteRepository) => TServerRouteRepository extends ",
               {
                 "pluginId": "@kbn/server-route-repository",
@@ -349,9 +393,15 @@
                 "section": "def-server.ServerRoute",
                 "text": "ServerRoute"
               },
-              "<string, WithoutIncompatibleMethods<",
-              "Type",
-              "<{ path?: any; query?: any; body?: any; }, { path?: any; query?: any; body?: any; }, unknown>>, TRouteHandlerResources, unknown, TRouteCreateOptions>[]"
+              "<string, ",
+              {
+                "pluginId": "@kbn/server-route-repository",
+                "scope": "server",
+                "docId": "kibKbnServerRouteRepositoryPluginApi",
+                "section": "def-server.RouteParamsRT",
+                "text": "RouteParamsRT"
+              },
+              ", TRouteHandlerResources, unknown, TRouteCreateOptions>[]"
             ],
             "path": "packages/kbn-server-route-repository/src/typings.ts",
             "deprecated": false,
@@ -388,9 +438,17 @@
             "section": "def-server.ServerRoute",
             "text": "ServerRoute"
           },
-          "<any, infer TRouteParamsRT, any, any, Record<string, any>> ? TRouteParamsRT extends WithoutIncompatibleMethods<",
-          "Type",
-          "<{ path?: any; query?: any; body?: any; }, { path?: any; query?: any; body?: any; }, unknown>> ? ClientRequestParamsOfType<TRouteParamsRT> : {} : never : never : never"
+          "<any, infer TRouteParamsRT, any, any, ",
+          "ServerRouteCreateOptions",
+          "> ? TRouteParamsRT extends ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "server",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-server.RouteParamsRT",
+            "text": "RouteParamsRT"
+          },
+          " ? ClientRequestParamsOfType<TRouteParamsRT> : {} : never : never : never"
         ],
         "path": "packages/kbn-server-route-repository/src/typings.ts",
         "deprecated": false,
@@ -420,9 +478,17 @@
             "section": "def-server.ServerRoute",
             "text": "ServerRoute"
           },
-          "<any, infer TRouteParamsRT, any, any, Record<string, any>> ? TRouteParamsRT extends WithoutIncompatibleMethods<",
-          "Type",
-          "<{ path?: any; query?: any; body?: any; }, { path?: any; query?: any; body?: any; }, unknown>> ? DecodedRequestParamsOfType<TRouteParamsRT> : {} : never : never : never"
+          "<any, infer TRouteParamsRT, any, any, ",
+          "ServerRouteCreateOptions",
+          "> ? TRouteParamsRT extends ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "server",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-server.RouteParamsRT",
+            "text": "RouteParamsRT"
+          },
+          " ? DecodedRequestParamsOfType<TRouteParamsRT> : {} : never : never : never"
         ],
         "path": "packages/kbn-server-route-repository/src/typings.ts",
         "deprecated": false,
@@ -474,7 +540,9 @@
             "section": "def-server.ServerRoute",
             "text": "ServerRoute"
           },
-          "<any, any, any, infer TReturnType, Record<string, any>> ? TReturnType : never : never : never"
+          "<any, any, any, infer TReturnType, ",
+          "ServerRouteCreateOptions",
+          "> ? TReturnType : never : never : never"
         ],
         "path": "packages/kbn-server-route-repository/src/typings.ts",
         "deprecated": false,
@@ -488,9 +556,9 @@
         "label": "RouteParamsRT",
         "description": [],
         "signature": [
-          "Pick<",
+          "Omit<",
           "Type",
-          "<{ path?: any; query?: any; body?: any; }, { path?: any; query?: any; body?: any; }, unknown>, \"name\" | \"is\" | \"pipe\" | \"_A\" | \"_O\" | \"validate\" | \"_I\" | \"asDecoder\" | \"decode\"> & { encode: ",
+          "<{ path?: any; query?: any; body?: any; }, { path?: any; query?: any; body?: any; }, unknown>, \"encode\" | \"asEncoder\"> & { encode: ",
           "Encode",
           "<any, any>; asEncoder: () => ",
           "Encoder",
@@ -570,9 +638,15 @@
         "label": "ServerRoute",
         "description": [],
         "signature": [
-          "{ endpoint: TEndpoint; params?: TRouteParamsRT | undefined; handler: ({}: TRouteHandlerResources & (TRouteParamsRT extends WithoutIncompatibleMethods<",
-          "Type",
-          "<{ path?: any; query?: any; body?: any; }, { path?: any; query?: any; body?: any; }, unknown>> ? DecodedRequestParamsOfType<TRouteParamsRT> : {})) => Promise<TReturnType>; } & TRouteCreateOptions"
+          "{ endpoint: TEndpoint; params?: TRouteParamsRT | undefined; handler: ({}: TRouteHandlerResources & (TRouteParamsRT extends ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "server",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-server.RouteParamsRT",
+            "text": "RouteParamsRT"
+          },
+          " ? DecodedRequestParamsOfType<TRouteParamsRT> : {})) => Promise<TReturnType>; } & TRouteCreateOptions"
         ],
         "path": "packages/kbn-server-route-repository/src/typings.ts",
         "deprecated": false,
@@ -600,13 +674,7 @@
               "// `body` can be null, but `validate` expects non-nullable types\n// if any validation is defined. Not having validation currently\n// means we don't get the payload. See\n// https://github.com/elastic/kibana/issues/50179"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "server",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
-                "text": "Type"
-              },
+              "Type",
               "<Readonly<{} & {}> | null>"
             ],
             "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",
@@ -620,13 +688,7 @@
             "label": "params",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "server",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ObjectType",
-                "text": "ObjectType"
-              },
+              "ObjectType",
               "<{}>"
             ],
             "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",
@@ -640,13 +702,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "server",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ObjectType",
-                "text": "ObjectType"
-              },
+              "ObjectType",
               "<{}>"
             ],
             "path": "packages/kbn-server-route-repository/src/route_validation_object.ts",

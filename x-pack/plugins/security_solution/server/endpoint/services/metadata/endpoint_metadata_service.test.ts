@@ -111,7 +111,7 @@ describe('EndpointMetadataService', () => {
 
     beforeEach(() => {
       agentPolicyServiceMock = testMockedContext.agentPolicyService;
-      esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+      esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
     });
 
     it('should throw wrapped error if es error', async () => {

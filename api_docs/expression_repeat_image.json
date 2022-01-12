@@ -5,13 +5,23 @@
     "functions": [
       {
         "parentPluginId": "expressionRepeatImage",
-        "id": "def-public.repeatImageRenderer",
+        "id": "def-public.getRepeatImageRenderer",
         "type": "Function",
         "tags": [],
-        "label": "repeatImageRenderer",
+        "label": "getRepeatImageRenderer",
         "description": [],
         "signature": [
-          "() => ",
+          "(theme$?: ",
+          "Observable",
+          "<",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.CoreTheme",
+            "text": "CoreTheme"
+          },
+          ">) => () => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -31,23 +41,51 @@
         ],
         "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
         "deprecated": false,
-        "children": [],
+        "children": [
+          {
+            "parentPluginId": "expressionRepeatImage",
+            "id": "def-public.getRepeatImageRenderer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "theme$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreTheme",
+                "text": "CoreTheme"
+              },
+              ">"
+            ],
+            "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
-      }
-    ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [
+      },
       {
         "parentPluginId": "expressionRepeatImage",
-        "id": "def-public.renderers",
-        "type": "Array",
+        "id": "def-public.repeatImageRendererFactory",
+        "type": "Function",
         "tags": [],
-        "label": "renderers",
+        "label": "repeatImageRendererFactory",
         "description": [],
         "signature": [
-          "(() => ",
+          "(core: ",
+          {
+            "pluginId": "core",
+            "scope": "public",
+            "docId": "kibCorePluginApi",
+            "section": "def-public.CoreSetup",
+            "text": "CoreSetup"
+          },
+          "<object, unknown>) => () => ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -63,13 +101,40 @@
             "section": "def-common.RepeatImageRendererConfig",
             "text": "RepeatImageRendererConfig"
           },
-          ">)[]"
+          ">"
         ],
-        "path": "src/plugins/expression_repeat_image/public/expression_renderers/index.ts",
+        "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
         "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "expressionRepeatImage",
+            "id": "def-public.repeatImageRendererFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "core",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "public",
+                "docId": "kibCorePluginApi",
+                "section": "def-public.CoreSetup",
+                "text": "CoreSetup"
+              },
+              "<object, unknown>"
+            ],
+            "path": "src/plugins/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [],
     "start": {
       "parentPluginId": "expressionRepeatImage",
@@ -121,7 +186,7 @@
         "label": "repeatImageFunction",
         "description": [],
         "signature": [
-          "() => { name: \"repeatImage\"; aliases: never[]; type: \"render\"; inputTypes: \"number\"[]; help: string; args: { emptyImage: { types: (\"string\" | \"null\")[]; help: string; default: null; }; image: { types: (\"string\" | \"null\")[]; help: string; default: null; }; max: { types: (\"number\" | \"null\")[]; help: string; default: number; }; size: { types: \"number\"[]; default: number; help: string; }; }; fn: (count: number, args: Arguments) => Promise<{ type: \"render\"; as: string; value: { image: string | null; emptyImage: string | null; size: number; max: number | null; count: number; }; }>; }"
+          "() => { name: \"repeatImage\"; aliases: never[]; type: string; inputTypes: \"number\"[]; help: string; args: { emptyImage: { types: (\"string\" | \"null\")[]; help: string; default: null; }; image: { types: (\"string\" | \"null\")[]; help: string; default: null; }; max: { types: (\"number\" | \"null\")[]; help: string; default: number; }; size: { types: \"number\"[]; default: number; help: string; }; }; fn: (count: number, args: Arguments) => Promise<{ type: \"render\"; as: string; value: { image: string | null; emptyImage: string | null; size: number; max: number | null; count: number; }; }>; }"
         ],
         "path": "src/plugins/expression_repeat_image/common/expression_functions/repeat_image_function.ts",
         "deprecated": false,
@@ -345,10 +410,10 @@
             "pluginId": "expressions",
             "scope": "common",
             "docId": "kibExpressionsPluginApi",
-            "section": "def-common.ExpressionValueBoxed",
-            "text": "ExpressionValueBoxed"
+            "section": "def-common.ExpressionValueRender",
+            "text": "ExpressionValueRender"
           },
-          "<\"render\", { as: string; value: Arguments; }>>, ",
+          "<Arguments>>, ",
           {
             "pluginId": "expressions",
             "scope": "common",
@@ -365,13 +430,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expression_repeat_image/common/types/expression_functions.ts",
@@ -409,7 +468,7 @@
         "label": "OriginString",
         "description": [],
         "signature": [
-          "\"top\" | \"left\" | \"bottom\" | \"right\""
+          "\"top\" | \"bottom\" | \"left\" | \"right\""
         ],
         "path": "src/plugins/expression_repeat_image/common/types/expression_renderers.ts",
         "deprecated": false,

@@ -57,6 +57,9 @@ export class DocLinksService {
         cloud: {
           indexManagement: `${ELASTIC_WEBSITE_URL}/guide/en/cloud/current/ec-configure-index-management.html`,
         },
+        console: {
+          guide: `${KIBANA_DOCS}console-kibana.html`,
+        },
         dashboard: {
           guide: `${KIBANA_DOCS}dashboard.html`,
           drilldowns: `${KIBANA_DOCS}drilldowns.html`,
@@ -219,7 +222,10 @@ export class DocLinksService {
           runtimeFields: `${KIBANA_DOCS}managing-data-views.html#runtime-fields`,
         },
         addData: `${KIBANA_DOCS}connect-to-elasticsearch.html`,
-        kibana: `${KIBANA_DOCS}index.html`,
+        kibana: {
+          guide: `${KIBANA_DOCS}index.html`,
+          autocompleteSuggestions: `${KIBANA_DOCS}kibana-concepts-analysts.html#autocomplete-suggestions`,
+        },
         upgradeAssistant: {
           overview: `${KIBANA_DOCS}upgrade-assistant.html`,
           batchReindex: `${KIBANA_DOCS}batch-start-resume-reindex.html`,
@@ -269,6 +275,7 @@ export class DocLinksService {
           mappingJoinFieldsPerformance: `${ELASTICSEARCH_DOCS}parent-join.html#_parent_join_and_performance`,
           mappingMeta: `${ELASTICSEARCH_DOCS}mapping-field-meta.html`,
           mappingMetaFields: `${ELASTICSEARCH_DOCS}mapping-meta-field.html`,
+          mappingMultifields: `${ELASTICSEARCH_DOCS}multi-fields.html`,
           mappingNormalizer: `${ELASTICSEARCH_DOCS}normalizer.html`,
           mappingNorms: `${ELASTICSEARCH_DOCS}norms.html`,
           mappingNullValue: `${ELASTICSEARCH_DOCS}null-value.html`,
@@ -286,11 +293,13 @@ export class DocLinksService {
           migrationApiDeprecation: `${ELASTICSEARCH_DOCS}migration-api-deprecation.html`,
           nodeRoles: `${ELASTICSEARCH_DOCS}modules-node.html#node-roles`,
           releaseHighlights: `${ELASTICSEARCH_DOCS}release-highlights.html`,
+          version8ReleaseHighlights: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/8.0/elastic-stack-highlights.html`,
           remoteClusters: `${ELASTICSEARCH_DOCS}remote-clusters.html`,
           remoteClustersProxy: `${ELASTICSEARCH_DOCS}remote-clusters.html#proxy-mode`,
           remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}remote-clusters-settings.html#remote-cluster-proxy-settings`,
           scriptParameters: `${ELASTICSEARCH_DOCS}modules-scripting-using.html#prefer-params`,
           shardAllocationSettings: `${ELASTICSEARCH_DOCS}modules-cluster.html#cluster-shard-allocation-settings`,
+          sortSearch: `${ELASTICSEARCH_DOCS}sort-search-results.html`,
           transportSettings: `${ELASTICSEARCH_DOCS}modules-network.html#common-network-settings`,
           typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
           setupUpgrade: `${ELASTICSEARCH_DOCS}setup-upgrade.html`,
@@ -308,10 +317,12 @@ export class DocLinksService {
         },
         securitySolution: {
           trustedApps: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/trusted-apps-ov.html`,
+          eventFilters: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/event-filters.html`,
         },
         query: {
           eql: `${ELASTICSEARCH_DOCS}eql.html`,
           kueryQuerySyntax: `${KIBANA_DOCS}kuery-query.html`,
+          luceneQuery: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html`,
           luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
           percolate: `${ELASTICSEARCH_DOCS}query-dsl-percolate-query.html`,
           queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
@@ -467,6 +478,7 @@ export class DocLinksService {
           cronExpressions: `${ELASTICSEARCH_DOCS}cron-expressions.html`,
           executeWatchActionModes: `${ELASTICSEARCH_DOCS}watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode`,
           indexExists: `${ELASTICSEARCH_DOCS}indices-exists.html`,
+          multiSearch: `${ELASTICSEARCH_DOCS}search-multi-search.html`,
           openIndex: `${ELASTICSEARCH_DOCS}indices-open-close.html`,
           putComponentTemplate: `${ELASTICSEARCH_DOCS}indices-component-template.html`,
           painlessExecute: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-execute-api.html`,
@@ -476,15 +488,17 @@ export class DocLinksService {
           putIndexTemplateV1: `${ELASTICSEARCH_DOCS}indices-templates-v1.html`,
           putSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
           putWatch: `${ELASTICSEARCH_DOCS}watcher-api-put-watch.html`,
+          searchPreference: `${ELASTICSEARCH_DOCS}search-search.html#search-preference`,
           simulatePipeline: `${ELASTICSEARCH_DOCS}simulate-pipeline-api.html`,
           timeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#time-units`,
+          unfreezeIndex: `${ELASTICSEARCH_DOCS}unfreeze-index-api.html`,
           updateTransform: `${ELASTICSEARCH_DOCS}update-transform.html`,
         },
         plugins: {
-          azureRepo: `${PLUGIN_DOCS}repository-azure.html`,
-          gcsRepo: `${PLUGIN_DOCS}repository-gcs.html`,
+          azureRepo: `${ELASTICSEARCH_DOCS}repository-azure.html`,
+          gcsRepo: `${ELASTICSEARCH_DOCS}repository-gcs.html`,
           hdfsRepo: `${PLUGIN_DOCS}repository-hdfs.html`,
-          s3Repo: `${PLUGIN_DOCS}repository-s3.html`,
+          s3Repo: `${ELASTICSEARCH_DOCS}repository-s3.html`,
           snapshotRestoreRepos: `${PLUGIN_DOCS}repository.html`,
           mapperSize: `${PLUGIN_DOCS}mapper-size-usage.html`,
         },
@@ -562,7 +576,7 @@ export class DocLinksService {
           upgradeElasticAgent712lower: `${FLEET_DOCS}upgrade-elastic-agent.html#upgrade-7.12-lower`,
           learnMoreBlog: `${ELASTIC_WEBSITE_URL}blog/elastic-agent-and-fleet-make-it-easier-to-integrate-your-systems-with-elastic`,
           apiKeysLearnMore: `${KIBANA_DOCS}api-keys.html`,
-          onPremRegistry: `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/${DOC_LINK_VERSION}/air-gapped.html`,
+          onPremRegistry: `${FLEET_DOCS}air-gapped.html`,
         },
         ecs: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
@@ -611,6 +625,9 @@ export interface DocLinksStart {
     };
     readonly cloud: {
       readonly indexManagement: string;
+    };
+    readonly console: {
+      readonly guide: string;
     };
     readonly dashboard: {
       readonly guide: string;
@@ -775,7 +792,10 @@ export interface DocLinksStart {
       readonly runtimeFields: string;
     };
     readonly addData: string;
-    readonly kibana: string;
+    readonly kibana: {
+      readonly guide: string;
+      readonly autocompleteSuggestions: string;
+    };
     readonly upgradeAssistant: {
       readonly overview: string;
       readonly batchReindex: string;
@@ -795,10 +815,12 @@ export interface DocLinksStart {
     };
     readonly securitySolution: {
       readonly trustedApps: string;
+      readonly eventFilters: string;
     };
     readonly query: {
       readonly eql: string;
       readonly kueryQuerySyntax: string;
+      readonly luceneQuery: string;
       readonly luceneQuerySyntax: string;
       readonly percolate: string;
       readonly queryDsl: string;
@@ -827,6 +849,7 @@ export interface DocLinksStart {
       cronExpressions: string;
       executeWatchActionModes: string;
       indexExists: string;
+      multiSearch: string;
       openIndex: string;
       putComponentTemplate: string;
       painlessExecute: string;
@@ -835,8 +858,10 @@ export interface DocLinksStart {
       putSnapshotLifecyclePolicy: string;
       putIndexTemplateV1: string;
       putWatch: string;
+      searchPreference: string;
       simulatePipeline: string;
       timeUnits: string;
+      unfreezeIndex: string;
       updateTransform: string;
     }>;
     readonly observability: Readonly<{

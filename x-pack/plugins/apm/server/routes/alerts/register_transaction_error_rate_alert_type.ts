@@ -11,7 +11,7 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
-} from '@kbn/rule-data-utils/technical_field_names';
+} from '@kbn/rule-data-utils';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
@@ -88,7 +88,7 @@ export function registerTransactionErrorRateAlertType({
       producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      executor: async ({ services, params: alertParams }) => {
+      executor: async ({ services, params: ruleParams }) => {
         const config = await config$.pipe(take(1)).toPromise();
         const indices = await getApmIndices({
           config,
@@ -116,7 +116,7 @@ export function registerTransactionErrorRateAlertType({
                   {
                     range: {
                       '@timestamp': {
-                        gte: `now-${alertParams.windowSize}${alertParams.windowUnit}`,
+                        gte: `now-${ruleParams.windowSize}${ruleParams.windowUnit}`,
                       },
                     },
                   },
@@ -131,9 +131,9 @@ export function registerTransactionErrorRateAlertType({
                       ],
                     },
                   },
-                  ...termQuery(SERVICE_NAME, alertParams.serviceName),
-                  ...termQuery(TRANSACTION_TYPE, alertParams.transactionType),
-                  ...environmentQuery(alertParams.environment),
+                  ...termQuery(SERVICE_NAME, ruleParams.serviceName),
+                  ...termQuery(TRANSACTION_TYPE, ruleParams.transactionType),
+                  ...environmentQuery(ruleParams.environment),
                 ],
               },
             },
@@ -185,7 +185,7 @@ export function registerTransactionErrorRateAlertType({
             )?.doc_count ?? 0;
           const errorRate = (failed / (failed + succesful)) * 100;
 
-          if (errorRate >= alertParams.threshold) {
+          if (errorRate >= ruleParams.threshold) {
             results.push({
               serviceName,
               environment,
@@ -215,9 +215,9 @@ export function registerTransactionErrorRateAlertType({
                 [TRANSACTION_TYPE]: transactionType,
                 [PROCESSOR_EVENT]: ProcessorEvent.transaction,
                 [ALERT_EVALUATION_VALUE]: errorRate,
-                [ALERT_EVALUATION_THRESHOLD]: alertParams.threshold,
+                [ALERT_EVALUATION_THRESHOLD]: ruleParams.threshold,
                 [ALERT_REASON]: formatTransactionErrorRateReason({
-                  threshold: alertParams.threshold,
+                  threshold: ruleParams.threshold,
                   measured: errorRate,
                   asPercent,
                   serviceName,
@@ -228,9 +228,9 @@ export function registerTransactionErrorRateAlertType({
               serviceName,
               transactionType,
               environment: getEnvironmentLabel(environment),
-              threshold: alertParams.threshold,
+              threshold: ruleParams.threshold,
               triggerValue: asDecimalOrInteger(errorRate),
-              interval: `${alertParams.windowSize}${alertParams.windowUnit}`,
+              interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
             });
         });
 

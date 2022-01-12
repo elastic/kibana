@@ -8,9 +8,9 @@
 import React, { FC } from 'react';
 import { EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { OverlayStart } from 'kibana/public';
+import type { OverlayStart, ThemeServiceStart } from 'kibana/public';
 import type { ModelItem } from './models_list';
-import { toMountPoint } from '../../../../../../../src/plugins/kibana_react/public';
+import { toMountPoint, wrapWithTheme } from '../../../../../../../src/plugins/kibana_react/public';
 
 interface ForceStopModelConfirmDialogProps {
   model: ModelItem;
@@ -64,22 +64,25 @@ export const ForceStopModelConfirmDialog: FC<ForceStopModelConfirmDialogProps> =
 };
 
 export const getUserConfirmationProvider =
-  (overlays: OverlayStart) => async (forceStopModel: ModelItem) => {
+  (overlays: OverlayStart, theme: ThemeServiceStart) => async (forceStopModel: ModelItem) => {
     return new Promise(async (resolve, reject) => {
       try {
         const modalSession = overlays.openModal(
           toMountPoint(
-            <ForceStopModelConfirmDialog
-              model={forceStopModel}
-              onCancel={() => {
-                modalSession.close();
-                resolve(false);
-              }}
-              onConfirm={() => {
-                modalSession.close();
-                resolve(true);
-              }}
-            />
+            wrapWithTheme(
+              <ForceStopModelConfirmDialog
+                model={forceStopModel}
+                onCancel={() => {
+                  modalSession.close();
+                  resolve(false);
+                }}
+                onConfirm={() => {
+                  modalSession.close();
+                  resolve(true);
+                }}
+              />,
+              theme.theme$
+            )
           )
         );
       } catch (e) {

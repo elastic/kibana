@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   EuiPanel,
@@ -17,6 +17,7 @@ import {
   EuiIconTip,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiButtonGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,11 +33,21 @@ import { VisEditorOptionsProps } from '../../../../../visualizations/public';
 import { TruncateLabelsOption } from './truncate_labels';
 import { PaletteRegistry } from '../../../../../charts/public';
 import { DEFAULT_PERCENT_DECIMALS } from '../../../common';
-import { PieVisParams, LabelPositions, ValueFormats, PieTypeProps } from '../../types';
-import { getLabelPositions, getValuesFormats } from '../collections';
+import { PieTypeProps } from '../../types';
+import {
+  PieVisParams,
+  LabelPositions,
+  ValueFormats,
+} from '../../../../../chart_expressions/expression_pie/common';
+
+import { emptySizeRatioOptions, getLabelPositions, getValuesFormats } from '../collections';
 import { getLegendPositions } from '../positions';
 
 export interface PieOptionsProps extends VisEditorOptionsProps<PieVisParams>, PieTypeProps {}
+
+const emptySizeRatioLabel = i18n.translate('visTypePie.editors.pie.emptySizeRatioLabel', {
+  defaultMessage: 'Inner area size',
+});
 
 function DecimalSlider<ParamName extends string>({
   paramName,
@@ -96,6 +107,14 @@ const PieOptions = (props: PieOptionsProps) => {
     fetchPalettes();
   }, [props.palettes]);
 
+  const handleEmptySizeRatioChange = useCallback(
+    (sizeId) => {
+      const emptySizeRatio = emptySizeRatioOptions.find(({ id }) => id === sizeId)?.value;
+      setValue('emptySizeRatio', emptySizeRatio);
+    },
+    [setValue]
+  );
+
   return (
     <>
       <EuiPanel paddingSize="s">
@@ -116,6 +135,23 @@ const PieOptions = (props: PieOptionsProps) => {
           value={stateParams.isDonut}
           setValue={setValue}
         />
+        {props.showElasticChartsOptions && stateParams.isDonut && (
+          <EuiFormRow label={emptySizeRatioLabel} fullWidth>
+            <EuiButtonGroup
+              isFullWidth
+              name="emptySizeRatio"
+              buttonSize="compressed"
+              legend={emptySizeRatioLabel}
+              options={emptySizeRatioOptions}
+              idSelected={
+                emptySizeRatioOptions.find(({ value }) => value === stateParams.emptySizeRatio)
+                  ?.id ?? 'emptySizeRatioOption-small'
+              }
+              onChange={handleEmptySizeRatioChange}
+              data-test-subj="visTypePieEmptySizeRatioButtonGroup"
+            />
+          </EuiFormRow>
+        )}
         <BasicOptions {...props} legendPositions={getLegendPositions} />
         {props.showElasticChartsOptions && (
           <>

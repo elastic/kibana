@@ -154,13 +154,7 @@
         ],
         "signature": [
           "(param: string | undefined, field: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.DataViewFieldBase",
-            "text": "DataViewFieldBase"
-          },
+          "DataViewFieldBase",
           " | undefined, isRequired: boolean, touched: boolean) => string | null | undefined"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/check_empty_value/index.ts",
@@ -188,13 +182,7 @@
             "label": "field",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.DataViewFieldBase",
-                "text": "DataViewFieldBase"
-              },
+              "DataViewFieldBase",
               " | undefined"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/check_empty_value/index.ts",
@@ -274,15 +262,9 @@
           "\nGiven an array of lists and optionally a field this will return all\nthe lists that match against the field based on the types from the field\n\nNOTE: That we support one additional property from \"FieldSpec\" located here:\nsrc/plugins/data/common/index_patterns/fields/types.ts\nThis type property is esTypes. If it exists and is on there we will read off the esTypes."
         ],
         "signature": [
-          "(lists: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[], field?: (",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.DataViewFieldBase",
-            "text": "DataViewFieldBase"
-          },
-          " & { esTypes?: string[] | undefined; }) | undefined) => { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
+          "(lists: { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"long\" | \"double\" | \"text\" | \"binary\" | \"date_nanos\" | \"integer\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }[], field?: (",
+          "DataViewFieldBase",
+          " & { esTypes?: string[] | undefined; }) | undefined) => { _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"long\" | \"double\" | \"text\" | \"binary\" | \"date_nanos\" | \"integer\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }[]"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/filter_field_to_list/index.ts",
         "deprecated": false,
@@ -297,7 +279,7 @@
               "The lists to match against the field"
             ],
             "signature": [
-              "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"ip_range\" | \"date_range\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"long\" | \"double\" | \"text\" | \"date_nanos\" | \"shape\" | \"short\" | \"binary\" | \"float\" | \"half_float\" | \"integer\" | \"byte\" | \"long_range\" | \"integer_range\" | \"float_range\" | \"double_range\"; updated_at: string; updated_by: string; version: number; }[]"
+              "{ _version: string | undefined; created_at: string; created_by: string; description: string; deserializer: string | undefined; id: string; immutable: boolean; meta: object | undefined; name: string; serializer: string | undefined; tie_breaker_id: string; type: \"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"long\" | \"double\" | \"text\" | \"binary\" | \"date_nanos\" | \"integer\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; updated_at: string; updated_by: string; version: number; }[]"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/filter_field_to_list/index.ts",
             "deprecated": false,
@@ -314,13 +296,7 @@
             ],
             "signature": [
               "(",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.DataViewFieldBase",
-                "text": "DataViewFieldBase"
-              },
+              "DataViewFieldBase",
               " & { esTypes?: string[] | undefined; }) | undefined"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/filter_field_to_list/index.ts",
@@ -436,21 +412,9 @@
         ],
         "signature": [
           "(field: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.DataViewFieldBase",
-            "text": "DataViewFieldBase"
-          },
+          "DataViewFieldBase",
           " | undefined) => ",
-          {
-            "pluginId": "@kbn/securitysolution-list-utils",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionListUtilsPluginApi",
-            "section": "def-common.OperatorOption",
-            "text": "OperatorOption"
-          },
+          "OperatorOption",
           "[]"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/get_operators/index.ts",
@@ -463,16 +427,10 @@
             "tags": [],
             "label": "field",
             "description": [
-              "IndexPatternFieldBase selected field"
+              "DataViewFieldBase selected field"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.DataViewFieldBase",
-                "text": "DataViewFieldBase"
-              },
+              "DataViewFieldBase",
               " | undefined"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/get_operators/index.ts",
@@ -525,13 +483,7 @@
         ],
         "signature": [
           "(param: string | undefined, field: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.DataViewFieldBase",
-            "text": "DataViewFieldBase"
-          },
+          "DataViewFieldBase",
           " | undefined, isRequired: boolean, touched: boolean) => string | undefined"
         ],
         "path": "packages/kbn-securitysolution-autocomplete/src/param_is_valid/index.ts",
@@ -563,13 +515,7 @@
               "the selected field"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.DataViewFieldBase",
-                "text": "DataViewFieldBase"
-              },
+              "DataViewFieldBase",
               " | undefined"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/param_is_valid/index.ts",
@@ -768,13 +714,7 @@
             "label": "indexPattern",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.DataViewBase",
-                "text": "DataViewBase"
-              },
+              "DataViewBase",
               " | undefined"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
@@ -788,13 +728,7 @@
             "label": "operatorType",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/securitysolution-io-ts-list-types",
-                "scope": "common",
-                "docId": "kibKbnSecuritysolutionIoTsListTypesPluginApi",
-                "section": "def-common.ListOperatorTypeEnum",
-                "text": "ListOperatorTypeEnum"
-              }
+              "ListOperatorTypeEnum"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",
             "deprecated": false
@@ -817,13 +751,7 @@
             "label": "selectedField",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.DataViewFieldBase",
-                "text": "DataViewFieldBase"
-              },
+              "DataViewFieldBase",
               " | undefined"
             ],
             "path": "packages/kbn-securitysolution-autocomplete/src/hooks/use_field_value_autocomplete/index.ts",

@@ -6,7 +6,7 @@
  */
 
 import { KibanaRequest, Logger } from 'src/core/server';
-import { ExceptionListClient } from '../../../lists/server';
+import { CreateExceptionListItemOptions, ExceptionListClient } from '../../../lists/server';
 import {
   CasesClient,
   PluginStartContract as CasesPluginStartContract,
@@ -36,8 +36,10 @@ import {
 } from './errors';
 import {
   EndpointFleetServicesFactory,
+  EndpointInternalFleetServicesInterface,
   EndpointScopedFleetServicesInterface,
 } from './services/endpoint_fleet_services';
+import type { ListsServerExtensionRegistrar } from '../../../lists/server';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -56,6 +58,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   alerting: AlertsPluginStartContract;
   config: ConfigType;
   registerIngestCallback?: FleetStartContract['registerExternalCallback'];
+  registerListsServerExtension?: ListsServerExtensionRegistrar;
   licenseService: LicenseService;
   exceptionListsClient: ExceptionListClient | undefined;
   cases: CasesPluginStartContract | undefined;
@@ -117,6 +120,18 @@ export class EndpointAppContextService {
         getPackagePolicyDeleteCallback(dependencies.exceptionListsClient)
       );
     }
+
+    if (this.startDependencies.registerListsServerExtension) {
+      const { registerListsServerExtension } = this.startDependencies;
+
+      registerListsServerExtension({
+        type: 'exceptionsListPreCreateItem',
+        callback: async (arg: CreateExceptionListItemOptions) => {
+          // this.startDependencies?.logger.info('exceptionsListPreCreateItem called!');
+          return arg;
+        },
+      });
+    }
   }
 
   public stop() {}
@@ -138,6 +153,14 @@ export class EndpointAppContextService {
     }
 
     return this.fleetServicesFactory.asScoped(req);
+  }
+
+  public getInternalFleetServices(): EndpointInternalFleetServicesInterface {
+    if (this.fleetServicesFactory === null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.fleetServicesFactory.asInternalUser();
   }
 
   /** @deprecated use `getScopedFleetServices()` instead */

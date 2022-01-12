@@ -41,7 +41,6 @@ import { GetMetadataListRequestQuery } from '../../../../common/endpoint/schema/
 import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,
-  FORBIDDEN_MESSAGE,
   METADATA_TRANSFORMS_PATTERN,
 } from '../../../../common/endpoint/constants';
 import { EndpointFleetServicesInterface } from '../../services/endpoint_fleet_services';
@@ -96,6 +95,7 @@ export function getMetadataListRequestHandler(
   return async (context, request, response) => {
     const endpointMetadataService = endpointAppContext.service.getEndpointMetadataService();
     const fleetServices = endpointAppContext.service.getScopedFleetServices(request);
+    const esClient = context.core.elasticsearch.client.asInternalUser;
 
     let doesUnitedIndexExist = false;
     let didUnitedIndexError = false;
@@ -107,9 +107,7 @@ export function getMetadataListRequestHandler(
     };
 
     try {
-      doesUnitedIndexExist = await endpointMetadataService.doesUnitedIndexExist(
-        context.core.elasticsearch.client.asCurrentUser
-      );
+      doesUnitedIndexExist = await endpointMetadataService.doesUnitedIndexExist(esClient);
     } catch (error) {
       // for better UX, try legacy query instead of immediately failing on united index error
       didUnitedIndexError = true;
@@ -142,7 +140,7 @@ export function getMetadataListRequestHandler(
     // Unified index is installed and being used - perform search using new approach
     try {
       const { data, total } = await endpointMetadataService.getHostMetadataList(
-        context.core.elasticsearch.client.asCurrentUser,
+        esClient,
         fleetServices,
         request.query
       );
@@ -176,7 +174,7 @@ export const getMetadataRequestHandler = function (
     try {
       return response.ok({
         body: await endpointMetadataService.getEnrichedHostMetadata(
-          context.core.elasticsearch.client.asCurrentUser,
+          context.core.elasticsearch.client.asInternalUser,
           endpointAppContext.service.getScopedFleetServices(request),
           request.params.id
         ),
@@ -191,15 +189,6 @@ export function getMetadataTransformStatsHandler(
   logger: Logger
 ): RequestHandler<unknown, unknown, unknown, SecuritySolutionRequestHandlerContext> {
   return async (context, _, response) => {
-    const { canAccessEndpointManagement } = context.securitySolution.endpointAuthz;
-    if (!canAccessEndpointManagement) {
-      return response.forbidden({
-        body: {
-          message: FORBIDDEN_MESSAGE,
-        },
-      });
-    }
-
     const esClient = context.core.elasticsearch.client.asInternalUser;
     try {
       const transformStats = await esClient.transform.getTransformStats({
@@ -363,16 +352,12 @@ async function legacyListMetadataQuery(
   };
 
   const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
+  const esClient = context.core.elasticsearch.client.asInternalUser;
 
-  const unenrolledAgentIds = await findAllUnenrolledAgentIds(
-    fleetAgentClient,
-    context.core.elasticsearch.client.asCurrentUser,
-    endpointPolicyIds
-  );
+  const unenrolledAgentIds = await findAllUnenrolledAgentIds(fleetAgentClient, endpointPolicyIds);
 
   const statusAgentIds = await findAgentIdsByStatus(
     fleetAgentClient,
-    context.core.elasticsearch.client.asCurrentUser,
     queryOptions?.hostStatuses || []
   );
 
@@ -384,9 +369,7 @@ async function legacyListMetadataQuery(
     statusAgentIds,
   });
 
-  const result = await context.core.elasticsearch.client.asCurrentUser.search<HostMetadata>(
-    queryParams
-  );
+  const result = await esClient.search<HostMetadata>(queryParams);
   const hostListQueryResult = queryResponseToHostListResult(result.body);
   return mapToHostResultList(queryParams, hostListQueryResult, metadataRequestContext);
 }

@@ -5,27 +5,26 @@
  * 2.0.
  */
 
-import {
-  EuiIcon,
-  EuiToolTip,
-  EuiFlexGroup,
-  EuiFlexItem,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import { EuiIcon, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { TypeOf } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
+import { ApmRoutes } from '../../routing/apm_route_config';
 import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
 import {
   asMillisecondDuration,
   asTransactionRate,
 } from '../../../../common/utils/formatters';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { truncate } from '../../../utils/style';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { TransactionDetailLink } from '../../shared/Links/apm/transaction_detail_link';
 import { ITableColumn, ManagedTable } from '../../shared/managed_table';
-import { AgentIcon } from '../../shared/agent_icon';
+import { ServiceLink } from '../../shared/service_link';
+import { TruncateWithTooltip } from '../../shared/truncate_with_tooltip';
+import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 
 type TraceGroup = APIReturnType<'GET /internal/apm/traces'>['items'][0];
 
@@ -40,97 +39,111 @@ interface Props {
   isFailure: boolean;
 }
 
-const traceListColumns: Array<ITableColumn<TraceGroup>> = [
-  {
-    field: 'name',
-    name: i18n.translate('xpack.apm.tracesTable.nameColumnLabel', {
-      defaultMessage: 'Name',
-    }),
-    width: '40%',
-    sortable: true,
-    render: (
-      _: string,
-      { serviceName, transactionName, transactionType }: TraceGroup
-    ) => (
-      <EuiToolTip content={transactionName} anchorClassName="eui-textTruncate">
-        <StyledTransactionLink
-          serviceName={serviceName}
-          transactionName={transactionName}
-          transactionType={transactionType}
+export function getTraceListColumns({
+  query,
+}: {
+  query: TypeOf<ApmRoutes, '/traces'>['query'];
+}): Array<ITableColumn<TraceGroup>> {
+  return [
+    {
+      field: 'name',
+      name: i18n.translate('xpack.apm.tracesTable.nameColumnLabel', {
+        defaultMessage: 'Name',
+      }),
+      width: '40%',
+      sortable: true,
+      render: (
+        _: string,
+        { serviceName, transactionName, transactionType }: TraceGroup
+      ) => (
+        <EuiToolTip
+          content={transactionName}
+          anchorClassName="eui-textTruncate"
         >
-          {transactionName}
-        </StyledTransactionLink>
-      </EuiToolTip>
-    ),
-  },
-  {
-    field: 'serviceName',
-    name: i18n.translate(
-      'xpack.apm.tracesTable.originatingServiceColumnLabel',
-      {
-        defaultMessage: 'Originating service',
-      }
-    ),
-    sortable: true,
-    render: (_: string, { serviceName, agentName }) => (
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <AgentIcon agentName={agentName} />
-        </EuiFlexItem>
-        <EuiFlexItem>{serviceName}</EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-  },
-  {
-    field: 'averageResponseTime',
-    name: i18n.translate('xpack.apm.tracesTable.avgResponseTimeColumnLabel', {
-      defaultMessage: 'Latency (avg.)',
-    }),
-    sortable: true,
-    dataType: 'number',
-    render: (_, { averageResponseTime }) =>
-      asMillisecondDuration(averageResponseTime),
-  },
-  {
-    field: 'transactionsPerMinute',
-    name: i18n.translate('xpack.apm.tracesTable.tracesPerMinuteColumnLabel', {
-      defaultMessage: 'Traces per minute',
-    }),
-    sortable: true,
-    dataType: 'number',
-    render: (_, { transactionsPerMinute }) =>
-      asTransactionRate(transactionsPerMinute),
-  },
-  {
-    field: 'impact',
-    name: (
-      <EuiToolTip
-        content={i18n.translate(
-          'xpack.apm.tracesTable.impactColumnDescription',
-          {
-            defaultMessage:
-              'The most used and slowest endpoints in your service. It is the result of multiplying latency and throughput',
+          <StyledTransactionLink
+            serviceName={serviceName}
+            transactionName={transactionName}
+            transactionType={transactionType}
+          >
+            {transactionName}
+          </StyledTransactionLink>
+        </EuiToolTip>
+      ),
+    },
+    {
+      field: 'serviceName',
+      name: i18n.translate(
+        'xpack.apm.tracesTable.originatingServiceColumnLabel',
+        {
+          defaultMessage: 'Originating service',
+        }
+      ),
+      sortable: true,
+      render: (_: string, { serviceName, agentName, transactionType }) => (
+        <TruncateWithTooltip
+          data-test-subj="apmTraceListAppLink"
+          text={serviceName || NOT_AVAILABLE_LABEL}
+          content={
+            <ServiceLink
+              agentName={agentName}
+              query={{ ...query, transactionType }}
+              serviceName={serviceName}
+            />
           }
-        )}
-      >
-        <>
-          {i18n.translate('xpack.apm.tracesTable.impactColumnLabel', {
-            defaultMessage: 'Impact',
-          })}{' '}
-          <EuiIcon
-            size="s"
-            color="subdued"
-            type="questionInCircle"
-            className="eui-alignTop"
-          />
-        </>
-      </EuiToolTip>
-    ),
-    align: RIGHT_ALIGNMENT,
-    sortable: true,
-    render: (_, { impact }) => <ImpactBar value={impact} />,
-  },
-];
+        />
+      ),
+    },
+    {
+      field: 'averageResponseTime',
+      name: i18n.translate('xpack.apm.tracesTable.avgResponseTimeColumnLabel', {
+        defaultMessage: 'Latency (avg.)',
+      }),
+      sortable: true,
+      dataType: 'number',
+      render: (_, { averageResponseTime }) =>
+        asMillisecondDuration(averageResponseTime),
+    },
+    {
+      field: 'transactionsPerMinute',
+      name: i18n.translate('xpack.apm.tracesTable.tracesPerMinuteColumnLabel', {
+        defaultMessage: 'Traces per minute',
+      }),
+      sortable: true,
+      dataType: 'number',
+      render: (_, { transactionsPerMinute }) =>
+        asTransactionRate(transactionsPerMinute),
+    },
+    {
+      field: 'impact',
+      name: (
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.tracesTable.impactColumnDescription',
+            {
+              defaultMessage:
+                'The most used and slowest endpoints in your service. It is the result of multiplying latency and throughput',
+            }
+          )}
+        >
+          <>
+            {i18n.translate('xpack.apm.tracesTable.impactColumnLabel', {
+              defaultMessage: 'Impact',
+            })}{' '}
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignTop"
+            />
+          </>
+        </EuiToolTip>
+      ),
+      align: RIGHT_ALIGNMENT,
+      sortable: true,
+      render: (_, { impact }) => <ImpactBar value={impact} />,
+    },
+  ];
+}
 
 const noItemsMessage = (
   <EmptyMessage
@@ -141,6 +154,12 @@ const noItemsMessage = (
 );
 
 export function TraceList({ items = [], isLoading, isFailure }: Props) {
+  const { query } = useApmParams('/traces');
+
+  const traceListColumns = useMemo(
+    () => getTraceListColumns({ query }),
+    [query]
+  );
   return (
     <ManagedTable
       isLoading={isLoading}

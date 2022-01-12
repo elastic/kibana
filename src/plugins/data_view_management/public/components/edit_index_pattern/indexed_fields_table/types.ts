@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternFieldBase } from '@kbn/es-query';
+import { DataViewFieldBase } from '@kbn/es-query';
 import { IndexPatternField } from '../../../../../../plugins/data/public';
 
-type IndexedFieldItemBase = Partial<IndexPatternField> & IndexPatternFieldBase;
+type IndexedFieldItemBase = Partial<IndexPatternField> & DataViewFieldBase;
 
 export interface IndexedFieldItem extends IndexedFieldItemBase {
   info: string[];

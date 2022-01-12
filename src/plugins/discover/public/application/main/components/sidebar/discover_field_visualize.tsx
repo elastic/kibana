@@ -8,7 +8,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import type { IndexPattern, IndexPatternField } from 'src/plugins/data/common';
+import type { DataView, DataViewField } from 'src/plugins/data/common';
 
 import { triggerVisualizeActions, VisualizeInformation } from './lib/visualize_trigger_utils';
 import type { FieldDetails } from './types';
@@ -16,10 +16,10 @@ import { getVisualizeInformation } from './lib/visualize_trigger_utils';
 import { DiscoverFieldVisualizeInner } from './discover_field_visualize_inner';
 
 interface Props {
-  field: IndexPatternField;
-  indexPattern: IndexPattern;
+  field: DataViewField;
+  indexPattern: DataView;
   details: FieldDetails;
-  multiFields?: IndexPatternField[];
+  multiFields?: DataViewField[];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
 }
 

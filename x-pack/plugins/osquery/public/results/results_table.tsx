@@ -232,7 +232,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   );
 
   useEffect(() => {
-    if (!allResultsData?.edges) {
+    if (!allResultsData?.edges?.length) {
       return;
     }
 
@@ -302,7 +302,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const toolbarVisibility = useMemo(
     () => ({
-      showStyleSelector: false,
+      showDisplaySelector: false,
       additionalControls: (
         <>
           <ViewResultsInDiscoverAction

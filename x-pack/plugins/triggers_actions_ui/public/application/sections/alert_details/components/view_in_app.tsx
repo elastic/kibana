@@ -17,11 +17,11 @@ import {
   AlertStateNavigation,
   AlertUrlNavigation,
 } from '../../../../../../alerting/common';
-import { Alert } from '../../../../types';
+import { Rule } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 
 export interface ViewInAppProps {
-  alert: Alert;
+  alert: Rule;
 }
 
 const NO_NAVIGATION = false;
@@ -82,7 +82,7 @@ function hasNavigation(
 
 function getNavigationHandler(
   alertNavigation: AlertNavigationLoadingState,
-  alert: Alert,
+  alert: Rule,
   navigateToApp: CoreStart['application']['navigateToApp']
 ): object {
   return hasNavigation(alertNavigation)

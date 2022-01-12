@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertType } from '../../../types';
+import { RuleType } from '../../../types';
 import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
 import { loadAlertTypes } from './rule_types';
 import { ALERTS_FEATURE_ID } from '../../../../../alerting/common';
@@ -14,7 +14,7 @@ const http = httpServiceMock.createStartContract();
 
 describe('loadAlertTypes', () => {
   test('should call get alert types API', async () => {
-    const resolvedValue: AlertType[] = [
+    const resolvedValue: RuleType[] = [
       {
         id: 'test',
         name: 'Test',

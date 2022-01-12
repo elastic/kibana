@@ -19,6 +19,7 @@ import type {
   DeletePackagePoliciesRequestSchema,
   UpgradePackagePoliciesRequestSchema,
   DryRunPackagePoliciesRequestSchema,
+  FleetRequestHandler,
 } from '../../types';
 import type {
   CreatePackagePolicyResponse,
@@ -80,7 +81,7 @@ export const getOnePackagePolicyHandler: RequestHandler<
   }
 };
 
-export const createPackagePolicyHandler: RequestHandler<
+export const createPackagePolicyHandler: FleetRequestHandler<
   undefined,
   undefined,
   TypeOf<typeof CreatePackagePolicyRequestSchema.body>
@@ -89,6 +90,7 @@ export const createPackagePolicyHandler: RequestHandler<
   const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
   const { force, ...newPolicy } = request.body;
+  const spaceId = context.fleet.spaceId;
   try {
     const newPackagePolicy = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
       soClient,
@@ -106,6 +108,7 @@ export const createPackagePolicyHandler: RequestHandler<
     const packagePolicy = await packagePolicyService.create(soClient, esClient, newData, {
       user,
       force,
+      spaceId,
     });
     const body: CreatePackagePolicyResponse = { item: packagePolicy };
     return response.ok({
@@ -263,10 +266,10 @@ export const dryRunUpgradePackagePolicyHandler: RequestHandler<
   const soClient = context.core.savedObjects.client;
   try {
     const body: UpgradePackagePolicyDryRunResponse = [];
-    const { packagePolicyIds, packageVersion } = request.body;
+    const { packagePolicyIds } = request.body;
 
     for (const id of packagePolicyIds) {
-      const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id, packageVersion);
+      const result = await packagePolicyService.getUpgradeDryRunDiff(soClient, id);
       body.push(result);
     }
 

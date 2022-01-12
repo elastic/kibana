@@ -40,11 +40,12 @@ export function UsageAPIProvider({ getService }: FtrProviderContext) {
      */
     async getTelemetryStats(payload: {
       unencrypted?: boolean;
+      refreshCache?: boolean;
     }): Promise<ReturnType<TelemetryCollectionManagerPlugin['getStats']>> {
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
-        .send(payload)
+        .send({ refreshCache: true, ...payload })
         .expect(200);
       return body;
     },

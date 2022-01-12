@@ -324,11 +324,13 @@ export class SecurityPlugin
         mode: this.authorizationSetup.mode,
       },
       license,
-      privilegeDeprecationsService: getPrivilegeDeprecationsService(
-        this.authorizationSetup,
+      privilegeDeprecationsService: getPrivilegeDeprecationsService({
+        authz: this.authorizationSetup,
+        getFeatures: () =>
+          startServicesPromise.then((services) => services.features.getKibanaFeatures()),
         license,
-        this.logger.get('deprecations')
-      ),
+        logger: this.logger.get('deprecations'),
+      }),
     });
   }
 

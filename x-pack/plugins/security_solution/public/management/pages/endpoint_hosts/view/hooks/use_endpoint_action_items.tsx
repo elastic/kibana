@@ -65,7 +65,7 @@ export const useEndpointActionItems = (
         // Un-isolate is always available to users regardless of license level
         isolationActions.push({
           'data-test-subj': 'unIsolateLink',
-          icon: 'logoSecurity',
+          icon: 'lockOpen',
           key: 'unIsolateHost',
           navigateAppId: APP_UI_ID,
           navigateOptions: {
@@ -83,7 +83,7 @@ export const useEndpointActionItems = (
         // For Platinum++ licenses, users also have ability to isolate
         isolationActions.push({
           'data-test-subj': 'isolateLink',
-          icon: 'logoSecurity',
+          icon: 'lock',
           key: 'isolateHost',
           navigateAppId: APP_UI_ID,
           navigateOptions: {
