@@ -157,26 +157,13 @@ export default ({ getService }: FtrProviderContext): void => {
         // Add a legacy rule action to the body of the rule
         await createLegacyRuleAction(supertest, createRuleBody.id, hookAction.id);
 
-        // Test to ensure that we have exactly 1 legacy action by querying the Alerting client REST API directly
-        // See: https://www.elastic.co/guide/en/kibana/current/find-rules-api.html
-        // Note: We specifically query for both the filter of type "siem.notifications" and the "has_reference" to keep it very specific
-        await supertest
-          .get(`${BASE_ALERTING_API_PATH}/rules/_find`)
-          .query({
-            page: 1,
-            per_page: 10,
-            filter: 'alert.attributes.alertTypeId:(siem.notifications)',
-            has_reference: JSON.stringify({ id: createRuleBody.id, type: 'alert' }),
-          })
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
         // delete the rule with the legacy action
         const { body } = await supertest
           .delete(`${DETECTION_ENGINE_RULES_URL}?id=${createRuleBody.id}`)
           .set('kbn-xsrf', 'true')
           .expect(200);
+
+        // ensure the actions contains the response
         expect(body.actions).to.eql([
           {
             id: hookAction.id,
@@ -206,21 +193,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Add a legacy rule action to the body of the rule
         await createLegacyRuleAction(supertest, createRuleBody.id, hookAction.id);
-
-        // Test to ensure that we have exactly 1 legacy action by querying the Alerting client REST API directly
-        // See: https://www.elastic.co/guide/en/kibana/current/find-rules-api.html
-        // Note: We specifically query for both the filter of type "siem.notifications" and the "has_reference" to keep it very specific
-        await supertest
-          .get(`${BASE_ALERTING_API_PATH}/rules/_find`)
-          .query({
-            page: 1,
-            per_page: 10,
-            filter: 'alert.attributes.alertTypeId:(siem.notifications)',
-            has_reference: JSON.stringify({ id: createRuleBody.id, type: 'alert' }),
-          })
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
 
         await supertest
           .delete(`${DETECTION_ENGINE_RULES_URL}?id=${createRuleBody.id}`)

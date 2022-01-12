@@ -316,7 +316,7 @@ export const legacyMigrate = async ({
   }
   /**
    * On update / patch I'm going to take the actions as they are, better off taking rules client.find (siem.notification) result
-   * and putting that into the actions array of the rule, then set the rules onThrottle property, notifyWhen and throttle from null -> actually value (1hr etc..)
+   * and putting that into the actions array of the rule, then set the rules onThrottle property, notifyWhen and throttle from null -> actual value (1hr etc..)
    * Then use the rules client to delete the siem.notification
    * Then with the legacy Rule Actions saved object type, just delete it.
    */

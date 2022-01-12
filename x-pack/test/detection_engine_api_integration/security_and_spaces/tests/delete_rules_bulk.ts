@@ -270,21 +270,6 @@ export default ({ getService }: FtrProviderContext): void => {
         // Add a legacy rule action to the body of the rule
         await createLegacyRuleAction(supertest, createRuleBody.id, hookAction.id);
 
-        // Test to ensure that we have exactly 1 legacy action by querying the Alerting client REST API directly
-        // See: https://www.elastic.co/guide/en/kibana/current/find-rules-api.html
-        // Note: We specifically query for both the filter of type "siem.notifications" and the "has_reference" to keep it very specific
-        await supertest
-          .get(`${BASE_ALERTING_API_PATH}/rules/_find`)
-          .query({
-            page: 1,
-            per_page: 10,
-            filter: 'alert.attributes.alertTypeId:(siem.notifications)',
-            has_reference: JSON.stringify({ id: createRuleBody.id, type: 'alert' }),
-          })
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
         // delete the rule with the legacy action
         const { body } = await supertest
           .delete(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
@@ -312,6 +297,65 @@ export default ({ getService }: FtrProviderContext): void => {
       /**
        * @deprecated Once the legacy notification system is removed, remove this test too.
        */
+      it('should return 2 legacy actions in the response body when it deletes 2 rules', async () => {
+        // create two different actions
+        const { body: hookAction1 } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+        const { body: hookAction2 } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'true')
+          .send(getWebHookAction())
+          .expect(200);
+
+        // create 2 rules without actions
+        const createRuleBody1 = await createRule(supertest, log, getSimpleRule('rule-1'));
+        const createRuleBody2 = await createRule(supertest, log, getSimpleRule('rule-2'));
+
+        // Add a legacy rule action to the body of the 2 rules
+        await createLegacyRuleAction(supertest, createRuleBody1.id, hookAction1.id);
+        await createLegacyRuleAction(supertest, createRuleBody2.id, hookAction2.id);
+
+        // delete 2 rules where both have legacy actions
+        const { body } = await supertest
+          .delete(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
+          .send([{ id: createRuleBody1.id }, { id: createRuleBody2.id }])
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+
+        // ensure we only get two bodies back
+        expect(body.length).to.eql(2);
+
+        // ensure that its actions equal what we expect for both responses
+        expect(body[0].actions).to.eql([
+          {
+            id: hookAction1.id,
+            action_type_id: hookAction1.actionTypeId,
+            group: 'default',
+            params: {
+              message:
+                'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            },
+          },
+        ]);
+        expect(body[1].actions).to.eql([
+          {
+            id: hookAction2.id,
+            action_type_id: hookAction2.actionTypeId,
+            group: 'default',
+            params: {
+              message:
+                'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
+            },
+          },
+        ]);
+      });
+
+      /**
+       * @deprecated Once the legacy notification system is removed, remove this test too.
+       */
       it('should delete a legacy action when it deletes a rule that has one', async () => {
         // create an action
         const { body: hookAction } = await supertest
@@ -326,21 +370,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // Add a legacy rule action to the body of the rule
         await createLegacyRuleAction(supertest, createRuleBody.id, hookAction.id);
 
-        // Test to ensure that we have exactly 1 legacy action by querying the Alerting client REST API directly
-        // See: https://www.elastic.co/guide/en/kibana/current/find-rules-api.html
-        // Note: We specifically query for both the filter of type "siem.notifications" and the "has_reference" to keep it very specific
-        await supertest
-          .get(`${BASE_ALERTING_API_PATH}/rules/_find`)
-          .query({
-            page: 1,
-            per_page: 10,
-            filter: 'alert.attributes.alertTypeId:(siem.notifications)',
-            has_reference: JSON.stringify({ id: createRuleBody.id, type: 'alert' }),
-          })
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200);
-
+        // bulk delete the rule
         await supertest
           .delete(`${DETECTION_ENGINE_RULES_URL}/_bulk_delete`)
           .send([{ id: createRuleBody.id }])
