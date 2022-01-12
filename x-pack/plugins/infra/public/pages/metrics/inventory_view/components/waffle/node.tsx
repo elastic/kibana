@@ -11,13 +11,14 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { first } from 'lodash';
-import { EuiPopover } from '@elastic/eui';
+import { EuiPopover, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapNode,
   InfraWaffleMapOptions,
 } from '../../../../../lib/lib';
+import { ConditionalToolTip } from './conditional_tooltip';
 import { colorFromValue } from '../../lib/color_from_value';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { NodeContextPopover } from '../node_details/overlay';
@@ -30,6 +31,7 @@ const initialState = {
   isPopoverOpen: false,
   isOverlayOpen: false,
   isAlertFlyoutVisible: false,
+  isToolTipOpen: false,
 };
 
 type State = Readonly<typeof initialState>;
@@ -48,7 +50,7 @@ export class Node extends React.PureComponent<Props, State> {
   public readonly state: State = initialState;
   public render() {
     const { nodeType, node, options, squareSize, bounds, formatter, currentTime } = this.props;
-    const { isPopoverOpen, isAlertFlyoutVisible } = this.state;
+    const { isPopoverOpen, isAlertFlyoutVisible, isToolTipOpen } = this.state;
     const metric = first(node.metrics);
     const valueMode = squareSize > 70;
     const ellipsisMode = squareSize > 30;
@@ -67,6 +69,9 @@ export class Node extends React.PureComponent<Props, State> {
         data-test-subj="nodeContainer"
         style={{ width: squareSize || 0, height: squareSize || 0 }}
         onClick={this.togglePopover}
+        onMouseOver={this.showToolTip}
+        onMouseLeave={this.hideToolTip}
+        className="buttonContainer"
       >
         <SquareOuter color={color} style={nodeBorder}>
           <SquareInner color={color}>
@@ -96,6 +101,8 @@ export class Node extends React.PureComponent<Props, State> {
         data-test-subj="nodeContainer"
         style={{ width: squareSize || 0, height: squareSize || 0, ...nodeBorder }}
         onClick={this.togglePopover}
+        onMouseOver={this.showToolTip}
+        onMouseLeave={this.hideToolTip}
         color={color}
       />
     );
@@ -119,6 +126,16 @@ export class Node extends React.PureComponent<Props, State> {
               currentTime={currentTime}
             />
           </EuiPopover>
+        ) : isToolTipOpen ? (
+          <EuiToolTip
+            delay="regular"
+            position="right"
+            content={
+              <ConditionalToolTip currentTime={currentTime} node={node} nodeType={nodeType} />
+            }
+          >
+            {nodeSquare}
+          </EuiToolTip>
         ) : (
           nodeSquare
         )}
@@ -181,6 +198,12 @@ export class Node extends React.PureComponent<Props, State> {
     if (this.state.isPopoverOpen) {
       this.setState({ isPopoverOpen: false });
     }
+  };
+  private showToolTip = () => {
+    this.setState({ isToolTipOpen: true });
+  };
+  private hideToolTip = () => {
+    this.setState({ isToolTipOpen: false });
   };
 }
 
