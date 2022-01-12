@@ -1015,6 +1015,7 @@ export default ({ getService }: FtrProviderContext) => {
             await ml.api.deleteAnomalyDetectionJobES(job.jobId);
           }
           await ml.api.cleanMlIndices();
+          await ml.testResources.deleteIndexPatternByTitle(testData.indexPattern.name);
         });
 
         it(testData.testTitleSuffix, async () => {
@@ -1157,6 +1158,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         after(async () => {
           await ml.api.cleanMlIndices();
+          if (testData.hasOwnProperty('indexPattern')) {
+            await ml.testResources.deleteIndexPatternByTitle(testData.indexPattern!.name);
+          }
         });
 
         it(testData.testTitleSuffix, async () => {
