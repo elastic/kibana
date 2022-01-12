@@ -132,6 +132,8 @@ export default function ({ getService }: FtrProviderContext) {
       }
       await ml.testResources.cleanMLSavedObjects();
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
     });
 
     for (const testData of testDataList) {

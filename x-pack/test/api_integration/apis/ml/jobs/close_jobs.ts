@@ -50,6 +50,10 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
+    after(async () => {
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+    });
+
     beforeEach(async () => {
       for (const job of testSetupJobConfigs) {
         const datafeedId = `datafeed-${job.job_id}`;

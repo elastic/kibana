@@ -293,6 +293,10 @@ export default function ({ getService }: FtrProviderContext) {
         'anomaly_detection_jobs',
         'data_frame_analytics_jobs',
       ]);
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_bank_marketing');
+      await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
+      await ml.testResources.deleteIndexPatternByTitle('ft_egs_regression');
     });
 
     it('opens export flyout and exports anomaly detector jobs', async () => {

@@ -98,6 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
 
     it('job creation loads the population wizard for the source data', async () => {
