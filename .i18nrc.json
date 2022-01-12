@@ -77,7 +77,7 @@
     "visTypeVega": "src/plugins/vis_types/vega",
     "visTypeVislib": "src/plugins/vis_types/vislib",
     "visTypeXy": "src/plugins/vis_types/xy",
-    "visualizations": "src/plugins/visualizations",
+    "visualizations": "src/plugins/visualizations"
   },
   "translations": []
 }
