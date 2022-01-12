@@ -6,7 +6,7 @@
  */
 
 import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { BaseValidator } from './base_validator';
 import { ExceptionItemLikeOptions } from '../types';
@@ -18,6 +18,7 @@ import {
   ConditionEntry,
   ConditionEntryField,
   OperatingSystem,
+  TrustedAppEntryTypes,
 } from '../../../../common/endpoint/types';
 import {
   getDuplicateFields,
@@ -39,6 +40,20 @@ const ConditionEntryTypeSchema = schema.conditional(
   schema.literal('match')
 );
 const ConditionEntryOperatorSchema = schema.literal('included');
+
+type ConditionEntryFieldAllowedType =
+  | TypeOf<typeof ProcessHashField>
+  | TypeOf<typeof ProcessExecutablePath>
+  | TypeOf<typeof ProcessCodeSigner>;
+
+export interface TrustedAppConditionEntry<
+  T extends ConditionEntryFieldAllowedType = ConditionEntryFieldAllowedType
+> {
+  field: T;
+  type: TrustedAppEntryTypes;
+  operator: 'included';
+  value: string;
+}
 
 /*
  * A generic Entry schema to be used for a specific entry schema depending on the OS
@@ -72,15 +87,7 @@ const CommonEntrySchema = {
 
 const WindowsEntrySchema = schema.object({
   ...CommonEntrySchema,
-  field: schema.oneOf([
-    schema.oneOf([
-      schema.literal('process.hash.md5'),
-      schema.literal('process.hash.sha1'),
-      schema.literal('process.hash.sha256'),
-    ]),
-    ProcessExecutablePath,
-    ProcessCodeSigner,
-  ]),
+  field: schema.oneOf([ProcessHashField, ProcessExecutablePath, ProcessCodeSigner]),
 });
 
 const LinuxEntrySchema = schema.object({
@@ -93,8 +100,8 @@ const MacEntrySchema = schema.object({
 
 const entriesSchemaOptions = {
   minSize: 1,
-  validate(entries: ConditionEntry[]) {
-    const dups = getDuplicateFields(entries);
+  validate(entries: TrustedAppConditionEntry[]) {
+    const dups = getDuplicateFields(entries as ConditionEntry[]);
     return dups.map((field) => `duplicatedEntry.${field}`).join(', ') || undefined;
   },
 };
