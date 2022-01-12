@@ -51,7 +51,7 @@ jobs:
 
       - name: Generate preview
         if: github.event.pull_request.merged == false
-        uses: elastic/builder@v21.0.0
+        uses: elastic/builder@v21.1.0
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }} # Required
           vercel-org-id: ${{ secrets.ORG_ID}}  #Required
