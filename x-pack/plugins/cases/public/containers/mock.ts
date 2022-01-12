@@ -204,7 +204,15 @@ export const basicCaseMetrics: CaseMetrics = {
     },
   },
   connectors: { total: 1 },
-  lifespan: { creationDate: basicCreatedAt, closeDate: basicClosedAt },
+  lifespan: {
+    creationDate: basicCreatedAt,
+    closeDate: basicClosedAt,
+    statusInfo: {
+      inProgressDuration: 20,
+      openDuration: 10,
+      numberOfReopens: 1,
+    },
+  },
 };
 
 export const collectionCase: Case = {

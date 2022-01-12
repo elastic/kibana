@@ -40,12 +40,8 @@ export default ({ getService }: FtrProviderContext): void => {
           features: ['lifespan'],
         });
 
-        expect(metrics).to.eql({
-          lifespan: {
-            creationDate: '2021-06-17T18:57:41.682Z',
-            closeDate: '2021-06-17T18:57:42.682Z',
-          },
-        });
+        expect(metrics.lifespan?.creationDate).to.be('2021-06-17T18:57:41.682Z');
+        expect(metrics.lifespan?.closeDate).to.eql('2021-06-17T18:57:42.682Z');
       });
 
       it('returns an error when passing invalid features', async () => {
@@ -60,5 +56,48 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(errorResponse.message).to.contain('invalid features');
       });
     });
+
+    describe('status changes', () => {
+      const caseId = '0215ff30-6e39-11ec-8e5f-bf82b2955cf8';
+
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.1.0/status_changes.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.1.0/status_changes.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      it('returns the lifespan of the case for status changes', async () => {
+        // each status change happens after 10 minutes, these are the changes in the status_changes.json file:
+        // open at "2022-01-05T15:00:00.000Z" -> in-progress 15:10 -> closed 15:20 -> open 15:30 -> closed 15:40 -> open 15:50 -> closed 16:00
+        const metrics = await getCaseMetrics({
+          supertest,
+          caseId,
+          features: ['lifespan'],
+        });
+
+        expect(metrics).to.eql({
+          lifespan: {
+            creationDate: '2022-01-05T15:00:00.000Z',
+            closeDate: null,
+            statusInfo: {
+              openDuration: minutesToMilliseconds(30),
+              inProgressDuration: minutesToMilliseconds(10),
+              numberOfReopens: 2,
+            },
+          },
+        });
+      });
+    });
   });
 };
+
+function minutesToMilliseconds(minutes: number): number {
+  return minutes * 60 * 1000;
+}
