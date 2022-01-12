@@ -24,7 +24,8 @@ import classNames from 'classnames';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
-import { esFilters, IndexPatternField } from '../../../../../../data/public';
+import { esFilters } from '../../../../../../data/public';
+import { DataViewField } from '../../../../../../data/common';
 import { DiscoverSidebarResponsive } from '../sidebar';
 import { DiscoverLayoutProps } from './types';
 import { SEARCH_FIELDS_FROM_SOURCE, SHOW_FIELD_STATISTICS } from '../../../../../common';
@@ -170,7 +171,7 @@ export function DiscoverLayout({
   });
 
   const onAddFilter = useCallback(
-    (field: IndexPatternField | string, values: string, operation: '+' | '-') => {
+    (field: DataViewField | string, values: string, operation: '+' | '-') => {
       const fieldName = typeof field === 'string' ? field : field.name;
       popularizeField(indexPattern, fieldName, indexPatterns, capabilities);
       const newFilters = esFilters.generateFilters(

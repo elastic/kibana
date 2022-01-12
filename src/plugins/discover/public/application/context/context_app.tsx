@@ -15,7 +15,7 @@ import { cloneDeep } from 'lodash';
 import { esFilters } from '../../../../data/public';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { ContextErrorMessage } from './components/context_error_message';
-import { IndexPattern, IndexPatternField } from '../../../../data/common';
+import { DataView, DataViewField } from '../../../../data/common';
 import { LoadingStatus } from './services/context_query_state';
 import { AppState, isEqualFilters } from './services/context_state';
 import { useColumns } from '../../utils/use_data_grid_columns';
@@ -30,7 +30,7 @@ import { useDiscoverServices } from '../../utils/use_discover_services';
 const ContextAppContentMemoized = memo(ContextAppContent);
 
 export interface ContextAppProps {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   anchorId: string;
 }
 
@@ -111,7 +111,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   );
 
   const addFilter = useCallback(
-    async (field: IndexPatternField | string, values: unknown, operation: string) => {
+    async (field: DataViewField | string, values: unknown, operation: string) => {
       const newFilters = esFilters.generateFilters(
         filterManager,
         field,

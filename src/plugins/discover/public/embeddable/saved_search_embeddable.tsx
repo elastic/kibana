@@ -21,8 +21,8 @@ import { APPLY_FILTER_TRIGGER, esFilters, FilterManager } from '../../../data/pu
 import { DiscoverServices } from '../build_services';
 import {
   Filter,
-  IndexPattern,
-  IndexPatternField,
+  DataView,
+  DataViewField,
   ISearchSource,
   Query,
   TimeRange,
@@ -59,7 +59,7 @@ export type SearchProps = Partial<DiscoverGridProps> &
     inspectorAdapters?: Adapters;
     services: DiscoverServices;
 
-    filter?: (field: IndexPatternField, value: string[], operator: string) => void;
+    filter?: (field: DataViewField, value: string[], operator: string) => void;
     hits?: ElasticSearchHit[];
     totalHitCount?: number;
     onMoveColumn?: (column: string, index: number) => void;
@@ -69,7 +69,7 @@ interface SearchEmbeddableConfig {
   savedSearch: SavedSearch;
   editUrl: string;
   editPath: string;
-  indexPatterns?: IndexPattern[];
+  indexPatterns?: DataView[];
   editable: boolean;
   filterManager: FilterManager;
   services: DiscoverServices;
@@ -404,6 +404,7 @@ export class SavedSearchEmbeddable
                 filters={this.input.filters}
                 query={this.input.query}
                 onAddFilter={searchProps.onFilter}
+                searchSessionId={this.input.searchSessionId}
               />
             </KibanaContextProvider>
           </KibanaThemeProvider>

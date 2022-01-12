@@ -10,7 +10,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
-import { IndexPatternField, IndexPattern, DataView, Query } from '../../../../../../data/common';
+import { DataViewField, DataView, Query } from '../../../../../../data/common';
 import {
   EmbeddableInput,
   EmbeddableOutput,
@@ -24,7 +24,7 @@ import type { GetStateReturn } from '../../services/discover_state';
 import { DataRefetch$ } from '../../utils/use_saved_search';
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   savedSearch?: SavedSearch;
   query?: Query;
   visibleFieldNames?: string[];
@@ -33,7 +33,8 @@ export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
   /**
    * Callback to add a filter to filter bar
    */
-  onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
+  sessionId?: string;
 }
 export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
   showDistributions?: boolean;
@@ -75,7 +76,7 @@ export interface FieldStatisticsTableProps {
   /**
    * Callback to add a filter to filter bar
    */
-  onAddFilter?: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   /**
    * Metric tracking function
    * @param metricType
@@ -83,6 +84,7 @@ export interface FieldStatisticsTableProps {
    */
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
   savedSearchRefetch$?: DataRefetch$;
+  searchSessionId?: string;
 }
 
 export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
@@ -96,6 +98,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     onAddFilter,
     trackUiMetric,
     savedSearchRefetch$,
+    searchSessionId,
   } = props;
   const { services } = useDiscoverServices();
   const [embeddable, setEmbeddable] = useState<
@@ -139,10 +142,20 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
         filters,
         visibleFieldNames: columns,
         onAddFilter,
+        sessionId: searchSessionId,
       });
       embeddable.reload();
     }
-  }, [embeddable, indexPattern, savedSearch, query, columns, filters, onAddFilter]);
+  }, [
+    embeddable,
+    indexPattern,
+    savedSearch,
+    query,
+    columns,
+    filters,
+    onAddFilter,
+    searchSessionId,
+  ]);
 
   useEffect(() => {
     if (showPreviewByDefault && embeddable && !isErrorEmbeddable(embeddable)) {

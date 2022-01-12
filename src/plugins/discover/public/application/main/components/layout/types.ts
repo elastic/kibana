@@ -7,7 +7,7 @@
  */
 
 import {
-  IndexPattern,
+  DataView,
   IndexPatternAttributes,
   Query,
   SavedObject,
@@ -21,7 +21,7 @@ import { RequestAdapter } from '../../../../../../inspector';
 import { ElasticSearchHit } from '../../../../types';
 
 export interface DiscoverLayoutProps {
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
   inspectorAdapters: { requests: RequestAdapter };
   navigateTo: (url: string) => void;

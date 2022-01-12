@@ -8,7 +8,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { IndexPattern } from 'src/plugins/data/common';
+import type { DataView } from 'src/plugins/data/common';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -34,7 +34,7 @@ export interface DiscoverGridFlyoutProps {
   columns: string[];
   hit: ElasticSearchHit;
   hits?: ElasticSearchHit[];
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   onAddColumn: (column: string) => void;
   onClose: () => void;
   onFilter: DocViewFilterFn;

@@ -7,9 +7,12 @@
  */
 import React, { useState, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
 import { ElasticSearchHit } from '../types';
+import { KibanaContextProvider } from '../../../kibana_react/public';
+import { getServices } from '../kibana_services';
 
 export interface DiscoverGridEmbeddableProps extends DiscoverGridProps {
   totalHitCount: number;
@@ -18,18 +21,32 @@ export interface DiscoverGridEmbeddableProps extends DiscoverGridProps {
 export const DataGridMemoized = memo(DiscoverGrid);
 
 export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
+  const services = getServices();
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
 
   return (
-    <EuiFlexGroup style={{ width: '100%' }} direction="column" gutterSize="xs" responsive={false}>
-      {props.totalHitCount !== 0 && (
-        <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
-          <TotalDocuments totalHitCount={props.totalHitCount} />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem style={{ minHeight: 0 }}>
-        <DataGridMemoized {...props} setExpandedDoc={setExpandedDoc} expandedDoc={expandedDoc} />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <I18nProvider>
+      <KibanaContextProvider services={services}>
+        <EuiFlexGroup
+          style={{ width: '100%' }}
+          direction="column"
+          gutterSize="xs"
+          responsive={false}
+        >
+          {props.totalHitCount !== 0 && (
+            <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
+              <TotalDocuments totalHitCount={props.totalHitCount} />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem style={{ minHeight: 0 }}>
+            <DataGridMemoized
+              {...props}
+              setExpandedDoc={setExpandedDoc}
+              expandedDoc={expandedDoc}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </KibanaContextProvider>
+    </I18nProvider>
   );
 }

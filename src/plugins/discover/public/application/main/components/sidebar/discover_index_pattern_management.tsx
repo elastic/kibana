@@ -10,13 +10,13 @@ import React, { useState } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
-import { IndexPattern } from '../../../../../../data/common';
+import { DataView } from '../../../../../../data/common';
 
 export interface DiscoverIndexPatternManagementProps {
   /**
    * Currently selected index pattern
    */
-  selectedIndexPattern?: IndexPattern;
+  selectedIndexPattern?: DataView;
   /**
    * Read from the Fields API
    */
