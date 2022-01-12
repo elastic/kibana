@@ -4,39 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect } from 'react';
+import React from 'react';
 import { mountWithIntl } from '@kbn/test/jest';
 import { JsonEditorWithMessageVariables } from './json_editor_with_message_variables';
+import { MockCodeEditor } from '../code_editor.mock';
 
-const mockEditorInstance = {
-  executeEdits: () => {},
-  getSelection: () => {},
-  getValue: () => {},
-  onDidBlurEditorWidget: () => ({
-    dispose: () => {},
-  }),
-};
+const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
 
-const MockCodeEditor = (props: any) => {
-  const { editorDidMount } = props;
-  useEffect(() => {
-    editorDidMount(mockEditorInstance);
-  }, [editorDidMount]);
-
-  return (
-    <input
-      data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-      data-value={props.value}
-      value={props.value}
-      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-        props.onChange(e.target.value);
-      }}
-    />
-  );
-};
-
-jest.mock('../../../../../../src/plugins/kibana_react/public', () => {
-  const original = jest.requireActual('../../../../../../src/plugins/kibana_react/public');
+jest.mock(kibanaReactPath, () => {
+  const original = jest.requireActual(kibanaReactPath);
   return {
     ...original,
     CodeEditor: (props: any) => {
