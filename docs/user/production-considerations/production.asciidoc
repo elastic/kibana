@@ -83,7 +83,6 @@ This avoids conflicts between cookies from the different {kib} instances.
 This will achieve seamless high availability and keep the session
 active in case of failure from the currently used instance.
 
-[float]
 
 
 [float]
