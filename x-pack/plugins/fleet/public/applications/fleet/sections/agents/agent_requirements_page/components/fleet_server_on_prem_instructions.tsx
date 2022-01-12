@@ -362,9 +362,14 @@ const AgentPolicySelectionStep = ({
   );
 
   return {
-    title: i18n.translate('xpack.fleet.fleetServerSetup.stepSelectAgentPolicyTitle', {
-      defaultMessage: 'Select an Agent policy',
-    }),
+    title:
+      agentPolicies.length === 0
+        ? i18n.translate('xpack.fleet.fleetServerSetup.stepCreateAgentPolicyTitle', {
+            defaultMessage: 'Create an agent policy to host Fleet Server',
+          })
+        : i18n.translate('xpack.fleet.fleetServerSetup.stepSelectAgentPolicyTitle', {
+            defaultMessage: 'Select an agent policy to host Fleet Server',
+          }),
     status: undefined,
     children: (
       <>
