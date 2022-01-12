@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiLink,
@@ -25,7 +25,6 @@ import { IS_OPERATOR } from '../../../timelines/components/timeline/data_provide
 import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import { HoverActions } from '../hover_actions';
 import { DataProvider, QueryOperator } from '../../../../common/types';
-import { TimelineContext } from '../../../../../timelines/public';
 
 const Subtext = styled.div`
   font-size: ${(props) => props.theme.eui.euiFontSizeXS};
@@ -163,14 +162,13 @@ interface OverflowItemProps {
   rowItem: string;
 }
 
-export const OverflowItemComponent: React.FC<OverflowItemProps> = ({
+const OverflowItemComponent: React.FC<OverflowItemProps> = ({
   dataProvider,
   dragDisplayValue,
   field,
   rowItem,
 }) => {
   const [showTopN, setShowTopN] = useState<boolean>(false);
-  const { timelineId: timelineIdFind } = useContext(TimelineContext);
   const [hoverActionsOwnFocus] = useState<boolean>(false);
   const toggleTopN = useCallback(() => {
     setShowTopN((prevShowTopN) => {
@@ -200,7 +198,6 @@ export const OverflowItemComponent: React.FC<OverflowItemProps> = ({
           ownFocus={hoverActionsOwnFocus}
           showOwnFocus={false}
           showTopN={showTopN}
-          timelineId={timelineIdFind}
           toggleTopN={toggleTopN}
           values={dragDisplayValue ?? rowItem}
         />

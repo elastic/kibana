@@ -14,7 +14,7 @@ import {
   RowItemOverflowComponent,
   getRowItemDraggable,
   OverflowFieldComponent,
-  OverflowItemComponent,
+  OverflowItem,
 } from './helpers';
 import { TestProviders } from '../../mock';
 import { getEmptyValue } from '../empty_value';
@@ -286,7 +286,7 @@ describe('Table Helpers', () => {
     };
 
     test('Renders Hover Actions', () => {
-      const wrapper = shallow(<OverflowItemComponent {...props} />);
+      const wrapper = shallow(<OverflowItem {...props} />);
       expect(wrapper.find('[data-test-subj="hover-actions"]').exists()).toBeTruthy();
     });
   });
