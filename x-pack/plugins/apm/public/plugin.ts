@@ -370,7 +370,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       fleet.registerExtension({
         package: 'apm',
         view: 'package-policy-edit',
-        useLatestPackageVersion: true,
+        useLatestPackageVersion: false,
         Component: getLazyAPMPolicyEditExtension(),
       });
 
