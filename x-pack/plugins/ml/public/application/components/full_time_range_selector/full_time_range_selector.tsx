@@ -106,13 +106,13 @@ export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, ca
   const buttonTooltip =
     frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE ? (
       <FormattedMessage
-        id="xpack.ml.fullTimeRangeSelector.useFullDataButtonTooltip"
+        id="xpack.ml.fullTimeRangeSelector.useFullDataExcludingFrozenButtonTooltip"
         defaultMessage="Use full range of data excluding frozen data tier."
       />
     ) : (
       <FormattedMessage
-        id="xpack.ml.fullTimeRangeSelector.useFullDataButtonTooltip"
-        defaultMessage="Use full range of data including frozen data tier. Searches with frozen data may take longer."
+        id="xpack.ml.fullTimeRangeSelector.useFullDataIncludingFrozenButtonTooltip"
+        defaultMessage="Use full range of data including frozen data tier, which might have slower search results."
       />
     );
 

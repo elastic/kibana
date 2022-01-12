@@ -135,12 +135,12 @@ export const FullTimeRangeSelector: FC<Props> = ({
   const buttonTooltip =
     frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE ? (
       <FormattedMessage
-        id="xpack.ml.fullTimeRangeSelector.useFullDataButtonTooltip"
+        id="xpack.dataVisualizer.fullTimeRangeSelector.useFullDataExcludingFrozenButtonTooltip"
         defaultMessage="Use full range of data excluding frozen data tier."
       />
     ) : (
       <FormattedMessage
-        id="xpack.ml.fullTimeRangeSelector.useFullDataButtonTooltip"
+        id="xpack.dataVisualizer.fullTimeRangeSelector.useFullDataIncludingFrozenButtonTooltip"
         defaultMessage="Use full range of data including frozen data tier, which might have slower search results."
       />
     );
