@@ -604,6 +604,7 @@ export const createLegacyRuleAction = async (
         },
       ],
     });
+
 /**
  * Deletes the signals index for use inside of afterEach blocks of tests
  * @param supertest The supertest client library
