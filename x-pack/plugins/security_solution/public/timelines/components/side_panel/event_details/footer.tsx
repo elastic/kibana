@@ -64,7 +64,6 @@ export const EventDetailsFooterComponent = React.memo(
       [detailsData]
     );
 
-    // TODO prolly a bug
     const addExceptionModalWrapperData = useMemo(
       () =>
         [
