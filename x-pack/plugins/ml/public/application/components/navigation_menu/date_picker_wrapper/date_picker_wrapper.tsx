@@ -8,8 +8,15 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
 import { debounce } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiSuperDatePicker, OnRefreshProps } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperDatePicker,
+  OnRefreshProps,
+} from '@elastic/eui';
 import { TimeHistoryContract, TimeRange } from 'src/plugins/data/public';
 import { UI_SETTINGS } from '../../../../../../../../src/plugins/data/common';
 
@@ -46,13 +53,16 @@ function getRecentlyUsedRangesFactory(timeHistory: TimeHistoryContract) {
   };
 }
 
-function updateLastRefresh(timeRange: OnRefreshProps) {
-  mlTimefilterRefresh$.next({ lastRefresh: Date.now(), timeRange });
+function updateLastRefresh(timeRange?: OnRefreshProps) {
+  mlTimefilterRefresh$.next({ lastRefresh: Date.now(), ...(timeRange ? { timeRange } : {}) });
 }
 
 export const DatePickerWrapper: FC = () => {
   const { services } = useMlKibana();
   const config = services.uiSettings;
+
+  const { httpService } = services.mlServices;
+
   const { timefilter, history } = services.data.query.timefilter;
 
   const [globalState, setGlobalState] = useUrlState('_g');
@@ -68,6 +78,7 @@ export const DatePickerWrapper: FC = () => {
     [setGlobalState]
   );
 
+  const [isLoading, setIsLoading] = useState(false);
   const [time, setTime] = useState(timefilter.getTime());
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges());
   const [isAutoRefreshSelectorEnabled, setIsAutoRefreshSelectorEnabled] = useState(
@@ -95,6 +106,13 @@ export const DatePickerWrapper: FC = () => {
   useEffect(() => {
     const subscriptions = new Subscription();
     const refreshIntervalUpdate$ = timefilter.getRefreshIntervalUpdate$();
+
+    subscriptions.add(
+      httpService.getLoadingCount$.subscribe((v) => {
+        setIsLoading(v !== 0);
+      })
+    );
+
     if (refreshIntervalUpdate$ !== undefined) {
       subscriptions.add(
         refreshIntervalUpdate$.subscribe((r) => {
@@ -149,20 +167,42 @@ export const DatePickerWrapper: FC = () => {
   const isPaused = refreshInterval.pause || (!refreshInterval.pause && !refreshInterval.value);
 
   return isAutoRefreshSelectorEnabled || isTimeRangeSelectorEnabled ? (
-    <div className="mlNavigationMenu__datePickerWrapper">
-      <EuiSuperDatePicker
-        start={time.from}
-        end={time.to}
-        isPaused={isPaused}
-        isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
-        refreshInterval={refreshInterval.value}
-        onTimeChange={updateFilter}
-        onRefresh={updateLastRefresh}
-        onRefreshChange={updateInterval}
-        recentlyUsedRanges={recentlyUsedRanges}
-        dateFormat={dateFormat}
-        commonlyUsedRanges={commonlyUsedRanges}
-      />
-    </div>
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="center"
+      className="mlNavigationMenu__datePickerWrapper"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiSuperDatePicker
+          isLoading={isLoading}
+          start={time.from}
+          end={time.to}
+          isPaused={isPaused}
+          isAutoRefreshOnly={!isTimeRangeSelectorEnabled}
+          refreshInterval={refreshInterval.value}
+          onTimeChange={updateFilter}
+          onRefresh={updateLastRefresh}
+          onRefreshChange={updateInterval}
+          recentlyUsedRanges={recentlyUsedRanges}
+          dateFormat={dateFormat}
+          commonlyUsedRanges={commonlyUsedRanges}
+        />
+      </EuiFlexItem>
+
+      {isTimeRangeSelectorEnabled ? null : (
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            color="primary"
+            iconType={'refresh'}
+            onClick={() => updateLastRefresh()}
+            data-test-subj={`mlRefreshPageButton${isLoading ? ' loading' : ' loaded'}`}
+            isLoading={isLoading}
+          >
+            <FormattedMessage id="xpack.ml.pageRefreshButton" defaultMessage="Refresh" />
+          </EuiButton>
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   ) : null;
 };
