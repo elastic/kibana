@@ -22,7 +22,7 @@ import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 import { SearchAPI } from './search_api';
 import { TimeCache } from './time_cache';
-import { IServiceSettings } from '../../../../maps_ems/public';
+import type { IServiceSettings } from '../vega_view/vega_map_view/service_settings/service_settings_types';
 import {
   Bool,
   Data,

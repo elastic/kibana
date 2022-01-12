@@ -9,7 +9,7 @@
 import type { IExternalUrl } from 'kibana/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { IServiceSettings } from 'src/plugins/maps_ems/public';
+import type { IServiceSettings } from './vega_map_view/service_settings/service_settings_types';
 import { VegaParser } from '../data_model/vega_parser';
 import { createVegaStateRestorer } from '../lib/vega_state_restorer';
 

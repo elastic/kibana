@@ -5,6 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { TMSService } from '@elastic/ems-client';
+import type { MapConfig, TileMapConfig } from '../../../../../../maps_ems/public';
+
+export const ORIGIN_LEGACY = {
+  EMS: 'elastic_maps_service',
+  KIBANA_YML: 'self_hosted',
+};
+
+export const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
 
 export interface TmsLayer {
   id: string;
@@ -41,14 +50,18 @@ export interface VectorLayer extends FileLayer {
 }
 
 export interface IServiceSettings {
-  getEMSHotLink(layer: FileLayer): Promise<string | null>;
   getTMSServices(): Promise<TmsLayer[]>;
   getFileLayers(): Promise<FileLayer[]>;
   getUrlForRegionLayer(layer: FileLayer): Promise<string | undefined>;
-  setQueryParams(params: { [p: string]: string }): void;
   getAttributesForTMSLayer(
     tmsServiceConfig: TmsLayer,
     isDesaturated: boolean,
     isDarkMode: boolean
   ): any;
+
+  getDefaultTmsLayer(isDarkMode: boolean): Promise<string>;
+  getTmsService(id: string): Promise<TMSService | undefined>;
+  getMapConfig(): MapConfig;
+  getTileMapConfig(): TileMapConfig;
+  getAttributionsFromTMSServce(tmsService: TMSService): string;
 }

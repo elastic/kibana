@@ -21,13 +21,7 @@ import type {
 } from '../../../../src/core/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { MapInspectorView } from './inspector/map_inspector_view';
-import {
-  setEMSSettings,
-  setKibanaCommonConfig,
-  setKibanaVersion,
-  setMapAppConfig,
-  setStartServices,
-} from './kibana_services';
+import { setMapAppConfig, setStartServices } from './kibana_services';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import type { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
@@ -55,18 +49,13 @@ import {
 import { registerLayerWizard } from './classes/layers';
 import { registerSource } from './classes/sources/source_registry';
 import type { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
-import type { MapsEmsPluginSetup } from '../../../../src/plugins/maps_ems/public';
+import type { MapsEmsPluginPublicStart } from '../../../../src/plugins/maps_ems/public';
 import type { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import type { FileUploadPluginStart } from '../../file_upload/public';
 import type { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 import type { PresentationUtilPluginStart } from '../../../../src/plugins/presentation_util/public';
-import {
-  getIsEnterprisePlus,
-  registerLicensedFeatures,
-  setLicensingPluginStart,
-} from './licensed_features';
-import { EMSSettings } from '../common/ems_settings';
+import { registerLicensedFeatures, setLicensingPluginStart } from './licensed_features';
 import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 import type { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import {
@@ -91,7 +80,6 @@ export interface MapsPluginSetupDependencies {
   home?: HomePublicPluginSetup;
   visualizations: VisualizationsSetup;
   embeddable: EmbeddableSetup;
-  mapsEms: MapsEmsPluginSetup;
   share: SharePluginSetup;
   licensing: LicensingPluginSetup;
   usageCollection?: UsageCollectionSetup;
@@ -114,6 +102,7 @@ export interface MapsPluginStartDependencies {
   presentationUtil: PresentationUtilPluginStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
+  mapsEms: MapsEmsPluginPublicStart;
 }
 
 /**
@@ -144,12 +133,7 @@ export class MapsPlugin
     registerLicensedFeatures(plugins.licensing);
 
     const config = this._initializerContext.config.get<MapsConfigType>();
-    setKibanaCommonConfig(plugins.mapsEms.config);
     setMapAppConfig(config);
-    setKibanaVersion(this._initializerContext.env.packageInfo.version);
-
-    const emsSettings = new EMSSettings(plugins.mapsEms.config, getIsEnterprisePlus);
-    setEMSSettings(emsSettings);
 
     const locator = plugins.share.url.locators.create(
       new MapsAppLocatorDefinition({
