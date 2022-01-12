@@ -6,6 +6,7 @@
  */
 
 import { ApplicationStart } from 'kibana/public';
+import { DocLinksStart } from 'src/core/public';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
@@ -40,4 +41,5 @@ export interface AppServicesContext {
   license: ILicense;
   cloud?: CloudSetup;
   getUrlForApp: ApplicationStart['getUrlForApp'];
+  docLinks: DocLinksStart;
 }

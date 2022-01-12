@@ -76,7 +76,6 @@ import { checkBoxControlColumn } from './control_columns';
 import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { ViewSelection } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
-import { useDataGridHeightHack } from './height_hack';
 import { REMOVE_COLUMN } from './column_headers/translations';
 
 const StatefulAlertStatusBulkActions = lazy(
@@ -788,8 +787,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       [loadPage]
     );
 
-    const height = useDataGridHeightHack(pageSize, data.length);
-
     // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
     const [activeStatefulEventContext] = useState({
       timelineID: id,
@@ -803,7 +800,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           {tableView === 'gridView' && (
             <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
               <EuiDataGrid
-                height={height}
                 id={'body-data-grid'}
                 data-test-subj="body-data-grid"
                 aria-label={i18n.TGRID_BODY_ARIA_LABEL}
