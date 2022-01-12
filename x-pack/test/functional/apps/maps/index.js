@@ -79,6 +79,10 @@ export default function ({ loadTestFile, getService }) {
     });
 
     describe('', function () {
+      loadTestFile(require.resolve('./reporting'));
+    });
+
+    describe('', function () {
       this.tags('ciGroup10');
       loadTestFile(require.resolve('./es_pew_pew_source'));
       loadTestFile(require.resolve('./joins'));
