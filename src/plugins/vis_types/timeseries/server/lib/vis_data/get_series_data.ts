@@ -14,7 +14,7 @@ import { handleResponseBody } from './series/handle_response_body';
 import { getSeriesRequestParams } from './series/get_request_params';
 import { getActiveSeries } from './helpers/get_active_series';
 import { isAggSupported } from './helpers/check_aggs';
-import { isEntireTimeRangeMode } from './helpers/get_timerange_mode';
+
 import type {
   VisTypeTimeseriesRequestHandlerContext,
   VisTypeTimeseriesVisDataRequest,
@@ -61,10 +61,7 @@ export async function getSeriesData(
 
   try {
     const bodiesPromises = getActiveSeries(panel).map((series) => {
-      if (isEntireTimeRangeMode(panel, series)) {
-        isAggSupported(series.metrics);
-      }
-
+      isAggSupported(series.metrics, capabilities);
       return getSeriesRequestParams(req, panel, panelIndex, series, capabilities, services);
     });
 

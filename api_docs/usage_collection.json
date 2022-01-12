@@ -679,7 +679,7 @@
           "\nPossible type values in the schema"
         ],
         "signature": [
-          "\"boolean\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"text\" | \"short\" | \"float\" | \"integer\" | \"byte\""
+          "\"boolean\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"text\" | \"integer\" | \"short\" | \"byte\" | \"float\""
         ],
         "path": "src/plugins/usage_collection/server/collector/types.ts",
         "deprecated": false,

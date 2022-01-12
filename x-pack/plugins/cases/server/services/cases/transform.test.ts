@@ -61,7 +61,7 @@ describe('case transforms', () => {
       ).toBeNull();
     });
 
-    it('return a null external_service.connector_id field if it is none', () => {
+    it('return none external_service.connector_id field if it is none', () => {
       expect(
         transformUpdateResponseToExternalModel({
           type: 'a',
@@ -71,7 +71,7 @@ describe('case transforms', () => {
           },
           references: undefined,
         }).attributes.external_service?.connector_id
-      ).toBeNull();
+      ).toBe('none');
     });
 
     it('return the external_service fields if it is populated', () => {
@@ -87,7 +87,7 @@ describe('case transforms', () => {
         }).attributes.external_service
       ).toMatchInlineSnapshot(`
         Object {
-          "connector_id": null,
+          "connector_id": "none",
           "connector_name": ".jira",
           "external_id": "100",
           "external_title": "awesome",
@@ -267,7 +267,8 @@ describe('case transforms', () => {
 
     it('creates an empty references array to delete the connector_id when connector_id is null and the original references is undefined', () => {
       const transformedAttributes = transformAttributesToESModel({
-        external_service: createExternalService({ connector_id: null }),
+        // TODO: It was null. Check if it is correct
+        external_service: createExternalService({ connector_id: 'none' }),
       });
 
       expect(transformedAttributes.referenceHandler.build()).toEqual([]);
@@ -386,17 +387,18 @@ describe('case transforms', () => {
       ).toBeNull();
     });
 
-    it('sets external_service.connector_id to null when a reference cannot be found', () => {
+    it('sets external_service.connector_id to none when a reference cannot be found', () => {
       const transformedSO = transformSavedObjectToExternalModel(
         createCaseSavedObjectResponse({
-          externalService: createExternalService({ connector_id: null }),
+          // TODO: It was null. Check if it is correct
+          externalService: createExternalService({ connector_id: 'none' }),
         })
       );
 
-      expect(transformedSO.attributes.external_service?.connector_id).toBeNull();
+      expect(transformedSO.attributes.external_service?.connector_id).toBe('none');
       expect(transformedSO.attributes.external_service).toMatchInlineSnapshot(`
         Object {
-          "connector_id": null,
+          "connector_id": "none",
           "connector_name": ".jira",
           "external_id": "100",
           "external_title": "awesome",

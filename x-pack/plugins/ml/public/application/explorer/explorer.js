@@ -21,8 +21,6 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIconTip,
-  EuiPage,
-  EuiPageBody,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiSpacer,
@@ -36,11 +34,9 @@ import {
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
 import { ExplorerNoJobsFound, ExplorerNoResultsFound } from './components';
-import { DatePickerWrapper } from '../components/navigation_menu/date_picker_wrapper';
 import { InfluencersList } from '../components/influencers_list';
 import { explorerService } from './explorer_dashboard_service';
 import { AnomalyResultsViewSelector } from '../components/anomaly_results_view_selector';
-import { NavigationMenu } from '../components/navigation_menu';
 import { CheckboxShowCharts } from '../components/controls/checkbox_showcharts';
 import { JobSelector } from '../components/job_selector';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
@@ -76,6 +72,7 @@ import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { ML_APP_LOCATOR } from '../../../common/constants/locator';
 import { AnomalyContextMenu } from './anomaly_context_menu';
 import { isDefined } from '../../../common/types/guards';
+import { MlPageHeader } from '../components/page_header';
 
 const ExplorerPage = ({
   children,
@@ -88,56 +85,38 @@ const ExplorerPage = ({
   queryString,
   updateLanguage,
 }) => (
-  <div data-test-subj="mlPageAnomalyExplorer">
-    <NavigationMenu tabId="anomaly_detection" />
-    <EuiPage style={{ background: 'none' }}>
-      <EuiPageBody>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <AnomalyResultsViewSelector viewId="explorer" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiTitle className="eui-textNoWrap">
-                  <h1>
-                    <FormattedMessage
-                      id="xpack.ml.explorer.pageTitle"
-                      defaultMessage="Anomaly Explorer"
-                    />
-                  </h1>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageHeaderSection>
-          <EuiPageHeaderSection style={{ width: '100%' }}>
-            <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
-              {noInfluencersConfigured === false && influencers !== undefined && (
-                <EuiFlexItem>
-                  <div className="mlAnomalyExplorer__filterBar">
-                    <ExplorerQueryBar
-                      filterActive={filterActive}
-                      filterPlaceHolder={filterPlaceHolder}
-                      indexPattern={indexPattern}
-                      queryString={queryString}
-                      updateLanguage={updateLanguage}
-                    />
-                  </div>
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <DatePickerWrapper />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
-        <EuiHorizontalRule margin="none" />
-        <JobSelector {...jobSelectorProps} />
-        <EuiHorizontalRule margin="none" />
-        {children}
-      </EuiPageBody>
-    </EuiPage>
-  </div>
+  <>
+    <MlPageHeader>
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <AnomalyResultsViewSelector viewId="explorer" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <FormattedMessage id="xpack.ml.explorer.pageTitle" defaultMessage="Anomaly Explorer" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </MlPageHeader>
+    <EuiPageHeader>
+      <EuiPageHeaderSection style={{ width: '100%' }}>
+        {noInfluencersConfigured === false && influencers !== undefined ? (
+          <>
+            <ExplorerQueryBar
+              filterActive={filterActive}
+              filterPlaceHolder={filterPlaceHolder}
+              indexPattern={indexPattern}
+              queryString={queryString}
+              updateLanguage={updateLanguage}
+            />
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
+      </EuiPageHeaderSection>
+    </EuiPageHeader>
+    <EuiHorizontalRule margin="none" />
+    <JobSelector {...jobSelectorProps} />
+    <EuiHorizontalRule margin="none" />
+    {children}
+  </>
 );
 
 export class ExplorerUI extends React.Component {
@@ -421,7 +400,11 @@ export class ExplorerUI extends React.Component {
             ) : null}
             {annotationsCnt > 0 && (
               <>
-                <EuiPanel data-test-subj="mlAnomalyExplorerAnnotationsPanel loaded">
+                <EuiPanel
+                  data-test-subj="mlAnomalyExplorerAnnotationsPanel loaded"
+                  hasBorder
+                  hasShadow={false}
+                >
                   <EuiAccordion
                     id={this.htmlIdGen()}
                     buttonContent={
@@ -456,7 +439,7 @@ export class ExplorerUI extends React.Component {
               </>
             )}
             {loading === false && (
-              <EuiPanel>
+              <EuiPanel hasBorder hasShadow={false}>
                 <EuiFlexGroup direction="row" gutterSize="m" responsive={false} alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiTitle className="panel-title">

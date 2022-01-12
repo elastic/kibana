@@ -14,11 +14,12 @@ import {
   CaseType,
   CommentRequest,
   User,
-  UserAction,
-  UserActionField,
   ActionConnector,
+  CaseExternalServiceBasic,
+  CaseUserActionResponse,
   CaseMetricsResponse,
 } from '../api';
+import { SnakeToCamelCase } from '../types';
 
 export interface CasesContextFeatures {
   alerts: { sync: boolean };
@@ -72,29 +73,9 @@ export type Comment = CommentRequest & {
   updatedBy: ElasticUser | null;
   version: string;
 };
-export interface CaseUserActions {
-  actionId: string;
-  actionField: UserActionField;
-  action: UserAction;
-  actionAt: string;
-  actionBy: ElasticUser;
-  caseId: string;
-  commentId: string | null;
-  newValue: string | null;
-  newValConnectorId: string | null;
-  oldValue: string | null;
-  oldValConnectorId: string | null;
-}
 
-export interface CaseExternalService {
-  pushedAt: string;
-  pushedBy: ElasticUser;
-  connectorId: string;
-  connectorName: string;
-  externalId: string;
-  externalTitle: string;
-  externalUrl: string;
-}
+export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
+export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
 
 interface BasicCase {
   id: string;
@@ -147,6 +128,7 @@ export interface FilterOptions {
   status: CaseStatusWithAllStatus;
   tags: string[];
   reporters: User[];
+  owner: string[];
   onlyCollectionType?: boolean;
 }
 
@@ -168,6 +150,7 @@ export type CaseMetricsFeature =
   | 'alerts.count'
   | 'alerts.users'
   | 'alerts.hosts'
+  | 'actions.isolateHost'
   | 'connectors'
   | 'lifespan';
 
@@ -278,7 +261,7 @@ export interface SignalEcs {
 }
 
 export type SignalEcsAAD = Exclude<SignalEcs, 'rule' | 'status'> & {
-  rule?: Exclude<RuleEcs, 'id'> & { uuid: string[] };
+  rule?: Exclude<RuleEcs, 'id'> & { parameters: Record<string, unknown>; uuid: string[] };
   building_block_type?: string[];
   workflow_status?: string[];
 };

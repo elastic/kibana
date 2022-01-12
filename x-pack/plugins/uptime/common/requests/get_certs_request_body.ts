@@ -48,7 +48,7 @@ export const getCertsRequestBody = ({
             order: direction,
           },
         },
-      ]),
+      ]) as estypes.SortCombinations[],
       query: {
         bool: {
           ...(search

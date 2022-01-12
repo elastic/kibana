@@ -41,6 +41,9 @@ export {
   LazyDashboardPicker,
   LazySavedObjectSaveModalDashboard,
   withSuspense,
+  LazyDataViewPicker,
+  LazyFieldPicker,
+  LazyReduxEmbeddableWrapper,
 } from './components';
 
 export * from './components/types';
@@ -57,7 +60,13 @@ export {
   SolutionToolbarPopover,
 } from './components/solution_toolbar';
 
-export * from './components/controls';
+export {
+  ReduxEmbeddableContext,
+  useReduxContainerContext,
+  useReduxEmbeddableContext,
+  type ReduxContainerContextServices,
+  type ReduxEmbeddableWrapperPropsWithChildren,
+} from './components/redux_embeddables';
 
 /**
  * Register a set of Expression Functions with the Presentation Utility ExpressionInput.  This allows

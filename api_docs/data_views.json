@@ -130,23 +130,6 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-public.DataView.intervalName",
-            "type": "string",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "intervalName",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_view.ts",
-            "deprecated": true,
-            "removeBy": "8.1",
-            "references": []
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-public.DataView.type",
             "type": "string",
             "tags": [],
@@ -314,7 +297,7 @@
               "\nGet last saved saved object fields"
             ],
             "signature": [
-              "() => { fieldAttrs?: string | undefined; title?: string | undefined; timeFieldName?: string | undefined; intervalName?: string | undefined; fields?: string | undefined; sourceFilters?: string | undefined; fieldFormatMap?: string | undefined; typeMeta?: string | undefined; type?: string | undefined; }"
+              "() => { fieldAttrs?: string | undefined; title?: string | undefined; timeFieldName?: string | undefined; fields?: string | undefined; sourceFilters?: string | undefined; fieldFormatMap?: string | undefined; typeMeta?: string | undefined; type?: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
@@ -425,73 +408,6 @@
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
             "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-public.DataView.addScriptedField",
-            "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "addScriptedField",
-            "description": [
-              "\nAdd scripted field to field list\n"
-            ],
-            "signature": [
-              "(name: string, script: string, fieldType?: string) => Promise<void>"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_view.ts",
-            "deprecated": true,
-            "references": [],
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.DataView.addScriptedField.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [
-                  "field name"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_view.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.DataView.addScriptedField.$2",
-                "type": "string",
-                "tags": [],
-                "label": "script",
-                "description": [
-                  "script code"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_view.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-public.DataView.addScriptedField.$3",
-                "type": "string",
-                "tags": [],
-                "label": "fieldType",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_view.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
             "returnComment": []
           },
           {
@@ -1587,15 +1503,14 @@
           {
             "parentPluginId": "dataViews",
             "id": "def-public.DataViewField.lang",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "lang",
             "description": [
               "\nScript field language"
             ],
             "signature": [
-              "ScriptLanguage",
-              " | undefined"
+              "string | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -1603,13 +1518,12 @@
           {
             "parentPluginId": "dataViews",
             "id": "def-public.DataViewField.lang",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "lang",
             "description": [],
             "signature": [
-              "ScriptLanguage",
-              " | undefined"
+              "string | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -1897,9 +1811,7 @@
             "label": "toJSON",
             "description": [],
             "signature": [
-              "() => { count: number; script: string | undefined; lang: ",
-              "ScriptLanguage",
-              " | undefined; conflictDescriptions: Record<string, string[]> | undefined; name: string; type: string; esTypes: string[] | undefined; scripted: boolean; searchable: boolean; aggregatable: boolean; readFromDocValues: boolean; subType: ",
+              "() => { count: number; script: string | undefined; lang: string | undefined; conflictDescriptions: Record<string, string[]> | undefined; name: string; type: string; esTypes: string[] | undefined; scripted: boolean; searchable: boolean; aggregatable: boolean; readFromDocValues: boolean; subType: ",
               "IFieldSubType",
               " | undefined; customLabel: string | undefined; }"
             ],
@@ -2138,7 +2050,7 @@
             "label": "getFieldsForWildcard",
             "description": [],
             "signature": [
-              "({ pattern, metaFields, type, rollupIndex, allowNoIndex }: ",
+              "({ pattern, metaFields, type, rollupIndex, allowNoIndex, filter, }: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -2156,7 +2068,7 @@
                 "id": "def-public.DataViewsApiClient.getFieldsForWildcard.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ pattern, metaFields, type, rollupIndex, allowNoIndex }",
+                "label": "{\n    pattern,\n    metaFields,\n    type,\n    rollupIndex,\n    allowNoIndex,\n    filter,\n  }",
                 "description": [],
                 "signature": [
                   {
@@ -2830,7 +2742,15 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ") => Promise<any>"
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[]>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -2894,7 +2814,15 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              " | undefined) => Promise<any>"
+              " | undefined) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[]>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -3582,6 +3510,10 @@
         "deprecated": true,
         "references": [
           {
+            "plugin": "upgradeAssistant",
+            "path": "x-pack/plugins/upgrade_assistant/target/types/__jest__/client_integration/helpers/app_context.mock.d.ts"
+          },
+          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/target/types/public/application/lib/load_saved_dashboard_state.d.ts"
           },
@@ -3758,282 +3690,6 @@
             "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/components/table_header/helpers.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/components/table_header/helpers.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_flyout.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_flyout.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_context.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_context.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/get_render_cell_value.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/get_render_cell_value.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_columns.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_columns.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_columns.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_columns.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/columns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/columns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/get_default_sort.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/get_default_sort.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/components/table_header/table_header.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/components/table_header/table_header.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/row_formatter.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/row_formatter.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/row_formatter.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/doc_table_wrapper.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/doc_table_wrapper.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/get_sort_for_search_source.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/get_sort_for_search_source.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/utils/update_search_source.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/utils/update_search_source.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/update_search_source.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/update_search_source.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_es_doc_search.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_es_doc_search.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_data_grid_columns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_data_grid_columns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/sorting.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/sorting.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/context_app_content.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/context_app_content.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/context_app.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/context_app.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_index_pattern.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_index_pattern.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/resolve_index_pattern.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/resolve_index_pattern.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_visualize.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_visualize.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_index_pattern_management.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_index_pattern_management.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/calc_field_counts.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/calc_field_counts.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/types.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/types.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/top_nav/get_top_nav_links.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/top_nav/get_top_nav_links.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/discover_documents.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/discover_documents.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/get_switch_index_pattern_app_state.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/get_switch_index_pattern_app_state.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/get_switch_index_pattern_app_state.ts"
-          },
-          {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts"
           },
@@ -4358,42 +4014,6 @@
             "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/__mocks__/index_pattern.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/__mocks__/index_pattern.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/__mocks__/index_pattern_with_timefield.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/__mocks__/index_pattern_with_timefield.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/view_saved_search_action.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/view_saved_search_action.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
@@ -4602,22 +4222,6 @@
             "path": "src/plugins/data/common/search/tabify/tabify_docs.test.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/components/table_header/helpers.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/components/table_header/helpers.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/doc_table_wrapper.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/doc_table_wrapper.d.ts"
-          },
-          {
             "plugin": "data",
             "path": "src/plugins/data/common/search/aggs/buckets/_terms_other_bucket_helper.test.ts"
           },
@@ -4682,180 +4286,12 @@
             "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.test.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context.predecessors.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context.predecessors.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context.successors.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context.successors.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/get_switch_index_pattern_app_state.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/get_switch_index_pattern_app_state.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/row_formatter.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/row_formatter.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/utils/use_data_grid_columns.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/utils/use_data_grid_columns.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/discover_grid/discover_grid_context.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/discover_grid/discover_grid_context.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/discover_grid/discover_grid_flyout.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/discover_grid/discover_grid_flyout.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/discover_grid/get_render_cell_value.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/discover_grid/get_render_cell_value.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/lib/get_sort_for_search_source.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/lib/get_sort_for_search_source.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/lib/get_default_sort.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/lib/get_default_sort.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/context/utils/sorting.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/context/utils/sorting.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/get_switch_index_pattern_app_state.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/get_switch_index_pattern_app_state.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/get_switch_index_pattern_app_state.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/resolve_index_pattern.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/resolve_index_pattern.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/resolve_index_pattern.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/lib/row_formatter.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/lib/row_formatter.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/lib/row_formatter.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/discover_field_visualize.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/discover_field_visualize.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/top_nav/get_top_nav_links.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/top_nav/get_top_nav_links.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/components/table_header/table_header.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/components/table_header/table_header.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/components/doc_viewer_source/source.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/components/doc_viewer_source/source.tsx"
-          },
-          {
             "plugin": "apm",
             "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/selected_wildcards.tsx"
           },
           {
             "plugin": "apm",
             "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/selected_wildcards.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/use_context_app_fetch.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/use_context_app_fetch.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/use_context_app_fetch.test.ts"
           },
           {
             "plugin": "data",
@@ -4910,200 +4346,12 @@
             "path": "src/plugins/saved_objects/public/saved_object/helpers/apply_es_resp.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/doc_views_types.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/doc_views_types.ts"
-          },
-          {
             "plugin": "dataViewFieldEditor",
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/field_format_editor.tsx"
           },
           {
             "plugin": "dataViewFieldEditor",
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/field_format_editor.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/types.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/types.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/get_sort.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/get_sort.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/get_sort.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/get_sort.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/get_sort.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/components/table_row.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/components/table_row.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/services/discover_state.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/services/discover_state.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/services/discover_state.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/actions/columns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/actions/columns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/nested_fields.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/nested_fields.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/components/doc_viewer_table/table.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/components/doc_viewer_table/table.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/doc/components/doc.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/doc/components/doc.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/anchor.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/anchor.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/anchor.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/use_context_app_fetch.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/use_context_app_fetch.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_details.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_details.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_index_pattern.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_index_pattern.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_details.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_details.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_index_pattern_field_list.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_index_pattern_field_list.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar_responsive.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar_responsive.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/persist_saved_search.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/persist_saved_search.ts"
           },
           {
             "plugin": "visualizations",
@@ -6154,42 +5402,6 @@
             "path": "src/plugins/vis_default_editor/public/components/agg_params.tsx"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_sharing_data.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_sharing_data.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_sharing_data.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
             "plugin": "inputControlVis",
             "path": "src/plugins/input_control_vis/public/test_utils/get_index_pattern_mock.ts"
           },
@@ -6298,22 +5510,6 @@
             "path": "src/plugins/data_view_management/target/types/public/components/utils.d.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/anchor.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/anchor.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/doc/components/doc.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/doc/components/doc.d.ts"
-          },
-          {
             "plugin": "inputControlVis",
             "path": "src/plugins/input_control_vis/target/types/public/control/create_search_source.d.ts"
           },
@@ -6358,38 +5554,6 @@
             "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/field_calculator.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/field_calculator.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/context/services/context.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/context/services/context.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/context/services/context.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/context/services/context.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/nested_fields.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/nested_fields.d.ts"
-          },
-          {
             "plugin": "dataViewManagement",
             "path": "src/plugins/data_view_management/target/types/public/components/edit_index_pattern/source_filters_table/components/table/table.d.ts"
           },
@@ -6398,14 +5562,6 @@
             "path": "src/plugins/data_view_management/target/types/public/components/edit_index_pattern/source_filters_table/components/table/table.d.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/discover_index_pattern.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/discover_index_pattern.d.ts"
-          },
-          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
           },
@@ -6416,14 +5572,6 @@
           {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/lib/get_index_pattern_field_list.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/lib/get_index_pattern_field_list.d.ts"
           }
         ],
         "children": [],
@@ -6503,62 +5651,6 @@
             "path": "src/plugins/data/server/index.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_cell_actions.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_cell_actions.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/doc_table_wrapper.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/doc_table_wrapper.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/context_app.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/context_app.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_visualize.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_visualize.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_visualize.tsx"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/common/elasticsearch_util/es_agg_utils.ts"
           },
@@ -6671,34 +5763,6 @@
             "path": "x-pack/plugins/lens/target/types/server/routes/field_stats.d.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
             "plugin": "data",
             "path": "src/plugins/data/common/search/aggs/agg_config.test.ts"
           },
@@ -6745,316 +5809,12 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/common/search/aggs/utils/infer_time_zone.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/discover_field_visualize.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/discover_field_visualize.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/discover_field_visualize.d.ts"
           },
           {
             "plugin": "data",
             "path": "src/plugins/data/public/index.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/field_name/field_name.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/field_name/field_name.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/components/doc_viewer_table/table_cell_actions.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/components/doc_viewer_table/table_cell_actions.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/components/doc_viewer_table/table.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/components/doc_viewer_table/table.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_bucket.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_bucket.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_bucket.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_details.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_details.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_details.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/field_filter.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/field_filter.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_details.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_details.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_index_pattern_field_list.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_index_pattern_field_list.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_index_pattern_field_list.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_index_pattern_field_list.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar_responsive.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar_responsive.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/discover_layout.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/discover_layout.tsx"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
           },
@@ -7349,14 +6109,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/index_pattern_util.test.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/server/maps_telemetry/maps_telemetry.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/server/maps_telemetry/maps_telemetry.ts"
           },
           {
             "plugin": "maps",
@@ -7889,34 +6641,6 @@
           {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/field_filter.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/field_filter.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/lib/group_fields.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/lib/group_fields.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/lib/group_fields.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/lib/group_fields.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/lib/group_fields.d.ts"
           },
           {
             "plugin": "dataVisualizer",
@@ -8064,14 +6788,6 @@
             "path": "src/plugins/vis_types/timeseries/server/plugin.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/__mocks__/index_patterns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/__mocks__/index_patterns.ts"
-          },
-          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
@@ -8102,30 +6818,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/public/index.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
@@ -9350,7 +8042,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          ") => Promise<any>; getFieldsForIndexPattern: (indexPattern: ",
+          ") => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; getFieldsForIndexPattern: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -9374,7 +8074,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          " | undefined) => Promise<any>; refreshFields: (indexPattern: ",
+          " | undefined) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; refreshFields: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -9592,7 +8300,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          ") => Promise<any>; getFieldsForIndexPattern: (indexPattern: ",
+          ") => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; getFieldsForIndexPattern: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -9616,7 +8332,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          " | undefined) => Promise<any>; refreshFields: (indexPattern: ",
+          " | undefined) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; refreshFields: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -9756,30 +8480,6 @@
             "path": "src/plugins/data/public/search/types.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_data_grid_columns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_data_grid_columns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_index_pattern.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_index_pattern.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/resolve_index_pattern.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/resolve_index_pattern.ts"
-          },
-          {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/rtl_helpers.tsx"
           },
@@ -9822,22 +8522,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/server/search/expressions/esaggs.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/utils/use_data_grid_columns.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/utils/use_data_grid_columns.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/resolve_index_pattern.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/resolve_index_pattern.d.ts"
           },
           {
             "plugin": "data",
@@ -9920,30 +8604,6 @@
             "path": "x-pack/plugins/security/public/management/roles/edit_role/edit_role_page.tsx"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/build_services.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/build_services.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/actions/columns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/actions/columns.ts"
-          },
-          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
           },
@@ -10178,14 +8838,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/target/types/public/ui/index_pattern_select/create_index_pattern_select.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/build_services.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/build_services.d.ts"
           },
           {
             "plugin": "inputControlVis",
@@ -10335,7 +8987,15 @@
           "section": "def-common.GetFieldsOptions",
           "text": "GetFieldsOptions"
         },
-        ") => Promise<any>; getFieldsForIndexPattern: (indexPattern: ",
+        ") => Promise<",
+        {
+          "pluginId": "dataViews",
+          "scope": "common",
+          "docId": "kibDataViewsPluginApi",
+          "section": "def-common.FieldSpec",
+          "text": "FieldSpec"
+        },
+        "[]>; getFieldsForIndexPattern: (indexPattern: ",
         {
           "pluginId": "dataViews",
           "scope": "common",
@@ -10359,7 +9019,15 @@
           "section": "def-common.GetFieldsOptions",
           "text": "GetFieldsOptions"
         },
-        " | undefined) => Promise<any>; refreshFields: (indexPattern: ",
+        " | undefined) => Promise<",
+        {
+          "pluginId": "dataViews",
+          "scope": "common",
+          "docId": "kibDataViewsPluginApi",
+          "section": "def-common.FieldSpec",
+          "text": "FieldSpec"
+        },
+        "[]>; refreshFields: (indexPattern: ",
         {
           "pluginId": "dataViews",
           "scope": "common",
@@ -10675,7 +9343,7 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any> | undefined) => Promise<",
+              "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -10707,7 +9375,7 @@
                 "section": "def-server.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any> | undefined) => Promise<",
+              "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -10849,7 +9517,9 @@
               "\n Get a list of field objects for an index pattern that may contain wildcards\n"
             ],
             "signature": [
-              "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; }) => Promise<",
+              "(options: { pattern: string | string[]; metaFields?: string[] | undefined; fieldCapsOptions?: { allow_no_indices: boolean; } | undefined; type?: string | undefined; rollupIndex?: string | undefined; filter?: ",
+              "QueryDslQueryContainer",
+              " | undefined; }) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "server",
@@ -10933,6 +9603,20 @@
                     "description": [],
                     "signature": [
                       "string | undefined"
+                    ],
+                    "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "dataViews",
+                    "id": "def-server.IndexPatternsFetcher.getFieldsForWildcard.$1.filter",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "filter",
+                    "description": [],
+                    "signature": [
+                      "QueryDslQueryContainer",
+                      " | undefined"
                     ],
                     "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
                     "deprecated": false
@@ -11133,7 +9817,7 @@
             "section": "def-server.KibanaRequest",
             "text": "KibanaRequest"
           },
-          "<unknown, unknown, unknown, any> | undefined) => Promise<",
+          "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -11151,7 +9835,7 @@
             "id": "def-server.dataViewsServiceFactory.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    logger,\n    uiSettings,\n    fieldFormats,\n    capabilities,\n  }",
+            "label": "{\n  logger,\n  uiSettings,\n  fieldFormats,\n  capabilities,\n}",
             "description": [],
             "path": "src/plugins/data_views/server/data_views_service_factory.ts",
             "deprecated": false,
@@ -11670,7 +10354,210 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-server.DATA_VIEW_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_VIEW_PATH",
+        "description": [],
+        "path": "src/plugins/data_views/server/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-server.DATA_VIEW_PATH_LEGACY",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_VIEW_PATH_LEGACY",
+        "description": [],
+        "path": "src/plugins/data_views/server/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-server.RUNTIME_FIELD_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "RUNTIME_FIELD_PATH",
+        "description": [],
+        "path": "src/plugins/data_views/server/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-server.RUNTIME_FIELD_PATH_LEGACY",
+        "type": "string",
+        "tags": [],
+        "label": "RUNTIME_FIELD_PATH_LEGACY",
+        "description": [],
+        "path": "src/plugins/data_views/server/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-server.SCRIPTED_FIELD_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "SCRIPTED_FIELD_PATH",
+        "description": [],
+        "path": "src/plugins/data_views/server/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-server.SCRIPTED_FIELD_PATH_LEGACY",
+        "type": "string",
+        "tags": [],
+        "label": "SCRIPTED_FIELD_PATH_LEGACY",
+        "description": [],
+        "path": "src/plugins/data_views/server/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-server.SERVICE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE_KEY",
+        "description": [],
+        "signature": [
+          "\"data_view\""
+        ],
+        "path": "src/plugins/data_views/server/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-server.SERVICE_KEY_LEGACY",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE_KEY_LEGACY",
+        "description": [],
+        "signature": [
+          "\"index_pattern\""
+        ],
+        "path": "src/plugins/data_views/server/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-server.SERVICE_KEY_TYPE",
+        "type": "Type",
+        "tags": [],
+        "label": "SERVICE_KEY_TYPE",
+        "description": [],
+        "signature": [
+          "\"index_pattern\" | \"data_view\""
+        ],
+        "path": "src/plugins/data_views/server/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-server.SERVICE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE_PATH",
+        "description": [],
+        "signature": [
+          "\"/api/data_views\""
+        ],
+        "path": "src/plugins/data_views/server/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-server.SERVICE_PATH_LEGACY",
+        "type": "string",
+        "tags": [],
+        "label": "SERVICE_PATH_LEGACY",
+        "description": [],
+        "signature": [
+          "\"/api/index_patterns\""
+        ],
+        "path": "src/plugins/data_views/server/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-server.SPECIFIC_DATA_VIEW_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "SPECIFIC_DATA_VIEW_PATH",
+        "description": [],
+        "path": "src/plugins/data_views/server/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-server.SPECIFIC_DATA_VIEW_PATH_LEGACY",
+        "type": "string",
+        "tags": [],
+        "label": "SPECIFIC_DATA_VIEW_PATH_LEGACY",
+        "description": [],
+        "path": "src/plugins/data_views/server/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-server.SPECIFIC_RUNTIME_FIELD_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "SPECIFIC_RUNTIME_FIELD_PATH",
+        "description": [],
+        "path": "src/plugins/data_views/server/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-server.SPECIFIC_RUNTIME_FIELD_PATH_LEGACY",
+        "type": "string",
+        "tags": [],
+        "label": "SPECIFIC_RUNTIME_FIELD_PATH_LEGACY",
+        "description": [],
+        "path": "src/plugins/data_views/server/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-server.SPECIFIC_SCRIPTED_FIELD_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "SPECIFIC_SCRIPTED_FIELD_PATH",
+        "description": [],
+        "path": "src/plugins/data_views/server/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-server.SPECIFIC_SCRIPTED_FIELD_PATH_LEGACY",
+        "type": "string",
+        "tags": [],
+        "label": "SPECIFIC_SCRIPTED_FIELD_PATH_LEGACY",
+        "description": [],
+        "path": "src/plugins/data_views/server/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "start": {
       "parentPluginId": "dataViews",
@@ -11714,7 +10601,7 @@
               "section": "def-server.KibanaRequest",
               "text": "KibanaRequest"
             },
-            "<unknown, unknown, unknown, any> | undefined) => Promise<",
+            "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
             {
               "pluginId": "dataViews",
               "scope": "common",
@@ -12105,6 +10992,19 @@
               ],
               "path": "src/plugins/data_views/server/types.ts",
               "deprecated": false
+            },
+            {
+              "parentPluginId": "dataViews",
+              "id": "def-server.DataViewsServerPluginStart.dataViewsServiceFactory.$4",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "byPassCapabilities",
+              "description": [],
+              "signature": [
+                "boolean | undefined"
+              ],
+              "path": "src/plugins/data_views/server/types.ts",
+              "deprecated": false
             }
           ]
         },
@@ -12142,7 +11042,7 @@
               "section": "def-server.KibanaRequest",
               "text": "KibanaRequest"
             },
-            "<unknown, unknown, unknown, any> | undefined) => Promise<",
+            "<unknown, unknown, unknown, any> | undefined, byPassCapabilities?: boolean | undefined) => Promise<",
             {
               "pluginId": "dataViews",
               "scope": "common",
@@ -12194,14 +11094,6 @@
             {
               "plugin": "maps",
               "path": "x-pack/plugins/maps/server/kibana_server_services.ts"
-            },
-            {
-              "plugin": "securitySolution",
-              "path": "x-pack/plugins/security_solution/server/lib/sourcerer/routes/index.ts"
-            },
-            {
-              "plugin": "timelines",
-              "path": "x-pack/plugins/timelines/server/search_strategy/index_fields/index.ts"
             },
             {
               "plugin": "maps",
@@ -12591,6 +11483,19 @@
               ],
               "path": "src/plugins/data_views/server/types.ts",
               "deprecated": false
+            },
+            {
+              "parentPluginId": "dataViews",
+              "id": "def-server.DataViewsServerPluginStart.indexPatternsServiceFactory.$4",
+              "type": "CompoundType",
+              "tags": [],
+              "label": "byPassCapabilities",
+              "description": [],
+              "signature": [
+                "boolean | undefined"
+              ],
+              "path": "src/plugins/data_views/server/types.ts",
+              "deprecated": false
             }
           ]
         }
@@ -12739,23 +11644,6 @@
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DataView.intervalName",
-            "type": "string",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "intervalName",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_view.ts",
-            "deprecated": true,
-            "removeBy": "8.1",
-            "references": []
           },
           {
             "parentPluginId": "dataViews",
@@ -12926,7 +11814,7 @@
               "\nGet last saved saved object fields"
             ],
             "signature": [
-              "() => { fieldAttrs?: string | undefined; title?: string | undefined; timeFieldName?: string | undefined; intervalName?: string | undefined; fields?: string | undefined; sourceFilters?: string | undefined; fieldFormatMap?: string | undefined; typeMeta?: string | undefined; type?: string | undefined; }"
+              "() => { fieldAttrs?: string | undefined; title?: string | undefined; timeFieldName?: string | undefined; fields?: string | undefined; sourceFilters?: string | undefined; fieldFormatMap?: string | undefined; typeMeta?: string | undefined; type?: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
@@ -13037,73 +11925,6 @@
             "path": "src/plugins/data_views/common/data_views/data_view.ts",
             "deprecated": false,
             "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DataView.addScriptedField",
-            "type": "Function",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "addScriptedField",
-            "description": [
-              "\nAdd scripted field to field list\n"
-            ],
-            "signature": [
-              "(name: string, script: string, fieldType?: string) => Promise<void>"
-            ],
-            "path": "src/plugins/data_views/common/data_views/data_view.ts",
-            "deprecated": true,
-            "references": [],
-            "children": [
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.DataView.addScriptedField.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [
-                  "field name"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_view.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.DataView.addScriptedField.$2",
-                "type": "string",
-                "tags": [],
-                "label": "script",
-                "description": [
-                  "script code"
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_view.ts",
-                "deprecated": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "dataViews",
-                "id": "def-common.DataView.addScriptedField.$3",
-                "type": "string",
-                "tags": [],
-                "label": "fieldType",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/plugins/data_views/common/data_views/data_view.ts",
-                "deprecated": false,
-                "isRequired": true
-              }
-            ],
             "returnComment": []
           },
           {
@@ -14199,15 +13020,14 @@
           {
             "parentPluginId": "dataViews",
             "id": "def-common.DataViewField.lang",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "lang",
             "description": [
               "\nScript field language"
             ],
             "signature": [
-              "ScriptLanguage",
-              " | undefined"
+              "string | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -14215,13 +13035,12 @@
           {
             "parentPluginId": "dataViews",
             "id": "def-common.DataViewField.lang",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "lang",
             "description": [],
             "signature": [
-              "ScriptLanguage",
-              " | undefined"
+              "string | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false
@@ -14509,9 +13328,7 @@
             "label": "toJSON",
             "description": [],
             "signature": [
-              "() => { count: number; script: string | undefined; lang: ",
-              "ScriptLanguage",
-              " | undefined; conflictDescriptions: Record<string, string[]> | undefined; name: string; type: string; esTypes: string[] | undefined; scripted: boolean; searchable: boolean; aggregatable: boolean; readFromDocValues: boolean; subType: ",
+              "() => { count: number; script: string | undefined; lang: string | undefined; conflictDescriptions: Record<string, string[]> | undefined; name: string; type: string; esTypes: string[] | undefined; scripted: boolean; searchable: boolean; aggregatable: boolean; readFromDocValues: boolean; subType: ",
               "IFieldSubType",
               " | undefined; customLabel: string | undefined; }"
             ],
@@ -15105,7 +13922,15 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              ") => Promise<any>"
+              ") => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[]>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -15169,7 +13994,15 @@
                 "section": "def-common.GetFieldsOptions",
                 "text": "GetFieldsOptions"
               },
-              " | undefined) => Promise<any>"
+              " | undefined) => Promise<",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              "[]>"
             ],
             "path": "src/plugins/data_views/common/data_views/data_views.ts",
             "deprecated": false,
@@ -15910,6 +14743,10 @@
         "deprecated": true,
         "references": [
           {
+            "plugin": "upgradeAssistant",
+            "path": "x-pack/plugins/upgrade_assistant/target/types/__jest__/client_integration/helpers/app_context.mock.d.ts"
+          },
+          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/target/types/public/application/lib/load_saved_dashboard_state.d.ts"
           },
@@ -16086,282 +14923,6 @@
             "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/lib/cached_index_pattern_fetcher.test.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/components/table_header/helpers.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/components/table_header/helpers.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_flyout.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_flyout.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_context.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_context.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/get_render_cell_value.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/get_render_cell_value.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_columns.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_columns.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_columns.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_columns.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/columns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/columns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/get_default_sort.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/get_default_sort.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/components/table_header/table_header.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/components/table_header/table_header.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/row_formatter.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/row_formatter.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/row_formatter.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/doc_table_wrapper.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/doc_table_wrapper.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/get_sort_for_search_source.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/get_sort_for_search_source.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/utils/update_search_source.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/utils/update_search_source.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/update_search_source.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/update_search_source.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_es_doc_search.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_es_doc_search.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_data_grid_columns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_data_grid_columns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/sorting.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/sorting.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/context_app_content.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/context_app_content.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/context_app.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/context_app.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_index_pattern.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_index_pattern.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/resolve_index_pattern.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/resolve_index_pattern.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_visualize.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_visualize.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_index_pattern_management.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_index_pattern_management.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/calc_field_counts.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/calc_field_counts.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/types.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/types.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/top_nav/get_top_nav_links.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/top_nav/get_top_nav_links.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/discover_documents.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/discover_documents.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/get_switch_index_pattern_app_state.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/get_switch_index_pattern_app_state.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/get_switch_index_pattern_app_state.ts"
-          },
-          {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts"
           },
@@ -16686,42 +15247,6 @@
             "path": "x-pack/plugins/maps/target/types/public/routes/map_page/map_app/map_app.d.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/__mocks__/index_pattern.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/__mocks__/index_pattern.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/__mocks__/index_pattern_with_timefield.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/__mocks__/index_pattern_with_timefield.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/view_saved_search_action.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/view_saved_search_action.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
@@ -16930,22 +15455,6 @@
             "path": "src/plugins/data/common/search/tabify/tabify_docs.test.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/components/table_header/helpers.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/components/table_header/helpers.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/doc_table_wrapper.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/doc_table_wrapper.d.ts"
-          },
-          {
             "plugin": "data",
             "path": "src/plugins/data/common/search/aggs/buckets/_terms_other_bucket_helper.test.ts"
           },
@@ -17010,180 +15519,12 @@
             "path": "src/plugins/data/common/search/expressions/esaggs/request_handler.test.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context.predecessors.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context.predecessors.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context.successors.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context.successors.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/get_switch_index_pattern_app_state.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/get_switch_index_pattern_app_state.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/row_formatter.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/row_formatter.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/utils/use_data_grid_columns.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/utils/use_data_grid_columns.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/discover_grid/discover_grid_context.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/discover_grid/discover_grid_context.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/discover_grid/discover_grid_flyout.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/discover_grid/discover_grid_flyout.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/discover_grid/get_render_cell_value.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/discover_grid/get_render_cell_value.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/lib/get_sort_for_search_source.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/lib/get_sort_for_search_source.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/lib/get_default_sort.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/lib/get_default_sort.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/context/utils/sorting.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/context/utils/sorting.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/get_switch_index_pattern_app_state.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/get_switch_index_pattern_app_state.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/get_switch_index_pattern_app_state.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/resolve_index_pattern.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/resolve_index_pattern.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/resolve_index_pattern.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/lib/row_formatter.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/lib/row_formatter.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/lib/row_formatter.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/discover_field_visualize.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/discover_field_visualize.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/top_nav/get_top_nav_links.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/top_nav/get_top_nav_links.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/components/table_header/table_header.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/components/doc_table/components/table_header/table_header.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/components/doc_viewer_source/source.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/components/doc_viewer_source/source.tsx"
-          },
-          {
             "plugin": "apm",
             "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/selected_wildcards.tsx"
           },
           {
             "plugin": "apm",
             "path": "x-pack/plugins/apm/public/components/app/RumDashboard/LocalUIFilters/selected_wildcards.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/use_context_app_fetch.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/use_context_app_fetch.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/use_context_app_fetch.test.ts"
           },
           {
             "plugin": "data",
@@ -17238,200 +15579,12 @@
             "path": "src/plugins/saved_objects/public/saved_object/helpers/apply_es_resp.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/doc_views_types.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/doc_views_types.ts"
-          },
-          {
             "plugin": "dataViewFieldEditor",
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/field_format_editor.tsx"
           },
           {
             "plugin": "dataViewFieldEditor",
             "path": "src/plugins/data_view_field_editor/public/components/field_format_editor/field_format_editor.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/types.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/types.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/get_sort.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/get_sort.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/get_sort.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/get_sort.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/lib/get_sort.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/components/table_row.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/components/table_row.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/services/discover_state.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/services/discover_state.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/services/discover_state.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/actions/columns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/actions/columns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/nested_fields.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/nested_fields.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/components/doc_viewer_table/table.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/components/doc_viewer_table/table.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/doc/components/doc.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/doc/components/doc.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/anchor.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/anchor.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/anchor.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/context.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/use_context_app_fetch.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/utils/use_context_app_fetch.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_details.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_details.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_index_pattern.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_index_pattern.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_details.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_details.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_index_pattern_field_list.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_index_pattern_field_list.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar_responsive.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar_responsive.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/persist_saved_search.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/persist_saved_search.ts"
           },
           {
             "plugin": "visualizations",
@@ -18482,42 +16635,6 @@
             "path": "src/plugins/vis_default_editor/public/components/agg_params.tsx"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_sharing_data.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_sharing_data.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_sharing_data.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
             "plugin": "inputControlVis",
             "path": "src/plugins/input_control_vis/public/test_utils/get_index_pattern_mock.ts"
           },
@@ -18626,22 +16743,6 @@
             "path": "src/plugins/data_view_management/target/types/public/components/utils.d.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/anchor.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/services/anchor.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/doc/components/doc.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/doc/components/doc.d.ts"
-          },
-          {
             "plugin": "inputControlVis",
             "path": "src/plugins/input_control_vis/target/types/public/control/create_search_source.d.ts"
           },
@@ -18686,38 +16787,6 @@
             "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/field_calculator.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/field_calculator.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/context/services/context.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/context/services/context.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/context/services/context.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/context/services/context.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/nested_fields.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/nested_fields.d.ts"
-          },
-          {
             "plugin": "dataViewManagement",
             "path": "src/plugins/data_view_management/target/types/public/components/edit_index_pattern/source_filters_table/components/table/table.d.ts"
           },
@@ -18726,14 +16795,6 @@
             "path": "src/plugins/data_view_management/target/types/public/components/edit_index_pattern/source_filters_table/components/table/table.d.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/discover_index_pattern.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/discover_index_pattern.d.ts"
-          },
-          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
           },
@@ -18744,14 +16805,6 @@
           {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/target/types/public/application/components/lib/convert_series_to_datatable.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/lib/get_index_pattern_field_list.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/lib/get_index_pattern_field_list.d.ts"
           }
         ],
         "children": [],
@@ -18831,62 +16884,6 @@
             "path": "src/plugins/data/server/index.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_cell_actions.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/discover_grid/discover_grid_cell_actions.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/doc_table_wrapper.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/doc_table_wrapper.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/field_stats_table/field_stats_table.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/embeddable/saved_search_embeddable.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/context_app.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/context/context_app.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_visualize.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_visualize.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_visualize.tsx"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/common/elasticsearch_util/es_agg_utils.ts"
           },
@@ -18999,34 +16996,6 @@
             "path": "x-pack/plugins/lens/target/types/server/routes/field_stats.d.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/get_fields_to_show.test.ts"
-          },
-          {
             "plugin": "data",
             "path": "src/plugins/data/common/search/aggs/agg_config.test.ts"
           },
@@ -19073,316 +17042,12 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/common/search/aggs/utils/infer_time_zone.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/discover_field_visualize.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/discover_field_visualize.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/discover_field_visualize.d.ts"
           },
           {
             "plugin": "data",
             "path": "src/plugins/data/public/index.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/field_name/field_name.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/field_name/field_name.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/components/doc_viewer_table/table_cell_actions.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/components/doc_viewer_table/table_cell_actions.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/components/doc_viewer_table/table.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/services/doc_views/components/doc_viewer_table/table.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_bucket.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_bucket.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_bucket.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_details.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_details.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field_details.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/visualize_trigger_utils.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_field.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/field_filter.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/field_filter.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/group_fields.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_details.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_details.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_index_pattern_field_list.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_index_pattern_field_list.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_index_pattern_field_list.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/get_index_pattern_field_list.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar_responsive.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar_responsive.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/discover_layout.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/discover_layout.tsx"
-          },
-          {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/components/single_field_select.tsx"
           },
@@ -19677,14 +17342,6 @@
           {
             "plugin": "maps",
             "path": "x-pack/plugins/maps/public/index_pattern_util.test.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/server/maps_telemetry/maps_telemetry.ts"
-          },
-          {
-            "plugin": "maps",
-            "path": "x-pack/plugins/maps/server/maps_telemetry/maps_telemetry.ts"
           },
           {
             "plugin": "maps",
@@ -20217,34 +17874,6 @@
           {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/public/application/components/lib/convert_series_to_datatable.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/field_filter.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/lib/field_filter.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/lib/group_fields.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/lib/group_fields.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/lib/group_fields.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/lib/group_fields.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/lib/group_fields.d.ts"
           },
           {
             "plugin": "dataVisualizer",
@@ -20392,14 +18021,6 @@
             "path": "src/plugins/vis_types/timeseries/server/plugin.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/__mocks__/index_patterns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/__mocks__/index_patterns.ts"
-          },
-          {
             "plugin": "visTypeTimeseries",
             "path": "src/plugins/vis_types/timeseries/common/index_patterns_utils.test.ts"
           },
@@ -20430,30 +18051,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/public/index.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.test.ts"
           },
           {
             "plugin": "visTypeTimeseries",
@@ -20812,19 +18409,6 @@
           },
           {
             "parentPluginId": "dataViews",
-            "id": "def-common.DataViewAttributes.intervalName",
-            "type": "string",
-            "tags": [],
-            "label": "intervalName",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
             "id": "def-common.DataViewAttributes.sourceFilters",
             "type": "string",
             "tags": [],
@@ -21013,22 +18597,6 @@
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
-          },
-          {
-            "parentPluginId": "dataViews",
-            "id": "def-common.DataViewSpec.intervalName",
-            "type": "string",
-            "tags": [
-              "deprecated"
-            ],
-            "label": "intervalName",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/data_views/common/types.ts",
-            "deprecated": true,
-            "references": []
           },
           {
             "parentPluginId": "dataViews",
@@ -21513,13 +19081,12 @@
           {
             "parentPluginId": "dataViews",
             "id": "def-common.FieldSpecExportFmt.lang",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "lang",
             "description": [],
             "signature": [
-              "ScriptLanguage",
-              " | undefined"
+              "string | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
@@ -21762,6 +19329,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/plugins/data_views/common/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.GetFieldsOptions.filter",
+            "type": "Object",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              "QueryDslQueryContainer",
+              " | undefined"
             ],
             "path": "src/plugins/data_views/common/types.ts",
             "deprecated": false
@@ -24694,7 +22275,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          ") => Promise<any>; getFieldsForIndexPattern: (indexPattern: ",
+          ") => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; getFieldsForIndexPattern: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -24718,7 +22307,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          " | undefined) => Promise<any>; refreshFields: (indexPattern: ",
+          " | undefined) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; refreshFields: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25002,14 +22599,6 @@
             "path": "src/plugins/data/public/index.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_index_pattern.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_index_pattern.tsx"
-          },
-          {
             "plugin": "transform",
             "path": "x-pack/plugins/transform/public/app/hooks/use_search_items/common.ts"
           },
@@ -25028,26 +22617,10 @@
           {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/public/lib/es_service.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/discover_index_pattern.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/components/sidebar/discover_index_pattern.d.ts"
           },
           {
             "plugin": "data",
             "path": "src/plugins/data/server/index.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar_responsive.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/sidebar/discover_sidebar_responsive.tsx"
           },
           {
             "plugin": "discover",
@@ -25206,13 +22779,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/data_views/common/expressions/load_index_pattern.ts",
@@ -25291,7 +22858,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          ") => Promise<any>; getFieldsForIndexPattern: (indexPattern: ",
+          ") => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; getFieldsForIndexPattern: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25315,7 +22890,15 @@
             "section": "def-common.GetFieldsOptions",
             "text": "GetFieldsOptions"
           },
-          " | undefined) => Promise<any>; refreshFields: (indexPattern: ",
+          " | undefined) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.FieldSpec",
+            "text": "FieldSpec"
+          },
+          "[]>; refreshFields: (indexPattern: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25455,30 +23038,6 @@
             "path": "src/plugins/data/public/search/types.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_data_grid_columns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_data_grid_columns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_index_pattern.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/use_index_pattern.tsx"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/resolve_index_pattern.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/utils/resolve_index_pattern.ts"
-          },
-          {
             "plugin": "observability",
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/rtl_helpers.tsx"
           },
@@ -25521,22 +23080,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/server/search/expressions/esaggs.test.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/utils/use_data_grid_columns.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/utils/use_data_grid_columns.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/resolve_index_pattern.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/application/main/utils/resolve_index_pattern.d.ts"
           },
           {
             "plugin": "data",
@@ -25619,30 +23162,6 @@
             "path": "x-pack/plugins/security/public/management/roles/edit_role/edit_role_page.tsx"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/build_services.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/build_services.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/utils/popularize_field.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/actions/columns.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/components/doc_table/actions/columns.ts"
-          },
-          {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/lib/sync_dashboard_index_patterns.ts"
           },
@@ -25877,14 +23396,6 @@
           {
             "plugin": "data",
             "path": "src/plugins/data/target/types/public/ui/index_pattern_select/create_index_pattern_select.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/build_services.d.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/target/types/public/build_services.d.ts"
           },
           {
             "plugin": "inputControlVis",

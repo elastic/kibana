@@ -33,8 +33,8 @@ export interface MockedFleetAppContext extends FleetAppContext {
   data: ReturnType<typeof dataPluginMock.createStartContract>;
   encryptedSavedObjectsStart?: ReturnType<typeof encryptedSavedObjectsMock.createStart>;
   savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
-  securitySetup?: ReturnType<typeof securityMock.createSetup>;
-  securityStart?: ReturnType<typeof securityMock.createStart>;
+  securitySetup: ReturnType<typeof securityMock.createSetup>;
+  securityStart: ReturnType<typeof securityMock.createStart>;
   logger: ReturnType<ReturnType<typeof loggingSystemMock.create>['get']>;
 }
 

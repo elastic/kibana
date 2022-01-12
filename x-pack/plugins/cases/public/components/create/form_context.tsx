@@ -14,7 +14,7 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { Case } from '../../containers/types';
-import { CaseType } from '../../../common/api';
+import { CaseType, NONE_CONNECTOR_ID } from '../../../common/api';
 import { UsePostComment, usePostComment } from '../../containers/use_post_comment';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
@@ -24,7 +24,7 @@ const initialCaseValue: FormProps = {
   description: '',
   tags: [],
   title: '',
-  connectorId: 'none',
+  connectorId: NONE_CONNECTOR_ID,
   fields: null,
   syncAlerts: true,
   selectedOwner: null,

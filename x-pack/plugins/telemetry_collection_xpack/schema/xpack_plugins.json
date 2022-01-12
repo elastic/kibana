@@ -4925,73 +4925,6 @@
     },
     "reporting": {
       "properties": {
-        "csv": {
-          "properties": {
-            "available": {
-              "type": "boolean"
-            },
-            "total": {
-              "type": "long"
-            },
-            "deprecated": {
-              "type": "long"
-            },
-            "sizes": {
-              "properties": {
-                "1.0": {
-                  "type": "long"
-                },
-                "5.0": {
-                  "type": "long"
-                },
-                "25.0": {
-                  "type": "long"
-                },
-                "50.0": {
-                  "type": "long"
-                },
-                "75.0": {
-                  "type": "long"
-                },
-                "95.0": {
-                  "type": "long"
-                },
-                "99.0": {
-                  "type": "long"
-                }
-              }
-            },
-            "app": {
-              "properties": {
-                "search": {
-                  "type": "long"
-                },
-                "canvas workpad": {
-                  "type": "long"
-                },
-                "dashboard": {
-                  "type": "long"
-                },
-                "visualization": {
-                  "type": "long"
-                }
-              }
-            },
-            "layout": {
-              "properties": {
-                "canvas": {
-                  "type": "long"
-                },
-                "print": {
-                  "type": "long"
-                },
-                "preserve_layout": {
-                  "type": "long"
-                }
-              }
-            }
-          }
-        },
         "csv_searchsource": {
           "properties": {
             "available": {
@@ -5420,22 +5353,6 @@
           "properties": {
             "completed": {
               "properties": {
-                "csv": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "csv_searchsource": {
                   "properties": {
                     "search": {
@@ -5536,22 +5453,6 @@
             },
             "completed_with_warnings": {
               "properties": {
-                "csv": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "csv_searchsource": {
                   "properties": {
                     "search": {
@@ -5652,22 +5553,6 @@
             },
             "failed": {
               "properties": {
-                "csv": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "csv_searchsource": {
                   "properties": {
                     "search": {
@@ -5768,22 +5653,6 @@
             },
             "pending": {
               "properties": {
-                "csv": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "csv_searchsource": {
                   "properties": {
                     "search": {
@@ -5884,22 +5753,6 @@
             },
             "processing": {
               "properties": {
-                "csv": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
                 "csv_searchsource": {
                   "properties": {
                     "search": {
@@ -6033,73 +5886,6 @@
         },
         "last7Days": {
           "properties": {
-            "csv": {
-              "properties": {
-                "available": {
-                  "type": "boolean"
-                },
-                "total": {
-                  "type": "long"
-                },
-                "deprecated": {
-                  "type": "long"
-                },
-                "sizes": {
-                  "properties": {
-                    "1.0": {
-                      "type": "long"
-                    },
-                    "5.0": {
-                      "type": "long"
-                    },
-                    "25.0": {
-                      "type": "long"
-                    },
-                    "50.0": {
-                      "type": "long"
-                    },
-                    "75.0": {
-                      "type": "long"
-                    },
-                    "95.0": {
-                      "type": "long"
-                    },
-                    "99.0": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "app": {
-                  "properties": {
-                    "search": {
-                      "type": "long"
-                    },
-                    "canvas workpad": {
-                      "type": "long"
-                    },
-                    "dashboard": {
-                      "type": "long"
-                    },
-                    "visualization": {
-                      "type": "long"
-                    }
-                  }
-                },
-                "layout": {
-                  "properties": {
-                    "canvas": {
-                      "type": "long"
-                    },
-                    "print": {
-                      "type": "long"
-                    },
-                    "preserve_layout": {
-                      "type": "long"
-                    }
-                  }
-                }
-              }
-            },
             "csv_searchsource": {
               "properties": {
                 "available": {
@@ -6528,22 +6314,6 @@
               "properties": {
                 "completed": {
                   "properties": {
-                    "csv": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "csv_searchsource": {
                       "properties": {
                         "search": {
@@ -6644,22 +6414,6 @@
                 },
                 "completed_with_warnings": {
                   "properties": {
-                    "csv": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "csv_searchsource": {
                       "properties": {
                         "search": {
@@ -6760,22 +6514,6 @@
                 },
                 "failed": {
                   "properties": {
-                    "csv": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "csv_searchsource": {
                       "properties": {
                         "search": {
@@ -6876,22 +6614,6 @@
                 },
                 "pending": {
                   "properties": {
-                    "csv": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "csv_searchsource": {
                       "properties": {
                         "search": {
@@ -6992,22 +6714,6 @@
                 },
                 "processing": {
                   "properties": {
-                    "csv": {
-                      "properties": {
-                        "search": {
-                          "type": "long"
-                        },
-                        "canvas workpad": {
-                          "type": "long"
-                        },
-                        "dashboard": {
-                          "type": "long"
-                        },
-                        "visualization": {
-                          "type": "long"
-                        }
-                      }
-                    },
                     "csv_searchsource": {
                       "properties": {
                         "search": {
@@ -7391,6 +7097,16 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of cases attached to threat_match detection rule alerts"
+                          }
+                        }
+                      }
+                    },
+                    "legacy_notifications": {
+                      "properties": {
+                        "total": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of legacy notifications still in use"
                           }
                         }
                       }

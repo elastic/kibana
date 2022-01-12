@@ -263,8 +263,13 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     );
 
     return (
-      <InspectButtonContainer data-test-subj="alerts-histogram-panel" show={!isInitialLoading}>
-        <KpiPanel height={PANEL_HEIGHT} hasBorder paddingSize={paddingSize}>
+      <InspectButtonContainer show={!isInitialLoading}>
+        <KpiPanel
+          height={PANEL_HEIGHT}
+          hasBorder
+          paddingSize={paddingSize}
+          data-test-subj="alerts-histogram-panel"
+        >
           <HeaderSection
             id={uniqueQueryId}
             title={titleText}

@@ -41,8 +41,8 @@ export const PARTICIPANTS = i18n.translate('xpack.cases.caseView.particpantsLabe
   defaultMessage: 'Participants',
 });
 
-export const CREATE_TITLE = i18n.translate('xpack.cases.caseView.create', {
-  defaultMessage: 'Create new case',
+export const CREATE_CASE_TITLE = i18n.translate('xpack.cases.caseView.create', {
+  defaultMessage: 'Create case',
 });
 
 export const DESCRIPTION = i18n.translate('xpack.cases.caseView.description', {

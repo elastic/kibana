@@ -25,13 +25,7 @@
             "text": "SanitizedAlert"
           },
           "<never>) => string | ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.JsonObject",
-            "text": "JsonObject"
-          }
+          "JsonObject"
         ],
         "path": "x-pack/plugins/alerting/public/alert_navigation_registry/types.ts",
         "deprecated": false,
@@ -510,13 +504,7 @@
               ") => Promise<{ filter?: ",
               "KueryNode",
               " | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.JsonObject",
-                "text": "JsonObject"
-              },
+              "JsonObject",
               " | undefined; ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void; }>"
             ],
             "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
@@ -596,13 +584,7 @@
               ") => Promise<{ filter?: ",
               "KueryNode",
               " | ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.JsonObject",
-                "text": "JsonObject"
-              },
+              "JsonObject",
               " | undefined; ensureRuleTypeIsAuthorized: (ruleTypeId: string, consumer: string, auth: string) => void; }>"
             ],
             "path": "x-pack/plugins/alerting/server/authorization/alerting_authorization.ts",
@@ -1492,7 +1474,11 @@
             "label": "search",
             "description": [],
             "signature": [
-              "(query: ",
+              "<TDocument = unknown, TAggregations = Record<string, ",
+              "AggregationsAggregate",
+              ">>(query: ",
+              "SearchRequest",
+              " | ",
               "SearchRequest",
               ", options?: ",
               "TransportRequestOptions",
@@ -1500,7 +1486,7 @@
               "TransportResult",
               "<",
               "SearchResponse",
-              "<unknown>, unknown>>"
+              "<TDocument, TAggregations>, unknown>>"
             ],
             "path": "x-pack/plugins/alerting/server/lib/create_abortable_es_client_factory.ts",
             "deprecated": false,
@@ -1508,11 +1494,13 @@
               {
                 "parentPluginId": "alerting",
                 "id": "def-server.IAbortableEsClient.search.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "query",
                 "description": [],
                 "signature": [
+                  "SearchRequest",
+                  " | ",
                   "SearchRequest"
                 ],
                 "path": "x-pack/plugins/alerting/server/lib/create_abortable_es_client_factory.ts",
@@ -1707,13 +1695,7 @@
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.PublicMethodsOf",
-                "text": "PublicMethodsOf"
-              },
+              "PublicMethodsOf",
               "<",
               {
                 "pluginId": "alerting",
@@ -1768,13 +1750,7 @@
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>) => ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.PublicMethodsOf",
-                "text": "PublicMethodsOf"
-              },
+              "PublicMethodsOf",
               "<",
               {
                 "pluginId": "alerting",
@@ -3446,10 +3422,10 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-common.AlertingFrameworkHealth.alertingFrameworkHeath",
+            "id": "def-common.AlertingFrameworkHealth.alertingFrameworkHealth",
             "type": "Object",
             "tags": [],
-            "label": "alertingFrameworkHeath",
+            "label": "alertingFrameworkHealth",
             "description": [],
             "signature": [
               {
@@ -3560,13 +3536,7 @@
             "label": "state",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.JsonObject",
-                "text": "JsonObject"
-              }
+              "JsonObject"
             ],
             "path": "x-pack/plugins/alerting/common/alert_navigation.ts",
             "deprecated": false

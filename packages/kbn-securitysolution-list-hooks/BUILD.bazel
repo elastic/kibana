@@ -36,6 +36,7 @@ RUNTIME_DEPS = [
   "//packages/kbn-securitysolution-list-utils",
   "//packages/kbn-securitysolution-utils",
   "@npm//@testing-library/react-hooks",
+  "@npm//fp-ts",
   "@npm//react",
 ]
 
@@ -44,12 +45,14 @@ TYPES_DEPS = [
   "//packages/kbn-securitysolution-io-ts-list-types:npm_module_types",
   "//packages/kbn-securitysolution-list-api:npm_module_types",
   "//packages/kbn-securitysolution-list-constants:npm_module_types",
-  "//packages/kbn-securitysolution-list-utils",
+  "//packages/kbn-securitysolution-list-utils:npm_module_types",
   "//packages/kbn-securitysolution-utils:npm_module_types",
   "@npm//@types/jest",
   "@npm//@types/node",
   "@npm//@types/react",
   "@npm//@types/testing-library__react-hooks",
+  "@npm//fp-ts",
+  "@npm//tslib",
 ]
 
 jsts_transpiler(

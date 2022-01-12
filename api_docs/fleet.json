@@ -5301,8 +5301,7 @@
                 "docId": "kibSecurityPluginApi",
                 "section": "def-server.SecurityPluginSetup",
                 "text": "SecurityPluginSetup"
-              },
-              " | undefined"
+              }
             ],
             "path": "x-pack/plugins/fleet/server/plugin.ts",
             "deprecated": false
@@ -15576,7 +15575,7 @@
             "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
             "signature": [
-              "\"string\" | \"text\" | \"yaml\" | \"integer\" | \"bool\" | \"password\""
+              "\"string\" | \"text\" | \"integer\" | \"yaml\" | \"bool\" | \"password\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false
@@ -18738,7 +18737,7 @@
         "label": "RegistrySearchResult",
         "description": [],
         "signature": [
-          "{ download: string; type?: \"integration\" | undefined; title: string; description: string; icons?: (",
+          "{ download: string; title: string; type?: \"integration\" | undefined; description: string; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",
@@ -18813,7 +18812,7 @@
         "label": "RegistryVarType",
         "description": [],
         "signature": [
-          "\"string\" | \"text\" | \"yaml\" | \"integer\" | \"bool\" | \"password\""
+          "\"string\" | \"text\" | \"integer\" | \"yaml\" | \"bool\" | \"password\""
         ],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
         "deprecated": false,

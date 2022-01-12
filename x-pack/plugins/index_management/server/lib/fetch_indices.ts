@@ -18,7 +18,7 @@ async function fetchIndicesCall(
   // This call retrieves alias and settings (incl. hidden status) information about indices
   const { body: indices } = await client.asCurrentUser.indices.get({
     index: indexNamesString,
-    expand_wildcards: 'hidden,all',
+    expand_wildcards: ['hidden', 'all'],
   });
 
   if (!Object.keys(indices).length) {
@@ -28,7 +28,7 @@ async function fetchIndicesCall(
   const { body: catHits } = await client.asCurrentUser.cat.indices({
     format: 'json',
     h: 'health,status,index,uuid,pri,rep,docs.count,sth,store.size',
-    expand_wildcards: 'hidden,all',
+    expand_wildcards: ['hidden', 'all'],
     index: indexNamesString,
   });
 

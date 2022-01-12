@@ -14,7 +14,7 @@ describe('alertingFrameworkHealth', () => {
     http.get.mockResolvedValueOnce({
       is_sufficiently_secure: true,
       has_permanent_encryption_key: true,
-      alerting_framework_heath: {
+      alerting_framework_health: {
         decryption_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         execution_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         read_health: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
@@ -22,7 +22,7 @@ describe('alertingFrameworkHealth', () => {
     });
     const result = await alertingFrameworkHealth({ http });
     expect(result).toEqual({
-      alertingFrameworkHeath: {
+      alertingFrameworkHealth: {
         decryptionHealth: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         executionHealth: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },
         readHealth: { status: 'ok', timestamp: '2021-04-01T21:29:22.991Z' },

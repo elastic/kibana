@@ -227,6 +227,9 @@ export interface ExceptionListItem {
 
 export interface ListTemplate {
   '@timestamp': string;
+  cluster_uuid: string;
+  cluster_name: string;
+  license_id: string | undefined;
   detection_rule?: TelemetryEvent;
   endpoint_exception?: TelemetryEvent;
   endpoint_event_filter?: TelemetryEvent;

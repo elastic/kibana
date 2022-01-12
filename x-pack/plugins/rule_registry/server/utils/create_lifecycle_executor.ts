@@ -33,6 +33,7 @@ import {
   ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
   EVENT_KIND,
+  TAGS,
   TIMESTAMP,
   VERSION,
 } from '../../common/technical_rule_data_field_names';
@@ -242,6 +243,7 @@ export const createLifecycleExecutor =
           [EVENT_KIND]: 'signal',
           [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
           [VERSION]: ruleDataClient.kibanaVersion,
+          [TAGS]: options.tags,
           ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
         };
 

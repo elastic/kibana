@@ -83,6 +83,8 @@ export const metricsVisDefinition: VisTypeDefinition<
           point_size: 1,
           fill: 0.5,
           stacked: 'none',
+          override_index_pattern: 0,
+          series_drop_last_bucket: 0,
         },
       ],
       time_field: '',

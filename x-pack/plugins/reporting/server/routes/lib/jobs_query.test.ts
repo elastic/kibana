@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { UnwrapPromise } from '@kbn/utility-types';
 import { set } from 'lodash';
 import { ElasticsearchClient } from 'src/core/server';
 import { statuses } from '../../lib';
@@ -28,7 +27,7 @@ describe('jobsQuery', () => {
   describe('list', () => {
     beforeEach(() => {
       client.search.mockResolvedValue(
-        set<UnwrapPromise<ReturnType<ElasticsearchClient['search']>>>({}, 'body.hits.hits', [
+        set<Awaited<ReturnType<ElasticsearchClient['search']>>>({}, 'body.hits.hits', [
           { _source: { _id: 'id1', jobtype: 'pdf', payload: {} } },
           { _source: { _id: 'id2', jobtype: 'csv', payload: {} } },
         ])
@@ -83,7 +82,7 @@ describe('jobsQuery', () => {
     });
 
     it('should return an empty array when there are no hits', async () => {
-      client.search.mockResolvedValue({ body: {} } as UnwrapPromise<
+      client.search.mockResolvedValue({ body: {} } as Awaited<
         ReturnType<ElasticsearchClient['search']>
       >);
 
@@ -94,7 +93,7 @@ describe('jobsQuery', () => {
 
     it('should reject if the report source is missing', async () => {
       client.search.mockResolvedValue(
-        set<UnwrapPromise<ReturnType<ElasticsearchClient['search']>>>({}, 'body.hits.hits', [{}])
+        set<Awaited<ReturnType<ElasticsearchClient['search']>>>({}, 'body.hits.hits', [{}])
       );
 
       await expect(
@@ -105,7 +104,7 @@ describe('jobsQuery', () => {
 
   describe('count', () => {
     beforeEach(() => {
-      client.count.mockResolvedValue({ body: { count: 10 } } as UnwrapPromise<
+      client.count.mockResolvedValue({ body: { count: 10 } } as Awaited<
         ReturnType<ElasticsearchClient['count']>
       >);
     });
@@ -137,7 +136,7 @@ describe('jobsQuery', () => {
   describe('get', () => {
     beforeEach(() => {
       client.search.mockResolvedValue(
-        set<UnwrapPromise<ReturnType<ElasticsearchClient['search']>>>({}, 'body.hits.hits', [
+        set<Awaited<ReturnType<ElasticsearchClient['search']>>>({}, 'body.hits.hits', [
           { _source: { _id: 'id1', jobtype: 'pdf', payload: {} } },
         ])
       );
@@ -169,7 +168,7 @@ describe('jobsQuery', () => {
     });
 
     it('should return undefined when there is no report', async () => {
-      client.search.mockResolvedValue({ body: {} } as UnwrapPromise<
+      client.search.mockResolvedValue({ body: {} } as Awaited<
         ReturnType<ElasticsearchClient['search']>
       >);
 
@@ -185,7 +184,7 @@ describe('jobsQuery', () => {
   describe('getError', () => {
     beforeEach(() => {
       client.search.mockResolvedValue(
-        set<UnwrapPromise<ReturnType<ElasticsearchClient['search']>>>({}, 'body.hits.hits', [
+        set<Awaited<ReturnType<ElasticsearchClient['search']>>>({}, 'body.hits.hits', [
           {
             _source: {
               _id: 'id1',
@@ -220,7 +219,7 @@ describe('jobsQuery', () => {
 
     it('should reject when the job is not failed', async () => {
       client.search.mockResolvedValue(
-        set<UnwrapPromise<ReturnType<ElasticsearchClient['search']>>>({}, 'body.hits.hits', [
+        set<Awaited<ReturnType<ElasticsearchClient['search']>>>({}, 'body.hits.hits', [
           {
             _source: {
               _id: 'id1',
@@ -237,7 +236,7 @@ describe('jobsQuery', () => {
 
   describe('delete', () => {
     beforeEach(() => {
-      client.delete.mockResolvedValue({ body: {} } as UnwrapPromise<
+      client.delete.mockResolvedValue({ body: {} } as Awaited<
         ReturnType<ElasticsearchClient['delete']>
       >);
     });

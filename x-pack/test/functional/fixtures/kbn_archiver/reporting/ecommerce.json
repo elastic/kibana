@@ -763,3 +763,47 @@
   "updated_at": "2020-09-09T18:10:58.011Z",
   "version": "WzI4LDJd"
 }
+
+{
+  "attributes": {
+    "columns": [
+      "category",
+      "customer_full_name",
+      "taxful_total_price",
+      "currency"
+    ],
+    "description": "",
+    "grid": {},
+    "hideChart": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"highlightAll\":true,\"version\":true,\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[{\"meta\":{\"alias\":null,\"negate\":false,\"disabled\":false,\"type\":\"phrase\",\"key\":\"customer_first_name\",\"params\":{\"query\":\"Betty\"},\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match_phrase\":{\"customer_first_name\":\"Betty\"}},\"$state\":{\"store\":\"appState\"}}],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
+    },
+    "sort": [
+      [
+        "order_date",
+        "desc"
+      ]
+    ],
+    "title": "Customer Betty"
+  },
+  "coreMigrationVersion": "8.1.0",
+  "id": "ffc52150-6377-11ec-8099-3da0733c6cce",
+  "migrationVersion": {
+    "search": "8.0.0"
+  },
+  "references": [
+    {
+      "id": "aac3e500-f2c7-11ea-8250-fb138aa491e7",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
+      "type": "index-pattern"
+    },
+    {
+      "id": "aac3e500-f2c7-11ea-8250-fb138aa491e7",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "search",
+  "updated_at": "2021-12-22T22:39:18.507Z",
+  "version": "WzEzMDQsMV0="
+}

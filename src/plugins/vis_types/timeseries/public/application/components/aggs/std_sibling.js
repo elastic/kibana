@@ -130,7 +130,6 @@ const StandardSiblingAggUi = (props) => {
             panelType={props.panel.type}
             siblings={props.siblings}
             value={model.type}
-            uiRestrictions={props.uiRestrictions}
             onChange={handleSelectChange('type')}
           />
         </EuiFlexItem>
