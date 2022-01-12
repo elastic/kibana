@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { NavigationMenu } from './navigation_menu';
+export { withDebounceArg } from './with_debounce_arg';
