@@ -289,22 +289,24 @@ describe('throws when config is invalid', () => {
 });
 
 describe('deprecations', () => {
-  it('logs a warning if elasticsearch.username is set to "elastic"', () => {
-    const { messages } = applyElasticsearchDeprecations({ username: 'elastic' });
+  it('logs a critical deprecation if elasticsearch.username is set to "elastic"', () => {
+    const { messages, levels } = applyElasticsearchDeprecations({ username: 'elastic' });
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "Kibana is configured to authenticate to Elasticsearch with the \\"elastic\\" user. Use a service account token instead.",
       ]
     `);
+    expect(levels).toEqual(['critical']);
   });
 
   it('logs a warning if elasticsearch.username is set to "kibana"', () => {
-    const { messages } = applyElasticsearchDeprecations({ username: 'kibana' });
+    const { messages, levels } = applyElasticsearchDeprecations({ username: 'kibana' });
     expect(messages).toMatchInlineSnapshot(`
       Array [
         "Kibana is configured to authenticate to Elasticsearch with the \\"kibana\\" user. Use a service account token instead.",
       ]
     `);
+    expect(levels).toEqual(['warning']);
   });
 
   it('does not log a warning if elasticsearch.username is set to something besides "elastic" or "kibana"', () => {

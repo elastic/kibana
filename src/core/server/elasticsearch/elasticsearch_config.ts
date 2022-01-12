@@ -147,6 +147,7 @@ const deprecations: ConfigDeprecationProvider = () => [
 
     if (es.username === 'elastic' || es.username === 'kibana') {
       const username = es.username;
+      const level = es.username === 'elastic' ? 'critical' : 'warning';
       addDeprecation({
         configPath: `${fromPath}.username`,
         title: i18n.translate('core.deprecations.elasticsearchUsername.title', {
@@ -158,7 +159,7 @@ const deprecations: ConfigDeprecationProvider = () => [
             'Kibana is configured to authenticate to Elasticsearch with the "{username}" user. Use a service account token instead.',
           values: { username },
         }),
-        level: 'warning',
+        level,
         documentationUrl: `https://www.elastic.co/guide/en/elasticsearch/reference/${branch}/service-accounts.html`,
         correctiveActions: {
           manualSteps: [
