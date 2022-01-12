@@ -37,7 +37,6 @@ describe('POST /api/reporting/generate', () => {
       timeout: 10000,
       pollEnabled: true,
     },
-    index: '.reporting',
   });
 
   const mockLogger = createMockLevelLogger();

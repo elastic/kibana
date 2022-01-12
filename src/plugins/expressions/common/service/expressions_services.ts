@@ -148,8 +148,6 @@ export interface ExpressionExecutionParams {
   inspectorAdapters?: Adapters;
 
   executionContext?: KibanaExecutionContext;
-
-  extraContext?: object;
 }
 
 /**
