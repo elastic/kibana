@@ -15,13 +15,11 @@ import { CompleteRule, RuleParams } from '../schemas/rule_schemas';
 export const wrapHitsFactory =
   ({
     completeRule,
-    executionId,
     signalsIndex,
     mergeStrategy,
     ignoreFields,
   }: {
     completeRule: CompleteRule<RuleParams>;
-    executionId: string;
     signalsIndex: string;
     mergeStrategy: ConfigType['alertMergeStrategy'];
     ignoreFields: ConfigType['alertIgnoreFields'];
@@ -31,14 +29,7 @@ export const wrapHitsFactory =
       {
         _index: signalsIndex,
         _id: generateId(doc._index, doc._id, String(doc._version), completeRule.alertId ?? ''),
-        _source: buildBulkBody(
-          completeRule,
-          doc,
-          executionId,
-          mergeStrategy,
-          ignoreFields,
-          buildReasonMessage
-        ),
+        _source: buildBulkBody(completeRule, doc, mergeStrategy, ignoreFields, buildReasonMessage),
       },
     ]);
 

@@ -25,6 +25,7 @@ describe('createAlertEventLogRecordObject', () => {
   test('created alert event "execute-start"', async () => {
     expect(
       createAlertEventLogRecordObject({
+        executionId: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
         ruleId: '1',
         ruleType,
         action: 'execute-start',
@@ -53,7 +54,7 @@ describe('createAlertEventLogRecordObject', () => {
         alert: {
           rule: {
             execution: {
-              uuid: undefined,
+              uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
             },
           },
         },
@@ -83,6 +84,7 @@ describe('createAlertEventLogRecordObject', () => {
   test('created alert event "recovered-instance"', async () => {
     expect(
       createAlertEventLogRecordObject({
+        executionId: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
         ruleId: '1',
         ruleName: 'test name',
         ruleType,
@@ -119,7 +121,7 @@ describe('createAlertEventLogRecordObject', () => {
         alert: {
           rule: {
             execution: {
-              uuid: undefined,
+              uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
             },
           },
         },
@@ -152,6 +154,7 @@ describe('createAlertEventLogRecordObject', () => {
   test('created alert event "execute-action"', async () => {
     expect(
       createAlertEventLogRecordObject({
+        executionId: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
         ruleId: '1',
         ruleName: 'test name',
         ruleType,
@@ -193,7 +196,7 @@ describe('createAlertEventLogRecordObject', () => {
         alert: {
           rule: {
             execution: {
-              uuid: undefined,
+              uuid: '7a7065d7-6e8b-4aae-8d20-c93613dec9fb',
             },
           },
         },

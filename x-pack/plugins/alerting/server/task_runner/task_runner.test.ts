@@ -996,7 +996,6 @@ describe('Task Runner', () => {
     const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
     expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
     expect(eventLogger.startTiming).toHaveBeenCalledTimes(1);
-    // TODO: Necessary for "action": "active-instance" alert as well too?
     expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
       Array [
         Array [

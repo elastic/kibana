@@ -74,7 +74,6 @@ describe('searchAfterAndBulkCreate', () => {
     wrapHits = wrapHitsFactory({
       completeRule: queryCompleteRule,
       signalsIndex: DEFAULT_SIGNALS_INDEX,
-      executionId: 'executionId',
       mergeStrategy: 'missingFields',
       ignoreFields: [],
     });

@@ -92,7 +92,7 @@ export class RuleExecutionLogClient implements IRuleExecutionLogClient {
   }
 
   public async logStatusChange(args: LogStatusChangeArgs): Promise<void> {
-    const { newStatus, message, ruleId, ruleName, ruleType, spaceId } = args;
+    const { executionId, newStatus, message, ruleId, ruleName, ruleType, spaceId } = args;
 
     try {
       const truncatedMessage = message ? truncateMessage(message) : message;
@@ -109,7 +109,7 @@ export class RuleExecutionLogClient implements IRuleExecutionLogClient {
       );
     } catch (e) {
       const logMessage = 'Error logging rule execution status change';
-      const logAttributes = `status: "${newStatus}", rule id: "${ruleId}", rule name: "${ruleName}"`;
+      const logAttributes = `status: "${newStatus}", rule id: "${ruleId}", rule name: "${ruleName}", execution uuid: "${executionId}"`;
       const logReason = e instanceof Error ? `${e.stack}` : `${e}`;
       const logMeta: ExtMeta = {
         rule: {
@@ -118,6 +118,7 @@ export class RuleExecutionLogClient implements IRuleExecutionLogClient {
           type: ruleType,
           execution: {
             status: newStatus,
+            uuid: executionId,
           },
         },
         kibana: {

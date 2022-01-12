@@ -664,7 +664,7 @@ describe('utils', () => {
       mockLogger.error.mockClear();
       const res = await hasTimestampFields({
         timestampField,
-        executionId: 'executionId',
+        executionId: '7a7065d7-b33f-4aae-8d20-c93613dec9fb',
         ruleName: 'myfakerulename',
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -710,7 +710,7 @@ describe('utils', () => {
       mockLogger.error.mockClear();
       const res = await hasTimestampFields({
         timestampField,
-        executionId: 'executionId',
+        executionId: '7a7065d7-b33f-4aae-8d20-c93613dec9fb',
         ruleName: 'myfakerulename',
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -742,7 +742,7 @@ describe('utils', () => {
       mockLogger.error.mockClear();
       const res = await hasTimestampFields({
         timestampField,
-        executionId: 'executionId',
+        executionId: '7a7065d7-b33f-4aae-8d20-c93613dec9fb',
         ruleName: 'Endpoint Security',
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -774,7 +774,7 @@ describe('utils', () => {
       mockLogger.error.mockClear();
       const res = await hasTimestampFields({
         timestampField,
-        executionId: 'executionId',
+        executionId: '7a7065d7-b33f-4aae-8d20-c93613dec9fb',
         ruleName: 'NOT Endpoint Security',
         timestampFieldCapsResponse: timestampFieldCapsResponse as TransportResult<
           // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -35,7 +35,7 @@ const statusSeverityDict: Record<RuleExecutionStatus, number> = {
 };
 
 interface LogExecutionMetricsArgs {
-  executionId?: string;
+  executionId: string;
   ruleId: string;
   ruleName: string;
   ruleType: string;

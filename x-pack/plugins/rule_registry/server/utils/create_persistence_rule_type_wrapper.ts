@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { chunk } from 'lodash';
-import { ALERT_RULE_EXECUTION_UUID, ALERT_UUID, VERSION } from '@kbn/rule-data-utils';
+import { ALERT_UUID, VERSION } from '@kbn/rule-data-utils';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 
@@ -84,7 +84,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   return {
                     ...alert,
                     _source: {
-                      [ALERT_RULE_EXECUTION_UUID]: options.executionId,
                       [VERSION]: ruleDataClient.kibanaVersion,
                       ...commonRuleFields,
                       ...alert._source,

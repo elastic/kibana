@@ -46,7 +46,6 @@ export class AlertInstance<
   private state: State;
 
   constructor({ state, meta = {} }: RawAlertInstance = {}) {
-    // TODO: Add 'kibana.alert.rule.execution.uuid' to framework along with other execution status/metrics?
     this.state = (state || {}) as State;
     this.meta = meta;
   }
@@ -183,7 +182,6 @@ export class AlertInstance<
   }
 
   toRaw(): RawAlertInstance {
-    // TODO: To add 'kibana.alert.rule.execution.uuid' to  framework
     return {
       state: this.state,
       meta: this.meta,

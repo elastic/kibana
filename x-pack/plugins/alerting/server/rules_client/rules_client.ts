@@ -1303,7 +1303,6 @@ export class RulesClient {
             ruleId: id,
             ruleName: attributes.name,
             ruleType: this.ruleTypeRegistry.get(attributes.alertTypeId),
-            executionId: 'rules-client', // TODO: Is it possible to get executionId from relevant `TaskRunner` instance, or does it need to saved to `params` of AlertTaskInstance?
             instanceId,
             action: EVENT_LOG_ACTIONS.recoveredInstance,
             message,

@@ -74,7 +74,7 @@ export interface CreateExecutionLogArgs {
 }
 
 export interface LogStatusChangeArgs {
-  executionId?: string;
+  executionId: string;
   ruleId: string;
   ruleName: string;
   ruleType: string;
@@ -88,7 +88,7 @@ export interface LogStatusChangeArgs {
 }
 
 export interface LogExecutionMetricsArgs {
-  executionId?: string;
+  executionId: string;
   ruleId: string;
   ruleName: string;
   ruleType: string;

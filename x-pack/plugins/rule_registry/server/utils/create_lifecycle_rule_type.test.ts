@@ -119,7 +119,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         tags: ['tags'],
         updatedBy: 'updatedBy',
         namespace: 'namespace',
-        executionId: 'executionId',
+        executionId: 'b33f65d7-6e8b-4aae-8d20-c93613dec9f9',
       })) ?? {}) as Record<string, any>;
 
       previousStartedAt = startedAt;

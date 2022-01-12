@@ -38,7 +38,6 @@ export const wrapHitsFactory =
         _id: id,
         _index: '',
         _source: {
-          // TODO: executionId here as well?
           ...buildBulkBody(
             spaceId,
             completeRule,

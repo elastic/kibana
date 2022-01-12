@@ -71,13 +71,17 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     },
     kibana: {
       ...(alerting ? alerting : {}),
-      alert: {
-        rule: {
-          execution: {
-            uuid: executionId,
-          },
-        },
-      },
+      ...(executionId
+        ? {
+            alert: {
+              rule: {
+                execution: {
+                  uuid: executionId,
+                },
+              },
+            },
+          }
+        : {}),
       saved_objects: params.savedObjects.map((so) => ({
         ...(so.relation ? { rel: so.relation } : {}),
         type: so.type,

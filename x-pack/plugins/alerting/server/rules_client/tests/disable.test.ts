@@ -329,13 +329,6 @@ describe('disable()', () => {
         kind: 'alert',
       },
       kibana: {
-        alert: {
-          rule: {
-            execution: {
-              uuid: 'rules-client', // TODO: See TODO in `rules_client.ts`
-            },
-          },
-        },
         alerting: {
           action_group_id: 'default',
           action_subgroup: 'newSubgroup',
