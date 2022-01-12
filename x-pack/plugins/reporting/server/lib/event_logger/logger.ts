@@ -9,7 +9,7 @@ import deepMerge from 'deepmerge';
 import { IEventLogger, IEventLogService } from '../../../../event_log/server';
 import { ConcreteTaskInstance } from '../../../../task_manager/server';
 import { PLUGIN_ID } from '../../../common/constants';
-import { Report } from '../store';
+import { IReport } from '../store';
 import { ActionType } from './';
 import {
   ClaimedTask,
@@ -40,7 +40,7 @@ export function reportingEventLoggerFactory(eventLog: IEventLogService) {
 
     completionLogger: IEventLogger;
 
-    constructor(report: Report, task?: ConcreteTaskInstance) {
+    constructor(report: IReport, task?: ConcreteTaskInstance) {
       this.eventObj = {
         event: { timezone: report.payload.browserTimezone, provider: 'reporting' },
         kibana: {

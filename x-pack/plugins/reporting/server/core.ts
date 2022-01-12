@@ -39,7 +39,7 @@ import { ReportingConfig, ReportingSetup } from './';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
-import { Report, ReportingStore } from './lib/store';
+import { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
 import { ReportingPluginRouter, ScreenshotOptions } from './types';
 
@@ -389,7 +389,7 @@ export class ReportingCore {
     return this.executing.size;
   }
 
-  public getEventLogger(report: Report, task?: ConcreteTaskInstance) {
+  public getEventLogger(report: IReport, task?: ConcreteTaskInstance) {
     const ReportingEventLogger = reportingEventLoggerFactory(this.pluginSetupDeps!.eventLog);
     return new ReportingEventLogger(report, task);
   }
