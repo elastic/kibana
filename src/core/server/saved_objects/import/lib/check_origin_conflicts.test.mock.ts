@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-const mockUuidv4 = jest.fn().mockReturnValue('uuidv4');
-jest.mock('uuid', () => ({
-  v4: mockUuidv4,
-}));
+import type { createOriginQuery } from './utils';
 
-export { mockUuidv4 };
+export const mockCreateOriginQuery = jest.fn() as jest.MockedFunction<typeof createOriginQuery>;
+jest.mock('./utils', () => ({
+  createOriginQuery: mockCreateOriginQuery,
+}));
