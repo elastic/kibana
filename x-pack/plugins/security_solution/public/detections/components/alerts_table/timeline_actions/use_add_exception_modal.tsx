@@ -17,7 +17,7 @@ import { TimelineId } from '../../../../../common/types/timeline';
 import { inputsModel } from '../../../../common/store';
 
 interface UseExceptionModalProps {
-  ruleIndex?: string[];
+  ruleIndex: string[] | null | undefined;
   refetch?: inputsModel.Refetch;
   timelineId: string;
 }
