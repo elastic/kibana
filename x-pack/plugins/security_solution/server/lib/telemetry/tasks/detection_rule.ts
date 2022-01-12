@@ -10,7 +10,7 @@ import { LIST_DETECTION_RULE_EXCEPTION, TELEMETRY_CHANNEL_LISTS } from '../const
 import { batchTelemetryRecords, templateExceptionList } from '../helpers';
 import { TelemetryEventsSender } from '../sender';
 import { TelemetryReceiver } from '../receiver';
-import { ExceptionListItem, RuleSearchResult } from '../types';
+import type { ExceptionListItem, ESClusterInfo, ESLicense, RuleSearchResult } from '../types';
 import { TaskExecutionPeriod } from '../task';
 
 export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: number) {
@@ -27,6 +27,20 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
       sender: TelemetryEventsSender,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
+      const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
+        receiver.fetchClusterInfo(),
+        receiver.fetchLicenseInfo(),
+      ]);
+
+      const clusterInfo =
+        clusterInfoPromise.status === 'fulfilled'
+          ? clusterInfoPromise.value
+          : ({} as ESClusterInfo);
+      const licenseInfo =
+        licenseInfoPromise.status === 'fulfilled'
+          ? licenseInfoPromise.value
+          : ({} as ESLicense | undefined);
+
       // Lists Telemetry: Detection Rules
 
       const { body: prebuiltRules } = await receiver.fetchDetectionRules();
@@ -69,6 +83,8 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
 
       const detectionRuleExceptionsJson = templateExceptionList(
         detectionRuleExceptions,
+        clusterInfo,
+        licenseInfo,
         LIST_DETECTION_RULE_EXCEPTION
       );
 
