@@ -130,7 +130,7 @@ export function App({
         // Temporarily required until the 'by value' paradigm is default.
         dashboardFeatureFlag.allowByValueEmbeddables && isLinkedToOriginatingApp && !savedObjectId
       ),
-    [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, initialInput, savedObjectId]
+    [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, savedObjectId]
   );
 
   useEffect(() => {
