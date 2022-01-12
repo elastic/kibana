@@ -33,7 +33,6 @@ export class CspPlugin implements Plugin<CspSetup, CspStart, CspPluginSetup, Csp
     return {};
   }
   public start(core: CoreStart, plugins: CspPluginStart): CspStart {
-    console.log({ coreStart: core, startPlugins: plugins });
     return {};
   }
 
