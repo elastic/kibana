@@ -141,7 +141,7 @@ export const FullTimeRangeSelector: FC<Props> = ({
     ) : (
       <FormattedMessage
         id="xpack.ml.fullTimeRangeSelector.useFullDataButtonTooltip"
-        defaultMessage="Use full range of data including frozen data tier. Searches with frozen data may take longer."
+        defaultMessage="Use full range of data including frozen data tier, which might have slower search results."
       />
     );
 
