@@ -38,7 +38,7 @@ const BasicEndpointExceptionDataSchema = schema.object(
       { minSize: 1, maxSize: 1 }
     ),
   },
-  // Because we are only validating some fields from the Exception Item, we set `unknowns` to `true` here
+  // Because we are only validating some fields from the Exception Item, we set `unknowns` to `ignore` here
   { unknowns: 'ignore' }
 );
 

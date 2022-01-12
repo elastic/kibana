@@ -24,9 +24,17 @@ import {
   isValidHash,
 } from '../../../../common/endpoint/service/trusted_apps/validations';
 
+const ProcessHashField = schema.oneOf([
+  schema.literal('process.hash.md5'),
+  schema.literal('process.hash.sha1'),
+  schema.literal('process.hash.sha256'),
+]);
+const ProcessExecutablePath = schema.literal('process.executable.caseless');
+const ProcessCodeSigner = schema.literal('process.Ext.code_signature');
+
 const ConditionEntryTypeSchema = schema.conditional(
   schema.siblingRef('field'),
-  ConditionEntryField.PATH,
+  ProcessExecutablePath,
   schema.oneOf([schema.literal('match'), schema.literal('wildcard')]),
   schema.literal('match')
 );
@@ -36,23 +44,20 @@ const ConditionEntryOperatorSchema = schema.literal('included');
  * A generic Entry schema to be used for a specific entry schema depending on the OS
  */
 const CommonEntrySchema = {
-  field: schema.oneOf([
-    schema.literal(ConditionEntryField.HASH),
-    schema.literal(ConditionEntryField.PATH),
-  ]),
+  field: schema.oneOf([ProcessHashField, ProcessExecutablePath]),
   type: ConditionEntryTypeSchema,
   operator: ConditionEntryOperatorSchema,
   // If field === HASH then validate hash with custom method, else validate string with minLength = 1
   value: schema.conditional(
     schema.siblingRef('field'),
-    ConditionEntryField.HASH,
+    ProcessHashField,
     schema.string({
       validate: (hash: string) =>
         isValidHash(hash) ? undefined : `invalidField.${ConditionEntryField.HASH}`,
     }),
     schema.conditional(
       schema.siblingRef('field'),
-      ConditionEntryField.PATH,
+      ProcessExecutablePath,
       schema.string({
         validate: (field: string) =>
           field.length > 0 ? undefined : `invalidField.${ConditionEntryField.PATH}`,
@@ -68,9 +73,13 @@ const CommonEntrySchema = {
 const WindowsEntrySchema = schema.object({
   ...CommonEntrySchema,
   field: schema.oneOf([
-    schema.literal(ConditionEntryField.HASH),
-    schema.literal(ConditionEntryField.PATH),
-    schema.literal(ConditionEntryField.SIGNER),
+    schema.oneOf([
+      schema.literal('process.hash.md5'),
+      schema.literal('process.hash.sha1'),
+      schema.literal('process.hash.sha256'),
+    ]),
+    ProcessExecutablePath,
+    ProcessCodeSigner,
   ]),
 });
 
@@ -85,11 +94,8 @@ const MacEntrySchema = schema.object({
 const entriesSchemaOptions = {
   minSize: 1,
   validate(entries: ConditionEntry[]) {
-    return (
-      getDuplicateFields(entries)
-        .map((field) => `duplicatedEntry.${field}`)
-        .join(', ') || undefined
-    );
+    const dups = getDuplicateFields(entries);
+    return dups.map((field) => `duplicatedEntry.${field}`).join(', ') || undefined;
   },
 };
 
@@ -126,7 +132,7 @@ const TrustedAppDataSchema = schema.object(
     entries: EntriesSchema,
   },
 
-  // Because we are only validating some fields from the Exception Item, we set `unknowns` to `true` here
+  // Because we are only validating some fields from the Exception Item, we set `unknowns` to `ignore` here
   { unknowns: 'ignore' }
 );
 
