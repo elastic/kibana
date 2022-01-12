@@ -84,7 +84,6 @@ This will achieve seamless high availability and keep the session
 active in case of failure from the currently used instance.
 
 [float]
-[[reporting-load-balanced-kibana]]
 
 
 [float]
