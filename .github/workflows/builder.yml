@@ -1,0 +1,72 @@
+name: Elastic Builder
+on:
+  pull_request:
+    paths:
+      - '**.mdx'
+      - '**.docnav.json'
+      - '**.png'
+      - '**.gif'
+    types: [closed, opened, synchronize, reopened]
+
+jobs:
+  preview:
+    name: Do the magic
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup workspace
+        uses: actions/checkout@v2
+
+      - name: Checkout current branch into temp
+        uses: actions/checkout@v2
+        with:
+          path: 'temp'
+
+      - name: Checkout essential repos
+        uses: actions/checkout@v2
+        with:
+          repository: elastic/docs.elastic.dev
+          token: ${{ secrets.GH_PAT }}
+          path: ${{ github.workspace }}/docs.elastic.dev
+
+      - name: Checkout Wordlake
+        uses: actions/checkout@v2
+        with:
+          repository: elastic/wordlake-dev
+          token: ${{ secrets.GH_PAT }}
+          path: ${{ github.workspace }}/wordlake-dev
+
+      - name: Temp sources override
+        shell: bash
+        run: cp -f ${{ github.workspace }}/wordlake-dev/.scaffold/sources.json ${{ github.workspace }}/docs.elastic.dev/.
+
+      - name: Show workspace
+        shell: bash
+        run: ls -lat ${{ github.workspace }}
+
+      - name: Portal
+        shell: bash
+        run: |
+          mkdir -p ${{ github.workspace }}/wordlake-dev/${{ github.event.repository.name }}
+          rsync --ignore-missing-args -zavpm --include='*.docnav.json' --include='*.mdx' --include='*.png' --include='*.gif' --include='*/' --exclude='*' ${{ github.workspace }}/temp/ ${{ github.workspace }}/wordlake-dev/${{ github.event.repository.name }}/ 
+
+      - name: Generate preview
+        if: github.event.pull_request.merged == false
+        uses: elastic/builder@v21.0.0
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }} # Required
+          vercel-org-id: ${{ secrets.ORG_ID}}  #Required
+          vercel-project-id: ${{ secrets.PROJECT_ID}} #Required
+          vercel-project-name: docs-elastic-dev-staging
+          github-token: ${{ secrets.GH_PAT }} #Optional
+          working-directory: ./
+
+      - name: Portal for deploy
+        if: github.event.pull_request.merged == true
+        shell: bash
+        run: |
+          cd ${{ github.workspace }}/wordlake-dev
+          git config user.name count-docula
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "New content from https://github.com/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}"
+          git push
