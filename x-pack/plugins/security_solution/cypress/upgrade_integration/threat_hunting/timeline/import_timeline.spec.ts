@@ -17,7 +17,6 @@ import {
   NOTE_DESCRIPTION,
   NOTE_PREVIEW,
   NOTES_TAB_BUTTON,
-  PINNED_EVENT_TABLE_CELL,
   PINNED_TAB_BUTTON,
   PROCESS_KPI,
   QUERY_EVENT_TABLE_CELL,
@@ -44,7 +43,6 @@ import {
   deleteTimeline,
   goToCorrelationTab,
   goToNotesTab,
-  goToPinnedTab,
 } from '../../../tasks/timeline';
 import { expandNotes, importTimeline, openTimeline } from '../../../tasks/timelines';
 
