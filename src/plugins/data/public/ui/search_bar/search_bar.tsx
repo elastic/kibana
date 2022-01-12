@@ -113,6 +113,7 @@ interface State {
   showSavedQueryPopover: boolean;
   selectedSavedQueries: SavedQuery[];
   finalSelectedSavedQueries: SavedQuery[];
+  multipleFilters: Filter[];
   currentProps?: SearchBarProps;
   query?: Query;
   dateRangeFrom: string;
@@ -202,6 +203,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     currentProps: this.props,
     selectedSavedQueries: [],
     finalSelectedSavedQueries: [],
+    multipleFilters: [],
     query: this.props.query ? { ...this.props.query } : undefined,
     dateRangeFrom: get(this.props, 'dateRangeFrom', 'now-15m'),
     dateRangeTo: get(this.props, 'dateRangeTo', 'now'),
@@ -374,6 +376,11 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     this.setState({
       selectedSavedQueries: [...savedQueries],
     });
+  };
+
+  public onMultipleFiltersUpdated = (filters: Filter[]) => {
+    this.setState({ multipleFilters: filters });
+    // console.dir(filters);
   };
 
   public applyTimeFilterOverrideModal = (selectedQueries?: SavedQuery[]) => {
@@ -577,6 +584,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           query={this.state.query}
           filters={this.props.filters!}
           onFiltersUpdated={this.props.onFiltersUpdated}
+          onMultipleFiltersUpdated={this.onMultipleFiltersUpdated}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
           indexPatterns={this.props.indexPatterns}
@@ -681,6 +689,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
             selectedSavedQueries={this.state.finalSelectedSavedQueries}
             removeSelectedSavedQuery={this.removeSelectedSavedQuery}
+            multipleFilters={this.state.multipleFilters}
           />
         </div>
       );

@@ -29,6 +29,7 @@ import {
 } from '@elastic/eui';
 
 import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
+import { mapAndFlattenFilters } from '../../query/filter_manager/lib/map_and_flatten_filters';
 import { useKibana, withKibana } from '../../../../kibana_react/public';
 import QueryStringInputUI from './query_string_input';
 import { UI_SETTINGS } from '../../../common';
@@ -37,7 +38,7 @@ import type { PersistedLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
 import { shallowEqual } from '../../utils/shallow_equal';
 import { SavedQuery } from '../..';
-import { AddFilterModal } from './add_filter_modal';
+import { AddFilterModal, FilterGroup } from './add_filter_modal';
 
 const SuperDatePicker = React.memo(
   EuiSuperDatePicker as any
@@ -50,6 +51,7 @@ const QueryStringInput = withKibana(QueryStringInputUI);
 export interface QueryBarTopRowProps {
   filters: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
+  onMultipleFiltersUpdated?: (filters: Filter[]) => void;
   applySelectedSavedQueries?: () => void;
   customSubmitButton?: any;
   dataTestSubj?: string;
@@ -392,6 +394,22 @@ export const QueryBarTopRow = React.memo(
       props?.onFiltersUpdated?.(filters);
     }
 
+    function onAddMultipleFiltersANDOR(selectedFilters: FilterGroup[], buildFilters: Filter[]) {
+      const mappedFilters = mapAndFlattenFilters(buildFilters);
+      const mergedFilters = mappedFilters.map((filter, idx) => {
+        return {
+          ...filter,
+          groupId: selectedFilters[idx].groupId,
+          id: selectedFilters[idx].id,
+          relationship: selectedFilters[idx].relationship,
+          subGroupId: selectedFilters[idx].subGroupId,
+        };
+      });
+      props.toggleAddFilterModal?.(false);
+
+      props?.onMultipleFiltersUpdated?.(mergedFilters);
+    }
+
     function applySavedQueries() {
       props.toggleAddFilterModal?.(false);
       props?.applySelectedSavedQueries?.();
@@ -424,6 +442,7 @@ export const QueryBarTopRow = React.memo(
               filter={newFilter}
               indexPatterns={props.indexPatterns!}
               onSubmit={onAddMultipleFilters}
+              onMultipleFiltersSubmit={onAddMultipleFiltersANDOR}
               applySavedQueries={applySavedQueries}
               timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
               savedQueryManagement={props.savedQueryManagement}

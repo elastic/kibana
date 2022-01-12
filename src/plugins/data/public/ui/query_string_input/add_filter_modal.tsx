@@ -73,7 +73,7 @@ const tabs = [
   },
 ];
 
-interface FilterGroup {
+export interface FilterGroup {
   field: IFieldType | undefined;
   operator: Operator | undefined;
   value: any;
@@ -85,6 +85,7 @@ interface FilterGroup {
 
 export function AddFilterModal({
   onSubmit,
+  onMultipleFiltersSubmit,
   onCancel,
   applySavedQueries,
   filter,
@@ -94,6 +95,7 @@ export function AddFilterModal({
   initialAddFilterMode,
 }: {
   onSubmit: (filters: Filter[]) => void;
+  onMultipleFiltersSubmit: (filters: FilterGroup[], buildFilters: Filter[]) => void;
   applySavedQueries: () => void;
   onCancel: () => void;
   filter: Filter;
@@ -382,7 +384,8 @@ export function AddFilterModal({
         const finalFilters = builtFilters.filter(
           (value) => typeof value !== 'undefined'
         ) as Filter[];
-        onSubmit(finalFilters);
+        // onSubmit(finalFilters);
+        onMultipleFiltersSubmit(localFilters, finalFilters);
       }
     } else if (addFilterMode === 'saved_filters') {
       applySavedQueries();

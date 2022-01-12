@@ -7,6 +7,7 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { groupBy } from 'lodash';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import {
   buildEmptyFilter,
@@ -29,11 +30,13 @@ import { useKibana } from '../../../../kibana_react/public';
 import { IDataPluginServices, IIndexPattern } from '../..';
 import type { SavedQuery } from '../../query';
 import { SavedQueriesItem } from './saved_queries_item';
+import { FilterExpressionItem } from './filter_expression_item';
 
 import { UI_SETTINGS } from '../../../common';
 
 interface Props {
   filters: Filter[];
+  multipleFilters: Filter[];
   onFiltersUpdated?: (filters: Filter[]) => void;
   className: string;
   indexPatterns: IIndexPattern[];
@@ -91,6 +94,23 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         />
       </EuiFlexItem>
     ));
+  }
+
+  function renderMultipleFilters() {
+    const firstDepthGroupedFilters = groupBy(props.multipleFilters, 'groupId');
+    const GroupBadge: JSX.Element[] = [];
+    for (const [groupId, groupedFilters] of Object.entries(firstDepthGroupedFilters)) {
+      const badge = (
+        <FilterExpressionItem
+          groupId={groupId}
+          groupedFilters={groupedFilters}
+          indexPatterns={props?.indexPatterns}
+          onClick={() => {}}
+        />
+      );
+      GroupBadge.push(badge);
+    }
+    return GroupBadge;
   }
 
   function renderAddFilter() {
@@ -239,6 +259,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           alignItems="center"
           tabIndex={-1}
         >
+          {renderMultipleFilters()}
           {renderSelectedSavedQueries()}
           {renderItems()}
           {/* {renderAddFilter()} */}
