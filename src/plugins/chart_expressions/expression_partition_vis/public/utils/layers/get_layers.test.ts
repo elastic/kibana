@@ -11,6 +11,7 @@ import { dataPluginMock } from '../../../../../data/public/mocks';
 import type { DataPublicPluginStart } from '../../../../../data/public';
 import { getColor } from './get_color';
 import { createMockVisData, createMockBucketColumns, createMockPieParams } from '../../mocks';
+import { ChartTypes } from '../../../common/types';
 
 const visData = createMockVisData();
 const buckets = createMockBucketColumns();
@@ -69,13 +70,16 @@ describe('computeColor', () => {
       },
     } as unknown as ShapeTreeNode;
     const color = getColor(
+      ChartTypes.PIE,
       d,
+      0,
       false,
       {},
       buckets,
       visData.rows,
       visParams,
       getPaletteRegistry(),
+      { getColor: () => undefined },
       false,
       false,
       dataMock.fieldFormats
@@ -95,13 +99,16 @@ describe('computeColor', () => {
       },
     } as unknown as ShapeTreeNode;
     const color = getColor(
+      ChartTypes.PIE,
       d,
+      0,
       true,
       {},
       buckets,
       visData.rows,
       visParams,
       getPaletteRegistry(),
+      { getColor: () => undefined },
       false,
       false,
       dataMock.fieldFormats
@@ -120,13 +127,16 @@ describe('computeColor', () => {
       },
     } as unknown as ShapeTreeNode;
     const color = getColor(
+      ChartTypes.PIE,
       d,
+      0,
       true,
       { 'ES-Air': '#000028' },
       buckets,
       visData.rows,
       visParams,
       getPaletteRegistry(),
+      { getColor: () => undefined },
       false,
       false,
       dataMock.fieldFormats
@@ -166,13 +176,16 @@ describe('computeColor', () => {
       distinctColors: true,
     };
     const color = getColor(
+      ChartTypes.PIE,
       d,
+      0,
       true,
       { '≥ 1000 and < 2000': '#3F6833' },
       buckets,
       visData.rows,
       visParamsNew,
       getPaletteRegistry(),
+      { getColor: () => undefined },
       false,
       false,
       dataMock.fieldFormats,
