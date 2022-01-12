@@ -319,10 +319,18 @@ export function jobsProvider(
     if (jobResults && jobResults.jobs) {
       const job = jobResults.jobs.find((j) => j.job_id === jobId);
       if (job) {
+        removeUnClonableCustomSettings(job);
         result.job = job;
       }
     }
     return result;
+  }
+
+  function removeUnClonableCustomSettings(job: Job) {
+    if (isPopulatedObject(job.custom_settings)) {
+      delete job.custom_settings.managed;
+      delete job.custom_settings.created_by_module;
+    }
   }
 
   async function createFullJobsList(jobIds: string[] = []) {

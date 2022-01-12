@@ -503,6 +503,7 @@ export class DataRecognizer {
 
     this.applyJobConfigOverrides(moduleConfig, jobOverrides, jobPrefix);
     this.applyDatafeedConfigOverrides(moduleConfig, datafeedOverrides, jobPrefix);
+    this.applyJobCustomSettings(moduleConfig);
     this._updateDatafeedIndices(moduleConfig);
     this._updateJobUrlIndexPatterns(moduleConfig);
     await this._updateModelMemoryLimits(moduleConfig, estimateModelMemory, start, end);
@@ -1381,6 +1382,16 @@ export class DataRecognizer {
         }
       });
     }
+  }
+
+  public applyJobCustomSettings(moduleConfig: Module) {
+    const { jobs } = moduleConfig;
+    jobs.forEach((job) => {
+      if (isPopulatedObject(job.config.custom_settings) === false) {
+        job.config.custom_settings = {};
+      }
+      job.config.custom_settings.created_by_module = moduleConfig.id;
+    });
   }
 }
 
