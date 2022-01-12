@@ -14,11 +14,12 @@ import { coreMock, elasticsearchServiceMock, statusServiceMock } from 'src/core/
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { dataPluginMock } from 'src/plugins/data/server/mocks';
 import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
+import { DeepPartial } from 'utility-types';
 import { ReportingConfig, ReportingCore } from '../';
 import { featuresPluginMock } from '../../../features/server/mocks';
-import { securityMock } from '../../../security/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createMockScreenshottingStart } from '../../../screenshotting/server/mock';
+import { securityMock } from '../../../security/server/mocks';
 import { taskManagerMock } from '../../../task_manager/server/mocks';
 import { ReportingConfigType } from '../config';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
@@ -26,13 +27,15 @@ import { ReportingStore } from '../lib';
 import { setFieldFormats } from '../services';
 import { createMockLevelLogger } from './create_mock_levellogger';
 
-export const createMockPluginSetup = (setupMock?: any): ReportingInternalSetup => {
+export const createMockPluginSetup = (
+  setupMock: Partial<Record<keyof ReportingInternalSetup, any>>
+): ReportingInternalSetup => {
   return {
     features: featuresPluginMock.createSetup(),
     basePath: { set: jest.fn() },
     router: setupMock.router,
     security: securityMock.createSetup(),
-    licensing: { license$: Rx.of({ isAvailable: true, isActive: true, type: 'basic' }) } as any,
+    licensing: { license$: Rx.of({ isAvailable: true, isActive: true, type: 'basic' }) },
     taskManager: taskManagerMock.createSetup(),
     logger: createMockLevelLogger(),
     status: statusServiceMock.createSetupContract(),
@@ -46,7 +49,7 @@ const createMockReportingStore = () => ({} as ReportingStore);
 
 export const createMockPluginStart = (
   mockReportingCore: ReportingCore | undefined,
-  startMock?: any
+  startMock: Partial<Record<keyof ReportingInternalStart, any>>
 ): ReportingInternalStart => {
   const store = mockReportingCore
     ? new ReportingStore(mockReportingCore, logger)
@@ -61,7 +64,7 @@ export const createMockPluginStart = (
     taskManager: {
       schedule: jest.fn().mockImplementation(() => ({ id: 'taskId' })),
       ensureScheduled: jest.fn(),
-    } as any,
+    },
     logger: createMockLevelLogger(),
     screenshotting: startMock.screenshotting || createMockScreenshottingStart(),
     ...startMock,
@@ -75,12 +78,10 @@ interface ReportingConfigTestType {
   kibanaServer: Partial<ReportingConfigType['kibanaServer']>;
   csv: Partial<ReportingConfigType['csv']>;
   roles?: Partial<ReportingConfigType['roles']>;
-  capture: any;
-  server?: any;
 }
 
 export const createMockConfigSchema = (
-  overrides: Partial<ReportingConfigTestType> = {}
+  overrides: DeepPartial<ReportingConfigType> = {}
 ): ReportingConfigType => {
   // deeply merge the defaults and the provided partial schema
   return {
@@ -106,7 +107,7 @@ export const createMockConfigSchema = (
       enabled: false,
       ...overrides.roles,
     },
-  } as any;
+  } as ReportingConfigType;
 };
 
 export const createMockConfig = (
