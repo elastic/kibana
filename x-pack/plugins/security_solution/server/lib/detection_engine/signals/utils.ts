@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { createHash } from 'crypto';
-import { chunk, get, isEmpty, partition } from 'lodash';
+import { chunk, get, invert, isEmpty, partition } from 'lodash';
 import moment from 'moment';
 import uuidv5 from 'uuid/v5';
 
@@ -1004,7 +1004,8 @@ export const getField = <T extends SearchTypes>(event: SimpleHit, field: string)
     const mappedField = racFieldMappings[field] ?? field.replace('signal', 'kibana.alert');
     return get(event._source, mappedField) as T;
   } else if (isWrappedSignalHit(event)) {
-    return get(event._source, field) as T;
+    const mappedField = invert(racFieldMappings)[field] ?? field.replace('kibana.alert', 'signal');
+    return get(event._source, mappedField) as T;
   } else if (isWrappedEventHit(event)) {
     return get(event._source, field) as T;
   }
