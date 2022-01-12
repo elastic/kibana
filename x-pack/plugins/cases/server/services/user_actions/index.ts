@@ -421,12 +421,14 @@ export class CaseUserActionService {
           }
         );
 
-      let userActions: Array<SavedObject<CaseUserActionAttributesWithoutConnectorId>> = [];
+      let userActions: Array<SavedObject<CaseUserActionResponse>> = [];
       for await (const findResults of finder.find()) {
-        userActions = userActions.concat(findResults.saved_objects);
+        userActions = userActions.concat(
+          findResults.saved_objects.map((so) => transformToExternalModel(so))
+        );
       }
 
-      return userActions.map((so) => transformToExternalModel(so));
+      return userActions;
     } catch (error) {
       this.log.error(`Error finding status changes: ${error}`);
       throw error;

@@ -29,17 +29,24 @@ import {
 } from '../../policy_hooks';
 import { getCurrentArtifactsLocation } from '../../../store/policy_details/selectors';
 import { ImmutableObject, PolicyData } from '../../../../../../../common/endpoint/types';
+import { PolicyEventFiltersDeleteModal } from '../delete_modal';
+import { isGlobalPolicyEffected } from '../../../../../components/effected_policy_select/utils';
 import { getEventFiltersListPath } from '../../../../../common/routing';
+import { useUserPrivileges } from '../../../../../../common/components/user_privileges';
 
 interface PolicyEventFiltersListProps {
   policy: ImmutableObject<PolicyData>;
 }
 export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({ policy }) => {
   const { getAppUrl } = useAppUrl();
+  const { canCreateArtifactsByPolicy } = useUserPrivileges().endpointPrivileges;
   const policiesRequest = useGetEndpointSpecificPolicies();
   const navigateCallback = usePolicyDetailsEventFiltersNavigateCallback();
   const urlParams = usePolicyDetailsSelector(getCurrentArtifactsLocation);
   const [expandedItemsMap, setExpandedItemsMap] = useState<Map<string, boolean>>(new Map());
+  const [exceptionItemToDelete, setExceptionItemToDelete] = useState<
+    ExceptionListItemSchema | undefined
+  >();
 
   const {
     data: eventFilters,
@@ -112,15 +119,49 @@ export const PolicyEventFiltersList = React.memo<PolicyEventFiltersListProps>(({
       'data-test-subj': 'view-full-details-action',
     };
     const item = artifact as ExceptionListItemSchema;
+
+    const isGlobal = isGlobalPolicyEffected(item.tags);
+    const deleteAction = {
+      icon: 'trash',
+      children: i18n.translate(
+        'xpack.securitySolution.endpoint.policy.eventFilters.list.removeAction',
+        { defaultMessage: 'Remove from policy' }
+      ),
+      onClick: () => {
+        setExceptionItemToDelete(item);
+      },
+      disabled: isGlobal,
+      toolTipContent: isGlobal
+        ? i18n.translate(
+            'xpack.securitySolution.endpoint.policy.eventFilters.list.removeActionNotAllowed',
+            {
+              defaultMessage: 'Globally applied event filters cannot be removed from policy.',
+            }
+          )
+        : undefined,
+      toolTipPosition: 'top' as const,
+      'data-test-subj': 'remove-from-policy-action',
+    };
     return {
       expanded: expandedItemsMap.get(item.id) || false,
-      actions: [fullDetailsAction],
+      actions: canCreateArtifactsByPolicy ? [fullDetailsAction, deleteAction] : [fullDetailsAction],
       policies: artifactCardPolicies,
     };
   };
 
+  const handleDeleteModalClose = useCallback(() => {
+    setExceptionItemToDelete(undefined);
+  }, [setExceptionItemToDelete]);
+
   return (
     <>
+      {exceptionItemToDelete && (
+        <PolicyEventFiltersDeleteModal
+          policyId={policy.id}
+          exception={exceptionItemToDelete}
+          onCancel={handleDeleteModalClose}
+        />
+      )}
       <SearchExceptions
         placeholder={i18n.translate(
           'xpack.securitySolution.endpoint.policy.eventFilters.list.search.placeholder',
