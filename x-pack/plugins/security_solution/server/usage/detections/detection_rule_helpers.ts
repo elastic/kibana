@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { LEGACY_NOTIFICATIONS_ID } from '../../../common/constants';
-
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../../src/core/server';
-import { SIGNALS_ID } from '../../../common/constants';
+import { LEGACY_NOTIFICATIONS_ID, SIGNALS_ID } from '../../../common/constants';
 import { isElasticRule } from './index';
 import type {
   AlertsAggregationResponse,
@@ -231,7 +229,7 @@ export const getDetectionRuleMetrics = async (
       body: {
         aggs: {
           detectionAlerts: {
-            terms: { field: 'signal.rule.id.keyword' },
+            terms: { field: 'signal.rule.id' },
           },
         },
         query: {
@@ -295,7 +293,7 @@ export const getDetectionRuleMetrics = async (
         const isElastic = isElasticRule(hit._source?.alert.tags);
         return {
           rule_name: hit._source?.alert.name,
-          rule_id: ruleId,
+          rule_id: hit._source?.alert.params.ruleId,
           rule_type: hit._source?.alert.params.type,
           rule_version: Number(hit._source?.alert.params.version),
           enabled: hit._source?.alert.enabled,

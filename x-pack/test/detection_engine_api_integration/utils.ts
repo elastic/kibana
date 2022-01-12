@@ -23,6 +23,7 @@ import type {
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
+import { ToolingLog } from '@kbn/dev-utils';
 import { PrePackagedRulesAndTimelinesStatusSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response';
 import {
   CreateRulesSchema,
@@ -31,6 +32,7 @@ import {
   QueryCreateSchema,
   EqlCreateSchema,
   ThresholdCreateSchema,
+  ThreatMatchCreateSchema,
 } from '../../plugins/security_solution/common/detection_engine/schemas/request';
 import { Signal } from '../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { signalsMigrationType } from '../../plugins/security_solution/server/lib/detection_engine/migrations/saved_objects';
@@ -50,6 +52,7 @@ import {
   INTERNAL_RULE_ID_KEY,
   UPDATE_OR_CREATE_LEGACY_ACTIONS,
 } from '../../plugins/security_solution/common/constants';
+import { DetectionMetrics } from '../../plugins/security_solution/server/usage/detections/types';
 
 /**
  * This will remove server generated properties such as date times, etc...
@@ -1712,3 +1715,85 @@ export const getOpenSignals = async (
   await refreshIndex(es, rule.output_index);
   return getSignalsByIds(supertest, [rule.id]);
 };
+
+/**
+ * Cluster stats URL. Replace this with any from kibana core if there is ever a constant there for this.
+ */
+export const getStatsUrl = (): string => '/api/telemetry/v2/clusters/_stats';
+
+/**
+ * Given a body this will return the detection metrics from it.
+ * @param body The Stats body
+ * @returns Detection metrics
+ */
+export const getDetectionMetricsFromBody = (
+  body: Array<{
+    stats: {
+      stack_stats: {
+        kibana: { plugins: { security_solution: { detectionMetrics: DetectionMetrics } } };
+      };
+    };
+  }>
+): DetectionMetrics => {
+  return body[0].stats.stack_stats.kibana.plugins.security_solution.detectionMetrics;
+};
+
+/**
+ * Gets the stats from the stats endpoint
+ * @param supertest The supertest agent.
+ * @returns The detection metrics
+ */
+export const getStats = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  log: ToolingLog
+): Promise<DetectionMetrics> => {
+  const response = await supertest
+    .post(getStatsUrl())
+    .set('kbn-xsrf', 'true')
+    .send({ unencrypted: true, refreshCache: true });
+  if (response.status !== 200) {
+    log.error(
+      `Did not get an expected 200 "ok" when getting the stats for detections. CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
+        response.body
+      )}, status: ${JSON.stringify(response.status)}`
+    );
+  }
+  return getDetectionMetricsFromBody(response.body);
+};
+
+/**
+ * This is a typical simple indicator match/threat match for testing that is easy for most basic testing
+ * @param ruleId
+ * @param enabled Enables the rule on creation or not. Defaulted to false.
+ */
+export const getSimpleThreatMatch = (
+  ruleId = 'rule-1',
+  enabled = false
+): ThreatMatchCreateSchema => ({
+  description: 'Detecting root and admin users',
+  name: 'Query with a rule id',
+  severity: 'high',
+  enabled,
+  index: ['auditbeat-*'],
+  type: 'threat_match',
+  risk_score: 55,
+  language: 'kuery',
+  rule_id: ruleId,
+  from: '1900-01-01T00:00:00.000Z',
+  query: '*:*',
+  threat_query: '*:*',
+  threat_index: ['auditbeat-*'],
+  threat_mapping: [
+    // We match host.name against host.name
+    {
+      entries: [
+        {
+          field: 'host.name',
+          value: 'host.name',
+          type: 'mapping',
+        },
+      ],
+    },
+  ],
+  threat_filters: [],
+});
