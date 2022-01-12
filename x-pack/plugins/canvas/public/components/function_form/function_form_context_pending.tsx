@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { FC, useCallback, useEffect } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { Loading } from '../loading';
 import { CanvasElement, ExpressionContext } from '../../../types';
@@ -18,9 +18,7 @@ interface FunctionFormContextPendingProps {
   updateContext: (element?: CanvasElement) => void;
 }
 
-export const FunctionFormContextPending: React.FunctionComponent<
-  FunctionFormContextPendingProps
-> = (props) => {
+export const FunctionFormContextPending: FC<FunctionFormContextPendingProps> = (props) => {
   const { contextExpression, expressionType, context, updateContext } = props;
   const prevContextExpression = usePrevious(contextExpression);
   const fetchContext = useCallback(
