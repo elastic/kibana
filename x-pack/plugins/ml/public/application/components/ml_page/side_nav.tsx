@@ -7,11 +7,21 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSideNavItemType } from '@elastic/eui';
-import { TabId } from '../navigation_menu/navigation_menu';
+import { useEffect } from 'react';
 import type { MlLocatorParams } from '../../../../common/types/locator';
 import { useUrlState } from '../../util/url_state';
-import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { isFullLicense } from '../../license';
+import { ML_APP_NAME } from '../../../../common/constants/app';
+
+export type TabId =
+  | 'access-denied'
+  | 'anomaly_detection'
+  | 'data_frame_analytics'
+  | 'trained_models'
+  | 'datavisualizer'
+  | 'overview'
+  | 'settings';
 
 export interface Tab {
   id: TabId;
@@ -76,7 +86,7 @@ interface TabData {
   name: string;
 }
 
-const TAB_DATA: Record<TabId, TabData> = {
+export const TAB_DATA: Record<TabId, TabData> = {
   overview: {
     testSubject: 'mlMainTab overview',
     name: i18n.translate('xpack.ml.overviewTabLabel', {
@@ -124,8 +134,20 @@ const TAB_DATA: Record<TabId, TabData> = {
 };
 
 export function useSideNavItems(activeRouteId: string | undefined) {
+  const {
+    services: {
+      chrome: { docTitle },
+    },
+  } = useMlKibana();
   const mlLocator = useMlLocator();
   const navigateToPath = useNavigateToPath();
+
+  useEffect(() => {
+    const title = TAB_DATA[activeRouteId as TabId]?.name;
+    if (title) {
+      docTitle.change([title, ML_APP_NAME]);
+    }
+  }, [activeRouteId]);
 
   const [globalState] = useUrlState('_g');
 
