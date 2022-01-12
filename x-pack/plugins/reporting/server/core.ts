@@ -28,11 +28,7 @@ import type { ScreenshotResult, ScreenshottingStart } from '../../screenshotting
 import { SecurityPluginSetup } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import { SpacesPluginSetup } from '../../spaces/server';
-import {
-  ConcreteTaskInstance,
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '../../task_manager/server';
+import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { durationToNumber } from '../common/schema_utils';
 import { ReportingConfig, ReportingSetup } from './';
@@ -389,7 +385,7 @@ export class ReportingCore {
     return this.executing.size;
   }
 
-  public getEventLogger(report: IReport, task?: ConcreteTaskInstance) {
+  public getEventLogger(report: IReport, task?: { id: string }) {
     const ReportingEventLogger = reportingEventLoggerFactory(this.pluginSetupDeps!.eventLog);
     return new ReportingEventLogger(report, task);
   }

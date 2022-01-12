@@ -12,7 +12,7 @@ import { TaskManagerStartContract, TaskRunCreatorFunction } from '../../../../ta
 import { numberToDuration } from '../../../common/schema_utils';
 import { ReportingConfigType } from '../../config';
 import { statuses } from '../statuses';
-import { Report, SavedReport } from '../store';
+import { SavedReport } from '../store';
 import { ReportingTask, ReportingTaskStatus, REPORTING_MONITOR_TYPE, ReportTaskParams } from './';
 
 /*
@@ -153,9 +153,7 @@ export class MonitorReportsTask implements ReportingTask {
 
     const newTask = await this.reporting.scheduleTask(task);
 
-    this.reporting
-      .getEventLogger(new Report({ ...task, _id: task.id, _index: task.index }), newTask)
-      .logRetry(`Scheduled retry for report ${task.id}`);
+    this.reporting.getEventLogger({ _id: task.id, ...task }, newTask).logRetry();
 
     return newTask;
   }

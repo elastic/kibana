@@ -100,12 +100,7 @@ export class RequestHandler {
     );
 
     // 6. Log the action with event log
-    reporting
-      .getEventLogger(report, task)
-      .logScheduleTask(
-        `Scheduled ${exportType.name} reporting task.` +
-          ` Task ID: task:${task.id}. Report ID: ${report._id}`
-      );
+    reporting.getEventLogger(report, task).logScheduleTask();
 
     return report;
   }

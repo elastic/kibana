@@ -76,7 +76,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           payload: { browserTimezone: (req.params as BaseParams).browserTimezone },
         });
 
-        eventLog.logExecutionStart('starting csv generation');
+        eventLog.logExecutionStart();
 
         try {
           let buffer = Buffer.from('');
@@ -108,7 +108,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
             logger.warn('CSV Job Execution created empty content result');
           }
 
-          eventLog.logExecutionComplete('csv generation is complete', jobOutputSize);
+          eventLog.logExecutionComplete({ byteSize: jobOutputSize });
 
           return res.ok({
             body: jobOutputContent || '',

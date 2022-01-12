@@ -99,59 +99,152 @@ describe('Event Logger', () => {
     `);
   });
 
-  it(`logExecutionStart should create a 'start' event`, () => {
+  it(`logExecutionStart`, () => {
     const logger = new factory(mockReport);
-    const result = logger.logExecutionStart('starting the event');
-    expect(result.event).toMatchInlineSnapshot(`
-      Object {
-        "action": "execute-start",
-        "kind": "event",
-        "provider": "reporting",
-        "timezone": "UTC",
-      }
+    const result = logger.logExecutionStart();
+    expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "action": "execute-start",
+          "kind": "event",
+          "provider": "reporting",
+          "timezone": "UTC",
+        },
+        Object {
+          "id": "12348",
+          "jobType": "csv",
+        },
+        "starting csv execution",
+      ]
     `);
-    expect(result.message).toBe(`starting the event`);
+    expect(result.message).toMatchInlineSnapshot(`"starting csv execution"`);
     expect(logger.completionLogger.startTiming).toBeCalled();
   });
 
-  it(`logExecutionComplete should create a 'complete' event`, () => {
+  it(`logExecutionComplete`, () => {
     const logger = new factory(mockReport);
-    logger.logExecutionStart('starting the event');
+    logger.logExecutionStart();
 
-    const result = logger.logExecutionComplete('completed the event', 444);
-    expect(result.event).toMatchInlineSnapshot(`
-      Object {
-        "action": "execute-complete",
-        "kind": "metrics",
-        "outcome": "success",
-        "provider": "reporting",
-        "timezone": "UTC",
-      }
+    const result = logger.logExecutionComplete({ byteSize: 444 });
+    expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "action": "execute-complete",
+          "kind": "metrics",
+          "outcome": "success",
+          "provider": "reporting",
+          "timezone": "UTC",
+        },
+        Object {
+          "byteSize": 444,
+          "id": "12348",
+          "jobType": "csv",
+        },
+        "completed csv execution",
+      ]
     `);
-    expect(result.kibana.reporting).toMatchInlineSnapshot(`
-      Object {
-        "byteSize": 444,
-        "id": "12348",
-        "jobType": "csv",
-      }
-    `);
-    expect(result.message).toBe(`completed the event`);
+    expect(result.message).toMatchInlineSnapshot(`"completed csv execution"`);
     expect(logger.completionLogger.startTiming).toBeCalled();
     expect(logger.completionLogger.stopTiming).toBeCalled();
   });
 
-  it(`logError should create an 'error' event`, () => {
+  it(`logError`, () => {
     const logger = new factory(mockReport);
     const result = logger.logError(new Error('an error occurred'));
-    expect(result.event).toMatchInlineSnapshot(`
-      Object {
-        "action": "execute-complete",
-        "kind": "error",
-        "outcome": "failure",
-        "provider": "reporting",
-        "timezone": "UTC",
-      }
+    expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "action": "execute-complete",
+          "kind": "error",
+          "outcome": "failure",
+          "provider": "reporting",
+          "timezone": "UTC",
+        },
+        Object {
+          "id": "12348",
+          "jobType": "csv",
+        },
+        "an error occurred",
+      ]
     `);
     expect(result.message).toBe(`an error occurred`);
+  });
+
+  it(`logClaimTask`, () => {
+    const logger = new factory(mockReport);
+    const result = logger.logClaimTask();
+    expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "action": "claim-task",
+          "kind": "event",
+          "provider": "reporting",
+          "timezone": "UTC",
+        },
+        Object {
+          "id": "12348",
+          "jobType": "csv",
+        },
+        "claimed report 12348",
+      ]
+    `);
+  });
+
+  it(`logReportFailure`, () => {
+    const logger = new factory(mockReport);
+    const result = logger.logReportFailure();
+    expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "action": "fail-report",
+          "kind": "event",
+          "provider": "reporting",
+          "timezone": "UTC",
+        },
+        Object {
+          "id": "12348",
+          "jobType": "csv",
+        },
+        "report 12348 has failed",
+      ]
+    `);
+  });
+  it(`logReportSaved`, () => {
+    const logger = new factory(mockReport);
+    const result = logger.logReportSaved();
+    expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "action": "save-report",
+          "kind": "event",
+          "provider": "reporting",
+          "timezone": "UTC",
+        },
+        Object {
+          "id": "12348",
+          "jobType": "csv",
+        },
+        "saved report 12348",
+      ]
+    `);
+  });
+  it(`logRetry`, () => {
+    const logger = new factory(mockReport);
+    const result = logger.logRetry();
+    expect([result.event, result.kibana.reporting, result.message]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "action": "retry",
+          "kind": "event",
+          "provider": "reporting",
+          "timezone": "UTC",
+        },
+        Object {
+          "id": "12348",
+          "jobType": "csv",
+        },
+        "scheduled retry for report 12348",
+      ]
+    `);
   });
 });

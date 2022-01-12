@@ -300,7 +300,8 @@ export class ReportingStore {
       throw err;
     }
 
-    this.reportingCore.getEventLogger(report).logClaimTask(`Report ${report._id} claimed.`);
+    this.reportingCore.getEventLogger(report).logClaimTask();
+
     return body;
   }
 
@@ -332,7 +333,8 @@ export class ReportingStore {
       throw err;
     }
 
-    this.reportingCore.getEventLogger(report).logReportFailure(`Report ${report._id} failed.`);
+    this.reportingCore.getEventLogger(report).logReportFailure();
+
     return body;
   }
 
@@ -369,7 +371,8 @@ export class ReportingStore {
       throw err;
     }
 
-    this.reportingCore.getEventLogger(report).logReportSaved(`Report ${report._id} saved.`);
+    this.reportingCore.getEventLogger(report).logReportSaved();
+
     return body;
   }
 
