@@ -69,18 +69,19 @@ export class SampleDataInstaller {
 
     for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
       const dataIndex = sampleDataset.dataIndices[i];
+      const indexName = createIndexName(sampleDataset.id, dataIndex.id);
       // clean up any old installation of dataset
       await this.uninstallDataIndex(sampleDataset, dataIndex);
       await this.installDataIndex(sampleDataset, dataIndex);
 
       const injectedCount = await insertDataIntoIndex({
-        index: createIndexName(sampleDataset.id, dataIndex.id),
+        index: indexName,
         nowReference,
         logger: this.logger,
         esClient: this.esClient,
         dataIndexConfig: dataIndex,
       });
-      createdDocsPerIndex[dataIndex.id] = injectedCount;
+      createdDocsPerIndex[indexName] = injectedCount;
     }
 
     const createdSavedObjects = await this.importSavedObjects(sampleDataset);
