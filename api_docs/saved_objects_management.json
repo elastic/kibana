@@ -324,7 +324,7 @@
             "label": "obj",
             "description": [],
             "signature": [
-              "{ type: string; id: string; title?: string | undefined; meta: { title?: string | undefined; icon?: string | undefined; }; overwrite?: boolean | undefined; }"
+              "{ title?: string | undefined; id: string; type: string; meta: { title?: string | undefined; icon?: string | undefined; }; overwrite?: boolean | undefined; }"
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
             "deprecated": false
@@ -826,7 +826,7 @@
             "label": "euiColumn",
             "description": [],
             "signature": [
-              "{ children?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onChange?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; color?: string | undefined; onKeyDown?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; id?: string | undefined; title?: string | undefined; description?: string | undefined; security?: string | undefined; name: React.ReactNode; className?: string | undefined; field: (string & {}) | keyof ",
+              "{ children?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLTableDataCellElement> | undefined; onChange?: React.FormEventHandler<HTMLTableDataCellElement> | undefined; color?: string | undefined; onKeyDown?: React.KeyboardEventHandler<HTMLTableDataCellElement> | undefined; title?: string | undefined; id?: string | undefined; description?: string | undefined; security?: string | undefined; name: React.ReactNode; className?: string | undefined; field: (string & {}) | keyof ",
               {
                 "pluginId": "savedObjectsManagement",
                 "scope": "public",
