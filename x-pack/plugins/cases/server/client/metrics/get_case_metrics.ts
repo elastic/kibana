@@ -67,7 +67,7 @@ const buildHandlers = (
   clientArgs: CasesClientArgs
 ): Set<MetricsHandler> => {
   const handlers: MetricsHandler[] = [
-    new Lifespan(params.caseId, casesClient),
+    new Lifespan(params.caseId, casesClient, clientArgs),
     new AlertsCount(params.caseId, casesClient, clientArgs),
     new AlertDetails(params.caseId, casesClient, clientArgs),
     new Actions(params.caseId, casesClient, clientArgs),
