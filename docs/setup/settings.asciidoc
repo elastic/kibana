@@ -370,10 +370,10 @@ used by the tile service. Specify the position of the subdomain the URL with
 the token `{s}`.
 
 | [[tilemap-url]] `map.tilemap.url:` {ess-icon}
- | The URL to the tileservice that {kib} uses
-to display map tiles in tilemap visualizations. By default,
-{kib} reads this URL from an external metadata service, but users can
-override this parameter to use their own Tile Map Service. For example:
+ | The URL to the service that {kib} uses
+as the default basemap in <<maps, maps>> and <<vega-with-a-map, vega maps>>. By default,
+{kib} sets a basemap from the <<maps-connect-to-ems, Elastic Maps Service>>, but users can
+point to their own Tile Map Service. For example:
 `"https://tiles.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana"`
 
 | `migrations.batchSize:`
