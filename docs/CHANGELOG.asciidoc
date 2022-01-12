@@ -115,8 +115,6 @@ Review important information about the {kib} 6.x.x releases.
 [[release-notes-6.8.23]]
 == {kib} 6.8.23
 
-coming::[6.8.23]
-
 For information about the {kib} 6.8.23 release, review the following information.
 
 [float]
