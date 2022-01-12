@@ -299,4 +299,12 @@ export const Operations: Record<ReadOperations | WriteOperations, OperationDetai
     docType: 'user actions',
     savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
   },
+  [ReadOperations.GetUserActionMetrics]: {
+    ecsType: EVENT_TYPES.access,
+    name: ReadOperations.GetUserActionMetrics,
+    action: 'case_user_action_get_metrics',
+    verbs: accessVerbs,
+    docType: 'user actions',
+    savedObjectType: CASE_USER_ACTION_SAVED_OBJECT,
+  },
 };
