@@ -288,6 +288,44 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JobService
    *
+   * @api {post} /api/ml/jobs/jobs_with_geo Jobs summary
+   * @apiName JobsSummary
+   * @apiDescription Returns a list of anomaly detection jobs with analysis config with fields supported by maps.
+   *
+   * @apiSchema (body) optionalJobIdsSchema
+   *
+   * @apiSuccess {Array} jobIds list of job ids.
+   */
+  router.get(
+    {
+      path: '/api/ml/jobs/jobs_with_geo',
+      validate: false,
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, response, context }) => {
+      try {
+        const { getJobsWithGeo } = jobServiceProvider(
+          client,
+          mlClient,
+          context.alerting?.getRulesClient()
+        );
+
+        const resp = await getJobsWithGeo();
+
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobService
+   *
    * @api {post} /api/ml/jobs/jobs_with_time_range Jobs with time range
    * @apiName JobsWithTimeRange
    * @apiDescription Creates a list of jobs with data about the job's time range
