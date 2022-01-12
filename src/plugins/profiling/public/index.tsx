@@ -5,13 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import './index.scss';
 
-import { ProfilingPlugin } from './plugin';
+import { ProdfilerPlugin } from './plugin';
 
-// This exports static code and TypeScript types,
-// as well as, Kibana Platform `plugin()` initializer.
 export function plugin() {
-  return new ProfilingPlugin();
+  return new ProdfilerPlugin();
 }
-export { ProfilingPluginSetup, ProfilingPluginStart } from './types';
