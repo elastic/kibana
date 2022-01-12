@@ -44,7 +44,14 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
   agentPolicy: AgentPolicy | undefined;
   updateAgentPolicy: (agentPolicy: AgentPolicy | undefined) => void;
   setHasAgentPolicyError: (hasError: boolean) => void;
-}> = ({ packageInfo, agentPolicy, updateAgentPolicy, setHasAgentPolicyError }) => {
+  onNewAgentPolicyCreate: () => void;
+}> = ({
+  packageInfo,
+  agentPolicy,
+  updateAgentPolicy,
+  setHasAgentPolicyError,
+  onNewAgentPolicyCreate,
+}) => {
   const { isReady: isFleetReady } = useFleetStatus();
 
   const [selectedAgentPolicyError, setSelectedAgentPolicyError] = useState<Error>();
@@ -170,6 +177,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
             onClose={(newAgentPolicy?: AgentPolicy) => {
               setIsCreateAgentPolicyFlyoutOpen(false);
               if (newAgentPolicy) {
+                onNewAgentPolicyCreate();
                 refreshAgentPolicies();
                 setSelectedPolicyId(newAgentPolicy.id);
               }
