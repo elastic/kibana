@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -10,25 +11,28 @@ import {
   DEFAULT_EMS_FONT_LIBRARY_URL,
   DEFAULT_EMS_LANDING_PAGE_URL,
   DEFAULT_EMS_TILE_API_URL,
-} from '../../../../src/plugins/maps_ems/common';
+} from './ems_defaults';
 
-export interface IEMSConfig {
-  emsUrl?: string;
-  includeElasticMapsService?: boolean;
-  emsFileApiUrl?: string;
-  emsTileApiUrl?: string;
-  emsLandingPageUrl?: string;
-  emsFontLibraryUrl?: string;
-  isEMSEnabled?: boolean;
+export interface EMSConfig {
+  includeElasticMapsService: boolean;
+  emsUrl: string;
+  emsFileApiUrl: string;
+  emsTileApiUrl: string;
+  emsLandingPageUrl: string;
+  emsFontLibraryUrl: string;
+}
+
+export function createEMSSettings(emsConfig: EMSConfig, getIsEnterprisePlus: () => boolean) {
+  return new EMSSettings(emsConfig, getIsEnterprisePlus);
 }
 
 export class EMSSettings {
-  private readonly _config: IEMSConfig;
+  private readonly _config: EMSConfig;
   private readonly _getIsEnterprisePlus: () => boolean;
 
-  constructor(config: IEMSConfig, getIsEnterPrisePlus: () => boolean) {
+  constructor(config: EMSConfig, getIsEnterprisePlus: () => boolean) {
     this._config = config;
-    this._getIsEnterprisePlus = getIsEnterPrisePlus;
+    this._getIsEnterprisePlus = getIsEnterprisePlus;
   }
 
   isEMSUrlSet() {

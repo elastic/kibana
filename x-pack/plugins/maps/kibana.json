@@ -42,7 +42,6 @@
     "kibanaReact",
     "kibanaUtils",
     "usageCollection",
-    "home",
-    "mapsEms"
+    "home"
   ]
 }

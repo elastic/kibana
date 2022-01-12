@@ -8,44 +8,26 @@
 
 import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
-import { EMSClient, FileLayer as EMSFileLayer, TMSService } from '@elastic/ems-client';
-import { i18n } from '@kbn/i18n';
-import { getKibanaVersion } from '../kibana_services';
-import { FileLayer, IServiceSettings, TmsLayer } from './service_settings_types';
-import { ORIGIN, TMS_IN_YML_ID } from '../../common';
-import type { MapsEmsConfig, TileMapConfig } from '../../config';
-
+import type { EMSClient, FileLayer as EMSFileLayer, TMSService } from '@elastic/ems-client';
+import type { FileLayer, IServiceSettings, TmsLayer } from './service_settings_types';
+import { ORIGIN_LEGACY, TMS_IN_YML_ID } from './service_settings_types';
+import type { MapConfig, TileMapConfig } from '../../../../../../maps_ems/public';
 /**
  * This class provides access to the EMS-layers and the kibana.yml configured layers through a single interface.
  */
 export class ServiceSettings implements IServiceSettings {
-  private readonly _mapConfig: MapsEmsConfig;
+  private readonly _mapConfig: MapConfig;
   private readonly _tilemapsConfig: TileMapConfig;
   private readonly _hasTmsConfigured: boolean;
   private readonly _emsClient: EMSClient;
   private readonly tmsOptionsFromConfig: any;
 
-  constructor(mapConfig: MapsEmsConfig, tilemapsConfig: TileMapConfig) {
+  constructor(mapConfig: MapConfig, tilemapsConfig: TileMapConfig, emsClient: EMSClient) {
     this._mapConfig = mapConfig;
     this._tilemapsConfig = tilemapsConfig;
     this._hasTmsConfigured = typeof tilemapsConfig.url === 'string' && tilemapsConfig.url !== '';
 
-    this._emsClient = new EMSClient({
-      language: i18n.getLocale(),
-      appVersion: getKibanaVersion(),
-      appName: 'kibana',
-      fileApiUrl: this._mapConfig.emsFileApiUrl,
-      tileApiUrl: this._mapConfig.emsTileApiUrl,
-      landingPageUrl: this._mapConfig.emsLandingPageUrl,
-      // Wrap to avoid errors passing window fetch
-      fetchFunction(...args: any[]) {
-        // @ts-expect-error
-        return fetch(...args);
-      },
-    });
-    // any kibana user, regardless of distribution, should get all zoom levels
-    // use `sspl` license to indicate this
-    this._emsClient.addQueryParams({ license: 'sspl' });
+    this._emsClient = emsClient;
 
     const markdownIt = new MarkdownIt({
       html: false,
@@ -59,22 +41,12 @@ export class ServiceSettings implements IServiceSettings {
     });
   }
 
-  __debugStubManifestCalls(manifestRetrieval: () => Promise<unknown>): { removeStub: () => void } {
-    const oldGetManifest = this._emsClient.getManifest;
+  getMapConfig(): MapConfig {
+    return this._mapConfig;
+  }
 
-    // This legacy code used for debugging/testing only.
-    // @ts-expect-error
-    this._emsClient.getManifest = manifestRetrieval;
-    return {
-      removeStub: () => {
-        // @ts-expect-error
-        delete this._emsClient.getManifest;
-        // not strictly necessary since this is prototype method
-        if (this._emsClient.getManifest !== oldGetManifest) {
-          this._emsClient.getManifest = oldGetManifest;
-        }
-      },
-    };
+  getTileMapConfig(): TileMapConfig {
+    return this._tilemapsConfig;
   }
 
   _backfillSettings = (fileLayer: EMSFileLayer): FileLayer => {
@@ -85,7 +57,7 @@ export class ServiceSettings implements IServiceSettings {
 
     return {
       name: fileLayer.getDisplayName(),
-      origin: fileLayer.getOrigin(),
+      origin: ORIGIN_LEGACY.EMS,
       id: fileLayer.getId(),
       created_at: fileLayer.getCreatedAt(),
       attribution: getAttributionString(fileLayer),
@@ -115,7 +87,7 @@ export class ServiceSettings implements IServiceSettings {
       const tmsService: TmsLayer = {
         ..._.cloneDeep(this.tmsOptionsFromConfig),
         id: TMS_IN_YML_ID,
-        origin: ORIGIN.KIBANA_YML,
+        origin: ORIGIN_LEGACY.KIBANA_YML,
       };
 
       allServices.push(tmsService);
@@ -129,7 +101,7 @@ export class ServiceSettings implements IServiceSettings {
           .map(async (tmsService: TMSService) => {
             // shim for compatibility
             return {
-              origin: tmsService.getOrigin(),
+              origin: ORIGIN_LEGACY.EMS,
               id: tmsService.getId(),
               minZoom: (await tmsService.getMinZoom()) as number,
               maxZoom: (await tmsService.getMaxZoom()) as number,
@@ -143,33 +115,18 @@ export class ServiceSettings implements IServiceSettings {
     return allServices;
   }
 
-  /**
-   * Set optional query-parameters for all requests
-   *
-   * @param additionalQueryParams
-   */
-  setQueryParams(additionalQueryParams: { [p: string]: string }) {
-    // Functions more as a "set" than an "add" in ems-client
-    this._emsClient.addQueryParams(additionalQueryParams);
+  async getTmsService(id: string) {
+    return this._emsClient.findTMSServiceById(id);
   }
 
-  async getFileLayerFromConfig(fileLayerConfig: FileLayer): Promise<EMSFileLayer | undefined> {
-    const fileLayers = await this._emsClient.getFileLayers();
-    return fileLayers.find((fileLayer) => {
-      const hasIdByName = fileLayer.hasId(fileLayerConfig.name); // legacy
-      const hasIdById = fileLayer.hasId(fileLayerConfig.id);
-      return hasIdByName || hasIdById;
-    });
-  }
+  async getDefaultTmsLayer(isDarkMode: boolean): Promise<string> {
+    const { dark, desaturated } = this._mapConfig.emsTileLayerId;
 
-  async getEMSHotLink(fileLayerConfig: FileLayer): Promise<string | null> {
-    const layer = await this.getFileLayerFromConfig(fileLayerConfig);
-    return layer ? layer.getEMSHotLink() : null;
-  }
+    if (hasUserConfiguredTmsLayer(this._mapConfig)) {
+      return TMS_IN_YML_ID;
+    }
 
-  async loadFileLayerConfig(fileLayerConfig: FileLayer): Promise<FileLayer | null> {
-    const fileLayer = await this.getFileLayerFromConfig(fileLayerConfig);
-    return fileLayer ? this._backfillSettings(fileLayer) : null;
+    return isDarkMode ? dark : desaturated;
   }
 
   async _getAttributesForEMSTMSLayer(isDesaturated: boolean, isDarkMode: boolean) {
@@ -193,7 +150,7 @@ export class ServiceSettings implements IServiceSettings {
       minZoom: await tmsService!.getMinZoom(),
       maxZoom: await tmsService!.getMaxZoom(),
       attribution: getAttributionString(tmsService!),
-      origin: ORIGIN.EMS,
+      origin: ORIGIN_LEGACY.EMS,
     };
   }
 
@@ -202,16 +159,16 @@ export class ServiceSettings implements IServiceSettings {
     isDesaturated: boolean,
     isDarkMode: boolean
   ) {
-    if (tmsServiceConfig.origin === ORIGIN.EMS) {
+    if (tmsServiceConfig.origin === ORIGIN_LEGACY.EMS) {
       return this._getAttributesForEMSTMSLayer(isDesaturated, isDarkMode);
-    } else if (tmsServiceConfig.origin === ORIGIN.KIBANA_YML) {
+    } else if (tmsServiceConfig.origin === ORIGIN_LEGACY.KIBANA_YML) {
       const attrs = _.pick(this._tilemapsConfig, ['url', 'minzoom', 'maxzoom', 'attribution']);
-      return { ...attrs, ...{ origin: ORIGIN.KIBANA_YML } };
+      return { ...attrs, ...{ origin: ORIGIN_LEGACY.KIBANA_YML } };
     } else {
       // this is an older config. need to resolve this dynamically.
       if (tmsServiceConfig.id === TMS_IN_YML_ID) {
         const attrs = _.pick(this._tilemapsConfig, ['url', 'minzoom', 'maxzoom', 'attribution']);
-        return { ...attrs, ...{ origin: ORIGIN.KIBANA_YML } };
+        return { ...attrs, ...{ origin: ORIGIN_LEGACY.KIBANA_YML } };
       } else {
         // assume ems
         return this._getAttributesForEMSTMSLayer(isDesaturated, isDarkMode);
@@ -236,14 +193,17 @@ export class ServiceSettings implements IServiceSettings {
 
   async getUrlForRegionLayer(fileLayerConfig: FileLayer): Promise<string | undefined> {
     let url;
-    if (fileLayerConfig.origin === ORIGIN.EMS) {
+    if (fileLayerConfig.origin === ORIGIN_LEGACY.EMS) {
       url = this._getFileUrlFromEMS(fileLayerConfig);
-    } else if (fileLayerConfig.layerId && fileLayerConfig.layerId.startsWith(`${ORIGIN.EMS}.`)) {
+    } else if (
+      fileLayerConfig.layerId &&
+      fileLayerConfig.layerId.startsWith(`${ORIGIN_LEGACY.EMS}.`)
+    ) {
       // fallback for older saved objects
       url = this._getFileUrlFromEMS(fileLayerConfig);
     } else if (
       fileLayerConfig.layerId &&
-      fileLayerConfig.layerId.startsWith(`${ORIGIN.KIBANA_YML}.`)
+      fileLayerConfig.layerId.startsWith(`${ORIGIN_LEGACY.KIBANA_YML}.`)
     ) {
       // fallback for older saved objects
       url = fileLayerConfig.url;
@@ -254,14 +214,12 @@ export class ServiceSettings implements IServiceSettings {
     return url;
   }
 
-  async getJsonForRegionLayer(fileLayerConfig: FileLayer) {
-    const url = await this.getUrlForRegionLayer(fileLayerConfig);
-    const response = await fetch(url!);
-    return await response.json();
+  getAttributionsFromTMSServce(tmsService: TMSService): string {
+    return getAttributionString(tmsService);
   }
 }
 
-function getAttributionString(emsService: EMSFileLayer | TMSService) {
+function getAttributionString(emsService: EMSFileLayer | TMSService): string {
   const attributions = emsService.getAttributions();
   const attributionSnippets = attributions.map((attribution) => {
     const anchorTag = document.createElement('a');
@@ -273,4 +231,8 @@ function getAttributionString(emsService: EMSFileLayer | TMSService) {
     return anchorTag.outerHTML;
   });
   return attributionSnippets.join(' | '); // !!!this is the current convention used in Kibana
+}
+
+function hasUserConfiguredTmsLayer(config: MapConfig) {
+  return Boolean(config.tilemap?.url);
 }
