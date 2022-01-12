@@ -15,15 +15,14 @@ import { pageObjects } from './page_objects';
 // Docker image to use for Fleet API integration tests.
 // This hash comes from the latest successful build of the Snapshot Distribution of the Package Registry, for
 // example: https://beats-ci.elastic.co/blue/organizations/jenkins/Ingest-manager%2Fpackage-storage/detail/snapshot/74/pipeline/257#step-302-log-1.
-// It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry.
+// It should be updated any time there is a new Docker image published for the Snapshot Distribution of the Package Registry that updates Synthetics.
 export const dockerImage =
-  'docker.elastic.co/package-registry/distribution:ffcbe0ba25b9bae09a671249cbb1b25af0aa1994';
+  'docker.elastic.co/package-registry/distribution:48202133e7506873aff3cc7c3b1d284158727779';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }) {
   const registryPort = process.env.FLEET_PACKAGE_REGISTRY_PORT;
-  console.warn('registryPort', registryPort);
 
   const kibanaCommonConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
