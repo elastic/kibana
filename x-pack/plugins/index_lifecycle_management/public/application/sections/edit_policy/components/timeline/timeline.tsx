@@ -11,6 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiIconTip } from '@elastic/eui';
 
+import { useKibana } from '../../../../../shared_imports';
+
 import { PhaseExceptDelete } from '../../../../../../common/types';
 
 import {
@@ -141,6 +143,8 @@ export const Timeline: FunctionComponent<Props> = memo(
         <InfinityIcon color="subdued" aria-label={i18nTexts.foreverIcon.ariaLabel} />
       ) : null;
 
+    const { docLinks } = useKibana().services;
+
     return (
       <EuiFlexGroup gutterSize="s" direction="column" responsive={false}>
         <EuiFlexItem>
@@ -151,7 +155,7 @@ export const Timeline: FunctionComponent<Props> = memo(
             {i18nTexts.description}
             &nbsp;
             <LearnMoreLink
-              docPath="ilm-index-lifecycle.html#ilm-phase-transitions"
+              docPath={docLinks.links.elasticsearch.ilmPhaseTransitions}
               text={
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.learnAboutTimingText"
