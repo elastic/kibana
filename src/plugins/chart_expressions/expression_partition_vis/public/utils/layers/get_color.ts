@@ -8,10 +8,58 @@
 import { ShapeTreeNode } from '@elastic/charts';
 import { isEqual } from 'lodash';
 import type { FieldFormatsStart } from '../../../../../field_formats/public';
-import { SeriesLayer, PaletteRegistry, lightenColor } from '../../../../../charts/public';
-import type { DatatableRow } from '../../../../../expressions/public';
+import {
+  SeriesLayer,
+  PaletteRegistry,
+  lightenColor,
+  PaletteDefinition,
+  PaletteOutput,
+} from '../../../../../charts/public';
+import type { Datatable, DatatableRow } from '../../../../../expressions/public';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 import { DistinctSeries, getDistinctSeries } from '../get_distinct_series';
+
+const isTreemapOrMosaicChart = (shape: ChartTypes) =>
+  [ChartTypes.MOSAIC, ChartTypes.TREEMAP].includes(shape);
+
+export const byDataColorPaletteMap = (
+  rows: Datatable['rows'],
+  columnId: string,
+  paletteDefinition: PaletteDefinition,
+  { params }: PaletteOutput
+) => {
+  const colorMap = new Map<string, string | undefined>(
+    rows.map((item) => [String(item[columnId]), undefined])
+  );
+  let rankAtDepth = 0;
+
+  return {
+    getColor: (item: unknown) => {
+      const key = String(item);
+      if (!colorMap.has(key)) return;
+
+      let color = colorMap.get(key);
+      if (color) {
+        return color;
+      }
+      color =
+        paletteDefinition.getCategoricalColor(
+          [
+            {
+              name: key,
+              totalSeriesAtDepth: colorMap.size,
+              rankAtDepth: rankAtDepth++,
+            },
+          ],
+          { behindText: false },
+          params
+        ) || undefined;
+
+      colorMap.set(key, color);
+      return color;
+    },
+  };
+};
 
 const getDistinctColor = (
   d: ShapeTreeNode,
@@ -110,13 +158,16 @@ const overrideColorForOldVisualization = (
 };
 
 export const getColor = (
+  chartType: ChartTypes,
   d: ShapeTreeNode,
+  layerIndex: number,
   isSplitChart: boolean,
   overwriteColors: { [key: string]: string } = {},
   columns: Array<Partial<BucketColumns>>,
   rows: DatatableRow[],
   visParams: PartitionVisParams,
   palettes: PaletteRegistry | null,
+  byDataPalette: ReturnType<typeof byDataColorPaletteMap>,
   syncColors: boolean,
   isDarkMode: boolean,
   formatter: FieldFormatsStart,
@@ -126,28 +177,29 @@ export const getColor = (
   const { parentSeries } = distinctSeries;
   const dataName = d.dataName;
 
+  // Mind the difference here: the contrast computation for the text ignores the alpha/opacity
+  // therefore change it for dask mode
+  const defaultColor = isDarkMode ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)';
+
   let name = '';
   if (format) {
     name = formatter.deserialize(format).convert(dataName) ?? '';
   }
 
-  // Vis specific
   if (visParams.distinctColors) {
-    return getDistinctColor(
-      d,
-      isSplitChart,
-      overwriteColors,
-      visParams,
-      palettes,
-      syncColors,
-      distinctSeries,
-      name
+    return (
+      getDistinctColor(
+        d,
+        isSplitChart,
+        overwriteColors,
+        visParams,
+        palettes,
+        syncColors,
+        distinctSeries,
+        name
+      ) || defaultColor
     );
   }
-
-  // Mind the difference here: the contrast computation for the text ignores the alpha/opacity
-  // therefore change it for dask mode
-  const defaultColor = isDarkMode ? 'rgba(0,0,0,0)' : 'rgba(255,255,255,0)';
 
   const seriesLayers = createSeriesLayers(d, parentSeries, isSplitChart);
 
@@ -156,10 +208,24 @@ export const getColor = (
     return lightenColor(overwriteColor, seriesLayers.length, columns.length);
   }
 
+  if (chartType === ChartTypes.MOSAIC && byDataPalette && seriesLayers[1]) {
+    return byDataPalette.getColor(seriesLayers[1].name) || defaultColor;
+  }
+
+  if (isTreemapOrMosaicChart(chartType)) {
+    if (layerIndex < columns.length - 1) {
+      return defaultColor;
+    }
+    // only use the top level series layer for coloring
+    if (seriesLayers.length > 1) {
+      seriesLayers.pop();
+    }
+  }
+
   const outputColor = palettes?.get(visParams.palette.name).getCategoricalColor(
     seriesLayers,
     {
-      behindText: visParams.labels.show,
+      behindText: visParams.labels.show || isTreemapOrMosaicChart(chartType),
       maxDepth: columns.length,
       totalSeries: rows.length,
       syncColors,

@@ -12,12 +12,12 @@ import { PaletteRegistry } from '../../../../../charts/public';
 import type { Datatable, DatatableRow } from '../../../../../expressions/public';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
 import { sortPredicateByType } from './sort_predicate';
-import { getColor } from './get_color';
+import { byDataColorPaletteMap, getColor } from './get_color';
 
 const EMPTY_SLICE = Symbol('empty_slice');
 
 export const getLayers = (
-  visType: ChartTypes,
+  chartType: ChartTypes,
   columns: Array<Partial<BucketColumns>>,
   visParams: PartitionVisParams,
   visData: Datatable,
@@ -38,7 +38,16 @@ export const getLayers = (
     fillLabel.valueFormatter = () => '';
   }
   const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
-  return columns.map((col) => {
+  let byDataPalette: ReturnType<typeof byDataColorPaletteMap>;
+  if (!syncColors && columns[1]?.id && palettes && visParams.palette) {
+    byDataPalette = byDataColorPaletteMap(
+      rows,
+      columns[1].id,
+      palettes?.get(visParams.palette.name),
+      visParams.palette
+    );
+  }
+  return columns.map((col, layerIndex) => {
     return {
       groupByRollup: (d: Datum) => {
         return col.id ? d[col.id] ?? EMPTY_SLICE : col.name;
@@ -54,25 +63,25 @@ export const getLayers = (
         return String(d);
       },
       fillLabel,
-      sortPredicate: sortPredicateByType(visType, visParams, visData, columns, col),
+      sortPredicate: sortPredicateByType(chartType, visParams, visData, columns, col),
       shape: {
-        fillColor: (d) => {
-          const outputColor = getColor(
+        fillColor: (d) =>
+          getColor(
+            chartType,
             d,
+            layerIndex,
             isSplitChart,
             overwriteColors,
             columns,
             rows,
             visParams,
             palettes,
+            byDataPalette,
             syncColors,
             isDarkMode,
             formatter,
             col.format
-          );
-
-          return outputColor || 'rgba(0,0,0,0)';
-        },
+          ),
       },
     };
   });
