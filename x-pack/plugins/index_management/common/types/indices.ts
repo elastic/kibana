@@ -56,10 +56,10 @@ export interface Index {
   status: string;
   name: string;
   uuid: string;
-  primary: string;
-  replica: string;
-  documents?: string;
-  size: any;
+  primary: number;
+  replica: number;
+  documents: number;
+  size: string;
   isFrozen: boolean;
   hidden: boolean;
   aliases: string | string[];
