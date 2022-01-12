@@ -17,6 +17,7 @@ import { ManifestSchema } from '../../../../plugins/security_solution/common/end
 import { policyFactory } from '../../../../plugins/security_solution/common/endpoint/models/policy_config';
 import { popupVersionsMap } from '../../../../plugins/security_solution/public/management/pages/policy/view/policy_forms/protections/popup_options_to_versions';
 
+// Made a difference to build a PR
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const retryService = getService('retry');
