@@ -185,7 +185,7 @@ export const createLifecycleExecutor =
     const trackedAlertStates = Object.values(state.trackedAlerts);
 
     logger.debug(
-      `Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStates.length} previous)`
+      `[Rule Registry] Tracking ${allAlertIds.length} alerts (${newAlertIds.length} new, ${trackedAlertStates.length} previous)`
     );
 
     const trackedAlertsDataMap: Record<
@@ -216,7 +216,7 @@ export const createLifecycleExecutor =
         const currentAlertData = currentAlerts[alertId];
 
         if (!alertData) {
-          logger.debug(`Could not find alert data for ${alertId}`);
+          logger.debug(`[Rule Registry] Could not find alert data for ${alertId}`);
         }
 
         const isNew = !state.trackedAlerts[alertId];
@@ -264,7 +264,7 @@ export const createLifecycleExecutor =
     const writeAlerts = ruleDataClient.isWriteEnabled() && shouldWriteAlerts();
 
     if (allEventsToIndex.length > 0 && writeAlerts) {
-      logger.debug(`Preparing to index ${allEventsToIndex.length} alerts.`);
+      logger.debug(`[Rule Registry] Preparing to index ${allEventsToIndex.length} alerts.`);
 
       await ruleDataClient.getWriter().bulk({
         body: allEventsToIndex.flatMap(({ event, indexName }) => [
