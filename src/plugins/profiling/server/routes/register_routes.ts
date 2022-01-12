@@ -11,12 +11,12 @@ import { registerTraceEventsTopNStackTracesSearchRoute } from './search_topNStac
 import { registerTraceEventsTopNContainersSearchRoute } from './search_topNContainers';
 import { registerTraceEventsTopNDeploymentsSearchRoute } from './search_topNDeployments';
 import { registerTraceEventsTopNThreadsSearchRoute } from './search_topNThreads';
-import { registerFlamegraphSearchRoute } from './search_flamegraph';
+import { registerFlameChartSearchRoute } from './search_flameChart';
 
 export function registerRoutes(router: IRouter<DataRequestHandlerContext>) {
   registerTraceEventsTopNStackTracesSearchRoute(router);
   registerTraceEventsTopNContainersSearchRoute(router);
   registerTraceEventsTopNDeploymentsSearchRoute(router);
   registerTraceEventsTopNThreadsSearchRoute(router);
-  registerFlamegraphSearchRoute(router);
+  registerFlameChartSearchRoute(router);
 }
