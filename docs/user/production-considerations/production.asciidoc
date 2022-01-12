@@ -85,7 +85,6 @@ active in case of failure from the currently used instance.
 
 [float]
 [[reporting-load-balanced-kibana]]
-=== Reporting and multiple load-balanced {kib} clusters
 
 
 [float]
