@@ -43,7 +43,7 @@ RUNTIME_DEPS = [
 
 TYPES_DEPS = [
   "//packages/elastic-datemath:npm_module_types",
-  "//packages/elastic-safer-lodash-set",
+  "//packages/elastic-safer-lodash-set:npm_module_types",
   "//packages/kbn-analytics:npm_module_types",
   "//packages/kbn-i18n:npm_module_types",
   "//packages/kbn-i18n-react:npm_module_types",
