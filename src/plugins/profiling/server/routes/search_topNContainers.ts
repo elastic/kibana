@@ -10,13 +10,15 @@ import { IEsSearchRequest } from '../../../data/server';
 import { IEsSearchResponse } from '../../../data/common';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import type { IRouter } from '../../../../core/server';
-import { TRACE_EVENTS_TOPN_CONTAINERS_SEARCH_ROUTE_PATH } from '../../common';
+import { TOPN_CONTAINERS_ROUTE_PATH } from '../../common';
 import { getDocID } from './index';
 
-export function registerTraceEventsTopNContainersSearchRoute(router: IRouter<DataRequestHandlerContext>) {
+export function registerTraceEventsTopNContainersSearchRoute(
+  router: IRouter<DataRequestHandlerContext>
+) {
   router.get(
     {
-      path: TRACE_EVENTS_TOPN_CONTAINERS_SEARCH_ROUTE_PATH,
+      path: TOPN_CONTAINERS_ROUTE_PATH,
       validate: {
         query: schema.object({
           index: schema.maybe(schema.string()),
@@ -52,7 +54,7 @@ export function registerTraceEventsTopNContainersSearchRoute(router: IRouter<Dat
                             TimeStamp: {
                               gte: timeFrom,
                               lt: timeTo,
-                              format: 'strict_date_optional_time',
+                              format: 'epoch_second',
                               boost: 1.0,
                             },
                           },
@@ -62,16 +64,16 @@ export function registerTraceEventsTopNContainersSearchRoute(router: IRouter<Dat
                   },
                   aggs: {
                     histogram: {
-                      date_histogram: {
+                      auto_date_histogram: {
                         field: 'TimeStamp',
-                        fixed_interval: '100s',
+                        buckets: 100,
                       },
                       aggs: {
                         group_by: {
                           terms: {
                             field: 'ContainerName',
+                            size: 100,
                           },
-                          size: 10000,
                         },
                       },
                     },
@@ -83,29 +85,9 @@ export function registerTraceEventsTopNContainersSearchRoute(router: IRouter<Dat
           )
           .toPromise();
 
-        const docIDs: string[] = [];
-        // @ts-ignore
-        resTopNStackTraces.rawResponse.aggregations.histogram.buckets.forEach((timeInterval) => {
-          timeInterval.group_by.buckets.forEach((stackTraceItem: any) => {
-            const bigIntKey0 = BigInt(stackTraceItem.key[0]);
-            const bigIntKey1 = BigInt(stackTraceItem.key[1]);
-            const docID = getDocID(bigIntKey0, bigIntKey1);
-
-            docIDs.push(docID);
-          });
-        });
-
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
-
-        const resTraceMetadata = await esClient.mget<any>({
-          index: 'profiling-stacktraces',
-          body: { ids: docIDs },
-        });
-
         return response.ok({
           body: {
-            topNContainers: (resTopNStackTraces as IEsSearchResponse).rawResponse.aggregations,
-            traceMetadata: resTraceMetadata.body.docs,
+            topN: (resTopNStackTraces as IEsSearchResponse).rawResponse.aggregations,
           },
         });
       } catch (e) {

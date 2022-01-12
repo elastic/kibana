@@ -10,13 +10,13 @@ import { IEsSearchRequest } from '../../../data/server';
 import { IEsSearchResponse } from '../../../data/common';
 import type { DataRequestHandlerContext } from '../../../data/server';
 import type { IRouter } from '../../../../core/server';
-import { FLAMEGRAPH_SEARCH_ROUTE_PATH } from '../../common';
+import { FLAMECHART_ROUTE_PATH } from '../../common';
 import { getDocID } from './index';
 
-export function registerFlamegraphSearchRoute(router: IRouter<DataRequestHandlerContext>) {
+export function registerFlameChartSearchRoute(router: IRouter<DataRequestHandlerContext>) {
   router.get(
     {
-      path: FLAMEGRAPH_SEARCH_ROUTE_PATH,
+      path: FLAMECHART_ROUTE_PATH,
       validate: {
         query: schema.object({
           index: schema.maybe(schema.string()),
