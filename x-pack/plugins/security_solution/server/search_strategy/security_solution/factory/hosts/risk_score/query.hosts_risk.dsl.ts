@@ -6,7 +6,6 @@
  */
 
 import { Direction, HostsRiskScoreRequestOptions } from '../../../../../../common/search_strategy';
-import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 const QUERY_SIZE = 10;
 
@@ -14,11 +13,10 @@ export const buildHostsRiskScoreQuery = ({
   timerange,
   hostNames,
   defaultIndex,
-  filterQuery,
   limit = QUERY_SIZE,
   sortOrder = Direction.desc,
 }: HostsRiskScoreRequestOptions) => {
-  const filter = [...createQueryFilterClauses(filterQuery)];
+  const filter = [];
 
   if (timerange) {
     filter.push({

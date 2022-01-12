@@ -19,14 +19,12 @@ import { HeaderSection } from '../../../common/components/header_section';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import * as i18n from './translations';
 import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
-import { ESTermQuery } from '../../../../common/typed_json';
 import { Direction } from '../../../../../timelines/common';
 
 export interface TopHostScoreContributorsProps {
   hostName: string;
   from: string;
   to: string;
-  filterQuery?: ESTermQuery | string;
 }
 
 interface TableItem {
@@ -56,7 +54,6 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
   hostName,
   from,
   to,
-  filterQuery,
 }) => {
   const timerange = useMemo(
     () => ({
@@ -69,7 +66,6 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
   const hostRisk = useHostsRiskScore({
     hostName,
     timerange,
-    filterQuery,
     onlyLatest: false,
     queryId: QUERY_ID,
     limit: 1,

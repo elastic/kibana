@@ -19,32 +19,19 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   margin-top: ${({ theme }) => theme.eui.paddingSizes.l};
 `;
 
-const HostRiskTabBodyComponent: React.FC<HostsComponentsQueryProps & { hostName: string }> = ({
-  hostName,
-  startDate,
-  endDate,
-  filterQuery,
-}) => {
+const HostRiskTabBodyComponent: React.FC<
+  Pick<HostsComponentsQueryProps, 'startDate' | 'endDate'> & { hostName: string }
+> = ({ hostName, startDate, endDate }) => {
   const { buttonHref } = useRiskyHostsDashboardButtonHref(startDate, endDate);
 
   return (
     <>
       <EuiFlexGroup direction="row">
         <EuiFlexItem grow={2}>
-          <HostRiskScoreOverTime
-            hostName={hostName}
-            from={startDate}
-            to={endDate}
-            filterQuery={filterQuery}
-          />
+          <HostRiskScoreOverTime hostName={hostName} from={startDate} to={endDate} />
         </EuiFlexItem>
         <EuiFlexItem grow={1}>
-          <TopHostScoreContributors
-            hostName={hostName}
-            from={startDate}
-            to={endDate}
-            filterQuery={filterQuery}
-          />
+          <TopHostScoreContributors hostName={hostName} from={startDate} to={endDate} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <StyledEuiFlexGroup gutterSize="s">

@@ -11,7 +11,6 @@ import type {
   IEsSearchResponse,
 } from '../../../../../../../../src/plugins/data/common';
 import { RISKY_HOSTS_INDEX_PREFIX } from '../../../../constants';
-import { ESTermQuery } from '../../../../typed_json';
 import { Direction, Inspect, Maybe, TimerangeInput } from '../../../common';
 
 export interface HostsRiskScoreRequestOptions extends IEsSearchRequest {
@@ -19,7 +18,6 @@ export interface HostsRiskScoreRequestOptions extends IEsSearchRequest {
   factoryQueryType?: FactoryQueryTypes;
   hostNames?: string[];
   timerange?: TimerangeInput;
-  filterQuery?: ESTermQuery | string;
   onlyLatest?: boolean;
   limit?: number;
   sortOrder?: Direction.asc | Direction.desc;

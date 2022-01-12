@@ -16,7 +16,6 @@ import { Direction, getHostRiskIndex, HostsRiskScore } from '../../../../common/
 
 import { useHostsRiskScoreComplete } from './use_hosts_risk_score_complete';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
-import { ESTermQuery } from '../../../../common/typed_json';
 
 export const QUERY_ID = 'host_risk_score';
 const noop = () => {};
@@ -41,13 +40,11 @@ export const useHostsRiskScore = ({
   timerange,
   hostName,
   onlyLatest = true,
-  filterQuery,
   queryId = QUERY_ID,
   sortOrder,
   limit,
 }: {
   timerange?: { to: string; from: string };
-  filterQuery?: ESTermQuery | string;
   hostName?: string;
   onlyLatest?: boolean;
   queryId?: string;
@@ -114,7 +111,6 @@ export const useHostsRiskScore = ({
           timerange: timerange
             ? { to: timerange.to, from: timerange.from, interval: '' }
             : undefined,
-          filterQuery,
           hostNames: hostName ? [hostName] : undefined,
           defaultIndex: [getHostRiskIndex(space.id, onlyLatest)],
           onlyLatest,
@@ -127,7 +123,6 @@ export const useHostsRiskScore = ({
     start,
     data,
     timerange,
-    filterQuery,
     hostName,
     onlyLatest,
     riskyHostsFeatureEnabled,

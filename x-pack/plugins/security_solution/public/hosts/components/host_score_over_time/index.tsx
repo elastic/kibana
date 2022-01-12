@@ -27,14 +27,12 @@ import { HeaderSection } from '../../../common/components/header_section';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import * as i18n from './translations';
 import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
-import { ESTermQuery } from '../../../../common/typed_json';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 
 export interface HostRiskScoreOverTimeProps {
   hostName: string;
   from: string;
   to: string;
-  filterQuery?: ESTermQuery | string;
 }
 
 const RISKY_TRESHOULD = 70;
@@ -56,7 +54,6 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
   hostName,
   from,
   to,
-  filterQuery,
 }) => {
   const timeZone = useTimeZone();
 
@@ -80,7 +77,6 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
     hostName,
     onlyLatest: false,
     timerange,
-    filterQuery,
     queryId: QUERY_ID,
   });
 
