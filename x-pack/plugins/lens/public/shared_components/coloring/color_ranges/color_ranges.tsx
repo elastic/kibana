@@ -60,8 +60,10 @@ export function ColorRanges({
   >({});
 
   useEffect(() => {
-    setColorRangesValidity(validateColorRanges(localState.colorRanges));
-  }, [localState.colorRanges]);
+    setColorRangesValidity(
+      validateColorRanges(localState.colorRanges, dataBounds, localState.rangeType)
+    );
+  }, [localState.colorRanges, localState.rangeType, dataBounds]);
 
   useUpdateEffect(() => {
     if (paletteConfiguration) {
@@ -79,10 +81,16 @@ export function ColorRanges({
 
   useDebounce(
     () => {
-      const { continuity: localContinuity, colorRanges: localColorRanges } = localState;
+      const {
+        continuity: localContinuity,
+        colorRanges: localColorRanges,
+        rangeType: localRangeType,
+      } = localState;
 
       if (
-        Object.values(validateColorRanges(localColorRanges)).every(({ isValid }) => isValid) &&
+        Object.values(validateColorRanges(localColorRanges, dataBounds, localRangeType)).every(
+          ({ isValid }) => isValid
+        ) &&
         localColorRanges !== colorRanges
       ) {
         const { max, colorStops } = toColorStops(localColorRanges, localContinuity);
@@ -113,7 +121,7 @@ export function ColorRanges({
             rangeType={localState.rangeType}
             dataBounds={dataBounds}
             index={index}
-            isValid={colorRangesValidity[index]?.isValid}
+            validation={colorRangesValidity[index]}
             accessor="start"
           />
         </EuiFlexItem>
@@ -128,7 +136,7 @@ export function ColorRanges({
             rangeType={localState.rangeType}
             dataBounds={dataBounds}
             index={localState.colorRanges.length - 1}
-            isValid={colorRangesValidity.last?.isValid}
+            validation={colorRangesValidity.last}
             accessor="end"
           />
         </EuiFlexItem>

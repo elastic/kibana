@@ -10,7 +10,7 @@ Array [
       "start": 20,
     },
     "index": 0,
-    "isValid": true,
+    "isValid": undefined,
   },
   Object {
     "accessor": "start",
@@ -20,7 +20,7 @@ Array [
       "start": 40,
     },
     "index": 1,
-    "isValid": true,
+    "isValid": undefined,
   },
   Object {
     "accessor": "start",
@@ -30,7 +30,7 @@ Array [
       "start": 60,
     },
     "index": 2,
-    "isValid": true,
+    "isValid": undefined,
   },
   Object {
     "accessor": "start",
@@ -40,7 +40,7 @@ Array [
       "start": 80,
     },
     "index": 3,
-    "isValid": true,
+    "isValid": undefined,
   },
   Object {
     "accessor": "end",
@@ -50,7 +50,7 @@ Array [
       "start": 80,
     },
     "index": 3,
-    "isValid": true,
+    "isValid": undefined,
   },
 ]
 `;
@@ -65,7 +65,7 @@ Array [
       "start": 0,
     },
     "index": 0,
-    "isValid": true,
+    "isValid": undefined,
   },
   Object {
     "accessor": "start",
@@ -75,7 +75,7 @@ Array [
       "start": 50,
     },
     "index": 1,
-    "isValid": true,
+    "isValid": undefined,
   },
   Object {
     "accessor": "start",
@@ -85,7 +85,7 @@ Array [
       "start": 100,
     },
     "index": 2,
-    "isValid": true,
+    "isValid": undefined,
   },
   Object {
     "accessor": "start",
@@ -95,7 +95,7 @@ Array [
       "start": 150,
     },
     "index": 3,
-    "isValid": true,
+    "isValid": undefined,
   },
   Object {
     "accessor": "end",
@@ -105,7 +105,7 @@ Array [
       "start": 150,
     },
     "index": 3,
-    "isValid": true,
+    "isValid": undefined,
   },
 ]
 `;
@@ -129,7 +129,7 @@ Array [
       "start": 40,
     },
     "index": 0,
-    "isValid": true,
+    "isValid": undefined,
   },
   Object {
     "accessor": "start",
@@ -139,7 +139,7 @@ Array [
       "start": 60,
     },
     "index": 1,
-    "isValid": true,
+    "isValid": undefined,
   },
   Object {
     "accessor": "start",
@@ -149,7 +149,7 @@ Array [
       "start": 65,
     },
     "index": 2,
-    "isValid": true,
+    "isValid": undefined,
   },
   Object {
     "accessor": "end",
@@ -159,7 +159,7 @@ Array [
       "start": 65,
     },
     "index": 2,
-    "isValid": true,
+    "isValid": undefined,
   },
 ]
 `;
