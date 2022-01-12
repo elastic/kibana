@@ -268,10 +268,11 @@ export const duplicateRules = async ({ rules }: DuplicateRulesProps): Promise<Bu
 export const performBulkAction = async <Action extends BulkAction>({
   action,
   query,
+  edit,
 }: BulkActionProps<Action>): Promise<BulkActionResponse<Action>> =>
   KibanaServices.get().http.fetch<BulkActionResponse<Action>>(DETECTION_ENGINE_RULES_BULK_ACTION, {
     method: 'POST',
-    body: JSON.stringify({ action, query }),
+    body: JSON.stringify({ action, query, ...(edit ? { edit } : {}) }),
   });
 
 /**

@@ -8,7 +8,10 @@
 import React, { Dispatch } from 'react';
 import { NavigateToAppOptions } from '../../../../../../../../../src/core/public';
 import { APP_UI_ID } from '../../../../../../common/constants';
-import { BulkAction } from '../../../../../../common/detection_engine/schemas/common/schemas';
+import {
+  BulkAction,
+  BulkActionEditPayload,
+} from '../../../../../../common/detection_engine/schemas/common/schemas';
 import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { SecurityPageName } from '../../../../../app/types';
 import { getEditRuleUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
@@ -177,7 +180,8 @@ export const rulesBulkActionByQuery = async (
   query: string,
   action: BulkAction,
   dispatch: React.Dispatch<RulesTableAction>,
-  dispatchToaster: Dispatch<ActionToaster>
+  dispatchToaster: Dispatch<ActionToaster>,
+  payload?: { edit?: BulkActionEditPayload[] }
 ) => {
   try {
     dispatch({ type: 'loadingRuleIds', ids: visibleRuleIds, actionType: action });
@@ -185,14 +189,13 @@ export const rulesBulkActionByQuery = async (
     if (action === BulkAction.export) {
       const blob = await performBulkAction({ query, action });
       downloadBlob(blob, `${i18n.EXPORT_FILENAME}.ndjson`);
-
       const exportedRulesCount = await getExportedRulesCount(blob);
       displaySuccessToast(
         i18n.SUCCESSFULLY_EXPORTED_RULES(exportedRulesCount, selectedItemsCount),
         dispatchToaster
       );
     } else {
-      await performBulkAction({ query, action });
+      await performBulkAction({ query, action, edit: payload?.edit });
     }
   } catch (e) {
     displayErrorToast(i18n.BULK_ACTION_FAILED, [e.message], dispatchToaster);

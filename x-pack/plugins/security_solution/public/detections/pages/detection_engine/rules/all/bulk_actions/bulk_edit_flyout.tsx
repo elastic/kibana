@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutFooter,
@@ -23,13 +23,15 @@ import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
 import { useKibana } from '../../../../../../common/lib/kibana';
 
 import {
+  BulkAction,
+  BulkActionEditType,
+} from '../../../../../../../common/detection_engine/schemas/common/schemas';
+
+import {
   Field,
   Form,
   getUseField,
-  UseField,
-  UseMultiFields,
   useForm,
-  useFormData,
   ERROR_CODE,
   FIELD_TYPES,
   fieldValidators,
@@ -37,108 +39,161 @@ import {
   ValidationFunc,
 } from '../../../../../../shared_imports';
 
-interface MyForm {
+import { IndexPatternsForm, schema as indexPatternsFormSchema } from './forms/index_patterns_form';
+interface IndexPatternForm {
   index: string[];
 }
+interface TagsForm {
+  tags: string[];
+}
 
-const CommonUseField = getUseField({ component: Field });
+type BulkeEditForm = IndexPatternForm | TagsForm;
 
 interface IndexEditActions {
   index: string[];
 }
 
-export const schema: FormSchema<IndexEditActions> = {
-  index: {
-    fieldsToValidateOnChange: ['index', 'queryBar'],
-    type: FIELD_TYPES.COMBO_BOX,
-    label: 'Add index patterns for selected rules',
-    // helpText: <EuiText size="xs">{INDEX_HELPER_TEXT}</EuiText>,
-    validations: [
-      {
-        validator: (
-          ...args: Parameters<ValidationFunc>
-        ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          // const [{ formData }] = args;
-
-          return fieldValidators.emptyField('A minimum of one index pattern is required.')(...args);
-        },
-      },
-    ],
-  },
-};
-
 interface FormComponentProps<T> {
   data: T;
-  //  getData: (a: T) => void;
-  formRef: ReturnType<typeof useRef>;
+  onChange: (formState: FormState<T>) => void;
+  editAction: BulkActionEditType;
 }
 
-export const FormComponent = <T,>({ data, formRef }: FormComponentProps<T>) => {
-  const { uiSettings } = useKibana().services;
+const isIndexPatternsEditAction = (editAction: BulkActionEditType) =>
+  [
+    BulkActionEditType.add_index_patterns,
+    BulkActionEditType.delete_index_patterns,
+    BulkActionEditType.set_index_patterns,
+  ].includes(editAction);
+
+const isTagsEditAction = (editAction: BulkActionEditType) =>
+  [
+    BulkActionEditType.add_tags,
+    BulkActionEditType.delete_tags,
+    BulkActionEditType.set_tags,
+  ].includes(editAction);
+
+const computeFormSchema = (editAction: BulkActionEditType) => {
+  if (isIndexPatternsEditAction(editAction)) {
+    return indexPatternsFormSchema;
+  }
+};
+
+export const FormComponent = <T,>({ data, onChange, editAction }: FormComponentProps<T>) => {
+  const schema = computeFormSchema(editAction);
   const { form } = useForm<T>({
     defaultValue: data,
     schema,
   });
 
-  const defaultPatterns = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
+  const { isValid, validate, getFormData } = form;
 
-  //   const { getFields, getFormData, reset, submit } = form;
-  if (formRef?.current) {
-    formRef.current = form;
-  }
+  useEffect(() => {
+    const updatedFormState = { isValid, getData: getFormData, validate };
+
+    // Forward the state to the parent
+    onChange(updatedFormState);
+  }, [onChange, isValid, getFormData, validate]);
 
   return (
     <Form form={form}>
-      <CommonUseField
-        path="index"
-        config={{
-          ...schema.index,
-        }}
-        componentProps={{
-          idAria: 'detectionEngineBulkEditIndices',
-          'data-test-subj': 'detectionEngineBulkEditIndices',
-          euiFieldProps: {
-            fullWidth: true,
-            placeholder: '',
-            noSuggestions: false,
-            options: defaultPatterns.map((label) => ({ label })),
-          },
-        }}
-      />
+      {isIndexPatternsEditAction(editAction) ? (
+        <IndexPatternsForm editAction={editAction} form={form} />
+      ) : isTagsEditAction(editAction) ? (
+        <h2>Tags form</h2>
+      ) : null}
     </Form>
   );
 };
+
+interface FormState<T> {
+  isValid: boolean | undefined;
+  getData(): T;
+  validate(): Promise<boolean>;
+}
+
 interface Props {
   onClose: () => void;
-  onConfirm: (a: any) => void;
+  onConfirm: (formState: IndexPatternForm) => void;
+  editAction: BulkActionEditType;
 }
-const BulkEditFlyoutComponent = ({ onClose, onConfirm }: Props) => {
-  const formRef = useRef<ReturnType<typeof useForm>>({} as ReturnType<typeof useForm>);
-  const handleSave = () => {
-    console.log('HANDLE safe', formRef?.current?.getFormData?.());
-    onConfirm(formRef?.current?.getFormData?.());
+
+const flyoutTitleMap: Record<BulkActionEditType, string> = {
+  [BulkActionEditType.add_index_patterns]: 'Add index patterns',
+  [BulkActionEditType.delete_index_patterns]: 'Delete index patterns',
+  [BulkActionEditType.add_tags]: 'Add tags',
+  [BulkActionEditType.delete_tags]: 'Delete tags',
+};
+
+const prepareConfirmData = (editAction: BulkActionEditType, formData: FormData) => {
+  if (isIndexPatternsEditAction(editAction)) {
+    const bulkActionEditType = formData.overwrite
+      ? BulkActionEditType.set_index_patterns
+      : editAction;
+    return { value: formData.index, type: bulkActionEditType };
+  }
+
+  if (isTagsEditAction(editAction)) {
+    const bulkActionEditType = formData.overwrite ? BulkActionEditType.set_tags : editAction;
+    return { value: formData.tags, type: bulkActionEditType };
+  }
+};
+
+const BulkEditFlyoutComponent = ({ onClose, onConfirm, editAction }: Props) => {
+  const initialFormData = useMemo(() => {
+    if (isIndexPatternsEditAction(editAction)) {
+      return { index: [], overwrite: false };
+    }
+    if (isTagsEditAction(editAction)) {
+      return { tags: [], overwrite: false };
+    }
+  }, [editAction]);
+
+  const initialState = {
+    isValid: undefined,
+    getData: () => ({}),
+    validate: async () => true,
+  } as FormState<typeof initialFormData>;
+
+  const [formState, setFormState] = useState<FormState<typeof initialFormData>>(initialState);
+
+  const handleSave = async () => {
+    const isValid = await formState.validate();
+    if (isValid) {
+      onConfirm(prepareConfirmData(editAction, formState.getData()));
+    }
   };
+
+  const sendForm = useCallback(
+    async (updatedFormState: FormState<typeof initialFormData>) => {
+      setFormState(updatedFormState);
+    },
+    [setFormState]
+  );
+  const { isValid } = formState;
+
   const flyoutTitleId = 'Bulk edit flyout';
+
   return (
     <EuiFlyout ownFocus onClose={onClose} aria-labelledby={flyoutTitleId} size="s">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id={flyoutTitleId}>Add index patterns</h2>
+          <h2 id={flyoutTitleId}>{flyoutTitleMap[editAction] ?? null}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <FormComponent formRef={formRef} data={{ index: [] }} />
+        <FormComponent onChange={sendForm} data={initialFormData} editAction={editAction} />
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onConfirm} flush="left">
+            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
               Close
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={handleSave} fill>
+            <EuiButton onClick={handleSave} fill disabled={isValid === false}>
               Save
             </EuiButton>
           </EuiFlexItem>

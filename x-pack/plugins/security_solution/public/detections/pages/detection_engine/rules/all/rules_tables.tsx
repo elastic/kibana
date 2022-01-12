@@ -54,6 +54,7 @@ import { useValueChanged } from '../../../../../common/hooks/use_value_changed';
 import { convertRulesFilterToKQL } from '../../../../containers/detection_engine/rules/utils';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 import { useAsyncConfirmation } from '../../../../containers/detection_engine/rules/rules_table/use_async_confirmation';
+import { useBulkEditFlyout } from '../../../../containers/detection_engine/rules/rules_table/use_bulk_edit_flyout';
 import { useRulesCount } from '../../../../containers/detection_engine/rules/use_rules_count';
 
 const INITIAL_SORT_FIELD = 'enabled';
@@ -206,13 +207,13 @@ export const RulesTables = React.memo<RulesTableProps>(
       onFinish: hideBulkEditConfirmation,
     });
 
-    const [isBulkEditFlyoutVisible, showBulkEditFlyout, hideBulkEditFlyout] = useBoolState();
-
-    const [performBulkEdit, handlePerformBulkEditConfirm, handlePerformBulkEditCancel] =
-      useAsyncConfirmation({
-        onInit: showBulkEditFlyout,
-        onFinish: hideBulkEditFlyout,
-      });
+    const {
+      isBulkEditFlyoutVisible,
+      handlePerformBulkEditConfirm,
+      handlePerformBulkEditCancel,
+      bulkEditActionType,
+      performBulkEdit,
+    } = useBulkEditFlyout();
 
     const selectedItemsCount = isAllSelected ? pagination.total : selectedRuleIds.length;
     const hasPagination = pagination.total > pagination.perPage;
@@ -568,8 +569,9 @@ export const RulesTables = React.memo<RulesTableProps>(
             onConfirm={handleBulkEditConfirm}
           />
         )}
-        {isBulkEditFlyoutVisible && (
+        {isBulkEditFlyoutVisible && bulkEditActionType !== undefined && (
           <BulkEditFlyout
+            editAction={bulkEditActionType}
             onClose={handlePerformBulkEditCancel}
             onConfirm={handlePerformBulkEditConfirm}
           />

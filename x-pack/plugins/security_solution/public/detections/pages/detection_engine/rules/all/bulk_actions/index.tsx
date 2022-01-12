@@ -32,6 +32,7 @@ import { canEditRuleWithActions } from '../../../../../../common/utils/privilege
 import {
   BulkAction,
   BulkActionEditType,
+  BulkActionEditPayload,
 } from '../../../../../../../common/detection_engine/schemas/common/schemas';
 
 interface GetBatchItems {
@@ -49,8 +50,8 @@ interface GetBatchItems {
   filterQuery: string;
   confirmDeletion: () => Promise<boolean>;
   confirmBulkEdit: () => Promise<boolean>;
-  performBulkEdit: () => Promise<boolean>;
-  fetchRulesCount: (filter: string) => Promise<void>
+  performBulkEdit: (bulkActionEditType: BulkActionEditType) => Promise<BulkActionEditPayload>;
+  fetchRulesCount: (filter: string) => Promise<void>;
   selectedItemsCount: number;
 }
 
@@ -194,7 +195,7 @@ export const getBatchItems = ({
     }
   };
 
-  const handleBulkEdit = (bulkEditAction: BulkActionEditType) => async () => {
+  const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
     closePopover();
 
     if (isAllSelected) {
@@ -202,24 +203,26 @@ export const getBatchItems = ({
     }
 
     if ((await confirmBulkEdit()) === false) {
+      // User has cancelled edit action
       return;
     }
 
-    if ((await performBulkEdit()) === false) {
-      return;
+    try {
+      const editPayload = await performBulkEdit(bulkEditActionType);
+
+      await rulesBulkActionByQuery(
+        selectedRuleIds,
+        selectedItemsCount,
+        filterQuery,
+        BulkAction.edit,
+        dispatch,
+        dispatchToaster,
+        { edit: [editPayload] }
+      );
+      await reFetchRules();
+    } catch (e) {
+      // user has cancelled form or error has occured
     }
-
-   // alert('should do EDIT action');
-    // await rulesBulkActionByQuery(
-    //   selectedRuleIds,
-    //   selectedItemsCount,
-    //   filterQuery,
-    //   BulkAction.edit,
-    //   dispatch,
-    //   dispatchToaster
-    // );
-
-    // await reFetchRules();
   };
 
   const isDeleteDisabled = containsLoading || selectedRuleIds.length === 0;
@@ -264,6 +267,24 @@ export const getBatchItems = ({
           name: i18n.BULK_ACTION_DELETE_INDEX_PATTERNS,
           'data-test-subj': 'deleteIndexPatternsBulkEditRule',
           onClick: handleBulkEdit(BulkActionEditType.delete_index_patterns),
+          disabled: missingActionPrivileges || containsLoading || selectedRuleIds.length === 0,
+          toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+          toolTipPosition: 'right',
+        },
+        {
+          key: 'Add tags',
+          name: 'Add tags',
+          'data-test-subj': 'addTagsBulkEditRule',
+          onClick: handleBulkEdit(BulkActionEditType.add_tags),
+          disabled: missingActionPrivileges || containsLoading || selectedRuleIds.length === 0,
+          toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+          toolTipPosition: 'right',
+        },
+        {
+          key: 'Delete tags',
+          name: 'Delete tags',
+          'data-test-subj': 'deleteTagsBulkEditRule',
+          onClick: handleBulkEdit(BulkActionEditType.delete_tags),
           disabled: missingActionPrivileges || containsLoading || selectedRuleIds.length === 0,
           toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
           toolTipPosition: 'right',

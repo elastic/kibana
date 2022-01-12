@@ -32,6 +32,7 @@ import {
   BulkAction,
   ruleExecutionStatus,
   RuleExecutionStatus,
+  BulkActionEditPayload,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 import {
   CreateRulesSchema,
@@ -222,6 +223,7 @@ export interface DuplicateRulesProps {
 export interface BulkActionProps<Action extends BulkAction> {
   action: Action;
   query: string;
+  edit?: BulkActionEditPayload[];
 }
 
 export interface BulkActionResult {
