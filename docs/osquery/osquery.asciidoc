@@ -125,7 +125,7 @@ image::images/scheduled-pack.png[Shows queries in the pack and details about eac
 
 You can save queries in two ways:
 
-* After running a live query, click the *Save for later* link
+* After running a live query, click the *Save for later* link.
 * From the *Saved queries* tab, click the **Add saved query** button.
 
 Once you save a query, you can only edit it from the *Saved queries* tab.
