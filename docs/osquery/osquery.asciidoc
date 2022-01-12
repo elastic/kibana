@@ -130,7 +130,7 @@ You can save queries in two ways:
 
 Once you save a query, you can only edit it from the *Saved queries* tab.
 
-How to add or edit saved queries from the *Saved queries* tab:
+To add or edit saved queries from the *Saved queries* tab:
 
 . Go to *Saved queries*, and then click **Add saved query** or the edit icon.
 . Provide the following fields:
