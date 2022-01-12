@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf2_',
         indexPatternName: 'ft_module_sample_logs',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1585576710000,
       },
       expected: {
         responseCode: 200,
@@ -106,7 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf3_',
         indexPatternName: 'ft_module_apache',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1536933580000,
       },
       expected: {
         responseCode: 200,
@@ -161,7 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf4_',
         indexPatternName: 'ft_module_apm',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1632925220000,
       },
       expected: {
         responseCode: 200,
@@ -225,7 +225,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf6_',
         indexPatternName: 'ft_module_logs',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1556570920000,
       },
       expected: {
         responseCode: 200,
@@ -252,7 +252,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf7_',
         indexPatternName: 'ft_module_logs',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1556570920000,
       },
       expected: {
         responseCode: 200,
@@ -278,7 +278,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf8_',
         indexPatternName: 'ft_module_nginx',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1542372260000,
       },
       expected: {
         responseCode: 200,
@@ -333,7 +333,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf9_',
         indexPatternName: 'ft_module_sample_ecommerce',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1585260210000,
       },
       expected: {
         responseCode: 200,
@@ -360,7 +360,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf11_',
         indexPatternName: 'ft_module_siem_auditbeat',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1566403650000,
       },
       expected: {
         responseCode: 200,
@@ -387,7 +387,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf12_',
         indexPatternName: 'ft_module_siem_packetbeat',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1588688580000,
       },
       expected: {
         responseCode: 200,
@@ -434,7 +434,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf13_',
         indexPatternName: 'ft_module_heartbeat',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1584117860000,
       },
       expected: {
         responseCode: 200,
@@ -461,7 +461,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf14_',
         indexPatternName: 'ft_module_auditbeat',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1597847410000,
       },
       expected: {
         responseCode: 200,
@@ -500,7 +500,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf15_',
         indexPatternName: 'ft_logs-endpoint.events.*',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1606858680000,
       },
       expected: {
         responseCode: 200,
@@ -552,7 +552,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf16_',
         indexPatternName: 'ft_logs-endpoint.events.*',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1606858580000,
       },
       expected: {
         responseCode: 200,
@@ -614,7 +614,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf17_',
         indexPatternName: 'ft_module_metricbeat',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1554501720000,
       },
       expected: {
         responseCode: 200,
@@ -651,7 +651,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf18_',
         indexPatternName: 'ft_module_metrics_ui',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1599762970000,
       },
       expected: {
         responseCode: 200,
@@ -688,7 +688,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf19_',
         indexPatternName: 'ft_module_metrics_ui',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1599763000000,
       },
       expected: {
         responseCode: 200,
@@ -725,7 +725,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf20_',
         indexPatternName: 'ft_module_siem_cloudtrail',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1594231870000,
       },
       expected: {
         responseCode: 200,
@@ -772,7 +772,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf21_',
         indexPatternName: 'ft_module_siem_winlogbeat',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1595382280000,
       },
       expected: {
         responseCode: 200,
@@ -849,7 +849,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf22_',
         indexPatternName: 'ft_module_siem_winlogbeat',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1566321950000,
       },
       expected: {
         responseCode: 200,
@@ -876,7 +876,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf23_',
         indexPatternName: 'ft_module_apache_data_stream',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1536933580000,
       },
       expected: {
         responseCode: 200,
@@ -923,7 +923,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf24_',
         indexPatternName: 'ft_module_nginx_data_stream',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1542372260000,
       },
       expected: {
         responseCode: 200,
