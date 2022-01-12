@@ -13,6 +13,7 @@ import { Redirect } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
 import { RouteComponentProps, RouteProps } from 'react-router-dom';
 import {
   AppMountParameters,
@@ -23,7 +24,7 @@ import {
 import {
   KibanaContextProvider,
   RedirectAppLinks,
-  useUiSetting$,
+  useKibana,
 } from '@kbn/kibana-react-plugin/public';
 
 import {
@@ -31,6 +32,7 @@ import {
   InspectorContextProvider,
   useBreadcrumbs,
 } from '@kbn/observability-plugin/public';
+
 import {
   DASHBOARD_LABEL,
   RumHome,
@@ -62,7 +64,9 @@ export const uxRoutes: RouteDefinition[] = [
 ];
 
 function UxApp() {
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+  const { services } = useKibana();
+  const theme = useObservable(services.theme!.theme$);
+  const darkMode = theme?.darkMode || false;
 
   const { http } = useKibanaServices();
   const basePath = http.basePath.get();

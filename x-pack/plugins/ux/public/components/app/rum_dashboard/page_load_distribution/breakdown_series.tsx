@@ -12,7 +12,8 @@ import {
   EUI_CHARTS_THEME_DARK,
   EUI_CHARTS_THEME_LIGHT,
 } from '@elastic/eui/dist/eui_charts_theme';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { PercentileRange } from '.';
 import { useBreakdowns } from './use_breakdowns';
 
@@ -29,7 +30,9 @@ export function BreakdownSeries({
   percentileRange,
   onLoadingChange,
 }: Props) {
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+  const { services } = useKibana();
+  const theme = useObservable(services.theme!.theme$);
+  const darkMode = theme?.darkMode || false;
 
   const euiChartTheme = darkMode
     ? EUI_CHARTS_THEME_DARK

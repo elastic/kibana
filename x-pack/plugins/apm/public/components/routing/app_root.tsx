@@ -10,11 +10,12 @@ import { RouteRenderer, RouterProvider } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { Route } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
+import useObservable from 'react-use/lib/useObservable';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
-  useUiSetting$,
+  useKibana,
 } from '@kbn/kibana-react-plugin/public';
 import {
   HeaderMenuPortal,
@@ -109,7 +110,9 @@ function MountApmHeaderActionMenu() {
 }
 
 function ApmThemeProvider({ children }: { children: React.ReactNode }) {
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+  const { services } = useKibana();
+  const theme = useObservable(services.theme!.theme$);
+  const darkMode = theme?.darkMode || false;
 
   return (
     <ThemeProvider

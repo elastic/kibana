@@ -27,7 +27,8 @@ import numeral from '@elastic/numeral';
 import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { ChartWrapper } from '../chart_wrapper';
@@ -76,7 +77,9 @@ export function PageViewsChart({ data, loading }: Props) {
 
   const breakdownAccessors = data?.topItems?.length ? data?.topItems : ['y'];
 
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
+  const { services } = useKibana();
+  const theme = useObservable(services.theme!.theme$);
+  const darkMode = theme?.darkMode || false;
 
   const customSeriesNaming: SeriesNameFn = ({ yAccessor }) => {
     if (yAccessor === 'y') {
