@@ -25,6 +25,7 @@ import { AdministrationListPage } from '../../../components/administration_list_
 import { ArtifactEntryCard, ArtifactEntryCardProps } from '../../../components/artifact_entry_card';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
 import { BackToExternalAppSecondaryButton } from '../../../components/back_to_external_app_secondary_button';
+import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 import { ManagementPageLoader } from '../../../components/management_page_loader';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
 import { SearchExceptions } from '../../../components/search_exceptions';
@@ -55,6 +56,27 @@ export const HostIsolationExceptionsList = () => {
 
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
+
+  const [memoizedRouteState, setMemoizedRouteState] = useState<ListPageRouteState | undefined>();
+  useEffect(() => {
+    if (routeState && routeState.onBackButtonNavigateTo) {
+      setMemoizedRouteState(routeState);
+    }
+  }, [routeState]);
+
+  const backButtonEmptyComponent = useMemo(() => {
+    if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
+      return <BackToExternalAppSecondaryButton {...memoizedRouteState} />;
+    }
+    return null;
+  }, [memoizedRouteState]);
+
+  const backButtonHeaderComponent = useMemo(() => {
+    if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
+      return <BackToExternalAppButton {...memoizedRouteState} />;
+    }
+    return null;
+  }, [memoizedRouteState]);
 
   const [itemToDelete, setItemToDelete] = useState<ExceptionListItemSchema | null>(null);
 
@@ -155,13 +177,6 @@ export const HostIsolationExceptionsList = () => {
       [navigateCallback]
     );
 
-  const backButton = useMemo(() => {
-    if (routeState && routeState.onBackButtonNavigateTo) {
-      return <BackToExternalAppSecondaryButton {...routeState} />;
-    }
-    return null;
-  }, [routeState]);
-
   const handleAddButtonClick = useCallback(
     () =>
       navigateCallback({
@@ -193,7 +208,7 @@ export const HostIsolationExceptionsList = () => {
 
   return (
     <AdministrationListPage
-      headerBackComponent={backButton}
+      headerBackComponent={backButtonHeaderComponent}
       title={
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.list.pageTitle"
@@ -275,7 +290,7 @@ export const HostIsolationExceptionsList = () => {
           !hasDataToShow && (
             <HostIsolationExceptionsEmptyState
               onAdd={handleAddButtonClick}
-              backComponent={backButton}
+              backComponent={backButtonEmptyComponent}
             />
           )
         }

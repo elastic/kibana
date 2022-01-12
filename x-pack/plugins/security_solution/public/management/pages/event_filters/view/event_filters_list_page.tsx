@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useEffect } from 'react';
+import React, { memo, useCallback, useMemo, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -46,6 +46,7 @@ import { EventFilterDeleteModal } from './components/event_filter_delete_modal';
 
 import { SearchExceptions } from '../../../components/search_exceptions';
 import { BackToExternalAppSecondaryButton } from '../../../components/back_to_external_app_secondary_button';
+import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 import { ABOUT_EVENT_FILTERS } from './translations';
 import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
 import { useToasts } from '../../../../common/lib/kibana';
@@ -103,6 +104,27 @@ export const EventFiltersListPage = memo(() => {
   const navigateCallback = useEventFiltersNavigateCallback();
   const showFlyout = !!location.show;
 
+  const [memoizedRouteState, setMemoizedRouteState] = useState<ListPageRouteState | undefined>();
+  useEffect(() => {
+    if (routeState && routeState.onBackButtonNavigateTo) {
+      setMemoizedRouteState(routeState);
+    }
+  }, [routeState]);
+
+  const backButtonEmptyComponent = useMemo(() => {
+    if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
+      return <BackToExternalAppSecondaryButton {...memoizedRouteState} />;
+    }
+    return null;
+  }, [memoizedRouteState]);
+
+  const backButtonHeaderComponent = useMemo(() => {
+    if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
+      return <BackToExternalAppButton {...memoizedRouteState} />;
+    }
+    return null;
+  }, [memoizedRouteState]);
+
   // load the list of policies
   const policiesRequest = useGetEndpointSpecificPolicies({
     onError: (err) => {
@@ -140,13 +162,6 @@ export const EventFiltersListPage = memo(() => {
       });
     }
   }, [dispatch, formEntry, history, isActionError, location, navigateCallback]);
-
-  const backButton = useMemo(() => {
-    if (routeState && routeState.onBackButtonNavigateTo) {
-      return <BackToExternalAppSecondaryButton {...routeState} />;
-    }
-    return null;
-  }, [routeState]);
 
   const handleAddButtonClick = useCallback(
     () =>
@@ -240,6 +255,7 @@ export const EventFiltersListPage = memo(() => {
 
   return (
     <AdministrationListPage
+      headerBackComponent={backButtonHeaderComponent}
       title={
         <FormattedMessage
           id="xpack.securitySolution.eventFilters.list.pageTitle"
@@ -314,7 +330,7 @@ export const EventFiltersListPage = memo(() => {
             <EventFiltersListEmptyState
               onAdd={handleAddButtonClick}
               isAddDisabled={showFlyout}
-              backComponent={backButton}
+              backComponent={backButtonEmptyComponent}
             />
           )
         }

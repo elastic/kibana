@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback } from 'react';
+import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { useLocation } from 'react-router-dom';
@@ -32,6 +32,7 @@ import { ABOUT_TRUSTED_APPS, SEARCH_TRUSTED_APP_PLACEHOLDER } from './translatio
 import { EmptyState } from './components/empty_state';
 import { SearchExceptions } from '../../../components/search_exceptions';
 import { BackToExternalAppSecondaryButton } from '../../../components/back_to_external_app_secondary_button';
+import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 import { ListPageRouteState } from '../../../../../common/endpoint/types';
 import { ManagementPageLoader } from '../../../components/management_page_loader';
 
@@ -50,6 +51,27 @@ export const TrustedAppsPage = memo(() => {
       included_policies: includedPolicies,
     })
   );
+
+  const [memoizedRouteState, setMemoizedRouteState] = useState<ListPageRouteState | undefined>();
+  useEffect(() => {
+    if (routeState && routeState.onBackButtonNavigateTo) {
+      setMemoizedRouteState(routeState);
+    }
+  }, [routeState]);
+
+  const backButtonEmptyComponent = useMemo(() => {
+    if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
+      return <BackToExternalAppSecondaryButton {...memoizedRouteState} />;
+    }
+    return null;
+  }, [memoizedRouteState]);
+
+  const backButtonHeaderComponent = useMemo(() => {
+    if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
+      return <BackToExternalAppButton {...memoizedRouteState} />;
+    }
+    return null;
+  }, [memoizedRouteState]);
 
   const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({
     show: 'create',
@@ -74,13 +96,6 @@ export const TrustedAppsPage = memo(() => {
     () => doEntriesExist || (isCheckingIfEntriesExists && didEntriesExist),
     [didEntriesExist, doEntriesExist, isCheckingIfEntriesExists]
   );
-
-  const backButton = useMemo(() => {
-    if (routeState && routeState.onBackButtonNavigateTo) {
-      return <BackToExternalAppSecondaryButton {...routeState} />;
-    }
-    return null;
-  }, [routeState]);
 
   const addButton = (
     <EuiButton
@@ -145,7 +160,7 @@ export const TrustedAppsPage = memo(() => {
         <EmptyState
           onAdd={handleAddButtonClick}
           isAddDisabled={showCreateFlyout}
-          backComponent={backButton}
+          backComponent={backButtonEmptyComponent}
         />
       )}
     </>
@@ -154,6 +169,7 @@ export const TrustedAppsPage = memo(() => {
   return (
     <AdministrationListPage
       data-test-subj="trustedAppsListPage"
+      headerBackComponent={backButtonHeaderComponent}
       title={
         <FormattedMessage
           id="xpack.securitySolution.trustedapps.list.pageTitle"
