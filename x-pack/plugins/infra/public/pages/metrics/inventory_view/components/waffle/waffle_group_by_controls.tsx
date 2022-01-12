@@ -13,23 +13,22 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { IFieldType } from 'src/plugins/data/public';
 import { InfraGroupByOptions } from '../../../../../lib/lib';
 import { CustomFieldPanel } from './custom_field_panel';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { SnapshotGroupBy } from '../../../../../../common/http_api/snapshot_api';
 import { DropdownButton } from '../dropdown_button';
-
+import { DerivedIndexPattern } from '../../../../../containers/metrics_source';
 interface Props {
   options: Array<{ text: string; field: string; toolTipContent?: string }>;
   nodeType: InventoryItemType;
   groupBy: SnapshotGroupBy;
   onChange: (groupBy: SnapshotGroupBy) => void;
   onChangeCustomOptions: (options: InfraGroupByOptions[]) => void;
-  fields: IFieldType[];
+  fields: DerivedIndexPattern['fields'];
   customOptions: InfraGroupByOptions[];
 }
 
@@ -134,6 +133,7 @@ export class WaffleGroupByControls extends React.PureComponent<Props, State> {
       <DropdownButton
         label={i18n.translate('xpack.infra.waffle.groupByLabel', { defaultMessage: 'Group by' })}
         onClick={this.handleToggle}
+        data-test-subj={'waffleGroupByDropdown'}
       >
         {buttonBody}
       </DropdownButton>
@@ -147,7 +147,11 @@ export class WaffleGroupByControls extends React.PureComponent<Props, State> {
         panelPaddingSize="none"
         closePopover={this.handleClose}
       >
-        <StyledContextMenu initialPanelId="firstPanel" panels={panels} />
+        <StyledContextMenu
+          initialPanelId="firstPanel"
+          panels={panels}
+          data-test-subj="groupByContextMenu"
+        />
       </EuiPopover>
     );
   }

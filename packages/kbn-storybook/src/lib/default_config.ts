@@ -7,7 +7,7 @@
  */
 
 import * as path from 'path';
-import { StorybookConfig } from '@storybook/core/types';
+import { StorybookConfig } from '@storybook/core-common';
 import { Configuration } from 'webpack';
 import webpackMerge from 'webpack-merge';
 import { REPO_ROOT } from './constants';
@@ -16,9 +16,18 @@ import { default as WebpackConfig } from '../webpack.config';
 const toPath = (_path: string) => path.join(REPO_ROOT, _path);
 export const defaultConfig: StorybookConfig = {
   addons: ['@kbn/storybook/preset', '@storybook/addon-a11y', '@storybook/addon-essentials'],
-  stories: ['../**/*.stories.tsx'],
+  stories: ['../**/*.stories.tsx', '../**/*.stories.mdx'],
   typescript: {
     reactDocgen: false,
+  },
+  features: {
+    postcss: false,
+  },
+  // @ts-expect-error StorybookConfig type is incomplete
+  // https://storybook.js.org/docs/react/configure/babel#custom-configuration
+  babel: async (options) => {
+    options.presets.push('@emotion/babel-preset-css-prop');
+    return options;
   },
   webpackFinal: (config, options) => {
     if (process.env.CI) {

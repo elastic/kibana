@@ -14,12 +14,13 @@ export {
   LABEL_BORDER_SIZES,
   LAYER_TYPE,
   MAP_SAVED_OBJECT_TYPE,
+  SCALING_TYPES,
   SOURCE_TYPES,
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
 } from './constants';
 
-export {
+export type {
   EMSFileSourceDescriptor,
   ESTermSourceDescriptor,
   LayerDescriptor,

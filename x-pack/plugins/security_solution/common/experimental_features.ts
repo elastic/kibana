@@ -16,11 +16,12 @@ export const allowedExperimentalValues = Object.freeze({
   ruleRegistryEnabled: true,
   tGridEnabled: true,
   tGridEventRenderedViewEnabled: true,
-  trustedAppsByPolicyEnabled: true,
   excludePoliciesInFilterEnabled: false,
   uebaEnabled: false,
   disableIsolationUIPendingStatuses: false,
   riskyHostsEnabled: false,
+  securityRulesCancelEnabled: false,
+  pendingActionResponsesWithAck: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

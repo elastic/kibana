@@ -28,6 +28,7 @@ export interface UsageStats {
   'autocomplete:valueSuggestionMethod': string;
   'search:timeout': number;
   'visualization:visualize:legacyPieChartsLibrary': boolean;
+  'visualization:visualize:legacyHeatmapChartsLibrary': boolean;
   'doc_table:legacy': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
   'discover:searchFieldsFromSource': boolean;
@@ -37,6 +38,7 @@ export interface UsageStats {
   'securitySolution:rulesTableRefresh': string;
   'observability:enableInspectEsQueries': boolean;
   'observability:maxSuggestions': number;
+  'observability:enableComparisonByDefault': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;

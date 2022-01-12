@@ -27,7 +27,7 @@ import {
 import type { SecurityLicenseFeatures } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
+import { auditServiceMock } from '../audit/index.mock';
 import { ConfigSchema, createConfig } from '../config';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import type { SessionValue } from '../session_management';
@@ -48,7 +48,6 @@ function getMockOptions({
   selector?: AuthenticatorOptions['config']['authc']['selector'];
 } = {}) {
   return {
-    legacyAuditLogger: securityAuditLoggerMock.create(),
     audit: auditServiceMock.create(),
     getCurrentUser: jest.fn(),
     clusterClient: elasticsearchServiceMock.createClusterClient(),
@@ -1092,9 +1091,15 @@ describe('Authenticator', () => {
     let authenticator: Authenticator;
     let mockOptions: ReturnType<typeof getMockOptions>;
     let mockSessVal: SessionValue;
+    const auditLogger = {
+      log: jest.fn(),
+    };
+
     beforeEach(() => {
+      auditLogger.log.mockClear();
       mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
       mockOptions.session.get.mockResolvedValue(null);
+      mockOptions.audit.asScoped.mockReturnValue(auditLogger);
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
@@ -1376,6 +1381,26 @@ describe('Authenticator', () => {
       expect(mockOptions.session.create).not.toHaveBeenCalled();
       expect(mockOptions.session.update).not.toHaveBeenCalled();
       expect(mockOptions.session.extend).not.toHaveBeenCalled();
+    });
+
+    it('adds audit event when invalidating session.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+        AuthenticationResult.redirectTo('some-url', { state: null })
+      );
+      mockOptions.session.get.mockResolvedValue(mockSessVal);
+
+      await expect(authenticator.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.redirectTo('some-url', { state: null })
+      );
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: { action: 'user_logout', category: ['authentication'], outcome: 'unknown' },
+        })
+      );
     });
 
     it('does not clear session if provider can not handle system API request authentication with active session.', async () => {
@@ -1797,8 +1822,14 @@ describe('Authenticator', () => {
     let authenticator: Authenticator;
     let mockOptions: ReturnType<typeof getMockOptions>;
     let mockSessVal: SessionValue;
+    const auditLogger = {
+      log: jest.fn(),
+    };
+
     beforeEach(() => {
+      auditLogger.log.mockClear();
       mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
+      mockOptions.audit.asScoped.mockReturnValue(auditLogger);
       mockSessVal = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
 
       authenticator = new Authenticator(mockOptions);
@@ -1837,6 +1868,25 @@ describe('Authenticator', () => {
       expect(mockOptions.session.invalidate).toHaveBeenCalled();
     });
 
+    it('adds audit event.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockBasicAuthenticationProvider.logout.mockResolvedValue(
+        DeauthenticationResult.redirectTo('some-url')
+      );
+      mockOptions.session.get.mockResolvedValue(mockSessVal);
+
+      await expect(authenticator.logout(request)).resolves.toEqual(
+        DeauthenticationResult.redirectTo('some-url')
+      );
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: { action: 'user_logout', category: ['authentication'], outcome: 'unknown' },
+        })
+      );
+    });
+
     it('if session does not exist but provider name is valid, returns whatever authentication provider returns.', async () => {
       const request = httpServerMock.createKibanaRequest({
         query: { provider: 'basic1' },
@@ -1873,6 +1923,24 @@ describe('Authenticator', () => {
       expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
     });
 
+    it('if session does not exist and providers is empty, redirects to default logout path.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      mockOptions = getMockOptions({
+        providers: { basic: { basic1: { order: 0, enabled: false } } },
+      });
+      authenticator = new Authenticator(mockOptions);
+
+      await expect(authenticator.logout(request)).resolves.toEqual(
+        DeauthenticationResult.redirectTo(
+          '/mock-server-basepath/security/logged_out?msg=LOGGED_OUT'
+        )
+      );
+
+      expect(mockBasicAuthenticationProvider.logout).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
+    });
+
     it('redirects to login form if session does not exist and provider name is invalid', async () => {
       const request = httpServerMock.createKibanaRequest({ query: { provider: 'foo' } });
       mockOptions.session.get.mockResolvedValue(null);
@@ -1890,10 +1958,15 @@ describe('Authenticator', () => {
     let authenticator: Authenticator;
     let mockOptions: ReturnType<typeof getMockOptions>;
     let mockSessionValue: SessionValue;
+    const auditLogger = {
+      log: jest.fn(),
+    };
+
     beforeEach(() => {
       mockOptions = getMockOptions({ providers: { basic: { basic1: { order: 0 } } } });
       mockSessionValue = sessionMock.createValue({ state: { authorization: 'Basic xxx' } });
       mockOptions.session.get.mockResolvedValue(mockSessionValue);
+      mockOptions.audit.asScoped.mockReturnValue(auditLogger);
       mockOptions.getCurrentUser.mockReturnValue(mockAuthenticatedUser());
       mockOptions.license.getFeatures.mockReturnValue({
         allowAccessAgreement: true,
@@ -1953,13 +2026,11 @@ describe('Authenticator', () => {
         accessAgreementAcknowledged: true,
       });
 
-      expect(mockOptions.legacyAuditLogger.accessAgreementAcknowledged).toHaveBeenCalledTimes(1);
-      expect(mockOptions.legacyAuditLogger.accessAgreementAcknowledged).toHaveBeenCalledWith(
-        'user',
-        {
-          type: 'basic',
-          name: 'basic1',
-        }
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: { action: 'access_agreement_acknowledged', category: ['authentication'] },
+        })
       );
 
       expect(mockOptions.featureUsageService.recordPreAccessAgreementUsage).toHaveBeenCalledTimes(

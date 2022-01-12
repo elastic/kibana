@@ -39,7 +39,7 @@ export class EmbeddedLensExamplePlugin
       links: [
         {
           label: 'README',
-          href: 'https://github.com/elastic/kibana/tree/master/x-pack/examples/embedded_lens_example',
+          href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/embedded_lens_example',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

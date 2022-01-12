@@ -7,11 +7,9 @@
 
 import { Logger } from 'src/core/server';
 import type { DataRequestHandlerContext } from 'src/plugins/data/server';
+import { Stream } from 'stream';
 import { RENDER_AS } from '../../common/constants';
-
-function isAbortError(error: Error) {
-  return error.message === 'Request aborted' || error.message === 'Aborted';
-}
+import { isAbortError } from './util';
 
 export async function getEsGridTile({
   logger,
@@ -23,6 +21,8 @@ export async function getEsGridTile({
   z,
   requestBody = {},
   requestType = RENDER_AS.POINT,
+  gridPrecision,
+  abortController,
 }: {
   x: number;
   y: number;
@@ -33,12 +33,14 @@ export async function getEsGridTile({
   logger: Logger;
   requestBody: any;
   requestType: RENDER_AS.GRID | RENDER_AS.POINT;
-}): Promise<Buffer | null> {
+  gridPrecision: number;
+  abortController: AbortController;
+}): Promise<Stream | null> {
   try {
     const path = `/${encodeURIComponent(index)}/_mvt/${geometryFieldName}/${z}/${x}/${y}`;
     const body = {
       size: 0, // no hits
-      grid_precision: 7,
+      grid_precision: gridPrecision,
       exact_bounds: false,
       extent: 4096, // full resolution,
       query: requestBody.query,
@@ -47,12 +49,21 @@ export async function getEsGridTile({
       fields: requestBody.fields,
       runtime_mappings: requestBody.runtime_mappings,
     };
-    const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request({
-      method: 'GET',
-      path,
-      body,
-    });
-    return tile.body as unknown as Buffer;
+    const tile = await context.core.elasticsearch.client.asCurrentUser.transport.request(
+      {
+        method: 'GET',
+        path,
+        body,
+      },
+      {
+        signal: abortController.signal,
+        headers: {
+          'Accept-Encoding': 'gzip',
+        },
+        asStream: true,
+      }
+    );
+    return tile.body as Stream;
   } catch (e) {
     if (!isAbortError(e)) {
       // These are often circuit breaking exceptions

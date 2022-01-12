@@ -9,15 +9,19 @@ import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import React from 'react';
 import { Provider } from 'react-redux';
+import fastIsEqual from 'fast-deep-equal';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
+import { Filter } from '@kbn/es-query';
 import {
   Embeddable,
   IContainer,
   ReferenceOrValueEmbeddable,
+  genericEmbeddableInputIsEqual,
   VALUE_CLICK_TRIGGER,
+  omitGenericEmbeddableInput,
 } from '../../../../../src/plugins/embeddable/public';
 import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
 import {
@@ -25,7 +29,6 @@ import {
   APPLY_FILTER_TRIGGER,
   esFilters,
   TimeRange,
-  Filter,
   Query,
 } from '../../../../../src/plugins/data/public';
 import { createExtentFilter } from '../../common/elasticsearch_util';
@@ -210,16 +213,26 @@ export class MapEmbeddable
   }
 
   public async getInputAsRefType(): Promise<MapByReferenceInput> {
-    const input = getMapAttributeService().getExplicitInputFromEmbeddable(this);
-    return getMapAttributeService().getInputAsRefType(input, {
+    return getMapAttributeService().getInputAsRefType(this.getExplicitInput(), {
       showSaveModal: true,
       saveModalTitle: this.getTitle(),
     });
   }
 
+  public async getExplicitInputIsEqual(
+    lastExplicitInput: Partial<MapByValueInput | MapByReferenceInput>
+  ): Promise<boolean> {
+    const currentExplicitInput = this.getExplicitInput();
+    if (!genericEmbeddableInputIsEqual(lastExplicitInput, currentExplicitInput)) return false;
+
+    // generic embeddable input is equal, now we compare map specific input elements, ignoring 'mapBuffer'.
+    const lastMapInput = omitGenericEmbeddableInput(_.omit(lastExplicitInput, 'mapBuffer'));
+    const currentMapInput = omitGenericEmbeddableInput(_.omit(currentExplicitInput, 'mapBuffer'));
+    return fastIsEqual(lastMapInput, currentMapInput);
+  }
+
   public async getInputAsValueType(): Promise<MapByValueInput> {
-    const input = getMapAttributeService().getExplicitInputFromEmbeddable(this);
-    return getMapAttributeService().getInputAsValueType(input);
+    return getMapAttributeService().getInputAsValueType(this.getExplicitInput());
   }
 
   public getDescription() {

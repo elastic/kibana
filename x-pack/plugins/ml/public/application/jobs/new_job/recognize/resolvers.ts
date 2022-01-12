@@ -19,7 +19,7 @@ import { CreateLinkWithUserDefaults } from '../../../components/custom_hooks/use
  */
 export function checkViewOrCreateJobs(
   moduleId: string,
-  indexPatternId: string,
+  dataViewId: string,
   createLinkWithUserDefaults: CreateLinkWithUserDefaults,
   navigateToPath: NavigateToPath
 ): Promise<any> {
@@ -36,7 +36,7 @@ export function checkViewOrCreateJobs(
           await navigateToPath(url);
           reject();
         } else {
-          await navigateToPath(`/jobs/new_job/recognize?id=${moduleId}&index=${indexPatternId}`);
+          await navigateToPath(`/jobs/new_job/recognize?id=${moduleId}&index=${dataViewId}`);
           reject();
         }
       })

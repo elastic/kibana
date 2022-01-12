@@ -6,8 +6,6 @@
  */
 
 import { Values } from '@kbn/utility-types';
-import { AlertExecutorOptions } from '../../../alerting/server';
-import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {
   ALERT_INSTANCE_ID,
   ALERT_UUID,
@@ -18,9 +16,12 @@ import {
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   SPACE_IDS,
-  TAGS,
+  ALERT_RULE_TAGS,
   TIMESTAMP,
-} from '../../common/technical_rule_data_field_names';
+} from '@kbn/rule-data-utils';
+
+import { AlertExecutorOptions } from '../../../alerting/server';
+import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 
 const commonAlertFieldNames = [
   ALERT_RULE_CATEGORY,
@@ -30,7 +31,7 @@ const commonAlertFieldNames = [
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   SPACE_IDS,
-  TAGS,
+  ALERT_RULE_TAGS,
   TIMESTAMP,
 ];
 export type CommonAlertFieldName = Values<typeof commonAlertFieldNames>;
@@ -51,7 +52,7 @@ export const getCommonAlertFields = (
     [ALERT_RULE_TYPE_ID]: options.rule.ruleTypeId,
     [ALERT_RULE_UUID]: options.alertId,
     [SPACE_IDS]: [options.spaceId],
-    [TAGS]: options.tags,
+    [ALERT_RULE_TAGS]: options.tags,
     [TIMESTAMP]: options.startedAt.toISOString(),
   };
 };

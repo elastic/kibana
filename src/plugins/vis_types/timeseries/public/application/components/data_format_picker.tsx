@@ -8,7 +8,7 @@
 
 import React, { useEffect, useMemo, useCallback, useState, ChangeEvent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   htmlIdGenerator,

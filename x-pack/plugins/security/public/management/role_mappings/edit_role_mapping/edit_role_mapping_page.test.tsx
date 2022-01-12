@@ -39,6 +39,7 @@ describe('EditRoleMappingPage', () => {
     return mountWithIntl(
       <KibanaContextProvider services={coreStart}>
         <EditRoleMappingPage
+          action="edit"
           name={name}
           roleMappingsAPI={roleMappingsAPI}
           rolesAPIClient={rolesAPI}

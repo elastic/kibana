@@ -26,7 +26,7 @@ import {
   EuiCode,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const checkModel = (model) => Array.isArray(model.variables) && model.script !== undefined;
 
@@ -115,7 +115,7 @@ export function MathAgg(props) {
                 values={{
                   link: (
                     <EuiLink
-                      href="https://github.com/elastic/kibana/blob/master/packages/kbn-tinymath/docs/functions.md"
+                      href="https://github.com/elastic/kibana/blob/main/packages/kbn-tinymath/docs/functions.md"
                       target="_blank"
                     >
                       <FormattedMessage

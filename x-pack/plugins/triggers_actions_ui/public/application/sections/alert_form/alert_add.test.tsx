@@ -9,14 +9,14 @@ import uuid from 'uuid';
 import React, { FunctionComponent } from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test/jest';
 import { act } from 'react-dom/test-utils';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormLabel } from '@elastic/eui';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import AlertAdd from './alert_add';
 import { createAlert } from '../../lib/alert_api';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
-  Alert,
+  Rule,
   AlertAddProps,
   AlertFlyoutCloseReason,
   ConnectorValidationResult,
@@ -69,7 +69,7 @@ describe.skip('alert_add', () => {
   let wrapper: ReactWrapper<any>;
 
   async function setup(
-    initialValues?: Partial<Alert>,
+    initialValues?: Partial<Rule>,
     onClose: AlertAddProps['onClose'] = jest.fn(),
     defaultScheduleInterval?: string
   ) {
@@ -122,7 +122,7 @@ describe.skip('alert_add', () => {
       hasPermanentEncryptionKey: true,
     });
 
-    const alertType = {
+    const ruleType = {
       id: 'my-alert-type',
       iconClass: 'test',
       description: 'test',
@@ -130,7 +130,7 @@ describe.skip('alert_add', () => {
       validate: (): ValidationResult => {
         return { errors: {} };
       },
-      alertParamsExpression: TestExpression,
+      ruleParamsExpression: TestExpression,
       requiresAppContext: false,
     };
 
@@ -149,8 +149,8 @@ describe.skip('alert_add', () => {
     });
     actionTypeRegistry.get.mockReturnValueOnce(actionTypeModel);
     actionTypeRegistry.has.mockReturnValue(true);
-    ruleTypeRegistry.list.mockReturnValue([alertType]);
-    ruleTypeRegistry.get.mockReturnValue(alertType);
+    ruleTypeRegistry.list.mockReturnValue([ruleType]);
+    ruleTypeRegistry.get.mockReturnValue(ruleType);
     ruleTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.list.mockReturnValue([actionTypeModel]);
     actionTypeRegistry.has.mockReturnValue(true);
@@ -268,7 +268,7 @@ describe.skip('alert_add', () => {
   });
 });
 
-function mockAlert(overloads: Partial<Alert> = {}): Alert {
+function mockAlert(overloads: Partial<Rule> = {}): Rule {
   return {
     id: uuid.v4(),
     enabled: true,

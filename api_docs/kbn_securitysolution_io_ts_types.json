@@ -231,6 +231,34 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.ImportQuerySchema",
+        "type": "Type",
+        "tags": [],
+        "label": "ImportQuerySchema",
+        "description": [],
+        "signature": [
+          "{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; }"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/import_query_schema/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.ImportQuerySchemaDecoded",
+        "type": "Type",
+        "tags": [],
+        "label": "ImportQuerySchemaDecoded",
+        "description": [],
+        "signature": [
+          "Omit<{ overwrite?: boolean | undefined; overwrite_exceptions?: boolean | undefined; }, \"overwrite\" | \"overwrite_exceptions\"> & { overwrite: boolean; overwrite_exceptions: boolean; }"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/import_query_schema/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
         "id": "def-common.IsoDateStringC",
         "type": "Type",
         "tags": [],
@@ -533,6 +561,27 @@
           "<string[], string | null | undefined, unknown>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-types/src/empty_string_array/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-types",
+        "id": "def-common.importQuerySchema",
+        "type": "Object",
+        "tags": [],
+        "label": "importQuerySchema",
+        "description": [],
+        "signature": [
+          "ExactC",
+          "<",
+          "PartialC",
+          "<{ overwrite: ",
+          "Type",
+          "<boolean, string | boolean | undefined, unknown>; overwrite_exceptions: ",
+          "Type",
+          "<boolean, string | boolean | undefined, unknown>; }>>"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-types/src/import_query_schema/index.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

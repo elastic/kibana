@@ -86,6 +86,7 @@ export const patchRulesRoute = (
         threshold,
         threat_filters: threatFilters,
         threat_index: threatIndex,
+        threat_indicator_path: threatIndicatorPath,
         threat_query: threatQuery,
         threat_mapping: threatMapping,
         threat_language: threatLanguage,
@@ -143,7 +144,6 @@ export const patchRulesRoute = (
 
         const rule = await patchRules({
           rulesClient,
-          savedObjectsClient,
           author,
           buildingBlockType,
           description,
@@ -156,8 +156,6 @@ export const patchRulesRoute = (
           license,
           outputIndex,
           savedId,
-          spaceId: context.securitySolution.getSpaceId(),
-          ruleStatusClient,
           timelineId,
           timelineTitle,
           meta,
@@ -179,6 +177,7 @@ export const patchRulesRoute = (
           threshold,
           threatFilters,
           threatIndex,
+          threatIndicatorPath,
           threatQuery,
           threatMapping,
           threatLanguage,
@@ -195,17 +194,12 @@ export const patchRulesRoute = (
           exceptionsList,
         });
         if (rule != null && rule.enabled != null && rule.name != null) {
-          const ruleStatuses = await ruleStatusClient.find({
-            logsCount: 1,
+          const ruleStatus = await ruleStatusClient.getCurrentStatus({
             ruleId: rule.id,
             spaceId: context.securitySolution.getSpaceId(),
           });
 
-          const [validated, errors] = transformValidate(
-            rule,
-            ruleStatuses[0],
-            isRuleRegistryEnabled
-          );
+          const [validated, errors] = transformValidate(rule, ruleStatus, isRuleRegistryEnabled);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { Description } from './description';
@@ -27,7 +27,7 @@ export const ChangeDataView: FC<{ isDisabled: boolean }> = ({ isDisabled }) => {
         >
           <FormattedMessage
             id="xpack.ml.newJob.wizard.datafeedStep.dataView.changeDataView.button"
-            defaultMessage="Change index pattern"
+            defaultMessage="Change data view"
           />
         </EuiButtonEmpty>
       </Description>

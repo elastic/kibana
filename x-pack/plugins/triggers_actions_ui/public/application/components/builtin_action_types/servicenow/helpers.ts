@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { lazy, ComponentType } from 'react';
 import { EuiSelectOption } from '@elastic/eui';
+import { AppInfo, Choice, RESTApiError } from './types';
+import { ActionConnector, IErrorObject } from '../../../../types';
 import {
-  ENABLE_NEW_SN_ITSM_CONNECTOR,
-  ENABLE_NEW_SN_SIR_CONNECTOR,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../actions/server/constants/connectors';
-import { IErrorObject } from '../../../../../public/types';
-import { AppInfo, Choice, RESTApiError, ServiceNowActionConnector } from './types';
+  deprecatedMessage,
+  checkConnectorIsDeprecated,
+} from '../../../../common/connectors_selection';
 
 export const DEFAULT_CORRELATION_ID = '{{rule.id}}:{{alert.id}}';
 
@@ -27,28 +27,20 @@ export const isFieldInvalid = (
   error: string | IErrorObject | string[]
 ): boolean => error !== undefined && error.length > 0 && field != null;
 
-// TODO: Remove when the applications are certified
-export const isDeprecatedConnector = (connector: ServiceNowActionConnector): boolean => {
-  if (connector == null) {
-    return true;
+export const getConnectorDescriptiveTitle = (connector: ActionConnector) => {
+  let title = connector.name;
+
+  if (checkConnectorIsDeprecated(connector)) {
+    title += ` ${deprecatedMessage}`;
   }
 
-  if (!ENABLE_NEW_SN_ITSM_CONNECTOR && connector.actionTypeId === '.servicenow') {
-    return true;
+  return title;
+};
+
+export const getSelectedConnectorIcon = (
+  actionConnector: ActionConnector
+): React.LazyExoticComponent<ComponentType<{ actionConnector: ActionConnector }>> | undefined => {
+  if (checkConnectorIsDeprecated(actionConnector)) {
+    return lazy(() => import('./servicenow_selection_row'));
   }
-
-  if (!ENABLE_NEW_SN_SIR_CONNECTOR && connector.actionTypeId === '.servicenow-sir') {
-    return true;
-  }
-
-  /**
-   * Connectors after the Elastic ServiceNow application use the
-   * Import Set API (https://developer.servicenow.com/dev.do#!/reference/api/rome/rest/c_ImportSetAPI)
-   * A ServiceNow connector is considered deprecated if it uses the Table API.
-   *
-   * All other connectors do not have the usesTableApi config property
-   * so the function will always return false for them.
-   */
-
-  return !!connector.config.usesTableApi;
 };

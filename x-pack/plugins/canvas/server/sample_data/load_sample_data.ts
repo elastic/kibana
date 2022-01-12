@@ -28,11 +28,16 @@ export function loadSampleData(
       return savedObject;
     });
   }
+  const getPath = (objectId: string) => `/app/canvas#/workpad/${objectId}`;
 
   addSavedObjectsToSampleDataset('ecommerce', updateCanvasWorkpadTimestamps(ecommerceSavedObjects));
   addAppLinksToSampleDataset('ecommerce', [
     {
-      path: '/app/canvas#/workpad/workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e',
+      sampleObject: {
+        type: 'canvas-workpad',
+        id: 'workpad-e08b9bdb-ec14-4339-94c4-063bddfd610e',
+      },
+      getPath,
       icon: 'canvasApp',
       label,
     },
@@ -41,7 +46,11 @@ export function loadSampleData(
   addSavedObjectsToSampleDataset('flights', updateCanvasWorkpadTimestamps(flightsSavedObjects));
   addAppLinksToSampleDataset('flights', [
     {
-      path: '/app/canvas#/workpad/workpad-a474e74b-aedc-47c3-894a-db77e62c41e0',
+      sampleObject: {
+        type: 'canvas-workpad',
+        id: 'workpad-a474e74b-aedc-47c3-894a-db77e62c41e0',
+      },
+      getPath,
       icon: 'canvasApp',
       label,
     },
@@ -50,7 +59,11 @@ export function loadSampleData(
   addSavedObjectsToSampleDataset('logs', updateCanvasWorkpadTimestamps(webLogsSavedObjects));
   addAppLinksToSampleDataset('logs', [
     {
-      path: '/app/canvas#/workpad/workpad-ad72a4e9-b422-480c-be6d-a64a0b79541d',
+      sampleObject: {
+        type: 'canvas-workpad',
+        id: 'workpad-ad72a4e9-b422-480c-be6d-a64a0b79541d',
+      },
+      getPath,
       icon: 'canvasApp',
       label,
     },

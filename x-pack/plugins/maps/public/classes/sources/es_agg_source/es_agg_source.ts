@@ -30,7 +30,6 @@ export interface IESAggSource extends IESSource {
 
 export abstract class AbstractESAggSource extends AbstractESSource implements IESAggSource {
   private readonly _metricFields: IESAggField[];
-  private readonly _canReadFromGeoJson: boolean;
 
   static createDescriptor(
     descriptor: Partial<AbstractESAggSourceDescriptor>
@@ -44,23 +43,13 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     };
   }
 
-  constructor(
-    descriptor: AbstractESAggSourceDescriptor,
-    inspectorAdapters?: Adapters,
-    canReadFromGeoJson = true
-  ) {
+  constructor(descriptor: AbstractESAggSourceDescriptor, inspectorAdapters?: Adapters) {
     super(descriptor, inspectorAdapters);
     this._metricFields = [];
-    this._canReadFromGeoJson = canReadFromGeoJson;
     if (descriptor.metrics) {
       descriptor.metrics.forEach((aggDescriptor: AggDescriptor) => {
         this._metricFields.push(
-          ...esAggFieldsFactory(
-            aggDescriptor,
-            this,
-            this.getOriginForField(),
-            this._canReadFromGeoJson
-          )
+          ...esAggFieldsFactory(aggDescriptor, this, this.getOriginForField())
         );
       });
     }
@@ -89,12 +78,7 @@ export abstract class AbstractESAggSource extends AbstractESSource implements IE
     const metrics = this._metricFields.filter((esAggField) => esAggField.isValid());
     // Handle case where metrics is empty because older saved object state is empty array or there are no valid aggs.
     return metrics.length === 0
-      ? esAggFieldsFactory(
-          { type: AGG_TYPE.COUNT },
-          this,
-          this.getOriginForField(),
-          this._canReadFromGeoJson
-        )
+      ? esAggFieldsFactory({ type: AGG_TYPE.COUNT }, this, this.getOriginForField())
       : metrics;
   }
 

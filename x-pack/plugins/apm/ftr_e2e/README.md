@@ -4,4 +4,4 @@ APM uses [FTR](../../../../packages/kbn-test/README.md) (functional test runner)
 
 ## Running tests
 
-Go to [tests documentation](../scripts/test#e2e-tests-cypress/README.md)
+Go to [tests documentation](../dev_docs/testing.md#e2e-tests-cypress)

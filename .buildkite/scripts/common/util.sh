@@ -16,12 +16,14 @@ is_pr() {
 
 verify_no_git_changes() {
   RED='\033[0;31m'
+  YELLOW='\033[0;33m'
   C_RESET='\033[0m' # Reset color
 
   GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc')"
   if [ "$GIT_CHANGES" ]; then
     echo -e "\n${RED}ERROR: '$1' caused changes to the following files:${C_RESET}\n"
     echo -e "$GIT_CHANGES\n"
+    echo -e "\n${YELLOW}TO FIX: Run '$1' locally, commit the changes and push to your branch${C_RESET}\n"
     exit 1
   fi
 }

@@ -14,6 +14,8 @@ import { useActions, useValues } from 'kea';
 import { LicensingLogic } from '../../../shared/licensing';
 import { AppLogic } from '../../app_logic';
 import {
+  ADD_GITHUB_VIA_APP_PATH,
+  ADD_GITHUB_ENTERPRISE_SERVER_VIA_APP_PATH,
   ADD_SOURCE_PATH,
   SOURCE_DETAILS_PATH,
   PRIVATE_SOURCES_PATH,
@@ -21,7 +23,7 @@ import {
   getSourcesPath,
 } from '../../routes';
 
-import { AddSource, AddSourceList } from './components/add_source';
+import { AddSource, AddSourceList, GitHubViaApp } from './components/add_source';
 import { OrganizationSources } from './organization_sources';
 import { PrivateSources } from './private_sources';
 import { staticSourceData } from './source_data';
@@ -65,6 +67,12 @@ export const SourcesRouter: React.FC = () => {
       </Route>
       <Route exact path={SOURCES_PATH}>
         <OrganizationSources />
+      </Route>
+      <Route exact path={ADD_GITHUB_VIA_APP_PATH}>
+        <GitHubViaApp isGithubEnterpriseServer={false} />
+      </Route>
+      <Route exact path={ADD_GITHUB_ENTERPRISE_SERVER_VIA_APP_PATH}>
+        <GitHubViaApp isGithubEnterpriseServer />
       </Route>
       {staticSourceData.map(({ addPath, accountContextOnly }, i) => (
         <Route key={i} exact path={getSourcesPath(addPath, isOrganization)}>

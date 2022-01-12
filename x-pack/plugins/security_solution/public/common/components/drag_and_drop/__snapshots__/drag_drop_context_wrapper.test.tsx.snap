@@ -125,6 +125,7 @@ exports[`DragDropContextWrapper rendering it renders against the snapshot 1`] = 
               "packetbeat",
             ],
             "name": "@timestamp",
+            "readFromDocValues": true,
             "searchable": true,
             "type": "date",
           },

@@ -31,10 +31,10 @@ export type { DatatableVisualizationState } from './datatable_visualization/visu
 export type {
   IndexPatternPersistedState,
   PersistedIndexPatternLayer,
-  IndexPatternColumn,
-  FieldBasedIndexPatternColumn,
   OperationType,
   IncompleteColumn,
+  GenericIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
   FiltersIndexPatternColumn,
   RangeIndexPatternColumn,
   TermsIndexPatternColumn,
@@ -58,6 +58,6 @@ export type {
 } from './indexpattern_datasource/types';
 export type { LensEmbeddableInput } from './embeddable';
 
-export { LensPublicStart } from './plugin';
+export type { LensPublicStart } from './plugin';
 
 export const plugin = () => new LensPlugin();

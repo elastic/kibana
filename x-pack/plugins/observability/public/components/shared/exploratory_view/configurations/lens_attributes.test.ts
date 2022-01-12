@@ -9,6 +9,7 @@ import { LayerConfig, LensAttributes } from './lens_attributes';
 import { mockAppIndexPattern, mockIndexPattern } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';
 import { sampleAttribute } from './test_data/sample_attribute';
+
 import {
   LCP_FIELD,
   TRANSACTION_DURATION,
@@ -17,6 +18,7 @@ import {
 import { buildExistsFilter, buildPhrasesFilter } from './utils';
 import { sampleAttributeKpi } from './test_data/sample_attribute_kpi';
 import { RECORDS_FIELD, REPORT_METRIC_FIELD, PERCENTILE_RANKS, ReportTypes } from './constants';
+import { obsvReportConfigMap } from '../obsv_exploratory_view';
 
 describe('Lens Attribute', () => {
   mockAppIndexPattern();
@@ -25,6 +27,7 @@ describe('Lens Attribute', () => {
     reportType: 'data-distribution',
     dataType: 'ux',
     indexPattern: mockIndexPattern,
+    reportConfigMap: obsvReportConfigMap,
   });
 
   reportViewConfig.baseFilters?.push(...buildExistsFilter('transaction.type', mockIndexPattern));
@@ -56,6 +59,7 @@ describe('Lens Attribute', () => {
       reportType: ReportTypes.KPI,
       dataType: 'ux',
       indexPattern: mockIndexPattern,
+      reportConfigMap: obsvReportConfigMap,
     });
 
     const lnsAttrKpi = new LensAttributes([
@@ -80,6 +84,7 @@ describe('Lens Attribute', () => {
       reportType: ReportTypes.KPI,
       dataType: 'ux',
       indexPattern: mockIndexPattern,
+      reportConfigMap: obsvReportConfigMap,
     });
 
     const lnsAttrKpi = new LensAttributes([
@@ -467,7 +472,7 @@ describe('Lens Attribute', () => {
           palette: undefined,
           seriesType: 'line',
           xAccessor: 'x-axis-column-layer0',
-          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0' }],
+          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0', axisMode: 'left' }],
         },
       ],
       legend: { isVisible: true, showSingleSeries: true, position: 'right' },
@@ -475,6 +480,11 @@ describe('Lens Attribute', () => {
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
       valueLabels: 'hide',
     });
+  });
+
+  it('should not use global filters when there is more than one series', function () {
+    const multiSeriesLensAttr = new LensAttributes([layerConfig, layerConfig]).getJSON();
+    expect(multiSeriesLensAttr.state.query.query).toEqual('transaction.duration.us < 60000000');
   });
 
   describe('Layer breakdowns', function () {
@@ -510,14 +520,14 @@ describe('Lens Attribute', () => {
           seriesType: 'line',
           splitAccessor: 'breakdown-column-layer0',
           xAccessor: 'x-axis-column-layer0',
-          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0' }],
+          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0', axisMode: 'left' }],
         },
       ]);
 
       expect(lnsAttr.layers.layer0).toEqual({
         columnOrder: [
-          'x-axis-column-layer0',
           'breakdown-column-layer0',
+          'x-axis-column-layer0',
           'y-axis-column-layer0',
           'y-axis-column-layer0X0',
           'y-axis-column-layer0X1',

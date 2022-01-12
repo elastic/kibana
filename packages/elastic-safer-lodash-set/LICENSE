@@ -12,7 +12,7 @@ individuals. For exact contribution history, see the revision history
 available at the following locations:
  - https://github.com/lodash/lodash
  - https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/lodash
- - https://github.com/elastic/kibana/tree/master/packages/elastic-safer-lodash-set
+ - https://github.com/elastic/kibana/tree/main/packages/elastic-safer-lodash-set
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

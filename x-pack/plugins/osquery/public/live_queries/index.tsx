@@ -8,7 +8,7 @@
 import { castArray } from 'lodash';
 import { EuiCode, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LiveQueryForm } from './form';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';

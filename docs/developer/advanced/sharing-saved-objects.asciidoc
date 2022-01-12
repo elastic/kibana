@@ -157,7 +157,7 @@ const savedObject = resolveResult.saved_object;
 TIP: See an example of this in https://github.com/elastic/kibana/pull/107256#user-content-example-steps[step 2 of the POC]!
 
 The
-https://github.com/elastic/kibana/blob/master/docs/development/core/server/kibana-plugin-core-server.savedobjectsresolveresponse.md[SavedObjectsResolveResponse
+https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.savedobjectsresolveresponse.md[SavedObjectsResolveResponse
 interface] has three fields, summarized below:
 
 * `saved_object` - The saved object that was found.

@@ -15,7 +15,7 @@ export interface ChromeRecentlyAccessedHistoryItem
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [id](./kibana-plugin-core-public.chromerecentlyaccessedhistoryitem.id.md) | <code>string</code> |  |
-|  [label](./kibana-plugin-core-public.chromerecentlyaccessedhistoryitem.label.md) | <code>string</code> |  |
-|  [link](./kibana-plugin-core-public.chromerecentlyaccessedhistoryitem.link.md) | <code>string</code> |  |
+|  [id](./kibana-plugin-core-public.chromerecentlyaccessedhistoryitem.id.md) | string |  |
+|  [label](./kibana-plugin-core-public.chromerecentlyaccessedhistoryitem.label.md) | string |  |
+|  [link](./kibana-plugin-core-public.chromerecentlyaccessedhistoryitem.link.md) | string |  |
 

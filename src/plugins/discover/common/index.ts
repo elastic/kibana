@@ -21,4 +21,5 @@ export const SEARCH_FIELDS_FROM_SOURCE = 'discover:searchFieldsFromSource';
 export const MAX_DOC_FIELDS_DISPLAYED = 'discover:maxDocFieldsDisplayed';
 export const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
 export const SHOW_MULTIFIELDS = 'discover:showMultiFields';
+export const TRUNCATE_MAX_HEIGHT = 'truncate:maxHeight';
 export const SEARCH_EMBEDDABLE_TYPE = 'search';

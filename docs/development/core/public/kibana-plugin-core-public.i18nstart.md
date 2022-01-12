@@ -16,5 +16,5 @@ export interface I18nStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [Context](./kibana-plugin-core-public.i18nstart.context.md) | <code>({ children }: {</code><br/><code>        children: React.ReactNode;</code><br/><code>    }) =&gt; JSX.Element</code> | React Context provider required as the topmost component for any i18n-compatible React tree. |
+|  [Context](./kibana-plugin-core-public.i18nstart.context.md) | ({ children }: { children: React.ReactNode; }) =&gt; JSX.Element | React Context provider required as the topmost component for any i18n-compatible React tree. |
 

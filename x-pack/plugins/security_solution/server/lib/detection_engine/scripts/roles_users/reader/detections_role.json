@@ -4,7 +4,8 @@
     "indices": [
       {
         "names" : [
-          ".siem-signals*",
+          ".siem-signals-*",
+          ".alerts-security*",
           ".lists*",
           ".items*",
           "metrics-endpoint.metadata_current_*",

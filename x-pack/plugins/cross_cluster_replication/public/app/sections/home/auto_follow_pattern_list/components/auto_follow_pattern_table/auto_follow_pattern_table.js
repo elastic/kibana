@@ -8,13 +8,13 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiInMemoryTable,
   EuiButton,
   EuiLink,
-  EuiLoadingKibana,
+  EuiLoadingLogo,
   EuiOverlayMask,
   EuiHealth,
 } from '@elastic/eui';
@@ -273,7 +273,7 @@ export class AutoFollowPatternTable extends PureComponent {
     if (apiStatusDelete === API_STATUS.DELETING) {
       return (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl" />
+          <EuiLoadingLogo logo="logoKibana" size="xl" />
         </EuiOverlayMask>
       );
     }

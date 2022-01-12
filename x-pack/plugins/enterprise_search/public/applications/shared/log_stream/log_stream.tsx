@@ -17,7 +17,7 @@ import { LOGS_SOURCE_ID } from '../../../../common/constants';
  * default for timestamps. All other props get passed as-is to the underlying LogStream.
  *
  * Documentation links for reference:
- * - https://github.com/elastic/kibana/blob/master/x-pack/plugins/infra/public/components/log_stream/log_stream.stories.mdx
+ * - https://github.com/elastic/kibana/blob/main/x-pack/plugins/infra/public/components/log_stream/log_stream.stories.mdx
  * - Run `yarn storybook infra` for live docs
  */
 

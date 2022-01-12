@@ -100,17 +100,11 @@ export class TOCEntryButton extends Component<Props, State> {
         values: { minZoom, maxZoom },
       });
     } else {
-      const customIconAndTooltipContent = this.props.layer.getCustomIconAndTooltipContent();
-      if (customIconAndTooltipContent) {
-        icon = customIconAndTooltipContent.icon;
-        if (!customIconAndTooltipContent.areResultsTrimmed) {
-          tooltipContent = customIconAndTooltipContent.tooltipContent;
-        } else {
-          footnotes.push({
-            icon: <EuiIcon color="subdued" type="partial" size="s" />,
-            message: customIconAndTooltipContent.tooltipContent,
-          });
-        }
+      const { icon: layerIcon, tooltipContent: layerTooltipContent } =
+        this.props.layer.getLayerIcon(true);
+      icon = layerIcon;
+      if (layerTooltipContent) {
+        tooltipContent = layerTooltipContent;
       }
 
       if (this.props.isUsingSearch && this.props.layer.getQueryableIndexPatternIds().length) {
@@ -180,6 +174,7 @@ export class TOCEntryButton extends Component<Props, State> {
             {footnoteTooltipContent}
           </Fragment>
         }
+        data-test-subj="layerTocTooltip"
       >
         <EuiButtonEmpty
           className="mapTocEntry__layerName eui-textLeft"

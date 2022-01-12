@@ -11,7 +11,8 @@ import { getSettingsCollector } from './get_settings_collector';
 import { getMonitoringUsageCollector } from './get_usage_collector';
 import { MonitoringConfig } from '../../config';
 
-export { KibanaSettingsCollector, getKibanaSettings } from './get_settings_collector';
+export type { KibanaSettingsCollector } from './get_settings_collector';
+export { getKibanaSettings } from './get_settings_collector';
 
 export function registerCollectors(
   usageCollection: UsageCollectionSetup,

@@ -7,9 +7,10 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { markdown } from '../';
+import { getMarkdownRenderer } from '../';
 import { Render } from '../../__stories__/render';
 
+const markdown = getMarkdownRenderer();
 storiesOf('renderers/markdown', module)
   .add('default', () => {
     const config = {

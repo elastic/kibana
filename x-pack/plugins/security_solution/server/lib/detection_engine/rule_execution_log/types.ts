@@ -6,7 +6,7 @@
  */
 
 import { Duration } from 'moment';
-import { SavedObjectsFindResult } from '../../../../../../../src/core/server';
+import { LogMeta, SavedObjectsFindResult } from 'src/core/server';
 import { RuleExecutionStatus } from '../../../../common/detection_engine/schemas/common/schemas';
 import { IRuleStatusSOAttributes } from '../rules/types';
 
@@ -15,26 +15,62 @@ export enum UnderlyingLogClient {
   'eventLog' = 'eventLog',
 }
 
+export interface IRuleExecutionLogClient {
+  /** @deprecated */
+  find(args: FindExecutionLogArgs): Promise<Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>>;
+  /** @deprecated */
+  findBulk(args: FindBulkExecutionLogArgs): Promise<FindBulkExecutionLogResponse>;
+
+  getLastFailures(args: GetLastFailuresArgs): Promise<IRuleStatusSOAttributes[]>;
+  getCurrentStatus(args: GetCurrentStatusArgs): Promise<IRuleStatusSOAttributes | undefined>;
+  getCurrentStatusBulk(args: GetCurrentStatusBulkArgs): Promise<GetCurrentStatusBulkResult>;
+
+  deleteCurrentStatus(ruleId: string): Promise<void>;
+
+  logStatusChange(args: LogStatusChangeArgs): Promise<void>;
+}
+
+/** @deprecated */
 export interface FindExecutionLogArgs {
   ruleId: string;
   spaceId: string;
   logsCount?: number;
 }
 
+/** @deprecated */
 export interface FindBulkExecutionLogArgs {
   ruleIds: string[];
   spaceId: string;
   logsCount?: number;
 }
 
-export interface ExecutionMetrics {
-  searchDurations?: string[];
-  indexingDurations?: string[];
-  /**
-   * @deprecated lastLookBackDate is logged only by SavedObjectsAdapter and should be removed in the future
-   */
-  lastLookBackDate?: string;
-  executionGap?: Duration;
+/** @deprecated */
+export interface FindBulkExecutionLogResponse {
+  [ruleId: string]: IRuleStatusSOAttributes[] | undefined;
+}
+
+export interface GetLastFailuresArgs {
+  ruleId: string;
+  spaceId: string;
+}
+
+export interface GetCurrentStatusArgs {
+  ruleId: string;
+  spaceId: string;
+}
+
+export interface GetCurrentStatusBulkArgs {
+  ruleIds: string[];
+  spaceId: string;
+}
+
+export interface GetCurrentStatusBulkResult {
+  [ruleId: string]: IRuleStatusSOAttributes;
+}
+
+export interface CreateExecutionLogArgs {
+  attributes: IRuleStatusSOAttributes;
+  spaceId: string;
 }
 
 export interface LogStatusChangeArgs {
@@ -50,20 +86,6 @@ export interface LogStatusChangeArgs {
   metrics?: ExecutionMetrics;
 }
 
-export interface UpdateExecutionLogArgs {
-  id: string;
-  attributes: IRuleStatusSOAttributes;
-  ruleId: string;
-  ruleName: string;
-  ruleType: string;
-  spaceId: string;
-}
-
-export interface CreateExecutionLogArgs {
-  attributes: IRuleStatusSOAttributes;
-  spaceId: string;
-}
-
 export interface LogExecutionMetricsArgs {
   ruleId: string;
   ruleName: string;
@@ -72,17 +94,27 @@ export interface LogExecutionMetricsArgs {
   metrics: ExecutionMetrics;
 }
 
-export interface FindBulkExecutionLogResponse {
-  [ruleId: string]: IRuleStatusSOAttributes[] | undefined;
+export interface ExecutionMetrics {
+  searchDurations?: string[];
+  indexingDurations?: string[];
+  /**
+   * @deprecated lastLookBackDate is logged only by SavedObjectsAdapter and should be removed in the future
+   */
+  lastLookBackDate?: string;
+  executionGap?: Duration;
 }
 
-export interface IRuleExecutionLogClient {
-  find: (
-    args: FindExecutionLogArgs
-  ) => Promise<Array<SavedObjectsFindResult<IRuleStatusSOAttributes>>>;
-  findBulk: (args: FindBulkExecutionLogArgs) => Promise<FindBulkExecutionLogResponse>;
-  update: (args: UpdateExecutionLogArgs) => Promise<void>;
-  delete: (id: string) => Promise<void>;
-  logStatusChange: (args: LogStatusChangeArgs) => Promise<void>;
-  logExecutionMetrics: (args: LogExecutionMetricsArgs) => Promise<void>;
-}
+/**
+ * Custom extended log metadata that rule execution logger can attach to every log record.
+ */
+export type ExtMeta = LogMeta & {
+  rule?: LogMeta['rule'] & {
+    type?: string;
+    execution?: {
+      status?: RuleExecutionStatus;
+    };
+  };
+  kibana?: {
+    spaceId?: string;
+  };
+};

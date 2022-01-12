@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Query } from 'src/plugins/data/public';
+import type { Query } from 'src/plugins/data/public';
 import type { Operation } from '../../../types';
 import type { TimeScaleUnit } from '../../../../common/expressions';
 import type { OperationType } from '../definitions';
@@ -41,6 +41,11 @@ export interface ReferenceBasedIndexPatternColumn
     FormattedIndexPatternColumn {
   references: string[];
 }
+
+export type GenericIndexPatternColumn =
+  | BaseIndexPatternColumn
+  | FieldBasedIndexPatternColumn
+  | ReferenceBasedIndexPatternColumn;
 
 // Used to store the temporary invalid state
 export interface IncompleteColumn {

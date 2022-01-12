@@ -44,10 +44,10 @@ const PageWrapper: FC<PageProps> = ({ location, deps }) => {
     sort: false,
   });
 
-  const { context } = useResolver(index, savedSearchId, deps.config, {
+  const { context } = useResolver(index, savedSearchId, deps.config, deps.dataViewsContract, {
     ...basicResolvers(deps),
     analyticsFields: () =>
-      loadNewJobCapabilities(index, savedSearchId, deps.indexPatterns, DATA_FRAME_ANALYTICS),
+      loadNewJobCapabilities(index, savedSearchId, deps.dataViewsContract, DATA_FRAME_ANALYTICS),
   });
 
   return (

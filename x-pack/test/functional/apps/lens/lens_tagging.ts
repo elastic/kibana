@@ -11,8 +11,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
-  const esArchiver = getService('esArchiver');
   const retry = getService('retry');
+  const esArchiver = getService('esArchiver');
   const find = getService('find');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
     'visualize',
     'lens',
+    'timePicker',
   ]);
 
   const lensTag = 'extreme-lens-tag';
@@ -31,10 +32,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens tagging', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/lens/basic');
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
+    });
+
+    after(async () => {
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     it('adds a new tag to a Lens visualization', async () => {

@@ -18,11 +18,11 @@ registerSwitcher(switcher: CapabilitiesSwitcher): void;
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  switcher | <code>CapabilitiesSwitcher</code> |  |
+|  switcher | CapabilitiesSwitcher |  |
 
 <b>Returns:</b>
 
-`void`
+void
 
 ## Example
 
@@ -54,6 +54,5 @@ public setup(core: CoreSetup, deps: {}) {
      return {}; // All capabilities will remain unchanged.
    });
 }
-
 ```
 

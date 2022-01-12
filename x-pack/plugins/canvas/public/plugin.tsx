@@ -38,7 +38,7 @@ import { getPluginApi, CanvasApi } from './plugin_api';
 import { setupExpressions } from './setup_expressions';
 import { pluginServiceRegistry } from './services/kibana';
 
-export { CoreStart, CoreSetup };
+export type { CoreStart, CoreSetup };
 
 /**
  * These are the private interfaces for the services your plugin depends on.
@@ -130,6 +130,11 @@ export class CanvasPlugin
             appUpdater: this.appUpdater,
             initContext: this.initContext,
           })
+        );
+
+        const { expressions, presentationUtil } = startPlugins;
+        await presentationUtil.registerExpressionsLanguage(
+          Object.values(expressions.getFunctions())
         );
 
         // Load application bundle

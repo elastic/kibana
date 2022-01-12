@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { map as mapAsync } from 'bluebird';
-
 export function AceEditorProvider({ getService }) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -35,7 +33,7 @@ export function AceEditorProvider({ getService }) {
       return await retry.try(async () => {
         const editor = await testSubjects.find(testSubjectSelector);
         const lines = await editor.findAllByClassName('ace_line');
-        const linesText = await mapAsync(lines, (line) => line.getVisibleText());
+        const linesText = await Promise.all(lines.map((line) => line.getVisibleText()));
         return linesText.join('\n');
       });
     }

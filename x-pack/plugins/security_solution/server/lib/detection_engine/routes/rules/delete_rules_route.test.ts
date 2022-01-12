@@ -12,7 +12,7 @@ import {
   getDeleteRequest,
   getFindResultWithSingleHit,
   getDeleteRequestById,
-  getRuleExecutionStatuses,
+  getRuleExecutionStatusSucceeded,
   getEmptySavedObjectsResponse,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
@@ -32,7 +32,9 @@ describe.each([
 
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
-    clients.ruleExecutionLogClient.find.mockResolvedValue(getRuleExecutionStatuses());
+    clients.ruleExecutionLogClient.getCurrentStatus.mockResolvedValue(
+      getRuleExecutionStatusSucceeded()
+    );
 
     deleteRulesRoute(server.router, isRuleRegistryEnabled);
   });

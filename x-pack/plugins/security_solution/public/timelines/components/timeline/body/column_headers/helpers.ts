@@ -6,17 +6,10 @@
  */
 
 import { get } from 'lodash/fp';
-import { ColumnHeaderOptions } from '../../../../../../common';
+import { ColumnHeaderOptions } from '../../../../../../common/types';
 
 import { BrowserFields } from '../../../../../common/containers/source';
-import {
-  DEFAULT_COLUMN_MIN_WIDTH,
-  DEFAULT_DATE_COLUMN_MIN_WIDTH,
-  SHOW_CHECK_BOXES_COLUMN_WIDTH,
-  EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH,
-  DEFAULT_ACTIONS_COLUMN_WIDTH,
-  MINIMUM_ACTIONS_COLUMN_WIDTH,
-} from '../constants';
+import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
 
 /** Enriches the column headers with field details from the specified browserFields */
 export const getColumnHeaders = (
@@ -40,20 +33,3 @@ export const getColumnHeaders = (
 
 export const getColumnWidthFromType = (type: string): number =>
   type !== 'date' ? DEFAULT_COLUMN_MIN_WIDTH : DEFAULT_DATE_COLUMN_MIN_WIDTH;
-
-/** Returns the (fixed) width of the Actions column */
-export const getActionsColumnWidth = (
-  isEventViewer: boolean,
-  showCheckboxes = false,
-  additionalActionWidth = 0
-): number => {
-  const checkboxesWidth = showCheckboxes ? SHOW_CHECK_BOXES_COLUMN_WIDTH : 0;
-  const actionsColumnWidth =
-    checkboxesWidth +
-    (isEventViewer ? EVENTS_VIEWER_ACTIONS_COLUMN_WIDTH : DEFAULT_ACTIONS_COLUMN_WIDTH) +
-    additionalActionWidth;
-
-  return actionsColumnWidth > MINIMUM_ACTIONS_COLUMN_WIDTH + checkboxesWidth
-    ? actionsColumnWidth
-    : MINIMUM_ACTIONS_COLUMN_WIDTH + checkboxesWidth;
-};

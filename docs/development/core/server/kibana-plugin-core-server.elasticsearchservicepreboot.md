@@ -15,6 +15,6 @@ export interface ElasticsearchServicePreboot
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [config](./kibana-plugin-core-server.elasticsearchservicepreboot.config.md) | <code>Readonly&lt;ElasticsearchConfigPreboot&gt;</code> | A limited set of Elasticsearch configuration entries. |
-|  [createClient](./kibana-plugin-core-server.elasticsearchservicepreboot.createclient.md) | <code>(type: string, clientConfig?: Partial&lt;ElasticsearchClientConfig&gt;) =&gt; ICustomClusterClient</code> | Create application specific Elasticsearch cluster API client with customized config. See [IClusterClient](./kibana-plugin-core-server.iclusterclient.md)<!-- -->. |
+|  [config](./kibana-plugin-core-server.elasticsearchservicepreboot.config.md) | Readonly&lt;ElasticsearchConfigPreboot&gt; | A limited set of Elasticsearch configuration entries. |
+|  [createClient](./kibana-plugin-core-server.elasticsearchservicepreboot.createclient.md) | (type: string, clientConfig?: Partial&lt;ElasticsearchClientConfig&gt;) =&gt; ICustomClusterClient | Create application specific Elasticsearch cluster API client with customized config. See [IClusterClient](./kibana-plugin-core-server.iclusterclient.md)<!-- -->. |
 

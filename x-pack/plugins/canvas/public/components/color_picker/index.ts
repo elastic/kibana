@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { ColorPicker, Props } from './color_picker';
+export type { Props } from './color_picker';
+export { ColorPicker } from './color_picker';

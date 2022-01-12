@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
-import { SavedObjectsFindResponse, SavedObjectsFindResult } from 'kibana/server';
+import { SavedObjectsFindResponse } from 'src/core/server';
 
 import { ActionResult } from '../../../../../../actions/server';
 import {
@@ -23,13 +23,9 @@ import {
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
+  INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL,
 } from '../../../../../common/constants';
-import {
-  RuleAlertType,
-  IRuleSavedAttributesSavedObjectAttributes,
-  HapiReadableStream,
-  IRuleStatusSOAttributes,
-} from '../../rules/types';
+import { RuleAlertType, HapiReadableStream, IRuleStatusSOAttributes } from '../../rules/types';
 import { requestMock } from './request';
 import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
 import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
@@ -40,9 +36,12 @@ import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detec
 import { RuleParams } from '../../schemas/rule_schemas';
 import { SanitizedAlert, ResolvedSanitizedRule } from '../../../../../../alerting/common';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
-import { getPerformBulkActionSchemaMock } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
+import {
+  getPerformBulkActionSchemaMock,
+  getPerformBulkActionEditSchemaMock,
+} from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { FindBulkExecutionLogResponse } from '../../rule_execution_log/types';
+import { GetCurrentStatusBulkResult } from '../../rule_execution_log/types';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleNotificationAlertType } from '../../notifications/legacy_types';
 
@@ -129,6 +128,13 @@ export const getBulkActionRequest = () =>
     method: 'patch',
     path: DETECTION_ENGINE_RULES_BULK_ACTION,
     body: getPerformBulkActionSchemaMock(),
+  });
+
+export const getBulkActionEditRequest = () =>
+  requestMock.create({
+    method: 'patch',
+    path: DETECTION_ENGINE_RULES_BULK_ACTION,
+    body: getPerformBulkActionEditSchemaMock(),
   });
 
 export const getDeleteBulkRequest = () =>
@@ -225,11 +231,11 @@ export const getFindResultWithMultiHits = ({
   };
 };
 
-export const ruleStatusRequest = () =>
+export const internalRuleStatusRequest = () =>
   requestMock.create({
     method: 'post',
-    path: `${DETECTION_ENGINE_RULES_URL}/_find_statuses`,
-    body: { ids: ['04128c15-0d1b-4716-a4c5-46997ac7f3bd'] },
+    path: INTERNAL_DETECTION_ENGINE_RULE_STATUS_URL,
+    body: { ruleId: '04128c15-0d1b-4716-a4c5-46997ac7f3bd' },
   });
 
 export const getImportRulesRequest = (hapiStream?: HapiReadableStream) =>
@@ -468,101 +474,71 @@ export const getMockPrivilegesResult = () => ({
 });
 
 export const getEmptySavedObjectsResponse =
-  (): SavedObjectsFindResponse<IRuleSavedAttributesSavedObjectAttributes> => ({
+  (): SavedObjectsFindResponse<IRuleStatusSOAttributes> => ({
     page: 1,
     per_page: 1,
     total: 0,
     saved_objects: [],
   });
 
-export const getRuleExecutionStatuses = (): Array<
-  SavedObjectsFindResult<IRuleStatusSOAttributes>
-> => [
-  {
-    type: 'my-type',
-    id: 'e0b86950-4e9f-11ea-bdbd-07b56aa159b3',
-    attributes: {
-      statusDate: '2020-02-18T15:26:49.783Z',
-      status: RuleExecutionStatus.succeeded,
-      lastFailureAt: undefined,
-      lastSuccessAt: '2020-02-18T15:26:49.783Z',
-      lastFailureMessage: undefined,
-      lastSuccessMessage: 'succeeded',
-      lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
-      gap: '500.32',
-      searchAfterTimeDurations: ['200.00'],
-      bulkCreateTimeDurations: ['800.43'],
-    },
-    score: 1,
-    references: [
-      {
-        id: '04128c15-0d1b-4716-a4c5-46997ac7f3bc',
-        type: 'alert',
-        name: 'alert_0',
-      },
-    ],
-    updated_at: '2020-02-18T15:26:51.333Z',
-    version: 'WzQ2LDFd',
-  },
-  {
-    type: 'my-type',
-    id: '91246bd0-5261-11ea-9650-33b954270f67',
-    attributes: {
-      statusDate: '2020-02-18T15:15:58.806Z',
-      status: RuleExecutionStatus.failed,
-      lastFailureAt: '2020-02-18T15:15:58.806Z',
-      lastSuccessAt: '2020-02-13T20:31:59.855Z',
-      lastFailureMessage:
-        'Signal rule name: "Query with a rule id Number 1", id: "1ea5a820-4da1-4e82-92a1-2b43a7bece08", rule_id: "query-rule-id-1" has a time gap of 5 days (412682928ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.',
-      lastSuccessMessage: 'succeeded',
-      lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
-      gap: '500.32',
-      searchAfterTimeDurations: ['200.00'],
-      bulkCreateTimeDurations: ['800.43'],
-    },
-    score: 1,
-    references: [
-      {
-        id: '1ea5a820-4da1-4e82-92a1-2b43a7bece08',
-        type: 'alert',
-        name: 'alert_0',
-      },
-    ],
-    updated_at: '2020-02-18T15:15:58.860Z',
-    version: 'WzMyLDFd',
-  },
+export const getRuleExecutionStatusSucceeded = (): IRuleStatusSOAttributes => ({
+  statusDate: '2020-02-18T15:26:49.783Z',
+  status: RuleExecutionStatus.succeeded,
+  lastFailureAt: undefined,
+  lastSuccessAt: '2020-02-18T15:26:49.783Z',
+  lastFailureMessage: undefined,
+  lastSuccessMessage: 'succeeded',
+  lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
+  gap: '500.32',
+  searchAfterTimeDurations: ['200.00'],
+  bulkCreateTimeDurations: ['800.43'],
+});
+
+export const getRuleExecutionStatusFailed = (): IRuleStatusSOAttributes => ({
+  statusDate: '2020-02-18T15:15:58.806Z',
+  status: RuleExecutionStatus.failed,
+  lastFailureAt: '2020-02-18T15:15:58.806Z',
+  lastSuccessAt: '2020-02-13T20:31:59.855Z',
+  lastFailureMessage:
+    'Signal rule name: "Query with a rule id Number 1", id: "1ea5a820-4da1-4e82-92a1-2b43a7bece08", rule_id: "query-rule-id-1" has a time gap of 5 days (412682928ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.',
+  lastSuccessMessage: 'succeeded',
+  lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
+  gap: '500.32',
+  searchAfterTimeDurations: ['200.00'],
+  bulkCreateTimeDurations: ['800.43'],
+});
+
+export const getRuleExecutionStatuses = (): IRuleStatusSOAttributes[] => [
+  getRuleExecutionStatusSucceeded(),
+  getRuleExecutionStatusFailed(),
 ];
 
-export const getFindBulkResultStatus = (): FindBulkExecutionLogResponse => ({
-  '04128c15-0d1b-4716-a4c5-46997ac7f3bd': [
-    {
-      statusDate: '2020-02-18T15:26:49.783Z',
-      status: RuleExecutionStatus.succeeded,
-      lastFailureAt: undefined,
-      lastSuccessAt: '2020-02-18T15:26:49.783Z',
-      lastFailureMessage: undefined,
-      lastSuccessMessage: 'succeeded',
-      lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
-      gap: '500.32',
-      searchAfterTimeDurations: ['200.00'],
-      bulkCreateTimeDurations: ['800.43'],
-    },
-  ],
-  '1ea5a820-4da1-4e82-92a1-2b43a7bece08': [
-    {
-      statusDate: '2020-02-18T15:15:58.806Z',
-      status: RuleExecutionStatus.failed,
-      lastFailureAt: '2020-02-18T15:15:58.806Z',
-      lastSuccessAt: '2020-02-13T20:31:59.855Z',
-      lastFailureMessage:
-        'Signal rule name: "Query with a rule id Number 1", id: "1ea5a820-4da1-4e82-92a1-2b43a7bece08", rule_id: "query-rule-id-1" has a time gap of 5 days (412682928ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.',
-      lastSuccessMessage: 'succeeded',
-      lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
-      gap: '500.32',
-      searchAfterTimeDurations: ['200.00'],
-      bulkCreateTimeDurations: ['800.43'],
-    },
-  ],
+export const getFindBulkResultStatus = (): GetCurrentStatusBulkResult => ({
+  '04128c15-0d1b-4716-a4c5-46997ac7f3bd': {
+    statusDate: '2020-02-18T15:26:49.783Z',
+    status: RuleExecutionStatus.succeeded,
+    lastFailureAt: undefined,
+    lastSuccessAt: '2020-02-18T15:26:49.783Z',
+    lastFailureMessage: undefined,
+    lastSuccessMessage: 'succeeded',
+    lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
+    gap: '500.32',
+    searchAfterTimeDurations: ['200.00'],
+    bulkCreateTimeDurations: ['800.43'],
+  },
+  '1ea5a820-4da1-4e82-92a1-2b43a7bece08': {
+    statusDate: '2020-02-18T15:15:58.806Z',
+    status: RuleExecutionStatus.failed,
+    lastFailureAt: '2020-02-18T15:15:58.806Z',
+    lastSuccessAt: '2020-02-13T20:31:59.855Z',
+    lastFailureMessage:
+      'Signal rule name: "Query with a rule id Number 1", id: "1ea5a820-4da1-4e82-92a1-2b43a7bece08", rule_id: "query-rule-id-1" has a time gap of 5 days (412682928ms), and could be missing signals within that time. Consider increasing your look behind time or adding more Kibana instances.',
+    lastSuccessMessage: 'succeeded',
+    lastLookBackDate: new Date('2020-02-18T15:14:58.806Z').toISOString(),
+    gap: '500.32',
+    searchAfterTimeDurations: ['200.00'],
+    bulkCreateTimeDurations: ['800.43'],
+  },
 });
 
 export const getBasicEmptySearchResponse = (): estypes.SearchResponse<unknown> => ({

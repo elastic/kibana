@@ -19,12 +19,12 @@ import { SuggestedCurationsCallout } from './suggested_curations_callout';
 
 const MOCK_VALUES = {
   engine: {
-    search_relevance_suggestions: {
+    adaptive_relevance_suggestions: {
       curation: {
         pending: 1,
       },
     },
-    search_relevance_suggestions_active: true,
+    adaptive_relevance_suggestions_active: true,
   },
 };
 
@@ -44,7 +44,7 @@ describe('SuggestedCurationsCallout', () => {
     setMockValues({
       ...MOCK_VALUES,
       engine: {
-        search_relevance_suggestions_active: true,
+        adaptive_relevance_suggestions_active: true,
       },
     });
 
@@ -54,7 +54,7 @@ describe('SuggestedCurationsCallout', () => {
   });
 
   it('is empty when suggestions are not active', () => {
-    const values = set('engine.search_relevance_suggestions_active', false, MOCK_VALUES);
+    const values = set('engine.adaptive_relevance_suggestions_active', false, MOCK_VALUES);
     setMockValues(values);
 
     const wrapper = shallow(<SuggestedCurationsCallout />);
@@ -63,7 +63,7 @@ describe('SuggestedCurationsCallout', () => {
   });
 
   it('is empty when no pending curations', () => {
-    const values = set('engine.search_relevance_suggestions.curation.pending', 0, MOCK_VALUES);
+    const values = set('engine.adaptive_relevance_suggestions.curation.pending', 0, MOCK_VALUES);
     setMockValues(values);
 
     const wrapper = shallow(<SuggestedCurationsCallout />);

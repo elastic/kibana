@@ -25,20 +25,21 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('delete_rules', () => {
     describe('deleting rules', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should delete a single rule with a rule_id', async () => {
-        await createRule(supertest, getSimpleRule('rule-1'));
+        await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // delete the rule by its rule_id
         const { body } = await supertest
@@ -51,7 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should delete a single rule using an auto generated rule_id', async () => {
-        const bodyWithCreatedRule = await createRule(supertest, getSimpleRuleWithoutRuleId());
+        const bodyWithCreatedRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
 
         // delete that rule by its auto-generated rule_id
         const { body } = await supertest
@@ -64,7 +65,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should delete a single rule using an auto generated id', async () => {
-        const bodyWithCreatedRule = await createRule(supertest, getSimpleRule());
+        const bodyWithCreatedRule = await createRule(supertest, log, getSimpleRule());
 
         // delete that rule by its auto-generated id
         const { body } = await supertest

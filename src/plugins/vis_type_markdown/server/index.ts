@@ -13,7 +13,7 @@ import { configSchema, ConfigSchema } from '../config';
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('markdown_vis.enabled', 'vis_type_markdown.enabled'),
+    renameFromRoot('markdown_vis.enabled', 'vis_type_markdown.enabled', { level: 'warning' }),
   ],
 };
 

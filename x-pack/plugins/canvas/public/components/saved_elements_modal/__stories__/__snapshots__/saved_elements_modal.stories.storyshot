@@ -38,7 +38,9 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          My elements
+          <h1>
+            My elements
+          </h1>
         </div>
       </div>
       <div
@@ -86,36 +88,49 @@ exports[`Storyshots components/SavedElementsModal no custom elements 1`] = `
             className="euiSpacer euiSpacer--l"
           />
           <div
-            className="euiEmptyPrompt"
+            className="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
           >
-            <span
-              color="subdued"
-              data-euiicon-type="vector"
-              size="xxl"
-            />
             <div
-              className="euiSpacer euiSpacer--m"
-            />
-            <h2
-              className="euiTitle euiTitle--small"
-            >
-              Add new elements
-            </h2>
-            <span
-              className="euiTextColor euiTextColor--subdued"
-              style={Object {}}
+              className="euiEmptyPrompt__main"
             >
               <div
-                className="euiSpacer euiSpacer--m"
-              />
-              <div
-                className="euiText euiText--medium"
+                className="euiEmptyPrompt__icon"
               >
-                <p>
-                  Group and save workpad elements to create new elements
-                </p>
+                <span
+                  color="subdued"
+                  data-euiicon-type="vector"
+                  size="xxl"
+                />
               </div>
-            </span>
+              <div
+                className="euiEmptyPrompt__content"
+              >
+                <div
+                  className="euiEmptyPrompt__contentInner"
+                >
+                  <h2
+                    className="euiTitle euiTitle--small"
+                  >
+                    Add new elements
+                  </h2>
+                  <span
+                    className="euiTextColor euiTextColor--subdued"
+                    style={Object {}}
+                  >
+                    <div
+                      className="euiSpacer euiSpacer--m"
+                    />
+                    <div
+                      className="euiText euiText--medium"
+                    >
+                      <p>
+                        Group and save workpad elements to create new elements
+                      </p>
+                    </div>
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -188,7 +203,9 @@ exports[`Storyshots components/SavedElementsModal with custom elements 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          My elements
+          <h1>
+            My elements
+          </h1>
         </div>
       </div>
       <div
@@ -637,7 +654,9 @@ exports[`Storyshots components/SavedElementsModal with text filter 1`] = `
         <div
           className="euiModalHeader__title canvasAssetManager__modalHeaderTitle"
         >
-          My elements
+          <h1>
+            My elements
+          </h1>
         </div>
       </div>
       <div

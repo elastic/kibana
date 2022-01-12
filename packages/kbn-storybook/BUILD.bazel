@@ -32,10 +32,12 @@ RUNTIME_DEPS = [
   "//packages/kbn-dev-utils",
   "//packages/kbn-ui-shared-deps-npm",
   "//packages/kbn-ui-shared-deps-src",
+  "//packages/kbn-utils",
   "@npm//@storybook/addons",
   "@npm//@storybook/api",
   "@npm//@storybook/components",
   "@npm//@storybook/core",
+  "@npm//@storybook/core-common",
   "@npm//@storybook/node-logger",
   "@npm//@storybook/react",
   "@npm//@storybook/theming",
@@ -46,16 +48,19 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-dev-utils",
+  "//packages/kbn-dev-utils:npm_module_types",
   "//packages/kbn-ui-shared-deps-npm",
   "//packages/kbn-ui-shared-deps-src",
+  "//packages/kbn-utils:npm_module_types",
   "@npm//@storybook/addons",
   "@npm//@storybook/api",
   "@npm//@storybook/components",
   "@npm//@storybook/core",
+  "@npm//@storybook/core-common",
   "@npm//@storybook/node-logger",
   "@npm//@storybook/react",
   "@npm//@storybook/theming",
+  "@npm//@types/express", # necessary for storybook which is missing the types
   "@npm//@types/loader-utils",
   "@npm//@types/node",
   "@npm//@types/react",

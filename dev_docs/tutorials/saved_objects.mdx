@@ -252,6 +252,8 @@ Having said that, if a document is encountered that is not in the expected shape
 fail an upgrade than to silently ignore a corrupt document which can cause unexpected behaviour at some future point in time. When such a scenario is encountered,
 the error should be verbose and informative so that the corrupt document can be corrected, if possible.
 
+**WARNING:** Do not attempt to change the `migrationVersion`, `id`, or `type` fields within a migration function, this is not supported.
+
 ### Testing Migrations
 
-Bugs in a migration function cause downtime for our users and therefore have a very high impact. Follow the <DocLink id="kibDevTutorialTestingPlugins" section="saved-object-migrations" text="Saved Object migrations section in the plugin testing guide"/>.
+Bugs in a migration function cause downtime for our users and therefore have a very high impact. Follow the <DocLink id="kibDevTutorialTestingPlugins" section="saved-objects-migrations" text="Saved Object migrations section in the plugin testing guide"/>.

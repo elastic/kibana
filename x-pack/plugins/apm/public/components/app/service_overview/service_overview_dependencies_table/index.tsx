@@ -11,7 +11,7 @@ import React, { ReactNode } from 'react';
 import { useUiTracker } from '../../../../../../observability/public';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -33,7 +33,7 @@ export function ServiceOverviewDependenciesTable({
 }: ServiceOverviewDependenciesTableProps) {
   const {
     urlParams: { comparisonEnabled, comparisonType, latencyAggregationType },
-  } = useUrlParams();
+  } = useLegacyUrlParams();
 
   const {
     query: { environment, kuery, rangeFrom, rangeTo },

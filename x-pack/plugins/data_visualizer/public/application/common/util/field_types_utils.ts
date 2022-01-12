@@ -10,40 +10,8 @@ import { JOB_FIELD_TYPES } from '../../../../common';
 import type { IndexPatternField } from '../../../../../../../src/plugins/data/common';
 import { KBN_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
 
-export const jobTypeAriaLabels = {
-  BOOLEAN: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.booleanTypeAriaLabel', {
-    defaultMessage: 'boolean type',
-  }),
-  DATE: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.dateTypeAriaLabel', {
-    defaultMessage: 'date type',
-  }),
-  GEO_POINT: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.geoPointTypeAriaLabel', {
-    defaultMessage: '{geoPointParam} type',
-    values: {
-      geoPointParam: 'geo point',
-    },
-  }),
-  GEO_SHAPE: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.geoShapeTypeAriaLabel', {
-    defaultMessage: 'geo shape type',
-  }),
-  IP: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.ipTypeAriaLabel', {
-    defaultMessage: 'ip type',
-  }),
-  KEYWORD: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.keywordTypeAriaLabel', {
-    defaultMessage: 'keyword type',
-  }),
-  NUMBER: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.numberTypeAriaLabel', {
-    defaultMessage: 'number type',
-  }),
-  HISTOGRAM: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.histogramTypeAriaLabel', {
-    defaultMessage: 'histogram type',
-  }),
-  TEXT: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.textTypeAriaLabel', {
-    defaultMessage: 'text type',
-  }),
-  UNKNOWN: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.unknownTypeAriaLabel', {
-    defaultMessage: 'unknown type',
-  }),
+export const getJobTypeLabel = (type: string) => {
+  return type in jobTypeLabels ? jobTypeLabels[type as keyof typeof jobTypeLabels] : null;
 };
 
 export const jobTypeLabels = {
@@ -86,16 +54,6 @@ export const jobTypeLabels = {
   [JOB_FIELD_TYPES.UNKNOWN]: i18n.translate('xpack.dataVisualizer.fieldTypeIcon.unknownTypeLabel', {
     defaultMessage: 'Unknown',
   }),
-};
-
-export const getJobTypeAriaLabel = (type: string) => {
-  const requestedFieldType = Object.keys(JOB_FIELD_TYPES).find(
-    (k) => JOB_FIELD_TYPES[k as keyof typeof JOB_FIELD_TYPES] === type
-  );
-  if (requestedFieldType === undefined) {
-    return null;
-  }
-  return jobTypeAriaLabels[requestedFieldType as keyof typeof jobTypeAriaLabels];
 };
 
 // convert kibana types to ML Job types

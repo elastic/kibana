@@ -304,7 +304,7 @@ describe('Cloud Plugin', () => {
       expect(coreStart.chrome.setHelpSupportUrl).toHaveBeenCalledTimes(1);
       expect(coreStart.chrome.setHelpSupportUrl.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "https://support.elastic.co/",
+          "https://cloud.elastic.co/support",
         ]
       `);
     });
@@ -348,7 +348,7 @@ describe('Cloud Plugin', () => {
       expect(coreStart.chrome.setCustomNavLink.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "euiIconType": "arrowLeft",
+            "euiIconType": "logoCloud",
             "href": "https://cloud.elastic.co/abc123",
             "title": "Manage this deployment",
           },
@@ -370,7 +370,7 @@ describe('Cloud Plugin', () => {
       expect(coreStart.chrome.setCustomNavLink.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
-            "euiIconType": "arrowLeft",
+            "euiIconType": "logoCloud",
             "href": "https://cloud.elastic.co/abc123",
             "title": "Manage this deployment",
           },

@@ -8,15 +8,17 @@
 import type { FunctionComponent } from 'react';
 import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from 'kibana/public';
-import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
+import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel } from '@elastic/eui';
 import type { History } from 'history';
 import { Router, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import useObservable from 'react-use/lib/useObservable';
 
 import type { TopNavMenuData } from 'src/plugins/navigation/public';
+
+import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 import {
@@ -25,7 +27,7 @@ import {
 } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
 
-import { PackageInstallProvider, useUrlModal } from '../integrations/hooks';
+import { PackageInstallProvider } from '../integrations/hooks';
 
 import {
   ConfigContext,
@@ -37,7 +39,7 @@ import {
   useStartServices,
   UIExtensionsContext,
 } from './hooks';
-import { Error, Loading, SettingFlyout, FleetSetupLoading } from './components';
+import { Error, Loading, FleetSetupLoading } from './components';
 import type { UIExtensionsStorage } from './types';
 
 import { FLEET_ROUTING_PATHS } from './constants';
@@ -48,6 +50,7 @@ import { AgentsApp } from './sections/agents';
 import { MissingESRequirementsPage } from './sections/agents/agent_requirements_page';
 import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
+import { SettingsApp } from './sections/settings';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
@@ -208,10 +211,20 @@ export const FleetAppContext: React.FC<{
   history: AppMountParameters['history'];
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
+  theme$: AppMountParameters['theme$'];
   /** For testing purposes only */
   routerHistory?: History<any>;
 }> = memo(
-  ({ children, startServices, config, history, kibanaVersion, extensions, routerHistory }) => {
+  ({
+    children,
+    startServices,
+    config,
+    history,
+    kibanaVersion,
+    extensions,
+    routerHistory,
+    theme$,
+  }) => {
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
 
     return (
@@ -221,17 +234,22 @@ export const FleetAppContext: React.FC<{
             <EuiErrorBoundary>
               <ConfigContext.Provider value={config}>
                 <KibanaVersionContext.Provider value={kibanaVersion}>
-                  <EuiThemeProvider darkMode={isDarkMode}>
-                    <UIExtensionsContext.Provider value={extensions}>
-                      <FleetStatusProvider>
-                        <Router history={history}>
-                          <PackageInstallProvider notifications={startServices.notifications}>
-                            {children}
-                          </PackageInstallProvider>
-                        </Router>
-                      </FleetStatusProvider>
-                    </UIExtensionsContext.Provider>
-                  </EuiThemeProvider>
+                  <KibanaThemeProvider theme$={theme$}>
+                    <EuiThemeProvider darkMode={isDarkMode}>
+                      <UIExtensionsContext.Provider value={extensions}>
+                        <FleetStatusProvider>
+                          <Router history={history}>
+                            <PackageInstallProvider
+                              notifications={startServices.notifications}
+                              theme$={theme$}
+                            >
+                              {children}
+                            </PackageInstallProvider>
+                          </Router>
+                        </FleetStatusProvider>
+                      </UIExtensionsContext.Provider>
+                    </EuiThemeProvider>
+                  </KibanaThemeProvider>
                 </KibanaVersionContext.Provider>
               </ConfigContext.Provider>
             </EuiErrorBoundary>
@@ -244,7 +262,6 @@ export const FleetAppContext: React.FC<{
 
 const FleetTopNav = memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
-    const { getModalHref } = useUrlModal();
     const services = useStartServices();
 
     const { TopNavMenu } = services.navigation.ui;
@@ -256,14 +273,6 @@ const FleetTopNav = memo(
         }),
         iconType: 'popout',
         run: () => window.open(FEEDBACK_URL),
-      },
-
-      {
-        label: i18n.translate('xpack.fleet.appNavigation.settingsButton', {
-          defaultMessage: 'Fleet settings',
-        }),
-        iconType: 'gear',
-        run: () => services.application.navigateToUrl(getModalHref('settings')),
       },
     ];
     return (
@@ -278,21 +287,9 @@ const FleetTopNav = memo(
 
 export const AppRoutes = memo(
   ({ setHeaderActionMenu }: { setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'] }) => {
-    const { modal, setModal } = useUrlModal();
-
     return (
       <>
         <FleetTopNav setHeaderActionMenu={setHeaderActionMenu} />
-
-        {modal === 'settings' && (
-          <EuiPortal>
-            <SettingFlyout
-              onClose={() => {
-                setModal(null);
-              }}
-            />
-          </EuiPortal>
-        )}
 
         <Switch>
           <Route path={FLEET_ROUTING_PATHS.agents}>
@@ -306,6 +303,10 @@ export const AppRoutes = memo(
           </Route>
           <Route path={FLEET_ROUTING_PATHS.data_streams}>
             <DataStreamApp />
+          </Route>
+
+          <Route path={FLEET_ROUTING_PATHS.settings}>
+            <SettingsApp />
           </Route>
 
           {/* TODO: Move this route to the Integrations app */}

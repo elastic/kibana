@@ -17,7 +17,7 @@ import { basicResolvers } from '../../resolvers';
 import { Page, preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { checkBasicLicense } from '../../../license';
-import { loadIndexPatterns } from '../../../util/index_utils';
+import { cacheDataViewsContract } from '../../../util/index_utils';
 import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 
 enum MODE {
@@ -86,11 +86,11 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) =
   const newJobResolvers = {
     ...basicResolvers(deps),
     preConfiguredJobRedirect: () =>
-      preConfiguredJobRedirect(deps.indexPatterns, basePath.get(), navigateToUrl),
+      preConfiguredJobRedirect(deps.dataViewsContract, basePath.get(), navigateToUrl),
   };
   const dataVizResolvers = {
     checkBasicLicense,
-    loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
+    cacheDataViewsContract: () => cacheDataViewsContract(deps.dataViewsContract),
     checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
   };
 
@@ -98,6 +98,7 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) =
     undefined,
     undefined,
     deps.config,
+    deps.dataViewsContract,
     mode === MODE.NEW_JOB ? newJobResolvers : dataVizResolvers
   );
   return (

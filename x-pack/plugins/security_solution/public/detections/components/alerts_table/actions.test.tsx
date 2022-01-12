@@ -10,10 +10,11 @@ import moment from 'moment';
 
 import { sendAlertToTimelineAction, determineToAndFrom } from './actions';
 import {
-  mockEcsDataWithAlert,
   defaultTimelineProps,
-  mockTimelineResult,
+  getThresholdDetectionAlertAADMock,
+  mockEcsDataWithAlert,
   mockTimelineDetails,
+  mockTimelineResult,
 } from '../../../common/mock/';
 import { CreateTimeline, UpdateTimelineLoading } from './types';
 import { Ecs } from '../../../../common/ecs';
@@ -23,7 +24,7 @@ import {
   TimelineStatus,
   TimelineTabs,
 } from '../../../../common/types/timeline';
-import { ISearchStart } from '../../../../../../../src/plugins/data/public';
+import type { ISearchStart } from '../../../../../../../src/plugins/data/public';
 import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { getTimelineTemplate } from '../../../timelines/containers/api';
 import { defaultHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
@@ -76,7 +77,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: mockEcsDataWithAlert,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -92,7 +92,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: mockEcsDataWithAlert,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -142,6 +141,7 @@ describe('alert actions', () => {
             ],
             defaultColumns: defaultHeaders,
             dataProviders: [],
+            dataViewId: null,
             dateRange: {
               end: '2018-11-05T19:03:25.937Z',
               start: '2018-11-05T18:58:25.937Z',
@@ -248,7 +248,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: mockEcsDataWithAlert,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -266,7 +265,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: mockEcsDataWithAlert,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -300,7 +298,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -326,7 +323,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -356,7 +352,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -397,7 +392,6 @@ describe('alert actions', () => {
         await sendAlertToTimelineAction({
           createTimeline,
           ecsData: ecsDataMock,
-          nonEcsData: [],
           updateTimelineIsLoading,
           searchStrategyClient,
         });
@@ -422,13 +416,60 @@ describe('alert actions', () => {
     });
 
     test('it uses current time timestamp if ecsData.timestamp is not provided', () => {
-      const { timestamp, ...ecsDataMock } = {
-        ...mockEcsDataWithAlert,
-      };
+      const { timestamp, ...ecsDataMock } = mockEcsDataWithAlert;
       const result = determineToAndFrom({ ecs: ecsDataMock });
 
       expect(result.from).toEqual('2020-03-01T17:54:46.349Z');
       expect(result.to).toEqual('2020-03-01T17:59:46.349Z');
+    });
+
+    test('it uses original_time and threshold_result.from for threshold alerts', async () => {
+      const ecsDataMock = getThresholdDetectionAlertAADMock();
+
+      const expectedFrom = '2021-01-10T21:11:45.839Z';
+      const expectedTo = '2021-01-10T21:12:45.839Z';
+
+      await sendAlertToTimelineAction({
+        createTimeline,
+        ecsData: ecsDataMock,
+        updateTimelineIsLoading,
+        searchStrategyClient,
+      });
+      expect(createTimeline).toHaveBeenCalledTimes(1);
+      expect(createTimeline).toHaveBeenCalledWith({
+        ...defaultTimelineProps,
+        timeline: {
+          ...defaultTimelineProps.timeline,
+          dataProviders: [
+            {
+              and: [],
+              enabled: true,
+              excluded: false,
+              id: 'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-destination-ip-1',
+              kqlQuery: '',
+              name: 'destination.ip',
+              queryMatch: { field: 'destination.ip', operator: ':', value: 1 },
+            },
+          ],
+          dateRange: {
+            start: expectedFrom,
+            end: expectedTo,
+          },
+          description: '_id: 1',
+          kqlQuery: {
+            filterQuery: {
+              kuery: {
+                expression: ['user.id:1'],
+                kind: ['kuery'],
+              },
+              serializedQuery: ['user.id:1'],
+            },
+          },
+          resolveTimelineConfig: undefined,
+        },
+        from: expectedFrom,
+        to: expectedTo,
+      });
     });
   });
 });

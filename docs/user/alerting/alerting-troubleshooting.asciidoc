@@ -5,7 +5,7 @@
 <titleabbrev>Troubleshooting</titleabbrev>
 ++++
 
-The Alerting framework provides many options for diagnosing problems with Rules and Connectors.
+Alerting provides many options for diagnosing problems with Rules and Connectors.
 
 [float]
 [[alerting-kibana-log]]
@@ -15,7 +15,7 @@ Rules and connectors log to the Kibana logger with tags of [alerting] and [actio
 
 [source, txt]
 --------------------------------------------------
-server    log   [11:39:40.389] [error][alerting][alerting][plugins][plugins] Executing Alert "5b6237b0-c6f6-11eb-b0ff-a1a0cbcf29b6" has resulted in Error: Saved object [action/fdbc8610-c6f5-11eb-b0ff-a1a0cbcf29b6] not found
+server    log   [11:39:40.389] [error][alerting][alerting][plugins][plugins] Executing Rule "5b6237b0-c6f6-11eb-b0ff-a1a0cbcf29b6" has resulted in Error: Saved object [action/fdbc8610-c6f5-11eb-b0ff-a1a0cbcf29b6] not found
 --------------------------------------------------
 Some of the resources, such as saved objects and API keys, may no longer be available or valid, yielding error messages about those missing resources.
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { GenericBuckets } from '../../../../../common';
+import type { GenericBuckets } from '../../../../../common/search_strategy';
 
 export interface AlertsCountAggregation {
   alertsByGroupingCount: {

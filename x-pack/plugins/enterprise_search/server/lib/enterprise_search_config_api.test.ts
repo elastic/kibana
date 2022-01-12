@@ -41,12 +41,11 @@ describe('callEnterpriseSearchConfigAPI', () => {
 
   const mockResponse = {
     version: {
-      number: '1.0.0',
+      number: '7.16.0',
     },
     settings: {
       external_url: 'http://some.vanity.url/',
       read_only_mode: false,
-      ilm_enabled: true,
       is_federated_auth: false,
       search_oauth: {
         client_id: 'someUID',
@@ -121,6 +120,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
 
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({
       ...DEFAULT_INITIAL_APP_DATA,
+      kibanaVersion: '1.0.0',
       access: {
         hasAppSearchAccess: true,
         hasWorkplaceSearchAccess: false,
@@ -133,13 +133,13 @@ describe('callEnterpriseSearchConfigAPI', () => {
     (fetch as unknown as jest.Mock).mockReturnValueOnce(Promise.resolve(new Response('{}')));
 
     expect(await callEnterpriseSearchConfigAPI(mockDependencies)).toEqual({
+      kibanaVersion: '1.0.0',
       access: {
         hasAppSearchAccess: false,
         hasWorkplaceSearchAccess: false,
       },
       publicUrl: undefined,
       readOnlyMode: false,
-      ilmEnabled: false,
       searchOAuth: {
         clientId: undefined,
         redirectUrl: undefined,

@@ -68,13 +68,13 @@ const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   hideSubtitle = false,
 }) => (
   <Header data-test-subj="header-section" border={border} height={height}>
-    <EuiFlexGroup alignItems="center" gutterSize="none">
+    <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={growLeftSplit}>
-        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="none">
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           <EuiFlexItem>
             <EuiTitle size={titleSize}>
               <h4 data-test-subj="header-section-title">
-                {title}
+                <span className="eui-textBreakNormal">{title}</span>
                 {tooltip && (
                   <>
                     {' '}

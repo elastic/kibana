@@ -805,7 +805,7 @@
         "label": "Dimension",
         "description": [],
         "signature": [
-          "Pick<",
+          "Omit<",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -813,7 +813,7 @@
             "section": "def-public.SchemaConfig",
             "text": "SchemaConfig"
           },
-          ", \"label\" | \"format\" | \"accessor\" | \"aggType\"> & { params: {} | ",
+          ", \"params\"> & { params: {} | ",
           "DateHistogramParams",
           " | ",
           "HistogramParams",

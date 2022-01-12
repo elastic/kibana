@@ -31,6 +31,7 @@ import {
   getDoesAnyTrustedAppExistsIsLoading,
 } from '../selectors';
 import {
+  GetTrustedAppsListResponse,
   Immutable,
   MaybeImmutable,
   PutTrustedAppUpdateResponse,
@@ -39,12 +40,13 @@ import {
 import { ImmutableMiddlewareAPI } from '../../../../../../common/store';
 import { TrustedAppsService } from '../../../../trusted_apps/service';
 import {
+  asStaleResourceState,
   createFailedResourceState,
   createLoadedResourceState,
   createLoadingResourceState,
-  createUninitialisedResourceState,
   isLoadingResourceState,
   isUninitialisedResourceState,
+  isLoadedResourceState,
 } from '../../../../../state';
 import { parseQueryFilterToKQL } from '../../../../../common/utils';
 import { SEARCHABLE_FIELDS } from '../../../../trusted_apps/constants';
@@ -113,9 +115,7 @@ const checkIfThereAreAssignableTrustedApps = async (
 
   store.dispatch({
     type: 'policyArtifactsAssignableListExistDataChanged',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
-    payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
+    payload: createLoadingResourceState<boolean>(),
   });
   try {
     const trustedApps = await trustedAppsService.getTrustedAppsList({
@@ -131,9 +131,54 @@ const checkIfThereAreAssignableTrustedApps = async (
   } catch (err) {
     store.dispatch({
       type: 'policyArtifactsAssignableListExistDataChanged',
-      // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-      // @ts-ignore
-      payload: createFailedResourceState(err.body ?? err),
+      payload: createFailedResourceState<boolean>(err.body ?? err),
+    });
+  }
+};
+
+const checkIfPolicyHasTrustedAppsAssigned = async (
+  store: ImmutableMiddlewareAPI<PolicyDetailsState, PolicyDetailsAction>,
+  trustedAppsService: TrustedAppsService
+) => {
+  const state = store.getState();
+  if (isLoadingResourceState(state.artifacts.hasTrustedApps)) {
+    return;
+  }
+  if (isLoadedResourceState(state.artifacts.hasTrustedApps)) {
+    store.dispatch({
+      type: 'policyArtifactsHasTrustedApps',
+      payload: createLoadingResourceState(state.artifacts.hasTrustedApps),
+    });
+  } else {
+    store.dispatch({
+      type: 'policyArtifactsHasTrustedApps',
+      payload: createLoadingResourceState<GetTrustedAppsListResponse>(),
+    });
+  }
+  try {
+    const policyId = policyIdFromParams(state);
+    const kuery = `(exception-list-agnostic.attributes.tags:"policy:${policyId}" OR exception-list-agnostic.attributes.tags:"policy:all")`;
+    const trustedApps = await trustedAppsService.getTrustedAppsList({
+      page: 1,
+      per_page: 100,
+      kuery,
+    });
+
+    if (
+      !trustedApps.total &&
+      isUninitialisedResourceState(state.artifacts.doesAnyTrustedAppExists)
+    ) {
+      await checkIfAnyTrustedApp(store, trustedAppsService);
+    }
+
+    store.dispatch({
+      type: 'policyArtifactsHasTrustedApps',
+      payload: createLoadedResourceState(trustedApps),
+    });
+  } catch (err) {
+    store.dispatch({
+      type: 'policyArtifactsHasTrustedApps',
+      payload: createFailedResourceState<GetTrustedAppsListResponse>(err.body ?? err),
     });
   }
 };
@@ -148,9 +193,7 @@ const checkIfAnyTrustedApp = async (
   }
   store.dispatch({
     type: 'policyArtifactsDeosAnyTrustedAppExists',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
-    payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
+    payload: createLoadingResourceState<GetTrustedAppsListResponse>(),
   });
   try {
     const trustedApps = await trustedAppsService.getTrustedAppsList({
@@ -160,12 +203,12 @@ const checkIfAnyTrustedApp = async (
 
     store.dispatch({
       type: 'policyArtifactsDeosAnyTrustedAppExists',
-      payload: createLoadedResourceState(!isEmpty(trustedApps.data)),
+      payload: createLoadedResourceState(trustedApps),
     });
   } catch (err) {
     store.dispatch({
       type: 'policyArtifactsDeosAnyTrustedAppExists',
-      payload: createFailedResourceState<boolean>(err.body ?? err),
+      payload: createFailedResourceState<GetTrustedAppsListResponse>(err.body ?? err),
     });
   }
 };
@@ -180,9 +223,7 @@ const searchTrustedApps = async (
 
   store.dispatch({
     type: 'policyArtifactsAssignableListPageDataChanged',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-ignore
-    payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
+    payload: createLoadingResourceState<GetTrustedAppsListResponse>(),
   });
 
   try {
@@ -192,7 +233,9 @@ const searchTrustedApps = async (
 
     if (filter) {
       const filterKuery = parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) || undefined;
-      if (filterKuery) kuery.push(filterKuery);
+      if (filterKuery) {
+        kuery.push(filterKuery);
+      }
     }
 
     const trustedApps = await trustedAppsService.getTrustedAppsList({
@@ -212,9 +255,7 @@ const searchTrustedApps = async (
   } catch (err) {
     store.dispatch({
       type: 'policyArtifactsAssignableListPageDataChanged',
-      // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-      // @ts-ignore
-      payload: createFailedResourceState(err.body ?? err),
+      payload: createFailedResourceState<GetTrustedAppsListResponse>(err.body ?? err),
     });
   }
 };
@@ -229,9 +270,7 @@ const updateTrustedApps = async (
 
   store.dispatch({
     type: 'policyArtifactsUpdateTrustedAppsChanged',
-    // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-    // @ts-expect-error
-    payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
+    payload: createLoadingResourceState<PutTrustedAppUpdateResponse[]>(),
   });
 
   try {
@@ -239,6 +278,7 @@ const updateTrustedApps = async (
       policyId,
       trustedApps
     );
+    await checkIfPolicyHasTrustedAppsAssigned(store, trustedAppsService);
 
     store.dispatch({
       type: 'policyArtifactsUpdateTrustedAppsChanged',
@@ -268,19 +308,29 @@ const fetchPolicyTrustedAppsIfNeeded = async (
   if (forceFetch || doesPolicyTrustedAppsListNeedUpdate(state)) {
     dispatch({
       type: 'assignedTrustedAppsListStateChanged',
-      // @ts-ignore will be fixed when AsyncResourceState is refactored (#830)
-      payload: createLoadingResourceState(getCurrentPolicyAssignedTrustedAppsState(state)),
+      payload: createLoadingResourceState(
+        asStaleResourceState(getCurrentPolicyAssignedTrustedAppsState(state))
+      ),
     });
 
     try {
       const urlLocationData = getCurrentUrlLocationPaginationParams(state);
       const policyId = policyIdFromParams(state);
+      const kuery = [
+        `((exception-list-agnostic.attributes.tags:"policy:${policyId}") OR (exception-list-agnostic.attributes.tags:"policy:all"))`,
+      ];
+
+      if (urlLocationData.filter) {
+        const filterKuery =
+          parseQueryFilterToKQL(urlLocationData.filter, SEARCHABLE_FIELDS) || undefined;
+        if (filterKuery) {
+          kuery.push(filterKuery);
+        }
+      }
       const fetchResponse = await trustedAppsService.getTrustedAppsList({
         page: urlLocationData.page_index + 1,
         per_page: urlLocationData.page_size,
-        kuery: `((exception-list-agnostic.attributes.tags:"policy:${policyId}") OR (exception-list-agnostic.attributes.tags:"policy:all"))${
-          urlLocationData.filter ? ` AND (${urlLocationData.filter})` : ''
-        }`,
+        kuery: kuery.join(' AND '),
       });
 
       dispatch({
@@ -290,8 +340,9 @@ const fetchPolicyTrustedAppsIfNeeded = async (
           artifacts: fetchResponse,
         }),
       });
-      if (!fetchResponse.total) {
-        await checkIfAnyTrustedApp({ getState, dispatch }, trustedAppsService);
+
+      if (isUninitialisedResourceState(state.artifacts.hasTrustedApps)) {
+        await checkIfPolicyHasTrustedAppsAssigned({ getState, dispatch }, trustedAppsService);
       }
     } catch (error) {
       dispatch({
@@ -320,8 +371,8 @@ const fetchAllPoliciesIfNeeded = async (
 
   dispatch({
     type: 'policyDetailsListOfAllPoliciesStateChanged',
-    // @ts-ignore will be fixed when AsyncResourceState is refactored (#830)
-    payload: createLoadingResourceState(currentPoliciesState),
+    // @ts-expect-error ts 4.5 upgrade
+    payload: createLoadingResourceState(asStaleResourceState(currentPoliciesState)),
   });
 
   try {
@@ -357,8 +408,9 @@ const removeTrustedAppsFromPolicy = async (
 
   dispatch({
     type: 'policyDetailsTrustedAppsRemoveListStateChanged',
-    // @ts-expect-error will be fixed when AsyncResourceState is refactored (#830)
-    payload: createLoadingResourceState(getCurrentTrustedAppsRemoveListState(state)),
+    payload: createLoadingResourceState(
+      asStaleResourceState(getCurrentTrustedAppsRemoveListState(state))
+    ),
   });
 
   try {
@@ -372,6 +424,7 @@ const removeTrustedAppsFromPolicy = async (
       currentPolicyId,
       trustedApps
     );
+    await checkIfPolicyHasTrustedAppsAssigned({ getState, dispatch }, trustedAppsService);
 
     dispatch({
       type: 'policyDetailsTrustedAppsRemoveListStateChanged',

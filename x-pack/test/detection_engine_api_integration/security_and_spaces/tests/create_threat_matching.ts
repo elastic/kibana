@@ -17,15 +17,11 @@ import {
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
   VERSION,
-  TAGS,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
-import {
-  DETECTION_ENGINE_RULES_STATUS_URL,
-  DETECTION_ENGINE_RULES_URL,
-} from '../../../../plugins/security_solution/common/constants';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
@@ -41,6 +37,7 @@ import {
 import { getCreateThreatMatchRulesSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas.mock';
 import { getThreatMatchingSchemaPartialMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema.mocks';
 import { ENRICHMENT_TYPES } from '../../../../plugins/security_solution/common/cti/constants';
+import { Ancestor } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -48,8 +45,7 @@ import {
   ALERT_ORIGINAL_EVENT_CATEGORY,
   ALERT_ORIGINAL_EVENT_MODULE,
   ALERT_ORIGINAL_TIME,
-} from '../../../../plugins/security_solution/server/lib/detection_engine/rule_types/field_maps/field_names';
-import { Ancestor } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
+} from '../../../../plugins/security_solution/common/field_maps/field_names';
 
 const format = (value: unknown): string => JSON.stringify(value, null, 2);
 
@@ -67,6 +63,7 @@ const assertContains = (subject: unknown[], expected: unknown[]) =>
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const log = getService('log');
 
   /**
    * Specific api integration tests for threat matching rule type
@@ -82,16 +79,20 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       beforeEach(async () => {
-        await createSignalsIndex(supertest);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should create a single rule with a rule_id', async () => {
-        const ruleResponse = await createRule(supertest, getCreateThreatMatchRulesSchemaMock());
+        const ruleResponse = await createRule(
+          supertest,
+          log,
+          getCreateThreatMatchRulesSchemaMock()
+        );
         const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
         expect(bodyToCompare).to.eql(getThreatMatchingSchemaPartialMock());
       });
@@ -99,20 +100,21 @@ export default ({ getService }: FtrProviderContext) => {
       it('should create a single rule with a rule_id and validate it ran successfully', async () => {
         const ruleResponse = await createRule(
           supertest,
+          log,
           getCreateThreatMatchRulesSchemaMock('rule-1', true)
         );
 
-        await waitForRuleSuccessOrStatus(supertest, ruleResponse.id, 'succeeded');
+        await waitForRuleSuccessOrStatus(supertest, log, ruleResponse.id, 'succeeded');
 
-        const { body: statusBody } = await supertest
-          .post(DETECTION_ENGINE_RULES_STATUS_URL)
+        const { body: rule } = await supertest
+          .get(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send({ ids: [ruleResponse.id] })
+          .query({ id: ruleResponse.id })
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
         expect(bodyToCompare).to.eql(getThreatMatchingSchemaPartialMock(true));
-        expect(statusBody[ruleResponse.id].current_status.status).to.eql('succeeded');
+        expect(rule.status).to.eql('succeeded');
       });
     });
 
@@ -126,13 +128,13 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       beforeEach(async () => {
-        await deleteAllAlerts(supertest);
-        await createSignalsIndex(supertest);
+        await deleteAllAlerts(supertest, log);
+        await createSignalsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteSignalsIndex(supertest);
-        await deleteAllAlerts(supertest);
+        await deleteSignalsIndex(supertest, log);
+        await deleteAllAlerts(supertest, log);
       });
 
       it('should be able to execute and get 10 signals when doing a specific query', async () => {
@@ -164,10 +166,10 @@ export default ({ getService }: FtrProviderContext) => {
           threat_filters: [],
         };
 
-        const createdRule = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, createdRule.id);
-        await waitForSignalsToBePresent(supertest, 10, [createdRule.id]);
-        const signalsOpen = await getSignalsByIds(supertest, [createdRule.id]);
+        const createdRule = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, createdRule.id);
+        await waitForSignalsToBePresent(supertest, log, 10, [createdRule.id]);
+        const signalsOpen = await getSignalsByIds(supertest, log, [createdRule.id]);
         expect(signalsOpen.hits.hits.length).equal(10);
         const fullSource = signalsOpen.hits.hits.find(
           (signal) =>
@@ -282,7 +284,6 @@ export default ({ getService }: FtrProviderContext) => {
           [ALERT_WORKFLOW_STATUS]: 'open',
           [SPACE_IDS]: ['default'],
           [VERSION]: fullSignal[VERSION],
-          [TAGS]: [`__internal_rule_id:${createdRule.rule_id}`, '__internal_immutable:false'],
           threat: {
             enrichments: get(fullSignal, 'threat.enrichments'),
           },
@@ -299,13 +300,10 @@ export default ({ getService }: FtrProviderContext) => {
             false_positives: [],
             from: '1900-01-01T00:00:00.000Z',
             immutable: false,
-            index: ['auditbeat-*'],
             interval: '5m',
-            language: 'kuery',
             max_signals: 100,
             name: 'Query with a rule id',
             producer: 'siem',
-            query: '*:*',
             references: [],
             risk_score: 55,
             risk_score_mapping: [],
@@ -315,20 +313,6 @@ export default ({ getService }: FtrProviderContext) => {
             severity_mapping: [],
             tags: [],
             threat: [],
-            threat_filters: [],
-            threat_index: ['auditbeat-*'],
-            threat_mapping: [
-              {
-                entries: [
-                  {
-                    field: 'host.name',
-                    type: 'mapping',
-                    value: 'host.name',
-                  },
-                ],
-              },
-            ],
-            threat_query: 'source.ip: "188.166.120.93"',
             to: 'now',
             type: 'threat_match',
             updated_at: fullSignal[ALERT_RULE_UPDATED_AT],
@@ -368,9 +352,9 @@ export default ({ getService }: FtrProviderContext) => {
           threat_filters: [],
         };
 
-        const ruleResponse = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, ruleResponse.id);
-        const signalsOpen = await getSignalsByIds(supertest, [ruleResponse.id]);
+        const ruleResponse = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, ruleResponse.id);
+        const signalsOpen = await getSignalsByIds(supertest, log, [ruleResponse.id]);
         expect(signalsOpen.hits.hits.length).equal(0);
       });
 
@@ -407,9 +391,9 @@ export default ({ getService }: FtrProviderContext) => {
           threat_filters: [],
         };
 
-        const ruleResponse = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, ruleResponse.id);
-        const signalsOpen = await getSignalsByIds(supertest, [ruleResponse.id]);
+        const ruleResponse = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, ruleResponse.id);
+        const signalsOpen = await getSignalsByIds(supertest, log, [ruleResponse.id]);
         expect(signalsOpen.hits.hits.length).equal(0);
       });
 
@@ -446,9 +430,9 @@ export default ({ getService }: FtrProviderContext) => {
           threat_filters: [],
         };
 
-        const ruleResponse = await createRule(supertest, rule);
-        await waitForRuleSuccessOrStatus(supertest, ruleResponse.id);
-        const signalsOpen = await getSignalsByIds(supertest, [ruleResponse.id]);
+        const ruleResponse = await createRule(supertest, log, rule);
+        await waitForRuleSuccessOrStatus(supertest, log, ruleResponse.id);
+        const signalsOpen = await getSignalsByIds(supertest, log, [ruleResponse.id]);
         expect(signalsOpen.hits.hits.length).equal(0);
       });
 
@@ -485,15 +469,15 @@ export default ({ getService }: FtrProviderContext) => {
             items_per_search: 1, // iterate only 1 threat item per loop to ensure we're slow
           };
 
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id, 'failed');
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id, 'failed');
 
           const { body } = await supertest
-            .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
+            .post(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
-            .send({ ids: [id] })
+            .query({ id })
             .expect(200);
-          expect(body[id].current_status.last_failure_message).to.contain(
+          expect(body.last_failure_message).to.contain(
             'execution has exceeded its allotted interval'
           );
         });
@@ -537,10 +521,10 @@ export default ({ getService }: FtrProviderContext) => {
             threat_filters: [],
           };
 
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const signalsOpen = await getSignalsByIds(supertest, [id]);
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           expect(signalsOpen.hits.hits.length).equal(2);
 
           const { hits } = signalsOpen.hits;
@@ -549,6 +533,7 @@ export default ({ getService }: FtrProviderContext) => {
             {
               enrichments: [
                 {
+                  feed: {},
                   indicator: {
                     description: "domain should match the auditbeat hosts' data's source.ip",
                     domain: '159.89.119.67',
@@ -573,6 +558,7 @@ export default ({ getService }: FtrProviderContext) => {
             {
               enrichments: [
                 {
+                  feed: {},
                   indicator: {
                     description: "domain should match the auditbeat hosts' data's source.ip",
                     domain: '159.89.119.67',
@@ -626,10 +612,10 @@ export default ({ getService }: FtrProviderContext) => {
             threat_filters: [],
           };
 
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsOpen = await getSignalsByIds(supertest, [id]);
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           expect(signalsOpen.hits.hits.length).equal(1);
 
           const { hits } = signalsOpen.hits;
@@ -639,6 +625,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           assertContains(threat.enrichments, [
             {
+              feed: {},
               indicator: {
                 description: 'this should match auditbeat/hosts on both port and ip',
                 first_seen: '2021-01-26T11:06:03.000Z',
@@ -656,6 +643,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             {
+              feed: {},
               indicator: {
                 description: 'this should match auditbeat/hosts on ip',
                 first_seen: '2021-01-26T11:06:03.000Z',
@@ -713,10 +701,10 @@ export default ({ getService }: FtrProviderContext) => {
             threat_filters: [],
           };
 
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 1, [id]);
-          const signalsOpen = await getSignalsByIds(supertest, [id]);
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           expect(signalsOpen.hits.hits.length).equal(1);
 
           const { hits } = signalsOpen.hits;
@@ -726,6 +714,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           assertContains(threat.enrichments, [
             {
+              feed: {},
               indicator: {
                 description: 'this should match auditbeat/hosts on both port and ip',
                 first_seen: '2021-01-26T11:06:03.000Z',
@@ -748,6 +737,7 @@ export default ({ getService }: FtrProviderContext) => {
             // threat.indicator.matched data). That's the case with the
             // first and third indicators matched, here.
             {
+              feed: {},
               indicator: {
                 description: 'this should match auditbeat/hosts on both port and ip',
                 first_seen: '2021-01-26T11:06:03.000Z',
@@ -766,6 +756,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             {
+              feed: {},
               indicator: {
                 description: 'this should match auditbeat/hosts on ip',
                 first_seen: '2021-01-26T11:06:03.000Z',
@@ -827,10 +818,10 @@ export default ({ getService }: FtrProviderContext) => {
             threat_filters: [],
           };
 
-          const { id } = await createRule(supertest, rule);
-          await waitForRuleSuccessOrStatus(supertest, id);
-          await waitForSignalsToBePresent(supertest, 2, [id]);
-          const signalsOpen = await getSignalsByIds(supertest, [id]);
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 2, [id]);
+          const signalsOpen = await getSignalsByIds(supertest, log, [id]);
           expect(signalsOpen.hits.hits.length).equal(2);
 
           const { hits } = signalsOpen.hits;
@@ -840,6 +831,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           assertContains(threats[0].enrichments, [
             {
+              feed: {},
               indicator: {
                 description: "domain should match the auditbeat hosts' data's source.ip",
                 domain: '159.89.119.67',
@@ -860,6 +852,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             {
+              feed: {},
               indicator: {
                 description: 'this should match auditbeat/hosts on both port and ip',
                 first_seen: '2021-01-26T11:06:03.000Z',
@@ -877,6 +870,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
             {
+              feed: {},
               indicator: {
                 description: 'this should match auditbeat/hosts on both port and ip',
                 first_seen: '2021-01-26T11:06:03.000Z',
@@ -897,6 +891,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           assertContains(threats[1].enrichments, [
             {
+              feed: {},
               indicator: {
                 description: "domain should match the auditbeat hosts' data's source.ip",
                 domain: '159.89.119.67',

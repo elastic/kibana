@@ -9,10 +9,12 @@
   "requiredPlugins": [
     "data",
     "embeddable",
+    "controls",
     "inspector",
     "navigation",
     "savedObjects",
     "share",
+    "screenshotMode",
     "uiActions",
     "urlForwarding",
     "presentationUtil",

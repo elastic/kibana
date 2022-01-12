@@ -11,7 +11,7 @@ import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
-import { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
+import type { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
 import { NowProviderInternalContract } from '../../now_provider';
 import {
   calculateBounds,
@@ -25,7 +25,7 @@ import {
 import { TimeHistoryContract } from './time_history';
 import { createAutoRefreshLoop, AutoRefreshDoneFn } from './lib/auto_refresh_loop';
 
-export { AutoRefreshDoneFn };
+export type { AutoRefreshDoneFn };
 
 // TODO: remove!
 export class Timefilter {
@@ -151,10 +151,16 @@ export class Timefilter {
   public setRefreshInterval = (refreshInterval: Partial<RefreshInterval>) => {
     const prevRefreshInterval = this.getRefreshInterval();
     const newRefreshInterval = { ...prevRefreshInterval, ...refreshInterval };
+    let shouldUnpauseRefreshLoop =
+      newRefreshInterval.pause === false && prevRefreshInterval != null;
+    if (prevRefreshInterval?.value > 0 && newRefreshInterval.value <= 0) {
+      shouldUnpauseRefreshLoop = false;
+    }
     // If the refresh interval is <= 0 handle that as a paused refresh
+    // unless the user has un-paused the refresh loop and the value is not going from > 0 to 0
     if (newRefreshInterval.value <= 0) {
       newRefreshInterval.value = 0;
-      newRefreshInterval.pause = true;
+      newRefreshInterval.pause = shouldUnpauseRefreshLoop ? false : true;
     }
     this._refreshInterval = {
       value: newRefreshInterval.value,

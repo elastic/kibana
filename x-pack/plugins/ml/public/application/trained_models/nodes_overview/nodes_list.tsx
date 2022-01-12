@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC, useCallback, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
+import { cloneDeep } from 'lodash';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
 import { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
 import { usePageUrlState } from '../../util/url_state';
@@ -31,12 +32,10 @@ import { MemoryPreviewChart } from './memory_preview_chart';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { ListingPageUrlState } from '../../../../common/types/common';
 import { useToastNotificationService } from '../../services/toast_notification_service';
+import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats/common';
+import { useRefresh } from '../../routing/use_refresh';
 
 export type NodeItem = NodeDeploymentStatsResponse;
-
-export interface NodeItemWithStats extends NodeItem {
-  stats: any;
-}
 
 export const getDefaultNodesListState = (): ListingPageUrlState => ({
   pageIndex: 0,
@@ -45,10 +44,17 @@ export const getDefaultNodesListState = (): ListingPageUrlState => ({
   sortDirection: 'asc',
 });
 
-export const NodesList: FC = () => {
+export interface NodesListProps {
+  compactView?: boolean;
+}
+
+export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
   const trainedModelsApiService = useTrainedModelsApiService();
+
+  const refresh = useRefresh();
+
   const { displayErrorToast } = useToastNotificationService();
-  const bytesFormatter = useFieldFormatter('bytes');
+  const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const [items, setItems] = useState<NodeItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, JSX.Element>>(
@@ -65,6 +71,14 @@ export const NodesList: FC = () => {
     try {
       const nodesResponse = await trainedModelsApiService.getTrainedModelsNodesOverview();
       setItems(nodesResponse.nodes);
+
+      // Update expanded rows.
+      nodesResponse.nodes.forEach((node) => {
+        if (itemIdToExpandedRowMap[node.id]) {
+          itemIdToExpandedRowMap[node.id] = <ExpandedRow item={node} />;
+        }
+      });
+
       setIsLoading(false);
       refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.IDLE);
     } catch (e) {
@@ -75,14 +89,14 @@ export const NodesList: FC = () => {
         })
       );
     }
-  }, []);
+  }, [itemIdToExpandedRowMap]);
 
   const toggleDetails = (item: NodeItem) => {
-    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+    const itemIdToExpandedRowMapValues = cloneDeep(itemIdToExpandedRowMap);
     if (itemIdToExpandedRowMapValues[item.id]) {
       delete itemIdToExpandedRowMapValues[item.id];
     } else {
-      itemIdToExpandedRowMapValues[item.id] = <ExpandedRow item={item as NodeItemWithStats} />;
+      itemIdToExpandedRowMapValues[item.id] = <ExpandedRow item={item} />;
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
@@ -153,11 +167,7 @@ export const NodesList: FC = () => {
     };
   }, [items]);
 
-  const { onTableChange, pagination, sorting } = useTableSettings<NodeItem>(
-    items,
-    pageState,
-    updatePageState
-  );
+  let tableSettings: object = useTableSettings<NodeItem>(items, pageState, updatePageState);
 
   const search: EuiSearchBarProps = {
     query: searchQueryText,
@@ -179,6 +189,17 @@ export const NodesList: FC = () => {
     onRefresh: fetchNodesData,
   });
 
+  useEffect(
+    function updateOnTimerRefresh() {
+      fetchNodesData();
+    },
+    [refresh]
+  );
+
+  if (compactView) {
+    tableSettings = {};
+  }
+
   return (
     <>
       <EuiSpacer size="m" />
@@ -194,20 +215,18 @@ export const NodesList: FC = () => {
         <EuiInMemoryTable<NodeItem>
           allowNeutralSort={false}
           columns={columns}
-          hasActions={true}
+          hasActions={false}
           isExpandable={true}
           itemIdToExpandedRowMap={itemIdToExpandedRowMap}
           isSelectable={false}
           items={items}
           itemId={'id'}
           loading={isLoading}
-          search={search}
+          search={compactView ? undefined : search}
+          {...tableSettings}
           rowProps={(item) => ({
             'data-test-subj': `mlNodesTableRow row-${item.id}`,
           })}
-          pagination={pagination}
-          onTableChange={onTableChange}
-          sorting={sorting}
           data-test-subj={isLoading ? 'mlNodesTable loading' : 'mlNodesTable loaded'}
         />
       </div>

@@ -245,8 +245,15 @@ export class TagManagementPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly settings = this.ctx.getPageObject('settings');
 
-  public readonly tagModal = new TagModal(this.ctx, this);
-  public readonly assignFlyout = new TagAssignmentFlyout(this.ctx, this);
+  public readonly tagModal: TagModal;
+  public readonly assignFlyout: TagAssignmentFlyout;
+
+  constructor(ctx: FtrProviderContext) {
+    super(ctx);
+
+    this.tagModal = new TagModal(this.ctx, this);
+    this.assignFlyout = new TagAssignmentFlyout(this.ctx, this);
+  }
 
   /**
    * Navigate to the tag management section, by accessing the management app, then clicking

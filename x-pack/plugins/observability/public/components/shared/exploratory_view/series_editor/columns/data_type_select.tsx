@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiButton,
   EuiPopover,
@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { AppDataType, SeriesUrl } from '../../types';
 import { DataTypes, ReportTypes } from '../../configurations/constants';
+import { useExploratoryView } from '../../contexts/exploratory_view_config';
 
 interface Props {
   seriesId: number;
@@ -26,46 +27,15 @@ interface Props {
   };
 }
 
-export const DataTypesLabels = {
-  [DataTypes.UX]: i18n.translate('xpack.observability.overview.exploratoryView.uxLabel', {
-    defaultMessage: 'User experience (RUM)',
-  }),
-
-  [DataTypes.SYNTHETICS]: i18n.translate(
-    'xpack.observability.overview.exploratoryView.syntheticsLabel',
-    {
-      defaultMessage: 'Synthetics monitoring',
-    }
-  ),
-
-  [DataTypes.MOBILE]: i18n.translate(
-    'xpack.observability.overview.exploratoryView.mobileExperienceLabel',
-    {
-      defaultMessage: 'Mobile experience',
-    }
-  ),
-};
-
-export const dataTypes: Array<{ id: AppDataType; label: string }> = [
-  {
-    id: DataTypes.SYNTHETICS,
-    label: DataTypesLabels[DataTypes.SYNTHETICS],
-  },
-  {
-    id: DataTypes.UX,
-    label: DataTypesLabels[DataTypes.UX],
-  },
-  {
-    id: DataTypes.MOBILE,
-    label: DataTypesLabels[DataTypes.MOBILE],
-  },
-];
-
 const SELECT_DATA_TYPE = 'SELECT_DATA_TYPE';
 
 export function DataTypesSelect({ seriesId, series }: Props) {
   const { setSeries, reportType } = useSeriesStorage();
   const [showOptions, setShowOptions] = useState(false);
+
+  const focusButton = useCallback((ref: HTMLButtonElement) => {
+    ref?.focus();
+  }, []);
 
   const onDataTypeChange = (dataType: AppDataType) => {
     if (String(dataType) !== SELECT_DATA_TYPE) {
@@ -76,6 +46,8 @@ export function DataTypesSelect({ seriesId, series }: Props) {
       });
     }
   };
+
+  const { dataTypes } = useExploratoryView();
 
   const options = dataTypes
     .filter(({ id }) => {
@@ -92,6 +64,8 @@ export function DataTypesSelect({ seriesId, series }: Props) {
       inputDisplay: label,
     }));
 
+  const currDataType = dataTypes.find((dt) => dt.id === series.dataType);
+
   return (
     <>
       {!series.dataType && (
@@ -102,6 +76,7 @@ export function DataTypesSelect({ seriesId, series }: Props) {
               onClick={() => setShowOptions((prevState) => !prevState)}
               fill
               size="s"
+              buttonRef={focusButton}
             >
               {SELECT_DATA_TYPE_LABEL}
             </EuiButton>
@@ -122,7 +97,7 @@ export function DataTypesSelect({ seriesId, series }: Props) {
       )}
       {series.dataType && (
         <EuiToolTip position="top" content={SELECT_DATA_TYPE_TOOLTIP}>
-          <EuiBadge>{DataTypesLabels[series.dataType as DataTypes]}</EuiBadge>
+          <EuiBadge>{currDataType?.label}</EuiBadge>
         </EuiToolTip>
       )}
     </>

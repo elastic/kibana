@@ -122,13 +122,14 @@
                 "type": "Function",
                 "tags": [],
                 "label": "register",
-                "description": [],
+                "description": [
+                  "/**\n     * Attempts to register the provided component, with the ability to optionally allow\n     * the component to override an existing one.\n     *\n     * If the intent is to override, then `allowOverride` must be set to true, otherwise an exception is thrown.\n     *\n     * @param id the id of the component to register\n     * @param component the component\n     * @param allowOverride (default: false) - optional flag to allow this component to override a previously registered component\n     */"
+                ],
                 "signature": [
-                  "(id: Id, component: React.ComponentType<Record<string, any> | undefined>, allowOverride?: boolean) => void"
+                  "(id: Id, component: RegistryComponent, allowOverride?: boolean) => void"
                 ],
                 "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
                 "deprecated": false,
-                "returnComment": [],
                 "children": [
                   {
                     "parentPluginId": "advancedSettings",
@@ -138,10 +139,11 @@
                     "label": "id",
                     "description": [],
                     "signature": [
-                      "\"advanced_settings_page_title\" | \"advanced_settings_page_subtitle\" | \"advanced_settings_page_footer\""
+                      "Id"
                     ],
                     "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "isRequired": true
                   },
                   {
                     "parentPluginId": "advancedSettings",
@@ -151,10 +153,11 @@
                     "label": "component",
                     "description": [],
                     "signature": [
-                      "React.ComponentClass<Record<string, any> | undefined, any> | React.FunctionComponent<Record<string, any> | undefined>"
+                      "RegistryComponent"
                     ],
                     "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "isRequired": true
                   },
                   {
                     "parentPluginId": "advancedSettings",
@@ -163,10 +166,15 @@
                     "tags": [],
                     "label": "allowOverride",
                     "description": [],
+                    "signature": [
+                      "boolean"
+                    ],
                     "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "isRequired": true
                   }
-                ]
+                ],
+                "returnComment": []
               }
             ]
           },
@@ -199,13 +207,14 @@
                 "type": "Function",
                 "tags": [],
                 "label": "get",
-                "description": [],
+                "description": [
+                  "/**\n     * Retrieve a registered component by its ID.\n     * If the component does not exist, then an exception is thrown.\n     *\n     * @param id the ID of the component to retrieve\n     */"
+                ],
                 "signature": [
-                  "(id: Id) => React.ComponentType<Record<string, any> | undefined>"
+                  "(id: Id) => RegistryComponent"
                 ],
                 "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
                 "deprecated": false,
-                "returnComment": [],
                 "children": [
                   {
                     "parentPluginId": "advancedSettings",
@@ -215,12 +224,14 @@
                     "label": "id",
                     "description": [],
                     "signature": [
-                      "\"advanced_settings_page_title\" | \"advanced_settings_page_subtitle\" | \"advanced_settings_page_footer\""
+                      "Id"
                     ],
                     "path": "src/plugins/advanced_settings/public/component_registry/component_registry.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "isRequired": true
                   }
-                ]
+                ],
+                "returnComment": []
               }
             ]
           }
@@ -288,7 +299,7 @@
           "label": "component",
           "description": [],
           "signature": [
-            "{ componentType: { [key: string]: Id; }; register: (id: Id, component: React.ComponentType<Record<string, any> | undefined>, allowOverride?: boolean) => void; }"
+            "{ componentType: { [key: string]: Id; }; register: (id: Id, component: RegistryComponent, allowOverride?: boolean) => void; }"
           ],
           "path": "src/plugins/advanced_settings/public/types.ts",
           "deprecated": false
@@ -315,7 +326,7 @@
           "label": "component",
           "description": [],
           "signature": [
-            "{ componentType: { [key: string]: Id; }; get: (id: Id) => React.ComponentType<Record<string, any> | undefined>; }"
+            "{ componentType: { [key: string]: Id; }; get: (id: Id) => RegistryComponent; }"
           ],
           "path": "src/plugins/advanced_settings/public/types.ts",
           "deprecated": false

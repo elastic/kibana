@@ -120,7 +120,6 @@ export default function ({ getPageObjects, getService }) {
         maxzoom: 24,
         filter: [
           'all',
-          ['!=', ['get', '__kbn_is_centroid_feature__'], true],
           ['any', ['==', ['geometry-type'], 'Polygon'], ['==', ['geometry-type'], 'MultiPolygon']],
           ['==', ['get', '__kbn_isvisibleduetojoin__'], true],
         ],
@@ -196,7 +195,6 @@ export default function ({ getPageObjects, getService }) {
         maxzoom: 24,
         filter: [
           'all',
-          ['!=', ['get', '__kbn_is_centroid_feature__'], true],
           [
             'any',
             ['==', ['geometry-type'], 'Polygon'],

@@ -69,4 +69,21 @@ describe('Expand Dotted', () => {
       flat: 'yep',
     });
   });
+
+  it('expands non dotted field without changing it other than reference', () => {
+    const simpleDottedObj = {
+      test: { value: '123' },
+    };
+    expect(expandDottedObject(simpleDottedObj)).toEqual(simpleDottedObj);
+  });
+
+  it('expands empty object without changing it other than reference', () => {
+    const simpleDottedObj = {};
+    expect(expandDottedObject(simpleDottedObj)).toEqual(simpleDottedObj);
+  });
+
+  it('if we allow arrays as a type, it should not touch them', () => {
+    const simpleDottedObj: string[] = ['hello'];
+    expect(expandDottedObject(simpleDottedObj)).toEqual(simpleDottedObj);
+  });
 });

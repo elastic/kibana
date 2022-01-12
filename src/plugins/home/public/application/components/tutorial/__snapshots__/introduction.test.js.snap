@@ -1,118 +1,286 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`props exportedFieldsUrl 1`] = `
-<EuiPageHeader
-  description={
-    <React.Fragment>
-      <Content
-        text="this is a great tutorial about..."
+exports[`props Beats badge should not show 1`] = `
+<Fragment>
+  <div>
+    <EuiButtonEmpty
+      flush="left"
+      iconType="arrowLeft"
+      size="xs"
+    >
+      <FormattedMessage
+        defaultMessage="Browse all integrations"
+        id="home.tutorial.introduction.browseAllIntegrationsButton"
+        values={Object {}}
       />
+    </EuiButtonEmpty>
+  </div>
+  <EuiSpacer />
+  <EuiPageHeader
+    description={
       <React.Fragment>
-        <br />
-        <EuiLink
-          href="exported_fields_url"
-          rel="noopener"
-          target="_blank"
-        >
-          <FormattedMessage
-            defaultMessage="View exported fields"
-            id="home.tutorial.introduction.viewButtonLabel"
-            values={Object {}}
-          />
-        </EuiLink>
+        <Content
+          text="this is a great tutorial about..."
+        />
       </React.Fragment>
-    </React.Fragment>
-  }
-  pageTitle={
-    <React.Fragment>
-      Great tutorial
-    </React.Fragment>
-  }
-/>
+    }
+    pageTitle={
+      <React.Fragment>
+        Great tutorial
+        <React.Fragment>
+           
+          <EuiBetaBadge
+            label="Beta"
+          />
+        </React.Fragment>
+      </React.Fragment>
+    }
+  />
+</Fragment>
+`;
+
+exports[`props Beats badge should show 1`] = `
+<Fragment>
+  <div>
+    <EuiButtonEmpty
+      flush="left"
+      iconType="arrowLeft"
+      size="xs"
+    >
+      <FormattedMessage
+        defaultMessage="Browse all integrations"
+        id="home.tutorial.introduction.browseAllIntegrationsButton"
+        values={Object {}}
+      />
+    </EuiButtonEmpty>
+  </div>
+  <EuiSpacer />
+  <EuiPageHeader
+    description={
+      <React.Fragment>
+        <Content
+          text="this is a great tutorial about..."
+        />
+      </React.Fragment>
+    }
+    pageTitle={
+      <React.Fragment>
+        Great tutorial
+        <React.Fragment>
+           
+          <EuiBetaBadge
+            label="Beta"
+          />
+        </React.Fragment>
+        <React.Fragment>
+           
+          <EuiBadge>
+            <FormattedMessage
+              defaultMessage="Beats"
+              id="home.tutorial.introduction.beatsBadgeLabel"
+              values={Object {}}
+            />
+          </EuiBadge>
+        </React.Fragment>
+      </React.Fragment>
+    }
+  />
+</Fragment>
+`;
+
+exports[`props exportedFieldsUrl 1`] = `
+<Fragment>
+  <div>
+    <EuiButtonEmpty
+      flush="left"
+      iconType="arrowLeft"
+      size="xs"
+    >
+      <FormattedMessage
+        defaultMessage="Browse all integrations"
+        id="home.tutorial.introduction.browseAllIntegrationsButton"
+        values={Object {}}
+      />
+    </EuiButtonEmpty>
+  </div>
+  <EuiSpacer />
+  <EuiPageHeader
+    description={
+      <React.Fragment>
+        <Content
+          text="this is a great tutorial about..."
+        />
+        <React.Fragment>
+          <br />
+          <EuiLink
+            href="exported_fields_url"
+            rel="noopener"
+            target="_blank"
+          >
+            <FormattedMessage
+              defaultMessage="View exported fields"
+              id="home.tutorial.introduction.viewButtonLabel"
+              values={Object {}}
+            />
+          </EuiLink>
+        </React.Fragment>
+      </React.Fragment>
+    }
+    pageTitle={
+      <React.Fragment>
+        Great tutorial
+      </React.Fragment>
+    }
+  />
+</Fragment>
 `;
 
 exports[`props iconType 1`] = `
-<EuiPageHeader
-  description={
-    <React.Fragment>
-      <Content
-        text="this is a great tutorial about..."
+<Fragment>
+  <div>
+    <EuiButtonEmpty
+      flush="left"
+      iconType="arrowLeft"
+      size="xs"
+    >
+      <FormattedMessage
+        defaultMessage="Browse all integrations"
+        id="home.tutorial.introduction.browseAllIntegrationsButton"
+        values={Object {}}
       />
-    </React.Fragment>
-  }
-  iconType="logoElastic"
-  pageTitle={
-    <React.Fragment>
-      Great tutorial
-    </React.Fragment>
-  }
-/>
+    </EuiButtonEmpty>
+  </div>
+  <EuiSpacer />
+  <EuiPageHeader
+    description={
+      <React.Fragment>
+        <Content
+          text="this is a great tutorial about..."
+        />
+      </React.Fragment>
+    }
+    iconType="logoElastic"
+    pageTitle={
+      <React.Fragment>
+        Great tutorial
+      </React.Fragment>
+    }
+  />
+</Fragment>
 `;
 
 exports[`props isBeta 1`] = `
-<EuiPageHeader
-  description={
-    <React.Fragment>
-      <Content
-        text="this is a great tutorial about..."
+<Fragment>
+  <div>
+    <EuiButtonEmpty
+      flush="left"
+      iconType="arrowLeft"
+      size="xs"
+    >
+      <FormattedMessage
+        defaultMessage="Browse all integrations"
+        id="home.tutorial.introduction.browseAllIntegrationsButton"
+        values={Object {}}
       />
-    </React.Fragment>
-  }
-  pageTitle={
-    <React.Fragment>
-      Great tutorial
+    </EuiButtonEmpty>
+  </div>
+  <EuiSpacer />
+  <EuiPageHeader
+    description={
       <React.Fragment>
-         
-        <EuiBetaBadge
-          label="Beta"
+        <Content
+          text="this is a great tutorial about..."
         />
       </React.Fragment>
-    </React.Fragment>
-  }
-/>
+    }
+    pageTitle={
+      <React.Fragment>
+        Great tutorial
+        <React.Fragment>
+           
+          <EuiBetaBadge
+            label="Beta"
+          />
+        </React.Fragment>
+      </React.Fragment>
+    }
+  />
+</Fragment>
 `;
 
 exports[`props previewUrl 1`] = `
-<EuiPageHeader
-  description={
-    <React.Fragment>
-      <Content
-        text="this is a great tutorial about..."
+<Fragment>
+  <div>
+    <EuiButtonEmpty
+      flush="left"
+      iconType="arrowLeft"
+      size="xs"
+    >
+      <FormattedMessage
+        defaultMessage="Browse all integrations"
+        id="home.tutorial.introduction.browseAllIntegrationsButton"
+        values={Object {}}
       />
-    </React.Fragment>
-  }
-  pageTitle={
-    <React.Fragment>
-      Great tutorial
-    </React.Fragment>
-  }
-  rightSideItems={
-    Array [
-      <EuiImage
-        allowFullScreen={true}
-        alt="screenshot of primary dashboard."
-        fullScreenIconColor="dark"
-        size="l"
-        url="preview_image_url"
-      />,
-    ]
-  }
-/>
+    </EuiButtonEmpty>
+  </div>
+  <EuiSpacer />
+  <EuiPageHeader
+    description={
+      <React.Fragment>
+        <Content
+          text="this is a great tutorial about..."
+        />
+      </React.Fragment>
+    }
+    pageTitle={
+      <React.Fragment>
+        Great tutorial
+      </React.Fragment>
+    }
+    rightSideItems={
+      Array [
+        <EuiImage
+          allowFullScreen={true}
+          alt="screenshot of primary dashboard."
+          fullScreenIconColor="dark"
+          size="l"
+          url="preview_image_url"
+        />,
+      ]
+    }
+  />
+</Fragment>
 `;
 
 exports[`render 1`] = `
-<EuiPageHeader
-  description={
-    <React.Fragment>
-      <Content
-        text="this is a great tutorial about..."
+<Fragment>
+  <div>
+    <EuiButtonEmpty
+      flush="left"
+      iconType="arrowLeft"
+      size="xs"
+    >
+      <FormattedMessage
+        defaultMessage="Browse all integrations"
+        id="home.tutorial.introduction.browseAllIntegrationsButton"
+        values={Object {}}
       />
-    </React.Fragment>
-  }
-  pageTitle={
-    <React.Fragment>
-      Great tutorial
-    </React.Fragment>
-  }
-/>
+    </EuiButtonEmpty>
+  </div>
+  <EuiSpacer />
+  <EuiPageHeader
+    description={
+      <React.Fragment>
+        <Content
+          text="this is a great tutorial about..."
+        />
+      </React.Fragment>
+    }
+    pageTitle={
+      <React.Fragment>
+        Great tutorial
+      </React.Fragment>
+    }
+  />
+</Fragment>
 `;

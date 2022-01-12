@@ -42,6 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const kbnClient = getService('kibanaServer');
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const log = getService('log');
 
   describe('Creating signals migrations', () => {
     let createdMigrations: CreateResponse[];
@@ -57,7 +58,7 @@ export default ({ getService }: FtrProviderContext): void => {
       outdatedSignalsIndexName = getIndexNameFromLoad(
         await esArchiver.load('x-pack/test/functional/es_archives/signals/outdated_signals_index')
       );
-      await createSignalsIndex(supertest);
+      await createSignalsIndex(supertest, log);
     });
 
     afterEach(async () => {
@@ -76,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
         kbnClient,
         ids: createdMigrations.filter((m) => m?.migration_id).map((m) => m.migration_id),
       });
-      await deleteSignalsIndex(supertest);
+      await deleteSignalsIndex(supertest, log);
     });
 
     it('returns the information necessary to finalize the migration', async () => {
@@ -110,7 +111,7 @@ export default ({ getService }: FtrProviderContext): void => {
       createResponses.forEach((response) => expect(response.migration_id).to.be.a('string'));
 
       const [{ migration_index: newIndex }] = createResponses;
-      await waitForIndexToPopulate(es, newIndex);
+      await waitForIndexToPopulate(es, log, newIndex);
       const migrationResults = await es.search<{ signal: Signal }>({ index: newIndex });
 
       expect(migrationResults.hits.hits).length(1);

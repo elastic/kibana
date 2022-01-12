@@ -12,4 +12,4 @@ export { DateFormat, DateNanosFormat } from './lib/converters';
 export function plugin() {
   return new FieldFormatsPlugin();
 }
-export { FieldFormatsSetup, FieldFormatsStart } from './plugin';
+export type { FieldFormatsSetup, FieldFormatsStart } from './plugin';

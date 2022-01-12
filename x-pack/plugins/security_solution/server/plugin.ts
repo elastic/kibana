@@ -7,7 +7,6 @@
 
 import { Observable } from 'rxjs';
 import LRU from 'lru-cache';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   SIGNALS_ID,
   QUERY_RULE_TYPE_ID,
@@ -22,6 +21,8 @@ import { Logger, SavedObjectsClient } from '../../../../src/core/server';
 import { UsageCounter } from '../../../../src/plugins/usage_collection/server';
 
 import { ECS_COMPONENT_TEMPLATE_NAME } from '../../rule_registry/common/assets';
+import { FieldMap } from '../../rule_registry/common/field_map';
+import { technicalRuleFieldMap } from '../../rule_registry/common/assets/field_maps/technical_rule_field_map';
 import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
 import { IRuleDataClient, Dataset } from '../../rule_registry/server';
 import { ListPluginSetup } from '../../lists/server';
@@ -36,17 +37,20 @@ import {
   createThresholdAlertType,
 } from './lib/detection_engine/rule_types';
 import { initRoutes } from './routes';
-import { isAlertExecutor } from './lib/detection_engine/signals/types';
-import { signalRulesAlertType } from './lib/detection_engine/signals/signal_rule_alert_type';
+import { registerLimitedConcurrencyRoutes } from './routes/limited_concurrency';
 import { ManifestTask } from './endpoint/lib/artifacts';
 import { CheckMetadataTransformsTask } from './endpoint/lib/metadata';
 import { initSavedObjects } from './saved_objects';
 import { AppClientFactory } from './client';
 import { createConfig, ConfigType } from './config';
 import { initUiSettings } from './ui_settings';
-import { APP_ID, SERVER_APP_ID, LEGACY_NOTIFICATIONS_ID } from '../common/constants';
+import {
+  APP_ID,
+  SERVER_APP_ID,
+  LEGACY_NOTIFICATIONS_ID,
+  DEFAULT_ALERTS_INDEX,
+} from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
-import { registerLimitedConcurrencyRoutes } from './endpoint/routes/limited_concurrency';
 import { registerResolverRoutes } from './endpoint/routes/resolver';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
@@ -55,7 +59,6 @@ import { EndpointAppContextService } from './endpoint/endpoint_app_context_servi
 import { EndpointAppContext } from './endpoint/types';
 import { initUsageCollectors } from './usage';
 import type { SecuritySolutionRequestHandlerContext } from './types';
-import { registerTrustedAppsRoutes } from './endpoint/routes/trusted_apps';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
 import { TelemetryReceiver } from './lib/telemetry/receiver';
@@ -63,8 +66,7 @@ import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
 import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
-import { alertsFieldMap } from './lib/detection_engine/rule_types/field_maps/alerts';
-import { rulesFieldMap } from './lib/detection_engine/rule_types/field_maps/rules';
+import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
 import { registerEventLogProvider } from './lib/detection_engine/rule_execution_log/event_log_adapter/register_event_log_provider';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
 import { EndpointMetadataService } from './endpoint/services/metadata';
@@ -87,8 +89,9 @@ import type {
   SecuritySolutionPluginStart,
   PluginInitializerContext,
 } from './plugin_contract';
+import { alertsFieldMap, rulesFieldMap } from '../common/field_maps';
 
-export { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
+export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
 export class Plugin implements ISecuritySolutionPlugin {
   private readonly pluginContext: PluginInitializerContext;
@@ -130,14 +133,9 @@ export class Plugin implements ISecuritySolutionPlugin {
   ): SecuritySolutionPluginSetup {
     this.logger.debug('plugin setup');
 
-    const { pluginContext, config, logger, appClientFactory } = this;
+    const { appClientFactory, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
     this.kibanaIndex = core.savedObjects.getKibanaIndex();
-
-    appClientFactory.setup({
-      getSpaceId: plugins.spaces?.spacesService?.getSpaceId,
-      config,
-    });
 
     initSavedObjects(core.savedObjects);
     initUiSettings(core.uiSettings, experimentalFeatures);
@@ -145,7 +143,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const eventLogService = plugins.eventLog;
     registerEventLogProvider(eventLogService);
 
-    const requestContextFactory = new RequestContextFactory({ config, core, plugins });
+    const requestContextFactory = new RequestContextFactory({ config, logger, core, plugins });
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
       APP_ID,
@@ -166,7 +164,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     initUsageCollectors({
       core,
       kibanaIndex: core.savedObjects.getKibanaIndex(),
-      signalsIndex: config.signalsIndex,
+      signalsIndex: DEFAULT_ALERTS_INDEX,
       ml: plugins.ml,
       usageCollection: plugins.usageCollection,
     });
@@ -178,61 +176,69 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const { ruleDataService } = plugins.ruleRegistry;
     let ruleDataClient: IRuleDataClient | null = null;
+    let previewRuleDataClient: IRuleDataClient | null = null;
 
     // rule options are used both to create and preview rules.
     const ruleOptions: CreateRuleOptions = {
       experimentalFeatures,
       logger: this.logger,
       ml: plugins.ml,
+      eventsTelemetry: this.telemetryEventsSender,
       version: pluginContext.env.packageInfo.version,
     };
 
-    if (isRuleRegistryEnabled) {
-      // NOTE: this is not used yet
-      // TODO: convert the aliases to FieldMaps. Requires enhancing FieldMap to support alias path.
-      // Split aliases by component template since we need to alias some fields in technical field mappings,
-      // some fields in security solution specific component template.
-      const aliases: Record<string, estypes.MappingProperty> = {};
-      Object.entries(aadFieldConversion).forEach(([key, value]) => {
-        aliases[key] = {
-          type: 'alias',
-          path: value,
-        };
-      });
+    const aliasesFieldMap: FieldMap = {};
+    Object.entries(aadFieldConversion).forEach(([key, value]) => {
+      aliasesFieldMap[key] = {
+        type: 'alias',
+        path: value,
+      };
+    });
 
-      ruleDataClient = ruleDataService.initializeIndex({
-        feature: SERVER_APP_ID,
-        registrationContext: 'security',
-        dataset: Dataset.alerts,
-        componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
-        componentTemplates: [
-          {
-            name: 'mappings',
-            mappings: mappingFromFieldMap({ ...alertsFieldMap, ...rulesFieldMap }, false),
-          },
-        ],
-        secondaryAlias: config.signalsIndex,
-      });
+    const ruleDataServiceOptions = {
+      feature: SERVER_APP_ID,
+      registrationContext: 'security',
+      dataset: Dataset.alerts,
+      componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
+      componentTemplates: [
+        {
+          name: 'mappings',
+          mappings: mappingFromFieldMap(
+            { ...technicalRuleFieldMap, ...alertsFieldMap, ...rulesFieldMap, ...aliasesFieldMap },
+            false
+          ),
+        },
+      ],
+      secondaryAlias: config.signalsIndex,
+    };
 
-      const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
-        lists: plugins.lists,
-        logger: this.logger,
-        config: this.config,
-        ruleDataClient,
-        eventLogService,
-      });
+    ruleDataClient = ruleDataService.initializeIndex(ruleDataServiceOptions);
+    const previewIlmPolicy = previewPolicy.policy;
 
-      plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
-      plugins.alerting.registerType(
-        securityRuleTypeWrapper(createSavedQueryAlertType(ruleOptions))
-      );
-      plugins.alerting.registerType(
-        securityRuleTypeWrapper(createIndicatorMatchAlertType(ruleOptions))
-      );
-      plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(ruleOptions)));
-      plugins.alerting.registerType(securityRuleTypeWrapper(createQueryAlertType(ruleOptions)));
-      plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
-    }
+    previewRuleDataClient = ruleDataService.initializeIndex({
+      ...ruleDataServiceOptions,
+      additionalPrefix: '.preview',
+      ilmPolicy: previewIlmPolicy,
+    });
+
+    const securityRuleTypeOptions = {
+      lists: plugins.lists,
+      logger: this.logger,
+      config: this.config,
+      ruleDataClient,
+      eventLogService,
+    };
+
+    const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
+
+    plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType(ruleOptions)));
+    plugins.alerting.registerType(securityRuleTypeWrapper(createSavedQueryAlertType(ruleOptions)));
+    plugins.alerting.registerType(
+      securityRuleTypeWrapper(createIndicatorMatchAlertType(ruleOptions))
+    );
+    plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(ruleOptions)));
+    plugins.alerting.registerType(securityRuleTypeWrapper(createQueryAlertType(ruleOptions)));
+    plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
 
     // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(
@@ -245,13 +251,15 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleDataService,
       logger,
       ruleDataClient,
-      ruleOptions
+      ruleOptions,
+      core.getStartServices,
+      securityRuleTypeOptions,
+      previewRuleDataClient
     );
     registerEndpointRoutes(router, endpointContext);
     registerLimitedConcurrencyRoutes(core);
     registerResolverRoutes(router);
     registerPolicyRoutes(router, endpointContext);
-    registerTrustedAppsRoutes(router, endpointContext);
     registerActionRoutes(router, endpointContext);
 
     const racRuleTypes = [
@@ -271,23 +279,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.features.registerKibanaFeature(getKibanaPrivilegesFeaturePrivileges(ruleTypes));
     plugins.features.registerKibanaFeature(getCasesKibanaFeature());
 
-    // Continue to register legacy rules against alerting client exposed through rule-registry
     if (plugins.alerting != null) {
-      const signalRuleType = signalRulesAlertType({
-        logger,
-        eventsTelemetry: this.telemetryEventsSender,
-        version: pluginContext.env.packageInfo.version,
-        ml: plugins.ml,
-        lists: plugins.lists,
-        config,
-        experimentalFeatures,
-        eventLogService,
-      });
       const ruleNotificationType = legacyRulesNotificationAlertType({ logger });
-
-      if (isAlertExecutor(signalRuleType)) {
-        plugins.alerting.registerType(signalRuleType);
-      }
 
       if (legacyIsNotificationAlertExecutor(ruleNotificationType)) {
         plugins.alerting.registerType(ruleNotificationType);
@@ -308,10 +301,17 @@ export class Plugin implements ISecuritySolutionPlugin {
     }
 
     core.getStartServices().then(([_, depsStart]) => {
+      appClientFactory.setup({
+        getSpaceId: depsStart.spaces?.spacesService?.getSpaceId,
+        config,
+      });
+
       const securitySolutionSearchStrategy = securitySolutionSearchStrategyProvider(
         depsStart.data,
-        endpointContext
+        endpointContext,
+        depsStart.spaces?.spacesService?.getSpaceId
       );
+
       plugins.data.search.registerSearchStrategy(
         'securitySolutionSearchStrategy',
         securitySolutionSearchStrategy
@@ -339,7 +339,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     core: SecuritySolutionPluginCoreStartDependencies,
     plugins: SecuritySolutionPluginStartDependencies
   ): SecuritySolutionPluginStart {
-    const { config, logger, appClientFactory } = this;
+    const { config, logger } = this;
 
     const savedObjectsClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const registerIngestCallback = plugins.fleet?.registerExternalCallback;
@@ -402,12 +402,11 @@ export class Plugin implements ISecuritySolutionPlugin {
       endpointMetadataService: new EndpointMetadataService(
         core.savedObjects,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        plugins.fleet?.agentService!,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         plugins.fleet?.agentPolicyService!,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        plugins.fleet?.packagePolicyService!,
         logger
       ),
-      appClientFactory,
       security: plugins.security,
       alerting: plugins.alerting,
       config: this.config,
@@ -417,6 +416,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerIngestCallback,
       licenseService,
       exceptionListsClient: exceptionListClient,
+      registerListsServerExtension: this.lists?.registerExtension,
     });
 
     this.telemetryReceiver.start(

@@ -1,0 +1,51 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "telemetry",
+    "source": {
+      "@timestamp": "2020-10-28T05:00:53.000Z",
+      "keyword": "word one"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "2",
+    "index": "telemetry",
+    "source": {
+      "@timestamp": "2020-10-28T05:01:53.000Z",
+      "keyword": "word two"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "3",
+    "index": "telemetry",
+    "source": {
+      "@timestamp": "2020-10-28T05:02:53.000Z",
+      "keyword": "word three"
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "4",
+    "index": "telemetry",
+    "source": {
+      "@timestamp": "2020-10-28T05:03:53.000Z",
+      "keyword": "word four"
+    },
+    "type": "_doc"
+  }
+}

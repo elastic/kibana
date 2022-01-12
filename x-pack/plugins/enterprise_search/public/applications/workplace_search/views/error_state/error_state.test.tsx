@@ -17,6 +17,7 @@ describe('ErrorState', () => {
   it('renders', () => {
     const wrapper = shallow(<ErrorState />);
 
-    expect(wrapper.find(ErrorStatePrompt)).toHaveLength(1);
+    const prompt = wrapper.find(ErrorStatePrompt);
+    expect(prompt).toHaveLength(1);
   });
 });

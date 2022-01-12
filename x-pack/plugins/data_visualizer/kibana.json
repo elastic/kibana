@@ -10,14 +10,16 @@
     "embeddable",
     "share",
     "discover",
-    "fileUpload"
+    "fileUpload",
+    "uiActions",
+    "charts"
   ],
   "optionalPlugins": [
     "security",
     "maps",
     "home",
     "lens",
-    "indexPatternFieldEditor",
+    "dataViewFieldEditor",
     "customIntegrations"
   ],
   "requiredBundles": [
@@ -25,7 +27,8 @@
     "kibanaReact",
     "maps",
     "esUiShared",
-    "fieldFormats"
+    "fieldFormats",
+    "uiActions"
   ],
   "extraPublicDirs": [
     "common"

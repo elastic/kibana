@@ -13,7 +13,7 @@ import {
   ESFilter,
 } from '../../../../../../../../src/core/types/elasticsearch';
 import { APMEventESSearchRequest, APMEventESTermsEnumRequest } from '.';
-import { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig } from '../../../../routes/settings/apm_indices/get_apm_indices';
 
 const processorEventIndexMap = {
   [ProcessorEvent.transaction]: 'transaction',

@@ -71,7 +71,8 @@ export default function ({
 
       it('with percentageMode option', async () => {
         const expression =
-          'metricVis metric={visdimension 0} percentageMode=true colorRange={range from=0 to=1000}';
+          'metricVis metric={visdimension 0} percentageMode=true \
+            palette={palette stop=0 color="rgb(0,0,0,0)" stop=10000 color="rgb(100, 100, 100)" range="number" continuity="none"}';
         await (
           await expectExpression(
             'metric_percentage_mode',

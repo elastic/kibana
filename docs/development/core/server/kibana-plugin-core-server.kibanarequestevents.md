@@ -16,6 +16,6 @@ export interface KibanaRequestEvents
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [aborted$](./kibana-plugin-core-server.kibanarequestevents.aborted_.md) | <code>Observable&lt;void&gt;</code> | Observable that emits once if and when the request has been aborted. |
-|  [completed$](./kibana-plugin-core-server.kibanarequestevents.completed_.md) | <code>Observable&lt;void&gt;</code> | Observable that emits once if and when the request has been completely handled. |
+|  [aborted$](./kibana-plugin-core-server.kibanarequestevents.aborted_.md) | Observable&lt;void&gt; | Observable that emits once if and when the request has been aborted. |
+|  [completed$](./kibana-plugin-core-server.kibanarequestevents.completed_.md) | Observable&lt;void&gt; | Observable that emits once if and when the request has been completely handled. |
 

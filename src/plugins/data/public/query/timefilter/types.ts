@@ -23,4 +23,4 @@ export type InputTimeRange =
       to: Moment;
     };
 
-export { TimeRangeBounds } from '../../../common';
+export type { TimeRangeBounds } from '../../../common';

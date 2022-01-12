@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IndexPatternSpec } from 'src/plugins/data_views/common';
+import { DataViewSpec } from 'src/plugins/data_views/common';
 import { handleErrors } from './util/handle_errors';
 import {
   fieldSpecSchema,
@@ -15,7 +15,13 @@ import {
   serializedFieldFormatSchema,
 } from './util/schemas';
 import { IRouter, StartServicesAccessor } from '../../../../core/server';
-import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
+import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
+import {
+  DATA_VIEW_PATH,
+  DATA_VIEW_PATH_LEGACY,
+  SERVICE_KEY,
+  SERVICE_KEY_LEGACY,
+} from '../constants';
 
 const indexPatternSpecSchema = schema.object({
   title: schema.string(),
@@ -46,50 +52,67 @@ const indexPatternSpecSchema = schema.object({
   runtimeFieldMap: schema.maybe(schema.recordOf(schema.string(), runtimeFieldSpecSchema)),
 });
 
-export const registerCreateIndexPatternRoute = (
-  router: IRouter,
-  getStartServices: StartServicesAccessor<
-    DataViewsServerPluginStartDependencies,
-    DataViewsServerPluginStart
-  >
-) => {
-  router.post(
-    {
-      path: '/api/index_patterns/index_pattern',
-      validate: {
-        body: schema.object({
-          override: schema.maybe(schema.boolean({ defaultValue: false })),
-          refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
-          index_pattern: indexPatternSpecSchema,
-        }),
-      },
-    },
-    router.handleLegacyErrors(
-      handleErrors(async (ctx, req, res) => {
-        const savedObjectsClient = ctx.core.savedObjects.client;
-        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-        const [, , { indexPatternsServiceFactory }] = await getStartServices();
-        const indexPatternsService = await indexPatternsServiceFactory(
-          savedObjectsClient,
-          elasticsearchClient
-        );
-        const body = req.body;
-
-        const indexPattern = await indexPatternsService.createAndSave(
-          body.index_pattern as IndexPatternSpec,
-          body.override,
-          !body.refresh_fields
-        );
-
-        return res.ok({
-          headers: {
-            'content-type': 'application/json',
-          },
-          body: JSON.stringify({
-            index_pattern: indexPattern.toSpec(),
+const registerCreateDataViewRouteFactory =
+  (path: string, serviceKey: string) =>
+  (
+    router: IRouter,
+    getStartServices: StartServicesAccessor<
+      DataViewsServerPluginStartDependencies,
+      DataViewsServerPluginStart
+    >
+  ) => {
+    router.post(
+      {
+        path,
+        validate: {
+          body: schema.object({
+            override: schema.maybe(schema.boolean({ defaultValue: false })),
+            refresh_fields: schema.maybe(schema.boolean({ defaultValue: false })),
+            data_view: serviceKey === SERVICE_KEY ? indexPatternSpecSchema : schema.never(),
+            index_pattern:
+              serviceKey === SERVICE_KEY_LEGACY ? indexPatternSpecSchema : schema.never(),
           }),
-        });
-      })
-    )
-  );
-};
+        },
+      },
+      router.handleLegacyErrors(
+        handleErrors(async (ctx, req, res) => {
+          const savedObjectsClient = ctx.core.savedObjects.client;
+          const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+          const [, , { dataViewsServiceFactory }] = await getStartServices();
+          const indexPatternsService = await dataViewsServiceFactory(
+            savedObjectsClient,
+            elasticsearchClient,
+            req
+          );
+          const body = req.body;
+
+          const spec = serviceKey === SERVICE_KEY ? body.data_view : body.index_pattern;
+
+          const indexPattern = await indexPatternsService.createAndSave(
+            spec as DataViewSpec,
+            body.override,
+            !body.refresh_fields
+          );
+
+          return res.ok({
+            headers: {
+              'content-type': 'application/json',
+            },
+            body: JSON.stringify({
+              [serviceKey]: indexPattern.toSpec(),
+            }),
+          });
+        })
+      )
+    );
+  };
+
+export const registerCreateDataViewRoute = registerCreateDataViewRouteFactory(
+  DATA_VIEW_PATH,
+  SERVICE_KEY
+);
+
+export const registerCreateDataViewRouteLegacy = registerCreateDataViewRouteFactory(
+  DATA_VIEW_PATH_LEGACY,
+  SERVICE_KEY_LEGACY
+);

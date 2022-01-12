@@ -69,32 +69,24 @@ export const updateRulesRoute = (
           id: request.body.id,
         });
 
-        await legacyMigrate({
+        const migratedRule = await legacyMigrate({
           rulesClient,
           savedObjectsClient,
           rule: existingRule,
         });
         const rule = await updateRules({
           defaultOutputIndex: siemClient.getSignalsIndex(),
-          isRuleRegistryEnabled,
           rulesClient,
-          ruleStatusClient,
-          savedObjectsClient,
+          existingRule: migratedRule,
           ruleUpdate: request.body,
-          spaceId: context.securitySolution.getSpaceId(),
         });
 
         if (rule != null) {
-          const ruleStatuses = await ruleStatusClient.find({
-            logsCount: 1,
+          const ruleStatus = await ruleStatusClient.getCurrentStatus({
             ruleId: rule.id,
             spaceId: context.securitySolution.getSpaceId(),
           });
-          const [validated, errors] = transformValidate(
-            rule,
-            ruleStatuses[0],
-            isRuleRegistryEnabled
-          );
+          const [validated, errors] = transformValidate(rule, ruleStatus, isRuleRegistryEnabled);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

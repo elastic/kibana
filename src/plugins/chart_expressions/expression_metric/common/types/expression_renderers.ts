@@ -5,9 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Range } from '../../../../expressions/common';
+
 import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { ColorMode, Labels, Style, ColorSchemas } from '../../../../charts/common';
+import {
+  ColorMode,
+  Labels,
+  CustomPaletteState,
+  Style as ChartStyle,
+} from '../../../../charts/common';
+import { Style } from '../../../../expressions/common';
 
 export const visType = 'metric';
 
@@ -16,16 +22,14 @@ export interface DimensionsVisParam {
   bucket?: ExpressionValueVisDimension;
 }
 
+export type MetricStyle = Style & Pick<ChartStyle, 'bgColor' | 'labelColor'>;
 export interface MetricVisParam {
   percentageMode: boolean;
   percentageFormatPattern?: string;
-  useRanges: boolean;
-  colorSchema: ColorSchemas;
   metricColorMode: ColorMode;
-  colorsRange: Range[];
+  palette?: CustomPaletteState;
   labels: Labels;
-  invertColors: boolean;
-  style: Style;
+  style: MetricStyle;
 }
 
 export interface VisParams {
@@ -42,5 +46,4 @@ export interface MetricOptions {
   color?: string;
   bgColor?: string;
   lightText: boolean;
-  rowIndex: number;
 }

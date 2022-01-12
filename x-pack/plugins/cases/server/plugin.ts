@@ -13,7 +13,7 @@ import {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '../../actions/server';
-import { APP_ID, ENABLE_CASE_CONNECTOR } from '../common';
+import { APP_ID, ENABLE_CASE_CONNECTOR } from '../common/constants';
 
 import { initCaseApi } from './routes/api';
 import {
@@ -126,6 +126,11 @@ export class CasePlugin {
       },
       featuresPluginStart: plugins.features,
       actionsPluginStart: plugins.actions,
+      /**
+       * Lens will be always defined as
+       * it is declared as required plugin in kibana.json
+       */
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       lensEmbeddableFactory: this.lensEmbeddableFactory!,
     });
 
