@@ -9,8 +9,8 @@ exports[`FullTimeRangeSelector renders the selector 1`] = `
   <EuiToolTip
     content={
       <FormattedMessage
-        defaultMessage="Use full range of data including frozen data tier. Searches with frozen data may take longer."
-        id="xpack.ml.fullTimeRangeSelector.useFullDataButtonTooltip"
+        defaultMessage="Use full range of data including frozen data tier, which might have slower search results."
+        id="xpack.ml.fullTimeRangeSelector.useFullDataIncludingFrozenButtonTooltip"
         values={Object {}}
       />
     }
@@ -55,7 +55,7 @@ exports[`FullTimeRangeSelector renders the selector 1`] = `
       <EuiPanel>
         <EuiRadioGroup
           compressed={true}
-          idSelected="t"
+          idSelected="e"
           onChange={[Function]}
           options={
             Array [
