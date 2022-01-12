@@ -51,6 +51,7 @@ import {
   getColumns,
   getSplitDimensionAccessor,
   getColumnByAccessor,
+  isLegendFlat,
 } from '../utils';
 import { ChartSplit, SMALL_MULTIPLES_ID } from './chart_split';
 import { VisualizationNoResults } from './visualization_noresults';
@@ -267,6 +268,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     [visType, visParams, visData, chartTheme, dimensions, rescaleFactor]
   );
   const tooltip: TooltipProps = {
+    boundary: document.getElementById('app-fixed-viewport') ?? undefined,
     type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
   };
   const legendPosition = visParams.legendPosition ?? Position.Right;
@@ -333,7 +335,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       }),
     [visData.rows, metricColumn]
   );
-
+  const flatLegend = isLegendFlat(visType, splitChartDimension);
   const canShowPieChart = !isAllZeros && !hasNegative;
 
   return (
@@ -359,7 +361,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
               legendPosition={legendPosition}
               legendMaxDepth={visParams.nestedLegend ? undefined : 1}
               legendColorPicker={props.uiState ? legendColorPicker : undefined}
-              flatLegend={Boolean(splitChartDimension)}
+              flatLegend={flatLegend}
               tooltip={tooltip}
               onElementClick={(args) => {
                 handleSliceClick(

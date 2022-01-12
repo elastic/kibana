@@ -15,3 +15,4 @@ export { getColumns } from './get_columns';
 export { getSplitDimensionAccessor } from './get_split_dimension_accessor';
 export { getDistinctSeries } from './get_distinct_series';
 export { getColumnByAccessor } from './accessor';
+export { isLegendFlat } from './is_legend_flat';
