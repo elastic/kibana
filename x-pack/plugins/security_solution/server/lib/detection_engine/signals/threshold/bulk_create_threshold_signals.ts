@@ -161,9 +161,11 @@ const getTransformedHits = (
         // Store `from` in the signal so that we know the lower bound for the
         // threshold set in the timeline search. The upper bound will always be
         // the `original_time` of the signal (the timestamp of the latest event
-        // in the set).
+        // in the set) + padding.
         from:
-          signalHit?.lastSignalTimestamp != null ? new Date(signalHit.lastSignalTimestamp) : from,
+          signalHit?.lastSignalTimestamp != null
+            ? new Date(signalHit.lastSignalTimestamp + 1) // Add 1 millisecond for padding
+            : from,
       },
     };
 
