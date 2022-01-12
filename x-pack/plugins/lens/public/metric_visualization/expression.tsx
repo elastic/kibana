@@ -98,7 +98,8 @@ function getColorStyling(
     [cssProp]: color,
   };
   if (colorMode === ColorMode.Background && color) {
-    styling.color = getContrastColor(color, isDarkTheme);
+    // set to "euiTextColor" for both light and dark color, depending on the theme
+    styling.color = getContrastColor(color, isDarkTheme, 'euiTextColor', 'euiTextColor');
   }
   return styling;
 }
