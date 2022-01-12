@@ -14,7 +14,6 @@ import {
   PartitionVisParams,
   PieContainerDimensions,
 } from '../../common/types';
-import { getColumnByAccessor } from './accessor';
 
 type Config = RecursivePartial<PartitionConfig>;
 
@@ -47,15 +46,16 @@ const getPieDonutWaffleCommonConfig: GetConfigFn = (
   const isSplitChart = Boolean(visParams.dimensions.splitColumn || visParams.dimensions.splitRow);
   const preventLinksFromShowing =
     (visParams.labels.position === LabelPositions.INSIDE || isSplitChart) && visParams.labels.show;
+  const saveRescaleFactor = visParams.labels.show && !preventLinksFromShowing;
 
   const usingOuterSizeRatio =
-    dimensions && !isSplitChart
+    dimensions && !isSplitChart && !saveRescaleFactor
       ? {
           outerSizeRatio:
             // Cap the ratio to 1 and then rescale
             rescaleFactor * Math.min(MAX_SIZE / Math.min(dimensions?.width, dimensions?.height), 1),
         }
-      : null;
+      : {};
 
   const config: Config = { ...usingOuterSizeRatio };
 
@@ -76,18 +76,12 @@ const getPieDonutWaffleCommonConfig: GetConfigFn = (
     config.linkLabel = { maxCount: 0 };
   }
 
-  if (visParams.labels.show && !preventLinksFromShowing) {
-    const metricId = getColumnByAccessor(visParams.dimensions.metric.accessor, visData.columns).id;
-    const overallSum = visData.rows.reduce((sum, row) => sum + row[metricId], 0);
-    const slices = visData.rows.map((row) => row[metricId] / overallSum);
-    const smallSlices = slices.filter((value) => value < 0.02).length;
-    if (smallSlices) {
-      // shrink up to 20% to give some room for the linked values
-      config.outerSizeRatio = 1 / (1 + Math.min(smallSlices * 0.05, 0.2));
-    }
+  if (saveRescaleFactor) {
+    // shrink up to 20% to give some room for the linked values
+    config.outerSizeRatio = rescaleFactor;
   }
 
-  return { ...config, ...usingOuterSizeRatio };
+  return { ...config };
 };
 
 const getTreemapMosaicCommonConfig: GetConfigFn = (visParams) => {

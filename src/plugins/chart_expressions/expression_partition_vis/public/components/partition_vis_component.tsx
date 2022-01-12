@@ -197,10 +197,10 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
 
   const { visData, visParams, visType, services, syncColors } = props;
 
-  function getSliceValue(d: Datum, metricColumn: DatatableColumn) {
+  const getSliceValue = useCallback((d: Datum, metricColumn: DatatableColumn) => {
     const value = d[metricColumn.id];
     return Number.isFinite(value) && value >= 0 ? value : 0;
-  }
+  }, []);
 
   // formatters
   const metricFieldFormatter = services.fieldFormats.deserialize(
@@ -223,6 +223,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     [visData, visParams]
   );
 
+  const isDarkMode = props.chartsThemeService.useDarkMode();
   const layers = useMemo(
     () =>
       getLayers(
@@ -235,7 +236,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         props.palettesRegistry,
         services.fieldFormats,
         syncColors,
-        props.chartsThemeService.useDarkMode()
+        isDarkMode
       ),
     [
       visType,
@@ -244,19 +245,19 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       visData,
       props.uiState,
       props.palettesRegistry,
-      props.chartsThemeService,
       services.fieldFormats,
       syncColors,
+      isDarkMode,
     ]
   );
 
   const rescaleFactor = useMemo(() => {
     const overallSum = visData.rows.reduce((sum, row) => sum + row[metricColumn.id], 0);
     const slices = visData.rows.map((row) => row[metricColumn.id] / overallSum);
-    const smallSlices = slices.filter((value) => value < 0.02).length;
-    if (smallSlices) {
+    const smallSlices = slices.filter((value) => value < 0.02) ?? [];
+    if (smallSlices.length) {
       // shrink up to 20% to give some room for the linked values
-      return 1 / (1 + Math.min(smallSlices * 0.05, 0.2));
+      return 1 / (1 + Math.min(smallSlices.length * 0.05, 0.2));
     }
     return 1;
   }, [visData.rows, metricColumn]);
