@@ -17,7 +17,6 @@ import {
   EuiCode,
   EuiCodeBlock,
   EuiCallOut,
-  EuiSelect,
   EuiRadioGroup,
   EuiFieldText,
   EuiForm,
@@ -29,7 +28,7 @@ import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DownloadStep } from '../../../../components';
+import { DownloadStep, SelectCreateAgentPolicy } from '../../../../components';
 import {
   useStartServices,
   useDefaultOutput,
@@ -46,13 +45,7 @@ import {
 import type { PLATFORM_TYPE } from '../../../../hooks';
 import type { AgentPolicy, PackagePolicy } from '../../../../types';
 import { FLEET_SERVER_PACKAGE } from '../../../../constants';
-import {
-  AgentPolicyCreatedCallOut,
-  CREATE_STATUS,
-  FleetServerOnPremRequiredCallout,
-} from '../../components';
-
-import { AgentPolicyCreateInlineForm } from '../../../agent_policy/components';
+import { FleetServerOnPremRequiredCallout } from '../../components';
 
 import { getInstallCommandForPlatform } from './install_command_utils';
 
@@ -351,10 +344,6 @@ const AgentPolicySelectionStep = ({
     [data]
   );
 
-  const options = useMemo(() => {
-    return agentPolicies.map((policy) => ({ text: policy.name, value: policy.id }));
-  }, [agentPolicies]);
-
   useEffect(() => {
     // Select default value
     if (agentPolicies.length && !policyId) {
@@ -363,41 +352,14 @@ const AgentPolicySelectionStep = ({
   }, [agentPolicies, policyId, setPolicyId]);
 
   const onChangeCallback = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setPolicyId(e.target.value);
-    },
-    [setPolicyId]
-  );
-
-  const [createStatus, setCreateStatus] = useState(CREATE_STATUS.INITIAL);
-
-  const onAgentPolicyCreated = useCallback(
-    (policy: AgentPolicy | null) => {
-      if (!policy) {
-        setCreateStatus(CREATE_STATUS.FAILED);
-        return;
+    (key: string | undefined, policy?: AgentPolicy) => {
+      if (policy) {
+        refreshAgentPolicies();
       }
-      setCreateStatus(CREATE_STATUS.CREATED);
-      setPolicyId(policy.id);
-      refreshAgentPolicies();
+      setPolicyId(key!);
     },
     [setPolicyId, refreshAgentPolicies]
   );
-
-  if (agentPolicies.length === 0) {
-    return {
-      title: i18n.translate('xpack.fleet.fleetServerSetup.stepCreateAgentPolicyTitle', {
-        defaultMessage: 'Create a Fleet Server agent policy',
-      }),
-      status: undefined,
-      children: (
-        <AgentPolicyCreateInlineForm
-          updateAgentPolicy={onAgentPolicyCreated}
-          isFleetServerPolicy={true}
-        />
-      ),
-    };
-  }
 
   return {
     title: i18n.translate('xpack.fleet.fleetServerSetup.stepSelectAgentPolicyTitle', {
@@ -406,33 +368,13 @@ const AgentPolicySelectionStep = ({
     status: undefined,
     children: (
       <>
-        <EuiText>
-          <FormattedMessage
-            id="xpack.fleet.fleetServerSetup.selectAgentPolicyDescriptionText"
-            defaultMessage="Agent policies allow you to configure and manage your agents remotely. We recommend creating a Fleet Server policy which includes the necessary configuration to run a Fleet Server."
-          />
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiSelect
-          prepend={
-            <EuiText>
-              <FormattedMessage
-                id="xpack.fleet.fleetServerSetup.agentPolicySelectLabel"
-                defaultMessage="Agent policy"
-              />
-            </EuiText>
-          }
-          options={options}
-          value={policyId}
-          onChange={onChangeCallback}
-          aria-label={i18n.translate('xpack.fleet.fleetServerSetup.agentPolicySelectAraiLabel', {
-            defaultMessage: 'Agent policy',
-          })}
-          data-test-subj="agentPolicyDropdown"
+        <SelectCreateAgentPolicy
+          agentPolicies={agentPolicies}
+          withKeySelection={false}
+          onAgentPolicyChange={onChangeCallback}
+          excludeFleetServer={false}
+          isFleetServerPolicy={true}
         />
-        {createStatus !== CREATE_STATUS.INITIAL && (
-          <AgentPolicyCreatedCallOut createStatus={createStatus} />
-        )}
       </>
     ),
   };

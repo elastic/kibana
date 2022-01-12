@@ -16,17 +16,10 @@ import semverPatch from 'semver/functions/patch';
 import type { AgentPolicy } from '../../types';
 import { useKibanaVersion } from '../../hooks';
 
-import { AgentPolicyCreateInlineForm } from '../../applications/fleet/sections/agent_policy/components';
-
 import { policyHasFleetServer } from '../../applications/fleet/sections/agents/services/has_fleet_server';
 
-import {
-  AgentPolicyCreatedCallOut,
-  CREATE_STATUS,
-} from '../../applications/fleet/sections/agents/components';
-
-import { EnrollmentStepAgentPolicy } from './agent_policy_selection';
 import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
+import { SelectCreateAgentPolicy } from './agent_policy_select_create';
 
 export const DownloadStep = (hasFleetServer: boolean) => {
   const kibanaVersion = useKibanaVersion();
@@ -105,53 +98,33 @@ export const AgentPolicySelectionStep = ({
   }, [agentPolicyList, excludeFleetServer]);
 
   const onAgentPolicyChange = useCallback(
-    async (policyId?: string) => {
+    async (key?: string, policy?: AgentPolicy) => {
+      if (policy) {
+        setAgentPolicyList([...agentPolicyList, policy]);
+      }
       if (setSelectedPolicyId) {
-        setSelectedPolicyId(policyId);
+        setSelectedPolicyId(key);
       }
     },
-    [setSelectedPolicyId]
-  );
-
-  const [createStatus, setCreateStatus] = useState(CREATE_STATUS.INITIAL);
-
-  const onAgentPolicyCreated = useCallback(
-    async (policy: AgentPolicy | null) => {
-      if (!policy) {
-        setCreateStatus(CREATE_STATUS.FAILED);
-        return;
-      }
-      setCreateStatus(CREATE_STATUS.CREATED);
-      setAgentPolicyList([...agentPolicyList, policy]);
-      if (setSelectedPolicyId) {
-        setSelectedPolicyId(policy.id);
-      }
-    },
-    [agentPolicyList, setAgentPolicyList, setSelectedPolicyId]
+    [setSelectedPolicyId, setAgentPolicyList, agentPolicyList]
   );
 
   return {
     title: i18n.translate('xpack.fleet.agentEnrollment.stepChooseAgentPolicyTitle', {
       defaultMessage: 'What type of host are you adding?',
     }),
-    children:
-      regularAgentPolicies.length > 0 ? (
-        <>
-          <EnrollmentStepAgentPolicy
-            agentPolicies={regularAgentPolicies}
-            withKeySelection={setSelectedAPIKeyId ? true : false}
-            selectedApiKeyId={selectedApiKeyId}
-            onKeyChange={setSelectedAPIKeyId}
-            onAgentPolicyChange={onAgentPolicyChange}
-            excludeFleetServer={excludeFleetServer}
-          />
-          {createStatus !== CREATE_STATUS.INITIAL && (
-            <AgentPolicyCreatedCallOut createStatus={createStatus} />
-          )}
-        </>
-      ) : (
-        <AgentPolicyCreateInlineForm updateAgentPolicy={onAgentPolicyCreated} />
-      ),
+    children: (
+      <>
+        <SelectCreateAgentPolicy
+          agentPolicies={regularAgentPolicies}
+          withKeySelection={setSelectedAPIKeyId ? true : false}
+          selectedApiKeyId={selectedApiKeyId}
+          onKeyChange={setSelectedAPIKeyId}
+          onAgentPolicyChange={onAgentPolicyChange}
+          excludeFleetServer={excludeFleetServer}
+        />
+      </>
+    ),
   };
 };
 

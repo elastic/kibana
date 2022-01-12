@@ -9,21 +9,12 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiLink,
-  EuiPortal,
-  EuiSelect,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiLink, EuiSelect, EuiSpacer } from '@elastic/eui';
 
 import type { AgentPolicy } from '../../types';
 import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
 
 import { useCapabilities } from '../../hooks';
-import { CreateAgentPolicyFlyout } from '../../applications/fleet/sections/agent_policy/list_page/components';
 
 import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
 
@@ -34,9 +25,11 @@ const AgentPolicyFormRow = styled(EuiFormRow)`
 `;
 
 type Props = {
-  agentPolicies?: AgentPolicy[];
-  onAgentPolicyChange?: (key?: string) => void;
+  agentPolicies: AgentPolicy[];
+  onAgentPolicyChange: (key?: string, policy?: AgentPolicy) => void;
   excludeFleetServer?: boolean;
+  onClickCreatePolicy: () => void;
+  selectedAgentPolicy?: string;
 } & (
   | {
       withKeySelection: true;
@@ -62,18 +55,20 @@ const resolveAgentId = (
 };
 
 export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
-  const { agentPolicies, onAgentPolicyChange, excludeFleetServer } = props;
-
-  const [agentPolicyList, setAgentPolicyList] = useState<AgentPolicy[]>(agentPolicies || []);
+  const {
+    agentPolicies,
+    onAgentPolicyChange,
+    excludeFleetServer,
+    onClickCreatePolicy,
+    selectedAgentPolicy,
+  } = props;
 
   const [selectedAgentPolicyId, setSelectedAgentPolicyId] = useState<undefined | string>(
-    () => resolveAgentId(agentPolicyList, undefined) // no agent id selected yet
+    () => resolveAgentId(agentPolicies, undefined) // no agent id selected yet
   );
 
   // Create new agent policy flyout state
   const hasWriteCapabilites = useCapabilities().write;
-  const [isCreateAgentPolicyFlyoutOpen, setIsCreateAgentPolicyFlyoutOpen] =
-    useState<boolean>(false);
 
   useEffect(
     function triggerOnAgentPolicyChangeEffect() {
@@ -86,41 +81,27 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
 
   useEffect(
     function useDefaultAgentPolicyEffect() {
-      const resolvedId = resolveAgentId(agentPolicyList, selectedAgentPolicyId);
+      const resolvedId = resolveAgentId(agentPolicies, selectedAgentPolicyId);
       if (resolvedId !== selectedAgentPolicyId) {
         setSelectedAgentPolicyId(resolvedId);
       }
     },
-    [agentPolicyList, selectedAgentPolicyId]
+    [agentPolicies, selectedAgentPolicyId]
   );
+
+  useEffect(() => {
+    if (selectedAgentPolicy) setSelectedAgentPolicyId(selectedAgentPolicy);
+  }, [selectedAgentPolicy]);
 
   return (
     <>
-      {isCreateAgentPolicyFlyoutOpen ? (
-        <EuiPortal>
-          <CreateAgentPolicyFlyout
-            onClose={(newAgentPolicy?: AgentPolicy) => {
-              setIsCreateAgentPolicyFlyoutOpen(false);
-              if (newAgentPolicy) {
-                setAgentPolicyList([...agentPolicyList, newAgentPolicy]);
-
-                setSelectedAgentPolicyId(newAgentPolicy.id);
-              }
-            }}
-            ownFocus={true}
-          />
-        </EuiPortal>
-      ) : null}
       <AgentPolicyFormRow
         fullWidth={true}
         label={
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <div>
-                <EuiLink
-                  disabled={!hasWriteCapabilites}
-                  onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
-                >
+                <EuiLink disabled={!hasWriteCapabilites} onClick={onClickCreatePolicy}>
                   <FormattedMessage
                     id="xpack.fleet.enrollmentStepAgentPolicy.addPolicyButton"
                     defaultMessage="Create new agent policy"
@@ -134,7 +115,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
         <EuiSelect
           fullWidth
           isLoading={!agentPolicies}
-          options={agentPolicyList.map((agentPolicy: AgentPolicy) => ({
+          options={agentPolicies.map((agentPolicy: AgentPolicy) => ({
             value: agentPolicy.id,
             text: agentPolicy.name,
           }))}
@@ -146,7 +127,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
               defaultMessage: 'Agent policy',
             }
           )}
-          hasNoInitialSelection={agentPolicyList.length > 1}
+          hasNoInitialSelection={agentPolicies.length > 1}
           data-test-subj="agentPolicyDropdown"
         />
       </AgentPolicyFormRow>

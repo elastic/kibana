@@ -41,16 +41,18 @@ const StyledEuiAccordion = styled(EuiAccordion)`
 interface Props {
   updateAgentPolicy: (u: AgentPolicy | null) => void;
   isFleetServerPolicy?: boolean;
+  agentPolicyName: string;
 }
 
 export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
   updateAgentPolicy,
   isFleetServerPolicy,
+  agentPolicyName,
 }) => {
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
 
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>({
-    name: isFleetServerPolicy ? 'Fleet Server policy 1' : 'Agent policy 1',
+    name: agentPolicyName,
     description: '',
     namespace: 'default',
     monitoring_enabled: Object.values(dataTypes),

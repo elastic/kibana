@@ -30,4 +30,9 @@ describe('increment policy name', () => {
     ]);
     expect(name).toEqual('Agent policy 11');
   });
+
+  it('should return index 2 when policy 1 exists - fleet server', () => {
+    const name = incrementPolicyName([{ name: 'Fleet Server policy 1' } as any], true);
+    expect(name).toEqual('Fleet Server policy 2');
+  });
 });

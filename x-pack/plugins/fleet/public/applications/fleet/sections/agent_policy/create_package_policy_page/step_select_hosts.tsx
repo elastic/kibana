@@ -15,8 +15,9 @@ import type { AgentPolicy, NewAgentPolicy, PackageInfo } from '../../../types';
 import { AgentPolicyIntegrationForm } from '../components';
 import type { ValidationResults } from '../components/agent_policy_validation';
 
+import { incrementPolicyName } from '../../../services';
+
 import { StepSelectAgentPolicy } from './step_select_agent_policy';
-import { incrementPolicyName } from './utils';
 
 export enum SelectedPolicyTab {
   NEW = 'new',
