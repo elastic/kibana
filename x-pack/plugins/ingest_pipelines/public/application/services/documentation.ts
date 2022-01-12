@@ -19,6 +19,7 @@ export class DocumentationService {
   private dissectKeyModifiersUrl: string = '';
   private classificationUrl: string = '';
   private regressionUrl: string = '';
+  private documentationUrl: string = '';
 
   public setup(docLinks: DocLinksStart): void {
     const { DOC_LINK_VERSION, ELASTIC_WEBSITE_URL, links } = docLinks;
@@ -35,6 +36,7 @@ export class DocumentationService {
     this.dissectKeyModifiersUrl = links.ingest.dissectKeyModifiers;
     this.classificationUrl = links.ingest.inferenceClassification;
     this.regressionUrl = links.ingest.inferenceRegression;
+    this.documentationUrl = links.ingest.inference;
   }
 
   public getEsDocsBasePath() {
@@ -79,6 +81,10 @@ export class DocumentationService {
 
   public getRegressionUrl() {
     return this.regressionUrl;
+  }
+
+  public getDocumentationUrl() {
+    return this.documentationUrl;
   }
 }
 
