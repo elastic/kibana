@@ -15,21 +15,18 @@ import {
   AreaSeries,
 } from '@elastic/charts';
 
-export const ComplianceTrendChart = () => {
-  return (
-    <Chart size={{ height: 200 }}>
-      <Settings showLegend={false} legendPosition="right" />
-      <AreaSeries
-        id="compliance_score"
-        name="Compliance Score"
-        // TODO: no api for this chart yet, using empty state for now. needs BE
-        data={[]}
-        xScaleType="time"
-        xAccessor={0}
-        yAccessors={[1]}
-      />
-      <Axis id="bottom-axis" position="bottom" tickFormat={timeFormatter(niceTimeFormatByDay(1))} />
-      <Axis ticks={4} id="left-axis" position="left" showGridLines domain={{ min: 0, max: 100 }} />
-    </Chart>
-  );
-};
+export const ComplianceTrendChart = () => (
+  <Chart size={{ height: 200 }}>
+    <Settings showLegend={false} legendPosition="right" />
+    <AreaSeries
+      id="compliance_score"
+      // TODO: no api for this chart yet, using empty state for now. needs BE
+      data={[]}
+      xScaleType="time"
+      xAccessor={0}
+      yAccessors={[1]}
+    />
+    <Axis id="bottom-axis" position="bottom" tickFormat={timeFormatter(niceTimeFormatByDay(1))} />
+    <Axis ticks={4} id="left-axis" position="left" showGridLines domain={{ min: 0, max: 100 }} />
+  </Chart>
+);

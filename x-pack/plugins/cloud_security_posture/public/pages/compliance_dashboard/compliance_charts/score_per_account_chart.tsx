@@ -26,7 +26,6 @@ export const ScorePerAccountChart = ({
           valueFormatter: (v) => `${Number(v * 100).toFixed(0)}%`,
         }}
         id="bars"
-        name="0"
         data={accountEvaluations}
         xAccessor={'resource'}
         yAccessors={['value']}

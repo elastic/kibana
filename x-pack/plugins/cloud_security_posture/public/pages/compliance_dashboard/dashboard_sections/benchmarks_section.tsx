@@ -21,6 +21,7 @@ import { ComplianceTrendChart } from '../compliance_charts/compliance_trend_char
 import { useCloudPostureStatsApi } from '../../../common/api/use_cloud_posture_stats_api';
 import { CspHealthBadge } from '../../../components/csp_health_badge';
 import { ChartPanel } from '../../../components/chart_panel';
+import * as TEXT from '../translations';
 
 type BenchmarksWithIcons = 'CIS Kubernetes';
 
@@ -65,7 +66,7 @@ export const BenchmarksSection = () => {
                 listItems={[
                   {
                     // TODO: this shows the failed/passed ratio and not the calculated score. needs product
-                    title: 'Compliance Score',
+                    title: TEXT.COMPLIANCE_SCORE,
                     description: (
                       <ChartPanel
                         hasBorder={false}
@@ -83,7 +84,7 @@ export const BenchmarksSection = () => {
               <EuiDescriptionList
                 listItems={[
                   {
-                    title: 'Compliance Trend',
+                    title: TEXT.COMPLIANCE_TREND,
                     description: (
                       <ChartPanel
                         hasBorder={false}
@@ -102,22 +103,22 @@ export const BenchmarksSection = () => {
               <EuiDescriptionList
                 listItems={[
                   {
-                    title: 'Posture Score',
+                    title: TEXT.POSTURE_SCORE,
                     // TODO: temporary until the type for this are fixed and the score is no longer optional (right now can fail if score equals 0).
                     description: benchmark.postureScore || 'error',
                   },
                   {
-                    title: 'Status',
+                    title: TEXT.STATUS,
                     description:
                       benchmark.postureScore !== undefined ? (
                         <CspHealthBadge value={benchmark.postureScore} />
                       ) : (
-                        'error'
+                        TEXT.ERROR
                       ),
                   },
                   {
-                    title: 'Total Failures',
-                    description: benchmark.totalFailed || 'error',
+                    title: TEXT.TOTAL_FAILURES,
+                    description: benchmark.totalFailed || TEXT.ERROR,
                   },
                 ]}
               />

@@ -13,6 +13,7 @@ import { SummarySection } from './dashboard_sections/summary_section';
 import { BenchmarksSection } from './dashboard_sections/benchmarks_section';
 import { useCloudPostureStatsApi } from '../../common/api';
 import { CspPageTemplate } from '../../components/page_template';
+import * as TEXT from './translations';
 
 const CompliancePage = () => {
   const getStats = useCloudPostureStatsApi();
@@ -20,15 +21,7 @@ const CompliancePage = () => {
 
   return (
     <>
-      <EuiTitle>
-        <h3>{'Summary'}</h3>
-      </EuiTitle>
-      <EuiSpacer />
       <SummarySection />
-      <EuiSpacer />
-      <EuiTitle>
-        <h3>{'Benchmarks'}</h3>
-      </EuiTitle>
       <EuiSpacer />
       <BenchmarksSection />
       <EuiSpacer />
@@ -42,7 +35,7 @@ export const ComplianceDashboard = () => {
   return (
     <CspPageTemplate
       pageHeader={{
-        pageTitle: 'Compliance',
+        pageTitle: TEXT.CLOUD_POSTURE,
       }}
     >
       <CompliancePage />

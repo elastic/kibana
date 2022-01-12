@@ -19,6 +19,7 @@ import type { PartitionElementEvent } from '@elastic/charts';
 import { statusColors } from '../../../common/constants';
 import type { BenchmarkStats } from '../../../../common/types';
 import { useNavigateToCspFindings } from '../../../common/navigation/use_navigate_to_csp_findings';
+import * as TEXT from '../translations';
 
 interface CloudPostureScoreChartProps {
   data: BenchmarkStats;
@@ -44,8 +45,8 @@ export const CloudPostureScoreChart = ({
   const percentage = `${((totalPassed / total) * 100).toFixed(1)}%`;
 
   const data = [
-    { label: 'Passed', value: totalPassed },
-    { label: 'Failed', value: totalFailed },
+    { label: TEXT.PASSED, value: totalPassed },
+    { label: TEXT.FAILEd, value: totalFailed },
   ];
 
   return (

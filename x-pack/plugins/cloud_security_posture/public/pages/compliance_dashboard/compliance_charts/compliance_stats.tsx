@@ -20,6 +20,7 @@ import type { IconType, EuiStatProps } from '@elastic/eui';
 import { useCloudPostureStatsApi } from '../../../common/api';
 import { statusColors } from '../../../common/constants';
 import { Score } from '../../../../common/types';
+import * as TEXT from '../translations';
 
 // type Trend = Array<[time: number, value: number]>;
 
@@ -77,14 +78,14 @@ export const ComplianceStats = () => {
   const stats = [
     {
       title: postureScore,
-      description: 'Posture Score',
+      description: TEXT.POSTURE_SCORE,
       titleColor: getTitleColor(postureScore),
       iconType: getScoreIcon(postureScore),
     },
     {
       // TODO: remove placeholder for the commented out component, needs BE
       title: placeholder,
-      description: 'Posture Score Trend',
+      description: TEXT.POSTURE_SCORE_TREND,
     },
     // {
     //   title: (
@@ -123,12 +124,12 @@ export const ComplianceStats = () => {
     {
       // TODO: this should count only ACTIVE benchmarks. needs BE
       title: benchmarks.length,
-      description: 'Active Frameworks',
+      description: TEXT.ACTIVE_FRAMEWORKS,
     },
     {
       // TODO: should be relatively simple to return from BE. needs BE
       title: placeholder,
-      description: 'Total Resources',
+      description: TEXT.TOTAL_RESOURCES,
     },
   ];
 

@@ -12,6 +12,7 @@ import { ScorePerAccountChart } from '../compliance_charts/score_per_account_cha
 import { ChartPanel } from '../../../components/chart_panel';
 import { ComplianceStats } from '../compliance_charts/compliance_stats';
 import { useCloudPostureStatsApi } from '../../../common/api';
+import * as TEXT from '../translations';
 
 export const SummarySection = () => {
   const getStats = useCloudPostureStatsApi();
@@ -25,8 +26,8 @@ export const SummarySection = () => {
       <EuiFlexItem>
         <ChartPanel
           chart={ResourcesAtRiskChart}
-          title="Top 5 Resources Types At Risk"
-          description="Non compliant first"
+          title={TEXT.TOP_5_CHART_TITLE}
+          description={TEXT.NON_COMPLIANT_FIRST}
           data={getStats.data?.resourcesEvaluations}
           isLoading={getStats.isLoading}
           isError={getStats.isError}
@@ -35,8 +36,8 @@ export const SummarySection = () => {
       <EuiFlexItem>
         <ChartPanel
           chart={ScorePerAccountChart}
-          title="Score Per Account / Cluster"
-          description="Non compliant first"
+          title={TEXT.SCORE_PER_CLUSTER_CHART_TITLE}
+          description={TEXT.NON_COMPLIANT_FIRST}
           // TODO: no api for this chart yet, using empty state for now. needs BE
           data={[]}
           isLoading={getStats.isLoading}
