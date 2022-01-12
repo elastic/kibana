@@ -355,7 +355,6 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   }, [dispatch, filterManager, tGridEnabled, timelineId]);
 
   const leadingControlColumns = useMemo(() => getDefaultControlColumn(ACTION_BUTTON_COUNT), []);
-  const memoizedCellActions = useMemo(() => defaultCellActions, []);
 
   if (loading || indexPatternsLoading || isEmpty(selectedPatterns)) {
     return null;
@@ -365,7 +364,7 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
     <StatefulEventsViewer
       additionalFilters={additionalFiltersComponent}
       currentFilter={filterGroup}
-      defaultCellActions={memoizedCellActions}
+      defaultCellActions={defaultCellActions}
       defaultModel={alertsDefaultModel}
       end={to}
       entityType="events"

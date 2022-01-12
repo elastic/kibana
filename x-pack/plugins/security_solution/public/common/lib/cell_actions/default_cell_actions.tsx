@@ -9,10 +9,7 @@ import { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { head, getOr, get, isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
-import type {
-  BrowserFields,
-  TimelineNonEcsData,
-} from '../../../../../timelines/common/search_strategy';
+import type { TimelineNonEcsData } from '../../../../../timelines/common/search_strategy';
 import {
   ColumnHeaderOptions,
   DataProvider,
@@ -27,7 +24,7 @@ import { IS_OPERATOR } from '../../../timelines/components/timeline/data_provide
 import { escapeDataProviderId } from '../../components/drag_and_drop/helpers';
 import { useKibana } from '../kibana';
 import { getLinkColumnDefinition } from './helpers';
-import { getField } from '../../../helpers';
+import { getField, getFieldKey } from '../../../helpers';
 
 /** a noop required by the filter in / out buttons */
 const onFilterAdded = () => {};
@@ -45,6 +42,71 @@ const useKibanaServices = () => {
 };
 
 export const EmptyComponent = () => <></>;
+
+const useFormattedFieldProps = ({
+  rowIndex,
+  pageSize,
+  ecsData,
+  columnId,
+  header,
+  data,
+}: {
+  rowIndex: number;
+  data: TimelineNonEcsData[][];
+  ecsData: Ecs[];
+  header?: ColumnHeaderOptions;
+  columnId: string;
+  pageSize: number;
+}) => {
+  const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
+  const ecs = ecsData[pageRowIndex];
+  const link = getLinkColumnDefinition(columnId, header?.type, header?.linkField);
+  const linkField = header?.linkField ? header?.linkField : link?.linkField;
+  const linkValues = header && getOr([], linkField ?? '', ecs);
+  const eventId = (header && get('_id' ?? '', ecs)) || '';
+  const values = getMappedNonEcsValue({
+    data: data[pageRowIndex],
+    fieldName: columnId,
+  });
+  const value = parseValue(head(values));
+  const title = values && values.length > 1 ? `${link?.label}: ${value}` : link?.label;
+  // if linkField is defined but link values is empty, it's possible we are trying to look for a column definition for an old event set
+  if (linkField !== undefined && linkValues.length === 0 && values !== undefined) {
+    const normalizedLinkValue = getField(ecs, linkField);
+    const normalizedLinkField = getFieldKey(ecs, linkField);
+    const normalizedColumnId = getFieldKey(ecs, columnId);
+    const normalizedLink = getLinkColumnDefinition(
+      normalizedColumnId,
+      header?.type,
+      normalizedLinkField
+    );
+    return {
+      pageRowIndex,
+      link: normalizedLink,
+      eventId,
+      fieldFormat: header?.format || '',
+      fieldName: normalizedColumnId,
+      fieldType: header?.type || '',
+      value: parseValue(head(normalizedColumnId)),
+      values,
+      title,
+      linkValue: head<string>(normalizedLinkValue),
+    };
+  } else {
+    return {
+      pageRowIndex,
+      link,
+      eventId,
+      fieldFormat: header?.format || '',
+      fieldName: columnId,
+      fieldType: header?.type || '',
+      value,
+      values,
+      title,
+      linkValue: head<string>(linkValues),
+    };
+  }
+};
 
 export const cellActions: TGridCellAction[] = [
   ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
@@ -150,15 +212,7 @@ export const cellActions: TGridCellAction[] = [
         </>
       );
     },
-  ({
-      data,
-      pageSize,
-      timelineId,
-    }: {
-      data: TimelineNonEcsData[][];
-      pageSize: number;
-      timelineId: string;
-    }) =>
+  ({ data, pageSize }: { data: TimelineNonEcsData[][]; pageSize: number }) =>
     ({ rowIndex, columnId, Component }) => {
       const { timelines } = useKibanaServices();
 
@@ -187,14 +241,12 @@ export const cellActions: TGridCellAction[] = [
       );
     },
   ({
-    browserFields,
     data,
     ecsData,
     header,
     timelineId,
     pageSize,
   }: {
-    browserFields: BrowserFields;
     data: TimelineNonEcsData[][];
     ecsData: Ecs[];
     header?: ColumnHeaderOptions;
@@ -208,7 +260,6 @@ export const cellActions: TGridCellAction[] = [
         Component,
         closePopover,
       }: EuiDataGridColumnCellActionProps) => {
-        /* eslint-disable @typescript-eslint/no-shadow */
         const {
           pageRowIndex,
           link,
@@ -220,58 +271,7 @@ export const cellActions: TGridCellAction[] = [
           fieldFormat,
           fieldType,
           linkValue,
-        } = useMemo(() => {
-          const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
-          const ecs = ecsData[pageRowIndex];
-          const link = getLinkColumnDefinition(columnId, header?.type, header?.linkField);
-          const linkField = header?.linkField ? header?.linkField : link?.linkField;
-          const linkValues = header && getOr([], linkField ?? '', ecs);
-          const eventId = header && get('_id' ?? '', ecs);
-          const values = getMappedNonEcsValue({
-            data: data[pageRowIndex],
-            fieldName: columnId,
-          });
-          const value = parseValue(head(values));
-          const title = values && values.length > 1 ? `${link?.label}: ${value}` : link?.label;
-          // if linkField is defined but link values is empty, it's possible we are trying to look for a column definition for an old event set
-          if (linkField !== undefined && linkValues.length === 0 && values !== undefined) {
-            const { field: normalizedLinkField, value: normalizedLinkValue } = getField(
-              ecs,
-              linkField
-            );
-            const { field: normalizedColumnId } = getField(ecs, columnId);
-            const normalizedLink = getLinkColumnDefinition(
-              normalizedColumnId,
-              header?.type,
-              normalizedLinkField
-            );
-            return {
-              pageRowIndex,
-              link: normalizedLink,
-              eventId,
-              fieldFormat: header?.format || '',
-              fieldName: normalizedColumnId,
-              fieldType: header?.type || '',
-              value: parseValue(head(normalizedColumnId)),
-              values,
-              title,
-              linkValue: head(normalizedLinkValue),
-            };
-          } else {
-            return {
-              pageRowIndex,
-              link,
-              eventId,
-              fieldFormat: header?.format || '',
-              fieldName: columnId,
-              fieldType: header?.type || '',
-              value,
-              values,
-              title,
-              linkValue: head(linkValues),
-            };
-          }
-        }, [columnId, rowIndex]);
+        } = useFormattedFieldProps({ rowIndex, pageSize, ecsData, columnId, header, data });
 
         const showEmpty = useMemo(() => {
           const hasLink = link !== undefined && values && !isEmpty(value);
