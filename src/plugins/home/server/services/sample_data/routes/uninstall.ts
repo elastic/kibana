@@ -10,9 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from 'src/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { SampleDataUsageTracker } from '../usage/usage';
-import { getUniqueObjectTypes } from '../lib/utils';
-import { getSavedObjectsClient } from './utils';
-import { SampleDataInstaller } from '../sample_data_installer';
+import { getSampleDataInstaller } from './utils';
 import { SampleDataInstallError } from '../errors';
 
 export function createUninstallRoute(
@@ -34,17 +32,11 @@ export function createUninstallRoute(
         return response.notFound();
       }
 
-      const { getImporter, client: soClient } = context.core.savedObjects;
-      const objectTypes = getUniqueObjectTypes(sampleDataset.savedObjects);
-      const savedObjectsClient = getSavedObjectsClient(context, objectTypes);
-      const soImporter = getImporter(savedObjectsClient);
-
-      const sampleDataInstaller = new SampleDataInstaller({
-        esClient: context.core.elasticsearch.client,
-        soImporter,
-        soClient,
-        logger,
+      const sampleDataInstaller = getSampleDataInstaller({
+        datasetId: sampleDataset.id,
         sampleDatasets,
+        logger,
+        context,
       });
 
       try {

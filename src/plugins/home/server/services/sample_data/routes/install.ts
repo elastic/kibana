@@ -10,9 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { IRouter, Logger } from 'src/core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { SampleDataUsageTracker } from '../usage/usage';
-import { getSavedObjectsClient } from './utils';
-import { getUniqueObjectTypes } from '../lib/utils';
-import { SampleDataInstaller } from '../sample_data_installer';
+import { getSampleDataInstaller } from './utils';
 import { SampleDataInstallError } from '../errors';
 
 export function createInstallRoute(
@@ -36,24 +34,20 @@ export function createInstallRoute(
       if (!sampleDataset) {
         return res.notFound();
       }
+
       //  @ts-ignore Custom query validation used
       const now = query.now ? new Date(query.now) : new Date();
 
-      const { getImporter, client: soClient } = context.core.savedObjects;
-      const objectTypes = getUniqueObjectTypes(sampleDataset.savedObjects);
-      const savedObjectsClient = getSavedObjectsClient(context, objectTypes);
-      const soImporter = getImporter(savedObjectsClient);
-
-      const sampleDataInstaller = new SampleDataInstaller({
-        esClient: context.core.elasticsearch.client,
-        soImporter,
-        soClient,
-        logger,
+      const sampleDataInstaller = getSampleDataInstaller({
+        datasetId: sampleDataset.id,
         sampleDatasets,
+        logger,
+        context,
       });
 
       try {
         const installResult = await sampleDataInstaller.install(params.id, now);
+        // track the usage operation in a non-blocking way
         usageTracker.addInstall(params.id);
         return res.ok({
           body: {
