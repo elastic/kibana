@@ -38,9 +38,6 @@ async function fetchIndicesCall(
     const indexData = indices[indexName];
     const indexStats = indicesStats[indexName];
     const aliases = Object.keys(indexData.aliases!);
-    const primaryShardsNumber = indexStats?.primaries?.shard_stats?.total_count ?? 0;
-    const replicaShardsNumber =
-      indexStats?.total?.shard_stats?.total_count ?? 0 - primaryShardsNumber;
     return {
       // @ts-expect-error new property https://github.com/elastic/elasticsearch-specification/issues/1253
       health: indexStats?.health,
@@ -48,8 +45,8 @@ async function fetchIndicesCall(
       status: indexStats?.status,
       name: indexName,
       uuid: indexStats.uuid!,
-      primary: primaryShardsNumber,
-      replica: replicaShardsNumber,
+      primary: indexData.settings?.number_of_shards,
+      replica: indexData.settings?.number_of_replicas,
       documents: indexStats?.total?.docs?.count ?? 0,
       size: new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString(),
       // @ts-expect-error

@@ -56,8 +56,8 @@ export interface Index {
   status: string;
   name: string;
   uuid: string;
-  primary: number;
-  replica: number;
+  primary?: number | string;
+  replica?: number | string;
   documents: number;
   size: string;
   isFrozen: boolean;
