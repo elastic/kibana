@@ -56,7 +56,7 @@ class EsInitializationSteps {
       this.esContext.logger.error(`error getting existing index templates - ${err.message}`);
     }
 
-    asyncForEach(Object.keys(indexTemplates), async (indexTemplateName: string) => {
+    await asyncForEach(Object.keys(indexTemplates), async (indexTemplateName: string) => {
       try {
         const hidden: string | boolean = indexTemplates[indexTemplateName]?.settings?.index?.hidden;
         // Check to see if this index template is hidden
@@ -93,7 +93,7 @@ class EsInitializationSteps {
       // should not block the rest of initialization, log the error and move on
       this.esContext.logger.error(`error getting existing indices - ${err.message}`);
     }
-    asyncForEach(Object.keys(indices), async (indexName: string) => {
+    await asyncForEach(Object.keys(indices), async (indexName: string) => {
       try {
         const hidden: string | boolean | undefined = indices[indexName]?.settings?.index?.hidden;
 
@@ -125,7 +125,7 @@ class EsInitializationSteps {
       // should not block the rest of initialization, log the error and move on
       this.esContext.logger.error(`error getting existing index aliases - ${err.message}`);
     }
-    asyncForEach(Object.keys(indexAliases), async (indexName: string) => {
+    await asyncForEach(Object.keys(indexAliases), async (indexName: string) => {
       try {
         const aliases = indexAliases[indexName]?.aliases;
         const hasNotHiddenAliases: boolean = Object.keys(aliases).some((alias: string) => {
