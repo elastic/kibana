@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import type { IndexPattern } from 'src/plugins/data/common';
+import type { DataView } from 'src/plugins/data/common';
 import { mountWithIntl } from '@kbn/test/jest';
 import { DocViewerSource } from './source';
 import * as hooks from '../../../../utils/use_es_doc_search';
@@ -27,7 +27,7 @@ const mockIndexPattern = {
 const getMock = jest.fn(() => Promise.resolve(mockIndexPattern));
 const mockIndexPatternService = {
   get: getMock,
-} as unknown as IndexPattern;
+} as unknown as DataView;
 
 (getServices as jest.Mock).mockImplementation(() => ({
   uiSettings: {

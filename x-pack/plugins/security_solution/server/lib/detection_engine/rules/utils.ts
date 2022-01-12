@@ -98,7 +98,7 @@ export interface UpdateProperties {
   timelineTitle: TimelineTitleOrUndefined;
   meta: MetaOrUndefined;
   machineLearningJobId: MachineLearningJobIdOrUndefined;
-  filters: PartialFilter[];
+  filters: PartialFilter[] | undefined;
   index: IndexOrUndefined;
   interval: IntervalOrUndefined;
   maxSignals: MaxSignalsOrUndefined;

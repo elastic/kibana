@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-
 import { CaseResponse, CasesByAlertId } from '../../../../plugins/cases/common/api';
 
 /**

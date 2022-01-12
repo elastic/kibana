@@ -166,6 +166,7 @@ export const horizontalBarVisTypeDefinition = {
           '!sampler',
           '!diversified_sampler',
           '!multi_terms',
+          '!significant_text',
         ],
       },
       {
@@ -183,6 +184,7 @@ export const horizontalBarVisTypeDefinition = {
           '!sampler',
           '!diversified_sampler',
           '!multi_terms',
+          '!significant_text',
         ],
       },
       {
@@ -200,6 +202,7 @@ export const horizontalBarVisTypeDefinition = {
           '!sampler',
           '!diversified_sampler',
           '!multi_terms',
+          '!significant_text',
         ],
       },
     ],
