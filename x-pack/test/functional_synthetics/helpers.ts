@@ -7,7 +7,7 @@
 
 import { Context } from 'mocha';
 import { ToolingLog } from '@kbn/dev-utils';
-import { FtrProviderContext } from '../api_integration/ftr_provider_context';
+import { FtrProviderContext } from './ftr_provider_context';
 
 export function skipIfNoDockerRegistry(providerContext: FtrProviderContext) {
   const { getService } = providerContext;
