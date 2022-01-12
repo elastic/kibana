@@ -28,7 +28,6 @@ import {
   EuiErrorBoundary,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import semverGt from 'semver/functions/gt';
 
 import type { AgentPolicy, PackageInfo, UpdatePackagePolicy, PackagePolicy } from '../../../types';
 import {
@@ -65,6 +64,8 @@ import type {
 } from '../../../../../../common/types/rest_spec';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo, storedPackagePoliciesToAgentInputs } from '../../../services';
+
+import { hasUpgradeAvailable } from './utils';
 
 export const EditPackagePolicyPage = memo(() => {
   const {
@@ -155,25 +156,24 @@ export const EditPackagePolicyForm = memo<{
           setAgentPolicy(agentPolicyData.item);
         }
 
-        const { data: upgradePackagePolicyDryRunData } = await sendUpgradePackagePolicyDryRun([
-          packagePolicyId,
-        ]);
+        const { data: upgradePackagePolicyDryRunData, error: upgradePackagePolicyDryRunError } =
+          await sendUpgradePackagePolicyDryRun([packagePolicyId]);
 
-        const hasUpgradeAvailable =
-          upgradePackagePolicyDryRunData &&
-          upgradePackagePolicyDryRunData[0].diff &&
-          semverGt(
-            upgradePackagePolicyDryRunData[0].diff[1].package?.version ?? '',
-            upgradePackagePolicyDryRunData[0].diff[0].package?.version ?? ''
-          );
+        if (upgradePackagePolicyDryRunError) {
+          throw upgradePackagePolicyDryRunError;
+        }
+
+        const hasUpgrade = upgradePackagePolicyDryRunData
+          ? hasUpgradeAvailable(upgradePackagePolicyDryRunData)
+          : false;
 
         // If the dry run data doesn't indicate a difference in version numbers, flip the form back
         // to its non-upgrade state, even if we were initially set to the upgrade view
-        if (!hasUpgradeAvailable) {
+        if (!hasUpgrade) {
           setIsUpgrade(false);
         }
 
-        if (upgradePackagePolicyDryRunData && hasUpgradeAvailable) {
+        if (upgradePackagePolicyDryRunData && hasUpgrade) {
           setDryRunData(upgradePackagePolicyDryRunData);
         }
 
