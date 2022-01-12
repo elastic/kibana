@@ -45,6 +45,7 @@ export class AnomalySource implements IVectorSource {
   constructor(sourceDescriptor: Partial<AnomalySourceDescriptor>, adapters?: Adapters) {
     this._descriptor = AnomalySource.createDescriptor(sourceDescriptor);
   }
+
   // TODO: implement Time filter functionality and query awareness
   async getGeoJsonWithMeta(
     layerName: string,

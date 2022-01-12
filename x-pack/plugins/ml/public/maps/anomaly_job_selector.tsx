@@ -20,6 +20,7 @@ interface State {
   jobId?: string;
   jobIdList?: Array<EuiComboBoxOptionOption<string>>;
 }
+
 export class AnomalyJobSelector extends Component<Props, State> {
   private _isMounted: boolean = false;
 
