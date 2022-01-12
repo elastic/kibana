@@ -110,10 +110,48 @@ describe('CaseViewMetrics', () => {
     expect(getAllByText('0')).toHaveLength(basicCaseNumericValueFeatures.length);
   });
 
-  it('should render metrics with default value of a dash', () => {
+  it('should render status metrics with default value of a dash', () => {
     const { getAllByText } = renderCaseMetrics({ metrics: {} });
     // \u2014 is the unicode for a long dash
     expect(getAllByText('\u2014')).toHaveLength(3);
+  });
+
+  it('should render open to close duration with the icon when it is reopened', () => {
+    const { getByText, getByTestId } = renderCaseMetrics({
+      metrics: {
+        lifespan: {
+          creationDate: new Date(0).toISOString(),
+          closeDate: new Date(2).toISOString(),
+          statusInfo: {
+            inProgressDuration: 20,
+            openDuration: 10,
+            reopenDates: [new Date(1).toISOString()],
+          },
+        },
+      },
+    });
+
+    expect(getByText('2 milliseconds (reopened)')).toBeInTheDocument();
+    expect(getByTestId('case-metrics-lifespan-reopen-icon')).toBeInTheDocument();
+  });
+
+  it('should not render open to close duration with the icon when it is not reopened', () => {
+    const { getByText, queryByTestId } = renderCaseMetrics({
+      metrics: {
+        lifespan: {
+          creationDate: new Date(0).toISOString(),
+          closeDate: new Date(2).toISOString(),
+          statusInfo: {
+            inProgressDuration: 20,
+            openDuration: 10,
+            reopenDates: [],
+          },
+        },
+      },
+    });
+
+    expect(getByText('2 milliseconds')).toBeInTheDocument();
+    expect(queryByTestId('case-metrics-lifespan-reopen-icon')).not.toBeInTheDocument();
   });
 
   it('should prevent negative value for isolateHost actions', () => {

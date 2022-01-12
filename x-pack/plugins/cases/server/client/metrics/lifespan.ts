@@ -81,7 +81,7 @@ function isDateValid(date: Date): boolean {
 
 interface StatusCalculations {
   durations: Map<CaseStatuses, number>;
-  numberOfReopens: number;
+  reopenDates: string[];
   lastStatus: CaseStatuses;
   lastStatusChangeTimestamp: Date;
 }
@@ -98,7 +98,7 @@ export function getStatusInfo(
         return acc;
       }
 
-      const { durations, lastStatus, lastStatusChangeTimestamp, numberOfReopens } = acc;
+      const { durations, lastStatus, lastStatusChangeTimestamp, reopenDates } = acc;
 
       const attributes = userAction.attributes;
       const newStatus = attributes.payload.status;
@@ -111,7 +111,9 @@ export function getStatusInfo(
         }),
         lastStatus: newStatus,
         lastStatusChangeTimestamp: newStatusChangeTimestamp,
-        numberOfReopens: isReopen(newStatus, lastStatus) ? numberOfReopens + 1 : numberOfReopens,
+        reopenDates: isReopen(newStatus, lastStatus)
+          ? [...reopenDates, newStatusChangeTimestamp.toISOString()]
+          : reopenDates,
       };
     },
     {
@@ -119,7 +121,7 @@ export function getStatusInfo(
         [CaseStatuses.open, 0],
         [CaseStatuses['in-progress'], 0],
       ]),
-      numberOfReopens: 0,
+      reopenDates: [],
       lastStatus: CaseStatuses.open,
       lastStatusChangeTimestamp: caseOpenTimestamp,
     }
@@ -135,7 +137,7 @@ export function getStatusInfo(
   return {
     openDuration: accumulatedDurations.get(CaseStatuses.open) ?? 0,
     inProgressDuration: accumulatedDurations.get(CaseStatuses['in-progress']) ?? 0,
-    numberOfReopens: accStatusInfo.numberOfReopens,
+    reopenDates: accStatusInfo.reopenDates,
   };
 }
 

@@ -42,7 +42,6 @@ describe('CaseActionBar', () => {
     );
 
     expect(wrapper.find(`[data-test-subj="case-view-status"]`).exists()).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="sync-alerts-switch"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="case-refresh"]`).exists()).toBeTruthy();
@@ -58,18 +57,6 @@ describe('CaseActionBar', () => {
 
     expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).first().text()).toBe(
       'Open'
-    );
-  });
-
-  it('it should show the correct date', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CaseActionBar {...defaultProps} />
-      </TestProviders>
-    );
-
-    expect(wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).prop('value')).toBe(
-      basicCase.createdAt
     );
   });
 

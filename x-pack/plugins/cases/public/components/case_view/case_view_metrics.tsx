@@ -7,16 +7,13 @@
 
 import React, { useMemo } from 'react';
 import prettyMilliseconds from 'pretty-ms';
-import styled from 'styled-components';
 import {
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiIconTip,
 } from '@elastic/eui';
 import { CaseMetrics, CaseMetricsFeature } from '../../../common/ui';
 import {
@@ -26,13 +23,16 @@ import {
   CASE_IN_PROGRESS_DURATION,
   CASE_OPEN_DURATION,
   CASE_OPEN_TO_CLOSE_DURATION,
+  CASE_REOPENED,
+  CASE_REOPENED_ON,
   ISOLATED_HOSTS_METRIC,
   TOTAL_ALERTS_METRIC,
   TOTAL_CONNECTORS_METRIC,
 } from './translations';
 import { getMaybeDate } from '../formatted_date/maybe_date';
-import { FormattedRelativePreferenceDate } from '../formatted_date';
+import { FormattedDate, FormattedRelativePreferenceDate } from '../formatted_date';
 import { getEmptyTagValue } from '../empty_value';
+import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
 
 const CaseStatusMetrics: React.FC<{ lifespanMetrics?: CaseMetrics['lifespan'] }> = React.memo(
   ({ lifespanMetrics }) => {
@@ -42,36 +42,54 @@ const CaseStatusMetrics: React.FC<{ lifespanMetrics?: CaseMetrics['lifespan'] }>
 
     const items = [
       {
-        title: CASE_CREATED,
-        value: getCaseCreationDate(lifespanMetrics.creationDate),
+        key: CASE_CREATED,
+        component: (
+          <CaseStatusMetricsItem
+            title={CASE_CREATED}
+            value={getCaseCreationDate(lifespanMetrics.creationDate)}
+          />
+        ),
         dataTestSubject: 'case-metrics-lifespan-item-creation-date',
       },
       {
-        title: CASE_IN_PROGRESS_DURATION,
-        value: getInProgressDuration(lifespanMetrics.statusInfo.inProgressDuration),
+        key: CASE_IN_PROGRESS_DURATION,
+        component: (
+          <CaseStatusMetricsItem
+            title={CASE_IN_PROGRESS_DURATION}
+            value={getInProgressDuration(lifespanMetrics.statusInfo.inProgressDuration)}
+          />
+        ),
         dataTestSubject: 'case-metrics-lifespan-item-inProgress-duration',
       },
       {
-        title: CASE_OPEN_DURATION,
-        value: formatDuration(lifespanMetrics.statusInfo.openDuration),
+        key: CASE_OPEN_DURATION,
+        component: (
+          <CaseStatusMetricsItem
+            title={CASE_OPEN_DURATION}
+            value={formatDuration(lifespanMetrics.statusInfo.openDuration)}
+          />
+        ),
         dataTestSubject: 'case-metrics-lifespan-item-open-duration',
       },
       {
-        title: CASE_OPEN_TO_CLOSE_DURATION,
-        value: getOpenCloseDuration(lifespanMetrics.creationDate, lifespanMetrics.closeDate),
+        key: CASE_OPEN_TO_CLOSE_DURATION,
+        component: (
+          <CaseStatusMetricsOpenCloseDuration
+            title={CASE_OPEN_TO_CLOSE_DURATION}
+            value={getOpenCloseDuration(lifespanMetrics.creationDate, lifespanMetrics.closeDate)}
+            reopens={lifespanMetrics.statusInfo.reopenDates}
+          />
+        ),
         dataTestSubject: 'case-metrics-lifespan-item-open-to-close-duration',
       },
     ];
 
     return (
-      <EuiFlexItem grow={4}>
+      <EuiFlexItem grow={3}>
         <EuiFlexGrid columns={2} gutterSize="s" responsive={false}>
-          {items.map(({ title, value, dataTestSubject }) => (
-            <EuiFlexItem data-test-subj={dataTestSubject} key={title}>
-              <EuiDescriptionList compressed>
-                <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>{value}</EuiDescriptionListDescription>
-              </EuiDescriptionList>
+          {items.map(({ component, dataTestSubject, key }) => (
+            <EuiFlexItem data-test-subj={dataTestSubject} key={key}>
+              {component}
             </EuiFlexItem>
           ))}
         </EuiFlexGrid>
@@ -95,10 +113,6 @@ const getCaseCreationDate = (date: string) => {
   );
 };
 
-const formatDuration = (milliseconds: number) => {
-  return prettyMilliseconds(milliseconds, { compact: true, verbose: true });
-};
-
 const getInProgressDuration = (duration: number) => {
   if (duration <= 0) {
     return getEmptyTagValue();
@@ -107,22 +121,107 @@ const getInProgressDuration = (duration: number) => {
   return formatDuration(duration);
 };
 
-const getOpenCloseDuration = (openDate: string, closeDate: string | null) => {
+const formatDuration = (milliseconds: number) => {
+  return prettyMilliseconds(milliseconds, { compact: true, verbose: true });
+};
+
+const getOpenCloseDuration = (openDate: string, closeDate: string | null): string | undefined => {
   if (closeDate == null) {
-    return getEmptyTagValue();
+    return;
   }
 
   const openDateObject = getMaybeDate(openDate);
   const closeDateObject = getMaybeDate(closeDate);
 
   if (!openDateObject.isValid() || !closeDateObject.isValid()) {
-    return getEmptyTagValue();
+    return;
   }
 
   return formatDuration(closeDateObject.diff(openDateObject));
 };
 
-const MetricValue = styled(EuiFlexItem)`
+const Title = euiStyled(EuiFlexItem)`
+  font-size: ${({ theme }) => theme.eui.euiSizeM};
+  font-weight: bold;
+`;
+
+const CaseStatusMetricsItem: React.FC<{
+  title: string;
+  value: JSX.Element | string;
+}> = React.memo(({ title, value }) => (
+  <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+    <Title>{title}</Title>
+    <EuiFlexItem>{value}</EuiFlexItem>
+  </EuiFlexGroup>
+));
+CaseStatusMetricsItem.displayName = 'CaseStatusMetricsItem';
+
+const CaseStatusMetricsOpenCloseDuration: React.FC<{
+  title: string;
+  value?: string;
+  reopens: string[];
+}> = React.memo(({ title, value, reopens }) => {
+  const valueText = getOpenCloseDurationText(value, reopens);
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+      <Title>{title}</Title>
+      {value != null && caseWasReopened(reopens) ? (
+        <ValueWithExplanationIcon value={valueText} explanationValues={reopens} />
+      ) : (
+        <EuiFlexItem>{valueText}</EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
+});
+CaseStatusMetricsOpenCloseDuration.displayName = 'OpenCloseDuration';
+
+const getOpenCloseDurationText = (value: string | undefined, reopens: string[]) => {
+  if (value == null) {
+    return getEmptyTagValue();
+  } else if (reopens.length > 0) {
+    return `${value} ${CASE_REOPENED}`;
+  }
+
+  return value;
+};
+
+const caseWasReopened = (reopens: string[]) => {
+  return reopens.length > 0;
+};
+
+const ValueWithExplanationIcon: React.FC<{
+  value: string | JSX.Element;
+  explanationValues: string[];
+}> = React.memo(({ value, explanationValues }) => {
+  const content = (
+    <>
+      {CASE_REOPENED_ON}
+      {explanationValues.map((explanationValue, index) => (
+        <React.Fragment key={`explanation-value-${index}`}>
+          <FormattedDate
+            data-test-subj={`case-metrics-lifespan-reopen-${index}`}
+            value={explanationValue}
+          />{' '}
+        </React.Fragment>
+      ))}
+    </>
+  );
+
+  return (
+    <EuiFlexItem data-test-subj="case-metrics-lifespan-reopen-icon">
+      <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>{value}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip content={content} position="right" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+});
+ValueWithExplanationIcon.displayName = 'ValueWithExplanationIcon';
+
+const MetricValue = euiStyled(EuiFlexItem)`
   font-size: ${({ theme }) => theme.eui.euiSizeL};
   font-weight: bold;
 `;
@@ -236,7 +335,7 @@ const useGetLifespanMetrics = (
     const lifespan = metrics?.lifespan ?? {
       closeDate: '',
       creationDate: '',
-      statusInfo: { inProgressDuration: 0, numberOfReopens: 0, openDuration: 0 },
+      statusInfo: { inProgressDuration: 0, reopenDates: [], openDuration: 0 },
     };
 
     if (!features.includes('lifespan')) {

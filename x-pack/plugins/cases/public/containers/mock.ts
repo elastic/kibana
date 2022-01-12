@@ -212,7 +212,7 @@ export const basicCaseMetrics: CaseMetrics = {
     statusInfo: {
       inProgressDuration: 20,
       openDuration: 10,
-      numberOfReopens: 1,
+      reopenDates: [],
     },
   },
 };

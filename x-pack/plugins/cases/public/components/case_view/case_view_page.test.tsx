@@ -139,10 +139,6 @@ describe('CaseViewPage', () => {
     );
 
     expect(
-      wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).first().prop('value')
-    ).toEqual(data.createdAt);
-
-    expect(
       wrapper
         .find(`[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]`)
         .first()
@@ -178,9 +174,6 @@ describe('CaseViewPage', () => {
     );
 
     await waitFor(() => {
-      expect(
-        wrapper.find(`[data-test-subj="case-action-bar-status-date"]`).first().prop('value')
-      ).toEqual(basicCaseClosed.closedAt);
       expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).first().text()).toEqual(
         'Closed'
       );

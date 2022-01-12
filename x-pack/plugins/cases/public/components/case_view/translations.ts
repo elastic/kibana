@@ -189,3 +189,11 @@ export const CASE_OPEN_TO_CLOSE_DURATION = i18n.translate(
     defaultMessage: 'Duration from case creation to close',
   }
 );
+
+export const CASE_REOPENED = i18n.translate('xpack.cases.caseView.metrics.lifespan.reopened', {
+  defaultMessage: '(reopened)',
+});
+
+export const CASE_REOPENED_ON = i18n.translate('xpack.cases.caseView.metrics.lifespan.reopenedOn', {
+  defaultMessage: 'Case was reopened on ',
+});
