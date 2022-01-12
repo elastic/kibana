@@ -12,7 +12,7 @@ import { ReportingCore } from '../../';
 import { ILM_POLICY_NAME, REPORTING_SYSTEM_INDEX } from '../../../common/constants';
 import { JobStatus, ReportOutput, ReportSource } from '../../../common/types';
 import { ReportTaskParams } from '../tasks';
-import { Report, ReportDocument, SavedReport } from './';
+import { IReport, Report, ReportDocument, SavedReport } from './';
 import { IlmPolicyManager } from './ilm_policy_manager';
 import { indexTimestamp } from './index_timestamp';
 import { mapping } from './mapping';
@@ -216,8 +216,8 @@ export class ReportingStore {
 
       return report as SavedReport;
     } catch (err) {
-      this.logger.error(`Error in adding a report!`);
-      this.logger.error(err);
+      this.reportingCore.getEventLogger(report).logError(err);
+      this.logError(`Error in adding a report!`, err, report);
       throw err;
     }
   }
@@ -266,6 +266,7 @@ export class ReportingStore {
           `[id: ${taskJson.id}] [index: ${taskJson.index}]`
       );
       this.logger.error(err);
+      this.reportingCore.getEventLogger({ _id: taskJson.id } as IReport).logError(err);
       throw err;
     }
   }
@@ -293,16 +294,19 @@ export class ReportingStore {
         })
       ).body;
     } catch (err) {
-      this.logger.error(
-        `Error in updating status to processing! Report: ` + jobDebugMessage(report)
-      );
-      this.logger.error(err);
+      this.logError(`Error in updating status to processing! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
     }
 
     this.reportingCore.getEventLogger(report).logClaimTask();
 
     return body;
+  }
+
+  private logError(message: string, err: Error, report: Report) {
+    this.logger.error(message);
+    this.logger.error(err);
+    this.reportingCore.getEventLogger(report).logError(err);
   }
 
   public async setReportFailed(
@@ -328,8 +332,7 @@ export class ReportingStore {
         })
       ).body;
     } catch (err) {
-      this.logger.error(`Error in updating status to failed! Report: ` + jobDebugMessage(report));
-      this.logger.error(err);
+      this.logError(`Error in updating status to failed! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
     }
 
@@ -366,8 +369,7 @@ export class ReportingStore {
         })
       ).body;
     } catch (err) {
-      this.logger.error(`Error in updating status to complete! Report: ` + jobDebugMessage(report));
-      this.logger.error(err);
+      this.logError(`Error in updating status to complete! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
     }
 
@@ -396,10 +398,7 @@ export class ReportingStore {
         })
       ).body;
     } catch (err) {
-      this.logger.error(
-        `Error in clearing expiration and status for retry! Report: ` + jobDebugMessage(report)
-      );
-      this.logger.error(err);
+      this.logError(`Error in clearing expiration and status for retry! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
     }
 
