@@ -9,10 +9,10 @@ import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/discover_grid';
-import { getServices } from '../kibana_services';
-import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
-import { ElasticSearchHit } from '../types';
-import { KibanaContextProvider } from '../../../kibana_react/public';
+import { KibanaContextProvider } from '../../../../kibana_react/public';
+import { ElasticSearchHit } from '../doc_views/doc_views_types';
+import { TotalDocuments } from '../apps/main/components/total_documents/total_documents';
+import { getServices } from '../../kibana_services';
 
 export interface DiscoverGridEmbeddableProps extends DiscoverGridProps {
   totalHitCount: number;
