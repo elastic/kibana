@@ -1,8 +1,35 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Expandable Host Component ExpandableHostDetails: rendering it should render the HostOverview of the ExpandableHostDetails 1`] = `
+exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should render the Host Details view in the Details Panel when the panelView is hostDetail and the hostName is set 1`] = `
 .c3 {
   color: #535966;
+}
+
+.c2 dt {
+  font-size: 12px !important;
+}
+
+.c2 dd {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.c2 dd > div {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.c1 {
+  position: relative;
+}
+
+.c1 .euiButtonIcon {
+  position: absolute;
+  right: 12px;
+  top: 6px;
+  z-index: 2;
 }
 
 .c0 {
@@ -33,33 +60,6 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
   opacity: 1;
 }
 
-.c2 dt {
-  font-size: 12px !important;
-}
-
-.c2 dd {
-  width: -webkit-fit-content;
-  width: -moz-fit-content;
-  width: fit-content;
-}
-
-.c2 dd > div {
-  width: -webkit-fit-content;
-  width: -moz-fit-content;
-  width: fit-content;
-}
-
-.c1 {
-  position: relative;
-}
-
-.c1 .euiButtonIcon {
-  position: absolute;
-  right: 12px;
-  top: 6px;
-  z-index: 2;
-}
-
 .c4 {
   padding: 16px;
   background: rgba(250,251,253,0.9);
@@ -76,8 +76,9 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
 }
 
 <ExpandableHostDetails
-  contextID="text-context"
-  hostName="testHostName"
+  contextID="test-query"
+  hostName="woohoo!"
+  isDraggable={false}
 >
   <AnomalyTableProvider
     criteriaFields={Array []}
@@ -87,7 +88,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
   >
     <HostOverview
       anomaliesData={null}
-      contextID="text-context"
+      contextID="test-query"
       data={Object {}}
       docValueFields={
         Array [
@@ -102,7 +103,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
         ]
       }
       endDate="2020-07-08T08:20:18.966Z"
-      hostName="testHostName"
+      hostName="woohoo!"
       id="hostsDetailsQuery"
       indexNames={
         Array [
@@ -325,7 +326,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                           Object {
                             "description": <Memo(DefaultFieldRenderer)
                               attrName="host.ip"
-                              idPrefix="host-overview-text-context"
+                              idPrefix="host-overview-test-query"
                               isDraggable={false}
                               render={[Function]}
                               rowItems={Array []}
@@ -335,7 +336,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                           Object {
                             "description": <Memo(DefaultFieldRenderer)
                               attrName="host.mac"
-                              idPrefix="host-overview-text-context"
+                              idPrefix="host-overview-test-query"
                               isDraggable={false}
                               rowItems={Array []}
                             />,
@@ -344,7 +345,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                           Object {
                             "description": <Memo(DefaultFieldRenderer)
                               attrName="host.os.platform"
-                              idPrefix="host-overview-text-context"
+                              idPrefix="host-overview-test-query"
                               isDraggable={false}
                               rowItems={Array []}
                             />,
@@ -366,7 +367,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 Object {
                                   "description": <Memo(DefaultFieldRenderer)
                                     attrName="host.ip"
-                                    idPrefix="host-overview-text-context"
+                                    idPrefix="host-overview-test-query"
                                     isDraggable={false}
                                     render={[Function]}
                                     rowItems={Array []}
@@ -376,7 +377,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 Object {
                                   "description": <Memo(DefaultFieldRenderer)
                                     attrName="host.mac"
-                                    idPrefix="host-overview-text-context"
+                                    idPrefix="host-overview-test-query"
                                     isDraggable={false}
                                     rowItems={Array []}
                                   />,
@@ -385,7 +386,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 Object {
                                   "description": <Memo(DefaultFieldRenderer)
                                     attrName="host.os.platform"
-                                    idPrefix="host-overview-text-context"
+                                    idPrefix="host-overview-test-query"
                                     isDraggable={false}
                                     rowItems={Array []}
                                   />,
@@ -401,7 +402,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   Object {
                                     "description": <Memo(DefaultFieldRenderer)
                                       attrName="host.ip"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       render={[Function]}
                                       rowItems={Array []}
@@ -411,7 +412,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   Object {
                                     "description": <Memo(DefaultFieldRenderer)
                                       attrName="host.mac"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     />,
@@ -420,7 +421,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   Object {
                                     "description": <Memo(DefaultFieldRenderer)
                                       attrName="host.os.platform"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     />,
@@ -449,7 +450,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   >
                                     <DefaultFieldRenderer
                                       attrName="host.ip"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       render={[Function]}
                                       rowItems={Array []}
@@ -481,7 +482,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   >
                                     <DefaultFieldRenderer
                                       attrName="host.mac"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     >
@@ -512,7 +513,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   >
                                     <DefaultFieldRenderer
                                       attrName="host.os.platform"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     >
@@ -538,7 +539,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                           Object {
                             "description": <Memo(DefaultFieldRenderer)
                               attrName="host.os.name"
-                              idPrefix="host-overview-text-context"
+                              idPrefix="host-overview-test-query"
                               isDraggable={false}
                               rowItems={Array []}
                             />,
@@ -547,7 +548,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                           Object {
                             "description": <Memo(DefaultFieldRenderer)
                               attrName="host.os.family"
-                              idPrefix="host-overview-text-context"
+                              idPrefix="host-overview-test-query"
                               isDraggable={false}
                               rowItems={Array []}
                             />,
@@ -556,7 +557,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                           Object {
                             "description": <Memo(DefaultFieldRenderer)
                               attrName="host.os.version"
-                              idPrefix="host-overview-text-context"
+                              idPrefix="host-overview-test-query"
                               isDraggable={false}
                               rowItems={Array []}
                             />,
@@ -565,7 +566,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                           Object {
                             "description": <Memo(DefaultFieldRenderer)
                               attrName="host.architecture"
-                              idPrefix="host-overview-text-context"
+                              idPrefix="host-overview-test-query"
                               isDraggable={false}
                               rowItems={Array []}
                             />,
@@ -587,7 +588,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 Object {
                                   "description": <Memo(DefaultFieldRenderer)
                                     attrName="host.os.name"
-                                    idPrefix="host-overview-text-context"
+                                    idPrefix="host-overview-test-query"
                                     isDraggable={false}
                                     rowItems={Array []}
                                   />,
@@ -596,7 +597,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 Object {
                                   "description": <Memo(DefaultFieldRenderer)
                                     attrName="host.os.family"
-                                    idPrefix="host-overview-text-context"
+                                    idPrefix="host-overview-test-query"
                                     isDraggable={false}
                                     rowItems={Array []}
                                   />,
@@ -605,7 +606,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 Object {
                                   "description": <Memo(DefaultFieldRenderer)
                                     attrName="host.os.version"
-                                    idPrefix="host-overview-text-context"
+                                    idPrefix="host-overview-test-query"
                                     isDraggable={false}
                                     rowItems={Array []}
                                   />,
@@ -614,7 +615,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 Object {
                                   "description": <Memo(DefaultFieldRenderer)
                                     attrName="host.architecture"
-                                    idPrefix="host-overview-text-context"
+                                    idPrefix="host-overview-test-query"
                                     isDraggable={false}
                                     rowItems={Array []}
                                   />,
@@ -630,7 +631,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   Object {
                                     "description": <Memo(DefaultFieldRenderer)
                                       attrName="host.os.name"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     />,
@@ -639,7 +640,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   Object {
                                     "description": <Memo(DefaultFieldRenderer)
                                       attrName="host.os.family"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     />,
@@ -648,7 +649,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   Object {
                                     "description": <Memo(DefaultFieldRenderer)
                                       attrName="host.os.version"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     />,
@@ -657,7 +658,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   Object {
                                     "description": <Memo(DefaultFieldRenderer)
                                       attrName="host.architecture"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     />,
@@ -686,7 +687,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   >
                                     <DefaultFieldRenderer
                                       attrName="host.os.name"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     >
@@ -717,7 +718,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   >
                                     <DefaultFieldRenderer
                                       attrName="host.os.family"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     >
@@ -748,7 +749,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   >
                                     <DefaultFieldRenderer
                                       attrName="host.os.version"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     >
@@ -779,7 +780,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   >
                                     <DefaultFieldRenderer
                                       attrName="host.architecture"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     >
@@ -805,7 +806,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                           Object {
                             "description": <Memo(DefaultFieldRenderer)
                               attrName="cloud.provider"
-                              idPrefix="host-overview-text-context"
+                              idPrefix="host-overview-test-query"
                               isDraggable={false}
                               rowItems={Array []}
                             />,
@@ -814,7 +815,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                           Object {
                             "description": <Memo(DefaultFieldRenderer)
                               attrName="cloud.region"
-                              idPrefix="host-overview-text-context"
+                              idPrefix="host-overview-test-query"
                               isDraggable={false}
                               rowItems={Array []}
                             />,
@@ -823,7 +824,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                           Object {
                             "description": <Memo(DefaultFieldRenderer)
                               attrName="cloud.instance.id"
-                              idPrefix="host-overview-text-context"
+                              idPrefix="host-overview-test-query"
                               isDraggable={false}
                               rowItems={Array []}
                             />,
@@ -832,7 +833,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                           Object {
                             "description": <Memo(DefaultFieldRenderer)
                               attrName="cloud.machine.type"
-                              idPrefix="host-overview-text-context"
+                              idPrefix="host-overview-test-query"
                               isDraggable={false}
                               rowItems={Array []}
                             />,
@@ -854,7 +855,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 Object {
                                   "description": <Memo(DefaultFieldRenderer)
                                     attrName="cloud.provider"
-                                    idPrefix="host-overview-text-context"
+                                    idPrefix="host-overview-test-query"
                                     isDraggable={false}
                                     rowItems={Array []}
                                   />,
@@ -863,7 +864,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 Object {
                                   "description": <Memo(DefaultFieldRenderer)
                                     attrName="cloud.region"
-                                    idPrefix="host-overview-text-context"
+                                    idPrefix="host-overview-test-query"
                                     isDraggable={false}
                                     rowItems={Array []}
                                   />,
@@ -872,7 +873,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 Object {
                                   "description": <Memo(DefaultFieldRenderer)
                                     attrName="cloud.instance.id"
-                                    idPrefix="host-overview-text-context"
+                                    idPrefix="host-overview-test-query"
                                     isDraggable={false}
                                     rowItems={Array []}
                                   />,
@@ -881,7 +882,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                 Object {
                                   "description": <Memo(DefaultFieldRenderer)
                                     attrName="cloud.machine.type"
-                                    idPrefix="host-overview-text-context"
+                                    idPrefix="host-overview-test-query"
                                     isDraggable={false}
                                     rowItems={Array []}
                                   />,
@@ -897,7 +898,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   Object {
                                     "description": <Memo(DefaultFieldRenderer)
                                       attrName="cloud.provider"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     />,
@@ -906,7 +907,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   Object {
                                     "description": <Memo(DefaultFieldRenderer)
                                       attrName="cloud.region"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     />,
@@ -915,7 +916,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   Object {
                                     "description": <Memo(DefaultFieldRenderer)
                                       attrName="cloud.instance.id"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     />,
@@ -924,7 +925,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   Object {
                                     "description": <Memo(DefaultFieldRenderer)
                                       attrName="cloud.machine.type"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     />,
@@ -953,7 +954,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   >
                                     <DefaultFieldRenderer
                                       attrName="cloud.provider"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     >
@@ -984,7 +985,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   >
                                     <DefaultFieldRenderer
                                       attrName="cloud.region"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     >
@@ -1015,7 +1016,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   >
                                     <DefaultFieldRenderer
                                       attrName="cloud.instance.id"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     >
@@ -1046,7 +1047,7 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   >
                                     <DefaultFieldRenderer
                                       attrName="cloud.machine.type"
-                                      idPrefix="host-overview-text-context"
+                                      idPrefix="host-overview-test-query"
                                       isDraggable={false}
                                       rowItems={Array []}
                                     >
