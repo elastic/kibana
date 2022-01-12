@@ -768,12 +768,6 @@ export class JobCreator {
     this._detectors = this._job_config.analysis_config.detectors;
     this._influencers = this._job_config.analysis_config.influencers!;
 
-    // 'Managed' means job is preconfigured and deployed by other solutions
-    // we should not clone the setting
-    if (this._job_config.custom_settings?.managed === true) {
-      this._job_config.custom_settings.managed = false;
-    }
-
     if (this._job_config.groups === undefined) {
       this._job_config.groups = [];
     }
