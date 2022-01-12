@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ToastsApi } from 'kibana/public';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Rule, AlertSummary, RuleType } from '../../../../types';
 import {
   ComponentOpts as AlertApis,
@@ -37,11 +37,30 @@ export const AlertsRoute: React.FunctionComponent<WithAlertSummaryProps> = ({
 
   const [alertSummary, setAlertSummary] = useState<AlertSummary | null>(null);
   const [numberOfExecutions, setNumberOfExecutions] = useState(60);
+  const ruleID = useRef<string | null>(null);
 
   useEffect(() => {
-    getAlertSummary(rule.id, loadAlertSummary, setAlertSummary, toasts, numberOfExecutions);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rule, numberOfExecutions]);
+    if (ruleID.current !== rule.id) {
+      ruleID.current = rule.id;
+      getAlertSummary(
+        ruleID.current,
+        loadAlertSummary,
+        setAlertSummary,
+        toasts,
+        numberOfExecutions
+      );
+    }
+  }, [rule, ruleID, numberOfExecutions, loadAlertSummary, setAlertSummary, toasts]);
+
+  const onChangeDuration = useCallback(
+    (executions: number) => {
+      setNumberOfExecutions(executions);
+      if (ruleID.current !== null) {
+        getAlertSummary(ruleID.current, loadAlertSummary, setAlertSummary, toasts, executions);
+      }
+    },
+    [ruleID, setNumberOfExecutions, loadAlertSummary, setAlertSummary, toasts]
+  );
 
   return alertSummary ? (
     <Alerts
@@ -51,7 +70,7 @@ export const AlertsRoute: React.FunctionComponent<WithAlertSummaryProps> = ({
       readOnly={readOnly}
       alertSummary={alertSummary}
       numberOfExecutions={numberOfExecutions}
-      onChangeDuration={setNumberOfExecutions}
+      onChangeDuration={onChangeDuration}
     />
   ) : (
     <CenterJustifiedSpinner />

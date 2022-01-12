@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
@@ -54,6 +54,11 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
     numberOfExecutions
   );
 
+  const onChange = useCallback(
+    ({ target }) => onChangeDuration(Number(target.value)),
+    [onChangeDuration]
+  );
+
   return (
     <EuiPanel data-test-subj="executionDurationChartPanel" hasBorder={true}>
       <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -79,7 +84,7 @@ export const ExecutionDurationChart: React.FunctionComponent<ComponentOpts> = ({
                   defaultMessage: 'Select number of executions',
                 }
               )}
-              onChange={({ target }) => onChangeDuration(Number(target.value))}
+              onChange={onChange}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
