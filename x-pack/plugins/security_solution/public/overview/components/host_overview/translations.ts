@@ -26,6 +26,20 @@ export const MAX_ANOMALY_SCORE_BY_JOB = i18n.translate(
   }
 );
 
+export const HOST_RISK_SCORE = i18n.translate(
+  'xpack.securitySolution.host.details.overview.hostRiskScoreTitle',
+  {
+    defaultMessage: 'Host risk score',
+  }
+);
+
+export const HOST_RISK_CLASSIFICATION = i18n.translate(
+  'xpack.securitySolution.host.details.overview.hostRiskClassification',
+  {
+    defaultMessage: 'Host risk classification',
+  }
+);
+
 export const IP_ADDRESSES = i18n.translate(
   'xpack.securitySolution.host.details.overview.ipAddressesTitle',
   {

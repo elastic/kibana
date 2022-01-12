@@ -6,16 +6,24 @@
  */
 
 import { getCaseMetrics } from './get_case_metrics';
-import { CaseAttributes, CaseResponse } from '../../../common/api';
+import { CaseAttributes, CaseResponse, CaseStatuses } from '../../../common/api';
 import { CasesClientMock, createCasesClientMock } from '../mocks';
 import { CasesClientArgs } from '../types';
 import { createAuthorizationMock } from '../../authorization/mock';
 import { loggingSystemMock, savedObjectsClientMock } from '../../../../../../src/core/server/mocks';
-import { createAttachmentServiceMock, createCaseServiceMock } from '../../services/mocks';
+import {
+  createAttachmentServiceMock,
+  createCaseServiceMock,
+  createUserActionServiceMock,
+} from '../../services/mocks';
 import { SavedObject } from 'kibana/server';
-import { mockAlertsService } from './alerts/test_utils';
+import { mockAlertsService } from './test_utils/alerts';
+import { createStatusChangeSavedObject } from './test_utils/lifespan';
 
 describe('getMetrics', () => {
+  const inProgressStatusChangeTimestamp = new Date('2021-11-23T20:00:43Z');
+  const currentTime = new Date('2021-11-23T20:01:43Z');
+
   const mockCreateCloseInfo = {
     created_at: '2021-11-23T19:59:43Z',
     closed_at: '2021-11-23T19:59:44Z',
@@ -25,13 +33,21 @@ describe('getMetrics', () => {
   let mockServices: ReturnType<typeof createMockClientArgs>['mockServices'];
   let clientArgs: ReturnType<typeof createMockClientArgs>['clientArgs'];
 
+  const openDuration =
+    inProgressStatusChangeTimestamp.getTime() - new Date(mockCreateCloseInfo.created_at).getTime();
+  const inProgressDuration = currentTime.getTime() - inProgressStatusChangeTimestamp.getTime();
+
   beforeEach(() => {
     client = createMockClient();
     ({ mockServices, clientArgs } = createMockClientArgs());
+
+    jest.clearAllMocks();
+    jest.useFakeTimers('modern');
+    jest.setSystemTime(currentTime);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.useRealTimers();
   });
 
   it('returns the lifespan metrics', async () => {
@@ -45,6 +61,11 @@ describe('getMetrics', () => {
       lifespan: {
         creationDate: mockCreateCloseInfo.created_at,
         closeDate: mockCreateCloseInfo.closed_at,
+        statusInfo: {
+          openDuration,
+          inProgressDuration,
+          numberOfReopens: 0,
+        },
       },
     });
   });
@@ -73,6 +94,11 @@ describe('getMetrics', () => {
     expect(metrics.lifespan).toEqual({
       creationDate: mockCreateCloseInfo.created_at,
       closeDate: mockCreateCloseInfo.closed_at,
+      statusInfo: {
+        openDuration,
+        inProgressDuration,
+        numberOfReopens: 0,
+      },
     });
     expect(metrics.alerts?.count).toEqual(5);
   });
@@ -172,6 +198,13 @@ function createMockClientArgs() {
 
   const logger = loggingSystemMock.createLogger();
 
+  const userActionService = createUserActionServiceMock();
+  userActionService.findStatusChanges.mockImplementation(async () => {
+    return [
+      createStatusChangeSavedObject(CaseStatuses['in-progress'], new Date('2021-11-23T20:00:43Z')),
+    ];
+  });
+
   const clientArgs = {
     authorization,
     unsecuredSavedObjectsClient: soClient,
@@ -179,6 +212,7 @@ function createMockClientArgs() {
     logger,
     attachmentService,
     alertsService,
+    userActionService,
   };
 
   return { mockServices: clientArgs, clientArgs: clientArgs as unknown as CasesClientArgs };

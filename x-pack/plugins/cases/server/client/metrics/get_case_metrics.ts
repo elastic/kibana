@@ -66,12 +66,9 @@ const buildHandlers = (
   casesClient: CasesClient,
   clientArgs: CasesClientArgs
 ): Set<MetricsHandler> => {
-  // TODO: rename this to handlers when the lifespan changes are merged
-  const otherHandlers: MetricsHandler[] = [AlertsCount, AlertDetails, Actions, Connectors].map(
-    (className) => new className({ caseId: params.caseId, casesClient, clientArgs })
+  const handlers: MetricsHandler[] = [AlertsCount, AlertDetails, Actions, Connectors, Lifespan].map(
+    (ClassName) => new ClassName({ caseId: params.caseId, casesClient, clientArgs })
   );
-
-  const handlers: MetricsHandler[] = [...otherHandlers, new Lifespan(params.caseId, casesClient)];
 
   const uniqueFeatures = new Set(params.features);
   const handlerFeatures = new Set<string>();
