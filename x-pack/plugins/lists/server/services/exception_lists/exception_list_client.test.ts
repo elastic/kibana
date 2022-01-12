@@ -128,8 +128,7 @@ describe('exception_list_client', () => {
                 reason: ['Invalid value "undefined" supplied to "entries"'],
               })
             );
-
-            // FIXME:PT add check for logger.error()
+            expect(extensionPointStorageContext.logger.error).toHaveBeenCalled();
           });
 
           it('should use data returned from extension point callbacks when saving', async () => {
