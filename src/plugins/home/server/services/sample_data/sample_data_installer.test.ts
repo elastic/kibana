@@ -201,6 +201,37 @@ describe('SampleDataInstaller', () => {
         expect((e as SampleDataInstallError).httpCode).toEqual(500);
       }
     });
+
+    describe('when the data index is using an alias', () => {
+      it('deletes the alias and the index', async () => {
+        const indexName = 'target_index';
+
+        esClient.asCurrentUser.indices.getAlias.mockResolvedValue(
+          elasticsearchServiceMock.createApiResponse({
+            body: {
+              [indexName]: {
+                aliases: {
+                  kibana_sample_data_test_single_data_index: {},
+                },
+              },
+            },
+          })
+        );
+
+        await installer.install('test_single_data_index');
+
+        expect(esClient.asCurrentUser.indices.deleteAlias).toHaveBeenCalledTimes(1);
+        expect(esClient.asCurrentUser.indices.deleteAlias).toHaveBeenCalledWith({
+          name: 'kibana_sample_data_test_single_data_index',
+          index: indexName,
+        });
+
+        expect(esClient.asCurrentUser.indices.delete).toHaveBeenCalledTimes(1);
+        expect(esClient.asCurrentUser.indices.delete).toHaveBeenCalledWith({
+          index: indexName,
+        });
+      });
+    });
   });
 
   describe('#uninstall', () => {
@@ -264,6 +295,37 @@ describe('SampleDataInstaller', () => {
         expect(e).toBeInstanceOf(SampleDataInstallError);
         expect((e as SampleDataInstallError).httpCode).toEqual(500);
       }
+    });
+
+    describe('when the data index is using an alias', () => {
+      it('deletes the alias and the index', async () => {
+        const indexName = 'target_index';
+
+        esClient.asCurrentUser.indices.getAlias.mockResolvedValue(
+          elasticsearchServiceMock.createApiResponse({
+            body: {
+              [indexName]: {
+                aliases: {
+                  kibana_sample_data_test_single_data_index: {},
+                },
+              },
+            },
+          })
+        );
+
+        await installer.uninstall('test_single_data_index');
+
+        expect(esClient.asCurrentUser.indices.deleteAlias).toHaveBeenCalledTimes(1);
+        expect(esClient.asCurrentUser.indices.deleteAlias).toHaveBeenCalledWith({
+          name: 'kibana_sample_data_test_single_data_index',
+          index: indexName,
+        });
+
+        expect(esClient.asCurrentUser.indices.delete).toHaveBeenCalledTimes(1);
+        expect(esClient.asCurrentUser.indices.delete).toHaveBeenCalledWith({
+          index: indexName,
+        });
+      });
     });
   });
 });
