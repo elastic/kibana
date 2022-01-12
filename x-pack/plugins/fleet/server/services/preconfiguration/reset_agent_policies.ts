@@ -10,8 +10,13 @@ import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'sr
 
 import { appContextService } from '../app_context';
 import { setupFleet } from '../setup';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
+import {
+  AGENT_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '../../constants';
 import { agentPolicyService } from '../agent_policy';
+import { packagePolicyService } from '../package_policy';
 import { getAgentsByKuery, forceUnenrollAgent } from '../agents';
 import { listEnrollmentApiKeys, deleteEnrollmentApiKey } from '../api_keys';
 import type { AgentPolicy } from '../../types';
@@ -24,8 +29,53 @@ export async function resetPreconfiguredAgentPolicies(
   const logger = appContextService.getLogger();
   logger.warn('Reseting Fleet preconfigured agent policies');
   await _deleteExistingData(soClient, esClient, logger, agentPolicyId);
+  await _deleteGhostPackagePolicies(soClient, esClient, logger);
 
   await setupFleet(soClient, esClient);
+}
+
+/**
+ * Delete all package policies that are not used in any agent policies
+ */
+async function _deleteGhostPackagePolicies(
+  soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
+  logger: Logger
+) {
+  const { items: packagePolicies } = await packagePolicyService.list(soClient, {
+    perPage: SO_SEARCH_LIMIT,
+  });
+
+  const policyIds = Array.from(
+    packagePolicies.reduce((acc, packagePolicy) => {
+      acc.add(packagePolicy.policy_id);
+
+      return acc;
+    }, new Set<string>())
+  );
+
+  const objects = policyIds.map((id) => ({ id, type: AGENT_POLICY_SAVED_OBJECT_TYPE }));
+  const agentPolicyExistsMap = (await soClient.bulkGet(objects)).saved_objects.reduce((acc, so) => {
+    if (so.error && so.error.statusCode === 404) {
+      acc.set(so.id, false);
+    } else {
+      acc.set(so.id, true);
+    }
+    return acc;
+  }, new Map<string, boolean>());
+
+  await pMap(
+    packagePolicies,
+    (packagePolicy) => {
+      if (agentPolicyExistsMap.get(packagePolicy.policy_id) === false) {
+        logger.info(`Deleting ghost package policy ${packagePolicy.name} (${packagePolicy.id})`);
+        return soClient.delete(PACKAGE_POLICY_SAVED_OBJECT_TYPE, packagePolicy.id);
+      }
+    },
+    {
+      concurrency: 20,
+    }
+  );
 }
 
 async function _deleteExistingData(

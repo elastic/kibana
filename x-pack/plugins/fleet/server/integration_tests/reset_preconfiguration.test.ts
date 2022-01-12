@@ -176,7 +176,7 @@ describe('Fleet preconfiguration rest', () => {
   describe('Reset one preconfigured policy', () => {
     const POLICY_ID = 'test-12345';
 
-    it('Works and reset one preconfigured policies if the policy is already deleted', async () => {
+    it('Works and reset one preconfigured policies if the policy is already deleted (with a ghost package policy)', async () => {
       const soClient = kbnServer.coreStart.savedObjects.createInternalRepository();
 
       await soClient.delete('ingest-agent-policies', POLICY_ID);
