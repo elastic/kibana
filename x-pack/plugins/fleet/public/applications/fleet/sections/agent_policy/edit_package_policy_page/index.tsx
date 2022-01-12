@@ -187,7 +187,24 @@ export const EditPackagePolicyForm = memo<{
             ...restOfPackagePolicy,
             inputs: baseInputs.map((input: any) => {
               // Remove `compiled_input` from all input info, we assign this after saving
-              const { streams, compiled_input: compiledInput, ...restOfInput } = input;
+              const { streams, compiled_input: compiledInput, vars, ...restOfInput } = input;
+              let basePolicyInputVars: any =
+                isUpgrade &&
+                basePolicy.inputs.find(
+                  (i) => i.type === input.type && i.policy_template === input.policy_template
+                )?.vars;
+              let newVars = vars;
+              if (basePolicyInputVars && vars) {
+                // merging vars from dry run with updated ones
+                basePolicyInputVars = Object.keys(vars).reduce(
+                  (acc, curr) => ({ ...acc, [curr]: basePolicyInputVars[curr] }),
+                  {}
+                );
+                newVars = {
+                  ...vars,
+                  ...basePolicyInputVars,
+                };
+              }
               return {
                 ...restOfInput,
                 streams: streams.map((stream: any) => {
@@ -195,6 +212,7 @@ export const EditPackagePolicyForm = memo<{
                   const { compiled_stream, ...restOfStream } = stream;
                   return restOfStream;
                 }),
+                vars: newVars,
               };
             }),
             package: basePackage,
