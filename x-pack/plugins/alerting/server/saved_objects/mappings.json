@@ -97,15 +97,16 @@
         "properties": {
           "execution": {
             "properties": {
-              "stats": {
+              "history": {
                 "properties": {
                   "success": {
-                    "type": "long"
-                  },
-                  "failure": {
-                    "type": "long"
-                  },
-                  "success_to_failure_ratio": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "calculated_metrics": {
+                "properties": {
+                  "success_ratio": {
                     "type": "float"
                   }
                 }

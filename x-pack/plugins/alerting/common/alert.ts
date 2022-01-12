@@ -139,10 +139,11 @@ export interface ActionVariable {
 
 export interface RuleMonitoring extends SavedObjectAttributes {
   execution: {
-    stats: {
-      success: number;
-      failure: number;
-      success_to_failure_ratio: number;
+    history: Array<{
+      success: boolean;
+    }>;
+    calculated_metrics: {
+      success_ratio: number;
     };
   };
 }

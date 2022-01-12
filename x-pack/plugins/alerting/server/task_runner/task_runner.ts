@@ -63,15 +63,14 @@ const FALLBACK_RETRY_INTERVAL = '5m';
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
 
-const DEFAULT_MONITORING = {
+export const getDefaultMonitoring = (): RuleMonitoring => ({
   execution: {
-    stats: {
-      success: 0,
-      failure: 0,
-      success_to_failure_ratio: 0,
+    history: [],
+    calculated_metrics: {
+      success_ratio: 0,
     },
   },
-};
+});
 
 interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -664,9 +663,8 @@ export class TaskRunner<
 
     const ruleMonitoring =
       resolveErr<RuleMonitoring | undefined, Error>(monitoring, () => {
-        return DEFAULT_MONITORING;
-      }) ?? DEFAULT_MONITORING;
-
+        return getDefaultMonitoring();
+      }) ?? getDefaultMonitoring();
     const executionStatus: AlertExecutionStatus = map(
       state,
       (ruleTaskState: RuleTaskState) => executionStatusFromState(ruleTaskState),
@@ -700,6 +698,9 @@ export class TaskRunner<
       executionStatus.lastDuration = Math.round(event.event?.duration / Millis2Nanos);
     }
 
+    const monitoringHistory = {
+      success: true,
+    };
     // if executionStatus indicates an error, fill in fields in
     // event from it
     if (executionStatus.error) {
@@ -711,16 +712,13 @@ export class TaskRunner<
       if (!event.message) {
         event.message = `${this.ruleType.id}:${ruleId}: execution failed`;
       }
-      ruleMonitoring.execution.stats.failure = ruleMonitoring.execution.stats.failure ?? 0;
-      ruleMonitoring.execution.stats.failure += 1;
-    } else {
-      ruleMonitoring.execution.stats.success = ruleMonitoring.execution.stats.success ?? 0;
-      ruleMonitoring.execution.stats.success += 1;
+      monitoringHistory.success = false;
     }
 
-    ruleMonitoring.execution.stats.success_to_failure_ratio =
-      ruleMonitoring.execution.stats.success /
-      (ruleMonitoring.execution.stats.success + ruleMonitoring.execution.stats.failure);
+    ruleMonitoring.execution.history.push(monitoringHistory);
+    ruleMonitoring.execution.calculated_metrics.success_ratio =
+      ruleMonitoring.execution.history.filter(({ success }) => success).length /
+      ruleMonitoring.execution.history.length;
     await this.updateMonitoring(ruleId, namespace, ruleMonitoring);
     eventLogger.logEvent(event);
 
