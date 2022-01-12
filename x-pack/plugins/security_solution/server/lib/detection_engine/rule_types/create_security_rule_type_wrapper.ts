@@ -286,7 +286,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 errors: result.errors.concat(runResult.errors),
                 lastLookbackDate: runResult.lastLookBackDate,
                 searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
-                state: runState,
+                state: runResult.state,
                 success: result.success && runResult.success,
                 warning: warningMessages.length > 0,
                 warningMessages,
