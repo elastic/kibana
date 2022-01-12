@@ -7,11 +7,12 @@
 
 import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { i18n } from '@kbn/i18n';
-import React, { Dispatch, useCallback, useEffect } from 'react';
+import React, { Dispatch, useCallback, useEffect, useMemo } from 'react';
 import { EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
+import { Immutable, ListPageRouteState } from '../../../../../common/endpoint/types';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
 import {
   getCurrentLocation,
@@ -26,8 +27,9 @@ import {
   useHostIsolationExceptionsNavigateCallback,
   useHostIsolationExceptionsSelector,
 } from './hooks';
+import { getEndpointListPath } from '../../../common/routing';
+import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
-import { Immutable } from '../../../../../common/endpoint/types';
 import { AdministrationListPage } from '../../../components/administration_list_page';
 import { SearchExceptions } from '../../../components/search_exceptions';
 import { ArtifactEntryCard, ArtifactEntryCardProps } from '../../../components/artifact_entry_card';
@@ -39,7 +41,6 @@ import {
   DELETE_HOST_ISOLATION_EXCEPTION_LABEL,
   EDIT_HOST_ISOLATION_EXCEPTION_LABEL,
 } from './components/translations';
-import { getEndpointListPath } from '../../../common/routing';
 import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
@@ -53,6 +54,8 @@ export const HostIsolationExceptionsList = () => {
   const pagination = useHostIsolationExceptionsSelector(getListPagination);
   const isLoading = useHostIsolationExceptionsSelector(getListIsLoading);
   const fetchError = useHostIsolationExceptionsSelector(getListFetchError);
+  const { state: routeState } = useLocation<ListPageRouteState | undefined>();
+
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
   const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
   const itemToDelete = useHostIsolationExceptionsSelector(getItemToDelete);
@@ -116,6 +119,13 @@ export const HostIsolationExceptionsList = () => {
       [navigateCallback]
     );
 
+  const backButton = useMemo(() => {
+    if (routeState && routeState.onBackButtonNavigateTo) {
+      return <BackToExternalAppButton {...routeState} />;
+    }
+    return null;
+  }, [routeState]);
+
   const handleAddButtonClick = useCallback(
     () =>
       navigateCallback({
@@ -127,6 +137,7 @@ export const HostIsolationExceptionsList = () => {
 
   return (
     <AdministrationListPage
+      headerBackComponent={backButton}
       title={
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.list.pageTitle"
