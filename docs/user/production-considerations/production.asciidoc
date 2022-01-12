@@ -88,7 +88,6 @@ active in case of failure from the currently used instance.
 === Reporting and multiple load-balanced {kib} clusters
 
 Depending on the load balancing configuration, you might need to specify 
-`xpack.reporting.kibanaServer.*` settings to use *Reporting*.
 
 [float]
 [[high-availability]]
