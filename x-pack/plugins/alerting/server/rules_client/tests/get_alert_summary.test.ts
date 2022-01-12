@@ -299,6 +299,25 @@ describe('getAlertSummary()', () => {
     `);
   });
 
+  test('calls event log client with number of executions', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(AlertSummaryFindEventsResult);
+
+    const numberOfExecutions = 15;
+    await rulesClient.getAlertSummary({ id: '1', numberOfExecutions });
+
+    expect(unsecuredSavedObjectsClient.get).toHaveBeenCalledTimes(1);
+    expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
+    const { start, end } = eventLogClient.findEventsBySavedObjectIds.mock.calls[0][2]!;
+
+    expect({ start, end }).toMatchInlineSnapshot(`
+      Object {
+        "end": "2019-02-12T21:01:22.479Z",
+        "start": "2019-02-12T21:01:07.479Z",
+      }
+    `);
+  });
+
   test('invalid start date throws an error', async () => {
     unsecuredSavedObjectsClient.get.mockResolvedValueOnce(getRuleSavedObject());
     eventLogClient.findEventsBySavedObjectIds.mockResolvedValueOnce(AlertSummaryFindEventsResult);
