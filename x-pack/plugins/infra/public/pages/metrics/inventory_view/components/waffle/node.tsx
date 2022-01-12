@@ -62,7 +62,7 @@ export class Node extends React.PureComponent<Props, State> {
 
     const nodeBorder = this.state.isOverlayOpen ? { border: 'solid 4px #000' } : undefined;
 
-    const button = (
+    const bigSquare = (
       <NodeContainer
         data-test-subj="nodeContainer"
         style={{ width: squareSize || 0, height: squareSize || 0 }}
@@ -91,7 +91,7 @@ export class Node extends React.PureComponent<Props, State> {
       </NodeContainer>
     );
 
-    const smallButton = (
+    const smallSquare = (
       <NodeContainerSmall
         data-test-subj="nodeContainer"
         style={{ width: squareSize || 0, height: squareSize || 0, ...nodeBorder }}
@@ -100,21 +100,28 @@ export class Node extends React.PureComponent<Props, State> {
       />
     );
 
+    const nodeSquare = valueMode || ellipsisMode ? bigSquare : smallSquare;
+
     return (
       <>
-        <EuiPopover
-          button={valueMode || ellipsisMode ? button : smallButton}
-          isOpen={isPopoverOpen}
-          closePopover={this.closePopover}
-          anchorPosition="downCenter"
-        >
-          <NodeContextMenu
-            node={node}
-            nodeType={nodeType}
-            options={options}
-            currentTime={currentTime}
-          />
-        </EuiPopover>
+        {isPopoverOpen ? (
+          <EuiPopover
+            button={nodeSquare}
+            isOpen={isPopoverOpen}
+            closePopover={this.closePopover}
+            anchorPosition="downCenter"
+            style={{ height: squareSize }}
+          >
+            <NodeContextMenu
+              node={node}
+              nodeType={nodeType}
+              options={options}
+              currentTime={currentTime}
+            />
+          </EuiPopover>
+        ) : (
+          nodeSquare
+        )}
 
         {this.state.isOverlayOpen && (
           <NodeContextPopover
