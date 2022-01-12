@@ -317,7 +317,7 @@ export function registerMlSnapshotRoutes({
             }
 
             log.error(
-              'Failed to determine status of the ML model upgrade, upgradeStatus is not defined and snapshot upgrade is not completed.'
+              `Failed to determine status of the ML model upgrade, upgradeStatus is not defined and snapshot upgrade is not completed. snapshotId=${snapshotId} and jobId=${jobId}`
             );
             return response.customError({
               statusCode: upgradeSnapshotError ? upgradeSnapshotError.statusCode : 500,
