@@ -18,7 +18,8 @@ import {
 } from './utils';
 import { adjustTimeScaleOnOtherColumnChange } from '../../time_scale_utils';
 import { OperationDefinition } from '..';
-import { getFormatFromPreviousColumn, getFilter } from '../helpers';
+import { getFormatFromPreviousColumn, getFilter, combineErrorMessages } from '../helpers';
+import { getDisallowedPreviousShiftMessage } from '../../../time_shift_utils';
 
 const OPERATION_NAME = 'differences';
 
@@ -92,13 +93,16 @@ export const derivativeOperation: OperationDefinition<
   },
   onOtherColumnChanged: adjustTimeScaleOnOtherColumnChange,
   getErrorMessage: (layer: IndexPatternLayer, columnId: string) => {
-    return getErrorsForDateReference(
-      layer,
-      columnId,
-      i18n.translate('xpack.lens.indexPattern.derivative', {
-        defaultMessage: 'Differences',
-      })
-    );
+    return combineErrorMessages([
+      getErrorsForDateReference(
+        layer,
+        columnId,
+        i18n.translate('xpack.lens.indexPattern.derivative', {
+          defaultMessage: 'Differences',
+        })
+      ),
+      getDisallowedPreviousShiftMessage(layer, columnId),
+    ]);
   },
   getDisabledStatus(indexPattern, layer, layerType) {
     const opName = i18n.translate('xpack.lens.indexPattern.derivative', {

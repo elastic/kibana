@@ -67,6 +67,13 @@ export function getInvalidFieldMessage(
   return undefined;
 }
 
+export function combineErrorMessages(
+  errorMessages: Array<string[] | undefined>
+): string[] | undefined {
+  const messages = (errorMessages.filter(Boolean) as string[][]).flat();
+  return messages.length ? messages : undefined;
+}
+
 export function getSafeName(name: string, indexPattern: IndexPattern): string {
   const field = indexPattern.getFieldByName(name);
   return field
