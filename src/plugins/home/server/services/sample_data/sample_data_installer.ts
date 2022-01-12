@@ -34,6 +34,9 @@ export interface SampleDataInstallResult {
   createdSavedObjects: number;
 }
 
+/**
+ * Utility class in charge of installing and uninstalling sample datasets
+ */
 export class SampleDataInstaller {
   private readonly esClient: IScopedClusterClient;
   private readonly soClient: SavedObjectsClientContract;
@@ -102,7 +105,11 @@ export class SampleDataInstaller {
       const dataIndex = sampleDataset.dataIndices[i];
       await this.uninstallDataIndex(sampleDataset, dataIndex);
     }
-    await this.deleteSavedObjects(sampleDataset);
+    const deletedObjects = await this.deleteSavedObjects(sampleDataset);
+
+    return {
+      deletedSavedObjects: deletedObjects,
+    };
   }
 
   private async uninstallDataIndex(dataset: SampleDatasetSchema, dataIndex: DataIndexSchema) {
@@ -187,9 +194,12 @@ export class SampleDataInstaller {
       await Promise.all(deletePromises);
     } catch (err) {
       throw new SampleDataInstallError(
-        `Unable to delete sample dataset saved objects, error: ${err.body.error.type}`,
-        err.body.status
+        `Unable to delete sample dataset saved objects, error: ${
+          err.body?.error?.type ?? err.message
+        }`,
+        err.body?.status ?? 500
       );
     }
+    return objectsToDelete.length;
   }
 }
