@@ -11,11 +11,12 @@ import {
   Logger,
   SavedObject,
   SavedObjectReference,
+  SavedObjectsClientContract,
   SavedObjectsFindResponse,
-  SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from 'kibana/server';
 
+import { KueryNode } from '@kbn/es-query';
 import {
   isConnectorUserAction,
   isPushedUserAction,
@@ -50,9 +51,10 @@ import {
   SUB_CASE_REF_NAME,
 } from '../../common/constants';
 import { findConnectorIdReference } from '../transform';
-import { isTwoArraysDifference } from '../../client/utils';
+import { buildFilter, combineFilters, isTwoArraysDifference } from '../../client/utils';
 import { BuilderParameters, BuilderReturnValue, CommonArguments, CreateUserAction } from './types';
 import { BuilderFactory } from './builder_factory';
+import { defaultSortField } from '../../common/utils';
 
 interface GetCaseUserActionArgs extends ClientArgs {
   caseId: string;
@@ -378,6 +380,60 @@ export class CaseUserActionService {
       throw error;
     }
   }
+
+  public async findStatusChanges({
+    unsecuredSavedObjectsClient,
+    caseId,
+    filter,
+  }: {
+    unsecuredSavedObjectsClient: SavedObjectsClientContract;
+    caseId: string;
+    filter?: KueryNode;
+  }): Promise<Array<SavedObject<CaseUserActionResponse>>> {
+    try {
+      this.log.debug('Attempting to find status changes');
+
+      const updateActionFilter = buildFilter({
+        filters: Actions.update,
+        field: 'action',
+        operator: 'or',
+        type: CASE_USER_ACTION_SAVED_OBJECT,
+      });
+
+      const statusChangeFilter = buildFilter({
+        filters: ActionTypes.status,
+        field: 'type',
+        operator: 'or',
+        type: CASE_USER_ACTION_SAVED_OBJECT,
+      });
+
+      const combinedFilters = combineFilters([updateActionFilter, statusChangeFilter, filter]);
+
+      const finder =
+        unsecuredSavedObjectsClient.createPointInTimeFinder<CaseUserActionAttributesWithoutConnectorId>(
+          {
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+            sortField: defaultSortField,
+            sortOrder: 'asc',
+            filter: combinedFilters,
+            perPage: MAX_DOCS_PER_PAGE,
+          }
+        );
+
+      let userActions: Array<SavedObject<CaseUserActionResponse>> = [];
+      for await (const findResults of finder.find()) {
+        userActions = userActions.concat(
+          findResults.saved_objects.map((so) => transformToExternalModel(so))
+        );
+      }
+
+      return userActions;
+    } catch (error) {
+      this.log.error(`Error finding status changes: ${error}`);
+      throw error;
+    }
+  }
 }
 
 export function transformFindResponseToExternalModel(
@@ -393,8 +449,8 @@ export function transformFindResponseToExternalModel(
 }
 
 function transformToExternalModel(
-  userAction: SavedObjectsFindResult<CaseUserActionAttributesWithoutConnectorId>
-): SavedObjectsFindResult<CaseUserActionResponse> {
+  userAction: SavedObject<CaseUserActionAttributesWithoutConnectorId>
+): SavedObject<CaseUserActionResponse> {
   const { references } = userAction;
 
   const caseId = findReferenceId(CASE_REF_NAME, CASE_SAVED_OBJECT, references) ?? '';
@@ -417,7 +473,7 @@ function transformToExternalModel(
 }
 
 const addReferenceIdToPayload = (
-  userAction: SavedObjectsFindResult<CaseUserActionAttributes>
+  userAction: SavedObject<CaseUserActionAttributes>
 ): CaseUserActionAttributes['payload'] => {
   const connectorId = getConnectorIdFromReferences(userAction);
   const userActionAttributes = userAction.attributes;
@@ -444,7 +500,7 @@ const addReferenceIdToPayload = (
 };
 
 function getConnectorIdFromReferences(
-  userAction: SavedObjectsFindResult<CaseUserActionAttributes>
+  userAction: SavedObject<CaseUserActionAttributes>
 ): string | null {
   const { references } = userAction;
 
