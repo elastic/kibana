@@ -7,7 +7,6 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-
 import { NavigateToPath } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
@@ -20,6 +19,7 @@ export const modelsListRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
+  id: 'trained_models',
   path: '/trained_models',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
@@ -32,6 +32,8 @@ export const modelsListRouteFactory = (
       href: '',
     },
   ],
+  enableDatePicker: true,
+  'data-test-subj': 'mlPageModelManagement',
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {

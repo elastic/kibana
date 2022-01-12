@@ -28,7 +28,12 @@ export const overviewRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
+  id: 'overview',
   path: '/overview',
+  title: i18n.translate('xpack.ml.overview.overviewLabel', {
+    defaultMessage: 'Overview',
+  }),
+  enableDatePicker: true,
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
@@ -39,6 +44,7 @@ export const overviewRouteFactory = (
       onClick: breadcrumbOnClickFactory('/overview', navigateToPath),
     },
   ],
+  'data-test-subj': 'mlPageOverview',
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
@@ -63,6 +69,7 @@ const PageWrapper: FC<PageProps> = ({ deps }) => {
 };
 
 export const appRootRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
+  id: '',
   path: '/',
   render: () => <Page />,
   breadcrumbs: [],

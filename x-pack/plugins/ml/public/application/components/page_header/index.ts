@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { NavigationMenu } from './navigation_menu';
+export { MlPageHeader } from './page_header';

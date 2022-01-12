@@ -26,6 +26,7 @@ export const settingsRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
+  id: 'settings',
   path: '/settings',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [

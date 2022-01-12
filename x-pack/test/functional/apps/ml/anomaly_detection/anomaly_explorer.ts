@@ -146,11 +146,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('has correct axes labels');
           await ml.swimLane.assertAxisLabels(overallSwimLaneTestSubj, 'x', [
             '2016-02-07 00:00',
-            '2016-02-08 00:00',
             '2016-02-09 00:00',
-            '2016-02-10 00:00',
             '2016-02-11 00:00',
-            '2016-02-12 00:00',
           ]);
           await ml.swimLane.assertAxisLabels(overallSwimLaneTestSubj, 'y', ['Overall']);
         });
@@ -159,11 +156,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('has correct axes labels');
           await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'x', [
             '2016-02-07 00:00',
-            '2016-02-08 00:00',
             '2016-02-09 00:00',
-            '2016-02-10 00:00',
             '2016-02-11 00:00',
-            '2016-02-12 00:00',
           ]);
           await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', [
             'AAL',

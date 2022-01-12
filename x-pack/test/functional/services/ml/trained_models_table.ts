@@ -74,13 +74,13 @@ export function TrainedModelsTableProvider({ getService }: FtrProviderContext) {
     }
 
     public async waitForRefreshButtonLoaded() {
-      await testSubjects.existOrFail('~mlAnalyticsRefreshListButton', { timeout: 10 * 1000 });
-      await testSubjects.existOrFail('mlAnalyticsRefreshListButton loaded', { timeout: 30 * 1000 });
+      await testSubjects.existOrFail('~mlRefreshPageButton', { timeout: 10 * 1000 });
+      await testSubjects.existOrFail('mlRefreshPageButton loaded', { timeout: 30 * 1000 });
     }
 
     public async refreshModelsTable() {
       await this.waitForRefreshButtonLoaded();
-      await testSubjects.click('~mlAnalyticsRefreshListButton');
+      await testSubjects.click('~mlRefreshPageButton');
       await this.waitForRefreshButtonLoaded();
       await this.waitForModelsToLoad();
     }

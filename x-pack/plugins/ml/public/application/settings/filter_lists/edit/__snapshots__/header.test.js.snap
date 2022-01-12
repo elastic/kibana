@@ -2,6 +2,13 @@
 
 exports[`EditFilterListHeader renders the header when creating a new filter list with ID, description and items set 1`] = `
 <Fragment>
+  <MlPageHeader>
+    <FormattedMessage
+      defaultMessage="Create new filter list"
+      id="xpack.ml.settings.filterLists.editFilterHeader.createFilterListTitle"
+      values={Object {}}
+    />
+  </MlPageHeader>
   <EuiFlexGroup
     alignItems="baseline"
     justifyContent="spaceBetween"
@@ -14,19 +21,6 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
         gutterSize="m"
         responsive={false}
       >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiTitle>
-            <h1>
-              <FormattedMessage
-                defaultMessage="Create new filter list"
-                id="xpack.ml.settings.filterLists.editFilterHeader.createFilterListTitle"
-                values={Object {}}
-              />
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
         <EuiFlexItem
           grow={false}
         >
@@ -111,6 +105,13 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
 
 exports[`EditFilterListHeader renders the header when creating a new filter list with the ID not set 1`] = `
 <Fragment>
+  <MlPageHeader>
+    <FormattedMessage
+      defaultMessage="Create new filter list"
+      id="xpack.ml.settings.filterLists.editFilterHeader.createFilterListTitle"
+      values={Object {}}
+    />
+  </MlPageHeader>
   <EuiFlexGroup
     alignItems="baseline"
     justifyContent="spaceBetween"
@@ -123,19 +124,6 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
         gutterSize="m"
         responsive={false}
       >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiTitle>
-            <h1>
-              <FormattedMessage
-                defaultMessage="Create new filter list"
-                id="xpack.ml.settings.filterLists.editFilterHeader.createFilterListTitle"
-                values={Object {}}
-              />
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
         <EuiFlexItem
           grow={false}
         >
@@ -227,6 +215,17 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
 
 exports[`EditFilterListHeader renders the header when editing an existing unused filter list with no description or items 1`] = `
 <Fragment>
+  <MlPageHeader>
+    <FormattedMessage
+      defaultMessage="Filter list {filterId}"
+      id="xpack.ml.settings.filterLists.editFilterHeader.filterListTitle"
+      values={
+        Object {
+          "filterId": "test_filter_list",
+        }
+      }
+    />
+  </MlPageHeader>
   <EuiFlexGroup
     alignItems="baseline"
     justifyContent="spaceBetween"
@@ -239,23 +238,6 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
         gutterSize="m"
         responsive={false}
       >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiTitle>
-            <h1>
-              <FormattedMessage
-                defaultMessage="Filter list {filterId}"
-                id="xpack.ml.settings.filterLists.editFilterHeader.filterListTitle"
-                values={
-                  Object {
-                    "filterId": "test_filter_list",
-                  }
-                }
-              />
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
         <EuiFlexItem
           grow={false}
         >
@@ -330,6 +312,17 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
 
 exports[`EditFilterListHeader renders the header when editing an existing used filter list with description and items set 1`] = `
 <Fragment>
+  <MlPageHeader>
+    <FormattedMessage
+      defaultMessage="Filter list {filterId}"
+      id="xpack.ml.settings.filterLists.editFilterHeader.filterListTitle"
+      values={
+        Object {
+          "filterId": "test_filter_list",
+        }
+      }
+    />
+  </MlPageHeader>
   <EuiFlexGroup
     alignItems="baseline"
     justifyContent="spaceBetween"
@@ -342,23 +335,6 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
         gutterSize="m"
         responsive={false}
       >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiTitle>
-            <h1>
-              <FormattedMessage
-                defaultMessage="Filter list {filterId}"
-                id="xpack.ml.settings.filterLists.editFilterHeader.filterListTitle"
-                values={
-                  Object {
-                    "filterId": "test_filter_list",
-                  }
-                }
-              />
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
         <EuiFlexItem
           grow={false}
         >

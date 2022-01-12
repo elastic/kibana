@@ -50,6 +50,7 @@ export const timeSeriesExplorerRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
+  id: 'timeseriesexplorer',
   path: '/timeseriesexplorer',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
@@ -62,6 +63,7 @@ export const timeSeriesExplorerRouteFactory = (
       href: '',
     },
   ],
+  enableDatePicker: true,
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {

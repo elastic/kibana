@@ -23,11 +23,6 @@ import { ML_PAGES } from '../../../../common/constants/locator';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import { useTableSettings } from '../../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { ExpandedRow } from './expanded_row';
-import {
-  REFRESH_ANALYTICS_LIST_STATE,
-  refreshAnalyticsList$,
-  useRefreshAnalyticsList,
-} from '../../data_frame_analytics/common';
 import { MemoryPreviewChart } from './memory_preview_chart';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { ListingPageUrlState } from '../../../../common/types/common';
@@ -80,7 +75,6 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
       });
 
       setIsLoading(false);
-      refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.IDLE);
     } catch (e) {
       displayErrorToast(
         e,
@@ -182,12 +176,6 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
       incremental: true,
     },
   };
-
-  // Subscribe to the refresh observable to trigger reloading the model list.
-  useRefreshAnalyticsList({
-    isLoading: setIsLoading,
-    onRefresh: fetchNodesData,
-  });
 
   useEffect(
     function updateOnTimerRefresh() {

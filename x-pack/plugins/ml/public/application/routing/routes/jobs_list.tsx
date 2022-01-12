@@ -24,6 +24,10 @@ import { AnnotationUpdatesService } from '../../services/annotations_service';
 import { MlAnnotationUpdatesContext } from '../../contexts/ml/ml_annotation_updates_context';
 
 export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
+  id: 'anomaly_detection',
+  title: i18n.translate('xpack.ml.overview.anomalyDetection.panelTitle', {
+    defaultMessage: 'Anomaly Detection',
+  }),
   path: '/jobs',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
@@ -36,6 +40,8 @@ export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: st
       href: '',
     },
   ],
+  'data-test-subj': 'mlPageJobManagement',
+  enableDatePicker: true,
 });
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {

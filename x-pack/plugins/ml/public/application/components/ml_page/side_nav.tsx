@@ -5,27 +5,30 @@
  * 2.0.
  */
 
-import React, { FC, useState, useEffect } from 'react';
-
-import { EuiPageHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TabId } from './navigation_menu';
-import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
-import { MlLocatorParams } from '../../../../common/types/locator';
+import type { EuiSideNavItemType } from '@elastic/eui';
+import { useEffect } from 'react';
+import type { MlLocatorParams } from '../../../../common/types/locator';
 import { useUrlState } from '../../util/url_state';
+import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { isFullLicense } from '../../license';
 import { ML_APP_NAME } from '../../../../common/constants/app';
-import './main_tabs.scss';
+
+export type TabId =
+  | 'access-denied'
+  | 'anomaly_detection'
+  | 'data_frame_analytics'
+  | 'trained_models'
+  | 'datavisualizer'
+  | 'overview'
+  | 'settings';
 
 export interface Tab {
   id: TabId;
   name: any;
   disabled: boolean;
   betaTag?: JSX.Element;
-}
-
-interface Props {
-  disableLinks: boolean;
-  tabId: TabId;
+  items?: Tab[];
 }
 
 function getTabs(disableLinks: boolean): Tab[] {
@@ -43,6 +46,15 @@ function getTabs(disableLinks: boolean): Tab[] {
         defaultMessage: 'Anomaly Detection',
       }),
       disabled: disableLinks,
+      items: [
+        {
+          id: 'settings',
+          name: i18n.translate('xpack.ml.navMenu.settingsTabLinkText', {
+            defaultMessage: 'Settings',
+          }),
+          disabled: disableLinks,
+        },
+      ],
     },
     {
       id: 'data_frame_analytics',
@@ -65,22 +77,16 @@ function getTabs(disableLinks: boolean): Tab[] {
       }),
       disabled: false,
     },
-    {
-      id: 'settings',
-      name: i18n.translate('xpack.ml.navMenu.settingsTabLinkText', {
-        defaultMessage: 'Settings',
-      }),
-      disabled: disableLinks,
-    },
   ];
 }
+
 interface TabData {
   testSubject: string;
   pathId?: MlLocatorParams['page'];
   name: string;
 }
 
-const TAB_DATA: Record<TabId, TabData> = {
+export const TAB_DATA: Record<TabId, TabData> = {
   overview: {
     testSubject: 'mlMainTab overview',
     name: i18n.translate('xpack.ml.overviewTabLabel', {
@@ -127,21 +133,23 @@ const TAB_DATA: Record<TabId, TabData> = {
   },
 };
 
-export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
+export function useSideNavItems(activeRouteId: string | undefined) {
   const {
     services: {
       chrome: { docTitle },
     },
   } = useMlKibana();
-  const [globalState] = useUrlState('_g');
-  const [selectedTabId, setSelectedTabId] = useState(tabId);
-  function onSelectedTabChanged(id: TabId) {
-    setSelectedTabId(id);
-  }
-
-  const tabs = getTabs(disableLinks);
   const mlLocator = useMlLocator();
   const navigateToPath = useNavigateToPath();
+
+  useEffect(() => {
+    const title = TAB_DATA[activeRouteId as TabId]?.name;
+    if (title) {
+      docTitle.change([title, ML_APP_NAME]);
+    }
+  }, [activeRouteId]);
+
+  const [globalState] = useUrlState('_g');
 
   const redirectToTab = async (defaultPathId: MlLocatorParams['page']) => {
     const pageState =
@@ -164,31 +172,26 @@ export const MainTabs: FC<Props> = ({ tabId, disableLinks }) => {
     await navigateToPath(path, false);
   };
 
-  useEffect(() => {
-    docTitle.change([TAB_DATA[selectedTabId].name, ML_APP_NAME]);
-  }, [selectedTabId]);
+  const tabs = getTabs(!isFullLicense());
 
-  return (
-    <EuiPageHeader
-      paddingSize="m"
-      className="mlMainTabs"
-      bottomBorder
-      tabs={tabs.map((tab: Tab) => {
-        const { id, disabled } = tab;
-        const testSubject = TAB_DATA[id].testSubject;
-        const defaultPathId = (TAB_DATA[id].pathId || id) as MlLocatorParams['page'];
+  function getTabItem(tab: Tab): EuiSideNavItemType<any> {
+    const { id, disabled, items } = tab;
+    const testSubject = TAB_DATA[id].testSubject;
+    const defaultPathId = (TAB_DATA[id].pathId || id) as MlLocatorParams['page'];
 
-        return {
-          label: tab.name,
-          disabled,
-          onClick: () => {
-            onSelectedTabChanged(id);
-            redirectToTab(defaultPathId);
-          },
-          'data-test-subj': testSubject + (id === selectedTabId ? ' selected' : ''),
-          isSelected: id === selectedTabId,
-        };
-      })}
-    />
-  );
-};
+    return {
+      id,
+      name: tab.name,
+      isSelected: id === activeRouteId,
+      disabled,
+      onClick: () => {
+        redirectToTab(defaultPathId);
+      },
+      'data-test-subj': testSubject + (id === activeRouteId ? ' selected' : ''),
+      items: items ? items.map(getTabItem) : undefined,
+      forceOpen: true,
+    };
+  }
+
+  return tabs.map(getTabItem);
+}
