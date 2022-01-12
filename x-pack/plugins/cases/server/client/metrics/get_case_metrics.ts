@@ -14,6 +14,7 @@ import { CasesClient } from '../client';
 import { CasesClientArgs } from '../types';
 import { AlertsCount } from './alerts/count';
 import { AlertDetails } from './alerts/details';
+import { Actions } from './actions';
 import { Connectors } from './connectors';
 import { Lifespan } from './lifespan';
 import { MetricsHandler } from './types';
@@ -66,9 +67,10 @@ const buildHandlers = (
   clientArgs: CasesClientArgs
 ): Set<MetricsHandler> => {
   const handlers: MetricsHandler[] = [
-    new Lifespan(params.caseId, casesClient),
+    new Lifespan(params.caseId, casesClient, clientArgs),
     new AlertsCount(params.caseId, casesClient, clientArgs),
     new AlertDetails(params.caseId, casesClient, clientArgs),
+    new Actions(params.caseId, casesClient, clientArgs),
     new Connectors(),
   ];
 

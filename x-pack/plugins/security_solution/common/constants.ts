@@ -375,3 +375,30 @@ export const WARNING_TRANSFORM_STATES = new Set([
   TRANSFORM_STATES.STOPPED,
   TRANSFORM_STATES.STOPPING,
 ]);
+
+/**
+ * How many rules to update at a time is set to 50 from errors coming from
+ * the slow environments such as cloud when the rule updates are > 100 we were
+ * seeing timeout issues.
+ *
+ * Since there is not timeout options at the alerting API level right now, we are
+ * at the mercy of the Elasticsearch server client/server default timeouts and what
+ * we are doing could be considered a workaround to not being able to increase the timeouts.
+ *
+ * However, other bad effects and saturation of connections beyond 50 makes this a "noisy neighbor"
+ * if we don't limit its number of connections as we increase the number of rules that can be
+ * installed at a time.
+ *
+ * Lastly, we saw weird issues where Chrome on upstream 408 timeouts will re-call the REST route
+ * which in turn could create additional connections we want to avoid.
+ *
+ * See file import_rules_route.ts for another area where 50 was chosen, therefore I chose
+ * 50 here to mimic it as well. If you see this re-opened or what similar to it, consider
+ * reducing the 50 above to a lower number.
+ *
+ * See the original ticket here:
+ * https://github.com/elastic/kibana/issues/94418
+ */
+export const MAX_RULES_TO_UPDATE_IN_PARALLEL = 50;
+
+export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrency`;
