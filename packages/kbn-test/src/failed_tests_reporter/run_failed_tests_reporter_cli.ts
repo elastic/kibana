@@ -25,7 +25,7 @@ import { getBuildkiteMetadata } from './buildkite_metadata';
 import { ExistingFailedTestIssues } from './existing_failed_test_issues';
 
 const DEFAULT_PATTERNS = [Path.resolve(REPO_ROOT, 'target/junit/**/*.xml')];
-const DISABLE_FAILED_TEST_REPORTER = !!process.env.DISABLE_FAILED_TEST_REPORTER;
+const DISABLE_FAILED_TEST_REPORTER = process.env.DISABLE_FAILED_TEST_REPORTER === 'true';
 
 export function runFailedTestsReporterCli() {
   run(
