@@ -8,7 +8,7 @@
 export type { ApiKey, ApiKeyToInvalidate, ApiKeyRoleDescriptors } from './api_key';
 export type { User, EditUser } from './user';
 export { getUserDisplayName } from './user';
-export type { AuthenticatedUser } from './authenticated_user';
+export type { AuthenticatedUser, UserRealm } from './authenticated_user';
 export { canUserChangePassword } from './authenticated_user';
 export type { AuthenticationProvider } from './authentication_provider';
 export { shouldProviderUseLoginForm } from './authentication_provider';
