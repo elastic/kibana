@@ -99,6 +99,9 @@ const proxyHttpStart = new Proxy<HttpStart>({} as unknown as HttpStart, {
     try {
       return getHttp()[prop];
     } catch (e) {
+      if (prop === 'getLoadingCount$') {
+        return () => {};
+      }
       // eslint-disable-next-line no-console
       console.error(e);
     }

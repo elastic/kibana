@@ -81,6 +81,12 @@ export const timeShiftOptions = [
     }),
     value: '1y',
   },
+  {
+    label: i18n.translate('xpack.lens.indexPattern.timeShift.previous', {
+      defaultMessage: 'Previous time range',
+    }),
+    value: 'previous',
+  },
 ];
 
 export const timeShiftOptionOrder = timeShiftOptions.reduce<{ [key: string]: number }>(
@@ -101,7 +107,7 @@ export function getDateHistogramInterval(
     (colId) => layer.columns[colId].operationType === 'date_histogram'
   );
   if (!dateHistogramColumn && !indexPattern.timeFieldName) {
-    return { canShift: false };
+    return { canShift: false, hasDateHistogram: false };
   }
   if (dateHistogramColumn && activeData && activeData[layerId] && activeData[layerId]) {
     const column = activeData[layerId].columns.find((col) => col.id === dateHistogramColumn);
@@ -112,14 +118,16 @@ export function getDateHistogramInterval(
         interval: search.aggs.parseInterval(expression),
         expression,
         canShift: true,
+        hasDateHistogram: true,
       };
     }
   }
-  return { canShift: true };
+  return { canShift: true, hasDateHistogram: Boolean(dateHistogramColumn) };
 }
 
 export function getLayerTimeShiftChecks({
   interval: dateHistogramInterval,
+  hasDateHistogram,
   canShift,
 }: ReturnType<typeof getDateHistogramInterval>) {
   return {
@@ -140,7 +148,39 @@ export function getLayerTimeShiftChecks({
         !Number.isInteger(parsedValue.asMilliseconds() / dateHistogramInterval.asMilliseconds())
       );
     },
+    isInvalid: (parsedValue: ReturnType<typeof parseTimeShift>) => {
+      return Boolean(
+        parsedValue === 'invalid' || (hasDateHistogram && parsedValue && parsedValue === 'previous')
+      );
+    },
   };
+}
+
+export function getDisallowedPreviousShiftMessage(
+  layer: IndexPatternLayer,
+  columnId: string
+): string[] | undefined {
+  const currentColumn = layer.columns[columnId];
+  const hasPreviousShift =
+    currentColumn.timeShift && parseTimeShift(currentColumn.timeShift) === 'previous';
+  if (!hasPreviousShift) {
+    return;
+  }
+  const hasDateHistogram = Object.values(layer.columns).some(
+    (column) => column.operationType === 'date_histogram'
+  );
+  if (!hasDateHistogram) {
+    return;
+  }
+  return [
+    i18n.translate('xpack.lens.indexPattern.dateHistogramTimeShift', {
+      defaultMessage:
+        'In a single layer, you are unable to combine previous time range shift with date histograms. Either use an explicit time shift duration in "{column}" or replace the date histogram.',
+      values: {
+        column: currentColumn.label,
+      },
+    }),
+  ];
 }
 
 export function getStateTimeShiftWarningMessages(
