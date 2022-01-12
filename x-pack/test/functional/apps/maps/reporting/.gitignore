@@ -1,0 +1,2 @@
+# ignore temporary screenshot files that are created during test runs for PNG comparison
+session
