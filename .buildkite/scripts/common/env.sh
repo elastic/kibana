@@ -102,4 +102,4 @@ export TEST_CORS_SERVER_PORT=6106
 export ALERTING_PROXY_PORT=6105
 export TEST_PROXY_SERVER_PORT=6107
 
-export ES_SNAPSHOT_MANIFEST="https://storage.googleapis.com/kibana-ci-es-snapshots-daily/8.1.0/archives/20211215-151514_b5812c8e/manifest.json"
+export ES_SNAPSHOT_MANIFEST="https://storage.googleapis.com/kibana-ci-es-snapshots-daily/8.0.0/archives/20220111-151610_129af38d/manifest.json"
