@@ -38,7 +38,6 @@ function getLensTopNavConfig(options: {
   actions: LensTopNavActions;
   tooltips: LensTopNavTooltips;
   savingToLibraryPermitted: boolean;
-  savingToDashboardPermitted: boolean;
 }): TopNavMenuData[] {
   const {
     actions,
@@ -47,17 +46,13 @@ function getLensTopNavConfig(options: {
     enableExportToCSV,
     showSaveAndReturn,
     savingToLibraryPermitted,
-    savingToDashboardPermitted,
     tooltips,
   } = options;
   const topNavMenu: TopNavMenuData[] = [];
 
   const enableSaveButton =
     savingToLibraryPermitted ||
-    (allowByValue &&
-      savingToDashboardPermitted &&
-      !options.isByValueMode &&
-      !options.showSaveAndReturn);
+    (allowByValue && !options.isByValueMode && !options.showSaveAndReturn);
 
   const saveButtonLabel = options.isByValueMode
     ? i18n.translate('xpack.lens.app.addToLibrary', {
@@ -130,7 +125,6 @@ function getLensTopNavConfig(options: {
       iconType: 'checkInCircleFilled',
       run: actions.saveAndReturn,
       testId: 'lnsApp_saveAndReturnButton',
-      disableButton: !savingToDashboardPermitted,
       description: i18n.translate('xpack.lens.app.saveAndReturnButtonAriaLabel', {
         defaultMessage: 'Save the current lens visualization and return to the last app',
       }),
@@ -231,9 +225,6 @@ export const LensTopNavMenu = ({
   const { from, to } = data.query.timefilter.timefilter.getTime();
 
   const savingToLibraryPermitted = Boolean(isSaveable && application.capabilities.visualize.save);
-  const savingToDashboardPermitted = Boolean(
-    isSaveable && application.capabilities.dashboard?.showWriteControls
-  );
 
   const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
     defaultMessage: 'unsaved',
@@ -251,7 +242,6 @@ export const LensTopNavMenu = ({
         allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
         showCancel: Boolean(isLinkedToOriginatingApp),
         savingToLibraryPermitted,
-        savingToDashboardPermitted,
         tooltips: {
           showExportWarning: () => {
             if (activeData) {
@@ -301,27 +291,25 @@ export const LensTopNavMenu = ({
             }
           },
           saveAndReturn: () => {
-            if (savingToDashboardPermitted) {
-              // disabling the validation on app leave because the document has been saved.
-              onAppLeave((actions) => {
-                return actions.default();
-              });
-              runSave(
-                {
-                  newTitle: title || '',
-                  newCopyOnSave: false,
-                  isTitleDuplicateConfirmed: false,
-                  returnToOrigin: true,
-                },
-                {
-                  saveToLibrary:
-                    (initialInput && attributeService.inputIsRefType(initialInput)) ?? false,
-                }
-              );
-            }
+            // disabling the validation on app leave because the document has been saved.
+            onAppLeave((actions) => {
+              return actions.default();
+            });
+            runSave(
+              {
+                newTitle: title || '',
+                newCopyOnSave: false,
+                isTitleDuplicateConfirmed: false,
+                returnToOrigin: true,
+              },
+              {
+                saveToLibrary:
+                  (initialInput && attributeService.inputIsRefType(initialInput)) ?? false,
+              }
+            );
           },
           showSaveModal: () => {
-            if (savingToDashboardPermitted || savingToLibraryPermitted) {
+            if (savingToLibraryPermitted) {
               setIsSaveModalVisible(true);
             }
           },
@@ -345,7 +333,6 @@ export const LensTopNavMenu = ({
       onAppLeave,
       redirectToOrigin,
       runSave,
-      savingToDashboardPermitted,
       savingToLibraryPermitted,
       setIsSaveModalVisible,
       uiSettings,

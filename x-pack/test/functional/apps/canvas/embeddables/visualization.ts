@@ -53,6 +53,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('by-value', () => {
       it('creates new tsvb embeddable', async () => {
+        await PageObjects.canvas.deleteSelectedElement();
         const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
         await PageObjects.canvas.createNewVis('metrics');
         await PageObjects.visualize.saveVisualizationAndReturn();
@@ -71,10 +72,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const embeddableCount = await PageObjects.canvas.getEmbeddableCount();
           expect(embeddableCount).to.eql(originalEmbeddableCount);
         });
-        await PageObjects.canvas.deleteSelectedElement();
       });
 
       it('creates new vega embeddable', async () => {
+        await PageObjects.canvas.deleteSelectedElement();
         const originalEmbeddableCount = await PageObjects.canvas.getEmbeddableCount();
         await PageObjects.canvas.createNewVis('vega');
         await PageObjects.visualize.saveVisualizationAndReturn();
