@@ -216,7 +216,7 @@ export const createLifecycleExecutor =
         const currentAlertData = currentAlerts[alertId];
 
         if (!alertData) {
-          logger.warn(`Could not find alert data for ${alertId}`);
+          logger.debug(`Could not find alert data for ${alertId}`);
         }
 
         const isNew = !state.trackedAlerts[alertId];
