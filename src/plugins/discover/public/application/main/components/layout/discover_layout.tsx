@@ -313,8 +313,8 @@ export function DiscoverLayout({
                       isTimeBased={isTimeBased}
                       viewMode={viewMode}
                       setDiscoverViewMode={setDiscoverViewMode}
-                      hideChartState={state.hideChart}
-                      intervalState={state.interval}
+                      hideChart={state.hideChart}
+                      interval={state.interval}
                     />
                   </EuiFlexItem>
                   <EuiHorizontalRule margin="none" />

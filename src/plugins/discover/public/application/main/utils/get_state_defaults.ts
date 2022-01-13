@@ -48,7 +48,7 @@ export function getStateDefaults({
   const query = searchSource.getField('query') || data.query.queryString.getDefaultQuery();
   const sort = getSortArray(savedSearch.sort ?? [], indexPattern!);
   const columns = getDefaultColumns(savedSearch, config);
-  const chartHidden = Boolean(storage.get(CHART_HIDDEN_KEY));
+  const chartHidden: boolean | unknown = storage.get(CHART_HIDDEN_KEY);
 
   const defaultState = {
     query,

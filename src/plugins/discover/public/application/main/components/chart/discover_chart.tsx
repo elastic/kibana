@@ -39,8 +39,8 @@ export function DiscoverChart({
   isTimeBased,
   viewMode,
   setDiscoverViewMode,
-  hideChartState,
-  intervalState,
+  hideChart,
+  interval,
 }: {
   resetSavedSearch: () => void;
   savedSearch: SavedSearch;
@@ -51,8 +51,8 @@ export function DiscoverChart({
   isTimeBased: boolean;
   viewMode: VIEW_MODE;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
-  hideChartState?: boolean;
-  intervalState?: string;
+  hideChart?: boolean;
+  interval?: string;
 }) {
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
   const showViewModeToggle = services.uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
@@ -76,14 +76,14 @@ export function DiscoverChart({
     if (chartRef.current.moveFocus && chartRef.current.element) {
       chartRef.current.element.focus();
     }
-  }, [hideChartState]);
+  }, [hideChart]);
 
   const toggleHideChart = useCallback(() => {
-    const newHideChart = !hideChartState;
+    const newHideChart = !hideChart;
     chartRef.current.moveFocus = !newHideChart;
     storage.set(CHART_HIDDEN_KEY, newHideChart);
     stateContainer.setAppState({ hideChart: newHideChart });
-  }, [hideChartState, stateContainer, storage]);
+  }, [hideChart, stateContainer, storage]);
 
   const timefilterUpdateHandler = useCallback(
     (ranges: { from: number; to: number }) => {
@@ -97,10 +97,10 @@ export function DiscoverChart({
   );
   const panels = useChartPanels(
     toggleHideChart,
-    (interval) => stateContainer.setAppState({ interval }),
+    (newInterval) => stateContainer.setAppState({ interval: newInterval }),
     () => setShowChartOptionsPopover(false),
-    hideChartState,
-    intervalState
+    hideChart,
+    interval
   );
 
   return (
@@ -152,7 +152,7 @@ export function DiscoverChart({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      {isTimeBased && !hideChartState && (
+      {isTimeBased && !hideChart && (
         <EuiFlexItem grow={false}>
           <section
             ref={(element) => (chartRef.current.element = element)}
