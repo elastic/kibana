@@ -433,10 +433,11 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.telemetryReceiver
     );
 
-    this.checkMetadataTransformsTask?.start({
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      taskManager: plugins.taskManager!,
-    });
+    if (plugins.taskManager) {
+      this.checkMetadataTransformsTask?.start({
+        taskManager: plugins.taskManager,
+      });
+    }
 
     return {};
   }

@@ -409,10 +409,7 @@ export class EndpointMetadataService {
     fleetServices: EndpointFleetServicesInterface,
     queryOptions: GetMetadataListRequestQuery
   ): Promise<Pick<MetadataListResponse, 'data' | 'total'>> {
-    const endpointPolicies = await getAllEndpointPackagePolicies(
-      this.packagePolicyService,
-      this.DANGEROUS_INTERNAL_SO_CLIENT
-    );
+    const endpointPolicies = await this.getAllEndpointPackagePolicies();
     const endpointPolicyIds = endpointPolicies.map((policy) => policy.policy_id);
     const unitedIndexQuery = await buildUnitedIndexQuery(queryOptions, endpointPolicyIds);
 
@@ -482,5 +479,12 @@ export class EndpointMetadataService {
       data: hosts,
       total: (docsCount as unknown as SearchTotalHits).value,
     };
+  }
+
+  async getAllEndpointPackagePolicies() {
+    return getAllEndpointPackagePolicies(
+      this.packagePolicyService,
+      this.DANGEROUS_INTERNAL_SO_CLIENT
+    );
   }
 }

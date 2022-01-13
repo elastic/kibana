@@ -42,6 +42,8 @@ import { requestContextFactoryMock } from '../request_context_factory.mock';
 import { EndpointMetadataService } from './services/metadata';
 import { createFleetAuthzMock } from '../../../fleet/common';
 import { createMockClients } from '../lib/detection_engine/routes/__mocks__/request_context';
+import { createEndpointMetadataServiceTestContextMock } from './services/metadata/mocks';
+
 import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 
 /**
@@ -64,6 +66,7 @@ export const createMockEndpointAppContext = (
 export const createMockEndpointAppContextService = (
   mockManifestManager?: ManifestManager
 ): jest.Mocked<EndpointAppContextService> => {
+  const mockEndpointMetadataContext = createEndpointMetadataServiceTestContextMock();
   return {
     start: jest.fn(),
     stop: jest.fn(),
@@ -71,6 +74,8 @@ export const createMockEndpointAppContextService = (
     getAgentService: jest.fn(),
     getAgentPolicyService: jest.fn(),
     getManifestManager: jest.fn().mockReturnValue(mockManifestManager ?? jest.fn()),
+    getEndpointMetadataService: jest.fn(() => mockEndpointMetadataContext.endpointMetadataService),
+    getInternalFleetServices: jest.fn(() => mockEndpointMetadataContext.fleetServices),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 

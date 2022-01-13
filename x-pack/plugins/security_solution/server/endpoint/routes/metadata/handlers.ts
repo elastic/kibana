@@ -29,7 +29,6 @@ import { AgentNotFoundError } from '../../../../../fleet/server';
 import { EndpointAppContext, HostListQueryResult } from '../../types';
 import { GetMetadataRequestSchema } from './index';
 import { findAllUnenrolledAgentIds } from './support/unenroll';
-import { getAllEndpointPackagePolicies } from './support/endpoint_package_policies';
 import { findAgentIdsByStatus } from './support/agent_status';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { fleetAgentStatusToEndpointHostStatus } from '../../utils';
@@ -115,10 +114,7 @@ export function getMetadataListRequestHandler(
 
     // If no unified Index present, then perform a search using the legacy approach
     if (!doesUnitedIndexExist || didUnitedIndexError) {
-      const endpointPolicies = await getAllEndpointPackagePolicies(
-        fleetServices.packagePolicy,
-        context.core.savedObjects.client
-      );
+      const endpointPolicies = await endpointMetadataService.getAllEndpointPackagePolicies();
 
       const legacyResponse = await legacyListMetadataQuery(
         context,
