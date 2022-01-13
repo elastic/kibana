@@ -61,7 +61,7 @@ export const CloudPostureScoreChart = ({
 
   const data = [
     { label: TEXT.PASSED, value: totalPassed },
-    { label: TEXT.FAILEd, value: totalFailed },
+    { label: TEXT.FAILED, value: totalFailed },
   ];
 
   return (
