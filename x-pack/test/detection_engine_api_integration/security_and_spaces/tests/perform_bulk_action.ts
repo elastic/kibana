@@ -326,5 +326,38 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(responses.filter((r) => r.body.statusCode === 429).length).to.eql(5);
     });
+
+    it('should edit rule by its id in ids param', async () => {
+      const ruleId = 'ruleId';
+      const timelineId = '91832785-286d-4ebe-b884-1a208d111a70';
+      const timelineTitle = 'Test timeline';
+      await createRule(supertest, log, getSimpleRule(ruleId));
+      const {
+        body: { id },
+      } = await fetchRule(ruleId);
+
+      const { body } = await postBulkAction()
+        .send({
+          ids: [id],
+          action: BulkAction.edit,
+          [BulkAction.edit]: [
+            {
+              type: BulkActionEditType.set_timeline,
+              value: {
+                timeline_id: timelineId,
+                timeline_title: timelineTitle,
+              },
+            },
+          ],
+        })
+        .expect(200);
+
+      expect(body).to.eql({ success: true, rules_count: 1 });
+
+      const { body: rule } = await fetchRule(ruleId).expect(200);
+
+      expect(rule.timeline_id).to.eql(timelineId);
+      expect(rule.timeline_title).to.eql(timelineTitle);
+    });
   });
 };

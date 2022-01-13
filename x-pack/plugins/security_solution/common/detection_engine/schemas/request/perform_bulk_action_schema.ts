@@ -6,12 +6,18 @@
  */
 
 import * as t from 'io-ts';
-import { BulkAction, queryOrUndefined, bulkActionEditPayload } from '../common/schemas';
+import {
+  BulkAction,
+  queryOrUndefined,
+  bulkActionEditPayload,
+  idsOrUndefined,
+} from '../common/schemas';
 
 export const performBulkActionSchema = t.intersection([
   t.exact(
     t.type({
       query: queryOrUndefined,
+      ids: idsOrUndefined,
     })
   ),
   t.union([
