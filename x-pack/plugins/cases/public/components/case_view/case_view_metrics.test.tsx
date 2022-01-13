@@ -43,21 +43,21 @@ interface FeatureTest {
 const metricsFeaturesTests: FeatureTest[] = [
   {
     feature: 'alerts.count',
-    items: [{ title: 'Total Alerts', value: basicCaseMetrics.alerts!.count! }],
+    items: [{ title: 'Total alerts', value: basicCaseMetrics.alerts!.count! }],
   },
   {
     feature: 'alerts.users',
-    items: [{ title: 'Associated Users', value: basicCaseMetrics.alerts!.users!.total! }],
+    items: [{ title: 'Associated users', value: basicCaseMetrics.alerts!.users!.total! }],
   },
   {
     feature: 'alerts.hosts',
-    items: [{ title: 'Associated Hosts', value: basicCaseMetrics.alerts!.hosts!.total! }],
+    items: [{ title: 'Associated hosts', value: basicCaseMetrics.alerts!.hosts!.total! }],
   },
   {
     feature: 'actions.isolateHost',
     items: [
       {
-        title: 'Isolated Hosts',
+        title: 'Isolated hosts',
         value:
           basicCaseMetrics.actions!.isolateHost!.isolate.total -
           basicCaseMetrics.actions!.isolateHost!.unisolate.total,
@@ -66,7 +66,7 @@ const metricsFeaturesTests: FeatureTest[] = [
   },
   {
     feature: 'connectors',
-    items: [{ title: 'Total Connectors', value: basicCaseMetrics.connectors!.total! }],
+    items: [{ title: 'Total connectors', value: basicCaseMetrics.connectors!.total! }],
   },
   {
     feature: 'lifespan',
@@ -167,7 +167,7 @@ describe('CaseViewMetrics', () => {
       metrics: incosistentMetrics,
       features: ['actions.isolateHost'],
     });
-    expect(getByText('Isolated Hosts')).toBeInTheDocument();
+    expect(getByText('Isolated hosts')).toBeInTheDocument();
     expect(getByText('0')).toBeInTheDocument();
   });
 
