@@ -20,6 +20,7 @@ import { InspectButton, InspectButtonContainer } from '../../../common/component
 import * as i18n from './translations';
 import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
 import { Direction } from '../../../../../timelines/common';
+import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
 
 export interface TopHostScoreContributorsProps {
   hostName: string;
@@ -48,7 +49,6 @@ const columns: Array<EuiTableFieldDataColumnType<TableItem>> = [
 ];
 
 const PAGE_SIZE = 5;
-const QUERY_ID = 'TopHostScoreContributorsQuery';
 
 const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps> = ({
   hostName,
@@ -67,7 +67,7 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
     hostName,
     timerange,
     onlyLatest: false,
-    queryId: QUERY_ID,
+    queryId: HostRiskScoreQueryId.TOP_HOST_SCORE_CONTRIBUTORS,
     limit: 1,
     sortOrder: Direction.desc,
   });
@@ -99,7 +99,10 @@ const TopHostScoreContributorsComponent: React.FC<TopHostScoreContributorsProps>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <InspectButton queryId={QUERY_ID} title={i18n.TOP_RISK_SCORE_CONTRIBUTORS} />
+            <InspectButton
+              queryId={HostRiskScoreQueryId.TOP_HOST_SCORE_CONTRIBUTORS}
+              title={i18n.TOP_RISK_SCORE_CONTRIBUTORS}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
 

@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { HostRiskSeverity } from '../../../../common/search_strategy';
 import { RISKY_HOSTS_DOC_LINK } from '../../../overview/components/overview_risky_host_links/risky_hosts_disabled_module';
 import { HostRiskScore } from '../common/host_risk_score';
@@ -62,7 +62,7 @@ const tableItems: TableItem[] = [
 
 export const HOST_RISK_INFO_BUTTON_CLASS = 'HostRiskInformation__button';
 
-export const HostRiskInformationButtonIcon = () => {
+export const HostRiskInformationButtonIcon = memo(() => {
   const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
 
   return (
@@ -79,9 +79,10 @@ export const HostRiskInformationButtonIcon = () => {
       {isFlyoutVisible && <HostRiskInformationFlyout handleOnClose={handleOnClose} />}
     </>
   );
-};
+});
+HostRiskInformationButtonIcon.displayName = 'HostRiskInformationButtonIcon';
 
-export const HostRiskInformationButtonEmpty = () => {
+export const HostRiskInformationButtonEmpty = memo(() => {
   const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
 
   return (
@@ -92,7 +93,8 @@ export const HostRiskInformationButtonEmpty = () => {
       {isFlyoutVisible && <HostRiskInformationFlyout handleOnClose={handleOnClose} />}
     </>
   );
-};
+});
+HostRiskInformationButtonEmpty.displayName = 'HostRiskInformationButtonEmpty';
 
 const useOnOpenCloseHandler = (): [boolean, () => void, () => void] => {
   const [isOpen, setIsOpen] = useState(false);

@@ -28,6 +28,7 @@ import { InspectButton, InspectButtonContainer } from '../../../common/component
 import * as i18n from './translations';
 import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
+import { HostRiskScoreQueryId } from '../../../common/containers/hosts_risk/types';
 
 export interface HostRiskScoreOverTimeProps {
   hostName: string;
@@ -37,7 +38,6 @@ export interface HostRiskScoreOverTimeProps {
 
 const RISKY_TRESHOULD = 70;
 const DEFAULT_CHART_HEIGH = 250;
-const QUERY_ID = 'HostRiskScoreOverTimeQuery';
 
 const StyledEuiText = styled(EuiText)`
   font-size: 9px;
@@ -57,7 +57,10 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
 }) => {
   const timeZone = useTimeZone();
 
-  const dataTimeFormatter = useMemo(() => histogramDateTimeFormatter([from, to]), [from, to]);
+  const memoizedDataTimeFormatter = useMemo(
+    () => histogramDateTimeFormatter([from, to]),
+    [from, to]
+  );
   const scoreFormatter = useCallback((d: number) => Math.round(d).toString(), []);
   const headerFormatter = useCallback(
     (tooltip: TooltipValue) => <PreferenceFormattedDate value={tooltip.value} />,
@@ -77,7 +80,7 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
     hostName,
     onlyLatest: false,
     timerange,
-    queryId: QUERY_ID,
+    queryId: HostRiskScoreQueryId.HOST_RISK_SCORE_OVER_TIME,
   });
 
   const data = useMemo(
@@ -100,7 +103,10 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <InspectButton queryId={QUERY_ID} title={i18n.HOST_RISK_SCORE_OVER_TIME} />
+            <InspectButton
+              queryId={HostRiskScoreQueryId.HOST_RISK_SCORE_OVER_TIME}
+              title={i18n.HOST_RISK_SCORE_OVER_TIME}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -121,7 +127,7 @@ const HostRiskScoreOverTimeComponent: React.FC<HostRiskScoreOverTimeProps> = ({
                   <Axis
                     id="bottom"
                     position={Position.Bottom}
-                    tickFormat={dataTimeFormatter}
+                    tickFormat={memoizedDataTimeFormatter}
                     showGridLines
                     gridLine={{
                       strokeWidth: 1,

@@ -16,8 +16,8 @@ import { Direction, getHostRiskIndex, HostsRiskScore } from '../../../../common/
 
 import { useHostsRiskScoreComplete } from './use_hosts_risk_score_complete';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { HostRiskScoreQueryId } from './types';
 
-export const QUERY_ID = 'host_risk_score';
 const noop = () => {};
 
 const isRecord = (item: unknown): item is Record<string, unknown> =>
@@ -36,18 +36,21 @@ export interface HostRisk {
   result?: HostsRiskScore[];
 }
 
+/**
+ * @param queryId Provide this parameter when using query inspector to identify the query.
+ */
 export const useHostsRiskScore = ({
   timerange,
   hostName,
   onlyLatest = true,
-  queryId = QUERY_ID,
+  queryId = HostRiskScoreQueryId.DEFAULT,
   sortOrder,
   limit,
 }: {
   timerange?: { to: string; from: string };
   hostName?: string;
   onlyLatest?: boolean;
-  queryId?: string;
+  queryId?: HostRiskScoreQueryId;
   limit?: number;
   sortOrder?: Direction;
 }): HostRisk | null => {
