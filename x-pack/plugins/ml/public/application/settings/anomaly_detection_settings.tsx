@@ -12,7 +12,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageContent,
   EuiPageContentHeader,
   EuiSpacer,
   EuiText,
@@ -78,152 +77,152 @@ export const AnomalyDetectionSettings: FC = () => {
 
   return (
     <Fragment>
-      <EuiPageContent className="mlSettingsPage__content" horizontalPosition="center">
-        <EuiPageContentHeader>
-          <EuiTitle>
-            <h2>
-              <FormattedMessage
-                id="xpack.ml.settings.anomalyDetection.anomalyDetectionTitle"
-                defaultMessage="Anomaly Detection"
-              />
-            </h2>
-          </EuiTitle>
-        </EuiPageContentHeader>
+      <EuiPageContentHeader>
+        <EuiTitle>
+          <h2>
+            <FormattedMessage
+              id="xpack.ml.settings.anomalyDetection.anomalyDetectionTitle"
+              defaultMessage="Anomaly Detection"
+            />
+          </h2>
+        </EuiTitle>
+      </EuiPageContentHeader>
 
-        <EuiFlexGroup gutterSize="xl">
-          <EuiFlexItem grow={5}>
-            <EuiTitle size="s">
-              <h3>
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup gutterSize="xl">
+        <EuiFlexItem grow={5}>
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.ml.settings.anomalyDetection.calendarsTitle"
+                defaultMessage="Calendars"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s">
+            <EuiTextColor color="subdued">
+              <p>
                 <FormattedMessage
-                  id="xpack.ml.settings.anomalyDetection.calendarsTitle"
-                  defaultMessage="Calendars"
+                  id="xpack.ml.settings.anomalyDetection.calendarsText"
+                  defaultMessage="Calendars contain a list of scheduled events for which you do not want to generate anomalies, such as planned system outages or public holidays."
                 />
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiText size="s">
-              <EuiTextColor color="subdued">
-                <p>
+              </p>
+            </EuiTextColor>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup alignItems="center">
+            {canGetCalendars && (
+              <EuiFlexItem grow={false} style={{ display: 'block' }}>
+                <EuiText>
                   <FormattedMessage
-                    id="xpack.ml.settings.anomalyDetection.calendarsText"
-                    defaultMessage="Calendars contain a list of scheduled events for which you do not want to generate anomalies, such as planned system outages or public holidays."
+                    id="xpack.ml.settings.anomalyDetection.calendarsSummaryCount"
+                    defaultMessage="You have {calendarsCountBadge} {calendarsCount, plural, one {calendar} other {calendars}}"
+                    values={{
+                      calendarsCountBadge: <EuiBadge>{calendarsCount}</EuiBadge>,
+                      calendarsCount,
+                    }}
                   />
-                </p>
-              </EuiTextColor>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup alignItems="center">
-              {canGetCalendars && (
-                <EuiFlexItem grow={false} style={{ display: 'block' }}>
-                  <EuiText>
-                    <FormattedMessage
-                      id="xpack.ml.settings.anomalyDetection.calendarsSummaryCount"
-                      defaultMessage="You have {calendarsCountBadge} {calendarsCount, plural, one {calendar} other {calendars}}"
-                      values={{
-                        calendarsCountBadge: <EuiBadge>{calendarsCount}</EuiBadge>,
-                        calendarsCount,
-                      }}
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="mlCalendarsMngButton"
-                  flush="left"
-                  color="primary"
-                  onClick={redirectToCalendarList}
-                  isDisabled={canGetCalendars === false}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.settings.anomalyDetection.manageCalendarsLink"
-                    defaultMessage="Manage"
-                  />
-                </EuiButtonEmpty>
+                </EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="mlCalendarsCreateButton"
-                  flush="left"
-                  color="primary"
-                  onClick={redirectToNewCalendarPage}
-                  isDisabled={canCreateCalendar === false}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.settings.anomalyDetection.createCalendarLink"
-                    defaultMessage="Create"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={5}>
-            <EuiTitle size="s">
-              <h3>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="mlCalendarsMngButton"
+                flush="left"
+                color="primary"
+                onClick={redirectToCalendarList}
+                isDisabled={canGetCalendars === false}
+              >
                 <FormattedMessage
-                  id="xpack.ml.settings.anomalyDetection.filterListsTitle"
-                  defaultMessage="Filter Lists"
+                  id="xpack.ml.settings.anomalyDetection.manageCalendarsLink"
+                  defaultMessage="Manage"
                 />
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiText size="s">
-              <EuiTextColor color="subdued">
-                <p>
-                  <FormattedMessage
-                    id="xpack.ml.settings.anomalyDetection.filterListsText"
-                    defaultMessage="Filter lists contain values that you can use to include or exclude events from the machine learning analysis."
-                  />
-                </p>
-              </EuiTextColor>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup alignItems="center">
-              {canGetFilters && (
-                <EuiFlexItem grow={false}>
-                  <EuiText>
-                    <FormattedMessage
-                      id="xpack.ml.settings.anomalyDetection.filterListsSummaryCount"
-                      defaultMessage="You have {filterListsCountBadge} {filterListsCount, plural, one {filter list} other {filter lists}}"
-                      values={{
-                        filterListsCountBadge: <EuiBadge>{filterListsCount}</EuiBadge>,
-                        filterListsCount,
-                      }}
-                    />
-                  </EuiText>
-                </EuiFlexItem>
-              )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="mlCalendarsCreateButton"
+                flush="left"
+                color="primary"
+                onClick={redirectToNewCalendarPage}
+                isDisabled={canCreateCalendar === false}
+              >
+                <FormattedMessage
+                  id="xpack.ml.settings.anomalyDetection.createCalendarLink"
+                  defaultMessage="Create"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={5}>
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.ml.settings.anomalyDetection.filterListsTitle"
+                defaultMessage="Filter Lists"
+              />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="s">
+            <EuiTextColor color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.ml.settings.anomalyDetection.filterListsText"
+                  defaultMessage="Filter lists contain values that you can use to include or exclude events from the machine learning analysis."
+                />
+              </p>
+            </EuiTextColor>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup alignItems="center">
+            {canGetFilters && (
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="mlFilterListsMngButton"
-                  flush="left"
-                  color="primary"
-                  onClick={redirectToFilterLists}
-                  isDisabled={canGetFilters === false}
-                >
+                <EuiText>
                   <FormattedMessage
-                    id="xpack.ml.settings.anomalyDetection.manageFilterListsLink"
-                    defaultMessage="Manage"
+                    id="xpack.ml.settings.anomalyDetection.filterListsSummaryCount"
+                    defaultMessage="You have {filterListsCountBadge} {filterListsCount, plural, one {filter list} other {filter lists}}"
+                    values={{
+                      filterListsCountBadge: <EuiBadge>{filterListsCount}</EuiBadge>,
+                      filterListsCount,
+                    }}
                   />
-                </EuiButtonEmpty>
+                </EuiText>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="mlFilterListsCreateButton"
-                  color="primary"
-                  onClick={redirectToNewFilterListPage}
-                  isDisabled={canCreateFilter === false}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.settings.anomalyDetection.createFilterListsLink"
-                    defaultMessage="Create"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPageContent>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="mlFilterListsMngButton"
+                flush="left"
+                color="primary"
+                onClick={redirectToFilterLists}
+                isDisabled={canGetFilters === false}
+              >
+                <FormattedMessage
+                  id="xpack.ml.settings.anomalyDetection.manageFilterListsLink"
+                  defaultMessage="Manage"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="mlFilterListsCreateButton"
+                color="primary"
+                onClick={redirectToNewFilterListPage}
+                isDisabled={canCreateFilter === false}
+              >
+                <FormattedMessage
+                  id="xpack.ml.settings.anomalyDetection.createFilterListsLink"
+                  defaultMessage="Create"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </Fragment>
   );
 };
