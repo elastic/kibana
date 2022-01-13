@@ -393,6 +393,20 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       }
     }, [isSelectAllChecked, onSelectPage, selectAll]);
 
+    // Clean any removed custom field that may still be present in stored columnHeaders
+    useEffect(() => {
+      if (browserFields && columnHeaders) {
+        columnHeaders.forEach(({ id: columnId }) => {
+          if (browserFields.base.fields?.[columnId] == null) {
+            const [category] = columnId.split('.');
+            if (browserFields[category]?.fields?.[columnId] == null) {
+              dispatch(tGridActions.removeColumn({ id, columnId }));
+            }
+          }
+        });
+      }
+    }, [browserFields, columnHeaders, dispatch, id]);
+
     const onAlertStatusActionSuccess = useMemo(() => {
       if (bulkActions && bulkActions !== true) {
         return bulkActions.onAlertStatusActionSuccess;

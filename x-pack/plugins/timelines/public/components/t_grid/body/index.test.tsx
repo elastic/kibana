@@ -14,7 +14,7 @@ import { REMOVE_COLUMN } from './column_headers/translations';
 import { Direction } from '../../../../common/search_strategy';
 import { useMountAppended } from '../../utils/use_mount_appended';
 import { defaultHeaders, mockBrowserFields, mockTimelineData, TestProviders } from '../../../mock';
-import { TimelineTabs } from '../../../../common/types/timeline';
+import { ColumnHeaderOptions, TimelineTabs } from '../../../../common/types/timeline';
 import { TestCellRenderer } from '../../../mock/cell_renderer';
 import { mockGlobalState } from '../../../mock/global_state';
 import { EuiDataGridColumn } from '@elastic/eui';
@@ -328,6 +328,24 @@ describe('Body', () => {
     expect(mockDispatch).toBeCalledWith({
       payload: { columnId: '@timestamp', id: 'timeline-test', width: NaN },
       type: 'x-pack/timelines/t-grid/UPDATE_COLUMN_WIDTH',
+    });
+  });
+
+  test('it dispatches the `REMOVE_COLUMN` action when there is a field removed from the custom fields', async () => {
+    const customFieldId = 'my.custom.runtimeField';
+    const extraFieldProps = {
+      ...props,
+      columnHeaders: [...defaultHeaders, { id: customFieldId } as ColumnHeaderOptions],
+    };
+    render(
+      <TestProviders>
+        <BodyComponent {...extraFieldProps} />
+      </TestProviders>
+    );
+
+    expect(mockDispatch).toBeCalledWith({
+      payload: { columnId: customFieldId, id: 'timeline-test' },
+      type: 'x-pack/timelines/t-grid/REMOVE_COLUMN',
     });
   });
 });
