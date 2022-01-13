@@ -163,18 +163,18 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('existing_fields apis legacy', () => {
     before(async () => {
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/visualize/default');
       await kibanaServer.uiSettings.update({
         'lens:useFieldExistenceSampling': true,
       });
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/visualize/default');
     });
     after(async () => {
+      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/test/functional/es_archives/visualize/default');
       await kibanaServer.uiSettings.update({
         'lens:useFieldExistenceSampling': false,
       });
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.unload('x-pack/test/functional/es_archives/visualize/default');
     });
 
     describe('existence', () => {
