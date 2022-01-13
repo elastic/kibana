@@ -32,7 +32,7 @@ import { fetchFields, VisFields } from '../lib/fetch_fields';
 import { getDataStart, getCoreStart } from '../../services';
 import type { TimeseriesVisParams } from '../../types';
 import { UseIndexPatternModeCallout } from './use_index_patter_mode_callout';
-import type { EditorRenderProps } from '../../../../../visualize/public';
+import type { EditorRenderProps } from '../../../../../visualizations/public';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 const APP_NAME = 'VisEditor';

@@ -377,7 +377,7 @@ describe('alert actions', () => {
         });
       });
 
-      test(' with NO  signal.group.id', async () => {
+      test(' with NO signal.group.id', async () => {
         const ecsDataMock: Ecs = {
           ...mockEcsDataWithAlert,
           signal: {
