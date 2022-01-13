@@ -44,7 +44,7 @@ export const ResolverNoProcessEvents = () => (
     <EuiText size="s">
       {i18n.translate('xpack.securitySolution.resolver.noProcessEvents.dataView', {
         defaultMessage: `In case you selected a different data view,
-          make sure your data view contains one of the inidices that are stored in the source event at "{field}".`,
+          make sure your data view contains all of the indices that are stored in the source event at "{field}".`,
         values: { field: 'kibana.alert.rule.parameters.index' },
       })}
     </EuiText>
