@@ -44,10 +44,11 @@ export const useGlobalFullScreen = (): GlobalFullScreen => {
     useShallowEqualSelector(inputsSelectors.globalFullScreenSelector) ?? false;
   const setGlobalFullScreen = useCallback(
     (fullScreen: boolean) => {
+      const isDataGridFullScreen = document.querySelector('.euiDataGrid--fullScreen') !== null;
       if (fullScreen) {
         document.body.classList.add(SCROLLING_DISABLED_CLASS_NAME, 'euiDataGrid__restrictBody');
         resetScroll();
-      } else {
+      } else if (isDataGridFullScreen === false || fullScreen === false) {
         document.body.classList.remove(SCROLLING_DISABLED_CLASS_NAME, 'euiDataGrid__restrictBody');
         resetScroll();
       }
@@ -72,9 +73,10 @@ export const useTimelineFullScreen = (): TimelineFullScreen => {
     useShallowEqualSelector(inputsSelectors.timelineFullScreenSelector) ?? false;
   const setTimelineFullScreen = useCallback(
     (fullScreen: boolean) => {
+      const isDataGridFullScreen = document.querySelector('.euiDataGrid--fullScreen') !== null;
       if (fullScreen) {
         document.body.classList.add('euiDataGrid__restrictBody');
-      } else {
+      } else if (isDataGridFullScreen === false || fullScreen === false) {
         document.body.classList.remove('euiDataGrid__restrictBody');
       }
       dispatch(inputsActions.setFullScreen({ id: 'timeline', fullScreen }));
