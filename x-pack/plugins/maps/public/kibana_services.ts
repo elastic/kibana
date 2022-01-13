@@ -36,7 +36,15 @@ export const getAutocompleteService = () => pluginsStart.unifiedSearch.autocompl
 export const getInspector = () => pluginsStart.inspector;
 export const getFileUpload = () => pluginsStart.fileUpload;
 export const getUiSettings = () => coreStart.uiSettings;
-export const getIsDarkMode = () => getUiSettings().get('theme:darkMode', false);
+export const getIsDarkMode = () => {
+  const theme = getUiSettings().get('theme', 'system');
+
+  if (theme === 'system') {
+    return window.matchMedia('(prefers-color-scheme: dark').matches;
+  }
+
+  return theme === 'dark';
+};
 export const getIndexPatternSelectComponent = () =>
   pluginsStart.unifiedSearch.ui.IndexPatternSelect;
 export const getSearchBar = () => pluginsStart.unifiedSearch.ui.SearchBar;
