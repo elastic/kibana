@@ -16,6 +16,8 @@ const noop = () => {
   return;
 };
 
+const mockContainerDiv = document.createElement('div');
+
 const mockSuggestions: QuerySuggestion[] = [
   {
     description: 'This is not a helpful suggestion',
@@ -43,7 +45,7 @@ describe('SuggestionsComponent', () => {
         show={false}
         suggestions={mockSuggestions}
         loadMore={noop}
-        queryBarRect={{ top: 0 } as DOMRect}
+        inputContainer={mockContainerDiv}
       />
     );
 
@@ -59,7 +61,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={[]}
         loadMore={noop}
-        queryBarRect={{ top: 0 } as DOMRect}
+        inputContainer={mockContainerDiv}
       />
     );
 
@@ -67,7 +69,7 @@ describe('SuggestionsComponent', () => {
   });
 
   it('Should display given suggestions if the show prop is true', () => {
-    const component = shallow(
+    const component = mount(
       <SuggestionsComponent
         index={0}
         onClick={noop}
@@ -75,16 +77,16 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
-        queryBarRect={{ top: 0 } as DOMRect}
+        inputContainer={mockContainerDiv}
       />
     );
 
     expect(component.isEmptyRender()).toBe(false);
-    expect(component).toMatchSnapshot();
+    expect(component.find(SuggestionComponent)).toHaveLength(2);
   });
 
   it('Passing the index should control which suggestion is selected', () => {
-    const component = shallow(
+    const component = mount(
       <SuggestionsComponent
         index={1}
         onClick={noop}
@@ -92,11 +94,11 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
-        queryBarRect={{ top: 0 } as DOMRect}
+        inputContainer={mockContainerDiv}
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(component.find(SuggestionComponent).at(1).prop('selected')).toBe(true);
   });
 
   it('Should call onClick with the selected suggestion when it is clicked', () => {
@@ -109,7 +111,7 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
-        queryBarRect={{ top: 0 } as DOMRect}
+        inputContainer={mockContainerDiv}
       />
     );
 
@@ -128,12 +130,12 @@ describe('SuggestionsComponent', () => {
         show={true}
         suggestions={mockSuggestions}
         loadMore={noop}
-        queryBarRect={{ top: 0 } as DOMRect}
+        inputContainer={mockContainerDiv}
       />
     );
 
     component.find(SuggestionComponent).at(1).simulate('mouseenter');
     expect(mockCallback).toHaveBeenCalledTimes(1);
-    expect(mockCallback).toHaveBeenCalledWith(1);
+    expect(mockCallback).toHaveBeenCalledWith(mockSuggestions[1], 1);
   });
 });
