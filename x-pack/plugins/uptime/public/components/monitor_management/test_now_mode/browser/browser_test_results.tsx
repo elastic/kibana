@@ -22,7 +22,6 @@ export const BrowserTestRunResult = ({ monitorId }: Props) => {
   });
 
   const hits = data?.hits.hits;
-
   const doc = hits?.[0]?._source as JourneyStep;
 
   const getButtonContent = (

@@ -200,6 +200,25 @@ export const MockRedux = ({
   );
 };
 
+export function WrappedHelper<ExtraCore>({
+  children,
+  core,
+  kibanaProps,
+  state,
+  url,
+  history = createMemoryHistory(),
+}: RenderRouterOptions<ExtraCore> & { children: ReactElement }) {
+  const testState: AppState = merge({}, mockState, state);
+
+  return (
+    <MountWithReduxProvider state={testState}>
+      <MockRouter history={history} kibanaProps={kibanaProps} core={core}>
+        {children}
+      </MockRouter>
+    </MountWithReduxProvider>
+  );
+}
+
 /* Custom react testing library render */
 export function render<ExtraCore>(
   ui: ReactElement,
@@ -212,19 +231,21 @@ export function render<ExtraCore>(
     url,
   }: RenderRouterOptions<ExtraCore> = {}
 ) {
-  const testState: AppState = merge({}, mockState, state);
-
   if (url) {
     history = getHistoryFromUrl(url);
   }
 
   return {
     ...reactTestLibRender(
-      <MountWithReduxProvider state={testState}>
-        <MockRouter history={history} kibanaProps={kibanaProps} core={core}>
-          {ui}
-        </MockRouter>
-      </MountWithReduxProvider>,
+      <WrappedHelper
+        history={history}
+        kibanaProps={kibanaProps}
+        core={core}
+        url={url}
+        state={state}
+      >
+        {ui}
+      </WrappedHelper>,
       renderOptions
     ),
     history,

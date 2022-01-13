@@ -11,12 +11,16 @@ import { JourneyStep } from '../../../../../common/runtime_types';
 import { createEsParams, useEsSearch } from '../../../../../../observability/public';
 import { useTickTick } from '../use_tick_tick';
 
-export const useBrowserRunOnceMonitors = ({ monitorId }: { monitorId: string }) => {
+export const useBrowserEsResults = ({
+  monitorId,
+  lastRefresh,
+}: {
+  monitorId: string;
+  lastRefresh: number;
+}) => {
   const { settings } = useSelector(selectDynamicSettings);
 
-  const { refreshTimer, lastRefresh } = useTickTick();
-
-  const { data, loading } = useEsSearch(
+  return useEsSearch(
     createEsParams({
       index: settings?.heartbeatIndices,
       body: {
@@ -47,6 +51,12 @@ export const useBrowserRunOnceMonitors = ({ monitorId }: { monitorId: string }) 
     [monitorId, settings?.heartbeatIndices, lastRefresh],
     { name: 'TestRunData' }
   );
+};
+
+export const useBrowserRunOnceMonitors = ({ monitorId }: { monitorId: string }) => {
+  const { refreshTimer, lastRefresh } = useTickTick();
+
+  const { data, loading } = useBrowserEsResults({ monitorId, lastRefresh });
 
   const hits = data?.hits.hits;
 
