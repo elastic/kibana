@@ -63,7 +63,7 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
             </EuiButtonEmptyTo>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
         <EuiHorizontalRule size="full" margin="none" />
       </>
     );
