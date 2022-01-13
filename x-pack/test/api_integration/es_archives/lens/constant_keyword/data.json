@@ -18,7 +18,7 @@
     "index": "existence_index_2",
     "source": {
       "filter_field": "b",
-      "textfield1": "test",
+      "textfield2": "test",
       "ts": "2022-01-02"
     }
   }
