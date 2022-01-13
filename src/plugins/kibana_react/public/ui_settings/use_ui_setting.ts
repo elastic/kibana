@@ -16,7 +16,7 @@ import { useKibana } from '../context';
  * Usage:
  *
  * ```js
- * const darkMode = useUiSetting('theme:darkMode');
+ * const theme = useUiSetting('theme');
  * ```
  */
 export const useUiSetting = <T>(key: string, defaultValue?: T): T => {
@@ -41,7 +41,7 @@ type Setter<T> = (newValue: T) => Promise<boolean>;
  * Usage:
  *
  * ```js
- * const [darkMode, setDarkMode] = useUiSetting$('theme:darkMode');
+ * const [theme, setTheme] = useUiSetting$('theme');
  * ```
  */
 export const useUiSetting$ = <T>(key: string, defaultValue?: T): [T, Setter<T>] => {
