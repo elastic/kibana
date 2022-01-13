@@ -14,7 +14,6 @@ import { Router, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import useObservable from 'react-use/lib/useObservable';
 
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 
@@ -233,8 +232,6 @@ export const FleetAppContext: React.FC<{
     routerHistory,
     theme$,
   }) => {
-    const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
-
     return (
       <RedirectAppLinks application={startServices.application}>
         <startServices.i18n.Context>
@@ -243,7 +240,7 @@ export const FleetAppContext: React.FC<{
               <ConfigContext.Provider value={config}>
                 <KibanaVersionContext.Provider value={kibanaVersion}>
                   <KibanaThemeProvider theme$={theme$}>
-                    <EuiThemeProvider darkMode={isDarkMode}>
+                    <EuiThemeProvider theme$={theme$}>
                       <UIExtensionsContext.Provider value={extensions}>
                         <FleetStatusProvider>
                           <Router history={history}>

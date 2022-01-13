@@ -10,7 +10,6 @@ import type { AppMountParameters } from '@kbn/core/public';
 import { EuiErrorBoundary } from '@elastic/eui';
 import type { History } from 'history';
 import { Router, Redirect, Route, Switch } from 'react-router-dom';
-import useObservable from 'react-use/lib/useObservable';
 
 import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -59,7 +58,6 @@ export const IntegrationsAppContext: React.FC<{
     setHeaderActionMenu,
     theme$,
   }) => {
-    const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
     const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
 
     return (
@@ -70,7 +68,7 @@ export const IntegrationsAppContext: React.FC<{
               <ConfigContext.Provider value={config}>
                 <KibanaVersionContext.Provider value={kibanaVersion}>
                   <KibanaThemeProvider theme$={theme$}>
-                    <EuiThemeProvider darkMode={isDarkMode}>
+                    <EuiThemeProvider theme$={theme$}>
                       <UIExtensionsContext.Provider value={extensions}>
                         <FleetStatusProvider>
                           <startServices.customIntegrations.ContextProvider>
