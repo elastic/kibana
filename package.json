@@ -127,7 +127,7 @@
     "@kbn/test-subj-selector": "0.2.1",
     "@kbn/ui-framework": "1.0.0",
     "@logrhythm/icons": "^1.19.0",
-    "@logrhythm/nm-web-shared": "1.30.0",
+    "@logrhythm/nm-web-shared": "1.31.0",
     "@logrhythm/webui": "^5.9.15",
     "@material-ui/core": "^4.4.0",
     "@material-ui/icons": "^4.5.1",
