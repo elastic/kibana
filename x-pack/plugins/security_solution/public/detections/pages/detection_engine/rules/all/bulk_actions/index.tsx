@@ -226,9 +226,12 @@ export const getBatchItems = ({
   };
 
   const isDeleteDisabled = containsLoading || selectedRuleIds.length === 0;
+  const isEditDisabled = missingActionPrivileges || containsLoading || selectedRuleIds.length === 0;
+
   return [
     {
       id: 0,
+      title: 'Options',
       items: [
         {
           key: i18n.BULK_ACTION_ENABLE,
@@ -244,54 +247,24 @@ export const getBatchItems = ({
           key: i18n.BULK_ACTION_DUPLICATE,
           name: i18n.BULK_ACTION_DUPLICATE,
           'data-test-subj': 'duplicateRuleBulk',
-          disabled: missingActionPrivileges || containsLoading || selectedRuleIds.length === 0,
+          disabled: isEditDisabled,
           onClick: handleDuplicateAction,
           toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
           toolTipPosition: 'right',
         },
         {
-          isSeparator: true,
-          key: 'bulkEditRuleSeparatorStart',
+          key: 'Index patterns',
+          name: 'Index patterns',
+          'data-test-subj': 'indexPatternsBulkEditRule',
+          disabled: isEditDisabled,
+          panel: 2,
         },
         {
-          key: i18n.BULK_ACTION_ADD_INDEX_PATTERNS,
-          name: i18n.BULK_ACTION_ADD_INDEX_PATTERNS,
-          'data-test-subj': 'addIndexPatternsBulkEditRule',
-          onClick: handleBulkEdit(BulkActionEditType.add_index_patterns),
-          disabled: missingActionPrivileges || containsLoading || selectedRuleIds.length === 0,
-          toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
-          toolTipPosition: 'right',
-        },
-        {
-          key: i18n.BULK_ACTION_DELETE_INDEX_PATTERNS,
-          name: i18n.BULK_ACTION_DELETE_INDEX_PATTERNS,
-          'data-test-subj': 'deleteIndexPatternsBulkEditRule',
-          onClick: handleBulkEdit(BulkActionEditType.delete_index_patterns),
-          disabled: missingActionPrivileges || containsLoading || selectedRuleIds.length === 0,
-          toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
-          toolTipPosition: 'right',
-        },
-        {
-          key: 'Add tags',
-          name: 'Add tags',
-          'data-test-subj': 'addTagsBulkEditRule',
-          onClick: handleBulkEdit(BulkActionEditType.add_tags),
-          disabled: missingActionPrivileges || containsLoading || selectedRuleIds.length === 0,
-          toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
-          toolTipPosition: 'right',
-        },
-        {
-          key: 'Delete tags',
-          name: 'Delete tags',
-          'data-test-subj': 'deleteTagsBulkEditRule',
-          onClick: handleBulkEdit(BulkActionEditType.delete_tags),
-          disabled: missingActionPrivileges || containsLoading || selectedRuleIds.length === 0,
-          toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
-          toolTipPosition: 'right',
-        },
-        {
-          isSeparator: true,
-          key: 'bulkEditRuleSeparatorEnd',
+          key: 'Tags',
+          name: 'Tags',
+          'data-test-subj': 'tagsBulkEditRule',
+          disabled: isEditDisabled,
+          panel: 1,
         },
         {
           key: i18n.BULK_ACTION_EXPORT,
@@ -328,6 +301,54 @@ export const getBatchItems = ({
           toolTipContent: containsImmutable
             ? i18n.BATCH_ACTION_DELETE_SELECTED_IMMUTABLE
             : undefined,
+          toolTipPosition: 'right',
+        },
+      ],
+    },
+    {
+      id: 1,
+      title: 'Options',
+      items: [
+        {
+          key: 'Add tags',
+          name: 'Add tags',
+          'data-test-subj': 'addTagsBulkEditRule',
+          onClick: handleBulkEdit(BulkActionEditType.add_tags),
+          disabled: isEditDisabled,
+          toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+          toolTipPosition: 'right',
+        },
+        {
+          key: 'Delete tags',
+          name: 'Delete tags',
+          'data-test-subj': 'deleteTagsBulkEditRule',
+          onClick: handleBulkEdit(BulkActionEditType.delete_tags),
+          disabled: isEditDisabled,
+          toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+          toolTipPosition: 'right',
+        },
+      ],
+    },
+    {
+      id: 2,
+      title: 'Options',
+      items: [
+        {
+          key: i18n.BULK_ACTION_ADD_INDEX_PATTERNS,
+          name: i18n.BULK_ACTION_ADD_INDEX_PATTERNS,
+          'data-test-subj': 'addIndexPatternsBulkEditRule',
+          onClick: handleBulkEdit(BulkActionEditType.add_index_patterns),
+          disabled: isEditDisabled,
+          toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+          toolTipPosition: 'right',
+        },
+        {
+          key: i18n.BULK_ACTION_DELETE_INDEX_PATTERNS,
+          name: i18n.BULK_ACTION_DELETE_INDEX_PATTERNS,
+          'data-test-subj': 'deleteIndexPatternsBulkEditRule',
+          onClick: handleBulkEdit(BulkActionEditType.delete_index_patterns),
+          disabled: isEditDisabled,
+          toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
           toolTipPosition: 'right',
         },
       ],
