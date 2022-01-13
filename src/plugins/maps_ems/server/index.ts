@@ -12,9 +12,13 @@ import {
   Plugin,
   PluginConfigDescriptor,
 } from 'src/core/server';
-import { MapsEmsConfig, emsConfigSchema } from '../config';
+import { MapConfig, mapConfigSchema } from '../config';
+import { EMSSettings, LICENSE_CHECK_ID } from '../common';
+import { LicensingPluginSetup } from '../../../../x-pack/plugins/licensing/server';
+import { ILicense } from '../../../../x-pack/plugins/licensing/common/types';
+export type { EMSSettings } from '../common';
 
-export const config: PluginConfigDescriptor<MapsEmsConfig> = {
+export const config: PluginConfigDescriptor<MapConfig> = {
   exposeToBrowser: {
     tilemap: true,
     includeElasticMapsService: true,
@@ -25,24 +29,46 @@ export const config: PluginConfigDescriptor<MapsEmsConfig> = {
     emsFontLibraryUrl: true,
     emsTileLayerId: true,
   },
-  schema: emsConfigSchema,
+  schema: mapConfigSchema,
 };
 
-export interface MapsEmsPluginSetup {
-  config: MapsEmsConfig;
+export interface MapsEmsPluginServerSetup {
+  config: MapConfig;
+  createEMSSettings: () => EMSSettings;
 }
 
-export class MapsEmsPlugin implements Plugin<MapsEmsPluginSetup> {
-  readonly _initializerContext: PluginInitializerContext<MapsEmsConfig>;
+interface MapsEmsSetupServerDependencies {
+  licensing?: LicensingPluginSetup;
+}
 
-  constructor(initializerContext: PluginInitializerContext<MapsEmsConfig>) {
+export class MapsEmsPlugin implements Plugin<MapsEmsPluginServerSetup> {
+  readonly _initializerContext: PluginInitializerContext<MapConfig>;
+
+  constructor(initializerContext: PluginInitializerContext<MapConfig>) {
     this._initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup) {
-    const emsPluginConfig = this._initializerContext.config.get();
+  public setup(core: CoreSetup, plugins: MapsEmsSetupServerDependencies) {
+    const mapConfig = this._initializerContext.config.get();
+
+    let isEnterprisePlus = false;
+    if (plugins.licensing) {
+      function updateLicenseState(license: ILicense) {
+        const enterprise = license.check(LICENSE_CHECK_ID, 'enterprise');
+        isEnterprisePlus = enterprise.state === 'valid';
+      }
+
+      plugins.licensing.refresh().then(updateLicenseState);
+      plugins.licensing.license$.subscribe(updateLicenseState);
+    }
+
     return {
-      config: emsPluginConfig,
+      config: mapConfig,
+      createEMSSettings: () => {
+        return new EMSSettings(mapConfig, () => {
+          return isEnterprisePlus;
+        });
+      },
     };
   }
 

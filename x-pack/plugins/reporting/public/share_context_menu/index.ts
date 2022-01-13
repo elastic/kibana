@@ -6,7 +6,7 @@
  */
 
 import * as Rx from 'rxjs';
-import type { IUiSettingsClient, ToastsSetup } from 'src/core/public';
+import type { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from 'src/core/public';
 import { CoreStart } from 'src/core/public';
 import type { LayoutParams } from '../../../screenshotting/common';
 import type { LicensingPluginSetup } from '../../../licensing/public';
@@ -19,6 +19,7 @@ export interface ExportPanelShareOpts {
   license$: LicensingPluginSetup['license$']; // FIXME: 'license$' is deprecated
   startServices$: Rx.Observable<[CoreStart, object, unknown]>;
   usesUiCapabilities: boolean;
+  theme: ThemeServiceSetup;
 }
 
 export interface ReportingSharingData {
