@@ -32,6 +32,7 @@ async function fetchIndicesCall(
     index: indexNamesString,
     expand_wildcards: ['hidden', 'all'],
     forbid_closed_indices: false,
+    metric: ['docs', 'store'],
   });
   const indicesNames = Object.keys(indices);
   return indicesNames.map((indexName: string) => {
@@ -45,8 +46,8 @@ async function fetchIndicesCall(
       status: indexStats?.status,
       name: indexName,
       uuid: indexStats.uuid!,
-      primary: indexData.settings?.number_of_shards,
-      replica: indexData.settings?.number_of_replicas,
+      primary: indexData.settings?.index?.number_of_shards,
+      replica: indexData.settings?.index?.number_of_replicas,
       documents: indexStats?.total?.docs?.count ?? 0,
       size: new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString(),
       // @ts-expect-error
