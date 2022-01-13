@@ -9,16 +9,17 @@
 import { SavedObject, SavedObjectsClientContract, SavedObjectsImportFailure } from '../../types';
 import { extractErrors } from './extract_errors';
 import { CreatedObject } from '../types';
+import type { ImportStateMap } from './types';
 
-interface CreateSavedObjectsParams<T> {
+export interface CreateSavedObjectsParams<T> {
   objects: Array<SavedObject<T>>;
   accumulatedErrors: SavedObjectsImportFailure[];
   savedObjectsClient: SavedObjectsClientContract;
-  importIdMap: Map<string, { id?: string; omitOriginId?: boolean }>;
+  importStateMap: ImportStateMap;
   namespace?: string;
   overwrite?: boolean;
 }
-interface CreateSavedObjectsResult<T> {
+export interface CreateSavedObjectsResult<T> {
   createdObjects: Array<CreatedObject<T>>;
   errors: SavedObjectsImportFailure[];
 }
@@ -31,7 +32,7 @@ export const createSavedObjects = async <T>({
   objects,
   accumulatedErrors,
   savedObjectsClient,
-  importIdMap,
+  importStateMap,
   namespace,
   overwrite,
 }: CreateSavedObjectsParams<T>): Promise<CreateSavedObjectsResult<T>> => {
@@ -58,19 +59,24 @@ export const createSavedObjects = async <T>({
     // use the import ID map to ensure that each reference is being created with the correct ID
     const references = object.references?.map((reference) => {
       const { type, id } = reference;
-      const importIdEntry = importIdMap.get(`${type}:${id}`);
-      if (importIdEntry?.id) {
-        return { ...reference, id: importIdEntry.id };
+      const importStateValue = importStateMap.get(`${type}:${id}`);
+      if (importStateValue?.destinationId) {
+        return { ...reference, id: importStateValue.destinationId };
       }
       return reference;
     });
     // use the import ID map to ensure that each object is being created with the correct ID, also ensure that the `originId` is set on
     // the created object if it did not have one (or is omitted if specified)
-    const importIdEntry = importIdMap.get(`${object.type}:${object.id}`);
-    if (importIdEntry?.id) {
-      objectIdMap.set(`${object.type}:${importIdEntry.id}`, object);
-      const originId = importIdEntry.omitOriginId ? undefined : object.originId ?? object.id;
-      return { ...object, id: importIdEntry.id, originId, ...(references && { references }) };
+    const importStateValue = importStateMap.get(`${object.type}:${object.id}`);
+    if (importStateValue?.destinationId) {
+      objectIdMap.set(`${object.type}:${importStateValue.destinationId}`, object);
+      const originId = importStateValue.omitOriginId ? undefined : object.originId ?? object.id;
+      return {
+        ...object,
+        id: importStateValue.destinationId,
+        originId,
+        ...(references && { references }),
+      };
     }
     return { ...object, ...(references && { references }) };
   });
