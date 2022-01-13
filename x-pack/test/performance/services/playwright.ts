@@ -12,8 +12,7 @@ import { createAsyncInstance } from '@kbn/test';
 import Url from 'url';
 import { FtrService } from '../ftr_provider_context';
 
-type PromiseOf<T extends Promise<any>> = T extends Promise<infer X> ? X : never;
-type StorageState = PromiseOf<ReturnType<BrowserContext['storageState']>>;
+type StorageState = Awaited<ReturnType<BrowserContext['storageState']>>;
 
 export class PlaywrightService extends FtrService {
   private readonly config = this.ctx.getService('config');
