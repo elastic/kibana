@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo, useCallback, useState, useEffect } from 'react';
+import React, { memo, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { useLocation } from 'react-router-dom';
@@ -35,6 +35,7 @@ import { BackToExternalAppSecondaryButton } from '../../../components/back_to_ex
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 import { ListPageRouteState } from '../../../../../common/endpoint/types';
 import { ManagementPageLoader } from '../../../components/management_page_loader';
+import { useMemoizedRouteState } from '../../../common/hooks';
 
 export const TrustedAppsPage = memo(() => {
   const dispatch = useDispatch<Dispatch<AppAction>>();
@@ -52,12 +53,7 @@ export const TrustedAppsPage = memo(() => {
     })
   );
 
-  const [memoizedRouteState, setMemoizedRouteState] = useState<ListPageRouteState | undefined>();
-  useEffect(() => {
-    if (routeState && routeState.onBackButtonNavigateTo) {
-      setMemoizedRouteState(routeState);
-    }
-  }, [routeState]);
+  const memoizedRouteState = useMemoizedRouteState(routeState);
 
   const backButtonEmptyComponent = useMemo(() => {
     if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {

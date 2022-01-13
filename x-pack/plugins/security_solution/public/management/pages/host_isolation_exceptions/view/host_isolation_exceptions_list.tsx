@@ -43,6 +43,7 @@ import {
   useHostIsolationExceptionsNavigateCallback,
   useHostIsolationExceptionsSelector,
 } from './hooks';
+import { useMemoizedRouteState } from '../../../common/hooks';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -57,12 +58,7 @@ export const HostIsolationExceptionsList = () => {
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
 
-  const [memoizedRouteState, setMemoizedRouteState] = useState<ListPageRouteState | undefined>();
-  useEffect(() => {
-    if (routeState && routeState.onBackButtonNavigateTo) {
-      setMemoizedRouteState(routeState);
-    }
-  }, [routeState]);
+  const memoizedRouteState = useMemoizedRouteState(routeState);
 
   const backButtonEmptyComponent = useMemo(() => {
     if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
