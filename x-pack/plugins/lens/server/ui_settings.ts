@@ -14,14 +14,17 @@ export const FIELD_EXISTENCE_SETTING = 'lens:useFieldExistenceSampling';
 
 export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
   [FIELD_EXISTENCE_SETTING]: {
-    name: i18n.translate('xpack.advancedSettings.useFieldExistenceSampling.title', {
+    name: i18n.translate('xpack.lens.advancedSettings.useFieldExistenceSampling.title', {
       defaultMessage: 'Use field existence sampling',
     }),
     value: false,
-    description: i18n.translate('xpack.advancedSettings.useFieldExistenceSampling.description', {
-      defaultMessage:
-        'If enabled, document sampling is used to determine field existence (available or empty) for the Lens field list instead of relying on index mappings.',
-    }),
+    description: i18n.translate(
+      'xpack.lens.advancedSettings.useFieldExistenceSampling.description',
+      {
+        defaultMessage:
+          'If enabled, document sampling is used to determine field existence (available or empty) for the Lens field list instead of relying on index mappings.',
+      }
+    ),
     category: ['visualization'],
     schema: schema.boolean(),
   },

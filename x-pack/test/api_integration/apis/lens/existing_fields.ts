@@ -33,14 +33,14 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       await esArchiver.load('x-pack/test/api_integration/es_archives/lens/constant_keyword');
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/constant_keyword.json'
+        'x-pack/test/api_integration/fixtures/kbn_archiver/lens/constant_keyword.json'
       );
     });
 
     after(async () => {
       await esArchiver.unload('x-pack/test/api_integration/es_archives/lens/constant_keyword');
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/constant_keyword.json'
+        'x-pack/test/api_integration/fixtures/kbn_archiver/lens/constant_keyword.json'
       );
     });
 
