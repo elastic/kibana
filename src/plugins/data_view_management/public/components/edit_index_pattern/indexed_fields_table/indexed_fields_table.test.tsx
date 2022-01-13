@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
-import { IndexPatternField, IndexPattern, IndexPatternType } from 'src/plugins/data/public';
+import { DataViewField, DataView, DataViewType } from 'src/plugins/data_views/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
 import { getFieldInfo } from '../../utils';
 
@@ -36,10 +36,10 @@ const helpers = {
 const indexPattern = {
   getNonScriptedFields: () => fields,
   getFormatterForFieldNoDefault: () => ({ params: () => ({}) }),
-} as unknown as IndexPattern;
+} as unknown as DataView;
 
 const rollupIndexPattern = {
-  type: IndexPatternType.ROLLUP,
+  type: DataViewType.ROLLUP,
   typeMeta: {
     params: {
       'rollup-index': 'rollup',
@@ -64,12 +64,12 @@ const rollupIndexPattern = {
   },
   getNonScriptedFields: () => fields,
   getFormatterForFieldNoDefault: () => ({ params: () => ({}) }),
-} as unknown as IndexPattern;
+} as unknown as DataView;
 
 const mockFieldToIndexPatternField = (
   spec: Record<string, string | string[] | boolean | undefined>
 ) => {
-  return new IndexPatternField(spec as unknown as IndexPatternField['spec']);
+  return new DataViewField(spec as unknown as DataViewField['spec']);
 };
 
 const fields = [
