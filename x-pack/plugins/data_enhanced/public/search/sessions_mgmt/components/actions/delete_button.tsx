@@ -74,7 +74,8 @@ export const createDeleteActionDescriptor = (
   onClick: async () => {
     const ref = core.overlays.openModal(
       toMountPoint(
-        <DeleteConfirm onActionDismiss={() => ref?.close()} searchSession={uiSession} api={api} />
+        <DeleteConfirm onActionDismiss={() => ref?.close()} searchSession={uiSession} api={api} />,
+        { theme$: core.theme.theme$ }
       )
     );
     await ref.onClose;
