@@ -37,7 +37,7 @@ export function getIlmPolicy() {
             rollover: {
               max_size: '50GB',
               max_age: '30d',
-              // max_docs: 1, // you know, for testing
+              max_docs: 1, // you know, for testing
             },
           },
         },
