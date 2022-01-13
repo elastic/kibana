@@ -56,9 +56,6 @@ export function createCreateIndexStream({
 
   async function handleIndex(record: DocRecord) {
     const { index, settings, mappings, aliases } = record.value;
-
-    // Determine if the mapping belongs to a pre-7.0 instance, for BWC tests, mainly
-    const isPre7Mapping = !!mappings && Object.keys(mappings).length > 0 && !mappings.properties;
     const isKibanaTaskManager = index.startsWith('.kibana_task_manager');
     const isKibana = index.startsWith('.kibana') && !isKibanaTaskManager;
 
@@ -79,7 +76,6 @@ export function createCreateIndexStream({
         await client.indices.create(
           {
             index,
-            include_type_name: isPre7Mapping,
             body: {
               settings,
               mappings,
