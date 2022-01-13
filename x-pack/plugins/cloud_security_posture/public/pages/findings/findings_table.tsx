@@ -12,6 +12,7 @@ import {
   EuiBadgeGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiEmptyPrompt,
   EuiBadge,
   EuiBasicTable,
   PropsOf,
@@ -29,7 +30,7 @@ interface BaseFindingsTableProps {
 
 type FindingsTableProps = FindingsFetchState & BaseFindingsTableProps;
 
-export const FindingsTable = ({ data, status, error, selectItem }: FindingsTableProps) => {
+export const FindingsTable = ({ data = [], status, error, selectItem }: FindingsTableProps) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(25);
 
@@ -54,8 +55,10 @@ export const FindingsTable = ({ data, status, error, selectItem }: FindingsTable
     [data, pageSize, pageIndex]
   );
 
-  // TODO: add empty/error/loading views
-  if (!data) return null;
+  // Show "zero state"
+  if (!data.length && status === 'success')
+    // TODO: use our own logo
+    return <EuiEmptyPrompt iconType="logoKibana" title={<h2>{TEXT.NO_FINDINGS}</h2>} />;
 
   // TODO: async pagination
   const pagination: EuiBasicTableProps<CspFinding>['pagination'] = {
