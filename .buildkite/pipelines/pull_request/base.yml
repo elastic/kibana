@@ -1,3 +1,6 @@
+env:
+  ES_SNAPSHOT_MANIFEST: https://storage.googleapis.com/kibana-ci-es-snapshots-daily/8.0.0/manifest-latest-verified.json
+
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
@@ -21,10 +24,10 @@ steps:
     depends_on: build
     timeout_in_minutes: 150
     key: default-cigroup
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
+    # retry:
+    #   automatic:
+    #     - exit_status: '*'
+    #       limit: 1
 
   - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Docker CI Group'
@@ -33,10 +36,10 @@ steps:
     depends_on: build
     timeout_in_minutes: 120
     key: default-cigroup-docker
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
+    # retry:
+    #   automatic:
+    #     - exit_status: '*'
+    #       limit: 1
 
   - command: .buildkite/scripts/steps/functional/oss_cigroup.sh
     label: 'OSS CI Group'
@@ -46,10 +49,10 @@ steps:
     depends_on: build
     timeout_in_minutes: 120
     key: oss-cigroup
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
+    # retry:
+    #   automatic:
+    #     - exit_status: '*'
+    #       limit: 1
 
   - command: .buildkite/scripts/steps/functional/oss_accessibility.sh
     label: 'OSS Accessibility Tests'
@@ -57,10 +60,10 @@ steps:
       queue: ci-group-4d
     depends_on: build
     timeout_in_minutes: 120
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
+    # retry:
+    #   automatic:
+    #     - exit_status: '*'
+    #       limit: 1
 
   - command: .buildkite/scripts/steps/functional/xpack_accessibility.sh
     label: 'Default Accessibility Tests'
@@ -68,10 +71,10 @@ steps:
       queue: n2-4
     depends_on: build
     timeout_in_minutes: 120
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
+    # retry:
+    #   automatic:
+    #     - exit_status: '*'
+    #       limit: 1
 
   - command: .buildkite/scripts/steps/functional/oss_firefox.sh
     label: 'OSS Firefox Tests'
@@ -79,10 +82,10 @@ steps:
       queue: ci-group-4d
     depends_on: build
     timeout_in_minutes: 120
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
+    # retry:
+    #   automatic:
+    #     - exit_status: '*'
+    #       limit: 1
 
   - command: .buildkite/scripts/steps/functional/xpack_firefox.sh
     label: 'Default Firefox Tests'
@@ -90,10 +93,10 @@ steps:
       queue: n2-4
     depends_on: build
     timeout_in_minutes: 120
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
+    # retry:
+    #   automatic:
+    #     - exit_status: '*'
+    #       limit: 1
 
   - command: .buildkite/scripts/steps/functional/oss_misc.sh
     label: 'OSS Misc Functional Tests'
@@ -101,10 +104,10 @@ steps:
       queue: n2-4
     depends_on: build
     timeout_in_minutes: 120
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
+    # retry:
+    #   automatic:
+    #     - exit_status: '*'
+    #       limit: 1
 
   - command: .buildkite/scripts/steps/functional/xpack_saved_object_field_metrics.sh
     label: 'Saved Object Field Metrics'
@@ -112,10 +115,10 @@ steps:
       queue: n2-4
     depends_on: build
     timeout_in_minutes: 120
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
+    # retry:
+    #   automatic:
+    #     - exit_status: '*'
+    #       limit: 1
 
   - command: .buildkite/scripts/steps/test/jest.sh
     label: 'Jest Tests'
