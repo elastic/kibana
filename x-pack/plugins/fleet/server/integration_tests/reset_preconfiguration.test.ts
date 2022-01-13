@@ -32,7 +32,7 @@ const waitForFleetSetup = async (root: Root) => {
   }
 };
 
-describe('Fleet preconfiguration rest', () => {
+describe.skip('Fleet preconfiguration rest', () => {
   let esServer: kbnTestServer.TestElasticsearchUtils;
   let kbnServer: kbnTestServer.TestKibanaUtils;
 
