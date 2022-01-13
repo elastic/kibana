@@ -8,7 +8,10 @@
 import type { IRouter, RequestHandler } from 'src/core/server';
 
 import { PLUGIN_ID, PRECONFIGURATION_API_ROUTES } from '../../constants';
-import { PutPreconfigurationSchema } from '../../types';
+import {
+  PutPreconfigurationSchema,
+  PostResetOnePreconfiguredAgentPoliciesSchema,
+} from '../../types';
 
 import {
   updatePreconfigurationHandler,
@@ -28,7 +31,7 @@ export const registerRoutes = (router: IRouter) => {
   router.post(
     {
       path: PRECONFIGURATION_API_ROUTES.RESET_ONE_PATTERN,
-      validate: false,
+      validate: PostResetOnePreconfiguredAgentPoliciesSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     resetOnePreconfigurationHandler as RequestHandler
