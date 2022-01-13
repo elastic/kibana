@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
+import { Client } from '@elastic/elasticsearch';
 import { Logger } from '../../logging';
 import { GetAuthHeaders, Headers, isKibanaRequest, isRealRequest } from '../../http';
 import { ensureRawRequest, filterHeaders } from '../../http/router';
@@ -52,10 +52,8 @@ export interface ICustomClusterClient extends IClusterClient {
 
 /** @internal **/
 export class ClusterClient implements ICustomClusterClient {
-  public readonly asInternalUser: KibanaClient;
-  private readonly rootScopedClient: KibanaClient;
-  private readonly allowListHeaders: string[];
-
+  public readonly asInternalUser: Client;
+  private readonly rootScopedClient: Client;
   private isClosed = false;
 
   constructor(
@@ -72,8 +70,6 @@ export class ClusterClient implements ICustomClusterClient {
       getExecutionContext,
       scoped: true,
     });
-
-    this.allowListHeaders = ['x-opaque-id', ...this.config.requestHeadersWhitelist];
   }
 
   asScoped(request: ScopeableRequest) {
@@ -95,14 +91,15 @@ export class ClusterClient implements ICustomClusterClient {
   private getScopedHeaders(request: ScopeableRequest): Headers {
     let scopedHeaders: Headers;
     if (isRealRequest(request)) {
-      const requestHeaders = ensureRawRequest(request).headers;
+      const requestHeaders = ensureRawRequest(request).headers ?? {};
       const requestIdHeaders = isKibanaRequest(request) ? { 'x-opaque-id': request.id } : {};
-      const authHeaders = this.getAuthHeaders(request);
+      const authHeaders = this.getAuthHeaders(request) ?? {};
 
-      scopedHeaders = filterHeaders(
-        { ...requestHeaders, ...requestIdHeaders, ...authHeaders },
-        this.allowListHeaders
-      );
+      scopedHeaders = {
+        ...filterHeaders(requestHeaders, this.config.requestHeadersWhitelist),
+        ...requestIdHeaders,
+        ...authHeaders,
+      };
     } else {
       scopedHeaders = filterHeaders(request?.headers ?? {}, this.config.requestHeadersWhitelist);
     }
