@@ -486,4 +486,7 @@ export const mergeSavedObjectMigrationMaps = (
 export const getAllMigrations = (
   filterMigrations: MigrateFunctionsObject
 ): SavedObjectMigrationMap =>
-  mergeSavedObjectMigrationMaps(lensMigrations, getLensFilterMigrations(filterMigrations));
+  mergeSavedObjectMigrationMaps(
+    lensMigrations,
+    getLensFilterMigrations(filterMigrations) as unknown as SavedObjectMigrationMap
+  );

@@ -172,7 +172,9 @@ export const commonRenameFilterReferences = (attributes: LensDocShape715<VisStat
 /**
  * This creates a migration map that applies filter migrations to Lens visualizations
  */
-export const getLensFilterMigrations = (filterMigrations: MigrateFunctionsObject) =>
+export const getLensFilterMigrations = (
+  filterMigrations: MigrateFunctionsObject
+): MigrateFunctionsObject =>
   mapValues(filterMigrations, (migrate) =>
     getApplyMigrationWithinObject(migrate, 'attributes.state.filters')
   );

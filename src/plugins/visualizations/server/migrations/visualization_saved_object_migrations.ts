@@ -1224,5 +1224,7 @@ export const getAllMigrations = (
 ): SavedObjectMigrationMap =>
   mergeSavedObjectMigrationMaps(
     visualizationSavedObjectTypeMigrations,
-    getVisualizationSearchSourceMigrations(searchSourceMigrations as MigrateFunctionsObject)
+    getVisualizationSearchSourceMigrations(
+      searchSourceMigrations
+    ) as unknown as SavedObjectMigrationMap
   );
