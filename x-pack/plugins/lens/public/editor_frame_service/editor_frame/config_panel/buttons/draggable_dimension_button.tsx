@@ -30,6 +30,8 @@ export function DraggableDimensionButton({
   group,
   groups,
   onDrop,
+  onDragStart,
+  onDragEnd,
   children,
   layerDatasourceDropProps,
   layerDatasource,
@@ -43,6 +45,8 @@ export function DraggableDimensionButton({
     dropTarget: DragDropIdentifier,
     dropType?: DropType
   ) => void;
+  onDragStart: () => void;
+  onDragEnd: () => void;
   group: VisualizationDimensionGroupConfig;
   groups: VisualizationDimensionGroupConfig[];
   label: string;
@@ -143,6 +147,8 @@ export function DraggableDimensionButton({
         reorderableGroup={reorderableGroup.length > 1 ? reorderableGroup : undefined}
         value={value}
         onDrop={handleOnDrop}
+        onDragStart={() => onDragStart()}
+        onDragEnd={() => onDragEnd()}
       >
         {children}
       </DragDrop>

@@ -63,8 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const elasticChart = getService('elasticChart');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/118584
-  describe.skip('anomaly explorer', function () {
+  describe('anomaly explorer', function () {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -77,6 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.testResources.deleteMLTestDashboard();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     for (const testData of testDataList) {
@@ -147,11 +147,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('has correct axes labels');
           await ml.swimLane.assertAxisLabels(overallSwimLaneTestSubj, 'x', [
             '2016-02-07 00:00',
-            '2016-02-08 00:00',
             '2016-02-09 00:00',
-            '2016-02-10 00:00',
             '2016-02-11 00:00',
-            '2016-02-12 00:00',
           ]);
           await ml.swimLane.assertAxisLabels(overallSwimLaneTestSubj, 'y', ['Overall']);
         });
@@ -160,11 +157,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('has correct axes labels');
           await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'x', [
             '2016-02-07 00:00',
-            '2016-02-08 00:00',
             '2016-02-09 00:00',
-            '2016-02-10 00:00',
             '2016-02-11 00:00',
-            '2016-02-12 00:00',
           ]);
           await ml.swimLane.assertAxisLabels(viewBySwimLaneTestSubj, 'y', [
             'AAL',

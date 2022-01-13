@@ -358,18 +358,10 @@ export const getHeatmapVisualization = ({
                       strokeColor: state.gridConfig.strokeColor
                         ? [state.gridConfig.strokeColor]
                         : [],
-                      cellHeight: state.gridConfig.cellHeight ? [state.gridConfig.cellHeight] : [],
-                      cellWidth: state.gridConfig.cellWidth ? [state.gridConfig.cellWidth] : [],
                       // cells
                       isCellLabelVisible: [state.gridConfig.isCellLabelVisible],
                       // Y-axis
                       isYAxisLabelVisible: [state.gridConfig.isYAxisLabelVisible],
-                      yAxisLabelWidth: state.gridConfig.yAxisLabelWidth
-                        ? [state.gridConfig.yAxisLabelWidth]
-                        : [],
-                      yAxisLabelColor: state.gridConfig.yAxisLabelColor
-                        ? [state.gridConfig.yAxisLabelColor]
-                        : [],
                       // X-axis
                       isXAxisLabelVisible: state.gridConfig.isXAxisLabelVisible
                         ? [state.gridConfig.isXAxisLabelVisible]
