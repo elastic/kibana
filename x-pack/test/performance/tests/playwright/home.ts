@@ -10,8 +10,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService }: FtrProviderContext) {
   describe('perf_login_and_home', () => {
     const config = getService('config');
-    const { makePage } = getService('playwright');
-    const { page } = makePage(false);
+    const playwright = getService('playwright');
+    const { page } = playwright.makePage({ autoLogin: true });
 
     it('Go to Kibana login page', async () => {
       const kibanaUrl = Url.format({

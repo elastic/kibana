@@ -18,59 +18,62 @@ export class PlaywrightService extends FtrService {
   private readonly config = this.ctx.getService('config');
   private browser!: ChromiumBrowser;
   private context!: BrowserContext;
-  private page!: Page;
   private storageState: StorageState | undefined;
 
-  private async populateStorageState() {
+  private async getStorageState() {
+    if (this.storageState) {
+      return this.storageState;
+    }
+
     const kibanaUrl = Url.format({
       protocol: this.config.get('servers.kibana.protocol'),
       hostname: this.config.get('servers.kibana.hostname'),
       port: this.config.get('servers.kibana.port'),
     });
 
-    await this.page.goto(`${kibanaUrl}`);
-    const usernameLocator = this.page.locator('[data-test-subj=loginUsername]');
-    const passwordLocator = this.page.locator('[data-test-subj=loginPassword]');
-    const submitButtonLocator = this.page.locator('[data-test-subj=loginSubmit]');
+    const page = await this.context.newPage();
+    await page.goto(`${kibanaUrl}`);
+    const usernameLocator = page.locator('[data-test-subj=loginUsername]');
+    const passwordLocator = page.locator('[data-test-subj=loginPassword]');
+    const submitButtonLocator = page.locator('[data-test-subj=loginSubmit]');
 
     await usernameLocator?.type('elastic', { delay: 500 });
     await passwordLocator?.type('changeme', { delay: 500 });
     await submitButtonLocator?.click({ delay: 1000 });
 
-    await this.page.waitForSelector('#headerUserMenu');
+    await page.waitForSelector('#headerUserMenu');
 
-    this.storageState = await this.page?.context().storageState();
+    this.storageState = await page?.context().storageState();
+    await page.close();
+
+    return this.storageState;
   }
 
   private async getBrowserInstance() {
-    if (this.browser) {
+    if (!this.browser) {
       this.browser = await playwright.chromium.launch({ headless: true });
     }
     return this.browser;
   }
 
-  public makePage(useStorageState: boolean = false) {
+  public makePage(
+    options: {
+      autoLogin?: boolean;
+    } = {}
+  ) {
     const browser$ = new Rx.Subject<ChromiumBrowser>();
-    const browser = createAsyncInstance('service', 'browser', firstValueFrom(browser$));
     const page$ = new Rx.Subject<Page>();
-    const page = createAsyncInstance('service', 'page', firstValueFrom(page$));
+    let pageToCleanup: Page | undefined;
 
     before(async () => {
-      const actualBrowser = await this.getBrowserInstance();
-      browser$.next(actualBrowser);
-
-      if (!this.storageState && useStorageState) {
-        await this.populateStorageState();
-      }
-
-      this.context = await actualBrowser.newContext({
-        ...(useStorageState && { storageState: this.storageState }),
+      const browser = await this.getBrowserInstance();
+      this.context = await browser.newContext({
+        ...(options.autoLogin && { storageState: await this.getStorageState() }),
       });
 
-      this.page = await this.context.newPage();
-      page$.next(this.page);
-
-      const client = await this.context.newCDPSession(this.page);
+      const page = await this.context.newPage();
+      pageToCleanup = page;
+      const client = await this.context.newCDPSession(page);
 
       await client.send('Network.clearBrowserCache');
       await client.send('Network.setCacheDisabled', { cacheDisabled: true });
@@ -81,7 +84,7 @@ export class PlaywrightService extends FtrService {
         offline: false,
       });
 
-      await this.page.route('**', (route) => {
+      await page.route('**', (route) => {
         if (route.request().url().includes('rum')) {
           // console.log(
           //   '------REQUEST------' +
@@ -98,15 +101,20 @@ export class PlaywrightService extends FtrService {
         }
         return route.continue();
       });
+
+      browser$.next(browser);
+      page$.next(page);
     });
 
     after(async () => {
-      await this.browser.close();
+      if (pageToCleanup) {
+        await pageToCleanup.close();
+      }
     });
 
     return {
-      browser,
-      page,
+      browser: createAsyncInstance('service', 'browser', firstValueFrom(browser$)),
+      page: createAsyncInstance('service', 'page', firstValueFrom(page$)),
     };
   }
 }
