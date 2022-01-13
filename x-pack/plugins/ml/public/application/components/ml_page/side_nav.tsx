@@ -20,12 +20,14 @@ export type TabId =
   | 'data_frame_analytics'
   | 'trained_models'
   | 'datavisualizer'
+  | 'data_view_datavisualizer'
+  | 'filedatavisualizer'
   | 'overview'
   | 'settings';
 
 export interface Tab {
   id: TabId;
-  name: any;
+  name: string;
   disabled: boolean;
   betaTag?: JSX.Element;
   items?: Tab[];
@@ -76,6 +78,22 @@ function getTabs(disableLinks: boolean): Tab[] {
         defaultMessage: 'Data Visualizer',
       }),
       disabled: false,
+      items: [
+        {
+          id: 'filedatavisualizer',
+          name: i18n.translate('xpack.ml.navMenu.fileDataVisualizerLinkText', {
+            defaultMessage: 'File',
+          }),
+          disabled: false,
+        },
+        {
+          id: 'data_view_datavisualizer',
+          name: i18n.translate('xpack.ml.navMenu.dataViewDataVisualizerLinkText', {
+            defaultMessage: 'Data View',
+          }),
+          disabled: false,
+        },
+      ],
     },
   ];
 }
@@ -118,6 +136,20 @@ export const TAB_DATA: Record<TabId, TabData> = {
     name: i18n.translate('xpack.ml.dataVisualizerTabLabel', {
       defaultMessage: 'Data Visualizer',
     }),
+  },
+  data_view_datavisualizer: {
+    testSubject: 'mlMainTab dataVisualizer dataViewDatavisualizer',
+    name: i18n.translate('xpack.ml.dataVisualizerTabLabel', {
+      defaultMessage: 'Data View',
+    }),
+    pathId: 'datavisualizer_index_select',
+  },
+  filedatavisualizer: {
+    testSubject: 'mlMainTab dataVisualizer fileDatavisualizer',
+    name: i18n.translate('xpack.ml.dataVisualizerTabLabel', {
+      defaultMessage: 'File',
+    }),
+    pathId: 'filedatavisualizer',
   },
   settings: {
     testSubject: 'mlMainTab settings',
@@ -174,7 +206,7 @@ export function useSideNavItems(activeRouteId: string | undefined) {
 
   const tabs = getTabs(!isFullLicense());
 
-  function getTabItem(tab: Tab): EuiSideNavItemType<any> {
+  function getTabItem(tab: Tab): EuiSideNavItemType<unknown> {
     const { id, disabled, items } = tab;
     const testSubject = TAB_DATA[id].testSubject;
     const defaultPathId = (TAB_DATA[id].pathId || id) as MlLocatorParams['page'];
