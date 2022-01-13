@@ -268,7 +268,11 @@ describe.each([
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
-        body: { ...getPerformBulkActionSchemaMock(), ids: [mockRule.id, 'failed-mock-id'] },
+        body: {
+          ...getPerformBulkActionSchemaMock(),
+          ids: [mockRule.id, 'failed-mock-id'],
+          query: undefined,
+        },
       });
 
       const response = await server.inject(request, context);
@@ -356,7 +360,7 @@ describe.each([
       expect(result.badRequest).toHaveBeenCalledWith('Invalid value "test fake" supplied to "ids"');
     });
 
-    it('accepts no more than 100 rules ids in payload', async () => {
+    it('rejects payload if there is more than 100 ids in payload', async () => {
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -371,6 +375,25 @@ describe.each([
 
       expect(response.status).toEqual(400);
       expect(response.body.message).toEqual('More than 100 ids sent for bulk edit action.');
+    });
+
+    it('rejects payload if both query and ids defined', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: {
+          ...getPerformBulkActionSchemaMock(),
+          query: '',
+          ids: ['fake-id'],
+        },
+      });
+
+      const response = await server.inject(request, context);
+
+      expect(response.status).toEqual(400);
+      expect(response.body.message).toEqual(
+        'Both query and ids are sent. Define either ids or query in request payload.'
+      );
     });
   });
 

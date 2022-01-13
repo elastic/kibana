@@ -243,6 +243,14 @@ export const performBulkActionRoute = (
           statusCode: 400,
         });
       }
+
+      if (body?.ids && body.query !== undefined) {
+        return siemResponse.error({
+          body: `Both query and ids are sent. Define either ids or query in request payload.`,
+          statusCode: 400,
+        });
+      }
+
       const abortController = new AbortController();
 
       // subscribing to completed$, because it handles both cases when request was completed and aborted.

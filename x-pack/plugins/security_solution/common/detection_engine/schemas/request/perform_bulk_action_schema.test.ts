@@ -21,6 +21,7 @@ describe('perform_bulk_action_schema', () => {
     // missing query means it will request for all rules
     test('valid request: missing query', () => {
       const payload: PerformBulkActionSchema = {
+        ids: undefined,
         query: undefined,
         action: BulkAction.enable,
       };
@@ -33,6 +34,7 @@ describe('perform_bulk_action_schema', () => {
     test('invalid request: missing action', () => {
       const payload: Omit<PerformBulkActionSchema, 'action'> = {
         query: 'name: test',
+        ids: undefined,
       };
       const message = retrieveValidationMessage(payload);
 
@@ -47,6 +49,7 @@ describe('perform_bulk_action_schema', () => {
       const payload: Omit<PerformBulkActionSchema, 'action'> & { action: 'unknown' } = {
         query: 'name: test',
         action: 'unknown',
+        ids: undefined,
       };
       const message = retrieveValidationMessage(payload);
 
@@ -84,6 +87,7 @@ describe('perform_bulk_action_schema', () => {
   describe('bulk enable', () => {
     test('valid request', () => {
       const payload: PerformBulkActionSchema = {
+        ids: undefined,
         query: 'name: test',
         action: BulkAction.enable,
       };
@@ -96,6 +100,7 @@ describe('perform_bulk_action_schema', () => {
   describe('bulk disable', () => {
     test('valid request', () => {
       const payload: PerformBulkActionSchema = {
+        ids: undefined,
         query: 'name: test',
         action: BulkAction.disable,
       };
@@ -108,6 +113,7 @@ describe('perform_bulk_action_schema', () => {
   describe('bulk export', () => {
     test('valid request', () => {
       const payload: PerformBulkActionSchema = {
+        ids: undefined,
         query: 'name: test',
         action: BulkAction.export,
       };
@@ -120,6 +126,7 @@ describe('perform_bulk_action_schema', () => {
   describe('bulk delete', () => {
     test('valid request', () => {
       const payload: PerformBulkActionSchema = {
+        ids: undefined,
         query: 'name: test',
         action: BulkAction.delete,
       };
@@ -132,6 +139,7 @@ describe('perform_bulk_action_schema', () => {
   describe('bulk duplicate', () => {
     test('valid request', () => {
       const payload: PerformBulkActionSchema = {
+        ids: undefined,
         query: 'name: test',
         action: BulkAction.duplicate,
       };
@@ -268,6 +276,7 @@ describe('perform_bulk_action_schema', () => {
 
       test('valid request: set_index_patterns edit action', () => {
         const payload: PerformBulkActionSchema = {
+          ids: undefined,
           query: 'name: test',
           action: BulkAction.edit,
           [BulkAction.edit]: [{ type: BulkActionEditType.set_index_patterns, value: ['logs-*'] }],
@@ -281,6 +290,7 @@ describe('perform_bulk_action_schema', () => {
 
       test('valid request: add_index_patterns edit action', () => {
         const payload: PerformBulkActionSchema = {
+          ids: undefined,
           query: 'name: test',
           action: BulkAction.edit,
           [BulkAction.edit]: [{ type: BulkActionEditType.add_index_patterns, value: ['logs-*'] }],
@@ -294,6 +304,7 @@ describe('perform_bulk_action_schema', () => {
 
       test('valid request: delete_index_patterns edit action', () => {
         const payload: PerformBulkActionSchema = {
+          ids: undefined,
           query: 'name: test',
           action: BulkAction.edit,
           [BulkAction.edit]: [
@@ -353,6 +364,7 @@ describe('perform_bulk_action_schema', () => {
 
       test('valid request: set_timeline edit action', () => {
         const payload: PerformBulkActionSchema = {
+          ids: undefined,
           query: 'name: test',
           action: BulkAction.edit,
           [BulkAction.edit]: [
