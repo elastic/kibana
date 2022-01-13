@@ -34,6 +34,7 @@ interface MarkdownEditorProps {
   parsingPlugins?: PluggableList;
   processingPlugins?: PluggableList;
   uiPlugins?: EuiMarkdownEditorUiPlugin[] | undefined;
+  disabledUiPlugins?: string[] | undefined;
   value: string;
 }
 
@@ -46,14 +47,15 @@ export interface MarkdownEditorRef {
 }
 
 const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProps>(
-  ({ ariaLabel, dataTestSubj, editorId, height, onChange, value }, ref) => {
+  ({ ariaLabel, dataTestSubj, editorId, height, onChange, value, disabledUiPlugins }, ref) => {
     const astRef = useRef<EuiMarkdownAstNode | undefined>(undefined);
     const [markdownErrorMessages, setMarkdownErrorMessages] = useState([]);
     const onParse: EuiMarkdownEditorProps['onParse'] = useCallback((err, { messages, ast }) => {
       setMarkdownErrorMessages(err ? [err] : messages);
       astRef.current = ast;
     }, []);
-    const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins();
+
+    const { parsingPlugins, processingPlugins, uiPlugins } = usePlugins(disabledUiPlugins);
     const editorRef = useRef<EuiMarkdownEditorRef>(null);
 
     useLensButtonToggle({
