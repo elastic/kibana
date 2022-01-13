@@ -110,13 +110,30 @@ function getModalContent(
         />
       ),
       modalText: (
-        <EuiText>
-          <FormattedMessage
-            id="xpack.ml.deleteJobCheckModal.modalTextCanDelete"
-            defaultMessage="{ids} can be deleted."
-            values={{ ids: jobIds.join(', ') }}
-          />
-        </EuiText>
+        <>
+          {hasManagedJob ? (
+            <>
+              <ManagedJobsWarningCallout
+                jobsCount={jobIds.length}
+                action={i18n.translate(
+                  'xpack.ml.jobsList.deleteJobCheckModal.removeOrDeleteAction',
+                  {
+                    defaultMessage: 'removing or deleting',
+                  }
+                )}
+              />
+              <EuiSpacer size="s" />
+            </>
+          ) : null}
+
+          <EuiText>
+            <FormattedMessage
+              id="xpack.ml.deleteJobCheckModal.modalTextCanDelete"
+              defaultMessage="{ids} can be deleted."
+              values={{ ids: jobIds.join(', ') }}
+            />
+          </EuiText>
+        </>
       ),
     };
   } else if (canRemoveFromSpace) {
@@ -131,13 +148,13 @@ function getModalContent(
         <>
           {hasManagedJob ? (
             <>
-              <EuiSpacer size="s" />
               <ManagedJobsWarningCallout
                 jobsCount={jobIds.length}
                 action={i18n.translate('xpack.ml.jobsList.deleteJobCheckModal.removeAction', {
                   defaultMessage: 'removing',
                 })}
               />
+              <EuiSpacer size="s" />
             </>
           ) : null}
 
