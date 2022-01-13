@@ -63,3 +63,5 @@ export type {
   HistogramParams,
 } from '../common/expression_functions/xy_dimension';
 export { urlFor, getFullPath } from './utils/saved_visualize_utils';
+
+export type { IEditorController, EditorRenderProps } from './visualize_app/types';
