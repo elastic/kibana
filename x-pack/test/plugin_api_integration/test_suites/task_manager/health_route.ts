@@ -86,14 +86,27 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const request = supertest(url.format(config.get('servers.kibana')));
 
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
   function getHealthRequest() {
     return request.get('/api/task_manager/_health').set('kbn-xsrf', 'foo');
   }
 
   function getHealth(): Promise<MonitoringStats> {
-    return getHealthRequest()
-      .expect(200)
-      .then((response) => response.body);
+    return retry.try(async () => {
+      const health = await getHealthRequest()
+        .expect(200)
+        .then((response) => response.body);
+
+      // only return health stats once they contain sampleTask
+      if (health.stats.runtime.value.drift_by_type.sampleTask) {
+        return health;
+      }
+
+      // if sampleTask is not in the metrics, wait a bit and retry
+      delay(500);
+      throw new Error('sampleTask has not yet run');
+    });
   }
 
   function scheduleTask(task: Partial<ConcreteTaskInstance>): Promise<ConcreteTaskInstance> {
@@ -105,12 +118,9 @@ export default function ({ getService }: FtrProviderContext) {
       .then((response: { body: ConcreteTaskInstance }) => response.body);
   }
 
-  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
   const monitoredAggregatedStatsRefreshRate = 5000;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/119258
-  describe.skip('health', () => {
+  describe('health', () => {
     it('should return basic configuration of task manager', async () => {
       const health = await getHealth();
       expect(health.status).to.eql('OK');
