@@ -55,9 +55,7 @@ export const AlertsRoute: React.FunctionComponent<WithAlertSummaryProps> = ({
   const onChangeDuration = useCallback(
     (executions: number) => {
       setNumberOfExecutions(executions);
-      if (ruleID.current !== null) {
-        getAlertSummary(ruleID.current, loadAlertSummary, setAlertSummary, toasts, executions);
-      }
+      getAlertSummary(ruleID.current!, loadAlertSummary, setAlertSummary, toasts, executions);
     },
     [ruleID, setNumberOfExecutions, loadAlertSummary, setAlertSummary, toasts]
   );
