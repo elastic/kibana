@@ -25,6 +25,7 @@ import { transformValidateBulkError } from './validate';
 import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '../utils';
 import { deleteRules } from '../../rules/delete_rules';
 import { readRules } from '../../rules/read_rules';
+import { legacyMigrate } from '../../rules/utils';
 
 type Config = RouteConfig<unknown, unknown, QueryRulesBulkSchemaDecoded, 'delete' | 'post'>;
 type Handler = RequestHandler<
@@ -60,6 +61,7 @@ export const deleteRulesBulkRoute = (
     }
 
     const ruleStatusClient = context.securitySolution.getExecutionLogClient();
+    const savedObjectsClient = context.core.savedObjects.client;
 
     const rules = await Promise.all(
       request.body.map(async (payloadRule) => {
@@ -76,24 +78,29 @@ export const deleteRulesBulkRoute = (
 
         try {
           const rule = await readRules({ rulesClient, id, ruleId, isRuleRegistryEnabled });
-          if (!rule) {
+          const migratedRule = await legacyMigrate({
+            rulesClient,
+            savedObjectsClient,
+            rule,
+          });
+          if (!migratedRule) {
             return getIdBulkError({ id, ruleId });
           }
 
           const ruleStatuses = await ruleStatusClient.find({
             logsCount: 6,
-            ruleId: rule.id,
+            ruleId: migratedRule.id,
             spaceId: context.securitySolution.getSpaceId(),
           });
           await deleteRules({
             rulesClient,
             ruleStatusClient,
             ruleStatuses,
-            id: rule.id,
+            id: migratedRule.id,
           });
           return transformValidateBulkError(
             idOrRuleIdOrUnknown,
-            rule,
+            migratedRule,
             ruleStatuses,
             isRuleRegistryEnabled
           );
