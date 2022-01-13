@@ -68,7 +68,6 @@ describe('heatmap', () => {
           position: Position.Right,
           type: LEGEND_FUNCTION,
           maxLines: 1,
-          shouldTruncate: true,
         },
         gridConfig: {
           type: HEATMAP_GRID_FUNCTION,
@@ -377,15 +376,12 @@ describe('heatmap', () => {
         xAccessor: 'x-accessor',
         valueAccessor: 'value-accessor',
       };
-      const attributes = {
-        title: 'Test',
-      };
 
       expect(
         getHeatmapVisualization({
           paletteService,
           theme,
-        }).toExpression(state, datasourceLayers, attributes)
+        }).toExpression(state, datasourceLayers)
       ).toEqual({
         type: 'expression',
         chain: [
@@ -393,8 +389,6 @@ describe('heatmap', () => {
             type: 'function',
             function: FUNCTION_NAME,
             arguments: {
-              title: ['Test'],
-              description: [''],
               xAccessor: ['x-accessor'],
               yAccessor: [''],
               valueAccessor: ['value-accessor'],
@@ -438,14 +432,10 @@ describe('heatmap', () => {
                         // grid
                         strokeWidth: [],
                         strokeColor: [],
-                        cellHeight: [],
-                        cellWidth: [],
                         // cells
                         isCellLabelVisible: [false],
                         // Y-axis
                         isYAxisLabelVisible: [true],
-                        yAxisLabelWidth: [],
-                        yAxisLabelColor: [],
                         // X-axis
                         isXAxisLabelVisible: [true],
                       },
@@ -513,8 +503,6 @@ describe('heatmap', () => {
             type: 'function',
             function: FUNCTION_NAME,
             arguments: {
-              title: [''],
-              description: [''],
               xAccessor: ['x-accessor'],
               yAccessor: [''],
               valueAccessor: [''],

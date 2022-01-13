@@ -14,8 +14,9 @@ import {
   DATA_COLINDEX_ATTRIBUTE,
   DATA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
-} from '../../../../../common';
-import type { BrowserFields, OnUpdateColumns } from '../../../../../common';
+} from '../../../../../common/utils/accessibility';
+import type { BrowserFields } from '../../../../../common/search_strategy';
+import type { OnUpdateColumns } from '../../../../../common/types';
 
 import { CategoryTitle } from './category_title';
 import { getFieldColumns } from './field_items';

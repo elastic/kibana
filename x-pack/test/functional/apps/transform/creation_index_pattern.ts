@@ -32,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await transform.api.cleanTransformIndices();
+      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
 
     const testDataList: Array<PivotTransformTestData | LatestTransformTestData> = [
@@ -181,7 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
               legend: 'top 20 of 46 categories',
               colorStats: [
                 { color: '#000000', percentage: 60 },
-                { color: '#54B399', percentage: 35 },
+                { color: '#54B399', percentage: 37 },
               ],
             },
             {
@@ -190,7 +191,7 @@ export default function ({ getService }: FtrProviderContext) {
               legend: 'top 20 of 3321 categories',
               colorStats: [
                 { color: '#000000', percentage: 25 },
-                { color: '#54B399', percentage: 67 },
+                { color: '#54B399', percentage: 75 },
               ],
             },
             {
@@ -207,7 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: 'customer_id',
               legend: 'top 20 of 46 categories',
               colorStats: [
-                { color: '#54B399', percentage: 35 },
+                { color: '#54B399', percentage: 37 },
                 { color: '#000000', percentage: 60 },
               ],
             },
@@ -216,8 +217,8 @@ export default function ({ getService }: FtrProviderContext) {
               id: 'customer_last_name',
               legend: 'top 20 of 183 categories',
               colorStats: [
-                { color: '#000000', percentage: 25 },
-                { color: '#54B399', percentage: 70 },
+                { color: '#000000', percentage: 23 },
+                { color: '#54B399', percentage: 77 },
               ],
             },
             {

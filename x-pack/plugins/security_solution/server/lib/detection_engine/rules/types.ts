@@ -108,8 +108,7 @@ import { IRuleExecutionLogClient } from '../rule_execution_log/types';
 
 export type RuleAlertType = SanitizedAlert<RuleParams>;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface IRuleStatusSOAttributes extends Record<string, any> {
+export interface IRuleStatusSOAttributes extends SavedObjectAttributes {
   statusDate: StatusDate;
   lastFailureAt: LastFailureAt | null | undefined;
   lastFailureMessage: LastFailureMessage | null | undefined;
@@ -141,10 +140,6 @@ export interface RuleStatusResponse {
     failures: IRuleStatusResponseAttributes[] | null | undefined;
   };
 }
-
-export interface IRuleSavedAttributesSavedObjectAttributes
-  extends IRuleStatusSOAttributes,
-    SavedObjectAttributes {}
 
 export interface IRuleStatusSavedObject {
   type: string;
@@ -262,20 +257,17 @@ export interface CreateRulesOptions {
 }
 
 export interface UpdateRulesOptions {
-  isRuleRegistryEnabled: boolean;
-  spaceId: string;
-  ruleStatusClient: IRuleExecutionLogClient;
   rulesClient: RulesClient;
   defaultOutputIndex: string;
   existingRule: SanitizedAlert<RuleParams> | null | undefined;
   ruleUpdate: UpdateRulesSchema;
 }
 
-export interface PatchRulesOptions {
-  spaceId: string;
-  ruleStatusClient: IRuleExecutionLogClient;
+export interface PatchRulesOptions extends Partial<PatchRulesFieldsOptions> {
   rulesClient: RulesClient;
-  savedObjectsClient: SavedObjectsClientContract;
+  rule: SanitizedAlert<RuleParams> | null | undefined;
+}
+interface PatchRulesFieldsOptions {
   anomalyThreshold: AnomalyThresholdOrUndefined;
   author: AuthorOrUndefined;
   buildingBlockType: BuildingBlockTypeOrUndefined;
@@ -310,6 +302,7 @@ export interface PatchRulesOptions {
   threshold: ThresholdOrUndefined;
   threatFilters: ThreatFiltersOrUndefined;
   threatIndex: ThreatIndexOrUndefined;
+  threatIndicatorPath: ThreatIndicatorPathOrUndefined;
   threatQuery: ThreatQueryOrUndefined;
   threatMapping: ThreatMappingOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
@@ -322,7 +315,6 @@ export interface PatchRulesOptions {
   version: VersionOrUndefined;
   exceptionsList: ListArrayOrUndefined;
   actions: RuleAlertAction[] | undefined;
-  rule: SanitizedAlert<RuleParams> | null | undefined;
   namespace?: NamespaceOrUndefined;
 }
 

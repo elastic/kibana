@@ -82,7 +82,7 @@ export async function getSearchAggregatedTransactions({
   }
 }
 
-export function getTransactionDurationFieldForTransactions(
+export function getDurationFieldForTransactions(
   searchAggregatedTransactions: boolean
 ) {
   return searchAggregatedTransactions

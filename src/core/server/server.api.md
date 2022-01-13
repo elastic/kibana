@@ -11,7 +11,7 @@ import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { CliArgs } from '@kbn/config';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
-import { ConditionalType } from '@kbn/config-schema/target_types/types';
+import { ConditionalType } from '@kbn/config-schema';
 import { ConfigDeprecation } from '@kbn/config';
 import { ConfigDeprecationContext } from '@kbn/config';
 import { ConfigDeprecationFactory } from '@kbn/config';
@@ -33,7 +33,6 @@ import type { KibanaClient } from '@elastic/elasticsearch/lib/api/kibana';
 import { Logger } from '@kbn/logging';
 import { LoggerFactory } from '@kbn/logging';
 import { LogLevel as LogLevel_2 } from '@kbn/logging';
-import { LogLevelId } from '@kbn/logging';
 import { LogMeta } from '@kbn/logging';
 import { LogRecord } from '@kbn/logging';
 import type { MaybePromise } from '@kbn/utility-types';
@@ -1372,14 +1371,32 @@ export type KibanaResponseFactory = typeof kibanaResponseFactory;
 export const kibanaResponseFactory: {
     custom: <T extends string | Record<string, any> | Error | Buffer | Stream | {
         message: string | Error;
-        attributes?: Record<string, any> | undefined;
+        attributes?: ResponseErrorAttributes | undefined;
     } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
-    badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    unauthorized: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    forbidden: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    notFound: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    conflict: (options?: ErrorHttpResponseOptions) => KibanaResponse<ResponseError>;
-    customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<ResponseError>;
+    badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    unauthorized: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    forbidden: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    notFound: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    conflict: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
+    customError: (options: CustomHttpResponseOptions<ResponseError>) => KibanaResponse<string | Error | {
+        message: string | Error;
+        attributes?: ResponseErrorAttributes | undefined;
+    }>;
     redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     ok: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
@@ -2200,6 +2217,8 @@ export class SavedObjectsErrorHelpers {
     // (undocumented)
     static createGenericNotFoundError(type?: string | null, id?: string | null): DecoratedError;
     // (undocumented)
+    static createGenericNotFoundEsUnavailableError(type?: string | null, id?: string | null): DecoratedError;
+    // (undocumented)
     static createIndexAliasNotFoundError(alias: string): DecoratedError;
     // (undocumented)
     static createInvalidVersionError(versionInput?: string): DecoratedError;
@@ -2356,7 +2375,7 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     sortField?: string;
     // (undocumented)
-    sortOrder?: estypes.SearchSortOrder;
+    sortOrder?: estypes.SortOrder;
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;
@@ -2728,7 +2747,7 @@ export class SavedObjectsSerializer {
 export interface SavedObjectsServiceSetup {
     addClientWrapper: (priority: number, id: string, factory: SavedObjectsClientWrapperFactory) => void;
     getKibanaIndex: () => string;
-    registerType: <Attributes = any>(type: SavedObjectsType<Attributes>) => void;
+    registerType: <Attributes extends SavedObjectAttributes = any>(type: SavedObjectsType<Attributes>) => void;
     setClientFactoryProvider: (clientFactoryProvider: SavedObjectsClientFactoryProvider) => void;
 }
 
@@ -2765,6 +2784,7 @@ export interface SavedObjectsType<Attributes = any> {
     migrations?: SavedObjectMigrationMap | (() => SavedObjectMigrationMap);
     name: string;
     namespaceType: SavedObjectsNamespaceType;
+    schemas?: SavedObjectsValidationMap | (() => SavedObjectsValidationMap);
 }
 
 // @public
@@ -2846,6 +2866,15 @@ export class SavedObjectsUtils {
     static namespaceIdToString: (namespace?: string | undefined) => string;
     static namespaceStringToId: (namespace: string) => string | undefined;
 }
+
+// @public
+export interface SavedObjectsValidationMap {
+    // (undocumented)
+    [version: string]: SavedObjectsValidationSpec;
+}
+
+// @public
+export type SavedObjectsValidationSpec = ObjectType;
 
 // Warning: (ae-extra-release-tag) The doc comment should not contain more than one release tag
 //

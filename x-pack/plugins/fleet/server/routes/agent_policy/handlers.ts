@@ -22,8 +22,8 @@ import type {
   CopyAgentPolicyRequestSchema,
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
+  FleetRequestHandler,
 } from '../../types';
-import type { AgentPolicy, NewPackagePolicy } from '../../types';
 import { FLEET_SYSTEM_PACKAGE } from '../../../common';
 import type {
   GetAgentPoliciesResponse,
@@ -39,12 +39,12 @@ import type {
 import { defaultIngestErrorHandler } from '../../errors';
 import { incrementPackageName } from '../../services/package_policy';
 
-export const getAgentPoliciesHandler: RequestHandler<
+export const getAgentPoliciesHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetAgentPoliciesRequestSchema.query>
 > = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const soClient = context.fleet.epm.internalSoClient;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   const { full: withPackagePolicies = false, ...restOfQuery } = request.query;
   try {
     const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
@@ -100,22 +100,19 @@ export const getOneAgentPolicyHandler: RequestHandler<
   }
 };
 
-export const createAgentPolicyHandler: RequestHandler<
+export const createAgentPolicyHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof CreateAgentPolicyRequestSchema.query>,
   TypeOf<typeof CreateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
   const withSysMonitoring = request.query.sys_monitoring ?? false;
-
+  const spaceId = context.fleet.spaceId;
   try {
     // eslint-disable-next-line prefer-const
-    let [agentPolicy, newSysPackagePolicy] = await Promise.all<
-      AgentPolicy,
-      NewPackagePolicy | undefined
-    >([
+    let [agentPolicy, newSysPackagePolicy] = await Promise.all([
       agentPolicyService.create(soClient, esClient, request.body, {
         user,
       }),
@@ -136,6 +133,7 @@ export const createAgentPolicyHandler: RequestHandler<
       newSysPackagePolicy.name = await incrementPackageName(soClient, FLEET_SYSTEM_PACKAGE);
 
       await packagePolicyService.create(soClient, esClient, newSysPackagePolicy, {
+        spaceId,
         user,
         bumpRevision: false,
       });
@@ -161,7 +159,7 @@ export const updateAgentPolicyHandler: RequestHandler<
   TypeOf<typeof UpdateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   try {
     const agentPolicy = await agentPolicyService.update(
@@ -188,7 +186,7 @@ export const copyAgentPolicyHandler: RequestHandler<
   TypeOf<typeof CopyAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   try {
     const agentPolicy = await agentPolicyService.copy(
@@ -216,7 +214,7 @@ export const deleteAgentPoliciesHandler: RequestHandler<
   TypeOf<typeof DeleteAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = context.core.elasticsearch.client.asInternalUser;
   try {
     const body: DeleteAgentPolicyResponse = await agentPolicyService.delete(
       soClient,

@@ -12,7 +12,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SubCasesFindRequestRt, SUB_CASES_URL, throwErrors } from '../../../../common';
+import { SUB_CASES_URL } from '../../../../common/constants';
+import { SubCasesFindRequestRt, throwErrors } from '../../../../common/api';
 import { RouteDeps } from '../types';
 import { escapeHatch, wrapError } from '../utils';
 

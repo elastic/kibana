@@ -40,11 +40,11 @@ import {
   ExternalUrlConfig,
 } from '../external_url';
 
-interface PrebootDeps {
+export interface PrebootDeps {
   context: InternalContextPreboot;
 }
 
-interface SetupDeps {
+export interface SetupDeps {
   context: ContextSetup;
   executionContext: InternalExecutionContextSetup;
 }

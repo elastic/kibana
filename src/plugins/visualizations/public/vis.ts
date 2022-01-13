@@ -27,7 +27,7 @@ import {
   IndexPattern,
   ISearchSource,
   AggConfigSerialized,
-  SearchSourceFields,
+  SerializedSearchSourceFields,
 } from '../../data/public';
 import { BaseVisType } from './vis_types';
 import { VisParams } from '../common/types';
@@ -37,7 +37,7 @@ import { getSavedSearch, throwErrorOnSavedSearchUrlConflict } from '../../discov
 export interface SerializedVisData {
   expression?: string;
   aggs: AggConfigSerialized[];
-  searchSource: SearchSourceFields;
+  searchSource: SerializedSearchSourceFields;
   savedSearchId?: string;
 }
 
@@ -113,7 +113,19 @@ export class Vis<TVisParams = VisParams> {
     return defaults({}, cloneDeep(params ?? {}), cloneDeep(this.type.visConfig?.defaults ?? {}));
   }
 
-  async setState(state: PartialVisState) {
+  async setState(inState: PartialVisState) {
+    let state = inState;
+
+    const { updateVisTypeOnParamsChange } = this.type;
+    const newType = updateVisTypeOnParamsChange && updateVisTypeOnParamsChange(state.params);
+    if (newType) {
+      state = {
+        ...inState,
+        type: newType,
+        params: { ...inState.params, type: newType },
+      };
+    }
+
     let typeChanged = false;
     if (state.type && this.type.name !== state.type) {
       // @ts-ignore
@@ -188,7 +200,7 @@ export class Vis<TVisParams = VisParams> {
       data: {
         aggs: aggs as any,
         searchSource: this.data.searchSource ? this.data.searchSource.getSerializedFields() : {},
-        savedSearchId: this.data.savedSearchId,
+        ...(this.data.savedSearchId ? { savedSearchId: this.data.savedSearchId } : {}),
       },
     };
   }

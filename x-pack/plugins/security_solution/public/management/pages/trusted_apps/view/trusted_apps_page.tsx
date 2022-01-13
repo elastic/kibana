@@ -10,15 +10,7 @@ import { useDispatch } from 'react-redux';
 import { Dispatch } from 'redux';
 import { useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -41,12 +33,9 @@ import { EmptyState } from './components/empty_state';
 import { SearchExceptions } from '../../../components/search_exceptions';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 import { ListPageRouteState } from '../../../../../common/endpoint/types';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { ManagementPageLoader } from '../../../components/management_page_loader';
 
 export const TrustedAppsPage = memo(() => {
-  const isTrustedAppsByPolicyEnabled = useIsExperimentalFeatureEnabled(
-    'trustedAppsByPolicyEnabled'
-  );
   const dispatch = useDispatch<Dispatch<AppAction>>();
   const { state: routeState } = useLocation<ListPageRouteState | undefined>();
   const location = useTrustedAppsSelector(getCurrentLocation);
@@ -56,10 +45,9 @@ export const TrustedAppsPage = memo(() => {
   const doEntriesExist = useTrustedAppsSelector(entriesExist);
   const didEntriesExist = useTrustedAppsSelector(prevEntriesExist);
   const navigationCallbackQuery = useTrustedAppsNavigateCallback(
-    (query: string, includedPolicies?: string, excludedPolicies?: string) => ({
+    (query: string, includedPolicies?: string) => ({
       filter: query,
       included_policies: includedPolicies,
-      excluded_policies: excludedPolicies,
     })
   );
 
@@ -73,9 +61,9 @@ export const TrustedAppsPage = memo(() => {
   }));
 
   const handleOnSearch = useCallback(
-    (query: string, includedPolicies?: string, excludedPolicies?: string) => {
+    (query: string, includedPolicies?: string) => {
       dispatch({ type: 'trustedAppForceRefresh', payload: { forceRefresh: true } });
-      navigationCallbackQuery(query, includedPolicies, excludedPolicies);
+      navigationCallbackQuery(query, includedPolicies);
     },
     [dispatch, navigationCallbackQuery]
   );
@@ -127,9 +115,8 @@ export const TrustedAppsPage = memo(() => {
             defaultValue={location.filter}
             onSearch={handleOnSearch}
             placeholder={SEARCH_TRUSTED_APP_PLACEHOLDER}
-            hasPolicyFilter={isTrustedAppsByPolicyEnabled}
+            hasPolicyFilter={true}
             policyList={policyList}
-            defaultExcludedPolicies={location.excluded_policies}
             defaultIncludedPolicies={location.included_policies}
           />
           <EuiFlexGroup
@@ -177,10 +164,7 @@ export const TrustedAppsPage = memo(() => {
       <TrustedAppsNotifications />
 
       {isCheckingIfEntriesExists && !didEntriesExist ? (
-        <EuiEmptyPrompt
-          data-test-subj="trustedAppsListLoader"
-          body={<EuiLoadingSpinner className="essentialAnimation" size="xl" />}
-        />
+        <ManagementPageLoader data-test-subj="trustedAppsListLoader" />
       ) : (
         content
       )}

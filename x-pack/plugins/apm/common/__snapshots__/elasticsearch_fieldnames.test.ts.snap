@@ -75,11 +75,11 @@ Object {
 }
 `;
 
-exports[`Error HOST_NAME 1`] = `"my hostname"`;
+exports[`Error HOST_HOSTNAME 1`] = `"my hostname"`;
+
+exports[`Error HOST_NAME 1`] = `undefined`;
 
 exports[`Error HOST_OS_PLATFORM 1`] = `undefined`;
-
-exports[`Error HOSTNAME 1`] = `undefined`;
 
 exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
 
@@ -318,11 +318,11 @@ exports[`Span FID_FIELD 1`] = `undefined`;
 
 exports[`Span HOST 1`] = `undefined`;
 
+exports[`Span HOST_HOSTNAME 1`] = `undefined`;
+
 exports[`Span HOST_NAME 1`] = `undefined`;
 
 exports[`Span HOST_OS_PLATFORM 1`] = `undefined`;
-
-exports[`Span HOSTNAME 1`] = `undefined`;
 
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 
@@ -561,11 +561,11 @@ Object {
 }
 `;
 
-exports[`Transaction HOST_NAME 1`] = `"my hostname"`;
+exports[`Transaction HOST_HOSTNAME 1`] = `"my hostname"`;
+
+exports[`Transaction HOST_NAME 1`] = `undefined`;
 
 exports[`Transaction HOST_OS_PLATFORM 1`] = `undefined`;
-
-exports[`Transaction HOSTNAME 1`] = `undefined`;
 
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
 

@@ -39,7 +39,7 @@ import { DataRequestAbortError } from '../../../util/data_request';
 import { canSkipSourceUpdate } from '../../../util/can_skip_fetch';
 import { getFeatureCollectionBounds } from '../../../util/get_feature_collection_bounds';
 import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from './assign_feature_ids';
-import { addGeoJsonMbSource, syncVectorSource } from './utils';
+import { syncGeojsonSourceData } from './geojson_source_data';
 import { JoinState, performInnerJoins } from './perform_inner_joins';
 import { buildVectorRequestMeta } from '../../build_vector_request_meta';
 
@@ -51,7 +51,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     mapColors?: string[]
   ): VectorLayerDescriptor {
     const layerDescriptor = super.createDescriptor(options) as VectorLayerDescriptor;
-    layerDescriptor.type = LAYER_TYPE.VECTOR;
+    layerDescriptor.type = LAYER_TYPE.GEOJSON_VECTOR;
 
     if (!options.style) {
       const styleProperties = VectorStyle.createDefaultStyleProperties(mapColors ? mapColors : []);
@@ -138,8 +138,26 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     return await style.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
   }
 
+  _requiresPrevSourceCleanup(mbMap: MbMap) {
+    const mbSource = mbMap.getSource(this.getMbSourceId());
+    if (!mbSource) {
+      return false;
+    }
+
+    return mbSource.type !== 'geojson';
+  }
+
   syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice) {
-    addGeoJsonMbSource(this.getMbSourceId(), this.getMbLayerIds(), mbMap);
+    this._removeStaleMbSourcesAndLayers(mbMap);
+
+    const mbSourceId = this.getMbSourceId();
+    const mbSource = mbMap.getSource(mbSourceId);
+    if (!mbSource) {
+      mbMap.addSource(mbSourceId, {
+        type: 'geojson',
+        data: EMPTY_FEATURE_COLLECTION,
+      });
+    }
 
     this._syncFeatureCollectionWithMb(mbMap);
 
@@ -211,7 +229,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     try {
       await this._syncSourceStyleMeta(syncContext, source, style);
       await this._syncSourceFormatters(syncContext, source, style);
-      const sourceResult = await syncVectorSource({
+      const sourceResult = await syncGeojsonSourceData({
         layerId: this.getId(),
         layerName: await this.getDisplayName(source),
         prevDataRequest: this.getSourceDataRequest(),

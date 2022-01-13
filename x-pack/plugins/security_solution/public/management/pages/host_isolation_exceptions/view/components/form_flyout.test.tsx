@@ -5,29 +5,35 @@
  * 2.0.
  */
 
+import { waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
+import uuid from 'uuid';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
-import userEvent from '@testing-library/user-event';
-import { HostIsolationExceptionsFormFlyout } from './form_flyout';
-import uuid from 'uuid';
-import { createEmptyHostIsolationException } from '../../utils';
-import { waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import { getHostIsolationExceptionsListPath } from '../../../../common/routing';
+import { sendGetEndpointSpecificPackagePolicies } from '../../../../services/policies/policies';
+import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../../services/policies/test_mock_utilts';
 import {
   createHostIsolationExceptionItem,
-  updateOneHostIsolationExceptionItem,
   getOneHostIsolationExceptionItem,
+  updateOneHostIsolationExceptionItem,
 } from '../../service';
-import { getHostIsolationExceptionsListPath } from '../../../../common/routing';
+import { createEmptyHostIsolationException } from '../../utils';
+import { HostIsolationExceptionsFormFlyout } from './form_flyout';
 
 jest.mock('../../service.ts');
 jest.mock('../../../../../common/hooks/use_license');
+jest.mock('../../../../services/policies/policies');
 
 const createHostIsolationExceptionItemMock = createHostIsolationExceptionItem as jest.Mock;
 const updateOneHostIsolationExceptionItemMock = updateOneHostIsolationExceptionItem as jest.Mock;
 const getOneHostIsolationExceptionItemMock = getOneHostIsolationExceptionItem as jest.Mock;
+(sendGetEndpointSpecificPackagePolicies as jest.Mock).mockImplementation(
+  sendGetEndpointSpecificPackagePoliciesMock
+);
 
 describe('When on the host isolation exceptions flyout form', () => {
   let mockedContext: AppContextTestRender;

@@ -30,7 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 import { getEnterpriseSearchUrl } from '../../../../shared/enterprise_search_url';
-import { DOCS_PREFIX } from '../../../routes';
+import { API_CLIENTS_DOCS_URL, INDEXING_DOCS_URL } from '../../../routes';
 import { EngineLogic } from '../../engine';
 import { EngineDetails } from '../../engine/types';
 
@@ -74,12 +74,12 @@ export const FlyoutBody: React.FC = () => {
             defaultMessage="The {documentsApiLink} can be used to add new documents to your engine, update documents, retrieve documents by id, and delete documents. There are a variety of {clientLibrariesLink} to help you get started."
             values={{
               documentsApiLink: (
-                <EuiLink target="_blank" href={`${DOCS_PREFIX}/indexing-documents-guide.html`}>
+                <EuiLink target="_blank" href={INDEXING_DOCS_URL}>
                   documents API
                 </EuiLink>
               ),
               clientLibrariesLink: (
-                <EuiLink target="_blank" href={`${DOCS_PREFIX}/api-clients.html`}>
+                <EuiLink target="_blank" href={API_CLIENTS_DOCS_URL}>
                   client libraries
                 </EuiLink>
               ),

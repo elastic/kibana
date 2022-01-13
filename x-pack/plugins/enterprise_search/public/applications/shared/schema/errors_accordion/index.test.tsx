@@ -22,11 +22,11 @@ describe('SchemaErrorsAccordion', () => {
     fieldCoercionErrors: {
       id: [
         {
-          external_id: 'foo',
+          id: 'foo',
           error: 'this is an error',
         },
         {
-          external_id: 'bar',
+          id: 'bar',
           error: 'this is another error',
         },
       ],

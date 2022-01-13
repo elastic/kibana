@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectReference } from 'kibana/server';
-import { noneConnectorId } from '../../common';
+import { NONE_CONNECTOR_ID } from '../../common/api';
 
 interface Reference {
   soReference?: SavedObjectReference;
@@ -21,7 +21,7 @@ export class ConnectorReferenceHandler {
       // When id is null, or the none connector we'll try to remove the reference if it exists
       // When id is undefined it means that we're doing a patch request and this particular field shouldn't be updated
       // so we'll ignore it. If it was already in the reference array then it'll stay there when we merge them together below
-      if (id === null || id === noneConnectorId) {
+      if (id === null || id === NONE_CONNECTOR_ID) {
         this.newReferences.push({ name });
       } else if (id) {
         this.newReferences.push({ soReference: { id, name, type }, name });

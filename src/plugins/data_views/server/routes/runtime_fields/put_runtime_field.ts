@@ -14,69 +14,97 @@ import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../types';
+import {
+  RUNTIME_FIELD_PATH,
+  RUNTIME_FIELD_PATH_LEGACY,
+  SERVICE_KEY,
+  SERVICE_KEY_LEGACY,
+} from '../../constants';
 
-export const registerPutRuntimeFieldRoute = (
-  router: IRouter,
-  getStartServices: StartServicesAccessor<
-    DataViewsServerPluginStartDependencies,
-    DataViewsServerPluginStart
-  >
-) => {
-  router.put(
-    {
-      path: '/api/index_patterns/index_pattern/{id}/runtime_field',
-      validate: {
-        params: schema.object({
-          id: schema.string({
-            minLength: 1,
-            maxLength: 1_000,
+const putRuntimeFieldRouteFactory =
+  (path: string, serviceKey: string) =>
+  (
+    router: IRouter,
+    getStartServices: StartServicesAccessor<
+      DataViewsServerPluginStartDependencies,
+      DataViewsServerPluginStart
+    >
+  ) => {
+    router.put(
+      {
+        path,
+        validate: {
+          params: schema.object({
+            id: schema.string({
+              minLength: 1,
+              maxLength: 1_000,
+            }),
           }),
-        }),
-        body: schema.object({
-          name: schema.string({
-            minLength: 1,
-            maxLength: 1_000,
+          body: schema.object({
+            name: schema.string({
+              minLength: 1,
+              maxLength: 1_000,
+            }),
+            runtimeField: runtimeFieldSpecSchema,
           }),
-          runtimeField: runtimeFieldSpecSchema,
-        }),
-      },
-    },
-    handleErrors(async (ctx, req, res) => {
-      const savedObjectsClient = ctx.core.savedObjects.client;
-      const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
-      const [, , { indexPatternsServiceFactory }] = await getStartServices();
-      const indexPatternsService = await indexPatternsServiceFactory(
-        savedObjectsClient,
-        elasticsearchClient
-      );
-      const id = req.params.id;
-      const { name, runtimeField } = req.body;
-
-      const indexPattern = await indexPatternsService.get(id);
-
-      const oldFieldObject = indexPattern.fields.getByName(name);
-
-      if (oldFieldObject && !oldFieldObject.runtimeField) {
-        throw new Error('Only runtime fields can be updated');
-      }
-
-      if (oldFieldObject) {
-        indexPattern.removeRuntimeField(name);
-      }
-
-      indexPattern.addRuntimeField(name, runtimeField);
-
-      await indexPatternsService.updateSavedObject(indexPattern);
-
-      const fieldObject = indexPattern.fields.getByName(name);
-      if (!fieldObject) throw new Error(`Could not create a field [name = ${name}].`);
-
-      return res.ok({
-        body: {
-          field: fieldObject.toSpec(),
-          index_pattern: indexPattern.toSpec(),
         },
-      });
-    })
-  );
-};
+      },
+      handleErrors(async (ctx, req, res) => {
+        const savedObjectsClient = ctx.core.savedObjects.client;
+        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const [, , { indexPatternsServiceFactory }] = await getStartServices();
+        const indexPatternsService = await indexPatternsServiceFactory(
+          savedObjectsClient,
+          elasticsearchClient,
+          req
+        );
+        const id = req.params.id;
+        const { name, runtimeField } = req.body;
+
+        const indexPattern = await indexPatternsService.get(id);
+
+        const oldFieldObject = indexPattern.fields.getByName(name);
+
+        if (oldFieldObject && !oldFieldObject.runtimeField) {
+          throw new Error('Only runtime fields can be updated');
+        }
+
+        if (oldFieldObject) {
+          indexPattern.removeRuntimeField(name);
+        }
+
+        indexPattern.addRuntimeField(name, runtimeField);
+
+        await indexPatternsService.updateSavedObject(indexPattern);
+
+        const fieldObject = indexPattern.fields.getByName(name);
+        if (!fieldObject) throw new Error(`Could not create a field [name = ${name}].`);
+
+        const legacyResponse = {
+          body: {
+            field: fieldObject.toSpec(),
+            [serviceKey]: indexPattern.toSpec(),
+          },
+        };
+
+        const response = {
+          body: {
+            fields: [fieldObject.toSpec()],
+            [serviceKey]: indexPattern.toSpec(),
+          },
+        };
+
+        return res.ok(serviceKey === SERVICE_KEY_LEGACY ? legacyResponse : response);
+      })
+    );
+  };
+
+export const registerPutRuntimeFieldRoute = putRuntimeFieldRouteFactory(
+  RUNTIME_FIELD_PATH,
+  SERVICE_KEY
+);
+
+export const registerPutRuntimeFieldRouteLegacy = putRuntimeFieldRouteFactory(
+  RUNTIME_FIELD_PATH_LEGACY,
+  SERVICE_KEY_LEGACY
+);

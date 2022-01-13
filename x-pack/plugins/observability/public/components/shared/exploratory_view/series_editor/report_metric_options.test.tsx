@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { mockAppIndexPattern, mockIndexPattern, mockUxSeries, render } from '../rtl_helpers';
 import { getDefaultConfigs } from '../configurations/default_configs';
 import { PERCENTILE } from '../configurations/constants';
@@ -53,5 +54,22 @@ describe('ReportMetricOptions', function () {
     );
 
     expect(await screen.findByText('Page load time')).toBeInTheDocument();
+  });
+
+  it('should include a tooltip for the report metric', async function () {
+    mockAppIndexPattern({ loading: false });
+    const { getByText, findByText } = render(
+      <ReportMetricOptions
+        seriesId={0}
+        seriesConfig={{ ...dataViewSeries }}
+        series={{ ...mockUxSeries }}
+      />
+    );
+
+    userEvent.hover(getByText('Page load time'));
+
+    // The tooltip from EUI takes 250ms to appear, so we must
+    // use a `find*` query to asynchronously poll for it.
+    expect(await findByText('Report metric')).toBeInTheDocument();
   });
 });

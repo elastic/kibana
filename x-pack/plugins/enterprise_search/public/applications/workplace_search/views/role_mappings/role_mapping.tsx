@@ -42,7 +42,6 @@ export const RoleMapping: React.FC = () => {
     handleAttributeValueChange,
     handleAttributeSelectorChange,
     handleRoleChange,
-    handleAuthProviderChange,
     closeUsersAndRolesFlyout,
   } = useActions(RoleMappingsLogic);
 
@@ -54,9 +53,6 @@ export const RoleMapping: React.FC = () => {
     attributeName,
     selectedGroups,
     includeInAllGroups,
-    availableAuthProviders,
-    multipleAuthProvidersConfig,
-    selectedAuthProviders,
     roleMapping,
     roleMappingErrors,
     formLoading,
@@ -85,10 +81,6 @@ export const RoleMapping: React.FC = () => {
           disabled={!isNew}
           handleAttributeSelectorChange={handleAttributeSelectorChange}
           handleAttributeValueChange={handleAttributeValueChange}
-          availableAuthProviders={availableAuthProviders}
-          selectedAuthProviders={selectedAuthProviders}
-          multipleAuthProvidersConfig={multipleAuthProvidersConfig}
-          handleAuthProviderChange={handleAuthProviderChange}
         />
         <EuiSpacer size="m" />
         <RoleSelector

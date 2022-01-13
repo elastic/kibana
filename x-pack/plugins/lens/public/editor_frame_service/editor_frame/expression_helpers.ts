@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ast, fromExpression, ExpressionFunctionAST } from '@kbn/interpreter/common';
+import { Ast, fromExpression, ExpressionFunctionAST } from '@kbn/interpreter';
 import { DatasourceStates } from '../../state_management';
 import { Visualization, DatasourcePublicAPI, DatasourceMap } from '../../types';
 

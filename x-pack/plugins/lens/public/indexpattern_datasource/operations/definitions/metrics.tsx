@@ -13,6 +13,7 @@ import {
   getInvalidFieldMessage,
   getSafeName,
   getFilter,
+  combineErrorMessages,
 } from './helpers';
 import {
   FormattedIndexPatternColumn,
@@ -23,6 +24,7 @@ import {
   adjustTimeScaleLabelSuffix,
   adjustTimeScaleOnOtherColumnChange,
 } from '../time_scale_utils';
+import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 
 type MetricColumn<T> = FormattedIndexPatternColumn &
   FieldBasedIndexPatternColumn & {
@@ -132,7 +134,13 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       }).toAst();
     },
     getErrorMessage: (layer, columnId, indexPattern) =>
-      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
+      combineErrorMessages([
+        getInvalidFieldMessage(
+          layer.columns[columnId] as FieldBasedIndexPatternColumn,
+          indexPattern
+        ),
+        getDisallowedPreviousShiftMessage(layer, columnId),
+      ]),
     filterable: true,
     documentation: {
       section: 'elasticsearch',

@@ -11,8 +11,8 @@ import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '../../../../common';
 import { DiscoverServices } from '../../../build_services';
 import { fetchAnchor } from '../services/anchor';
 import { fetchSurroundingDocs, SurrDocType } from '../services/context';
-import { MarkdownSimple, toMountPoint } from '../../../../../kibana_react/public';
-import { IndexPattern, SortDirection } from '../../../../../data/public';
+import { MarkdownSimple, toMountPoint, wrapWithTheme } from '../../../../../kibana_react/public';
+import { DataView, SortDirection } from '../../../../../data/common';
 import {
   ContextFetchState,
   FailureReason,
@@ -29,7 +29,7 @@ const createError = (statusKey: string, reason: FailureReason, error?: Error) =>
 
 export interface ContextAppFetchProps {
   anchorId: string;
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   appState: AppState;
   useNewFieldsApi: boolean;
   services: DiscoverServices;
@@ -42,7 +42,8 @@ export function useContextAppFetch({
   useNewFieldsApi,
   services,
 }: ContextAppFetchProps) {
-  const { uiSettings: config, data, toastNotifications, filterManager } = services;
+  const { uiSettings: config, data, toastNotifications, filterManager, core } = services;
+  const { theme$ } = core.theme;
 
   const searchSource = useMemo(() => {
     return data.search.searchSource.createEmpty();
@@ -70,11 +71,14 @@ export function useContextAppFetch({
       toastNotifications.addDanger({
         title: errorTitle,
         text: toMountPoint(
-          <MarkdownSimple>
-            {i18n.translate('discover.context.invalidTieBreakerFiledSetting', {
-              defaultMessage: 'Invalid tie breaker field setting',
-            })}
-          </MarkdownSimple>
+          wrapWithTheme(
+            <MarkdownSimple>
+              {i18n.translate('discover.context.invalidTieBreakerFiledSetting', {
+                defaultMessage: 'Invalid tie breaker field setting',
+              })}
+            </MarkdownSimple>,
+            theme$
+          )
         ),
       });
       return;
@@ -93,7 +97,7 @@ export function useContextAppFetch({
       setState(createError('anchorStatus', FailureReason.UNKNOWN, error));
       toastNotifications.addDanger({
         title: errorTitle,
-        text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
+        text: toMountPoint(wrapWithTheme(<MarkdownSimple>{error.message}</MarkdownSimple>, theme$)),
       });
     }
   }, [
@@ -104,6 +108,7 @@ export function useContextAppFetch({
     anchorId,
     searchSource,
     useNewFieldsApi,
+    theme$,
   ]);
 
   const fetchSurroundingRows = useCallback(
@@ -135,7 +140,9 @@ export function useContextAppFetch({
         setState(createError(statusKey, FailureReason.UNKNOWN, error));
         toastNotifications.addDanger({
           title: errorTitle,
-          text: toMountPoint(<MarkdownSimple>{error.message}</MarkdownSimple>),
+          text: toMountPoint(
+            wrapWithTheme(<MarkdownSimple>{error.message}</MarkdownSimple>, theme$)
+          ),
         });
       }
     },
@@ -148,6 +155,7 @@ export function useContextAppFetch({
       indexPattern,
       toastNotifications,
       useNewFieldsApi,
+      theme$,
     ]
   );
 

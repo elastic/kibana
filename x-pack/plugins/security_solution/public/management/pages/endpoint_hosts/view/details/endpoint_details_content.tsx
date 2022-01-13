@@ -31,7 +31,10 @@ import { EndpointAgentStatus } from '../components/endpoint_agent_status';
 
 const EndpointDetailsContentStyled = styled.div`
   dl dt {
-    max-width: 220px;
+    max-width: 27%;
+  }
+  dl dd {
+    max-width: 73%;
   }
   .policyLineText {
     padding-right: 5px;

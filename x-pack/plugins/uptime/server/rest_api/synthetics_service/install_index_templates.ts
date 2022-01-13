@@ -7,7 +7,7 @@
 import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { UMRestApiRouteFactory } from '../types';
 import { API_URLS } from '../../../common/constants';
-import { UptimeCoreSetup } from '../../lib/adapters';
+import { UptimeServerSetup } from '../../lib/adapters';
 
 export const installIndexTemplatesRoute: UMRestApiRouteFactory = () => ({
   method: 'GET',
@@ -27,7 +27,7 @@ export async function installSyntheticsIndexTemplates({
   server,
   savedObjectsClient,
 }: {
-  server: UptimeCoreSetup;
+  server: UptimeServerSetup;
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
 }) {

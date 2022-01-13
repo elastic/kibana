@@ -10,8 +10,8 @@ import React from 'react';
 import { ReactWrapper, shallow } from 'enzyme';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { indexPatternMock } from '../../__mocks__/index_pattern';
-import { ElasticSearchHit } from '../../services/doc_views/doc_views_types';
 import { flattenHit } from 'src/plugins/data/common';
+import { ElasticSearchHit } from '../../types';
 
 jest.mock('../../../../kibana_react/public', () => ({
   useUiSetting: () => true,
@@ -23,7 +23,7 @@ jest.mock('../../../../kibana_react/public', () => ({
 jest.mock('../../kibana_services', () => ({
   getServices: () => ({
     uiSettings: {
-      get: jest.fn(),
+      get: jest.fn((key) => key === 'discover:maxDocFieldsDisplayed' && 200),
     },
     fieldFormats: {
       getDefaultInstance: jest.fn(() => ({ convert: (value: unknown) => (value ? value : '-') })),
@@ -35,7 +35,6 @@ const rowsSource: ElasticSearchHit[] = [
   {
     _id: '1',
     _index: 'test',
-    _type: 'test',
     _score: 1,
     _source: { bytes: 100, extension: '.gz' },
     highlight: {
@@ -48,7 +47,6 @@ const rowsFields: ElasticSearchHit[] = [
   {
     _id: '1',
     _index: 'test',
-    _type: 'test',
     _score: 1,
     _source: undefined,
     fields: { bytes: [100], extension: ['.gz'] },
@@ -62,7 +60,6 @@ const rowsFieldsWithTopLevelObject: ElasticSearchHit[] = [
   {
     _id: '1',
     _index: 'test',
-    _type: 'test',
     _score: 1,
     _source: undefined,
     fields: { 'object.value': [100], extension: ['.gz'] },
@@ -202,7 +199,6 @@ describe('Discover grid cell rendering', function () {
               "bytes": 100,
               "extension": ".gz",
             },
-            "_type": "test",
             "highlight": Object {
               "extension": Array [
                 "@kibana-highlighted-field.gz@/kibana-highlighted-field",
@@ -397,7 +393,6 @@ describe('Discover grid cell rendering', function () {
             "_index": "test",
             "_score": 1,
             "_source": undefined,
-            "_type": "test",
             "fields": Object {
               "bytes": Array [
                 100,

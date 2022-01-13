@@ -17,7 +17,8 @@ import { APIReturnType } from '../../../services/rest/createCallApmApi';
 
 import {
   CONTAINER_ID,
-  HOSTNAME,
+  HOST_NAME,
+  SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -86,20 +87,27 @@ export function ServiceLogs() {
       height={'60vh'}
       startTimestamp={moment(start).valueOf()}
       endTimestamp={moment(end).valueOf()}
-      query={getInfrastructureKQLFilter(data)}
+      query={getInfrastructureKQLFilter(data, serviceName)}
     />
   );
 }
 
 export const getInfrastructureKQLFilter = (
-  data?: APIReturnType<'GET /internal/apm/services/{serviceName}/infrastructure'>
+  data:
+    | APIReturnType<'GET /internal/apm/services/{serviceName}/infrastructure'>
+    | undefined,
+  serviceName: string
 ) => {
   const containerIds = data?.serviceInfrastructure?.containerIds ?? [];
   const hostNames = data?.serviceInfrastructure?.hostNames ?? [];
 
-  const kqlFilter = containerIds.length
+  const infraAttributes = containerIds.length
     ? containerIds.map((id) => `${CONTAINER_ID}: "${id}"`)
-    : hostNames.map((id) => `${HOSTNAME}: "${id}"`);
+    : hostNames.map((id) => `${HOST_NAME}: "${id}"`);
 
-  return kqlFilter.join(' or ');
+  const infraAttributesJoined = infraAttributes.join(' or ');
+
+  return infraAttributes.length
+    ? `${SERVICE_NAME}: "${serviceName}" or (not ${SERVICE_NAME} and (${infraAttributesJoined}))`
+    : `${SERVICE_NAME}: "${serviceName}"`;
 };

@@ -6,8 +6,22 @@
  * Side Public License, v 1.
  */
 
+const Fs = require('fs');
+const Path = require('path');
+
 module.exports = {
   preset: '@kbn/test/jest_integration',
   rootDir: '.',
-  roots: ['<rootDir>/src', '<rootDir>/packages'],
+  roots: [
+    '<rootDir>/src',
+    '<rootDir>/packages',
+    ...Fs.readdirSync(Path.resolve(__dirname, 'x-pack')).flatMap((name) => {
+      // create roots for all x-pack/* dirs except for test
+      if (name !== 'test' && Fs.statSync(Path.resolve(__dirname, 'x-pack', name)).isDirectory()) {
+        return [`<rootDir>/x-pack/${name}`];
+      }
+
+      return [];
+    }),
+  ],
 };

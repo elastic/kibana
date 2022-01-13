@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { flow } from 'lodash';
+import { isPushedUserAction } from '../../../common/utils/user_actions';
 import {
   ActionConnector,
   CaseFullExternalService,
@@ -20,9 +21,8 @@ import {
   CommentRequestUserType,
   CommentRequestAlertType,
   CommentRequestActionsType,
-  CaseUserActionResponse,
-  isPush,
-} from '../../../common';
+  ActionTypes,
+} from '../../../common/api';
 import { ActionsClient } from '../../../../actions/server';
 import { CasesClientGetAlertsResponse } from '../../client/alerts/types';
 import {
@@ -57,18 +57,14 @@ export const getLatestPushInfo = (
   userActions: CaseUserActionsResponse
 ): { index: number; pushedInfo: CaseFullExternalService } | null => {
   for (const [index, action] of [...userActions].reverse().entries()) {
-    if (
-      isPush(action.action, action.action_field) &&
-      isValidNewValue(action) &&
-      connectorId === action.new_val_connector_id
-    ) {
+    if (isPushedUserAction(action) && connectorId === action.payload.externalService.connector_id) {
       try {
-        const pushedInfo = JSON.parse(action.new_value);
+        const pushedInfo = action.payload.externalService;
         // We returned the index of the element in the userActions array.
         // As we traverse the userActions in reverse we need to calculate the index of a normal traversal
         return {
           index: userActions.length - index - 1,
-          pushedInfo: { ...pushedInfo, connector_id: connectorId },
+          pushedInfo,
         };
       } catch (e) {
         // ignore parse failures and check the next user action
@@ -78,14 +74,6 @@ export const getLatestPushInfo = (
 
   return null;
 };
-
-type NonNullNewValueAction = Omit<CaseUserActionResponse, 'new_value' | 'new_val_connector_id'> & {
-  new_value: string;
-  new_val_connector_id: string;
-};
-
-const isValidNewValue = (userAction: CaseUserActionResponse): userAction is NonNullNewValueAction =>
-  userAction.new_val_connector_id != null && userAction.new_value != null;
 
 const getCommentContent = (comment: CommentResponse): string => {
   if (comment.type === CommentType.user) {
@@ -220,9 +208,7 @@ export const createIncident = async ({
   const commentsIdsToBeUpdated = new Set(
     userActions
       .slice(latestPushInfo?.index ?? 0)
-      .filter(
-        (action) => Array.isArray(action.action_field) && action.action_field[0] === 'comment'
-      )
+      .filter((action) => action.type === ActionTypes.comment)
       .map((action) => action.comment_id)
   );
 

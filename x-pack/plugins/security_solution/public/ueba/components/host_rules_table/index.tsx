@@ -18,13 +18,12 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { uebaActions, uebaModel, uebaSelectors } from '../../store';
 import { getHostRulesColumns } from './columns';
 import * as i18n from './translations';
-import {
+import type {
   HostRulesEdges,
   HostRulesItem,
   HostRulesSortField,
-  HostRulesFields,
-} from '../../../../common';
-import { Direction } from '../../../../common/search_strategy';
+} from '../../../../common/search_strategy';
+import { Direction, HostRulesFields } from '../../../../common/search_strategy';
 import { HOST_RULES } from '../../pages/translations';
 import { rowItems } from '../utils';
 

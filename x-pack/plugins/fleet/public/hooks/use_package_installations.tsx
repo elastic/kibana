@@ -36,9 +36,8 @@ export const usePackageInstallations = () => {
   });
 
   const allInstalledPackages = useMemo(
-    () =>
-      (allPackages?.response || []).filter((pkg) => pkg.status === installationStatuses.Installed),
-    [allPackages?.response]
+    () => (allPackages?.items || []).filter((pkg) => pkg.status === installationStatuses.Installed),
+    [allPackages?.items]
   );
 
   const updatablePackages = useMemo(

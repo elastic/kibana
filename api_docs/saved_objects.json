@@ -682,15 +682,13 @@
                 "label": "savedObjectsClient",
                 "description": [],
                 "signature": [
-                  "Pick<",
                   {
                     "pluginId": "core",
                     "scope": "public",
                     "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-public.SavedObjectsClient",
-                    "text": "SavedObjectsClient"
-                  },
-                  ", \"create\" | \"bulkCreate\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"bulkUpdate\">"
+                    "section": "def-public.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
                 ],
                 "path": "src/plugins/saved_objects/public/saved_object/saved_object_loader.ts",
                 "deprecated": false,
@@ -1435,15 +1433,15 @@
             "section": "def-public.SavedObjectsCreateOptions",
             "text": "SavedObjectsCreateOptions"
           },
-          ", services: { savedObjectsClient: Pick<",
+          ", services: { savedObjectsClient: ",
           {
             "pluginId": "core",
             "scope": "public",
             "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-public.SavedObjectsClient",
-            "text": "SavedObjectsClient"
+            "section": "def-public.SavedObjectsClientContract",
+            "text": "SavedObjectsClientContract"
           },
-          ", \"create\" | \"bulkCreate\" | \"delete\" | \"find\" | \"bulkGet\" | \"bulkResolve\" | \"get\" | \"resolve\" | \"update\" | \"bulkUpdate\">; overlays: ",
+          "; overlays: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -1611,15 +1609,7 @@
                   },
                   "<unknown>>; delete: (type: string, id: string, options?: ",
                   "SavedObjectsDeleteOptions",
-                  " | undefined) => Promise<{}>; find: <T = unknown, A = unknown>(options: Pick<",
-                  {
-                    "pluginId": "core",
-                    "scope": "server",
-                    "docId": "kibCoreSavedObjectsPluginApi",
-                    "section": "def-server.SavedObjectsFindOptions",
-                    "text": "SavedObjectsFindOptions"
-                  },
-                  ", \"type\" | \"filter\" | \"aggs\" | \"fields\" | \"page\" | \"perPage\" | \"sortField\" | \"search\" | \"searchFields\" | \"hasReference\" | \"hasReferenceOperator\" | \"defaultSearchOperator\" | \"namespaces\" | \"preference\">) => Promise<",
+                  " | undefined) => Promise<{}>; find: <T = unknown, A = unknown>(options: SavedObjectsFindOptions) => Promise<",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -1731,7 +1721,7 @@
         "label": "showSaveModal",
         "description": [],
         "signature": [
-          "(saveModal: React.ReactElement<MinimalSaveModalProps, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>, I18nContext: ({ children }: { children: React.ReactNode; }) => JSX.Element, Wrapper: React.FC<{}> | undefined) => void"
+          "(saveModal: React.ReactElement<MinimalSaveModalProps, string | React.JSXElementConstructor<any>>, I18nContext: ({ children }: { children: React.ReactNode; }) => JSX.Element, Wrapper: React.FC<{}> | undefined) => void"
         ],
         "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
         "deprecated": false,
@@ -1744,7 +1734,7 @@
             "label": "saveModal",
             "description": [],
             "signature": [
-              "React.ReactElement<MinimalSaveModalProps, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)>"
+              "React.ReactElement<MinimalSaveModalProps, string | React.JSXElementConstructor<any>>"
             ],
             "path": "src/plugins/saved_objects/public/save_modal/show_saved_object_save_modal.tsx",
             "deprecated": false,
@@ -1977,7 +1967,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "string | number | boolean | {} | React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> | React.ReactNodeArray | React.ReactPortal | ((state: ",
+              "React.ReactNode | ((state: ",
               {
                 "pluginId": "savedObjects",
                 "scope": "public",
@@ -1985,7 +1975,7 @@
                 "section": "def-public.SaveModalState",
                 "text": "SaveModalState"
               },
-              ") => React.ReactNode) | null | undefined"
+              ") => React.ReactNode)"
             ],
             "path": "src/plugins/saved_objects/public/save_modal/saved_object_save_modal_origin.tsx",
             "deprecated": false
@@ -2055,6 +2045,22 @@
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
           },
           {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/display_duplicate_title_confirm_modal.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/display_duplicate_title_confirm_modal.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/check_for_duplicate_title.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/check_for_duplicate_title.ts"
+          },
+          {
             "plugin": "savedObjectsTaggingOss",
             "path": "src/plugins/saved_objects_tagging_oss/public/decorator/types.ts"
           },
@@ -2101,6 +2107,38 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/public/application/actions/clone_panel_action.tsx"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/display_duplicate_title_confirm_modal.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/display_duplicate_title_confirm_modal.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/check_for_duplicate_title.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/check_for_duplicate_title.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/persistence/saved_objects_utils/check_for_duplicate_title.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/persistence/saved_objects_utils/check_for_duplicate_title.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/persistence/saved_objects_utils/display_duplicate_title_confirm_modal.d.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/target/types/public/persistence/saved_objects_utils/display_duplicate_title_confirm_modal.d.ts"
           }
         ],
         "children": [
@@ -2144,7 +2182,9 @@
             "label": "applyESResp",
             "description": [],
             "signature": [
-              "(resp: Record<string, any>) => Promise<",
+              "(resp: ",
+              "EsResponse",
+              ") => Promise<",
               {
                 "pluginId": "savedObjects",
                 "scope": "public",
@@ -2165,7 +2205,7 @@
                 "label": "resp",
                 "description": [],
                 "signature": [
-                  "Record<string, any>"
+                  "EsResponse"
                 ],
                 "path": "src/plugins/saved_objects/public/types.ts",
                 "deprecated": false,
@@ -2478,15 +2518,14 @@
             "label": "searchSource",
             "description": [],
             "signature": [
-              "Pick<",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
+                "section": "def-common.ISearchSource",
+                "text": "ISearchSource"
               },
-              ", \"history\" | \"setOverwriteDataViewType\" | \"setField\" | \"removeField\" | \"setFields\" | \"getId\" | \"getFields\" | \"getField\" | \"getOwnField\" | \"create\" | \"createCopy\" | \"createChild\" | \"setParent\" | \"getParent\" | \"fetch$\" | \"fetch\" | \"onRequestStart\" | \"getSearchRequestBody\" | \"destroy\" | \"getSerializedFields\" | \"serialize\"> | undefined"
+              " | undefined"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
@@ -2503,8 +2542,8 @@
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSourceFields",
-                "text": "SearchSourceFields"
+                "section": "def-common.SerializedSearchSourceFields",
+                "text": "SerializedSearchSourceFields"
               },
               " | undefined"
             ],
@@ -2807,15 +2846,15 @@
             "label": "searchSource",
             "description": [],
             "signature": [
-              "boolean | Pick<",
+              "boolean | ",
               {
                 "pluginId": "data",
                 "scope": "common",
                 "docId": "kibDataSearchPluginApi",
-                "section": "def-common.SearchSource",
-                "text": "SearchSource"
+                "section": "def-common.ISearchSource",
+                "text": "ISearchSource"
               },
-              ", \"history\" | \"setOverwriteDataViewType\" | \"setField\" | \"removeField\" | \"setFields\" | \"getId\" | \"getFields\" | \"getField\" | \"getOwnField\" | \"create\" | \"createCopy\" | \"createChild\" | \"setParent\" | \"getParent\" | \"fetch$\" | \"fetch\" | \"onRequestStart\" | \"getSearchRequestBody\" | \"destroy\" | \"getSerializedFields\" | \"serialize\"> | undefined"
+              " | undefined"
             ],
             "path": "src/plugins/saved_objects/public/types.ts",
             "deprecated": false
@@ -3557,7 +3596,7 @@
         "label": "SavedObjectFinderUiProps",
         "description": [],
         "signature": [
-          "({ savedObjects: ",
+          "{ savedObjects: ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -3573,23 +3612,8 @@
             "section": "def-public.IUiSettingsClient",
             "text": "IUiSettingsClient"
           },
-          "; } & SavedObjectFinderFixedPage) | ({ savedObjects: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-public.SavedObjectsStart",
-            "text": "SavedObjectsStart"
-          },
-          "; uiSettings: ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.IUiSettingsClient",
-            "text": "IUiSettingsClient"
-          },
-          "; } & SavedObjectFinderInitialPageSize)"
+          "; } & ",
+          "SavedObjectFinderProps"
         ],
         "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx",
         "deprecated": false,

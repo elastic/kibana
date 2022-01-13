@@ -17,14 +17,12 @@ import {
 } from 'kibana/server';
 
 import { nodeBuilder } from '@kbn/es-query';
-import { CasesService } from '../../services';
+import { AlertService, CasesService } from '../../services';
 import {
-  CASE_COMMENT_SAVED_OBJECT,
   CaseStatuses,
   CommentAttributes,
   CommentType,
   excess,
-  SUB_CASE_SAVED_OBJECT,
   SubCaseAttributes,
   SubCasePatchRequest,
   SubCaseResponse,
@@ -35,18 +33,17 @@ import {
   throwErrors,
   User,
   CaseAttributes,
-} from '../../../common';
+} from '../../../common/api';
+import { CASE_COMMENT_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getCaseToUpdate } from '../utils';
-import { buildSubCaseUserActions } from '../../services/user_actions/helpers';
+import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateRequest,
-  createCaseError,
   isCommentRequestTypeAlertOrGenAlert,
   flattenSubCaseSavedObject,
-} from '../../common';
+} from '../../common/utils';
 import { UpdateAlertRequest } from '../../client/alerts/types';
 import { CasesClientArgs } from '../types';
-import { CasesClientInternal } from '../client_internal';
 
 function checkNonExistingOrConflict(
   toUpdate: SubCasePatchRequest[],
@@ -208,13 +205,13 @@ async function getAlertComments({
 async function updateAlerts({
   caseService,
   unsecuredSavedObjectsClient,
-  casesClientInternal,
+  alertsService,
   logger,
   subCasesToSync,
 }: {
   caseService: CasesService;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
-  casesClientInternal: CasesClientInternal;
+  alertsService: AlertService;
   logger: Logger;
   subCasesToSync: SubCasePatchRequest[];
 }) {
@@ -246,7 +243,7 @@ async function updateAlerts({
       []
     );
 
-    await casesClientInternal.alerts.updateStatus({ alerts: alertsToUpdate });
+    await alertsService.updateAlertsStatus(alertsToUpdate);
   } catch (error) {
     throw createCaseError({
       message: `Failed to update alert status while updating sub cases: ${JSON.stringify(
@@ -264,11 +261,9 @@ async function updateAlerts({
 export async function update({
   subCases,
   clientArgs,
-  casesClientInternal,
 }: {
   subCases: SubCasesPatchRequest;
   clientArgs: CasesClientArgs;
-  casesClientInternal: CasesClientInternal;
 }): Promise<SubCasesResponse> {
   const query = pipe(
     excess(SubCasesPatchRequestRt).decode(subCases),
@@ -276,7 +271,8 @@ export async function update({
   );
 
   try {
-    const { unsecuredSavedObjectsClient, user, caseService, userActionService } = clientArgs;
+    const { unsecuredSavedObjectsClient, user, caseService, userActionService, alertsService } =
+      clientArgs;
 
     const bulkSubCases = await caseService.getSubCases({
       unsecuredSavedObjectsClient,
@@ -358,7 +354,7 @@ export async function update({
     await updateAlerts({
       caseService,
       unsecuredSavedObjectsClient,
-      casesClientInternal,
+      alertsService,
       subCasesToSync: subCasesToSyncAlertsFor,
       logger: clientArgs.logger,
     });
@@ -384,14 +380,11 @@ export async function update({
       []
     );
 
-    await userActionService.bulkCreate({
+    await userActionService.bulkCreateUpdateCase({
       unsecuredSavedObjectsClient,
-      actions: buildSubCaseUserActions({
-        originalSubCases: bulkSubCases.saved_objects,
-        updatedSubCases: updatedCases.saved_objects,
-        actionDate: updatedAt,
-        actionBy: user,
-      }),
+      originalCases: bulkSubCases.saved_objects,
+      updatedCases: updatedCases.saved_objects,
+      user,
     });
 
     return SubCasesResponseRt.encode(returnUpdatedSubCases);

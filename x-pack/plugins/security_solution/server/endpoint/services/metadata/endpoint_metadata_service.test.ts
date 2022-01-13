@@ -111,18 +111,22 @@ describe('EndpointMetadataService', () => {
 
     beforeEach(() => {
       agentPolicyServiceMock = testMockedContext.agentPolicyService;
-      esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+      esClient = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
     });
 
     it('should throw wrapped error if es error', async () => {
       const esMockResponse = elasticsearchServiceMock.createErrorTransportRequestPromise({});
       esClient.search.mockResolvedValue(esMockResponse);
-      const metadataListResponse = metadataService.getHostMetadataList(esClient, {
-        page: 0,
-        pageSize: 10,
-        kuery: '',
-        hostStatuses: [],
-      });
+      const metadataListResponse = metadataService.getHostMetadataList(
+        esClient,
+        testMockedContext.fleetServices,
+        {
+          page: 0,
+          pageSize: 10,
+          kuery: '',
+          hostStatuses: [],
+        }
+      );
       await expect(metadataListResponse).rejects.toThrow(EndpointError);
     });
 
@@ -176,6 +180,7 @@ describe('EndpointMetadataService', () => {
       const queryOptions = { page: 1, pageSize: 10, kuery: '', hostStatuses: [] };
       const metadataListResponse = await metadataService.getHostMetadataList(
         esClient,
+        testMockedContext.fleetServices,
         queryOptions
       );
       const unitedIndexQuery = await buildUnitedIndexQuery(queryOptions, packagePolicyIds);

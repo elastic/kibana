@@ -96,7 +96,6 @@ const defineBasicObservabilityRole = (
       {
         spaces: ['*'],
         base: [],
-        // @ts-expect-error TypeScript doesn't distinguish between missing and
         // undefined props yet
         feature: features,
       },

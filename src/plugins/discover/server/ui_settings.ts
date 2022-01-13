@@ -49,7 +49,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     }),
     value: 200,
     description: i18n.translate('discover.advancedSettings.maxDocFieldsDisplayedText', {
-      defaultMessage: 'Maximum number of fields rendered in the document column',
+      defaultMessage: 'Maximum number of fields rendered in the document summary',
     }),
     category: ['discover'],
     schema: schema.number(),
@@ -211,7 +211,16 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     description: i18n.translate(
       'discover.advancedSettings.discover.showFieldStatisticsDescription',
       {
-        defaultMessage: `Enable "Field statistics" table in Discover.`,
+        defaultMessage: `Enable {fieldStatisticsDocs} in Discover to explore the fields in your data. This functionality is in beta and is subject to change. `,
+        values: {
+          fieldStatisticsDocs:
+            `<a href="https://www.elastic.co/guide/en/kibana/current/show-field-statistics.html"
+            target="_blank" rel="noopener">` +
+            i18n.translate('discover.advancedSettings.discover.fieldStatisticsLinkText', {
+              defaultMessage: 'Field statistics view',
+            }) +
+            '</a>',
+        },
       }
     ),
     value: false,

@@ -11,10 +11,10 @@ import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
 import { LAYER_TYPE } from '../../../../common/constants';
 import { HeatmapLayerDescriptor } from '../../../../common/descriptor_types';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source';
-import { getVectorSourceBounds, MvtSourceData, syncMvtSourceData } from '../vector_layer';
+import { syncBoundsData, MvtSourceData, syncMvtSourceData } from '../vector_layer';
 import { DataRequestContext } from '../../../actions';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
-import { ITiledSingleLayerVectorSource } from '../../sources/tiled_single_layer_vector_source';
+import { IMvtVectorSource } from '../../sources/vector_source';
 
 export class HeatmapLayer extends AbstractLayer {
   private readonly _style: HeatmapStyle;
@@ -91,7 +91,7 @@ export class HeatmapLayer extends AbstractLayer {
         this.getQuery(),
         syncContext.isForceRefresh
       ),
-      source: this.getSource() as ITiledSingleLayerVectorSource,
+      source: this.getSource() as IMvtVectorSource,
       syncContext,
     });
   }
@@ -111,7 +111,7 @@ export class HeatmapLayer extends AbstractLayer {
       return false;
     }
 
-    return mbSource.tiles?.[0] !== sourceData.urlTemplate;
+    return mbSource.tiles?.[0] !== sourceData.tileUrl;
   }
 
   syncLayerWithMB(mbMap: MbMap) {
@@ -130,9 +130,9 @@ export class HeatmapLayer extends AbstractLayer {
     if (!mbSource) {
       mbMap.addSource(mbSourceId, {
         type: 'vector',
-        tiles: [sourceData.urlTemplate],
-        minzoom: sourceData.minSourceZoom,
-        maxzoom: sourceData.maxSourceZoom,
+        tiles: [sourceData.tileUrl],
+        minzoom: sourceData.tileMinZoom,
+        maxzoom: sourceData.tileMaxZoom,
       });
     }
 
@@ -142,7 +142,7 @@ export class HeatmapLayer extends AbstractLayer {
         id: heatmapLayerId,
         type: 'heatmap',
         source: mbSourceId,
-        ['source-layer']: sourceData.layerName,
+        ['source-layer']: sourceData.tileSourceLayer,
         paint: {},
       });
     }
@@ -153,7 +153,7 @@ export class HeatmapLayer extends AbstractLayer {
     }
     const metricField = metricFields[0];
 
-    // do not use tile meta features from previous urlTemplate to avoid styling new tiles from previous tile meta features
+    // do not use tile meta features from previous tile URL to avoid styling new tiles from previous tile meta features
     const tileMetaFeatures = this._requiresPrevSourceCleanup(mbMap) ? [] : this._getMetaFromTiles();
     let max = 0;
     for (let i = 0; i < tileMetaFeatures.length; i++) {
@@ -193,7 +193,7 @@ export class HeatmapLayer extends AbstractLayer {
   }
 
   async getBounds(syncContext: DataRequestContext) {
-    return await getVectorSourceBounds({
+    return await syncBoundsData({
       layerId: this.getId(),
       syncContext,
       source: this.getSource(),

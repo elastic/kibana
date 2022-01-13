@@ -61,6 +61,7 @@ export class DataViewsPublicPlugin
         application.navigateToApp,
         overlays
       ),
+      getCanSave: () => Promise.resolve(application.capabilities.indexPatterns.save === true),
     });
   }
 

@@ -7,7 +7,8 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { CommentType, SECURITY_SOLUTION_OWNER } from '../../common';
+import { CommentType } from '../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { usePostComment, UsePostComment } from './use_post_comment';
 import { basicCaseId, basicSubCaseId } from './mock';
 import * as api from './api';

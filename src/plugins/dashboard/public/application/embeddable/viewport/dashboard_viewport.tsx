@@ -13,7 +13,7 @@ import { DashboardContainer, DashboardReactContextValue } from '../dashboard_con
 import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
-import { ControlGroupContainer } from '../../../../../presentation_util/public';
+import { ControlGroupContainer } from '../../../../../controls/public';
 
 export interface DashboardViewportProps {
   container: DashboardContainer;
@@ -32,7 +32,7 @@ interface State {
 
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
   static contextType = context;
-  public readonly context!: DashboardReactContextValue;
+  public declare readonly context: DashboardReactContextValue;
 
   private controlsRoot: React.RefObject<HTMLDivElement>;
 

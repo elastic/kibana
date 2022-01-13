@@ -10,5 +10,6 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["expressions", "presentationUtil"],
-  "optionalPlugins": []
+  "optionalPlugins": [],
+  "requiredBundles": ["kibanaReact"]
 }

@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GaugeComponent renders the chart 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Connect(SpecInstance)
+    debugState={false}
+    theme={Object {}}
+  />
+  <Connect(SpecInstance)
+    actual={3}
+    bandFillColor={[Function]}
+    bands={
+      Array [
+        0,
+        4,
+      ]
+    }
+    base={0}
+    id="goal"
+    labelMajor="Count of records   "
+    labelMinor=""
+    subtype="verticalBullet"
+    tickValueFormatter={[Function]}
+    ticks={
+      Array [
+        0,
+        1.33,
+        2.67,
+        4,
+      ]
+    }
+  />
+</Chart>
+`;

@@ -40,9 +40,9 @@ import { useHistory } from 'react-router-dom';
 import { isEmpty } from 'lodash';
 import {
   ActionType,
-  Alert,
+  Rule,
   AlertTableItem,
-  AlertType,
+  RuleType,
   RuleTypeIndex,
   Pagination,
 } from '../../../../types';
@@ -95,7 +95,7 @@ interface AlertTypeState {
 }
 interface AlertState {
   isLoading: boolean;
-  data: Alert[];
+  data: Rule[];
   totalItemCount: number;
 }
 
@@ -483,7 +483,22 @@ export const AlertsList: React.FunctionComponent = () => {
     },
     {
       field: 'executionStatus.lastExecutionDate',
-      name: 'Last run',
+      name: (
+        <EuiToolTip
+          data-test-subj="alertsTableCell-lastExecutionDateTooltip"
+          content={i18n.translate(
+            'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.lastExecutionDateTitle',
+            {
+              defaultMessage: 'Start time of the last execution.',
+            }
+          )}
+        >
+          <span>
+            Last run{' '}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
       sortable: true,
       width: '15%',
       'data-test-subj': 'alertsTableCell-lastExecutionDate',
@@ -523,6 +538,7 @@ export const AlertsList: React.FunctionComponent = () => {
       width: '12%',
       name: (
         <EuiToolTip
+          data-test-subj="alertsTableCell-durationTooltip"
           content={i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.durationTitle',
             {
@@ -1027,7 +1043,7 @@ export const AlertsList: React.FunctionComponent = () => {
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
           ruleType={
-            alertTypesState.data.get(currentRuleToEdit.alertTypeId) as AlertType<string, string>
+            alertTypesState.data.get(currentRuleToEdit.alertTypeId) as RuleType<string, string>
           }
           onSave={loadAlertsData}
         />
@@ -1061,12 +1077,12 @@ const noPermissionPrompt = (
   />
 );
 
-function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
+function filterAlertsById(alerts: Rule[], ids: string[]): Rule[] {
   return alerts.filter((alert) => ids.includes(alert.id));
 }
 
 function convertAlertsToTableItems(
-  alerts: Alert[],
+  alerts: Rule[],
   ruleTypeIndex: RuleTypeIndex,
   canExecuteActions: boolean
 ) {

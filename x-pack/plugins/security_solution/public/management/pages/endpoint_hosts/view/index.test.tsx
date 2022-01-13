@@ -1125,9 +1125,7 @@ describe('when on the endpoint list page', () => {
       });
 
       it('should display policy response sub-panel', async () => {
-        expect(
-          await renderResult.findByTestId('endpointDetailsPolicyResponseFlyoutHeader')
-        ).not.toBeNull();
+        expect(await renderResult.findByTestId('flyoutSubHeaderBackButton')).not.toBeNull();
         expect(
           await renderResult.findByTestId('endpointDetailsPolicyResponseFlyoutBody')
         ).not.toBeNull();
@@ -1214,7 +1212,7 @@ describe('when on the endpoint list page', () => {
 
       it('should include the back to details link', async () => {
         const subHeaderBackLink = await renderResult.findByTestId('flyoutSubHeaderBackButton');
-        expect(subHeaderBackLink.textContent).toBe('Endpoint Details');
+        expect(subHeaderBackLink.textContent).toBe('Endpoint details');
         expect(subHeaderBackLink.getAttribute('href')).toEqual(
           `${APP_PATH}${MANAGEMENT_PATH}/endpoints?page_index=0&page_size=10&selected_endpoint=1&show=details`
         );
@@ -1490,7 +1488,11 @@ describe('when on the endpoint list page', () => {
           state: TRANSFORM_STATES.STARTED,
         } as TransformStats,
       ];
-      setEndpointListApiMockImplementation(coreStart.http, { transforms });
+      setEndpointListApiMockImplementation(coreStart.http, {
+        transforms,
+        endpointsResults: [],
+        endpointPackagePolicies: mockPolicyResultList({ total: 3 }).items,
+      });
       render();
       const banner = screen.queryByTestId('callout-endpoints-list-transform-failed');
       expect(banner).toBeNull();
@@ -1500,7 +1502,25 @@ describe('when on the endpoint list page', () => {
       const transforms: TransformStats[] = [
         { id: 'not-metadata', state: TRANSFORM_STATES.FAILED } as TransformStats,
       ];
-      setEndpointListApiMockImplementation(coreStart.http, { transforms });
+      setEndpointListApiMockImplementation(coreStart.http, {
+        transforms,
+        endpointsResults: [],
+        endpointPackagePolicies: mockPolicyResultList({ total: 3 }).items,
+      });
+      render();
+      const banner = screen.queryByTestId('callout-endpoints-list-transform-failed');
+      expect(banner).toBeNull();
+    });
+
+    it('is not displayed when no endpoint policy', () => {
+      const transforms: TransformStats[] = [
+        { id: 'not-metadata', state: TRANSFORM_STATES.FAILED } as TransformStats,
+      ];
+      setEndpointListApiMockImplementation(coreStart.http, {
+        transforms,
+        endpointsResults: [],
+        endpointPackagePolicies: [],
+      });
       render();
       const banner = screen.queryByTestId('callout-endpoints-list-transform-failed');
       expect(banner).toBeNull();
@@ -1513,7 +1533,11 @@ describe('when on the endpoint list page', () => {
           state: TRANSFORM_STATES.FAILED,
         } as TransformStats,
       ];
-      setEndpointListApiMockImplementation(coreStart.http, { transforms });
+      setEndpointListApiMockImplementation(coreStart.http, {
+        transforms,
+        endpointsResults: [],
+        endpointPackagePolicies: mockPolicyResultList({ total: 3 }).items,
+      });
       render();
       const banner = await screen.findByTestId('callout-endpoints-list-transform-failed');
       expect(banner).toBeInTheDocument();
@@ -1530,7 +1554,11 @@ describe('when on the endpoint list page', () => {
           state: TRANSFORM_STATES.FAILED,
         } as TransformStats,
       ];
-      setEndpointListApiMockImplementation(coreStart.http, { transforms });
+      setEndpointListApiMockImplementation(coreStart.http, {
+        transforms,
+        endpointsResults: [],
+        endpointPackagePolicies: mockPolicyResultList({ total: 3 }).items,
+      });
       render();
       const banner = await screen.findByTestId('callout-endpoints-list-transform-failed');
       expect(banner).not.toHaveTextContent(transforms[0].id);

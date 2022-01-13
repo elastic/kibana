@@ -28,11 +28,13 @@ import {
   PRIVATE_SOURCES_PATH,
   ORG_SETTINGS_PATH,
   USERS_AND_ROLES_PATH,
+  API_KEYS_PATH,
   SECURITY_PATH,
   PERSONAL_SETTINGS_PATH,
   PERSONAL_PATH,
 } from './routes';
 import { AccountSettings } from './views/account_settings';
+import { ApiKeys } from './views/api_keys';
 import { SourcesRouter } from './views/content_sources';
 import { SourceAdded } from './views/content_sources/components/source_added';
 import { ErrorState } from './views/error_state';
@@ -48,7 +50,7 @@ import { SetupGuide } from './views/setup_guide';
 
 export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
-  const { errorConnecting } = useValues(HttpLogic);
+  const { errorConnectingMessage } = useValues(HttpLogic);
   const { enterpriseSearchVersion, kibanaVersion } = props;
   const incompatibleVersions = isVersionMismatch(enterpriseSearchVersion, kibanaVersion);
 
@@ -61,7 +63,7 @@ export const WorkplaceSearch: React.FC<InitialAppData> = (props) => {
         kibanaVersion={kibanaVersion}
       />
     );
-  } else if (errorConnecting) {
+  } else if (errorConnectingMessage) {
     return <ErrorState />;
   }
 
@@ -132,6 +134,9 @@ export const WorkplaceSearchConfigured: React.FC<InitialAppData> = (props) => {
       </Route>
       <Route path={USERS_AND_ROLES_PATH}>
         <RoleMappings />
+      </Route>
+      <Route path={API_KEYS_PATH}>
+        <ApiKeys />
       </Route>
       <Route path={SECURITY_PATH}>
         <Security />

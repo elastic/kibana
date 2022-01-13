@@ -28,7 +28,7 @@ export const Policy = memo(() => {
     <EditPackagePolicyForm
       packagePolicyId={packagePolicyId}
       from="package-edit"
-      isUpgrade={extensionView?.useLatestPackageVersion}
+      forceUpgrade={extensionView?.useLatestPackageVersion}
     />
   );
 });

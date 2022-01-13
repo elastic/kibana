@@ -6,29 +6,42 @@
  * Side Public License, v 1.
  */
 
-import { first } from 'rxjs/operators';
-
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { installBrowser } from '../../../../x-pack/plugins/reporting/server/browsers/install';
+import { install, paths } from '../../../../x-pack/plugins/screenshotting/server/utils';
 
 export const InstallChromium = {
   description: 'Installing Chromium',
 
   async run(config, log, build) {
+    const preInstalledPackages = paths.packages.filter((p) => p.isPreInstalled);
+
     for (const platform of config.getNodePlatforms()) {
+      const pkg = paths.find(platform.getName(), platform.getArchitecture(), preInstalledPackages);
       const target = `${platform.getName()}-${platform.getArchitecture()}`;
+
+      if (!pkg) {
+        log.info(`Skipping Chromium install for ${target}`);
+
+        // Unbundled chromium packages (for Darwin): Chromium is downloaded at
+        // server startup, rather than being pre-installed
+        continue;
+      }
+
       log.info(`Installing Chromium for ${target}`);
 
-      // revert after https://github.com/elastic/kibana/issues/109949
-      if (target === 'darwin-arm64') continue;
+      const logger = {
+        get: log.withType.bind(log),
+        debug: log.debug.bind(log),
+        info: log.info.bind(log),
+        warn: log.warning.bind(log),
+        trace: log.verbose.bind(log),
+        error: log.error.bind(log),
+        fatal: log.error.bind(log),
+        log: log.write.bind(log),
+      };
 
-      const { binaryPath$ } = installBrowser(
-        log,
-        build.resolvePathForPlatform(platform, 'x-pack/plugins/reporting/chromium'),
-        platform.getName(),
-        platform.getArchitecture()
-      );
-      await binaryPath$.pipe(first()).toPromise();
+      const path = build.resolvePathForPlatform(platform, 'x-pack/plugins/screenshotting/chromium');
+      await install(logger, pkg, path);
     }
   },
 };

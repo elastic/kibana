@@ -19,9 +19,9 @@ import {
   AlertTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-  RawAlert,
+  RawRule,
 } from '../types';
-import { NormalizedAlertType, UntypedNormalizedAlertType } from '../rule_type_registry';
+import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { isEphemeralTaskRejectedDueToCapacityError } from '../../../task_manager/server';
 import { createAlertEventLogRecordObject } from '../lib/create_alert_event_log_record_object';
 
@@ -34,15 +34,15 @@ export interface CreateExecutionHandlerOptions<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > {
-  alertId: string;
-  alertName: string;
+  ruleId: string;
+  ruleName: string;
   tags?: string[];
   actionsPlugin: ActionsPluginStartContract;
   actions: AlertAction[];
   spaceId: string;
-  apiKey: RawAlert['apiKey'];
+  apiKey: RawRule['apiKey'];
   kibanaBaseUrl: string | undefined;
-  alertType: NormalizedAlertType<
+  ruleType: NormalizedRuleType<
     Params,
     ExtractedParams,
     State,
@@ -54,15 +54,15 @@ export interface CreateExecutionHandlerOptions<
   logger: Logger;
   eventLogger: IEventLogger;
   request: KibanaRequest;
-  alertParams: AlertTypeParams;
+  ruleParams: AlertTypeParams;
   supportsEphemeralTasks: boolean;
-  maxEphemeralActionsPerAlert: number;
+  maxEphemeralActionsPerRule: number;
 }
 
 interface ExecutionHandlerOptions<ActionGroupIds extends string> {
   actionGroup: ActionGroupIds;
   actionSubgroup?: string;
-  alertInstanceId: string;
+  alertId: string;
   context: AlertInstanceContext;
   state: AlertInstanceState;
 }
@@ -81,20 +81,20 @@ export function createExecutionHandler<
   RecoveryActionGroupId extends string
 >({
   logger,
-  alertId,
-  alertName,
+  ruleId,
+  ruleName,
   tags,
   actionsPlugin,
-  actions: alertActions,
+  actions: ruleActions,
   spaceId,
   apiKey,
-  alertType,
+  ruleType,
   kibanaBaseUrl,
   eventLogger,
   request,
-  alertParams,
+  ruleParams,
   supportsEphemeralTasks,
-  maxEphemeralActionsPerAlert,
+  maxEphemeralActionsPerRule,
 }: CreateExecutionHandlerOptions<
   Params,
   ExtractedParams,
@@ -104,66 +104,66 @@ export function createExecutionHandler<
   ActionGroupIds,
   RecoveryActionGroupId
 >): ExecutionHandler<ActionGroupIds | RecoveryActionGroupId> {
-  const alertTypeActionGroups = new Map(
-    alertType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
+  const ruleTypeActionGroups = new Map(
+    ruleType.actionGroups.map((actionGroup) => [actionGroup.id, actionGroup.name])
   );
   return async ({
     actionGroup,
     actionSubgroup,
     context,
     state,
-    alertInstanceId,
+    alertId,
   }: ExecutionHandlerOptions<ActionGroupIds | RecoveryActionGroupId>) => {
-    if (!alertTypeActionGroups.has(actionGroup)) {
-      logger.error(`Invalid action group "${actionGroup}" for alert "${alertType.id}".`);
+    if (!ruleTypeActionGroups.has(actionGroup)) {
+      logger.error(`Invalid action group "${actionGroup}" for rule "${ruleType.id}".`);
       return;
     }
-    const actions = alertActions
+    const actions = ruleActions
       .filter(({ group }) => group === actionGroup)
       .map((action) => {
         return {
           ...action,
           params: transformActionParams({
             actionsPlugin,
-            alertId,
-            alertType: alertType.id,
+            alertId: ruleId,
+            alertType: ruleType.id,
             actionTypeId: action.actionTypeId,
-            alertName,
+            alertName: ruleName,
             spaceId,
             tags,
-            alertInstanceId,
+            alertInstanceId: alertId,
             alertActionGroup: actionGroup,
-            alertActionGroupName: alertTypeActionGroups.get(actionGroup)!,
+            alertActionGroupName: ruleTypeActionGroups.get(actionGroup)!,
             alertActionSubgroup: actionSubgroup,
             context,
             actionParams: action.params,
             actionId: action.id,
             state,
             kibanaBaseUrl,
-            alertParams,
+            alertParams: ruleParams,
           }),
         };
       })
       .map((action) => ({
         ...action,
         params: injectActionParams({
-          ruleId: alertId,
+          ruleId,
           spaceId,
           actionParams: action.params,
           actionTypeId: action.actionTypeId,
         }),
       }));
 
-    const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
+    const ruleLabel = `${ruleType.id}:${ruleId}: '${ruleName}'`;
 
     const actionsClient = await actionsPlugin.getActionsClientWithRequest(request);
-    let ephemeralActionsToSchedule = maxEphemeralActionsPerAlert;
+    let ephemeralActionsToSchedule = maxEphemeralActionsPerRule;
     for (const action of actions) {
       if (
         !actionsPlugin.isActionExecutable(action.id, action.actionTypeId, { notifyUsage: true })
       ) {
         logger.warn(
-          `Alert "${alertId}" skipped scheduling action "${action.id}" because it is disabled`
+          `Rule "${ruleId}" skipped scheduling action "${action.id}" because it is disabled`
         );
         continue;
       }
@@ -176,15 +176,15 @@ export function createExecutionHandler<
         spaceId,
         apiKey: apiKey ?? null,
         source: asSavedObjectExecutionSource({
-          id: alertId,
+          id: ruleId,
           type: 'alert',
         }),
         relatedSavedObjects: [
           {
-            id: alertId,
+            id: ruleId,
             type: 'alert',
             namespace: namespace.namespace,
-            typeId: alertType.id,
+            typeId: ruleType.id,
           },
         ],
       };
@@ -203,18 +203,18 @@ export function createExecutionHandler<
       }
 
       const event = createAlertEventLogRecordObject({
-        ruleId: alertId,
-        ruleType: alertType as UntypedNormalizedAlertType,
+        ruleId,
+        ruleType: ruleType as UntypedNormalizedRuleType,
         action: EVENT_LOG_ACTIONS.executeAction,
-        instanceId: alertInstanceId,
+        instanceId: alertId,
         group: actionGroup,
         subgroup: actionSubgroup,
-        ruleName: alertName,
+        ruleName,
         savedObjects: [
           {
             type: 'alert',
-            id: alertId,
-            typeId: alertType.id,
+            id: ruleId,
+            typeId: ruleType.id,
             relation: SAVED_OBJECT_REL_PRIMARY,
           },
           {
@@ -224,7 +224,7 @@ export function createExecutionHandler<
           },
         ],
         ...namespace,
-        message: `alert: ${alertLabel} instanceId: '${alertInstanceId}' scheduled ${
+        message: `alert: ${ruleLabel} instanceId: '${alertId}' scheduled ${
           actionSubgroup
             ? `actionGroup(subgroup): '${actionGroup}(${actionSubgroup})'`
             : `actionGroup: '${actionGroup}'`

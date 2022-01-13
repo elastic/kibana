@@ -165,6 +165,63 @@
           },
           {
             "parentPluginId": "@kbn/storybook",
+            "id": "def-server.defaultConfig.features",
+            "type": "Object",
+            "tags": [],
+            "label": "features",
+            "description": [],
+            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/storybook",
+                "id": "def-server.defaultConfig.features.postcss",
+                "type": "boolean",
+                "tags": [],
+                "label": "postcss",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "packages/kbn-storybook/src/lib/default_config.ts",
+                "deprecated": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/storybook",
+            "id": "def-server.defaultConfig.babel",
+            "type": "Function",
+            "tags": [],
+            "label": "babel",
+            "description": [
+              "// @ts-expect-error StorybookConfig type is incomplete\n// https://storybook.js.org/docs/react/configure/babel#custom-configuration"
+            ],
+            "signature": [
+              "(options: any) => Promise<any>"
+            ],
+            "path": "packages/kbn-storybook/src/lib/default_config.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/storybook",
+                "id": "def-server.defaultConfig.babel.$1",
+                "type": "Any",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "packages/kbn-storybook/src/lib/default_config.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/storybook",
             "id": "def-server.defaultConfig.webpackFinal",
             "type": "Function",
             "tags": [],
@@ -174,23 +231,23 @@
               "(config: ",
               "Configuration",
               ", options: ",
-              "StorybookOptions",
+              "Options",
               ") => { resolve: { alias: { '@emotion/core': string; '@emotion/styled': string; 'emotion-theming': string; }; modules?: string[] | undefined; descriptionFiles?: string[] | undefined; mainFields?: string[] | string[][] | undefined; aliasFields?: string[] | string[][] | undefined; mainFiles?: string[] | undefined; extensions?: string[] | undefined; enforceExtension?: boolean | undefined; unsafeCache?: boolean | {} | undefined; cachePredicate?: ((data: { path: string; request: string; }) => boolean) | undefined; plugins?: ",
               "ResolvePlugin",
-              "[] | undefined; symlinks?: boolean | undefined; cacheWithContext?: boolean | undefined; }; mode?: \"none\" | \"production\" | \"development\" | undefined; name?: string | undefined; context?: string | undefined; entry?: string | string[] | ",
+              "[] | undefined; symlinks?: boolean | undefined; cacheWithContext?: boolean | undefined; roots?: string[] | undefined; }; mode?: \"none\" | \"production\" | \"development\" | undefined; name?: string | undefined; context?: string | undefined; entry?: string | string[] | ",
               "Entry",
               " | ",
               "EntryFunc",
-              " | undefined; devtool?: boolean | \"eval\" | \"inline-source-map\" | \"cheap-eval-source-map\" | \"cheap-source-map\" | \"cheap-module-eval-source-map\" | \"cheap-module-source-map\" | \"eval-source-map\" | \"source-map\" | \"nosources-source-map\" | \"hidden-source-map\" | \"inline-cheap-source-map\" | \"inline-cheap-module-source-map\" | \"@eval\" | \"@inline-source-map\" | \"@cheap-eval-source-map\" | \"@cheap-source-map\" | \"@cheap-module-eval-source-map\" | \"@cheap-module-source-map\" | \"@eval-source-map\" | \"@source-map\" | \"@nosources-source-map\" | \"@hidden-source-map\" | \"#eval\" | \"#inline-source-map\" | \"#cheap-eval-source-map\" | \"#cheap-source-map\" | \"#cheap-module-eval-source-map\" | \"#cheap-module-source-map\" | \"#eval-source-map\" | \"#source-map\" | \"#nosources-source-map\" | \"#hidden-source-map\" | \"#@eval\" | \"#@inline-source-map\" | \"#@cheap-eval-source-map\" | \"#@cheap-source-map\" | \"#@cheap-module-eval-source-map\" | \"#@cheap-module-source-map\" | \"#@eval-source-map\" | \"#@source-map\" | \"#@nosources-source-map\" | \"#@hidden-source-map\" | undefined; output?: ",
+              " | undefined; devtool?: ",
+              "Options",
+              ".Devtool | undefined; output?: ",
               "Output",
               " | undefined; module?: ",
               "Module",
               " | undefined; resolveLoader?: ",
               "ResolveLoader",
-              " | undefined; externals?: string | RegExp | ",
-              "ExternalsObjectElement",
-              " | ",
-              "ExternalsFunctionElement",
+              " | undefined; externals?: ",
+              "ExternalsElement",
               " | ",
               "ExternalsElement",
               "[] | undefined; target?: \"node\" | \"web\" | \"webworker\" | \"async-node\" | \"node-webkit\" | \"atom\" | \"electron\" | \"electron-renderer\" | \"electron-preload\" | \"electron-main\" | ((compiler?: any) => void) | undefined; bail?: boolean | undefined; profile?: boolean | undefined; cache?: boolean | object | undefined; watch?: boolean | undefined; watchOptions?: ",
@@ -199,13 +256,15 @@
               "Node",
               " | undefined; amd?: { [moduleName: string]: boolean; } | undefined; recordsPath?: string | undefined; recordsInputPath?: string | undefined; recordsOutputPath?: string | undefined; plugins?: ",
               "Plugin",
-              "[] | undefined; stats?: boolean | \"none\" | \"normal\" | \"verbose\" | \"errors-only\" | \"errors-warnings\" | \"minimal\" | ",
+              "[] | undefined; stats?: ",
               "Stats",
-              ".ToStringOptionsObject | undefined; performance?: false | ",
+              ".ToStringOptions | undefined; performance?: false | ",
               "Options",
               ".Performance | undefined; parallelism?: number | undefined; optimization?: ",
               "Options",
-              ".Optimization | undefined; }"
+              ".Optimization | undefined; infrastructureLogging?: ",
+              "Options",
+              ".InfrastructureLogging | undefined; }"
             ],
             "path": "packages/kbn-storybook/src/lib/default_config.ts",
             "deprecated": false,
@@ -227,12 +286,12 @@
               {
                 "parentPluginId": "@kbn/storybook",
                 "id": "def-server.defaultConfig.webpackFinal.$2",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "StorybookOptions"
+                  "Options"
                 ],
                 "path": "packages/kbn-storybook/src/lib/default_config.ts",
                 "deprecated": false,

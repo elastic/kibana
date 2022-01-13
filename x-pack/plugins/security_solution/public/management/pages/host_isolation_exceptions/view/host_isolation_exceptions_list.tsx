@@ -5,37 +5,43 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useEffect, useState } from 'react';
-import { EuiButton, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useHistory } from 'react-router-dom';
+import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
+import { Immutable, ListPageRouteState } from '../../../../../common/endpoint/types';
 import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
-import { getCurrentLocation } from '../store/selector';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useToasts } from '../../../../common/lib/kibana';
 import {
-  useFetchHostIsolationExceptionsList,
-  useHostIsolationExceptionsNavigateCallback,
-  useHostIsolationExceptionsSelector,
-} from './hooks';
-import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
-import { Immutable } from '../../../../../common/endpoint/types';
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
+  MANAGEMENT_PAGE_SIZE_OPTIONS,
+} from '../../../common/constants';
+import { getEndpointListPath } from '../../../common/routing';
+import { getLoadPoliciesError } from '../../../common/translations';
 import { AdministrationListPage } from '../../../components/administration_list_page';
-import { SearchExceptions } from '../../../components/search_exceptions';
 import { ArtifactEntryCard, ArtifactEntryCardProps } from '../../../components/artifact_entry_card';
-import { HostIsolationExceptionsEmptyState } from './components/empty';
+import { useEndpointPoliciesToArtifactPolicies } from '../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
+import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
+import { ManagementPageLoader } from '../../../components/management_page_loader';
+import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
+import { SearchExceptions } from '../../../components/search_exceptions';
+import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
+import { getCurrentLocation } from '../store/selector';
 import { HostIsolationExceptionDeleteModal } from './components/delete_modal';
+import { HostIsolationExceptionsEmptyState } from './components/empty';
 import { HostIsolationExceptionsFormFlyout } from './components/form_flyout';
 import {
   DELETE_HOST_ISOLATION_EXCEPTION_LABEL,
   EDIT_HOST_ISOLATION_EXCEPTION_LABEL,
 } from './components/translations';
-import { getEndpointListPath } from '../../../common/routing';
-import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
 import {
-  MANAGEMENT_DEFAULT_PAGE_SIZE,
-  MANAGEMENT_PAGE_SIZE_OPTIONS,
-} from '../../../common/constants';
+  useFetchHostIsolationExceptionsList,
+  useHostIsolationExceptionsNavigateCallback,
+  useHostIsolationExceptionsSelector,
+} from './hooks';
 
 type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
   Immutable<ExceptionListItemSchema>,
@@ -44,14 +50,40 @@ type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
 
 export const HostIsolationExceptionsList = () => {
   const history = useHistory();
-  const privileges = useEndpointPrivileges();
+  const privileges = useUserPrivileges().endpointPrivileges;
+  const { state: routeState } = useLocation<ListPageRouteState | undefined>();
 
   const location = useHostIsolationExceptionsSelector(getCurrentLocation);
   const navigateCallback = useHostIsolationExceptionsNavigateCallback();
 
   const [itemToDelete, setItemToDelete] = useState<ExceptionListItemSchema | null>(null);
 
-  const { isLoading, data, error, refetch } = useFetchHostIsolationExceptionsList();
+  const includedPoliciesParam = location.included_policies;
+
+  const { isLoading, data, error, refetch } = useFetchHostIsolationExceptionsList({
+    filter: location.filter,
+    page: location.page_index,
+    perPage: location.page_size,
+    policies:
+      includedPoliciesParam && includedPoliciesParam !== ''
+        ? includedPoliciesParam.split(',')
+        : undefined,
+  });
+
+  const { isLoading: isLoadingAll, data: allData } = useFetchHostIsolationExceptionsList({
+    page: 0,
+    perPage: 1,
+    enabled: data && !data.total,
+  });
+
+  const toasts = useToasts();
+
+  // load the list of policies>
+  const policiesRequest = useGetEndpointSpecificPolicies({
+    onError: (err) => {
+      toasts.addDanger(getLoadPoliciesError(err));
+    },
+  });
 
   const pagination = {
     totalItemCount: data?.total ?? 0,
@@ -61,10 +93,10 @@ export const HostIsolationExceptionsList = () => {
   };
 
   const listItems = data?.data || [];
-  const totalCountListItems = data?.total || 0;
+  const allListItems = allData?.data || [];
 
   const showFlyout = privileges.canIsolateHost && !!location.show;
-  const hasDataToShow = !!location.filter || listItems.length > 0;
+  const hasDataToShow = allListItems.length > 0 || listItems.length > 0;
 
   useEffect(() => {
     if (!isLoading && listItems.length === 0 && !privileges.canIsolateHost) {
@@ -73,11 +105,16 @@ export const HostIsolationExceptionsList = () => {
   }, [history, isLoading, listItems.length, privileges.canIsolateHost]);
 
   const handleOnSearch = useCallback(
-    (query: string) => {
-      navigateCallback({ filter: query });
+    (filter: string, includedPolicies: string) => {
+      navigateCallback({
+        filter,
+        included_policies: includedPolicies,
+      });
     },
     [navigateCallback]
   );
+
+  const artifactCardPolicies = useEndpointPoliciesToArtifactPolicies(policiesRequest.data?.items);
 
   function handleItemComponentProps(element: ExceptionListItemSchema): ArtifactEntryCardProps {
     const editAction = {
@@ -103,6 +140,7 @@ export const HostIsolationExceptionsList = () => {
       item: element,
       'data-test-subj': `hostIsolationExceptionsCard`,
       actions: privileges.canIsolateHost ? [editAction, deleteAction] : [deleteAction],
+      policies: artifactCardPolicies,
     };
   }
 
@@ -116,6 +154,13 @@ export const HostIsolationExceptionsList = () => {
       },
       [navigateCallback]
     );
+
+  const backButton = useMemo(() => {
+    if (routeState && routeState.onBackButtonNavigateTo) {
+      return <BackToExternalAppButton {...routeState} />;
+    }
+    return null;
+  }, [routeState]);
 
   const handleAddButtonClick = useCallback(
     () =>
@@ -142,8 +187,13 @@ export const HostIsolationExceptionsList = () => {
     [navigateCallback]
   );
 
+  if ((isLoading || isLoadingAll) && !hasDataToShow) {
+    return <ManagementPageLoader data-test-subj="hostIsolationExceptionListLoader" />;
+  }
+
   return (
     <AdministrationListPage
+      headerBackComponent={backButton}
       title={
         <FormattedMessage
           id="xpack.securitySolution.hostIsolationExceptions.list.pageTitle"
@@ -189,6 +239,9 @@ export const HostIsolationExceptionsList = () => {
           <SearchExceptions
             defaultValue={location.filter}
             onSearch={handleOnSearch}
+            policyList={policiesRequest.data?.items}
+            hasPolicyFilter
+            defaultIncludedPolicies={location.included_policies}
             placeholder={i18n.translate(
               'xpack.securitySolution.hostIsolationExceptions.search.placeholder',
               {
@@ -201,7 +254,7 @@ export const HostIsolationExceptionsList = () => {
             <FormattedMessage
               id="xpack.securitySolution.hostIsolationExceptions.list.totalCount"
               defaultMessage="Showing {total, plural, one {# exception} other {# exceptions}}"
-              values={{ total: totalCountListItems }}
+              values={{ total: listItems.length }}
             />
           </EuiText>
           <EuiSpacer size="s" />

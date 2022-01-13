@@ -23,8 +23,11 @@ describe('HostRiskSummary', () => {
           host: {
             name: 'test-host-name',
           },
-          risk_score: 9999,
           risk: riskKeyword,
+          risk_stats: {
+            risk_score: 9999,
+            rule_risks: [],
+          },
         },
       ],
     };
@@ -63,8 +66,11 @@ describe('HostRiskSummary', () => {
           host: {
             name: 'test-host-name',
           },
-          risk_score: 9999,
           risk: 'test-risk',
+          risk_stats: {
+            risk_score: 9999,
+            rule_risks: [],
+          },
         },
       ],
     };

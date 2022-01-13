@@ -6,7 +6,7 @@
  */
 
 import React, { ReactNode } from 'react';
-import { BrowserFields, IBrowserSimpleFields, IBrowserAdvancedFields } from '../types';
+import { BrowserFields, BrowserSimpleFields, BrowserAdvancedFields } from '../types';
 import {
   BrowserSimpleFieldsContextProvider,
   BrowserAdvancedFieldsContextProvider,
@@ -24,22 +24,22 @@ export const BrowserContextProvider = ({
   defaultValues,
   children,
 }: BrowserContextProviderProps) => {
-  const simpleKeys = Object.keys(defaultBrowserSimpleFields) as Array<keyof IBrowserSimpleFields>;
+  const simpleKeys = Object.keys(defaultBrowserSimpleFields) as Array<keyof BrowserSimpleFields>;
   const advancedKeys = Object.keys(defaultBrowserAdvancedFields) as Array<
-    keyof IBrowserAdvancedFields
+    keyof BrowserAdvancedFields
   >;
-  const formattedDefaultSimpleFields = formatDefaultValues<IBrowserSimpleFields>(
+  const formattedDefaultSimpleFields = formatDefaultValues<BrowserSimpleFields>(
     simpleKeys,
     defaultValues || {}
   );
-  const formattedDefaultAdvancedFields = formatDefaultValues<IBrowserAdvancedFields>(
+  const formattedDefaultAdvancedFields = formatDefaultValues<BrowserAdvancedFields>(
     advancedKeys,
     defaultValues || {}
   );
-  const simpleFields: IBrowserSimpleFields | undefined = defaultValues
+  const simpleFields: BrowserSimpleFields | undefined = defaultValues
     ? formattedDefaultSimpleFields
     : undefined;
-  const advancedFields: IBrowserAdvancedFields | undefined = defaultValues
+  const advancedFields: BrowserAdvancedFields | undefined = defaultValues
     ? formattedDefaultAdvancedFields
     : undefined;
   return (

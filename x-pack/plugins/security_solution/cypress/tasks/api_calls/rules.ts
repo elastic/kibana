@@ -136,15 +136,3 @@ export const createSignalsIndex = () => {
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });
 };
-
-export const removeSignalsIndex = () => {
-  cy.request({ url: '/api/detection_engine/index', failOnStatusCode: false }).then((response) => {
-    if (response.status === 200) {
-      cy.request({
-        method: 'DELETE',
-        url: `api/detection_engine/index`,
-        headers: { 'kbn-xsrf': 'delete-signals' },
-      });
-    }
-  });
-};

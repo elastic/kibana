@@ -14,7 +14,6 @@ import * as metrics from './metrics';
 import { BUCKET_TYPES, CalculateBoundsFn } from './buckets';
 import { METRIC_TYPES } from './metrics';
 
-/** @internal */
 export interface AggTypesDependencies {
   calculateBounds: CalculateBoundsFn;
   getConfig: <T = any>(key: string) => T;
@@ -60,8 +59,11 @@ export const getAggTypes = () => ({
     { name: BUCKET_TYPES.FILTER, fn: buckets.getFilterBucketAgg },
     { name: BUCKET_TYPES.FILTERS, fn: buckets.getFiltersBucketAgg },
     { name: BUCKET_TYPES.SIGNIFICANT_TERMS, fn: buckets.getSignificantTermsBucketAgg },
+    { name: BUCKET_TYPES.SIGNIFICANT_TEXT, fn: buckets.getSignificantTextBucketAgg },
     { name: BUCKET_TYPES.GEOHASH_GRID, fn: buckets.getGeoHashBucketAgg },
     { name: BUCKET_TYPES.GEOTILE_GRID, fn: buckets.getGeoTitleBucketAgg },
+    { name: BUCKET_TYPES.SAMPLER, fn: buckets.getSamplerBucketAgg },
+    { name: BUCKET_TYPES.DIVERSIFIED_SAMPLER, fn: buckets.getDiversifiedSamplerBucketAgg },
   ],
 });
 
@@ -70,6 +72,7 @@ export const getAggTypesFunctions = () => [
   buckets.aggFilter,
   buckets.aggFilters,
   buckets.aggSignificantTerms,
+  buckets.aggSignificantText,
   buckets.aggIpRange,
   buckets.aggDateRange,
   buckets.aggRange,
@@ -79,6 +82,8 @@ export const getAggTypesFunctions = () => [
   buckets.aggDateHistogram,
   buckets.aggTerms,
   buckets.aggMultiTerms,
+  buckets.aggSampler,
+  buckets.aggDiversifiedSampler,
   metrics.aggAvg,
   metrics.aggBucketAvg,
   metrics.aggBucketMax,

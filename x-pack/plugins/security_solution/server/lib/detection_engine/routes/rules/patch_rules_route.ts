@@ -86,6 +86,7 @@ export const patchRulesRoute = (
         threshold,
         threat_filters: threatFilters,
         threat_index: threatIndex,
+        threat_indicator_path: threatIndicatorPath,
         threat_query: threatQuery,
         threat_mapping: threatMapping,
         threat_language: threatLanguage,
@@ -143,7 +144,6 @@ export const patchRulesRoute = (
 
         const rule = await patchRules({
           rulesClient,
-          savedObjectsClient,
           author,
           buildingBlockType,
           description,
@@ -156,8 +156,6 @@ export const patchRulesRoute = (
           license,
           outputIndex,
           savedId,
-          spaceId: context.securitySolution.getSpaceId(),
-          ruleStatusClient,
           timelineId,
           timelineTitle,
           meta,
@@ -179,6 +177,7 @@ export const patchRulesRoute = (
           threshold,
           threatFilters,
           threatIndex,
+          threatIndicatorPath,
           threatQuery,
           threatMapping,
           threatLanguage,

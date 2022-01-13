@@ -37,6 +37,11 @@ exports[`ChecklistFlyout renders 1`] = `
           "hasRequiredPrivileges": true,
           "lastCompletedStep": undefined,
           "loadingState": 1,
+          "meta": Object {
+            "aliases": Array [],
+            "indexName": "myIndex",
+            "reindexName": "reindexed-myIndex",
+          },
           "reindexTaskPercComplete": null,
           "reindexWarnings": Array [],
           "status": undefined,

@@ -114,8 +114,8 @@ export const METRICSET_NAME = 'metricset.name';
 export const LABEL_NAME = 'labels.name';
 
 export const HOST = 'host';
-export const HOST_NAME = 'host.hostname';
-export const HOSTNAME = 'host.name';
+export const HOST_HOSTNAME = 'host.hostname'; // Do not use. Please use `HOST_NAME` instead.
+export const HOST_NAME = 'host.name';
 export const HOST_OS_PLATFORM = 'host.os.platform';
 export const CONTAINER_ID = 'container.id';
 export const KUBERNETES = 'kubernetes';

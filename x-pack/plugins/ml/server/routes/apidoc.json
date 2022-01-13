@@ -118,6 +118,7 @@
     "MlInfo",
     "MlEsSearch",
     "MlIndexExists",
+    "MlSpecificIndexExists",
 
     "JobAuditMessages",
     "GetJobAuditMessages",

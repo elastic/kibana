@@ -97,21 +97,11 @@ class AppContextService {
   }
 
   public getSecurity() {
-    if (!this.hasSecurity()) {
-      throw new Error('Security service not set.');
-    }
     return this.securityStart!;
   }
 
   public getSecurityLicense() {
-    if (!this.hasSecurity()) {
-      throw new Error('Security service not set.');
-    }
     return this.securitySetup!.license;
-  }
-
-  public hasSecurity() {
-    return !!this.securitySetup && !!this.securityStart;
   }
 
   public getCloud() {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from 'kibana/server';
 
 import { ElasticsearchAssetType } from '../../../../../common/types/models';
 import type {
@@ -18,6 +18,7 @@ import { saveInstalledEsRefs } from '../../packages/install';
 import { getAsset } from '../transform/common';
 
 import { getESAssetMetadata } from '../meta';
+import { retryTransientEsErrors } from '../retry';
 
 import { deleteIlmRefs, deleteIlms } from './remove';
 
@@ -35,7 +36,8 @@ export const installIlmForDataStream = async (
   registryPackage: InstallablePackage,
   paths: string[],
   esClient: ElasticsearchClient,
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  logger: Logger
 ) => {
   const installation = await getInstallation({ savedObjectsClient, pkgName: registryPackage.name });
   let previousInstalledIlmEsAssets: EsAssetReference[] = [];
@@ -90,7 +92,7 @@ export const installIlmForDataStream = async (
     );
 
     const installationPromises = ilmInstallations.map(async (ilmInstallation) => {
-      return handleIlmInstall({ esClient, ilmInstallation });
+      return handleIlmInstall({ esClient, ilmInstallation, logger });
     });
 
     installedIlms = await Promise.all(installationPromises).then((results) => results.flat());
@@ -117,15 +119,21 @@ export const installIlmForDataStream = async (
 async function handleIlmInstall({
   esClient,
   ilmInstallation,
+  logger,
 }: {
   esClient: ElasticsearchClient;
   ilmInstallation: IlmInstallation;
+  logger: Logger;
 }): Promise<EsAssetReference> {
-  await esClient.transport.request({
-    method: 'PUT',
-    path: `/_ilm/policy/${ilmInstallation.installationName}`,
-    body: ilmInstallation.content,
-  });
+  await retryTransientEsErrors(
+    () =>
+      esClient.transport.request({
+        method: 'PUT',
+        path: `/_ilm/policy/${ilmInstallation.installationName}`,
+        body: ilmInstallation.content,
+      }),
+    { logger }
+  );
 
   return { id: ilmInstallation.installationName, type: ElasticsearchAssetType.dataStreamIlmPolicy };
 }

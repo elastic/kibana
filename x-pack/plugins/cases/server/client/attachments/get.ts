@@ -18,18 +18,18 @@ import {
   CommentResponseRt,
   CommentsResponse,
   CommentsResponseRt,
-  ENABLE_CASE_CONNECTOR,
   FindQueryParams,
-} from '../../../common';
+} from '../../../common/api';
+import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import {
-  createCaseError,
   checkEnabledCaseConnectorOrThrow,
   defaultSortField,
   transformComments,
   flattenCommentSavedObject,
   flattenCommentSavedObjects,
   getIDsAndIndicesAsArrays,
-} from '../../common';
+} from '../../common/utils';
+import { createCaseError } from '../../common/error';
 import { defaultPage, defaultPerPage } from '../../routes/api';
 import { CasesClientArgs } from '../types';
 import { combineFilters, stringToKueryNode } from '../utils';
@@ -115,32 +115,40 @@ export const getAllAlertsAttachToCase = async (
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
 ): Promise<AlertResponse> => {
-  const { unsecuredSavedObjectsClient, authorization, attachmentService } = clientArgs;
+  const { unsecuredSavedObjectsClient, authorization, attachmentService, logger } = clientArgs;
 
-  // This will perform an authorization check to ensure the user has access to the parent case
-  const theCase = await casesClient.cases.get({
-    id: caseId,
-    includeComments: false,
-    includeSubCaseComments: false,
-  });
+  try {
+    // This will perform an authorization check to ensure the user has access to the parent case
+    const theCase = await casesClient.cases.get({
+      id: caseId,
+      includeComments: false,
+      includeSubCaseComments: false,
+    });
 
-  const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
-    await authorization.getAuthorizationFilter(Operations.getAlertsAttachedToCase);
+    const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
+      await authorization.getAuthorizationFilter(Operations.getAlertsAttachedToCase);
 
-  const alerts = await attachmentService.getAllAlertsAttachToCase({
-    unsecuredSavedObjectsClient,
-    caseId: theCase.id,
-    filter: authorizationFilter,
-  });
+    const alerts = await attachmentService.getAllAlertsAttachToCase({
+      unsecuredSavedObjectsClient,
+      caseId: theCase.id,
+      filter: authorizationFilter,
+    });
 
-  ensureSavedObjectsAreAuthorized(
-    alerts.map((alert) => ({
-      owner: alert.attributes.owner,
-      id: alert.id,
-    }))
-  );
+    ensureSavedObjectsAreAuthorized(
+      alerts.map((alert) => ({
+        owner: alert.attributes.owner,
+        id: alert.id,
+      }))
+    );
 
-  return normalizeAlertResponse(alerts);
+    return normalizeAlertResponse(alerts);
+  } catch (error) {
+    throw createCaseError({
+      message: `Failed to get alerts attached to case id: ${caseId}: ${error}`,
+      error,
+      logger,
+    });
+  }
 };
 
 /**

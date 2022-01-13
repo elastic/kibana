@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import { lazy, ComponentType } from 'react';
 import { EuiSelectOption } from '@elastic/eui';
-import { IErrorObject } from '../../../../../public/types';
-import { AppInfo, Choice, RESTApiError, ServiceNowActionConnector } from './types';
+import { AppInfo, Choice, RESTApiError } from './types';
+import { ActionConnector, IErrorObject } from '../../../../types';
+import {
+  deprecatedMessage,
+  checkConnectorIsDeprecated,
+} from '../../../../common/connectors_selection';
 
 export const DEFAULT_CORRELATION_ID = '{{rule.id}}:{{alert.id}}';
 
@@ -22,22 +27,20 @@ export const isFieldInvalid = (
   error: string | IErrorObject | string[]
 ): boolean => error !== undefined && error.length > 0 && field != null;
 
-// TODO: Remove when the applications are certified
-export const isDeprecatedConnector = (connector?: ServiceNowActionConnector): boolean => {
-  if (connector == null) {
-    return false;
+export const getConnectorDescriptiveTitle = (connector: ActionConnector) => {
+  let title = connector.name;
+
+  if (checkConnectorIsDeprecated(connector)) {
+    title += ` ${deprecatedMessage}`;
   }
 
-  if (connector.actionTypeId === '.servicenow' || connector.actionTypeId === '.servicenow-sir') {
-    /**
-     * Connector's prior to the Elastic ServiceNow application
-     * use the Table API (https://developer.servicenow.com/dev.do#!/reference/api/rome/rest/c_TableAPI)
-     * Connectors after the Elastic ServiceNow application use the
-     * Import Set API (https://developer.servicenow.com/dev.do#!/reference/api/rome/rest/c_ImportSetAPI)
-     * A ServiceNow connector is considered deprecated if it uses the Table API.
-     */
-    return !!connector.config.usesTableApi;
-  }
+  return title;
+};
 
-  return false;
+export const getSelectedConnectorIcon = (
+  actionConnector: ActionConnector
+): React.LazyExoticComponent<ComponentType<{ actionConnector: ActionConnector }>> | undefined => {
+  if (checkConnectorIsDeprecated(actionConnector)) {
+    return lazy(() => import('./servicenow_selection_row'));
+  }
 };

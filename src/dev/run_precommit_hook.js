@@ -8,7 +8,8 @@
 
 import SimpleGit from 'simple-git/promise';
 
-import { run, combineErrors, createFlagError, REPO_ROOT } from '@kbn/dev-utils';
+import { run, combineErrors, createFlagError } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';

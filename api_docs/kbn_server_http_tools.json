@@ -542,13 +542,7 @@
             "label": "maxPayload",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/config-schema",
-                "scope": "server",
-                "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ByteSizeValue",
-                "text": "ByteSizeValue"
-              }
+              "ByteSizeValue"
             ],
             "path": "packages/kbn-server-http-tools/src/types.ts",
             "deprecated": false
@@ -768,133 +762,37 @@
         "label": "sslSchema",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ObjectType",
-            "text": "ObjectType"
-          },
+          "ObjectType",
           "<{ certificate: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
-          },
+          "Type",
           "<string | undefined>; certificateAuthorities: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
-          },
+          "Type",
           "<string | string[] | undefined>; cipherSuites: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
-          },
+          "Type",
           "<string[]>; enabled: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
-          },
+          "Type",
           "<boolean>; key: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
-          },
+          "Type",
           "<string | undefined>; keyPassphrase: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
-          },
+          "Type",
           "<string | undefined>; keystore: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ObjectType",
-            "text": "ObjectType"
-          },
+          "ObjectType",
           "<{ path: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
-          },
+          "Type",
           "<string | undefined>; password: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
-          },
+          "Type",
           "<string | undefined>; }>; truststore: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ObjectType",
-            "text": "ObjectType"
-          },
+          "ObjectType",
           "<{ path: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
-          },
+          "Type",
           "<string | undefined>; password: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
-          },
+          "Type",
           "<string | undefined>; }>; redirectHttpFromPort: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
-          },
+          "Type",
           "<number | undefined>; supportedProtocols: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
-          },
+          "Type",
           "<string[]>; clientAuthentication: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "server",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
-            "text": "Type"
-          },
+          "Type",
           "<\"none\" | \"required\" | \"optional\">; }>"
         ],
         "path": "packages/kbn-server-http-tools/src/ssl/ssl_config.ts",

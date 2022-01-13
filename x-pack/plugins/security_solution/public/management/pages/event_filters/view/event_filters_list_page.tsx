@@ -47,6 +47,11 @@ import { EventFilterDeleteModal } from './components/event_filter_delete_modal';
 import { SearchExceptions } from '../../../components/search_exceptions';
 import { BackToExternalAppButton } from '../../../components/back_to_external_app_button';
 import { ABOUT_EVENT_FILTERS } from './translations';
+import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
+import { useToasts } from '../../../../common/lib/kibana';
+import { getLoadPoliciesError } from '../../../common/translations';
+import { useEndpointPoliciesToArtifactPolicies } from '../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
+import { ManagementPageLoader } from '../../../components/management_page_loader';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 
@@ -83,6 +88,7 @@ export const EventFiltersListPage = memo(() => {
   const { state: routeState } = useLocation<ListPageRouteState | undefined>();
   const history = useHistory();
   const dispatch = useDispatch<Dispatch<AppAction>>();
+  const toasts = useToasts();
   const isActionError = useEventFiltersSelector(getActionError);
   const formEntry = useEventFiltersSelector(getFormEntry);
   const listItems = useEventFiltersSelector(getListItems);
@@ -96,6 +102,15 @@ export const EventFiltersListPage = memo(() => {
 
   const navigateCallback = useEventFiltersNavigateCallback();
   const showFlyout = !!location.show;
+
+  // load the list of policies
+  const policiesRequest = useGetEndpointSpecificPolicies({
+    onError: (err) => {
+      toasts.addDanger(getLoadPoliciesError(err));
+    },
+  });
+
+  const artifactCardPolicies = useEndpointPoliciesToArtifactPolicies(policiesRequest.data?.items);
 
   // Clean url params if wrong
   useEffect(() => {
@@ -162,9 +177,9 @@ export const EventFiltersListPage = memo(() => {
   );
 
   const handleOnSearch = useCallback(
-    (query: string) => {
+    (query: string, includedPolicies?: string) => {
       dispatch({ type: 'eventFiltersForceRefresh', payload: { forceRefresh: true } });
-      navigateCallback({ filter: query });
+      navigateCallback({ filter: query, included_policies: includedPolicies });
     },
     [navigateCallback, dispatch]
   );
@@ -175,12 +190,9 @@ export const EventFiltersListPage = memo(() => {
     // Casting `listItems` below to remove the `Immutable<>` from it in order to prevent errors
     // with common component's props
     for (const eventFilter of listItems as ExceptionListItemSchema[]) {
-      let policies: ArtifactEntryCardProps['policies'];
-
       cachedCardProps[eventFilter.id] = {
         item: eventFilter as AnyArtifact,
-        policies,
-        hideDescription: true,
+        policies: artifactCardPolicies,
         'data-test-subj': 'eventFilterCard',
         actions: [
           {
@@ -213,7 +225,7 @@ export const EventFiltersListPage = memo(() => {
     }
 
     return cachedCardProps;
-  }, [dispatch, history, listItems, location]);
+  }, [artifactCardPolicies, dispatch, history, listItems, location]);
 
   const handleArtifactCardProps = useCallback(
     (eventFilter: ExceptionListItemSchema) => {
@@ -221,6 +233,10 @@ export const EventFiltersListPage = memo(() => {
     },
     [artifactCardPropsPerItem]
   );
+
+  if (isLoading && !doesDataExist) {
+    return <ManagementPageLoader data-test-subj="eventFilterListLoader" />;
+  }
 
   return (
     <AdministrationListPage
@@ -268,6 +284,9 @@ export const EventFiltersListPage = memo(() => {
             placeholder={i18n.translate('xpack.securitySolution.eventFilter.search.placeholder', {
               defaultMessage: 'Search on the fields below: name, comments, value',
             })}
+            hasPolicyFilter
+            policyList={policiesRequest.data?.items}
+            defaultIncludedPolicies={location.included_policies}
           />
           <EuiSpacer size="m" />
           <EuiText color="subdued" size="xs" data-test-subj="eventFiltersCountLabel">

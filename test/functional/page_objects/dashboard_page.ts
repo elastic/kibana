@@ -534,6 +534,27 @@ export class DashboardPageObject extends FtrService {
     return await Promise.all(titleObjects.map(async (title) => await title.getVisibleText()));
   }
 
+  // returns an array of Boolean values - true if the panel title is visible in view mode, false if it is not
+  public async getVisibilityOfPanelTitles() {
+    this.log.debug('in getVisibilityOfPanels');
+    // only works if the dashboard is in view mode
+    const inViewMode = await this.getIsInViewMode();
+    if (!inViewMode) {
+      await this.clickCancelOutOfEditMode();
+    }
+    const visibilities: boolean[] = [];
+    const titleObjects = await this.testSubjects.findAll('dashboardPanelTitle__wrapper');
+    for (const titleObject of titleObjects) {
+      const exists = !(await titleObject.elementHasClass('embPanel__header--floater'));
+      visibilities.push(exists);
+    }
+    // return to edit mode if a switch to view mode above was necessary
+    if (!inViewMode) {
+      await this.switchToEditMode();
+    }
+    return visibilities;
+  }
+
   public async getPanelDimensions() {
     const panels = await this.find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
     return await Promise.all(

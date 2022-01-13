@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiToolTip,
   EuiPopover,
@@ -43,6 +43,10 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
       selectedMetricField: value,
     });
   };
+
+  const focusButton = useCallback((ref: HTMLButtonElement) => {
+    ref?.focus();
+  }, []);
 
   if (!series.dataType) {
     return null;
@@ -107,6 +111,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
               fill
               size="s"
               isLoading={!indexPattern && loading}
+              buttonRef={focusButton}
             >
               {SELECT_REPORT_METRIC_LABEL}
             </EuiButton>
@@ -128,18 +133,20 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
       )}
       {series.selectedMetricField &&
         (indexPattern ? (
-          <EuiBadge
-            iconType="cross"
-            iconSide="right"
-            iconOnClick={() => onChange(undefined)}
-            iconOnClickAriaLabel={REMOVE_REPORT_METRIC_LABEL}
-          >
-            {
-              seriesConfig?.metricOptions?.find(
-                (option) => option.id === series.selectedMetricField
-              )?.label
-            }
-          </EuiBadge>
+          <EuiToolTip position="top" content={REPORT_METRIC_TOOLTIP}>
+            <EuiBadge
+              iconType="cross"
+              iconSide="right"
+              iconOnClick={() => onChange(undefined)}
+              iconOnClickAriaLabel={REMOVE_REPORT_METRIC_LABEL}
+            >
+              {
+                seriesConfig?.metricOptions?.find(
+                  (option) => option.id === series.selectedMetricField
+                )?.label
+              }
+            </EuiBadge>
+          </EuiToolTip>
         ) : (
           <EuiLoadingSpinner />
         ))}
@@ -167,5 +174,12 @@ const NO_DATA_AVAILABLE = i18n.translate('xpack.observability.expView.seriesEdit
 
 const NO_PERMISSIONS = i18n.translate('xpack.observability.expView.seriesEditor.noPermissions', {
   defaultMessage:
-    "Unable to create Index Pattern. You don't have the required permission, please contact your admin.",
+    "Unable to create Data View. You don't have the required permission, please contact your admin.",
 });
+
+const REPORT_METRIC_TOOLTIP = i18n.translate(
+  'xpack.observability.expView.seriesEditor.reportMetricTooltip',
+  {
+    defaultMessage: 'Report metric',
+  }
+);

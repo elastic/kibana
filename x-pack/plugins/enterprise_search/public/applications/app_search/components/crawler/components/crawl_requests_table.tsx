@@ -12,7 +12,8 @@ import { useActions, useValues } from 'kea';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
+  EuiTableFieldDataColumnType,
+  EuiTableComputedColumnType,
   EuiEmptyPrompt,
   EuiLink,
 } from '@elastic/eui';
@@ -30,7 +31,9 @@ export const CrawlRequestsTable: React.FC = () => {
   const { events } = useValues(CrawlerLogic);
   const { fetchCrawlRequest, openFlyout } = useActions(CrawlDetailLogic);
 
-  const columns: Array<EuiBasicTableColumn<CrawlEvent>> = [
+  const columns: Array<
+    EuiTableFieldDataColumnType<CrawlEvent> | EuiTableComputedColumnType<CrawlEvent>
+  > = [
     {
       field: 'id',
       name: i18n.translate(

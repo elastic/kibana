@@ -1955,7 +1955,7 @@ export const mockTimelineModel: TimelineModel = {
   columns: mockTimelineModelColumns,
   defaultColumns: mockTimelineModelColumns,
   dataProviders: [],
-  dataViewId: '',
+  dataViewId: null,
   dateRange: {
     end: '2020-03-18T13:52:38.929Z',
     start: '2020-03-18T13:46:38.929Z',
@@ -2092,7 +2092,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
         queryMatch: { field: '_id', operator: ':', value: '1' },
       },
     ],
-    dataViewId: '',
+    dataViewId: null,
     dateRange: { end: '2018-11-05T19:03:25.937Z', start: '2018-11-05T18:58:25.937Z' },
     deletedEventIds: [],
     description: '',

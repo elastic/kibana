@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { VisualizationToolbarProps } from '../types';
 import { LegendSettingsPopover, ToolbarPopover, ValueLabelsSettings } from '../shared_components';
 import type { HeatmapVisualizationState } from './types';
+import { getDefaultVisualValuesForLayer } from '../shared_components/datasource_default_values';
 
 const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
   {
@@ -32,9 +33,13 @@ const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label:
 
 export const HeatmapToolbar = memo(
   (props: VisualizationToolbarProps<HeatmapVisualizationState>) => {
-    const { state, setState } = props;
+    const { state, setState, frame } = props;
 
     const legendMode = state.legend.isVisible ? 'show' : 'hide';
+    const defaultTruncationValue = getDefaultVisualValuesForLayer(
+      state,
+      frame.datasourceLayers
+    ).truncateText;
 
     return (
       <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" responsive={false}>
@@ -90,9 +95,9 @@ export const HeatmapToolbar = memo(
                   legend: { ...state.legend, maxLines: val },
                 });
               }}
-              shouldTruncate={state?.legend.shouldTruncate ?? true}
+              shouldTruncate={state?.legend.shouldTruncate ?? defaultTruncationValue}
               onTruncateLegendChange={() => {
-                const current = state.legend.shouldTruncate ?? true;
+                const current = state.legend.shouldTruncate ?? defaultTruncationValue;
                 setState({
                   ...state,
                   legend: { ...state.legend, shouldTruncate: !current },

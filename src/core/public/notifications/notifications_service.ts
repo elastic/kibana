@@ -15,11 +15,11 @@ import { ToastsService, ToastsSetup, ToastsStart } from './toasts';
 import { IUiSettingsClient } from '../ui_settings';
 import { OverlayStart } from '../overlays';
 
-interface SetupDeps {
+export interface SetupDeps {
   uiSettings: IUiSettingsClient;
 }
 
-interface StartDeps {
+export interface StartDeps {
   i18n: I18nStart;
   overlays: OverlayStart;
   theme: ThemeServiceStart;

@@ -57,6 +57,7 @@ const FormattedFieldValueComponent: React.FC<{
   isButton?: boolean;
   isDraggable?: boolean;
   onClick?: () => void;
+  onClickAriaLabel?: string;
   title?: string;
   truncate?: boolean;
   value: string | number | undefined | null;
@@ -73,6 +74,7 @@ const FormattedFieldValueComponent: React.FC<{
   isObjectArray = false,
   isDraggable = true,
   onClick,
+  onClickAriaLabel,
   title,
   truncate = true,
   value,
@@ -190,6 +192,10 @@ const FormattedFieldValueComponent: React.FC<{
         fieldName={fieldName}
         isDraggable={isDraggable}
         value={value}
+        onClick={onClick}
+        onClickAriaLabel={onClickAriaLabel}
+        iconType={isButton ? 'arrowDown' : undefined}
+        iconSide={isButton ? 'right' : undefined}
       />
     );
   } else if (fieldName === AGENT_STATUS_FIELD_NAME) {
@@ -215,7 +221,6 @@ const FormattedFieldValueComponent: React.FC<{
       Component,
       eventId,
       fieldName,
-      linkValue,
       isDraggable,
       truncate,
       title,

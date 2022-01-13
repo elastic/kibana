@@ -8,11 +8,13 @@
 import { HttpSetup } from 'kibana/public';
 import React, { ReactNode } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { NotificationsSetup, IUiSettingsClient } from 'kibana/public';
+import { Observable } from 'rxjs';
+
+import { NotificationsSetup, IUiSettingsClient, CoreTheme } from 'kibana/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 import type { FileUploadPluginStart } from '../../../file_upload/public';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '../shared_imports';
 
 import { API_BASE_PATH } from '../../common/constants';
 
@@ -48,7 +50,8 @@ export const renderApp = (
   element: HTMLElement,
   I18nContext: ({ children }: { children: ReactNode }) => JSX.Element,
   services: AppServices,
-  coreServices: CoreServices
+  coreServices: CoreServices,
+  { theme$ }: { theme$: Observable<CoreTheme> }
 ) => {
   render(
     <AuthorizationProvider
@@ -56,9 +59,11 @@ export const renderApp = (
       httpClient={coreServices.http}
     >
       <I18nContext>
-        <KibanaContextProvider services={services}>
-          <App />
-        </KibanaContextProvider>
+        <KibanaThemeProvider theme$={theme$}>
+          <KibanaContextProvider services={services}>
+            <App />
+          </KibanaContextProvider>
+        </KibanaThemeProvider>
       </I18nContext>
     </AuthorizationProvider>,
     element

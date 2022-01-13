@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
-import { AgentService } from '../../../../../../fleet/server';
+import { AgentClient } from '../../../../../../fleet/server';
 import { AgentStatusKueryHelper } from '../../../../../../fleet/common/services';
 import { Agent } from '../../../../../../fleet/common/types/models';
 import { HostStatus } from '../../../../../common/endpoint/types';
@@ -34,8 +33,7 @@ export function buildStatusesKuery(statusesToFilter: string[]): string | undefin
 }
 
 export async function findAgentIdsByStatus(
-  agentService: AgentService,
-  esClient: ElasticsearchClient,
+  agentClient: AgentClient,
   statuses: string[],
   pageSize: number = 1000
 ): Promise<string[]> {
@@ -59,7 +57,7 @@ export async function findAgentIdsByStatus(
   let hasMore = true;
 
   while (hasMore) {
-    const agents = await agentService.listAgents(esClient, searchOptions(page++));
+    const agents = await agentClient.listAgents(searchOptions(page++));
     result.push(...agents.agents.map((agent: Agent) => agent.id));
     hasMore = agents.agents.length > 0;
   }

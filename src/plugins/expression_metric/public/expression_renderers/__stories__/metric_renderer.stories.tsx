@@ -9,7 +9,7 @@
 import React, { CSSProperties } from 'react';
 import { storiesOf } from '@storybook/react';
 import { Style } from 'src/plugins/expressions';
-import { metricRenderer } from '../metric_renderer';
+import { getMetricRenderer } from '../metric_renderer';
 import { Render } from '../../../../presentation_util/public/__stories__';
 import { MetricRendererConfig } from '../../../common';
 
@@ -45,7 +45,7 @@ storiesOf('renderers/Metric', module)
       label: '',
       metricFormat: '',
     };
-    return <Render renderer={metricRenderer} config={config} />;
+    return <Render renderer={getMetricRenderer()} config={config} />;
   })
   .add('with number metric', () => {
     const config: MetricRendererConfig = {
@@ -55,7 +55,7 @@ storiesOf('renderers/Metric', module)
       label: '',
       metricFormat: '',
     };
-    return <Render renderer={metricRenderer} config={config} />;
+    return <Render renderer={getMetricRenderer()} config={config} />;
   })
   .add('with string metric', () => {
     const config: MetricRendererConfig = {
@@ -65,7 +65,7 @@ storiesOf('renderers/Metric', module)
       label: '',
       metricFormat: '',
     };
-    return <Render renderer={metricRenderer} config={config} />;
+    return <Render renderer={getMetricRenderer()} config={config} />;
   })
   .add('with label', () => {
     const config: MetricRendererConfig = {
@@ -75,7 +75,7 @@ storiesOf('renderers/Metric', module)
       label: 'Average price',
       metricFormat: '',
     };
-    return <Render renderer={metricRenderer} config={config} />;
+    return <Render renderer={getMetricRenderer()} config={config} />;
   })
   .add('with number metric and a specified format', () => {
     const config: MetricRendererConfig = {
@@ -85,7 +85,7 @@ storiesOf('renderers/Metric', module)
       label: 'Average price',
       metricFormat: '0.00%',
     };
-    return <Render renderer={metricRenderer} config={config} />;
+    return <Render renderer={getMetricRenderer()} config={config} />;
   })
   .add('with formatted string metric and a specified format', () => {
     const config: MetricRendererConfig = {
@@ -95,7 +95,7 @@ storiesOf('renderers/Metric', module)
       label: 'Total Revenue',
       metricFormat: '$0a',
     };
-    return <Render renderer={metricRenderer} config={config} />;
+    return <Render renderer={getMetricRenderer()} config={config} />;
   })
   .add('with invalid metricFont', () => {
     const config: MetricRendererConfig = {
@@ -105,5 +105,5 @@ storiesOf('renderers/Metric', module)
       label: 'Total Revenue',
       metricFormat: '$0a',
     };
-    return <Render renderer={metricRenderer} config={config} />;
+    return <Render renderer={getMetricRenderer()} config={config} />;
   });

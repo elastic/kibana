@@ -13,5 +13,7 @@ import {
   IndexPatternsTestPluginStart,
 } from './plugin';
 
-export const plugin: PluginInitializer<IndexPatternsTestPluginSetup, IndexPatternsTestPluginStart> =
-  () => new IndexPatternsTestPlugin();
+export const plugin: PluginInitializer<
+  IndexPatternsTestPluginSetup,
+  IndexPatternsTestPluginStart
+> = () => new IndexPatternsTestPlugin();

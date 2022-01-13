@@ -245,6 +245,7 @@ export const useFleetServerInstructions = (policyId?: string) => {
   const { data: settings, resendRequest: refreshSettings } = useGetSettings();
   const fleetServerHost = settings?.item.fleet_server_hosts?.[0];
   const esHost = output?.hosts?.[0];
+  const sslCATrustedFingerprint: string | undefined = output?.ca_trusted_fingerprint;
 
   const installCommand = useMemo((): string => {
     if (!serviceToken || !esHost) {
@@ -257,9 +258,18 @@ export const useFleetServerInstructions = (policyId?: string) => {
       serviceToken,
       policyId,
       fleetServerHost,
-      deploymentMode === 'production'
+      deploymentMode === 'production',
+      sslCATrustedFingerprint
     );
-  }, [serviceToken, esHost, platform, policyId, fleetServerHost, deploymentMode]);
+  }, [
+    serviceToken,
+    esHost,
+    platform,
+    policyId,
+    fleetServerHost,
+    deploymentMode,
+    sslCATrustedFingerprint,
+  ]);
 
   const getServiceToken = useCallback(async () => {
     setIsLoadingServiceToken(true);
@@ -285,20 +295,15 @@ export const useFleetServerInstructions = (policyId?: string) => {
 
   const addFleetServerHost = useCallback(
     async (host: string) => {
-      try {
-        await sendPutSettings({
-          fleet_server_hosts: [host, ...(settings?.item.fleet_server_hosts || [])],
-        });
-        await refreshSettings();
-      } catch (err) {
-        notifications.toasts.addError(err, {
-          title: i18n.translate('xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle', {
-            defaultMessage: 'Error adding Fleet Server host',
-          }),
-        });
+      const res = await sendPutSettings({
+        fleet_server_hosts: [host, ...(settings?.item.fleet_server_hosts || [])],
+      });
+      if (res.error) {
+        throw res.error;
       }
+      await refreshSettings();
     },
-    [refreshSettings, notifications.toasts, settings?.item.fleet_server_hosts]
+    [refreshSettings, settings?.item.fleet_server_hosts]
   );
 
   return {
@@ -417,6 +422,7 @@ export const AddFleetServerHostStepContent = ({
   const [isLoading, setIsLoading] = useState(false);
   const [fleetServerHost, setFleetServerHost] = useState('');
   const [error, setError] = useState<undefined | string>();
+  const { notifications } = useStartServices();
 
   const { getHref } = useLink();
 
@@ -447,10 +453,16 @@ export const AddFleetServerHostStepContent = ({
       } else {
         setCalloutHost('');
       }
+    } catch (err) {
+      notifications.toasts.addError(err, {
+        title: i18n.translate('xpack.fleet.fleetServerSetup.errorAddingFleetServerHostTitle', {
+          defaultMessage: 'Error adding Fleet Server host',
+        }),
+      });
     } finally {
       setIsLoading(false);
     }
-  }, [fleetServerHost, addFleetServerHost, validate]);
+  }, [fleetServerHost, addFleetServerHost, validate, notifications.toasts]);
 
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {

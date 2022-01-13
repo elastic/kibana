@@ -75,6 +75,7 @@ export interface InventoryMetricConditions {
 export interface InventoryMetricThresholdParams {
   criteria: InventoryMetricConditions[];
   filterQuery?: string;
+  filterQueryText?: string;
   nodeType: InventoryItemType;
   sourceId?: string;
   alertOnNoData?: boolean;

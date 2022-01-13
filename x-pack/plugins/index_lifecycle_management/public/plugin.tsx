@@ -11,7 +11,6 @@ import { CoreSetup, PluginInitializerContext, Plugin } from 'src/core/public';
 import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { PLUGIN } from '../common/constants';
 import { init as initHttp } from './application/services/http';
-import { init as initDocumentation } from './application/services/documentation';
 import { init as initUiMetric } from './application/services/ui_metric';
 import { init as initNotification } from './application/services/notification';
 import { BreadcrumbService } from './application/services/breadcrumbs';
@@ -50,24 +49,19 @@ export class IndexLifecycleManagementPlugin
         id: PLUGIN.ID,
         title: PLUGIN.TITLE,
         order: 2,
-        mount: async ({ element, history, setBreadcrumbs }) => {
+        mount: async ({ element, history, setBreadcrumbs, theme$ }) => {
           const [coreStart, { licensing }] = await getStartServices();
           const {
             chrome: { docTitle },
             i18n: { Context: I18nContext },
-            docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
             application,
+            docLinks,
           } = coreStart;
 
           const license = await licensing.license$.pipe(first()).toPromise();
 
           docTitle.change(PLUGIN.TITLE);
           this.breadcrumbService.setup(setBreadcrumbs);
-
-          // Initialize additional services.
-          initDocumentation(
-            `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`
-          );
 
           const { renderApp } = await import('./application');
 
@@ -78,6 +72,8 @@ export class IndexLifecycleManagementPlugin
             application,
             this.breadcrumbService,
             license,
+            theme$,
+            docLinks,
             cloud
           );
 

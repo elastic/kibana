@@ -10,7 +10,7 @@ import {
   HostsRiskScoreRequestOptions,
   HostsQueries,
   HostsRiskScoreStrategyResponse,
-} from '../../../../../../common';
+} from '../../../../../../common/search_strategy';
 import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
 import { buildHostsRiskScoreQuery } from './query.hosts_risk.dsl';

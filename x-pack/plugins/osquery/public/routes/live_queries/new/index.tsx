@@ -16,10 +16,14 @@ import { useRouterNavigate } from '../../../common/lib/kibana';
 import { LiveQuery } from '../../../live_queries';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
 
+interface LocationState {
+  form: Record<string, unknown>;
+}
+
 const NewLiveQueryPageComponent = () => {
   useBreadcrumbs('live_query_new');
   const { replace } = useHistory();
-  const location = useLocation();
+  const location = useLocation<LocationState>();
   const liveQueryListProps = useRouterNavigate('live_queries');
   const [initialFormData, setInitialFormData] = useState<Record<string, unknown> | undefined>({});
 

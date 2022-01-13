@@ -51,6 +51,7 @@ function ColorSchemaOptions({
       <EuiLink
         onClick={() => {
           uiState.set('vis.colors', null);
+          uiState?.emit('reload');
           setIsCustomColors(false);
         }}
       >

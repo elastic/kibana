@@ -10,6 +10,7 @@ import { Redirect, Route, Switch, useLocation, useParams, useHistory } from 'rea
 import styled from 'styled-components';
 import type { EuiToolTipProps } from '@elastic/eui';
 import {
+  EuiBadge,
   EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
@@ -27,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
 
+import { splitPkgKey } from '../../../../../../../common';
 import {
   useGetPackageInstallStatus,
   useSetPackageInstallStatus,
@@ -132,26 +134,27 @@ export function Detail() {
     packageInfo.savedObject &&
     semverLt(packageInfo.savedObject.attributes.version, packageInfo.latestVersion);
 
+  const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   // Fetch package info
   const {
     data: packageInfoData,
     error: packageInfoError,
     isLoading: packageInfoLoading,
-  } = useGetPackageInfoByKey(pkgkey);
+  } = useGetPackageInfoByKey(pkgName, pkgVersion);
 
   const isLoading = packageInfoLoading || permissionCheck.isLoading;
 
   const showCustomTab =
-    useUIExtension(packageInfoData?.response.name ?? '', 'package-detail-custom') !== undefined;
+    useUIExtension(packageInfoData?.item.name ?? '', 'package-detail-custom') !== undefined;
 
   // Track install status state
   useEffect(() => {
-    if (packageInfoData?.response) {
-      const packageInfoResponse = packageInfoData.response;
+    if (packageInfoData?.item) {
+      const packageInfoResponse = packageInfoData.item;
       setPackageInfo(packageInfoResponse);
 
       let installedVersion;
-      const { name } = packageInfoData.response;
+      const { name } = packageInfoData.item;
       if ('savedObject' in packageInfoResponse) {
         installedVersion = packageInfoResponse.savedObject.attributes.version;
       }
@@ -207,11 +210,22 @@ export function Detail() {
             </FlexItemWithMaxHeight>
             <EuiFlexItem>
               <EuiFlexGroup alignItems="center" gutterSize="m">
-                <FlexItemWithMinWidth grow={false}>
-                  <EuiText>
-                    {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
-                    <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
-                  </EuiText>
+                <FlexItemWithMinWidth grow={true}>
+                  <EuiFlexGroup alignItems="center">
+                    <EuiFlexItem grow={false}>
+                      <EuiText>
+                        {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
+                        <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="default">
+                        {i18n.translate('xpack.fleet.epm.elasticAgentBadgeLabel', {
+                          defaultMessage: 'Elastic Agent',
+                        })}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </FlexItemWithMinWidth>
                 {packageInfo?.release && packageInfo.release !== 'ga' ? (
                   <EuiFlexItem grow={false}>
@@ -594,7 +608,7 @@ export function Detail() {
             <OverviewPage packageInfo={packageInfo} integrationInfo={integrationInfo} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_settings}>
-            <SettingsPage packageInfo={packageInfo} />
+            <SettingsPage packageInfo={packageInfo} theme$={services.theme.theme$} />
           </Route>
           <Route path={INTEGRATIONS_ROUTING_PATHS.integration_details_assets}>
             <AssetsPage packageInfo={packageInfo} />
@@ -614,13 +628,14 @@ export function Detail() {
 
 type EuiButtonPropsFull = Parameters<typeof EuiButton>[0];
 
-const EuiButtonWithTooltip: React.FC<EuiButtonPropsFull & { tooltip?: Partial<EuiToolTipProps> }> =
-  ({ tooltip: tooltipProps, ...buttonProps }) => {
-    return tooltipProps ? (
-      <EuiToolTip {...tooltipProps}>
-        <EuiButton {...buttonProps} />
-      </EuiToolTip>
-    ) : (
+const EuiButtonWithTooltip: React.FC<
+  EuiButtonPropsFull & { tooltip?: Partial<EuiToolTipProps> }
+> = ({ tooltip: tooltipProps, ...buttonProps }) => {
+  return tooltipProps ? (
+    <EuiToolTip {...tooltipProps}>
       <EuiButton {...buttonProps} />
-    );
-  };
+    </EuiToolTip>
+  ) : (
+    <EuiButton {...buttonProps} />
+  );
+};

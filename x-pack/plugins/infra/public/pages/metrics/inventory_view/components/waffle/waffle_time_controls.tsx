@@ -58,6 +58,7 @@ export const WaffleTimeControls = withTheme(({ interval }: Props) => {
           delay="long"
           display="inlineBlock"
           position="top"
+          data-test-subj="waffleDatePickerIntervalTooltip"
         >
           <EuiDatePicker
             dateFormat="L LTS"

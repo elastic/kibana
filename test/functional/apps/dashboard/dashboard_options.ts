@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'dashboard']);
 
-  describe('dashboard data-shared attributes', () => {
+  describe('dashboard options', () => {
     let originalTitles: string[] = [];
 
     before(async () => {

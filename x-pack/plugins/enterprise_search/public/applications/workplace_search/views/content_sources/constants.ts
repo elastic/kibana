@@ -147,13 +147,6 @@ export const EXTERNAL_IDENTITIES_LINK = i18n.translate(
   }
 );
 
-export const ACCESS_TOKEN_LABEL = i18n.translate(
-  'xpack.enterpriseSearch.workplaceSearch.sources.accessToken.label',
-  {
-    defaultMessage: 'Access Token',
-  }
-);
-
 export const ID_LABEL = i18n.translate('xpack.enterpriseSearch.workplaceSearch.sources.id.label', {
   defaultMessage: 'Source Identifier',
 });
@@ -374,6 +367,13 @@ export const SYNC_DIAGNOSTICS_BUTTON = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.sources.syncDiagnosticsButton',
   {
     defaultMessage: 'Download diagnostics data',
+  }
+);
+
+export const DOWNLOAD_DIAGNOSTIC_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.sources.downloadDiagnosticButton',
+  {
+    defaultMessage: 'Download diagnostic bundle',
   }
 );
 

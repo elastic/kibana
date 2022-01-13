@@ -24,6 +24,8 @@ import type {
 
 import type { SharePluginStart } from 'src/plugins/share/public';
 
+import { once } from 'lodash';
+
 import type { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
@@ -72,7 +74,7 @@ export interface FleetSetup {}
  */
 export interface FleetStart {
   /** Authorization for the current user */
-  authz: FleetAuthz;
+  authz: Promise<FleetAuthz>;
   registerExtension: UIExtensionRegistrationCallback;
   isInitialized: () => Promise<true>;
 }
@@ -144,7 +146,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           ...startDepsServices,
           storage: this.storage,
           cloud: deps.cloud,
-          authz: fleetStart.authz,
+          authz: await fleetStart.authz,
         };
         const { renderApp, teardownIntegrations } = await import('./applications/integrations');
 
@@ -181,7 +183,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           ...startDepsServices,
           storage: this.storage,
           cloud: deps.cloud,
-          authz: fleetStart.authz,
+          authz: await fleetStart.authz,
         };
         const { renderApp, teardownFleet } = await import('./applications/fleet');
         const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);
@@ -236,9 +238,11 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     return {};
   }
 
-  public start(core: CoreStart): FleetStart {
-    let successPromise: ReturnType<FleetStart['isInitialized']>;
+  public start(core: CoreStart, deps: FleetStartDeps): FleetStart {
     const registerExtension = createExtensionRegistrationCallback(this.extensions);
+    const getPermissions = once(() =>
+      core.http.get<CheckPermissionsResponse>(appRoutesService.getCheckPermissionsPath())
+    );
 
     registerExtension({
       package: CUSTOM_LOGS_INTEGRATION_NAME,
@@ -246,46 +250,51 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       Component: LazyCustomLogsAssetsExtension,
     });
 
-    const { capabilities } = core.application;
-    const authz = calculateAuthz({
-      fleet: {
-        // Once we have a split privilege, this should be using fleetv2
-        // all: capabilities.fleetv2.all as boolean,
-        all: capabilities.fleet.all as boolean,
-        setup: false, // browser users will never have setup privileges
-      },
-
-      integrations: {
-        all: capabilities.fleet.all as boolean,
-        read: capabilities.fleet.read as boolean,
-      },
-    });
-
     return {
-      authz,
-      isInitialized: () => {
-        if (!successPromise) {
-          successPromise = Promise.resolve().then(async () => {
-            const permissionsResponse = await core.http.get<CheckPermissionsResponse>(
-              appRoutesService.getCheckPermissionsPath()
-            );
+      // Temporarily rely on superuser check to calculate authz. Once Kibana RBAC is in place for Fleet this should
+      // switch to a sync calculation based on `core.application.capabilites` properties.
+      authz: getPermissions()
+        .catch((e) => {
+          // eslint-disable-next-line no-console
+          console.warn(`Could not load Fleet permissions due to error: ${e}`);
+          return { success: false };
+        })
+        .then((permissionsResponse) => {
+          if (permissionsResponse?.success) {
+            // If superuser, give access to everything
+            return calculateAuthz({
+              fleet: { all: true, setup: true },
+              integrations: { all: true, read: true },
+              isSuperuser: true,
+            });
+          } else {
+            // All other users only get access to read integrations if they have the read privilege
+            const { capabilities } = core.application;
+            return calculateAuthz({
+              fleet: { all: false, setup: false },
+              integrations: { all: false, read: capabilities.fleet.read as boolean },
+              isSuperuser: false,
+            });
+          }
+        }),
 
-            if (permissionsResponse?.success) {
-              return core.http
-                .post<PostFleetSetupResponse>(setupRouteService.getSetupPath())
-                .then(({ isInitialized }) =>
-                  isInitialized
-                    ? Promise.resolve(true)
-                    : Promise.reject(new Error('Unknown setup error'))
-                );
-            } else {
-              throw new Error(permissionsResponse?.error || 'Unknown permissions error');
-            }
-          });
+      isInitialized: once(async () => {
+        const permissionsResponse = await getPermissions();
+
+        if (permissionsResponse?.success) {
+          const { isInitialized } = await core.http.post<PostFleetSetupResponse>(
+            setupRouteService.getSetupPath()
+          );
+          if (!isInitialized) {
+            throw new Error('Unknown setup error');
+          }
+
+          return true;
+        } else {
+          throw new Error(permissionsResponse?.error || 'Unknown permissions error');
         }
+      }),
 
-        return successPromise;
-      },
       registerExtension,
     };
   }

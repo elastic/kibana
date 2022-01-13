@@ -16,9 +16,10 @@ import { AgentConfigurations } from '../../app/Settings/agent_configurations';
 import { CreateAgentConfigurationRouteView } from './create_agent_configuration_route_view';
 import { EditAgentConfigurationRouteView } from './edit_agent_configuration_route_view';
 import { ApmIndices } from '../../app/Settings/ApmIndices';
-import { CustomizeUI } from '../../app/Settings/customize_ui';
+import { CustomLinkOverview } from '../../app/Settings/custom_link';
 import { Schema } from '../../app/Settings/schema';
 import { AnomalyDetection } from '../../app/Settings/anomaly_detection';
+import { AgentKeys } from '../../app/Settings/agent_keys';
 
 function page<TPath extends string>({
   path,
@@ -94,8 +95,8 @@ export const settings = {
       }),
       params: t.partial({
         query: t.partial({
-          name: t.string,
           environment: t.string,
+          name: t.string,
           pageStep: agentConfigurationPageStepRt,
         }),
       }),
@@ -109,12 +110,12 @@ export const settings = {
       element: <ApmIndices />,
     }),
     page({
-      path: '/settings/customize-ui',
-      title: i18n.translate('xpack.apm.views.settings.customizeUI.title', {
-        defaultMessage: 'Customize app',
+      path: '/settings/custom-links',
+      title: i18n.translate('xpack.apm.views.settings.customLink.title', {
+        defaultMessage: 'Custom Links',
       }),
-      tab: 'customize-ui',
-      element: <CustomizeUI />,
+      tab: 'custom-links',
+      element: <CustomLinkOverview />,
     }),
     page({
       path: '/settings/schema',
@@ -131,6 +132,14 @@ export const settings = {
       }),
       element: <AnomalyDetection />,
       tab: 'anomaly-detection',
+    }),
+    page({
+      path: '/settings/agent-keys',
+      title: i18n.translate('xpack.apm.views.settings.agentKeys.title', {
+        defaultMessage: 'Agent keys',
+      }),
+      element: <AgentKeys />,
+      tab: 'agent-keys',
     }),
     {
       path: '/settings',

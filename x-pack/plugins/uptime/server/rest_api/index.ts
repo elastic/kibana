@@ -26,8 +26,16 @@ import { createGetMonitorDurationRoute } from './monitors/monitors_durations';
 import { createGetIndexStatusRoute } from './index_state';
 import { createNetworkEventsRoute } from './network_events';
 import { createJourneyFailedStepsRoute } from './pings/journeys';
-import { createLastSuccessfulStepRoute } from './synthetics/last_successful_step';
+import { createLastSuccessfulCheckRoute } from './synthetics/last_successful_check';
 import { installIndexTemplatesRoute } from './synthetics_service/install_index_templates';
+import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
+import {
+  getAllSyntheticsMonitorRoute,
+  getSyntheticsMonitorRoute,
+} from './synthetics_service/get_monitor';
+import { addSyntheticsMonitorRoute } from './synthetics_service/add_monitor';
+import { editSyntheticsMonitorRoute } from './synthetics_service/edit_monitor';
+import { deleteSyntheticsMonitorRoute } from './synthetics_service/delete_monitor';
 
 export * from './types';
 export { createRouteWithAuth } from './create_route_with_auth';
@@ -50,7 +58,13 @@ export const restApiRoutes: UMRestApiRouteFactory[] = [
   createJourneyScreenshotRoute,
   createNetworkEventsRoute,
   createJourneyFailedStepsRoute,
-  createLastSuccessfulStepRoute,
+  createLastSuccessfulCheckRoute,
   createJourneyScreenshotBlocksRoute,
   installIndexTemplatesRoute,
+  getServiceLocationsRoute,
+  getSyntheticsMonitorRoute,
+  getAllSyntheticsMonitorRoute,
+  addSyntheticsMonitorRoute,
+  editSyntheticsMonitorRoute,
+  deleteSyntheticsMonitorRoute,
 ];

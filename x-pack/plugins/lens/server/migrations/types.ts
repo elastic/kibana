@@ -6,7 +6,8 @@
  */
 
 import type { PaletteOutput } from 'src/plugins/charts/common';
-import { Query, Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { Query } from 'src/plugins/data/public';
 import type { CustomPaletteParams, LayerType } from '../../common';
 
 export type OperationTypePre712 =

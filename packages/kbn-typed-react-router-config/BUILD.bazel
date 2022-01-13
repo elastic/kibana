@@ -44,6 +44,7 @@ TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/react-router-config",
   "@npm//@types/react-router-dom",
+  "@npm//@types/history",
 ]
 
 jsts_transpiler(

@@ -42,6 +42,9 @@ export const IGNORE_FILE_GLOBS = [
   'test/package/Vagrantfile',
   '**/test/**/fixtures/**/*',
 
+  // Required to match the name in the docs.elastic.dev repo.
+  'nav-kibana-dev.docnav.json',
+
   // filename must match language code which requires capital letters
   '**/translations/*.json',
 
@@ -97,6 +100,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
+  'typings/*',
 ];
 
 /**

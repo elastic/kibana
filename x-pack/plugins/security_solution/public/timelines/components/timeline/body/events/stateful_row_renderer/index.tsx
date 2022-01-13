@@ -14,7 +14,7 @@ import {
   ARIA_ROWINDEX_ATTRIBUTE,
   getRowRendererClassName,
 } from '../../../../../../../../timelines/public';
-import { RowRenderer } from '../../../../../../../common';
+import { RowRenderer } from '../../../../../../../common/types';
 import { BrowserFields } from '../../../../../../common/containers/source';
 import { TimelineItem } from '../../../../../../../common/search_strategy/timeline';
 import { getRowRenderer } from '../../renderers/get_row_renderer';

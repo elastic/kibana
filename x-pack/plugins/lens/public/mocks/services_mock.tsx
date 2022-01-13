@@ -18,7 +18,8 @@ import { dashboardPluginMock } from '../../../../../src/plugins/dashboard/public
 import type {
   LensByValueInput,
   LensByReferenceInput,
-  ResolvedLensSavedObjectAttributes,
+  LensSavedObjectAttributes,
+  LensUnwrapMetaInfo,
 } from '../embeddable/embeddable';
 import {
   mockAttributeService,
@@ -49,7 +50,9 @@ export const defaultDoc = {
 } as unknown as Document;
 
 export const exactMatchDoc = {
-  ...defaultDoc,
+  attributes: {
+    ...defaultDoc,
+  },
   sharingSavedObjectProps: {
     outcome: 'exactMatch',
   },
@@ -83,9 +86,10 @@ export function makeDefaultServices(
 
   function makeAttributeService(): LensAttributeService {
     const attributeServiceMock = mockAttributeService<
-      ResolvedLensSavedObjectAttributes,
+      LensSavedObjectAttributes,
       LensByValueInput,
-      LensByReferenceInput
+      LensByReferenceInput,
+      LensUnwrapMetaInfo
     >(
       DOC_TYPE,
       {

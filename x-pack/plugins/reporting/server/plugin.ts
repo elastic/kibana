@@ -8,10 +8,10 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
 import { PLUGIN_ID } from '../common/constants';
 import { ReportingCore } from './';
-import { initializeBrowserDriverFactory } from './browsers';
 import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
 import { LevelLogger, ReportingStore } from './lib';
+import { registerEventLogProviderActions } from './lib/event_logger';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
 import type {
@@ -23,6 +23,9 @@ import type {
 } from './types';
 import { registerReportingUsageCollector } from './usage';
 
+/*
+ * @internal
+ */
 export class ReportingPlugin
   implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps>
 {
@@ -35,7 +38,7 @@ export class ReportingPlugin
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
     const { http } = core;
-    const { screenshotMode, features, licensing, security, spaces, taskManager } = plugins;
+    const { features, licensing, eventLog, security, spaces, taskManager } = plugins;
 
     const reportingCore = new ReportingCore(this.logger, this.initContext);
 
@@ -53,18 +56,19 @@ export class ReportingPlugin
     const router = http.createRouter<ReportingRequestHandlerContext>();
     const basePath = http.basePath;
     reportingCore.pluginSetup({
-      screenshotMode,
       features,
       licensing,
-      basePath,
-      router,
+      eventLog,
       security,
       spaces,
       taskManager,
       logger: this.logger,
       status: core.status,
+      basePath,
+      router,
     });
 
+    registerEventLogProviderActions(eventLog);
     registerUiSettings(core);
     registerDeprecations({
       core,
@@ -98,11 +102,9 @@ export class ReportingPlugin
     (async () => {
       await reportingCore.pluginSetsUp();
 
-      const browserDriverFactory = await initializeBrowserDriverFactory(reportingCore, this.logger);
       const store = new ReportingStore(reportingCore, this.logger);
 
       await reportingCore.pluginStart({
-        browserDriverFactory,
         savedObjects: core.savedObjects,
         uiSettings: core.uiSettings,
         store,
@@ -110,6 +112,7 @@ export class ReportingPlugin
         data: plugins.data,
         taskManager: plugins.taskManager,
         logger: this.logger,
+        screenshotting: plugins.screenshotting,
       });
 
       // Note: this must be called after ReportingCore.pluginStart

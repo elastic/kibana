@@ -9,7 +9,7 @@
       "settings": {
         "__one_of": [{
           "__condition": {
-            "lines_regex": "type[\"']\\s*:\\s*[\"']fs`"
+            "lines_regex": "type[\"']\\s*:\\s*[\"']fs"
           },
           "__template": {
             "location": "path"

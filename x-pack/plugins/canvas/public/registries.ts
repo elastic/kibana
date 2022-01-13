@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { addRegistries, register } from '@kbn/interpreter/common';
+import { addRegistries, register } from '@kbn/interpreter';
 // @ts-expect-error untyped local
 import { elementsRegistry } from './lib/elements_registry';
 // @ts-expect-error untyped local

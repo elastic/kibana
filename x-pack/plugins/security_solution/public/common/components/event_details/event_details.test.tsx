@@ -48,6 +48,8 @@ describe('EventDetails', () => {
     timelineId: 'test',
     eventView: EventsViewType.summaryView,
     hostRisk: { fields: [], loading: true },
+    indexName: 'test',
+    handleOnEventClosed: jest.fn(),
     rawEventData,
   };
 

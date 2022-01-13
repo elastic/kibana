@@ -17,7 +17,9 @@
     "licensing",
     "uiActions",
     "taskManager",
+    "eventLog",
     "embeddable",
+    "screenshotting",
     "screenshotMode",
     "share",
     "features"

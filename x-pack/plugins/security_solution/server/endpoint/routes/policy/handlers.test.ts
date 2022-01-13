@@ -11,8 +11,17 @@ import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import { createMockAgentService } from '../../../../../fleet/server/mocks';
-import { getHostPolicyResponseHandler, getAgentPolicySummaryHandler } from './handlers';
+import {
+  createMockAgentClient,
+  createMockAgentService,
+  createPackagePolicyServiceMock,
+} from '../../../../../fleet/server/mocks';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../fleet/common';
+import {
+  getHostPolicyResponseHandler,
+  getAgentPolicySummaryHandler,
+  getPolicyListHandler,
+} from './handlers';
 import {
   KibanaResponseFactory,
   SavedObjectsClientContract,
@@ -29,10 +38,11 @@ import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data'
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { Agent } from '../../../../../fleet/common/types/models';
-import { AgentService } from '../../../../../fleet/server/services';
+import { AgentClient, AgentService } from '../../../../../fleet/server/services';
 import { get } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { ScopedClusterClientMock } from '../../../../../../../src/core/server/elasticsearch/client/mocks';
+import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;
@@ -101,6 +111,7 @@ describe('test policy response handler', () => {
 
   describe('test agent policy summary handler', () => {
     let mockAgentService: jest.Mocked<AgentService>;
+    let mockAgentClient: jest.Mocked<AgentClient>;
 
     let agentListResult: {
       agents: Agent[];
@@ -122,6 +133,8 @@ describe('test policy response handler', () => {
       mockResponse = httpServerMock.createResponseFactory();
       endpointAppContextService = new EndpointAppContextService();
       mockAgentService = createMockAgentService();
+      mockAgentClient = createMockAgentClient();
+      mockAgentService.asScoped.mockReturnValue(mockAgentClient);
       emptyAgentListResult = {
         agents: [],
         total: 2,
@@ -173,7 +186,7 @@ describe('test policy response handler', () => {
     afterEach(() => endpointAppContextService.stop());
 
     it('should return the summary of all the agent with the given policy name', async () => {
-      mockAgentService.listAgents
+      mockAgentClient.listAgents
         .mockImplementationOnce(() => Promise.resolve(agentListResult))
         .mockImplementationOnce(() => Promise.resolve(emptyAgentListResult));
 
@@ -204,7 +217,7 @@ describe('test policy response handler', () => {
     });
 
     it('should return the agent summary', async () => {
-      mockAgentService.listAgents
+      mockAgentClient.listAgents
         .mockImplementationOnce(() => Promise.resolve(agentListResult))
         .mockImplementationOnce(() => Promise.resolve(emptyAgentListResult));
 
@@ -230,6 +243,80 @@ describe('test policy response handler', () => {
           package: 'endpoint',
           versions_count: { '8.0.0': 2, '8.1.0': 1 },
         },
+      });
+    });
+  });
+  describe('test GET policy list handler', () => {
+    let mockPackagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
+    let policyHandler: ReturnType<typeof getPolicyListHandler>;
+
+    beforeEach(() => {
+      mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
+      mockSavedObjectClient = savedObjectsClientMock.create();
+      mockResponse = httpServerMock.createResponseFactory();
+      mockPackagePolicyService = createPackagePolicyServiceMock();
+      mockPackagePolicyService.list.mockImplementation(() => {
+        return Promise.resolve({
+          items: [],
+          total: 0,
+          page: 1,
+          perPage: 10,
+        });
+      });
+      endpointAppContextService = new EndpointAppContextService();
+      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
+      endpointAppContextService.start({
+        ...createMockEndpointAppContextServiceStartContract(),
+        ...{ packagePolicyService: mockPackagePolicyService },
+      });
+      policyHandler = getPolicyListHandler({
+        logFactory: loggingSystemMock.create(),
+        service: endpointAppContextService,
+        config: () => Promise.resolve(createMockConfig()),
+        experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
+      });
+    });
+
+    afterEach(() => endpointAppContextService.stop());
+
+    it('should return a list of endpoint package policies', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest({
+        query: {},
+      });
+
+      await policyHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+        mockRequest,
+        mockResponse
+      );
+      expect(mockPackagePolicyService.list.mock.calls[0][1]).toEqual({
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+        perPage: undefined,
+        sortField: undefined,
+      });
+      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok.mock.calls[0][0]?.body).toEqual({
+        items: [],
+        total: 0,
+        page: 1,
+        perPage: 10,
+      });
+    });
+
+    it('should add endpoint-specific kuery to the requests kuery', async () => {
+      const mockRequest = httpServerMock.createKibanaRequest({
+        query: { kuery: 'some query' },
+      });
+
+      await policyHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+        mockRequest,
+        mockResponse
+      );
+      expect(mockPackagePolicyService.list.mock.calls[0][1]).toEqual({
+        kuery: `(some query) and ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+        perPage: undefined,
+        sortField: undefined,
       });
     });
   });

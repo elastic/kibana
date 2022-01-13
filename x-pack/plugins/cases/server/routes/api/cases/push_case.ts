@@ -12,7 +12,8 @@ import { identity } from 'fp-ts/lib/function';
 
 import { wrapError, escapeHatch } from '../utils';
 
-import { throwErrors, CasePushRequestParamsRt, CASE_PUSH_URL } from '../../../../common';
+import { throwErrors, CasePushRequestParamsRt } from '../../../../common/api';
+import { CASE_PUSH_URL } from '../../../../common/constants';
 import { RouteDeps } from '../types';
 
 export function initPushCaseApi({ router, logger }: RouteDeps) {

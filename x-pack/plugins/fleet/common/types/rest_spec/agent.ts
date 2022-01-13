@@ -7,22 +7,19 @@
 
 import type { Agent, AgentAction, NewAgentAction } from '../models';
 
+import type { ListResult, ListWithKuery } from './common';
+
 export interface GetAgentsRequest {
-  query: {
-    page: number;
-    perPage: number;
-    kuery?: string;
+  query: ListWithKuery & {
     showInactive: boolean;
     showUpgradeable?: boolean;
   };
 }
 
-export interface GetAgentsResponse {
-  list: Agent[];
-  total: number;
+export interface GetAgentsResponse extends ListResult<Agent> {
   totalInactive: number;
-  page: number;
-  perPage: number;
+  // deprecated in 8.x
+  list?: Agent[];
 }
 
 export interface GetOneAgentRequest {

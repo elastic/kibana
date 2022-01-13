@@ -71,11 +71,10 @@ pageLoadAssetSize:
   visTypeVislib: 242838
   visTypeXy: 113478
   visualizations: 90000
-  visualize: 57431
   watcher: 43598
   runtimeFields: 41752
   stackAlerts: 29684
-  presentationUtil: 84606
+  presentationUtil: 58834
   osquery: 107090
   fileUpload: 25664
   dataVisualizer: 27530
@@ -96,6 +95,7 @@ pageLoadAssetSize:
   securitySolution: 273763
   customIntegrations: 28810
   expressionMetricVis: 23121
+  expressionHeatmap: 27505
   visTypeMetric: 23332
   bfetch: 22837
   kibanaUtils: 79713
@@ -115,3 +115,9 @@ pageLoadAssetSize:
   dataViewFieldEditor: 20000
   dataViewManagement: 5000
   reporting: 57003
+  visTypeHeatmap: 25340
+  screenshotting: 17017
+  expressionGauge: 25000
+  controls: 34788
+  expressionPie: 26338
+  sharedUX: 16225

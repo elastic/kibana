@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
+
 import { useStartServices } from '../../../hooks';
 import type { EnrollmentAPIKey } from '../../../types';
+
 import { PlatformSelector } from './platform_selector';
 
 interface Props {

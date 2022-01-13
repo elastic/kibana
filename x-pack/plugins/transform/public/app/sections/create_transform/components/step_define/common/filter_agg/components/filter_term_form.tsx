@@ -69,7 +69,7 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
       if (
         !(
           isEsSearchResponseWithAggregations(response) &&
-          isMultiBucketAggregate<estypes.AggregationsKeyedBucketKeys>(
+          isMultiBucketAggregate<estypes.AggregationsSignificantLongTermsBucket>(
             response.aggregations.field_values
           )
         )
@@ -83,7 +83,10 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
       }
 
       setOptions(
-        response.aggregations.field_values.buckets.map((value) => ({ label: value.key + '' }))
+        (
+          response.aggregations.field_values
+            .buckets as estypes.AggregationsSignificantLongTermsBucket[]
+        ).map((value) => ({ label: value.key + '' }))
       );
     }, 600),
     [selectedField]

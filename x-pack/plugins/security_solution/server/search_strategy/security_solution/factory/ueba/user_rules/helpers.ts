@@ -6,7 +6,11 @@
  */
 
 import { getOr } from 'lodash/fp';
-import { UserRulesHit, UserRulesFields, UserRulesByUser } from '../../../../../../common';
+import {
+  UserRulesHit,
+  UserRulesFields,
+  UserRulesByUser,
+} from '../../../../../../common/search_strategy';
 import { formatHostRulesData } from '../host_rules/helpers';
 
 export const formatUserRulesData = (buckets: UserRulesHit[]): UserRulesByUser[] =>

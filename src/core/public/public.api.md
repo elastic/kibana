@@ -42,6 +42,7 @@ import { Request as Request_2 } from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { SchemaTypeError } from '@kbn/config-schema';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
+import { TransitionPromptHook } from 'history';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { TransportRequestParams } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
@@ -506,6 +507,12 @@ export interface DocLinksStart {
         readonly canvas: {
             readonly guide: string;
         };
+        readonly cloud: {
+            readonly indexManagement: string;
+        };
+        readonly console: {
+            readonly guide: string;
+        };
         readonly dashboard: {
             readonly guide: string;
             readonly drilldowns: string;
@@ -537,10 +544,61 @@ export interface DocLinksStart {
             readonly install: string;
             readonly start: string;
         };
+        readonly appSearch: {
+            readonly apiRef: string;
+            readonly apiClients: string;
+            readonly apiKeys: string;
+            readonly authentication: string;
+            readonly crawlRules: string;
+            readonly curations: string;
+            readonly duplicateDocuments: string;
+            readonly entryPoints: string;
+            readonly guide: string;
+            readonly indexingDocuments: string;
+            readonly indexingDocumentsSchema: string;
+            readonly logSettings: string;
+            readonly metaEngines: string;
+            readonly precisionTuning: string;
+            readonly relevanceTuning: string;
+            readonly resultSettings: string;
+            readonly searchUI: string;
+            readonly security: string;
+            readonly synonyms: string;
+            readonly webCrawler: string;
+            readonly webCrawlerEventLogs: string;
+        };
         readonly enterpriseSearch: {
-            readonly base: string;
-            readonly appSearchBase: string;
-            readonly workplaceSearchBase: string;
+            readonly configuration: string;
+            readonly licenseManagement: string;
+            readonly mailService: string;
+            readonly usersAccess: string;
+        };
+        readonly workplaceSearch: {
+            readonly apiKeys: string;
+            readonly box: string;
+            readonly confluenceCloud: string;
+            readonly confluenceServer: string;
+            readonly customSources: string;
+            readonly customSourcePermissions: string;
+            readonly documentPermissions: string;
+            readonly dropbox: string;
+            readonly externalIdentities: string;
+            readonly gitHub: string;
+            readonly gettingStarted: string;
+            readonly gmail: string;
+            readonly googleDrive: string;
+            readonly indexingSchedule: string;
+            readonly jiraCloud: string;
+            readonly jiraServer: string;
+            readonly oneDrive: string;
+            readonly permissions: string;
+            readonly salesforce: string;
+            readonly security: string;
+            readonly serviceNow: string;
+            readonly sharePoint: string;
+            readonly slack: string;
+            readonly synch: string;
+            readonly zendesk: string;
         };
         readonly heartbeat: {
             readonly base: string;
@@ -618,7 +676,10 @@ export interface DocLinksStart {
             readonly runtimeFields: string;
         };
         readonly addData: string;
-        readonly kibana: string;
+        readonly kibana: {
+            readonly guide: string;
+            readonly autocompleteSuggestions: string;
+        };
         readonly upgradeAssistant: {
             readonly overview: string;
             readonly batchReindex: string;
@@ -638,10 +699,12 @@ export interface DocLinksStart {
         };
         readonly securitySolution: {
             readonly trustedApps: string;
+            readonly eventFilters: string;
         };
         readonly query: {
             readonly eql: string;
             readonly kueryQuerySyntax: string;
+            readonly luceneQuery: string;
             readonly luceneQuerySyntax: string;
             readonly percolate: string;
             readonly queryDsl: string;
@@ -670,6 +733,7 @@ export interface DocLinksStart {
             cronExpressions: string;
             executeWatchActionModes: string;
             indexExists: string;
+            multiSearch: string;
             openIndex: string;
             putComponentTemplate: string;
             painlessExecute: string;
@@ -678,8 +742,10 @@ export interface DocLinksStart {
             putSnapshotLifecyclePolicy: string;
             putIndexTemplateV1: string;
             putWatch: string;
+            searchPreference: string;
             simulatePipeline: string;
             timeUnits: string;
+            unfreezeIndex: string;
             updateTransform: string;
         }>;
         readonly observability: Readonly<{
@@ -718,7 +784,14 @@ export interface DocLinksStart {
         }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
-        readonly plugins: Record<string, string>;
+        readonly plugins: {
+            azureRepo: string;
+            gcsRepo: string;
+            hdfsRepo: string;
+            s3Repo: string;
+            snapshotRestoreRepos: string;
+            mapperSize: string;
+        };
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{
@@ -1433,7 +1506,7 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     sortField?: string;
     // (undocumented)
-    sortOrder?: estypes.SearchSortOrder;
+    sortOrder?: estypes.SortOrder;
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;
@@ -1627,13 +1700,13 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> {
 
 // @public
 export class ScopedHistory<HistoryLocationState = unknown> implements History_2<HistoryLocationState> {
-    constructor(parentHistory: History_2, basePath: string);
+    constructor(parentHistory: History_2<HistoryLocationState>, basePath: string);
     get action(): Action;
-    block: (prompt?: string | boolean | History_2.TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
+    block: (prompt?: string | boolean | TransitionPromptHook<HistoryLocationState> | undefined) => UnregisterCallback;
     createHref: (location: LocationDescriptorObject<HistoryLocationState>, { prependBasePath }?: {
         prependBasePath?: boolean | undefined;
     }) => Href;
-    createSubHistory: <SubHistoryLocationState = unknown>(basePath: string) => ScopedHistory<SubHistoryLocationState>;
+    createSubHistory: (basePath: string) => ScopedHistory<HistoryLocationState>;
     go: (n: number) => void;
     goBack: () => void;
     goForward: () => void;

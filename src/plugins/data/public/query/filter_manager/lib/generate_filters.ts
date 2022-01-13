@@ -40,7 +40,9 @@ function getExistingFilter(
     }
 
     if (isScriptedPhraseFilter(filter)) {
-      return filter.meta.field === fieldName && filter.script.script.params?.value === value;
+      return (
+        filter.meta.field === fieldName && filter.query?.script?.script?.params?.value === value
+      );
     }
   }) as any;
 }

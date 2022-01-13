@@ -21,17 +21,25 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
+import { CLOUD_SNAPSHOT_REPOSITORY } from '../../../../../common/constants';
 import { useAppContext } from '../../../app_context';
+import { ResponseError } from '../../../../../common/types';
 import { uiMetricService, UIM_BACKUP_DATA_CLOUD_CLICK } from '../../../lib/ui_metric';
 
 interface Props {
   cloudSnapshotsUrl: string;
   setIsComplete: (isComplete: boolean) => void;
+  setForceOnPremStep: (forceOnPrem: boolean) => void;
 }
+
+const isMissingFoundSnapshotsRepo = (error: ResponseError) => {
+  return error.statusCode === 404 && error.message.toString().includes(CLOUD_SNAPSHOT_REPOSITORY);
+};
 
 export const CloudBackup: React.FunctionComponent<Props> = ({
   cloudSnapshotsUrl,
   setIsComplete,
+  setForceOnPremStep,
 }) => {
   const {
     services: { api },
@@ -46,10 +54,18 @@ export const CloudBackup: React.FunctionComponent<Props> = ({
     if (!isLoading) {
       // An error should invalidate the previous state.
       setIsComplete((!error && data?.isBackedUp) ?? false);
+      // If snapshots are not enabled, as it could happen in an ECE installation, the
+      // cloud backup status api will return a 404 error saying that the found-snapshots
+      // repository is missing. If that were to happen, we should force the users to see
+      // the on prem backup step instead.
+      if (error && isMissingFoundSnapshotsRepo(error)) {
+        setForceOnPremStep(true);
+      }
     }
+
     // Depending upon setIsComplete would create an infinite loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error, isLoading, data]);
+  }, [error, isLoading, data, setForceOnPremStep]);
 
   if (isInitialRequest && isLoading) {
     return <EuiLoadingContent data-test-subj="cloudBackupLoading" lines={3} />;

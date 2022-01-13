@@ -3,11 +3,13 @@ id: kibDevPerformance
 slug: /kibana-dev-docs/key-concepts/performance
 title: Performance
 summary: Performance tips for Kibana development.
-date: 2021-09-02
+date: 2021-12-03
 tags: ['kibana', 'onboarding', 'dev', 'performance']
 ---
 
-## Keep Kibana fast
+## Client-side considerations
+
+### Lazy load code
 
 _tl;dr_: Load as much code lazily as possible. Everyone loves snappy
 applications with a responsive UI and hates spinners. Users deserve the
@@ -105,3 +107,15 @@ Many OSS tools allow you to analyze the generated stats file:
   Webpack authors
 - [webpack-visualizer](https://chrisbateman.github.io/webpack-visualizer/)
 - [webpack-bundle-analyzer](https://github.com/webpack-contrib/webpack-bundle-analyzer)
+
+## Server-side considerations
+
+### Don't block the event loop
+
+[Node.js is single threaded](https://nodejs.dev/learn/introduction-to-nodejs) which means a single CPU-intensive server-side, synchronous operation will block any other functionality waiting to execute on the Kibana server. The affects background tasks, like alerts, and search sessions, as well as search requests and page loads.
+
+**When writing code that will run on the server, [don't block the event loop](https://nodejs.org/en/docs/guides/dont-block-the-event-loop/)**. Instead consider:
+
+- Writing async code. For example, leverage [setImmediate](https://nodejs.dev/learn/understanding-setimmediate) inside for loops.
+- Executing logic on the client instead. This may not be a good option if you require a lot of data going back and forth between the server and the client, as that can also slow down the user's experience, especially over slower bandwidth internet connections.
+- Worker threads are also an option if the code doesn't rely on stateful Kibana services. If you are interested in using worker threads, please reach out to a tech-lead before doing so. We will likely want to implement a worker threads pool to ensure worker threads cooperate appropriately.

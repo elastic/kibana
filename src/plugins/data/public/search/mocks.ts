@@ -8,7 +8,7 @@
 
 import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
 import { searchSourceMock } from './search_source/mocks';
-import { ISearchSetup, ISearchStart } from './types';
+import type { ISearchSetup, ISearchStart } from './types';
 import { getSessionsClientMock, getSessionServiceMock } from './session/mocks';
 import { createSearchUsageCollectorMock } from './collectors/mocks';
 

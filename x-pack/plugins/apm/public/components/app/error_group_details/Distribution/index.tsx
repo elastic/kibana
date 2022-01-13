@@ -16,7 +16,7 @@ import {
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import React, { Suspense, useState } from 'react';
-import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';

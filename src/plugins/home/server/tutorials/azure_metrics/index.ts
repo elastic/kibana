@@ -57,8 +57,8 @@ export function azureMetricsSpecProvider(context: TutorialContext): TutorialSche
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/home/assets/azure_metrics/screenshot.png',
     onPrem: onPremInstructions(moduleName, context),
-    elasticCloud: cloudInstructions(moduleName),
-    onPremElasticCloud: onPremCloudInstructions(moduleName),
+    elasticCloud: cloudInstructions(moduleName, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, context),
     integrationBrowserCategories: ['azure', 'cloud', 'network', 'security'],
   };
 }

@@ -100,6 +100,29 @@ export const ArtifactCardGrid = memo<ArtifactCardGridProps>(
       [callerDefinedCardProps, onExpandCollapse]
     );
 
+    const isEverythingExpanded = useMemo(() => {
+      for (const [_, currentCardProps] of callerDefinedCardProps) {
+        const currentExpandedState = Boolean(currentCardProps.expanded);
+        if (!currentExpandedState) {
+          return false;
+        }
+      }
+      return true;
+    }, [callerDefinedCardProps]);
+
+    const handleCardExpandCollapseAll = useCallback(() => {
+      let expanded: AnyArtifact[] = [];
+      let collapsed: AnyArtifact[] = [];
+
+      if (!isEverythingExpanded) {
+        expanded = Array.from(callerDefinedCardProps.keys());
+      } else {
+        collapsed = Array.from(callerDefinedCardProps.keys());
+      }
+
+      onExpandCollapse({ expanded, collapsed });
+    }, [callerDefinedCardProps, onExpandCollapse, isEverythingExpanded]);
+
     // Full list of card props that includes the actual artifact and the callbacks
     type FullCardProps = Map<AnyArtifact, ArtifactEntryCollapsibleCardProps>;
     const fullCardProps = useMemo<FullCardProps>(() => {
@@ -127,7 +150,11 @@ export const ArtifactCardGrid = memo<ArtifactCardGridProps>(
 
     return (
       <>
-        <GridHeader data-test-subj={getTestId('header')} />
+        <GridHeader
+          expandAllIconType={isEverythingExpanded ? 'fold' : 'unfold'}
+          onExpandCollapseAll={handleCardExpandCollapseAll}
+          data-test-subj={getTestId('header')}
+        />
 
         <PaginatedContent
           {...paginatedContentProps}

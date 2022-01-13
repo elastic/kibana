@@ -23,6 +23,7 @@ export {
   loadIndexData,
   useLoadIndexTemplates,
   simulateIndexTemplate,
+  useLoadNodesPlugins,
 } from './api';
 export { sortTable } from './sort_table';
 

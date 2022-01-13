@@ -7,8 +7,8 @@
 
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { catchError, finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
-import { PNG_JOB_TYPE } from '../../../../common/constants';
+import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
+import { PNG_JOB_TYPE, REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../../types';
 import {
@@ -16,7 +16,7 @@ import {
   getConditionalHeaders,
   getFullUrls,
   omitBlockedHeaders,
-  generatePngObservableFactory,
+  generatePngObservable,
 } from '../../common';
 import { TaskPayloadPNG } from '../types';
 
@@ -25,40 +25,35 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
     const config = reporting.getConfig();
     const encryptionKey = config.get('encryptionKey');
 
-    return async function runTask(jobId, job, cancellationToken, stream) {
-      const apmTrans = apm.startTransaction('reporting execute_job png', 'reporting');
-      const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
+    return function runTask(jobId, job, cancellationToken, stream) {
+      const apmTrans = apm.startTransaction('execute-job-png', REPORTING_TRANSACTION_TYPE);
+      const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
       let apmGeneratePng: { end: () => void } | null | undefined;
 
-      const generatePngObservable = await generatePngObservableFactory(reporting);
       const jobLogger = parentLogger.clone([PNG_JOB_TYPE, 'execute', jobId]);
       const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
         mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
         map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
         map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
         mergeMap((conditionalHeaders) => {
-          const urls = getFullUrls(config, job);
-          const hashUrl = urls[0];
-          if (apmGetAssets) apmGetAssets.end();
+          const [url] = getFullUrls(config, job);
 
-          apmGeneratePng = apmTrans?.startSpan('generate_png_pipeline', 'execute');
-          return generatePngObservable(
-            jobLogger,
-            hashUrl,
-            job.browserTimezone,
+          apmGetAssets?.end();
+          apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
+
+          return generatePngObservable(reporting, jobLogger, {
             conditionalHeaders,
-            job.layout
-          );
+            urls: [url],
+            browserTimezone: job.browserTimezone,
+            layout: job.layout,
+          });
         }),
         tap(({ buffer }) => stream.write(buffer)),
         map(({ warnings }) => ({
           content_type: 'image/png',
           warnings,
         })),
-        catchError((err) => {
-          jobLogger.error(err);
-          return Rx.throwError(err);
-        }),
+        tap({ error: (error) => jobLogger.error(error) }),
         finalize(() => apmGeneratePng?.end())
       );
 

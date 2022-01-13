@@ -7,7 +7,7 @@
 
 import React, { FC, useState, useCallback, useMemo, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fromExpression } from '@kbn/interpreter/common';
+import { fromExpression } from '@kbn/interpreter';
 import { useExpressionsService } from '../../services';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 // @ts-expect-error
@@ -110,11 +110,16 @@ const ExpressionContainer: FC<ExpressionContainerProps> = ({ done, element, page
     }
   }, [element, setFormState, formState]);
 
+  const functionDefinitions = useMemo(
+    () => Object.values(expressions.getFunctions()),
+    [expressions]
+  );
+
   return (
     <Component
       done={done}
       isCompact={isCompact}
-      functionDefinitions={Object.values(expressions.getFunctions())}
+      functionDefinitions={functionDefinitions}
       formState={formState}
       setExpression={onSetExpression}
       toggleCompactView={toggleCompactView}

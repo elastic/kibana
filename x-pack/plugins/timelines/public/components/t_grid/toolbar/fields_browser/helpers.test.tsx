@@ -16,7 +16,7 @@ import {
   getFieldCount,
   filterBrowserFieldsByFieldName,
 } from './helpers';
-import { BrowserFields } from '../../../../../common';
+import { BrowserFields } from '../../../../../common/search_strategy';
 
 const timelineId = 'test';
 

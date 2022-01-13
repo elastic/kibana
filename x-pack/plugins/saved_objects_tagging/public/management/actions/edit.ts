@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart, OverlayStart } from 'kibana/public';
+import { NotificationsStart, OverlayStart, ThemeServiceStart } from 'kibana/public';
 import { TagWithRelations } from '../../../common';
 import { ITagInternalClient } from '../../services/tags';
 import { getEditModalOpener } from '../../components/edition_modal';
@@ -14,6 +14,7 @@ import { TagAction } from './types';
 
 interface GetEditActionOptions {
   overlays: OverlayStart;
+  theme: ThemeServiceStart;
   notifications: NotificationsStart;
   tagClient: ITagInternalClient;
   fetchTags: () => Promise<void>;
@@ -21,11 +22,12 @@ interface GetEditActionOptions {
 
 export const getEditAction = ({
   notifications,
+  theme,
   overlays,
   tagClient,
   fetchTags,
 }: GetEditActionOptions): TagAction => {
-  const editModalOpener = getEditModalOpener({ overlays, tagClient });
+  const editModalOpener = getEditModalOpener({ overlays, theme, tagClient });
   return {
     id: 'edit',
     name: ({ name }) =>

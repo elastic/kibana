@@ -36,7 +36,8 @@ export const config: PluginConfigDescriptor = {
               username: schema.string(),
               password: schema.string(),
               manifestUrl: schema.string(),
-              hosts: schema.arrayOf(schema.string()),
+              hosts: schema.maybe(schema.arrayOf(schema.string())),
+              syncInterval: schema.maybe(schema.string()),
             })
           ),
         })

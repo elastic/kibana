@@ -617,7 +617,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [
-                  "see {@link ParseSearchQueryOptions}"
+                  "see {@link ParseSearchQueryOptions }"
                 ],
                 "signature": [
                   {
