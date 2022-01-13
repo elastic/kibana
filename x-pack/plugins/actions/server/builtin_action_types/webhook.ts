@@ -82,22 +82,6 @@ export function getActionType({
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
 }): WebhookActionType {
-  console.log(JSON.stringify({
-    id: ActionTypeId,
-    minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.actions.builtin.webhookTitle', {
-      defaultMessage: 'Webhook',
-    }),
-    validate: {
-      config: schema.object(configSchemaProps, {
-        validate: curry(validateActionTypeConfig)(configurationUtilities),
-      }),
-      secrets: SecretsSchema,
-      params: ParamsSchema,
-    },
-    renderParameterTemplates,
-    executor: curry(executor)({ logger, configurationUtilities }),
-  }));
   return {
     id: ActionTypeId,
     minimumLicenseRequired: 'gold',
@@ -165,10 +149,6 @@ export async function executor(
   const actionId = execOptions.actionId;
   const { method, url, headers = {}, hasAuth } = execOptions.config;
   const { body: data } = execOptions.params;
-  /* eslint no-console: ["off", { allow: ["log"] }] */
-  console.log('-----------------------------------------');
-  console.log(execOptions.params);
-  console.log('-----------------------------------------');
 
   const secrets: ActionTypeSecretsType = execOptions.secrets;
   const basicAuth =
