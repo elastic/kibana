@@ -21,7 +21,7 @@ export interface Kibana {
   hostname: string;
 }
 
-export async function createApmUsersAndRoles({
+export async function createApmAndObsUsersAndRoles({
   kibana,
   elasticsearch,
 }: {
@@ -61,7 +61,9 @@ export async function createApmUsersAndRoles({
   // user definitions
   const users = [
     { username: 'apm_read_user', roles: [KIBANA_READ_ROLE] },
-    { username: 'apm_power_user', roles: [KIBANA_POWER_ROLE] },
+    { username: 'apm_read_user', roles: [KIBANA_READ_ROLE] },
+    { username: 'obs_read_user', roles: [KIBANA_READ_ROLE] },
+    { username: 'obs_admin_user', roles: [KIBANA_POWER_ROLE] },
   ];
 
   // create users

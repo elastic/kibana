@@ -12,6 +12,7 @@ import { run as playwrightRun } from '@elastic/synthetics';
 import { esArchiverLoad, esArchiverUnload } from './tasks/es_archiver';
 
 import './journeys';
+import { createApmAndObsUsersAndRoles } from '../../apm/scripts/create_apm_users_and_roles/create_apm_users_and_roles';
 
 export function playwrightRunTests({ headless, match }: { headless: boolean; match?: string }) {
   return async ({ getService }: any) => {
@@ -43,6 +44,11 @@ async function playwrightStart(getService: any, headless = true, match?: string)
     protocol: config.get('servers.kibana.protocol'),
     hostname: config.get('servers.kibana.hostname'),
     port: config.get('servers.kibana.port'),
+  });
+
+  await createApmAndObsUsersAndRoles({
+    elasticsearch: { username: 'elastic', password: 'changeme' },
+    kibana: { roleSuffix: 'e2e', hostname: kibanaUrl },
   });
 
   const res = await playwrightRun({
