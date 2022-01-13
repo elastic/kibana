@@ -22,6 +22,15 @@ import { ML_ANOMALY } from './anomaly_source_factory';
 import { getResultsForJobId } from './util';
 import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';
 
+export type SearchFilters = any & {
+  applyGlobalQuery: boolean;
+  applyGlobalTime: boolean;
+  fieldNames: string[];
+  geogridPrecision?: number;
+  sourceQuery?: object;
+  sourceMeta: object;
+};
+
 export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
   jobId: string;
   typicalActual: 'typical' | 'actual';
@@ -45,24 +54,18 @@ export class AnomalySource implements IVectorSource {
   constructor(sourceDescriptor: Partial<AnomalySourceDescriptor>, adapters?: Adapters) {
     this._descriptor = AnomalySource.createDescriptor(sourceDescriptor);
   }
-  // TODO: implement Time filter functionality and query awareness
+  // TODO: implement query awareness
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: any & {
-      applyGlobalQuery: boolean;
-      applyGlobalTime: boolean;
-      fieldNames: string[];
-      geogridPrecision?: number;
-      sourceQuery?: object;
-      sourceMeta: object;
-    },
+    searchFilters: SearchFilters,
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta> {
     const results = await getResultsForJobId(
       AnomalySource.services[2].mlResultsService,
       this._descriptor.jobId,
-      this._descriptor.typicalActual
+      this._descriptor.typicalActual,
+      searchFilters
     );
 
     return {
@@ -108,7 +111,7 @@ export class AnomalySource implements IVectorSource {
   }
 
   getApplyGlobalTime(): boolean {
-    return false;
+    return true;
   }
 
   async getAttributions(): Promise<Attribution[]> {

@@ -7,13 +7,17 @@
 
 import { FeatureCollection, Feature } from 'geojson';
 import { ESSearchResponse } from '../../../../../src/core/types/elasticsearch';
+import { MlApiServices } from '../application/services/ml_api_service';
 import { MLAnomalyDoc } from '../../common/types/anomalies';
+import type { SearchFilters } from './anomaly_source';
 
 export async function getResultsForJobId(
-  mlResultsService: any,
+  mlResultsService: MlApiServices['results'],
   jobId: string,
-  locationType: 'typical' | 'actual'
+  locationType: 'typical' | 'actual',
+  searchFilters: SearchFilters
 ): Promise<FeatureCollection> {
+  const { timeFilters } = searchFilters;
   // Query to look for the highest scoring anomaly.
   const body: any = {
     query: {
@@ -26,6 +30,18 @@ export async function getResultsForJobId(
       excludes: [],
     },
   };
+
+  if (timeFilters) {
+    const timerange = {
+      range: {
+        timestamp: {
+          gte: `${timeFilters.from}`,
+          lte: timeFilters.to,
+        },
+      },
+    };
+    body.query.bool.must.push(timerange);
+  }
 
   let resp: ESSearchResponse<MLAnomalyDoc> | null = null;
   let hits: Array<{ typical: number[]; actual: number[]; record_score: number }> = [];
