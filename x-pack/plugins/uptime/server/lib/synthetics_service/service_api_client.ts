@@ -56,6 +56,8 @@ export class ServiceAPIClient {
     const config = this.config;
     if (config.tls && config.tls.certificate && config.tls.key) {
       const tlsConfig = new SslConfig(config.tls);
+
+      // TODO: Logging only for testing purpse, should be removed before mergin
       this.logger.info(tlsConfig.certificate ?? '');
       this.logger.info(tlsConfig.key ?? '');
       this.logger.info(tlsConfig.certificateAuthorities?.[0] ?? '');
