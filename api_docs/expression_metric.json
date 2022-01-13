@@ -186,7 +186,7 @@
         "label": "metricFunction",
         "description": [],
         "signature": [
-          "() => { name: \"metric\"; aliases: never[]; type: \"render\"; inputTypes: (\"number\" | \"string\" | \"null\")[]; help: string; args: { label: { types: \"string\"[]; aliases: string[]; help: string; default: string; }; labelFont: { types: \"style\"[]; help: string; default: string; }; metricFont: { types: \"style\"[]; help: string; default: string; }; metricFormat: { types: \"string\"[]; aliases: string[]; help: string; }; }; fn: (input: ",
+          "() => { name: \"metric\"; aliases: never[]; type: string; inputTypes: (\"number\" | \"string\" | \"null\")[]; help: string; args: { label: { types: \"string\"[]; aliases: string[]; help: string; default: string; }; labelFont: { types: \"style\"[]; help: string; default: string; }; metricFont: { types: \"style\"[]; help: string; default: string; }; metricFormat: { types: \"string\"[]; aliases: string[]; help: string; }; }; fn: (input: ",
           {
             "pluginId": "expressionMetric",
             "scope": "common",
@@ -508,13 +508,7 @@
             "text": "Adapters"
           },
           ", ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          },
+          "SerializableRecord",
           ">>"
         ],
         "path": "src/plugins/expression_metric/common/types/expression_functions.ts",

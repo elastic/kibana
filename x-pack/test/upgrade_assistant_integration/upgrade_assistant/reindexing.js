@@ -34,7 +34,7 @@ export default function ({ getService }) {
     return lastState;
   };
 
-  describe('reindexing', () => {
+  describe.skip('reindexing', () => {
     afterEach(() => {
       // Cleanup saved objects
       return es.deleteByQuery({
@@ -123,7 +123,10 @@ export default function ({ getService }) {
 
     it('shows no warnings', async () => {
       const resp = await supertest.get(`/api/upgrade_assistant/reindex/7.0-data`);
-      expect(resp.body.warnings.length).to.be(0);
+      // By default all reindexing operations will replace an index with an alias (with the same name)
+      // pointing to a newly created "reindexed" index.
+      expect(resp.body.warnings.length).to.be(1);
+      expect(resp.body.warnings[0].warningType).to.be('replaceIndexWithAlias');
     });
 
     it('reindexes old 7.0 index', async () => {

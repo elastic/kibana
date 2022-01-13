@@ -8,9 +8,10 @@
 import semverGte from 'semver/functions/gte';
 import { makeLensEmbeddableFactory } from './make_lens_embeddable_factory';
 import { getAllMigrations } from '../migrations/saved_object_migrations';
+import { Filter } from '@kbn/es-query';
 
-describe('saved object migrations and embeddable migrations', () => {
-  test('should have same versions registered (>7.13.0)', () => {
+describe('embeddable migrations', () => {
+  test('should have all saved object migrations versions (>7.13.0)', () => {
     const savedObjectMigrationVersions = Object.keys(getAllMigrations({})).filter((version) => {
       return semverGte(version, '7.13.1');
     });
@@ -43,11 +44,11 @@ describe('saved object migrations and embeddable migrations', () => {
     };
 
     const embeddableMigrationVersions = makeLensEmbeddableFactory({
-      [migrationVersion]: (filterState) => {
-        return {
+      [migrationVersion]: (filters: Filter[]) => {
+        return filters.map((filterState) => ({
           ...filterState,
           migrated: true,
-        };
+        }));
       },
     })()?.migrations;
 

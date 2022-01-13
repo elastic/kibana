@@ -207,7 +207,9 @@ class AgentPolicyService {
     if (agentPolicies.total === 0) {
       return {
         created: true,
-        policy: await this.create(soClient, esClient, newAgentPolicy, { id: String(id) }),
+        policy: await this.create(soClient, esClient, newAgentPolicy, {
+          id: id ? String(id) : uuidv5(newAgentPolicy.name, UUID_V5_NAMESPACE),
+        }),
       };
     }
 
@@ -227,6 +229,7 @@ class AgentPolicyService {
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
     await this.requireUniqueName(soClient, agentPolicy);
+
     const newSo = await soClient.create<AgentPolicySOAttributes>(
       SAVED_OBJECT_TYPE,
       {
@@ -615,22 +618,23 @@ class AgentPolicyService {
   public async delete(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    id: string
+    id: string,
+    options?: { force?: boolean; removeFleetServerDocuments?: boolean }
   ): Promise<DeleteAgentPolicyResponse> {
     const agentPolicy = await this.get(soClient, id, false);
     if (!agentPolicy) {
       throw new Error('Agent policy not found');
     }
 
-    if (agentPolicy.is_managed) {
+    if (agentPolicy.is_managed && !options?.force) {
       throw new HostedAgentPolicyRestrictionRelatedError(`Cannot delete hosted agent policy ${id}`);
     }
 
-    if (agentPolicy.is_default) {
+    if (agentPolicy.is_default && !options?.force) {
       throw new Error('The default agent policy cannot be deleted');
     }
 
-    if (agentPolicy.is_default_fleet_server) {
+    if (agentPolicy.is_default_fleet_server && !options?.force) {
       throw new Error('The default fleet server agent policy cannot be deleted');
     }
 
@@ -652,6 +656,7 @@ class AgentPolicyService {
           esClient,
           agentPolicy.package_policies as string[],
           {
+            force: options?.force,
             skipUnassignFromAgentPolicies: true,
           }
         );
@@ -664,7 +669,7 @@ class AgentPolicyService {
       }
     }
 
-    if (agentPolicy.is_preconfigured) {
+    if (agentPolicy.is_preconfigured && !options?.force) {
       await soClient.create(PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE, {
         id: String(id),
       });
@@ -672,6 +677,11 @@ class AgentPolicyService {
 
     await soClient.delete(SAVED_OBJECT_TYPE, id);
     await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'deleted', id);
+
+    if (options?.removeFleetServerDocuments) {
+      await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
+    }
+
     return {
       id,
       name: agentPolicy.name,
@@ -714,6 +724,23 @@ class AgentPolicyService {
       body: fleetServerPolicy,
       id: uuid(),
       refresh: 'wait_for',
+    });
+  }
+
+  public async deleteFleetServerPoliciesForPolicyId(
+    esClient: ElasticsearchClient,
+    agentPolicyId: string
+  ) {
+    await esClient.deleteByQuery({
+      index: AGENT_POLICY_INDEX,
+      ignore_unavailable: true,
+      body: {
+        query: {
+          term: {
+            policy_id: agentPolicyId,
+          },
+        },
+      },
     });
   }
 

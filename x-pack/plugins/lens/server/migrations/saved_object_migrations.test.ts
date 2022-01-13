@@ -15,6 +15,7 @@ import {
 import { LensDocShape715, VisState716, VisStatePost715, VisStatePre715 } from './types';
 import { CustomPaletteParams, layerTypes } from '../../common';
 import { PaletteOutput } from 'src/plugins/charts/common';
+import { Filter } from '@kbn/es-query';
 
 describe('Lens migrations', () => {
   const migrations = getAllMigrations({});
@@ -1533,11 +1534,11 @@ describe('Lens migrations', () => {
     };
 
     const migrationFunctionsObject = getAllMigrations({
-      [migrationVersion]: (filterState) => {
-        return {
+      [migrationVersion]: (filters: Filter[]) => {
+        return filters.map((filterState) => ({
           ...filterState,
           migrated: true,
-        };
+        }));
       },
     });
 

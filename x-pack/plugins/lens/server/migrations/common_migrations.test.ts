@@ -12,9 +12,9 @@ describe('Lens migrations', () => {
   describe('applying filter migrations', () => {
     it('creates a filter migrations map that works on a lens visualization', () => {
       const filterMigrations = {
-        '1.1': (filter: Filter) => ({ ...filter, version: '1.1' }),
-        '2.2': (filter: Filter) => ({ ...filter, version: '2.2' }),
-        '3.3': (filter: Filter) => ({ ...filter, version: '3.3' }),
+        '1.1': (filters: Filter[]) => filters.map((filter) => ({ ...filter, version: '1.1' })),
+        '2.2': (filters: Filter[]) => filters.map((filter) => ({ ...filter, version: '2.2' })),
+        '3.3': (filters: Filter[]) => filters.map((filter) => ({ ...filter, version: '3.3' })),
       };
 
       const lensVisualizationSavedObject = {

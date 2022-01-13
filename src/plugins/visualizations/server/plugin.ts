@@ -12,6 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { PluginSetup as DataPluginSetup } from 'src/plugins/data/server';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
 import { registerVisualizationsCollector } from './usage_collector';
+import { capabilitiesProvider } from './capabilities_provider';
 
 import type { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
 import type {
@@ -47,6 +48,7 @@ export class VisualizationsPlugin
 
     const searchSourceMigrations = plugins.data.search.searchSource.getAllMigrations();
     core.savedObjects.registerType(getVisualizationSavedObjectType(searchSourceMigrations));
+    core.capabilities.registerProvider(capabilitiesProvider);
 
     core.uiSettings.register({
       [VISUALIZE_ENABLE_LABS_SETTING]: {
