@@ -4,10 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { SslConfig } from '@kbn/server-http-tools';
-
-import path from 'path';
 import {
   PluginInitializerContext,
   CoreStart,
@@ -78,7 +74,12 @@ export class Plugin implements PluginType {
     } as UptimeServerSetup;
 
     if (this.server?.config?.unsafe?.service.enabled) {
-      this.syntheticService = new SyntheticsService(this.logger, this.server);
+      this.syntheticService = new SyntheticsService(
+        this.logger,
+        this.server,
+        this.server.config.unsafe.service
+      );
+
       this.syntheticService.registerSyncTask(plugins.taskManager);
     }
 
@@ -90,32 +91,6 @@ export class Plugin implements PluginType {
       plugins.usageCollection,
       () => this.savedObjectsClient
     );
-
-    try {
-      this.logger.info('with path');
-
-      const tlsConfig = new SslConfig({
-        key: path.join(__filename, config?.unsafe?.service?.tls.key),
-        certificate: path.join(__filename, config?.unsafe?.service?.tls.certificate),
-      } as any);
-      this.logger.info(tlsConfig.key!);
-      this.logger.info(tlsConfig.certificate!);
-      this.server.pathTls = tlsConfig;
-    } catch (e) {
-      this.logger.error(e);
-    }
-
-    try {
-      this.logger.info('without path');
-
-      const tlsConfig1 = new SslConfig(config?.unsafe?.service?.tls);
-
-      this.logger.info(tlsConfig1.key!);
-      this.logger.info(tlsConfig1.certificate!);
-      this.server.withoutPathTls = tlsConfig1;
-    } catch (e) {
-      this.logger.error(e);
-    }
 
     return {
       ruleRegistry: ruleDataClient,
@@ -140,7 +115,7 @@ export class Plugin implements PluginType {
       this.server.savedObjectsClient = this.savedObjectsClient;
     }
 
-    if (this.server?.config?.unsafe?.service.enabled) {
+    if (this.server?.config?.unsafe?.service?.enabled) {
       this.syntheticService?.init(coreStart);
       this.syntheticService?.scheduleSyncTask(plugins.taskManager);
       if (this.server && this.syntheticService) {
