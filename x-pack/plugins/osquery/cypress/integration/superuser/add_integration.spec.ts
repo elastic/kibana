@@ -25,7 +25,7 @@ describe('Super User - Add Integration', () => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
   });
 
-  it.skip('should add the old integration and be able to upgrade it', () => {
+  it('should add the old integration and be able to upgrade it', () => {
     cy.visit(OLD_OSQUERY_MANAGER);
     cy.contains(integration).click();
     addIntegration();
@@ -46,8 +46,8 @@ describe('Super User - Add Integration', () => {
     cy.contains(/^Default Fleet Server policy$/).click();
     cy.contains('Actions').click();
     cy.contains('View policy').click();
-    // cy.contains('name: osquery_manager-1');
-    // cy.contains(`version: 0.8.0`);
+    cy.contains('name: osquery_manager-1');
+    cy.contains(`version: 0.8.1`);
     cy.visit('app/integrations/detail/osquery_manager/policies');
     cy.contains('Loading integration policies').should('exist');
     cy.contains('Loading integration policies').should('not.exist');
@@ -71,10 +71,10 @@ describe('Super User - Add Integration', () => {
     addIntegration();
     cy.contains('osquery_manager-');
   });
-  it.skip('should have integration and packs copied when upgrading integration', () => {
+  it('should have integration and packs copied when upgrading integration', () => {
     const packageName = 'osquery_manager';
     const oldVersion = '0.7.4';
-    const newVersion = '0.8.0';
+    const newVersion = '0.8.1';
 
     cy.visit(`app/integrations/detail/${packageName}-${oldVersion}/overview`);
     cy.contains('Add Osquery Manager').click();
@@ -105,11 +105,11 @@ describe('Super User - Add Integration', () => {
     cy.contains('Default policy').click();
     cy.contains('Upgrade').click();
     cy.contains(/^Advanced$/).click();
-    // cy.contains('"Integration":');
+    cy.contains('"Integration":');
     cy.contains(/^Upgrade integration$/).click();
     cy.contains(/^osquery_manager-2$/).click();
     cy.contains(/^Advanced$/).click();
-    // cy.contains('"Integration":');
+    cy.contains('"Integration":');
     cy.contains('Cancel').click();
     cy.get('tr')
       .should('contain', 'osquery_manager-2')
