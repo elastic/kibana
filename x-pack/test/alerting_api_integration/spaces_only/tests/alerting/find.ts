@@ -69,6 +69,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         created_at: match.created_at,
         updated_at: match.updated_at,
         execution_status: match.execution_status,
+        monitoring: match.monitoring,
       });
       expect(Date.parse(match.created_at)).to.be.greaterThan(0);
       expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
