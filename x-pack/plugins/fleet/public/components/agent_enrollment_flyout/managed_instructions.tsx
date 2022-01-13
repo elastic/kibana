@@ -23,6 +23,8 @@ import {
 } from '../../applications/fleet/sections/agents/agent_requirements_page/components';
 import { FleetServerRequirementPage } from '../../applications/fleet/sections/agents/agent_requirements_page';
 
+import { policyHasFleetServer } from '../../applications/fleet/sections/agents/services/has_fleet_server';
+
 import { DownloadStep, AgentPolicySelectionStep, AgentEnrollmentKeySelectionStep } from './steps';
 import type { BaseProps } from './types';
 
@@ -76,6 +78,15 @@ export const ManagedInstructions = React.memo<Props>(
       perPage: 1000,
       showInactive: false,
     });
+
+    const fleetServers = useMemo(() => {
+      const fleetServerAgentPolicies: string[] = (agentPolicies || [])
+        .filter((pol) => policyHasFleetServer(pol))
+        .map((pol) => pol.id);
+      return (agents?.items || []).filter((agent) =>
+        fleetServerAgentPolicies.includes(agent.policy_id || '')
+      );
+    }, [agents, agentPolicies]);
 
     const fleetServerSteps = useMemo(() => {
       const {
@@ -147,7 +158,7 @@ export const ManagedInstructions = React.memo<Props>(
       return null;
     }
 
-    if (fleetStatus.isReady && agents && agents.items.length > 0) {
+    if (fleetStatus.isReady && fleetServers.length > 0) {
       return (
         <>
           <EuiText>
@@ -166,8 +177,7 @@ export const ManagedInstructions = React.memo<Props>(
       <>
         {(fleetStatus.missingRequirements?.length === 1 &&
           fleetStatus.missingRequirements[0] === 'fleet_server') ||
-        !agents ||
-        agents.items.length === 0 ? (
+        fleetServers.length === 0 ? (
           <FleetServerMissingRequirements />
         ) : (
           <DefaultMissingRequirements />
