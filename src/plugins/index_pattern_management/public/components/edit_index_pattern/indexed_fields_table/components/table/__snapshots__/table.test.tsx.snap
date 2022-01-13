@@ -107,6 +107,7 @@ exports[`Table render name 2`] = `
 
 exports[`Table should render conflicting type 1`] = `
 <span>
+  text, long
   <span>
     <EuiBadge
       color="warning"
@@ -119,6 +120,12 @@ exports[`Table should render conflicting type 1`] = `
       Conflict
     </EuiBadge>
   </span>
+</span>
+`;
+
+exports[`Table should render mixed, non-conflicting type 1`] = `
+<span>
+  keyword, constant_keyword
 </span>
 `;
 

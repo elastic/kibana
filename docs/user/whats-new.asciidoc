@@ -1,11 +1,9 @@
 [[whats-new]]
 == What's new in {minor-version}
 
-coming::[7.16.0]
-
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
-check out the <<release-notes-7.16.0>>.
+check out the <<release-notes-7.16.0, release notes>>.
 
 Other versions: {kibana-ref-all}/7.15/whats-new.html[7.15] | {kibana-ref-all}/7.14/whats-new.html[7.14] | {kibana-ref-all}/7.13/whats-new.html[7.13] | {kibana-ref-all}/7.12/whats-new.html[7.12] | {kibana-ref-all}/7.11/whats-new.html[7.11] |
 {kibana-ref-all}/7.10/whats-new.html[7.10] | {kibana-ref-all}/7.9/whats-new.html[7.9] | {kibana-ref-all}/7.8/whats-new.html[7.8] | {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] |
@@ -102,6 +100,22 @@ on the rules detail page.
 
 [role="screenshot"]
 image::images/rule-details-7.16.png[View of all ingest options for Elastic]
+
+[float]
+=== Osquery Manager now generally available
+
+With the GA release, *Osquery Manager* is now fully supported and available
+for use in production. In addition, the 7.16 release offers the following new capabilities:
+
+* Customize the osquery configuration.
+* Map saved query results to ECS.
+* Test out queries when editing saved queries.
+* Map static values to ECS.
+* Schedule query packs for one or more agent policies.
+* Set custom namespace values for the integration.
+* Query three new Kubernetes tables.
+
+For more information, refer to {kibana-ref}/osquery.html[Osquery].
 
 [float]
 === Transform health alerting rules

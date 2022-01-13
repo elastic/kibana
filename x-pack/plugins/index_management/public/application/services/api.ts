@@ -321,3 +321,10 @@ export function simulateIndexTemplate(template: { [key: string]: any }) {
     return result;
   });
 }
+
+export function useLoadNodesPlugins() {
+  return useRequest<string[]>({
+    path: `${API_BASE_PATH}/nodes/plugins`,
+    method: 'get',
+  });
+}

@@ -12,12 +12,12 @@ import {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectMigrationContext,
-  LogMeta,
 } from '../../../../../../src/core/server';
 import { ConnectorTypes, isCreateConnector, isPush, isUpdateConnector } from '../../../common';
 
 import { extractConnectorIdFromJson } from '../../services/user_actions/transform';
 import { UserActionFieldType } from '../../services/user_actions/types';
+import { logError } from './utils';
 
 interface UserActions {
   action_field: string[];
@@ -30,10 +30,6 @@ interface UserActionUnmigratedConnectorDocument {
   action_field?: string[];
   new_value?: string | null;
   old_value?: string | null;
-}
-
-interface UserActionLogMeta extends LogMeta {
-  migrations: { userAction: { id: string } };
 }
 
 export function userActionsConnectorIdMigration(
@@ -49,7 +45,13 @@ export function userActionsConnectorIdMigration(
   try {
     return formatDocumentWithConnectorReferences(doc);
   } catch (error) {
-    logError(doc.id, context, error);
+    logError({
+      id: doc.id,
+      context,
+      error,
+      docType: 'user action connector',
+      docKey: 'userAction',
+    });
 
     return originalDocWithReferences;
   }
@@ -96,19 +98,6 @@ function formatDocumentWithConnectorReferences(
     },
     references: [...references, ...newValueConnectorRefs, ...oldValueConnectorRefs],
   };
-}
-
-function logError(id: string, context: SavedObjectMigrationContext, error: Error) {
-  context.log.error<UserActionLogMeta>(
-    `Failed to migrate user action connector doc id: ${id} version: ${context.migrationVersion} error: ${error.message}`,
-    {
-      migrations: {
-        userAction: {
-          id,
-        },
-      },
-    }
-  );
 }
 
 export const userActionsMigrations = {

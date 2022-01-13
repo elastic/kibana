@@ -58,7 +58,7 @@ The upgrade path from 6.8 to 7.0 is *not* supported.
 [[upgrade-before-you-begin]]
 === Before you begin
 
-WARNING: {kib} automatically runs upgrade migrations when required. To roll back to an earlier version in case of an upgrade failure, you **must** have a {ref}/snapshot-restore.html[backup snapshot] available. This snapshot must include the `kibana` feature state or all `kibana*` indices. For more information see <<upgrade-migrations, upgrade migrations>>.
+WARNING: {kib} automatically runs upgrade migrations when required. To roll back to an earlier version in case of an upgrade failure, you **must** have a {ref}/snapshot-restore.html[backup snapshot] available. This snapshot must include the `kibana` feature state or all `.kibana*` indices. For more information see <<upgrade-migrations, upgrade migrations>>.
 
 Before you upgrade {kib}:
 

@@ -157,7 +157,6 @@ locations for an RPM-based system:
   | Configuration files including `kibana.yml`
   | /etc/kibana
   | <<settings,KBN_PATH_CONF>>
- d|
 
 | data
   | The location of the data files written to disk by Kibana and its plugins
@@ -165,9 +164,9 @@ locations for an RPM-based system:
   | path.data
 
 | logs
-    | Logs files location
-    |  /var/log/kibana
-    | path.logs
+  | Logs files location
+  | /var/log/kibana
+  | path.logs
 
 | plugins
   | Plugin files location. Each plugin will be contained in a subdirectory.

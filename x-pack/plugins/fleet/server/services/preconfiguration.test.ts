@@ -332,6 +332,7 @@ describe('policy preconfiguration', () => {
         id: 'test-id',
         package_policies: [
           {
+            id: 'test-package',
             package: { name: 'test_package' },
             name: 'Test package',
           },

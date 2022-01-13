@@ -8,10 +8,11 @@
 import {
   Embeddable,
   LensByValueInput,
+  LensUnwrapMetaInfo,
+  LensEmbeddableInput,
   LensByReferenceInput,
   LensSavedObjectAttributes,
-  LensEmbeddableInput,
-  ResolvedLensSavedObjectAttributes,
+  LensUnwrapResult,
 } from './embeddable';
 import { ReactExpressionRendererProps } from 'src/plugins/expressions/public';
 import { Query, TimeRange, Filter, IndexPatternsContract } from 'src/plugins/data/public';
@@ -50,9 +51,11 @@ const defaultSaveMethod = (
     return { id: '123' };
   });
 };
-const defaultUnwrapMethod = (savedObjectId: string): Promise<LensSavedObjectAttributes> => {
+const defaultUnwrapMethod = (
+  savedObjectId: string
+): Promise<{ attributes: LensSavedObjectAttributes }> => {
   return new Promise(() => {
-    return { ...savedVis };
+    return { attributes: { ...savedVis } };
   });
 };
 const defaultCheckForDuplicateTitle = (props: OnSaveProps): Promise<true> => {
@@ -69,17 +72,22 @@ const options = {
 const attributeServiceMockFromSavedVis = (document: Document): LensAttributeService => {
   const core = coreMock.createStart();
   const service = new AttributeService<
-    ResolvedLensSavedObjectAttributes,
+    LensSavedObjectAttributes,
     LensByValueInput,
-    LensByReferenceInput
+    LensByReferenceInput,
+    LensUnwrapMetaInfo
   >('lens', jest.fn(), core.i18n.Context, core.notifications.toasts, options);
   service.unwrapAttributes = jest.fn((input: LensByValueInput | LensByReferenceInput) => {
     return Promise.resolve({
-      ...document,
-      sharingSavedObjectProps: {
-        outcome: 'exactMatch',
+      attributes: {
+        ...document,
       },
-    } as ResolvedLensSavedObjectAttributes);
+      metaInfo: {
+        sharingSavedObjectProps: {
+          outcome: 'exactMatch',
+        },
+      },
+    } as LensUnwrapResult);
   });
   service.wrapAttributes = jest.fn();
   return service;
@@ -92,9 +100,10 @@ describe('embeddable', () => {
   let trigger: { exec: jest.Mock };
   let basePath: IBasePath;
   let attributeService: AttributeService<
-    ResolvedLensSavedObjectAttributes,
+    LensSavedObjectAttributes,
     LensByValueInput,
-    LensByReferenceInput
+    LensByReferenceInput,
+    LensUnwrapMetaInfo
   >;
 
   beforeEach(() => {
@@ -233,13 +242,17 @@ describe('embeddable', () => {
     attributeService.unwrapAttributes = jest.fn(
       (input: LensByValueInput | LensByReferenceInput) => {
         return Promise.resolve({
-          ...savedVis,
-          sharingSavedObjectProps: {
-            outcome: 'conflict',
-            sourceId: '1',
-            aliasTargetId: '2',
+          attributes: {
+            ...savedVis,
           },
-        } as ResolvedLensSavedObjectAttributes);
+          metaInfo: {
+            sharingSavedObjectProps: {
+              outcome: 'conflict',
+              sourceId: '1',
+              aliasTargetId: '2',
+            },
+          },
+        } as LensUnwrapResult);
       }
     );
     const embeddable = new Embeddable(

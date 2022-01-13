@@ -107,10 +107,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const isContextMenuDisabled = useMemo(
     () =>
       eventType !== 'signal' &&
-      !(
-        (ecsData.event?.kind?.includes('event') || ecsData.event?.kind?.includes('alert')) &&
-        ecsData.agent?.type?.includes('endpoint')
-      ),
+      !(ecsData.event?.kind?.includes('event') && ecsData.agent?.type?.includes('endpoint')),
     [eventType, ecsData.event?.kind, ecsData.agent?.type]
   );
 

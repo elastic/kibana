@@ -11,7 +11,11 @@ import {
   httpServerMock,
 } from 'src/core/server/mocks';
 
-import type { SavedObjectsClient, SavedObjectsUpdateResponse } from 'src/core/server';
+import type {
+  SavedObjectsClient,
+  SavedObjectsClientContract,
+  SavedObjectsUpdateResponse,
+} from 'src/core/server';
 import type { KibanaRequest } from 'kibana/server';
 
 import type {
@@ -36,7 +40,7 @@ import type {
   RegistryPackage,
 } from '../../common';
 
-import { IngestManagerError } from '../errors';
+import { IngestManagerError, PackagePolicyIneligibleForUpgradeError } from '../errors';
 
 import {
   preconfigurePackageInputs,
@@ -91,6 +95,21 @@ hosts:
   ];
 }
 
+async function mockedGetInstallation(params: any) {
+  let pkg;
+  if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
+  if (params.pkgName === 'aws') pkg = { version: '0.3.3' };
+  return Promise.resolve(pkg);
+}
+
+async function mockedGetPackageInfo(params: any) {
+  let pkg;
+  if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
+  if (params.pkgName === 'aws') pkg = { version: '0.3.3' };
+  if (params.pkgName === 'endpoint') pkg = {};
+  return Promise.resolve(pkg);
+}
+
 function mockedRegistryInfo(): RegistryPackage {
   return {} as RegistryPackage;
 }
@@ -103,7 +122,8 @@ jest.mock('./epm/packages/assets', () => {
 
 jest.mock('./epm/packages', () => {
   return {
-    getPackageInfo: () => ({}),
+    getPackageInfo: mockedGetPackageInfo,
+    getInstallation: mockedGetInstallation,
   };
 });
 
@@ -2807,6 +2827,63 @@ describe('Package policy service', () => {
         expect(result.inputs[0]?.vars?.path_2.value).toBe('/var/log/custom.log');
         expect(result.inputs[0]?.policy_template).toBe('template_1');
       });
+    });
+  });
+
+  describe('upgrade package policy info', () => {
+    let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+    beforeEach(() => {
+      savedObjectsClient = savedObjectsClientMock.create();
+    });
+    function mockPackage(pkgName: string) {
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+        package: {
+          ...mockPackagePolicy.package,
+          name: pkgName,
+        },
+      };
+
+      savedObjectsClient.get.mockResolvedValueOnce({
+        id: 'package-policy-id',
+        type: 'abcd',
+        references: [],
+        version: '1.3.2',
+        attributes,
+      });
+    }
+    it('should return success if package and policy versions match', async () => {
+      mockPackage('apache');
+
+      const response = await packagePolicyService.getUpgradePackagePolicyInfo(
+        savedObjectsClient,
+        'package-policy-id'
+      );
+
+      expect(response).toBeDefined();
+    });
+
+    it('should return error if package policy newer than package version', async () => {
+      mockPackage('aws');
+
+      expect(
+        packagePolicyService.getUpgradePackagePolicyInfo(savedObjectsClient, 'package-policy-id')
+      ).rejects.toEqual(
+        new PackagePolicyIneligibleForUpgradeError(
+          "Package policy c6d16e42-c32d-4dce-8a88-113cfe276ad1's package version 0.9.0 of package aws is newer than the installed package version. Please install the latest version of aws."
+        )
+      );
+    });
+
+    it('should return error if package not installed', async () => {
+      mockPackage('notinstalled');
+
+      expect(
+        packagePolicyService.getUpgradePackagePolicyInfo(savedObjectsClient, 'package-policy-id')
+      ).rejects.toEqual(new IngestManagerError('Package notinstalled is not installed'));
     });
   });
 });

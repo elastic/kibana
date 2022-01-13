@@ -104,7 +104,7 @@ export const updateRules = async ({
   if (existingRule.enabled && enabled === false) {
     await rulesClient.disable({ id: existingRule.id });
   } else if (!existingRule.enabled && enabled === true) {
-    await enableRule({ rule: existingRule, rulesClient, ruleStatusClient, spaceId });
+    await enableRule({ rule: existingRule, rulesClient });
   }
   return { ...update, enabled };
 };

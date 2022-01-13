@@ -1,0 +1,14 @@
+{
+  "transform.upgrade_transforms": {
+    "url_params": {
+      "dry_run": "__flag__"
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_transform/_upgrade"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/upgrade-transforms.html"
+  }
+}

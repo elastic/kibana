@@ -13,6 +13,9 @@ Review important information about the {kib} 7.16.x releases.
 // Best practices:
 // * When there are changes to kibana.yml settings, include the links to the new settings.
 
+* <<release-notes-7.16.3>>
+* <<release-notes-7.16.2>>
+* <<release-notes-7.16.1>>
 * <<release-notes-7.16.0>>
 //* <<release-notes-7.15.2>>
 //* <<release-notes-7.15.1>>
@@ -67,10 +70,560 @@ Review important information about the {kib} 7.16.x releases.
 
 --
 
+[[release-notes-7.16.3]]
+== {kib} 7.16.3
+
+Review the following information about the 7.16.3 release.
+
+[float]
+[[breaking-changes-v7.16.3]]
+=== Breaking changes
+Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.16.2, review the <<breaking-changes-7.16.0,7.16.0 breaking changes>>.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[fixes-v7.16.3]]
+=== Bug fix
+
+The 7.16.3 release includes the following bug fix.
+
+Security::
+Fixes P12 parsing for certificates with "Basic constraints" {kibana-pull}122056[#122056]
+
+[[release-notes-7.16.2]]
+== {kib} 7.16.2
+
+Review the following information about the 7.16.2 release.
+
+[float]
+[[breaking-changes-v7.16.2]]
+=== Breaking changes
+Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.16.2, review the <<breaking-changes-7.16.0,7.16.0 breaking changes>>.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[fixes-v7.16.2]]
+=== Bug Fixes
+
+The 7.16.2 release includes the following bug fixes.
+
+Fleet::
+* Omits `elasticsearch` field for policy update API (partial backport of {kibana-pull}121412[#121412])
+Lens & Visualizations::
+* Fixes the broken chart when an agg is placed in another axis and then is hidden {kibana-pull}121488[#121488]
+Metrics::
+* Adds migrations for saved object references {kibana-pull}121214[#121214]
+
+[[release-notes-7.16.1]]
+== {kib} 7.16.1
+
+Review the following information about the 7.16.1 release.
+
+[float]
+[[breaking-changes-v7.16.1]]
+=== Breaking changes
+Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.16.1, review the <<breaking-changes-7.16.0,7.16.0 breaking changes>>.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+[float]
+[[fixes-v7.16.1]]
+=== Bug Fixes
+
+The 7.16.1 release includes the following bug fixes.
+
+Dashboard::
+Fixes invalid filter blank screen {kibana-pull}120530[#120530]
+Discover::
+* Fixes CSV report for filtered *Discover* results on dashboards {kibana-pull}119583[#119583]
+* Fixes timefield sorting when switching similar index patterns {kibana-pull}116145[#116145]
+Elastic Security::
+For the Elastic Security 7.16.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+Fixes bug with duplicate Fleet Server inputs in Cloud deployments {kibana-pull}119925[#119925]
+Lens & Visualizations::
+* Fixes time shift metric lookup {kibana-pull}119774[#119774]
+* Enables normal mode for percentage charts {kibana-pull}119582[#119582]
+* Defaults the point size to 1 and corrects the vislib migrations {kibana-pull}118994[#118994]
+* Adds `rtl` label support to Elastic Charts {kibana-pull}118606[#118606]
+Logs::
+Respect the Advanced Settings for queries {kibana-pull}116485[#116485]
+Machine Learning::
+* Ensures validation call is successful in outlier detection wizard {kibana-pull}120816[#120816]
+* Fixes time range charts in anomaly detection job selection  {kibana-pull}120343[#120343]
+Management::
+* Restore support for exclusion in index pattern {kibana-pull}120703[#120703]
+* Fixes the *Fix* button for ML snapshots in need of upgrade {kibana-pull}119745[#119745]
+* Fixes the Painless script editor scrolling experience {kibana-pull}119577[#119577]
+* Adds support for the Mapper Size Plugin `_size` parameter in the index template mappings {kibana-pull}119365[#119365]
+Metrics::
+Handle invalid KQL in filterQuery {kibana-pull}119557[#119557]
+Monitoring::
+Separate out mb and legacy index patterns from requests {kibana-pull}120841[#120841]
+Osquery::
+Fixes Pack uploader and *View in Lens* link {kibana-pull}120845[#120845]
+Platform::
+* Fixes expressions performance regression {kibana-pull}117714[#117714]
+* Fixes an issue where banners were unintentionally appearing in reports {kibana-pull}116147[#116147]
+Reporting::
+Improves the performance when generating a large CSV export {kibana-pull}120365[#120365] and {kibana-pull}120309[#120309]
+Security::
+Fixes an issue where {kib} crashed when no authentication providers were enabled {kibana-pull}118784[#118784]
+
 [[release-notes-7.16.0]]
 == {kib} 7.16.0
 
-coming::[7.16.0]
+For information about the {kib} 7.16.0 release, review the following information.
+
+[float]
+[[breaking-changes-7.16.0]]
+=== Breaking changes
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade to 7.16.0, review the breaking changes, then mitigate the impact to your application.
+
+To review the breaking changes in previous versions, refer to the following: 
+
+{kibana-ref-all}/7.15/release-notes-7.15.0.html#breaking-changes-7.15.0[7.15] | {kibana-ref-all}/7.14/release-notes-7.14.0.html#breaking-changes-7.14.0[7.14] | {kibana-ref-all}/7.13/release-notes-7.13.0.html#breaking-changes-7.13.0[7.13] | 
+{kibana-ref-all}/7.12/release-notes-7.12.0.html#breaking-changes-7.12.0[7.12] | {kibana-ref-all}/7.11/breaking-changes-7.11.html[7.11] | 
+{kibana-ref-all}/7.10/breaking-changes-7.10.html[7.10] | {kibana-ref-all}/7.9/breaking-changes-7.9.html[7.9] | {kibana-ref-all}/7.8/breaking-changes-7.8.html[7.8] | 
+{kibana-ref-all}/7.7/breaking-changes-7.7.html[7.7] | {kibana-ref-all}/7.6/breaking-changes-7.6.html[7.6] | {kibana-ref-all}/7.5/breaking-changes-7.5.html[7.5] |
+{kibana-ref-all}/7.4/breaking-changes-7.4.html[7.4] | {kibana-ref-all}/7.3/breaking-changes-7.3.html[7.3] | {kibana-ref-all}/7.2/breaking-changes-7.2.html[7.2] | 
+{kibana-ref-all}/7.1/breaking-changes-7.1.html[7.1] | {kibana-ref-all}/7.0/breaking-changes-7.0.html[7.0]
+
+// tag::notable-breaking-changes[]
+      
+[discrete]
+[[breaking-112523]]
+.Updates browser support
+[%collapsible]
+====
+*Details* +
+Google Chrome, Microsoft Edge, Mozilla Firefox, and ApplemSafari browser support has been updated. For more information, refer to {kibana-pull}112523[#112523].
+
+*Impact* +
+Use the following supported browsers:
+
+* Chrome 92
+* Edge 92
+* Firefox 91.0
+* Safari 14.1
+====
+      
+[discrete]
+[[breaking-111339]]
+.Removes legacy data table
+[%collapsible]
+====
+*Details* +
+The legacy aggregation-based data table and `vis_type_table.legacyVisEnabled` setting are no longer supported. For more information, refer to {kibana-pull}111339[#111339].
+
+*Impact* +
+To auto-fit the table row height, create an {kibana-ref}/add-aggregation-based-visualization-panels.html#create-aggregation-based-panel[aggregation-based data table], click *Options*, then select *Auto fit rows to content*.
+====
+      
+[discrete]
+[[breaking-110786]]
+.Removes the legacy area, bar, and line charts library
+[%collapsible]
+====
+*Details* +
+The legacy aggregation-based area, bar, and line charts are no longer supported. For more information, refer to {kibana-pull}110786[#110786].
+
+*Impact* +
+When you upgrade to 7.16.0, you are only able to create area, bar, and line charts using the new implementation.
+====
+      
+[discrete]
+[[breaking-110255]]
+.Removes the Timelion app
+[%collapsible]
+====
+*Details* +
+The Timelion app is no longer supported. For more information, refer to {kibana-pull}110255[#110255]
+
+*Impact* +
+When you upgrade to 7.16.0, you are unable to use the *Timelion* app. The {kibana-ref}/timelion.html[*Timelion*] visualization editor is still supported. 
+====
+
+[discrete]
+[[breaking-107345]]
+.Replaces Osquery scheduled query groups with packs
+[%collapsible]
+====
+*Details* +
+Queries are now scheduled using packs. For more information, refer to {kibana-pull}107345[#107345].
+
+*Impact* +
+When you upgrade to 7.16.0, any existing scheduled query groups are converted to packs. 
+Queries in the updated packs are scheduled for the same agent policy as the original 
+scheduled query group. Action IDs for scheduled queries in a pack have the 
+format `pack_<pack_name>_<query ID>`. 
+====
+      
+// end::notable-breaking-changes[]
+
+[float]
+[[deprecations-7.16.0]]
+=== Deprecations
+
+The following functionality is deprecated in 7.16.0, and will be removed in 8.0.0.
+Deprecated functionality does not have an immediate impact on your application, but we strongly recommend
+you make the necessary updates after you upgrade to 7.16.0.
+
+For the Elastic Security 7.16.0 deprecations, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[discrete]
+[[deprecation-118363]]
+.Adds levels to rule registry deprecations
+[%collapsible]
+====
+*Details* +
+Levels are now explicitly in deprecation configurations. For more information, refer to {kibana-pull}118363[#118363].
+
+*Impact* +
+Levels for deprecations are explicitly set.
+====
+      
+[discrete]
+[[deprecation-114578]]
+.Deprecates `search:includeFrozen`
+[%collapsible]
+====
+*Details* +
+The <<search-includefrozen,`search:includeFrozen`>> advanced setting is deprecated and will be removed in 9.0.0. For more information, refer to {kibana-pull}114578[#114578].
+
+*Impact* +
+In 7.16.0, there is no impact.
+====
+      
+[discrete]
+[[deprecation-114381]]
+.Sets `ignore_throttled` when `search:includeFrozen` is `true`
+[%collapsible]
+====
+*Details* +
+When the <<search-includefrozen,`search:includeFrozen`>> advanced setting is set to `true`, `ignore_throttled` is conditionally configured. For more information, refer to {kibana-pull}114381[#114381].
+
+*Impact* +
+When you open *Upgrade Assistant*, then click *View deprecation logs in Observability*, `ignore_throttled` deprecation logs appear.
+====
+      
+[discrete]
+[[deprecation-114019]]
+.Deprecates `xpack.reporting.capture.viewport`
+[%collapsible]
+====
+*Details* +
+The `xpack.reporting.capture.viewport` settings are deprecated and will be removed in 8.0.0. For more information, refer to {kibana-pull}114019[#114019].
+
+*Impact* +
+When you upgrade to 8.0.0, you are unable to use the `xpack.reporting.capture.viewport` settings.
+====
+      
+[discrete]
+[[deprecation-113364]]
+.Removes the `apm_oss plugin` and deprecates related settings
+[%collapsible]
+====
+*Details* +
+The `apm_oss` plugin has been removed as a dependency of the `apm` plugin, and the `apm_oss` settings have been deprecated and moved to the `xpack.apm.indices*` configuration path. For more information, refer to {kibana-pull}113364[#113364].
+
+*Impact* +
+Update the following settings:
+
+* `apm_oss.errorIndices` is deprecated. Use `xpack.apm.indices.error`.
+* `apm_oss.metricsIndices` is deprecated. Use `xpack.apm.indices.metric`.
+* `apm_oss.onboardingIndices` is deprecated. Use `xpack.apm.indices.onboarding`.
+* `apm_oss.sourcemapIndices` is deprecated. Use `xpack.apm.indices.sourcemap`.
+* `apm_oss.spanIndices` is deprecated. Use `xpack.apm.indices.span`.
+* `apm_oss.transactionIndices` is deprecated. Use `xpack.apm.indices.transaction`.
+====
+      
+[discrete]
+[[deprecation-113555]]
+.Deprecates `proxyFilter` and `proxyConfig`
+[%collapsible]
+====
+*Details* +
+The `proxyFilter` and `proxyConfig` settings are deprecated and will be removed in 8.0.0. For more information, refer to {kibana-pull}113555[#113555].
+
+*Impact* +
+Before you upgrade to 8.0.0, remove `console.proxyFilter` from kibana.yml, CLI flag, or Docker environment variable, then use the `server.ssl.*` and <<elasticsearch-ssl-keyPassphrase,>>`elasticsearch.ssl.keyPassphrase`>> settings.
+====
+
+[discrete]
+[[deprecation-111550]]
+.Deprecates `KIBANA_PATH_CONF`
+[%collapsible]
+====
+*Details* +
+The `KIBANA_PATH_CONF` environment variable is deprecated and will be removed in 8.0.0. For more information, refer to {kibana-pull}111550[#111550].
+
+*Impact* +
+Use <<settings,`KBN_PATH_CONF`>>.
+====
+      
+[float]
+[[features-7.16.0]]
+=== Features
+{kib} 7.16.0 adds the following new and notable features.
+
+APM::
+* Adds chart for failed transaction correlations {kibana-pull}110172[#110172]
+* Correlations chart enhancements {kibana-pull}113039[#113039]
+Canvas::
+* Adds Tag Cloud support {kibana-pull}106858[#106858]
+Elastic Security::
+For the Elastic Security 7.16.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Lens & Visualizations::
+* Adds reference lines to *Lens* {kibana-pull}108342[#108342]
+* Support custom field format in *TSVB* {kibana-pull}101245[#101245]
+Observability::
+* Adds "Add to case" button {kibana-pull}112463[#112463]
+Machine Learning::
+* Adds the ability to change data view in advanced job wizard {kibana-pull}115191[#115191]
+* Adds KQL filter bar, filtering functionality, and compact design to Index data visualizer {kibana-pull}112870[#112870]
+Management::
+* Adds alerting rules management to Transform UI {kibana-pull}115363[#115363]
+* Transforms health alerting rule type {kibana-pull}112277[#112277]
+* Allow fields that start with an underscore in the field list {kibana-pull}111238[#111238]
+Platform::
+* Inspect flyout should be available in editor mode {kibana-pull}109656[#109656]
+Sharing::
+* Short URL service now supports human readable slugs for short URLs {kibana-pull}107859[#107859]
+
+For more information about the features introduced in 7.16.0, refer to <<whats-new,What's new in 7.16>>.
+
+[[enhancements-and-bug-fixes-v7.16.0]]
+=== Enhancements and bug fixes
+
+For detailed information about the 7.16.0 release, review the enhancements and bug fixes.
+
+[float]
+[[enhancement-v7.16.0]]
+=== Enhancements
+Alerting::
+* The Alerting event log indices, named `kibana-event-log-*`, are set to hidden indices via the `index.hidden: true` index setting {kibana-pull}117470[#117470]
+* Removes TLS requirement for alerting when security is enabled {kibana-pull}115234[#115234]
+* Shows execution duration on Rule Details view {kibana-pull}114719[#114719]
+* Shows last execution duration on Rule Management view {kibana-pull}113935[#113935]
+* Allow rule types to specify a default and minimum interval {kibana-pull}113650[#113650]
+APM::
+* Adds advanced mode toggle for the APM failed transactions table {kibana-pull}114363[#114363]
+* Adds context popover for APM latency correlations & failed transactions correlations {kibana-pull}113679[#113679]
+* Adds chart for failed transactions correlations tab {kibana-pull}110172[#110172]
+* Correlations chart enhancements {kibana-pull}113039[#113039]
+Canvas::
+* Adds Tag Cloud support {kibana-pull}106858[#106858]
+Dashboard::
+* Dashboard PDF and PNG reports can now be generated without requiring users to first save {kibana-pull}108553[#108553]
+Discover::
+* Remember most recent "hide chart" setting {kibana-pull}114534[#114534]
+* Adds "Chart options" menu {kibana-pull}112453[#112453]
+* Adds "Open in Discover" to dashboard panels {kibana-pull}112396[#112396]
+Elastic Security::
+For the Elastic Security 7.16.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Adds prompt for users to add an agent if they add an integration to an agent policy with no agents {kibana-pull}114830[#114830]
+* Allow users with read access to view Integrations app {kibana-pull}113925[#113925]
+* Removes enterprise license requirement for custom registry URL {kibana-pull}113858[#113858]
+* Adds "Keep Policies up to Date" functionality for integrations {kibana-pull}112702[#112702]
+* Allow packages to specify index privileges {kibana-pull}112397[#112397]
+* Allow Integrations browse page to filter on descriptions {kibana-pull}111649[#111649]
+* Support automatic upgrades of Package Policies when updating Integrations {kibana-pull}108269[#108269]
+Kibana Home & Add Data::
+* Adds “Add data” button to Global Nav Drawer {kibana-pull}113648[#113648]
+Lens & Visualizations::
+* Relax break down group validation for percentage charts in *Lens* {kibana-pull}114803[#114803]
+* Adds rowHeightsOptions to table {kibana-pull}114637[#114637]
+* Respect external URL allow list in TSVB {kibana-pull}114093[#114093]
+* Respect external URL allow list in vega {kibana-pull}113720[#113720]
+* Enables filter bar in *TSVB* {kibana-pull}109223[#109223]
+* Support custom field format in *TSVB* {kibana-pull}101245[#101245]
+Machine Learning::
+* Adds ability to change data view in advanced job wizard {kibana-pull}115191[#115191]
+* Adds KQL filter bar, filtering functionality, and compact design to Index data visualizer {kibana-pull}112870[#112870]
+* Job sync usability improvements {kibana-pull}112693[#112693]
+* Auto-scalable ML node integrations improvements {kibana-pull}112264[#112264]
+* Datafeed preview based job validation check {kibana-pull}109080[#109080]
+Management::
+* Adds alerting rules management to Transform UI {kibana-pull}115363[#115363]
+* Upgrade Assistant now displays the progress of your reindexing tasks {kibana-pull}114275[#114275]
+* Transforms health alerting rule type {kibana-pull}112277[#112277]
+* Allow fields that start with an underscore in the field list {kibana-pull}111238[#111238]
+* In Snapshot & Restore, the performance of snapshots list is improved to handle a large number of snapshots {kibana-pull}110266[#110266]
+* Open in dev tools button for request inspector {kibana-pull}109923[#109923]
+* Use date field dropdown for edit transform retention policy setting {kibana-pull}108804[#108804]
+* Adds tooltip help text for Transform filter query control {kibana-pull}108720[#108720]
+Maps::
+* Adds support for UTM and MGRS coordinates in Maps "Go To" button {kibana-pull}107835[#107835]
+Observability::
+* Adds APM-Fleet integration version check and upgrade message {kibana-pull}115297[#115297]
+* Adds comparison to the error occurrences histogram and "failed transaction rate" to the chart panels {kibana-pull}115194[#115194]
+* Revert multi-metric ML job {kibana-pull}114961[#114961]
+* Adds the ability to select any service name, transaction type, and environment when creating and editing rules, both in APM and Stack Management. {kibana-pull}111883[#111883]
+* Show new "no data screen" on the getting started page {kibana-pull}111803[#111803]
+* Consistent "no data" screen with other Observability solutions {kibana-pull}111630[#111630]
+* Set start date of APM ML job to -4 weeks {kibana-pull}111375[#111375]
+* Deprecate `apm_oss.indexPattern` config option {kibana-pull}111133[#111133]
+* Show badge for failed spans in waterfall {kibana-pull}109812[#109812]
+* Show hostname in JVM view {kibana-pull}109651[#109651]
+* Enable the observability alerting and cases features {kibana-pull}115785[#115785]
+* Adds separate setting for Alert If Group Disappears for metric threshold rules {kibana-pull}113032[#113032]
+* Adds warning about redundant groupBy on metric threshold {kibana-pull}111891[#111891]
+* Adds KQL filter bar to alerts {kibana-pull}111663[#111663]
+* Adds Inventory Timeline open/close state to context and URL state {kibana-pull}111034[#111034]
+* Adds references for saved views in source configuration {kibana-pull}110556[#110556]
+* Browser - add script recorder option {kibana-pull}115184[#115184]
+* Adds uptime query inspector panel {kibana-pull}115170[#115170]
+* Clean up empty states, tutorial links and routing to prefer unified integrations {kibana-pull}114911[#114911]
+* Make uptime settings saved object exportable {kibana-pull}114235[#114235]
+* Adds percentile ranks, show legend always, and fix field labels {kibana-pull}113765[#113765]
+* Adds exploratory view multi series {kibana-pull}113464[#113464]
+* Adds TLS options for browser monitors when zip url is selected {kibana-pull}112554[#112554]
+* Adds "Add to case" button {kibana-pull}112463[#112463]
+* Adds new advanced options {kibana-pull}112454[#112454]
+* Make all error messages on tables consistence {kibana-pull}111690[#111690]
+* Redirect to error page when Heartbeat mappings are missing {kibana-pull}110857[#110857]
+* New "No Data" screens {kibana-pull}107709[#107709]
+* For filters, use shared component {kibana-pull}105739[#105739]
+* Annotate waterfall chart with additional metrics {kibana-pull}103642[#103642]
+Operations::
+* Development and build support for ARM based Apple devices {kibana-pull}114879[#114879]
+Platform::
+* The `/api/status` endpoint will now only respond with a `503` status code if any Kibana core service is unavailable {kibana-pull}113729[#113729]
+* Integration tests for unsupported product 404 responses {kibana-pull}109755[#109755]
+* Inspect flyout should be available in editor mode {kibana-pull}109656[#109656]
+Reporting::
+* You can now generate a PDF or PNG report of an unsaved visualization {kibana-pull}110206[#110206]
+Sharing::
+* Short URL service was updated to support short URL creation from locators {kibana-pull}107859[#107859]
+
+[float]
+[[fixes-v7.16.0]]
+=== Bug Fixes
+Canvas::
+* Fixes Advanced settings in Datasource recreate on any change {kibana-pull}111840[#111840]
+* Fixes Storybook for DatasourceComponent is crashing {kibana-pull}110180[#110180]
+Dashboard::
+* Adds *Timelion* panel without asking for the index pattern {kibana-pull}113896[#113896]
+* Fixes duplicating tags {kibana-pull}119079[#119079]
+Discover::
+* Shows ignored field values {kibana-pull}115040[#115040]
+* Fixes search highlighting of expanded document {kibana-pull}114884[#114884]
+* Fixes wrong timepicker range when brushing {kibana-pull}111989[#111989]
+* Hides multifields from doc table {kibana-pull}109242[#109242]
+Elastic Security::
+For the Elastic Security 7.16.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Link to the installed version of an integration from global search {kibana-pull}115736[#115736]
+* Fixes agent count in update modal {kibana-pull}114622[#114622]
+* Shows security requirements page when ES security is not enabled {kibana-pull}114583[#114583]
+* Improves default settings for Fleet component templates {kibana-pull}114101[#114101]
+* Report `installing` status while package install is in progress {kibana-pull}111875[#111875]
+Lens & Visualizations::
+* Do not show legend actions popup when in non-interactive mode in *Lens* {kibana-pull}115804[#115804]
+* Fixes the scale type on a terms aggregation on a number field {kibana-pull}115729[#115729]
+* Fixes the formatting on multiple axis {kibana-pull}115552[#115552]
+* Fixes the long text problem that appears behind the gauge chart in *TSVB* {kibana-pull}115516[#115516]
+* Fixes cursor type for topN charts with drilldowns in *TSVB* {kibana-pull}115333[#115333]
+* Chart with override index pattern and last_value are migrated with entire_time_range from 7.13+ in *TSVB* {kibana-pull}115041[#115041]
+* Fixes editor blowing up when working on non-exisiting data view in *Lens* {kibana-pull}114816[#114816]
+* Formula: better messages for unsupported field types in *Lens* {kibana-pull}114528[#114528]
+* Improves error message in case of invalid $schema URL in *Vega* {kibana-pull}114459[#114459]
+* [Inspector] Close the inspector on Lens unmount in *Lens* {kibana-pull}114317[#114317]
+* Keep the custom label when transitioning to/from Formula in *Lens* {kibana-pull}114270[#114270]
+* Fixes filters not being cleaned when navigating to another visualisation in *Lens* {kibana-pull}114137[#114137]
+* Fixes chart not updating with refresh button in *Lens* {kibana-pull}114135[#114135]
+* Fixes Metric visualization scale in *Lens* {kibana-pull}113956[#113956]
+* Error on refreshing an unsaved visualization created from a saved search in *Visualize* {kibana-pull}113938[#113938]
+* Fixes problem with one chart plotted for multiple y axis when migrating from an old SO {kibana-pull}112972[#112972]
+* Better error details on expression evaluation in *Timelion* {kibana-pull}112663[#112663]
+* Adds support of triple quotes {kibana-pull}112656[#112656]
+* Fixes bug with nested terms, one with other bucket and the other disabled {kibana-pull}112636[#112636]
+* Better error explanation for EsErrors and inspector now showing error responses in *Vega* {kibana-pull}112634[#112634]
+* Fixes the brushing of the last bucket for timeseries visualizations in *TSVB* {kibana-pull}112068[#112068]
+* Removes trailing semicolor and scrollbar for empty pie chart visualization in *Lens* {kibana-pull}111971[#111971]
+* Loads the no results screen if all slices have zero value {kibana-pull}111931[#111931]
+* Reverse colors should not reverse palette picker previews in *Lens* {kibana-pull}110455[#110455]
+* Shows validation feedback on top values out of bounds number of values in *Lens* {kibana-pull}110222[#110222]
+* *TSVB* metrics that have legend (percentiles and percentile ranks) don't resize the text size properly {kibana-pull}109483[#109483]
+* Split chart and alphabetical descending order doesn't work as expected {kibana-pull}108858[#108858]
+* Doesn't work correctly with pipeline aggregations in "entire time range" mode in *TSVB* {kibana-pull}105073[#105073]
+Machine Learning::
+* Data Frame Analytics wizard: retain query language when switching steps {kibana-pull}116227[#116227]
+* Fixes errors from annotations searches when event mapping is incorrect {kibana-pull}116101[#116101]
+* Fixes index data visualizer not available when no ML nodes available {kibana-pull}115972[#115972]
+* Data Frame Analytics: Fix legend text colors for Vega based charts in dark mode {kibana-pull}115911[#115911]
+* Deletes annotation directly from the index it is stored in {kibana-pull}115328[#115328]
+* Fixes deletion of models that are not used by pipelines {kibana-pull}114107[#114107]
+Management::
+* Space privilege "Index pattern management" read still shows delete button {kibana-pull}115390[#115390]
+* Pass `compress` flag in query instead of headers {kibana-pull}113929[#113929]
+* Fixes url formatter editor "Open in new tab" is hidden by default {kibana-pull}113141[#113141]
+* The mappings editor in Index Management now supports defining a multi-field for the IP field type {kibana-pull}112477[#112477]
+Maps::
+* Fixes locked tooltip issues {kibana-pull}115583[#115583]
+* Fixes choropleth map with applyGlobalQuery set to false still creates filter for source {kibana-pull}108999[#108999]
+* Adds force-refresh toggle {kibana-pull}104691[#104691]
+Monitoring::
+* Fixes blank page between loading page and overview {kibana-pull}114550[#114550]
+* Fixes shard size alerts {kibana-pull}114357[#114357]
+* Adds initial react app {kibana-pull}109218[#109218]
+Observability::
+* Adds missing legacy key for apm-server.secret_token {kibana-pull}116554[#116554]
+* Alerts chart preview wrong timezone {kibana-pull}116014[#116014]
+* Default time range overrides fetched range for link-to/trace URLs without range parameters {kibana-pull}115449[#115449]
+* Update dependencies overview route to use backendName as a query param {kibana-pull}115226[#115226]
+* Waterfall layout and expansion fixes {kibana-pull}114889[#114889]
+* Update namespace for indices {kibana-pull}114612[#114612]
+* Adds all APM configuration settings to the documentation {kibana-pull}114139[#114139]
+* Fixes GC time calculation {kibana-pull}113992[#113992]
+* Update title and description on APM tutorial in cloud hosted deployments {kibana-pull}113438[#113438]
+* Removes dot from legend on the error marker {kibana-pull}113437[#113437]
+* Display all properties by default in flyout {kibana-pull}113221[#113221]
+* Fixes loading message missing or inconsistent in various list views {kibana-pull}110772[#110772]
+* Clear threshold alert groups state when filterQuery changes {kibana-pull}116205[#116205]
+* Ensure Kubernetes Pod CPU & Memory Usage is consistent across pages {kibana-pull}116177[#116177]
+* Synthetics step fix browser console indexing error {kibana-pull}115897[#115897]
+* Adjust the theme colors for uptime monitors browser screenshot labels {kibana-pull}115543[#115543]
+* Removes rate aggregations {kibana-pull}114187[#114187]
+* Fixes copy typo {kibana-pull}111203[#111203]
+* Improves log threshold rule field selection {kibana-pull}111135[#111135]
+Platform::
+* Reverting to legacy ES client behavior where maxSockets = Infinity {kibana-pull}113644[#113644]
+* Fixes Error 500 on the workpad update {kibana-pull}111683[#111683]
+* Adds references extract/inject for Workpads {kibana-pull}109874[#109874]
+Querying & Filtering::
+* Saved query saved objects now properly reference index pattern saved objects, so they can be exported/imported properly {kibana-pull}111213[#111213]
+Reporting::
+* Revisit handling timeouts for different phases of screenshot capture {kibana-pull}113807[#113807]
+Security::
+* Adds custom error message when receiving 401 response to avoid confusion with Kibana session timeout {kibana-pull}113460[#113460]
 
 /////
 [[release-notes-7.15.2]]

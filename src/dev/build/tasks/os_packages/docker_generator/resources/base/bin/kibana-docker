@@ -279,6 +279,7 @@ kibana_vars=(
     xpack.fleet.agents.tlsCheckDisabled
     xpack.fleet.enabled
     xpack.fleet.packages
+    xpack.fleet.registryProxyUrl
     xpack.fleet.registryUrl
     xpack.graph.canEditDrillDownUrls
     xpack.graph.enabled

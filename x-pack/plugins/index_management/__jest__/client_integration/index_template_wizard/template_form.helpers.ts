@@ -339,4 +339,6 @@ export type TestSubjects =
   | 'versionField'
   | 'aliasesEditor'
   | 'settingsEditor'
-  | 'versionField.input';
+  | 'versionField.input'
+  | 'mappingsEditor.formTab'
+  | 'mappingsEditor.advancedConfiguration.sizeEnabledToggle';

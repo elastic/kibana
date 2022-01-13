@@ -227,7 +227,7 @@ describe('take action dropdown', () => {
       });
     });
 
-    test('should disable the "Add Endpoint event filter" button if provided non-event or non-endpoint', async () => {
+    test('should hide the "Add Endpoint event filter" button if provided no event from endpoint', async () => {
       wrapper = mount(
         <TestProviders>
           <TakeActionDropdown
@@ -239,9 +239,7 @@ describe('take action dropdown', () => {
       );
       wrapper.find('button[data-test-subj="take-action-dropdown-btn"]').simulate('click');
       await waitFor(() => {
-        expect(
-          wrapper.find('[data-test-subj="add-event-filter-menu-item"]').first().getDOMNode()
-        ).toBeDisabled();
+        expect(wrapper.exists('[data-test-subj="add-event-filter-menu-item"]')).toBeFalsy();
       });
     });
   });

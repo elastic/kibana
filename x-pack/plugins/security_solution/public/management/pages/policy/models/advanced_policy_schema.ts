@@ -790,4 +790,34 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'linux.advanced.artifacts.user.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.artifacts.user.ca_cert',
+      {
+        defaultMessage: 'PEM-encoded certificate for Fleet Server certificate authority.',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.artifacts.user.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.artifacts.user.ca_cert',
+      {
+        defaultMessage: 'PEM-encoded certificate for Fleet Server certificate authority.',
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.artifacts.user.ca_cert',
+    first_supported_version: '7.9',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.artifacts.user.ca_cert',
+      {
+        defaultMessage: 'PEM-encoded certificate for Fleet Server certificate authority.',
+      }
+    ),
+  },
 ];

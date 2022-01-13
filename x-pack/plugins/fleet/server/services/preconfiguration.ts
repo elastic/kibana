@@ -406,6 +406,7 @@ async function addPreconfiguredPolicyPackages(
   agentPolicy: AgentPolicy,
   installedPackagePolicies: Array<
     Partial<Omit<NewPackagePolicy, 'inputs'>> & {
+      id?: string | number;
       name: string;
       installedPackage: Installation;
       inputs?: InputsOverride[];
@@ -414,7 +415,7 @@ async function addPreconfiguredPolicyPackages(
   defaultOutput: Output
 ) {
   // Add packages synchronously to avoid overwriting
-  for (const { installedPackage, name, description, inputs } of installedPackagePolicies) {
+  for (const { installedPackage, id, name, description, inputs } of installedPackagePolicies) {
     const packageInfo = await getPackageInfo({
       savedObjectsClient: soClient,
       pkgName: installedPackage.name,
@@ -428,6 +429,7 @@ async function addPreconfiguredPolicyPackages(
       agentPolicy,
       defaultOutput,
       name,
+      id,
       description,
       (policy) => preconfigurePackageInputs(policy, packageInfo, inputs)
     );

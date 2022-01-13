@@ -470,7 +470,22 @@ export const AlertsList: React.FunctionComponent = () => {
     },
     {
       field: 'executionStatus.lastExecutionDate',
-      name: 'Last run',
+      name: (
+        <EuiToolTip
+          data-test-subj="alertsTableCell-lastExecutionDateTooltip"
+          content={i18n.translate(
+            'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.lastExecutionDateTitle',
+            {
+              defaultMessage: 'Start time of the last execution.',
+            }
+          )}
+        >
+          <span>
+            Last run{' '}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
       sortable: true,
       width: '15%',
       'data-test-subj': 'alertsTableCell-lastExecutionDate',
@@ -510,6 +525,7 @@ export const AlertsList: React.FunctionComponent = () => {
       width: '12%',
       name: (
         <EuiToolTip
+          data-test-subj="alertsTableCell-durationTooltip"
           content={i18n.translate(
             'xpack.triggersActionsUI.sections.alertsList.alertsListTable.columns.durationTitle',
             {

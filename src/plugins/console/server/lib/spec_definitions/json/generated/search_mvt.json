@@ -1,0 +1,24 @@
+{
+  "search_mvt": {
+    "url_params": {
+      "exact_bounds": "__flag__",
+      "extent": 0,
+      "grid_precision": 0,
+      "grid_type": [
+        "grid",
+        "point",
+        "centroid"
+      ],
+      "size": 0,
+      "track_total_hits": ""
+    },
+    "methods": [
+      "POST",
+      "GET"
+    ],
+    "patterns": [
+      "{indices}/_mvt/{field}/{zoom}/{x}/{y}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-vector-tile-api.html"
+  }
+}

@@ -25,6 +25,7 @@ export interface PreconfiguredAgentPolicy extends Omit<NewAgentPolicy, 'namespac
   namespace?: string;
   package_policies: Array<
     Partial<Omit<NewPackagePolicy, 'inputs' | 'package'>> & {
+      id?: string | number;
       name: string;
       package: Partial<PackagePolicyPackage> & { name: string };
       inputs?: InputsOverride[];

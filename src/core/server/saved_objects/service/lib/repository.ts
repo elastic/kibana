@@ -297,7 +297,6 @@ export class SavedObjectsRepository {
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObject<T>> {
     const {
-      id = SavedObjectsUtils.generateId(),
       migrationVersion,
       overwrite = false,
       references = [],
@@ -306,6 +305,7 @@ export class SavedObjectsRepository {
       initialNamespaces,
       version,
     } = options;
+    const id = options.id || SavedObjectsUtils.generateId();
     const namespace = normalizeNamespace(options.namespace);
 
     this.validateInitialNamespaces(type, initialNamespaces);
@@ -929,7 +929,7 @@ export class SavedObjectsRepository {
       index: pit ? undefined : this.getIndicesForTypes(allowedTypes),
       // If `searchAfter` is provided, we drop `from` as it will not be used for pagination.
       from: searchAfter ? undefined : perPage * (page - 1),
-      _source: includedFields(type, fields),
+      _source: includedFields(allowedTypes, fields),
       preference,
       rest_total_hits_as_int: true,
       size: perPage,
@@ -937,7 +937,7 @@ export class SavedObjectsRepository {
         size: perPage,
         seq_no_primary_term: true,
         from: perPage * (page - 1),
-        _source: includedFields(type, fields),
+        _source: includedFields(allowedTypes, fields),
         ...(aggsObject ? { aggs: aggsObject } : {}),
         ...getSearchDsl(this._mappings, this._registry, {
           search,
@@ -1247,6 +1247,9 @@ export class SavedObjectsRepository {
   ): Promise<SavedObjectsUpdateResponse<T>> {
     if (!this._allowedTypes.includes(type)) {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+    }
+    if (!id) {
+      throw SavedObjectsErrorHelpers.createBadRequestError('id cannot be empty'); // prevent potentially upserting a saved object with an empty ID
     }
 
     const { version, references, upsert, refresh = DEFAULT_REFRESH_SETTING } = options;
@@ -1777,6 +1780,10 @@ export class SavedObjectsRepository {
       initialize = false,
       upsertAttributes,
     } = options;
+
+    if (!id) {
+      throw SavedObjectsErrorHelpers.createBadRequestError('id cannot be empty'); // prevent potentially upserting a saved object with an empty ID
+    }
 
     const normalizedCounterFields = counterFields.map((counterField) => {
       /**

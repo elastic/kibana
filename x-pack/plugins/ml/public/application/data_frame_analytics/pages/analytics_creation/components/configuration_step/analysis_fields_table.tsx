@@ -85,6 +85,7 @@ const checkboxDisabledCheck = (item: FieldSelectionItem) =>
 export const AnalysisFieldsTable: FC<{
   dependentVariable?: string;
   includes: string[];
+  isJobTypeWithDepVar: boolean;
   setFormState: React.Dispatch<React.SetStateAction<any>>;
   minimumFieldsRequiredMessage?: string;
   setMinimumFieldsRequiredMessage: React.Dispatch<React.SetStateAction<any>>;
@@ -95,6 +96,7 @@ export const AnalysisFieldsTable: FC<{
   ({
     dependentVariable,
     includes,
+    isJobTypeWithDepVar,
     setFormState,
     minimumFieldsRequiredMessage,
     setMinimumFieldsRequiredMessage,
@@ -120,7 +122,7 @@ export const AnalysisFieldsTable: FC<{
       } else if (includes.length > 0) {
         setFormState({
           includes:
-            dependentVariable && includes.includes(dependentVariable)
+            (dependentVariable && includes.includes(dependentVariable)) || !isJobTypeWithDepVar
               ? includes
               : [...includes, dependentVariable],
         });
@@ -234,6 +236,7 @@ export const AnalysisFieldsTable: FC<{
               onTableChange={(selection: string[]) => {
                 // dependent variable must always be in includes
                 if (
+                  isJobTypeWithDepVar &&
                   dependentVariable !== undefined &&
                   dependentVariable !== '' &&
                   selection.length === 0

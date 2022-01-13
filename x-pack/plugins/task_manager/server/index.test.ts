@@ -61,7 +61,7 @@ describe('deprecations', () => {
     const { messages } = applyTaskManagerDeprecations({ enabled: true });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.task_manager.enabled\\" is deprecated. The ability to disable this plugin will be removed in 8.0.0.",
+        "This setting will be removed in 8.0 and the Task Manager plugin will always be enabled.",
       ]
     `);
   });

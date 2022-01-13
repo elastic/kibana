@@ -69,6 +69,18 @@ beforeEach(() => {
     valid: {
       archives: [createArchive({ license: 'oss' }), createArchive({ license: 'default' })],
     },
+    invalidArch: {
+      archives: [
+        createArchive({ license: 'oss', architecture: 'invalid_arch' }),
+        createArchive({ license: 'default', architecture: 'invalid_arch' }),
+      ],
+    },
+    differentVersion: {
+      archives: [
+        createArchive({ license: 'oss', version: 'another-version' }),
+        createArchive({ license: 'default', version: 'another-version' }),
+      ],
+    },
     multipleArch: {
       archives: [
         createArchive({ architecture: 'fake_arch', license: 'oss' }),
@@ -90,10 +102,10 @@ const artifactTest = (requestedLicense, expectedLicense, fetchTimesCalled = 1) =
         `${PERMANENT_SNAPSHOT_BASE_URL}/${MOCK_VERSION}/manifest.json`
       );
     }
-    expect(artifact.getUrl()).toEqual(MOCK_URL + `/${expectedLicense}`);
-    expect(artifact.getChecksumUrl()).toEqual(MOCK_URL + `/${expectedLicense}.sha512`);
-    expect(artifact.getChecksumType()).toEqual('sha512');
-    expect(artifact.getFilename()).toEqual(MOCK_FILENAME + `-${ARCHITECTURE}.${expectedLicense}`);
+    expect(artifact.spec.url).toEqual(MOCK_URL + `/${expectedLicense}`);
+    expect(artifact.spec.checksumUrl).toEqual(MOCK_URL + `/${expectedLicense}.sha512`);
+    expect(artifact.spec.checksumType).toEqual('sha512');
+    expect(artifact.spec.filename).toEqual(MOCK_FILENAME + `-${ARCHITECTURE}.${expectedLicense}`);
   };
 };
 
@@ -116,8 +128,14 @@ describe('Artifact', () => {
         artifactTest('INVALID_LICENSE', 'default')
       );
 
+      it('should return an artifact even if the version does not match', async () => {
+        mockFetch(MOCKS.differentVersion);
+        artifactTest('default', 'default');
+      });
+
       it('should throw when an artifact cannot be found in the manifest for the specified parameters', async () => {
-        await expect(Artifact.getSnapshot('default', 'INVALID_VERSION', log)).rejects.toThrow(
+        mockFetch(MOCKS.invalidArch);
+        await expect(Artifact.getSnapshot('default', MOCK_VERSION, log)).rejects.toThrow(
           "couldn't find an artifact"
         );
       });
@@ -144,8 +162,14 @@ describe('Artifact', () => {
         artifactTest('INVALID_LICENSE', 'default', 2)
       );
 
+      it('should return an artifact even if the version does not match', async () => {
+        mockFetch(MOCKS.differentVersion);
+        artifactTest('default', 'default', 2);
+      });
+
       it('should throw when an artifact cannot be found in the manifest for the specified parameters', async () => {
-        await expect(Artifact.getSnapshot('default', 'INVALID_VERSION', log)).rejects.toThrow(
+        mockFetch(MOCKS.invalidArch);
+        await expect(Artifact.getSnapshot('default', MOCK_VERSION, log)).rejects.toThrow(
           "couldn't find an artifact"
         );
       });
@@ -158,7 +182,7 @@ describe('Artifact', () => {
 
       it('should return artifact metadata for the correct architecture', async () => {
         const artifact = await Artifact.getSnapshot('oss', MOCK_VERSION, log);
-        expect(artifact.getFilename()).toEqual(MOCK_FILENAME + `-${ARCHITECTURE}.oss`);
+        expect(artifact.spec.filename).toEqual(MOCK_FILENAME + `-${ARCHITECTURE}.oss`);
       });
     });
 
@@ -182,7 +206,7 @@ describe('Artifact', () => {
 
     describe('with latest unverified snapshot', () => {
       beforeEach(() => {
-        process.env.KBN_ES_SNAPSHOT_USE_UNVERIFIED = 1;
+        process.env.KBN_ES_SNAPSHOT_USE_UNVERIFIED = '1';
         mockFetch(MOCKS.valid);
       });
 
