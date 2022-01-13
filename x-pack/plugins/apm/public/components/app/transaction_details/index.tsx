@@ -32,7 +32,8 @@ export function TransactionDetails() {
   } = query;
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const apmRouter = useApmRouter();
-  const { transactionType, fallbackToTransactions, runtimeName } = useApmServiceContext();
+  const { transactionType, fallbackToTransactions, runtimeName } =
+    useApmServiceContext();
 
   const history = useHistory();
 

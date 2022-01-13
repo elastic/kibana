@@ -57,7 +57,7 @@ export interface ServiceMetadataDetails {
     type?: string;
     functionName?: string;
     faasTriggerTypes?: string[];
-  }
+  };
   cloud?: {
     provider?: string;
     availabilityZones?: string[];
@@ -181,13 +181,14 @@ export async function getServiceMetadataDetails({
         }
       : undefined;
 
-  const serverlessDetails = (!!response.aggregations?.faasTriggerTypes?.buckets.length && cloud)
+  const serverlessDetails =
+    !!response.aggregations?.faasTriggerTypes?.buckets.length && cloud
       ? {
           type: cloud.service?.name,
           functionName: service.name,
           faasTriggerTypes: response.aggregations?.faasTriggerTypes.buckets.map(
-             (bucket) => bucket.key as string
-           ),
+            (bucket) => bucket.key as string
+          ),
         }
       : undefined;
 
@@ -197,8 +198,8 @@ export async function getServiceMetadataDetails({
         projectName: cloud.project?.name,
         serviceName: cloud.service?.name,
         availabilityZones: response.aggregations?.availabilityZones.buckets.map(
-           (bucket) => bucket.key as string
-         ),
+          (bucket) => bucket.key as string
+        ),
         regions: response.aggregations?.regions.buckets.map(
           (bucket) => bucket.key as string
         ),

@@ -9,7 +9,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { isRumAgentName, isIosAgentName, isServerlessAgent } from '../../../../common/agent_name';
+import {
+  isRumAgentName,
+  isIosAgentName,
+  isServerlessAgent,
+} from '../../../../common/agent_name';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
@@ -36,8 +40,13 @@ import { replace } from '../../shared/links/url_helpers';
 export const chartHeight = 288;
 
 export function ServiceOverview() {
-  const { agentName, serviceName, transactionType, fallbackToTransactions, runtimeName } =
-    useApmServiceContext();
+  const {
+    agentName,
+    serviceName,
+    transactionType,
+    fallbackToTransactions,
+    runtimeName,
+  } = useApmServiceContext();
   const {
     query,
     query: {

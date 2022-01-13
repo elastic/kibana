@@ -29,5 +29,5 @@ export interface Cloud {
   };
   service?: {
     name: string;
-  }
+  };
 }

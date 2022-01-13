@@ -37,11 +37,14 @@ export function calculateTransactionColdstartRate(
   coldstartStatesResponse: AggregationResultOf<ColdstartAggregation, {}>
 ) {
   const coldstartStates = Object.fromEntries(
-    coldstartStatesResponse.buckets.map(({ key, doc_count: count }) => [key === 1 ? 'true' : 'false', count])
+    coldstartStatesResponse.buckets.map(({ key, doc_count: count }) => [
+      key === 1 ? 'true' : 'false',
+      count,
+    ])
   );
 
-  const coldstarts = coldstartStates['true'] ?? 0;
-  const warmstarts = coldstartStates['false'] ?? 0;
+  const coldstarts = coldstartStates.true ?? 0;
+  const warmstarts = coldstartStates.false ?? 0;
 
   return coldstarts / (coldstarts + warmstarts);
 }

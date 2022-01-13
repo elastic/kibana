@@ -21,7 +21,7 @@ export function TransactionCharts({
   start,
   end,
   transactionName,
-  isServerlessContext
+  isServerlessContext,
 }: {
   kuery: string;
   environment: string;

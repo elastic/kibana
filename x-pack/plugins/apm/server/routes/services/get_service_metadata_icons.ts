@@ -72,7 +72,13 @@ export async function getServiceMetadataIcons({
     },
     body: {
       size: 1,
-      _source: [KUBERNETES, CLOUD_PROVIDER, CONTAINER_ID, AGENT_NAME, CLOUD_SERVICE_NAME],
+      _source: [
+        KUBERNETES,
+        CLOUD_PROVIDER,
+        CONTAINER_ID,
+        AGENT_NAME,
+        CLOUD_SERVICE_NAME,
+      ],
       query: { bool: { filter, should } },
     },
   };
@@ -101,7 +107,7 @@ export async function getServiceMetadataIcons({
   }
 
   let serverlessType: string | undefined;
-  if(cloud?.provider === 'aws' && cloud?.service?.name === 'lambda'){
+  if (cloud?.provider === 'aws' && cloud?.service?.name === 'lambda') {
     serverlessType = 'lambda';
   }
 

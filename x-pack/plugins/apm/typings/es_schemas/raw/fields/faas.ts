@@ -10,6 +10,6 @@ export interface Faas {
   execution?: string;
   trigger?: {
     type?: string;
-    request_id?: string; 
-  }
+    request_id?: string;
+  };
 }

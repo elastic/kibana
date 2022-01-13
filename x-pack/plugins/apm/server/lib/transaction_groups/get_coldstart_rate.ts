@@ -70,9 +70,7 @@ export async function getColdstartRate({
     },
     ...transactionNamefilter,
     ...transactionTypefilter,
-    ...getDocumentTypeFilterForTransactions(
-      searchAggregatedTransactions
-    ),
+    ...getDocumentTypeFilterForTransactions(searchAggregatedTransactions),
     ...rangeQuery(start, end),
     ...environmentQuery(environment),
     ...kqlQuery(kuery),
@@ -82,11 +80,7 @@ export async function getColdstartRate({
 
   const params = {
     apm: {
-      events: [
-        getProcessorEventForTransactions(
-          searchAggregatedTransactions
-        ),
-      ],
+      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
     body: {
       size: 0,
@@ -127,7 +121,9 @@ export async function getColdstartRate({
     resp.aggregations.timeseries.buckets
   );
 
-  const average = calculateTransactionColdstartRate(resp.aggregations.coldstartStates);
+  const average = calculateTransactionColdstartRate(
+    resp.aggregations.coldstartStates
+  );
 
   return { noHits, transactionColdstartRate, average };
 }
