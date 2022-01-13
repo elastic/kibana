@@ -70,7 +70,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "16.13.0",
+    "node": "16.13.2",
     "yarn": "^1.21.1"
   },
   "resolutions": {
@@ -100,8 +100,8 @@
     "@dnd-kit/core": "^3.1.1",
     "@dnd-kit/sortable": "^4.0.0",
     "@dnd-kit/utilities": "^2.0.0",
-    "@elastic/apm-rum": "^5.10.0",
-    "@elastic/apm-rum-react": "^1.3.2",
+    "@elastic/apm-rum": "^5.10.1",
+    "@elastic/apm-rum-react": "^1.3.3",
     "@elastic/apm-synthtrace": "link:bazel-bin/packages/elastic-apm-synthtrace",
     "@elastic/charts": "40.2.0",
     "@elastic/datemath": "link:bazel-bin/packages/elastic-datemath",
@@ -602,6 +602,7 @@
     "@types/kbn__server-route-repository": "link:bazel-bin/packages/kbn-server-route-repository/npm_module_types",
     "@types/kbn__std": "link:bazel-bin/packages/kbn-std/npm_module_types",
     "@types/kbn__telemetry-tools": "link:bazel-bin/packages/kbn-telemetry-tools/npm_module_types",
+    "@types/kbn__ui-shared-deps-npm": "link:bazel-bin/packages/kbn-ui-shared-deps-npm/npm_module_types",
     "@types/kbn__utility-types": "link:bazel-bin/packages/kbn-utility-types/npm_module_types",
     "@types/kbn__utils": "link:bazel-bin/packages/kbn-utils/npm_module_types",
     "@types/license-checker": "15.0.0",
