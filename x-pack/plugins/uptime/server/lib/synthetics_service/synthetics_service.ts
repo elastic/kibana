@@ -7,12 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import {
-  CoreStart,
-  KibanaRequest,
-  Logger,
-  SavedObjectsClient,
-} from '../../../../../../src/core/server';
+import { KibanaRequest, Logger } from '../../../../../../src/core/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -62,7 +57,7 @@ export class SyntheticsService {
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
   }
 
-  public init(coreStart: CoreStart) {
+  public init() {
     // TODO: Figure out fake kibana requests to handle API keys on start up
     // getAPIKeyForSyntheticsService({ server: this.server }).then((apiKey) => {
     //   if (apiKey) {
@@ -70,20 +65,11 @@ export class SyntheticsService {
     //   }
     // });
 
-    this.setupIndexTemplates(coreStart);
+    this.setupIndexTemplates();
   }
 
-  private setupIndexTemplates(coreStart: CoreStart) {
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const savedObjectsClient = new SavedObjectsClient(
-      coreStart.savedObjects.createInternalRepository()
-    );
-
-    installSyntheticsIndexTemplates({
-      esClient,
-      server: this.server,
-      savedObjectsClient,
-    }).then(
+  private setupIndexTemplates() {
+    installSyntheticsIndexTemplates(this.server).then(
       (result) => {
         if (result.name === 'synthetics' && result.install_status === 'installed') {
           this.logger.info('Installed synthetics index templates');
