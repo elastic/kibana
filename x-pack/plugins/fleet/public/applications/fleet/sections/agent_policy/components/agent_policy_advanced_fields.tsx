@@ -27,6 +27,8 @@ import { useStartServices } from '../../../hooks';
 
 import { AgentPolicyPackageBadge } from '../../../components';
 
+import { policyHasFleetServer } from '../../agents/services/has_fleet_server';
+
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
 import type { ValidationResults } from './agent_policy_validation';
 
@@ -290,7 +292,9 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 defaultMessage="Existing data will not be deleted."
               />
               <EuiSpacer size="s" />
-              <AgentPolicyDeleteProvider>
+              <AgentPolicyDeleteProvider
+                hasFleetServer={policyHasFleetServer(agentPolicy as AgentPolicy)}
+              >
                 {(deleteAgentPolicyPrompt) => {
                   return (
                     <EuiButton
