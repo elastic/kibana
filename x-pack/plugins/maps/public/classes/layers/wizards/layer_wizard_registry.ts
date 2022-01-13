@@ -39,11 +39,13 @@ export type LayerWizard = {
   renderWizard(renderWizardArguments: RenderWizardArguments): ReactElement<any>;
   title: string;
   showFeatureEditTools?: boolean;
+  order?: number;
 };
 
 export type LayerWizardWithMeta = LayerWizard & {
   isVisible: boolean;
   isDisabled: boolean;
+  order: number;
 };
 
 const registry: LayerWizard[] = [];
@@ -67,9 +69,14 @@ export async function getLayerWizards(): Promise<LayerWizardWithMeta[]> {
       ...layerWizard,
       isVisible: await layerWizard.checkVisibility!(),
       isDisabled: await layerWizard.getIsDisabled!(),
+      order: typeof layerWizard.order === 'number' ? layerWizard.order : 0,
     };
   });
-  return (await Promise.all(promises)).filter(({ isVisible }) => {
-    return isVisible;
-  });
+  return (await Promise.all(promises))
+    .filter(({ isVisible }) => {
+      return isVisible;
+    })
+    .sort((wizard1: LayerWizardWithMeta, wizard2: LayerWizardWithMeta) => {
+      return wizard1.order - wizard2.order;
+    });
 }
