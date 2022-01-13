@@ -15,5 +15,5 @@ import { CreateExceptionListItemOptions } from '../../../../lists/server';
  */
 export type ExceptionItemLikeOptions = Pick<
   CreateExceptionListItemOptions,
-  'osTypes' | 'tags' | 'description' | 'name' | 'entries'
+  'osTypes' | 'tags' | 'description' | 'name' | 'entries' | 'namespaceType'
 > & { listId?: string };

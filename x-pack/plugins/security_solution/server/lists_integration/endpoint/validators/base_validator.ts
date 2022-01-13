@@ -145,7 +145,7 @@ export class BaseValidator {
    */
   protected wasByPolicyEffectScopeChanged(
     updatedItem: ExceptionItemLikeOptions,
-    currentItem: ExceptionListItemSchema
+    currentItem: Pick<ExceptionListItemSchema, 'tags'>
   ): boolean {
     // if global, then return. Nothing to validate and setting the trusted app to global is allowed
     if (!this.isItemByPolicy(updatedItem)) {

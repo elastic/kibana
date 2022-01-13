@@ -28,7 +28,6 @@ import { ManifestManager } from './services/artifacts/manifest_manager/manifest_
 import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import { EndpointAppContext } from './types';
 import { MetadataRequestContext } from './routes/metadata/handlers';
-import { LicenseService } from '../../common/license';
 import { SecuritySolutionRequestHandlerContext } from '../types';
 import { parseExperimentalConfigValue } from '../../common/experimental_features';
 // A TS error (TS2403) is thrown when attempting to export the mock function below from Cases
@@ -43,6 +42,7 @@ import { createFleetAuthzMock } from '../../../fleet/common';
 import { createMockClients } from '../lib/detection_engine/routes/__mocks__/request_context';
 import type { EndpointAuthz } from '../../common/endpoint/types/authz';
 import { EndpointFleetServicesFactory } from './services/fleet';
+import { createLicenseServiceMock } from '../../common/license/mocks';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -136,7 +136,7 @@ export const createMockEndpointAppContextServiceStartContract =
       security: securityMock.createStart(),
       alerting: alertsMock.createStart(),
       config,
-      licenseService: new LicenseService(),
+      licenseService: createLicenseServiceMock(),
       registerIngestCallback: jest.fn<
         ReturnType<FleetStartContract['registerExternalCallback']>,
         Parameters<FleetStartContract['registerExternalCallback']>
