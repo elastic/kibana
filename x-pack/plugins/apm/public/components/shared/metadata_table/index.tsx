@@ -24,7 +24,7 @@ import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_
 import { HeightRetainer } from '../height_retainer';
 import { fromQuery, toQuery } from '../links/url_helpers';
 import { filterSectionsByTerm } from './helper';
-import { Section } from './Section';
+import { Section } from './section';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { SectionDescriptor } from './types';
 
