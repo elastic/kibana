@@ -286,11 +286,11 @@ export const getTopNavConfig = (
       ? [
           {
             id: 'goToLens',
-            label: i18n.translate('visualize.topNavMenu.goToLensButtonLabel', {
+            label: i18n.translate('visualizations.topNavMenu.goToLensButtonLabel', {
               defaultMessage: 'Edit visualization in Lens',
             }),
             emphasize: false,
-            description: i18n.translate('visualize.topNavMenu.goToLensButtonAriaLabel', {
+            description: i18n.translate('visualizations.topNavMenu.goToLensButtonAriaLabel', {
               defaultMessage: 'Go to Lens with your current configuration',
             }),
             disableButton: !editInLensOptions,
