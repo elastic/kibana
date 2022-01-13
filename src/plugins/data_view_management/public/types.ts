@@ -21,6 +21,8 @@ import { IndexPatternManagementStart } from './index';
 import { KibanaReactContextValue } from '../../kibana_react/public';
 import { IndexPatternFieldEditorStart } from '../../data_view_field_editor/public';
 import { DataViewEditorStart } from '../../data_view_editor/public';
+import { DataViewsPublicPluginStart } from '../../data_views/public';
+import { FieldFormatsStart } from '../../field_formats/public';
 
 export interface IndexPatternManagmentContext {
   chrome: ChromeStart;
@@ -31,11 +33,13 @@ export interface IndexPatternManagmentContext {
   http: HttpSetup;
   docLinks: DocLinksStart;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   indexPatternManagementStart: IndexPatternManagementStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   fieldFormatEditors: IndexPatternFieldEditorStart['fieldFormatEditors'];
   IndexPatternEditor: DataViewEditorStart['IndexPatternEditorComponent'];
+  fieldFormats: FieldFormatsStart;
 }
 
 export type IndexPatternManagmentContextValue =

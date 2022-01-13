@@ -9,21 +9,21 @@
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
 import { OverlayStart, ThemeServiceStart } from 'src/core/public';
-import { IndexPatternField, IndexPattern } from '../../../../../../plugins/data/public';
+import { DataViewField, DataView } from '../../../../../../plugins/data_views/public';
 import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { Table } from './components/table';
 import { IndexedFieldItem } from './types';
 import { IndexPatternManagmentContext } from '../../../types';
 
 interface IndexedFieldsTableProps {
-  fields: IndexPatternField[];
-  indexPattern: IndexPattern;
+  fields: DataViewField[];
+  indexPattern: DataView;
   fieldFilter?: string;
   indexedFieldTypeFilter?: string;
   helpers: {
     editField: (fieldName: string) => void;
     deleteField: (fieldName: string) => void;
-    getFieldInfo: (indexPattern: IndexPattern, field: IndexPatternField) => string[];
+    getFieldInfo: (indexPattern: DataView, field: DataViewField) => string[];
   };
   fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
   userEditPermission: boolean;
@@ -61,7 +61,7 @@ class IndexedFields extends Component<IndexedFieldsTableProps, IndexedFieldsTabl
     }
   }
 
-  mapFields(fields: IndexPatternField[]): IndexedFieldItem[] {
+  mapFields(fields: DataViewField[]): IndexedFieldItem[] {
     const { indexPattern, fieldWildcardMatcher, helpers, userEditPermission } = this.props;
     const sourceFilters =
       indexPattern.sourceFilters &&

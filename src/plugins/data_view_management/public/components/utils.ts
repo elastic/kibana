@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternsContract } from 'src/plugins/data/public';
-import { IFieldType, IndexPattern, IndexPatternListItem } from 'src/plugins/data/public';
+import {
+  DataViewsContract,
+  DataView,
+  DataViewField,
+  DataViewListItem,
+} from 'src/plugins/data_views/public';
 import { i18n } from '@kbn/i18n';
 
 const defaultIndexPatternListName = i18n.translate(
@@ -30,7 +34,7 @@ const isRollup = (indexPatternType: string = '') => {
 
 export async function getIndexPatterns(
   defaultIndex: string,
-  indexPatternsService: IndexPatternsContract
+  indexPatternsService: DataViewsContract
 ) {
   const existingIndexPatterns = await indexPatternsService.getIdsWithTitle(true);
   const indexPatternsListItems = existingIndexPatterns.map((idxPattern) => {
@@ -63,7 +67,7 @@ export async function getIndexPatterns(
   );
 }
 
-export const getTags = (indexPattern: IndexPatternListItem | IndexPattern, isDefault: boolean) => {
+export const getTags = (indexPattern: DataViewListItem | DataView, isDefault: boolean) => {
   const tags = [];
   if (isDefault) {
     tags.push({
@@ -80,14 +84,11 @@ export const getTags = (indexPattern: IndexPatternListItem | IndexPattern, isDef
   return tags;
 };
 
-export const areScriptedFieldsEnabled = (indexPattern: IndexPatternListItem | IndexPattern) => {
+export const areScriptedFieldsEnabled = (indexPattern: DataViewListItem | DataView) => {
   return !isRollup(indexPattern.type);
 };
 
-export const getFieldInfo = (
-  indexPattern: IndexPatternListItem | IndexPattern,
-  field: IFieldType
-) => {
+export const getFieldInfo = (indexPattern: DataViewListItem | DataView, field: DataViewField) => {
   if (!isRollup(indexPattern.type)) {
     return [];
   }
