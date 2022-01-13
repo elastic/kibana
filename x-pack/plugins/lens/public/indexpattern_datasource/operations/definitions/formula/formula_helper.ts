@@ -23,7 +23,7 @@ export interface FormulaHelper {
    * @param column.formula - String representation of a formula
    * @param [column.label] - Custom formula label
    * @param layer - The layer to which the formula columns will be added
-   * @param dataViewId - The id of dataView
+   * @param dataView - The dataView instance
    * @param [params.operations] - Use this parameter if you only need to include specific operations.
    *
    * See `x-pack/examples/embedded_lens_example` for exemplary usage.
