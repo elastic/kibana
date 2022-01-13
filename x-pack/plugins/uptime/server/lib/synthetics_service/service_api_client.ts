@@ -56,6 +56,9 @@ export class ServiceAPIClient {
     const config = this.config;
     if (config.tls && config.tls.certificate && config.tls.key) {
       const tlsConfig = new SslConfig(config.tls);
+      this.logger.info(tlsConfig.certificate ?? '');
+      this.logger.info(tlsConfig.key ?? '');
+      this.logger.info(tlsConfig.certificateAuthorities?.[0] ?? '');
       return new https.Agent({
         rejectUnauthorized: true, // (NOTE: this will disable client verification)
         cert: tlsConfig.certificate,
