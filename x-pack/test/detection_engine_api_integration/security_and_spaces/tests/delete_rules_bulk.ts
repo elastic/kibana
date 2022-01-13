@@ -264,7 +264,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         // create a rule without actions
-        const createRuleBody = await createRule(supertest, log, getSimpleRule('rule-1'));
+        const createRuleBody = await createRule(supertest, getSimpleRule('rule-1'));
 
         // Add a legacy rule action to the body of the rule
         await createLegacyRuleAction(supertest, createRuleBody.id, hookAction.id);
@@ -310,8 +310,8 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         // create 2 rules without actions
-        const createRuleBody1 = await createRule(supertest, log, getSimpleRule('rule-1'));
-        const createRuleBody2 = await createRule(supertest, log, getSimpleRule('rule-2'));
+        const createRuleBody1 = await createRule(supertest, getSimpleRule('rule-1'));
+        const createRuleBody2 = await createRule(supertest, getSimpleRule('rule-2'));
 
         // Add a legacy rule action to the body of the 2 rules
         await createLegacyRuleAction(supertest, createRuleBody1.id, hookAction1.id);
@@ -364,7 +364,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         // create a rule without actions
-        const createRuleBody = await createRule(supertest, log, getSimpleRule('rule-1'));
+        const createRuleBody = await createRule(supertest, getSimpleRule('rule-1'));
 
         // Add a legacy rule action to the body of the rule
         await createLegacyRuleAction(supertest, createRuleBody.id, hookAction.id);
