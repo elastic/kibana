@@ -9,6 +9,13 @@ import { Context } from 'mocha';
 import { ToolingLog } from '@kbn/dev-utils';
 import { FtrProviderContext } from './ftr_provider_context';
 
+export function warnAndSkipTest(mochaContext: Context, log: ToolingLog) {
+  log.warning(
+    'disabling tests because DockerServers service is not enabled, set FLEET_PACKAGE_REGISTRY_PORT to run them'
+  );
+  mochaContext.skip();
+}
+
 export function skipIfNoDockerRegistry(providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const dockerServers = getService('dockerServers');

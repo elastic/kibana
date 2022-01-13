@@ -8,8 +8,6 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile, getService }: FtrProviderContext) => {
-  const server = getService('kibanaServer');
-
   describe('Uptime app', function () {
     describe('with generated data', () => {
       loadTestFile(require.resolve('./synthetics_integration'));
