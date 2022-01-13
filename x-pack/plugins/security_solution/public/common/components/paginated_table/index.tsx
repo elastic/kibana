@@ -39,6 +39,8 @@ import {
 } from '../../../network/components/network_top_countries_table/columns';
 import { TlsColumns } from '../../../network/components/tls_table/columns';
 import { UncommonProcessTableColumns } from '../../../hosts/components/uncommon_process_table';
+import { HostRiskScoreColumns } from '../../../hosts/pages/navigation/hosts_risk_score_tab_body';
+
 import { UsersColumns } from '../../../network/components/users_table/columns';
 import { HeaderSection } from '../header_section';
 import { Loader } from '../loader';
@@ -92,7 +94,8 @@ declare type BasicTableColumns =
   | RiskScoreColumns
   | TlsColumns
   | UncommonProcessTableColumns
-  | UsersColumns;
+  | UsersColumns
+  | HostRiskScoreColumns;
 
 declare type SiemTables = BasicTableProps<BasicTableColumns>;
 

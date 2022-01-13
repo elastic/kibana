@@ -60,7 +60,7 @@ export const NAVIGATION_ALERTS_TITLE = i18n.translate(
 export const NAVIGATION_HOST_RISK_TITLE = i18n.translate(
   'xpack.securitySolution.hosts.navigation.hostRisk',
   {
-    defaultMessage: 'Host risk',
+    defaultMessage: 'Risk Score',
   }
 );
 
@@ -90,3 +90,45 @@ export const VIEW_DASHBOARD_BUTTON = i18n.translate(
     defaultMessage: 'View source dashboard',
   }
 );
+
+export const HOST_RISK_CLASSIFICATION = i18n.translate(
+  'xpack.securitySolution.hostsRiskTable.hostRiskClassificationTitle',
+  {
+    defaultMessage: 'Host risk classification',
+  }
+);
+
+export const HOST_RISK_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.hostsRiskTable.hostRiskToolTip',
+  {
+    defaultMessage:
+      'Host risk classifcation is determined by host risk score. Hosts classified as Critical or High are indicated as risky.',
+  }
+);
+
+export const HOST_NAME = i18n.translate('xpack.securitySolution.hostsRiskTable.hostNameTitle', {
+  defaultMessage: 'Host Name',
+});
+
+export const HOST_RISK_SCORE = i18n.translate(
+  'xpack.securitySolution.hostsRiskTable.hostRiskScoreTitle',
+  {
+    defaultMessage: 'Host risk score',
+  }
+);
+
+export const HOST_RISK = i18n.translate('xpack.securitySolution.hostsRiskTable.tabTitle', {
+  defaultMessage: 'Host risk',
+});
+
+export const UNIT = (totalCount: number) =>
+  i18n.translate('xpack.securitySolution.hostsRiskTable.unit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {host} other {hosts}}`,
+  });
+
+export const ROWS = (numRows: number) =>
+  i18n.translate('xpack.securitySolution.hostsRiskTable.rows', {
+    values: { numRows },
+    defaultMessage: '{numRows} {numRows, plural, =0 {rows} =1 {row} other {rows}}',
+  });
