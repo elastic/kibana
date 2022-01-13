@@ -17,6 +17,7 @@ import type {
   ToastsStart,
   ScopedHistory,
   AppMountParameters,
+  ThemeServiceStart,
 } from 'kibana/public';
 
 import type {
@@ -105,6 +106,7 @@ export interface VisualizeServices extends CoreStart {
   usageCollection?: UsageCollectionStart;
   getKibanaVersion: () => string;
   spaces?: SpacesPluginStart;
+  theme: ThemeServiceStart;
   visEditorsRegistry: VisEditorsRegistry;
 }
 

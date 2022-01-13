@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
-import { OverlayStart } from 'src/core/public';
+import { OverlayStart, ThemeServiceStart } from 'src/core/public';
 import { IndexPatternField, IndexPattern } from '../../../../../../plugins/data/public';
 import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { Table } from './components/table';
@@ -28,6 +28,7 @@ interface IndexedFieldsTableProps {
   fieldWildcardMatcher: (filters: any[]) => (val: any) => boolean;
   userEditPermission: boolean;
   openModal: OverlayStart['openModal'];
+  theme: ThemeServiceStart;
 }
 
 interface IndexedFieldsTableState {
@@ -129,6 +130,7 @@ class IndexedFields extends Component<IndexedFieldsTableProps, IndexedFieldsTabl
           editField={(field) => this.props.helpers.editField(field.name)}
           deleteField={(fieldName) => this.props.helpers.deleteField(fieldName)}
           openModal={this.props.openModal}
+          theme={this.props.theme}
         />
       </div>
     );

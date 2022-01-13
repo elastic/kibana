@@ -63,6 +63,7 @@ export const reportingScreenshotShareProvider = ({
   license$,
   startServices$,
   usesUiCapabilities,
+  theme,
 }: ExportPanelShareOpts) => {
   let licenseToolTipContent = '';
   let licenseDisabled = true;
@@ -156,6 +157,7 @@ export const reportingScreenshotShareProvider = ({
             getJobParams={getJobParams(apiClient, jobProviderOptions, pngReportType)}
             isDirty={isDirty}
             onClose={onClose}
+            theme={theme}
           />
         ),
       },
@@ -191,6 +193,7 @@ export const reportingScreenshotShareProvider = ({
             getJobParams={getJobParams(apiClient, jobProviderOptions, pdfReportType)}
             isDirty={isDirty}
             onClose={onClose}
+            theme={theme}
           />
         ),
       },

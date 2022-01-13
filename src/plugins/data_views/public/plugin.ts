@@ -45,7 +45,7 @@ export class DataViewsPublicPlugin
     core: CoreStart,
     { fieldFormats }: DataViewsPublicStartDependencies
   ): DataViewsPublicPluginStart {
-    const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
+    const { uiSettings, http, notifications, savedObjects, theme, overlays, application } = core;
 
     return new DataViewsService({
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
@@ -59,7 +59,8 @@ export class DataViewsPublicPlugin
       onRedirectNoIndexPattern: onRedirectNoIndexPattern(
         application.capabilities,
         application.navigateToApp,
-        overlays
+        overlays,
+        theme
       ),
       getCanSave: () => Promise.resolve(application.capabilities.indexPatterns.save === true),
     });

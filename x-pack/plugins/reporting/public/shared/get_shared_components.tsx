@@ -35,6 +35,7 @@ export function getSharedComponents(core: CoreSetup, apiClient: ReportingAPIClie
           apiClient={apiClient}
           toasts={core.notifications.toasts}
           uiSettings={core.uiSettings}
+          theme={core.theme}
           {...props}
         />
       );
@@ -48,6 +49,7 @@ export function getSharedComponents(core: CoreSetup, apiClient: ReportingAPIClie
           apiClient={apiClient}
           toasts={core.notifications.toasts}
           uiSettings={core.uiSettings}
+          theme={core.theme}
           {...props}
         />
       );
@@ -61,6 +63,7 @@ export function getSharedComponents(core: CoreSetup, apiClient: ReportingAPIClie
           apiClient={apiClient}
           toasts={core.notifications.toasts}
           uiSettings={core.uiSettings}
+          theme={core.theme}
           {...props}
         />
       );

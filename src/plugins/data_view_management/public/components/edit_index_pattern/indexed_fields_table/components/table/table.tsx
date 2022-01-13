@@ -7,7 +7,7 @@
  */
 
 import React, { PureComponent } from 'react';
-import { OverlayModalStart } from 'src/core/public';
+import { OverlayModalStart, ThemeServiceStart } from 'src/core/public';
 
 import {
   EuiIcon,
@@ -179,6 +179,7 @@ interface IndexedFieldProps {
   editField: (field: IndexedFieldItem) => void;
   deleteField: (fieldName: string) => void;
   openModal: OverlayModalStart['open'];
+  theme: ThemeServiceStart;
 }
 
 const getItems = (conflictDescriptions: IndexedFieldItem['conflictDescriptions']) => {
@@ -311,7 +312,8 @@ export const getConflictModalContent = ({
 const getConflictBtn = (
   fieldName: string,
   conflictDescriptions: IndexedFieldItem['conflictDescriptions'],
-  openModal: IndexedFieldProps['openModal']
+  openModal: IndexedFieldProps['openModal'],
+  theme: ThemeServiceStart
 ) => {
   const onClick = () => {
     const overlayRef = openModal(
@@ -322,7 +324,8 @@ const getConflictBtn = (
           },
           fieldName,
           conflictDescriptions,
-        })
+        }),
+        { theme$: theme.theme$ }
       )
     );
   };
@@ -355,7 +358,12 @@ export class Table extends PureComponent<IndexedFieldProps> {
       <span>
         {type === 'conflict' && conflictDescription ? '' : type}
         {field.conflictDescriptions
-          ? getConflictBtn(field.name, field.conflictDescriptions, this.props.openModal)
+          ? getConflictBtn(
+              field.name,
+              field.conflictDescriptions,
+              this.props.openModal,
+              this.props.theme
+            )
           : ''}
       </span>
     );

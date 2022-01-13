@@ -24,7 +24,6 @@ import {
   EuiSuperUpdateButton,
   OnRefreshProps,
 } from '@elastic/eui';
-
 import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
 import { useKibana, withKibana } from '../../../../kibana_react/public';
 import QueryStringInputUI from './query_string_input';

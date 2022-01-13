@@ -42,6 +42,7 @@ export const VisualizeListing = () => {
       visualizeCapabilities,
       dashboardCapabilities,
       kbnUrlStateStorage,
+      theme,
     },
   } = useKibana<VisualizeServices>();
   const { pathname } = useLocation();
@@ -201,6 +202,7 @@ export const VisualizeListing = () => {
       })}
       toastNotifications={toastNotifications}
       searchFilters={searchFilters}
+      theme={theme}
     >
       {dashboardCapabilities.createNew && (
         <>

@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import type { CoreStart } from 'kibana/public';
+import type { CoreStart, ThemeServiceStart } from 'kibana/public';
 import type { UiActionsStart } from 'src/plugins/ui_actions/public';
 import type { Start as InspectorStartContract } from 'src/plugins/inspector/public';
 import { EuiLoadingChart } from '@elastic/eui';
@@ -68,6 +68,7 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
     const input = { ...props };
     const [embeddable, loading, error] = useEmbeddableFactory({ factory, input });
     const hasActions = props.withActions === true;
+    const theme = core.theme;
 
     if (loading) {
       return <EuiLoadingChart />;
@@ -81,6 +82,7 @@ export function getEmbeddableComponent(core: CoreStart, plugins: PluginsStartDep
           inspector={inspector}
           actionPredicate={() => hasActions}
           input={input}
+          theme={theme}
         />
       );
     }
@@ -95,6 +97,7 @@ interface EmbeddablePanelWrapperProps {
   inspector: PluginsStartDependencies['inspector'];
   actionPredicate: (id: string) => boolean;
   input: EmbeddableComponentProps;
+  theme: ThemeServiceStart;
 }
 
 const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
@@ -103,6 +106,7 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
   actionPredicate,
   inspector,
   input,
+  theme,
 }) => {
   useEffect(() => {
     embeddable.updateInput(input);
@@ -118,6 +122,7 @@ const EmbeddablePanelWrapper: FC<EmbeddablePanelWrapperProps> = ({
       showShadow={false}
       showBadges={false}
       showNotifications={false}
+      theme={theme}
     />
   );
 };
