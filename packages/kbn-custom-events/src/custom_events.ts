@@ -7,7 +7,7 @@
  */
 
 import { PackageInfo } from '@kbn/config';
-import { isArray, isInteger, mapKeys, snakeCase } from 'lodash';
+import { isArray, isInteger, mapKeys } from 'lodash';
 import { FullStoryApi } from './fullstory';
 
 export interface CustomEventConfig {
@@ -55,7 +55,7 @@ export class CustomEvents {
       if (userId) {
         // Join the cloud org id and the user to create a truly unique user id.
         // The hashing here is to keep it at clear as possible in our source code that we do not send literal user IDs
-        const hashedId = sha256(`${esOrgId}:${userId}`);
+        const hashedId = sha256(esOrgId ? `${esOrgId}:${userId}` : `${userId}`);
         const kibanaVer = packageInfo.version;
         // TODO: use semver instead
         const parsedVer = (kibanaVer.indexOf('.') > -1 ? kibanaVer.split('.') : []).map((s) =>
@@ -75,7 +75,9 @@ export class CustomEvents {
       }
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.error(`[custom events] Could not call initialize due to error: ${e.toString()}`, e);
+      console.error(
+        `[custom events] Could not call initialize due to error: ${e?.toString() || e}`
+      );
     }
 
     return !!this.fullStory;
@@ -116,9 +118,8 @@ export class CustomEvents {
   private formatContext(context: Record<string, FullstoryEventValue>) {
     // format context keys as required for env vars, see docs: https://help.fullstory.com/hc/en-us/articles/360020623234
     return mapKeys(context, (value, key) => {
-      const snakeCasedKey = snakeCase(key);
       const type = this.getFullstoryType(value);
-      return [snakeCasedKey, type].join('_');
+      return [key, type].join('_');
     });
   }
 
@@ -170,7 +171,7 @@ export class CustomEvents {
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(
-        `[custom events] Could not report custom event due to error: ${e.toString()}`,
+        `[custom events] Could not report custom event due to error: ${e?.toString() || e}`,
         e
       );
     }
