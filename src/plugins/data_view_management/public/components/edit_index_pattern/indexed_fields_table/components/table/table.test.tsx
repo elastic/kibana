@@ -11,7 +11,9 @@ import { shallow } from 'enzyme';
 import { DataView } from 'src/plugins/data_views/public';
 import { IndexedFieldItem } from '../../types';
 import { Table, renderFieldName, getConflictModalContent } from './table';
-import { overlayServiceMock } from 'src/core/public/mocks';
+import { overlayServiceMock, themeServiceMock } from 'src/core/public/mocks';
+
+const theme = themeServiceMock.createStartContract();
 
 const indexPattern = {
   timeFieldName: 'timestamp',
@@ -89,6 +91,7 @@ const renderTable = (
       editField={editField}
       deleteField={() => {}}
       openModal={overlayServiceMock.createStartContract().openModal}
+      theme={theme}
     />
   );
 
