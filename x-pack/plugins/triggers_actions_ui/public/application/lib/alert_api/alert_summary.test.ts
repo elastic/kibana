@@ -61,7 +61,7 @@ describe('loadAlertSummary', () => {
       Array [
         "/internal/alerting/rule/te%2Fst/_alert_summary",
         Object {
-            "query": Object {
+          "query": Object {
             "number_of_executions": undefined,
           },
         },
