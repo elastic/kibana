@@ -59,7 +59,6 @@ const customSettingsSchema = schema.object(
     created_by: schema.maybe(schema.string()),
     custom_urls: schema.maybe(schema.arrayOf(schema.maybe(schema.object(customUrlSchema)))),
     managed: schema.maybe(schema.boolean()),
-    created_by_module: schema.maybe(schema.string()),
   },
   { unknowns: 'allow' } // Create / Update job API allows other fields to be added to custom_settings.
 );
