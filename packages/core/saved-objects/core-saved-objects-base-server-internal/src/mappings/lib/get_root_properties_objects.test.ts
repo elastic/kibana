@@ -164,7 +164,7 @@ test('excludes references and migrationVersion which are part of the blacklist',
         type: 'object',
       },
       migrationVersion: {
-        type: 'object',
+        type: 'version',
       },
       foo: {
         type: 'object',

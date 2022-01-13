@@ -57,7 +57,7 @@ describe('ui settings migrations', () => {
         attributes: { 'ml:fileDataVisualizerMaxFileSize': '1000' },
         // This field can be added if you only want this object to go through the > 7.12.0 migrations
         // If this field is omitted the object will be run through all migrations available.
-        migrationVersion: { config: '7.12.0' },
+        migrationVersion: '7.12.0',
         references: [],
       },
     ];

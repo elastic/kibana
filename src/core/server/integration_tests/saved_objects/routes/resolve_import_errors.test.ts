@@ -161,7 +161,7 @@ describe(`POST ${URL}`, () => {
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-      [expect.objectContaining({ migrationVersion: {} })],
+      [expect.objectContaining({ migrationVersion: '' })],
       expect.any(Object) // options
     );
   });
@@ -199,7 +199,7 @@ describe(`POST ${URL}`, () => {
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-      [{ type, id, attributes, migrationVersion: {} }],
+      [{ type, id, attributes, migrationVersion: '' }],
       expect.objectContaining({ overwrite: undefined })
     );
   });
@@ -238,7 +238,7 @@ describe(`POST ${URL}`, () => {
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-      [{ type, id, attributes, migrationVersion: {} }],
+      [{ type, id, attributes, migrationVersion: '' }],
       expect.objectContaining({ overwrite: true })
     );
   });
@@ -282,7 +282,7 @@ describe(`POST ${URL}`, () => {
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-      [{ type, id, attributes, references, migrationVersion: {} }],
+      [{ type, id, attributes, references, migrationVersion: '' }],
       expect.objectContaining({ overwrite: undefined })
     );
     expect(savedObjectsClient.bulkGet).toHaveBeenCalledTimes(1);
@@ -331,7 +331,7 @@ describe(`POST ${URL}`, () => {
     });
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1); // successResults objects were created because no resolvable errors are present
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledWith(
-      [{ type, id, attributes, references, migrationVersion: {} }],
+      [{ type, id, attributes, references, migrationVersion: '' }],
       expect.objectContaining({ overwrite: undefined })
     );
     expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();

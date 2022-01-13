@@ -181,7 +181,7 @@ export interface SavedObjectsClientContract {
    * @param {object} attributes - the attributes to update
    * @param {object} options {@link SavedObjectsUpdateOptions}
    * @prop {integer} options.version - ensures version matches that of persisted object
-   * @prop {object} options.migrationVersion - The optional migrationVersion of this document
+   * @prop {string} options.migrationVersion - The optional migrationVersion of this document
    * @returns the udpated simple saved object
    * @deprecated See https://github.com/elastic/kibana/issues/149098
    */

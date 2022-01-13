@@ -76,7 +76,7 @@ export interface ISavedObjectsRepository {
    * @param {object} [options={}] {@link SavedObjectsCreateOptions} - options for the create operation
    * @property {string} [options.id] - force id on creation, not recommended
    * @property {boolean} [options.overwrite=false]
-   * @property {object} [options.migrationVersion=undefined]
+   * @property {string} [options.migrationVersion=undefined]
    * @property {string} [options.namespace]
    * @property {array} [options.references=[]] - [{ name, type, id }]
    * @returns {promise} the created saved object { id, type, version, attributes }

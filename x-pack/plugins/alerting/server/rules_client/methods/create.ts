@@ -22,7 +22,7 @@ import { NormalizedAlertAction, RulesClientContext } from '../types';
 
 interface SavedObjectOptions {
   id?: string;
-  migrationVersion?: Record<string, string>;
+  migrationVersion?: string;
 }
 
 export interface CreateOptions<Params extends RuleTypeParams> {

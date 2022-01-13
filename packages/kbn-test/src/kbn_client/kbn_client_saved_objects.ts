@@ -12,8 +12,6 @@ import type { SavedObjectsBulkDeleteResponse } from '@kbn/core-saved-objects-api
 
 import { KbnClientRequester, uriencode } from './kbn_client_requester';
 
-type MigrationVersion = Record<string, string>;
-
 interface Reference {
   id: string;
   name: string;
@@ -23,7 +21,7 @@ interface Reference {
 interface SavedObjectResponse<Attributes extends Record<string, any>> {
   attributes: Attributes;
   id: string;
-  migrationVersion?: MigrationVersion;
+  migrationVersion?: string;
   references: Reference[];
   type: string;
   updated_at?: string;
@@ -41,7 +39,7 @@ interface IndexOptions<Attributes> {
   attributes: Attributes;
   id?: string;
   overwrite?: boolean;
-  migrationVersion?: MigrationVersion;
+  migrationVersion?: string;
   references?: Reference[];
 }
 

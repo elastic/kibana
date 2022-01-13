@@ -9,26 +9,6 @@
 import * as serverTypes from './server_types';
 
 /**
- * Information about the migrations that have been applied to this SavedObject.
- * When Kibana starts up, KibanaMigrator detects outdated documents and
- * migrates them based on this value. For each migration that has been applied,
- * the plugin's name is used as a key and the latest migration version as the
- * value.
- *
- * @example
- * migrationVersion: {
- *   dashboard: '7.1.1',
- *   space: '6.6.6',
- * }
- *
- * @public
- */
-export interface SavedObjectsMigrationVersion {
-  /** The plugin name and version string */
-  [pluginName: string]: string;
-}
-
-/**
  * The namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive:
  *  * single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace.
  *  * multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces.

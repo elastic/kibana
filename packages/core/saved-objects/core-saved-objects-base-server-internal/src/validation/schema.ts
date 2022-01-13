@@ -40,7 +40,7 @@ export const createSavedObjectSanitizedDocSchema = (attributesSchema: SavedObjec
     ),
     namespace: schema.maybe(schema.string()),
     namespaces: schema.maybe(schema.arrayOf(schema.string())),
-    migrationVersion: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+    migrationVersion: schema.maybe(schema.string()),
     coreMigrationVersion: schema.maybe(schema.string()),
     updated_at: schema.maybe(schema.string()),
     created_at: schema.maybe(schema.string()),

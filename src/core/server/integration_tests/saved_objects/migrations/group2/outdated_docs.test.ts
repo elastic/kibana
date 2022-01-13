@@ -94,7 +94,7 @@ describe('migration v2', () => {
 
     expect(migratedDocs.length).toBe(1);
     const [doc] = migratedDocs;
-    expect(doc._source.migrationVersion.foo).toBe('7.14.0');
+    expect(doc._source.migrationVersion).toBe('7.14.0');
     expect(doc._source.coreMigrationVersion).toBe('8.0.0');
   });
 });

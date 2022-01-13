@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { SavedObjectReference } from '../..';
 import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
 
@@ -25,8 +24,8 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
    * Can be used in conjunction with `overwrite` for implementing optimistic concurrency control.
    **/
   version?: string;
-  /** {@inheritDoc SavedObjectsMigrationVersion} */
-  migrationVersion?: SavedObjectsMigrationVersion;
+  /** A semver value that is used when migrating documents between Kibana versions. */
+  migrationVersion?: string;
   /**
    * A semver value that is used when upgrading objects between Kibana versions. If undefined, this will be automatically set to the current
    * Kibana version when the object is created. If this is set to a non-semver value, or it is set to a semver value greater than the

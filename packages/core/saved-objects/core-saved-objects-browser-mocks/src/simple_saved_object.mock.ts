@@ -19,7 +19,7 @@ const simpleSavedObjectMockDefaults: Partial<SimpleSavedObject<T>> = {
   _version: '',
   id: 'id',
   type: 'type',
-  migrationVersion: {},
+  migrationVersion: '8.0.0',
   coreMigrationVersion: '8.0.0',
   error: undefined,
   references: [],

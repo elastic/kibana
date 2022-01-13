@@ -601,7 +601,7 @@ export const getMockBulkCreateResponse = (
           ...(originId && { originId }),
           references,
           ...mockTimestampFieldsWithCreated,
-          migrationVersion: migrationVersion || { [type]: '1.1.1' },
+          migrationVersion: migrationVersion || '1.1.1',
         },
         ...mockVersionProps,
       },
@@ -627,7 +627,8 @@ export const expectCreateResult = (obj: {
   namespaces?: string[];
 }) => ({
   ...obj,
-  migrationVersion: { [obj.type]: '1.1.1' },
+  migrationVersion: '1.1.1',
+  coreMigrationVersion: expect.any(String),
   version: mockVersion,
   namespaces: obj.namespaces ?? [obj.namespace ?? 'default'],
   ...mockTimestampFieldsWithCreated,

@@ -92,7 +92,7 @@ describe('#getSavedObjectFromSource', () => {
   const _primary_term = 1;
   const attributes = { foo: 'bar' };
   const references = [{ type: 'ref-type', id: 'ref-id', name: 'ref-name' }];
-  const migrationVersion = { foo: 'migrationVersion' };
+  const migrationVersion = 'migrationVersion';
   const coreMigrationVersion = 'coreMigrationVersion';
   const originId = 'originId';
   // eslint-disable-next-line @typescript-eslint/naming-convention

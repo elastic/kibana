@@ -41,7 +41,7 @@ export const registerCreateRoute = (
         }),
         body: schema.object({
           attributes: schema.recordOf(schema.string(), schema.any()),
-          migrationVersion: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+          migrationVersion: schema.maybe(schema.string()),
           coreMigrationVersion: schema.maybe(schema.string()),
           references: schema.maybe(
             schema.arrayOf(

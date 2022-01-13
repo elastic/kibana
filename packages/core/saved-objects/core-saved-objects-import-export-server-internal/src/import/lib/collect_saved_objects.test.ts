@@ -139,8 +139,8 @@ describe('collectSavedObjects()', () => {
       const result = await collectSavedObjects({ readStream, supportedTypes, objectLimit });
 
       const collectedObjects = [
-        { ...obj1, migrationVersion: {} },
-        { ...obj2, migrationVersion: {} },
+        { ...obj1, migrationVersion: '' },
+        { ...obj2, migrationVersion: '' },
       ];
       const importStateMap = new Map([
         [`a:1`, {}], // a:1 is included because it is present in the collected objects
@@ -166,7 +166,7 @@ describe('collectSavedObjects()', () => {
       const supportedTypes = [obj1.type];
       const result = await collectSavedObjects({ readStream, supportedTypes, objectLimit });
 
-      const collectedObjects = [{ ...obj1, migrationVersion: {} }];
+      const collectedObjects = [{ ...obj1, migrationVersion: '' }];
       const importStateMap = new Map([
         [`a:1`, {}], // a:1 is included because it is present in the collected objects
         [`b:2`, { isOnlyReference: true }], // b:2 was filtered out due to an unsupported type; b:2 is included because a:1 has a reference to b:2, but this is marked as `isOnlyReference` because b:2 is not present in the collected objects
@@ -207,7 +207,7 @@ describe('collectSavedObjects()', () => {
           filter,
         });
 
-        const collectedObjects = [{ ...obj2, migrationVersion: {} }];
+        const collectedObjects = [{ ...obj2, migrationVersion: '' }];
         const importStateMap = new Map([
           // a:1 was filtered out due to an unsupported type; a:1 is not included because there are no other references to a:1
           [`b:2`, {}], // b:2 is included because it is present in the collected objects

@@ -196,7 +196,7 @@ describe('migration v2', () => {
     migratedDocs.forEach((doc, i) => {
       expect(doc.id).toBe(`foo:${i}`);
       expect(doc.foo.status).toBe(`migrated`);
-      expect(doc.migrationVersion.foo).toBe('7.14.0');
+      expect(doc.migrationVersion).toBe('7.14.0');
     });
   });
 
@@ -215,7 +215,7 @@ describe('migration v2', () => {
     migratedDocs.forEach((doc, i) => {
       expect(doc.id).toBe(`foo:${i}`);
       expect(doc.foo.status).toBe(`migrated`);
-      expect(doc.migrationVersion.foo).toBe('7.14.0');
+      expect(doc.migrationVersion).toBe('7.14.0');
     });
   });
 
@@ -234,7 +234,7 @@ describe('migration v2', () => {
     migratedDocs.forEach((doc, i) => {
       expect(doc.id).toBe(`foo:${i}`);
       expect(doc.foo.status).toBe(`migrated`);
-      expect(doc.migrationVersion.foo).toBe('7.14.0');
+      expect(doc.migrationVersion).toBe('7.14.0');
     });
   });
 
@@ -253,7 +253,7 @@ describe('migration v2', () => {
     migratedDocs.forEach((doc, i) => {
       expect(doc.id).toBe(`foo:${i}`);
       expect(doc.foo.status).toBe(`migrated`);
-      expect(doc.migrationVersion.foo).toBe('7.14.0');
+      expect(doc.migrationVersion).toBe('7.14.0');
     });
   });
 });

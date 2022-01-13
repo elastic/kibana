@@ -72,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
                     resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta,
                 },
                 migrationVersion: resp.body.saved_objects[0].migrationVersion,
-                coreMigrationVersion: '7.14.0',
+                coreMigrationVersion: '8.8.0',
                 namespaces: ['default'],
                 references: [
                   {
@@ -103,7 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 namespaces: ['default'],
                 migrationVersion: resp.body.saved_objects[2].migrationVersion,
-                coreMigrationVersion: '7.14.0',
+                coreMigrationVersion: '8.8.0',
                 references: [],
               },
             ],

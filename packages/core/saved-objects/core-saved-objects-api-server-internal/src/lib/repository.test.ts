@@ -181,7 +181,7 @@ describe('SavedObjectsRepository', () => {
     mockGetSearchDsl.mockClear();
   });
 
-  const mockMigrationVersion = { foo: '2.3.4' };
+  const mockMigrationVersion = '2.3.4';
   const mockMigrateDocument = (doc: SavedObjectUnsanitizedDoc<any>) => ({
     ...doc,
     attributes: {
@@ -934,6 +934,7 @@ describe('SavedObjectsRepository', () => {
           _source: {
             ...response.items[0].create._source,
             namespaces: response.items[0].create._source.namespaces,
+            coreMigrationVersion: expect.any(String),
           },
           _id: expect.stringMatching(/^myspace:config:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/),
         });
@@ -942,6 +943,7 @@ describe('SavedObjectsRepository', () => {
           _source: {
             ...response.items[1].create._source,
             namespaces: response.items[1].create._source.namespaces,
+            coreMigrationVersion: expect.any(String),
           },
         });
 
@@ -2946,7 +2948,8 @@ describe('SavedObjectsRepository', () => {
           attributes,
           references,
           namespaces: [namespace ?? 'default'],
-          migrationVersion: { [MULTI_NAMESPACE_TYPE]: '1.1.1' },
+          migrationVersion: '1.1.1',
+          coreMigrationVersion: expect.any(String),
         });
       });
     });

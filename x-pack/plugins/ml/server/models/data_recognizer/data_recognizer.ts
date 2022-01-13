@@ -758,7 +758,7 @@ export class DataRecognizer {
         // it is automatically migrated to the 7.0+ format with a references attribute.
         filteredSavedObjects.map((doc) => ({
           ...doc,
-          migrationVersion: {},
+          migrationVersion: '',
         }))
       );
     }

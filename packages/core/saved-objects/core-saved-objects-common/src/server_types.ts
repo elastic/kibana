@@ -14,7 +14,7 @@
  * See https://github.com/elastic/kibana/issues/149098.
  */
 
-import type { SavedObjectsMigrationVersion, SavedObjectError } from './saved_objects';
+import type { SavedObjectError } from './saved_objects';
 
 /**
  * Don't use this type, it's simply a helper type for {@link SavedObjectAttribute}
@@ -80,8 +80,8 @@ export interface SavedObject<T = unknown> {
   attributes: T;
   /** {@inheritdoc SavedObjectReference} */
   references: SavedObjectReference[];
-  /** {@inheritdoc SavedObjectsMigrationVersion} */
-  migrationVersion?: SavedObjectsMigrationVersion;
+  /** A semver value that is used when migrating documents between Kibana versions. */
+  migrationVersion?: string;
   /** A semver value that is used when upgrading objects between Kibana versions. */
   coreMigrationVersion?: string;
   /**

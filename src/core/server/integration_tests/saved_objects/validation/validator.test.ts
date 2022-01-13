@@ -174,7 +174,7 @@ describe('validates saved object types when a schema is provided', () => {
         a: 1,
         b: 'heya',
       },
-      { migrationVersion: { bar: '7.16.0' } }
+      { migrationVersion: '7.16.0' }
     );
     expect(attributes).toEqual(
       expect.objectContaining({
@@ -192,7 +192,7 @@ describe('validates saved object types when a schema is provided', () => {
           a: 1,
           b: 2, // invalid, would throw validation error if migration didn't fail first
         },
-        { migrationVersion: { foo: '7.16.0' } }
+        { migrationVersion: '7.16.0' }
       );
     }).rejects.toThrowError(`Migration function for version ${kibanaVersion} threw an error`);
   });
@@ -239,7 +239,7 @@ describe('validates saved object types when a schema is provided', () => {
             a: 1,
             b: 2,
           },
-          { migrationVersion: { foo: '7.16.0' } }
+          { migrationVersion: '7.16.0' }
         );
       }).rejects.toThrowErrorMatchingInlineSnapshot(
         `"[attributes.b]: expected value of type [string] but got [number]: Bad Request"`
@@ -253,7 +253,7 @@ describe('validates saved object types when a schema is provided', () => {
           a: 1,
           b: 'heya',
         },
-        { migrationVersion: { foo: '7.16.0' } }
+        { migrationVersion: '7.16.0' }
       );
       expect(attributes).toEqual(
         expect.objectContaining({

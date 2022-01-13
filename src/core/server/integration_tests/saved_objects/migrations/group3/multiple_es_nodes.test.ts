@@ -191,7 +191,7 @@ describe('migration v2', () => {
     migratedFooDocs.forEach((doc, i) => {
       expect(doc.id).toBe(`foo:${i}`);
       expect(doc.foo.status).toBe(`migrated_${i}`);
-      expect(doc.migrationVersion.foo).toBe('7.14.0');
+      expect(doc.migrationVersion).toBe('7.14.0');
     });
 
     const migratedBarDocs = await fetchDocs(esClient, migratedIndexAlias, 'bar');
@@ -199,7 +199,7 @@ describe('migration v2', () => {
     migratedBarDocs.forEach((doc, i) => {
       expect(doc.id).toBe(`bar:${i}`);
       expect(doc.bar.status).toBe(`migrated_${i}`);
-      expect(doc.migrationVersion.bar).toBe('7.14.0');
+      expect(doc.migrationVersion).toBe('7.14.0');
     });
   });
 });

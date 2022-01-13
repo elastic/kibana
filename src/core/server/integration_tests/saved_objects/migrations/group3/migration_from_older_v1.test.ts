@@ -152,7 +152,7 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
   ) => {
     const migrationVersions = doc._source.migrationVersion;
     const type = doc._source.type;
-    expect(migrationVersions ? migrationVersions[type] : undefined).toEqual(expectedVersions[type]);
+    expect(migrationVersions).toEqual(expectedVersions[type]);
   };
 
   const stopServers = async () => {
