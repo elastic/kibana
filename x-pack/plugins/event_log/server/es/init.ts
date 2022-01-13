@@ -40,7 +40,7 @@ export interface ParsedIndexAlias extends estypes.IndicesAliasDefinition {
   is_hidden?: boolean;
 }
 
-function parseIndexAliases(aliasInfo: estypes.IndicesGetAliasResponse): ParsedIndexAlias[] {
+export function parseIndexAliases(aliasInfo: estypes.IndicesGetAliasResponse): ParsedIndexAlias[] {
   return Object.keys(aliasInfo).flatMap((indexName: string) =>
     Object.keys(aliasInfo[indexName].aliases).map((alias: string) => ({
       ...aliasInfo[indexName].aliases[alias],
@@ -110,7 +110,6 @@ class EsInitializationSteps {
       // should not block the rest of initialization, log the error and move on
       this.esContext.logger.error(`error getting existing indices - ${err.message}`);
     }
-
     await asyncForEach(Object.keys(indices), async (indexName: string) => {
       try {
         const hidden: string | boolean | undefined = indices[indexName]?.settings?.index?.hidden;
@@ -154,7 +153,6 @@ class EsInitializationSteps {
       try {
         const aliasData = indexAliasData[aliasName];
         const isNotHidden = aliasData.some((data) => data.is_hidden !== true);
-
         if (isNotHidden) {
           this.esContext.logger.debug(`setting existing "${aliasName}" index alias to hidden.`);
           await this.esContext.esAdapter.setIndexAliasToHidden(
