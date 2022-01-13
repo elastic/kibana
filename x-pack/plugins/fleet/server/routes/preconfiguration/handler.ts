@@ -58,18 +58,15 @@ export const resetOnePreconfigurationHandler: FleetRequestHandler<
   }
 };
 
-export const resetPreconfigurationHandler: FleetRequestHandler<
-  undefined,
-  undefined,
-  undefined
-> = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+export const resetPreconfigurationHandler: FleetRequestHandler<undefined, undefined, undefined> =
+  async (context, request, response) => {
+    const soClient = context.core.savedObjects.client;
+    const esClient = context.core.elasticsearch.client.asInternalUser;
 
-  try {
-    await resetPreconfiguredAgentPolicies(soClient, esClient);
-    return response.ok({});
-  } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
-  }
-};
+    try {
+      await resetPreconfiguredAgentPolicies(soClient, esClient);
+      return response.ok({});
+    } catch (error) {
+      return defaultIngestErrorHandler({ error, response });
+    }
+  };
