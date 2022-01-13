@@ -42,8 +42,8 @@ export const DATA_FRAME_ANALYTICS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
 });
 
 export const TRAINED_MODELS: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.trainedModelsLabel', {
-    defaultMessage: 'Trained Models',
+  text: i18n.translate('xpack.ml.modelManagementLabel', {
+    defaultMessage: 'Model Management',
   }),
   href: '/trained_models',
 });

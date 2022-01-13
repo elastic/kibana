@@ -26,7 +26,7 @@ export const Page: FC = () => {
           <MlPageHeader>
             <FormattedMessage
               id="xpack.ml.trainedModels.nodesList.header"
-              defaultMessage="Nodes overview"
+              defaultMessage="Nodes Overview"
             />
           </MlPageHeader>
           <NodesList />

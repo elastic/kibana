@@ -26,8 +26,8 @@ export const modelsListRouteFactory = (
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('TRAINED_MODELS', navigateToPath, basePath),
     {
-      text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.modelsListLabel', {
-        defaultMessage: 'Model Management',
+      text: i18n.translate('xpack.ml.modelManagementBreadcrumbs.trainedModelsLabel', {
+        defaultMessage: 'Trained Models',
       }),
       href: '',
     },
