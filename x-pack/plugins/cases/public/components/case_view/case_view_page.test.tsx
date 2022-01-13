@@ -506,7 +506,7 @@ describe('CaseViewPage', () => {
       expect(
         wrapper
           .find(
-            '[data-test-subj="comment-create-action-alert-action-id"] .euiCommentEvent__headerEvent'
+            '[data-test-subj="user-action-alert-comment-create-action-alert-action-id"] .euiCommentEvent__headerEvent'
           )
           .first()
           .text()
