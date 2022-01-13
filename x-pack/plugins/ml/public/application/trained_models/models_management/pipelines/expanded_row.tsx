@@ -76,35 +76,42 @@ export const ProcessorsStats: FC<ProcessorsStatsProps> = ({ stats }) => {
       truncateText: true,
       'data-test-subj': 'mlProcessorStatsCount',
     },
-    {
-      field: 'stats.time_in_millis',
-      name: (
-        <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.pipelines.processorStats.timePerDocHeader"
-              defaultMessage="Time per doc"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <HelpIcon
-              content={
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.modelsList.pipelines.processorStats.timePerDocDescription"
-                  defaultMessage="Total time spent preprocessing ingest documents during the lifetime of this node"
-                />
-              }
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-      width: '100px',
-      truncateText: false,
-      'data-test-subj': 'mlProcessorStatsTimePerDoc',
-      render: (v: number) => {
-        return durationFormatter(v);
-      },
-    },
+    /**
+     * TODO Display when https://github.com/elastic/elasticsearch/issues/81037 is resolved
+     */
+    ...(true
+      ? []
+      : [
+          {
+            field: 'stats.time_in_millis',
+            name: (
+              <EuiFlexGroup gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.modelsList.pipelines.processorStats.timePerDocHeader"
+                    defaultMessage="Time per doc"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <HelpIcon
+                    content={
+                      <FormattedMessage
+                        id="xpack.ml.trainedModels.modelsList.pipelines.processorStats.timePerDocDescription"
+                        defaultMessage="Total time spent preprocessing ingest documents during the lifetime of this node"
+                      />
+                    }
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ),
+            width: '100px',
+            truncateText: false,
+            'data-test-subj': 'mlProcessorStatsTimePerDoc',
+            render: (v: number) => {
+              return durationFormatter(v);
+            },
+          },
+        ]),
     {
       field: 'stats.current',
       name: (
