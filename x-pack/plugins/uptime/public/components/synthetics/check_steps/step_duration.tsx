@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { MouseEvent } from 'react';
+
 import * as React from 'react';
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { useMemo } from 'react';
@@ -55,6 +57,7 @@ export const StepDuration = ({
 
   return (
     <EuiPopover
+      onClick={(evt: MouseEvent<HTMLDivElement>) => evt.stopPropagation()}
       isOpen={durationPopoverOpenIndex === step.synthetics.step?.index}
       button={button}
       closePopover={() => setDurationPopoverOpenIndex(null)}

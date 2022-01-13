@@ -10,10 +10,10 @@ import {
   CaseAttributes,
   CaseFullExternalService,
   ConnectorTypes,
-  noneConnectorId,
+  NONE_CONNECTOR_ID,
 } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import { getNoneCaseConnector } from '../../common';
+import { getNoneCaseConnector } from '../../common/utils';
 import { createExternalService, ESCaseConnectorWithId } from '../../services/test_utils';
 import { caseConnectorIdMigration } from './cases';
 
@@ -116,7 +116,7 @@ describe('case migrations', () => {
 
     it('does not create a reference when the external_service.connector_id is none', () => {
       const caseSavedObject = create_7_14_0_case({
-        externalService: createExternalService({ connector_id: noneConnectorId }),
+        externalService: createExternalService({ connector_id: NONE_CONNECTOR_ID }),
       });
 
       const migratedConnector = caseConnectorIdMigration(
@@ -247,7 +247,7 @@ describe('case migrations', () => {
     it('does not create a reference and preserves the existing external_service fields when connector_id is null', () => {
       const caseSavedObject = create_7_14_0_case({
         externalService: {
-          connector_id: null,
+          connector_id: 'none',
           connector_name: '.jira',
           external_id: '100',
           external_title: 'awesome',

@@ -28,11 +28,9 @@ import {
   ALERT_UUID,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_NAME,
-} from '@kbn/rule-data-utils/technical_field_names';
-import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
-} from '@kbn/rule-data-utils/alerts_as_data_status';
+} from '@kbn/rule-data-utils';
 import moment from 'moment-timezone';
 import React, { useMemo } from 'react';
 import type { TopAlert } from '../../containers';

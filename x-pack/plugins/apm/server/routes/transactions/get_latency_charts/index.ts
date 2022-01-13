@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { PromiseReturnType } from '../../../../../observability/typings/common';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
@@ -30,8 +29,8 @@ import {
   getLatencyAggregation,
   getLatencyValue,
 } from '../../../lib/helpers/latency_aggregation_type';
-export type LatencyChartsSearchResponse = PromiseReturnType<
-  typeof searchLatency
+export type LatencyChartsSearchResponse = Awaited<
+  ReturnType<typeof searchLatency>
 >;
 
 function searchLatency({

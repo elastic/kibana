@@ -27,9 +27,8 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { DiscoverIndexPattern } from './discover_index_pattern';
-import { IndexPatternAttributes } from '../../../../../../data/common';
+import { DataViewField, DataView, DataViewAttributes } from '../../../../../../data/common';
 import { SavedObject } from '../../../../../../../core/types';
-import { IndexPatternField, IndexPattern } from '../../../../../../data/public';
 import { getDefaultFieldFilter } from './lib/field_filter';
 import { DiscoverSidebar } from './discover_sidebar';
 import { DiscoverServices } from '../../../../build_services';
@@ -55,7 +54,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * List of available index patterns
    */
-  indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+  indexPatternList: Array<SavedObject<DataViewAttributes>>;
   /**
    * Has been toggled closed
    */
@@ -67,7 +66,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Callback function when adding a filter from sidebar
    */
-  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter: (field: DataViewField | string, value: string, type: '+' | '-') => void;
   /**
    * Callback function when changing an index pattern
    */
@@ -80,7 +79,7 @@ export interface DiscoverSidebarResponsiveProps {
   /**
    * Currently selected index pattern
    */
-  selectedIndexPattern?: IndexPattern;
+  selectedIndexPattern?: DataView;
   /**
    * Discover plugin services;
    */
@@ -123,16 +122,11 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   const [fieldFilter, setFieldFilter] = useState(getDefaultFieldFilter());
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   /**
-   * needed for merging new with old field counts, high likely legacy, but kept this behavior
-   * because not 100% sure in this case
+   * fieldCounts are used to determine which fields are actually used in the given set of documents
    */
   const fieldCounts = useRef<Record<string, number> | null>(null);
   if (fieldCounts.current === null) {
-    fieldCounts.current = calcFieldCounts(
-      {},
-      props.documents$.getValue().result,
-      selectedIndexPattern
-    );
+    fieldCounts.current = calcFieldCounts(props.documents$.getValue().result, selectedIndexPattern);
   }
 
   const [documentState, setDocumentState] = useState(props.documents$.getValue());
@@ -140,11 +134,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     const subscription = props.documents$.subscribe((next) => {
       if (next.fetchStatus !== documentState.fetchStatus) {
         if (next.result) {
-          fieldCounts.current = calcFieldCounts(
-            next.result.length && fieldCounts.current ? fieldCounts.current : {},
-            next.result,
-            selectedIndexPattern!
-          );
+          fieldCounts.current = calcFieldCounts(next.result, selectedIndexPattern!);
         }
         setDocumentState({ ...documentState, ...next });
       }
@@ -180,17 +170,17 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     setIsFlyoutVisible(false);
   }, []);
 
-  const { indexPatternFieldEditor } = props.services;
+  const { dataViewFieldEditor } = props.services;
 
   const editField = useCallback(
     (fieldName?: string) => {
       const indexPatternFieldEditPermission =
-        indexPatternFieldEditor?.userPermissions.editIndexPattern();
+        dataViewFieldEditor?.userPermissions.editIndexPattern();
       const canEditIndexPatternField = !!indexPatternFieldEditPermission && useNewFieldsApi;
       if (!canEditIndexPatternField || !selectedIndexPattern) {
         return;
       }
-      const ref = indexPatternFieldEditor.openEditor({
+      const ref = dataViewFieldEditor.openEditor({
         ctx: {
           dataView: selectedIndexPattern,
         },
@@ -208,7 +198,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     },
     [
       closeFlyout,
-      indexPatternFieldEditor,
+      dataViewFieldEditor,
       selectedIndexPattern,
       setFieldEditorRef,
       onEditRuntimeField,

@@ -13,7 +13,8 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const editedDescription = 'Edited description';
 
-  describe('regression creation', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/122927
+  describe.skip('regression creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
       await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression', '@timestamp');
@@ -24,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_egs_regression');
     });
 
     const jobId = `egs_1_${Date.now()}`;
@@ -189,12 +191,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertDestIndexInputExists();
           await ml.dataFrameAnalyticsCreation.setDestIndex(testData.destinationIndex);
 
-          await ml.testExecution.logTestStep('sets the create data view switch');
-          await ml.dataFrameAnalyticsCreation.assertCreateIndexPatternSwitchExists();
-          await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
-            testData.createIndexPattern
-          );
-
           await ml.testExecution.logTestStep('continues to the validation step');
           await ml.dataFrameAnalyticsCreation.continueToValidationStep();
 
@@ -204,6 +200,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
+
+          await ml.testExecution.logTestStep('sets the create data view switch');
+          await ml.dataFrameAnalyticsCreation.assertCreateIndexPatternSwitchExists();
+          await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
+            testData.createIndexPattern
+          );
         });
 
         it('runs the analytics job and displays it correctly in the job list', async () => {

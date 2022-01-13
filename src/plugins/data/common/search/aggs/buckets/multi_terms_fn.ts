@@ -111,6 +111,12 @@ export const aggMultiTerms = (): FunctionDefinition => ({
         defaultMessage: 'Represents a custom label for this aggregation',
       }),
     },
+    separatorLabel: {
+      types: ['string'],
+      help: i18n.translate('data.search.aggs.buckets.multiTerms.separatorLabel.help', {
+        defaultMessage: 'The separator label used to join each term combination',
+      }),
+    },
   },
   fn: (input, args) => {
     const { id, enabled, schema, ...rest } = args;

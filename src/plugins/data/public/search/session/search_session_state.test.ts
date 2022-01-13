@@ -7,7 +7,7 @@
  */
 
 import { createSessionStateContainer, SearchSessionState } from './search_session_state';
-import { SearchSessionSavedObject } from './sessions_client';
+import type { SearchSessionSavedObject } from './sessions_client';
 import { SearchSessionStatus } from '../../../common';
 
 const mockSavedObject: SearchSessionSavedObject = {

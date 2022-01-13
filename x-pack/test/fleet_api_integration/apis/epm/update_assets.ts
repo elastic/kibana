@@ -18,18 +18,16 @@ export default function (providerContext: FtrProviderContext) {
   const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
   const pkgUpdateVersion = '0.2.0';
-  const pkgKey = `${pkgName}-${pkgVersion}`;
-  const pkgUpdateKey = `${pkgName}-${pkgUpdateVersion}`;
   const logsTemplateName = `logs-${pkgName}.test_logs`;
   const logsTemplateName2 = `logs-${pkgName}.test_logs2`;
   const metricsTemplateName = `metrics-${pkgName}.test_metrics`;
 
-  const uninstallPackage = async (pkg: string) => {
-    await supertest.delete(`/api/fleet/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
+  const uninstallPackage = async (pkg: string, version: string) => {
+    await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
   };
-  const installPackage = async (pkg: string) => {
+  const installPackage = async (pkg: string, version: string) => {
     await supertest
-      .post(`/api/fleet/epm/packages/${pkg}`)
+      .post(`/api/fleet/epm/packages/${pkg}/${version}`)
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true });
   };
@@ -39,11 +37,11 @@ export default function (providerContext: FtrProviderContext) {
     setupFleetAndAgents(providerContext);
 
     before(async () => {
-      await installPackage(pkgKey);
-      await installPackage(pkgUpdateKey);
+      await installPackage(pkgName, pkgVersion);
+      await installPackage(pkgName, pkgUpdateVersion);
     });
     after(async () => {
-      await uninstallPackage(pkgUpdateKey);
+      await uninstallPackage(pkgName, pkgUpdateVersion);
     });
     it('should have updated the ILM policy', async function () {
       const resPolicy = await es.ilm.getLifecycle(
@@ -330,6 +328,7 @@ export default function (providerContext: FtrProviderContext) {
         id: 'all_assets',
       });
       expect(res.attributes).eql({
+        installed_kibana_space_id: 'default',
         installed_kibana: [
           {
             id: 'sample_dashboard',

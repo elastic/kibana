@@ -8,16 +8,15 @@
 import { groupBy } from 'lodash';
 import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
+import { ScreenshotResult } from '../../../../../screenshotting/server';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
-import { createLayout, LayoutParams } from '../../../lib/layouts';
-import { getScreenshots$, ScreenshotResults } from '../../../lib/screenshots';
-import { ConditionalHeaders } from '../../common';
+import { ScreenshotOptions } from '../../../types';
 import { PdfMaker } from '../../common/pdf';
 import { getTracker } from './tracker';
 
-const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
-  const grouped = groupBy(urlScreenshots.map((u) => u.timeRange));
+const getTimeRange = (urlScreenshots: ScreenshotResult['results']) => {
+  const grouped = groupBy(urlScreenshots.map(({ timeRange }) => timeRange));
   const values = Object.values(grouped);
   if (values.length === 1) {
     return values[0][0];
@@ -26,97 +25,80 @@ const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
   return null;
 };
 
-export async function generatePdfObservableFactory(reporting: ReportingCore) {
-  const config = reporting.getConfig();
-  const captureConfig = config.get('capture');
-  const { browserDriverFactory } = await reporting.getPluginStartDeps();
+export function generatePdfObservable(
+  reporting: ReportingCore,
+  logger: LevelLogger,
+  title: string,
+  options: ScreenshotOptions,
+  logo?: string
+): Rx.Observable<{ buffer: Buffer | null; warnings: string[] }> {
+  const tracker = getTracker();
+  tracker.startScreenshots();
 
-  return function generatePdfObservable(
-    logger: LevelLogger,
-    title: string,
-    urls: string[],
-    browserTimezone: string | undefined,
-    conditionalHeaders: ConditionalHeaders,
-    layoutParams: LayoutParams,
-    logo?: string
-  ): Rx.Observable<{ buffer: Buffer | null; warnings: string[] }> {
-    const tracker = getTracker();
-    tracker.startLayout();
+  return reporting.getScreenshots(options).pipe(
+    mergeMap(async ({ layout, metrics$, results }) => {
+      metrics$.subscribe(({ cpu, memory }) => {
+        tracker.setCpuUsage(cpu);
+        tracker.setMemoryUsage(memory);
+      });
+      tracker.endScreenshots();
+      tracker.startSetup();
 
-    const layout = createLayout(captureConfig, layoutParams);
-    logger.debug(`Layout: width=${layout.width} height=${layout.height}`);
-    tracker.endLayout();
+      const pdfOutput = new PdfMaker(layout, logo);
+      if (title) {
+        const timeRange = getTimeRange(results);
+        title += timeRange ? ` - ${timeRange}` : '';
+        pdfOutput.setTitle(title);
+      }
+      tracker.endSetup();
 
-    tracker.startScreenshots();
-    const screenshots$ = getScreenshots$(captureConfig, browserDriverFactory, {
-      logger,
-      urlsOrUrlLocatorTuples: urls,
-      conditionalHeaders,
-      layout,
-      browserTimezone,
-    }).pipe(
-      mergeMap(async (results: ScreenshotResults[]) => {
-        tracker.endScreenshots();
-
-        tracker.startSetup();
-        const pdfOutput = new PdfMaker(layout, logo);
-        if (title) {
-          const timeRange = getTimeRange(results);
-          title += timeRange ? ` - ${timeRange}` : '';
-          pdfOutput.setTitle(title);
-        }
-        tracker.endSetup();
-
-        results.forEach((r) => {
-          r.screenshots.forEach((screenshot) => {
-            logger.debug(`Adding image to PDF. Image size: ${screenshot.data.byteLength}`); // prettier-ignore
-            tracker.startAddImage();
-            tracker.endAddImage();
-            pdfOutput.addImage(screenshot.data, {
-              title: screenshot.title ?? undefined,
-              description: screenshot.description ?? undefined,
-            });
+      results.forEach((r) => {
+        r.screenshots.forEach((screenshot) => {
+          logger.debug(`Adding image to PDF. Image size: ${screenshot.data.byteLength}`); // prettier-ignore
+          tracker.startAddImage();
+          tracker.endAddImage();
+          pdfOutput.addImage(screenshot.data, {
+            title: screenshot.title ?? undefined,
+            description: screenshot.description ?? undefined,
           });
         });
+      });
 
-        let buffer: Buffer | null = null;
-        try {
-          tracker.startCompile();
-          logger.debug(`Compiling PDF using "${layout.id}" layout...`);
-          pdfOutput.generate();
-          tracker.endCompile();
+      let buffer: Buffer | null = null;
+      try {
+        tracker.startCompile();
+        logger.info(`Compiling PDF using "${layout.id}" layout...`);
+        pdfOutput.generate();
+        tracker.endCompile();
 
-          tracker.startGetBuffer();
-          logger.debug(`Generating PDF Buffer...`);
-          buffer = await pdfOutput.getBuffer();
+        tracker.startGetBuffer();
+        logger.debug(`Generating PDF Buffer...`);
+        buffer = await pdfOutput.getBuffer();
 
-          const byteLength = buffer?.byteLength ?? 0;
-          logger.debug(`PDF buffer byte length: ${byteLength}`);
-          tracker.setByteLength(byteLength);
+        const byteLength = buffer?.byteLength ?? 0;
+        logger.debug(`PDF buffer byte length: ${byteLength}`);
+        tracker.setByteLength(byteLength);
 
-          tracker.endGetBuffer();
-        } catch (err) {
-          logger.error(`Could not generate the PDF buffer!`);
-          logger.error(err);
-        }
+        tracker.endGetBuffer();
+      } catch (err) {
+        logger.error(`Could not generate the PDF buffer!`);
+        logger.error(err);
+      }
 
-        tracker.end();
+      tracker.end();
 
-        return {
-          buffer,
-          warnings: results.reduce((found, current) => {
-            if (current.error) {
-              found.push(current.error.message);
-            }
-            if (current.renderErrors) {
-              found.push(...current.renderErrors);
-            }
-            return found;
-          }, [] as string[]),
-        };
-      })
-    );
-
-    return screenshots$;
-  };
+      return {
+        buffer,
+        warnings: results.reduce((found, current) => {
+          if (current.error) {
+            found.push(current.error.message);
+          }
+          if (current.renderErrors) {
+            found.push(...current.renderErrors);
+          }
+          return found;
+        }, [] as string[]),
+      };
+    })
+  );
 }

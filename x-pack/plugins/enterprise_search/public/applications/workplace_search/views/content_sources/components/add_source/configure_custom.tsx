@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { CUSTOM_SOURCE_DOCS_URL } from '../../../../routes';
+import { docLinks } from '../../../../../shared/doc_links';
 
 import { SOURCE_NAME_LABEL } from '../../constants';
 
@@ -63,7 +63,7 @@ export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({
                 defaultMessage="{link} to learn more about Custom API Sources."
                 values={{
                   link: (
-                    <EuiLink href={CUSTOM_SOURCE_DOCS_URL} target="_blank">
+                    <EuiLink href={docLinks.workplaceSearchCustomSources} target="_blank">
                       {CONFIG_CUSTOM_LINK_TEXT}
                     </EuiLink>
                   ),

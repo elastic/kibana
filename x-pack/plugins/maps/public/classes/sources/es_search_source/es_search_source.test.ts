@@ -26,15 +26,13 @@ describe('ESSearchSource', () => {
     expect(esSearchSource instanceof ESSearchSource).toBe(true);
   });
 
-  describe('ITiledSingleLayerVectorSource', () => {
-    it('mb-source params', () => {
+  describe('IMvtVectorSource', () => {
+    it('getTileSourceLayer', () => {
       const esSearchSource = new ESSearchSource(mockDescriptor);
-      expect(esSearchSource.getMinZoom()).toBe(0);
-      expect(esSearchSource.getMaxZoom()).toBe(24);
-      expect(esSearchSource.getLayerName()).toBe('hits');
+      expect(esSearchSource.getTileSourceLayer()).toBe('hits');
     });
 
-    describe('getUrlTemplateWithMeta', () => {
+    describe('getTileUrl', () => {
       const geoFieldName = 'bar';
       const mockIndexPatternService = {
         get() {
@@ -115,17 +113,20 @@ describe('ESSearchSource', () => {
           geoField: geoFieldName,
           indexPatternId: 'ipId',
         });
-        const urlTemplateWithMeta = await esSearchSource.getUrlTemplateWithMeta(searchFilters);
-        expect(urlTemplateWithMeta.urlTemplate).toBe(
-          `rootdir/api/maps/mvt/getTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=foobar-title-*&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:(),title:'foobar-title-*')),'1':('0':size,'1':1000),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:(),title:'foobar-title-*')),'5':('0':query,'1':(language:KQL,query:'tooltipField: foobar')),'6':('0':fieldsFromSource,'1':!(tooltipField,styleField)),'7':('0':source,'1':!(tooltipField,styleField))))`
+        const tileUrl = await esSearchSource.getTileUrl(searchFilters, '1234');
+        expect(tileUrl).toBe(
+          `rootdir/api/maps/mvt/getTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=foobar-title-*&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:(),title:'foobar-title-*')),'1':('0':size,'1':1000),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:(),title:'foobar-title-*')),'5':('0':query,'1':(language:KQL,query:'tooltipField: foobar')),'6':('0':fieldsFromSource,'1':!(tooltipField,styleField)),'7':('0':source,'1':!(tooltipField,styleField))))&token=1234`
         );
       });
     });
   });
 
   describe('isFilterByMapBounds', () => {
-    it('default', () => {
-      const esSearchSource = new ESSearchSource(mockDescriptor);
+    it('limit', () => {
+      const esSearchSource = new ESSearchSource({
+        ...mockDescriptor,
+        scalingType: SCALING_TYPES.LIMIT,
+      });
       expect(esSearchSource.isFilterByMapBounds()).toBe(true);
     });
     it('mvt', () => {
@@ -138,8 +139,11 @@ describe('ESSearchSource', () => {
   });
 
   describe('getJoinsDisabledReason', () => {
-    it('default', () => {
-      const esSearchSource = new ESSearchSource(mockDescriptor);
+    it('limit', () => {
+      const esSearchSource = new ESSearchSource({
+        ...mockDescriptor,
+        scalingType: SCALING_TYPES.LIMIT,
+      });
       expect(esSearchSource.getJoinsDisabledReason()).toBe(null);
     });
     it('mvt', () => {

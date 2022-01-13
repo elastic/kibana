@@ -50,7 +50,7 @@ export interface TGridModel extends TGridModelSettings {
     end: string;
   };
   /** Kibana data view id **/
-  dataViewId: string;
+  dataViewId: string | null; // null if legacy pre-8.0 timeline
   /** Events to not be rendered **/
   deletedEventIds: string[];
   /** This holds the view information for the flyout when viewing timeline in a consuming view (i.e. hosts page) or the side panel in the primary timeline view */

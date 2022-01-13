@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getUrlPrefix } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import type { RawAlert, RawAlertAction } from '../../../../../plugins/alerting/server/types';
+import type { RawRule, RawAlertAction } from '../../../../../plugins/alerting/server/types';
 import { FILEBEAT_7X_INDICATOR_PATH } from '../../../../../plugins/alerting/server/saved_objects/migrations';
 
 // eslint-disable-next-line import/no-default-export
@@ -205,7 +205,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     it('7.16.0 migrates existing alerts to contain legacyId field', async () => {
-      const searchResult = await es.search<RawAlert>(
+      const searchResult = await es.search<RawRule>(
         {
           index: '.kibana',
           body: {
@@ -221,13 +221,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(searchResult.statusCode).to.equal(200);
       expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.equal(1);
       const hit = searchResult.body.hits.hits[0];
-      expect((hit!._source!.alert! as RawAlert).legacyId).to.equal(
+      expect((hit!._source!.alert! as RawRule).legacyId).to.equal(
         '74f3e6d7-b7bb-477d-ac28-92ee22728e6e'
       );
     });
 
     it('7.16.0 migrates existing rules so predefined connectors are not stored in references', async () => {
-      const searchResult = await es.search<RawAlert>(
+      const searchResult = await es.search<RawRule>(
         {
           index: '.kibana',
           body: {
@@ -243,7 +243,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(searchResult.statusCode).to.equal(200);
       expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).to.equal(1);
       const hit = searchResult.body.hits.hits[0];
-      expect((hit!._source!.alert! as RawAlert).actions! as RawAlertAction[]).to.eql([
+      expect((hit!._source!.alert! as RawRule).actions! as RawAlertAction[]).to.eql([
         {
           actionRef: 'action_0',
           actionTypeId: 'test.noop',
@@ -348,7 +348,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     it('8.0 migrates incorrect action group spellings on the Metrics Inventory Threshold rule type', async () => {
-      const response = await es.get<{ alert: RawAlert }>(
+      const response = await es.get<{ alert: RawRule }>(
         {
           index: '.kibana',
           id: 'alert:92237b30-4e03-11ec-9ab9-d980518a2d28',
@@ -359,6 +359,19 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.body._source?.alert?.actions?.[0].group).to.be(
         'metrics.inventory_threshold.fired'
       );
+    });
+
+    it('8.0 migrates and disables pre-existing rules', async () => {
+      const response = await es.get<{ alert: RawRule }>(
+        {
+          index: '.kibana',
+          id: 'alert:38482620-ef1b-11eb-ad71-7de7959be71c',
+        },
+        { meta: true }
+      );
+      expect(response.statusCode).to.eql(200);
+      expect(response.body._source?.alert?.alertTypeId).to.be('siem.queryRule');
+      expect(response.body._source?.alert?.enabled).to.be(false);
     });
   });
 }

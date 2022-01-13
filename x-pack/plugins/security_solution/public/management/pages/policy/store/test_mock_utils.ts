@@ -57,7 +57,7 @@ export const policyListApiPathHandlers = (totalPolicies: number = 1) => {
     },
     [INGEST_API_EPM_PACKAGES]: (): GetPackagesResponse => {
       return {
-        response: [generator.generateEpmPackage()],
+        items: [generator.generateEpmPackage()],
       };
     },
   };

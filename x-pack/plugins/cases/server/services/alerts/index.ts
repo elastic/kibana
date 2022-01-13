@@ -11,32 +11,69 @@ import { isEmpty } from 'lodash';
 import { ElasticsearchClient, Logger } from 'kibana/server';
 import { CaseStatuses } from '../../../common/api';
 import { MAX_ALERTS_PER_SUB_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
-import { AlertInfo, createCaseError } from '../../common';
+import { createCaseError } from '../../common/error';
+import { AlertInfo } from '../../common/types';
 import { UpdateAlertRequest } from '../../client/alerts/types';
 import {
   ALERT_WORKFLOW_STATUS,
   STATUS_VALUES,
 } from '../../../../rule_registry/common/technical_rule_data_field_names';
-
-interface Alert {
-  _id: string;
-  _index: string;
-  _source: Record<string, unknown>;
-}
-
-interface AlertsResponse {
-  docs: Alert[];
-}
-
-function isEmptyAlert(alert: AlertInfo): boolean {
-  return isEmpty(alert.id) || isEmpty(alert.index);
-}
+import { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 
 export class AlertService {
   constructor(
     private readonly scopedClusterClient: ElasticsearchClient,
     private readonly logger: Logger
   ) {}
+
+  public async executeAggregations({
+    aggregationBuilders,
+    alerts,
+  }: {
+    aggregationBuilders: AggregationBuilder[];
+    alerts: AlertIdIndex[];
+  }): Promise<AggregationResponse> {
+    try {
+      const { ids, indices } = AlertService.getUniqueIdsIndices(alerts);
+
+      const builtAggs = aggregationBuilders.reduce((acc, agg) => {
+        return { ...acc, ...agg.build() };
+      }, {});
+
+      const res = await this.scopedClusterClient.search({
+        index: indices,
+        query: { ids: { values: ids } },
+        size: 0,
+        aggregations: builtAggs,
+      });
+
+      return res.body.aggregations;
+    } catch (error) {
+      const aggregationNames = aggregationBuilders.map((agg) => agg.getName());
+
+      throw createCaseError({
+        message: `Failed to execute aggregations [${aggregationNames.join(',')}]: ${error}`,
+        error,
+        logger: this.logger,
+      });
+    }
+  }
+
+  private static getUniqueIdsIndices(alerts: AlertIdIndex[]): { ids: string[]; indices: string[] } {
+    const { ids, indices } = alerts.reduce(
+      (acc, alert) => {
+        acc.ids.add(alert.id);
+        acc.indices.add(alert.index);
+        return acc;
+      },
+      { ids: new Set<string>(), indices: new Set<string>() }
+    );
+
+    return {
+      ids: Array.from(ids),
+      indices: Array.from(indices),
+    };
+  }
 
   public async updateAlertsStatus(alerts: UpdateAlertRequest[]) {
     try {
@@ -64,7 +101,7 @@ export class AlertService {
     return alerts.reduce<Map<string, Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>>>(
       (acc, alert) => {
         // skip any alerts that are empty
-        if (isEmptyAlert(alert)) {
+        if (AlertService.isEmptyAlert(alert)) {
           return acc;
         }
 
@@ -87,6 +124,10 @@ export class AlertService {
       },
       new Map()
     );
+  }
+
+  private static isEmptyAlert(alert: AlertInfo): boolean {
+    return isEmpty(alert.id) || isEmpty(alert.index);
   }
 
   private translateStatus(alert: UpdateAlertRequest): STATUS_VALUES {
@@ -141,7 +182,7 @@ export class AlertService {
   public async getAlerts(alertsInfo: AlertInfo[]): Promise<AlertsResponse | undefined> {
     try {
       const docs = alertsInfo
-        .filter((alert) => !isEmptyAlert(alert))
+        .filter((alert) => !AlertService.isEmptyAlert(alert))
         .slice(0, MAX_ALERTS_PER_SUB_CASE)
         .map((alert) => ({ _id: alert.id, _index: alert.index }));
 
@@ -186,4 +227,19 @@ function updateIndexEntryWithStatus(
   } else {
     statusBucket.push(alert);
   }
+}
+
+interface Alert {
+  _id: string;
+  _index: string;
+  _source: Record<string, unknown>;
+}
+
+interface AlertsResponse {
+  docs: Alert[];
+}
+
+interface AlertIdIndex {
+  id: string;
+  index: string;
 }

@@ -26,7 +26,8 @@ import {
 } from 'kibana/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
 import { loggerMock } from '@kbn/logging/mocks';
-import { getNoneCaseConnector, CONNECTOR_ID_REFERENCE_NAME } from '../../common';
+import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
+import { getNoneCaseConnector } from '../../common/utils';
 import { CasesService } from '.';
 import {
   createESJiraConnector,
@@ -819,7 +820,7 @@ describe('CasesService', () => {
           `);
       });
 
-      it('returns a null external service connector when it cannot find the reference', async () => {
+      it('returns none external service connector when it cannot find the reference', async () => {
         const { connector_id: id, ...restExternalConnector } = createExternalService()!;
         const returnValue: SavedObjectsUpdateResponse<ESCaseAttributes> = {
           type: CASE_SAVED_OBJECT,
@@ -840,7 +841,7 @@ describe('CasesService', () => {
           originalCase: {} as SavedObject<CaseAttributes>,
         });
 
-        expect(res.attributes.external_service?.connector_id).toBeNull();
+        expect(res.attributes.external_service?.connector_id).toBe('none');
       });
 
       it('returns the saved object fields when it cannot find the reference for connector_id', async () => {
@@ -865,28 +866,28 @@ describe('CasesService', () => {
         });
 
         expect(res).toMatchInlineSnapshot(`
-            Object {
-              "attributes": Object {
-                "external_service": Object {
-                  "connector_id": null,
-                  "connector_name": ".jira",
-                  "external_id": "100",
-                  "external_title": "awesome",
-                  "external_url": "http://www.google.com",
-                  "pushed_at": "2019-11-25T21:54:48.952Z",
-                  "pushed_by": Object {
-                    "email": "testemail@elastic.co",
-                    "full_name": "elastic",
-                    "username": "elastic",
-                  },
+          Object {
+            "attributes": Object {
+              "external_service": Object {
+                "connector_id": "none",
+                "connector_name": ".jira",
+                "external_id": "100",
+                "external_title": "awesome",
+                "external_url": "http://www.google.com",
+                "pushed_at": "2019-11-25T21:54:48.952Z",
+                "pushed_by": Object {
+                  "email": "testemail@elastic.co",
+                  "full_name": "elastic",
+                  "username": "elastic",
                 },
               },
-              "id": "1",
-              "references": undefined,
-              "type": "cases",
-              "version": "1",
-            }
-          `);
+            },
+            "id": "1",
+            "references": undefined,
+            "type": "cases",
+            "version": "1",
+          }
+        `);
       });
 
       it('returns the connector.id after finding the reference', async () => {
@@ -1081,7 +1082,7 @@ describe('CasesService', () => {
         );
         const res = await service.getCase({ unsecuredSavedObjectsClient, id: 'a' });
 
-        expect(res.attributes.external_service?.connector_id).toMatchInlineSnapshot(`null`);
+        expect(res.attributes.external_service?.connector_id).toMatchInlineSnapshot(`"none"`);
       });
 
       it('includes the external services fields when the connector id cannot be found in the references', async () => {
@@ -1092,7 +1093,7 @@ describe('CasesService', () => {
 
         expect(res.attributes.external_service).toMatchInlineSnapshot(`
           Object {
-            "connector_id": null,
+            "connector_id": "none",
             "connector_name": ".jira",
             "external_id": "100",
             "external_title": "awesome",

@@ -131,12 +131,12 @@ function getLensAttributes(
     references: [
       {
         id: 'logs-*',
-        name: 'dataView-datasource-current-dataView',
+        name: 'indexpattern-datasource-current-indexpattern',
         type: 'index-pattern',
       },
       {
         id: 'logs-*',
-        name: 'dataView-datasource-layer-layer1',
+        name: 'indexpattern-datasource-layer-layer1',
         type: 'index-pattern',
       },
       {
@@ -157,7 +157,7 @@ function getLensAttributes(
         {
           $state: { store: FilterStateStore.APP_STATE },
           meta: {
-            indexRefName: 'filter-index-pattern-0',
+            index: 'filter-index-pattern-0',
             negate: false,
             alias: null,
             disabled: false,
@@ -180,7 +180,7 @@ function getLensAttributes(
                 meta: {
                   alias: 'agent IDs',
                   disabled: false,
-                  indexRefName: 'filter-index-pattern-0',
+                  index: 'filter-index-pattern-0',
                   key: 'query',
                   negate: false,
                   type: 'custom',

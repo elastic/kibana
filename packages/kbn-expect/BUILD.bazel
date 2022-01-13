@@ -1,4 +1,5 @@
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "pkg_npm")
 
 PKG_BASE_NAME = "kbn-expect"
 PKG_REQUIRE_NAME = "@kbn/expect"

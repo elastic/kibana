@@ -8,9 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CorrelationsParams } from './types';
 
-export interface FieldStatsCommonRequestParams extends CorrelationsParams {
-  samplerShardSize: number;
-}
+export type FieldStatsCommonRequestParams = CorrelationsParams;
 
 export interface Field {
   fieldName: string;
@@ -55,3 +53,5 @@ export type FieldStats =
   | NumericFieldStats
   | KeywordFieldStats
   | BooleanFieldStats;
+
+export type FieldValueFieldStats = TopValuesStats;

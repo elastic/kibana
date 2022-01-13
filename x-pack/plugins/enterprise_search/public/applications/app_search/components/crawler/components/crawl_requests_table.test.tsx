@@ -35,6 +35,7 @@ const values: { events: CrawlEvent[] } = {
         domainAllowlist: ['https://www.elastic.co'],
         seedUrls: [],
         sitemapUrls: [],
+        maxCrawlDepth: 10,
       },
     },
     {
@@ -49,6 +50,7 @@ const values: { events: CrawlEvent[] } = {
         domainAllowlist: ['https://www.elastic.co'],
         seedUrls: [],
         sitemapUrls: [],
+        maxCrawlDepth: 10,
       },
     },
   ],

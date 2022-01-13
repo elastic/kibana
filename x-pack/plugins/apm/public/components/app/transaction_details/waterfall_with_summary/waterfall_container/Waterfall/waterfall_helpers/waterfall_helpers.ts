@@ -267,7 +267,7 @@ const getWaterfallDuration = (waterfallItems: IWaterfallItem[]) =>
 
 const getWaterfallItems = (items: TraceAPIResponse['traceDocs']) =>
   items.map((item) => {
-    const docType = item.processor.event;
+    const docType: 'span' | 'transaction' = item.processor.event;
     switch (docType) {
       case 'span':
         return getSpanItem(item as Span);

@@ -47,7 +47,7 @@ export const generateAndSaveAPIKey = async ({
 }: {
   request?: KibanaRequest;
   security: SecurityPluginStart;
-  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsClient?: SavedObjectsClientContract;
 }) => {
   const isApiKeysEnabled = await security.authc.apiKeys?.areAPIKeysEnabled();
 
@@ -66,7 +66,7 @@ export const generateAndSaveAPIKey = async ({
         cluster: ['monitor', 'read_ilm', 'read_pipeline'],
         index: [
           {
-            names: ['synthetics-*', 'heartbeat-*'],
+            names: ['synthetics-*'],
             privileges: ['view_index_metadata', 'create_doc', 'auto_configure'],
           },
         ],
@@ -81,8 +81,10 @@ export const generateAndSaveAPIKey = async ({
   if (apiKeyResult) {
     const { id, name, api_key: apiKey } = apiKeyResult;
     const apiKeyObject = { id, name, apiKey };
-    // discard decoded key and rest of the keys
-    await setSyntheticsServiceApiKey(savedObjectsClient, apiKeyObject);
+    if (savedObjectsClient) {
+      // discard decoded key and rest of the keys
+      await setSyntheticsServiceApiKey(savedObjectsClient, apiKeyObject);
+    }
     return apiKeyObject;
   }
 };

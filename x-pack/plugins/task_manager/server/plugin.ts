@@ -7,7 +7,7 @@
 
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs/operators';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
 import {
   PluginInitializerContext,
   Plugin,
@@ -60,6 +60,7 @@ export class TaskManagerPlugin
   private taskPollingLifecycle?: TaskPollingLifecycle;
   private ephemeralTaskLifecycle?: EphemeralTaskLifecycle;
   private taskManagerId?: string;
+  private usageCounter?: UsageCounter;
   private config: TaskManagerConfig;
   private logger: Logger;
   private definitions: TaskTypeDictionary;
@@ -98,7 +99,7 @@ export class TaskManagerPlugin
       elasticsearch: coreServices.elasticsearch,
     }));
 
-    const usageCounter = plugins.usageCollection?.createUsageCounter(`taskManager`);
+    this.usageCounter = plugins.usageCollection?.createUsageCounter(`taskManager`);
 
     // Routes
     const router = core.http.createRouter();
@@ -108,7 +109,7 @@ export class TaskManagerPlugin
       logger: this.logger,
       taskManagerId: this.taskManagerId,
       config: this.config!,
-      usageCounter,
+      usageCounter: this.usageCounter!,
       kibanaVersion: this.kibanaVersion,
       kibanaIndexName: core.savedObjects.getKibanaIndex(),
       getClusterClient: () =>
@@ -191,6 +192,7 @@ export class TaskManagerPlugin
       logger: this.logger,
       executionContext,
       taskStore,
+      usageCounter: this.usageCounter,
       middleware: this.middleware,
       elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
       ...managedConfiguration,

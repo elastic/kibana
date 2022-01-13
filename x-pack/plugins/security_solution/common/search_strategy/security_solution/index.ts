@@ -72,6 +72,8 @@ import {
   CtiEventEnrichmentRequestOptions,
   CtiEventEnrichmentStrategyResponse,
   CtiQueries,
+  CtiDataSourceRequestOptions,
+  CtiDataSourceStrategyResponse,
 } from './cti';
 import {
   HostRulesRequestOptions,
@@ -89,6 +91,7 @@ import {
   HostsKpiRiskyHostsStrategyResponse,
 } from './hosts/kpi/risky_hosts';
 
+export * from './cti';
 export * from './hosts';
 export * from './matrix_histogram';
 export * from './network';
@@ -108,7 +111,7 @@ export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
   filterQuery: ESQuery | string | undefined;
   defaultIndex: string[];
-  docValueFields?: estypes.SearchDocValueField[];
+  docValueFields?: estypes.QueryDslFieldAndFormat[];
   factoryQueryType?: FactoryQueryTypes;
 }
 
@@ -184,6 +187,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? MatrixHistogramStrategyResponse
   : T extends CtiQueries.eventEnrichment
   ? CtiEventEnrichmentStrategyResponse
+  : T extends CtiQueries.dataSource
+  ? CtiDataSourceStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -246,6 +251,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? MatrixHistogramRequestOptions
   : T extends CtiQueries.eventEnrichment
   ? CtiEventEnrichmentRequestOptions
+  : T extends CtiQueries.dataSource
+  ? CtiDataSourceRequestOptions
   : never;
 
 export interface DocValueFieldsInput {

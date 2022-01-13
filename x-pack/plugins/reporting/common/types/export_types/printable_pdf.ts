@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LayoutParams } from '../layout';
+import type { LayoutParams } from '../../../../screenshotting/common';
 import type { BaseParams, BasePayload } from '../base';
 
 interface BaseParamsPDF {
@@ -24,9 +24,4 @@ export interface TaskPayloadPDF extends BasePayload {
   layout: LayoutParams;
   forceNow?: string;
   objects: Array<{ relativeUrl: string }>;
-}
-
-export interface JobParamsPDFLegacy extends Omit<JobParamsPDF, 'relativeUrls'> {
-  savedObjectId: string;
-  queryString: string;
 }

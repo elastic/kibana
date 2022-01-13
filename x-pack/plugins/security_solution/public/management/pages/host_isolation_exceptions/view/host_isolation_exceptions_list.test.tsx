@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { act, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import { act, waitFor, waitForElementToBeRemoved, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
+import { EndpointPrivileges } from '../../../../../common/endpoint/types';
+import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
 import { sendGetEndpointSpecificPackagePoliciesMock } from '../../../services/policies/test_mock_utilts';
 import { getHostIsolationExceptionItems } from '../service';
 import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
-import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
-import { EndpointPrivileges } from '../../../../../common/endpoint/types';
 
 jest.mock('../service');
 jest.mock('../../../../common/hooks/use_license');
@@ -91,7 +91,9 @@ describe('When on the host isolation exceptions page', () => {
 
     describe('And data exists', () => {
       beforeEach(async () => {
-        getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
+        getHostIsolationExceptionItemsMock.mockImplementation(() =>
+          getFoundExceptionListItemSchemaMock(1)
+        );
       });
 
       it('should show loading indicator while retrieving data and hide it when it gets it', async () => {
@@ -105,24 +107,25 @@ describe('When on the host isolation exceptions page', () => {
         await waitForApiCall();
 
         // see if loader is present
-        expect(renderResult.getByTestId('hostIsolationExceptionsContent-loader')).toBeTruthy();
+        expect(renderResult.getByTestId('hostIsolationExceptionListLoader')).toBeTruthy();
 
         // release the request
         releaseApiResponse!(getFoundExceptionListItemSchemaMock());
 
         //  check the loader is gone
         await waitForElementToBeRemoved(
-          renderResult.getByTestId('hostIsolationExceptionsContent-loader')
+          renderResult.getByTestId('hostIsolationExceptionListLoader')
         );
       });
 
-      it('should display the search bar and item count', async () => {
+      it('should display the search bar, item count and policy filter', async () => {
         render();
         await waitForApiCall();
         expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
         expect(renderResult.getByTestId('hostIsolationExceptions-totalCount').textContent).toBe(
           'Showing 1 exception'
         );
+        expect(renderResult.getByTestId('policiesSelectorButton')).toBeTruthy();
       });
 
       it('should show items on the list', async () => {
@@ -166,11 +169,10 @@ describe('When on the host isolation exceptions page', () => {
         // wait for the page render
         await waitFor(() =>
           expect(getHostIsolationExceptionItemsMock).toHaveBeenLastCalledWith({
-            filter:
-              '(exception-list-agnostic.attributes.name:(*this*does*not*exists*) OR exception-list-agnostic.attributes.description:(*this*does*not*exists*) OR exception-list-agnostic.attributes.entries.value:(*this*does*not*exists*))',
             http: mockedContext.coreStart.http,
+            filter: undefined,
             page: 1,
-            perPage: 10,
+            perPage: 1,
           })
         );
 
@@ -180,12 +182,47 @@ describe('When on the host isolation exceptions page', () => {
         // check the searchbar is still there
         expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
       });
+
+      it('should apply a policy filter when a filter is selected', async () => {
+        const policies = await sendGetEndpointSpecificPackagePoliciesMock();
+        const firstPolicy = policies.items[0];
+        (sendGetEndpointSpecificPackagePolicies as jest.Mock).mockResolvedValue(policies);
+
+        render();
+        await waitForApiCall();
+
+        // press the filter button
+        const button = renderResult.getByTestId('policiesSelectorButton');
+        expect(button).toBeTruthy();
+        userEvent.click(button);
+
+        // find the first policy option and click it
+        const option = within(renderResult.getByTestId('policiesSelector-popover')).getByText(
+          firstPolicy.name
+        );
+        userEvent.click(option);
+
+        // wait for the page render
+        await waitFor(() =>
+          expect(getHostIsolationExceptionItemsMock).toHaveBeenLastCalledWith({
+            http: mockedContext.coreStart.http,
+            filter: undefined,
+            page: 1,
+            perPage: 1,
+          })
+        );
+
+        // check the url changed
+        expect(mockedContext.history.location.search).toBe(`?included_policies=${firstPolicy.id}`);
+      });
     });
 
     describe('has canIsolateHost privileges', () => {
       beforeEach(async () => {
         setEndpointPrivileges({ canIsolateHost: true });
-        getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
+        getHostIsolationExceptionItemsMock.mockImplementation(() =>
+          getFoundExceptionListItemSchemaMock(1)
+        );
       });
 
       it('should show the create flyout when the add button is pressed', async () => {

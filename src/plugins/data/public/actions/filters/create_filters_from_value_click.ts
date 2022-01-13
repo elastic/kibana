@@ -12,8 +12,7 @@ import { esFilters, Filter } from '../../../public';
 import { getIndexPatterns, getSearchService } from '../../../public/services';
 import { AggConfigSerialized } from '../../../common/search/aggs';
 
-/** @internal */
-export interface ValueClickDataContext {
+interface ValueClickDataContext {
   data: Array<{
     table: Pick<Datatable, 'rows' | 'columns'>;
     column: number;

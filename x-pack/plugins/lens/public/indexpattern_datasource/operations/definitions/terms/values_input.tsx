@@ -44,7 +44,7 @@ export const ValuesInput = ({
       label={i18n.translate('xpack.lens.indexPattern.terms.size', {
         defaultMessage: 'Number of values',
       })}
-      display="columnCompressed"
+      display="rowCompressed"
       fullWidth
       isInvalid={isHigherThanMax || isLowerThanMin}
       error={

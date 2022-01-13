@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { ServerApiError } from '../../common/types';
 
 import { OperatingSystem } from '../../../common/endpoint/types';
 
@@ -39,4 +40,11 @@ export const OS_TITLES: Readonly<{ [K in OperatingSystem]: string }> = {
   [OperatingSystem.LINUX]: i18n.translate('xpack.securitySolution.administration.os.linux', {
     defaultMessage: 'Linux',
   }),
+};
+
+export const getLoadPoliciesError = (error: ServerApiError) => {
+  return i18n.translate('xpack.securitySolution.exceptions.failedLoadPolicies', {
+    defaultMessage: 'There was an error loading policies: "{error}"',
+    values: { error: error.message },
+  });
 };

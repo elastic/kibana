@@ -12,6 +12,7 @@ import {
   SavedObjectsUpdateOptions,
 } from 'kibana/server';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { KueryNode } from '@kbn/es-query';
 import {
   AttributesTypeAlerts,
@@ -26,10 +27,17 @@ import {
 } from '../../../common/constants';
 import { ClientArgs } from '..';
 import { buildFilter, combineFilters } from '../../client/utils';
-
-interface GetAllAlertsAttachToCaseArgs extends ClientArgs {
+import { defaultSortField } from '../../common/utils';
+import { AggregationResponse } from '../../client/metrics/types';
+interface AttachedToCaseArgs extends ClientArgs {
   caseId: string;
   filter?: KueryNode;
+}
+
+type GetAllAlertsAttachToCaseArgs = AttachedToCaseArgs;
+type CountAlertsAttachedToCaseArgs = AttachedToCaseArgs;
+interface CountActionsAttachedToCaseArgs extends AttachedToCaseArgs {
+  aggregations: Record<string, estypes.AggregationsAggregationContainer>;
 }
 
 interface GetAttachmentArgs extends ClientArgs {
@@ -56,6 +64,52 @@ interface BulkUpdateAttachmentArgs extends ClientArgs {
 
 export class AttachmentService {
   constructor(private readonly log: Logger) {}
+
+  public async countAlertsAttachedToCase({
+    unsecuredSavedObjectsClient,
+    caseId,
+    filter,
+  }: CountAlertsAttachedToCaseArgs): Promise<number | undefined> {
+    try {
+      this.log.debug(`Attempting to count alerts for case id ${caseId}`);
+      const alertsFilter = buildFilter({
+        filters: [CommentType.alert, CommentType.generatedAlert],
+        field: 'type',
+        operator: 'or',
+        type: CASE_COMMENT_SAVED_OBJECT,
+      });
+
+      const combinedFilter = combineFilters([alertsFilter, filter]);
+
+      const response = await unsecuredSavedObjectsClient.find<
+        AttachmentAttributes,
+        { alerts: { value: number } }
+      >({
+        type: CASE_COMMENT_SAVED_OBJECT,
+        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+        page: 1,
+        perPage: 1,
+        sortField: defaultSortField,
+        aggs: this.buildCountAlertsAggs(),
+        filter: combinedFilter,
+      });
+
+      return response.aggregations?.alerts?.value;
+    } catch (error) {
+      this.log.error(`Error while counting alerts for case id ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
+  private buildCountAlertsAggs(): Record<string, estypes.AggregationsAggregationContainer> {
+    return {
+      alerts: {
+        cardinality: {
+          field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
+        },
+      },
+    };
+  }
 
   /**
    * Retrieves all the alerts attached to a case.
@@ -93,6 +147,46 @@ export class AttachmentService {
       return result;
     } catch (error) {
       this.log.error(`Error on GET all alerts for case id ${caseId}: ${error}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Executes the aggregations against the actions attached to a case.
+   */
+  public async executeCaseActionsAggregations({
+    unsecuredSavedObjectsClient,
+    caseId,
+    filter,
+    aggregations,
+  }: CountActionsAttachedToCaseArgs): Promise<AggregationResponse | undefined> {
+    try {
+      this.log.debug(`Attempting to count actions for case id ${caseId}`);
+      const actionsFilter = buildFilter({
+        filters: [CommentType.actions],
+        field: 'type',
+        operator: 'or',
+        type: CASE_COMMENT_SAVED_OBJECT,
+      });
+
+      const combinedFilter = combineFilters([actionsFilter, filter]);
+
+      const response = await unsecuredSavedObjectsClient.find<
+        AttachmentAttributes,
+        AggregationResponse
+      >({
+        type: CASE_COMMENT_SAVED_OBJECT,
+        hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+        page: 1,
+        perPage: 1,
+        sortField: defaultSortField,
+        aggs: aggregations,
+        filter: combinedFilter,
+      });
+
+      return response.aggregations;
+    } catch (error) {
+      this.log.error(`Error while counting actions for case id ${caseId}: ${error}`);
       throw error;
     }
   }

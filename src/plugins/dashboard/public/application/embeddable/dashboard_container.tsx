@@ -36,6 +36,7 @@ import {
   KibanaContextProvider,
   KibanaReactContext,
   KibanaReactContextValue,
+  KibanaThemeProvider,
 } from '../../services/kibana_react';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { DashboardAppCapabilities, DashboardContainerInput } from '../../types';
@@ -46,7 +47,7 @@ import {
   combineDashboardFiltersWithControlGroupFilters,
   syncDashboardControlGroup,
 } from '../lib/dashboard_control_group';
-import { ControlGroupContainer } from '../../../../presentation_util/public';
+import { ControlGroupContainer } from '../../../../controls/public';
 
 export interface DashboardContainerServices {
   ExitFullScreenButton: React.ComponentType<any>;
@@ -60,6 +61,7 @@ export interface DashboardContainerServices {
   uiSettings: IUiSettingsClient;
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
+  theme: CoreStart['theme'];
   http: CoreStart['http'];
 }
 
@@ -99,6 +101,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   private onDestroyControlGroup?: () => void;
   public controlGroup?: ControlGroupContainer;
+  private domNode?: HTMLElement;
 
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
@@ -256,12 +259,25 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   public render(dom: HTMLElement) {
+    if (this.domNode) {
+      ReactDOM.unmountComponentAtNode(this.domNode);
+    }
+    this.domNode = dom;
+    const controlsEnabled = this.services.presentationUtil.labsService.isProjectEnabled(
+      'labs:dashboard:dashboardControls'
+    );
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
-          <this.services.presentationUtil.ContextProvider>
-            <DashboardViewport container={this} controlGroup={this.controlGroup} />
-          </this.services.presentationUtil.ContextProvider>
+          <KibanaThemeProvider theme$={this.services.theme.theme$}>
+            <this.services.presentationUtil.ContextProvider>
+              <DashboardViewport
+                controlsEnabled={controlsEnabled}
+                container={this}
+                controlGroup={this.controlGroup}
+              />
+            </this.services.presentationUtil.ContextProvider>
+          </KibanaThemeProvider>
         </KibanaContextProvider>
       </I18nProvider>,
       dom
@@ -271,6 +287,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public destroy() {
     super.destroy();
     this.onDestroyControlGroup?.();
+    if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {

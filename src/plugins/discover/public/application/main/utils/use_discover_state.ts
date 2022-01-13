@@ -92,6 +92,7 @@ export function useDiscoverState({
   const { data$, refetch$, reset, inspectorAdapters } = useSavedSearchData({
     initialFetchStatus,
     searchSessionManager,
+    savedSearch,
     searchSource,
     services,
     stateContainer,

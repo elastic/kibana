@@ -5,35 +5,37 @@
  * 2.0.
  */
 
-import { Writable } from 'stream';
-import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
-import { IScopedSearchClient } from 'src/plugins/data/server';
-import { Datatable } from 'src/plugins/expressions/server';
-import { ReportingConfig } from '../../..';
-import {
-  cellHasFormulas,
-  ES_SEARCH_STRATEGY,
+import { i18n } from '@kbn/i18n';
+import type { IScopedClusterClient, IUiSettingsClient } from 'src/core/server';
+import type { IScopedSearchClient } from 'src/plugins/data/server';
+import type { Datatable } from 'src/plugins/expressions/server';
+import type { Writable } from 'stream';
+import type { ReportingConfig } from '../../..';
+import type {
   IndexPattern,
   ISearchSource,
   ISearchStartSearchSource,
   SearchFieldValue,
   SearchSourceFields,
-  tabifyDocs,
 } from '../../../../../../../src/plugins/data/common';
 import {
+  cellHasFormulas,
+  ES_SEARCH_STRATEGY,
+  tabifyDocs,
+} from '../../../../../../../src/plugins/data/common';
+import type {
   FieldFormat,
   FieldFormatConfig,
   IFieldFormatsRegistry,
 } from '../../../../../../../src/plugins/field_formats/common';
 import { KbnServerError } from '../../../../../../../src/plugins/kibana_utils/server';
-import { CancellationToken } from '../../../../common';
+import type { CancellationToken } from '../../../../common/cancellation_token';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';
-import { LevelLogger } from '../../../lib';
-import { TaskRunResult } from '../../../lib/tasks';
-import { JobParamsCSV } from '../types';
+import type { LevelLogger } from '../../../lib';
+import type { TaskRunResult } from '../../../lib/tasks';
+import type { JobParamsCSV } from '../types';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 
@@ -65,7 +67,6 @@ function isPlainStringArray(
 
 export class CsvGenerator {
   private _columns?: string[];
-  private _formatters?: Record<string, FieldFormat>;
   private csvContainsFormulas = false;
   private maxSizeReached = false;
   private csvRowCount = 0;
@@ -94,7 +95,7 @@ export class CsvGenerator {
         index: index.title,
         scroll: scrollSettings.duration,
         size: scrollSettings.size,
-        ignore_throttled: !includeFrozen,
+        ignore_throttled: includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
       },
     };
 
@@ -120,10 +121,6 @@ export class CsvGenerator {
    * Load field formats for each field in the list
    */
   private getFormatters(table: Datatable) {
-    if (this._formatters) {
-      return this._formatters;
-    }
-
     // initialize field formats
     const formatters: Record<string, FieldFormat> = {};
     table.columns.forEach((c) => {
@@ -131,8 +128,7 @@ export class CsvGenerator {
       formatters[c.id] = fieldFormat;
     });
 
-    this._formatters = formatters;
-    return this._formatters;
+    return formatters;
   }
 
   private escapeValues(settings: CsvExportSettings) {

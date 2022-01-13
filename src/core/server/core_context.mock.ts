@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { CoreContext } from './core_context';
 import { Env, IConfigService } from './config';

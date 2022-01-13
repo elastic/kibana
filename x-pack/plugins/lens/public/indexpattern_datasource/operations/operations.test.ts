@@ -378,10 +378,6 @@ describe('getOperationTypesForField', () => {
                 "operationType": "formula",
                 "type": "managedReference",
               },
-              Object {
-                "operationType": "static_value",
-                "type": "managedReference",
-              },
             ],
           },
           Object {
@@ -395,6 +391,20 @@ describe('getOperationTypesForField', () => {
                 "field": "source",
                 "operationType": "last_value",
                 "type": "field",
+              },
+            ],
+          },
+          Object {
+            "operationMetaData": Object {
+              "dataType": "number",
+              "isBucketed": false,
+              "isStaticValue": true,
+              "scale": "ratio",
+            },
+            "operations": Array [
+              Object {
+                "operationType": "static_value",
+                "type": "managedReference",
               },
             ],
           },

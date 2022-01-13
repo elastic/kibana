@@ -215,6 +215,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
 "
     >
       <div>
+        <div />
         <textarea
           data-test-subj="monacoEditorTextarea"
           onKeyDown={[Function]}

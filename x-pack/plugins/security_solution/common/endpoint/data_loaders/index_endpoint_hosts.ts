@@ -97,7 +97,7 @@ export async function indexEndpointHostDocs({
   client: Client;
   kbnClient: KbnClient;
   realPolicies: Record<string, CreatePackagePolicyResponse['item']>;
-  epmEndpointPackage: GetPackagesResponse['response'][0];
+  epmEndpointPackage: GetPackagesResponse['items'][0];
   metadataIndex: string;
   policyResponseIndex: string;
   enrollFleet: boolean;

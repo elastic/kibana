@@ -7,12 +7,12 @@
 
 import React, { memo, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { CaseStatuses, StatusAll, CasesContextValue } from '../../../../../../cases/common';
-import { TimelineItem } from '../../../../../common/';
+import { CaseStatuses, StatusAll, CasesFeatures } from '../../../../../../cases/common';
+import { TimelineItem } from '../../../../../common/search_strategy';
 import { useAddToCase, normalizedEventFields } from '../../../../hooks/use_add_to_case';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { TimelinesStartServices } from '../../../../types';
-import { tGridActions } from '../../../../';
+import { setOpenAddToExistingCase, setOpenAddToNewCase } from '../../../../store/t_grid/actions';
 
 export interface AddToCaseActionProps {
   event?: TimelineItem;
@@ -24,7 +24,7 @@ export interface AddToCaseActionProps {
   appId: string;
   owner: string;
   onClose?: Function;
-  casesFeatures?: CasesContextValue['features'];
+  casesFeatures?: CasesFeatures;
 }
 
 const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
@@ -68,8 +68,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
       updateCase: onCaseSuccess,
       userCanCrud: casePermissions?.crud ?? false,
       owner: [owner],
-      onClose: () =>
-        dispatch(tGridActions.setOpenAddToExistingCase({ id: eventId, isOpen: false })),
+      onClose: () => dispatch(setOpenAddToExistingCase({ id: eventId, isOpen: false })),
     };
   }, [
     casePermissions?.crud,
@@ -84,7 +83,7 @@ const AddToCaseActionComponent: React.FC<AddToCaseActionProps> = ({
   ]);
 
   const closeCaseFlyoutOpen = useCallback(() => {
-    dispatch(tGridActions.setOpenAddToNewCase({ id: eventId, isOpen: false }));
+    dispatch(setOpenAddToNewCase({ id: eventId, isOpen: false }));
   }, [dispatch, eventId]);
 
   const createCaseFlyoutProps = useMemo(() => {

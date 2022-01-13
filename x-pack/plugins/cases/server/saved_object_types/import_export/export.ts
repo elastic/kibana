@@ -20,7 +20,8 @@ import {
   MAX_DOCS_PER_PAGE,
   SAVED_OBJECT_TYPES,
 } from '../../../common/constants';
-import { createCaseError, defaultSortField } from '../../common';
+import { defaultSortField } from '../../common/utils';
+import { createCaseError } from '../../common/error';
 import { ESCaseAttributes } from '../../services/cases/types';
 
 export async function handleExport({
@@ -74,7 +75,7 @@ async function getAttachmentsAndUserActionsForCases(
     getAssociatedObjects<CaseUserActionAttributes>({
       savedObjectsClient,
       caseIds,
-      sortField: 'action_at',
+      sortField: defaultSortField,
       type: CASE_USER_ACTION_SAVED_OBJECT,
     }),
   ]);

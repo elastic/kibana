@@ -291,7 +291,6 @@ async function installDataStreamComponentTemplates(params: {
   });
   const templateNames = Object.keys(templates);
   const templateEntries = Object.entries(templates);
-
   // TODO: Check return values for errors
   await Promise.all(
     templateEntries.map(async ([name, body]) => {
@@ -307,7 +306,6 @@ async function installDataStreamComponentTemplates(params: {
           const { clusterPromise } = putComponentTemplate(esClient, logger, {
             body,
             name,
-            create: true,
           });
           return clusterPromise;
         }
@@ -343,8 +341,7 @@ export async function ensureDefaultComponentTemplate(
     await putComponentTemplate(esClient, logger, {
       name: FLEET_GLOBAL_COMPONENT_TEMPLATE_NAME,
       body: FLEET_GLOBAL_COMPONENT_TEMPLATE_CONTENT,
-      create: true,
-    });
+    }).clusterPromise;
   }
 
   return { isCreated: !existingTemplate };

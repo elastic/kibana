@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash';
 import { CommentType } from '../../../common/api';
-import { Comment } from '../../containers/types';
+import type { Comment } from '../../containers/types';
 
 export const getManualAlertIdsWithNoRuleId = (comments: Comment[]): string[] => {
   const dedupeAlerts = comments.reduce((alertIds, comment: Comment) => {

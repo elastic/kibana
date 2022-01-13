@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { OverlayStart } from '../../../../../core/public';
+import { CoreStart, OverlayStart } from '../../../../../core/public';
 import { dashboardCopyToDashboardAction } from '../../dashboard_strings';
 import { EmbeddableStateTransfer, IEmbeddable } from '../../services/embeddable';
 import { toMountPoint } from '../../services/kibana_react';
@@ -37,6 +37,7 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
   public order = 1;
 
   constructor(
+    private theme: CoreStart['theme'],
     private overlays: OverlayStart,
     private stateTransfer: EmbeddableStateTransfer,
     private capabilities: DashboardCopyToCapabilities,
@@ -79,7 +80,8 @@ export class CopyToDashboardAction implements Action<CopyToDashboardActionContex
           capabilities={this.capabilities}
           dashboardId={(embeddable.parent as DashboardContainer).getInput().id}
           embeddable={embeddable}
-        />
+        />,
+        { theme$: this.theme.theme$ }
       ),
       {
         maxWidth: 400,

@@ -13,13 +13,12 @@ import {
   SavedObjectReference,
 } from 'kibana/server';
 import { flatMap, uniqWith, isEmpty, xorWith } from 'lodash';
-import { AlertInfo } from '.';
+import { AlertInfo } from './types';
 import { LensServerPluginSetup } from '../../../lens/server';
 
 import {
   AssociationType,
   CaseAttributes,
-  CaseConnector,
   CaseResponse,
   CasesClientPostRequest,
   CasesFindResponse,
@@ -55,27 +54,17 @@ export const defaultSortField = 'created_at';
 export const nullUser: User = { username: null, full_name: null, email: null };
 
 export const transformNewCase = ({
-  connector,
-  createdDate,
-  email,
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  full_name,
+  user,
   newCase,
-  username,
 }: {
-  connector: CaseConnector;
-  createdDate: string;
-  email?: string | null;
-  full_name?: string | null;
+  user: User;
   newCase: CasesClientPostRequest;
-  username?: string | null;
 }): CaseAttributes => ({
   ...newCase,
   closed_at: null,
   closed_by: null,
-  connector,
-  created_at: createdDate,
-  created_by: { email, full_name, username },
+  created_at: new Date().toISOString(),
+  created_by: user,
   external_service: null,
   status: CaseStatuses.open,
   updated_at: null,

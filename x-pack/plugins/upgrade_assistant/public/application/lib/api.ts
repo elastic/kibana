@@ -13,6 +13,7 @@ import {
   ClusterUpgradeState,
   ResponseError,
   SystemIndicesMigrationStatus,
+  ReindexStatusResponse,
 } from '../../../common/types';
 import {
   API_BASE_PATH,
@@ -209,7 +210,7 @@ export class ApiService {
   }
 
   public async getReindexStatus(indexName: string) {
-    return await this.sendRequest({
+    return await this.sendRequest<ReindexStatusResponse>({
       path: `${API_BASE_PATH}/reindex/${indexName}`,
       method: 'get',
     });
@@ -226,6 +227,16 @@ export class ApiService {
     return await this.sendRequest({
       path: `${API_BASE_PATH}/reindex/${indexName}/cancel`,
       method: 'post',
+    });
+  }
+
+  public useLoadUpgradeStatus() {
+    return this.useRequest<{
+      readyForUpgrade: boolean;
+      details: string;
+    }>({
+      path: `${API_BASE_PATH}/status`,
+      method: 'get',
     });
   }
 }

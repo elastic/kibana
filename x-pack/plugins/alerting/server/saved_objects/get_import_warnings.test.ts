@@ -6,7 +6,7 @@
  */
 
 import { SavedObject } from 'kibana/server';
-import { RawAlert } from '../types';
+import { RawRule } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 
 describe('getImportWarnings', () => {
@@ -71,13 +71,13 @@ describe('getImportWarnings', () => {
         references: [],
       },
     ];
-    const warnings = getImportWarnings(savedObjectRules as unknown as Array<SavedObject<RawAlert>>);
+    const warnings = getImportWarnings(savedObjectRules as unknown as Array<SavedObject<RawRule>>);
     expect(warnings[0].message).toBe('2 rules must be enabled after the import.');
   });
 
   it('return no warning messages if no rules were imported', () => {
-    const savedObjectRules = [] as Array<SavedObject<RawAlert>>;
-    const warnings = getImportWarnings(savedObjectRules as unknown as Array<SavedObject<RawAlert>>);
+    const savedObjectRules = [] as Array<SavedObject<RawRule>>;
+    const warnings = getImportWarnings(savedObjectRules as unknown as Array<SavedObject<RawRule>>);
     expect(warnings.length).toBe(0);
   });
 });

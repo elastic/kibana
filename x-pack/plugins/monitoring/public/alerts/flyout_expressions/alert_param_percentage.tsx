@@ -13,10 +13,10 @@ interface Props {
   percentage: number;
   label: string;
   errors: string[];
-  setAlertParams: (property: string, value: any) => void;
+  setRuleParams: (property: string, value: any) => void;
 }
 export const AlertParamPercentage: React.FC<Props> = (props: Props) => {
-  const { name, label, setAlertParams, errors } = props;
+  const { name, label, setRuleParams, errors } = props;
   const [value, setValue] = React.useState(props.percentage);
 
   return (
@@ -35,7 +35,7 @@ export const AlertParamPercentage: React.FC<Props> = (props: Props) => {
             newValue = 0;
           }
           setValue(newValue);
-          setAlertParams(name, newValue);
+          setRuleParams(name, newValue);
         }}
       />
     </EuiFormRow>

@@ -9,6 +9,7 @@ import { CoreSetup, SavedObjectsClientContract } from '../../../../../src/core/s
 import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
 import { CollectorDependencies } from './types';
 import { fetchDetectionsMetrics } from './detections';
+import { SAVED_OBJECT_TYPES } from '../../../cases/common/constants';
 
 export type RegisterCollector = (deps: CollectorDependencies) => void;
 export interface UsageData {
@@ -17,7 +18,8 @@ export interface UsageData {
 
 export async function getInternalSavedObjectsClient(core: CoreSetup) {
   return core.getStartServices().then(async ([coreStart]) => {
-    return coreStart.savedObjects.createInternalRepository();
+    // note: we include the "cases" and "alert" hidden types here otherwise we would not be able to query them. If at some point cases and alert is not considered a hidden type this can be removed
+    return coreStart.savedObjects.createInternalRepository(['alert', ...SAVED_OBJECT_TYPES]);
   });
 }
 
@@ -120,6 +122,12 @@ export const registerCollector: RegisterCollector = ({
                 _meta: {
                   description: 'Number of cases attached to threat_match detection rule alerts',
                 },
+              },
+            },
+            legacy_notifications: {
+              total: {
+                type: 'long',
+                _meta: { description: 'Number of legacy notifications still in use' },
               },
             },
             elastic_total: {

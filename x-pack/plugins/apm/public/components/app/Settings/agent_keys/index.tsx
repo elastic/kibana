@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
@@ -21,6 +21,11 @@ import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { PermissionDenied } from './prompts/permission_denied';
 import { ApiKeysNotEnabled } from './prompts/api_keys_not_enabled';
 import { AgentKeysTable } from './agent_keys_table';
+import { CreateAgentKeyFlyout } from './create_agent_key';
+import { AgentKeyCallOut } from './create_agent_key/agent_key_callout';
+import { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { ApiKey } from '../../../../../../security/common/model';
 
 const INITIAL_DATA = {
   areApiKeysEnabled: false,
@@ -28,33 +33,12 @@ const INITIAL_DATA = {
 };
 
 export function AgentKeys() {
-  return (
-    <Fragment>
-      <EuiText color="subdued">
-        {i18n.translate('xpack.apm.settings.agentKeys.descriptionText', {
-          defaultMessage:
-            'View and delete agent keys. An agent key sends requests on behalf of a user.',
-        })}
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2>
-              {i18n.translate('xpack.apm.settings.agentKeys.title', {
-                defaultMessage: 'Agent keys',
-              })}
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <AgentKeysContent />
-    </Fragment>
-  );
-}
+  const { toasts } = useApmPluginContext().core.notifications;
 
-function AgentKeysContent() {
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [createdAgentKey, setCreatedAgentKey] =
+    useState<CreateApiKeyResponse>();
+
   const {
     data: { areApiKeysEnabled, canManage } = INITIAL_DATA,
     status: privilegesStatus,
@@ -85,16 +69,113 @@ function AgentKeysContent() {
   );
 
   const agentKeys = data?.agentKeys;
-  const isLoading =
-    privilegesStatus === FETCH_STATUS.LOADING ||
-    status === FETCH_STATUS.LOADING;
 
-  const requestFailed =
-    privilegesStatus === FETCH_STATUS.FAILURE ||
-    status === FETCH_STATUS.FAILURE;
+  return (
+    <Fragment>
+      <EuiText color="subdued">
+        {i18n.translate('xpack.apm.settings.agentKeys.descriptionText', {
+          defaultMessage:
+            'View and delete APM agent keys. An APM agent key sends requests on behalf of a user.',
+        })}
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiTitle>
+            <h2>
+              {i18n.translate('xpack.apm.settings.agentKeys.title', {
+                defaultMessage: 'APM agent keys',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        {areApiKeysEnabled && canManage && !isEmpty(agentKeys) && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={() => setIsFlyoutVisible(true)}
+              fill={true}
+              iconType="plusInCircle"
+            >
+              {i18n.translate(
+                'xpack.apm.settings.agentKeys.createAgentKeyButton',
+                {
+                  defaultMessage: 'Create APM agent key',
+                }
+              )}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      {createdAgentKey && (
+        <AgentKeyCallOut
+          name={createdAgentKey.name}
+          token={btoa(`${createdAgentKey.id}:${createdAgentKey.api_key}`)}
+        />
+      )}
+      {isFlyoutVisible && (
+        <CreateAgentKeyFlyout
+          onCancel={() => {
+            setIsFlyoutVisible(false);
+          }}
+          onSuccess={(agentKey: CreateApiKeyResponse) => {
+            setCreatedAgentKey(agentKey);
+            setIsFlyoutVisible(false);
+            refetchAgentKeys();
+          }}
+          onError={(keyName: string, message: string) => {
+            toasts.addDanger(
+              i18n.translate('xpack.apm.settings.agentKeys.crate.failed', {
+                defaultMessage:
+                  'Error creating APM agent key "{keyName}". Error: "{message}"',
+                values: { keyName, message },
+              })
+            );
+            setIsFlyoutVisible(false);
+          }}
+        />
+      )}
+      <AgentKeysContent
+        loading={
+          privilegesStatus === FETCH_STATUS.LOADING ||
+          status === FETCH_STATUS.LOADING
+        }
+        requestFailed={
+          privilegesStatus === FETCH_STATUS.FAILURE ||
+          status === FETCH_STATUS.FAILURE
+        }
+        canManage={canManage}
+        areApiKeysEnabled={areApiKeysEnabled}
+        agentKeys={agentKeys}
+        onKeyDelete={() => {
+          setCreatedAgentKey(undefined);
+          refetchAgentKeys();
+        }}
+        onCreateAgentClick={() => setIsFlyoutVisible(true)}
+      />
+    </Fragment>
+  );
+}
 
+function AgentKeysContent({
+  loading,
+  requestFailed,
+  canManage,
+  areApiKeysEnabled,
+  agentKeys,
+  onKeyDelete,
+  onCreateAgentClick,
+}: {
+  loading: boolean;
+  requestFailed: boolean;
+  canManage: boolean;
+  areApiKeysEnabled: boolean;
+  agentKeys?: ApiKey[];
+  onKeyDelete: () => void;
+  onCreateAgentClick: () => void;
+}) {
   if (!agentKeys) {
-    if (isLoading) {
+    if (loading) {
       return (
         <EuiEmptyPrompt
           icon={<EuiLoadingSpinner size="xl" />}
@@ -104,7 +185,7 @@ function AgentKeysContent() {
               {i18n.translate(
                 'xpack.apm.settings.agentKeys.agentKeysLoadingPromptTitle',
                 {
-                  defaultMessage: 'Loading Agent keys...',
+                  defaultMessage: 'Loading APM agent keys...',
                 }
               )}
             </h2>
@@ -122,7 +203,7 @@ function AgentKeysContent() {
               {i18n.translate(
                 'xpack.apm.settings.agentKeys.agentKeysErrorPromptTitle',
                 {
-                  defaultMessage: 'Could not load agent keys.',
+                  defaultMessage: 'Could not load APM agent keys.',
                 }
               )}
             </h2>
@@ -147,7 +228,7 @@ function AgentKeysContent() {
         title={
           <h2>
             {i18n.translate('xpack.apm.settings.agentKeys.emptyPromptTitle', {
-              defaultMessage: 'Create your first agent key',
+              defaultMessage: 'Create your first key',
             })}
           </h2>
         }
@@ -155,16 +236,20 @@ function AgentKeysContent() {
           <p>
             {i18n.translate('xpack.apm.settings.agentKeys.emptyPromptBody', {
               defaultMessage:
-                'Create agent keys to authorize requests to the APM Server.',
+                'Create APM agent keys to authorize APM agent requests to the APM Server.',
             })}
           </p>
         }
         actions={
-          <EuiButton fill={true} iconType="plusInCircleFilled">
+          <EuiButton
+            onClick={onCreateAgentClick}
+            fill={true}
+            iconType="plusInCircle"
+          >
             {i18n.translate(
               'xpack.apm.settings.agentKeys.createAgentKeyButton',
               {
-                defaultMessage: 'Create agent key',
+                defaultMessage: 'Create APM agent key',
               }
             )}
           </EuiButton>
@@ -175,10 +260,7 @@ function AgentKeysContent() {
 
   if (agentKeys && !isEmpty(agentKeys)) {
     return (
-      <AgentKeysTable
-        agentKeys={agentKeys ?? []}
-        refetchAgentKeys={refetchAgentKeys}
-      />
+      <AgentKeysTable agentKeys={agentKeys ?? []} onKeyDelete={onKeyDelete} />
     );
   }
 

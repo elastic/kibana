@@ -7,14 +7,16 @@
 
 import * as t from 'io-ts';
 import { ConfigKey } from './config_key';
+import { ServiceLocationsCodec } from './locations';
 import {
   DataStreamCodec,
   ModeCodec,
   ResponseBodyIndexPolicyCodec,
   ScheduleUnitCodec,
+  TLSVersionCodec,
+  VerificationModeCodec,
 } from './monitor_configs';
 import { MetadataCodec } from './monitor_meta_data';
-import { TLSVersionCodec, VerificationModeCodec } from './monitor_configs';
 
 const Schedule = t.interface({
   number: t.string,
@@ -47,11 +49,15 @@ export type ZipUrlTLSFields = t.TypeOf<typeof ZipUrlTLSFieldsCodec>;
 
 // CommonFields
 export const CommonFieldsCodec = t.interface({
+  [ConfigKey.NAME]: t.string,
   [ConfigKey.MONITOR_TYPE]: DataStreamCodec,
+  [ConfigKey.ENABLED]: t.boolean,
   [ConfigKey.SCHEDULE]: Schedule,
+  [ConfigKey.LOCATIONS]: t.array(t.string),
   [ConfigKey.APM_SERVICE_NAME]: t.string,
   [ConfigKey.TIMEOUT]: t.string,
   [ConfigKey.TAGS]: t.array(t.string),
+  [ConfigKey.LOCATIONS]: ServiceLocationsCodec,
 });
 
 export type CommonFields = t.TypeOf<typeof CommonFieldsCodec>;
@@ -182,14 +188,37 @@ export type BrowserFields = t.TypeOf<typeof BrowserFieldsCodec>;
 export type BrowserSimpleFields = t.TypeOf<typeof BrowserSimpleFieldsCodec>;
 export type BrowserAdvancedFields = t.TypeOf<typeof BrowserAdvancedFieldsCodec>;
 
+// MonitorFields, represents any possible monitor type
 export const MonitorFieldsCodec = t.intersection([
   HTTPFieldsCodec,
   TCPFieldsCodec,
   ICMPSimpleFieldsCodec,
   BrowserFieldsCodec,
-  t.interface({
-    [ConfigKey.NAME]: t.string,
-  }),
 ]);
 
 export type MonitorFields = t.TypeOf<typeof MonitorFieldsCodec>;
+
+// Monitor, represents one of (Icmp | Tcp | Http | Browser)
+export const SyntheticsMonitorCodec = t.union([
+  HTTPFieldsCodec,
+  TCPFieldsCodec,
+  ICMPSimpleFieldsCodec,
+  BrowserFieldsCodec,
+]);
+
+export type SyntheticsMonitor = t.TypeOf<typeof SyntheticsMonitorCodec>;
+
+export const SyntheticsMonitorWithIdCodec = t.intersection([
+  SyntheticsMonitorCodec,
+  t.interface({ id: t.string }),
+]);
+export type SyntheticsMonitorWithId = t.TypeOf<typeof SyntheticsMonitorWithIdCodec>;
+
+export const MonitorManagementListResultCodec = t.type({
+  monitors: t.array(t.interface({ id: t.string, attributes: SyntheticsMonitorCodec })),
+  page: t.number,
+  perPage: t.number,
+  total: t.union([t.number, t.null]),
+});
+
+export type MonitorManagementListResult = t.TypeOf<typeof MonitorManagementListResultCodec>;

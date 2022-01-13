@@ -13,7 +13,7 @@ import {
   fromKueryExpression,
   toElasticsearchQuery,
   luceneStringToDsl,
-  IndexPatternBase,
+  DataViewBase,
   Query,
 } from '@kbn/es-query';
 
@@ -23,7 +23,7 @@ const MAX_TOP_LEVEL_QUERY_SIZE = 0;
 const MAX_SHAPES_QUERY_SIZE = 10000;
 const MAX_BUCKETS_LIMIT = 65535;
 
-export const getEsFormattedQuery = (query: Query, indexPattern?: IndexPatternBase) => {
+export const getEsFormattedQuery = (query: Query, indexPattern?: DataViewBase) => {
   let esFormattedQuery;
 
   const queryLanguage = query.language;

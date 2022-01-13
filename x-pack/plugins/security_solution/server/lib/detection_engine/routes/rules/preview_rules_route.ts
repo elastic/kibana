@@ -7,10 +7,10 @@
 import moment from 'moment';
 import uuid from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { IRuleDataClient } from '../../../../../../rule_registry/server';
 import { buildSiemResponse } from '../utils';
 import { convertCreateAPIToInternalSchema } from '../../schemas/rule_converters';
 import { RuleParams } from '../../schemas/rule_schemas';
-import { signalRulesAlertType } from '../../signals/signal_rule_alert_type';
 import { createWarningsAndErrors } from '../../signals/preview/preview_rule_execution_log_client';
 import { parseInterval } from '../../signals/utils';
 import { buildMlAuthz } from '../../../machine_learning/authz';
@@ -20,7 +20,10 @@ import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { DETECTION_ENGINE_RULES_PREVIEW } from '../../../../../common/constants';
-import { previewRulesSchema } from '../../../../../common/detection_engine/schemas/request';
+import {
+  previewRulesSchema,
+  RulePreviewLogs,
+} from '../../../../../common/detection_engine/schemas/request';
 import { RuleExecutionStatus } from '../../../../../common/detection_engine/schemas/common/schemas';
 
 import {
@@ -33,22 +36,26 @@ import {
 import { ExecutorType } from '../../../../../../alerting/server/types';
 import { AlertInstance } from '../../../../../../alerting/server';
 import { ConfigType } from '../../../../config';
-import { IEventLogService } from '../../../../../../event_log/server';
 import { alertInstanceFactoryStub } from '../../signals/preview/alert_instance_factory_stub';
-import { CreateRuleOptions } from '../../rule_types/types';
-
-enum InvocationCount {
-  HOUR = 1,
-  DAY = 24,
-  WEEK = 168,
-}
+import { CreateRuleOptions, CreateSecurityRuleTypeWrapperProps } from '../../rule_types/types';
+import {
+  createEqlAlertType,
+  createIndicatorMatchAlertType,
+  createMlAlertType,
+  createQueryAlertType,
+  createThresholdAlertType,
+} from '../../rule_types';
+import { createSecurityRuleTypeWrapper } from '../../rule_types/create_security_rule_type_wrapper';
+import { RULE_PREVIEW_INVOCATION_COUNT } from '../../../../../common/detection_engine/constants';
 
 export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   ml: SetupPlugins['ml'],
   security: SetupPlugins['security'],
-  ruleOptions: CreateRuleOptions
+  ruleOptions: CreateRuleOptions,
+  securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
+  previewRuleDataClient: IRuleDataClient
 ) => {
   router.post(
     {
@@ -73,17 +80,24 @@ export const previewRulesRoute = async (
           return siemResponse.error({ statusCode: 404 });
         }
 
-        if (request.body.type !== 'threat_match') {
-          return response.ok({ body: { errors: ['Not an indicator match rule'] } });
-        }
-
         let invocationCount = request.body.invocationCount;
         if (
-          ![InvocationCount.HOUR, InvocationCount.DAY, InvocationCount.WEEK].includes(
-            invocationCount
-          )
+          ![
+            RULE_PREVIEW_INVOCATION_COUNT.HOUR,
+            RULE_PREVIEW_INVOCATION_COUNT.DAY,
+            RULE_PREVIEW_INVOCATION_COUNT.WEEK,
+            RULE_PREVIEW_INVOCATION_COUNT.MONTH,
+          ].includes(invocationCount)
         ) {
-          return response.ok({ body: { errors: ['Invalid invocation count'] } });
+          return response.ok({
+            body: { logs: [{ errors: ['Invalid invocation count'], warnings: [] }] },
+          });
+        }
+
+        if (request.body.type === 'threat_match') {
+          return response.ok({
+            body: { logs: [{ errors: ['Preview for rule type not supported'], warnings: [] }] },
+          });
         }
 
         const internalRule = convertCreateAPIToInternalSchema(request.body, siemClient, false);
@@ -99,11 +113,17 @@ export const previewRulesRoute = async (
         await context.lists?.getExceptionListClient().createEndpointList();
 
         const spaceId = siemClient.getSpaceId();
-        const previewIndex = siemClient.getPreviewIndex();
         const previewId = uuid.v4();
         const username = security?.authc.getCurrentUser(request)?.username;
         const { previewRuleExecutionLogClient, warningsAndErrorsStore } = createWarningsAndErrors();
         const runState: Record<string, unknown> = {};
+        const logs: RulePreviewLogs[] = [];
+
+        const previewRuleTypeWrapper = createSecurityRuleTypeWrapper({
+          ...securityRuleTypeOptions,
+          ruleDataClient: previewRuleDataClient,
+          ruleExecutionLogClientOverride: previewRuleExecutionLogClient,
+        });
 
         const runExecutors = async <
           TParams extends RuleParams,
@@ -134,7 +154,7 @@ export const previewRulesRoute = async (
 
           const startedAt = moment();
           const parsedDuration = parseDuration(internalRule.schedule.interval) ?? 0;
-          startedAt.subtract(moment.duration(parsedDuration * invocationCount));
+          startedAt.subtract(moment.duration(parsedDuration * (invocationCount - 1)));
 
           let previousStartedAt = null;
 
@@ -159,7 +179,10 @@ export const previewRulesRoute = async (
               rule,
               services: {
                 shouldWriteAlerts,
+                shouldStopExecution: () => false,
                 alertInstanceFactory,
+                // Just use es client always for preview
+                search: context.core.elasticsearch.client,
                 savedObjectsClient: context.core.savedObjects.client,
                 scopedClusterClient: context.core.elasticsearch.client,
               },
@@ -169,51 +192,104 @@ export const previewRulesRoute = async (
               tags: [],
               updatedBy: rule.updatedBy,
             })) as TState;
+
+            // Save and reset error and warning logs
+            const currentLogs = {
+              errors: warningsAndErrorsStore
+                .filter((item) => item.newStatus === RuleExecutionStatus.failed)
+                .map((item) => item.message ?? 'Unkown Error'),
+              warnings: warningsAndErrorsStore
+                .filter(
+                  (item) =>
+                    item.newStatus === RuleExecutionStatus['partial failure'] ||
+                    item.newStatus === RuleExecutionStatus.warning
+                )
+                .map((item) => item.message ?? 'Unknown Warning'),
+              startedAt: startedAt.toDate().toISOString(),
+            };
+            logs.push(currentLogs);
+            previewRuleExecutionLogClient.clearWarningsAndErrorsStore();
+
             previousStartedAt = startedAt.toDate();
             startedAt.add(parseInterval(internalRule.schedule.interval));
             invocationCount--;
           }
         };
 
-        const signalRuleAlertType = signalRulesAlertType({
-          ...ruleOptions,
-          lists: context.lists,
-          config,
-          indexNameOverride: previewIndex,
-          ruleExecutionLogClientOverride: previewRuleExecutionLogClient,
-          // unused as we override the ruleExecutionLogClient
-          eventLogService: {} as unknown as IEventLogService,
-          eventsTelemetry: undefined,
-          ml: undefined,
-          refreshOverride: 'wait_for',
-        });
+        switch (previewRuleParams.type) {
+          case 'query':
+            const queryAlertType = previewRuleTypeWrapper(createQueryAlertType(ruleOptions));
+            await runExecutors(
+              queryAlertType.executor,
+              queryAlertType.id,
+              queryAlertType.name,
+              previewRuleParams,
+              () => true,
+              alertInstanceFactoryStub
+            );
+            break;
+          case 'threshold':
+            const thresholdAlertType = previewRuleTypeWrapper(
+              createThresholdAlertType(ruleOptions)
+            );
+            await runExecutors(
+              thresholdAlertType.executor,
+              thresholdAlertType.id,
+              thresholdAlertType.name,
+              previewRuleParams,
+              () => true,
+              alertInstanceFactoryStub
+            );
+            break;
+          case 'threat_match':
+            const threatMatchAlertType = previewRuleTypeWrapper(
+              createIndicatorMatchAlertType(ruleOptions)
+            );
+            await runExecutors(
+              threatMatchAlertType.executor,
+              threatMatchAlertType.id,
+              threatMatchAlertType.name,
+              previewRuleParams,
+              () => true,
+              alertInstanceFactoryStub
+            );
+            break;
+          case 'eql':
+            const eqlAlertType = previewRuleTypeWrapper(createEqlAlertType(ruleOptions));
+            await runExecutors(
+              eqlAlertType.executor,
+              eqlAlertType.id,
+              eqlAlertType.name,
+              previewRuleParams,
+              () => true,
+              alertInstanceFactoryStub
+            );
+            break;
+          case 'machine_learning':
+            const mlAlertType = previewRuleTypeWrapper(createMlAlertType(ruleOptions));
+            await runExecutors(
+              mlAlertType.executor,
+              mlAlertType.id,
+              mlAlertType.name,
+              previewRuleParams,
+              () => true,
+              alertInstanceFactoryStub
+            );
+            break;
+        }
 
-        await runExecutors(
-          signalRuleAlertType.executor,
-          signalRuleAlertType.id,
-          signalRuleAlertType.name,
-          previewRuleParams,
-          () => true,
-          alertInstanceFactoryStub
+        // Refreshes alias to ensure index is able to be read before returning
+        await context.core.elasticsearch.client.asInternalUser.indices.refresh(
+          {
+            index: previewRuleDataClient.indexNameWithNamespace(spaceId),
+          },
+          { ignore: [404] }
         );
-
-        const errors = warningsAndErrorsStore
-          .filter((item) => item.newStatus === RuleExecutionStatus.failed)
-          .map((item) => item.message);
-
-        const warnings = warningsAndErrorsStore
-          .filter(
-            (item) =>
-              item.newStatus === RuleExecutionStatus['partial failure'] ||
-              item.newStatus === RuleExecutionStatus.warning
-          )
-          .map((item) => item.message);
 
         return response.ok({
           body: {
             previewId,
-            errors,
-            warnings,
+            logs,
           },
         });
       } catch (err) {

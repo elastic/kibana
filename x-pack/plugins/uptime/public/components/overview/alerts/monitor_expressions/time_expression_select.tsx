@@ -17,7 +17,7 @@ interface Props {
   defaultTimerangeCount?: number;
   defaultTimerangeUnit?: string;
   isEnabled?: boolean;
-  setAlertParams: (key: string, value: any) => void;
+  setRuleParams: (key: string, value: any) => void;
 }
 
 const DEFAULT_TIMERANGE_UNIT = 'm';
@@ -53,7 +53,7 @@ export const TimeExpressionSelect: React.FC<Props> = ({
   defaultTimerangeCount,
   defaultTimerangeUnit,
   isEnabled,
-  setAlertParams,
+  setRuleParams,
 }) => {
   const [numUnits, setNumUnits] = useState<number>(defaultTimerangeCount ?? 15);
 
@@ -65,9 +65,9 @@ export const TimeExpressionSelect: React.FC<Props> = ({
 
   useEffect(() => {
     const timerangeUnit = timerangeUnitOptions.find(({ checked }) => checked === 'on')?.key ?? 'm';
-    setAlertParams('timerangeUnit', timerangeUnit);
-    setAlertParams('timerangeCount', numUnits);
-  }, [numUnits, timerangeUnitOptions, setAlertParams]);
+    setRuleParams('timerangeUnit', timerangeUnit);
+    setRuleParams('timerangeCount', numUnits);
+  }, [numUnits, timerangeUnitOptions, setRuleParams]);
 
   return (
     <EuiFlexGroup gutterSize="s">

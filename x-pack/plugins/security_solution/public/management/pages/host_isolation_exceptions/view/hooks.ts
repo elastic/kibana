@@ -22,7 +22,7 @@ import {
   MANAGEMENT_STORE_HOST_ISOLATION_EXCEPTIONS_NAMESPACE,
 } from '../../../common/constants';
 import { getHostIsolationExceptionsListPath } from '../../../common/routing';
-import { parseQueryFilterToKQL } from '../../../common/utils';
+import { parsePoliciesAndFilterToKql, parseQueryFilterToKQL } from '../../../common/utils';
 import {
   getHostIsolationExceptionItems,
   getHostIsolationExceptionSummary,
@@ -85,25 +85,42 @@ export function useCanSeeHostIsolationExceptionsMenu(): boolean {
   return canSeeMenu;
 }
 
-const SEARCHABLE_FIELDS: Readonly<string[]> = [`name`, `description`, `entries.value`];
+const SEARCHABLE_FIELDS: Readonly<string[]> = [`item_id`, `name`, `description`, `entries.value`];
 
-export function useFetchHostIsolationExceptionsList(): QueryObserverResult<
-  FoundExceptionListItemSchema,
-  ServerApiError
-> {
+export function useFetchHostIsolationExceptionsList({
+  filter,
+  page,
+  perPage,
+  policies,
+  excludedPolicies = [],
+  enabled = true,
+}: {
+  filter?: string;
+  page: number;
+  perPage: number;
+  policies?: string[];
+  excludedPolicies?: string[];
+  enabled?: boolean;
+}): QueryObserverResult<FoundExceptionListItemSchema, ServerApiError> {
   const http = useHttp();
-  const location = useHostIsolationExceptionsSelector(getCurrentLocation);
 
   return useQuery<FoundExceptionListItemSchema, ServerApiError>(
-    ['hostIsolationExceptions', 'list', location.filter, location.page_size, location.page_index],
+    ['hostIsolationExceptions', 'list', filter, perPage, page, policies, excludedPolicies],
     () => {
+      const kql = parsePoliciesAndFilterToKql({
+        policies,
+        excludedPolicies,
+        kuery: filter ? parseQueryFilterToKQL(filter, SEARCHABLE_FIELDS) : undefined,
+      });
+
       return getHostIsolationExceptionItems({
         http,
-        page: location.page_index + 1,
-        perPage: location.page_size,
-        filter: parseQueryFilterToKQL(location.filter, SEARCHABLE_FIELDS) || undefined,
+        page: page + 1,
+        perPage,
+        filter: kql,
       });
-    }
+    },
+    { enabled }
   );
 }
 
@@ -114,7 +131,7 @@ export function useGetHostIsolationExceptionFormEntry({
 }: {
   id?: string;
   onSuccess: (data: CreateExceptionListItemSchema | UpdateExceptionListItemSchema) => void;
-  onError: (error: ServerApiError) => void;
+  onError?: (error: ServerApiError) => void;
 }): QueryObserverResult {
   const http = useHttp();
   return useQuery<UpdateExceptionListItemSchema | CreateExceptionListItemSchema, ServerApiError>(

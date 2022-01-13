@@ -1,10 +1,11 @@
-load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@npm//peggy:index.bzl", "peggy")
-load("@build_bazel_rules_nodejs//:index.bzl", "js_library", "pkg_npm")
-load("//src/dev/bazel:index.bzl", "jsts_transpiler")
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
 PKG_BASE_NAME = "kbn-es-query"
 PKG_REQUIRE_NAME = "@kbn/es-query"
+TYPES_PKG_REQUIRE_NAME = "@types/kbn__es-query"
 
 SOURCE_FILES = glob(
   [
@@ -40,7 +41,7 @@ RUNTIME_DEPS = [
 ]
 
 TYPES_DEPS = [
-  "//packages/kbn-utility-types",
+  "//packages/kbn-utility-types:npm_module_types",
   "//packages/kbn-i18n:npm_module_types",
   "@npm//@elastic/elasticsearch",
   "@npm//tslib",
@@ -104,7 +105,7 @@ ts_project(
 js_library(
   name = PKG_BASE_NAME,
   srcs = NPM_MODULE_EXTRA_FILES + [":grammar"],
-  deps = RUNTIME_DEPS + [":target_node", ":target_web", ":tsc_types"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )
@@ -120,6 +121,23 @@ filegroup(
   name = "build",
   srcs = [
     ":npm_module",
+  ],
+  visibility = ["//visibility:public"],
+)
+
+pkg_npm_types(
+  name = "npm_module_types",
+  srcs = SRCS,
+  deps = [":tsc_types"],
+  package_name = TYPES_PKG_REQUIRE_NAME,
+  tsconfig = ":tsconfig",
+  visibility = ["//visibility:public"],
+)
+
+filegroup(
+  name = "build_types",
+  srcs = [
+    ":npm_module_types",
   ],
   visibility = ["//visibility:public"],
 )

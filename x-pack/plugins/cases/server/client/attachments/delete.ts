@@ -9,15 +9,15 @@ import Boom from '@hapi/boom';
 import pMap from 'p-map';
 
 import { SavedObject } from 'kibana/public';
-import { AssociationType, CommentAttributes } from '../../../common/api';
+import { Actions, ActionTypes, AssociationType, CommentAttributes } from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
   MAX_CONCURRENT_SEARCHES,
   SUB_CASE_SAVED_OBJECT,
 } from '../../../common/constants';
 import { CasesClientArgs } from '../types';
-import { buildCommentUserActionItem } from '../../services/user_actions/helpers';
-import { createCaseError, checkEnabledCaseConnectorOrThrow } from '../../common';
+import { createCaseError } from '../../common/error';
+import { checkEnabledCaseConnectorOrThrow } from '../../common/utils';
 import { Operations } from '../../authorization';
 
 /**
@@ -104,22 +104,16 @@ export async function deleteAll(
       concurrency: MAX_CONCURRENT_SEARCHES,
     });
 
-    const deleteDate = new Date().toISOString();
-
-    await userActionService.bulkCreate({
+    await userActionService.bulkCreateAttachmentDeletion({
       unsecuredSavedObjectsClient,
-      actions: comments.saved_objects.map((comment) =>
-        buildCommentUserActionItem({
-          action: 'delete',
-          actionAt: deleteDate,
-          actionBy: user,
-          caseId: caseID,
-          subCaseId: subCaseID,
-          commentId: comment.id,
-          fields: ['comment'],
-          owner: comment.attributes.owner,
-        })
-      ),
+      caseId: caseID,
+      subCaseId: subCaseID,
+      attachments: comments.saved_objects.map((comment) => ({
+        id: comment.id,
+        owner: comment.attributes.owner,
+        attachment: comment.attributes,
+      })),
+      user,
     });
   } catch (error) {
     throw createCaseError({
@@ -151,8 +145,6 @@ export async function deleteComment(
   try {
     checkEnabledCaseConnectorOrThrow(subCaseID);
 
-    const deleteDate = new Date().toISOString();
-
     const myComment = await attachmentService.get({
       unsecuredSavedObjectsClient,
       attachmentId: attachmentID,
@@ -180,20 +172,16 @@ export async function deleteComment(
       attachmentId: attachmentID,
     });
 
-    await userActionService.bulkCreate({
+    await userActionService.createUserAction({
+      type: ActionTypes.comment,
+      action: Actions.delete,
       unsecuredSavedObjectsClient,
-      actions: [
-        buildCommentUserActionItem({
-          action: 'delete',
-          actionAt: deleteDate,
-          actionBy: user,
-          caseId: id,
-          subCaseId: subCaseID,
-          commentId: attachmentID,
-          fields: ['comment'],
-          owner: myComment.attributes.owner,
-        }),
-      ],
+      caseId: id,
+      subCaseId: subCaseID,
+      attachmentId: attachmentID,
+      payload: { attachment: { ...myComment.attributes } },
+      user,
+      owner: myComment.attributes.owner,
     });
   } catch (error) {
     throw createCaseError({

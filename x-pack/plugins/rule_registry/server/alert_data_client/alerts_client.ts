@@ -9,19 +9,13 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { Filter, buildEsQuery, EsQueryConfig } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
-import type {
-  getEsQueryConfig as getEsQueryConfigTyped,
-  getSafeSortIds as getSafeSortIdsTyped,
-  isValidFeatureId as isValidFeatureIdTyped,
+import {
+  getEsQueryConfig,
+  getSafeSortIds,
+  isValidFeatureId,
   STATUS_VALUES,
   ValidFeatureId,
 } from '@kbn/rule-data-utils';
-import {
-  getEsQueryConfig as getEsQueryConfigNonTyped,
-  getSafeSortIds as getSafeSortIdsNonTyped,
-  isValidFeatureId as isValidFeatureIdNonTyped,
-  // @ts-expect-error
-} from '@kbn/rule-data-utils/target_node/alerts_as_data_rbac';
 
 import {
   InlineScript,
@@ -45,10 +39,6 @@ import {
 } from '../../common/technical_rule_data_field_names';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import { Dataset, IRuleDataService } from '../rule_data_plugin_service';
-
-const getEsQueryConfig: typeof getEsQueryConfigTyped = getEsQueryConfigNonTyped;
-const getSafeSortIds: typeof getSafeSortIdsTyped = getSafeSortIdsNonTyped;
-const isValidFeatureId: typeof isValidFeatureIdTyped = isValidFeatureIdNonTyped;
 
 // TODO: Fix typings https://github.com/elastic/kibana/issues/101776
 type NonNullableProps<Obj extends {}, Props extends keyof Obj> = Omit<Obj, Props> & {
@@ -342,6 +332,7 @@ export class AlertsClient {
       }
 
       const bulkUpdateRequest = mgetRes.body.docs.flatMap((item) => {
+        // @ts-expect-error doesn't handle error branch in MGetResponse
         const fieldToUpdate = this.getAlertStatusFieldUpdate(item?._source, status);
         return [
           {

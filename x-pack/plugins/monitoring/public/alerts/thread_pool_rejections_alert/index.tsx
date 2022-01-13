@@ -8,7 +8,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { AlertTypeModel } from '../../../../triggers_actions_ui/public';
+import type { RuleTypeModel } from '../../../../triggers_actions_ui/public';
 import { RULE_REQUIRES_APP_CONTEXT } from '../../../common/constants';
 import type { CommonAlertParamDetails } from '../../../common/types/alerts';
 import type { MonitoringConfig } from '../../types';
@@ -31,7 +31,7 @@ export function createThreadPoolRejectionsAlertType(
   alertId: string,
   threadPoolAlertDetails: ThreadPoolRejectionAlertDetails,
   config: MonitoringConfig
-): AlertTypeModel {
+): RuleTypeModel {
   return {
     id: alertId,
     description: threadPoolAlertDetails.description,
@@ -39,7 +39,7 @@ export function createThreadPoolRejectionsAlertType(
     documentationUrl(docLinks) {
       return `${docLinks.links.monitoring.alertsKibanaThreadpoolRejections}`;
     },
-    alertParamsExpression: (props: LazyExpressionProps) => (
+    ruleParamsExpression: (props: LazyExpressionProps) => (
       <>
         <EuiSpacer />
         <LazyExpression

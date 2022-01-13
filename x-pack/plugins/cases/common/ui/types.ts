@@ -14,14 +14,19 @@ import {
   CaseType,
   CommentRequest,
   User,
-  UserAction,
-  UserActionField,
   ActionConnector,
+  CaseExternalServiceBasic,
+  CaseUserActionResponse,
+  CaseMetricsResponse,
 } from '../api';
+import { SnakeToCamelCase } from '../types';
 
-interface CasesFeatures {
+export interface CasesContextFeatures {
   alerts: { sync: boolean };
+  metrics: CaseMetricsFeature[];
 }
+
+export type CasesFeatures = Partial<CasesContextFeatures>;
 
 export interface CasesContextValue {
   owner: string[];
@@ -29,7 +34,7 @@ export interface CasesContextValue {
   appTitle: string;
   userCanCrud: boolean;
   basePath: string;
-  features: CasesFeatures;
+  features: CasesContextFeatures;
 }
 
 export interface CasesUiConfigType {
@@ -52,11 +57,8 @@ export type CaseStatusWithAllStatus = CaseStatuses | StatusAllType;
  */
 export type CaseViewRefreshPropInterface = null | {
   /**
-   * Refreshes the all of the user actions/comments in the view's timeline
-   * (note: this also triggers a silent `refreshCase()`)
+   * Refreshes the case its metrics and user actions/comments in the view's timeline
    */
-  refreshUserActionsAndComments: () => Promise<void>;
-  /** Refreshes the Case information only */
   refreshCase: () => Promise<void>;
 };
 
@@ -71,29 +73,9 @@ export type Comment = CommentRequest & {
   updatedBy: ElasticUser | null;
   version: string;
 };
-export interface CaseUserActions {
-  actionId: string;
-  actionField: UserActionField;
-  action: UserAction;
-  actionAt: string;
-  actionBy: ElasticUser;
-  caseId: string;
-  commentId: string | null;
-  newValue: string | null;
-  newValConnectorId: string | null;
-  oldValue: string | null;
-  oldValConnectorId: string | null;
-}
 
-export interface CaseExternalService {
-  pushedAt: string;
-  pushedBy: ElasticUser;
-  connectorId: string;
-  connectorName: string;
-  externalId: string;
-  externalTitle: string;
-  externalUrl: string;
-}
+export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
+export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
 
 interface BasicCase {
   id: string;
@@ -146,6 +128,7 @@ export interface FilterOptions {
   status: CaseStatusWithAllStatus;
   tags: string[];
   reporters: User[];
+  owner: string[];
   onlyCollectionType?: boolean;
 }
 
@@ -161,6 +144,15 @@ export interface AllCases extends CasesStatus {
   perPage: number;
   total: number;
 }
+
+export type CaseMetrics = CaseMetricsResponse;
+export type CaseMetricsFeature =
+  | 'alerts.count'
+  | 'alerts.users'
+  | 'alerts.hosts'
+  | 'actions.isolateHost'
+  | 'connectors'
+  | 'lifespan';
 
 export enum SortFieldCase {
   createdAt = 'createdAt',
@@ -269,7 +261,7 @@ export interface SignalEcs {
 }
 
 export type SignalEcsAAD = Exclude<SignalEcs, 'rule' | 'status'> & {
-  rule?: Exclude<RuleEcs, 'id'> & { uuid: string[] };
+  rule?: Exclude<RuleEcs, 'id'> & { parameters: Record<string, unknown>; uuid: string[] };
   building_block_type?: string[];
   workflow_status?: string[];
 };

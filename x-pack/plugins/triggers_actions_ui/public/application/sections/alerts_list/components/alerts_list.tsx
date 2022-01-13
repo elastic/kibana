@@ -40,9 +40,9 @@ import { useHistory } from 'react-router-dom';
 import { isEmpty } from 'lodash';
 import {
   ActionType,
-  Alert,
+  Rule,
   AlertTableItem,
-  AlertType,
+  RuleType,
   RuleTypeIndex,
   Pagination,
 } from '../../../../types';
@@ -95,7 +95,7 @@ interface AlertTypeState {
 }
 interface AlertState {
   isLoading: boolean;
-  data: Alert[];
+  data: Rule[];
   totalItemCount: number;
 }
 
@@ -1043,7 +1043,7 @@ export const AlertsList: React.FunctionComponent = () => {
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}
           ruleType={
-            alertTypesState.data.get(currentRuleToEdit.alertTypeId) as AlertType<string, string>
+            alertTypesState.data.get(currentRuleToEdit.alertTypeId) as RuleType<string, string>
           }
           onSave={loadAlertsData}
         />
@@ -1077,12 +1077,12 @@ const noPermissionPrompt = (
   />
 );
 
-function filterAlertsById(alerts: Alert[], ids: string[]): Alert[] {
+function filterAlertsById(alerts: Rule[], ids: string[]): Rule[] {
   return alerts.filter((alert) => ids.includes(alert.id));
 }
 
 function convertAlertsToTableItems(
-  alerts: Alert[],
+  alerts: Rule[],
   ruleTypeIndex: RuleTypeIndex,
   canExecuteActions: boolean
 ) {

@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
-import { Filter } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
 import { Observable } from 'rxjs';
 import { MBMap } from '../mb_map';

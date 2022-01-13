@@ -234,6 +234,11 @@ export interface ReferencedDeprecationsByPlugin {
   [key: string]: Array<{ deprecatedApi: ApiDeclaration; ref: ApiReference }>;
 }
 
+export interface UnreferencedDeprecationsByPlugin {
+  // Key is the plugin id.
+  [key: string]: ApiDeclaration[];
+}
+
 // A mapping of deprecated API id to the places that are still referencing it.
 export interface ReferencedDeprecationsByAPI {
   [key: string]: { deprecatedApi: ApiDeclaration; references: ApiReference[] };
@@ -246,6 +251,7 @@ export interface ApiStats {
   apiCount: number;
   missingExports: number;
   deprecatedAPIsReferencedCount: number;
+  unreferencedDeprecatedApisCount: number;
 }
 
 export type PluginMetaInfo = ApiStats & {

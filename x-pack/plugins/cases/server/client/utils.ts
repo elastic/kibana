@@ -31,8 +31,8 @@ import {
   isCommentRequestTypeAlertOrGenAlert,
   isCommentRequestTypeUser,
   isCommentRequestTypeActions,
-  SavedObjectFindOptionsKueryNode,
-} from '../common';
+} from '../common/utils';
+import { SavedObjectFindOptionsKueryNode } from '../common/types';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {

@@ -281,7 +281,7 @@ describe('ESGeoGridSource', () => {
     });
   });
 
-  describe('ITiledSingleLayerVectorSource', () => {
+  describe('IMvtVectorSource', () => {
     const mvtGeogridSource = new ESGeoGridSource(
       {
         id: 'foobar',
@@ -295,28 +295,15 @@ describe('ESGeoGridSource', () => {
       {}
     );
 
-    it('getLayerName', () => {
-      expect(mvtGeogridSource.getLayerName()).toBe('aggs');
+    it('getTileSourceLayer', () => {
+      expect(mvtGeogridSource.getTileSourceLayer()).toBe('aggs');
     });
 
-    it('getMinZoom', () => {
-      expect(mvtGeogridSource.getMinZoom()).toBe(0);
-    });
+    it('getTileUrl', async () => {
+      const tileUrl = await mvtGeogridSource.getTileUrl(vectorSourceRequestMeta, '1234');
 
-    it('getMaxZoom', () => {
-      expect(mvtGeogridSource.getMaxZoom()).toBe(24);
-    });
-
-    it('getUrlTemplateWithMeta', async () => {
-      const urlTemplateWithMeta = await mvtGeogridSource.getUrlTemplateWithMeta(
-        vectorSourceRequestMeta
-      );
-
-      expect(urlTemplateWithMeta.layerName).toBe('aggs');
-      expect(urlTemplateWithMeta.minSourceZoom).toBe(0);
-      expect(urlTemplateWithMeta.maxSourceZoom).toBe(24);
-      expect(urlTemplateWithMeta.urlTemplate).toEqual(
-        "rootdir/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=undefined&gridPrecision=8&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'')),'6':('0':aggs,'1':())))&requestType=point"
+      expect(tileUrl).toEqual(
+        "rootdir/api/maps/mvt/getGridTile/{z}/{x}/{y}.pbf?geometryFieldName=bar&index=undefined&gridPrecision=8&requestBody=(foobar:ES_DSL_PLACEHOLDER,params:('0':('0':index,'1':(fields:())),'1':('0':size,'1':0),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:())),'5':('0':query,'1':(language:KQL,query:'')),'6':('0':aggs,'1':())))&requestType=point&token=1234"
       );
     });
   });

@@ -42,6 +42,7 @@ const testMetrics = {
     memory: { heap: { used_in_bytes: 100 } },
     uptime_in_millis: 1500,
     event_loop_delay: 50,
+    event_loop_delay_histogram: { percentiles: { '50': 50, '75': 75, '95': 95, '99': 99 } },
   },
   os: {
     load: {
@@ -56,7 +57,7 @@ describe('getEcsOpsMetricsLog', () => {
   it('provides correctly formatted message', () => {
     const result = getEcsOpsMetricsLog(createMockOpsMetrics(testMetrics));
     expect(result.message).toMatchInlineSnapshot(
-      `"memory: 100.0B uptime: 0:00:01 load: [10.00,20.00,30.00] delay: 50.000"`
+      `"memory: 100.0B uptime: 0:00:01 load: [10.00,20.00,30.00] mean delay: 50.000 delay histogram: { 50: 50.000; 95: 95.000; 99: 99.000 }"`
     );
   });
 
@@ -70,6 +71,7 @@ describe('getEcsOpsMetricsLog', () => {
     const missingMetrics = {
       ...baseMetrics,
       process: {},
+      processes: [],
       os: {},
     } as unknown as OpsMetrics;
     const logMeta = getEcsOpsMetricsLog(missingMetrics);
@@ -77,39 +79,41 @@ describe('getEcsOpsMetricsLog', () => {
   });
 
   it('provides an ECS-compatible response', () => {
-    const logMeta = getEcsOpsMetricsLog(createBaseOpsMetrics());
-    expect(logMeta).toMatchInlineSnapshot(`
+    const logMeta = getEcsOpsMetricsLog(createMockOpsMetrics(testMetrics));
+    expect(logMeta.meta).toMatchInlineSnapshot(`
       Object {
-        "message": "memory: 1.0B load: [1.00,1.00,1.00] delay: 1.000",
-        "meta": Object {
-          "event": Object {
-            "category": Array [
-              "process",
-              "host",
-            ],
-            "kind": "metric",
-            "type": Array [
-              "info",
-            ],
-          },
-          "host": Object {
-            "os": Object {
-              "load": Object {
-                "15m": 1,
-                "1m": 1,
-                "5m": 1,
-              },
+        "event": Object {
+          "category": Array [
+            "process",
+            "host",
+          ],
+          "kind": "metric",
+          "type": Array [
+            "info",
+          ],
+        },
+        "host": Object {
+          "os": Object {
+            "load": Object {
+              "15m": 30,
+              "1m": 10,
+              "5m": 20,
             },
           },
-          "process": Object {
-            "eventLoopDelay": 1,
-            "memory": Object {
-              "heap": Object {
-                "usedInBytes": 1,
-              },
-            },
-            "uptime": 0,
+        },
+        "process": Object {
+          "eventLoopDelay": 50,
+          "eventLoopDelayHistogram": Object {
+            "50": 50,
+            "95": 95,
+            "99": 99,
           },
+          "memory": Object {
+            "heap": Object {
+              "usedInBytes": 100,
+            },
+          },
+          "uptime": 1,
         },
       }
     `);

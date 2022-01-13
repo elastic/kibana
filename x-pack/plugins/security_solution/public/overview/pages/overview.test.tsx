@@ -20,12 +20,9 @@ import { Overview } from './index';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useFetchIndex } from '../../common/containers/source';
-import { useIsThreatIntelModuleEnabled } from '../containers/overview_cti_links/use_is_threat_intel_module_enabled';
-import { useCtiEventCounts } from '../containers/overview_cti_links/use_cti_event_counts';
-import {
-  mockCtiEventCountsResponse,
-  mockCtiLinksResponse,
-} from '../components/overview_cti_links/mock';
+import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
+import { useTiIntegrations } from '../containers/overview_cti_links/use_ti_integrations';
+import { mockCtiLinksResponse, mockTiDataSources } from '../components/overview_cti_links/mock';
 import { useCtiDashboardLinks } from '../containers/overview_cti_links';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { initialUserPrivilegesState } from '../../common/components/user_privileges/user_privileges_context';
@@ -71,18 +68,17 @@ jest.mock('../../common/components/user_privileges', () => {
 jest.mock('../../common/containers/local_storage/use_messages_storage');
 
 jest.mock('../containers/overview_cti_links');
-jest.mock('../containers/overview_cti_links/use_cti_event_counts');
 
 const useCtiDashboardLinksMock = useCtiDashboardLinks as jest.Mock;
 useCtiDashboardLinksMock.mockReturnValue(mockCtiLinksResponse);
 
-jest.mock('../containers/overview_cti_links/use_cti_event_counts');
-const useCTIEventCountsMock = useCtiEventCounts as jest.Mock;
-useCTIEventCountsMock.mockReturnValue(mockCtiEventCountsResponse);
+jest.mock('../containers/overview_cti_links/use_all_ti_data_sources');
+const useAllTiDataSourcesMock = useAllTiDataSources as jest.Mock;
+useAllTiDataSourcesMock.mockReturnValue(mockTiDataSources);
 
-jest.mock('../containers/overview_cti_links/use_is_threat_intel_module_enabled');
-const useIsThreatIntelModuleEnabledMock = useIsThreatIntelModuleEnabled as jest.Mock;
-useIsThreatIntelModuleEnabledMock.mockReturnValue(true);
+jest.mock('../containers/overview_cti_links/use_ti_integrations');
+const useTiIntegrationsMock = useTiIntegrations as jest.Mock;
+useTiIntegrationsMock.mockReturnValue({});
 
 jest.mock('../../common/containers/hosts_risk/use_hosts_risk_score');
 const useHostsRiskScoreMock = useHostsRiskScore as jest.Mock;
@@ -301,8 +297,8 @@ describe('Overview', () => {
   });
 
   describe('Threat Intel Dashboard Links', () => {
-    it('invokes useIsThreatIntelModuleEnabled hook only once', () => {
-      useIsThreatIntelModuleEnabledMock.mockClear();
+    it('invokes useAllTiDataSourcesMock hook only once', () => {
+      useAllTiDataSourcesMock.mockClear();
       mount(
         <TestProviders>
           <MemoryRouter>
@@ -310,7 +306,7 @@ describe('Overview', () => {
           </MemoryRouter>
         </TestProviders>
       );
-      expect(useIsThreatIntelModuleEnabledMock).toHaveBeenCalledTimes(1);
+      expect(useAllTiDataSourcesMock).toHaveBeenCalledTimes(1);
     });
   });
 });

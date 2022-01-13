@@ -28,6 +28,12 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
 
+// ensures that fields appropriately match to their label
+jest.mock('@elastic/eui/lib/services/accessibility', () => ({
+  ...jest.requireActual('@elastic/eui/lib/services/accessibility'),
+  useGeneratedHtmlId: () => `id-${Math.random()}`,
+}));
+
 jest.mock('../../../../../../src/plugins/kibana_react/public', () => {
   const original = jest.requireActual('../../../../../../src/plugins/kibana_react/public');
   return {
@@ -321,6 +327,21 @@ describe('<CustomFields />', () => {
       expect(getByText('TCP')).toBeInTheDocument();
       expect(getByText('ICMP')).toBeInTheDocument();
       expect(queryByText('Browser (Beta)')).not.toBeInTheDocument();
+    });
+  });
+
+  it('allows monitors to be disabled', async () => {
+    const { queryByLabelText } = render(
+      <WrappedComponent dataStreams={[DataStream.HTTP, DataStream.TCP, DataStream.ICMP]} />
+    );
+
+    const enabled = queryByLabelText('Enabled') as HTMLInputElement;
+    expect(enabled).toBeChecked();
+
+    fireEvent.click(enabled);
+
+    await waitFor(() => {
+      expect(enabled).not.toBeChecked();
     });
   });
 });

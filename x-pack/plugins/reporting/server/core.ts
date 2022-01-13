@@ -7,8 +7,7 @@
 
 import Hapi from '@hapi/hapi';
 import * as Rx from 'rxjs';
-import { filter, first, map, take } from 'rxjs/operators';
-import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
+import { filter, first, map, switchMap, take } from 'rxjs/operators';
 import {
   BasePath,
   IClusterClient,
@@ -22,21 +21,26 @@ import {
   UiSettingsServiceStart,
 } from '../../../../src/core/server';
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
+import { IEventLogService } from '../../event_log/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
+import type { ScreenshotResult, ScreenshottingStart } from '../../screenshotting/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import { SpacesPluginSetup } from '../../spaces/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
+import { durationToNumber } from '../common/schema_utils';
 import { ReportingConfig, ReportingSetup } from './';
-import { HeadlessChromiumDriverFactory } from './browsers/chromium/driver_factory';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
-import { ReportingStore } from './lib/store';
+import { reportingEventLoggerFactory } from './lib/event_logger/logger';
+import { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
-import { ReportingPluginRouter } from './types';
+import { ReportingPluginRouter, ScreenshotOptions } from './types';
 
 export interface ReportingInternalSetup {
+  eventLog: IEventLogService;
   basePath: Pick<BasePath, 'set'>;
   router: ReportingPluginRouter;
   features: FeaturesPluginSetup;
@@ -44,13 +48,11 @@ export interface ReportingInternalSetup {
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
   taskManager: TaskManagerSetupContract;
-  screenshotMode: ScreenshotModePluginSetup;
   logger: LevelLogger;
   status: StatusServiceSetup;
 }
 
 export interface ReportingInternalStart {
-  browserDriverFactory: HeadlessChromiumDriverFactory;
   store: ReportingStore;
   savedObjects: SavedObjectsServiceStart;
   uiSettings: UiSettingsServiceStart;
@@ -58,8 +60,12 @@ export interface ReportingInternalStart {
   data: DataPluginStart;
   taskManager: TaskManagerStartContract;
   logger: LevelLogger;
+  screenshotting: ScreenshottingStart;
 }
 
+/**
+ * @internal
+ */
 export class ReportingCore {
   private packageInfo: PackageInfo;
   private pluginSetupDeps?: ReportingInternalSetup;
@@ -253,18 +259,6 @@ export class ReportingCore {
       .toPromise();
   }
 
-  private getScreenshotModeDep() {
-    return this.getPluginSetupDeps().screenshotMode;
-  }
-
-  public getEnableScreenshotMode() {
-    return this.getScreenshotModeDep().setScreenshotModeEnabled;
-  }
-
-  public getSetScreenshotLayout() {
-    return this.getScreenshotModeDep().setScreenshotLayout;
-  }
-
   /*
    * Gives synchronous access to the setupDeps
    */
@@ -350,6 +344,35 @@ export class ReportingCore {
     return startDeps.esClient;
   }
 
+  public getScreenshots(options: ScreenshotOptions): Rx.Observable<ScreenshotResult> {
+    return Rx.defer(() => this.getPluginStartDeps()).pipe(
+      switchMap(({ screenshotting }) => {
+        const config = this.getConfig();
+        return screenshotting.getScreenshots({
+          ...options,
+
+          timeouts: {
+            loadDelay: durationToNumber(config.get('capture', 'loadDelay')),
+            openUrl: durationToNumber(config.get('capture', 'timeouts', 'openUrl')),
+            waitForElements: durationToNumber(config.get('capture', 'timeouts', 'waitForElements')),
+            renderComplete: durationToNumber(config.get('capture', 'timeouts', 'renderComplete')),
+          },
+
+          layout: {
+            zoom: config.get('capture', 'zoom'),
+            ...options.layout,
+          },
+
+          urls: options.urls.map((url) =>
+            typeof url === 'string'
+              ? url
+              : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+          ),
+        });
+      })
+    );
+  }
+
   public trackReport(reportId: string) {
     this.executing.add(reportId);
   }
@@ -360,5 +383,10 @@ export class ReportingCore {
 
   public countConcurrentReports(): number {
     return this.executing.size;
+  }
+
+  public getEventLogger(report: IReport, task?: { id: string }) {
+    const ReportingEventLogger = reportingEventLoggerFactory(this.pluginSetupDeps!.eventLog);
+    return new ReportingEventLogger(report, task);
   }
 }

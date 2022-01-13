@@ -7,7 +7,7 @@
 
 import { TaskRunnerFactory } from './task_runner';
 import { RuleTypeRegistry, ConstructorOptions } from './rule_type_registry';
-import { ActionGroup, AlertType } from './types';
+import { ActionGroup, RuleType } from './types';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { ILicenseState } from './lib/license_state';
 import { licenseStateMock } from './lib/license_state.mock';
@@ -56,8 +56,8 @@ describe('has()', () => {
 });
 
 describe('register()', () => {
-  test('throws if AlertType Id contains invalid characters', () => {
-    const alertType: AlertType<never, never, never, never, never, 'default'> = {
+  test('throws if RuleType Id contains invalid characters', () => {
+    const ruleType: RuleType<never, never, never, never, never, 'default'> = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -76,21 +76,21 @@ describe('register()', () => {
 
     const invalidCharacters = [' ', ':', '*', '*', '/'];
     for (const char of invalidCharacters) {
-      expect(() => registry.register({ ...alertType, id: `${alertType.id}${char}` })).toThrowError(
-        new Error(`expected AlertType Id not to include invalid character: ${char}`)
+      expect(() => registry.register({ ...ruleType, id: `${ruleType.id}${char}` })).toThrowError(
+        new Error(`expected RuleType Id not to include invalid character: ${char}`)
       );
     }
 
     const [first, second] = invalidCharacters;
     expect(() =>
-      registry.register({ ...alertType, id: `${first}${alertType.id}${second}` })
+      registry.register({ ...ruleType, id: `${first}${ruleType.id}${second}` })
     ).toThrowError(
-      new Error(`expected AlertType Id not to include invalid characters: ${first}, ${second}`)
+      new Error(`expected RuleType Id not to include invalid characters: ${first}, ${second}`)
     );
   });
 
-  test('throws if AlertType Id isnt a string', () => {
-    const alertType: AlertType<never, never, never, never, never, 'default'> = {
+  test('throws if RuleType Id isnt a string', () => {
+    const ruleType: RuleType<never, never, never, never, never, 'default'> = {
       id: 123 as unknown as string,
       name: 'Test',
       actionGroups: [
@@ -107,13 +107,13 @@ describe('register()', () => {
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-    expect(() => registry.register(alertType)).toThrowError(
+    expect(() => registry.register(ruleType)).toThrowError(
       new Error(`expected value of type [string] but got [number]`)
     );
   });
 
-  test('throws if AlertType ruleTaskTimeout is not a valid duration', () => {
-    const alertType: AlertType<never, never, never, never, never, 'default'> = {
+  test('throws if RuleType ruleTaskTimeout is not a valid duration', () => {
+    const ruleType: RuleType<never, never, never, never, never, 'default'> = {
       id: '123',
       name: 'Test',
       actionGroups: [
@@ -131,7 +131,7 @@ describe('register()', () => {
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-    expect(() => registry.register(alertType)).toThrowError(
+    expect(() => registry.register(ruleType)).toThrowError(
       new Error(
         `Rule type \"123\" has invalid timeout: string is not a valid duration: 23 milisec.`
       )
@@ -139,7 +139,7 @@ describe('register()', () => {
   });
 
   test('throws if defaultScheduleInterval isnt valid', () => {
-    const alertType: AlertType<never, never, never, never, never, 'default'> = {
+    const ruleType: RuleType<never, never, never, never, never, 'default'> = {
       id: '123',
       name: 'Test',
       actionGroups: [
@@ -158,7 +158,7 @@ describe('register()', () => {
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-    expect(() => registry.register(alertType)).toThrowError(
+    expect(() => registry.register(ruleType)).toThrowError(
       new Error(
         `Rule type \"123\" has invalid default interval: string is not a valid duration: foobar.`
       )
@@ -166,7 +166,7 @@ describe('register()', () => {
   });
 
   test('throws if minimumScheduleInterval isnt valid', () => {
-    const alertType: AlertType<never, never, never, never, never, 'default'> = {
+    const ruleType: RuleType<never, never, never, never, never, 'default'> = {
       id: '123',
       name: 'Test',
       actionGroups: [
@@ -184,7 +184,7 @@ describe('register()', () => {
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-    expect(() => registry.register(alertType)).toThrowError(
+    expect(() => registry.register(ruleType)).toThrowError(
       new Error(
         `Rule type \"123\" has invalid minimum interval: string is not a valid duration: foobar.`
       )
@@ -192,7 +192,7 @@ describe('register()', () => {
   });
 
   test('throws if RuleType action groups contains reserved group id', () => {
-    const alertType: AlertType<never, never, never, never, never, 'default' | 'NotReserved'> = {
+    const ruleType: RuleType<never, never, never, never, never, 'default' | 'NotReserved'> = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -217,15 +217,15 @@ describe('register()', () => {
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-    expect(() => registry.register(alertType)).toThrowError(
+    expect(() => registry.register(ruleType)).toThrowError(
       new Error(
-        `Rule type [id="${alertType.id}"] cannot be registered. Action groups [recovered] are reserved by the framework.`
+        `Rule type [id="${ruleType.id}"] cannot be registered. Action groups [recovered] are reserved by the framework.`
       )
     );
   });
 
-  test('allows an AlertType to specify a custom recovery group', () => {
-    const alertType: AlertType<never, never, never, never, never, 'default', 'backToAwesome'> = {
+  test('allows an RuleType to specify a custom recovery group', () => {
+    const ruleType: RuleType<never, never, never, never, never, 'default', 'backToAwesome'> = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -245,7 +245,7 @@ describe('register()', () => {
       isExportable: true,
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    registry.register(alertType);
+    registry.register(ruleType);
     expect(registry.get('test').actionGroups).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -260,8 +260,8 @@ describe('register()', () => {
     `);
   });
 
-  test('allows an AlertType to specify a custom rule task timeout', () => {
-    const alertType: AlertType<never, never, never, never, never, 'default', 'backToAwesome'> = {
+  test('allows an RuleType to specify a custom rule task timeout', () => {
+    const ruleType: RuleType<never, never, never, never, never, 'default', 'backToAwesome'> = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -278,12 +278,12 @@ describe('register()', () => {
       isExportable: true,
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    registry.register(alertType);
+    registry.register(ruleType);
     expect(registry.get('test').ruleTaskTimeout).toBe('13m');
   });
 
-  test('throws if the custom recovery group is contained in the AlertType action groups', () => {
-    const alertType: AlertType<
+  test('throws if the custom recovery group is contained in the RuleType action groups', () => {
+    const ruleType: RuleType<
       never,
       never,
       never,
@@ -316,15 +316,15 @@ describe('register()', () => {
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-    expect(() => registry.register(alertType)).toThrowError(
+    expect(() => registry.register(ruleType)).toThrowError(
       new Error(
-        `Rule type [id="${alertType.id}"] cannot be registered. Action group [backToAwesome] cannot be used as both a recovery and an active action group.`
+        `Rule type [id="${ruleType.id}"] cannot be registered. Action group [backToAwesome] cannot be used as both a recovery and an active action group.`
       )
     );
   });
 
   test('registers the executor with the task manager', () => {
-    const alertType: AlertType<never, never, never, never, never, 'default'> = {
+    const ruleType: RuleType<never, never, never, never, never, 'default'> = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -341,7 +341,7 @@ describe('register()', () => {
       ruleTaskTimeout: '20m',
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    registry.register(alertType);
+    registry.register(ruleType);
     expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
     expect(taskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
@@ -357,7 +357,7 @@ describe('register()', () => {
   });
 
   test('shallow clones the given rule type', () => {
-    const alertType: AlertType<never, never, never, never, never, 'default'> = {
+    const ruleType: RuleType<never, never, never, never, never, 'default'> = {
       id: 'test',
       name: 'Test',
       actionGroups: [
@@ -373,8 +373,8 @@ describe('register()', () => {
       producer: 'alerts',
     };
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    registry.register(alertType);
-    alertType.name = 'Changed';
+    registry.register(ruleType);
+    ruleType.name = 'Changed';
     expect(registry.get('test').name).toEqual('Test');
   });
 
@@ -433,8 +433,8 @@ describe('get()', () => {
       executor: jest.fn(),
       producer: 'alerts',
     });
-    const alertType = registry.get('test');
-    expect(alertType).toMatchInlineSnapshot(`
+    const ruleType = registry.get('test');
+    expect(ruleType).toMatchInlineSnapshot(`
       Object {
         "actionGroups": Array [
           Object {
@@ -539,12 +539,12 @@ describe('list()', () => {
 
   test('should return action variables state and empty context', () => {
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    registry.register(alertTypeWithVariables('x', '', 's'));
-    const alertType = registry.get('x');
-    expect(alertType.actionVariables).toBeTruthy();
+    registry.register(ruleTypeWithVariables('x', '', 's'));
+    const ruleType = registry.get('x');
+    expect(ruleType.actionVariables).toBeTruthy();
 
-    const context = alertType.actionVariables!.context;
-    const state = alertType.actionVariables!.state;
+    const context = ruleType.actionVariables!.context;
+    const state = ruleType.actionVariables!.state;
 
     expect(context).toBeTruthy();
     expect(context!.length).toBe(0);
@@ -556,12 +556,12 @@ describe('list()', () => {
 
   test('should return action variables context and empty state', () => {
     const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
-    registry.register(alertTypeWithVariables('x', 'c', ''));
-    const alertType = registry.get('x');
-    expect(alertType.actionVariables).toBeTruthy();
+    registry.register(ruleTypeWithVariables('x', 'c', ''));
+    const ruleType = registry.get('x');
+    expect(ruleType.actionVariables).toBeTruthy();
 
-    const context = alertType.actionVariables!.context;
-    const state = alertType.actionVariables!.state;
+    const context = ruleType.actionVariables!.context;
+    const state = ruleType.actionVariables!.state;
 
     expect(state).toBeTruthy();
     expect(state!.length).toBe(0);
@@ -597,11 +597,11 @@ describe('ensureRuleTypeEnabled', () => {
 
   test('should call ensureLicenseForAlertType on the license state', async () => {
     ruleTypeRegistry.ensureRuleTypeEnabled('test');
-    expect(mockedLicenseState.ensureLicenseForAlertType).toHaveBeenCalled();
+    expect(mockedLicenseState.ensureLicenseForRuleType).toHaveBeenCalled();
   });
 
   test('should throw when ensureLicenseForAlertType throws', async () => {
-    mockedLicenseState.ensureLicenseForAlertType.mockImplementation(() => {
+    mockedLicenseState.ensureLicenseForRuleType.mockImplementation(() => {
       throw new Error('Fail');
     });
     expect(() => ruleTypeRegistry.ensureRuleTypeEnabled('test')).toThrowErrorMatchingInlineSnapshot(
@@ -610,12 +610,12 @@ describe('ensureRuleTypeEnabled', () => {
   });
 });
 
-function alertTypeWithVariables<ActionGroupIds extends string>(
+function ruleTypeWithVariables<ActionGroupIds extends string>(
   id: ActionGroupIds,
   context: string,
   state: string
-): AlertType<never, never, never, never, never, ActionGroupIds> {
-  const baseAlert: AlertType<never, never, never, never, never, ActionGroupIds> = {
+): RuleType<never, never, never, never, never, ActionGroupIds> {
+  const baseAlert: RuleType<never, never, never, never, never, ActionGroupIds> = {
     id,
     name: `${id}-name`,
     actionGroups: [],

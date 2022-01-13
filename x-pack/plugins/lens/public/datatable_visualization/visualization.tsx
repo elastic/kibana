@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { Ast } from '@kbn/interpreter/common';
+import { Ast } from '@kbn/interpreter';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
@@ -105,7 +105,8 @@ export const getDatatableVisualization = ({
     if (
       keptLayerIds.length > 1 ||
       (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
-      (state && table.changeType === 'unchanged')
+      (state && table.changeType === 'unchanged') ||
+      table.columns.some((col) => col.operation.isStaticValue)
     ) {
       return [];
     }

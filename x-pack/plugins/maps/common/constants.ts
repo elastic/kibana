@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
 
-export const EMS_APP_NAME = 'kibana';
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
@@ -35,8 +34,6 @@ export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
 // Identifies centroid feature.
 // Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
 export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__';
-
-export const MVT_TOKEN_PARAM_NAME = 'token';
 
 export function getNewMapPath() {
   return `/${MAPS_APP_PATH}/${MAP_PATH}`;

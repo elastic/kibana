@@ -8,18 +8,18 @@
 import { mapValues, last, first } from 'lodash';
 import moment from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
-import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
 import {
   isTooManyBucketsPreviewException,
   TOO_MANY_BUCKETS_PREVIEW_EXCEPTION,
 } from '../../../../common/alerting/metrics';
-import {
-  InfraDatabaseSearchResponse,
-  CallWithRequestParams,
-} from '../../adapters/framework/adapter_types';
+import { InfraDatabaseSearchResponse, CallWithRequestParams } from '../../adapters/framework';
 import { Comparator, InventoryMetricConditions } from './types';
 import { InventoryItemType, SnapshotMetricType } from '../../../../common/inventory_models/types';
-import { InfraTimerangeInput, SnapshotRequest } from '../../../../common/http_api/snapshot_api';
+import {
+  InfraTimerangeInput,
+  SnapshotRequest,
+  SnapshotCustomMetricInput,
+} from '../../../../common/http_api';
 import { InfraSource } from '../../sources';
 import { UNGROUPED_FACTORY_KEY } from '../common/utils';
 import { getNodes } from '../../../routes/snapshot/lib/get_nodes';
@@ -42,6 +42,7 @@ export const evaluateCondition = async ({
   compositeSize,
   filterQuery,
   lookbackSize,
+  startTime,
 }: {
   condition: InventoryMetricConditions;
   nodeType: InventoryItemType;
@@ -51,14 +52,18 @@ export const evaluateCondition = async ({
   compositeSize: number;
   filterQuery?: string;
   lookbackSize?: number;
+  startTime?: number;
 }): Promise<Record<string, ConditionResult>> => {
   const { comparator, warningComparator, metric, customMetric } = condition;
   let { threshold, warningThreshold } = condition;
 
+  const to = startTime ? moment(startTime) : moment();
+
   const timerange = {
-    to: Date.now(),
-    from: moment().subtract(condition.timeSize, condition.timeUnit).toDate().getTime(),
-    interval: condition.timeUnit,
+    to: to.valueOf(),
+    from: to.clone().subtract(condition.timeSize, condition.timeUnit).valueOf(),
+    interval: `${condition.timeSize}${condition.timeUnit}`,
+    forceInterval: true,
   } as InfraTimerangeInput;
   if (lookbackSize) {
     timerange.lookbackSize = lookbackSize;

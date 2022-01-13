@@ -23,7 +23,7 @@ import { ToastNotificationText } from '../components';
 import { useApi } from './use_api';
 
 export const useStartTransforms = () => {
-  const deps = useAppDependencies();
+  const { overlays, theme } = useAppDependencies();
   const toastNotifications = useToastNotifications();
   const api = useApi();
 
@@ -39,7 +39,12 @@ export const useStartTransforms = () => {
           }
         ),
         text: toMountPoint(
-          <ToastNotificationText overlays={deps.overlays} text={getErrorMessage(results)} />
+          <ToastNotificationText
+            overlays={overlays}
+            theme={theme}
+            text={getErrorMessage(results)}
+          />,
+          { theme$: theme.theme$ }
         ),
       });
       return;

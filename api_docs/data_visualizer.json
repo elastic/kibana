@@ -55,6 +55,19 @@
           },
           {
             "parentPluginId": "dataVisualizer",
+            "id": "def-public.IndexDataVisualizerViewProps.currentSessionId",
+            "type": "string",
+            "tags": [],
+            "label": "currentSessionId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/components/index_data_visualizer_view/index_data_visualizer_view.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "dataVisualizer",
             "id": "def-public.IndexDataVisualizerViewProps.additionalLinks",
             "type": "Array",
             "tags": [],
@@ -571,7 +584,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"number\" | \"boolean\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"keyword\" | \"text\""
+              "\"number\" | \"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"unknown\" | \"histogram\" | \"text\""
             ],
             "path": "x-pack/plugins/data_visualizer/common/types/field_request_config.ts",
             "deprecated": false
@@ -1050,7 +1063,7 @@
         "label": "JobFieldType",
         "description": [],
         "signature": [
-          "\"number\" | \"boolean\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"unknown\" | \"histogram\" | \"keyword\" | \"text\""
+          "\"number\" | \"boolean\" | \"keyword\" | \"ip\" | \"date\" | \"geo_point\" | \"geo_shape\" | \"unknown\" | \"histogram\" | \"text\""
         ],
         "path": "x-pack/plugins/data_visualizer/common/types/job_field_type.ts",
         "deprecated": false,

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { ReportingCore } from '../..';
 import { APP_WRAPPER_CLASS } from '../../../../../../src/core/server';
 import { API_DIAGNOSE_URL } from '../../../common/constants';
-import { omitBlockedHeaders, generatePngObservableFactory } from '../../export_types/common';
+import { omitBlockedHeaders, generatePngObservable } from '../../export_types/common';
 import { getAbsoluteUrlFactory } from '../../export_types/common/get_absolute_url';
 import { LevelLogger as Logger } from '../../lib';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
@@ -25,7 +25,6 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
       validate: {},
     },
     authorizedUserPreRouting(reporting, async (_user, _context, req, res) => {
-      const generatePngObservable = await generatePngObservableFactory(reporting);
       const config = reporting.getConfig();
       const decryptedHeaders = req.headers as Record<string, string>;
       const [basePath, protocol, hostname, port] = [
@@ -40,7 +39,6 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
 
       // Hack the layout to make the base/login page work
       const layout = {
-        id: 'png',
         dimensions: {
           width: 1440,
           height: 2024,
@@ -53,7 +51,7 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         },
       };
 
-      const headers = {
+      const conditionalHeaders = {
         headers: omitBlockedHeaders(decryptedHeaders),
         conditions: {
           hostname,
@@ -63,7 +61,12 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
         },
       };
 
-      return generatePngObservable(logger, hashUrl, 'America/Los_Angeles', headers, layout)
+      return generatePngObservable(reporting, logger, {
+        conditionalHeaders,
+        layout,
+        browserTimezone: 'America/Los_Angeles',
+        urls: [hashUrl],
+      })
         .pipe()
         .toPromise()
         .then((screenshot) => {

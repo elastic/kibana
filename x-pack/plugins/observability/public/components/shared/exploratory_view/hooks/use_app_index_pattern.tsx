@@ -13,7 +13,7 @@ import { useKibana } from '../../../../../../../../src/plugins/kibana_react/publ
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { ObservabilityIndexPatterns } from '../utils/observability_index_patterns';
 import { getDataHandler } from '../../../../data_handler';
-import { useExploratoryView } from '../contexts/exploatory_view_config';
+import { useExploratoryView } from '../contexts/exploratory_view_config';
 
 export interface IndexPatternContext {
   loading: boolean;
@@ -66,6 +66,11 @@ export function IndexPatternContextProvider({ children }: ProviderProps) {
               const resultUx = await getDataHandler(dataType)?.hasData();
               hasDataT = Boolean(resultUx?.hasData);
               indices = resultUx?.indices;
+              break;
+            case 'infra_metrics':
+              const resultMetrics = await getDataHandler(dataType)?.hasData();
+              hasDataT = Boolean(resultMetrics?.hasData);
+              indices = resultMetrics?.indices;
               break;
             case 'apm':
             case 'mobile':

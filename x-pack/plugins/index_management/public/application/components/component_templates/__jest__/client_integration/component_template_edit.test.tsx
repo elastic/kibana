@@ -74,13 +74,15 @@ describe('<ComponentTemplateEdit />', () => {
     expect(nameInput.props().disabled).toEqual(true);
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/84906
-  describe.skip('form payload', () => {
+  describe('form payload', () => {
     it('should send the correct payload with changed values', async () => {
       const { actions, component, form } = testBed;
 
       await act(async () => {
         form.setInputValue('versionField.input', '1');
+      });
+
+      await act(async () => {
         actions.clickNextButton();
       });
 

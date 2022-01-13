@@ -154,7 +154,7 @@ async function getPaginatedThroughputData(
                       },
                       {
                         term: {
-                          'metricset.name': 'stats',
+                          'metricset.name': 'node_stats',
                         },
                       },
                     ],
@@ -208,7 +208,10 @@ async function getPaginatedNodesData(
     [
       {
         bool: {
-          should: [{ term: { type: 'logstash_stats' } }, { term: { 'metricset.name': 'stats' } }],
+          should: [
+            { term: { type: 'logstash_stats' } },
+            { term: { 'metricset.name': 'node_stats' } },
+          ],
         },
       },
     ],
@@ -296,7 +299,7 @@ async function getThroughputPipelines(
                     },
                     {
                       term: {
-                        'metricset.name': 'stats',
+                        'metricset.name': 'node_stats',
                       },
                     },
                   ],
@@ -330,7 +333,10 @@ async function getNodePipelines(
     [
       {
         bool: {
-          should: [{ term: { type: 'logstash_stats' } }, { term: { 'metricset.name': 'stats' } }],
+          should: [
+            { term: { type: 'logstash_stats' } },
+            { term: { 'metricset.name': 'node_stats' } },
+          ],
         },
       },
     ],

@@ -21,6 +21,7 @@ export const ReportingCsvShareProvider = ({
   license$,
   startServices$,
   usesUiCapabilities,
+  theme,
 }: ExportPanelShareOpts) => {
   let licenseToolTipContent = '';
   let licenseHasCsvReporting = false;
@@ -96,6 +97,7 @@ export const ReportingCsvShareProvider = ({
               objectId={objectId}
               getJobParams={getJobParams}
               onClose={onClose}
+              theme={theme}
             />
           ),
         },

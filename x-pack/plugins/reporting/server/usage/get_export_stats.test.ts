@@ -22,7 +22,7 @@ const sizesAggResponse = {
 };
 
 beforeEach(() => {
-  featureMap = { PNG: true, csv: true, csv_searchsource: true, printable_pdf: true };
+  featureMap = { PNG: true, csv_searchsource: true, printable_pdf: true };
 });
 
 const exportTypesHandler = getExportTypesHandler(getExportTypesRegistry());
@@ -121,24 +121,6 @@ test('Model of jobTypes', () => {
       "total": 3,
     }
   `);
-  expect(result.csv).toMatchInlineSnapshot(`
-    Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 0,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
-      },
-      "total": 0,
-    }
-  `);
   expect(result.csv_searchsource).toMatchInlineSnapshot(`
     Object {
       "app": Object {
@@ -218,48 +200,6 @@ test('PNG counts, provided count of deprecated jobs explicitly', () => {
       },
       "available": true,
       "deprecated": 5,
-      "layout": Object {
-        "canvas": 0,
-        "preserve_layout": 0,
-        "print": 0,
-      },
-      "output_size": Object {
-        "1.0": 5093470,
-        "25.0": 5093470,
-        "5.0": 5093470,
-        "50.0": 8514532,
-        "75.0": 11935594,
-        "95.0": 11935594,
-        "99.0": 11935594,
-      },
-      "total": 15,
-    }
-  `);
-});
-
-test('CSV counts, provides all jobs implicitly deprecated due to jobtype', () => {
-  const result = getExportStats(
-    {
-      csv: {
-        available: true,
-        total: 15,
-        deprecated: 0,
-        sizes: sizesAggResponse,
-      },
-    },
-    featureMap,
-    exportTypesHandler
-  );
-  expect(result.csv).toMatchInlineSnapshot(`
-    Object {
-      "app": Object {
-        "canvas workpad": 0,
-        "dashboard": 0,
-        "search": 0,
-        "visualization": 0,
-      },
-      "available": true,
-      "deprecated": 15,
       "layout": Object {
         "canvas": 0,
         "preserve_layout": 0,

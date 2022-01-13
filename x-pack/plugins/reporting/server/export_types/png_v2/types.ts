@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { JobParamsPNGV2, TaskPayloadPNGV2 } from '../../../common/types';
+export type { JobParamsPNGV2, TaskPayloadPNGV2 } from '../../../common/types/export_types/png_v2';

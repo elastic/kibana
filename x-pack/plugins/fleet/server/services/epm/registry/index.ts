@@ -8,8 +8,10 @@
 import { URL } from 'url';
 
 import mime from 'mime-types';
-import semverValid from 'semver/functions/valid';
+
 import type { Response } from 'node-fetch';
+
+import { splitPkgKey as split } from '../../../../common';
 
 import { KibanaAssetType } from '../../../types';
 import type {
@@ -31,12 +33,7 @@ import {
 } from '../archive';
 import { streamToBuffer } from '../streams';
 import { appContextService } from '../..';
-import {
-  PackageKeyInvalidError,
-  PackageNotFoundError,
-  PackageCacheError,
-  RegistryResponseError,
-} from '../../../errors';
+import { PackageNotFoundError, PackageCacheError, RegistryResponseError } from '../../../errors';
 
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
@@ -46,33 +43,7 @@ export interface SearchParams {
   experimental?: boolean;
 }
 
-/**
- * Extract the package name and package version from a string.
- *
- * @param pkgkey a string containing the package name delimited by the package version
- */
-export function splitPkgKey(pkgkey: string): { pkgName: string; pkgVersion: string } {
-  // If no version is provided, use the provided package key as the
-  // package name and return an empty version value
-  if (!pkgkey.includes('-')) {
-    return { pkgName: pkgkey, pkgVersion: '' };
-  }
-
-  const pkgName = pkgkey.includes('-') ? pkgkey.substr(0, pkgkey.indexOf('-')) : pkgkey;
-
-  if (pkgName === '') {
-    throw new PackageKeyInvalidError('Package key parsing failed: package name was empty');
-  }
-
-  // this will return the entire string if `indexOf` return -1
-  const pkgVersion = pkgkey.substr(pkgkey.indexOf('-') + 1);
-  if (!semverValid(pkgVersion)) {
-    throw new PackageKeyInvalidError(
-      'Package key parsing failed: package version was not a valid semver'
-    );
-  }
-  return { pkgName, pkgVersion };
-}
+export const splitPkgKey = split;
 
 export const pkgToPkgKey = ({ name, version }: { name: string; version: string }) =>
   `${name}-${version}`;

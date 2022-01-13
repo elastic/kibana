@@ -68,7 +68,6 @@ describe('heatmap', () => {
           position: Position.Right,
           type: LEGEND_FUNCTION,
           maxLines: 1,
-          shouldTruncate: true,
         },
         gridConfig: {
           type: HEATMAP_GRID_FUNCTION,
@@ -433,14 +432,10 @@ describe('heatmap', () => {
                         // grid
                         strokeWidth: [],
                         strokeColor: [],
-                        cellHeight: [],
-                        cellWidth: [],
                         // cells
                         isCellLabelVisible: [false],
                         // Y-axis
                         isYAxisLabelVisible: [true],
-                        yAxisLabelWidth: [],
-                        yAxisLabelColor: [],
                         // X-axis
                         isXAxisLabelVisible: [true],
                       },

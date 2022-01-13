@@ -11,7 +11,11 @@ import { useEffect, useState } from 'react';
 import { useObservable, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { createFilter } from '../../../../common/containers/helpers';
 
-import { HostsKpiQueries, RequestBasicOptions } from '../../../../../common/search_strategy';
+import {
+  getHostRiskIndex,
+  HostsKpiQueries,
+  RequestBasicOptions,
+} from '../../../../../common/search_strategy';
 
 import {
   isCompleteResponse,
@@ -21,7 +25,6 @@ import type { DataPublicPluginStart } from '../../../../../../../../src/plugins/
 import type { HostsKpiRiskyHostsStrategyResponse } from '../../../../../common/search_strategy/security_solution/hosts/kpi/risky_hosts';
 import { useKibana } from '../../../../common/lib/kibana';
 import { isIndexNotFoundError } from '../../../../common/utils/exceptions';
-import { getHostRiskIndex } from '../../../../helpers';
 
 export type RiskyHostsScoreRequestOptions = RequestBasicOptions;
 

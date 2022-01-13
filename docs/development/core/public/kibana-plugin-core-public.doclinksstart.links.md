@@ -27,6 +27,9 @@ readonly links: {
         readonly cloud: {
             readonly indexManagement: string;
         };
+        readonly console: {
+            readonly guide: string;
+        };
         readonly dashboard: {
             readonly guide: string;
             readonly drilldowns: string;
@@ -88,6 +91,7 @@ readonly links: {
             readonly usersAccess: string;
         };
         readonly workplaceSearch: {
+            readonly apiKeys: string;
             readonly box: string;
             readonly confluenceCloud: string;
             readonly confluenceServer: string;
@@ -189,7 +193,10 @@ readonly links: {
             readonly runtimeFields: string;
         };
         readonly addData: string;
-        readonly kibana: string;
+        readonly kibana: {
+            readonly guide: string;
+            readonly autocompleteSuggestions: string;
+        };
         readonly upgradeAssistant: {
             readonly overview: string;
             readonly batchReindex: string;
@@ -209,10 +216,12 @@ readonly links: {
         };
         readonly securitySolution: {
             readonly trustedApps: string;
+            readonly eventFilters: string;
         };
         readonly query: {
             readonly eql: string;
             readonly kueryQuerySyntax: string;
+            readonly luceneQuery: string;
             readonly luceneQuerySyntax: string;
             readonly percolate: string;
             readonly queryDsl: string;
@@ -241,6 +250,7 @@ readonly links: {
             cronExpressions: string;
             executeWatchActionModes: string;
             indexExists: string;
+            multiSearch: string;
             openIndex: string;
             putComponentTemplate: string;
             painlessExecute: string;
@@ -249,8 +259,10 @@ readonly links: {
             putSnapshotLifecyclePolicy: string;
             putIndexTemplateV1: string;
             putWatch: string;
+            searchPreference: string;
             simulatePipeline: string;
             timeUnits: string;
+            unfreezeIndex: string;
             updateTransform: string;
         }>;
         readonly observability: Readonly<{
@@ -289,7 +301,14 @@ readonly links: {
         }>;
         readonly watcher: Record<string, string>;
         readonly ccs: Record<string, string>;
-        readonly plugins: Record<string, string>;
+        readonly plugins: {
+            azureRepo: string;
+            gcsRepo: string;
+            hdfsRepo: string;
+            s3Repo: string;
+            snapshotRestoreRepos: string;
+            mapperSize: string;
+        };
         readonly snapshotRestore: Record<string, string>;
         readonly ingest: Record<string, string>;
         readonly fleet: Readonly<{

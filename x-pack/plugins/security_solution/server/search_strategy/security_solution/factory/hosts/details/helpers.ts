@@ -188,11 +188,11 @@ export const getHostEndpoint = async (
     return null;
   }
 
-  const { esClient, endpointContext, request } = deps;
+  const { esClient, endpointContext } = deps;
   const logger = endpointContext.logFactory.get('metadata');
 
   try {
-    const fleetServices = endpointContext.service.getScopedFleetServices(request);
+    const fleetServices = endpointContext.service.getInternalFleetServices();
     const endpointMetadataService = endpointContext.service.getEndpointMetadataService();
 
     const endpointData = await endpointMetadataService

@@ -17,12 +17,21 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import type { ContentsProps } from '.';
-import { NodeStats } from '../../../../../common/service_map';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { AnomalyDetection } from './anomaly_detection';
 import { StatsList } from './stats_list';
 import { useTimeRange } from '../../../../hooks/use_time_range';
+import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
+import { APIReturnType } from '../../../../services/rest/createCallApmApi';
+
+type ServiceNodeReturn =
+  APIReturnType<'GET /internal/apm/service-map/service/{serviceName}'>;
+
+const INITIAL_STATE: ServiceNodeReturn = {
+  currentPeriod: {},
+  previousPeriod: undefined,
+};
 
 export function ServiceContents({
   onFocusClick,
@@ -42,28 +51,32 @@ export function ServiceContents({
     throw new Error('Expected rangeFrom and rangeTo to be set');
   }
 
-  const { rangeFrom, rangeTo } = query;
+  const { rangeFrom, rangeTo, comparisonEnabled, comparisonType } = query;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
+  const { offset } = getTimeRangeComparison({
+    start,
+    end,
+    comparisonEnabled,
+    comparisonType,
+  });
+
   const serviceName = nodeData.id!;
 
-  const { data = { transactionStats: {} } as NodeStats, status } = useFetcher(
+  const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi({
           endpoint: 'GET /internal/apm/service-map/service/{serviceName}',
           params: {
             path: { serviceName },
-            query: { environment, start, end },
+            query: { environment, start, end, offset },
           },
         });
       }
     },
-    [environment, serviceName, start, end],
-    {
-      preservePreviousData: false,
-    }
+    [environment, serviceName, start, end, offset]
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;

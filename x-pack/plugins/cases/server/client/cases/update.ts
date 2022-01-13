@@ -43,16 +43,16 @@ import {
   SUB_CASE_SAVED_OBJECT,
   MAX_TITLE_LENGTH,
 } from '../../../common/constants';
-import { buildCaseUserActions } from '../../services/user_actions/helpers';
+
 import { getCaseToUpdate } from '../utils';
 
 import { AlertService, CasesService } from '../../services';
+import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateRequest,
-  createCaseError,
   flattenCaseSavedObject,
   isCommentRequestTypeAlertOrGenAlert,
-} from '../../common';
+} from '../../common/utils';
 import { UpdateAlertRequest } from '../alerts/types';
 import { CasesClientArgs } from '..';
 import { Operations, OwnerEntity } from '../../authorization';
@@ -589,14 +589,11 @@ export const update = async (
         });
       });
 
-    await userActionService.bulkCreate({
+    await userActionService.bulkCreateUpdateCase({
       unsecuredSavedObjectsClient,
-      actions: buildCaseUserActions({
-        originalCases: myCases.saved_objects,
-        updatedCases: updatedCases.saved_objects,
-        actionDate: updatedDt,
-        actionBy: { email, full_name, username },
-      }),
+      originalCases: myCases.saved_objects,
+      updatedCases: updatedCases.saved_objects,
+      user,
     });
 
     return CasesResponseRt.encode(returnUpdatedCase);

@@ -5,11 +5,22 @@
  * 2.0.
  */
 
-import { SIGNALS_ID } from '@kbn/securitysolution-rules';
+import {
+  SIGNALS_ID,
+  EQL_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  THRESHOLD_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+} from '@kbn/securitysolution-rules';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { LEGACY_NOTIFICATIONS_ID } from '../../../common/constants';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../../../cases/common/constants';
 
 import { ElasticsearchClient, SavedObjectsClientContract } from '../../../../../../src/core/server';
 import { isElasticRule } from './index';
-import {
+import type {
   AlertsAggregationResponse,
   CasesSavedObject,
   DetectionRulesTypeUsage,
@@ -17,7 +28,31 @@ import {
   DetectionRuleAdoption,
   RuleSearchParams,
   RuleSearchResult,
+  DetectionMetrics,
 } from './types';
+
+/**
+ * Initial detection metrics initialized.
+ */
+export const getInitialDetectionMetrics = (): DetectionMetrics => ({
+  ml_jobs: {
+    ml_job_usage: {
+      custom: {
+        enabled: 0,
+        disabled: 0,
+      },
+      elastic: {
+        enabled: 0,
+        disabled: 0,
+      },
+    },
+    ml_job_metrics: [],
+  },
+  detection_rules: {
+    detection_rule_detail: [],
+    detection_rule_usage: initialDetectionRulesUsage,
+  },
+});
 
 /**
  * Default detection rule usage count, split by type + elastic/custom
@@ -58,6 +93,9 @@ export const initialDetectionRulesUsage: DetectionRulesTypeUsage = {
     disabled: 0,
     alerts: 0,
     cases: 0,
+  },
+  legacy_notifications: {
+    total: 0,
   },
   custom_total: {
     enabled: 0,
@@ -188,7 +226,25 @@ export const getDetectionRuleMetrics = async (
 ): Promise<DetectionRuleAdoption> => {
   let rulesUsage: DetectionRulesTypeUsage = initialDetectionRulesUsage;
   const ruleSearchOptions: RuleSearchParams = {
-    body: { query: { bool: { filter: { term: { 'alert.alertTypeId': SIGNALS_ID } } } } },
+    body: {
+      query: {
+        bool: {
+          filter: {
+            terms: {
+              'alert.alertTypeId': [
+                SIGNALS_ID,
+                EQL_RULE_TYPE_ID,
+                ML_RULE_TYPE_ID,
+                QUERY_RULE_TYPE_ID,
+                SAVED_QUERY_RULE_TYPE_ID,
+                INDICATOR_RULE_TYPE_ID,
+                THRESHOLD_RULE_TYPE_ID,
+              ],
+            },
+          },
+        },
+      },
+    },
     filter_path: [],
     ignore_unavailable: true,
     index: kibanaIndex,
@@ -203,7 +259,7 @@ export const getDetectionRuleMetrics = async (
       body: {
         aggs: {
           detectionAlerts: {
-            terms: { field: 'signal.rule.id.keyword' },
+            terms: { field: ALERT_RULE_UUID },
           },
         },
         query: {
@@ -224,12 +280,25 @@ export const getDetectionRuleMetrics = async (
     })) as { body: AlertsAggregationResponse };
 
     const cases = await savedObjectClient.find<CasesSavedObject>({
-      type: 'cases-comments',
-      fields: [],
+      type: CASE_COMMENT_SAVED_OBJECT,
       page: 1,
       perPage: MAX_RESULTS_WINDOW,
-      filter: 'cases-comments.attributes.type: alert',
+      namespaces: ['*'],
+      filter: `${CASE_COMMENT_SAVED_OBJECT}.attributes.type: alert`,
     });
+
+    // We get just 1 per a single page so we can get the total count to add to the rulesUsage.
+    // Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function.
+    const legacyNotificationsCount = (
+      await savedObjectClient.find({
+        type: 'alert',
+        page: 1,
+        namespaces: ['*'],
+        perPage: 1,
+        filter: `alert.attributes.alertTypeId: ${LEGACY_NOTIFICATIONS_ID}`,
+      })
+    ).total;
+    rulesUsage = { ...rulesUsage, legacy_notifications: { total: legacyNotificationsCount } };
 
     const casesCache = cases.saved_objects.reduce((cache, { attributes: casesObject }) => {
       const ruleId = casesObject.rule.id;
@@ -247,16 +316,15 @@ export const getDetectionRuleMetrics = async (
 
     const alertsCache = new Map<string, number>();
     alertBuckets.map((bucket) => alertsCache.set(bucket.key, bucket.doc_count));
-
     if (ruleResults.hits?.hits?.length > 0) {
       const ruleObjects = ruleResults.hits.hits.map((hit) => {
         const ruleId = hit._id.split(':')[1];
         const isElastic = isElasticRule(hit._source?.alert.tags);
         return {
           rule_name: hit._source?.alert.name,
-          rule_id: ruleId,
+          rule_id: hit._source?.alert.params.ruleId,
           rule_type: hit._source?.alert.params.type,
-          rule_version: hit._source?.alert.params.version,
+          rule_version: Number(hit._source?.alert.params.version),
           enabled: hit._source?.alert.enabled,
           elastic_rule: isElastic,
           created_on: hit._source?.alert.createdAt,

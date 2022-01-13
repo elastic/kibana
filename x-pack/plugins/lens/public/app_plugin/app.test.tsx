@@ -21,10 +21,8 @@ import {
   mockStoreDeps,
 } from '../mocks';
 import { I18nProvider } from '@kbn/i18n-react';
-import {
-  SavedObjectSaveModal,
-  checkForDuplicateTitle,
-} from '../../../../../src/plugins/saved_objects/public';
+import { SavedObjectSaveModal } from '../../../../../src/plugins/saved_objects/public';
+import { checkForDuplicateTitle } from '../persistence';
 import { createMemoryHistory } from 'history';
 import {
   esFilters,
@@ -42,17 +40,9 @@ import moment from 'moment';
 import { setState, LensAppState } from '../state_management/index';
 jest.mock('../editor_frame_service/editor_frame/expression_helpers');
 jest.mock('src/core/public');
-jest.mock('../../../../../src/plugins/saved_objects/public', () => {
-  // eslint-disable-next-line @typescript-eslint/no-shadow
-  const { SavedObjectSaveModal, SavedObjectSaveModalOrigin } = jest.requireActual(
-    '../../../../../src/plugins/saved_objects/public'
-  );
-  return {
-    SavedObjectSaveModal,
-    SavedObjectSaveModalOrigin,
-    checkForDuplicateTitle: jest.fn(),
-  };
-});
+jest.mock('../persistence/saved_objects_utils/check_for_duplicate_title', () => ({
+  checkForDuplicateTitle: jest.fn(),
+}));
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -136,11 +126,13 @@ describe('Lens App', () => {
     defaultSavedObjectId = '1234';
     defaultDoc = {
       savedObjectId: defaultSavedObjectId,
+      visualizationType: 'testVis',
+      type: 'lens',
       title: 'An extremely cool default document!',
       expression: 'definitely a valid expression',
       state: {
         query: 'lucene',
-        filters: [{ query: { match_phrase: { src: 'test' } } }],
+        filters: [{ query: { match_phrase: { src: 'test' } }, meta: { index: 'index-pattern-0' } }],
       },
       references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
     } as unknown as Document;
@@ -695,7 +687,7 @@ describe('Lens App', () => {
             savedObjectId: defaultSavedObjectId,
             title: 'hello there2',
             state: expect.objectContaining({
-              filters: [unpinned],
+              filters: services.data.query.filterManager.inject([unpinned], []),
             }),
           }),
           true,
@@ -1262,24 +1254,28 @@ describe('Lens App', () => {
     });
 
     it('should not confirm when changes are saved', async () => {
-      const { props } = await mountWith({
-        preloadedState: {
-          persistedDoc: {
-            ...defaultDoc,
-            state: {
-              ...defaultDoc.state,
-              datasourceStates: { testDatasource: {} },
-              visualization: {},
-            },
-          },
-          isSaveable: true,
-          ...(defaultDoc.state as Partial<LensAppState>),
-          visualization: {
-            activeId: 'testVis',
-            state: {},
+      const preloadedState = {
+        persistedDoc: {
+          ...defaultDoc,
+          state: {
+            ...defaultDoc.state,
+            datasourceStates: { testDatasource: {} },
+            visualization: {},
           },
         },
-      });
+        isSaveable: true,
+        ...(defaultDoc.state as Partial<LensAppState>),
+        visualization: {
+          activeId: 'testVis',
+          state: {},
+        },
+      };
+
+      const customProps = makeDefaultProps();
+      customProps.datasourceMap.testDatasource.isEqual = () => true; // if this returns false, the documents won't be accounted equal
+
+      const { props } = await mountWith({ preloadedState, props: customProps });
+
       const lastCall = props.onAppLeave.mock.calls[props.onAppLeave.mock.calls.length - 1][0];
       lastCall({ default: defaultLeave, confirm: confirmLeave });
       expect(defaultLeave).toHaveBeenCalled();

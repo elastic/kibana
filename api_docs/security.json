@@ -22,7 +22,13 @@
             "text": "AuthenticatedUser"
           },
           " extends ",
-          "User"
+          {
+            "pluginId": "security",
+            "scope": "common",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-common.User",
+            "text": "User"
+          }
         ],
         "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
         "deprecated": false,
@@ -37,7 +43,13 @@
               "\nThe name and type of the Realm that has authenticated the user."
             ],
             "signature": [
-              "UserRealm"
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.UserRealm",
+                "text": "UserRealm"
+              }
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
             "deprecated": false
@@ -52,7 +64,13 @@
               "\nThe name and type of the Realm where the user information were retrieved from."
             ],
             "signature": [
-              "UserRealm"
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.UserRealm",
+                "text": "UserRealm"
+              }
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
             "deprecated": false
@@ -67,7 +85,13 @@
               "\nThe authentication provider that used to authenticate user."
             ],
             "signature": [
-              "AuthenticationProvider"
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.AuthenticationProvider",
+                "text": "AuthenticationProvider"
+              }
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
             "deprecated": false
@@ -144,6 +168,70 @@
       },
       {
         "parentPluginId": "security",
+        "id": "def-public.ChangePasswordProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChangePasswordProps",
+        "description": [],
+        "path": "x-pack/plugins/security/public/account_management/change_password/change_password.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-public.ChangePasswordProps.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              }
+            ],
+            "path": "x-pack/plugins/security/public/account_management/change_password/change_password.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-public.PersonalInfoProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "PersonalInfoProps",
+        "description": [],
+        "path": "x-pack/plugins/security/public/account_management/personal_info/personal_info.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-public.PersonalInfoProps.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.AuthenticatedUser",
+                "text": "AuthenticatedUser"
+              }
+            ],
+            "path": "x-pack/plugins/security/public/account_management/personal_info/personal_info.tsx",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
         "id": "def-public.SecurityLicense",
         "type": "Interface",
         "tags": [],
@@ -191,7 +279,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "SecurityLicenseFeatures"
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.SecurityLicenseFeatures",
+                "text": "SecurityLicenseFeatures"
+              }
             ],
             "path": "x-pack/plugins/security/common/licensing/license_service.ts",
             "deprecated": false,
@@ -238,7 +332,13 @@
             "signature": [
               "Observable",
               "<",
-              "SecurityLicenseFeatures",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.SecurityLicenseFeatures",
+                "text": "SecurityLicenseFeatures"
+              },
               ">"
             ],
             "path": "x-pack/plugins/security/common/licensing/license_service.ts",
@@ -389,7 +489,14 @@
               "\nDescribes the layout of the login form if it's displayed."
             ],
             "signature": [
-              "\"form\" | \"error-es-unavailable\" | \"error-xpack-unavailable\" | undefined"
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.LoginLayout",
+                "text": "LoginLayout"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/security/common/licensing/license_features.ts",
             "deprecated": false
@@ -486,6 +593,48 @@
       },
       {
         "parentPluginId": "security",
+        "id": "def-public.UiApi",
+        "type": "Interface",
+        "tags": [],
+        "label": "UiApi",
+        "description": [],
+        "path": "x-pack/plugins/security/public/ui_api/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-public.UiApi.components",
+            "type": "Object",
+            "tags": [],
+            "label": "components",
+            "description": [],
+            "signature": [
+              "{ getPersonalInfo: LazyComponentFn<",
+              {
+                "pluginId": "security",
+                "scope": "public",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-public.PersonalInfoProps",
+                "text": "PersonalInfoProps"
+              },
+              ">; getChangePassword: LazyComponentFn<",
+              {
+                "pluginId": "security",
+                "scope": "public",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-public.ChangePasswordProps",
+                "text": "ChangePasswordProps"
+              },
+              ">; }"
+            ],
+            "path": "x-pack/plugins/security/public/ui_api/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
         "id": "def-public.UserMenuLink",
         "type": "Interface",
         "tags": [],
@@ -512,7 +661,7 @@
             "label": "iconType",
             "description": [],
             "signature": [
-              "string | React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
+              "string | React.ComponentType<{}>"
             ],
             "path": "x-pack/plugins/security/public/nav_control/nav_control_component.tsx",
             "deprecated": false
@@ -701,7 +850,13 @@
             "\nExposes UI components that will be loaded asynchronously."
           ],
           "signature": [
-            "UiApi"
+            {
+              "pluginId": "security",
+              "scope": "public",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-public.UiApi",
+              "text": "UiApi"
+            }
           ],
           "path": "x-pack/plugins/security/public/plugin.tsx",
           "deprecated": false
@@ -911,7 +1066,13 @@
             "text": "AuthenticatedUser"
           },
           " extends ",
-          "User"
+          {
+            "pluginId": "security",
+            "scope": "common",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-common.User",
+            "text": "User"
+          }
         ],
         "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
         "deprecated": false,
@@ -926,7 +1087,13 @@
               "\nThe name and type of the Realm that has authenticated the user."
             ],
             "signature": [
-              "UserRealm"
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.UserRealm",
+                "text": "UserRealm"
+              }
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
             "deprecated": false
@@ -941,7 +1108,13 @@
               "\nThe name and type of the Realm where the user information were retrieved from."
             ],
             "signature": [
-              "UserRealm"
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.UserRealm",
+                "text": "UserRealm"
+              }
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
             "deprecated": false
@@ -956,7 +1129,13 @@
               "\nThe authentication provider that used to authenticate user."
             ],
             "signature": [
-              "AuthenticationProvider"
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.AuthenticationProvider",
+                "text": "AuthenticationProvider"
+              }
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
             "deprecated": false
@@ -1005,7 +1184,13 @@
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, params: ",
-              "CreateAPIKeyParams",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.CreateAPIKeyParams",
+                "text": "CreateAPIKeyParams"
+              },
               ") => Promise<",
               {
                 "pluginId": "security",
@@ -1047,7 +1232,13 @@
                 "text": "KibanaRequest"
               },
               "<unknown, unknown, unknown, any>, createParams: ",
-              "CreateAPIKeyParams",
+              {
+                "pluginId": "security",
+                "scope": "server",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-server.CreateAPIKeyParams",
+                "text": "CreateAPIKeyParams"
+              },
               ") => Promise<",
               {
                 "pluginId": "security",
@@ -1167,6 +1358,70 @@
               "{ cluster: string[]; index: Record<string, string[]>; } | undefined"
             ],
             "path": "x-pack/plugins/security/server/authorization/types.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-server.CreateAPIKeyParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateAPIKeyParams",
+        "description": [
+          "\nRepresents the params for creating an API key"
+        ],
+        "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-server.CreateAPIKeyParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.CreateAPIKeyParams.role_descriptors",
+            "type": "Object",
+            "tags": [],
+            "label": "role_descriptors",
+            "description": [],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.CreateAPIKeyParams.expiration",
+            "type": "string",
+            "tags": [],
+            "label": "expiration",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.CreateAPIKeyParams.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
+            "path": "x-pack/plugins/security/server/authentication/api_keys/api_keys.ts",
             "deprecated": false
           }
         ],
@@ -1463,10 +1718,6 @@
           "deprecated": true,
           "references": [
             {
-              "plugin": "reporting",
-              "path": "x-pack/plugins/reporting/server/routes/lib/get_user.ts"
-            },
-            {
               "plugin": "encryptedSavedObjects",
               "path": "x-pack/plugins/encrypted_saved_objects/server/crypto/encryption_key_rotation_service.ts"
             },
@@ -1481,6 +1732,10 @@
             {
               "plugin": "ml",
               "path": "x-pack/plugins/ml/server/routes/annotations.ts"
+            },
+            {
+              "plugin": "reporting",
+              "path": "x-pack/plugins/reporting/server/routes/lib/get_user.ts"
             },
             {
               "plugin": "dataEnhanced",
@@ -1707,6 +1962,102 @@
     "interfaces": [
       {
         "parentPluginId": "security",
+        "id": "def-common.ApiKey",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApiKey",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/api_key.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.ApiKey.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/security/common/model/api_key.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.ApiKey.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/security/common/model/api_key.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.ApiKey.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [],
+            "path": "x-pack/plugins/security/common/model/api_key.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.ApiKey.realm",
+            "type": "string",
+            "tags": [],
+            "label": "realm",
+            "description": [],
+            "path": "x-pack/plugins/security/common/model/api_key.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.ApiKey.creation",
+            "type": "number",
+            "tags": [],
+            "label": "creation",
+            "description": [],
+            "path": "x-pack/plugins/security/common/model/api_key.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.ApiKey.expiration",
+            "type": "number",
+            "tags": [],
+            "label": "expiration",
+            "description": [],
+            "path": "x-pack/plugins/security/common/model/api_key.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.ApiKey.invalidated",
+            "type": "boolean",
+            "tags": [],
+            "label": "invalidated",
+            "description": [],
+            "path": "x-pack/plugins/security/common/model/api_key.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.ApiKey.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
+            "path": "x-pack/plugins/security/common/model/api_key.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
         "id": "def-common.AuthenticatedUser",
         "type": "Interface",
         "tags": [],
@@ -1723,7 +2074,13 @@
             "text": "AuthenticatedUser"
           },
           " extends ",
-          "User"
+          {
+            "pluginId": "security",
+            "scope": "common",
+            "docId": "kibSecurityPluginApi",
+            "section": "def-common.User",
+            "text": "User"
+          }
         ],
         "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
         "deprecated": false,
@@ -1738,7 +2095,13 @@
               "\nThe name and type of the Realm that has authenticated the user."
             ],
             "signature": [
-              "UserRealm"
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.UserRealm",
+                "text": "UserRealm"
+              }
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
             "deprecated": false
@@ -1753,7 +2116,13 @@
               "\nThe name and type of the Realm where the user information were retrieved from."
             ],
             "signature": [
-              "UserRealm"
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.UserRealm",
+                "text": "UserRealm"
+              }
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
             "deprecated": false
@@ -1768,7 +2137,13 @@
               "\nThe authentication provider that used to authenticate user."
             ],
             "signature": [
-              "AuthenticationProvider"
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.AuthenticationProvider",
+                "text": "AuthenticationProvider"
+              }
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
             "deprecated": false
@@ -1783,6 +2158,162 @@
               "\nThe AuthenticationType used by ES to authenticate the user.\n"
             ],
             "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.AuthenticationProvider",
+        "type": "Interface",
+        "tags": [],
+        "label": "AuthenticationProvider",
+        "description": [
+          "\nType and name tuple to identify provider used to authenticate user."
+        ],
+        "path": "x-pack/plugins/security/common/model/authentication_provider.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.AuthenticationProvider.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "x-pack/plugins/security/common/model/authentication_provider.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.AuthenticationProvider.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/security/common/model/authentication_provider.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.FeaturesPrivileges",
+        "type": "Interface",
+        "tags": [],
+        "label": "FeaturesPrivileges",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/features_privileges.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.FeaturesPrivileges.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[featureId: string]: string[]",
+            "description": [],
+            "signature": [
+              "[featureId: string]:  string[]"
+            ],
+            "path": "x-pack/plugins/security/common/model/features_privileges.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.PrivilegeDeprecationsRolesByFeatureIdRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrivilegeDeprecationsRolesByFeatureIdRequest",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/deprecations.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.PrivilegeDeprecationsRolesByFeatureIdRequest.context",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.GetDeprecationsContext",
+                "text": "GetDeprecationsContext"
+              }
+            ],
+            "path": "x-pack/plugins/security/common/model/deprecations.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.PrivilegeDeprecationsRolesByFeatureIdRequest.featureId",
+            "type": "string",
+            "tags": [],
+            "label": "featureId",
+            "description": [],
+            "path": "x-pack/plugins/security/common/model/deprecations.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.PrivilegeDeprecationsRolesByFeatureIdResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "PrivilegeDeprecationsRolesByFeatureIdResponse",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/deprecations.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.PrivilegeDeprecationsRolesByFeatureIdResponse.roles",
+            "type": "Array",
+            "tags": [],
+            "label": "roles",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.Role",
+                "text": "Role"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/security/common/model/deprecations.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.PrivilegeDeprecationsRolesByFeatureIdResponse.errors",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.DeprecationsDetails",
+                "text": "DeprecationsDetails"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/security/common/model/deprecations.ts",
             "deprecated": false
           }
         ],
@@ -1807,9 +2338,21 @@
             "description": [],
             "signature": [
               "(args: ",
-              "PrivilegeDeprecationsRolesByFeatureIdRequest",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.PrivilegeDeprecationsRolesByFeatureIdRequest",
+                "text": "PrivilegeDeprecationsRolesByFeatureIdRequest"
+              },
               ") => Promise<",
-              "PrivilegeDeprecationsRolesByFeatureIdResponse",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.PrivilegeDeprecationsRolesByFeatureIdResponse",
+                "text": "PrivilegeDeprecationsRolesByFeatureIdResponse"
+              },
               ">"
             ],
             "path": "x-pack/plugins/security/common/model/deprecations.ts",
@@ -1823,7 +2366,13 @@
                 "label": "args",
                 "description": [],
                 "signature": [
-                  "PrivilegeDeprecationsRolesByFeatureIdRequest"
+                  {
+                    "pluginId": "security",
+                    "scope": "common",
+                    "docId": "kibSecurityPluginApi",
+                    "section": "def-common.PrivilegeDeprecationsRolesByFeatureIdRequest",
+                    "text": "PrivilegeDeprecationsRolesByFeatureIdRequest"
+                  }
                 ],
                 "path": "x-pack/plugins/security/common/model/deprecations.ts",
                 "deprecated": false,
@@ -1831,6 +2380,258 @@
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.Role",
+        "type": "Interface",
+        "tags": [],
+        "label": "Role",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/role.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.Role.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/security/common/model/role.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.Role.elasticsearch",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearch",
+            "description": [],
+            "signature": [
+              "{ cluster: string[]; indices: ",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleIndexPrivilege",
+                "text": "RoleIndexPrivilege"
+              },
+              "[]; run_as: string[]; }"
+            ],
+            "path": "x-pack/plugins/security/common/model/role.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.Role.kibana",
+            "type": "Array",
+            "tags": [],
+            "label": "kibana",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.RoleKibanaPrivilege",
+                "text": "RoleKibanaPrivilege"
+              },
+              "[]"
+            ],
+            "path": "x-pack/plugins/security/common/model/role.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.Role.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ [anyKey: string]: any; } | undefined"
+            ],
+            "path": "x-pack/plugins/security/common/model/role.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.Role.transient_metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "transient_metadata",
+            "description": [],
+            "signature": [
+              "{ [anyKey: string]: any; } | undefined"
+            ],
+            "path": "x-pack/plugins/security/common/model/role.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.Role._transform_error",
+            "type": "Array",
+            "tags": [],
+            "label": "_transform_error",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/security/common/model/role.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.Role._unrecognized_applications",
+            "type": "Array",
+            "tags": [],
+            "label": "_unrecognized_applications",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/security/common/model/role.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.RoleIndexPrivilege",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleIndexPrivilege",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/role.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleIndexPrivilege.names",
+            "type": "Array",
+            "tags": [],
+            "label": "names",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/security/common/model/role.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleIndexPrivilege.privileges",
+            "type": "Array",
+            "tags": [],
+            "label": "privileges",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/security/common/model/role.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleIndexPrivilege.field_security",
+            "type": "Object",
+            "tags": [],
+            "label": "field_security",
+            "description": [],
+            "signature": [
+              "{ grant?: string[] | undefined; except?: string[] | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/security/common/model/role.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleIndexPrivilege.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security/common/model/role.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.RoleKibanaPrivilege",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoleKibanaPrivilege",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/role.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleKibanaPrivilege.spaces",
+            "type": "Array",
+            "tags": [],
+            "label": "spaces",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/security/common/model/role.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleKibanaPrivilege.base",
+            "type": "Array",
+            "tags": [],
+            "label": "base",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/security/common/model/role.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleKibanaPrivilege.feature",
+            "type": "Object",
+            "tags": [],
+            "label": "feature",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.FeaturesPrivileges",
+                "text": "FeaturesPrivileges"
+              }
+            ],
+            "path": "x-pack/plugins/security/common/model/role.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.RoleKibanaPrivilege._reserved",
+            "type": "Array",
+            "tags": [],
+            "label": "_reserved",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/security/common/model/role.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1884,7 +2685,13 @@
             "description": [],
             "signature": [
               "() => ",
-              "SecurityLicenseFeatures"
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.SecurityLicenseFeatures",
+                "text": "SecurityLicenseFeatures"
+              }
             ],
             "path": "x-pack/plugins/security/common/licensing/license_service.ts",
             "deprecated": false,
@@ -1931,7 +2738,13 @@
             "signature": [
               "Observable",
               "<",
-              "SecurityLicenseFeatures",
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.SecurityLicenseFeatures",
+                "text": "SecurityLicenseFeatures"
+              },
               ">"
             ],
             "path": "x-pack/plugins/security/common/licensing/license_service.ts",
@@ -1939,10 +2752,302 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.SecurityLicenseFeatures",
+        "type": "Interface",
+        "tags": [],
+        "label": "SecurityLicenseFeatures",
+        "description": [
+          "\nDescribes Security plugin features that depend on license."
+        ],
+        "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicenseFeatures.showLogin",
+            "type": "boolean",
+            "tags": [],
+            "label": "showLogin",
+            "description": [
+              "\nIndicates whether we show login page or skip it."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicenseFeatures.allowLogin",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowLogin",
+            "description": [
+              "\nIndicates whether we allow login or disable it on the login page."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicenseFeatures.showLinks",
+            "type": "boolean",
+            "tags": [],
+            "label": "showLinks",
+            "description": [
+              "\nIndicates whether we show security links throughout the kibana app."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicenseFeatures.showRoleMappingsManagement",
+            "type": "boolean",
+            "tags": [],
+            "label": "showRoleMappingsManagement",
+            "description": [
+              "\nIndicates whether we show the Role Mappings UI."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicenseFeatures.allowAccessAgreement",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowAccessAgreement",
+            "description": [
+              "\nIndicates whether we allow users to access agreement UI and acknowledge it."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicenseFeatures.allowAuditLogging",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowAuditLogging",
+            "description": [
+              "\nIndicates whether we allow logging of audit events."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicenseFeatures.allowRoleDocumentLevelSecurity",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowRoleDocumentLevelSecurity",
+            "description": [
+              "\nIndicates whether we allow users to define document level security in roles."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicenseFeatures.allowRoleFieldLevelSecurity",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowRoleFieldLevelSecurity",
+            "description": [
+              "\nIndicates whether we allow users to define field level security in roles."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicenseFeatures.allowRbac",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowRbac",
+            "description": [
+              "\nIndicates whether we allow Role-based access control (RBAC)."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicenseFeatures.allowSubFeaturePrivileges",
+            "type": "boolean",
+            "tags": [],
+            "label": "allowSubFeaturePrivileges",
+            "description": [
+              "\nIndicates whether we allow sub-feature privileges."
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.SecurityLicenseFeatures.layout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "layout",
+            "description": [
+              "\nDescribes the layout of the login form if it's displayed."
+            ],
+            "signature": [
+              {
+                "pluginId": "security",
+                "scope": "common",
+                "docId": "kibSecurityPluginApi",
+                "section": "def-common.LoginLayout",
+                "text": "LoginLayout"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.User",
+        "type": "Interface",
+        "tags": [],
+        "label": "User",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/user.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.User.username",
+            "type": "string",
+            "tags": [],
+            "label": "username",
+            "description": [],
+            "path": "x-pack/plugins/security/common/model/user.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.User.email",
+            "type": "string",
+            "tags": [],
+            "label": "email",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security/common/model/user.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.User.full_name",
+            "type": "string",
+            "tags": [],
+            "label": "full_name",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/security/common/model/user.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.User.roles",
+            "type": "Object",
+            "tags": [],
+            "label": "roles",
+            "description": [],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "x-pack/plugins/security/common/model/user.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.User.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "x-pack/plugins/security/common/model/user.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.User.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "{ _reserved: boolean; _deprecated?: boolean | undefined; _deprecated_reason?: string | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/security/common/model/user.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "security",
+        "id": "def-common.UserRealm",
+        "type": "Interface",
+        "tags": [],
+        "label": "UserRealm",
+        "description": [],
+        "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "security",
+            "id": "def-common.UserRealm.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-common.UserRealm.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "x-pack/plugins/security/common/model/authenticated_user.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "security",
+        "id": "def-common.LoginLayout",
+        "type": "Type",
+        "tags": [],
+        "label": "LoginLayout",
+        "description": [
+          "\nRepresents types of login form layouts."
+        ],
+        "signature": [
+          "\"form\" | \"error-es-unavailable\" | \"error-xpack-unavailable\""
+        ],
+        "path": "x-pack/plugins/security/common/licensing/license_features.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

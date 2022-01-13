@@ -42,7 +42,13 @@ jest.mock('../../../common/lib/kibana', () => {
     }),
   };
 });
-
+jest.mock('../../../common/containers/sourcerer', () => {
+  return {
+    useSourcererDataView: () => ({
+      selectedPatterns: ['filebeat-*', 'packetbeat-*'],
+    }),
+  };
+});
 jest.mock('./index_patterns_missing_prompt', () => {
   return {
     IndexPatternsMissingPrompt: jest.fn(() => <div data-test-subj="IndexPatternsMissingPrompt" />),
@@ -56,7 +62,6 @@ describe('EmbeddedMapComponent', () => {
       { id: '6f1eeb50-023d-11eb-bcb6-6ba0578012a9', title: 'filebeat-*' },
       { id: '28995490-023d-11eb-bcb6-6ba0578012a9', title: 'auditbeat-*' },
     ],
-    sourcererScope: { selectedPatterns: ['filebeat-*', 'packetbeat-*'] },
   };
   const mockCreateEmbeddable = {
     destroyed: false,

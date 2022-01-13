@@ -218,6 +218,7 @@ const ScriptFieldComponent = ({ existingConcreteFields, links }: Props) => {
           <>
             <EuiFormRow
               label={label}
+              hasChildLabel={false}
               id="runtimeFieldScript"
               error={errorMessage}
               isInvalid={!isValid}

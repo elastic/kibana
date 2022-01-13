@@ -10,9 +10,6 @@ import $ from 'jquery';
 import _ from 'lodash';
 import * as es from '../es/es';
 
-// NOTE: If this value ever changes to be a few seconds or less, it might introduce flakiness
-// due to timing issues in our app.js tests.
-const POLL_INTERVAL = 60000;
 let pollTimeoutId;
 
 let perIndexTypes = {};
@@ -250,7 +247,11 @@ function retrieveSettings(settingsKey, settingsToRetrieve) {
 
   // Fetch autocomplete info if setting is set to true, and if user has made changes.
   if (settingsToRetrieve[settingsKey] === true) {
-    return es.send('GET', settingKeyToPathMap[settingsKey], null, true);
+    // Use pretty=false in these request in order to compress the response by removing whitespace
+    const path = `${settingKeyToPathMap[settingsKey]}?pretty=false`;
+    const WITH_PRODUCT_ORIGIN = true;
+
+    return es.send('GET', path, null, true, WITH_PRODUCT_ORIGIN);
   } else {
     const settingsPromise = new $.Deferred();
     if (settingsToRetrieve[settingsKey] === false) {
@@ -327,6 +328,6 @@ export function retrieveAutoCompleteInfo(settings, settingsToRetrieve) {
       if (settings.getPolling()) {
         retrieveAutoCompleteInfo(settings, settings.getAutocomplete());
       }
-    }, POLL_INTERVAL);
+    }, settings.getPollInterval());
   });
 }

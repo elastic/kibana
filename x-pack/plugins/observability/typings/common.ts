@@ -19,10 +19,6 @@ export type ObservabilityApp =
   | 'ux'
   | 'fleet';
 
-export type PromiseReturnType<Func> = Func extends (...args: any[]) => Promise<infer Value>
-  ? Value
-  : Func;
-
 export type { Coordinates } from '../public/typings/fetch_overview_data/';
 
 export type InspectResponse = Request[];

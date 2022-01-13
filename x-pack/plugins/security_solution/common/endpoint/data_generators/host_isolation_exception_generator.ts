@@ -10,6 +10,8 @@ import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolutio
 import { BaseDataGenerator } from './base_data_generator';
 import { getCreateExceptionListItemSchemaMock } from '../../../../lists/common/schemas/request/create_exception_list_item_schema.mock';
 
+const EFFECT_SCOPE_TYPES = ['policy:', 'policy:all'];
+
 export class HostIsolationExceptionGenerator extends BaseDataGenerator<CreateExceptionListItemSchema> {
   generate(): CreateExceptionListItemSchema {
     const overrides: Partial<CreateExceptionListItemSchema> = {
@@ -17,7 +19,7 @@ export class HostIsolationExceptionGenerator extends BaseDataGenerator<CreateExc
       list_id: ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
       item_id: `generator_endpoint_host_isolation_exception_${this.randomUUID()}`,
       os_types: ['windows', 'linux', 'macos'],
-      tags: ['policy:all'],
+      tags: [this.randomChoice(EFFECT_SCOPE_TYPES)],
       namespace_type: 'agnostic',
       meta: undefined,
       description: `Description ${this.randomString(5)}`,

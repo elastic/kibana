@@ -15,14 +15,13 @@ export const ALERT_CHECKBOX = '[data-test-subj~="select-event"].euiCheckbox__inp
 export const ALERT_GRID_CELL = '[data-test-subj="dataGridRowCell"]';
 
 export const ALERT_RISK_SCORE_HEADER =
-  '[data-test-subj="dataGridHeaderCell-kibana.alert.rule.risk_score"]';
+  '[data-test-subj="dataGridHeaderCell-kibana.alert.risk_score"]';
 
 export const ALERT_RULE_NAME = '[data-test-subj="formatted-field-kibana.alert.rule.name"]';
 
-export const ALERT_RULE_RISK_SCORE =
-  '[data-test-subj="formatted-field-kibana.alert.rule.risk_score"]';
+export const ALERT_RISK_SCORE = '[data-test-subj="formatted-field-kibana.alert.risk_score"]';
 
-export const ALERT_RULE_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.rule.severity"]';
+export const ALERT_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.severity"]';
 
 export const ALERT_DATA_GRID = '[data-test-subj="dataGridWrapper"]';
 

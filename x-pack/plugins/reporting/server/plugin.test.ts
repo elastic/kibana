@@ -5,62 +5,35 @@
  * 2.0.
  */
 
-jest.mock('./browsers/install', () => ({
-  installBrowser: jest.fn().mockImplementation(() => ({
-    binaryPath$: {
-      pipe: jest.fn().mockImplementation(() => ({
-        toPromise: () => Promise.resolve(),
-      })),
-    },
-  })),
-}));
-
+import { CoreSetup, CoreStart } from 'kibana/server';
 import { coreMock } from 'src/core/server/mocks';
-import { featuresPluginMock } from '../../features/server/mocks';
-import { TaskManagerSetupContract } from '../../task_manager/server';
+import { ReportingInternalStart } from './core';
 import { ReportingPlugin } from './plugin';
-import { createMockConfigSchema } from './test_helpers';
+import { createMockConfigSchema, createMockPluginSetup } from './test_helpers';
+import {
+  createMockPluginStart,
+  createMockReportingCore,
+} from './test_helpers/create_mock_reportingplugin';
+import { ReportingSetupDeps } from './types';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
 describe('Reporting Plugin', () => {
   let configSchema: any;
   let initContext: any;
-  let coreSetup: any;
-  let coreStart: any;
-  let pluginSetup: any;
-  let pluginStart: any;
+  let coreSetup: CoreSetup;
+  let coreStart: CoreStart;
+  let pluginSetup: ReportingSetupDeps;
+  let pluginStart: ReportingInternalStart;
 
   beforeEach(async () => {
+    const reportingCore = await createMockReportingCore(createMockConfigSchema());
     configSchema = createMockConfigSchema();
     initContext = coreMock.createPluginInitializerContext(configSchema);
     coreSetup = coreMock.createSetup(configSchema);
     coreStart = coreMock.createStart();
-    pluginSetup = {
-      licensing: {},
-      features: featuresPluginMock.createSetup(),
-      usageCollection: {
-        makeUsageCollector: jest.fn(),
-        registerCollector: jest.fn(),
-      },
-      taskManager: {
-        registerTaskDefinitions: jest.fn(),
-      } as unknown as TaskManagerSetupContract,
-      security: {
-        authc: {
-          getCurrentUser: () => ({
-            id: '123',
-            roles: ['superuser'],
-            username: 'Tom Riddle',
-          }),
-        },
-      },
-    } as unknown as any;
-    pluginStart = {
-      data: {
-        fieldFormats: {},
-      },
-    } as unknown as any;
+    pluginSetup = createMockPluginSetup({}) as unknown as ReportingSetupDeps;
+    pluginStart = createMockPluginStart(reportingCore, {});
   });
 
   it('has a sync setup process', () => {
@@ -80,15 +53,14 @@ describe('Reporting Plugin', () => {
     const plugin = new ReportingPlugin(initContext);
     plugin.setup(coreSetup, pluginSetup);
     expect(coreSetup.uiSettings.register).toHaveBeenCalled();
-    expect(coreSetup.uiSettings.register.mock.calls[0][0]).toHaveProperty(
+    expect((coreSetup.uiSettings.register as jest.Mock).mock.calls[0][0]).toHaveProperty(
       'xpackReporting:customPdfLogo'
     );
   });
 
   it('logs start issues', async () => {
     const plugin = new ReportingPlugin(initContext);
-    // @ts-ignore overloading error logger
-    plugin.logger.error = jest.fn();
+    (plugin as unknown as { logger: { error: jest.Mock } }).logger.error = jest.fn();
     plugin.setup(coreSetup, pluginSetup);
     await sleep(5);
     plugin.start(null as any, pluginStart);

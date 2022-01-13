@@ -34,6 +34,7 @@ const previouslyRegisteredTypes = [
   'cases-sub-case',
   'cases-user-actions',
   'config',
+  'connector_token',
   'core-usage-stats',
   'dashboard',
   'endpoint:user-artifact',

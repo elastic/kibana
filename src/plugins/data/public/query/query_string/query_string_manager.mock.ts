@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { QueryStringContract } from '.';
+import type { QueryStringContract } from '.';
 import { Observable } from 'rxjs';
 
 const createSetupContractMock = () => {

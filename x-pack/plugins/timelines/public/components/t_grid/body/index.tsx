@@ -32,10 +32,7 @@ import React, {
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 
 import styled, { ThemeContext } from 'styled-components';
-import {
-  ALERT_RULE_CONSUMER,
-  ALERT_RULE_PRODUCER,
-} from '@kbn/rule-data-utils/technical_field_names';
+import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { Filter } from '@kbn/es-query';
 import {
   TGridCellAction,
@@ -68,7 +65,8 @@ import type { BrowserFields } from '../../../../common/search_strategy/index_fie
 import type { OnRowSelected, OnSelectAll } from '../types';
 import type { Refetch } from '../../../store/t_grid/inputs';
 import { getPageRowIndex } from '../../../../common/utils/pagination';
-import { StatefulEventContext, StatefulFieldsBrowser } from '../../../';
+import { StatefulEventContext } from '../../../components/stateful_event_context';
+import { StatefulFieldsBrowser } from '../../../components/t_grid/toolbar/fields_browser';
 import { tGridActions, TGridModel, tGridSelectors, TimelineState } from '../../../store/t_grid';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { RowAction } from './row_action';
@@ -78,7 +76,6 @@ import { checkBoxControlColumn } from './control_columns';
 import type { EuiTheme } from '../../../../../../../src/plugins/kibana_react/common';
 import { ViewSelection } from '../event_rendered_view/selector';
 import { EventRenderedView } from '../event_rendered_view';
-import { useDataGridHeightHack } from './height_hack';
 import { REMOVE_COLUMN } from './column_headers/translations';
 
 const StatefulAlertStatusBulkActions = lazy(
@@ -88,6 +85,7 @@ const StatefulAlertStatusBulkActions = lazy(
 interface OwnProps {
   activePage: number;
   additionalControls?: React.ReactNode;
+  appId?: string;
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
   createFieldComponent?: CreateFieldComponentType;
@@ -298,6 +296,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
   ({
     activePage,
     additionalControls,
+    appId = '',
     browserFields,
     bulkActions = true,
     clearSelected,
@@ -506,7 +505,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               showSortSelector: true,
               showFullScreenSelector: true,
             }),
-        showStyleSelector: false,
+        showDisplaySelector: false,
       }),
       [
         alertCountText,
@@ -673,7 +672,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
               pageSize,
               timelineId: id,
             });
-
           return {
             ...header,
             actions: {
@@ -788,8 +786,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       [loadPage]
     );
 
-    const height = useDataGridHeightHack(pageSize, data.length);
-
     // Store context in state rather than creating object in provider value={} to prevent re-renders caused by a new object being created
     const [activeStatefulEventContext] = useState({
       timelineID: id,
@@ -803,7 +799,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           {tableView === 'gridView' && (
             <EuiDataGridContainer hideLastPage={totalItems > ES_LIMIT_COUNT}>
               <EuiDataGrid
-                height={height}
                 id={'body-data-grid'}
                 data-test-subj="body-data-grid"
                 aria-label={i18n.TGRID_BODY_ARIA_LABEL}
@@ -829,6 +824,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
           )}
           {tableView === 'eventRenderedView' && (
             <EventRenderedView
+              appId={appId}
               alertToolbar={alertToolbar}
               browserFields={browserFields}
               events={data}

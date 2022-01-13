@@ -225,17 +225,16 @@ export function systemRoutes(
       try {
         const { indices } = request.body;
 
-        const options = {
-          index: indices,
-          fields: ['*'],
-          ignore_unavailable: true,
-          allow_no_indices: true,
-        };
+        const results = await Promise.all(
+          indices.map(async (index) =>
+            client.asCurrentUser.indices.exists({
+              index,
+            })
+          )
+        );
 
-        const { body } = await client.asCurrentUser.fieldCaps(options);
-
-        const result = indices.reduce((acc, cur) => {
-          acc[cur] = { exists: body.indices.includes(cur) };
+        const result = indices.reduce((acc, cur, i) => {
+          acc[cur] = { exists: results[i].body };
           return acc;
         }, {} as Record<string, { exists: boolean }>);
 

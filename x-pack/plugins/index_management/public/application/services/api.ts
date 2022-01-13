@@ -175,6 +175,7 @@ export async function clearCacheIndices(indices: string[]) {
   uiMetricService.trackMetric(METRIC_TYPE.COUNT, eventName);
   return response;
 }
+
 export async function unfreezeIndices(indices: string[]) {
   const body = JSON.stringify({
     indices,
@@ -301,5 +302,12 @@ export function simulateIndexTemplate(template: { [key: string]: any }) {
   }).then((result) => {
     uiMetricService.trackMetric(METRIC_TYPE.COUNT, UIM_TEMPLATE_SIMULATE);
     return result;
+  });
+}
+
+export function useLoadNodesPlugins() {
+  return useRequest<string[]>({
+    path: `${API_BASE_PATH}/nodes/plugins`,
+    method: 'get',
   });
 }

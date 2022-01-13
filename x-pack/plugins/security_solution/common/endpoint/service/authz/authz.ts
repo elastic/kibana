@@ -26,9 +26,9 @@ export const calculateEndpointAuthz = (
   return {
     canAccessFleet: hasAllAccessToFleet,
     canAccessEndpointManagement: hasAllAccessToFleet,
-    canCreateArtifactsByPolicy: isPlatinumPlusLicense,
+    canCreateArtifactsByPolicy: hasAllAccessToFleet && isPlatinumPlusLicense,
     canIsolateHost: isPlatinumPlusLicense && hasAllAccessToFleet,
-    canUnIsolateHost: true,
+    canUnIsolateHost: hasAllAccessToFleet,
   };
 };
 

@@ -46,6 +46,7 @@
     "xpack.reporting": ["plugins/reporting"],
     "xpack.rollupJobs": ["plugins/rollup"],
     "xpack.runtimeFields": "plugins/runtime_fields",
+    "xpack.screenshotting": "plugins/screenshotting",
     "xpack.searchProfiler": "plugins/searchprofiler",
     "xpack.security": "plugins/security",
     "xpack.server": "legacy/server",

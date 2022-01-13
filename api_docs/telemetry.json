@@ -610,9 +610,9 @@
           "\nThe payload structure as composed by the OSS telemetry collection mechanism."
         ],
         "signature": [
-          "{ timestamp: string; cluster_uuid: string; cluster_name: string; version: string; cluster_stats: Pick<",
+          "{ timestamp: string; cluster_uuid: string; cluster_name: string; version: string; cluster_stats: Omit<",
           "ClusterStatsResponse",
-          ", \"indices\" | \"nodes\" | \"status\" | \"cluster_uuid\" | \"timestamp\">; collection: string; stack_stats: { data: ",
+          ", \"cluster_name\" | \"_nodes\">; collection: string; stack_stats: { data: ",
           {
             "pluginId": "telemetry",
             "scope": "server",

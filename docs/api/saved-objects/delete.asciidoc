@@ -43,7 +43,7 @@ TIP: Use this if you attempted to delete an object and received an HTTP 400 erro
 
 ==== Example
 
-Delete an index pattern object with the `my-pattern` ID:
+Delete {a-data-source} object with the `my-pattern` ID:
 
 [source,sh]
 --------------------------------------------------

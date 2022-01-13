@@ -21,16 +21,15 @@ export default function (providerContext: FtrProviderContext) {
   const es: Client = getService('es');
   const pkgName = 'all_assets';
   const pkgVersion = '0.1.0';
-  const pkgKey = `${pkgName}-${pkgVersion}`;
   const logsTemplateName = `logs-${pkgName}.test_logs`;
   const metricsTemplateName = `metrics-${pkgName}.test_metrics`;
 
-  const uninstallPackage = async (pkg: string) => {
-    await supertest.delete(`/api/fleet/epm/packages/${pkg}`).set('kbn-xsrf', 'xxxx');
+  const uninstallPackage = async (pkg: string, version: string) => {
+    await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
   };
-  const installPackage = async (pkg: string) => {
+  const installPackage = async (pkg: string, version: string) => {
     await supertest
-      .post(`/api/fleet/epm/packages/${pkg}`)
+      .post(`/api/fleet/epm/packages/${pkg}/${version}`)
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true });
   };
@@ -42,11 +41,11 @@ export default function (providerContext: FtrProviderContext) {
     describe('installs all assets when installing a package for the first time', async () => {
       before(async () => {
         if (!server.enabled) return;
-        await installPackage(pkgKey);
+        await installPackage(pkgName, pkgVersion);
       });
       after(async () => {
         if (!server.enabled) return;
-        await uninstallPackage(pkgKey);
+        await uninstallPackage(pkgName, pkgVersion);
       });
       expectAssetsInstalled({
         logsTemplateName,
@@ -63,8 +62,8 @@ export default function (providerContext: FtrProviderContext) {
         if (!server.enabled) return;
         // these tests ensure that uninstall works properly so make sure that the package gets installed and uninstalled
         // and then we'll test that not artifacts are left behind.
-        await installPackage(pkgKey);
-        await uninstallPackage(pkgKey);
+        await installPackage(pkgName, pkgVersion);
+        await uninstallPackage(pkgName, pkgVersion);
       });
       it('should have uninstalled the index templates', async function () {
         const resLogsTemplate = await es.transport.request(
@@ -272,13 +271,13 @@ export default function (providerContext: FtrProviderContext) {
     describe('reinstalls all assets', async () => {
       before(async () => {
         if (!server.enabled) return;
-        await installPackage(pkgKey);
+        await installPackage(pkgName, pkgVersion);
         // reinstall
-        await installPackage(pkgKey);
+        await installPackage(pkgName, pkgVersion);
       });
       after(async () => {
         if (!server.enabled) return;
-        await uninstallPackage(pkgKey);
+        await uninstallPackage(pkgName, pkgVersion);
       });
       expectAssetsInstalled({
         logsTemplateName,
@@ -497,6 +496,7 @@ const expectAssetsInstalled = ({
       package_assets: sortBy(res.attributes.package_assets, (o: AssetReference) => o.type),
     };
     expect(sortedRes).eql({
+      installed_kibana_space_id: 'default',
       installed_kibana: [
         {
           id: 'sample_dashboard',
