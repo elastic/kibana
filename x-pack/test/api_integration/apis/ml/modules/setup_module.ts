@@ -1129,7 +1129,10 @@ export default ({ getService }: FtrProviderContext) => {
 
             // jobs should contain the module they were created by
             const createdByModule = jobsDetails.jobs[0].custom_settings?.created_by_module;
-            expect(createdByModule).to.eql(testData.module);
+            expect(createdByModule).to.eql(
+              testData.module,
+              `Expected created_by_module value to be '${testData.module}' (got '${createdByModule}')`
+            );
           }
 
           // verify saved objects creation
