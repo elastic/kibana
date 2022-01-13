@@ -14,6 +14,7 @@ const TEST_END_TIME = '2023-09-23T18:31:44.000';
 const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
 };
+const metaFields = ['_id', '_index', '_score', '_source', '_type'];
 
 const fieldsWithData = [
   'ts',
@@ -61,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         expect(body.indexPatternTitle).to.eql('existence_index_*');
-        expect(body.existingFieldNames.sort()).to.eql(fieldsWithData.sort());
+        expect(body.existingFieldNames.sort()).to.eql([...metaFields, ...fieldsWithData].sort());
       });
 
       it('should return fields filtered by term query', async () => {
@@ -86,7 +87,9 @@ export default ({ getService }: FtrProviderContext) => {
             toDate: TEST_END_TIME,
           })
           .expect(200);
-        expect(body.existingFieldNames.sort()).to.eql(expectedFieldNames.sort());
+        expect(body.existingFieldNames.sort()).to.eql(
+          [...metaFields, ...expectedFieldNames].sort()
+        );
       });
 
       // blocked on https://github.com/elastic/elasticsearch/issues/82515
@@ -112,7 +115,9 @@ export default ({ getService }: FtrProviderContext) => {
             toDate: TEST_END_TIME,
           })
           .expect(200);
-        expect(body.existingFieldNames.sort()).to.eql(expectedFieldNames.sort());
+        expect(body.existingFieldNames.sort()).to.eql(
+          [...metaFields, ...expectedFieldNames].sort()
+        );
       });
 
       it('should return fields filtered by time range', async () => {
@@ -137,7 +142,9 @@ export default ({ getService }: FtrProviderContext) => {
             toDate: '2021-12-12',
           })
           .expect(200);
-        expect(body.existingFieldNames.sort()).to.eql(expectedFieldNames.sort());
+        expect(body.existingFieldNames.sort()).to.eql(
+          [...metaFields, ...expectedFieldNames].sort()
+        );
       });
     });
   });
