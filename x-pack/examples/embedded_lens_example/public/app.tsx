@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -17,7 +17,6 @@ import {
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
-  EuiCallOut,
 } from '@elastic/eui';
 import { DataView } from 'src/plugins/data_views/public';
 import { CoreStart } from 'kibana/public';
@@ -92,11 +91,10 @@ function getLensAttributes(
 export const App = (props: {
   core: CoreStart;
   plugins: StartDependencies;
-  defaultDataView: DataView | null;
+  defaultDataView: DataView;
   lensFormulaHelper: FormulaHelper;
 }) => {
   const [color, setColor] = useState('green');
-  const [dataLayer, setDataLayer] = useState<PersistedIndexPatternLayer>();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [time, setTime] = useState({
@@ -107,48 +105,27 @@ export const App = (props: {
   const LensComponent = props.plugins.lens.EmbeddableComponent;
   const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
 
-  useEffect(() => {
-    const dataView = props.defaultDataView;
+  const baseLayer: PersistedIndexPatternLayer = {
+    columnOrder: ['col1'],
+    columns: {
+      col1: {
+        dataType: 'date',
+        isBucketed: true,
+        label: '@timestamp',
+        operationType: 'date_histogram',
+        params: { interval: 'auto' },
+        scale: 'interval',
+        sourceField: props.defaultDataView.timeFieldName!,
+      } as DateHistogramIndexPatternColumn,
+    },
+  };
 
-    if (!dataView) {
-      return;
-    }
-
-    const baseLayer: PersistedIndexPatternLayer = {
-      columnOrder: ['col1'],
-      columns: {
-        col1: {
-          dataType: 'date',
-          isBucketed: true,
-          label: '@timestamp',
-          operationType: 'date_histogram',
-          params: { interval: 'auto' },
-          scale: 'interval',
-          sourceField: dataView.timeFieldName!,
-        } as DateHistogramIndexPatternColumn,
-      },
-    };
-    setDataLayer(
-      props.lensFormulaHelper.insertOrReplaceFormulaColumn(
-        'col2',
-        { formula: 'count()' },
-        baseLayer,
-        dataView
-      )
-    );
-  }, [props, props.defaultDataView, props.lensFormulaHelper]);
-
-  if (!props.defaultDataView || !props.defaultDataView.isTimeBased()) {
-    return (
-      <EuiCallOut
-        title="Please define a default index pattern to use this demo"
-        color="danger"
-        iconType="alert"
-      >
-        <p>This demo only works if your default index pattern is set and time based</p>
-      </EuiCallOut>
-    );
-  }
+  const dataLayer = props.lensFormulaHelper.insertOrReplaceFormulaColumn(
+    'col2',
+    { formula: 'count()' },
+    baseLayer,
+    props.defaultDataView
+  );
 
   if (!dataLayer) {
     return null;
