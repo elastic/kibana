@@ -37,7 +37,7 @@ const onceTimeInterval = () =>
 
 const everyNMinutesTimeInterval = (value: number) =>
   i18n.translate('console.settingsPage.refreshInterval.everyNMinutesTimeInterval', {
-    defaultMessage: 'Every {value} minutes',
+    defaultMessage: 'Every {value} {value, plural, one {minute} other {minutes}}',
     values: { value },
   });
 
@@ -46,7 +46,7 @@ const everyHourTimeInterval = () =>
     defaultMessage: 'Every hour',
   });
 
-const PRESETS_IN_MINUTES = [0, 10, 20, 60];
+const PRESETS_IN_MINUTES = [0, 1, 10, 20, 60];
 const intervalOptions = PRESETS_IN_MINUTES.map((value) => ({
   value: (value * 60000).toString(),
   inputDisplay:
@@ -128,7 +128,7 @@ export function DevToolsSettingsModal(props: Props) {
     });
   }
 
-  const onChange = useCallback((value: string) => {
+  const onPollingIntervalChange = useCallback((value: string) => {
     const sanitizedValue = parseInt(value, 10);
 
     setPolling(!!sanitizedValue);
@@ -157,7 +157,7 @@ export function DevToolsSettingsModal(props: Props) {
           <EuiSuperSelect
             options={intervalOptions}
             valueOfSelected={pollInterval.toString()}
-            onChange={onChange}
+            onChange={onPollingIntervalChange}
           />
         </EuiFormRow>
 
