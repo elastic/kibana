@@ -49,8 +49,6 @@ export const useSimpleRunOnceMonitors = ({ monitorId }: { monitorId: string }) =
     { name: 'TestRunData' }
   );
 
-  console.log(data);
-
   return useMemo(() => {
     const doc = data?.hits.hits?.[0];
 
