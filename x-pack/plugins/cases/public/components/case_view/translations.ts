@@ -137,31 +137,31 @@ export const DOES_NOT_EXIST_BUTTON = i18n.translate('xpack.cases.caseView.doesNo
 });
 
 export const TOTAL_ALERTS_METRIC = i18n.translate('xpack.cases.caseView.metrics.totalAlerts', {
-  defaultMessage: 'Total Alerts',
+  defaultMessage: 'Total alerts',
 });
 
 export const ASSOCIATED_USERS_METRIC = i18n.translate(
   'xpack.cases.caseView.metrics.associatedUsers',
   {
-    defaultMessage: 'Associated Users',
+    defaultMessage: 'Associated users',
   }
 );
 
 export const ASSOCIATED_HOSTS_METRIC = i18n.translate(
   'xpack.cases.caseView.metrics.associatedHosts',
   {
-    defaultMessage: 'Associated Hosts',
+    defaultMessage: 'Associated hosts',
   }
 );
 
 export const ISOLATED_HOSTS_METRIC = i18n.translate('xpack.cases.caseView.metrics.isolatedHosts', {
-  defaultMessage: 'Isolated Hosts',
+  defaultMessage: 'Isolated hosts',
 });
 
 export const TOTAL_CONNECTORS_METRIC = i18n.translate(
   'xpack.cases.caseView.metrics.totalConnectors',
   {
-    defaultMessage: 'Total Connectors',
+    defaultMessage: 'Total connectors',
   }
 );
 
