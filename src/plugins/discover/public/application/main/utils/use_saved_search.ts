@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
-import { ISearchSource } from '../../../../../data/common';
+import { DataViewField, ISearchSource } from '../../../../../data/common';
 import { GetStateReturn } from '../services/discover_state';
 import { RequestAdapter } from '../../../../../inspector/public';
 import type { AutoRefreshDoneFn } from '../../../../../data/public';
@@ -30,6 +30,7 @@ export interface SavedSearchData {
   documents$: DataDocuments$;
   totalHits$: DataTotalHits$;
   charts$: DataCharts$;
+  availableFields$: AvailableFields$;
 }
 
 export interface TimechartBucketInterval {
@@ -42,6 +43,8 @@ export type DataMain$ = BehaviorSubject<DataMainMsg>;
 export type DataDocuments$ = BehaviorSubject<DataDocumentsMsg>;
 export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
 export type DataCharts$ = BehaviorSubject<DataChartsMessage>;
+// @todo
+export type AvailableFields$ = BehaviorSubject<DataAvailableFieldsMsg>;
 
 export type DataRefetch$ = Subject<DataRefetchMsg>;
 
@@ -76,6 +79,10 @@ export interface DataTotalHitsMsg extends DataMsg {
 export interface DataChartsMessage extends DataMsg {
   bucketInterval?: TimechartBucketInterval;
   chartData?: Chart;
+}
+
+export interface DataAvailableFieldsMsg extends DataMsg {
+  fields?: DataViewField[];
 }
 
 /**
@@ -116,14 +123,19 @@ export const useSavedSearch = ({
 
   const charts$: DataCharts$ = useBehaviorSubject({ fetchStatus: initialFetchStatus });
 
+  const availableFields$: AvailableFields$ = useBehaviorSubject({
+    fetchStatus: initialFetchStatus,
+  });
+
   const dataSubjects = useMemo(() => {
     return {
       main$,
       documents$,
       totalHits$,
       charts$,
+      availableFields$,
     };
-  }, [main$, charts$, documents$, totalHits$]);
+  }, [main$, charts$, documents$, totalHits$, availableFields$]);
 
   /**
    * The observable to trigger data fetching in UI

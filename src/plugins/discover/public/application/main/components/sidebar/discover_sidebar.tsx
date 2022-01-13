@@ -39,6 +39,7 @@ import { DiscoverIndexPatternManagement } from './discover_index_pattern_managem
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { ElasticSearchHit } from '../../../../types';
 import { DataViewField } from '../../../../../../data_views/common';
+import { FetchStatus } from '../../../types';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -104,6 +105,7 @@ export function DiscoverSidebarComponent({
   closeFlyout,
   editField,
   viewMode,
+  availableFields$,
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<DataViewField[] | null>(null);
 
@@ -150,6 +152,15 @@ export function DiscoverSidebarComponent({
   } = useMemo(
     () => groupFields(fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi),
     [fields, columns, popularLimit, fieldCounts, fieldFilter, useNewFieldsApi]
+  );
+
+  useEffect(
+    () =>
+      availableFields$.next({
+        fetchStatus: FetchStatus.COMPLETE,
+        fields: [...selectedFields, ...popularFields, ...unpopularFields],
+      }),
+    [selectedFields, popularFields, unpopularFields, availableFields$]
   );
 
   const paginate = useCallback(() => {

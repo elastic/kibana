@@ -109,6 +109,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       intervalMs,
       runtimeFieldMap,
       samplerShardSize,
+      availableFields,
     } = searchStrategyParams;
 
     const searchOptions: ISearchOptions = {
@@ -182,7 +183,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     );
 
     const documentCountStats$ =
-      timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0
+      !availableFields && timeFieldName !== undefined && intervalMs !== undefined && intervalMs > 0
         ? data.search.search(
             {
               params: getDocumentCountStatsRequest(searchStrategyParams),

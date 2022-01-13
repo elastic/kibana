@@ -246,6 +246,7 @@ export function DiscoverLayout({
               useNewFieldsApi={useNewFieldsApi}
               onEditRuntimeField={onEditRuntimeField}
               viewMode={viewMode}
+              availableFields$={savedSearchData$.availableFields$}
             />
           </EuiFlexItem>
           <EuiHideFor sizes={['xs', 's']}>
@@ -332,6 +333,7 @@ export function DiscoverLayout({
                     />
                   ) : (
                     <FieldStatisticsTableMemoized
+                      availableFields$={savedSearchData$.availableFields$}
                       savedSearch={savedSearch}
                       services={services}
                       indexPattern={indexPattern}
