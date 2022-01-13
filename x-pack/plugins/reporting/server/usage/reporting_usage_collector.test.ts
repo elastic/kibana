@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import * as Rx from 'rxjs';
-import sinon from 'sinon';
-import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { createCollectorFetchContextMock } from 'src/plugins/usage_collection/server/mocks';
+import { loggerMock } from '@kbn/logging/mocks';
+import { CollectorFetchContext } from 'src/plugins/usage_collection/server';
+import {
+  Collector,
+  createCollectorFetchContextMock,
+  usageCollectionPluginMock,
+} from 'src/plugins/usage_collection/server/mocks';
 import { ReportingCore } from '../';
 import { getExportTypesRegistry } from '../lib/export_types_registry';
 import { createMockConfigSchema, createMockReportingCore } from '../test_helpers';
-import { ReportingSetupDeps } from '../types';
 import { FeaturesAvailability } from './';
 import {
   getReportingUsageCollector,
@@ -20,22 +22,6 @@ import {
 } from './reporting_usage_collector';
 
 const exportTypesRegistry = getExportTypesRegistry();
-
-function getMockUsageCollection() {
-  class MockUsageCollector {
-    // @ts-ignore fetch is not used
-    private fetch: any;
-    constructor(_server: any, { fetch }: any) {
-      this.fetch = fetch;
-    }
-  }
-  return {
-    makeUsageCollector: (options: any) => {
-      return new MockUsageCollector(null, options);
-    },
-    registerCollector: sinon.stub(),
-  };
-}
 
 const getLicenseMock =
   (licenseType = 'platinum') =>
@@ -46,17 +32,6 @@ const getLicenseMock =
     } as FeaturesAvailability);
   };
 
-function getPluginsMock(
-  { license, usageCollection = getMockUsageCollection() } = { license: 'platinum' }
-) {
-  return {
-    licensing: { license$: Rx.of(getLicenseMock(license)) },
-    usageCollection,
-    elasticsearch: {},
-    security: {},
-  } as unknown as ReportingSetupDeps & { usageCollection: UsageCollectionSetup };
-}
-
 const getResponseMock = (base = {}) => base;
 
 const getMockFetchClients = (resp: any) => {
@@ -64,6 +39,9 @@ const getMockFetchClients = (resp: any) => {
   fetchParamsMock.esClient.search = jest.fn().mockResolvedValue({ body: resp });
   return fetchParamsMock;
 };
+
+const usageCollectionSetup = usageCollectionPluginMock.createSetupContract();
+
 describe('license checks', () => {
   let mockCore: ReportingCore;
   beforeAll(async () => {
@@ -73,10 +51,9 @@ describe('license checks', () => {
   describe('with a basic license', () => {
     let usageStats: any;
     beforeAll(async () => {
-      const plugins = getPluginsMock({ license: 'basic' });
       const collector = getReportingUsageCollector(
         mockCore,
-        plugins.usageCollection,
+        usageCollectionSetup,
         getLicenseMock('basic'),
         exportTypesRegistry,
         function isReady() {
@@ -102,10 +79,9 @@ describe('license checks', () => {
   describe('with no license', () => {
     let usageStats: any;
     beforeAll(async () => {
-      const plugins = getPluginsMock({ license: 'none' });
       const collector = getReportingUsageCollector(
         mockCore,
-        plugins.usageCollection,
+        usageCollectionSetup,
         getLicenseMock('none'),
         exportTypesRegistry,
         function isReady() {
@@ -131,10 +107,9 @@ describe('license checks', () => {
   describe('with platinum license', () => {
     let usageStats: any;
     beforeAll(async () => {
-      const plugins = getPluginsMock({ license: 'platinum' });
       const collector = getReportingUsageCollector(
         mockCore,
-        plugins.usageCollection,
+        usageCollectionSetup,
         getLicenseMock('platinum'),
         exportTypesRegistry,
         function isReady() {
@@ -160,10 +135,9 @@ describe('license checks', () => {
   describe('with no usage data', () => {
     let usageStats: any;
     beforeAll(async () => {
-      const plugins = getPluginsMock({ license: 'basic' });
       const collector = getReportingUsageCollector(
         mockCore,
-        plugins.usageCollection,
+        usageCollectionSetup,
         getLicenseMock('basic'),
         exportTypesRegistry,
         function isReady() {
@@ -190,10 +164,9 @@ describe('data modeling', () => {
     mockCore = await createMockReportingCore(createMockConfigSchema());
   });
   test('with usage data from the reporting/archived_reports es archive', async () => {
-    const plugins = getPluginsMock();
     const collector = getReportingUsageCollector(
       mockCore,
-      plugins.usageCollection,
+      usageCollectionSetup,
       getLicenseMock(),
       exportTypesRegistry,
       function isReady() {
@@ -238,10 +211,9 @@ describe('data modeling', () => {
   });
 
   test('usage data with meta.isDeprecated jobTypes', async () => {
-    const plugins = getPluginsMock();
     const collector = getReportingUsageCollector(
       mockCore,
-      plugins.usageCollection,
+      usageCollectionSetup,
       getLicenseMock(),
       exportTypesRegistry,
       function isReady() {
@@ -279,10 +251,9 @@ describe('data modeling', () => {
   });
 
   test('with sparse data', async () => {
-    const plugins = getPluginsMock();
     const collector = getReportingUsageCollector(
       mockCore,
-      plugins.usageCollection,
+      usageCollectionSetup,
       getLicenseMock(),
       exportTypesRegistry,
       function isReady() {
@@ -320,10 +291,9 @@ describe('data modeling', () => {
   });
 
   test('with empty data', async () => {
-    const plugins = getPluginsMock();
     const collector = getReportingUsageCollector(
       mockCore,
-      plugins.usageCollection,
+      usageCollectionSetup,
       getLicenseMock(),
       exportTypesRegistry,
       function isReady() {
@@ -372,15 +342,12 @@ describe('data modeling', () => {
 describe('Ready for collection observable', () => {
   test('converts observable to promise', async () => {
     const mockReporting = await createMockReportingCore(createMockConfigSchema());
+    const makeCollectorSpy = jest.fn((options: any) => new Collector(loggerMock.create(), options));
+    usageCollectionSetup.makeUsageCollector.mockImplementation(makeCollectorSpy);
 
-    const usageCollection = getMockUsageCollection();
-    const makeCollectorSpy = sinon.spy();
-    usageCollection.makeUsageCollector = makeCollectorSpy;
+    registerReportingUsageCollector(mockReporting, usageCollectionSetup);
 
-    const plugins = getPluginsMock({ usageCollection, license: 'platinum' });
-    registerReportingUsageCollector(mockReporting, plugins);
-
-    const [args] = makeCollectorSpy.firstCall.args;
+    const [args] = makeCollectorSpy.mock.calls[0];
     expect(args).toMatchSnapshot();
 
     await expect(args.isReady()).resolves.toBe(true);

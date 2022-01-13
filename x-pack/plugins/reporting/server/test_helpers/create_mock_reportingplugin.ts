@@ -9,7 +9,7 @@ jest.mock('../routes');
 jest.mock('../usage');
 
 import _ from 'lodash';
-import * as Rx from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { coreMock, elasticsearchServiceMock, statusServiceMock } from 'src/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { dataPluginMock } from 'src/plugins/data/server/mocks';
@@ -17,11 +17,12 @@ import { FieldFormatsRegistry } from 'src/plugins/field_formats/common';
 import { DeepPartial } from 'utility-types';
 import { ReportingConfig, ReportingCore } from '../';
 import { featuresPluginMock } from '../../../features/server/mocks';
+import { licensingMock } from '../../../licensing/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { createMockScreenshottingStart } from '../../../screenshotting/server/mock';
 import { securityMock } from '../../../security/server/mocks';
 import { taskManagerMock } from '../../../task_manager/server/mocks';
-import { ReportingConfigType } from '../config';
+import { buildConfig, ReportingConfigType } from '../config';
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStore } from '../lib';
 import { setFieldFormats } from '../services';
@@ -35,7 +36,6 @@ export const createMockPluginSetup = (
     basePath: { set: jest.fn() },
     router: setupMock.router,
     security: securityMock.createSetup(),
-    licensing: { license$: Rx.of({ isAvailable: true, isActive: true, type: 'basic' }) },
     taskManager: taskManagerMock.createSetup(),
     logger: createMockLevelLogger(),
     status: statusServiceMock.createSetupContract(),
@@ -49,27 +49,33 @@ export const createMockPluginSetup = (
 
 const logger = createMockLevelLogger();
 
-const createMockReportingStore = () => ({} as ReportingStore);
+const createMockReportingStore = async (config: ReportingConfigType) => {
+  const mockConfigSchema = createMockConfigSchema(config);
+  const mockContext = coreMock.createPluginInitializerContext(mockConfigSchema);
+  const mockCore = new ReportingCore(logger, mockContext);
+  mockCore.setConfig(await buildConfig(mockContext, coreMock.createSetup(), logger));
+  return new ReportingStore(mockCore, logger);
+};
 
-export const createMockPluginStart = (
-  mockReportingCore: ReportingCore | undefined,
-  startMock: Partial<Record<keyof ReportingInternalStart, any>>
-): ReportingInternalStart => {
-  const store = mockReportingCore
-    ? new ReportingStore(mockReportingCore, logger)
-    : createMockReportingStore();
-
+export const createMockPluginStart = async (
+  startMock: Partial<Record<keyof ReportingInternalStart, any>>,
+  config: ReportingConfigType
+): Promise<ReportingInternalStart> => {
   return {
     esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: startMock.savedObjects || { getScopedClient: jest.fn() },
     uiSettings: startMock.uiSettings || { asScopedToClient: () => ({ get: jest.fn() }) },
     data: startMock.data || dataPluginMock.createStartContract(),
-    store,
+    store: await createMockReportingStore(config),
     taskManager: {
       schedule: jest.fn().mockImplementation(() => ({ id: 'taskId' })),
       ensureScheduled: jest.fn(),
     },
-    logger: createMockLevelLogger(),
+    licensing: {
+      ...licensingMock.createStart(),
+      license$: new BehaviorSubject({ isAvailable: true, isActive: true, type: 'basic' }),
+    },
+    logger,
     screenshotting: startMock.screenshotting || createMockScreenshottingStart(),
     ...startMock,
   };
@@ -131,17 +137,8 @@ export const createMockReportingCore = async (
   setupDepsMock: ReportingInternalSetup | undefined = undefined,
   startDepsMock: ReportingInternalStart | undefined = undefined
 ) => {
-  const mockReportingCore = {
-    getConfig: () => createMockConfig(config),
-    getEsClient: () => startDepsMock?.esClient,
-    getDataService: () => startDepsMock?.data,
-  } as unknown as ReportingCore;
-
   if (!setupDepsMock) {
     setupDepsMock = createMockPluginSetup({});
-  }
-  if (!startDepsMock) {
-    startDepsMock = createMockPluginStart(mockReportingCore, {});
   }
 
   const context = coreMock.createPluginInitializerContext(createMockConfigSchema());
@@ -154,7 +151,7 @@ export const createMockReportingCore = async (
   await core.pluginSetsUp();
 
   if (!startDepsMock) {
-    startDepsMock = createMockPluginStart(core, context);
+    startDepsMock = await createMockPluginStart(context, config);
   }
   await core.pluginStart(startDepsMock);
   await core.pluginStartsUp();

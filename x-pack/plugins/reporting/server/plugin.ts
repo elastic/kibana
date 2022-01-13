@@ -37,8 +37,8 @@ export class ReportingPlugin
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
-    const { http } = core;
-    const { features, licensing, eventLog, security, spaces, taskManager } = plugins;
+    const { http, status } = core;
+    const { features, eventLog, security, spaces, taskManager } = plugins;
 
     const reportingCore = new ReportingCore(this.logger, this.initContext);
 
@@ -53,28 +53,25 @@ export class ReportingPlugin
       }
     });
 
-    const router = http.createRouter<ReportingRequestHandlerContext>();
     const basePath = http.basePath;
+    const router = http.createRouter<ReportingRequestHandlerContext>();
+
     reportingCore.pluginSetup({
+      status,
       features,
-      licensing,
       eventLog,
       security,
       spaces,
       taskManager,
-      logger: this.logger,
-      status: core.status,
       basePath,
       router,
+      logger: this.logger,
     });
 
     registerEventLogProviderActions(eventLog);
     registerUiSettings(core);
-    registerDeprecations({
-      core,
-      reportingCore,
-    });
-    registerReportingUsageCollector(reportingCore, plugins);
+    registerDeprecations({ core, reportingCore });
+    registerReportingUsageCollector(reportingCore, plugins.usageCollection);
     registerRoutes(reportingCore, this.logger);
 
     // async background setup
@@ -94,8 +91,10 @@ export class ReportingPlugin
   }
 
   public start(core: CoreStart, plugins: ReportingStartDeps) {
+    const { elasticsearch, savedObjects, uiSettings } = core;
+    const { data, licensing, screenshotting, taskManager } = plugins;
     // use data plugin for csv formats
-    setFieldFormats(plugins.data.fieldFormats);
+    setFieldFormats(data.fieldFormats); // FIXME: 'fieldFormats' is deprecated.
     const reportingCore = this.reportingCore!;
 
     // async background start
@@ -105,14 +104,15 @@ export class ReportingPlugin
       const store = new ReportingStore(reportingCore, this.logger);
 
       await reportingCore.pluginStart({
-        savedObjects: core.savedObjects,
-        uiSettings: core.uiSettings,
-        store,
-        esClient: core.elasticsearch.client,
-        data: plugins.data,
-        taskManager: plugins.taskManager,
         logger: this.logger,
-        screenshotting: plugins.screenshotting,
+        esClient: elasticsearch.client,
+        savedObjects,
+        uiSettings,
+        store,
+        data,
+        licensing,
+        screenshotting,
+        taskManager,
       });
 
       // Note: this must be called after ReportingCore.pluginStart

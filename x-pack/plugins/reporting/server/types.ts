@@ -13,7 +13,7 @@ import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import type { Writable } from 'stream';
 import { IEventLogService } from '../../event_log/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import type { LicensingPluginSetup } from '../../licensing/server';
+import type { LicensingPluginStart } from '../../licensing/server';
 import type {
   ScreenshotOptions as BaseScreenshotOptions,
   ScreenshottingStart,
@@ -91,7 +91,6 @@ export interface ExportTypeDefinition<
  * @internal
  */
 export interface ReportingSetupDeps {
-  licensing: LicensingPluginSetup;
   eventLog: IEventLogService;
   features: FeaturesPluginSetup;
   screenshotMode: ScreenshotModePluginSetup;
@@ -106,6 +105,7 @@ export interface ReportingSetupDeps {
  */
 export interface ReportingStartDeps {
   data: DataPluginStart;
+  licensing: LicensingPluginStart;
   screenshotting: ScreenshottingStart;
   taskManager: TaskManagerStartContract;
 }
