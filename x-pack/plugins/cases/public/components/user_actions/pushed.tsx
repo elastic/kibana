@@ -10,7 +10,7 @@ import { EuiCommentProps, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eu
 
 import { Actions, NONE_CONNECTOR_ID, PushedUserAction } from '../../../common/api';
 import { UserActionBuilder, UserActionResponse } from './types';
-import { createCommonUserActionBuilder } from './common';
+import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { CaseExternalService } from '../../containers/types';
@@ -136,7 +136,7 @@ export const createPushedUserActionBuilder: UserActionBuilder = ({
     });
 
     const label = getLabelTitle(pushedUserAction, firstPush);
-    const commonBuilder = createCommonUserActionBuilder({
+    const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
       handleOutlineComment,
       label,

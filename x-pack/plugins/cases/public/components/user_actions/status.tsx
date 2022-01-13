@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { CaseStatuses, StatusUserAction } from '../../../common/api';
 import { UserActionBuilder, UserActionResponse } from './types';
-import { createCommonUserActionBuilder } from './common';
+import { createCommonUpdateUserActionBuilder } from './common';
 import { Status, statuses } from '../status';
 import * as i18n from './translations';
 
@@ -44,7 +44,7 @@ export const createStatusUserActionBuilder: UserActionBuilder = ({
   build: () => {
     const statusUserAction = userAction as UserActionResponse<StatusUserAction>;
     const label = getLabelTitle(statusUserAction);
-    const commonBuilder = createCommonUserActionBuilder({
+    const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
       handleOutlineComment,
       label,

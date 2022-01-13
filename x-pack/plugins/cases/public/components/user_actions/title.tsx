@@ -7,7 +7,7 @@
 
 import { TitleUserAction } from '../../../common/api';
 import { UserActionBuilder, UserActionResponse } from './types';
-import { createCommonUserActionBuilder } from './common';
+import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
 
 const getLabelTitle = (userAction: UserActionResponse<TitleUserAction>) =>
@@ -22,7 +22,7 @@ export const createTitleUserActionBuilder: UserActionBuilder = ({
   build: () => {
     const titleUserAction = userAction as UserActionResponse<TitleUserAction>;
     const label = getLabelTitle(titleUserAction);
-    const commonBuilder = createCommonUserActionBuilder({
+    const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
       handleOutlineComment,
       label,

@@ -10,7 +10,7 @@ import classNames from 'classnames';
 import { EuiCommentProps } from '@elastic/eui';
 
 import type { UserActionBuilder, UserActionBuilderArgs, UserActionTreeProps } from './types';
-import { createCommonUserActionBuilder } from './common';
+import { createCommonUpdateUserActionBuilder } from './common';
 import { UserActionUsername } from './username';
 import { UserActionAvatar } from './avatar';
 import { UserActionContentToolbar } from './content_toolbar';
@@ -95,7 +95,7 @@ export const createDescriptionUserActionBuilder: UserActionBuilder = ({
 }) => ({
   build: () => {
     const label = getLabelTitle();
-    const commonBuilder = createCommonUserActionBuilder({
+    const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
       handleOutlineComment,
       label,

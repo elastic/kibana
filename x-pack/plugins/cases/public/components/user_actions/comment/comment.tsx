@@ -9,7 +9,7 @@ import { EuiCommentProps } from '@elastic/eui';
 
 import { CommentUserAction, Actions, CommentType } from '../../../../common/api';
 import { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from '../types';
-import { createCommonUserActionBuilder } from '../common';
+import { createCommonUpdateUserActionBuilder } from '../common';
 import { Comment } from '../../../containers/types';
 import * as i18n from '../translations';
 import { createUserAttachmentUserActionBuilder } from './user';
@@ -130,7 +130,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
     }
 
     const label = getUpdateLabelTitle();
-    const commonBuilder = createCommonUserActionBuilder({
+    const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
       handleOutlineComment,
       label,

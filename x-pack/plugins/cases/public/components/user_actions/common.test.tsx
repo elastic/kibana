@@ -12,7 +12,7 @@ import userEvent from '@testing-library/user-event';
 import copy from 'copy-to-clipboard';
 
 import { Actions } from '../../../common/api';
-import { createCommonUserActionBuilder } from './common';
+import { createCommonUpdateUserActionBuilder } from './common';
 import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 
@@ -20,7 +20,7 @@ jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 jest.mock('copy-to-clipboard', () => jest.fn());
 
-describe('createCommonUserActionBuilder ', () => {
+describe('createCommonUpdateUserActionBuilder ', () => {
   const label = <>{'A label'}</>;
   const handleOutlineComment = jest.fn();
 
@@ -30,7 +30,7 @@ describe('createCommonUserActionBuilder ', () => {
 
   it('renders correctly', async () => {
     const userAction = getUserAction('title', Actions.update);
-    const builder = createCommonUserActionBuilder({
+    const builder = createCommonUpdateUserActionBuilder({
       userAction,
       label,
       icon: 'dot',
@@ -56,7 +56,7 @@ describe('createCommonUserActionBuilder ', () => {
 
   it('renders shows the move to comment button if the user action is an edit comment', async () => {
     const userAction = getUserAction('comment', Actions.update);
-    const builder = createCommonUserActionBuilder({
+    const builder = createCommonUpdateUserActionBuilder({
       userAction,
       label,
       icon: 'dot',
@@ -75,7 +75,7 @@ describe('createCommonUserActionBuilder ', () => {
 
   it('it copies the reference link when clicking the reference button', async () => {
     const userAction = getUserAction('comment', Actions.update);
-    const builder = createCommonUserActionBuilder({
+    const builder = createCommonUpdateUserActionBuilder({
       userAction,
       label,
       icon: 'dot',
@@ -95,7 +95,7 @@ describe('createCommonUserActionBuilder ', () => {
 
   it('calls the handleOutlineComment when clicking the reference button', async () => {
     const userAction = getUserAction('comment', Actions.update);
-    const builder = createCommonUserActionBuilder({
+    const builder = createCommonUpdateUserActionBuilder({
       userAction,
       label,
       icon: 'dot',

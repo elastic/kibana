@@ -7,7 +7,7 @@
 
 import { ConnectorUserAction, NONE_CONNECTOR_ID } from '../../../common/api';
 import { UserActionBuilder, UserActionResponse } from './types';
-import { createCommonUserActionBuilder } from './common';
+import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
 
 const getLabelTitle = (userAction: UserActionResponse<ConnectorUserAction>) => {
@@ -31,7 +31,7 @@ export const createConnectorUserActionBuilder: UserActionBuilder = ({
   build: () => {
     const connectorUserAction = userAction as UserActionResponse<ConnectorUserAction>;
     const label = getLabelTitle(connectorUserAction);
-    const commonBuilder = createCommonUserActionBuilder({
+    const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
       handleOutlineComment,
       label,

@@ -43,7 +43,7 @@ type BuilderArgs = Pick<UserActionBuilderArgs, 'userAction' | 'handleOutlineComm
   icon: EuiCommentProps['timelineIcon'];
 };
 
-export const createCommonUserActionBuilder = ({
+export const createCommonUpdateUserActionBuilder = ({
   userAction,
   label,
   icon,

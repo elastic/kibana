@@ -10,7 +10,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { Actions, TagsUserAction } from '../../../common/api';
 import { UserActionBuilder, UserActionResponse } from './types';
-import { createCommonUserActionBuilder } from './common';
+import { createCommonUpdateUserActionBuilder } from './common';
 import { Tags } from '../tag_list/tags';
 import * as i18n from './translations';
 
@@ -37,7 +37,7 @@ export const createTagsUserActionBuilder: UserActionBuilder = ({
   build: () => {
     const tagsUserAction = userAction as UserActionResponse<TagsUserAction>;
     const label = getLabelTitle(tagsUserAction);
-    const commonBuilder = createCommonUserActionBuilder({
+    const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
       handleOutlineComment,
       label,
