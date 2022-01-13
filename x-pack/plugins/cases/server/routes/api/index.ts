@@ -14,10 +14,7 @@ import { initPushCaseApi } from './cases/push_case';
 import { initGetReportersApi } from './cases/reporters/get_reporters';
 import { initGetCasesStatusApi } from './stats/get_status';
 import { initGetTagsApi } from './cases/tags/get_tags';
-import {
-  initGetAllCaseUserActionsApi,
-  initGetAllSubCaseUserActionsApi,
-} from './user_actions/get_all_user_actions';
+import { initGetAllCaseUserActionsApi } from './user_actions/get_all_user_actions';
 
 import { initDeleteCommentApi } from './comments/delete_comment';
 import { initDeleteAllCommentsApi } from './comments/delete_all_comments';
@@ -33,11 +30,6 @@ import { initPatchCaseConfigure } from './configure/patch_configure';
 import { initPostCaseConfigure } from './configure/post_configure';
 
 import { RouteDeps } from './types';
-import { initGetSubCaseApi } from './sub_case/get_sub_case';
-import { initPatchSubCasesApi } from './sub_case/patch_sub_cases';
-import { initFindSubCasesApi } from './sub_case/find_sub_cases';
-import { initDeleteSubCasesApi } from './sub_case/delete_sub_cases';
-import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import { initGetCasesByAlertIdApi } from './cases/alerts/get_cases';
 import { initGetAllAlertsAttachToCaseApi } from './comments/get_alerts';
 import { initGetCaseMetricsApi } from './metrics/get_case_metrics';
@@ -60,15 +52,6 @@ export function initCaseApi(deps: RouteDeps) {
   initPostCaseApi(deps);
   initPushCaseApi(deps);
   initGetAllCaseUserActionsApi(deps);
-
-  if (ENABLE_CASE_CONNECTOR) {
-    // Sub cases
-    initGetAllSubCaseUserActionsApi(deps);
-    initGetSubCaseApi(deps);
-    initPatchSubCasesApi(deps);
-    initFindSubCasesApi(deps);
-    initDeleteSubCasesApi(deps);
-  }
 
   // Comments
   initDeleteCommentApi(deps);

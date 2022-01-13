@@ -127,7 +127,7 @@ export const getSubCase = async (
     }),
   ]);
   const response = assign<CaseResponse, SubCaseResponse>(caseResponse, subCaseResponse);
-  const subCaseIndex = response.subCaseIds?.findIndex((scId) => scId === response.id) ?? -1;
+  const subCaseIndex = -1;
   response.title = `${response.title}${subCaseIndex >= 0 ? ` ${subCaseIndex + 1}` : ''}`;
   return convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };

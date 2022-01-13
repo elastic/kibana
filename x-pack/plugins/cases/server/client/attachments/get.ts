@@ -11,7 +11,6 @@ import {
   AlertResponse,
   AllCommentsResponse,
   AllCommentsResponseRt,
-  AssociationType,
   AttributesTypeAlerts,
   CommentAttributes,
   CommentResponse,
@@ -22,7 +21,6 @@ import {
 } from '../../../common/api';
 import { ENABLE_CASE_CONNECTOR } from '../../../common/constants';
 import {
-  checkEnabledCaseConnectorOrThrow,
   defaultSortField,
   transformComments,
   flattenCommentSavedObject,
@@ -59,14 +57,6 @@ export interface GetAllArgs {
    * The case ID to retrieve all attachments for
    */
   caseID: string;
-  /**
-   * Optionally include the attachments associated with a sub case
-   */
-  includeSubCaseComments?: boolean;
-  /**
-   * If included the case ID will be ignored and the attachments will be retrieved from the specified ID of the sub case
-   */
-  subCaseID?: string;
 }
 
 export interface GetArgs {
@@ -163,13 +153,10 @@ export async function find(
   const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
 
   try {
-    checkEnabledCaseConnectorOrThrow(queryParams?.subCaseId);
-
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findComments);
 
-    const id = queryParams?.subCaseId ?? caseID;
-    const associationType = queryParams?.subCaseId ? AssociationType.subCase : AssociationType.case;
+    const id = caseID;
     const { filter, ...queryWithoutFilter } = queryParams ?? {};
 
     // if the fields property was defined, make sure we include the 'owner' field in the response
@@ -194,7 +181,6 @@ export async function find(
             ...queryWithoutFilter,
             fields,
           },
-          associationType,
         }
       : {
           caseService,
@@ -206,10 +192,9 @@ export async function find(
             sortField: 'created_at',
             filter: combinedFilter,
           },
-          associationType,
         };
 
-    const theComments = await caseService.getCommentsByAssociation(args);
+    const theComments = await caseService.getAllCaseComments(args);
 
     ensureSavedObjectsAreAuthorized(
       theComments.saved_objects.map((comment) => ({
@@ -267,7 +252,7 @@ export async function get(
  * @ignore
  */
 export async function getAll(
-  { caseID, includeSubCaseComments, subCaseID }: GetAllArgs,
+  { caseID }: GetAllArgs,
   clientArgs: CasesClientArgs
 ): Promise<AllCommentsResponse> {
   const { unsecuredSavedObjectsClient, caseService, logger, authorization } = clientArgs;
@@ -275,39 +260,18 @@ export async function getAll(
   try {
     let comments: SavedObjectsFindResponse<CommentAttributes>;
 
-    if (
-      !ENABLE_CASE_CONNECTOR &&
-      (subCaseID !== undefined || includeSubCaseComments !== undefined)
-    ) {
-      throw Boom.badRequest(
-        'The sub case id and include sub case comments fields are not supported when the case connector feature is disabled'
-      );
-    }
-
     const { filter, ensureSavedObjectsAreAuthorized } = await authorization.getAuthorizationFilter(
       Operations.getAllComments
     );
 
-    if (subCaseID) {
-      comments = await caseService.getAllSubCaseComments({
-        unsecuredSavedObjectsClient,
-        id: subCaseID,
-        options: {
-          filter,
-          sortField: defaultSortField,
-        },
-      });
-    } else {
-      comments = await caseService.getAllCaseComments({
-        unsecuredSavedObjectsClient,
-        id: caseID,
-        includeSubCaseComments,
-        options: {
-          filter,
-          sortField: defaultSortField,
-        },
-      });
-    }
+    comments = await caseService.getAllCaseComments({
+      unsecuredSavedObjectsClient,
+      id: caseID,
+      options: {
+        filter,
+        sortField: defaultSortField,
+      },
+    });
 
     ensureSavedObjectsAreAuthorized(
       comments.saved_objects.map((comment) => ({ id: comment.id, owner: comment.attributes.owner }))

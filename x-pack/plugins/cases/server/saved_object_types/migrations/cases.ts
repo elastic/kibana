@@ -78,6 +78,13 @@ export const caseConnectorIdMigration = (
   };
 };
 
+export const removeCaseType = (
+  doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+): SavedObjectSanitizedDoc<unknown> => {
+  // TODO: implement this
+  return { ...doc, references: doc.references ?? [] };
+};
+
 export const caseMigrations = {
   '7.10.0': (
     doc: SavedObjectUnsanitizedDoc<UnsanitizedCaseConnector>
@@ -138,4 +145,5 @@ export const caseMigrations = {
     return addOwnerToSO(doc);
   },
   '7.15.0': caseConnectorIdMigration,
+  '8.1.0': removeCaseType,
 };

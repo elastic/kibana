@@ -14,7 +14,6 @@ import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../../plugins/se
 import {
   CasesResponse,
   CaseStatuses,
-  CaseType,
   CommentType,
   ConnectorTypes,
 } from '../../../../../../plugins/cases/common/api';
@@ -23,9 +22,6 @@ import {
   getPostCaseRequest,
   postCaseReq,
   postCaseResp,
-  postCollectionReq,
-  postCommentAlertReq,
-  postCommentUserReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -205,28 +201,6 @@ export default ({ getService }: FtrProviderContext): void => {
           updated_by: defaultUser,
         });
       });
-
-      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-      it.skip('should allow converting an individual case to a collection when it does not have alerts', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postCommentUserReq,
-        });
-        await updateCase({
-          supertest,
-          params: {
-            cases: [
-              {
-                id: patchedCase.id,
-                version: patchedCase.version,
-                type: CaseType.collection,
-              },
-            ],
-          },
-        });
-      });
     });
 
     describe('unhappy path', () => {
@@ -305,24 +279,6 @@ export default ({ getService }: FtrProviderContext): void => {
               {
                 id: 'not-real',
                 status: CaseStatuses.closed,
-              },
-            ],
-          },
-          expectedHttpCode: 400,
-        });
-      });
-
-      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-      it.skip('should 400 and not allow converting a collection back to an individual case', async () => {
-        const postedCase = await createCase(supertest, postCollectionReq);
-        await updateCase({
-          supertest,
-          params: {
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                type: CaseType.individual,
               },
             ],
           },
@@ -441,64 +397,6 @@ export default ({ getService }: FtrProviderContext): void => {
             ],
           },
           expectedHttpCode: 409,
-        });
-      });
-
-      it('should 400 when attempting to update an individual case to a collection when it has alerts attached to it', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        const patchedCase = await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: postCommentAlertReq,
-        });
-        await updateCase({
-          supertest,
-          params: {
-            cases: [
-              {
-                id: patchedCase.id,
-                version: patchedCase.version,
-                type: CaseType.collection,
-              },
-            ],
-          },
-          expectedHttpCode: 400,
-        });
-      });
-
-      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed delete these tests
-      it('should 400 when attempting to update the case type when the case connector feature is disabled', async () => {
-        const postedCase = await createCase(supertest, postCaseReq);
-        await updateCase({
-          supertest,
-          params: {
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                type: CaseType.collection,
-              },
-            ],
-          },
-          expectedHttpCode: 400,
-        });
-      });
-
-      // ENABLE_CASE_CONNECTOR: once the case connector feature is completed unskip these tests
-      it.skip("should 400 when attempting to update a collection case's status", async () => {
-        const postedCase = await createCase(supertest, postCollectionReq);
-        await updateCase({
-          supertest,
-          params: {
-            cases: [
-              {
-                id: postedCase.id,
-                version: postedCase.version,
-                status: CaseStatuses.closed,
-              },
-            ],
-          },
-          expectedHttpCode: 400,
         });
       });
 

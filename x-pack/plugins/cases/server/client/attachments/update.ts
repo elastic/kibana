@@ -11,9 +11,8 @@ import { SavedObjectsClientContract, Logger } from 'kibana/server';
 import { LensServerPluginSetup } from '../../../../lens/server';
 import { CommentableCase } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import { checkEnabledCaseConnectorOrThrow } from '../../common/utils';
 import { Actions, ActionTypes, CaseResponse, CommentPatchRequest } from '../../../common/api';
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { AttachmentService, CasesService } from '../../services';
 import { CasesClientArgs } from '..';
 import { decodeCommentRequest } from '../utils';
@@ -44,52 +43,30 @@ interface CombinedCaseParams {
   caseID: string;
   logger: Logger;
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
-  subCaseId?: string;
 }
 
+// TODO: rename
 async function getCommentableCase({
   attachmentService,
   caseService,
   unsecuredSavedObjectsClient,
   caseID,
-  subCaseId,
   logger,
   lensEmbeddableFactory,
 }: CombinedCaseParams) {
-  if (subCaseId) {
-    const [caseInfo, subCase] = await Promise.all([
-      caseService.getCase({
-        unsecuredSavedObjectsClient,
-        id: caseID,
-      }),
-      caseService.getSubCase({
-        unsecuredSavedObjectsClient,
-        id: subCaseId,
-      }),
-    ]);
-    return new CommentableCase({
-      attachmentService,
-      caseService,
-      collection: caseInfo,
-      subCase,
-      unsecuredSavedObjectsClient,
-      logger,
-      lensEmbeddableFactory,
-    });
-  } else {
-    const caseInfo = await caseService.getCase({
-      unsecuredSavedObjectsClient,
-      id: caseID,
-    });
-    return new CommentableCase({
-      attachmentService,
-      caseService,
-      collection: caseInfo,
-      unsecuredSavedObjectsClient,
-      logger,
-      lensEmbeddableFactory,
-    });
-  }
+  const caseInfo = await caseService.getCase({
+    unsecuredSavedObjectsClient,
+    id: caseID,
+  });
+
+  return new CommentableCase({
+    attachmentService,
+    caseService,
+    collection: caseInfo,
+    unsecuredSavedObjectsClient,
+    logger,
+    lensEmbeddableFactory,
+  });
 }
 
 /**
@@ -113,8 +90,6 @@ export async function update(
   } = clientArgs;
 
   try {
-    checkEnabledCaseConnectorOrThrow(subCaseID);
-
     const {
       id: queryCommentId,
       version: queryCommentVersion,
@@ -128,7 +103,6 @@ export async function update(
       caseService,
       unsecuredSavedObjectsClient,
       caseID,
-      subCaseId: subCaseID,
       logger,
       lensEmbeddableFactory,
     });
@@ -155,9 +129,7 @@ export async function update(
       throw Boom.badRequest(`You cannot change the owner of the comment.`);
     }
 
-    const saveObjType = subCaseID ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
-
-    const caseRef = myComment.references.find((c) => c.type === saveObjType);
+    const caseRef = myComment.references.find((c) => c.type === CASE_SAVED_OBJECT);
     if (caseRef == null || (caseRef != null && caseRef.id !== commentableCase.id)) {
       throw Boom.notFound(
         `This comment ${queryCommentId} does not exist in ${commentableCase.id}).`
@@ -183,7 +155,6 @@ export async function update(
       action: Actions.update,
       unsecuredSavedObjectsClient,
       caseId: caseID,
-      subCaseId: subCaseID,
       attachmentId: updatedComment.id,
       payload: { attachment: queryRestAttributes },
       user,

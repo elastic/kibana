@@ -28,7 +28,6 @@ import {
 import {
   AttributesTypeUser,
   CommentsResponse,
-  CaseType,
   CaseAttributes,
   CaseUserActionAttributes,
   CasePostRequest,
@@ -239,7 +238,6 @@ const expectCaseCreateUserAction = (
 
   expect(restParsedCreateCase).to.eql({
     ...restCreateCase,
-    type: CaseType.individual,
     status: CaseStatuses.open,
   });
   expect(restParsedConnector).to.eql(restConnector);

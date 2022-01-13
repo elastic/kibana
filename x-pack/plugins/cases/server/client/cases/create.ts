@@ -19,10 +19,9 @@ import {
   CaseResponse,
   CasesClientPostRequestRt,
   CasePostRequest,
-  CaseType,
   ActionTypes,
 } from '../../../common/api';
-import { ENABLE_CASE_CONNECTOR, MAX_TITLE_LENGTH } from '../../../common/constants';
+import { MAX_TITLE_LENGTH } from '../../../common/constants';
 
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
@@ -47,20 +46,10 @@ export const create = async (
     authorization: auth,
   } = clientArgs;
 
-  // default to an individual case if the type is not defined.
-  const { type = CaseType.individual, ...nonTypeCaseFields } = data;
-
-  if (!ENABLE_CASE_CONNECTOR && type === CaseType.collection) {
-    throw Boom.badRequest(
-      'Case type cannot be collection when the case connector feature is disabled'
-    );
-  }
-
   const query = pipe(
     // decode with the defaulted type field
     excess(CasesClientPostRequestRt).decode({
-      type,
-      ...nonTypeCaseFields,
+      data,
     }),
     fold(throwErrors(Boom.badRequest), identity)
   );

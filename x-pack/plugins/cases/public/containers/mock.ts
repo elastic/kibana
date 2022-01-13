@@ -11,14 +11,12 @@ import type { ResolvedCase, CaseMetrics, CaseMetricsFeature } from '../../common
 import {
   Actions,
   ActionTypes,
-  AssociationType,
   CaseConnector,
   CaseResponse,
   CasesFindResponse,
   CasesResponse,
   CasesStatusResponse,
   CaseStatuses,
-  CaseType,
   CaseUserActionResponse,
   CaseUserActionsResponse,
   CommentResponse,
@@ -51,7 +49,6 @@ export const elasticUser = {
 export const tags: string[] = ['coke', 'pepsi'];
 
 export const basicComment: Comment = {
-  associationType: AssociationType.case,
   comment: 'Solve this fast!',
   type: CommentType.user,
   id: basicCommentId,
@@ -67,7 +64,6 @@ export const basicComment: Comment = {
 
 export const alertComment: Comment = {
   alertId: 'alert-id-1',
-  associationType: AssociationType.case,
   index: 'alert-index-1',
   type: CommentType.alert,
   id: 'alert-comment-id',
@@ -99,7 +95,6 @@ export const hostIsolationComment: () => Comment = () => {
       ],
       type: 'isolate',
     },
-    associationType: AssociationType.case,
     createdAt: basicCreatedAt,
     createdBy: elasticUser,
     owner: SECURITY_SOLUTION_OWNER,
@@ -125,7 +120,6 @@ export const hostReleaseComment: () => Comment = () => {
       ],
       type: 'unisolate',
     },
-    associationType: AssociationType.case,
     createdAt: basicCreatedAt,
     createdBy: elasticUser,
     owner: SECURITY_SOLUTION_OWNER,
@@ -138,7 +132,6 @@ export const hostReleaseComment: () => Comment = () => {
 };
 
 export const basicCase: Case = {
-  type: CaseType.individual,
   owner: SECURITY_SOLUTION_OWNER,
   closedAt: null,
   closedBy: null,
@@ -216,7 +209,6 @@ export const basicCaseMetrics: CaseMetrics = {
 };
 
 export const collectionCase: Case = {
-  type: CaseType.collection,
   owner: SECURITY_SOLUTION_OWNER,
   closedAt: null,
   closedBy: null,
@@ -344,7 +336,6 @@ export const elasticUserSnake = {
 };
 
 export const basicCommentSnake: CommentResponse = {
-  associationType: AssociationType.case,
   comment: 'Solve this fast!',
   type: CommentType.user,
   id: basicCommentId,

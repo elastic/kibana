@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  CommentSchemaType,
-  ContextTypeGeneratedAlertType,
-  createAlertsString,
-  isCommentGeneratedAlert,
-  transformConnectorComment,
-} from '../../../../plugins/cases/server/connectors';
+import { CommentSchemaType } from '../../../../plugins/cases/server/connectors';
 import {
   CasePostRequest,
   CaseResponse,
@@ -22,11 +16,8 @@ import {
   CommentRequestAlertType,
   CommentType,
   CaseStatuses,
-  CaseType,
   CasesClientPostRequest,
   SubCaseResponse,
-  AssociationType,
-  SubCasesFindResponse,
   CommentRequest,
   CommentRequestActionsType,
 } from '../../../../plugins/cases/common/api';
@@ -66,7 +57,6 @@ export const getPostCaseRequest = (req?: Partial<CasePostRequest>): CasePostRequ
  */
 export const postCollectionReq: CasePostRequest = {
   ...postCaseReq,
-  type: CaseType.collection,
 };
 
 /**
@@ -74,7 +64,6 @@ export const postCollectionReq: CasePostRequest = {
  */
 export const userActionPostResp: CasesClientPostRequest = {
   ...postCaseReq,
-  type: CaseType.individual,
 };
 
 export const postCommentUserReq: CommentRequestUserType = {
@@ -106,15 +95,6 @@ export const postCommentActionsReq: CommentRequestActionsType = {
   owner: 'securitySolutionFixture',
 };
 
-export const postCommentGenAlertReq: ContextTypeGeneratedAlertType = {
-  alerts: createAlertsString([
-    { _id: 'test-id', _index: 'test-index', ruleId: 'rule-id', ruleName: 'rule name' },
-    { _id: 'test-id2', _index: 'test-index', ruleId: 'rule-id', ruleName: 'rule name' },
-  ]),
-  type: CommentType.generatedAlert,
-  owner: 'securitySolutionFixture',
-};
-
 export const postCaseResp = (
   id?: string | null,
   req: CasePostRequest = postCaseReq
@@ -124,7 +104,6 @@ export const postCaseResp = (
   comments: [],
   totalAlerts: 0,
   totalComment: 0,
-  type: req.type ?? CaseType.individual,
   closed_by: null,
   created_by: defaultUser,
   external_service: null,
@@ -139,10 +118,8 @@ interface CommentRequestWithID {
 
 export const commentsResp = ({
   comments,
-  associationType,
 }: {
   comments: CommentRequestWithID[];
-  associationType: AssociationType;
 }): Array<Partial<CommentResponse>> => {
   return comments.map(({ comment, id }) => {
     const baseFields = {
@@ -153,19 +130,10 @@ export const commentsResp = ({
       updated_by: null,
     };
 
-    if (isCommentGeneratedAlert(comment)) {
-      return {
-        associationType,
-        ...transformConnectorComment(comment),
-        ...baseFields,
-      };
-    } else {
-      return {
-        associationType,
-        ...comment,
-        ...baseFields,
-      };
-    }
+    return {
+      ...comment,
+      ...baseFields,
+    };
   });
 };
 
@@ -201,9 +169,4 @@ const findCommon = {
 export const findCasesResp: CasesFindResponse = {
   ...findCommon,
   cases: [],
-};
-
-export const findSubCasesResp: SubCasesFindResponse = {
-  ...findCommon,
-  subCases: [],
 };

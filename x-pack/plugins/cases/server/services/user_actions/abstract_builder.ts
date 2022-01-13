@@ -6,17 +6,12 @@
  */
 
 import { SavedObjectReference } from 'kibana/server';
-import {
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
-  SUB_CASE_SAVED_OBJECT,
-} from '../../../common/constants';
+import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
 import {
   CASE_REF_NAME,
   COMMENT_REF_NAME,
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
-  SUB_CASE_REF_NAME,
 } from '../../common/constants';
 import {
   ActionTypes,
@@ -47,22 +42,13 @@ export abstract class UserActionBuilder {
     return restConnector;
   }
 
-  protected createCaseReferences(caseId: string, subCaseId?: string): SavedObjectReference[] {
+  protected createCaseReferences(caseId: string): SavedObjectReference[] {
     return [
       {
         type: CASE_SAVED_OBJECT,
         name: CASE_REF_NAME,
         id: caseId,
       },
-      ...(subCaseId
-        ? [
-            {
-              type: SUB_CASE_SAVED_OBJECT,
-              name: SUB_CASE_REF_NAME,
-              id: subCaseId,
-            },
-          ]
-        : []),
     ];
   }
 
@@ -106,7 +92,6 @@ export abstract class UserActionBuilder {
     value,
     valueKey,
     caseId,
-    subCaseId,
     attachmentId,
     connectorId,
     type,
@@ -119,7 +104,7 @@ export abstract class UserActionBuilder {
         type,
       },
       references: [
-        ...this.createCaseReferences(caseId, subCaseId),
+        ...this.createCaseReferences(caseId),
         ...this.createCommentReferences(attachmentId ?? null),
         ...(type === ActionTypes.connector
           ? this.createConnectorReference(connectorId ?? null)

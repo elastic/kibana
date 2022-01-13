@@ -32,7 +32,6 @@ import {
   ConnectorTypes,
   CasePostRequest,
   CaseResponse,
-  SubCasesFindResponse,
   CaseStatuses,
   SubCasesResponse,
   CasesResponse,
@@ -54,9 +53,8 @@ import {
   CaseResolveResponse,
   CaseMetricsResponse,
 } from '../../../../plugins/cases/common/api';
-import { getPostCaseRequest, postCollectionReq, postCommentGenAlertReq } from './mock';
-import { getCaseUserActionUrl, getSubCasesUrl } from '../../../../plugins/cases/common/api/helpers';
-import { ContextTypeGeneratedAlertType } from '../../../../plugins/cases/server/connectors';
+import { getPostCaseRequest } from './mock';
+import { getCaseUserActionUrl } from '../../../../plugins/cases/common/api/helpers';
 import { SignalHit } from '../../../../plugins/security_solution/server/lib/detection_engine/signals/types';
 import { ActionResult, FindActionResult } from '../../../../plugins/actions/server/types';
 import { User } from './authentication/types';
@@ -147,37 +145,12 @@ export const setStatus = async ({
 };
 
 /**
- * Variable to easily access the default comment for the createSubCase function.
- */
-export const defaultCreateSubComment = postCommentGenAlertReq;
-
-/**
- * Variable to easily access the default comment for the createSubCase function.
- */
-export const defaultCreateSubPost = postCollectionReq;
-
-/**
  * Response structure for the createSubCase and createSubCaseComment functions.
  */
 export interface CreateSubCaseResp {
   newSubCaseInfo: CaseResponse;
   modifiedSubCases?: SubCasesResponse;
 }
-
-/**
- * Creates a sub case using the actions API. If a caseID isn't passed in then it will create
- * the collection as well. To create a sub case a comment must be created so it uses a default
- * generated alert style comment which can be overridden.
- */
-export const createSubCase = async (args: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
-  comment?: ContextTypeGeneratedAlertType;
-  caseID?: string;
-  caseInfo?: CasePostRequest;
-  actionID?: string;
-}): Promise<CreateSubCaseResp> => {
-  return createSubCaseComment({ ...args, forceNewSubCase: true });
-};
 
 /**
  * Add case as a connector
@@ -203,89 +176,6 @@ export const deleteCaseAction = async (
   id: string
 ) => {
   await supertest.delete(`/api/actions/connector/${id}`).set('kbn-xsrf', 'foo');
-};
-
-/**
- * Creates a sub case using the actions APIs. This will handle forcing a creation of a new sub case even if one exists
- * if the forceNewSubCase parameter is set to true.
- */
-export const createSubCaseComment = async ({
-  supertest,
-  caseID,
-  comment = defaultCreateSubComment,
-  caseInfo = defaultCreateSubPost,
-  // if true it will close any open sub cases and force a new sub case to be opened
-  forceNewSubCase = false,
-  actionID,
-}: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
-  comment?: ContextTypeGeneratedAlertType;
-  caseID?: string;
-  caseInfo?: CasePostRequest;
-  forceNewSubCase?: boolean;
-  actionID?: string;
-}): Promise<CreateSubCaseResp> => {
-  let actionIDToUse: string;
-
-  if (actionID === undefined) {
-    actionIDToUse = await createCaseAction(supertest);
-  } else {
-    actionIDToUse = actionID;
-  }
-
-  let collectionID: string;
-
-  if (!caseID) {
-    collectionID = (
-      await supertest.post(CASES_URL).set('kbn-xsrf', 'true').send(caseInfo).expect(200)
-    ).body.id;
-  } else {
-    collectionID = caseID;
-  }
-
-  let closedSubCases: SubCasesResponse | undefined;
-  if (forceNewSubCase) {
-    const { body: subCasesResp }: { body: SubCasesFindResponse } = await supertest
-      .get(`${getSubCasesUrl(collectionID)}/_find`)
-      .expect(200);
-
-    const nonClosed = subCasesResp.subCases.filter(
-      (subCase) => subCase.status !== CaseStatuses.closed
-    );
-    if (nonClosed.length > 0) {
-      // mark the sub case as closed so a new sub case will be created on the next comment
-      closedSubCases = (
-        await supertest
-          .patch(SUB_CASES_PATCH_DEL_URL)
-          .set('kbn-xsrf', 'true')
-          .send({
-            subCases: nonClosed.map((subCase) => ({
-              id: subCase.id,
-              version: subCase.version,
-              status: CaseStatuses.closed,
-            })),
-          })
-          .expect(200)
-      ).body;
-    }
-  }
-
-  const caseConnector = await supertest
-    .post(`/api/actions/connector/${actionIDToUse}/_execute`)
-    .set('kbn-xsrf', 'foo')
-    .send({
-      params: {
-        subAction: 'addComment',
-        subActionParams: {
-          caseId: collectionID,
-          comment,
-        },
-      },
-    })
-    .expect(200);
-
-  expect(caseConnector.body.status).to.eql('ok');
-  return { newSubCaseInfo: caseConnector.body.data, modifiedSubCases: closedSubCases };
 };
 
 type ConfigRequestParams = Partial<CaseConnector> & {

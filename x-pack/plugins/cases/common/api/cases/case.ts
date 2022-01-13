@@ -12,7 +12,6 @@ import { UserRT } from '../user';
 import { CommentResponseRt } from './comment';
 import { CasesStatusResponseRt, CaseStatusRt } from './status';
 import { CaseConnectorRt } from '../connectors';
-import { SubCaseResponseRt } from './sub_case';
 
 const BucketsAggs = rt.array(
   rt.type({
@@ -41,13 +40,6 @@ export enum CaseType {
   individual = 'individual',
 }
 
-/**
- * Exposing the field used to define the case type so that it can be used for filtering in saved object find queries.
- */
-export const caseTypeField = 'type';
-
-const CaseTypeRt = rt.union([rt.literal(CaseType.collection), rt.literal(CaseType.individual)]);
-
 export const SettingsRt = rt.type({
   syncAlerts: rt.boolean,
 });
@@ -69,10 +61,6 @@ const CaseBasicRt = rt.type({
    * The title of a case
    */
   title: rt.string,
-  /**
-   * The type of a case (individual or collection)
-   */
-  [caseTypeField]: CaseTypeRt,
   /**
    * The external system that the case can be synced with
    */
@@ -155,28 +143,18 @@ const CasePostRequestNoTypeRt = rt.type({
  */
 export const CasesClientPostRequestRt = rt.type({
   ...CasePostRequestNoTypeRt.props,
-  [caseTypeField]: CaseTypeRt,
 });
 
+// TODO: refactor we no longer have a case type
 /**
  * This type is not used for validation when decoding a request because intersection does not have props defined which
  * required for the excess function. Instead we use this as the type used by the UI. This allows the type field to be
  * optional and the server will handle setting it to a default value before validating that the request
  * has all the necessary fields. CasesClientPostRequestRt is used for validation.
  */
-export const CasePostRequestRt = rt.intersection([
-  /**
-   * The case type: an individual case (one without children) or a collection case (one with children)
-   */
-  rt.partial({ [caseTypeField]: CaseTypeRt }),
-  CasePostRequestNoTypeRt,
-]);
+export const CasePostRequestRt = CasePostRequestNoTypeRt;
 
 export const CasesFindRequestRt = rt.partial({
-  /**
-   * Type of a case (individual, or collection)
-   */
-  type: CaseTypeRt,
   /**
    * Tags to filter by
    */
@@ -248,8 +226,6 @@ export const CaseResponseRt = rt.intersection([
     version: rt.string,
   }),
   rt.partial({
-    subCaseIds: rt.array(rt.string),
-    subCases: rt.array(SubCaseResponseRt),
     comments: rt.array(CommentResponseRt),
   }),
 ]);

@@ -16,32 +16,24 @@ import {
 } from 'src/core/server';
 import { LensServerPluginSetup } from '../../../../lens/server';
 import {
-  AssociationType,
   CaseResponse,
   CaseResponseRt,
   CaseSettings,
   CaseStatuses,
-  CaseType,
   CommentAttributes,
   CommentPatchRequest,
   CommentRequest,
   CommentType,
-  SubCaseAttributes,
   User,
   CommentRequestUserType,
   CaseAttributes,
 } from '../../../common/api';
-import {
-  CASE_SAVED_OBJECT,
-  MAX_DOCS_PER_PAGE,
-  SUB_CASE_SAVED_OBJECT,
-} from '../../../common/constants';
+import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import { AttachmentService, CasesService } from '../../services';
 import { createCaseError } from '../error';
 import {
   countAlertsForID,
   flattenCommentSavedObjects,
-  flattenSubCaseSavedObject,
   transformNewComment,
   getOrUpdateLensReferences,
 } from '../utils';
@@ -58,7 +50,6 @@ interface NewCommentResp {
 
 interface CommentableCaseParams {
   collection: SavedObject<CaseAttributes>;
-  subCase?: SavedObject<SubCaseAttributes>;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   caseService: CasesService;
   attachmentService: AttachmentService;
@@ -66,13 +57,14 @@ interface CommentableCaseParams {
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
 }
 
+// TODO: refactor, what is the purpose of this class now? It could be useful to interact with a case more easily?
+// but it doesn't abstract multiple things now
 /**
  * This class represents a case that can have a comment attached to it. This includes
  * a Sub Case, Case, and Collection.
  */
 export class CommentableCase {
   private readonly collection: SavedObject<CaseAttributes>;
-  private readonly subCase?: SavedObject<SubCaseAttributes>;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly caseService: CasesService;
   private readonly attachmentService: AttachmentService;
@@ -81,7 +73,6 @@ export class CommentableCase {
 
   constructor({
     collection,
-    subCase,
     unsecuredSavedObjectsClient,
     caseService,
     attachmentService,
@@ -89,7 +80,6 @@ export class CommentableCase {
     lensEmbeddableFactory,
   }: CommentableCaseParams) {
     this.collection = collection;
-    this.subCase = subCase;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.caseService = caseService;
     this.attachmentService = attachmentService;
@@ -98,7 +88,7 @@ export class CommentableCase {
   }
 
   public get status(): CaseStatuses {
-    return this.subCase?.attributes.status ?? this.collection.attributes.status;
+    return this.collection.attributes.status;
   }
 
   /**
@@ -110,7 +100,7 @@ export class CommentableCase {
    * collection but from the UI's perspective only the sub case really has the comment attached to it.
    */
   public get id(): string {
-    return this.subCase?.id ?? this.collection.id;
+    return this.collection.id;
   }
 
   public get settings(): CaseSettings {
@@ -126,56 +116,22 @@ export class CommentableCase {
     return this.collection.id;
   }
 
-  public get subCaseId(): string | undefined {
-    return this.subCase?.id;
-  }
-
   private get owner(): string {
     return this.collection.attributes.owner;
   }
 
   private buildRefsToCase(): SavedObjectReference[] {
-    const subCaseSOType = SUB_CASE_SAVED_OBJECT;
-    const caseSOType = CASE_SAVED_OBJECT;
     return [
       {
-        type: caseSOType,
-        name: `associated-${caseSOType}`,
+        type: CASE_SAVED_OBJECT,
+        name: `associated-${CASE_SAVED_OBJECT}`,
         id: this.collection.id,
       },
-      ...(this.subCase
-        ? [{ type: subCaseSOType, name: `associated-${subCaseSOType}`, id: this.subCase.id }]
-        : []),
     ];
   }
 
   private async update({ date, user }: { date: string; user: User }): Promise<CommentableCase> {
     try {
-      let updatedSubCaseAttributes: SavedObject<SubCaseAttributes> | undefined;
-
-      if (this.subCase) {
-        const updatedSubCase = await this.caseService.patchSubCase({
-          unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
-          subCaseId: this.subCase.id,
-          updatedAttributes: {
-            updated_at: date,
-            updated_by: {
-              ...user,
-            },
-          },
-          version: this.subCase.version,
-        });
-
-        updatedSubCaseAttributes = {
-          ...this.subCase,
-          attributes: {
-            ...this.subCase.attributes,
-            ...updatedSubCase.attributes,
-          },
-          version: updatedSubCase.version ?? this.subCase.version,
-        };
-      }
-
       const updatedCase = await this.caseService.patchCase({
         originalCase: this.collection,
         unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
@@ -197,7 +153,6 @@ export class CommentableCase {
           },
           version: updatedCase.version ?? this.collection.version,
         },
-        subCase: updatedSubCaseAttributes,
         unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
         caseService: this.caseService,
         attachmentService: this.attachmentService,
@@ -206,7 +161,7 @@ export class CommentableCase {
       });
     } catch (error) {
       throw createCaseError({
-        message: `Failed to update commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,
+        message: `Failed to update commentable case, case id: ${this.caseId}: ${error}`,
         error,
         logger: this.logger,
       });
@@ -264,7 +219,7 @@ export class CommentableCase {
       };
     } catch (error) {
       throw createCaseError({
-        message: `Failed to update comment in commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,
+        message: `Failed to update comment in commentable case, case id: ${this.caseId}: ${error}`,
         error,
         logger: this.logger,
       });
@@ -290,10 +245,6 @@ export class CommentableCase {
         if (this.status === CaseStatuses.closed) {
           throw Boom.badRequest('Alert cannot be attached to a closed case');
         }
-
-        if (!this.subCase && this.collection.attributes.type === CaseType.collection) {
-          throw Boom.badRequest('Alert cannot be attached to a collection case');
-        }
       }
 
       if (commentReq.owner !== this.owner) {
@@ -314,7 +265,6 @@ export class CommentableCase {
         this.attachmentService.create({
           unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
           attributes: transformNewComment({
-            associationType: this.subCase ? AssociationType.subCase : AssociationType.case,
             createdDate,
             ...commentReq,
             ...user,
@@ -330,7 +280,7 @@ export class CommentableCase {
       };
     } catch (error) {
       throw createCaseError({
-        message: `Failed creating a comment on a commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,
+        message: `Failed creating a comment on a commentable case, case id: ${this.caseId}: ${error}`,
         error,
         logger: this.logger,
       });
@@ -367,41 +317,10 @@ export class CommentableCase {
         ...this.formatCollectionForEncoding(collectionComments.total),
       };
 
-      if (this.subCase) {
-        const subCaseComments = await this.caseService.getAllSubCaseComments({
-          unsecuredSavedObjectsClient: this.unsecuredSavedObjectsClient,
-          id: this.subCase.id,
-        });
-        const totalAlerts =
-          countAlertsForID({ comments: subCaseComments, id: this.subCase.id }) ?? 0;
-
-        return CaseResponseRt.encode({
-          ...caseResponse,
-          /**
-           * For now we need the sub case comments and totals to be exposed on the top level of the response so that the UI
-           * functionality can stay the same. Ideally in the future we can refactor this so that the UI will look for the
-           * comments either in the top level for a case or a collection or in the subCases field if it is a sub case.
-           *
-           * If we ever need to return both the collection's comments and the sub case comments we'll need to refactor it then
-           * as well.
-           */
-          comments: flattenCommentSavedObjects(subCaseComments.saved_objects),
-          totalComment: subCaseComments.saved_objects.length,
-          totalAlerts,
-          subCases: [
-            flattenSubCaseSavedObject({
-              savedObject: this.subCase,
-              totalComment: subCaseComments.saved_objects.length,
-              totalAlerts,
-            }),
-          ],
-        });
-      }
-
       return CaseResponseRt.encode(caseResponse);
     } catch (error) {
       throw createCaseError({
-        message: `Failed encoding the commentable case, sub case id: ${this.subCaseId} case id: ${this.caseId}: ${error}`,
+        message: `Failed encoding the commentable case, case id: ${this.caseId}: ${error}`,
         error,
         logger: this.logger,
       });

@@ -9,15 +9,10 @@ import Boom from '@hapi/boom';
 import pMap from 'p-map';
 
 import { SavedObject } from 'kibana/public';
-import { Actions, ActionTypes, AssociationType, CommentAttributes } from '../../../common/api';
-import {
-  CASE_SAVED_OBJECT,
-  MAX_CONCURRENT_SEARCHES,
-  SUB_CASE_SAVED_OBJECT,
-} from '../../../common/constants';
+import { Actions, ActionTypes, CommentAttributes } from '../../../common/api';
+import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
-import { checkEnabledCaseConnectorOrThrow } from '../../common/utils';
 import { Operations } from '../../authorization';
 
 /**
@@ -72,13 +67,10 @@ export async function deleteAll(
   } = clientArgs;
 
   try {
-    checkEnabledCaseConnectorOrThrow(subCaseID);
-
     const id = subCaseID ?? caseID;
-    const comments = await caseService.getCommentsByAssociation({
+    const comments = await caseService.getAllCaseComments({
       unsecuredSavedObjectsClient,
       id,
-      associationType: subCaseID ? AssociationType.subCase : AssociationType.case,
     });
 
     if (comments.total <= 0) {
@@ -107,7 +99,6 @@ export async function deleteAll(
     await userActionService.bulkCreateAttachmentDeletion({
       unsecuredSavedObjectsClient,
       caseId: caseID,
-      subCaseId: subCaseID,
       attachments: comments.saved_objects.map((comment) => ({
         id: comment.id,
         owner: comment.attributes.owner,
@@ -143,8 +134,6 @@ export async function deleteComment(
   } = clientArgs;
 
   try {
-    checkEnabledCaseConnectorOrThrow(subCaseID);
-
     const myComment = await attachmentService.get({
       unsecuredSavedObjectsClient,
       attachmentId: attachmentID,
@@ -159,8 +148,8 @@ export async function deleteComment(
       operation: Operations.deleteComment,
     });
 
-    const type = subCaseID ? SUB_CASE_SAVED_OBJECT : CASE_SAVED_OBJECT;
-    const id = subCaseID ?? caseID;
+    const type = CASE_SAVED_OBJECT;
+    const id = caseID;
 
     const caseRef = myComment.references.find((c) => c.type === type);
     if (caseRef == null || (caseRef != null && caseRef.id !== id)) {
@@ -177,7 +166,6 @@ export async function deleteComment(
       action: Actions.delete,
       unsecuredSavedObjectsClient,
       caseId: id,
-      subCaseId: subCaseID,
       attachmentId: attachmentID,
       payload: { attachment: { ...myComment.attributes } },
       user,

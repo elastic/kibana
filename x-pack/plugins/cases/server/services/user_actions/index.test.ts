@@ -23,14 +23,12 @@ import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   SECURITY_SOLUTION_OWNER,
-  SUB_CASE_SAVED_OBJECT,
 } from '../../../common/constants';
 import {
   CASE_REF_NAME,
   COMMENT_REF_NAME,
   CONNECTOR_ID_REFERENCE_NAME,
   PUSH_CONNECTOR_ID_REFERENCE_NAME,
-  SUB_CASE_REF_NAME,
 } from '../../common/constants';
 
 import {
@@ -178,15 +176,6 @@ const createUserActionSO = ({
         name: CASE_REF_NAME,
         id: '1',
       },
-      ...(subCaseId
-        ? [
-            {
-              type: SUB_CASE_SAVED_OBJECT,
-              name: SUB_CASE_REF_NAME,
-              id: subCaseId,
-            },
-          ]
-        : []),
       ...(commentId
         ? [
             {
@@ -326,7 +315,6 @@ describe('CaseUserActionService', () => {
                     "type": ".jira",
                   },
                 },
-                "sub_case_id": "",
                 "type": "connector",
               },
               "id": "100",
@@ -421,18 +409,6 @@ describe('CaseUserActionService', () => {
         );
 
         expect(transformed.saved_objects[0].attributes.comment_id).toEqual('5');
-      });
-
-      it('sets sub_case_id correctly when it finds the reference', () => {
-        const userAction = {
-          ...createUserActionSO({ action: Actions.create, subCaseId: '5' }),
-        };
-
-        const transformed = transformFindResponseToExternalModel(
-          createSOFindResponse([createUserActionFindSO(userAction)])
-        );
-
-        expect(transformed.saved_objects[0].attributes.sub_case_id).toEqual('5');
       });
 
       it('sets action_id correctly to the saved object id', () => {

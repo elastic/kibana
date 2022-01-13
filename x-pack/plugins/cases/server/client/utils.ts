@@ -13,13 +13,12 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
 import { nodeBuilder, fromKueryExpression, KueryNode } from '@kbn/es-query';
-import { CASE_SAVED_OBJECT, SUB_CASE_SAVED_OBJECT } from '../../common/constants';
+import { CASE_SAVED_OBJECT } from '../../common/constants';
 import {
   OWNER_FIELD,
   AlertCommentRequestRt,
   ActionsCommentRequestRt,
   CaseStatuses,
-  CaseType,
   CommentRequest,
   ContextTypeUserRt,
   excess,
@@ -184,6 +183,7 @@ export function stringToKueryNode(expression?: string): KueryNode | undefined {
   return fromKueryExpression(expression);
 }
 
+// TODO: refactor this since there won't be case type anymore
 /**
  * Constructs the filters used for finding cases and sub cases.
  * There are a few scenarios that this function tries to handle when constructing the filters used for finding cases
@@ -215,7 +215,6 @@ export const constructQueryOptions = ({
   reporters,
   status,
   sortByField,
-  caseType,
   owner,
   authorizationFilter,
 }: {
@@ -223,10 +222,10 @@ export const constructQueryOptions = ({
   reporters?: string | string[];
   status?: CaseStatuses;
   sortByField?: string;
-  caseType?: CaseType;
   owner?: string | string[];
   authorizationFilter?: KueryNode;
-}): { case: SavedObjectFindOptionsKueryNode; subCase?: SavedObjectFindOptionsKueryNode } => {
+}): { case: SavedObjectFindOptionsKueryNode } => {
+  // TODO: review and make sure this logic is still correct
   const kueryNodeExists = (filter: KueryNode | null | undefined): filter is KueryNode =>
     filter != null;
 
@@ -239,108 +238,20 @@ export const constructQueryOptions = ({
   const sortField = sortToSnake(sortByField);
   const ownerFilter = buildFilter({ filters: owner ?? [], field: OWNER_FIELD, operator: 'or' });
 
-  switch (caseType) {
-    case CaseType.individual: {
-      // The cases filter will result in this structure "status === oh and (type === individual) and (tags === blah) and (reporter === yo)"
-      // The subCase filter will be undefined because we don't need to find sub cases if type === individual
+  const statusFilter = status != null ? addStatusFilter({ status }) : undefined;
 
-      // We do not want to support multiple type's being used, so force it to be a single filter value
-      const typeFilter = nodeBuilder.is(
-        `${CASE_SAVED_OBJECT}.attributes.type`,
-        CaseType.individual
-      );
+  const filters: KueryNode[] = [statusFilter, tagsFilter, reportersFilter, ownerFilter].filter(
+    kueryNodeExists
+  );
 
-      const filters: KueryNode[] = [typeFilter, tagsFilter, reportersFilter, ownerFilter].filter(
-        kueryNodeExists
-      );
+  const caseFilters = filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
 
-      const caseFilters =
-        status != null
-          ? addStatusFilter({
-              status,
-              appendFilter: filters.length > 1 ? nodeBuilder.and(filters) : filters[0],
-            })
-          : undefined;
-
-      return {
-        case: {
-          filter: combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter),
-          sortField,
-        },
-      };
-    }
-    case CaseType.collection: {
-      // The cases filter will result in this structure "(type == parent) and (tags == blah) and (reporter == yo)"
-      // The sub case filter will use the query.status if it exists
-      const typeFilter = nodeBuilder.is(
-        `${CASE_SAVED_OBJECT}.attributes.type`,
-        CaseType.collection
-      );
-
-      const filters: KueryNode[] = [typeFilter, tagsFilter, reportersFilter, ownerFilter].filter(
-        kueryNodeExists
-      );
-      const caseFilters = filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
-      const subCaseFilters =
-        status != null ? addStatusFilter({ status, type: SUB_CASE_SAVED_OBJECT }) : undefined;
-
-      return {
-        case: {
-          filter: combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter),
-          sortField,
-        },
-        subCase: {
-          filter: combineFilterWithAuthorizationFilter(subCaseFilters, authorizationFilter),
-          sortField,
-        },
-      };
-    }
-    default: {
-      /**
-       * In this scenario no type filter was sent, so we want to honor the status filter if one exists.
-       * To construct the filter and honor the status portion we need to find all individual cases that
-       * have that particular status. We also need to find cases that have sub cases but we want to ignore the
-       * case collection's status because it is not relevant. We only care about the status of the sub cases if the
-       * case is a collection.
-       *
-       * The cases filter will result in this structure "((status == open and type === individual) or type == parent) and (tags == blah) and (reporter == yo)"
-       * The sub case filter will use the query.status if it exists
-       */
-      const typeIndividual = nodeBuilder.is(
-        `${CASE_SAVED_OBJECT}.attributes.type`,
-        CaseType.individual
-      );
-      const typeParent = nodeBuilder.is(
-        `${CASE_SAVED_OBJECT}.attributes.type`,
-        CaseType.collection
-      );
-
-      const statusFilter =
-        status != null
-          ? nodeBuilder.and([addStatusFilter({ status }), typeIndividual])
-          : typeIndividual;
-      const statusAndType = nodeBuilder.or([statusFilter, typeParent]);
-
-      const filters: KueryNode[] = [statusAndType, tagsFilter, reportersFilter, ownerFilter].filter(
-        kueryNodeExists
-      );
-
-      const caseFilters = filters.length > 1 ? nodeBuilder.and(filters) : filters[0];
-      const subCaseFilters =
-        status != null ? addStatusFilter({ status, type: SUB_CASE_SAVED_OBJECT }) : undefined;
-
-      return {
-        case: {
-          filter: combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter),
-          sortField,
-        },
-        subCase: {
-          filter: combineFilterWithAuthorizationFilter(subCaseFilters, authorizationFilter),
-          sortField,
-        },
-      };
-    }
-  }
+  return {
+    case: {
+      filter: combineFilterWithAuthorizationFilter(caseFilters, authorizationFilter),
+      sortField,
+    },
+  };
 };
 
 interface CompareArrays {

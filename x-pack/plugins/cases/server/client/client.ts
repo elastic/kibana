@@ -10,8 +10,6 @@ import { CasesSubClient, createCasesSubClient } from './cases/client';
 import { AttachmentsSubClient, createAttachmentsSubClient } from './attachments/client';
 import { UserActionsSubClient, createUserActionsSubClient } from './user_actions/client';
 import { CasesClientInternal, createCasesClientInternal } from './client_internal';
-import { createSubCasesClient, SubCasesClient } from './sub_cases/client';
-import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
 import { ConfigureSubClient, createConfigurationSubClient } from './configure/client';
 import { createStatsSubClient, StatsSubClient } from './stats/client';
 import { createMetricsSubClient, MetricsSubClient } from './metrics/client';
@@ -24,7 +22,6 @@ export class CasesClient {
   private readonly _cases: CasesSubClient;
   private readonly _attachments: AttachmentsSubClient;
   private readonly _userActions: UserActionsSubClient;
-  private readonly _subCases: SubCasesClient;
   private readonly _configure: ConfigureSubClient;
   private readonly _stats: StatsSubClient;
   private readonly _metrics: MetricsSubClient;
@@ -34,7 +31,6 @@ export class CasesClient {
     this._cases = createCasesSubClient(args, this, this._casesClientInternal);
     this._attachments = createAttachmentsSubClient(args, this, this._casesClientInternal);
     this._userActions = createUserActionsSubClient(args);
-    this._subCases = createSubCasesClient(args);
     this._configure = createConfigurationSubClient(args, this._casesClientInternal);
     this._stats = createStatsSubClient(args);
     this._metrics = createMetricsSubClient(args, this);
@@ -59,18 +55,6 @@ export class CasesClient {
    */
   public get userActions() {
     return this._userActions;
-  }
-
-  /**
-   * Retrieves an interface for interacting with the case as a connector entities.
-   *
-   * Currently this functionality is disabled and will throw an error if this function is called.
-   */
-  public get subCases() {
-    if (!ENABLE_CASE_CONNECTOR) {
-      throw new Error('The case connector feature is disabled');
-    }
-    return this._subCases;
   }
 
   /**

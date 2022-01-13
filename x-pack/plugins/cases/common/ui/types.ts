@@ -6,12 +6,10 @@
  */
 
 import {
-  AssociationType,
   CaseAttributes,
   CaseConnector,
   CasePatchRequest,
   CaseStatuses,
-  CaseType,
   CommentRequest,
   User,
   ActionConnector,
@@ -63,7 +61,6 @@ export type CaseViewRefreshPropInterface = null | {
 };
 
 export type Comment = CommentRequest & {
-  associationType: AssociationType;
   id: string;
   createdAt: string;
   createdBy: ElasticUser;
@@ -95,7 +92,6 @@ interface BasicCase {
 }
 
 export interface SubCase extends BasicCase {
-  associationType: AssociationType;
   caseParentId: string;
 }
 
@@ -107,7 +103,6 @@ export interface Case extends BasicCase {
   subCaseIds: string[];
   settings: CaseAttributes['settings'];
   tags: string[];
-  type: CaseType;
 }
 
 export interface ResolvedCase {
@@ -189,7 +184,6 @@ export interface ActionLicense {
 
 export interface DeleteCase {
   id: string;
-  type: CaseType | null;
   title: string;
 }
 

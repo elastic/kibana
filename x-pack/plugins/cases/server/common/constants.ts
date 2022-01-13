@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  CASE_COMMENT_SAVED_OBJECT,
-  CASE_SAVED_OBJECT,
-  SUB_CASE_SAVED_OBJECT,
-} from '../../common/constants';
+import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../common/constants';
 
 /**
  * The name of the saved object reference indicating the action connector ID. This is stored in the Saved Object reference
@@ -31,8 +27,3 @@ export const CASE_REF_NAME = `associated-${CASE_SAVED_OBJECT}`;
  * The name of the saved object reference indicating the commentId reference
  */
 export const COMMENT_REF_NAME = `associated-${CASE_COMMENT_SAVED_OBJECT}`;
-
-/**
- * The name of the saved object reference indicating the subCaseId reference
- */
-export const SUB_CASE_REF_NAME = `associated-${SUB_CASE_SAVED_OBJECT}`;

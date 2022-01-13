@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { mapValues, trimEnd, mergeWith } from 'lodash';
+import { mapValues, trimEnd, mergeWith, cloneDeep, unset } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { SUB_CASE_SAVED_OBJECT } from '../../../common/constants';
 import {
   MigrateFunction,
   MigrateFunctionsObject,
@@ -19,7 +20,7 @@ import {
   SavedObjectMigrationContext,
 } from '../../../../../../src/core/server';
 import { LensServerPluginSetup } from '../../../../lens/server';
-import { CommentType, AssociationType } from '../../../common/api';
+import { CommentType } from '../../../common/api';
 import {
   isLensMarkdownNode,
   LensMarkdownNode,
@@ -38,6 +39,11 @@ interface UnsanitizedComment {
 interface SanitizedComment {
   comment: string;
   type: CommentType;
+}
+
+enum AssociationType {
+  case = 'case',
+  subCase = 'sub_case',
 }
 
 interface SanitizedCommentForSubCases {
@@ -97,6 +103,19 @@ export const createCommentsMigrations = (
       doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
     ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
       return addOwnerToSO(doc);
+    },
+    // TODO: move to its own function
+    '8.1.0': (
+      doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
+    ): SavedObjectSanitizedDoc<Record<string, unknown>> => {
+      const docCopy = cloneDeep(doc);
+      unset(docCopy, 'attributes.associationType');
+
+      return {
+        ...docCopy,
+        references:
+          docCopy.references?.filter((reference) => reference.type !== SUB_CASE_SAVED_OBJECT) ?? [],
+      };
     },
   };
 

@@ -94,15 +94,6 @@ export const OWNER_INFO = {
   },
 };
 
-/**
- * This flag governs enabling the case as a connector feature. It is disabled by default as the feature is not complete.
- */
-export const ENABLE_CASE_CONNECTOR = false;
-
-if (ENABLE_CASE_CONNECTOR) {
-  SAVED_OBJECT_TYPES.push(SUB_CASE_SAVED_OBJECT);
-}
-
 export const MAX_DOCS_PER_PAGE = 10000;
 export const MAX_CONCURRENT_SEARCHES = 10;
 

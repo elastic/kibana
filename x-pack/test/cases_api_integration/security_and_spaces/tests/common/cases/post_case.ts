@@ -12,7 +12,6 @@ import {
   ConnectorTypes,
   ConnectorJiraTypeFields,
   CaseStatuses,
-  CaseType,
 } from '../../../../../../plugins/cases/common/api';
 import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
 import {
@@ -138,10 +137,6 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('unhappy path', () => {
-      it('should not allow creating a collection style case', async () => {
-        await createCase(supertest, getPostCaseRequest({ type: CaseType.collection }), 400);
-      });
-
       it('400s when bad query supplied', async () => {
         await supertest
           .post(CASES_URL)

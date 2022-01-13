@@ -39,11 +39,3 @@ export const connectorMappingsMigrations = {
     return addOwnerToSO(doc);
   },
 };
-
-export const subCasesMigrations = {
-  '7.14.0': (
-    doc: SavedObjectUnsanitizedDoc<Record<string, unknown>>
-  ): SavedObjectSanitizedDoc<SanitizedCaseOwner> => {
-    return addOwnerToSO(doc);
-  },
-};

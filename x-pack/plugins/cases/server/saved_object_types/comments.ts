@@ -20,9 +20,6 @@ export const createCaseCommentSavedObjectType = ({
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
-      associationType: {
-        type: 'keyword',
-      },
       comment: {
         type: 'text',
       },

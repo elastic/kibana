@@ -21,14 +21,12 @@ import {
 import { nodeBuilder } from '@kbn/es-query';
 
 import {
-  AssociationType,
   CasePatchRequest,
   CasesPatchRequest,
   CasesPatchRequestRt,
   CasesResponse,
   CasesResponseRt,
   CaseStatuses,
-  CaseType,
   CommentAttributes,
   CommentType,
   excess,
@@ -38,9 +36,7 @@ import {
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
-  ENABLE_CASE_CONNECTOR,
   MAX_CONCURRENT_SEARCHES,
-  SUB_CASE_SAVED_OBJECT,
   MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 
@@ -62,47 +58,13 @@ import { Operations, OwnerEntity } from '../../authorization';
  */
 function throwIfUpdateStatusOfCollection(requests: UpdateRequestWithOriginalCase[]) {
   const requestsUpdatingStatusOfCollection = requests.filter(
-    ({ updateReq, originalCase }) =>
-      updateReq.status !== undefined && originalCase.attributes.type === CaseType.collection
+    ({ updateReq }) => updateReq.status !== undefined
   );
 
   if (requestsUpdatingStatusOfCollection.length > 0) {
     const ids = requestsUpdatingStatusOfCollection.map(({ updateReq }) => updateReq.id);
     throw Boom.badRequest(
       `Updating the status of a collection is not allowed ids: [${ids.join(', ')}]`
-    );
-  }
-}
-
-/**
- * Throws an error if any of the requests attempt to update a collection style case to an individual one.
- */
-function throwIfUpdateTypeCollectionToIndividual(requests: UpdateRequestWithOriginalCase[]) {
-  const requestsUpdatingTypeCollectionToInd = requests.filter(
-    ({ updateReq, originalCase }) =>
-      updateReq.type === CaseType.individual && originalCase.attributes.type === CaseType.collection
-  );
-
-  if (requestsUpdatingTypeCollectionToInd.length > 0) {
-    const ids = requestsUpdatingTypeCollectionToInd.map(({ updateReq }) => updateReq.id);
-    throw Boom.badRequest(
-      `Converting a collection to an individual case is not allowed ids: [${ids.join(', ')}]`
-    );
-  }
-}
-
-/**
- * Throws an error if any of the requests attempt to update the type of a case.
- */
-function throwIfUpdateType(requests: UpdateRequestWithOriginalCase[]) {
-  const requestsUpdatingType = requests.filter(({ updateReq }) => updateReq.type !== undefined);
-
-  if (requestsUpdatingType.length > 0) {
-    const ids = requestsUpdatingType.map(({ updateReq }) => updateReq.id);
-    throw Boom.badRequest(
-      `Updating the type of a case when sub cases are disabled is not allowed ids: [${ids.join(
-        ', '
-      )}]`
     );
   }
 }
@@ -139,13 +101,7 @@ async function throwIfInvalidUpdateOfTypeWithAlerts({
       options: {
         fields: [],
         // there should never be generated alerts attached to an individual case but we'll check anyway
-        filter: nodeBuilder.or([
-          nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
-          nodeBuilder.is(
-            `${CASE_COMMENT_SAVED_OBJECT}.attributes.type`,
-            CommentType.generatedAlert
-          ),
-        ]),
+        filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
         page: 1,
         perPage: 1,
       },
@@ -154,13 +110,10 @@ async function throwIfInvalidUpdateOfTypeWithAlerts({
     return { id: updateReq.id, alerts };
   };
 
-  const requestsUpdatingTypeField = requests.filter(
-    ({ updateReq }) => updateReq.type === CaseType.collection
-  );
   const getAlertsMapper = async (caseToUpdate: UpdateRequestWithOriginalCase) =>
     getAlertsForID(caseToUpdate);
   // Ensuring we don't too many concurrent get running.
-  const casesAlertTotals = await pMap(requestsUpdatingTypeField, getAlertsMapper, {
+  const casesAlertTotals = await pMap(requests, getAlertsMapper, {
     concurrency: MAX_CONCURRENT_SEARCHES,
   });
 
@@ -200,7 +153,7 @@ function throwIfTitleIsInvalid(requests: UpdateRequestWithOriginalCase[]) {
  */
 function getID(
   comment: SavedObject<CommentAttributes>,
-  type: typeof CASE_SAVED_OBJECT | typeof SUB_CASE_SAVED_OBJECT
+  type: typeof CASE_SAVED_OBJECT
 ): string | undefined {
   return comment.references.find((ref) => ref.type === type)?.id;
 }
@@ -223,54 +176,10 @@ async function getAlertComments({
   return caseService.getAllCaseComments({
     unsecuredSavedObjectsClient,
     id: idsOfCasesToSync,
-    includeSubCaseComments: true,
     options: {
-      filter: nodeBuilder.or([
-        nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
-        nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.generatedAlert),
-      ]),
+      filter: nodeBuilder.is(`${CASE_COMMENT_SAVED_OBJECT}.attributes.type`, CommentType.alert),
     },
   });
-}
-
-/**
- * Returns a map of sub case IDs to their status. This uses a group of alert comments to determine which sub cases should
- * be retrieved. This is based on whether the comment is associated to a sub case.
- */
-async function getSubCasesToStatus({
-  totalAlerts,
-  caseService,
-  unsecuredSavedObjectsClient,
-}: {
-  totalAlerts: SavedObjectsFindResponse<CommentAttributes>;
-  caseService: CasesService;
-  unsecuredSavedObjectsClient: SavedObjectsClientContract;
-}): Promise<Map<string, CaseStatuses>> {
-  const subCasesToRetrieve = totalAlerts.saved_objects.reduce((acc, alertComment) => {
-    if (
-      isCommentRequestTypeAlertOrGenAlert(alertComment.attributes) &&
-      alertComment.attributes.associationType === AssociationType.subCase
-    ) {
-      const id = getID(alertComment, SUB_CASE_SAVED_OBJECT);
-      if (id !== undefined) {
-        acc.add(id);
-      }
-    }
-    return acc;
-  }, new Set<string>());
-
-  const subCases = await caseService.getSubCases({
-    ids: Array.from(subCasesToRetrieve.values()),
-    unsecuredSavedObjectsClient,
-  });
-
-  return subCases.saved_objects.reduce((acc, subCase) => {
-    // log about the sub cases that we couldn't find
-    if (!subCase.error) {
-      acc.set(subCase.id, subCase.attributes.status);
-    }
-    return acc;
-  }, new Map<string, CaseStatuses>());
 }
 
 /**
@@ -279,24 +188,17 @@ async function getSubCasesToStatus({
 function getSyncStatusForComment({
   alertComment,
   casesToSyncToStatus,
-  subCasesToStatus,
 }: {
   alertComment: SavedObjectsFindResult<CommentAttributes>;
   casesToSyncToStatus: Map<string, CaseStatuses>;
-  subCasesToStatus: Map<string, CaseStatuses>;
 }): CaseStatuses {
-  let status: CaseStatuses = CaseStatuses.open;
-  if (alertComment.attributes.associationType === AssociationType.case) {
-    const id = getID(alertComment, CASE_SAVED_OBJECT);
-    // We should log if we can't find the status
-    // attempt to get the case status from our cases to sync map if we found the ID otherwise default to open
-    status =
-      id !== undefined ? casesToSyncToStatus.get(id) ?? CaseStatuses.open : CaseStatuses.open;
-  } else if (alertComment.attributes.associationType === AssociationType.subCase) {
-    const id = getID(alertComment, SUB_CASE_SAVED_OBJECT);
-    status = id !== undefined ? subCasesToStatus.get(id) ?? CaseStatuses.open : CaseStatuses.open;
+  const id = getID(alertComment, CASE_SAVED_OBJECT);
+
+  if (!id) {
+    return CaseStatuses.open;
   }
-  return status;
+
+  return casesToSyncToStatus.get(id) ?? CaseStatuses.open;
 }
 
 /**
@@ -337,13 +239,6 @@ async function updateAlerts({
     unsecuredSavedObjectsClient,
   });
 
-  // get a map of sub case id to the sub case status
-  const subCasesToStatus = await getSubCasesToStatus({
-    totalAlerts,
-    unsecuredSavedObjectsClient,
-    caseService,
-  });
-
   // create an array of requests that indicate the id, index, and status to update an alert
   const alertsToUpdate = totalAlerts.saved_objects.reduce(
     (acc: UpdateAlertRequest[], alertComment) => {
@@ -351,7 +246,6 @@ async function updateAlerts({
         const status = getSyncStatusForComment({
           alertComment,
           casesToSyncToStatus,
-          subCasesToStatus,
         });
 
         acc.push(...createAlertUpdateRequest({ comment: alertComment.attributes, status }));
@@ -489,14 +383,9 @@ export const update = async (
       throw Boom.notAcceptable('All update fields are identical to current version.');
     }
 
-    if (!ENABLE_CASE_CONNECTOR) {
-      throwIfUpdateType(updateCases);
-    }
-
     throwIfUpdateOwner(updateCases);
     throwIfTitleIsInvalid(updateCases);
     throwIfUpdateStatusOfCollection(updateCases);
-    throwIfUpdateTypeCollectionToIndividual(updateCases);
     await throwIfInvalidUpdateOfTypeWithAlerts({
       requests: updateCases,
       caseService,

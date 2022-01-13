@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import {
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
   SavedObject,
   SavedObjectReference,
 } from 'kibana/server';
-import { flatMap, uniqWith, isEmpty, xorWith } from 'lodash';
+import { flatMap, uniqWith, xorWith } from 'lodash';
 import { AlertInfo } from './types';
 import { LensServerPluginSetup } from '../../../lens/server';
 
 import {
-  AssociationType,
   CaseAttributes,
   CaseResponse,
   CasesClientPostRequest,
@@ -31,12 +29,8 @@ import {
   CommentsResponse,
   CommentType,
   ConnectorTypes,
-  SubCaseAttributes,
-  SubCaseResponse,
-  SubCasesFindResponse,
   User,
 } from '../../common/api';
-import { ENABLE_CASE_CONNECTOR } from '../../common/constants';
 import { UpdateAlertRequest } from '../client/alerts/types';
 import {
   parseCommentString,
@@ -97,69 +91,17 @@ export const transformCases = ({
   count_closed_cases: countClosedCases,
 });
 
-export const transformSubCases = ({
-  subCasesMap,
-  open,
-  inProgress,
-  closed,
-  page,
-  perPage,
-  total,
-}: {
-  subCasesMap: Map<string, SubCaseResponse[]>;
-  open: number;
-  inProgress: number;
-  closed: number;
-  page: number;
-  perPage: number;
-  total: number;
-}): SubCasesFindResponse => ({
-  page,
-  per_page: perPage,
-  total,
-  // Squish all the entries in the map together as one array
-  subCases: Array.from(subCasesMap.values()).flat(),
-  count_open_cases: open,
-  count_in_progress_cases: inProgress,
-  count_closed_cases: closed,
-});
-
 export const flattenCaseSavedObject = ({
   savedObject,
   comments = [],
   totalComment = comments.length,
   totalAlerts = 0,
-  subCases,
-  subCaseIds,
 }: {
   savedObject: SavedObject<CaseAttributes>;
   comments?: Array<SavedObject<CommentAttributes>>;
   totalComment?: number;
   totalAlerts?: number;
-  subCases?: SubCaseResponse[];
-  subCaseIds?: string[];
 }): CaseResponse => ({
-  id: savedObject.id,
-  version: savedObject.version ?? '0',
-  comments: flattenCommentSavedObjects(comments),
-  totalComment,
-  totalAlerts,
-  ...savedObject.attributes,
-  subCases,
-  subCaseIds: !isEmpty(subCaseIds) ? subCaseIds : undefined,
-});
-
-export const flattenSubCaseSavedObject = ({
-  savedObject,
-  comments = [],
-  totalComment = comments.length,
-  totalAlerts = 0,
-}: {
-  savedObject: SavedObject<SubCaseAttributes>;
-  comments?: Array<SavedObject<CommentAttributes>>;
-  totalComment?: number;
-  totalAlerts?: number;
-}): SubCaseResponse => ({
   id: savedObject.id,
   version: savedObject.version ?? '0',
   comments: flattenCommentSavedObjects(comments),
@@ -234,7 +176,6 @@ export const getAlertInfoFromComments = (comments: CommentRequest[] = []): Alert
   }, []);
 
 type NewCommentArgs = CommentRequest & {
-  associationType: AssociationType;
   createdDate: string;
   owner: string;
   email?: string | null;
@@ -243,7 +184,6 @@ type NewCommentArgs = CommentRequest & {
 };
 
 export const transformNewComment = ({
-  associationType,
   createdDate,
   email,
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -252,7 +192,6 @@ export const transformNewComment = ({
   ...comment
 }: NewCommentArgs): CommentAttributes => {
   return {
-    associationType,
     ...comment,
     created_at: createdDate,
     created_by: { email, full_name, username },
@@ -281,26 +220,14 @@ export const isCommentRequestTypeActions = (
   return context.type === CommentType.actions;
 };
 
+// TODO: rename to just alert
 /**
  * A type narrowing function for alert comments. Exporting so integration tests can use it.
  */
 export const isCommentRequestTypeAlertOrGenAlert = (
   context: CommentRequest
 ): context is CommentRequestAlertType => {
-  return context.type === CommentType.alert || context.type === CommentType.generatedAlert;
-};
-
-/**
- * This is used to test if the posted comment is an generated alert. A generated alert will have one or many alerts.
- * An alert is essentially an object with a _id field. This differs from a regular attached alert because the _id is
- * passed directly in the request, it won't be in an object. Internally case will strip off the outer object and store
- * both a generated and user attached alert in the same structure but this function is useful to determine which
- * structure the new alert in the request has.
- */
-export const isCommentRequestTypeGenAlert = (
-  context: CommentRequest
-): context is CommentRequestAlertType => {
-  return context.type === CommentType.generatedAlert;
+  return context.type === CommentType.alert;
 };
 
 /**
@@ -321,10 +248,7 @@ export function createAlertUpdateRequest({
  */
 export const countAlerts = (comment: SavedObjectsFindResult<CommentAttributes>) => {
   let totalAlerts = 0;
-  if (
-    comment.attributes.type === CommentType.alert ||
-    comment.attributes.type === CommentType.generatedAlert
-  ) {
+  if (comment.attributes.type === CommentType.alert) {
     if (Array.isArray(comment.attributes.alertId)) {
       totalAlerts += comment.attributes.alertId.length;
     } else {
@@ -374,17 +298,6 @@ export const countAlertsForID = ({
 }): number | undefined => {
   return groupTotalAlertsByID({ comments }).get(id);
 };
-
-/**
- * If subCaseID is defined and the case connector feature is disabled this throws an error.
- */
-export function checkEnabledCaseConnectorOrThrow(subCaseID: string | undefined) {
-  if (!ENABLE_CASE_CONNECTOR && subCaseID !== undefined) {
-    throw Boom.badRequest(
-      'The sub case parameters are not supported when the case connector feature is disabled'
-    );
-  }
-}
 
 /**
  * Returns a connector that indicates that no connector was set.
