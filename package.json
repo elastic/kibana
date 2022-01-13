@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "6.8.23",
+  "version": "6.8.24",
   "branch": "6.8",
   "types": "./kibana.d.ts",
   "build": {
@@ -281,7 +281,7 @@
     "webpack": "4.26.1",
     "webpack-merge": "4.1.4",
     "whatwg-fetch": "^3.0.0",
-    "x-pack": "6.8.23",
+    "x-pack": "6.8.24",
     "yauzl": "2.7.0"
   },
   "devDependencies": {
