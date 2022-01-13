@@ -49,7 +49,7 @@ class ValueInputTypeUI extends Component<Props> {
       case 'number_range':
         inputElement = (
           <EuiFieldNumber
-          compressed={this.props.compressed}
+            compressed={this.props.compressed}
             fullWidth={this.props.fullWidth}
             disabled={this.props.disabled}
             placeholder={this.props.placeholder}
@@ -64,7 +64,7 @@ class ValueInputTypeUI extends Component<Props> {
       case 'date_range':
         inputElement = (
           <EuiFieldText
-          compressed={this.props.compressed}
+            compressed={this.props.compressed}
             fullWidth={this.props.fullWidth}
             disabled={this.props.disabled}
             placeholder={this.props.placeholder}

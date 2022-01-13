@@ -1,0 +1,11 @@
+.globalFilterExpression__value {
+  color: makeHighContrastColor($euiColorSuccessText, $euiColorLightShade);
+}
+
+.globalFilterExpression__value--number {
+  color: makeHighContrastColor($euiColorDangerText, $euiColorLightShade);
+}
+
+.globalFilterExpression__relationship {
+  padding: $euiSizeXS;
+}
