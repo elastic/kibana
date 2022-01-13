@@ -151,7 +151,7 @@ export function MockKibanaProvider<ExtraCore extends Partial<CoreStart>>({
 
   return (
     <KibanaContextProvider services={{ ...core }} {...kibanaProps}>
-      <EuiThemeProvider darkMode={false}>
+      <EuiThemeProvider theme$={core!.theme!.theme$}>
         <I18nProvider>
           <DataViewContextProvider>{children}</DataViewContextProvider>
         </I18nProvider>
