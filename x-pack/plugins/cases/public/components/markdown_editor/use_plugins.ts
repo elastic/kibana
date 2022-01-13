@@ -49,5 +49,5 @@ export const usePlugins = (disabledPlugins?: string[]) => {
       parsingPlugins,
       processingPlugins,
     };
-  }, [kibanaConfig?.markdownPlugins?.lens, timelinePlugins]);
+  }, [disabledPlugins, kibanaConfig?.markdownPlugins?.lens, timelinePlugins]);
 };
