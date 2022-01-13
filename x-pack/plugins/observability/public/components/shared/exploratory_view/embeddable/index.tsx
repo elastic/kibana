@@ -35,8 +35,6 @@ export function getExploratoryViewEmbeddable(
 
     const series = props.attributes && props.attributes[0];
 
-    const isDarkMode = core.uiSettings.get('theme:darkMode');
-
     const loadIndexPattern = useCallback(
       async ({ dataType }: { dataType: AppDataType }) => {
         const dataTypesIndexPatterns = props.dataTypesIndexPatterns;
@@ -69,7 +67,7 @@ export function getExploratoryViewEmbeddable(
     }
 
     return (
-      <EuiThemeProvider darkMode={isDarkMode}>
+      <EuiThemeProvider theme$={core.theme.theme$}>
         <ExploratoryViewEmbeddable {...props} indexPatterns={indexPatterns} lens={plugins.lens} />
       </EuiThemeProvider>
     );
