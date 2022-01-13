@@ -60,6 +60,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               ],
               "projectName": "elastic-observability",
               "provider": "gcp",
+              "regions": Array [
+                "europe-west1",
+              ],
             },
             "container": Object {
               "isContainerized": true,
@@ -106,6 +109,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               ],
               "projectName": "elastic-observability",
               "provider": "gcp",
+              "regions": Array [
+                "europe-west1",
+              ],
             },
             "container": Object {
               "isContainerized": true,
