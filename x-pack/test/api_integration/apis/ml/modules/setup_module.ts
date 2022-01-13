@@ -1126,6 +1126,10 @@ export default ({ getService }: FtrProviderContext) => {
             } = await ml.api.getAnomalyDetectionJob(job.jobId);
             const actualModelMemoryLimit = jobsDetails.jobs[0].analysis_limits?.model_memory_limit;
             expect(actualModelMemoryLimit).to.match(/\d{1,2}mb/);
+
+            // jobs should contain the module they were created by
+            const createdByModule = jobsDetails.jobs[0].custom_settings?.created_by_module;
+            expect(createdByModule).to.eql(testData.module);
           }
 
           // verify saved objects creation
