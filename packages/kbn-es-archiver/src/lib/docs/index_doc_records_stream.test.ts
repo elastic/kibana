@@ -11,6 +11,7 @@ import {
   createPromiseFromStreams,
   ToolingLog,
   createRecursiveSerializer,
+  kibanaPackageJson,
 } from '@kbn/dev-utils';
 
 import { Progress } from '../progress';
@@ -51,6 +52,13 @@ expect.addSnapshotSerializer(
 const log = new ToolingLog();
 
 class MockClient {
+  info = jest.fn().mockReturnValue({
+    body: {
+      version: {
+        number: kibanaPackageJson.version,
+      },
+    },
+  });
   helpers = {
     bulk: jest.fn(),
   };

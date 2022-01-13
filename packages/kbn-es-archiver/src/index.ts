@@ -8,3 +8,4 @@
 
 export { EsArchiver } from './es_archiver';
 export * from './cli';
+export * from './lib/get_es_major_version';

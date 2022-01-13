@@ -7,6 +7,7 @@
  */
 
 import expect from '@kbn/expect';
+import { getEsMajorVersion } from '@kbn/es-archiver';
 
 export async function getIndexNotFoundError(es) {
   try {
@@ -23,9 +24,10 @@ export async function getIndexNotFoundError(es) {
 
 export async function getDocNotFoundError(es) {
   try {
+    const esMajor = await getEsMajorVersion(es);
     await es.get({
       index: 'basic_index',
-      type: 'type',
+      type: esMajor >= 8 ? undefined : 'type',
       id: '1234',
     });
   } catch (err) {

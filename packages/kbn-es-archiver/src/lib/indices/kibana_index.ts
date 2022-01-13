@@ -15,6 +15,7 @@ import { KbnClient } from '@kbn/test';
 import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
+import { getEsMajorVersion } from '../get_es_major_version';
 
 /**
  * Deletes all indices that start with `.kibana`, or if onlyTaskManager==true, all indices that start with `.kibana_task_manager`
@@ -155,10 +156,11 @@ export async function createDefaultSpace({
   index: string;
   client: KibanaClient;
 }) {
+  const esMajor = await getEsMajorVersion(client);
   await client.create(
     {
       index,
-      type: '_doc',
+      type: esMajor >= 8 ? undefined : '_doc',
       id: 'space:default',
       refresh: 'wait_for',
       body: {

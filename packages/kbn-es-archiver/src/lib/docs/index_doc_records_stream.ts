@@ -9,6 +9,8 @@
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import AggregateError from 'aggregate-error';
 import { Writable } from 'stream';
+import { inspect } from 'util';
+
 import { Stats } from '../stats';
 import { Progress } from '../progress';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
@@ -41,9 +43,10 @@ export function createIndexDocRecordsStream(
           return ops.get(doc);
         },
         onDrop(dropped) {
+          const op = inspect(ops.get(dropped.document));
           const dj = JSON.stringify(dropped.document);
           const ej = JSON.stringify(dropped.error);
-          errors.push(`Bulk doc failure [operation=${operation}]:\n  doc: ${dj}\n  error: ${ej}`);
+          errors.push(`Bulk doc failure [operation=${op}]:\n  doc: ${dj}\n  error: ${ej}`);
         },
       },
       {

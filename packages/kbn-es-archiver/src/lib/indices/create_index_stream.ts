@@ -56,6 +56,22 @@ export function createCreateIndexStream({
 
   async function handleIndex(record: DocRecord) {
     const { index, settings, mappings, aliases } = record.value;
+
+    // Determine if the mapping belongs to a pre-7.0 instance, for BWC tests, mainly
+    let convertedMappings: estypes.MappingTypeMapping | undefined;
+    if (!!mappings && Object.keys(mappings).length > 0 && !mappings.properties) {
+      const types = Object.keys(mappings) as Array<keyof typeof mappings>;
+      if (types.length > 1) {
+        throw new Error(
+          'unable to convert mapping to 8.0 because it defines more than one type in the index'
+        );
+      }
+
+      convertedMappings = mappings[types[0]] as estypes.MappingTypeMapping;
+    } else {
+      convertedMappings = mappings;
+    }
+
     const isKibanaTaskManager = index.startsWith('.kibana_task_manager');
     const isKibana = index.startsWith('.kibana') && !isKibanaTaskManager;
 
@@ -78,7 +94,7 @@ export function createCreateIndexStream({
             index,
             body: {
               settings,
-              mappings,
+              mappings: convertedMappings,
               aliases,
             },
           },
