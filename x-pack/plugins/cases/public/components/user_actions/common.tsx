@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiCommentProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { Actions, ConnectorUserAction } from '../../../common/api';
+import { Actions, ConnectorUserAction, UserAction } from '../../../common/api';
 import { UserActionTimestamp } from './timestamp';
 import { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from './types';
 import { UserActionUsernameWithAvatar } from './avatar_username';
@@ -20,12 +20,15 @@ interface Props {
   handleOutlineComment: (id: string) => void;
 }
 
+const showMoveToReference = (action: UserAction, commentId: string | null): commentId is string =>
+  action === Actions.update && commentId != null;
+
 const CommentListActions: React.FC<Props> = React.memo(({ userAction, handleOutlineComment }) => (
   <EuiFlexGroup responsive={false}>
     <EuiFlexItem grow={false}>
       <UserActionCopyLink id={userAction.actionId} />
     </EuiFlexItem>
-    {userAction.action === Actions.update && userAction.commentId != null && (
+    {showMoveToReference(userAction.action, userAction.commentId) && (
       <EuiFlexItem grow={false}>
         <UserActionMoveToReference
           id={userAction.commentId}
@@ -67,7 +70,7 @@ export const createCommonUpdateUserActionBuilder = ({
           <EuiFlexItem grow={false}>
             <UserActionCopyLink id={userAction.actionId} />
           </EuiFlexItem>
-          {userAction.action === Actions.update && userAction.commentId != null && (
+          {showMoveToReference(userAction.action, userAction.commentId) && (
             <EuiFlexItem grow={false}>
               <UserActionMoveToReference
                 id={userAction.commentId}
