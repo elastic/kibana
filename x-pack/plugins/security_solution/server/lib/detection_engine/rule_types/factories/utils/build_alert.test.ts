@@ -514,4 +514,53 @@ describe('buildAlert', () => {
     ];
     expect(ancestors).toEqual(expected);
   });
+
+  test('it builds an ancestor correctly if the parent is a legacy signal', () => {
+    const docId = 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71';
+    const sampleDoc = sampleDocNoSortIdWithTimestamp(docId);
+    const doc = {
+      ...sampleDoc,
+      _source: {
+        ...sampleDoc._source,
+        [TIMESTAMP]: new Date().toISOString(),
+        event: {
+          action: 'socket_opened',
+          dataset: 'socket',
+          kind: 'signal',
+          module: 'system',
+        },
+        signal: {
+          depth: 1,
+          ancestors: [
+            {
+              id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+              type: 'event',
+              index: 'myFakeSignalIndex',
+              depth: 0,
+            },
+          ],
+          rule: {
+            id: '98c0bf9e-4d38-46f4-9a6a-8a820426256b',
+          },
+        },
+      },
+    };
+    const ancestors = buildAncestors(doc);
+    const expected: Ancestor[] = [
+      {
+        id: '730ddf9e-5a00-4f85-9ddf-5878ca511a87',
+        type: 'event',
+        index: 'myFakeSignalIndex',
+        depth: 0,
+      },
+      {
+        rule: '98c0bf9e-4d38-46f4-9a6a-8a820426256b',
+        id: 'd5e8eb51-a6a0-456d-8a15-4b79bfec3d71',
+        type: 'signal',
+        index: 'myFakeSignalIndex',
+        depth: 1,
+      },
+    ];
+    expect(ancestors).toEqual(expected);
+  });
 });
