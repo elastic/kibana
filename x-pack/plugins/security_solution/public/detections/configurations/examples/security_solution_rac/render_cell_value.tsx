@@ -24,60 +24,59 @@ const reason =
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
-export const RenderCellValue: React.FC<
-  EuiDataGridCellValueElementProps & CellValueElementProps
-> = ({
-  columnId,
-  data,
-  eventId,
-  header,
-  isDetails,
-  isExpandable,
-  isExpanded,
-  linkValues,
-  rowIndex,
-  setCellProps,
-  timelineId,
-}) => {
-  const value =
-    useGetMappedNonEcsValue({
-      data,
-      fieldName: columnId,
-    })?.reduce((x) => x[0]) ?? '';
-  const draggableId = `${timelineId}-${eventId}-${columnId}-${value}`;
+export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellValueElementProps> =
+  ({
+    columnId,
+    data,
+    eventId,
+    header,
+    isDetails,
+    isExpandable,
+    isExpanded,
+    linkValues,
+    rowIndex,
+    setCellProps,
+    timelineId,
+  }) => {
+    const value =
+      useGetMappedNonEcsValue({
+        data,
+        fieldName: columnId,
+      })?.reduce((x) => x[0]) ?? '';
+    const draggableId = `${timelineId}-${eventId}-${columnId}-${value}`;
 
-  switch (columnId) {
-    case 'signal.rule.severity':
-    case ALERT_SEVERITY:
-      return (
-        <DefaultDraggable
-          data-test-subj="custom-severity"
-          field={columnId}
-          id={draggableId}
-          value={value}
-        >
-          <Severity severity={value} />
-        </DefaultDraggable>
-      );
-    case 'signal.reason':
-    case ALERT_REASON:
-      return <TruncatableText data-test-subj="custom-reason">{reason}</TruncatableText>;
-    default:
-      return (
-        <DefaultCellRenderer
-          columnId={columnId}
-          data={data}
-          eventId={eventId}
-          header={header}
-          isDetails={isDetails}
-          isDraggable={false}
-          isExpandable={isExpandable}
-          isExpanded={isExpanded}
-          linkValues={linkValues}
-          rowIndex={rowIndex}
-          setCellProps={setCellProps}
-          timelineId={timelineId}
-        />
-      );
-  }
-};
+    switch (columnId) {
+      case 'signal.rule.severity':
+      case ALERT_SEVERITY:
+        return (
+          <DefaultDraggable
+            data-test-subj="custom-severity"
+            field={columnId}
+            id={draggableId}
+            value={value}
+          >
+            <Severity severity={value} />
+          </DefaultDraggable>
+        );
+      case 'signal.reason':
+      case ALERT_REASON:
+        return <TruncatableText data-test-subj="custom-reason">{reason}</TruncatableText>;
+      default:
+        return (
+          <DefaultCellRenderer
+            columnId={columnId}
+            data={data}
+            eventId={eventId}
+            header={header}
+            isDetails={isDetails}
+            isDraggable={false}
+            isExpandable={isExpandable}
+            isExpanded={isExpanded}
+            linkValues={linkValues}
+            rowIndex={rowIndex}
+            setCellProps={setCellProps}
+            timelineId={timelineId}
+          />
+        );
+    }
+  };
