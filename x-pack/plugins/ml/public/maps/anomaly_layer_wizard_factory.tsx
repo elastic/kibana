@@ -9,7 +9,8 @@ import React from 'react';
 import uuid from 'uuid';
 import type { StartServicesAccessor } from 'kibana/public';
 import type { LayerWizard, RenderWizardArguments } from '../../../maps/public';
-import { COLOR_MAP_TYPE, FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '../../../maps/common';
+import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '../../../maps/common';
+import { SEVERITY_COLOR_RAMP } from '../../common';
 import { CreateAnomalySourceEditor } from './create_anomaly_source_editor';
 import {
   VectorLayerDescriptor,
@@ -70,15 +71,12 @@ export class AnomalyLayerWizardFactory {
               fillColor: {
                 type: STYLE_TYPE.DYNAMIC,
                 options: {
-                  color: 'Blue to Red',
-                  colorCategory: 'palette_0',
-                  fieldMetaOptions: { isEnabled: true, sigma: 3 },
-                  type: COLOR_MAP_TYPE.ORDINAL,
+                  customColorRamp: SEVERITY_COLOR_RAMP,
                   field: {
                     name: 'record_score',
                     origin: FIELD_ORIGIN.SOURCE,
                   },
-                  useCustomColorRamp: false,
+                  useCustomColorRamp: true,
                 },
               },
             } as unknown as VectorStylePropertiesDescriptor,

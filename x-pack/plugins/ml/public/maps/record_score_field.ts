@@ -90,10 +90,6 @@ export class RecordScoreField implements IField {
     return this._source;
   }
 
-  isCount() {
-    return false;
-  }
-
   isEqual(field: IField): boolean {
     return this.getName() === field.getName();
   }
@@ -102,49 +98,35 @@ export class RecordScoreField implements IField {
     return true;
   }
 
-  pluckRangeFromTileMetaFeature(metaFeature: TileMetaFeature) {
-    return null;
-  }
-
-  // NA
-  canReadFromGeoJson(): boolean {
-    return false;
-  }
-
-  // NA
-  canValueBeFormatted(): boolean {
-    return false;
-  }
-
-  // NA
-  supportsAutoDomain(): boolean {
-    return false;
-  }
-
-  // NA
-  supportsFieldMeta(): boolean {
-    return false;
-  }
-
   supportsFieldMetaFromLocalData(): boolean {
-    return false;
+    return true;
   }
 
   supportsFieldMetaFromEs(): boolean {
     return false;
   }
 
-  // NA
-  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null> {
+  canValueBeFormatted(): boolean {
+    return false;
+  }
+
+  async getExtendedStatsFieldMetaRequest(): Promise<unknown> {
     return null;
   }
 
-  // NA
-  async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
-    return undefined;
+  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown> {
+    return null;
   }
-  // NA
+
   async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
-    return undefined;
+    return null;
+  }
+
+  pluckRangeFromTileMetaFeature(metaFeature: TileMetaFeature): { min: number; max: number } | null {
+    return null;
+  }
+
+  isCount(): boolean {
+    return false;
   }
 }

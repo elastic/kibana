@@ -11,10 +11,12 @@ import { MlApiServices } from '../application/services/ml_api_service';
 import { MLAnomalyDoc } from '../../common/types/anomalies';
 import type { SearchFilters } from './anomaly_source';
 
+export type MlAnomalyLayers = 'typical' | 'actual' | 'connected';
+
 export async function getResultsForJobId(
   mlResultsService: MlApiServices['results'],
   jobId: string,
-  locationType: 'typical' | 'actual',
+  locationType: MlAnomalyLayers,
   searchFilters: SearchFilters
 ): Promise<FeatureCollection> {
   const { timeFilters } = searchFilters;
@@ -85,13 +87,23 @@ export async function getResultsForJobId(
     });
   }
 
+  // @ts-ignore
   const features: Feature[] = hits!.map((result) => {
-    return {
-      type: 'Feature',
-      geometry: {
+    let geometry;
+    if (locationType === 'typical' || locationType === 'actual') {
+      geometry = {
         type: 'Point',
         coordinates: locationType === 'typical' ? result.typical : result.actual,
-      },
+      };
+    } else {
+      geometry = {
+        type: 'LineString',
+        coordinates: [result.typical, result.actual],
+      };
+    }
+    return {
+      type: 'Feature',
+      geometry,
       properties: {
         record_score: result.record_score,
       },

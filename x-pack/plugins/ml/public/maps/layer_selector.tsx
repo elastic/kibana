@@ -9,10 +9,11 @@ import React, { Component } from 'react';
 
 import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { MlAnomalyLayers } from './util';
 
 interface Props {
-  onChange: (typicalActual: 'typical' | 'actual') => void;
-  typicalActual: 'typical' | 'actual';
+  onChange: (typicalActual: MlAnomalyLayers) => void;
+  typicalActual: MlAnomalyLayers;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -32,7 +33,10 @@ export class LayerSelector extends Component<Props, State> {
   }
 
   onSelect = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-    const typicalActual: 'typical' | 'actual' = selectedOptions[0].value! as 'typical' | 'actual';
+    const typicalActual: MlAnomalyLayers = selectedOptions[0].value! as
+      | 'typical'
+      | 'actual'
+      | 'connected';
     if (this._isMounted) {
       this.setState({ typicalActual });
       this.props.onChange(typicalActual);
@@ -54,6 +58,7 @@ export class LayerSelector extends Component<Props, State> {
           options={[
             { value: 'typical', label: 'typical' },
             { value: 'actual', label: 'actual' },
+            { value: 'connected', label: 'connected' },
           ]}
           selectedOptions={options}
         />

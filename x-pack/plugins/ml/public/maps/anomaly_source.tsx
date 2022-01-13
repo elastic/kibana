@@ -19,7 +19,7 @@ import type { SourceEditorArgs } from '../../../maps/public';
 import type { DataRequest } from '../../../maps/public';
 import type { IVectorSource, SourceStatus } from '../../../maps/public';
 import { ML_ANOMALY } from './anomaly_source_factory';
-import { getResultsForJobId } from './util';
+import { getResultsForJobId, MlAnomalyLayers } from './util';
 import { UpdateAnomalySourceEditor } from './update_anomaly_source_editor';
 
 export type SearchFilters = any & {
@@ -33,7 +33,7 @@ export type SearchFilters = any & {
 
 export interface AnomalySourceDescriptor extends AbstractSourceDescriptor {
   jobId: string;
-  typicalActual: 'typical' | 'actual';
+  typicalActual: MlAnomalyLayers;
 }
 
 export class AnomalySource implements IVectorSource {
@@ -203,6 +203,7 @@ export class AnomalySource implements IVectorSource {
     // Return true if you can compute bounds of data
     return true;
   }
+
   // Promise<Array<{ name: string; license: string }>>
   async getLicensedFeatures(): Promise<any[]> {
     return [{ name: 'layer from ML anomaly job', license: 'enterprise' }];
@@ -226,7 +227,9 @@ export class AnomalySource implements IVectorSource {
   }
 
   async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
-    return [VECTOR_SHAPE_TYPE.POINT];
+    return this._descriptor.typicalActual === 'connected'
+      ? [VECTOR_SHAPE_TYPE.LINE]
+      : [VECTOR_SHAPE_TYPE.POINT];
   }
 
   getSyncMeta(): object | null {

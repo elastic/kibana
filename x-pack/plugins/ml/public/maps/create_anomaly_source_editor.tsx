@@ -11,6 +11,7 @@ import { EuiPanel } from '@elastic/eui';
 import { AnomalySourceDescriptor } from './anomaly_source';
 import { AnomalyJobSelector } from './anomaly_job_selector';
 import { LayerSelector } from './layer_selector';
+import { MlAnomalyLayers } from './util';
 
 interface Props {
   onSourceConfigChange: (sourceConfig: Partial<AnomalySourceDescriptor> | null) => void;
@@ -19,7 +20,7 @@ interface Props {
 
 interface State {
   jobId?: string;
-  typicalActual?: 'typical' | 'actual';
+  typicalActual?: MlAnomalyLayers;
 }
 
 export class CreateAnomalySourceEditor extends Component<Props, State> {
@@ -39,7 +40,7 @@ export class CreateAnomalySourceEditor extends Component<Props, State> {
     this._isMounted = true;
   }
 
-  private onTypicalActualChange = (typicalActual: 'typical' | 'actual') => {
+  private onTypicalActualChange = (typicalActual: MlAnomalyLayers) => {
     if (!this._isMounted) {
       return;
     }

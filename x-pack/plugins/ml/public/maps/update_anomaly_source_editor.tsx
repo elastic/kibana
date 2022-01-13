@@ -10,10 +10,11 @@ import React, { Fragment, Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { LayerSelector } from './layer_selector';
+import { MlAnomalyLayers } from './util';
 
 interface Props {
   onChange: (...args: Array<{ propName: string; value: unknown }>) => void;
-  typicalActual: 'typical' | 'actual';
+  typicalActual: MlAnomalyLayers;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -33,7 +34,7 @@ export class UpdateAnomalySourceEditor extends Component<Props, State> {
           </EuiTitle>
           <EuiSpacer size="s" />
           <LayerSelector
-            onChange={(typicalActual: 'typical' | 'actual') => {
+            onChange={(typicalActual: MlAnomalyLayers) => {
               this.props.onChange({
                 propName: 'typicalActual',
                 value: typicalActual,
