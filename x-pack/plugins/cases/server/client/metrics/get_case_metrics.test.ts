@@ -60,7 +60,7 @@ describe('getMetrics', () => {
         statusInfo: {
           openDuration,
           inProgressDuration,
-          numberOfReopens: 0,
+          reopenDates: [],
         },
       },
     });
@@ -93,7 +93,7 @@ describe('getMetrics', () => {
       statusInfo: {
         openDuration,
         inProgressDuration,
-        numberOfReopens: 0,
+        reopenDates: [],
       },
     });
     expect(metrics.alerts?.count).toEqual(5);
