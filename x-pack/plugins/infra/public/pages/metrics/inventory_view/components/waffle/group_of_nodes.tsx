@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import {
   InfraWaffleMapBounds,
@@ -43,20 +43,22 @@ export const GroupOfNodes: React.FC<Props> = ({
     <GroupOfNodesContainer style={{ width }}>
       <GroupName group={group} onDrilldown={onDrilldown} isChild={isChild} options={options} />
       <Nodes>
-        {group.width
-          ? group.nodes.map((node) => (
-              <Node
-                key={`${node.pathId}:${node.name}`}
-                options={options}
-                squareSize={group.squareSize}
-                node={node}
-                formatter={formatter}
-                bounds={bounds}
-                nodeType={nodeType}
-                currentTime={currentTime}
-              />
-            ))
-          : null}
+        {group.width ? (
+          group.nodes.map((node) => (
+            <Node
+              key={`${node.pathId}:${node.name}`}
+              options={options}
+              squareSize={group.squareSize}
+              node={node}
+              formatter={formatter}
+              bounds={bounds}
+              nodeType={nodeType}
+              currentTime={currentTime}
+            />
+          ))
+        ) : (
+          <EuiLoadingSpinner size="xl" />
+        )}
       </Nodes>
     </GroupOfNodesContainer>
   );
