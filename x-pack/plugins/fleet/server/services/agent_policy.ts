@@ -540,14 +540,15 @@ class AgentPolicyService {
   public async delete(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
-    id: string
+    id: string,
+    options?: { force?: boolean; removeFleetServerDocuments?: boolean }
   ): Promise<DeleteAgentPolicyResponse> {
     const agentPolicy = await this.get(soClient, id, false);
     if (!agentPolicy) {
       throw new Error('Agent policy not found');
     }
 
-    if (agentPolicy.is_managed) {
+    if (agentPolicy.is_managed && !options?.force) {
       throw new HostedAgentPolicyRestrictionRelatedError(`Cannot delete hosted agent policy ${id}`);
     }
 
@@ -569,6 +570,7 @@ class AgentPolicyService {
           esClient,
           agentPolicy.package_policies as string[],
           {
+            force: options?.force,
             skipUnassignFromAgentPolicies: true,
           }
         );
@@ -581,7 +583,7 @@ class AgentPolicyService {
       }
     }
 
-    if (agentPolicy.is_preconfigured) {
+    if (agentPolicy.is_preconfigured && !options?.force) {
       await soClient.create(PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE, {
         id: String(id),
       });
@@ -589,6 +591,11 @@ class AgentPolicyService {
 
     await soClient.delete(SAVED_OBJECT_TYPE, id);
     await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'deleted', id);
+
+    if (options?.removeFleetServerDocuments) {
+      this.deleteFleetServerPoliciesForPolicyId(esClient, id);
+    }
+
     return {
       id,
       name: agentPolicy.name,
@@ -628,6 +635,23 @@ class AgentPolicyService {
       body: fleetServerPolicy,
       id: uuid(),
       refresh: 'wait_for',
+    });
+  }
+
+  public async deleteFleetServerPoliciesForPolicyId(
+    esClient: ElasticsearchClient,
+    agentPolicyId: string
+  ) {
+    await esClient.deleteByQuery({
+      index: AGENT_POLICY_INDEX,
+      ignore_unavailable: true,
+      body: {
+        query: {
+          term: {
+            policy_id: agentPolicyId,
+          },
+        },
+      },
     });
   }
 

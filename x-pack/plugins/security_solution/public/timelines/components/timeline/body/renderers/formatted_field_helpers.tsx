@@ -250,7 +250,6 @@ export const renderUrl = ({
   eventId,
   fieldName,
   isDraggable,
-  linkValue,
   truncate,
   title,
   value,
@@ -261,7 +260,6 @@ export const renderUrl = ({
   eventId: string;
   fieldName: string;
   isDraggable: boolean;
-  linkValue: string | null | undefined;
   truncate?: boolean;
   title?: string;
   value: string | number | null | undefined;
