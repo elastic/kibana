@@ -12,7 +12,7 @@ import type {
   IKibanaSearchResponse,
   TimeRange,
 } from '../../../../../../src/plugins/data/common';
-import type { CspPluginSetup } from '../../types';
+import type { CspClientPluginStartDeps } from '../../types';
 import { CSP_KUBEBEAT_INDEX_NAME } from '../../../common/constants';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 
@@ -30,7 +30,7 @@ export const isNonNullable = <T extends unknown>(v: T): v is NonNullable<T> =>
 export const useKubebeatDataView = () => {
   const {
     data: { dataViews },
-  } = useKibana<CspPluginSetup>().services;
+  } = useKibana<CspClientPluginStartDeps>().services;
 
   const createDataView = () =>
     dataViews.createAndSave({
@@ -60,7 +60,7 @@ export const useEsClientMutation = <T extends unknown>({
   dateRange: TimeRange;
   filters: Filter[];
 }) => {
-  const { data: dataService } = useKibana<CspPluginSetup>().services;
+  const { data: dataService } = useKibana<CspClientPluginStartDeps>().services;
   const { query: queryService, search: searchService } = dataService;
   return useMutation(async () => {
     queryService.queryString.setQuery(query);

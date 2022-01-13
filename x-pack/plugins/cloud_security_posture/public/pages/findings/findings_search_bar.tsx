@@ -11,8 +11,8 @@ import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import * as TEST_SUBJECTS from './test_subjects';
 import type { DataView, TimeRange } from '../../../../../../src/plugins/data/common';
 import type { FindingsFetchState } from './types';
-import type { CspPluginSetup } from '../../types';
 import type { FindingsUrlQuery } from './findings_container';
+import type { CspClientPluginStartDeps } from '../../types';
 import { PLUGIN_NAME } from '../../../common';
 
 interface BaseFindingsSearchBarProps {
@@ -38,7 +38,7 @@ export const FindingsSearchBar = ({
       query: queryService,
       ui: { SearchBar },
     },
-  } = useKibana<CspPluginSetup>().services;
+  } = useKibana<CspClientPluginStartDeps>().services;
 
   useEffect(() => {
     const subscription = queryService.filterManager.getUpdates$().subscribe(() =>

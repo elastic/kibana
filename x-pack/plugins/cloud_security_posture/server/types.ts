@@ -5,10 +5,26 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-empty-interface */
+import type {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from '../../../../src/plugins/data/server';
 
-export interface CspSetup {}
-export interface CspStart {}
-export interface CspPluginSetup {}
-export interface CspPluginStart {}
-/* eslint-enable @typescript-eslint/no-empty-interface */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CspServerPluginSetup {}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CspServerPluginStart {}
+
+export interface CspServerPluginSetupDeps {
+  // required
+  data: DataPluginSetup;
+
+  // optional
+}
+
+export interface CspServerPluginStartDeps {
+  // required
+  data: DataPluginStart;
+
+  // optional
+}

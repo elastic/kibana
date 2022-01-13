@@ -13,25 +13,41 @@ import type {
   Logger,
 } from '../../../../src/core/server';
 import { createFindingsIndexTemplate } from './index_template/create_index_template';
-import type { CspSetup, CspStart, CspPluginSetup, CspPluginStart } from './types';
+import type {
+  CspServerPluginSetup,
+  CspServerPluginStart,
+  CspServerPluginSetupDeps,
+  CspServerPluginStartDeps,
+} from './types';
 import { defineRoutes } from './routes';
 
-export class CspPlugin implements Plugin<CspSetup, CspStart, CspPluginSetup, CspPluginStart> {
+export class CspPlugin
+  implements
+    Plugin<
+      CspServerPluginSetup,
+      CspServerPluginStart,
+      CspServerPluginSetupDeps,
+      CspServerPluginStartDeps
+    >
+{
   private readonly logger: Logger;
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup<CspPluginStart>) {
+  public setup(
+    core: CoreSetup<CspServerPluginSetup>,
+    plugins: CspServerPluginSetupDeps
+  ): CspServerPluginSetup {
     this.logger.debug('csp: Setup');
     const router = core.http.createRouter();
-    // Register server side APIs
+
     defineRoutes(router);
 
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, plugins: CspServerPluginStartDeps): CspServerPluginStart {
     this.logger.debug('csp: Started');
     createFindingsIndexTemplate(core.elasticsearch.client.asInternalUser).catch(this.logger.error);
     return {};

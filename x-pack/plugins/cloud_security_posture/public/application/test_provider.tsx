@@ -9,19 +9,10 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Router, Switch, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
-
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-
-import type { AppMountParameters, CoreStart } from '../../../../../src/core/public';
-import type { CspStart } from '../types';
+import type { CspAppDeps } from './app';
 
 const queryClient = new QueryClient();
-
-interface CspAppDeps {
-  core: CoreStart;
-  deps: CspStart;
-  params: AppMountParameters;
-}
 
 export const TestProvider: React.FC<CspAppDeps> = ({ core, deps, params, children }) => {
   return (

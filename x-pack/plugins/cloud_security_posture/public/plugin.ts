@@ -6,12 +6,28 @@
  */
 
 import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '../../../../src/core/public';
-import type { CspSetup, CspStart, CspPluginSetup, CspPluginStart } from './types';
+import type {
+  CspClientPluginSetup,
+  CspClientPluginStart,
+  CspClientPluginSetupDeps,
+  CspClientPluginStartDeps,
+} from './types';
 import { AppNavLinkStatus, AppStatus } from '../../../../src/core/public';
 import { PLUGIN_NAME, PLUGIN_ID } from '../common';
 
-export class CspPlugin implements Plugin<CspSetup, CspStart, CspPluginSetup, CspPluginStart> {
-  public setup(core: CoreSetup<CspPluginStart, CspStart>, plugins: CspPluginSetup): CspSetup {
+export class CspPlugin
+  implements
+    Plugin<
+      CspClientPluginSetup,
+      CspClientPluginStart,
+      CspClientPluginSetupDeps,
+      CspClientPluginStartDeps
+    >
+{
+  public setup(
+    core: CoreSetup<CspClientPluginStartDeps, CspClientPluginStart>,
+    plugins: CspClientPluginSetup
+  ): CspClientPluginSetup {
     // Register an application into the side navigation menu
 
     core.application.register({
@@ -25,14 +41,14 @@ export class CspPlugin implements Plugin<CspSetup, CspStart, CspPluginSetup, Csp
         // Get start services as specified in kibana.json
         const [coreStart, depsStart] = await core.getStartServices();
         // Render the application
-        return renderApp(coreStart, depsStart as CspStart, params);
+        return renderApp(coreStart, depsStart, params);
       },
     });
 
     // Return methods that should be available to other plugins
     return {};
   }
-  public start(core: CoreStart, plugins: CspPluginStart): CspStart {
+  public start(core: CoreStart, plugins: CspClientPluginStartDeps): CspClientPluginStart {
     return {};
   }
 
