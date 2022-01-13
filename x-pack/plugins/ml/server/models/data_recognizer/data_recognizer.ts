@@ -1390,7 +1390,9 @@ export class DataRecognizer {
       if (isPopulatedObject(job.config.custom_settings) === false) {
         job.config.custom_settings = {};
       }
-      job.config.custom_settings.created_by_module = moduleConfig.id;
+      // overwrite the created_by property for all jobs to ensure they
+      // are all in the format `ml-module-<module id>
+      job.config.custom_settings.created_by = `ml-module-${moduleConfig.id}`;
     });
   }
 }

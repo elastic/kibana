@@ -1128,10 +1128,11 @@ export default ({ getService }: FtrProviderContext) => {
             expect(actualModelMemoryLimit).to.match(/\d{1,2}mb/);
 
             // jobs should contain the module they were created by
-            const createdByModule = jobsDetails.jobs[0].custom_settings?.created_by_module;
-            expect(createdByModule).to.eql(
-              testData.module,
-              `Expected created_by_module value to be '${testData.module}' (got '${createdByModule}')`
+            const createdBy = jobsDetails.jobs[0].custom_settings?.created_by;
+            const expectedCreatedBy = `ml-module-${testData.module}`;
+            expect(createdBy).to.eql(
+              expectedCreatedBy,
+              `Expected created_by value to be '${expectedCreatedBy}' (got '${createdBy}')`
             );
           }
 

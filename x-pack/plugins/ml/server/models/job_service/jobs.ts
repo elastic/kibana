@@ -329,7 +329,6 @@ export function jobsProvider(
   function removeUnClonableCustomSettings(job: Job) {
     if (isPopulatedObject(job.custom_settings)) {
       delete job.custom_settings.managed;
-      delete job.custom_settings.created_by_module;
     }
   }
 
