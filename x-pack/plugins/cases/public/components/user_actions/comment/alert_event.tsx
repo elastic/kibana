@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback } from 'react';
 import { isEmpty } from 'lodash';
-import { EuiText, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { CommentType } from '../../../../common/api';
 import * as i18n from '../translations';

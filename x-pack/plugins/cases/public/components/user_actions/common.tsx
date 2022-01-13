@@ -14,7 +14,6 @@ import { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from './
 import { UserActionUsernameWithAvatar } from './avatar_username';
 import { UserActionCopyLink } from './copy_link';
 import { UserActionMoveToReference } from './move_to_reference';
-import { CaseUserActions } from '../../containers/types';
 
 interface Props {
   userAction: UserActionResponse<ConnectorUserAction>;
