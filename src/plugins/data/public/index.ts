@@ -83,6 +83,7 @@ export type {
   GetFieldsOptions,
   AggregationRestrictions,
   IndexPatternListItem,
+  DataViewListItem,
 } from '../common';
 export {
   ES_FIELD_TYPES,

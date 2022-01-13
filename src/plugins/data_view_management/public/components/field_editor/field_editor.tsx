@@ -34,18 +34,18 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PainlessLang } from '@kbn/monaco';
 import type { FieldFormatInstanceType } from 'src/plugins/field_formats/common';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { KBN_FIELD_TYPES, ES_FIELD_TYPES } from '@kbn/field-types';
 import {
   getEnabledScriptingLanguages,
   getDeprecatedScriptingLanguages,
   getSupportedScriptingLanguages,
 } from '../../scripting_languages';
 import {
-  IndexPattern,
-  IndexPatternField,
-  KBN_FIELD_TYPES,
-  ES_FIELD_TYPES,
-  DataPublicPluginStart,
-} from '../../../../../plugins/data/public';
+  DataView,
+  DataViewField,
+  DataViewsPublicPluginStart,
+} from '../../../../../plugins/data_views/public';
 import { context as contextType, CodeEditor } from '../../../../kibana_react/public';
 import {
   ScriptingDisabledCallOut,
@@ -60,9 +60,9 @@ import { FIELD_TYPES_BY_LANG, DEFAULT_FIELD_TYPES } from './constants';
 import { executeScript, isScriptValid } from './lib';
 
 const getFieldTypeFormatsList = (
-  field: IndexPatternField['spec'],
+  field: DataViewField['spec'],
   defaultFieldFormat: FieldFormatInstanceType,
-  fieldFormats: DataPublicPluginStart['fieldFormats']
+  fieldFormats: FieldFormatsStart
 ) => {
   const formatsByType = fieldFormats
     .getByFieldType(field.type as KBN_FIELD_TYPES)
@@ -109,16 +109,16 @@ export interface FieldEditorState {
   isSaving: boolean;
   errors?: string[];
   format: any;
-  spec: IndexPatternField['spec'];
+  spec: DataViewField['spec'];
   customLabel: string;
 }
 
 export interface FieldEdiorProps {
-  indexPattern: IndexPattern;
-  spec: IndexPatternField['spec'];
+  indexPattern: DataView;
+  spec: DataViewField['spec'];
   services: {
     redirectAway: () => void;
-    indexPatternService: DataPublicPluginStart['indexPatterns'];
+    indexPatternService: DataViewsPublicPluginStart;
   };
 }
 
@@ -141,7 +141,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       scriptingLangs: [],
       fieldTypes: [],
       fieldTypeFormats: [],
-      existingFieldNames: indexPattern.fields.getAll().map((f: IndexPatternField) => f.name),
+      existingFieldNames: indexPattern.fields.getAll().map((f: DataViewField) => f.name),
       fieldFormatId: undefined,
       fieldFormatParams: {},
       showScriptingHelp: false,
@@ -159,7 +159,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   }
 
   async init(context: IndexPatternManagmentContextValue) {
-    const { http, notifications, data } = context.services;
+    const { http, notifications, fieldFormats } = context.services;
     const { format, spec } = this.state;
     const { indexPattern } = this.props;
 
@@ -177,7 +177,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const fieldTypes = get(FIELD_TYPES_BY_LANG, spec.lang || '', DEFAULT_FIELD_TYPES);
     spec.type = fieldTypes.includes(spec.type) ? spec.type : fieldTypes[0];
 
-    const DefaultFieldFormat = data.fieldFormats.getDefaultType(
+    const DefaultFieldFormat = fieldFormats.getDefaultType(
       spec.type as KBN_FIELD_TYPES,
       spec.esTypes as ES_FIELD_TYPES[]
     );
@@ -192,7 +192,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       fieldTypeFormats: getFieldTypeFormatsList(
         spec,
         DefaultFieldFormat as FieldFormatInstanceType,
-        data.fieldFormats
+        fieldFormats
       ),
       fieldFormatId: indexPattern.getFormatterForFieldNoDefault(spec.name)?.type?.id,
       customLabel: spec.customLabel || '',
@@ -207,14 +207,14 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   };
 
   onTypeChange = (type: KBN_FIELD_TYPES) => {
-    const { data } = this.context.services;
+    const { fieldFormats } = this.context.services;
     const { spec, format } = this.state;
-    const DefaultFieldFormat = data.fieldFormats.getDefaultType(type) as FieldFormatInstanceType;
+    const DefaultFieldFormat = fieldFormats.getDefaultType(type) as FieldFormatInstanceType;
 
     spec.type = type;
 
     this.setState({
-      fieldTypeFormats: getFieldTypeFormatsList(spec, DefaultFieldFormat, data.fieldFormats),
+      fieldTypeFormats: getFieldTypeFormatsList(spec, DefaultFieldFormat, fieldFormats),
       fieldFormatId: DefaultFieldFormat.id,
       fieldFormatParams: format.params(),
     });
@@ -233,9 +233,9 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
   onFormatChange = (formatId: string, params?: any) => {
     const { fieldTypeFormats } = this.state;
-    const { uiSettings, data } = this.context.services;
+    const { uiSettings, fieldFormats } = this.context.services;
 
-    const FieldFormat = data.fieldFormats.getType(
+    const FieldFormat = fieldFormats.getType(
       formatId || (fieldTypeFormats[0] as InitialFieldTypeFormat).defaultFieldFormat.id
     ) as FieldFormatInstanceType;
 
@@ -819,7 +819,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { redirectAway, indexPatternService } = this.props.services;
     const fieldExists = !!indexPattern.fields.getByName(field.name);
 
-    let oldField: IndexPatternField['spec'];
+    let oldField: DataViewField['spec'];
 
     if (fieldExists) {
       oldField = indexPattern.fields.getByName(field.name)!.spec;
