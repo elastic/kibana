@@ -15,12 +15,7 @@ import React, {
   ElementRef,
 } from 'react';
 import { PluggableList } from 'unified';
-import {
-  EuiMarkdownEditor,
-  EuiMarkdownEditorProps,
-  EuiMarkdownAstNode,
-  EuiMarkdownEditorUiPlugin,
-} from '@elastic/eui';
+import { EuiMarkdownEditor, EuiMarkdownEditorProps, EuiMarkdownAstNode } from '@elastic/eui';
 import { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 import { usePlugins } from './use_plugins';
 import { useLensButtonToggle } from './plugins/lens/use_lens_button_toggle';
@@ -33,7 +28,6 @@ interface MarkdownEditorProps {
   onChange: (content: string) => void;
   parsingPlugins?: PluggableList;
   processingPlugins?: PluggableList;
-  uiPlugins?: EuiMarkdownEditorUiPlugin[] | undefined;
   disabledUiPlugins?: string[] | undefined;
   value: string;
 }
