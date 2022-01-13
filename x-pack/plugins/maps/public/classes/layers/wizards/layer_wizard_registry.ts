@@ -11,6 +11,21 @@ import { ReactElement, FunctionComponent } from 'react';
 import type { LayerDescriptor } from '../../../../common/descriptor_types';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 
+export type LayerWizard = {
+  title: string;
+  categories: LAYER_WIZARD_CATEGORY[];
+  order: number;
+  description: string;
+  icon: string | FunctionComponent<any>;
+  renderWizard(renderWizardArguments: RenderWizardArguments): ReactElement<any>;
+  prerequisiteSteps?: Array<{ id: string; label: string }>;
+  disabledReason?: string;
+  getIsDisabled?: () => Promise<boolean> | boolean;
+  isBeta?: boolean;
+  checkVisibility?: () => Promise<boolean>;
+  showFeatureEditTools?: boolean;
+};
+
 export type RenderWizardArguments = {
   previewLayers: (layerDescriptors: LayerDescriptor[]) => void;
   mapColors: string[];
@@ -27,30 +42,14 @@ export type RenderWizardArguments = {
   advanceToNextStep: () => void;
 };
 
-export type LayerWizard = {
-  categories: LAYER_WIZARD_CATEGORY[];
-  checkVisibility?: () => Promise<boolean>;
-  description: string;
-  disabledReason?: string;
-  getIsDisabled?: () => Promise<boolean> | boolean;
-  isBeta?: boolean;
-  icon: string | FunctionComponent<any>;
-  prerequisiteSteps?: Array<{ id: string; label: string }>;
-  renderWizard(renderWizardArguments: RenderWizardArguments): ReactElement<any>;
-  title: string;
-  showFeatureEditTools?: boolean;
-  order?: number;
-};
-
 export type LayerWizardWithMeta = LayerWizard & {
   isVisible: boolean;
   isDisabled: boolean;
-  order: number;
 };
 
 const registry: LayerWizard[] = [];
 
-export function registerLayerWizard(layerWizard: LayerWizard) {
+export function registerLayerWizardInternal(layerWizard: LayerWizard) {
   registry.push({
     checkVisibility: async () => {
       return true;
@@ -63,13 +62,19 @@ export function registerLayerWizard(layerWizard: LayerWizard) {
   });
 }
 
+export function registerLayerWizardExternal(layerWizard: LayerWizard) {
+  if (layerWizard.order < 100) {
+    throw new Error(`layerWizard.order should be greater than or equal to '100`);
+  }
+  registerLayerWizardInternal(layerWizard);
+}
+
 export async function getLayerWizards(): Promise<LayerWizardWithMeta[]> {
   const promises = registry.map(async (layerWizard: LayerWizard) => {
     return {
       ...layerWizard,
       isVisible: await layerWizard.checkVisibility!(),
       isDisabled: await layerWizard.getIsDisabled!(),
-      order: typeof layerWizard.order === 'number' ? layerWizard.order : 0,
     };
   });
   return (await Promise.all(promises))
