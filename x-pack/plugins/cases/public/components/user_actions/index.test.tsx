@@ -78,7 +78,7 @@ describe(`UserActions`, () => {
       .mockReturnValue({ detailName: 'case-id', subCaseId: 'sub-case-id' });
   });
 
-  it('Loading spinner when user actions loading and displays fullName/username', async () => {
+  it('Loading spinner when user actions loading and displays fullName/username', () => {
     const wrapper = mount(
       <TestProviders>
         <UserActions {...{ ...defaultProps, isLoadingUserActions: true }} />

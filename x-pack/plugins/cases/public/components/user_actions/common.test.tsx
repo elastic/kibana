@@ -40,7 +40,7 @@ describe('createCommonUserActionBuilder ', () => {
     const createdUserAction = builder.build();
     render(
       <TestProviders>
-        <EuiCommentList comments={[createdUserAction]} />
+        <EuiCommentList comments={createdUserAction} />
       </TestProviders>
     );
 
@@ -66,7 +66,7 @@ describe('createCommonUserActionBuilder ', () => {
     const createdUserAction = builder.build();
     render(
       <TestProviders>
-        <EuiCommentList comments={[createdUserAction]} />
+        <EuiCommentList comments={createdUserAction} />
       </TestProviders>
     );
 
@@ -85,7 +85,7 @@ describe('createCommonUserActionBuilder ', () => {
     const createdUserAction = builder.build();
     render(
       <TestProviders>
-        <EuiCommentList comments={[createdUserAction]} />
+        <EuiCommentList comments={createdUserAction} />
       </TestProviders>
     );
 
@@ -105,7 +105,7 @@ describe('createCommonUserActionBuilder ', () => {
     const createdUserAction = builder.build();
     render(
       <TestProviders>
-        <EuiCommentList comments={[createdUserAction]} />
+        <EuiCommentList comments={createdUserAction} />
       </TestProviders>
     );
 

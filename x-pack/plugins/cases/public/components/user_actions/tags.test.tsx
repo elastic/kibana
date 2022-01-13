@@ -13,12 +13,13 @@ import { Actions } from '../../../common/api';
 import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createTagsUserActionBuilder } from './tags';
+import { getMockBuilderArgs } from './mock';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
 describe('createTagsUserActionBuilder ', () => {
-  const handleOutlineComment = jest.fn();
+  const builderArgs = getMockBuilderArgs();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -26,10 +27,9 @@ describe('createTagsUserActionBuilder ', () => {
 
   it('renders correctly when adding a tag', async () => {
     const userAction = getUserAction('tags', Actions.add);
-    // @ts-ignore no need to pass all the arguments
     const builder = createTagsUserActionBuilder({
+      ...builderArgs,
       userAction,
-      handleOutlineComment,
     });
 
     const createdUserAction = builder.build();
@@ -45,10 +45,9 @@ describe('createTagsUserActionBuilder ', () => {
 
   it('renders correctly when deleting a tag', async () => {
     const userAction = getUserAction('tags', Actions.delete);
-    // @ts-ignore no need to pass all the arguments
     const builder = createTagsUserActionBuilder({
+      ...builderArgs,
       userAction,
-      handleOutlineComment,
     });
 
     const createdUserAction = builder.build();

@@ -13,17 +13,18 @@ import { Actions, CaseStatuses } from '../../../common/api';
 import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createStatusUserActionBuilder } from './status';
+import { getMockBuilderArgs } from './mock';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
 describe('createStatusUserActionBuilder ', () => {
+  const builderArgs = getMockBuilderArgs();
   const tests = [
     [CaseStatuses.open, 'Open'],
     [CaseStatuses['in-progress'], 'In progress'],
     [CaseStatuses.closed, 'Closed'],
   ];
-  const handleOutlineComment = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -31,10 +32,9 @@ describe('createStatusUserActionBuilder ', () => {
 
   it.each(tests)('renders correctly when changed to %s status', async (status, label) => {
     const userAction = getUserAction('status', Actions.update, { payload: { status } });
-    // @ts-ignore no need to pass all the arguments
     const builder = createStatusUserActionBuilder({
+      ...builderArgs,
       userAction,
-      handleOutlineComment,
     });
 
     const createdUserAction = builder.build();

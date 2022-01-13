@@ -18,6 +18,7 @@ import {
   CaseUserActionResponse,
   CaseMetricsResponse,
   CommentResponse,
+  CommentResponseAlertsType,
 } from '../api';
 import { SnakeToCamelCase } from '../types';
 

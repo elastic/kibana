@@ -42,38 +42,24 @@ const AlertCommentEventComponent: React.FC<Props> = ({
     },
     [ruleId, onRuleDetailsClick]
   );
-  const detectionsRuleDetailsHref = getRuleDetailsHref?.(ruleId) ?? '';
+  const detectionsRuleDetailsHref = getRuleDetailsHref?.(ruleId);
+  const finalRuleName = ruleName ?? i18n.UNKNOWN_RULE;
 
-  return commentType !== CommentType.generatedAlert ? (
+  return (
     <>
       {`${i18n.ALERT_COMMENT_LABEL_TITLE} `}
       {loadingAlertData && <EuiLoadingSpinner size="m" />}
-      {!loadingAlertData && !isEmpty(ruleId) && (
+      {!loadingAlertData && !isEmpty(ruleId) && detectionsRuleDetailsHref != null && (
         <LinkAnchor
           onClick={onLinkClick}
           href={detectionsRuleDetailsHref}
           data-test-subj={`alert-rule-link-${alertId ?? 'deleted'}`}
         >
-          {ruleName ?? i18n.UNKNOWN_RULE}
+          {finalRuleName}
         </LinkAnchor>
       )}
-      {!loadingAlertData && isEmpty(ruleId) && i18n.UNKNOWN_RULE}
-    </>
-  ) : (
-    <>
-      <b>{i18n.GENERATED_ALERT_COUNT_COMMENT_LABEL_TITLE(alertsCount ?? 0)}</b>{' '}
-      {i18n.GENERATED_ALERT_COMMENT_LABEL_TITLE}{' '}
-      {loadingAlertData && <EuiLoadingSpinner size="m" />}
-      {!loadingAlertData && ruleId !== '' && (
-        <LinkAnchor
-          onClick={onLinkClick}
-          href={detectionsRuleDetailsHref}
-          data-test-subj={`alert-rule-link-${alertId ?? 'deleted'}`}
-        >
-          {ruleName}
-        </LinkAnchor>
-      )}
-      {!loadingAlertData && ruleId === '' && <EuiText>{ruleName}</EuiText>}
+      {!loadingAlertData && !isEmpty(ruleId) && detectionsRuleDetailsHref == null && finalRuleName}
+      {!loadingAlertData && isEmpty(ruleId) && finalRuleName}
     </>
   );
 };

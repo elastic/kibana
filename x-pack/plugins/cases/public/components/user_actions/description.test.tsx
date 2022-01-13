@@ -13,12 +13,13 @@ import { Actions } from '../../../common/api';
 import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createDescriptionUserActionBuilder } from './description';
+import { getMockBuilderArgs } from './mock';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
 describe('createDescriptionUserActionBuilder ', () => {
-  const handleOutlineComment = jest.fn();
+  const builderArgs = getMockBuilderArgs();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -26,10 +27,9 @@ describe('createDescriptionUserActionBuilder ', () => {
 
   it('renders correctly when editing a description', async () => {
     const userAction = getUserAction('description', Actions.update);
-    // @ts-ignore no need to pass all the arguments
     const builder = createDescriptionUserActionBuilder({
+      ...builderArgs,
       userAction,
-      handleOutlineComment,
     });
 
     const createdUserAction = builder.build();

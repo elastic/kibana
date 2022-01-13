@@ -44,6 +44,6 @@ export const createTagsUserActionBuilder: UserActionBuilder = ({
       icon: 'tag',
     });
 
-    return [commonBuilder.build()];
+    return commonBuilder.build();
   },
 });

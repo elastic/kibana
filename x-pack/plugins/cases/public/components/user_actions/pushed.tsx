@@ -143,6 +143,6 @@ export const createPushedUserActionBuilder: UserActionBuilder = ({
       icon: 'dot',
     });
 
-    return [commonBuilder.build(), ...footers];
+    return [...commonBuilder.build(), ...footers];
   },
 });

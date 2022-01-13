@@ -55,24 +55,21 @@ describe('Case view helpers', () => {});
 
 describe('helpers', () => {
   describe('isUserActionTypeSupported', () => {
-    const supportedTypes = [
-      ['comment'],
-      ['connector'],
-      ['description'],
-      ['pushed'],
-      ['tags'],
-      ['title'],
-      ['status'],
+    const types: Array<[string, boolean]> = [
+      ['comment', true],
+      ['connector', true],
+      ['description', true],
+      ['pushed', true],
+      ['tags', true],
+      ['title', true],
+      ['status', true],
+      ['settings', false],
+      ['create_case', false],
+      ['delete_case', false],
     ];
 
-    const unsupportedTypes = [['settings'], ['create_case'], ['delete_case']];
-
-    it.each(supportedTypes)('should support type %s', (type) => {
-      expect(isUserActionTypeSupported(type)).toBe(true);
-    });
-
-    it.each(unsupportedTypes)('should not support type %s ', (type) => {
-      expect(isUserActionTypeSupported(type)).toBe(false);
+    it.each(types)('determines if the type is support %s', (type, supported) => {
+      expect(isUserActionTypeSupported(type)).toBe(supported);
     });
   });
 

@@ -13,12 +13,13 @@ import { Actions, NONE_CONNECTOR_ID } from '../../../common/api';
 import { getUserAction, getJiraConnector } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createConnectorUserActionBuilder } from './connector';
+import { getMockBuilderArgs } from './mock';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
 describe('createConnectorUserActionBuilder ', () => {
-  const handleOutlineComment = jest.fn();
+  const builderArgs = getMockBuilderArgs();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -28,10 +29,10 @@ describe('createConnectorUserActionBuilder ', () => {
     const userAction = getUserAction('connector', Actions.update, {
       payload: { connector: getJiraConnector() },
     });
-    // @ts-ignore no need to pass all the arguments
+
     const builder = createConnectorUserActionBuilder({
+      ...builderArgs,
       userAction,
-      handleOutlineComment,
     });
 
     const createdUserAction = builder.build();
@@ -48,10 +49,10 @@ describe('createConnectorUserActionBuilder ', () => {
     const userAction = getUserAction('connector', Actions.update, {
       payload: { connector: { ...getJiraConnector(), id: NONE_CONNECTOR_ID } },
     });
-    // @ts-ignore no need to pass all the arguments
+
     const builder = createConnectorUserActionBuilder({
+      ...builderArgs,
       userAction,
-      handleOutlineComment,
     });
 
     const createdUserAction = builder.build();

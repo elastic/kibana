@@ -10,24 +10,17 @@ import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
 import { Actions, NONE_CONNECTOR_ID } from '../../../common/api';
-import { basicPush, getUserAction } from '../../containers/mock';
+import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createPushedUserActionBuilder } from './pushed';
+import { getMockBuilderArgs } from './mock';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
 describe('createPushedUserActionBuilder ', () => {
-  const caseServices = {
-    '123': {
-      ...basicPush,
-      firstPushIndex: 0,
-      lastPushIndex: 0,
-      commentsToUpdate: [],
-      hasDataToPush: true,
-    },
-  };
-  const handleOutlineComment = jest.fn();
+  const builderArgs = getMockBuilderArgs();
+  const caseServices = builderArgs.caseServices;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -35,12 +28,11 @@ describe('createPushedUserActionBuilder ', () => {
 
   it('renders correctly pushing for the first time', async () => {
     const userAction = getUserAction('pushed', Actions.push_to_service);
-    // @ts-ignore no need to pass all the arguments
     const builder = createPushedUserActionBuilder({
+      ...builderArgs,
       userAction,
       caseServices,
       index: 0,
-      handleOutlineComment,
     });
 
     const createdUserAction = builder.build();
@@ -59,12 +51,11 @@ describe('createPushedUserActionBuilder ', () => {
 
   it('renders correctly when updating an external service', async () => {
     const userAction = getUserAction('pushed', Actions.push_to_service);
-    // @ts-ignore no need to pass all the arguments
     const builder = createPushedUserActionBuilder({
+      ...builderArgs,
       userAction,
       caseServices,
       index: 1,
-      handleOutlineComment,
     });
 
     const createdUserAction = builder.build();
@@ -79,8 +70,8 @@ describe('createPushedUserActionBuilder ', () => {
 
   it('renders the pushing indicators correctly', async () => {
     const userAction = getUserAction('pushed', Actions.push_to_service);
-    // @ts-ignore no need to pass all the arguments
     const builder = createPushedUserActionBuilder({
+      ...builderArgs,
       userAction,
       caseServices: {
         ...caseServices,
@@ -90,7 +81,6 @@ describe('createPushedUserActionBuilder ', () => {
         },
       },
       index: 1,
-      handleOutlineComment,
     });
 
     const createdUserAction = builder.build();
@@ -106,8 +96,8 @@ describe('createPushedUserActionBuilder ', () => {
 
   it('shows only the already pushed indicator if has no data to push', async () => {
     const userAction = getUserAction('pushed', Actions.push_to_service);
-    // @ts-ignore no need to pass all the arguments
     const builder = createPushedUserActionBuilder({
+      ...builderArgs,
       userAction,
       caseServices: {
         ...caseServices,
@@ -118,7 +108,6 @@ describe('createPushedUserActionBuilder ', () => {
         },
       },
       index: 1,
-      handleOutlineComment,
     });
 
     const createdUserAction = builder.build();
@@ -141,8 +130,8 @@ describe('createPushedUserActionBuilder ', () => {
       },
     });
 
-    // @ts-ignore no need to pass all the arguments
     const builder = createPushedUserActionBuilder({
+      ...builderArgs,
       userAction,
       caseServices: {
         ...caseServices,
@@ -152,7 +141,6 @@ describe('createPushedUserActionBuilder ', () => {
         },
       },
       index: 1,
-      handleOutlineComment,
     });
 
     const createdUserAction = builder.build();

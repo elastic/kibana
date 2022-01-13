@@ -29,6 +29,6 @@ export const createTitleUserActionBuilder: UserActionBuilder = ({
       icon: 'dot',
     });
 
-    return [commonBuilder.build()];
+    return commonBuilder.build();
   },
 });

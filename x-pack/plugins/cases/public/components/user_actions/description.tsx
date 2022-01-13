@@ -102,6 +102,6 @@ export const createDescriptionUserActionBuilder: UserActionBuilder = ({
       icon: 'dot',
     });
 
-    return [commonBuilder.build()];
+    return commonBuilder.build();
   },
 });

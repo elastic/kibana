@@ -13,12 +13,13 @@ import { Actions } from '../../../common/api';
 import { getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createTitleUserActionBuilder } from './title';
+import { getMockBuilderArgs } from './mock';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
 describe('createTitleUserActionBuilder ', () => {
-  const handleOutlineComment = jest.fn();
+  const builderArgs = getMockBuilderArgs();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -28,8 +29,8 @@ describe('createTitleUserActionBuilder ', () => {
     const userAction = getUserAction('title', Actions.update);
     // @ts-ignore no need to pass all the arguments
     const builder = createTitleUserActionBuilder({
+      ...builderArgs,
       userAction,
-      handleOutlineComment,
     });
 
     const createdUserAction = builder.build();

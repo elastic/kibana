@@ -51,6 +51,6 @@ export const createStatusUserActionBuilder: UserActionBuilder = ({
       icon: 'folderClosed',
     });
 
-    return [commonBuilder.build()];
+    return commonBuilder.build();
   },
 });

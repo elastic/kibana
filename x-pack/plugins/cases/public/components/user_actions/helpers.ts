@@ -11,7 +11,7 @@ import type { Comment } from '../../containers/types';
 import { SUPPORTED_ACTION_TYPES } from './constants';
 import { SupportedUserActionTypes } from './types';
 
-export const isUserActionTypeSupported = (type: unknown): type is SupportedUserActionTypes =>
+export const isUserActionTypeSupported = (type: string): type is SupportedUserActionTypes =>
   SUPPORTED_ACTION_TYPES.includes(type as SupportedUserActionTypes);
 
 export const getManualAlertIdsWithNoRuleId = (comments: Comment[]): string[] => {

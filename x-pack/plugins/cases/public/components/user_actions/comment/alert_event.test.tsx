@@ -15,7 +15,7 @@ import { CommentType } from '../../../../common/api';
 
 const props = {
   alertId: 'alert-id-1',
-  getRuleDetailsHref: jest.fn().mockReturnValue('some-detection-rule-link'),
+  getRuleDetailsHref: jest.fn().mockReturnValue('https://example.com'),
   onRuleDetailsClick: jest.fn(),
   ruleId: 'rule-id-1',
   ruleName: 'Awesome rule',
@@ -59,6 +59,33 @@ describe('UserActionAvatar ', () => {
       wrapper.find(`[data-test-subj="alert-rule-link-alert-id-1"]`).first().exists()
     ).toBeFalsy();
 
+    expect(wrapper.text()).toBe('added an alert from Awesome rule');
+  });
+
+  it('does NOT render the link when the href is invalid but it shows the rule name', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AlertCommentEvent {...props} getRuleDetailsHref={undefined} />
+      </TestProviders>
+    );
+
+    expect(
+      wrapper.find(`[data-test-subj="alert-rule-link-alert-id-1"]`).first().exists()
+    ).toBeFalsy();
+
+    expect(wrapper.text()).toBe('added an alert from Awesome rule');
+  });
+
+  it('show Unknown rule if the rule name is invalid', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AlertCommentEvent {...props} ruleName={null} />
+      </TestProviders>
+    );
+
+    expect(
+      wrapper.find(`[data-test-subj="alert-rule-link-alert-id-1"]`).first().exists()
+    ).toBeTruthy();
     expect(wrapper.text()).toBe('added an alert from Unknown rule');
   });
 

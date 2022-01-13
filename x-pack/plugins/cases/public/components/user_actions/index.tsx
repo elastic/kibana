@@ -177,33 +177,39 @@ export const UserActions = React.memo(
       () =>
         caseUserActions.reduce<EuiCommentProps[]>(
           (comments, userAction, index) => {
-            if (isUserActionTypeSupported(userAction.type)) {
-              const builder = builderMap[userAction.type];
-              const userActionBuilder = builder({
-                caseData,
-                userAction,
-                caseServices,
-                comments: caseData.comments,
-                index,
-                userCanCrud,
-                commentRefs,
-                manageMarkdownEditIds,
-                selectedOutlineCommentId,
-                loadingCommentIds,
-                loadingAlertData,
-                alertData: manualAlertsData,
-                handleOutlineComment,
-                handleManageMarkdownEditId,
-                handleSaveComment,
-                handleManageQuote,
-                onShowAlertDetails,
-                actionsNavigation,
-                getRuleDetailsHref,
-                onRuleDetailsClick,
-              });
-              return [...comments, ...userActionBuilder.build()];
+            if (!isUserActionTypeSupported(userAction.type)) {
+              return comments;
             }
-            return comments;
+
+            const builder = builderMap[userAction.type];
+
+            if (builder == null) {
+              return comments;
+            }
+
+            const userActionBuilder = builder({
+              caseData,
+              userAction,
+              caseServices,
+              comments: caseData.comments,
+              index,
+              userCanCrud,
+              commentRefs,
+              manageMarkdownEditIds,
+              selectedOutlineCommentId,
+              loadingCommentIds,
+              loadingAlertData,
+              alertData: manualAlertsData,
+              handleOutlineComment,
+              handleManageMarkdownEditId,
+              handleSaveComment,
+              handleManageQuote,
+              onShowAlertDetails,
+              actionsNavigation,
+              getRuleDetailsHref,
+              onRuleDetailsClick,
+            });
+            return [...comments, ...userActionBuilder.build()];
           },
           [descriptionCommentListObj]
         ),

@@ -10,7 +10,7 @@ import { EuiCommentProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { Actions, ConnectorUserAction } from '../../../common/api';
 import { UserActionTimestamp } from './timestamp';
-import { UserActionResponse } from './types';
+import { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from './types';
 import { UserActionUsernameWithAvatar } from './avatar_username';
 import { UserActionCopyLink } from './copy_link';
 import { UserActionMoveToReference } from './move_to_reference';
@@ -39,43 +39,45 @@ const CommentListActions: React.FC<Props> = React.memo(({ userAction, handleOutl
 
 CommentListActions.displayName = 'CommentListActions';
 
+type BuilderArgs = Pick<UserActionBuilderArgs, 'userAction' | 'handleOutlineComment'> & {
+  label: EuiCommentProps['event'];
+  icon: EuiCommentProps['timelineIcon'];
+};
+
 export const createCommonUserActionBuilder = ({
   userAction,
   label,
   icon,
   handleOutlineComment,
-}: {
-  userAction: CaseUserActions;
-  label: EuiCommentProps['event'];
-  icon: EuiCommentProps['timelineIcon'];
-  handleOutlineComment: (id: string) => void;
-}) => ({
-  build: () => ({
-    username: (
-      <UserActionUsernameWithAvatar
-        username={userAction.createdBy.username}
-        fullName={userAction.createdBy.fullName}
-      />
-    ),
-    type: 'update' as const,
-    event: label,
-    'data-test-subj': `${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
-    timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-    timelineIcon: icon,
-    actions: (
-      <EuiFlexGroup responsive={false}>
-        <EuiFlexItem grow={false}>
-          <UserActionCopyLink id={userAction.actionId} />
-        </EuiFlexItem>
-        {userAction.action === Actions.update && userAction.commentId != null && (
+}: BuilderArgs): ReturnType<UserActionBuilder> => ({
+  build: () => [
+    {
+      username: (
+        <UserActionUsernameWithAvatar
+          username={userAction.createdBy.username}
+          fullName={userAction.createdBy.fullName}
+        />
+      ),
+      type: 'update' as const,
+      event: label,
+      'data-test-subj': `${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
+      timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
+      timelineIcon: icon,
+      actions: (
+        <EuiFlexGroup responsive={false}>
           <EuiFlexItem grow={false}>
-            <UserActionMoveToReference
-              id={userAction.commentId}
-              outlineComment={handleOutlineComment}
-            />
+            <UserActionCopyLink id={userAction.actionId} />
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    ),
-  }),
+          {userAction.action === Actions.update && userAction.commentId != null && (
+            <EuiFlexItem grow={false}>
+              <UserActionMoveToReference
+                id={userAction.commentId}
+                outlineComment={handleOutlineComment}
+              />
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      ),
+    },
+  ],
 });

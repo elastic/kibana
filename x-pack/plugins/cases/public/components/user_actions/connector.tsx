@@ -38,6 +38,6 @@ export const createConnectorUserActionBuilder: UserActionBuilder = ({
       icon: 'dot',
     });
 
-    return [commonBuilder.build()];
+    return commonBuilder.build();
   },
 });

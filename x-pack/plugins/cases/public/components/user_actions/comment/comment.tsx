@@ -5,253 +5,16 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
-import { get } from 'lodash';
-import { ThemeContext } from 'styled-components';
-import classNames from 'classnames';
-import { EuiCommentProps, EuiFlexGroup, EuiFlexItem, EuiToken } from '@elastic/eui';
-import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { EuiCommentProps } from '@elastic/eui';
 
-import {
-  CommentUserAction,
-  Actions,
-  CommentType,
-  CommentResponseUserType,
-  CommentResponseAlertsType,
-  CommentResponseActionsType,
-} from '../../../../common/api';
-import {
-  ActionsNavigation,
-  RuleDetailsNavigation,
-  UserActionBuilder,
-  UserActionBuilderArgs,
-  UserActionResponse,
-} from '../types';
+import { CommentUserAction, Actions, CommentType } from '../../../../common/api';
+import { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from '../types';
 import { createCommonUserActionBuilder } from '../common';
-import { Comment, Ecs } from '../../../containers/types';
-import { UserActionAvatar } from '../avatar';
-import { UserActionContentToolbar } from '../content_toolbar';
-import { ContentWrapper, UserActionMarkdown, UserActionMarkdownRefObject } from '../markdown_form';
-import { UserActionTimestamp } from '../timestamp';
-import { UserActionUsername } from '../username';
-import { AddCommentRefObject } from '../../add_comment';
-import { SnakeToCamelCase } from '../../../../common/types';
-import { UserActionUsernameWithAvatar } from '../avatar_username';
-import { AlertCommentEvent } from './alert_event';
-import { UserActionCopyLink } from '../copy_link';
-import { UserActionShowAlert } from './show_alert';
+import { Comment } from '../../../containers/types';
 import * as i18n from '../translations';
-import { MarkdownRenderer } from '../../markdown_editor';
-import { HostIsolationCommentEvent } from './host_isolation_event';
-
-const getUserAttachmentUserAction = ({
-  comment,
-  userCanCrud,
-  outlined,
-  isEdit,
-  isLoading,
-  commentRefs,
-  handleManageMarkdownEditId,
-  handleSaveComment,
-  handleManageQuote,
-}: {
-  comment: SnakeToCamelCase<CommentResponseUserType>;
-  userCanCrud: boolean;
-  outlined: boolean;
-  isEdit: boolean;
-  isLoading: boolean;
-  commentRefs: React.MutableRefObject<
-    Record<string, AddCommentRefObject | UserActionMarkdownRefObject | null | undefined>
-  >;
-  handleManageMarkdownEditId: (id: string) => void;
-  handleSaveComment: ({ id, version }: { id: string; version: string }, content: string) => void;
-  handleManageQuote: (quote: string) => void;
-}): EuiCommentProps => ({
-  username: (
-    <UserActionUsername
-      username={comment.createdBy.username}
-      fullName={comment.createdBy.fullName}
-    />
-  ),
-  'data-test-subj': `comment-create-action-${comment.id}`,
-  timestamp: <UserActionTimestamp createdAt={comment.createdAt} updatedAt={comment.updatedAt} />,
-  className: classNames('userAction__comment', {
-    outlined,
-    isEdit,
-  }),
-  children: (
-    <UserActionMarkdown
-      ref={(element) => (commentRefs.current[comment.id] = element)}
-      id={comment.id}
-      content={comment.comment}
-      isEditable={isEdit}
-      onChangeEditable={handleManageMarkdownEditId}
-      onSaveContent={handleSaveComment.bind(null, {
-        id: comment.id,
-        version: comment.version,
-      })}
-    />
-  ),
-  timelineIcon: (
-    <UserActionAvatar username={comment.createdBy.username} fullName={comment.createdBy.fullName} />
-  ),
-  actions: (
-    <UserActionContentToolbar
-      id={comment.id}
-      commentMarkdown={comment.comment}
-      editLabel={i18n.EDIT_COMMENT}
-      quoteLabel={i18n.QUOTE}
-      isLoading={isLoading}
-      onEdit={handleManageMarkdownEditId.bind(null, comment.id)}
-      onQuote={handleManageQuote.bind(null, comment.comment)}
-      userCanCrud={userCanCrud}
-    />
-  ),
-});
-
-const getAlertAttachmentUserAction = ({
-  userAction,
-  comment,
-  alertData,
-  getRuleDetailsHref,
-  loadingAlertData,
-  onRuleDetailsClick,
-  onShowAlertDetails,
-}: {
-  userAction: UserActionResponse<CommentUserAction>;
-  comment: SnakeToCamelCase<CommentResponseAlertsType>;
-  alertData: Record<string, Ecs>;
-  getRuleDetailsHref?: RuleDetailsNavigation['href'];
-  onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
-  loadingAlertData: boolean;
-  onShowAlertDetails: (alertId: string, index: string) => void;
-}): EuiCommentProps => {
-  // TODO: clean this up
-  const alertId = Array.isArray(comment.alertId)
-    ? comment.alertId.length > 0
-      ? comment.alertId[0]
-      : ''
-    : comment.alertId;
-
-  const alertIndex = Array.isArray(comment.index)
-    ? comment.index.length > 0
-      ? comment.index[0]
-      : ''
-    : comment.index;
-
-  // if (isEmpty(alertId)) {
-  //   return comments;
-  // }
-
-  const ruleId =
-    comment?.rule?.id ??
-    alertData[alertId]?.signal?.rule?.id?.[0] ??
-    get(alertData[alertId], ALERT_RULE_UUID)[0] ??
-    null;
-
-  const ruleName =
-    comment?.rule?.name ??
-    alertData[alertId]?.signal?.rule?.name?.[0] ??
-    get(alertData[alertId], ALERT_RULE_NAME)[0] ??
-    null;
-
-  return {
-    username: (
-      <UserActionUsernameWithAvatar
-        username={userAction.createdBy.username}
-        fullName={userAction.createdBy.fullName}
-      />
-    ),
-    className: 'comment-alert',
-    type: 'update',
-    event: (
-      <AlertCommentEvent
-        alertId={alertId}
-        getRuleDetailsHref={getRuleDetailsHref}
-        loadingAlertData={loadingAlertData}
-        onRuleDetailsClick={onRuleDetailsClick}
-        ruleId={ruleId}
-        ruleName={ruleName}
-        commentType={CommentType.alert}
-      />
-    ),
-    'data-test-subj': `${userAction.type}-${userAction.action}-action-${userAction.actionId}`,
-    timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-    timelineIcon: 'bell',
-    actions: (
-      <EuiFlexGroup responsive={false}>
-        <EuiFlexItem grow={false}>
-          <UserActionCopyLink id={userAction.actionId} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <UserActionShowAlert
-            id={userAction.actionId}
-            alertId={alertId}
-            index={alertIndex}
-            onShowAlertDetails={onShowAlertDetails}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
-  };
-};
-
-const ActionIcon = React.memo<{
-  actionType: string;
-}>(({ actionType }) => {
-  const theme = useContext(ThemeContext);
-  return (
-    <EuiToken
-      style={{ marginTop: '8px' }}
-      iconType={actionType === 'isolate' ? 'lock' : 'lockOpen'}
-      size="m"
-      shape="circle"
-      color={theme.eui.euiColorLightestShade}
-      data-test-subj="endpoint-action-icon"
-    />
-  );
-});
-
-ActionIcon.displayName = 'ActionIcon';
-
-const getActionAttachmentUserAction = ({
-  userAction,
-  comment,
-  actionsNavigation,
-}: {
-  userAction: UserActionResponse<CommentUserAction>;
-  comment: SnakeToCamelCase<CommentResponseActionsType>;
-  actionsNavigation?: ActionsNavigation;
-}): EuiCommentProps => {
-  return {
-    username: (
-      <UserActionUsernameWithAvatar
-        username={comment.createdBy.username}
-        fullName={comment.createdBy.fullName}
-      />
-    ),
-    className: classNames('comment-action', {
-      'empty-comment': comment.comment.trim().length === 0,
-    }),
-    event: (
-      <HostIsolationCommentEvent
-        type={comment.actions.type}
-        endpoints={comment.actions.targets}
-        href={actionsNavigation?.href}
-        onClick={actionsNavigation?.onClick}
-      />
-    ),
-    'data-test-subj': 'endpoint-action',
-    timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-    timelineIcon: <ActionIcon actionType={comment.actions.type} />,
-    actions: <UserActionCopyLink id={comment.id} />,
-    children: comment.comment.trim().length > 0 && (
-      <ContentWrapper data-test-subj="user-action-markdown">
-        <MarkdownRenderer>{comment.comment}</MarkdownRenderer>
-      </ContentWrapper>
-    ),
-  };
-};
+import { createUserAttachmentUserActionBuilder } from './user';
+import { createAlertAttachmentUserActionBuilder } from './alert';
+import { createActionAttachmentUserActionBuilder } from './actions';
 
 const getUpdateLabelTitle = () => `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
 
@@ -278,10 +41,10 @@ const getCreateCommentUserAction = ({
 } & Omit<
   UserActionBuilderArgs,
   'caseData' | 'caseServices' | 'comments' | 'index' | 'handleOutlineComment'
->): EuiCommentProps | undefined => {
+>): EuiCommentProps[] => {
   switch (comment.type) {
     case CommentType.user:
-      return getUserAttachmentUserAction({
+      const userBuilder = createUserAttachmentUserActionBuilder({
         comment,
         userCanCrud,
         outlined: comment.id === selectedOutlineCommentId,
@@ -293,8 +56,10 @@ const getCreateCommentUserAction = ({
         handleManageQuote,
       });
 
+      return userBuilder.build();
+
     case CommentType.alert:
-      return getAlertAttachmentUserAction({
+      const alertBuilder = createAlertAttachmentUserActionBuilder({
         alertData,
         comment,
         userAction,
@@ -303,10 +68,16 @@ const getCreateCommentUserAction = ({
         onRuleDetailsClick,
         onShowAlertDetails,
       });
+      return alertBuilder.build();
     case CommentType.actions:
-      return getActionAttachmentUserAction({ userAction, comment, actionsNavigation });
+      const actionBuilder = createActionAttachmentUserActionBuilder({
+        userAction,
+        comment,
+        actionsNavigation,
+      });
+      return actionBuilder.build();
     default:
-      break;
+      return [];
   }
 };
 
@@ -355,7 +126,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         handleManageQuote,
       });
 
-      return commentAction != null ? [commentAction] : [];
+      return commentAction;
     }
 
     const label = getUpdateLabelTitle();
@@ -366,6 +137,6 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
       icon: 'dot',
     });
 
-    return [commonBuilder.build()];
+    return commonBuilder.build();
   },
 });

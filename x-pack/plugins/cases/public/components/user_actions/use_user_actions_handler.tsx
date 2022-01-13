@@ -36,11 +36,7 @@ const isAddCommentRef = (
   ref: AddCommentRefObject | UserActionMarkdownRefObject | null | undefined
 ): ref is AddCommentRefObject => {
   const commentRef = ref as AddCommentRefObject;
-  if (commentRef?.addQuote != null) {
-    return true;
-  }
-
-  return false;
+  return commentRef?.addQuote != null;
 };
 
 export const useUserActionsHandler = ({
@@ -136,7 +132,7 @@ export const useUserActionsHandler = ({
     if (draftComment?.commentId) {
       setManageMarkdownEditIds((prevManageMarkdownEditIds) => {
         if (
-          ![NEW_COMMENT_ID].includes(draftComment?.commentId) &&
+          NEW_COMMENT_ID !== draftComment?.commentId &&
           !prevManageMarkdownEditIds.includes(draftComment?.commentId)
         ) {
           return [draftComment?.commentId];

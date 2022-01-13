@@ -9,7 +9,6 @@ import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
-import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 import { Actions } from '../../../../common/api';
 import {
   alertComment,
@@ -21,47 +20,13 @@ import {
 } from '../../../containers/mock';
 import { TestProviders } from '../../../common/mock';
 import { createCommentUserActionBuilder } from './comment';
+import { getMockBuilderArgs } from '../mock';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');
 
 describe('createCommentUserActionBuilder', () => {
-  const commentRefs = { current: {} };
-  const alertData = {
-    rule: {
-      id: 'rule-id',
-      name: 'rule',
-    },
-    index: 'index-id',
-    alertId: 'alert-id',
-    owner: SECURITY_SOLUTION_OWNER,
-  };
-
-  const getRuleDetailsHref = jest.fn();
-  const onRuleDetailsClick = jest.fn();
-  const onShowAlertDetails = jest.fn();
-  const handleManageMarkdownEditId = jest.fn();
-  const handleSaveComment = jest.fn();
-  const handleManageQuote = jest.fn();
-  const handleOutlineComment = jest.fn();
-
-  const args = {
-    caseData: basicCase,
-    alertData,
-    userCanCrud: true,
-    commentRefs,
-    manageMarkdownEditIds: [],
-    selectedOutlineCommentId: '',
-    loadingCommentIds: [],
-    loadingAlertData: false,
-    getRuleDetailsHref,
-    onRuleDetailsClick,
-    onShowAlertDetails,
-    handleManageMarkdownEditId,
-    handleSaveComment,
-    handleManageQuote,
-    handleOutlineComment,
-  };
+  const builderArgs = getMockBuilderArgs();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -69,9 +34,8 @@ describe('createCommentUserActionBuilder', () => {
 
   it('renders correctly when editing a comment', async () => {
     const userAction = getUserAction('comment', Actions.update);
-    // @ts-ignore no need to pass all the arguments
     const builder = createCommentUserActionBuilder({
-      ...args,
+      ...builderArgs,
       userAction,
     });
 
@@ -90,9 +54,8 @@ describe('createCommentUserActionBuilder', () => {
       commentId: basicCase.comments[0].id,
     });
 
-    // @ts-ignore no need to pass all the arguments
     const builder = createCommentUserActionBuilder({
-      ...args,
+      ...builderArgs,
       userAction,
     });
 
@@ -109,11 +72,10 @@ describe('createCommentUserActionBuilder', () => {
   it('renders correctly an alert', async () => {
     const userAction = getAlertUserAction();
 
-    // @ts-ignore no need to pass all the arguments
     const builder = createCommentUserActionBuilder({
-      ...args,
+      ...builderArgs,
       caseData: {
-        ...args.caseData,
+        ...builderArgs.caseData,
         comments: [alertComment],
       },
       userAction,
@@ -133,11 +95,10 @@ describe('createCommentUserActionBuilder', () => {
   it('renders correctly an action', async () => {
     const userAction = getHostIsolationUserAction();
 
-    // @ts-ignore no need to pass all the arguments
     const builder = createCommentUserActionBuilder({
-      ...args,
+      ...builderArgs,
       caseData: {
-        ...args.caseData,
+        ...builderArgs.caseData,
         comments: [hostIsolationComment()],
       },
       userAction,
