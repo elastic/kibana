@@ -16,7 +16,7 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 import { useGetUrlParams } from '../../../hooks';
 import { ToggleAlertFlyoutButton } from '../../overview/alerts/alerts_containers';
-import { MONITOR_MANAGEMENT, OVERVIEW_ROUTE, SETTINGS_ROUTE } from '../../../../common/constants';
+import { MONITOR_MANAGEMENT, MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../common/constants';
 import { stringifyUrlParams } from '../../../lib/helper/stringify_url_params';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { monitorStatusSelector } from '../../../state/selectors';
@@ -44,7 +44,7 @@ export function ActionMenuContent({ config }: { config: UptimeConfig }): React.R
 
   const selectedMonitor = useSelector(monitorStatusSelector);
 
-  const overviewRouteMatch = useRouteMatch(OVERVIEW_ROUTE);
+  const detailRouteMatch = useRouteMatch(MONITOR_ROUTE);
   const monitorId = selectedMonitor?.monitor?.id;
 
   const syntheticExploratoryViewLink = createExploratoryViewUrl(
@@ -66,7 +66,7 @@ export function ActionMenuContent({ config }: { config: UptimeConfig }): React.R
                *
                * This condition is intended to allow monitor filtering on all other pages.
                */
-              selectedMonitor?.monitor?.name && overviewRouteMatch?.isExact !== true
+              selectedMonitor?.monitor?.name && detailRouteMatch?.isExact === true
                 ? [selectedMonitor?.monitor?.name]
                 : [],
             'url.full': ['ALL_VALUES'],
