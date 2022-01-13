@@ -10,7 +10,6 @@ import { Switch, Route, Redirect, Router } from 'react-router-dom';
 import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -67,15 +66,14 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 };
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
-  const { savedObjects, uiSettings, theme$ } = deps;
+  const { savedObjects, theme$ } = deps;
   const sections: Section[] = ['rules', 'connectors', 'alerts', '__components_sandbox'];
-  const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
 
   const sectionsRegex = sections.join('|');
   setSavedObjectsClient(savedObjects.client);
   return (
     <I18nProvider>
-      <EuiThemeProvider darkMode={isDarkMode}>
+      <EuiThemeProvider theme$={theme$}>
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider services={{ ...deps }}>
             <Router history={deps.history}>
