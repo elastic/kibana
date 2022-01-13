@@ -263,12 +263,19 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       ReactDOM.unmountComponentAtNode(this.domNode);
     }
     this.domNode = dom;
+    const controlsEnabled = this.services.presentationUtil.labsService.isProjectEnabled(
+      'labs:dashboard:dashboardControls'
+    );
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.services}>
           <KibanaThemeProvider theme$={this.services.theme.theme$}>
             <this.services.presentationUtil.ContextProvider>
-              <DashboardViewport container={this} controlGroup={this.controlGroup} />
+              <DashboardViewport
+                controlsEnabled={controlsEnabled}
+                container={this}
+                controlGroup={this.controlGroup}
+              />
             </this.services.presentationUtil.ContextProvider>
           </KibanaThemeProvider>
         </KibanaContextProvider>

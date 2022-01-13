@@ -11,22 +11,26 @@ $controlMinWidth: $euiSize * 14;
   &--empty {
     display: flex;
     @include euiBreakpoint('m', 'l', 'xl') {
-      background: url(opt_a.svg);
-      background-position: left top;
-      background-repeat: no-repeat;
       .addControlButton {
         text-align: center;
       }
       .emptyStateText {
         padding-left: $euiSize * 2;
       }
+      height: $euiSize * 4;
+      overflow: hidden;
     }
     @include euiBreakpoint('xs', 's') {
       .addControlButton {
         text-align: center;
       }
+      .emptyStateText {
+        text-align: center;
+      }
+      .controlsIllustration__container {
+        margin-bottom: 0 !important;
+      }
     }
-    min-height: $euiSize * 4;
   }
 
   &--twoLine {
