@@ -122,7 +122,6 @@ export const EventFiltersListPage = memo(() => {
     if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
       return <BackToExternalAppButton {...memoizedRouteState} />;
     }
-    return null;
   }, [memoizedRouteState]);
 
   // load the list of policies

@@ -75,7 +75,6 @@ export const HostIsolationExceptionsList = () => {
     if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
       return <BackToExternalAppButton {...memoizedRouteState} />;
     }
-    return null;
   }, [memoizedRouteState]);
 
   const [itemToDelete, setItemToDelete] = useState<ExceptionListItemSchema | null>(null);

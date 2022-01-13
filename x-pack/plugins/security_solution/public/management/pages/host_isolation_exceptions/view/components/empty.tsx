@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import styled, { css } from 'styled-components';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ManagementEmptyStateWraper } from '../../../../components/management_empty_state_wraper';
+import { ManagementEmptyStateWrapper } from '../../../../components/management_empty_state_wrapper';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
   ${() => css`
@@ -22,7 +22,7 @@ export const HostIsolationExceptionsEmptyState = memo<{
   backComponent?: React.ReactNode;
 }>(({ onAdd, backComponent }) => {
   return (
-    <ManagementEmptyStateWraper>
+    <ManagementEmptyStateWrapper>
       <EmptyPrompt
         data-test-subj="hostIsolationExceptionsEmpty"
         iconType="plusInCircle"
@@ -55,7 +55,7 @@ export const HostIsolationExceptionsEmptyState = memo<{
           ...(backComponent ? [backComponent] : []),
         ]}
       />
-    </ManagementEmptyStateWraper>
+    </ManagementEmptyStateWrapper>
   );
 });
 

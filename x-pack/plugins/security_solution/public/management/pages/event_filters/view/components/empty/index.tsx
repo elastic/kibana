@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import styled, { css } from 'styled-components';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ManagementEmptyStateWraper } from '../../../../../components/management_empty_state_wraper';
+import { ManagementEmptyStateWrapper } from '../../../../../components/management_empty_state_wrapper';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
   ${() => css`
@@ -24,7 +24,7 @@ export const EventFiltersListEmptyState = memo<{
   backComponent?: React.ReactNode;
 }>(({ onAdd, isAddDisabled = false, backComponent }) => {
   return (
-    <ManagementEmptyStateWraper>
+    <ManagementEmptyStateWrapper>
       <EmptyPrompt
         data-test-subj="eventFiltersEmpty"
         iconType="plusInCircle"
@@ -57,7 +57,7 @@ export const EventFiltersListEmptyState = memo<{
           ...(backComponent ? [backComponent] : []),
         ]}
       />
-    </ManagementEmptyStateWraper>
+    </ManagementEmptyStateWrapper>
   );
 });
 

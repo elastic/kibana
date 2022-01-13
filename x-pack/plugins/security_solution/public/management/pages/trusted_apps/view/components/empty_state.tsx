@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ManagementEmptyStateWraper } from '../../../../components/management_empty_state_wraper';
+import { ManagementEmptyStateWrapper } from '../../../../components/management_empty_state_wrapper';
 
 export const EmptyState = memo<{
   onAdd: () => void;
@@ -17,7 +17,7 @@ export const EmptyState = memo<{
   backComponent?: React.ReactNode;
 }>(({ onAdd, isAddDisabled = false, backComponent }) => {
   return (
-    <ManagementEmptyStateWraper>
+    <ManagementEmptyStateWrapper>
       <EuiEmptyPrompt
         data-test-subj="trustedAppEmptyState"
         iconType="plusInCircle"
@@ -50,7 +50,7 @@ export const EmptyState = memo<{
           ...(backComponent ? [backComponent] : []),
         ]}
       />
-    </ManagementEmptyStateWraper>
+    </ManagementEmptyStateWrapper>
   );
 });
 

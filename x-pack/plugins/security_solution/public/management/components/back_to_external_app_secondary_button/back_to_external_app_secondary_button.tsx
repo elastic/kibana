@@ -21,8 +21,8 @@ export const BackToExternalAppSecondaryButton = memo<BackToExternalAppSecondaryB
     return (
       // eslint-disable-next-line @elastic/eui/href-or-on-click
       <EuiButtonEmpty
-        data-test-subj="backToOrigin"
         {...commonProps}
+        data-test-subj="backToOrigin"
         size="s"
         href={backButtonUrl}
         onClick={handleBackOnClick}
