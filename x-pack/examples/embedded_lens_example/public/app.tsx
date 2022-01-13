@@ -35,9 +35,31 @@ import { StartDependencies } from './plugin';
 // `TypedLensByValueInput` can be used for type-safety - it uses the same interfaces as Lens-internal code.
 function getLensAttributes(
   color: string,
-  dataLayer: PersistedIndexPatternLayer,
-  dataView: DataView
+  dataView: DataView,
+  lensFormulaHelper: FormulaHelper
 ): TypedLensByValueInput['attributes'] {
+  const baseLayer: PersistedIndexPatternLayer = {
+    columnOrder: ['col1'],
+    columns: {
+      col1: {
+        dataType: 'date',
+        isBucketed: true,
+        label: '@timestamp',
+        operationType: 'date_histogram',
+        params: { interval: 'auto' },
+        scale: 'interval',
+        sourceField: dataView.timeFieldName!,
+      } as DateHistogramIndexPatternColumn,
+    },
+  };
+
+  const dataLayer = lensFormulaHelper.insertOrReplaceFormulaColumn(
+    'col2',
+    { formula: 'count()' },
+    baseLayer,
+    dataView
+  );
+
   const xyConfig: XYState = {
     axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
     fittingFunction: 'None',
@@ -77,7 +99,7 @@ function getLensAttributes(
       datasourceStates: {
         indexpattern: {
           layers: {
-            layer1: dataLayer,
+            layer1: dataLayer!,
           },
         },
       },
@@ -105,31 +127,7 @@ export const App = (props: {
   const LensComponent = props.plugins.lens.EmbeddableComponent;
   const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
 
-  const baseLayer: PersistedIndexPatternLayer = {
-    columnOrder: ['col1'],
-    columns: {
-      col1: {
-        dataType: 'date',
-        isBucketed: true,
-        label: '@timestamp',
-        operationType: 'date_histogram',
-        params: { interval: 'auto' },
-        scale: 'interval',
-        sourceField: props.defaultDataView.timeFieldName!,
-      } as DateHistogramIndexPatternColumn,
-    },
-  };
-
-  const dataLayer = props.lensFormulaHelper.insertOrReplaceFormulaColumn(
-    'col2',
-    { formula: 'count()' },
-    baseLayer,
-    props.defaultDataView
-  );
-
-  if (!dataLayer) {
-    return null;
-  }
+  const attributes = getLensAttributes(color, props.defaultDataView, props.lensFormulaHelper);
 
   return (
     <EuiPage>
@@ -176,7 +174,7 @@ export const App = (props: {
                       {
                         id: '',
                         timeRange: time,
-                        attributes: getLensAttributes(color, dataLayer, props.defaultDataView!),
+                        attributes,
                       },
                       {
                         openInNewTab: true,
@@ -200,7 +198,7 @@ export const App = (props: {
                       {
                         id: '',
                         timeRange: time,
-                        attributes: getLensAttributes(color, dataLayer, props.defaultDataView!),
+                        attributes,
                       },
                       {
                         openInNewTab: false,
@@ -215,7 +213,7 @@ export const App = (props: {
                 <EuiButton
                   aria-label="Save visualization into library or embed directly into any dashboard"
                   data-test-subj="lns-example-save"
-                  isDisabled={!getLensAttributes(color, dataLayer, props.defaultDataView!)}
+                  isDisabled={!attributes}
                   onClick={() => {
                     setIsSaveModalVisible(true);
                   }}
@@ -227,7 +225,7 @@ export const App = (props: {
                 <EuiButton
                   aria-label="Change time range"
                   data-test-subj="lns-example-change-time-range"
-                  isDisabled={!getLensAttributes(color, dataLayer, props.defaultDataView!)}
+                  isDisabled={!attributes}
                   onClick={() => {
                     setTime({
                       from: '2015-09-18T06:31:44.000Z',
@@ -244,7 +242,7 @@ export const App = (props: {
               withActions
               style={{ height: 500 }}
               timeRange={time}
-              attributes={getLensAttributes(color, dataLayer, props.defaultDataView!)}
+              attributes={attributes}
               onLoad={(val) => {
                 setIsLoading(val);
               }}
@@ -264,13 +262,7 @@ export const App = (props: {
             />
             {isSaveModalVisible && (
               <LensSaveModalComponent
-                initialInput={
-                  getLensAttributes(
-                    color,
-                    dataLayer,
-                    props.defaultDataView!
-                  ) as unknown as LensEmbeddableInput
-                }
+                initialInput={attributes as unknown as LensEmbeddableInput}
                 onSave={() => {}}
                 onClose={() => setIsSaveModalVisible(false)}
               />
