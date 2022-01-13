@@ -64,7 +64,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.existingFieldNames.sort()).to.eql(fieldsWithData.sort());
       });
 
-      it('should return fields filtered by query and filters', async () => {
+      it('should return fields filtered by term query', async () => {
         const expectedFieldNames = [
           'ts',
           'filter_field',
@@ -80,6 +80,32 @@ export default ({ getService }: FtrProviderContext) => {
             dslQuery: {
               bool: {
                 filter: [{ term: { filter_field: 'a' } }],
+              },
+            },
+            fromDate: TEST_START_TIME,
+            toDate: TEST_END_TIME,
+          })
+          .expect(200);
+        expect(body.existingFieldNames.sort()).to.eql(expectedFieldNames.sort());
+      });
+
+      // blocked on https://github.com/elastic/elasticsearch/issues/82515
+      it.skip('should return fields filtered by match_phrase query', async () => {
+        const expectedFieldNames = [
+          'ts',
+          'filter_field',
+          'textfield1',
+          // textfield2 and mapping_runtime_field are defined on the other index
+          'data_view_runtime_field',
+        ];
+
+        const { body } = await supertest
+          .post(`/api/lens/existing_fields/existence_index`)
+          .set(COMMON_HEADERS)
+          .send({
+            dslQuery: {
+              bool: {
+                filter: [{ match_phrase: { filter_field: 'a' } }],
               },
             },
             fromDate: TEST_START_TIME,
