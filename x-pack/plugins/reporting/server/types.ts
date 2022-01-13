@@ -11,6 +11,7 @@ import type { DataPluginStart } from 'src/plugins/data/server/plugin';
 import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
 import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import type { Writable } from 'stream';
+import { IEventLogService } from '../../event_log/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import type { LicensingPluginSetup } from '../../licensing/server';
 import type {
@@ -91,6 +92,7 @@ export interface ExportTypeDefinition<
  */
 export interface ReportingSetupDeps {
   licensing: LicensingPluginSetup;
+  eventLog: IEventLogService;
   features: FeaturesPluginSetup;
   screenshotMode: ScreenshotModePluginSetup;
   security?: SecurityPluginSetup;

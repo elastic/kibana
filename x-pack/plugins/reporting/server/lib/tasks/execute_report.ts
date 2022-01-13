@@ -333,6 +333,10 @@ export class ExecuteReportTask implements ReportingTask {
           );
           this.logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
 
+          const eventLog = this.reporting.getEventLogger(
+            new Report({ ...task, _id: task.id, _index: task.index })
+          );
+
           try {
             const jobContentEncoding = this.getJobContentEncoding(jobType);
             const stream = await getContentStream(
@@ -347,9 +351,15 @@ export class ExecuteReportTask implements ReportingTask {
                 encoding: jobContentEncoding === 'base64' ? 'base64' : 'raw',
               }
             );
+
+            eventLog.logExecutionStart();
+
             const output = await this._performJob(task, cancellationToken, stream);
 
             stream.end();
+
+            eventLog.logExecutionComplete({ byteSize: stream.bytesWritten });
+
             await promisify(finished)(stream, { readable: false });
 
             report._seq_no = stream.getSeqNo()!;
@@ -365,6 +375,8 @@ export class ExecuteReportTask implements ReportingTask {
             // untrack the report for concurrency awareness
             this.logger.debug(`Stopping ${jobId}.`);
           } catch (failedToExecuteErr) {
+            eventLog.logError(failedToExecuteErr);
+
             cancellationToken.cancel();
 
             if (attempts < maxAttempts) {

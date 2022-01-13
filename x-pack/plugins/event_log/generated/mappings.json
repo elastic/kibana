@@ -239,6 +239,9 @@
                 },
                 "task": {
                     "properties": {
+                        "id": {
+                            "type": "keyword"
+                        },
                         "scheduled": {
                             "type": "date"
                         },
@@ -300,6 +303,19 @@
                                     }
                                 }
                             }
+                        }
+                    }
+                },
+                "reporting": {
+                    "properties": {
+                        "id": {
+                            "type": "keyword"
+                        },
+                        "jobType": {
+                            "type": "keyword"
+                        },
+                        "byteSize": {
+                            "type": "long"
                         }
                     }
                 },

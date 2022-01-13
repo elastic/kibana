@@ -9,10 +9,12 @@ import { schema } from '@kbn/config-schema';
 import { KibanaRequest } from 'src/core/server';
 import { Writable } from 'stream';
 import { ReportingCore } from '../../';
+import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
 import { runTaskFnFactory } from '../../export_types/csv_searchsource_immediate/execute_job';
 import { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immediate/types';
 import { LevelLogger as Logger } from '../../lib';
 import { TaskRunResult } from '../../lib/tasks';
+import { BaseParams } from '../../types';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { RequestHandler } from '../lib/request_handler';
 
@@ -64,9 +66,17 @@ export function registerGenerateCsvFromSavedObjectImmediate(
     authorizedUserPreRouting(
       reporting,
       async (user, context, req: CsvFromSavedObjectRequest, res) => {
-        const logger = parentLogger.clone(['csv_searchsource_immediate']);
+        const logger = parentLogger.clone([CSV_SEARCHSOURCE_IMMEDIATE_TYPE]);
         const runTaskFn = runTaskFnFactory(reporting, logger);
         const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
+
+        const eventLog = reporting.getEventLogger({
+          jobtype: CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
+          created_by: user && user.username,
+          payload: { browserTimezone: (req.params as BaseParams).browserTimezone },
+        });
+
+        eventLog.logExecutionStart();
 
         try {
           let buffer = Buffer.from('');
@@ -98,6 +108,8 @@ export function registerGenerateCsvFromSavedObjectImmediate(
             logger.warn('CSV Job Execution created empty content result');
           }
 
+          eventLog.logExecutionComplete({ byteSize: jobOutputSize });
+
           return res.ok({
             body: jobOutputContent || '',
             headers: {
@@ -107,6 +119,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           });
         } catch (err) {
           logger.error(err);
+          eventLog.logError(err);
           return requestHandler.handleError(err);
         }
       }

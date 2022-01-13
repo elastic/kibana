@@ -11,6 +11,7 @@ import { ReportingCore } from './';
 import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
 import { registerDeprecations } from './deprecations';
 import { LevelLogger, ReportingStore } from './lib';
+import { registerEventLogProviderActions } from './lib/event_logger';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
 import type {
@@ -37,7 +38,7 @@ export class ReportingPlugin
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
     const { http } = core;
-    const { features, licensing, security, spaces, taskManager } = plugins;
+    const { features, licensing, eventLog, security, spaces, taskManager } = plugins;
 
     const reportingCore = new ReportingCore(this.logger, this.initContext);
 
@@ -57,15 +58,17 @@ export class ReportingPlugin
     reportingCore.pluginSetup({
       features,
       licensing,
-      basePath,
-      router,
+      eventLog,
       security,
       spaces,
       taskManager,
       logger: this.logger,
       status: core.status,
+      basePath,
+      router,
     });
 
+    registerEventLogProviderActions(eventLog);
     registerUiSettings(core);
     registerDeprecations({
       core,
