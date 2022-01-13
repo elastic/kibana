@@ -10,8 +10,6 @@ import { Spaces } from '../../scenarios';
 import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
-const EXECUTION_DELAY_MS = 500;
-
 // eslint-disable-next-line import/no-default-export
 export default function monitoringAlertTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -21,19 +19,16 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
 
     after(async () => await objectRemover.removeAll());
 
-    it.skip('should return an accurate history for a single success', async () => {
+    it('should return an accurate history for a single success', async () => {
       const createResponse = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send({
-          ...getTestAlertData(),
-          schedule: { interval: '3s' },
-        });
+        .send(getTestAlertData({ schedule: { interval: '3s' } }));
       expect(createResponse.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
 
-      // Allow a single execution
-      await delay(1 * (3 * 1000) + EXECUTION_DELAY_MS);
+      // Allow at least one execution
+      await waitForExecutionCount(1, createResponse.body.id);
 
       const getResponse = await supertest.get(
         `${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createResponse.body.id}`
@@ -49,10 +44,7 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       const createResponse = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send({
-          ...getTestAlertData(),
-          schedule: { interval: '3s' },
-        });
+        .send(getTestAlertData({ schedule: { interval: '3s' } }));
       expect(createResponse.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
 
@@ -76,15 +68,15 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
       const createResponse = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send({
-          ...getTestAlertData({
+        .send(
+          getTestAlertData({
             rule_type_id: 'test.patternSuccessOrFailure',
             schedule: { interval: '3s' },
             params: {
               pattern,
             },
-          }),
-        });
+          })
+        );
       expect(createResponse.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
 
@@ -106,10 +98,10 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
     });
   });
 
-  const MAX_COUNT = 25;
-  let counter = 0;
+  const MAX_ATTEMPTS = 25;
+  let attempts = 0;
   async function waitForExecutionCount(count: number, id: string): Promise<boolean> {
-    if (counter++ >= MAX_COUNT) {
+    if (attempts++ >= MAX_ATTEMPTS) {
       expect().fail(`waiting for execution of alert ${id} to hit ${count}`);
       return true;
     }
@@ -118,7 +110,7 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
     );
     expect(getResponse.status).to.eql(200);
     if (getResponse.body.monitoring.execution.history.length >= count) {
-      counter = 0;
+      attempts = 0;
       return true;
     }
     // eslint-disable-next-line no-console
