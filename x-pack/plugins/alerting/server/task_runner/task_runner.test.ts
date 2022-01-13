@@ -21,7 +21,7 @@ import {
   TaskStatus,
 } from '../../../task_manager/server';
 import { TaskRunnerContext } from './task_runner_factory';
-import { TaskRunner, getDefaultMonitoring } from './task_runner';
+import { TaskRunner, getDefaultRuleMonitoring } from './task_runner';
 import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
 import {
   loggingSystemMock,
@@ -176,7 +176,7 @@ describe('Task Runner', () => {
       status: 'unknown',
       lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
     },
-    monitoring: getDefaultMonitoring(),
+    monitoring: getDefaultRuleMonitoring(),
   };
 
   beforeEach(() => {
