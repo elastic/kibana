@@ -6,9 +6,4 @@
  * Side Public License, v 1.
  */
 
-const mockUuidv4 = jest.fn().mockReturnValue('uuidv4');
-jest.mock('uuid', () => ({
-  v4: mockUuidv4,
-}));
-
-export { mockUuidv4 };
+export { KibanaThemeProvider } from './kibana_theme_provider';

@@ -17,27 +17,22 @@ import {
 } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
-import { CasesClient } from '../client';
-import { CasesClientArgs } from '../types';
-import { MetricsHandler } from './types';
+import { BaseHandler } from './base_handler';
+import { BaseHandlerCommonOptions } from './types';
 
-export class Lifespan implements MetricsHandler {
-  constructor(
-    private readonly caseId: string,
-    private readonly casesClient: CasesClient,
-    private readonly clientArgs: CasesClientArgs
-  ) {}
-
-  public getFeatures(): Set<string> {
-    return new Set(['lifespan']);
+export class Lifespan extends BaseHandler {
+  constructor(options: BaseHandlerCommonOptions) {
+    super(options, ['lifespan']);
   }
 
   public async compute(): Promise<CaseMetricsResponse> {
     const { unsecuredSavedObjectsClient, authorization, userActionService, logger } =
-      this.clientArgs;
+      this.options.clientArgs;
+
+    const { caseId, casesClient } = this.options;
 
     try {
-      const caseInfo = await this.casesClient.cases.get({ id: this.caseId });
+      const caseInfo = await casesClient.cases.get({ id: caseId });
 
       const caseOpenTimestamp = new Date(caseInfo.created_at);
       if (!isDateValid(caseOpenTimestamp)) {
@@ -52,7 +47,7 @@ export class Lifespan implements MetricsHandler {
 
       const statusUserActions = await userActionService.findStatusChanges({
         unsecuredSavedObjectsClient,
-        caseId: this.caseId,
+        caseId,
         filter: authorizationFilter,
       });
 
@@ -67,7 +62,7 @@ export class Lifespan implements MetricsHandler {
       };
     } catch (error) {
       throw createCaseError({
-        message: `Failed to retrieve lifespan metrics for case id: ${this.caseId}: ${error}`,
+        message: `Failed to retrieve lifespan metrics for case id: ${caseId}: ${error}`,
         error,
         logger,
       });
