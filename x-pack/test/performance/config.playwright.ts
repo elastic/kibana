@@ -17,12 +17,16 @@ const APM_PUBLIC_TOKEN = 'Q5q5rWQEw6tKeirBpw';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
 
-  const testFiles = [require.resolve('./tests/playwright/home.ts')];
+  const testFiles = [
+    require.resolve('./tests/playwright/home.ts'),
+    // require.resolve('./tests/playwright/flight_dashboard.ts'),
+  ];
 
   return {
     testFiles,
     services,
     pageObjects,
+    servicesRequiredForTestAnalysis: ['playwright'],
     servers: functionalConfig.get('servers'),
     esTestCluster: functionalConfig.get('esTestCluster'),
     apps: functionalConfig.get('apps'),
@@ -32,6 +36,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        '--server.uuid=5b2de169-2785-441b-ae8c-186a1936b17d',
+        '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
+        '--xpack.encryptedSavedObjects.encryptionKey="DkdXazszSCYexXqz4YktBGHCRkV6hyNK"',
+        '--xpack.security.session.idleTimeout=1Y',
+        '--xpack.security.session.lifespan=1Y',
+        '--xpack.security.session.cleanupInterval=1Y',
+      ],
       env: {
         ELASTIC_APM_ACTIVE: process.env.ELASTIC_APM_ACTIVE,
         ELASTIC_APM_CONTEXT_PROPAGATION_ONLY: 'false',
@@ -41,7 +54,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ELASTIC_APM_SECRET_TOKEN: APM_PUBLIC_TOKEN,
         ELASTIC_APM_GLOBAL_LABELS: Object.entries({
           ftrConfig: `x-pack/test/performance/tests/config.playwright`,
-          performancePhase: process.env.PERF_TEST_PHASE,
+          performancePhase: process.env.TEST_PERFORMANCE_PHASE,
         })
           .filter(([, v]) => !!v)
           .reduce((acc, [k, v]) => (acc ? `${acc},${k}=${v}` : `${k}=${v}`), ''),
