@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import { createSelector } from 'reselect';
-import { OverlayStart, ThemeServiceStart  } from 'src/core/public';
+import { OverlayStart, ThemeServiceStart } from 'src/core/public';
 import { DataViewField, DataView } from '../../../../../../plugins/data_views/public';
 import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { Table } from './components/table';
