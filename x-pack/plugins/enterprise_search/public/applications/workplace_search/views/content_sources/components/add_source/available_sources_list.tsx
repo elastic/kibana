@@ -58,10 +58,9 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
             <EuiText size="m">{name}</EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmptyTo
-              disabled={disabled}
-              to={getSourcesPath(addPath, true)}
-            >Connect</EuiButtonEmptyTo>
+            <EuiButtonEmptyTo disabled={disabled} to={getSourcesPath(addPath, true)}>
+              Connect
+            </EuiButtonEmptyTo>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s" />
