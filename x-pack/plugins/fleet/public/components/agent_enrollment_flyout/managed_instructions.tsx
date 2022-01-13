@@ -73,7 +73,7 @@ export const ManagedInstructions = React.memo<Props>(
     const apiKey = useGetOneEnrollmentAPIKey(selectedApiKeyId);
     const fleetServerInstructions = useFleetServerInstructions(apiKey?.data?.item?.policy_id);
 
-    const { data: agents } = useGetAgents({
+    const { data: agents, isLoading: isLoadingAgents } = useGetAgents({
       page: 1,
       perPage: 1000,
       showInactive: false,
@@ -158,7 +158,7 @@ export const ManagedInstructions = React.memo<Props>(
       return null;
     }
 
-    if (fleetStatus.isReady && fleetServers.length > 0) {
+    if (fleetStatus.isReady && (isLoadingAgents || fleetServers.length > 0)) {
       return (
         <>
           <EuiText>
