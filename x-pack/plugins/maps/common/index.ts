@@ -18,6 +18,11 @@ export {
   SOURCE_TYPES,
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
+  FieldFormatter,
+  LAYER_WIZARD_CATEGORY,
+  MAX_ZOOM,
+  MIN_ZOOM,
+  VECTOR_SHAPE_TYPE,
 } from './constants';
 
 export type {
