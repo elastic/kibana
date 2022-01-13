@@ -19,7 +19,8 @@ import { setTimeout as setTimeoutPromise } from 'timers/promises';
 
 const requestWaitDelay = 25;
 
-describe('ServerMetricsCollector', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/59234
+describe.skip('ServerMetricsCollector', () => {
   let server: HttpService;
   let collector: ServerMetricsCollector;
   let hapiServer: HapiServer;

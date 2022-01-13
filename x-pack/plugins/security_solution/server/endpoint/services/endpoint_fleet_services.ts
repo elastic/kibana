@@ -11,7 +11,7 @@ import type {
   AgentPolicyServiceInterface,
   FleetStartContract,
   PackagePolicyServiceInterface,
-  PackageService,
+  PackageClient,
 } from '../../../../fleet/server';
 
 export interface EndpointFleetServicesFactoryInterface {
@@ -33,13 +33,13 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       agentPolicyService: agentPolicy,
       packagePolicyService: packagePolicy,
       agentService,
-      packageService: packages,
+      packageService,
     } = this.fleetDependencies;
 
     return {
       agent: agentService.asScoped(req),
       agentPolicy,
-      packages,
+      packages: packageService.asScoped(req),
       packagePolicy,
 
       asInternal: this.asInternalUser.bind(this),
@@ -51,13 +51,13 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
       agentPolicyService: agentPolicy,
       packagePolicyService: packagePolicy,
       agentService,
-      packageService: packages,
+      packageService,
     } = this.fleetDependencies;
 
     return {
       agent: agentService.asInternalUser,
       agentPolicy,
-      packages,
+      packages: packageService.asInternalUser,
       packagePolicy,
 
       asScoped: this.asScoped.bind(this),
@@ -71,7 +71,7 @@ export class EndpointFleetServicesFactory implements EndpointFleetServicesFactor
 export interface EndpointFleetServicesInterface {
   agent: AgentClient;
   agentPolicy: AgentPolicyServiceInterface;
-  packages: PackageService;
+  packages: PackageClient;
   packagePolicy: PackagePolicyServiceInterface;
 }
 
