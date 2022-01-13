@@ -11,12 +11,13 @@ import { listMock } from '../../../lists/server/mocks';
 import { securityMock } from '../../../security/server/mocks';
 import { alertsMock } from '../../../alerting/server/mocks';
 import { xpackMocks } from '../fixtures';
-import { FleetStartContract, ExternalCallback, PackageService } from '../../../fleet/server';
+import { FleetStartContract, ExternalCallback } from '../../../fleet/server';
 import {
   createPackagePolicyServiceMock,
   createMockAgentPolicyService,
   createMockAgentService,
   createArtifactsClientMock,
+  createMockPackageService,
 } from '../../../fleet/server/mocks';
 import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
 import {
@@ -136,17 +137,6 @@ export const createMockEndpointAppContextServiceStartContract =
   };
 
 /**
- * Create mock PackageService
- */
-
-export const createMockPackageService = (): jest.Mocked<PackageService> => {
-  return {
-    getInstallation: jest.fn(),
-    ensureInstalledPackage: jest.fn(),
-  };
-};
-
-/**
  * Creates a mock IndexPatternService for use in tests that need to interact with the Fleet's
  * ESIndexPatternService.
  *
@@ -168,7 +158,6 @@ export const createMockFleetStartContract = (indexPattern: string): FleetStartCo
     registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
     packagePolicyService: createPackagePolicyServiceMock(),
     createArtifactsClient: jest.fn().mockReturnValue(createArtifactsClientMock()),
-    fetchFindLatestPackage: jest.fn().mockReturnValue('8.0.0'),
   };
 };
 

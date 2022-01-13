@@ -49,7 +49,7 @@ TYPES_DEPS = [
   "//packages/kbn-i18n-react:npm_module_types",
   "//packages/kbn-monaco:npm_module_types",
   "//packages/kbn-std:npm_module_types",
-  "//packages/kbn-ui-shared-deps-npm",
+  "//packages/kbn-ui-shared-deps-npm:npm_module_types",
   "@npm//@elastic/eui",
   "@npm//webpack",
 ]
