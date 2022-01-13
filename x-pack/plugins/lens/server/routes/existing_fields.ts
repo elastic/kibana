@@ -315,7 +315,7 @@ export function existingFields(filteredFields: FieldSpec[], allFields: Field[]):
   }
 
   return allFields
-    .filter((field) => !field.isScript && !field.runtimeField && !missingFields.has(field.name))
+    .filter((field) => (field.isScript || field.runtimeField) && !missingFields.has(field.name))
     .map((f) => f.name);
 }
 
