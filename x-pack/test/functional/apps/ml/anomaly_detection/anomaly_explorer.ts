@@ -76,6 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.testResources.deleteMLTestDashboard();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     for (const testData of testDataList) {
