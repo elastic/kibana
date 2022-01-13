@@ -159,7 +159,7 @@ export function MockKibanaProvider<ExtraCore>({
           data={(coreOptions as any).data}
           observability={(coreOptions as any).observability}
         >
-          <EuiThemeProvider darkMode={false}>
+          <EuiThemeProvider theme$={(coreOptions as any).theme.theme$}>
             <I18nProvider>{children}</I18nProvider>
           </EuiThemeProvider>
         </UptimeStartupPluginsContextProvider>

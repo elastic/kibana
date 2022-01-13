@@ -50,7 +50,6 @@ export interface UptimeAppProps {
   basePath: string;
   canSave: boolean;
   core: CoreStart;
-  darkMode: boolean;
   i18n: I18nStart;
   isApmAvailable: boolean;
   isInfraAvailable: boolean;
@@ -70,7 +69,6 @@ const Application = (props: UptimeAppProps) => {
     basePath,
     canSave,
     core,
-    darkMode,
     i18n: i18nCore,
     plugins,
     renderGlobalHelpControls,
@@ -119,10 +117,10 @@ const Application = (props: UptimeAppProps) => {
               }}
             >
               <Router history={appMountParameters.history}>
-                <EuiThemeProvider darkMode={darkMode}>
+                <EuiThemeProvider theme$={props.appMountParameters.theme$}>
                   <UptimeRefreshContextProvider>
                     <UptimeSettingsContextProvider {...props}>
-                      <UptimeThemeContextProvider darkMode={darkMode}>
+                      <UptimeThemeContextProvider theme$={props.appMountParameters.theme$}>
                         <UptimeStartupPluginsContextProvider {...startPlugins}>
                           <UptimeDataViewContextProvider dataViews={startPlugins.dataViews}>
                             <div className={APP_WRAPPER_CLASS} data-test-subj="uptimeApp">

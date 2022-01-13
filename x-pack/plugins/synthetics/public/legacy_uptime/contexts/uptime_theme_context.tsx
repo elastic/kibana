@@ -9,6 +9,10 @@ import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import React, { createContext, useMemo } from 'react';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
+import { CoreTheme } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { Observable } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import { UptimeAppColors } from '../app/uptime_app';
 
 export interface UptimeThemeContextValues {
@@ -43,11 +47,16 @@ const defaultContext: UptimeThemeContextValues = {
 export const UptimeThemeContext = createContext(defaultContext);
 
 interface ThemeContextProps {
-  darkMode: boolean;
+  theme$: Observable<CoreTheme>;
 }
 
-export const UptimeThemeContextProvider: React.FC<ThemeContextProps> = ({ darkMode, children }) => {
+export const UptimeThemeContextProvider: React.FC<ThemeContextProps> = ({ theme$, children }) => {
+  const { services } = useKibana();
+  const theme = useObservable(services.theme!.theme$);
+  const darkMode = theme?.darkMode || false;
+
   let colors: UptimeAppColors;
+
   if (darkMode) {
     colors = {
       danger: euiDarkVars.euiColorVis9,
