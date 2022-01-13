@@ -258,7 +258,6 @@ export function JobsList({
         columns={columns}
         items={filteredJobs}
         tableLayout="auto"
-        hidePerPageOptions={false}
       />
       <EuiSpacer size="l" />
     </>

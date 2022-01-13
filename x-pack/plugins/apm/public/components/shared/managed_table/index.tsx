@@ -67,7 +67,7 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     initialPageSize = INITIAL_PAGE_SIZE,
     initialSortField = props.columns[0]?.field || '',
     initialSortDirection = 'asc',
-    hidePerPageOptions = true,
+    hidePerPageOptions = false,
     noItemsMessage,
     sortItems = true,
     sortFn = defaultSortFn,

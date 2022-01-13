@@ -315,7 +315,6 @@ export function ServiceList({
           noItemsMessage={noItemsMessage}
           initialSortField={initialSortField}
           initialSortDirection="desc"
-          hidePerPageOptions={false}
           sortFn={(itemsToSort, sortField, sortDirection) => {
             // For healthStatus, sort items by healthStatus first, then by TPM
             return sortField === 'healthStatus'

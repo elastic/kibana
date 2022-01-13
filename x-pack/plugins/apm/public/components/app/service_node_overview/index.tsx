@@ -171,7 +171,6 @@ function ServiceNodeOverview() {
       columns={columns}
       initialSortField={INITIAL_SORT_FIELD}
       initialSortDirection={INITIAL_SORT_DIRECTION}
-      hidePerPageOptions={false}
     />
   );
 }

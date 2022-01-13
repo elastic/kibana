@@ -118,6 +118,7 @@ export function ServiceOverview() {
                     isSingleColumn={isSingleColumn}
                     start={start}
                     end={end}
+                    hidePerPageOptions={true}
                   />
                 </EuiPanel>
               </EuiFlexItem>

@@ -236,7 +236,6 @@ function ErrorGroupList({
       initialSortField="occurrences"
       initialSortDirection="desc"
       sortItems={false}
-      hidePerPageOptions={false}
     />
   );
 }

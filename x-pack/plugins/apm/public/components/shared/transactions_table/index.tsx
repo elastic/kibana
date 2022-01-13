@@ -70,7 +70,7 @@ export function TransactionsTable({
   hideViewTransactionsLink = false,
   isSingleColumn = true,
   numberOfTransactionsPerPage = 5,
-  hidePerPageOptions = true,
+  hidePerPageOptions = false,
   showAggregationAccurateCallout = false,
   environment,
   kuery,

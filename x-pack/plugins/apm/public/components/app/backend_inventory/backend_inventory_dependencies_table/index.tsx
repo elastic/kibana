@@ -105,7 +105,6 @@ export function BackendInventoryDependenciesTable() {
       )}
       status={status}
       compact={false}
-      hidePerPageOptions={false}
     />
   );
 }

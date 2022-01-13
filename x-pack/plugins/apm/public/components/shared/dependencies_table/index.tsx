@@ -58,7 +58,7 @@ export function DependenciesTable(props: Props) {
     nameColumnTitle,
     status,
     compact = true,
-    hidePerPageOptions = true,
+    hidePerPageOptions = false,
   } = props;
 
   // SparkPlots should be hidden if we're in two-column view and size XL (1200px)
