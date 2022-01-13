@@ -11,10 +11,6 @@ import React from 'react';
 import { AnomalyDetectionSettingsContext } from './anomaly_detection_settings_context';
 import { Settings } from './settings';
 
-jest.mock('../components/navigation_menu', () => ({
-  NavigationMenu: () => <div id="mockNavigationMenu" />,
-}));
-
 jest.mock('../components/help_menu', () => ({
   HelpMenu: () => <div id="mockHelpMenu" />,
 }));

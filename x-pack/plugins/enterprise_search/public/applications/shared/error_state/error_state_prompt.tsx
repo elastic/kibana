@@ -15,14 +15,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CloudSetup } from '../../../../../cloud/public';
 
+import { HttpLogic } from '../http';
 import { KibanaLogic } from '../kibana';
 import { EuiButtonTo, EuiLinkTo } from '../react_router_helpers';
 
 import './error_state_prompt.scss';
 
-export const ErrorStatePrompt: React.FC<{ errorConnectingMessage?: string }> = ({
-  errorConnectingMessage,
-}) => {
+export const ErrorStatePrompt: React.FC = () => {
+  const { errorConnectingMessage } = useValues(HttpLogic);
   const { config, cloud } = useValues(KibanaLogic);
   const isCloudEnabled = cloud.isCloudEnabled;
 

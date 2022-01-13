@@ -20,6 +20,7 @@ export const analyticsJobsListRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
+  id: 'data_frame_analytics',
   path: '/data_frame_analytics',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
@@ -32,6 +33,8 @@ export const analyticsJobsListRouteFactory = (
       href: '',
     },
   ],
+  'data-test-subj': 'mlPageDataFrameAnalytics',
+  enableDatePicker: true,
 });
 
 const PageWrapper: FC<PageProps> = ({ location, deps }) => {
