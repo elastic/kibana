@@ -786,7 +786,7 @@
     ],
     "title": "Customer Betty"
   },
-  "coreMigrationVersion": "8.0.0",
+  "coreMigrationVersion": "8.1.0",
   "id": "ffc52150-6377-11ec-8099-3da0733c6cce",
   "migrationVersion": {
     "search": "8.0.0"
