@@ -8,7 +8,6 @@
 import { FLEET_AGENT_POLICIES, navigateTo, OLD_OSQUERY_MANAGER } from '../../tasks/navigation';
 import {
   addIntegration,
-  clickButtonIfVisible,
   closeModalIfVisible,
 } from '../../tasks/integrations';
 
@@ -35,7 +34,7 @@ describe('Super User - Add Integration', () => {
     addIntegration();
     cy.contains('osquery_manager-1');
     cy.visit('app/fleet/policies');
-    cy.contains(/^Default policy$/).click();
+    cy.contains(/^Default Fleet Server policy$/).click();
     cy.contains('Actions').click();
     cy.contains('View policy').click();
     cy.contains('name: osquery_manager-1');
@@ -45,13 +44,11 @@ describe('Super User - Add Integration', () => {
     cy.contains(/^Settings$/).click();
     cy.contains(/^Upgrade to latest version$/).click();
     closeModalIfVisible();
-
-    cy.contains('Updated Osquery Manager and upgraded policies');
+    cy.contains('Updated Osquery Manager and upgraded policies', { timeout: 60000 });
     cy.visit('app/fleet/policies');
     cy.contains(/^Default Fleet Server policy$/).click();
     cy.contains('Actions').click();
     cy.contains('View policy').click();
-    // TODO Uncomment to check if we fixed the issue
     // cy.contains('name: osquery_manager-1');
     // cy.contains(`version: 0.8.0`);
     cy.visit('app/integrations/detail/osquery_manager/policies');
@@ -68,7 +65,8 @@ describe('Super User - Add Integration', () => {
     closeModalIfVisible();
     cy.contains(/^Successfully uninstalled Osquery Manager$/);
   });
-  it('should display Osquery integration in the Policies list once installed ', () => {
+
+  it('add integration', () => {
     cy.visit(FLEET_AGENT_POLICIES);
     cy.contains('Default Fleet Server policy').click();
     cy.contains('Add integration').click();
@@ -76,7 +74,6 @@ describe('Super User - Add Integration', () => {
     addIntegration();
     cy.contains('osquery_manager-');
   });
-
   it('should have integration and packs copied when upgrading integration', () => {
     const packageName = 'osquery_manager';
     const oldVersion = '0.7.4';
@@ -85,8 +82,7 @@ describe('Super User - Add Integration', () => {
     cy.visit(`app/integrations/detail/${packageName}-${oldVersion}/overview`);
     cy.contains('Add Osquery Manager').click();
     cy.contains('Save and continue').click();
-    closeModalIfVisible();
-    clickButtonIfVisible('Add Elastic Agent later');
+    cy.contains('Add Elastic Agent later').click();
     cy.contains('Upgrade');
     cy.contains('Default policy').click();
     cy.get('tr')
