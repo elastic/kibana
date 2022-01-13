@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { roundValue } from '../../utils';
+import { roundValue, getDataMinMax } from '../../utils';
 import {
   PaletteContinuity,
   checkIsMaxContinuity,
   checkIsMinContinuity,
 } from '../../../../../../../../src/plugins/charts/common';
+import type { CustomPaletteParams } from '../../../../../common';
 import type { ColorRange, ColorRangeAccessor } from '../types';
 
 /**
@@ -70,4 +71,37 @@ export const toColorStops = (colorRanges: ColorRange[], continuity: PaletteConti
       stop: i === 0 ? min : colorRange.start,
     })),
   };
+};
+
+/**
+ * Calculate right max or min value for new continuity
+ */
+
+export const getValueForContinuity = (
+  colorRanges: ColorRange[],
+  continuity: PaletteContinuity,
+  isLast: boolean,
+  rangeType: CustomPaletteParams['rangeType'],
+  dataBounds: { min: number; max: number }
+) => {
+  const { max, min } = getDataMinMax(rangeType, dataBounds);
+  let value;
+  if (isLast) {
+    if (['none', 'below'].includes(continuity)) {
+      value =
+        colorRanges[colorRanges.length - 1].start > max
+          ? colorRanges[colorRanges.length - 1].start + 1
+          : max;
+    } else {
+      value = Infinity;
+    }
+  } else {
+    if (['none', 'above'].includes(continuity)) {
+      value = colorRanges[0].end < min ? colorRanges[0].end - 1 : min;
+    } else {
+      value = -Infinity;
+    }
+  }
+
+  return value;
 };

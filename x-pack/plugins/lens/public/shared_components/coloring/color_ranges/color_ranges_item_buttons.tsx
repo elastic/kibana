@@ -75,13 +75,11 @@ export function ColorRangeEditButton({
   const isLast = isLastItem(accessor);
 
   const onExecuteAction = useCallback(() => {
-    const { max: autoMax, min: autoMin } = getDataMinMax(rangeType, dataBounds);
     const newContinuity = switchContinuity(isLast, continuity);
-    colorRanges[index][isLast ? 'end' : 'start'] = roundValue(isLast ? autoMax : autoMin);
 
     dispatch({
-      type: 'set',
-      payload: { colorRanges: [...colorRanges], continuity: newContinuity },
+      type: 'updateContinuity',
+      payload: { isLast, continuity: newContinuity, dataBounds },
     });
   }, [colorRanges, isLast, index, dispatch, continuity, dataBounds, rangeType]);
 
@@ -104,6 +102,7 @@ export function ColorRangeAutoDetectButton({
   index,
   colorRanges,
   continuity,
+  dataBounds,
   dispatch,
   accessor,
 }: ColorRangesItemButtonProps) {
@@ -112,11 +111,9 @@ export function ColorRangeAutoDetectButton({
   const onExecuteAction = useCallback(() => {
     const newContinuity = switchContinuity(isLast, continuity);
 
-    colorRanges[index][isLast ? 'end' : 'start'] = isLast ? Infinity : -Infinity;
-
     dispatch({
-      type: 'set',
-      payload: { colorRanges: [...colorRanges], continuity: newContinuity },
+      type: 'updateContinuity',
+      payload: { isLast, continuity: newContinuity, dataBounds },
     });
   }, [continuity, colorRanges, dispatch, index, isLast]);
 

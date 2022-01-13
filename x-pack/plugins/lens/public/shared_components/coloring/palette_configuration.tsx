@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useReducer } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { EuiFormRow, htmlIdGenerator, EuiButtonGroup, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -15,21 +16,13 @@ import './palette_configuration.scss';
 
 import { CUSTOM_PALETTE, DEFAULT_COLOR_STEPS, DEFAULT_CONTINUITY } from './constants';
 import type { CustomPaletteParams, RequiredPaletteParamTypes } from '../../../common';
-import {
-  getColorStops,
-  getPaletteStops,
-  mergePaletteParams,
-  getDataMinMax,
-  getStopsFromColorRangesByNewInterval,
-  getSwitchToCustomParams,
-  toColorRanges,
-} from './utils';
+import { getSwitchToCustomParams, toColorRanges } from './utils';
+
+import { toColorStops } from './color_ranges/utils';
 
 import { ColorRanges } from './color_ranges';
-import {
-  checkIsMinContinuity,
-  checkIsMaxContinuity,
-} from '../../../../../../src/plugins/charts/common';
+
+import { paletteConfigurationReducer } from './palette_configuration_reducer';
 const idPrefix = htmlIdGenerator()();
 
 export function CustomizablePalette({
@@ -45,36 +38,55 @@ export function CustomizablePalette({
   dataBounds?: { min: number; max: number };
   showRangeTypeSelector?: boolean;
 }) {
-  const onChangeColorRanges = useCallback(
-    (colorStops, upperMax, continuity) => {
-      const newParams = getSwitchToCustomParams(
-        palettes,
-        activePalette!,
-        {
-          continuity,
-          colorStops,
-          steps: activePalette!.params?.steps || DEFAULT_COLOR_STEPS,
-          reverse: !activePalette!.params?.reverse,
-          rangeMin: colorStops[0]?.stop,
-          rangeMax: upperMax,
-        },
-        dataBounds!
-      );
-      return setPalette(newParams);
-    },
-    [activePalette, dataBounds, palettes, setPalette]
-  );
-
   if (!dataBounds || !activePalette) {
     return null;
   }
-  const isCurrentPaletteCustom = activePalette.params?.name === CUSTOM_PALETTE;
 
   const colorRangesToShow = toColorRanges(
     palettes,
     activePalette?.params?.colorStops || [],
     activePalette,
     dataBounds
+  );
+
+  const [localState, dispatch] = useReducer(paletteConfigurationReducer, {
+    activePalette,
+    colorRanges: colorRangesToShow,
+  });
+
+  useDebounce(
+    () => {
+      if (
+        localState.activePalette !== activePalette ||
+        colorRangesToShow !== localState.colorRanges
+      ) {
+        let newPalette = localState.activePalette;
+
+        const continuity = localState.activePalette.params?.continuity ?? DEFAULT_CONTINUITY;
+        const isCurrentPaletteCustom = localState.activePalette.name === CUSTOM_PALETTE;
+        const { max, colorStops } = toColorStops(localState.colorRanges, continuity);
+
+        if (isCurrentPaletteCustom && newPalette.params?.colorStops !== colorStops) {
+          newPalette = getSwitchToCustomParams(
+            palettes,
+            localState.activePalette!,
+            {
+              continuity,
+              colorStops,
+              steps: localState.activePalette!.params?.steps || DEFAULT_COLOR_STEPS,
+              reverse: !localState.activePalette!.params?.reverse,
+              rangeMin: colorStops[0]?.stop,
+              rangeMax: max,
+            },
+            dataBounds!
+          );
+        }
+
+        setPalette(newPalette);
+      }
+    },
+    250,
+    [localState]
   );
 
   return (
@@ -89,40 +101,11 @@ export function CustomizablePalette({
         <PalettePicker
           data-test-subj="lnsPalettePanel_dynamicColoring_palette_picker"
           palettes={palettes}
-          activePalette={activePalette}
+          activePalette={localState.activePalette}
           setPalette={(newPalette) => {
-            const isNewPaletteCustom = newPalette.name === CUSTOM_PALETTE;
-            const newParams: CustomPaletteParams = {
-              ...activePalette.params,
-              name: newPalette.name,
-              colorStops: undefined,
-              continuity: DEFAULT_CONTINUITY,
-              reverse: false, // restore the reverse flag
-            };
-
-            const newColorStops = getColorStops(palettes, [], activePalette, dataBounds);
-
-            if (isNewPaletteCustom) {
-              newParams.colorStops = newColorStops;
-            }
-
-            setPalette({
-              ...newPalette,
-              params: {
-                ...newParams,
-                stops: getPaletteStops(palettes, newParams, {
-                  prevPalette:
-                    isNewPaletteCustom || isCurrentPaletteCustom ? undefined : newPalette.name,
-                  dataBounds,
-                  mapFromMinValue: true,
-                }),
-                rangeMin: checkIsMinContinuity(newParams.continuity)
-                  ? Number.NEGATIVE_INFINITY
-                  : Math.min(dataBounds.min, newColorStops[0].stop),
-                rangeMax: checkIsMaxContinuity(newParams.continuity)
-                  ? Number.POSITIVE_INFINITY
-                  : Math.min(dataBounds.max, newColorStops[newColorStops.length - 1].stop),
-              },
+            dispatch({
+              type: 'changeColorPalette',
+              payload: { palette: newPalette, dataBounds, palettes },
             });
           }}
           showCustomPalette
@@ -176,8 +159,8 @@ export function CustomizablePalette({
               },
             ]}
             idSelected={
-              activePalette.params?.rangeType
-                ? `${idPrefix}${activePalette.params?.rangeType}`
+              localState.activePalette.params?.rangeType
+                ? `${idPrefix}${localState.activePalette.params?.rangeType}`
                 : `${idPrefix}percent`
             }
             onChange={(id) => {
@@ -186,44 +169,10 @@ export function CustomizablePalette({
                 ''
               ) as RequiredPaletteParamTypes['rangeType'];
 
-              const continuity = activePalette.params?.continuity;
-              const params: CustomPaletteParams = { rangeType: newRangeType };
-              const { min: newMin, max: newMax } = getDataMinMax(newRangeType, dataBounds);
-              const { min: oldMin, max: oldMax } = getDataMinMax(
-                activePalette.params?.rangeType,
-                dataBounds
-              );
-              const newColorStops = getStopsFromColorRangesByNewInterval(colorRangesToShow, {
-                oldInterval: oldMax - oldMin,
-                newInterval: newMax - newMin,
-                newMin,
-                oldMin,
+              dispatch({
+                type: 'updateRangeType',
+                payload: { rangeType: newRangeType, dataBounds, palettes },
               });
-              if (isCurrentPaletteCustom) {
-                const stops = getPaletteStops(
-                  palettes,
-                  { ...activePalette.params, colorStops: newColorStops, ...params },
-                  { dataBounds }
-                );
-                params.colorStops = newColorStops;
-                params.stops = stops;
-              } else {
-                params.stops = getPaletteStops(
-                  palettes,
-                  { ...activePalette.params, ...params },
-                  { prevPalette: activePalette.name, dataBounds }
-                );
-              }
-
-              params.rangeMin = checkIsMinContinuity(continuity)
-                ? Number.NEGATIVE_INFINITY
-                : newColorStops[0].stop;
-
-              params.rangeMax = checkIsMaxContinuity(continuity)
-                ? Number.POSITIVE_INFINITY
-                : newMax;
-
-              setPalette(mergePaletteParams(activePalette, params));
             }}
           />
         </EuiFormRow>
@@ -236,10 +185,10 @@ export function CustomizablePalette({
         display="rowCompressed"
       >
         <ColorRanges
-          paletteConfiguration={activePalette?.params}
-          colorRanges={colorRangesToShow}
+          paletteConfiguration={localState.activePalette?.params}
+          colorRanges={localState.colorRanges}
           dataBounds={dataBounds}
-          onChange={onChangeColorRanges}
+          dispatch={dispatch}
         />
       </EuiFormRow>
     </div>

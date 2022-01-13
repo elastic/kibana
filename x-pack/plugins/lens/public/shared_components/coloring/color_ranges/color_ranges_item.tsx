@@ -156,10 +156,10 @@ export function ColorRangeItem({
   );
 
   useUpdateEffect(() => {
-    if (isValid && parseFloat(value) !== parseFloat(localValue)) {
+    if (parseFloat(value) !== parseFloat(localValue)) {
       setLocalValue(value);
     }
-  }, [isValid, localValue, value]);
+  }, [localValue, value]);
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>

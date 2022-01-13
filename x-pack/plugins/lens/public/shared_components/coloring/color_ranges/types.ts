@@ -55,14 +55,18 @@ export interface DeleteColorRangePayload {
 }
 
 /** @internal **/
-export type SetColorRangesPayload = Partial<ColorRangesState>;
+export interface UpdateContinuityPayload {
+  isLast: boolean;
+  continuity: PaletteContinuity;
+  dataBounds: DataBounds;
+};
 
 /** @internal **/
 export type ColorRangesActions =
   | { type: 'reversePalette' }
   | { type: 'sortColorRanges' }
   | { type: 'distributeEqually'; payload: DistributeEquallyPayload }
-  | { type: 'set'; payload: SetColorRangesPayload }
+  | { type: 'updateContinuity'; payload: UpdateContinuityPayload }
   | { type: 'deleteColorRange'; payload: DeleteColorRangePayload }
   | {
       type: 'addColorRange';

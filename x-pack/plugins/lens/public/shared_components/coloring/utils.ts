@@ -16,8 +16,10 @@ import {
   DEFAULT_COLOR_STEPS,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
+  DEFAULT_CONTINUITY,
 } from './constants';
 import type { ColorRange } from './color_ranges';
+import type { PaletteConfigurationState } from './types';
 import type { CustomPaletteParams, ColorStop } from '../../../common';
 import {
   checkIsMinContinuity,
@@ -40,6 +42,111 @@ import {
  * These naming conventions would be useful to track the code flow in this feature as multiple transformations are happening
  * for a single change.
  */
+
+export function updateRangeType(
+  newRangeType: CustomPaletteParams['rangeType'],
+  activePalette: PaletteConfigurationState['activePalette'],
+  dataBounds: { min: number; max: number },
+  palettes: PaletteRegistry,
+  colorRanges: PaletteConfigurationState['colorRanges']
+) {
+  const continuity = activePalette.params?.continuity;
+  const params: CustomPaletteParams = { rangeType: newRangeType };
+  const { min: newMin, max: newMax } = getDataMinMax(newRangeType, dataBounds);
+  const { min: oldMin, max: oldMax } = getDataMinMax(activePalette.params?.rangeType, dataBounds);
+  const newColorStops = getStopsFromColorRangesByNewInterval(colorRanges, {
+    oldInterval: oldMax - oldMin,
+    newInterval: newMax - newMin,
+    newMin,
+    oldMin,
+  });
+  const lastStop = newColorStops[newColorStops.length - 1].stop;
+  if (activePalette.name === CUSTOM_PALETTE) {
+    const stops = getPaletteStops(
+      palettes,
+      { ...activePalette.params, colorStops: newColorStops, ...params },
+      { dataBounds }
+    );
+    params.colorStops = newColorStops;
+    params.stops = stops;
+  } else {
+    params.stops = getPaletteStops(
+      palettes,
+      { ...activePalette.params, ...params },
+      { prevPalette: activePalette.name, dataBounds }
+    );
+  }
+
+  params.rangeMin = checkIsMinContinuity(continuity)
+    ? Number.NEGATIVE_INFINITY
+    : newColorStops[0].stop;
+
+  params.rangeMax = checkIsMaxContinuity(continuity)
+    ? Number.POSITIVE_INFINITY
+    : activePalette.params?.rangeMax
+    ? calculateStop(activePalette.params.rangeMax, newMin, oldMin, oldMax - oldMin, newMax - newMin)
+    : lastStop > newMax
+    ? lastStop + 1
+    : newMax;
+
+  return params;
+}
+
+export function changeColorPalette(
+  newPalette: PaletteConfigurationState['activePalette'],
+  activePalette: PaletteConfigurationState['activePalette'],
+  palettes: PaletteRegistry,
+  dataBounds: { min: number; max: number }
+) {
+  const isNewPaletteCustom = newPalette.name === CUSTOM_PALETTE;
+  const newParams: CustomPaletteParams = {
+    ...activePalette.params,
+    name: newPalette.name,
+    colorStops: undefined,
+    continuity: DEFAULT_CONTINUITY,
+    reverse: false, // restore the reverse flag
+  };
+
+  const newColorStops = getColorStops(palettes, [], activePalette, dataBounds);
+
+  if (isNewPaletteCustom) {
+    newParams.colorStops = newColorStops;
+  }
+
+  return {
+    ...newPalette,
+    params: {
+      ...newParams,
+      stops: getPaletteStops(palettes, newParams, {
+        prevPalette:
+          isNewPaletteCustom || activePalette.name === CUSTOM_PALETTE ? undefined : newPalette.name,
+        dataBounds,
+        mapFromMinValue: true,
+      }),
+      rangeMin: checkIsMinContinuity(newParams.continuity)
+        ? Number.NEGATIVE_INFINITY
+        : Math.min(dataBounds.min, newColorStops[0].stop),
+      rangeMax: checkIsMaxContinuity(newParams.continuity)
+        ? Number.POSITIVE_INFINITY
+        : Math.min(dataBounds.max, newColorStops[newColorStops.length - 1].stop),
+    },
+  };
+}
+
+export function updatePalette(
+  activePalette: PaletteConfigurationState['activePalette'],
+  newParams: Partial<PaletteConfigurationState['activePalette']['params']> = {},
+  newName?: string
+) {
+  return {
+    ...activePalette,
+    name: newName ?? activePalette.name,
+    params: {
+      ...activePalette.params,
+      ...newParams,
+    },
+  };
+}
 
 export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>(
   palettes: PaletteRegistry,

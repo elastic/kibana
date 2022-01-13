@@ -10,18 +10,6 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ColorRanges, ColorRangesProps } from './color_ranges';
 import { ReactWrapper } from 'enzyme';
-import type { ColorRangesItemProps } from './color_ranges_item';
-
-const colorRangeItemExtractProps = (component: ReactWrapper) => {
-  const props = component.props() as ColorRangesItemProps;
-
-  return {
-    index: props.index,
-    accessor: props.accessor,
-    isValid: props.isValid,
-    colorRange: props.colorRange,
-  };
-};
 
 const extraActionSelectors = {
   addColorRange: '[data-test-subj^="lnsPalettePanel_dynamicColoring_addColorRange"]',
@@ -40,8 +28,10 @@ const pageObjects = {
 
 describe('Color Ranges', () => {
   let props: ColorRangesProps;
+  let dispatch = jest.fn();
 
   beforeEach(() => {
+    dispatch.mockClear();
     props = {
       colorRanges: [
         { color: '#aaa', start: 20, end: 40 },
@@ -52,8 +42,9 @@ describe('Color Ranges', () => {
         rangeType: 'number',
         continuity: 'none',
       },
+      showExtraActions: true,
       dataBounds: { min: 0, max: 200 },
-      onChange: jest.fn(),
+      dispatch,
     };
   });
 
@@ -87,7 +78,10 @@ describe('Color Ranges', () => {
 
     component.update();
 
-    expect(component.find('ColorRangeItem').map(colorRangeItemExtractProps)).toMatchSnapshot();
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'addColorRange',
+      payload: { dataBounds: { min: 0, max: 200 } },
+    });
   });
 
   it('should sort ranges value on whole component blur', () => {
@@ -98,13 +92,23 @@ describe('Color Ranges', () => {
       firstInput.simulate('change', { target: { value: ' 65' } });
     });
 
+    expect(dispatch).toHaveBeenNthCalledWith(1, {
+      type: 'updateValue',
+      payload: { index: 0, value: ' 65', accessor: 'start' },
+    });
+
+    props.colorRanges = [
+      { color: '#aaa', start: 65, end: 40 },
+      { color: '#bbb', start: 40, end: 60 },
+      { color: '#ccc', start: 60, end: 80 },
+    ];
+    component.setProps({ colorRanges: props.colorRanges });
+
     act(() => {
       firstInput.simulate('blur');
     });
 
-    component.update();
-
-    expect(component.find('ColorRangeItem').map(colorRangeItemExtractProps)).toMatchSnapshot();
+    expect(dispatch).toHaveBeenNthCalledWith(2, { type: 'sortColorRanges' });
   });
 
   it('should reverse colors when user click "reverse"', () => {
@@ -122,7 +126,7 @@ describe('Color Ranges', () => {
 
     component.update();
 
-    expect(component.find('EuiColorPicker').map((item) => item.prop('color'))).toMatchSnapshot();
+    expect(dispatch).toHaveBeenCalledWith({ type: 'reversePalette' });
   });
 
   it('should distribute equally ranges when use click on "Distribute equally" button', () => {
@@ -141,6 +145,9 @@ describe('Color Ranges', () => {
 
     component.update();
 
-    expect(component.find('ColorRangeItem').map(colorRangeItemExtractProps)).toMatchSnapshot();
+    expect(dispatch).toHaveBeenCalledWith({
+      type: 'distributeEqually',
+      payload: { dataBounds: { min: 0, max: 200 } },
+    });
   });
 });

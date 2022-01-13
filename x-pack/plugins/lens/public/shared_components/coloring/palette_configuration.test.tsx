@@ -45,6 +45,8 @@ describe('palette panel', () => {
         setPalette: jest.fn(),
         dataBounds: { min: 0, max: 100 },
       };
+
+      jest.useFakeTimers();
     });
 
     function changePaletteIn(instance: ReactWrapper, newPaletteName: string) {
@@ -76,7 +78,11 @@ describe('palette panel', () => {
     it('should set the colorStops and stops when selecting the Custom palette from the list', () => {
       const instance = mountWithIntl(<CustomizablePalette {...props} />);
 
-      changePaletteIn(instance, 'custom');
+      act(() => {
+        changePaletteIn(instance, 'custom');
+      });
+
+      jest.advanceTimersByTime(250);
 
       expect(props.setPalette).toHaveBeenCalledWith({
         type: 'palette',
@@ -98,7 +104,11 @@ describe('palette panel', () => {
     it('should restore the reverse initial state on transitioning', () => {
       const instance = mountWithIntl(<CustomizablePalette {...props} />);
 
-      changePaletteIn(instance, 'negative');
+      act(() => {
+        changePaletteIn(instance, 'negative');
+      });
+
+      jest.advanceTimersByTime(250);
 
       expect(props.setPalette).toHaveBeenCalledWith({
         type: 'palette',
@@ -113,7 +123,11 @@ describe('palette panel', () => {
     it('should rewrite the min/max range values on palette change', () => {
       const instance = mountWithIntl(<CustomizablePalette {...props} />);
 
-      changePaletteIn(instance, 'custom');
+      act(() => {
+        changePaletteIn(instance, 'custom');
+      });
+
+      jest.advanceTimersByTime(250);
 
       expect(props.setPalette).toHaveBeenCalledWith({
         type: 'palette',
@@ -145,12 +159,16 @@ describe('palette panel', () => {
           .prop('onChange')!('number');
       });
 
+      jest.advanceTimersByTime(250);
+
       act(() => {
         instance
           .find('[data-test-subj="lnsPalettePanel_dynamicColoring_custom_range_groups"]')
           .find(EuiButtonGroup)
           .prop('onChange')!('percent');
       });
+
+      jest.advanceTimersByTime(250);
 
       expect(props.setPalette).toHaveBeenNthCalledWith(
         1,

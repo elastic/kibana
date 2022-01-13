@@ -6,4 +6,4 @@
  */
 
 export { ColorRanges } from './color_ranges';
-export type { ColorRange } from './types';
+export type { ColorRange, ColorRangesActions } from './types';

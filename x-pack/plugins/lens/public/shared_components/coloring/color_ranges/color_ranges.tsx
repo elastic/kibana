@@ -4,106 +4,53 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect, useReducer } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
-import useUpdateEffect from 'react-use/lib/useUpdateEffect';
+import React, { useState, useEffect, Dispatch } from 'react';
 
 import { EuiFlexGroup, EuiTextColor, EuiFlexItem } from '@elastic/eui';
 
 import { ColorRangesExtraActions } from './color_ranges_extra_actions';
 import { ColorRangeItem } from './color_ranges_item';
-import { colorRangesReducer } from './color_ranges_reducer';
 import {
   validateColorRanges,
   getErrorMessages,
   ColorRangeValidation,
 } from './color_ranges_validation';
-import { toColorStops } from './utils';
 
-import type { CustomPaletteParamsConfig, ColorStop } from '../../../../common';
-import type { ColorRange, DataBounds, ColorRangesState } from './types';
-import type { PaletteContinuity } from '../../../../../../../src/plugins/charts/common';
+import type { CustomPaletteParamsConfig } from '../../../../common';
+import type { ColorRange, DataBounds } from './types';
+import type { PaletteConfigurationActions } from '../types';
 
 import { defaultPaletteParams } from '../constants';
 
 export interface ColorRangesProps {
   colorRanges: ColorRange[];
   paletteConfiguration: CustomPaletteParamsConfig | undefined;
-  onChange: (colorStops: ColorStop[], upperMax: number, continuity: PaletteContinuity) => void;
   dataBounds: DataBounds;
   showExtraActions?: boolean;
+  dispatch: Dispatch<PaletteConfigurationActions>;
 }
-
-const toLocalState = (
-  colorRanges: ColorRangesProps['colorRanges'],
-  paletteConfiguration: ColorRangesProps['paletteConfiguration']
-): ColorRangesState => ({
-  colorRanges,
-  rangeType: paletteConfiguration?.rangeType ?? defaultPaletteParams.rangeType,
-  continuity: paletteConfiguration?.continuity ?? defaultPaletteParams.continuity,
-});
 
 export function ColorRanges({
   colorRanges,
-  onChange,
   dataBounds,
   paletteConfiguration,
   showExtraActions = true,
+  dispatch,
 }: ColorRangesProps) {
-  const [localState, dispatch] = useReducer(
-    colorRangesReducer,
-    toLocalState(colorRanges, paletteConfiguration)
-  );
-
   const [colorRangesValidity, setColorRangesValidity] = useState<
     Record<string, ColorRangeValidation>
   >({});
 
+  const lastColorRange = colorRanges[colorRanges.length - 1];
+  const errors = getErrorMessages(colorRangesValidity);
+  const continuity = paletteConfiguration?.continuity ?? defaultPaletteParams.continuity;
+  const rangeType = paletteConfiguration?.rangeType ?? defaultPaletteParams.rangeType;
+
   useEffect(() => {
     setColorRangesValidity(
-      validateColorRanges(localState.colorRanges, dataBounds, localState.rangeType)
+      validateColorRanges(colorRanges, dataBounds, rangeType)
     );
-  }, [localState.colorRanges, localState.rangeType, dataBounds]);
-
-  useUpdateEffect(() => {
-    if (paletteConfiguration) {
-      const { rangeType } = paletteConfiguration;
-      const rangeTypeChanged = rangeType && rangeType !== localState.rangeType;
-
-      if (rangeTypeChanged || colorRanges !== localState.colorRanges) {
-        dispatch({
-          type: 'set',
-          payload: toLocalState(colorRanges, paletteConfiguration),
-        });
-      }
-    }
-  }, [colorRanges, paletteConfiguration?.rangeType]);
-
-  useDebounce(
-    () => {
-      const {
-        continuity: localContinuity,
-        colorRanges: localColorRanges,
-        rangeType: localRangeType,
-      } = localState;
-
-      if (
-        Object.values(validateColorRanges(localColorRanges, dataBounds, localRangeType)).every(
-          ({ isValid }) => isValid
-        ) &&
-        localColorRanges !== colorRanges
-      ) {
-        const { max, colorStops } = toColorStops(localColorRanges, localContinuity);
-
-        onChange(colorStops, max, localContinuity);
-      }
-    },
-    250,
-    [localState]
-  );
-
-  const lastColorRange = localState.colorRanges[localState.colorRanges.length - 1];
-  const errors = getErrorMessages(colorRangesValidity);
+  }, [colorRanges, rangeType, dataBounds]);
 
   return (
     <EuiFlexGroup
@@ -111,14 +58,14 @@ export function ColorRanges({
       direction="column"
       gutterSize="s"
     >
-      {localState.colorRanges.map((colorRange, index) => (
+      {colorRanges.map((colorRange, index) => (
         <EuiFlexItem grow={false} key={`${colorRange.end ?? 0 + colorRange.start ?? 0}${index}`}>
           <ColorRangeItem
             colorRange={colorRange}
             dispatch={dispatch}
-            colorRanges={localState.colorRanges}
-            continuity={localState.continuity}
-            rangeType={localState.rangeType}
+            colorRanges={colorRanges}
+            continuity={continuity}
+            rangeType={rangeType}
             dataBounds={dataBounds}
             index={index}
             validation={colorRangesValidity[index]}
@@ -131,11 +78,11 @@ export function ColorRanges({
           <ColorRangeItem
             colorRange={lastColorRange}
             dispatch={dispatch}
-            colorRanges={localState.colorRanges}
-            continuity={localState.continuity}
-            rangeType={localState.rangeType}
+            colorRanges={colorRanges}
+            continuity={continuity}
+            rangeType={rangeType}
             dataBounds={dataBounds}
-            index={localState.colorRanges.length - 1}
+            index={colorRanges.length - 1}
             validation={colorRangesValidity.last}
             accessor="end"
           />
@@ -152,11 +99,11 @@ export function ColorRanges({
             dispatch={dispatch}
             shouldDisableAdd={Boolean(
               (paletteConfiguration?.maxSteps &&
-                localState.colorRanges.length >= paletteConfiguration?.maxSteps) ||
+                colorRanges.length >= paletteConfiguration?.maxSteps) ||
                 errors.length
             )}
-            shouldDisableDistribute={Boolean(localState.colorRanges.length === 1)}
-            shouldDisableReverse={Boolean(localState.colorRanges.length === 1)}
+            shouldDisableDistribute={Boolean(colorRanges.length === 1)}
+            shouldDisableReverse={Boolean(colorRanges.length === 1)}
             dataBounds={dataBounds}
           />
         </EuiFlexItem>
