@@ -83,7 +83,7 @@ describe('AlertSummaryView', () => {
       expect(queryByTestId('summary-view-guide')).not.toBeInTheDocument();
     });
   });
-  test.skip('Memory event code renders additional summary rows', () => {
+  test('Memory event code renders additional summary rows', () => {
     const renderProps = {
       ...props,
       data: mockAlertDetailsData.map((item) => {
@@ -105,7 +105,7 @@ describe('AlertSummaryView', () => {
     );
     expect(container.querySelector('div[data-test-subj="summary-view"]')).toMatchSnapshot();
   });
-  test.skip('Behavior event code renders additional summary rows', () => {
+  test('Behavior event code renders additional summary rows', () => {
     const renderProps = {
       ...props,
       data: mockAlertDetailsData.map((item) => {
