@@ -12,7 +12,7 @@ import React from 'react';
 import { DefaultDraggable } from '../../../../common/components/draggables';
 import { TruncatableText } from '../../../../common/components/truncatable_text';
 import { Severity } from '../../../components/severity';
-import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
+import { useGetMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
 import { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 
@@ -24,26 +24,27 @@ const reason =
  * accepts `EuiDataGridCellValueElementProps`, plus `data`
  * from the TGrid
  */
-export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellValueElementProps> =
-  ({
-    columnId,
-    data,
-    eventId,
-    header,
-    isDetails,
-    isExpandable,
-    isExpanded,
-    linkValues,
-    rowIndex,
-    setCellProps,
-    timelineId,
-  }) => {
-    const value =
-      getMappedNonEcsValue({
-        data,
-        fieldName: columnId,
-      })?.reduce((x) => x[0]) ?? '';
-    const draggableId = `${timelineId}-${eventId}-${columnId}-${value}`;
+export const RenderCellValue: React.FC<
+  EuiDataGridCellValueElementProps & CellValueElementProps
+> = ({
+  columnId,
+  data,
+  eventId,
+  header,
+  isDetails,
+  isExpandable,
+  isExpanded,
+  linkValues,
+  rowIndex,
+  setCellProps,
+  timelineId,
+}) => {
+  const value =
+    useGetMappedNonEcsValue({
+      data,
+      fieldName: columnId,
+    })?.reduce((x) => x[0]) ?? '';
+  const draggableId = `${timelineId}-${eventId}-${columnId}-${value}`;
 
     switch (columnId) {
       case 'signal.rule.severity':
