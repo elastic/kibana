@@ -224,7 +224,7 @@ describe('Initializing the store', () => {
       });
 
       expect(deps.lensServices.data.query.filterManager.setAppFilters).toHaveBeenCalledWith([
-        { query: { match_phrase: { src: 'test' } } },
+        { query: { match_phrase: { src: 'test' } }, meta: { index: 'injected!' } },
       ]);
 
       expect(store.getState()).toEqual({
