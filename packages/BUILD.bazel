@@ -78,6 +78,7 @@ filegroup(
   srcs = [
       "//packages/elastic-apm-synthtrace:build_types",
       "//packages/elastic-datemath:build_types",
+      "//packages/elastic-safer-lodash-set:build_types",
       "//packages/kbn-ace:build_types",
       "//packages/kbn-alerts:build_types",
       "//packages/kbn-analytics:build_types",
@@ -121,6 +122,7 @@ filegroup(
       "//packages/kbn-server-route-repository:build_types",
       "//packages/kbn-std:build_types",
       "//packages/kbn-telemetry-tools:build_types",
+      "//packages/kbn-ui-shared-deps-npm:build_types",
       "//packages/kbn-utility-types:build_types",
       "//packages/kbn-utils:build_types",
   ],
