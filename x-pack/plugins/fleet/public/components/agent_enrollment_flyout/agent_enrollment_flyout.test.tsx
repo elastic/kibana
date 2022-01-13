@@ -98,12 +98,12 @@ describe('<AgentEnrollmentFlyout />', () => {
     });
 
     (useGetAgents as jest.Mock).mockReturnValue({
-      data: { items: [{}] },
+      data: { items: [{ policy_id: 'fleet-server-policy' }] },
     });
 
     await act(async () => {
       testBed = await setup({
-        agentPolicies: [],
+        agentPolicies: [{ id: 'fleet-server-policy' } as AgentPolicy],
         onClose: jest.fn(),
       });
       testBed.component.update();
@@ -127,6 +127,7 @@ describe('<AgentEnrollmentFlyout />', () => {
         jest.clearAllMocks();
         await act(async () => {
           testBed = await setup({
+            agentPolicies: [{ id: 'fleet-server-policy' } as AgentPolicy],
             agentPolicy: testAgentPolicy,
             onClose: jest.fn(),
           });
@@ -148,7 +149,7 @@ describe('<AgentEnrollmentFlyout />', () => {
         jest.clearAllMocks();
         await act(async () => {
           testBed = await setup({
-            agentPolicies: [],
+            agentPolicies: [{ id: 'fleet-server-policy' } as AgentPolicy],
             onClose: jest.fn(),
             viewDataStep: { title: 'View Data', children: <div /> },
           });
@@ -168,7 +169,7 @@ describe('<AgentEnrollmentFlyout />', () => {
         jest.clearAllMocks();
         await act(async () => {
           testBed = await setup({
-            agentPolicies: [],
+            agentPolicies: [{ id: 'fleet-server-policy' } as AgentPolicy],
             onClose: jest.fn(),
             viewDataStep: undefined,
           });
@@ -199,6 +200,7 @@ describe('<AgentEnrollmentFlyout />', () => {
         jest.clearAllMocks();
         await act(async () => {
           testBed = await setup({
+            agentPolicies: [{ id: 'fleet-server-policy' } as AgentPolicy],
             agentPolicy: testAgentPolicy,
             onClose: jest.fn(),
           });

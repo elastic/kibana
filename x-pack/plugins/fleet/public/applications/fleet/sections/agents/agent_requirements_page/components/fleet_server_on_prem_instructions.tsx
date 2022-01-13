@@ -236,7 +236,7 @@ export const FleetServerCommandStep = ({
 };
 
 export const useFleetServerInstructions = (policyId?: string) => {
-  const { output, refresh: refreshOutputs } = useDefaultOutput();
+  const { output } = useDefaultOutput();
   const { notifications } = useStartServices();
   const [serviceToken, setServiceToken] = useState<string>();
   const [isLoadingServiceToken, setIsLoadingServiceToken] = useState<boolean>(false);
@@ -289,10 +289,6 @@ export const useFleetServerInstructions = (policyId?: string) => {
     setIsLoadingServiceToken(false);
   }, [notifications.toasts]);
 
-  const refresh = useCallback(() => {
-    return Promise.all([refreshOutputs(), refreshSettings()]);
-  }, [refreshOutputs, refreshSettings]);
-
   const addFleetServerHost = useCallback(
     async (host: string) => {
       const res = await sendPutSettings({
@@ -317,7 +313,6 @@ export const useFleetServerInstructions = (policyId?: string) => {
     installCommand,
     platform,
     setPlatform,
-    refresh,
   };
 };
 

@@ -63,3 +63,7 @@ jest.mock('@elastic/eui', () => {
     EuiSteps: 'eui-steps',
   };
 });
+
+jest.mock('../../applications/fleet/sections/agents/services/has_fleet_server', () => {
+  return { policyHasFleetServer: jest.fn().mockReturnValue(true) };
+});
