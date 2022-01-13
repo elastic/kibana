@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, get, omit, has, flow, forOwn, mergeWith } from 'lodash';
+import { cloneDeep, get, omit, has, flow, forOwn, mergeWith, mapValues } from 'lodash';
 
 import type {
   SavedObjectMigrationContext,
@@ -15,11 +15,11 @@ import type {
   SavedObjectUnsanitizedDoc,
 } from 'kibana/server';
 
-import { MigrateFunctionsObject } from 'src/plugins/kibana_utils/common';
 import {
-  getIntraObjectMigrationMap,
+  MigrateFunctionsObject,
   getApplyMigrationWithinObject,
-} from 'src/plugins/kibana_utils/common/persistable_state';
+} from '../../../kibana_utils/common';
+
 import { DEFAULT_QUERY_LANGUAGE, INDEX_PATTERN_SAVED_OBJECT_TYPE } from '../../../data/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
@@ -1209,12 +1209,10 @@ const mergeSavedObjectMigrationMaps = (
 };
 
 /**
- * This creates a migration map that applies search source migrations to legacy visualizations
+ * This creates a migration map that applies search source migrations to legacy visualization SOs
  */
-export const getVisualizationSearchSourceMigrations = (
-  searchSourceMigrations: MigrateFunctionsObject
-) =>
-  getIntraObjectMigrationMap(searchSourceMigrations, (migrate) =>
+const getVisualizationSearchSourceMigrations = (searchSourceMigrations: MigrateFunctionsObject) =>
+  mapValues(searchSourceMigrations, (migrate) =>
     getApplyMigrationWithinObject(migrate, 'attributes.kibanaSavedObjectMeta.searchSourceJSON', {
       serialize: JSON.stringify,
       deserialize: JSON.parse,
@@ -1226,5 +1224,5 @@ export const getAllMigrations = (
 ): SavedObjectMigrationMap =>
   mergeSavedObjectMigrationMaps(
     visualizationSavedObjectTypeMigrations,
-    getVisualizationSearchSourceMigrations(searchSourceMigrations)
+    getVisualizationSearchSourceMigrations(searchSourceMigrations as MigrateFunctionsObject)
   );

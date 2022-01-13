@@ -24,7 +24,7 @@ import type {
 } from '../../../core/server';
 import type { UsageCollectionSetup } from '../../usage_collection/server';
 import type { EmbeddableSetup } from '../../embeddable/server';
-import { visualizeEmbeddableFactory } from './embeddable/visualize_embeddable_factory';
+import { makeVisualizeEmbeddableFactory } from './embeddable/make_visualize_embeddable_factory';
 import { getVisualizationSavedObjectType } from './saved_objects';
 
 export class VisualizationsPlugin
@@ -69,7 +69,9 @@ export class VisualizationsPlugin
       registerVisualizationsCollector(plugins.usageCollection);
     }
 
-    plugins.embeddable.registerEmbeddableFactory(visualizeEmbeddableFactory());
+    plugins.embeddable.registerEmbeddableFactory(
+      makeVisualizeEmbeddableFactory(searchSourceMigrations)()
+    );
 
     return {};
   }

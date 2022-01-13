@@ -7,21 +7,21 @@
  */
 
 import semverGte from 'semver/functions/gte';
-import { visualizeEmbeddableFactory } from './visualize_embeddable_factory';
-import { visualizationSavedObjectTypeMigrations } from '../migrations/visualization_saved_object_migrations';
+import { makeVisualizeEmbeddableFactory } from './make_visualize_embeddable_factory';
+import { getAllMigrations } from '../migrations/visualization_saved_object_migrations';
 
 describe('saved object migrations and embeddable migrations', () => {
   test('should have same versions registered (>7.13.0)', () => {
-    const savedObjectMigrationVersions = Object.keys(visualizationSavedObjectTypeMigrations).filter(
-      (version) => {
-        return semverGte(version, '7.13.1');
-      }
-    );
-    const embeddableMigrationVersions = visualizeEmbeddableFactory()?.migrations;
+    const savedObjectMigrationVersions = Object.keys(getAllMigrations({})).filter((version) => {
+      return semverGte(version, '7.13.1');
+    });
+    const embeddableMigrationVersions = makeVisualizeEmbeddableFactory({})()?.migrations;
     if (embeddableMigrationVersions) {
       expect(savedObjectMigrationVersions.sort()).toEqual(
         Object.keys(embeddableMigrationVersions).sort()
       );
     }
   });
+
+  // TODO - test embedded search source migrations
 });

@@ -6,9 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { flow } from 'lodash';
+import { flow, mapValues } from 'lodash';
 import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
 import type { SerializableRecord } from '@kbn/utility-types';
+import {
+  mergeMigrationFunctionMaps,
+  MigrateFunctionsObject,
+  getApplyMigrationWithinObject,
+} from '../../../kibana_utils/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
   commonHideTSVBLastValueIndicator,
@@ -84,26 +89,37 @@ const byValueRemoveMarkdownLessFromTSVB = (state: SerializableRecord) => {
   };
 };
 
-export const visualizeEmbeddableFactory = (): EmbeddableRegistryDefinition => {
-  return {
-    id: 'visualization',
-    migrations: {
-      // These migrations are run in 7.13.1 for `by value` panels because the 7.13 release window was missed.
-      '7.13.1': (state) =>
-        flow(
-          byValueAddSupportOfDualIndexSelectionModeInTSVB,
-          byValueHideTSVBLastValueIndicator,
-          byValueRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel
-        )(state),
-      '7.14.0': (state) =>
-        flow(
-          byValueAddEmptyValueColorRule,
-          byValueMigrateVislibPie,
-          byValueMigrateTagcloud,
-          byValueAddDropLastBucketIntoTSVBModel
-        )(state),
-      '7.17.0': (state) => flow(byValueAddDropLastBucketIntoTSVBModel714Above)(state),
-      '8.0.0': (state) => flow(byValueRemoveMarkdownLessFromTSVB)(state),
-    },
+const getEmbeddedVisualizationSearchSourceMigrations = (
+  searchSourceMigrations: MigrateFunctionsObject
+) =>
+  mapValues(searchSourceMigrations, (migrate) =>
+    getApplyMigrationWithinObject(migrate, 'data.searchSource')
+  );
+
+export const makeVisualizeEmbeddableFactory =
+  (searchSourceMigrations: MigrateFunctionsObject) => (): EmbeddableRegistryDefinition => {
+    return {
+      id: 'visualization',
+      migrations: mergeMigrationFunctionMaps(
+        getEmbeddedVisualizationSearchSourceMigrations(searchSourceMigrations),
+        {
+          // These migrations are run in 7.13.1 for `by value` panels because the 7.13 release window was missed.
+          '7.13.1': (state) =>
+            flow(
+              byValueAddSupportOfDualIndexSelectionModeInTSVB,
+              byValueHideTSVBLastValueIndicator,
+              byValueRemoveDefaultIndexPatternAndTimeFieldFromTSVBModel
+            )(state),
+          '7.14.0': (state) =>
+            flow(
+              byValueAddEmptyValueColorRule,
+              byValueMigrateVislibPie,
+              byValueMigrateTagcloud,
+              byValueAddDropLastBucketIntoTSVBModel
+            )(state),
+          '7.17.0': (state) => flow(byValueAddDropLastBucketIntoTSVBModel714Above)(state),
+          '8.0.0': (state) => flow(byValueRemoveMarkdownLessFromTSVB)(state),
+        }
+      ),
+    };
   };
-};

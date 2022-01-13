@@ -17,7 +17,4 @@ export type {
 } from './types';
 export { migrateToLatest } from './migrate_to_latest';
 export { mergeMigrationFunctionMaps } from './merge_migration_function_map';
-export {
-  getIntraObjectMigrationMap,
-  getApplyMigrationWithinObject,
-} from './intra_object_migrations';
+export { getApplyMigrationWithinObject } from './get_apply_migration_within_object';

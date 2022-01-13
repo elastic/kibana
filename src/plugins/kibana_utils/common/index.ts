@@ -67,5 +67,4 @@ export {
   migrateToLatest,
   mergeMigrationFunctionMaps,
   getApplyMigrationWithinObject,
-  getIntraObjectMigrationMap,
 } from './persistable_state';
