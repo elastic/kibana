@@ -13,6 +13,7 @@ import {
   EuiBasicTableColumn,
   EuiLink,
   EuiToolTip,
+  EuiLoadingContent,
 } from '@elastic/eui';
 import moment from 'moment-timezone';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -82,7 +83,7 @@ export const AgentPoliciesPopover = ({ agentPolicyIds }: { agentPolicyIds: strin
 };
 
 const PacksTableComponent = () => {
-  const { data } = usePacks({});
+  const { data, isLoading } = usePacks({});
 
   const renderAgentPolicy = useCallback(
     (agentPolicyIds) => <AgentPoliciesPopover agentPolicyIds={agentPolicyIds} />,
@@ -176,6 +177,10 @@ const PacksTableComponent = () => {
     }),
     []
   );
+
+  if (isLoading) {
+    return <EuiLoadingContent lines={10} />;
+  }
 
   return (
     <EuiInMemoryTable<PackSavedObject>
