@@ -10,6 +10,7 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import {
+  EuiButton,
   EuiCard,
   EuiFlexGrid,
   EuiFlexGroup,
@@ -25,7 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { LicensingLogic } from '../../../../../shared/licensing';
-import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
+import { EuiButtonEmptyTo, EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { SourceIcon } from '../../../../components/shared/source_icon';
 import { ADD_CUSTOM_PATH, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
@@ -47,24 +48,23 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
   const getSourceCard = ({ name, serviceType, addPath, accountContextOnly }: SourceDataItem) => {
     const disabled = !hasPlatinumLicense && accountContextOnly;
 
-    // TODO
-    // does this card need a disabled state?
     const card = (
       <>
-        <EuiFlexGroup justifyContent="center" alignItems="center" responsive={false} gutterSize="l">
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="m">
           <EuiFlexItem grow={false}>
             <SourceIcon serviceType={serviceType} name={name} size="l" />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem>
             <EuiText size="m">{name}</EuiText>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText textAlign="right">
-              <EuiLinkTo to={getSourcesPath(addPath, true)}>Connect</EuiLinkTo>
-            </EuiText>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmptyTo
+              disabled={disabled}
+              to={getSourcesPath(addPath, true)}
+            >Connect</EuiButtonEmptyTo>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="l" />
+        <EuiSpacer size="s" />
         <EuiHorizontalRule size="full" margin="none" />
       </>
     );
@@ -92,7 +92,7 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
 
   const visibleSources = (
     <>
-      <EuiFlexGrid columns={2} direction="column" gutterSize="l">
+      <EuiFlexGrid columns={2} direction="column" gutterSize="m">
         {sources.map((source, i) => (
           <EuiFlexItem grow={false} key={i}>
             <EuiFlexGroup
@@ -129,7 +129,7 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
           .
         </p>
       </EuiText>
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
       {sources.length > 0 ? visibleSources : emptyState}
     </>
   );
