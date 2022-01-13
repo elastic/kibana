@@ -59,6 +59,7 @@ import {
 import { createAbortableEsClientFactory } from '../lib/create_abortable_es_client_factory';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
+const MONITORING_HISTORY_LIMIT = 200;
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -589,6 +590,13 @@ export class TaskRunner<
       this.ruleTypeRegistry.ensureRuleTypeEnabled(rule.alertTypeId);
     } catch (err) {
       throw new ErrorWithReason(AlertExecutionStatusErrorReasons.License, err);
+    }
+
+    if (rule.monitoring) {
+      if (rule.monitoring.execution.history.length >= MONITORING_HISTORY_LIMIT) {
+        // Remove the first (oldest) record
+        rule.monitoring.execution.history.shift();
+      }
     }
     return {
       monitoring: asOk(rule.monitoring),

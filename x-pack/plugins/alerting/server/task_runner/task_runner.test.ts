@@ -4765,4 +4765,28 @@ describe('Task Runner', () => {
                                     }
                     `);
   });
+
+  test('caps monitoring history at 200', async () => {
+    const taskRunner = new TaskRunner(
+      ruleType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+    rulesClient.get.mockResolvedValue(mockedRuleTypeSavedObject);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+        enabled: true,
+      },
+      references: [],
+    });
+
+    for (let i = 0; i < 300; i++) {
+      await taskRunner.run();
+    }
+    const runnerResult = await taskRunner.run();
+    expect(runnerResult.monitoring?.execution.history.length).toBe(200);
+  });
 });
