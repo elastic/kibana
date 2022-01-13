@@ -18,25 +18,27 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
-import { DataView } from 'src/plugins/data_views/public';
-import { CoreStart } from 'kibana/public';
-import { ViewMode } from '../../../../src/plugins/embeddable/public';
-import {
+
+import type { DataView } from 'src/plugins/data_views/public';
+import type { CoreStart } from 'kibana/public';
+import type { StartDependencies } from './plugin';
+import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   XYState,
   LensEmbeddableInput,
-  FormulaHelper,
+  FormulaPublicApi,
   DateHistogramIndexPatternColumn,
 } from '../../../plugins/lens/public';
-import { StartDependencies } from './plugin';
+
+import { ViewMode } from '../../../../src/plugins/embeddable/public';
 
 // Generate a Lens state based on some app-specific input parameters.
 // `TypedLensByValueInput` can be used for type-safety - it uses the same interfaces as Lens-internal code.
 function getLensAttributes(
   color: string,
   dataView: DataView,
-  lensFormulaHelper: FormulaHelper
+  formula: FormulaPublicApi
 ): TypedLensByValueInput['attributes'] {
   const baseLayer: PersistedIndexPatternLayer = {
     columnOrder: ['col1'],
@@ -53,7 +55,7 @@ function getLensAttributes(
     },
   };
 
-  const dataLayer = lensFormulaHelper.insertOrReplaceFormulaColumn(
+  const dataLayer = formula.insertOrReplaceFormulaColumn(
     'col2',
     { formula: 'count()' },
     baseLayer,
@@ -114,7 +116,7 @@ export const App = (props: {
   core: CoreStart;
   plugins: StartDependencies;
   defaultDataView: DataView;
-  lensFormulaHelper: FormulaHelper;
+  formula: FormulaPublicApi;
 }) => {
   const [color, setColor] = useState('green');
   const [isLoading, setIsLoading] = useState(false);
@@ -127,7 +129,7 @@ export const App = (props: {
   const LensComponent = props.plugins.lens.EmbeddableComponent;
   const LensSaveModalComponent = props.plugins.lens.SaveModalComponent;
 
-  const attributes = getLensAttributes(color, props.defaultDataView, props.lensFormulaHelper);
+  const attributes = getLensAttributes(color, props.defaultDataView, props.formula);
 
   return (
     <EuiPage>

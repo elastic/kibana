@@ -7,9 +7,10 @@
 
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { CoreSetup, AppMountParameters } from 'kibana/public';
 import { EuiCallOut } from '@elastic/eui';
-import { StartDependencies } from './plugin';
+
+import type { CoreSetup, AppMountParameters } from 'kibana/public';
+import type { StartDependencies } from './plugin';
 
 export const mount =
   (coreSetup: CoreSetup<StartDependencies>) =>
@@ -18,19 +19,14 @@ export const mount =
     const { App } = await import('./app');
 
     const defaultDataView = await plugins.data.indexPatterns.getDefault();
-    const lensFormulaHelper = await plugins.lens.createFormulaHelper();
+    const { formula } = await plugins.lens.stateHelperApi();
 
     const i18nCore = core.i18n;
 
     const reactElement = (
       <i18nCore.Context>
         {defaultDataView && defaultDataView.isTimeBased() ? (
-          <App
-            core={core}
-            plugins={plugins}
-            defaultDataView={defaultDataView}
-            lensFormulaHelper={lensFormulaHelper}
-          />
+          <App core={core} plugins={plugins} defaultDataView={defaultDataView} formula={formula} />
         ) : (
           <EuiCallOut
             title="Please define a default index pattern to use this demo"

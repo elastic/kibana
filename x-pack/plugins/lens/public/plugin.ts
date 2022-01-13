@@ -39,7 +39,7 @@ import { IndexPatternFieldEditorStart } from '../../../../src/plugins/data_view_
 import type {
   IndexPatternDatasource as IndexPatternDatasourceType,
   IndexPatternDatasourceSetupPlugins,
-  FormulaHelper,
+  FormulaPublicApi,
 } from './indexpattern_datasource';
 import type {
   XyVisualization as XyVisualizationType,
@@ -163,9 +163,11 @@ export interface LensPublicStart {
   getXyVisTypes: () => Promise<VisualizationType[]>;
 
   /**
-   * Method which returns formula helper keeping this async as to not impact page load bundle
+   * API which returns state helpers keeping this async as to not impact page load bundle
    */
-  createFormulaHelper: () => Promise<FormulaHelper>;
+  stateHelperApi: () => Promise<{
+    formula: FormulaPublicApi;
+  }>;
 }
 
 export class LensPlugin {
@@ -393,9 +395,12 @@ export class LensPlugin {
         return visualizationTypes;
       },
 
-      createFormulaHelper: async () => {
-        const { createFormulaHelper } = await import('./async_services');
-        return await createFormulaHelper();
+      stateHelperApi: async () => {
+        const { createFormulaPublicApi } = await import('./async_services');
+
+        return {
+          formula: createFormulaPublicApi(),
+        };
       },
     };
   }

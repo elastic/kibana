@@ -28,7 +28,7 @@ export * from './visualizations/gauge/gauge_visualization';
 export * from './visualizations/gauge';
 
 export * from './indexpattern_datasource/indexpattern';
-export { createFormulaHelper } from './indexpattern_datasource/operations/definitions/formula/formula_helper';
+export { createFormulaPublicApi } from './indexpattern_datasource/operations/definitions/formula/formula_public_api';
 
 export * from './indexpattern_datasource';
 

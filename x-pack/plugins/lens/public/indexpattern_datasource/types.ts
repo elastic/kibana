@@ -38,7 +38,7 @@ export type {
   OverallSumIndexPatternColumn,
 } from './operations';
 
-export type { FormulaHelper } from './operations/definitions/formula/formula_helper';
+export type { FormulaPublicApi } from './operations/definitions/formula/formula_public_api';
 
 export type DraggedField = DragDropIdentifier & {
   field: IndexPatternField;

@@ -14,7 +14,7 @@ import { convertDataViewIntoLensIndexPattern } from '../../../loader';
 import { PersistedIndexPatternLayer } from '../../../types';
 
 /** @public **/
-export interface FormulaHelper {
+export interface FormulaPublicApi {
   /**
    * Method which Lens consumer can import and given a formula string,
    * return a parsed result as list of columns to use as Embeddable attributes.
@@ -41,7 +41,7 @@ export interface FormulaHelper {
 }
 
 /** @public **/
-export const createFormulaHelper = (): FormulaHelper => {
+export const createFormulaPublicApi = (): FormulaPublicApi => {
   const cache: Map<string, IndexPattern> = new Map();
 
   const getCachedLensIndexPattern = (dataView: DataView): IndexPattern => {

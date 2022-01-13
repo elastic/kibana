@@ -55,7 +55,7 @@ export type {
   FormulaIndexPatternColumn,
   MathIndexPatternColumn,
   OverallSumIndexPatternColumn,
-  FormulaHelper,
+  FormulaPublicApi,
 } from './indexpattern_datasource/types';
 export type { LensEmbeddableInput } from './embeddable';
 
