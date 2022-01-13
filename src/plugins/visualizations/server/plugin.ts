@@ -12,6 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../common/constants';
 import { visualizationSavedObjectType } from './saved_objects';
 import { registerVisualizationsCollector } from './usage_collector';
+import { capabilitiesProvider } from './capabilities_provider';
 
 import type { VisualizationsPluginSetup, VisualizationsPluginStart } from './types';
 import type {
@@ -41,6 +42,7 @@ export class VisualizationsPlugin
     this.logger.debug('visualizations: Setup');
 
     core.savedObjects.registerType(visualizationSavedObjectType);
+    core.capabilities.registerProvider(capabilitiesProvider);
 
     core.uiSettings.register({
       [VISUALIZE_ENABLE_LABS_SETTING]: {
