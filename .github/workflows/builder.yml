@@ -25,14 +25,14 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: elastic/docs.elastic.dev
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.VERCEL_GITHUB_TOKEN }}
           path: ${{ github.workspace }}/docs.elastic.dev
 
       - name: Checkout Wordlake
         uses: actions/checkout@v2
         with:
           repository: elastic/wordlake-dev
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.VERCEL_GITHUB_TOKEN }}
           path: ${{ github.workspace }}/wordlake-dev
 
       - name: Temp sources override
@@ -54,10 +54,10 @@ jobs:
         uses: elastic/builder@v21.1.0
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }} # Required
-          vercel-org-id: ${{ secrets.ORG_ID}}  #Required
-          vercel-project-id: ${{ secrets.PROJECT_ID}} #Required
-          vercel-project-name: docs-elastic-dev-staging
-          github-token: ${{ secrets.GH_PAT }} #Optional
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}  #Required
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_DOCS_DEV}} #Required
+          vercel-project-name: docs-elastic-dev
+          github-token: ${{ secrets.VERCEL_GITHUB_TOKEN }} #Optional
           working-directory: ./
 
       - name: Portal for deploy
