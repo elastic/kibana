@@ -8,6 +8,7 @@
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
+  EuiBetaBadge,
   EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -24,15 +25,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
-import {
-  getAnalysisType,
-  REFRESH_ANALYTICS_LIST_STATE,
-  refreshAnalyticsList$,
-  useRefreshAnalyticsList,
-} from '../../data_frame_analytics/common';
+import { getAnalysisType } from '../../data_frame_analytics/common';
 import { ModelsTableToConfigMapping } from './index';
 import { ModelsBarStats, StatsBar } from '../../components/stats_bar';
-import { useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { useMlKibana, useMlLocator, useNavigateToPath, useTimefilter } from '../../contexts/kibana';
 import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
 import {
   ModelPipelines,
@@ -54,6 +50,7 @@ import { FIELD_FORMAT_IDS } from '../../../../../../../src/plugins/field_formats
 import { useRefresh } from '../../routing/use_refresh';
 import { DEPLOYMENT_STATE } from '../../../../common/constants/trained_models';
 import { getUserConfirmationProvider } from './force_stop_dialog';
+import { MlPageHeader } from '../../components/page_header';
 
 type Stats = Omit<TrainedModelStat, 'model_id'>;
 
@@ -86,6 +83,8 @@ export const ModelsList: FC = () => {
     },
   } = useMlKibana();
   const urlLocator = useMlLocator()!;
+
+  useTimefilter({ timeRangeSelector: false, autoRefreshSelector: true });
 
   const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
 
@@ -180,14 +179,7 @@ export const ModelsList: FC = () => {
       );
     }
     setIsLoading(false);
-    refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.IDLE);
   }, [itemIdToExpandedRowMap]);
-
-  // Subscribe to the refresh observable to trigger reloading the model list.
-  useRefreshAnalyticsList({
-    isLoading: setIsLoading,
-    onRefresh: fetchModelsData,
-  });
 
   useEffect(
     function updateOnTimerRefresh() {
@@ -695,6 +687,30 @@ export const ModelsList: FC = () => {
 
   return (
     <>
+      <MlPageHeader>
+        <EuiFlexGroup responsive={false} wrap={false} alignItems={'center'} gutterSize={'m'}>
+          <EuiFlexItem grow={false}>
+            <FormattedMessage id="xpack.ml.trainedModels.title" defaultMessage="Trained Models" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge
+              label={i18n.translate('xpack.ml.navMenu.trainedModelsTabBetaLabel', {
+                defaultMessage: 'Experimental',
+              })}
+              size="m"
+              color="hollow"
+              tooltipContent={i18n.translate(
+                'xpack.ml.navMenu.trainedModelsTabBetaTooltipContent',
+                {
+                  defaultMessage:
+                    "Model Management is an experimental feature and subject to change. We'd love to hear your feedback.",
+                }
+              )}
+              tooltipPosition={'right'}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </MlPageHeader>
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween">
         {modelsStats && (

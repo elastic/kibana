@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
+import { ResolvedArgProps, ResolvedLabels } from '../../arg';
 import { ExpressionAstExpression } from '../../../../types';
 import { ArgTypesStrings } from '../../../../i18n';
 
@@ -24,9 +25,8 @@ export interface Arguments {
 }
 export type Argument = keyof Arguments;
 
-export interface Props {
+export type Props = {
   argValue: ExpressionAstExpression;
-  labels: string[];
   onValueChange: (argValue: ExpressionAstExpression) => void;
   typeInstance?: {
     name: string;
@@ -34,10 +34,15 @@ export interface Props {
       include: string[];
     };
   };
-}
+} & ResolvedArgProps<ResolvedLabels>;
 
 export const ExtendedTemplate: FunctionComponent<Props> = (props) => {
-  const { typeInstance, onValueChange, labels, argValue } = props;
+  const {
+    typeInstance,
+    onValueChange,
+    resolved: { labels },
+    argValue,
+  } = props;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
   const selectedSeries = get(chainArgs, 'label.0', '');
@@ -141,5 +146,7 @@ ExtendedTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,
   typeInstance: PropTypes.object,
-  labels: PropTypes.array.isRequired,
+  resolved: PropTypes.shape({
+    labels: PropTypes.array.isRequired,
+  }).isRequired,
 };

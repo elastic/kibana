@@ -64,8 +64,7 @@ export const useInvestigateInTimeline = ({
         timeline: {
           ...timeline,
           filterManager,
-          // by setting as an empty array, it will default to all in the reducer because of the event type
-          indexNames: [],
+          indexNames: timeline.indexNames ?? [],
           show: true,
         },
         to: toTimeline,
@@ -78,7 +77,7 @@ export const useInvestigateInTimeline = ({
   const showInvestigateInTimelineAction = alertIds != null;
   const { isLoading: isFetchingAlertEcs, alertsEcsData } = useFetchEcsAlertsData({
     alertIds,
-    skip: ecsRowData != null || alertIds == null,
+    skip: alertIds == null,
   });
 
   const investigateInTimelineAlertClick = useCallback(async () => {
@@ -92,9 +91,7 @@ export const useInvestigateInTimeline = ({
         searchStrategyClient,
         updateTimelineIsLoading,
       });
-    }
-
-    if (ecsRowData != null) {
+    } else if (ecsRowData != null) {
       await sendAlertToTimelineAction({
         createTimeline,
         ecsData: ecsRowData,
