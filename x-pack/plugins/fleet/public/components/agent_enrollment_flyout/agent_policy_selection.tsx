@@ -133,12 +133,14 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
           data-test-subj="agentPolicyDropdown"
         />
       </AgentPolicyFormRow>
-      <EuiSpacer size="m" />
       {selectedAgentPolicyId && !isFleetServerPolicy && (
-        <AgentPolicyPackageBadges
-          agentPolicyId={selectedAgentPolicyId}
-          excludeFleetServer={excludeFleetServer}
-        />
+        <>
+          <EuiSpacer size="m" />
+          <AgentPolicyPackageBadges
+            agentPolicyId={selectedAgentPolicyId}
+            excludeFleetServer={excludeFleetServer}
+          />
+        </>
       )}
       {props.withKeySelection && props.onKeyChange && (
         <>

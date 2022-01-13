@@ -141,6 +141,10 @@ export interface FleetServerPolicy {
     [k: string]: unknown;
   };
   /**
+   * True when this policy is the default policy to start Fleet Server
+   */
+  default_fleet_server: boolean;
+  /**
    * Auto unenroll any Elastic Agents which have not checked in for this many seconds
    */
   unenroll_timeout?: number;

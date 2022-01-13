@@ -616,6 +616,7 @@ class AgentPolicyService {
       coordinator_idx: 0,
       data: fullPolicy as unknown as FleetServerPolicy['data'],
       policy_id: fullPolicy.id,
+      default_fleet_server: policy.is_default_fleet_server === true,
     };
 
     if (policy.unenroll_timeout) {

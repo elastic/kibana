@@ -288,6 +288,7 @@ describe('agent policy', () => {
           body: expect.objectContaining({
             '@timestamp': expect.anything(),
             data: { id: 'policy123', inputs: [{ id: 'input-123' }], revision: 1 },
+            default_fleet_server: false,
             policy_id: 'policy123',
             revision_idx: 1,
           }),

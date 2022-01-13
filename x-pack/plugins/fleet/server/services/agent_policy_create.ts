@@ -22,10 +22,11 @@ import { incrementPackageName } from './package_policy';
 import { bulkInstallPackages } from './epm/packages';
 import { ensureDefaultEnrollmentAPIKeysExists } from './setup';
 
+const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
+
 async function getAgentPolicyId(soClient: SavedObjectsClientContract): Promise<string | undefined> {
   let agentPolicyId;
   // creating first fleet server policy with id 'fleet-server-policy'
-  const FLEET_SERVER_POLICY_ID = 'fleet-server-policy';
   let agentPolicy;
   try {
     agentPolicy = await agentPolicyService.get(soClient, FLEET_SERVER_POLICY_ID, false);
@@ -94,6 +95,10 @@ export async function createAgentPolicyWithPackages({
     packagesToInstall.push(FLEET_SERVER_PACKAGE);
 
     agentPolicyId = await getAgentPolicyId(soClient);
+    if (agentPolicyId === FLEET_SERVER_POLICY_ID) {
+      // setting first fleet server policy to default, so that fleet server can enroll without setting policy_id
+      newPolicy.is_default_fleet_server = true;
+    }
   }
   if (withSysMonitoring) {
     packagesToInstall.push(FLEET_SYSTEM_PACKAGE);
