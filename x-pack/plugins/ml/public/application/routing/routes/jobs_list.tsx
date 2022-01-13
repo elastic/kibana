@@ -33,12 +33,6 @@ export const jobListRouteFactory = (navigateToPath: NavigateToPath, basePath: st
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
     getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
-    {
-      text: i18n.translate('xpack.ml.anomalyDetection.jobManagementLabel', {
-        defaultMessage: 'Job Management',
-      }),
-      href: '',
-    },
   ],
   'data-test-subj': 'mlPageJobManagement',
   enableDatePicker: true,
