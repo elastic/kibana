@@ -72,7 +72,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
           <EuiFlexItem grow>
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem grow>
-                <EuiSplitPanel.Outer display="plain" hasShadow={false} hasBorder>
+                <EuiSplitPanel.Outer color="plain" hasShadow={false} hasBorder>
                   <EuiSplitPanel.Inner>
                     <EuiFlexGroup
                       justifyContent="center"
