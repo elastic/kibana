@@ -49,11 +49,13 @@ export function CustomizablePalette({
     dataBounds
   );
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [localState, dispatch] = useReducer(paletteConfigurationReducer, {
     activePalette,
     colorRanges: colorRangesToShow,
   });
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   useDebounce(
     () => {
       if (

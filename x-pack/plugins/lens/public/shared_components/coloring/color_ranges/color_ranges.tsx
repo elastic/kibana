@@ -47,9 +47,7 @@ export function ColorRanges({
   const rangeType = paletteConfiguration?.rangeType ?? defaultPaletteParams.rangeType;
 
   useEffect(() => {
-    setColorRangesValidity(
-      validateColorRanges(colorRanges, dataBounds, rangeType)
-    );
+    setColorRangesValidity(validateColorRanges(colorRanges, dataBounds, rangeType));
   }, [colorRanges, rangeType, dataBounds]);
 
   return (

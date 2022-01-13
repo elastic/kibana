@@ -59,7 +59,7 @@ export interface UpdateContinuityPayload {
   isLast: boolean;
   continuity: PaletteContinuity;
   dataBounds: DataBounds;
-};
+}
 
 /** @internal **/
 export type ColorRangesActions =

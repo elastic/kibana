@@ -12,7 +12,6 @@ import { EuiButtonIcon } from '@elastic/eui';
 
 import { ValueMaxIcon } from '../../../assets/value_max';
 import { ValueMinIcon } from '../../../assets/value_min';
-import { getDataMinMax, roundValue } from '../utils';
 import { isLastItem } from './utils';
 
 import type { DataBounds, ColorRangesActions, ColorRange, ColorRangeAccessor } from './types';
@@ -65,8 +64,6 @@ export function ColorRangeDeleteButton({ index, dispatch }: ColorRangesItemButto
 
 export function ColorRangeEditButton({
   index,
-  colorRanges,
-  rangeType,
   dataBounds,
   continuity,
   dispatch,
@@ -81,7 +78,7 @@ export function ColorRangeEditButton({
       type: 'updateContinuity',
       payload: { isLast, continuity: newContinuity, dataBounds },
     });
-  }, [colorRanges, isLast, index, dispatch, continuity, dataBounds, rangeType]);
+  }, [isLast, dispatch, continuity, dataBounds]);
 
   const title = i18n.translate('xpack.lens.dynamicColoring.customPalette.editButtonAriaLabel', {
     defaultMessage: 'Edit',
@@ -99,8 +96,6 @@ export function ColorRangeEditButton({
 }
 
 export function ColorRangeAutoDetectButton({
-  index,
-  colorRanges,
   continuity,
   dataBounds,
   dispatch,
@@ -115,7 +110,7 @@ export function ColorRangeAutoDetectButton({
       type: 'updateContinuity',
       payload: { isLast, continuity: newContinuity, dataBounds },
     });
-  }, [continuity, colorRanges, dispatch, index, isLast]);
+  }, [continuity, dispatch, isLast]);
 
   const title = isLast
     ? i18n.translate('xpack.lens.dynamicColoring.customPalette.autoDetectMaximumAriaLabel', {

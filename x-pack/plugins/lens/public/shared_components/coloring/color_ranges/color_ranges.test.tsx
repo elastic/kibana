@@ -28,7 +28,7 @@ const pageObjects = {
 
 describe('Color Ranges', () => {
   let props: ColorRangesProps;
-  let dispatch = jest.fn();
+  const dispatch = jest.fn();
 
   beforeEach(() => {
     dispatch.mockClear();
