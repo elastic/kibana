@@ -30,6 +30,7 @@ type Props = {
   excludeFleetServer?: boolean;
   onClickCreatePolicy: () => void;
   selectedAgentPolicy?: string;
+  isFleetServerPolicy?: boolean;
 } & (
   | {
       withKeySelection: true;
@@ -61,6 +62,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
     excludeFleetServer,
     onClickCreatePolicy,
     selectedAgentPolicy,
+    isFleetServerPolicy,
   } = props;
 
   const [selectedAgentPolicyId, setSelectedAgentPolicyId] = useState<undefined | string>(
@@ -132,7 +134,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
         />
       </AgentPolicyFormRow>
       <EuiSpacer size="m" />
-      {selectedAgentPolicyId && (
+      {selectedAgentPolicyId && !isFleetServerPolicy && (
         <AgentPolicyPackageBadges
           agentPolicyId={selectedAgentPolicyId}
           excludeFleetServer={excludeFleetServer}

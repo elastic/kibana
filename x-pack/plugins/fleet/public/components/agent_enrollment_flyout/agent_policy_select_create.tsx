@@ -83,6 +83,7 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
           excludeFleetServer={excludeFleetServer}
           onClickCreatePolicy={() => setShowCreatePolicy(true)}
           selectedAgentPolicy={selectedAgentPolicy}
+          isFleetServerPolicy={isFleetServerPolicy}
         />
       )}
       {createStatus !== CREATE_STATUS.INITIAL && (
