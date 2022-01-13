@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import path from 'path';
-import fs from 'fs/promises';
-
 import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
 import { i18n } from '@kbn/i18n';
 import { groupBy, omit, pick, isEqual } from 'lodash';
@@ -33,8 +30,12 @@ import {
 
 import { escapeSearchQueryPhrase } from './saved_object';
 import { pkgToPkgKey } from './epm/registry';
-import { getInstallation, getPackageInfo } from './epm/packages';
-import { ensurePackagesCompletedInstall, installPackage } from './epm/packages/install';
+import { getInstallation, getInstallationObject, getPackageInfo } from './epm/packages';
+import {
+  ensurePackagesCompletedInstall,
+  getInstallType,
+  installPackage,
+} from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
 import type { InputsOverride } from './package_policy';
@@ -44,6 +45,7 @@ import type { UpgradeManagedPackagePoliciesResult } from './managed_package_poli
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
 import { outputService } from './output';
 import { getBundledPackages } from './epm/packages/get_bundled_packages';
+import { parseAndVerifyArchiveEntries } from './epm/archive';
 
 interface PreconfigurationResult {
   policies: Array<{ id: string; updated_at: string }>;
@@ -483,25 +485,37 @@ async function installBundledPackages(
   const results: BundledPackageInstallResult[] = [];
 
   for (const bundledPackage of bundledPackages) {
+    // TODO: Determine a better way to simply grab the package name/version from the archive
+    const { packageInfo } = await parseAndVerifyArchiveEntries(
+      bundledPackage.buffer,
+      'application/zip'
+    );
+
+    const installedPkg = await getInstallationObject({
+      savedObjectsClient: soClient,
+      pkgName: packageInfo.name,
+    });
+
+    const installType = getInstallType({ pkgVersion: packageInfo.version, installedPkg });
+
+    // If the package is already installed, don't attempt to reinstall it
+    if (installType !== 'install') {
+      logger.debug(`Bundled package ${bundledPackage.name} is already installed - skipping`);
+      continue;
+    }
+
     logger.debug(`Installing bundled package ${bundledPackage.name}`);
 
-    // try/catch bundled package installs individually to avoid stopping the whole setup process
-    // if a single package fails to install
-    try {
-      const result = await installPackage({
-        savedObjectsClient: soClient,
-        esClient,
-        installSource: 'upload',
-        archiveBuffer: bundledPackage.buffer,
-        contentType: 'application/zip',
-        spaceId,
-      });
+    const result = await installPackage({
+      savedObjectsClient: soClient,
+      esClient,
+      installSource: 'upload',
+      archiveBuffer: bundledPackage.buffer,
+      contentType: 'application/zip',
+      spaceId,
+    });
 
-      results.push({ name: bundledPackage.name, ...result });
-    } catch (error) {
-      logger.error(`Error installing bundled package`);
-      logger.error(error);
-    }
+    results.push({ name: bundledPackage.name, ...result });
   }
 
   return results;
