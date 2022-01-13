@@ -69,7 +69,6 @@ export const TrustedAppsPage = memo(() => {
     if (memoizedRouteState && memoizedRouteState.onBackButtonNavigateTo) {
       return <BackToExternalAppButton {...memoizedRouteState} />;
     }
-    return null;
   }, [memoizedRouteState]);
 
   const handleAddButtonClick = useTrustedAppsNavigateCallback(() => ({
