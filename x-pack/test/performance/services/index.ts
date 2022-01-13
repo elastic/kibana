@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { services as defaultFunctionalServices } from '../../functional/services';
+import { services as functionalServices } from '../../functional/services';
 import { PlaywrightService } from './playwright';
 
 export const services = {
-  ...defaultFunctionalServices,
+  es: functionalServices.es,
+
   playwright: PlaywrightService,
 };

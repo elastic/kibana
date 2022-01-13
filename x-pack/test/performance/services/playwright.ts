@@ -16,8 +16,7 @@ type StorageState = Awaited<ReturnType<BrowserContext['storageState']>>;
 
 export class PlaywrightService extends FtrService {
   private readonly config = this.ctx.getService('config');
-  private browser!: ChromiumBrowser;
-  private context!: BrowserContext;
+  private browser: ChromiumBrowser | undefined;
   private storageState: StorageState | undefined;
 
   private async getStorageState() {
@@ -31,7 +30,9 @@ export class PlaywrightService extends FtrService {
       port: this.config.get('servers.kibana.port'),
     });
 
-    const page = await this.context.newPage();
+    const browser = await this.getBrowserInstance();
+    const context = await browser.newContext();
+    const page = await context.newPage();
     await page.goto(`${kibanaUrl}`);
     const usernameLocator = page.locator('[data-test-subj=loginUsername]');
     const passwordLocator = page.locator('[data-test-subj=loginPassword]');
@@ -51,7 +52,9 @@ export class PlaywrightService extends FtrService {
 
   private async getBrowserInstance() {
     if (!this.browser) {
-      this.browser = await playwright.chromium.launch({ headless: true });
+      this.browser = await playwright.chromium.launch({
+        headless: !!(process.env.TEST_BROWSER_HEADLESS || process.env.CI),
+      });
     }
     return this.browser;
   }
@@ -67,13 +70,13 @@ export class PlaywrightService extends FtrService {
 
     before(async () => {
       const browser = await this.getBrowserInstance();
-      this.context = await browser.newContext({
+      const context = await browser.newContext({
         ...(options.autoLogin && { storageState: await this.getStorageState() }),
       });
 
-      const page = await this.context.newPage();
+      const page = await context.newPage();
       pageToCleanup = page;
-      const client = await this.context.newCDPSession(page);
+      const client = await context.newCDPSession(page);
 
       await client.send('Network.clearBrowserCache');
       await client.send('Network.setCacheDisabled', { cacheDisabled: true });
