@@ -11,8 +11,8 @@ import React from 'react';
 import { getNextEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { Transaction as ITransaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { TransactionDetailLink } from '../../../shared/Links/apm/transaction_detail_link';
-import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
+import { TransactionDetailLink } from '../../../shared/links/apm/transaction_detail_link';
+import { IWaterfall } from './waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
 import { Environment } from '../../../../../common/environment_rt';
 
 export function MaybeViewTraceLink({
