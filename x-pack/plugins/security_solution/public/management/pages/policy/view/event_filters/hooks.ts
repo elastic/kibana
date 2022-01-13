@@ -71,7 +71,6 @@ export function useSearchAssignedEventFilters(
     }
   );
 }
-
 export function useSearchNotAssignedEventFilters(
   policyId: string,
   options: { filter?: string; perPage?: number; enabled?: boolean }
@@ -103,7 +102,7 @@ export function useSearchNotAssignedEventFilters(
 export function useBulkUpdateEventFilters(
   callbacks: {
     onUpdateSuccess?: (updatedExceptions: ExceptionListItemSchema[]) => void;
-    onUpdateError?: () => void;
+    onUpdateError?: (error?: ServerApiError) => void;
     onSettledCallback?: () => void;
   } = {}
 ) {
@@ -116,7 +115,12 @@ export function useBulkUpdateEventFilters(
     onSettledCallback = () => {},
   } = callbacks;
 
-  return useMutation(
+  return useMutation<
+    ExceptionListItemSchema[],
+    ServerApiError,
+    ExceptionListItemSchema[],
+    () => void
+  >(
     (eventFilters: ExceptionListItemSchema[]) => {
       return pMap(
         eventFilters,

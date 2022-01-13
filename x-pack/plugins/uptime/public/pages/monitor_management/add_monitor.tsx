@@ -8,6 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTrackPageview } from '../../../../observability/public';
+import { ScheduleUnit } from '../../../common/runtime_types';
 import { SyntheticsProviders } from '../../components/fleet_package/contexts';
 import { Loader } from '../../components/monitor_management/loader/loader';
 import { MonitorConfig } from '../../components/monitor_management/monitor_config/monitor_config';
@@ -27,7 +28,12 @@ export const AddMonitorPage: React.FC = () => {
       errorTitle={ERROR_HEADING_LABEL}
       errorBody={ERROR_BODY_LABEL}
     >
-      <SyntheticsProviders>
+      <SyntheticsProviders
+        policyDefaultValues={{
+          isZipUrlSourceEnabled: false,
+          allowedScheduleUnits: [ScheduleUnit.MINUTES],
+        }}
+      >
         <MonitorConfig />
       </SyntheticsProviders>
     </Loader>

@@ -27,9 +27,7 @@ class UpdateError extends Error {
 }
 
 export const updateRules = async ({
-  spaceId,
   rulesClient,
-  ruleStatusClient,
   defaultOutputIndex,
   existingRule,
   ruleUpdate,
