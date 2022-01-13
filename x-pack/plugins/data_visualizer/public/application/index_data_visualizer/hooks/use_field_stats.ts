@@ -210,7 +210,6 @@ export function useFieldStatsSearchStrategy(
           });
 
           setFieldStats(statsMap);
-
           if (failedFields.length > 0) {
             statsMap$.next(statsMap);
             fieldsToRetry$.next(failedFields);
@@ -243,7 +242,7 @@ export function useFieldStatsSearchStrategy(
         if (Array.isArray(fieldBatches)) {
           fieldBatches.forEach((f) => {
             if (Array.isArray(f) && f.length === 1) {
-              statsMap.set(f[0].fieldName, f[0]);
+              statsMap.set(f[0].fields[0], f[0]);
             }
           });
           setFieldStats(statsMap);
