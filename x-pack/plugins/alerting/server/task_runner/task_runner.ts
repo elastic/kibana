@@ -63,7 +63,7 @@ const FALLBACK_RETRY_INTERVAL = '5m';
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
 
-export const getDefaultMonitoring = (): RuleMonitoring => ({
+export const getDefaultRuleMonitoring = (): RuleMonitoring => ({
   execution: {
     history: [],
     calculated_metrics: {
@@ -663,8 +663,8 @@ export class TaskRunner<
 
     const ruleMonitoring =
       resolveErr<RuleMonitoring | undefined, Error>(monitoring, () => {
-        return getDefaultMonitoring();
-      }) ?? getDefaultMonitoring();
+        return getDefaultRuleMonitoring();
+      }) ?? getDefaultRuleMonitoring();
     const executionStatus: AlertExecutionStatus = map(
       state,
       (ruleTaskState: RuleTaskState) => executionStatusFromState(ruleTaskState),

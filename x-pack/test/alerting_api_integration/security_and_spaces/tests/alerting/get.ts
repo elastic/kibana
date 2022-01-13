@@ -57,7 +57,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
-              const responseBody: { [key: string]: unknown } = {
+              expect(response.body).to.eql({
                 id: createdAlert.id,
                 name: 'abc',
                 tags: ['foo'],
@@ -78,11 +78,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 mute_all: false,
                 muted_alert_ids: [],
                 execution_status: response.body.execution_status,
-              };
-              if (response.body.monitoring) {
-                responseBody.monitoring = response.body.monitoring;
-              }
-              expect(response.body).to.eql(responseBody);
+                monitoring: response.body.monitoring,
+              });
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
               break;
