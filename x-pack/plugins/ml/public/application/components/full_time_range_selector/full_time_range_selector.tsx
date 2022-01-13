@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -88,33 +88,41 @@ export const FullTimeRangeSelector: FC<Props> = ({ dataView, query, disabled, ca
     ];
   }, []);
 
-  const popoverContent = (
-    <EuiPanel>
-      <EuiRadioGroup
-        options={sortOptions}
-        idSelected={frozenDataPreference}
-        onChange={(id) => {
-          setFrozenDataPreference(id as FrozenTierPreference);
-          setRange(dataView, query, id === FROZEN_TIER_PREFERENCE.EXCLUDE);
-          closePopover();
-        }}
-        compressed
-      />
-    </EuiPanel>
+  const setPreference = useCallback((id: string) => {
+    setFrozenDataPreference(id as FrozenTierPreference);
+    setRange(dataView, query, id === FROZEN_TIER_PREFERENCE.EXCLUDE);
+    closePopover();
+  }, []);
+
+  const popoverContent = useMemo(
+    () => (
+      <EuiPanel>
+        <EuiRadioGroup
+          options={sortOptions}
+          idSelected={frozenDataPreference}
+          onChange={setPreference}
+          compressed
+        />
+      </EuiPanel>
+    ),
+    [frozenDataPreference, sortOptions]
   );
 
-  const buttonTooltip =
-    frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE ? (
-      <FormattedMessage
-        id="xpack.ml.fullTimeRangeSelector.useFullDataExcludingFrozenButtonTooltip"
-        defaultMessage="Use full range of data excluding frozen data tier."
-      />
-    ) : (
-      <FormattedMessage
-        id="xpack.ml.fullTimeRangeSelector.useFullDataIncludingFrozenButtonTooltip"
-        defaultMessage="Use full range of data including frozen data tier, which might have slower search results."
-      />
-    );
+  const buttonTooltip = useMemo(
+    () =>
+      frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE ? (
+        <FormattedMessage
+          id="xpack.ml.fullTimeRangeSelector.useFullDataExcludingFrozenButtonTooltip"
+          defaultMessage="Use full range of data excluding frozen data tier."
+        />
+      ) : (
+        <FormattedMessage
+          id="xpack.ml.fullTimeRangeSelector.useFullDataIncludingFrozenButtonTooltip"
+          defaultMessage="Use full range of data including frozen data tier, which might have slower search results."
+        />
+      ),
+    [frozenDataPreference]
+  );
 
   return (
     <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
