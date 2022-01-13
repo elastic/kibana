@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { SavedObject } from 'kibana/public';
 
 // @ts-expect-error
 import { getDefaultWorkpad } from '../../../state/defaults';
@@ -15,21 +16,19 @@ import { useNotifyService, useWorkpadService } from '../../../services';
 
 import type { CanvasWorkpad } from '../../../../types';
 
-export const useCreateWorkpad = () => {
+export const useImportWorkpad = () => {
   const workpadService = useWorkpadService();
   const notifyService = useNotifyService();
   const history = useHistory();
 
   return useCallback(
-    async (_workpad?: CanvasWorkpad | null) => {
-      const workpad = _workpad || (getDefaultWorkpad() as CanvasWorkpad);
-
+    async (workpad: CanvasWorkpad | SavedObject<CanvasWorkpad>) => {
       try {
-        await workpadService.create(workpad);
-        history.push(`/workpad/${workpad.id}/page/1`);
+        const importedWorkpad = await workpadService.import(workpad);
+        history.push(`/workpad/${importedWorkpad.id}/page/1`);
       } catch (err) {
         notifyService.error(err, {
-          title: errors.getCreateFailureErrorMessage(),
+          title: errors.getUploadFailureErrorMessage(),
         });
       }
       return;
@@ -39,8 +38,8 @@ export const useCreateWorkpad = () => {
 };
 
 const errors = {
-  getCreateFailureErrorMessage: () =>
-    i18n.translate('xpack.canvas.error.useCreateWorkpad.createFailureErrorMessage', {
-      defaultMessage: `Couldn't create workpad`,
+  getUploadFailureErrorMessage: () =>
+    i18n.translate('xpack.canvas.error.useUploadWorkpad.uploadFailureErrorMessage', {
+      defaultMessage: `Couldn't upload workpad`,
     }),
 };

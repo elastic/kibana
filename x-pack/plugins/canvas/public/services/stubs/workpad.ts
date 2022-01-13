@@ -7,12 +7,13 @@
 
 import moment from 'moment';
 
+import { SavedObject } from 'src/core/types';
 import { PluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
 
 // @ts-expect-error
-import { getDefaultWorkpad } from '../../state/defaults';
+import { getDefaultWorkpad, getExportedWorkpad } from '../../state/defaults';
 import { CanvasWorkpadService } from '../workpad';
-import { CanvasTemplate } from '../../../types';
+import { CanvasTemplate, CanvasWorkpad } from '../../../types';
 
 type CanvasWorkpadServiceFactory = PluginServiceFactory<CanvasWorkpadService>;
 
@@ -94,6 +95,21 @@ export const findNoTemplates =
       .then(() => getNoTemplates());
   };
 
+export const exportWorkpad = (id: string) => {
+  const exportedWorkpad = getExportedWorkpad();
+  return {
+    ...exportedWorkpad,
+    attributes: { ...exportedWorkpad.attributes, id },
+    id,
+  };
+};
+
+export const importWorkpad = (workpad: SavedObject<CanvasWorkpad> | CanvasWorkpad) =>
+  Promise.resolve({
+    ...((workpad as SavedObject<CanvasWorkpad>).attributes ?? workpad),
+    id: workpad.id ?? 1,
+  });
+
 export const getNoTemplates = () => ({ templates: [] });
 export const getSomeTemplates = () => ({ templates });
 
@@ -103,6 +119,8 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = () => ({
     Promise.resolve({ outcome: 'exactMatch', workpad: { ...getDefaultWorkpad(), id } }),
   findTemplates: findNoTemplates(),
   create: (workpad) => Promise.resolve(workpad),
+  import: (workpad) => importWorkpad(workpad),
+  export: (id) => Promise.resolve(exportWorkpad(id)),
   createFromTemplate: (_templateId: string) => Promise.resolve(getDefaultWorkpad()),
   find: findNoWorkpads(),
   remove: (_id: string) => Promise.resolve(),

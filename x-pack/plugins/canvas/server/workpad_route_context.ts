@@ -16,12 +16,15 @@ import { WorkpadAttributes } from './routes/workpad/workpad_attributes';
 import { CANVAS_TYPE } from '../common/lib/constants';
 import { injectReferences, extractReferences } from './saved_objects/workpad_references';
 import { getId } from '../common/lib/get_id';
-import { CanvasWorkpad } from '../types';
+import { CanvasWorkpad, ImportedCanvasWorkpadSavedObject } from '../types';
 
 export interface CanvasRouteHandlerContext extends RequestHandlerContext {
   canvas: {
     workpad: {
       create: (attributes: CanvasWorkpad) => Promise<SavedObject<WorkpadAttributes>>;
+      import: (
+        workpad: ImportedCanvasWorkpadSavedObject
+      ) => Promise<SavedObject<WorkpadAttributes>>;
       get: (id: string) => Promise<SavedObject<WorkpadAttributes>>;
       resolve: (id: string) => Promise<SavedObjectsResolveResponse<WorkpadAttributes>>;
       update: (
@@ -60,6 +63,34 @@ export const createWorkpadRouteContext: (
             '@created': now,
           },
           { id, references }
+        );
+      },
+      import: async (workpad: ImportedCanvasWorkpadSavedObject) => {
+        const now = new Date().toISOString();
+        const { attributes, ...options } = workpad;
+        const { id: maybeId, ...attrsWithoutId } = attributes;
+        // Functionality of migrations on import of workpads was implemented in v8.1.0.
+        // All the workpads, imported before this version don't have specified migration versions
+        // and have different structure of the JSON file.
+        const DEFAULT_MIGRATION_VERSION = { [CANVAS_TYPE]: '8.0.0' };
+        const DEFAULT_CORE_MIGRATION_VERSION = '8.0.0';
+
+        const {
+          migrationVersion = DEFAULT_MIGRATION_VERSION,
+          coreMigrationVersion = DEFAULT_CORE_MIGRATION_VERSION,
+        } = options;
+
+        const id = maybeId ? maybeId : getId('workpad');
+
+        return await context.core.savedObjects.client.create<WorkpadAttributes>(
+          CANVAS_TYPE,
+          {
+            isWriteable: true,
+            ...attrsWithoutId,
+            '@timestamp': now,
+            '@created': now,
+          },
+          { ...options, migrationVersion, coreMigrationVersion, id }
         );
       },
       get: async (id: string) => {

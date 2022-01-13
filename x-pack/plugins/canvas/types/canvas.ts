@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObject } from 'src/core/types';
 import { ElementPosition } from './elements';
 import { FilterField } from './filters';
 
@@ -66,10 +67,24 @@ export interface CanvasWorkpad {
   width: number;
 }
 
+type ImportedCanvasWorkpad = Omit<
+  CanvasWorkpad,
+  '@created' | '@timestamp' | 'id' | 'isWriteable'
+> & {
+  id?: CanvasWorkpad['id'];
+  isWriteable?: CanvasWorkpad['isWriteable'];
+  '@created'?: CanvasWorkpad['@created'];
+  '@timestamp'?: CanvasWorkpad['@timestamp'];
+};
+
+export type ImportedCanvasWorkpadSavedObject = Partial<SavedObject<ImportedCanvasWorkpad>> &
+  Pick<SavedObject<ImportedCanvasWorkpad>, 'attributes'>;
+
 export type CanvasTemplateElement = Omit<CanvasElement, 'filter' | 'type'>;
 export type CanvasTemplatePage = Omit<CanvasPage, 'elements'> & {
   elements: CanvasTemplateElement[];
 };
+
 export interface CanvasTemplate {
   id: string;
   name: string;
