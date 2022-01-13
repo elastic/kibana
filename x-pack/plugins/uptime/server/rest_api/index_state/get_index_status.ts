@@ -13,13 +13,7 @@ export const createGetIndexStatusRoute: UMRestApiRouteFactory = (libs: UMServerL
   method: 'GET',
   path: API_URLS.INDEX_STATUS,
   validate: {},
-  handler: async ({ uptimeEsClient, server }): Promise<any> => {
-    const result = await libs.requests.getIndexStatus({ uptimeEsClient });
-    return {
-      ...result,
-      path: server.pathTls,
-      withoutPath: server.withoutPathTls,
-      hasChanged: true,
-    };
+  handler: async ({ uptimeEsClient }): Promise<any> => {
+    return await libs.requests.getIndexStatus({ uptimeEsClient });
   },
 });

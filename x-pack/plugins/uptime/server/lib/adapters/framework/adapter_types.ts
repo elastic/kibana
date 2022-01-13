@@ -49,8 +49,6 @@ export interface UptimeServerSetup {
   savedObjectsClient?: SavedObjectsClientContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   syntheticsService: SyntheticsService;
-  withoutPathTls: any;
-  pathTls: any;
 }
 
 export interface UptimeCorePluginsSetup {

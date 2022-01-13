@@ -62,8 +62,6 @@ export class ServiceAPIClient {
         key: tlsConfig.key,
         ca: tlsConfig.certificateAuthorities,
         passphrase: tlsConfig.keyPassphrase,
-        keepAlive: true,
-        timeout: 10000000,
       });
     }
   }
