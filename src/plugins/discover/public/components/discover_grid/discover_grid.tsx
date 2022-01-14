@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import './discover_grid.scss';
 import {
@@ -20,7 +20,6 @@ import {
   EuiLoadingSpinner,
   EuiIcon,
 } from '@elastic/eui';
-import classNames from 'classnames';
 import { flattenHit, DataView } from '../../../../data/common';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
@@ -35,6 +34,7 @@ import {
 } from './discover_grid_columns';
 import {
   defaultPageSize,
+  GRID_STYLE,
   pageSizeArr,
   toolbarVisibility as toolbarVisibilityDefaults,
 } from './constants';
@@ -50,7 +50,6 @@ import { SortPairArr } from '../doc_table/lib/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
 import { ElasticSearchHit } from '../../types';
 import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
-import { useGridStyle } from '../../utils/use_grid_style';
 
 interface SortObj {
   id: string;
@@ -368,7 +367,7 @@ export const DiscoverGrid = ({
     () =>
       !!onUpdateRowHeight
         ? {
-            allowDensity: true,
+            allowDensity: false,
             allowRowHeight: true,
           }
         : undefined,
@@ -394,9 +393,29 @@ export const DiscoverGrid = ({
     [showDisplaySelector, defaultColumns, additionalControls, isSortEnabled]
   );
 
-  const rowHeightsOptions = useRowHeightsOptions({ rowHeightState, onUpdateRowHeight });
+  const rowHeightsOptions = useRowHeightsOptions({
+    rowHeightState,
+    onUpdateRowHeight,
+    storage: services.storage,
+    uiSettings: services.uiSettings,
+  });
 
-  const { gridStyle, gridDensityClass } = useGridStyle();
+  /**
+   * The following should be removed after EUI update
+   * https://github.com/elastic/eui/issues/5524
+   */
+  const gridRef: React.RefObject<HTMLSpanElement> = useRef(null);
+  const [prevRowHeight, setPrevRowHeight] = useState(rowHeightState);
+
+  useEffect(() => {
+    if (gridRef.current === null) {
+      setPrevRowHeight(rowHeightState);
+    }
+  }, [rowHeightState]);
+
+  if (prevRowHeight !== rowHeightState) {
+    return null;
+  }
 
   if (!rowCount && isLoading) {
     return (
@@ -422,7 +441,6 @@ export const DiscoverGrid = ({
     );
   }
 
-  const gridClassNames = classNames(className, gridDensityClass);
   return (
     <DiscoverGridContext.Provider
       value={{
@@ -448,7 +466,8 @@ export const DiscoverGrid = ({
         data-title={searchTitle}
         data-description={searchDescription}
         data-document-number={displayedRows.length}
-        className={gridClassNames}
+        className={className}
+        ref={gridRef}
       >
         <EuiDataGridMemoized
           aria-describedby={randomId}
@@ -465,7 +484,7 @@ export const DiscoverGrid = ({
           sorting={sorting as EuiDataGridSorting}
           toolbarVisibility={toolbarVisibility}
           rowHeightsOptions={rowHeightsOptions}
-          gridStyle={gridStyle}
+          gridStyle={GRID_STYLE}
         />
 
         {showDisclaimer && (

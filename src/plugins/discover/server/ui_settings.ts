@@ -260,7 +260,7 @@ export const getUiSettings: () => Record<string, UiSettingsParams> = () => ({
     category: ['discover'],
     description: i18n.translate('discover.advancedSettings.params.rowHeightText', {
       defaultMessage:
-        'The maximum lines that a cell in a table should occupy. Auto height might be enabled by setting value to -1. Single option could be enabled by setting value to 0.',
+        'The number of lines to allow in a row. A value of -1 automatically adjusts the row height to fit the contents. A value of 0 displays the content in a single line.',
     }),
     schema: schema.number({ min: -1 }),
   },
