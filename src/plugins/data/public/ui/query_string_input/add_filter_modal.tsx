@@ -405,15 +405,21 @@ export function AddFilterModal({
       }
 
       const temp = (
-        <div className={classNames(filtersInGroup > 1 ? 'kbnQueryBar__filterModalGroups' : '')}>
+        <div
+          className={classNames(
+            filtersInGroup > 1 && groupsCount > 1 ? 'kbnQueryBar__filterModalGroups' : ''
+          )}
+        >
           {subGroups.map((subGroup, subGroupIdx) => {
+            const classes =
+              subGroup.length > 1 && groupsCount > 1
+                ? 'kbnQueryBar__filterModalSubGroups'
+                : groupsCount === 1 && subGroup.length > 1
+                ? 'kbnQueryBar__filterModalGroups'
+                : '';
             return (
               <>
-                <div
-                  className={classNames(
-                    subGroup.length > 1 ? 'kbnQueryBar__filterModalSubGroups' : ''
-                  )}
-                >
+                <div className={classNames(classes)}>
                   {subGroup.map((localfilter, index) => {
                     return (
                       <>
@@ -514,6 +520,12 @@ export function AddFilterModal({
                                   const updatedFilters = localFilters.filter(
                                     (_, idx) => idx !== localfilter.id
                                   );
+                                  const filtersOnGroup = updatedFilters.filter(
+                                    (f) => f.groupId === Number(groupId)
+                                  );
+                                  if (filtersOnGroup.length < 1) {
+                                    setGroupsCount(groupsCount - 1);
+                                  }
                                   setLocalFilters(updatedFilters);
                                 }}
                                 iconType="trash"
