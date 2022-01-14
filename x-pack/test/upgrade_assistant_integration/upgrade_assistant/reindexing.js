@@ -34,7 +34,7 @@ export default function ({ getService }) {
     return lastState;
   };
 
-  describe('reindexing', () => {
+  describe.skip('reindexing', () => {
     afterEach(() => {
       // Cleanup saved objects
       return es.deleteByQuery({
