@@ -118,6 +118,7 @@ export function DiscoverMainRoute() {
             onBeforeRedirect() {
               getUrlTracker().setTrackedUrl('/');
             },
+            theme: core.theme,
           })(e);
         }
       }
@@ -135,6 +136,7 @@ export function DiscoverMainRoute() {
     id,
     services,
     toastNotifications,
+    core.theme,
   ]);
 
   useEffect(() => {

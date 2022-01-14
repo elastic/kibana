@@ -27,6 +27,7 @@ export function ContextAppRoute() {
   const { chrome } = services;
 
   const { indexPatternId, id } = useParams<ContextUrlParams>();
+  const anchorId = decodeURIComponent(id);
   const breadcrumb = useMainRouteBreadcrumb();
 
   useEffect(() => {
@@ -68,5 +69,5 @@ export function ContextAppRoute() {
     return <LoadingIndicator />;
   }
 
-  return <ContextApp anchorId={id} indexPattern={indexPattern} />;
+  return <ContextApp anchorId={anchorId} indexPattern={indexPattern} />;
 }
