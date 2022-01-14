@@ -406,8 +406,10 @@ export const QueryBarTopRow = React.memo(
         };
       });
       props.toggleAddFilterModal?.(false);
-
       props?.onMultipleFiltersUpdated?.(mergedFilters);
+
+      const filters = [...props.filters, ...buildFilters];
+      props?.onFiltersUpdated?.(filters);
     }
 
     function applySavedQueries() {

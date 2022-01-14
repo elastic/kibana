@@ -9,3 +9,15 @@
 .globalFilterExpression__relationship {
   padding: $euiSizeXS;
 }
+
+.globalFilterExpression__groupNegate {
+  padding: $euiSizeXS;
+}
+
+.globalFilterExpression-isDisabled {
+  color: $euiColorDarkShade;
+  background-color: transparentize($euiColorLightShade, .5);
+  text-decoration: line-through;
+  font-weight: $euiFontWeightRegular;
+  font-style: italic;
+}

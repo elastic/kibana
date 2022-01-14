@@ -34,6 +34,7 @@ import {
   EuiHorizontalRule,
   EuiButtonIcon,
   EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 import { XJsonLang } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
@@ -416,42 +417,47 @@ export function AddFilterModal({
                   {subGroup.map((localfilter, index) => {
                     return (
                       <>
-                        <EuiFlexGroup>
+                        <EuiFlexGroup alignItems="center">
+                          <EuiFlexItem grow={false}>
+                            <EuiIcon type="grab" size="s" />
+                          </EuiFlexItem>
                           {renderFieldInput(localfilter.id)}
                           {renderOperatorInput(localfilter.id)}
                           <EuiSpacer size="s" />
                           <EuiFlexItem data-test-subj="filterParams">
                             {renderParamsEditor(localfilter.id)}
                           </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiButtonIcon
-                              onClick={() => {
-                                const updatedLocalFilter = { ...localfilter, relationship: 'OR' };
-                                const idx = localFilters.findIndex(
-                                  (f) => f.id === localfilter.id && f.groupId === Number(groupId)
-                                );
-                                const subGroupId = (localfilter?.subGroupId ?? 0) + 1;
-                                if (subGroup.length < 2) {
-                                  localFilters[idx] = updatedLocalFilter;
-                                }
-                                setLocalFilters([
-                                  ...localFilters,
-                                  {
-                                    field: undefined,
-                                    operator: undefined,
-                                    value: undefined,
-                                    relationship: undefined,
-                                    groupId: localfilter.groupId,
-                                    id: localFilters.length,
-                                    subGroupId,
-                                  },
-                                ]);
-                              }}
-                              iconType="returnKey"
-                              size="s"
-                              aria-label="Add filter group with OR"
-                            />
-                          </EuiFlexItem>
+                          {subGroup.length < 2 && (
+                            <EuiFlexItem grow={false}>
+                              <EuiButtonIcon
+                                onClick={() => {
+                                  const updatedLocalFilter = { ...localfilter, relationship: 'OR' };
+                                  const idx = localFilters.findIndex(
+                                    (f) => f.id === localfilter.id && f.groupId === Number(groupId)
+                                  );
+                                  const subGroupId = (localfilter?.subGroupId ?? 0) + 1;
+                                  if (subGroup.length < 2) {
+                                    localFilters[idx] = updatedLocalFilter;
+                                  }
+                                  setLocalFilters([
+                                    ...localFilters,
+                                    {
+                                      field: undefined,
+                                      operator: undefined,
+                                      value: undefined,
+                                      relationship: undefined,
+                                      groupId: localfilter.groupId,
+                                      id: localFilters.length,
+                                      subGroupId,
+                                    },
+                                  ]);
+                                }}
+                                iconType="returnKey"
+                                size="s"
+                                aria-label="Add filter group with OR"
+                              />
+                            </EuiFlexItem>
+                          )}
                           <EuiFlexItem grow={false}>
                             <EuiButtonIcon
                               display="base"

@@ -7,7 +7,7 @@
  */
 
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
-import { groupBy } from 'lodash';
+import { groupBy, isEqual } from 'lodash';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import {
   buildEmptyFilter,
@@ -45,6 +45,7 @@ interface Props {
   timeRangeForSuggestionsOverride?: boolean;
   selectedSavedQueries?: SavedQuery[];
   removeSelectedSavedQuery: (savedQuery: SavedQuery) => void;
+  onMultipleFiltersUpdated?: (filters: Filter[]) => void;
 }
 
 const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
@@ -106,6 +107,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
           groupedFilters={groupedFilters}
           indexPatterns={props?.indexPatterns}
           onClick={() => {}}
+          onRemove={onRemoveFilterGroup}
         />
       );
       GroupBadge.push(badge);
@@ -177,6 +179,26 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
     const filters = [...props.filters];
     filters.splice(i, 1);
     onFiltersUpdated(filters);
+    groupRef.current?.focus();
+  }
+
+  function onRemoveFilterGroup(groupId: string) {
+    const multipleFilters = [...props.multipleFilters];
+    const updatedMultipleFilters = multipleFilters.filter(
+      (filter) => filter.groupId !== Number(groupId)
+    );
+    const filters = [...props.filters];
+    const updatedFilters: Filter[] = [];
+
+    updatedMultipleFilters.forEach((filter) => {
+      filters.forEach((f) => {
+        if (isEqual(f.query, filter.query)) {
+          updatedFilters.push(f);
+        }
+      });
+    });
+    onFiltersUpdated(updatedFilters);
+    props?.onMultipleFiltersUpdated?.(updatedMultipleFilters);
     groupRef.current?.focus();
   }
 
@@ -261,7 +283,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
         >
           {renderMultipleFilters()}
           {renderSelectedSavedQueries()}
-          {renderItems()}
+          {props.multipleFilters.length === 0 && renderItems()}
           {/* {renderAddFilter()} */}
         </EuiFlexGroup>
       </EuiFlexItem>

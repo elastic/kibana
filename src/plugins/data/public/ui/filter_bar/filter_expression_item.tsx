@@ -35,6 +35,7 @@ interface Props {
   groupedFilters: any;
   indexPatterns: IIndexPattern[];
   onClick: (filter: Filter) => void;
+  onRemove: (groupId: string) => void;
   groupId: string;
 }
 
@@ -42,6 +43,7 @@ export const FilterExpressionItem: FC<Props> = ({
   groupedFilters,
   indexPatterns,
   onClick,
+  onRemove,
   groupId,
 }: Props) => {
   /**
@@ -97,6 +99,11 @@ export const FilterExpressionItem: FC<Props> = ({
 
     return label;
   }
+
+  const isDisabled = (labelConfig: LabelOptions, filter: Filter) => {
+    const { disabled } = filter.meta;
+    return disabled || labelConfig.status === FILTER_ITEM_ERROR;
+  };
 
   const getValue = (text?: string) => {
     return (
@@ -201,6 +208,15 @@ export const FilterExpressionItem: FC<Props> = ({
   const [ref] = useInnerText();
   let filterText = '';
   const filterExpression: JSX.Element[] = [];
+  const isGroupNegated = groupedFilters[0].groupNegated ?? false;
+  const groupNegatedPrefix = isGroupNegated ? (
+    <EuiTextColor color="danger" className="globalFilterExpression__groupNegate">
+      NOT
+    </EuiTextColor>
+  ) : null;
+  if (isGroupNegated && groupNegatedPrefix) {
+    filterExpression.push(groupNegatedPrefix);
+  }
   const groupBySubgroups = groupBy(groupedFilters, 'subGroupId');
   for (const [_, subGroupedFilters] of Object.entries(groupBySubgroups)) {
     const needsParenthesis = subGroupedFilters.length > 1;
@@ -247,14 +263,16 @@ export const FilterExpressionItem: FC<Props> = ({
         closeButtonProps={{
           tabIndex: -1,
         }}
-        // iconOnClick={() => onClick(savedQuery)}
-        // iconOnClickAriaLabel={i18n.translate(
-        //   'data.filter.filterBar.savedQueryBadgeIconAriaLabel',
-        //   {
-        //     defaultMessage: 'Remove {title}',
-        //     values: { title: savedQuery.attributes.title },
-        //   }
-        // )}
+        className={
+          isDisabled(getValueLabel(groupedFilters[0]), groupedFilters[0])
+            ? 'globalFilterExpression-isDisabled'
+            : ''
+        }
+        iconOnClick={() => onRemove(groupId)}
+        iconOnClickAriaLabel={i18n.translate('data.filter.filterBar.filteradgeIconAriaLabel', {
+          defaultMessage: 'Remove {title}',
+          values: { title: filterText },
+        })}
         // onClickAriaLabel={i18n.translate('data.filter.filterBar.savedQueryBadgeAriaLabel', {
         //   defaultMessage: 'Selected saved objects actions',
         // })}

@@ -445,11 +445,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         dateRangeTo = savedQuery.attributes.timefilter.to || dateRangeTo;
       }
     });
-    // this.setState({
-    //   query: finalQueryFromSelectedSavedObjects,
-    //   dateRangeFrom,
-    //   dateRangeTo,
-    // });
 
     this.props?.onQuerySubmit?.({
       query: finalQueryFromSelectedSavedObjects,
@@ -480,11 +475,15 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
   public onEnableAll = () => {
     const filters = this.props?.filters?.map(enableFilter);
+    const multipleFilters = this.state.multipleFilters?.map(enableFilter);
+    this.setState({ multipleFilters });
     this.props?.onFiltersUpdated?.(filters!);
   };
 
   public onDisableAll = () => {
     const filters = this.props?.filters?.map(disableFilter);
+    const multipleFilters = this.state.multipleFilters?.map(disableFilter);
+    this.setState({ multipleFilters });
     this.props?.onFiltersUpdated?.(filters!);
   };
 
@@ -500,6 +499,11 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
   public onToggleAllNegated = () => {
     const filters = this.props?.filters?.map(toggleFilterNegated);
+    const multipleFilterExpressions = this.state.multipleFilters as Filter[];
+    const multipleFilters = multipleFilterExpressions?.map((filter) => {
+      return { ...filter, groupNegated: true };
+    });
+    this.setState({ multipleFilters });
     this.props.onFiltersUpdated?.(filters!);
   };
 
@@ -509,7 +513,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   public onRemoveAll = () => {
-    this.setState({ selectedSavedQueries: [], finalSelectedSavedQueries: [] });
+    this.setState({ selectedSavedQueries: [], finalSelectedSavedQueries: [], multipleFilters: [] });
     this.props.onFiltersUpdated?.([]);
   };
 
@@ -689,6 +693,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
             selectedSavedQueries={this.state.finalSelectedSavedQueries}
             removeSelectedSavedQuery={this.removeSelectedSavedQuery}
+            onMultipleFiltersUpdated={this.onMultipleFiltersUpdated}
             multipleFilters={this.state.multipleFilters}
           />
         </div>
