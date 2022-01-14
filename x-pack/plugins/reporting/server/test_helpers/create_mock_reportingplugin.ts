@@ -35,7 +35,7 @@ export const createMockPluginSetup = (
   return {
     features: featuresPluginMock.createSetup(),
     basePath: { set: jest.fn() },
-    router: undefined,
+    router: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn() },
     security: securityMock.createSetup(),
     taskManager: taskManagerMock.createSetup(),
     logger: createMockLevelLogger(),
