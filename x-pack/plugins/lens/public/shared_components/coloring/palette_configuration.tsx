@@ -17,7 +17,7 @@ import './palette_configuration.scss';
 
 import { CUSTOM_PALETTE, DEFAULT_COLOR_STEPS, DEFAULT_CONTINUITY } from './constants';
 import type { CustomPaletteParams, RequiredPaletteParamTypes } from '../../../common';
-import { getSwitchToCustomParams, toColorRanges } from './utils';
+import { getSwitchToCustomParams, toColorRanges, getFallbackDataBounds } from './utils';
 
 import { toColorStops } from './color_ranges/utils';
 import { ColorRanges } from './color_ranges';
@@ -29,19 +29,15 @@ export function CustomizablePalette({
   palettes,
   activePalette,
   setPalette,
-  dataBounds,
+  dataBounds = getFallbackDataBounds(activePalette.params?.rangeType),
   showRangeTypeSelector = true,
 }: {
   palettes: PaletteRegistry;
-  activePalette?: PaletteOutput<CustomPaletteParams>;
+  activePalette: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
   dataBounds?: DataBounds;
   showRangeTypeSelector?: boolean;
 }) {
-  if (!dataBounds || !activePalette) {
-    return null;
-  }
-
   const colorRangesToShow = toColorRanges(
     palettes,
     activePalette?.params?.colorStops || [],
@@ -49,13 +45,11 @@ export function CustomizablePalette({
     dataBounds
   );
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [localState, dispatch] = useReducer(paletteConfigurationReducer, {
     activePalette,
     colorRanges: colorRangesToShow,
   });
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useDebounce(
     () => {
       if (

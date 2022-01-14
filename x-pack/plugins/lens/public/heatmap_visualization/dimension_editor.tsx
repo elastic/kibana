@@ -92,22 +92,26 @@ export function HeatmapDimensionEditor(
             isOpen={isPaletteOpen}
             handleClose={() => setIsPaletteOpen(!isPaletteOpen)}
           >
-            <CustomizablePalette
-              palettes={props.paletteService}
-              activePalette={activePalette}
-              dataBounds={currentMinMax}
-              setPalette={(newPalette) => {
-                // make sure to always have a list of stops
-                if (newPalette.params && !newPalette.params.stops) {
-                  newPalette.params.stops = displayStops;
-                }
-                (newPalette as HeatmapVisualizationState['palette'])!.accessor = accessor;
-                setState({
-                  ...state,
-                  palette: newPalette as HeatmapVisualizationState['palette'],
-                });
-              }}
-            />
+            {activePalette ? (
+              <CustomizablePalette
+                palettes={props.paletteService}
+                activePalette={activePalette}
+                dataBounds={currentMinMax}
+                setPalette={(newPalette) => {
+                  // make sure to always have a list of stops
+                  if (newPalette.params && !newPalette.params.stops) {
+                    newPalette.params.stops = displayStops;
+                  }
+                  (newPalette as HeatmapVisualizationState['palette'])!.accessor = accessor;
+                  setState({
+                    ...state,
+                    palette: newPalette as HeatmapVisualizationState['palette'],
+                  });
+                }}
+              />
+            ) : (
+              <></>
+            )}
           </PalettePanelContainer>
         </EuiFlexItem>
       </EuiFlexGroup>

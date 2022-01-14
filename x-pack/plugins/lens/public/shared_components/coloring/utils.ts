@@ -496,18 +496,27 @@ export function getNumericValue(rowValue: number | number[] | undefined) {
   return rowValue;
 }
 
-export const getFallbackDataBounds = () => ({
-  max: 100,
-  min: 0,
-  fallback: true,
-});
+export const getFallbackDataBounds = (
+  rangeType: CustomPaletteParams['rangeType'] = 'percent'
+): DataBounds =>
+  rangeType === 'percent'
+    ? {
+        min: 0,
+        max: 100,
+        fallback: true,
+      }
+    : {
+        min: 1,
+        max: 1,
+        fallback: true,
+      };
 
 export const findMinMaxByColumnId = (
   columnIds: string[],
   table: Datatable | undefined,
   getOriginalId: (id: string) => string = getId
 ) => {
-  const minMax: Record<string, { min: number; max: number; fallback?: boolean }> = {};
+  const minMax: Record<string, DataBounds> = {};
 
   if (table != null) {
     for (const columnId of columnIds) {
