@@ -265,5 +265,47 @@ describe('When on the host isolation exceptions page', () => {
         expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeFalsy();
       });
     });
+
+    describe('and the back button is present', () => {
+      beforeEach(async () => {
+        renderResult = render();
+        act(() => {
+          history.push(HOST_ISOLATION_EXCEPTIONS_PATH, {
+            onBackButtonNavigateTo: [{ appId: 'appId' }],
+            backButtonLabel: 'back to fleet',
+            backButtonUrl: '/fleet',
+          });
+        });
+      });
+
+      it('back button is present', () => {
+        const button = renderResult.queryByTestId('backToOrigin');
+        expect(button).not.toBeNull();
+        expect(button).toHaveAttribute('href', '/fleet');
+      });
+
+      it('back button is still present after push history', () => {
+        act(() => {
+          history.push(HOST_ISOLATION_EXCEPTIONS_PATH);
+        });
+        const button = renderResult.queryByTestId('backToOrigin');
+        expect(button).not.toBeNull();
+        expect(button).toHaveAttribute('href', '/fleet');
+      });
+    });
+
+    describe('and the back button is not present', () => {
+      beforeEach(async () => {
+        renderResult = render();
+        act(() => {
+          history.push(HOST_ISOLATION_EXCEPTIONS_PATH);
+        });
+      });
+
+      it('back button is not present when missing history params', () => {
+        const button = renderResult.queryByTestId('backToOrigin');
+        expect(button).toBeNull();
+      });
+    });
   });
 });

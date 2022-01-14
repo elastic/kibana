@@ -12,7 +12,7 @@ import { CaseStatuses, CaseAttributes, CaseType, CaseConnector } from '../../../
 import { Case, UpdateKey, UpdateByKey } from '../../../common/ui';
 import { EditableTitle } from '../header_page/editable_title';
 import { TagList } from '../tag_list';
-import { UserActionTree } from '../user_action_tree';
+import { UserActions } from '../user_actions';
 import { UserList } from '../user_list';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { getTypedPayload } from '../../containers/utils';
@@ -354,12 +354,11 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
                 {!initLoadingData && (
                   <EuiFlexGroup direction="column" responsive={false}>
                     <EuiFlexItem>
-                      <UserActionTree
+                      <UserActions
                         getRuleDetailsHref={ruleDetailsNavigation?.href}
                         onRuleDetailsClick={ruleDetailsNavigation?.onClick}
                         caseServices={caseServices}
                         caseUserActions={caseUserActions}
-                        connectors={connectors}
                         data={caseData}
                         actionsNavigation={actionsNavigation}
                         fetchUserActions={refetchCaseUserActions}

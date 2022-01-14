@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { AnomalyDetectionSetupState } from '../../../../common/anomaly_detection/get_anomaly_detection_setup_state';
 import { useMlManageJobsHref } from '../../../hooks/use_ml_manage_jobs_href';
-import { APMLink } from '../Links/apm/APMLink';
+import { APMLink } from '../links/apm/apm_link';
 
 export function shouldDisplayMlCallout(
   anomalyDetectionSetupState: AnomalyDetectionSetupState
