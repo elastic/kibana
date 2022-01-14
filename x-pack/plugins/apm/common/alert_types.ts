@@ -97,12 +97,14 @@ export function formatTransactionErrorRateReason({
 }
 
 export function formatTransactionDurationAnomalyReason({
+  threshold,
   serviceName,
   severityLevel,
   measured,
   windowSize,
   windowUnit,
 }: {
+  threshold: number;
   serviceName: string;
   severityLevel: string;
   measured: number;
@@ -112,8 +114,9 @@ export function formatTransactionDurationAnomalyReason({
   return i18n.translate(
     'xpack.apm.alertTypes.transactionDurationAnomaly.reason',
     {
-      defaultMessage: `{severityLevel} anomaly with a score of {measured} was detected in the last {windowSize} {windowUnit} for {serviceName}.`,
+      defaultMessage: `{severityLevel} anomaly with a score of {measured} was detected in the last {windowSize} {windowUnit} for {serviceName}. Alert when {threshold}`,
       values: {
+        threshold,
         serviceName,
         severityLevel,
         measured,
