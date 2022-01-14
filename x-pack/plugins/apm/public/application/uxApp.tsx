@@ -25,14 +25,14 @@ import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPat
 import {
   RumHome,
   DASHBOARD_LABEL,
-} from '../components/app/RumDashboard/RumHome';
+} from '../components/app/rum_dashboard/rum_home';
 import { ApmPluginContext } from '../context/apm_plugin/apm_plugin_context';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { ConfigSchema } from '../index';
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { createCallApmApi } from '../services/rest/createCallApmApi';
 import { createStaticDataView } from '../services/rest/data_view';
-import { UXActionMenu } from '../components/app/RumDashboard/ActionMenu';
+import { UXActionMenu } from '../components/app/rum_dashboard/action_menu';
 import { redirectTo } from '../components/routing/redirect_to';
 import {
   InspectorContextProvider,
