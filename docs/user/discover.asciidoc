@@ -283,3 +283,5 @@ include::{kib-repo-dir}/discover/search-for-relevance.asciidoc[]
 include::{kib-repo-dir}/discover/save-search.asciidoc[]
 
 include::{kib-repo-dir}/discover/search-sessions.asciidoc[]
+
+include::{kib-repo-dir}/discover/document-explorer.asciidoc[]
