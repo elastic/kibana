@@ -34,7 +34,7 @@ export function ContextAppRoute(props: ContextAppProps) {
 
   const { indexPatternId, id } = useParams<ContextUrlParams>();
   const anchorId = decodeURIComponent(id);
-  
+
   useEffect(() => {
     chrome.setBreadcrumbs([
       ...getRootBreadcrumbs(),
@@ -76,4 +76,3 @@ export function ContextAppRoute(props: ContextAppProps) {
 
   return <ContextApp anchorId={anchorId} indexPattern={indexPattern} />;
 }
-
