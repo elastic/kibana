@@ -327,8 +327,6 @@ export class EditJobFlyoutUI extends Component {
         jobClosed,
       } = this.state;
 
-      console.log('job', job, isManagedJob(job));
-
       const tabs = [
         {
           id: 'job-details',

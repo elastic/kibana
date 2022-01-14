@@ -320,16 +320,17 @@ export function jobsProvider(
     if (jobResults && jobResults.jobs) {
       const job = jobResults.jobs.find((j) => j.job_id === jobId);
       if (job) {
-        // 'Managed' means job is preconfigured and deployed by other solutions
-        // we should not clone the setting
-        if (job.custom_settings?.managed === true) {
-          job.custom_settings.managed = false;
-        }
-
+        removeUnClonableCustomSettings(job);
         result.job = job;
       }
     }
     return result;
+  }
+
+  function removeUnClonableCustomSettings(job: Job) {
+    if (isPopulatedObject(job.custom_settings)) {
+      delete job.custom_settings.managed;
+    }
   }
 
   async function createFullJobsList(jobIds: string[] = []) {
