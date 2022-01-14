@@ -102,7 +102,7 @@ export const DatavisualizerSelector: FC = () => {
               title={
                 <FormattedMessage
                   id="xpack.ml.datavisualizer.selector.importDataTitle"
-                  defaultMessage="Import data"
+                  defaultMessage="Visualize data from file"
                 />
               }
               description={
@@ -134,7 +134,7 @@ export const DatavisualizerSelector: FC = () => {
               title={
                 <FormattedMessage
                   id="xpack.ml.datavisualizer.selector.selectDataViewTitle"
-                  defaultMessage="Select a data view"
+                  defaultMessage="Visualize data from data view"
                 />
               }
               description={
