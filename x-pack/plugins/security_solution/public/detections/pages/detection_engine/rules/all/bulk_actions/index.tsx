@@ -18,7 +18,7 @@ import React, { Dispatch } from 'react';
 import * as i18n from '../../translations';
 import { RulesTableAction } from '../../../../../containers/detection_engine/rules/rules_table';
 import {
-  rulesBulkActionByQuery,
+  initRulesBulkAction,
   deleteRulesAction,
   duplicateRulesAction,
   enableRulesAction,
@@ -101,14 +101,16 @@ export const getBatchItems = ({
       : deactivatedRulesNoML.map(({ id }) => id);
 
     if (isAllSelected) {
-      await rulesBulkActionByQuery(
-        ruleIds,
+      const rulesBulkAction = initRulesBulkAction({
+        visibleRuleIds: ruleIds,
         selectedItemsCount,
-        filterQuery,
-        BulkAction.enable,
+        action: BulkAction.enable,
         dispatch,
-        dispatchToaster
-      );
+        dispatchToaster,
+      });
+
+      await rulesBulkAction.byQuery(filterQuery);
+
       await reFetchRules();
     } else {
       await enableRulesAction(ruleIds, true, dispatch, dispatchToaster);
@@ -119,14 +121,15 @@ export const getBatchItems = ({
     closePopover();
     const activatedIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
     if (isAllSelected) {
-      await rulesBulkActionByQuery(
-        activatedIds,
+      const rulesBulkAction = initRulesBulkAction({
+        visibleRuleIds: activatedIds,
         selectedItemsCount,
-        filterQuery,
-        BulkAction.disable,
+        action: BulkAction.disable,
         dispatch,
-        dispatchToaster
-      );
+        dispatchToaster,
+      });
+
+      await rulesBulkAction.byQuery(filterQuery);
       await reFetchRules();
     } else {
       await enableRulesAction(activatedIds, false, dispatch, dispatchToaster);
@@ -136,14 +139,15 @@ export const getBatchItems = ({
   const handleDuplicateAction = async () => {
     closePopover();
     if (isAllSelected) {
-      await rulesBulkActionByQuery(
-        selectedRuleIds,
+      const rulesBulkAction = initRulesBulkAction({
+        visibleRuleIds: selectedRuleIds,
         selectedItemsCount,
-        filterQuery,
-        BulkAction.duplicate,
+        action: BulkAction.duplicate,
         dispatch,
-        dispatchToaster
-      );
+        dispatchToaster,
+      });
+
+      await rulesBulkAction.byQuery(filterQuery);
       await reFetchRules();
     } else {
       await duplicateRulesAction(selectedRules, selectedRuleIds, dispatch, dispatchToaster);
@@ -160,14 +164,15 @@ export const getBatchItems = ({
         return;
       }
 
-      await rulesBulkActionByQuery(
-        selectedRuleIds,
+      const rulesBulkAction = initRulesBulkAction({
+        visibleRuleIds: selectedRuleIds,
         selectedItemsCount,
-        filterQuery,
-        BulkAction.delete,
+        action: BulkAction.delete,
         dispatch,
-        dispatchToaster
-      );
+        dispatchToaster,
+      });
+
+      await rulesBulkAction.byQuery(filterQuery);
     } else {
       await deleteRulesAction(selectedRuleIds, dispatch, dispatchToaster);
     }
@@ -178,14 +183,15 @@ export const getBatchItems = ({
   const handleExportAction = async () => {
     closePopover();
     if (isAllSelected) {
-      await rulesBulkActionByQuery(
-        selectedRuleIds,
+      const rulesBulkAction = initRulesBulkAction({
+        visibleRuleIds: selectedRuleIds,
         selectedItemsCount,
-        filterQuery,
-        BulkAction.export,
+        action: BulkAction.export,
         dispatch,
-        dispatchToaster
-      );
+        dispatchToaster,
+      });
+
+      await rulesBulkAction.byQuery(filterQuery);
     } else {
       await exportRulesAction(
         selectedRules.map((r) => r.rule_id),
@@ -209,16 +215,21 @@ export const getBatchItems = ({
 
     try {
       const editPayload = await performBulkEdit(bulkEditActionType);
-
-      await rulesBulkActionByQuery(
-        selectedRuleIds,
+      const rulesBulkAction = initRulesBulkAction({
+        visibleRuleIds: selectedRuleIds,
         selectedItemsCount,
-        filterQuery,
-        BulkAction.edit,
+        action: BulkAction.edit,
         dispatch,
         dispatchToaster,
-        { edit: [editPayload] }
-      );
+        payload: { edit: [editPayload] },
+      });
+
+      if (isAllSelected) {
+        await rulesBulkAction.byQuery(filterQuery);
+      } else {
+        await rulesBulkAction.byIds(selectedRuleIds);
+      }
+
       await reFetchRules();
     } catch (e) {
       // user has cancelled form or error has occured

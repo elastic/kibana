@@ -222,7 +222,8 @@ export interface DuplicateRulesProps {
 
 export interface BulkActionProps<Action extends BulkAction> {
   action: Action;
-  query: string;
+  query?: string;
+  ids?: string[];
   edit?: BulkActionEditPayload[];
 }
 

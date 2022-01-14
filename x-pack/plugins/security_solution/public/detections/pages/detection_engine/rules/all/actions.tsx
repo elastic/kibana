@@ -174,20 +174,30 @@ export const enableRulesAction = async (
   }
 };
 
-export const rulesBulkActionByQuery = async (
-  visibleRuleIds: string[],
-  selectedItemsCount: number,
-  query: string,
-  action: BulkAction,
-  dispatch: React.Dispatch<RulesTableAction>,
-  dispatchToaster: Dispatch<ActionToaster>,
-  payload?: { edit?: BulkActionEditPayload[] }
-) => {
+interface ExecuteRulesBulkActionArgs {
+  visibleRuleIds: string[];
+  selectedItemsCount: number;
+  action: BulkAction;
+  dispatch: React.Dispatch<RulesTableAction>;
+  dispatchToaster: Dispatch<ActionToaster>;
+  search: { query: string } | { ids: string[] };
+  payload?: { edit?: BulkActionEditPayload[] };
+}
+
+const executeRulesBulkAction = async ({
+  visibleRuleIds,
+  selectedItemsCount,
+  action,
+  dispatch,
+  dispatchToaster,
+  search,
+  payload,
+}: ExecuteRulesBulkActionArgs) => {
   try {
     dispatch({ type: 'loadingRuleIds', ids: visibleRuleIds, actionType: action });
 
     if (action === BulkAction.export) {
-      const blob = await performBulkAction({ query, action });
+      const blob = await performBulkAction({ ...search, action });
       downloadBlob(blob, `${i18n.EXPORT_FILENAME}.ndjson`);
       const exportedRulesCount = await getExportedRulesCount(blob);
       displaySuccessToast(
@@ -195,11 +205,30 @@ export const rulesBulkActionByQuery = async (
         dispatchToaster
       );
     } else {
-      await performBulkAction({ query, action, edit: payload?.edit });
+      await performBulkAction({ ...search, action, edit: payload?.edit });
     }
   } catch (e) {
     displayErrorToast(i18n.BULK_ACTION_FAILED, [e.message], dispatchToaster);
   } finally {
     dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
   }
+};
+
+export const initRulesBulkAction = (params: Omit<ExecuteRulesBulkActionArgs, 'search'>) => {
+  const byQuery = (query: string) =>
+    executeRulesBulkAction({
+      ...params,
+      search: { query },
+    });
+
+  const byIds = (ids: string[]) =>
+    executeRulesBulkAction({
+      ...params,
+      search: { ids },
+    });
+
+  return {
+    byQuery,
+    byIds,
+  };
 };
