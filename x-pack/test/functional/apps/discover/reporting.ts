@@ -111,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // match file length, the beginning and the end of the csv file contents
         const { text: csvFile } = await getReport();
-        expect(csvFile.length).to.be(5107481);
+        expect(csvFile.length).to.be(5093456);
         expectSnapshot(csvFile.slice(0, 5000)).toMatch();
         expectSnapshot(csvFile.slice(-5000)).toMatch();
       });
