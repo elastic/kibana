@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import {
   PluginInitializerContext,
   CoreStart,
@@ -75,7 +74,12 @@ export class Plugin implements PluginType {
     } as UptimeServerSetup;
 
     if (this.server?.config?.unsafe?.service.enabled) {
-      this.syntheticService = new SyntheticsService(this.logger, this.server);
+      this.syntheticService = new SyntheticsService(
+        this.logger,
+        this.server,
+        this.server.config.unsafe.service
+      );
+
       this.syntheticService.registerSyncTask(plugins.taskManager);
     }
 
@@ -111,8 +115,8 @@ export class Plugin implements PluginType {
       this.server.savedObjectsClient = this.savedObjectsClient;
     }
 
-    if (this.server?.config?.unsafe?.service.enabled) {
-      this.syntheticService?.init(coreStart);
+    if (this.server?.config?.unsafe?.service?.enabled) {
+      this.syntheticService?.init();
       this.syntheticService?.scheduleSyncTask(plugins.taskManager);
       if (this.server && this.syntheticService) {
         this.server.syntheticsService = this.syntheticService;
