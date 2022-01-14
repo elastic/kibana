@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { omit } from 'lodash';
 import { URLSearch } from './url_search';
-import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
+import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 
 export function URLFilter() {
