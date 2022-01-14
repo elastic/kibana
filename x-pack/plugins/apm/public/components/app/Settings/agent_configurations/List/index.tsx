@@ -23,9 +23,9 @@ import { getOptionLabel } from '../../../../../../common/agent_configuration/all
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../../hooks/use_theme';
-import { LoadingStatePrompt } from '../../../../shared/LoadingStatePrompt';
+import { LoadingStatePrompt } from '../../../../shared/loading_state_prompt';
 import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
-import { TimestampTooltip } from '../../../../shared/TimestampTooltip';
+import { TimestampTooltip } from '../../../../shared/timestamp_tooltip';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
 type Config =

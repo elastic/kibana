@@ -72,7 +72,7 @@ export const FleetEventFiltersCard = memo<PackageCustomExtensionComponentProps>(
     return {
       backButtonLabel: i18n.translate(
         'xpack.securitySolution.endpoint.fleetCustomExtension.backButtonLabel',
-        { defaultMessage: 'Back to Endpoint Integration' }
+        { defaultMessage: 'Return to Endpoint Security integrations' }
       ),
       onBackButtonNavigateTo: [
         INTEGRATIONS_PLUGIN_ID,
