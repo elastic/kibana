@@ -13,7 +13,7 @@ import { CsmSharedContextProvider } from './csm_shared_context';
 import { WebApplicationSelect } from './panels/web_application_select';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { UxEnvironmentFilter } from '../../shared/environment_filter';
-import { UserPercentile } from './UserPercentile';
+import { UserPercentile } from './user_percentile';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { KibanaPageTemplateProps } from '../../../../../../../src/plugins/kibana_react/public';
 import { useHasRumData } from './hooks/use_has_rum_data';

@@ -10,7 +10,7 @@ import React, { PureComponent, ReactNode } from 'react';
 import { makeWidthFlexible } from 'react-vis';
 import { AgentMark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 import { ErrorMark } from '../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
-import { getPlotValues } from './plotUtils';
+import { getPlotValues } from './plot_utils';
 import { TimelineAxis } from './timeline_axis';
 import { VerticalLines } from './vertical_lines';
 

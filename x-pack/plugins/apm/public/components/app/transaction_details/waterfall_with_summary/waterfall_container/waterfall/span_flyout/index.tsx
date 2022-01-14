@@ -33,7 +33,7 @@ import { Summary } from '../../../../../../shared/summary';
 import { DurationSummaryItem } from '../../../../../../shared/summary/duration_summary_item';
 import { HttpInfoSummaryItem } from '../../../../../../shared/summary/http_info_summary_item';
 import { TimestampTooltip } from '../../../../../../shared/timestamp_tooltip';
-import { ResponsiveFlyout } from '../ResponsiveFlyout';
+import { ResponsiveFlyout } from '../responsive_flyout';
 import { SyncBadge } from '../sync_badge';
 import { SpanDatabase } from './span_db';
 import { StickySpanProperties } from './sticky_span_properties';

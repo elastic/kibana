@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
-import { CsmSharedContext } from '../CsmSharedContext';
+import { CsmSharedContext } from '../csm_shared_context';
 import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
 
 interface JSErrorItem {
