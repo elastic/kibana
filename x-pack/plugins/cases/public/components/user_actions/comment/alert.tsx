@@ -130,12 +130,12 @@ const getRuleField = ({
   signalRuleFieldPath: string;
   kibanaAlertFieldPath: string;
 }): string | null => {
-  const fieldMaybeArray =
+  const field =
     getNonEmptyField(commentRuleField) ??
     getNonEmptyField(get(alertData, signalRuleFieldPath)) ??
     getNonEmptyField(get(alertData, kibanaAlertFieldPath));
 
-  return fieldMaybeArray;
+  return field;
 };
 
 function getNonEmptyField(field: string | string[] | undefined | null): string | null {
