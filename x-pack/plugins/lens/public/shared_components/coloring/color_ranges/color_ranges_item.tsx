@@ -123,6 +123,7 @@ export function ColorRangeItem({
   const isColorValid = isValidColor(colorRange.color);
   const ActionButton = getActionButton(mode);
   const isValid = validation?.isValid ?? true;
+  const isAllowUseValue = validation?.isAllowUseValue ?? true;
 
   const onLeaveFocus = useCallback(
     (e: FocusEvent<HTMLDivElement>) => {
@@ -159,7 +160,7 @@ export function ColorRangeItem({
   );
 
   useUpdateEffect(() => {
-    if (isValid && parseFloat(value) !== parseFloat(localValue)) {
+    if (isAllowUseValue && parseFloat(value) !== parseFloat(localValue)) {
       setLocalValue(value);
     }
   }, [localValue, value]);

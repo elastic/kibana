@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { DataBounds } from '../types';
 import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type { DataBounds } from '../types';
 
 interface ColorRangesContextType {
   dataBounds: DataBounds;

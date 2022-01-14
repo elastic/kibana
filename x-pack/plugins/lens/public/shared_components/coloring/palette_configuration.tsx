@@ -33,7 +33,7 @@ export function CustomizablePalette({
   dataBounds?: DataBounds;
   showRangeTypeSelector?: boolean;
 }) {
-  const idPrefix = useMemo(() => htmlIdGenerator()(), [htmlIdGenerator]);
+  const idPrefix = useMemo(() => htmlIdGenerator()(), []);
   const colorRangesToShow = toColorRanges(
     palettes,
     activePalette.params?.colorStops || [],
