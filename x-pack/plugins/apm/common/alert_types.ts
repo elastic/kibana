@@ -74,18 +74,24 @@ export function formatTransactionErrorRateReason({
   measured,
   serviceName,
   asPercent,
+  windowSize,
+  windowUnit,
 }: {
   threshold: number;
   measured: number;
   serviceName: string;
   asPercent: AsPercent;
+  windowSize: number;
+  windowUnit: string;
 }) {
   return i18n.translate('xpack.apm.alertTypes.transactionErrorRate.reason', {
-    defaultMessage: `Failed transactions rate is greater than {threshold} (current value is {measured}) for {serviceName}`,
+    defaultMessage: `Failed transactions is {measured} in the last {windowSize} {windowUnit} for {serviceName}. Alert when > {threshold}`,
     values: {
       threshold: asPercent(threshold, 100),
       measured: asPercent(measured, 100),
       serviceName,
+      windowSize,
+      windowUnit,
     },
   });
 }
@@ -106,7 +112,7 @@ export function formatTransactionDurationAnomalyReason({
   return i18n.translate(
     'xpack.apm.alertTypes.transactionDurationAnomaly.reason',
     {
-      defaultMessage: `{severityLevel} anomaly with a score of {measured} was detected in the last ({windowSize} {windowUnit}) for {serviceName}.`,
+      defaultMessage: `{severityLevel} anomaly with a score of {measured} was detected in the last {windowSize} {windowUnit} for {serviceName}.`,
       values: {
         serviceName,
         severityLevel,
