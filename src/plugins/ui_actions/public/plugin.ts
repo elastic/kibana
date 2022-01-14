@@ -15,6 +15,7 @@ import {
   visualizeGeoFieldTrigger,
   visualizeEditorTrigger,
 } from './triggers';
+import { setTheme } from './services';
 
 export type UiActionsSetup = Pick<
   UiActionsService,
@@ -34,6 +35,7 @@ export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): UiActionsSetup {
+    setTheme(core.theme);
     this.service.registerTrigger(rowClickTrigger);
     this.service.registerTrigger(visualizeFieldTrigger);
     this.service.registerTrigger(visualizeEditorTrigger);

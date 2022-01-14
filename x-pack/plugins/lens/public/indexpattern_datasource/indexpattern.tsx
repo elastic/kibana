@@ -12,6 +12,7 @@ import type { CoreStart, SavedObjectReference } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import type { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import type { FieldFormatsStart } from 'src/plugins/field_formats/public';
+import { isEqual } from 'lodash';
 import type { IndexPatternFieldEditorStart } from '../../../../../src/plugins/data_view_field_editor/public';
 import type {
   DatasourceDimensionEditorProps,
@@ -27,6 +28,7 @@ import {
   changeIndexPattern,
   changeLayerIndexPattern,
   extractReferences,
+  injectReferences,
 } from './loader';
 import { toExpression } from './to_expression';
 import {
@@ -547,6 +549,16 @@ export function getIndexPatternDatasource({
         })
       );
     },
+    isEqual: (
+      persistableState1: IndexPatternPersistedState,
+      references1: SavedObjectReference[],
+      persistableState2: IndexPatternPersistedState,
+      references2: SavedObjectReference[]
+    ) =>
+      isEqual(
+        injectReferences(persistableState1, references1),
+        injectReferences(persistableState2, references2)
+      ),
   };
 
   return indexPatternDatasource;

@@ -6,8 +6,6 @@
  */
 
 import './app.scss';
-
-import { isEqual } from 'lodash';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -32,13 +30,10 @@ import {
   DispatchSetState,
   selectSavedObjectFormat,
 } from '../state_management';
-import {
-  SaveModalContainer,
-  getLastKnownDocWithoutPinnedFilters,
-  runSaveLensVisualization,
-} from './save_modal_container';
+import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
 import { LensInspector } from '../lens_inspector_service';
 import { getEditPath } from '../../common';
+import { isLensEqual } from './lens_document_equality';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -94,8 +89,17 @@ export function App({
     isSaveable,
   } = useLensSelector((state) => state.lens);
 
+  const selectorDependencies = useMemo(
+    () => ({
+      datasourceMap,
+      visualizationMap,
+      extractFilterReferences: data.query.filterManager.extract,
+    }),
+    [datasourceMap, visualizationMap, data.query.filterManager.extract]
+  );
+
   const currentDoc = useLensSelector((state) =>
-    selectSavedObjectFormat(state, datasourceMap, visualizationMap)
+    selectSavedObjectFormat(state, selectorDependencies)
   );
 
   // Used to show a popover that guides the user towards changing the date range when no data is available.
@@ -154,9 +158,11 @@ export function App({
         'vizEditorOriginatingAppUrl' in initialContext &&
         initialContext.vizEditorOriginatingAppUrl
       ) {
-        const initialDocHasChanged = !isEqual(
-          initialDoc?.state.visualization,
-          getLastKnownDocWithoutPinnedFilters(lastKnownDoc)?.state.visualization
+        const initialDocHasChanged = !isLensEqual(
+          initialDoc,
+          lastKnownDoc,
+          data.query.filterManager.inject,
+          datasourceMap
         );
         if (!initialDocHasChanged) {
           return actions.default();
@@ -178,7 +184,7 @@ export function App({
 
       if (
         application.capabilities.visualize.save &&
-        !isEqual(persistedDoc?.state, getLastKnownDocWithoutPinnedFilters(lastKnownDoc)?.state) &&
+        !isLensEqual(persistedDoc, lastKnownDoc, data.query.filterManager.inject, datasourceMap) &&
         (isSaveable || persistedDoc)
       ) {
         return actions.confirm(
@@ -200,8 +206,10 @@ export function App({
     persistedDoc,
     application.capabilities.visualize.save,
     initialContext,
-    initialDoc?.state.visualization,
+    initialDoc,
     contextOriginatingApp,
+    data.query.filterManager.inject,
+    datasourceMap,
   ]);
 
   const getLegacyUrlConflictCallout = useCallback(() => {

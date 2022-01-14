@@ -92,6 +92,7 @@ export const redirectToSavedObjectPage = (
     onBeforeRedirect() {
       setActiveUrl(VisualizeConstants.LANDING_PAGE_PATH);
     },
+    theme: services.theme,
   })(error);
 };
 
