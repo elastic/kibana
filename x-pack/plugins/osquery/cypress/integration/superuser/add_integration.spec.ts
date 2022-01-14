@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FLEET_AGENT_POLICIES, navigateTo, OLD_OSQUERY_MANAGER } from '../../tasks/navigation';
-import { addIntegration, closeModalIfVisible } from '../../tasks/integrations';
+import { FLEET_AGENT_POLICIES } from '../../tasks/navigation';
+import { addIntegration } from '../../tasks/integrations';
 
 import { login } from '../../tasks/login';
 // import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
