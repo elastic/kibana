@@ -12,7 +12,7 @@ import { get } from 'lodash';
 import { datasourceRegistry } from '../../expression_types';
 import { getServerFunctions } from '../../state/selectors/app';
 import { getSelectedElement, getSelectedPage } from '../../state/selectors/workpad';
-import { setArgumentAtIndex, setAstAtIndex, flushContext } from '../../state/actions/elements';
+import { setAstAtIndex, flushContext } from '../../state/actions/elements';
 import { Datasource as Component } from './datasource';
 
 const DatasourceComponent = (props) => {
@@ -52,7 +52,6 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  dispatchArgumentAtIndex: (props) => (arg) => dispatch(setArgumentAtIndex({ ...props, arg })),
   dispatchAstAtIndex:
     ({ index, element, pageId }) =>
     (ast) => {
@@ -63,7 +62,7 @@ const mapDispatchToProps = (dispatch) => ({
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { element, pageId, functionDefinitions } = stateProps;
-  const { dispatchArgumentAtIndex, dispatchAstAtIndex } = dispatchProps;
+  const { dispatchAstAtIndex } = dispatchProps;
 
   const getDataTableFunctionsByName = (name) =>
     functionDefinitions.find((fn) => fn.name === name && fn.type === 'datatable');
@@ -102,11 +101,6 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     ...datasourceAst,
     datasources: datasourceRegistry.toArray(),
     setDatasourceAst: dispatchAstAtIndex({
-      pageId,
-      element,
-      index: datasourceAst && datasourceAst.expressionIndex,
-    }),
-    setDatasourceArgs: dispatchArgumentAtIndex({
       pageId,
       element,
       index: datasourceAst && datasourceAst.expressionIndex,

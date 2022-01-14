@@ -9,5 +9,7 @@ import { pointseries } from './point_series';
 import { math } from './math';
 import { tagcloud } from './tagcloud';
 import { metricVis } from './metric_vis';
+import { heatmapLegend } from './heatmap_legend';
+import { heatmapGrid } from './heatmap_grid';
 
-export const modelSpecs = [pointseries, math, tagcloud, metricVis];
+export const modelSpecs = [pointseries, math, tagcloud, metricVis, heatmapLegend, heatmapGrid];
