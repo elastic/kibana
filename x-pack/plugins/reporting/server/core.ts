@@ -23,7 +23,7 @@ import {
 import { PluginStart as DataPluginStart } from '../../../../src/plugins/data/server';
 import { IEventLogService } from '../../event_log/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { LicensingPluginStart } from '../../licensing/server';
 import type { ScreenshotResult, ScreenshottingStart } from '../../screenshotting/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
@@ -44,7 +44,6 @@ export interface ReportingInternalSetup {
   basePath: Pick<BasePath, 'set'>;
   router: ReportingPluginRouter;
   features: FeaturesPluginSetup;
-  licensing: LicensingPluginSetup;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
   taskManager: TaskManagerSetupContract;
@@ -58,9 +57,10 @@ export interface ReportingInternalStart {
   uiSettings: UiSettingsServiceStart;
   esClient: IClusterClient;
   data: DataPluginStart;
-  taskManager: TaskManagerStartContract;
+  licensing: LicensingPluginStart;
   logger: LevelLogger;
   screenshotting: ScreenshottingStart;
+  taskManager: TaskManagerStartContract;
 }
 
 /**
@@ -250,10 +250,12 @@ export class ReportingCore {
   }
 
   public async getLicenseInfo() {
-    const { licensing } = this.getPluginSetupDeps();
-    return await licensing.license$
+    const { license$ } = (await this.getPluginStartDeps()).licensing;
+    const registry = this.getExportTypesRegistry();
+
+    return await license$
       .pipe(
-        map((license) => checkLicense(this.getExportTypesRegistry(), license)),
+        map((license) => checkLicense(registry, license)),
         first()
       )
       .toPromise();
