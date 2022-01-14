@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import styled, { css } from 'styled-components';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ManagementEmptyStateWraper } from '../../../../components/management_empty_state_wraper';
+import { ManagementEmptyStateWrapper } from '../../../../components/management_empty_state_wrapper';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
   ${() => css`
@@ -17,9 +17,12 @@ const EmptyPrompt = styled(EuiEmptyPrompt)`
   `}
 `;
 
-export const HostIsolationExceptionsEmptyState = memo<{ onAdd: () => void }>(({ onAdd }) => {
+export const HostIsolationExceptionsEmptyState = memo<{
+  onAdd: () => void;
+  backComponent?: React.ReactNode;
+}>(({ onAdd, backComponent }) => {
   return (
-    <ManagementEmptyStateWraper>
+    <ManagementEmptyStateWrapper>
       <EmptyPrompt
         data-test-subj="hostIsolationExceptionsEmpty"
         iconType="plusInCircle"
@@ -37,7 +40,7 @@ export const HostIsolationExceptionsEmptyState = memo<{ onAdd: () => void }>(({ 
             defaultMessage="Add a Host isolation exception to allow isolated hosts to communicate with specific IPs."
           />
         }
-        actions={
+        actions={[
           <EuiButton
             fill
             onClick={onAdd}
@@ -47,10 +50,12 @@ export const HostIsolationExceptionsEmptyState = memo<{ onAdd: () => void }>(({ 
               id="xpack.securitySolution.hostIsolationExceptions.listEmpty.addButton"
               defaultMessage="Add Host isolation exception"
             />
-          </EuiButton>
-        }
+          </EuiButton>,
+
+          ...(backComponent ? [backComponent] : []),
+        ]}
       />
-    </ManagementEmptyStateWraper>
+    </ManagementEmptyStateWrapper>
   );
 });
 

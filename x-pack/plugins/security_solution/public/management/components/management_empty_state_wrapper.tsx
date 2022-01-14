@@ -13,7 +13,7 @@ export const StyledEuiFlexGroup = styled(EuiFlexGroup)`
   min-height: calc(100vh - 140px);
 `;
 
-export const ManagementEmptyStateWraper = memo(({ children }) => {
+export const ManagementEmptyStateWrapper = memo(({ children }) => {
   return (
     <StyledEuiFlexGroup direction="column" alignItems="center">
       <EuiPageTemplate template="centeredContent">{children}</EuiPageTemplate>
@@ -21,4 +21,4 @@ export const ManagementEmptyStateWraper = memo(({ children }) => {
   );
 });
 
-ManagementEmptyStateWraper.displayName = 'ManagementEmptyStateWraper';
+ManagementEmptyStateWrapper.displayName = 'ManagementEmptyStateWrapper';
