@@ -7,18 +7,16 @@
     },
     "index": ".kibana_$KIBANA_PACKAGE_VERSION_001",
     "mappings": {
-      "doc": {
-        "dynamic": "false",
-        "properties": {
-          "space": {
-            "dynamic": false,
-            "type": "object"
-          },
-          "type": { "type": "keyword" },
-          "migrationVersion": {
-            "dynamic": "true",
-            "type": "object"
-          }
+      "dynamic": "false",
+      "properties": {
+        "space": {
+          "dynamic": false,
+          "type": "object"
+        },
+        "type": { "type": "keyword" },
+        "migrationVersion": {
+          "dynamic": "true",
+          "type": "object"
         }
       }
     },

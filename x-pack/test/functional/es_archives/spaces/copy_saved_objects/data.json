@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "space:default",
     "source": {
       "space": {
@@ -23,7 +23,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "index-pattern:logstash-*",
     "source": {
       "index-pattern": {
@@ -44,7 +44,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "sales:index-pattern:logstash-*",
     "source": {
       "namespace": "sales",
@@ -66,7 +66,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "visualization:75c3e060-1e7c-11e9-8488-65449e65d0ed",
     "source": {
       "visualization": {
@@ -89,7 +89,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "dashboard:my-dashboard",
     "source": {
       "dashboard": {
@@ -114,7 +114,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "dashboard:dashboard-foo",
     "source": {
       "references": [{
@@ -144,7 +144,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "type": "doc",
+    "type": "_doc",
     "id": "dashboard:dashboard-bar",
     "source": {
       "references": [{
