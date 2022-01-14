@@ -28,7 +28,7 @@ describe('embeddable migrations', () => {
     const migrationVersion = 'some-version';
 
     const embeddedVisualizationDoc = {
-      visState: {
+      savedVis: {
         data: {
           searchSource: {
             type: 'some-type',

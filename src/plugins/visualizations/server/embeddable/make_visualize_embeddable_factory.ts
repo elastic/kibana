@@ -93,7 +93,7 @@ const getEmbeddedVisualizationSearchSourceMigrations = (
   searchSourceMigrations: MigrateFunctionsObject
 ) =>
   mapValues(searchSourceMigrations, (migrate) =>
-    getApplyMigrationWithinObject(migrate, 'visState.data.searchSource')
+    getApplyMigrationWithinObject(migrate, 'savedVis.data.searchSource')
   );
 
 export const makeVisualizeEmbeddableFactory =
