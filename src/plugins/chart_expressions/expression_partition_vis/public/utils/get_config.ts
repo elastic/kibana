@@ -59,7 +59,7 @@ const getPieDonutWaffleCommonConfig: GetConfigFn = (
 
   const config: Config = { ...usingOuterSizeRatio };
 
-  if (!visParams.labels.show || visParams.labels.position === LabelPositions.HIDE) {
+  if (!visParams.labels.show) {
     // Force all labels to be linked, then prevent links from showing
     config.linkLabel = { maxCount: 0, maximumSection: Number.POSITIVE_INFINITY };
   }
@@ -85,7 +85,7 @@ const getPieDonutWaffleCommonConfig: GetConfigFn = (
 };
 
 const getTreemapMosaicCommonConfig: GetConfigFn = (visParams) => {
-  if (!visParams.labels.show || visParams.labels.position === LabelPositions.HIDE) {
+  if (!visParams.labels.show) {
     return {
       fillLabel: { textColor: 'rgba(0,0,0,0)' },
     };

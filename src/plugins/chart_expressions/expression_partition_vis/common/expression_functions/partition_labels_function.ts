@@ -9,7 +9,12 @@
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, Datatable } from '../../../../expressions/common';
 import { PARTITION_LABELS_FUNCTION, PARTITION_LABELS_VALUE } from '../constants';
-import { ExpressionValuePartitionLabels, PartitionLabelsArguments } from '../types';
+import {
+  ExpressionValuePartitionLabels,
+  LabelPositions,
+  PartitionLabelsArguments,
+  ValueFormats,
+} from '../types';
 
 export const partitionLabelsFunction = (): ExpressionFunctionDefinition<
   typeof PARTITION_LABELS_FUNCTION,
@@ -36,6 +41,7 @@ export const partitionLabelsFunction = (): ExpressionFunctionDefinition<
       help: i18n.translate('expressionPartitionVis.partitionLabels.function.args.position.help', {
         defaultMessage: 'Defines the label position',
       }),
+      options: [LabelPositions.DEFAULT, LabelPositions.INSIDE],
     },
     values: {
       types: ['boolean'],
@@ -78,6 +84,7 @@ export const partitionLabelsFunction = (): ExpressionFunctionDefinition<
           defaultMessage: 'Defines the format of the values',
         }
       ),
+      options: [ValueFormats.PERCENT, ValueFormats.VALUE],
     },
   },
   fn: (context, args) => {

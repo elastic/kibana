@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Position } from '@elastic/charts';
 import { EmptySizeRatios, PartitionVisParams } from '../types/expression_renderers';
 import { prepareLogTable } from '../../../../visualizations/common/prepare_log_table';
 import { ChartTypes, PieVisExpressionFunctionDefinition } from '../types';
@@ -55,6 +56,7 @@ export const pieVisFunction = (): PieVisExpressionFunctionDefinition => ({
     legendPosition: {
       types: ['string'],
       help: strings.getLegendPositionArgHelp(),
+      options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
     },
     nestedLegend: {
       types: ['boolean'],

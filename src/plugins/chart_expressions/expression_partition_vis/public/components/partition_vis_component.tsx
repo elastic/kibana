@@ -424,11 +424,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
               }
               layers={layers}
               config={config}
-              topGroove={
-                !visParams.labels.show || visParams.labels.position === LabelPositions.HIDE
-                  ? 0
-                  : undefined
-              }
+              topGroove={!visParams.labels.show ? 0 : undefined}
             />
           </Chart>
         </div>

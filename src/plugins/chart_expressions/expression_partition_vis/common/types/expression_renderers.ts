@@ -102,7 +102,6 @@ export interface RenderValue {
 export enum LabelPositions {
   INSIDE = 'inside',
   DEFAULT = 'default',
-  HIDE = 'hide',
 }
 
 export enum ValueFormats {
