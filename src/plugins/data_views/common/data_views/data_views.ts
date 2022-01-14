@@ -68,6 +68,7 @@ interface IndexPatternsServiceDeps {
   onError: OnError;
   onRedirectNoIndexPattern?: () => void;
   getCanSave: () => Promise<boolean>;
+  getCanSaveSync?: () => boolean;
 }
 
 export class DataViewsService {
@@ -79,7 +80,8 @@ export class DataViewsService {
   private onNotification: OnNotification;
   private onError: OnError;
   private dataViewCache: ReturnType<typeof createDataViewCache>;
-  private getCanSave: () => Promise<boolean>;
+  public getCanSave: () => Promise<boolean>;
+  public getCanSaveSync: () => boolean;
 
   /**
    * @deprecated Use `getDefaultDataView` instead (when loading data view) and handle
@@ -96,6 +98,10 @@ export class DataViewsService {
     onError,
     onRedirectNoIndexPattern = () => {},
     getCanSave = () => Promise.resolve(false),
+    // this is for client side usage, not supported on server
+    getCanSaveSync = () => {
+      throw new Error('getCanSaveSync not implemented');
+    },
   }: IndexPatternsServiceDeps) {
     this.apiClient = apiClient;
     this.config = uiSettings;
@@ -105,6 +111,7 @@ export class DataViewsService {
     this.onError = onError;
     this.ensureDefaultDataView = createEnsureDefaultDataView(uiSettings, onRedirectNoIndexPattern);
     this.getCanSave = getCanSave;
+    this.getCanSaveSync = getCanSaveSync;
 
     this.dataViewCache = createDataViewCache();
   }

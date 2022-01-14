@@ -63,6 +63,7 @@ export class DataViewsPublicPlugin
         theme
       ),
       getCanSave: () => Promise.resolve(application.capabilities.indexPatterns.save === true),
+      getCanSaveSync: () => application.capabilities.indexPatterns.save === true,
     });
   }
 

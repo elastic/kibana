@@ -60,9 +60,7 @@ export class DataViewEditorPlugin
        * @returns boolean
        */
       userPermissions: {
-        editDataView: () => {
-          return !!application.capabilities.indexPatterns.save;
-        },
+        editDataView: () => dataViews.getCanSaveSync(),
       },
     };
   }
