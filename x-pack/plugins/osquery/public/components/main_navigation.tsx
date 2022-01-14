@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 import { useRouterNavigate } from '../common/lib/kibana';
