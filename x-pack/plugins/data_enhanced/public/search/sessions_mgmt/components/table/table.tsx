@@ -117,8 +117,9 @@ export function SearchSessionsMgmtTable({
       {...props}
       id={SEARCH_SESSIONS_TABLE_ID}
       data-test-subj={SEARCH_SESSIONS_TABLE_ID}
-      rowProps={() => ({
-        'data-test-subj': 'searchSessionsRow',
+      rowProps={(searchSession: UISession) => ({
+        'data-test-subj': `searchSessionsRow`,
+        'data-test-search-session-id': `id-${searchSession.id}`,
       })}
       columns={getColumns(core, plugins, api, config, timezone, onActionComplete, kibanaVersion)}
       items={tableData}
