@@ -48,6 +48,34 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
   const getSourceCard = ({ name, serviceType, addPath, accountContextOnly }: SourceDataItem) => {
     const disabled = !hasPlatinumLicense && accountContextOnly;
 
+    const connectButton = () => {
+      if (disabled) {
+        return (
+          <EuiToolTip
+            position="top"
+            content={i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.contentSource.availableSourceList.toolTipContent',
+              {
+                defaultMessage:
+                  '{name} is configurable as a Private Source, available with a Platinum subscription.',
+                values: { name },
+              }
+            )}
+          >
+            <EuiButtonEmptyTo disabled={disabled} to={getSourcesPath(addPath, true)}>
+              Connect
+            </EuiButtonEmptyTo>
+          </EuiToolTip>
+        );
+      } else {
+        return (
+          <EuiButtonEmptyTo disabled={disabled} to={getSourcesPath(addPath, true)}>
+            Connect
+          </EuiButtonEmptyTo>
+        );
+      }
+    };
+
     const card = (
       <>
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="m">
@@ -57,34 +85,12 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
           <EuiFlexItem>
             <EuiText size="m">{name}</EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmptyTo disabled={disabled} to={getSourcesPath(addPath, true)}>
-              Connect
-            </EuiButtonEmptyTo>
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{connectButton()}</EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiHorizontalRule size="full" margin="none" />
       </>
     );
-
-    if (disabled) {
-      return (
-        <EuiToolTip
-          position="top"
-          content={i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.contentSource.availableSourceList.toolTipContent',
-            {
-              defaultMessage:
-                '{name} is configurable as a Private Source, available with a Platinum subscription.',
-              values: { name },
-            }
-          )}
-        >
-          {card}
-        </EuiToolTip>
-      );
-    }
 
     return card;
   };
