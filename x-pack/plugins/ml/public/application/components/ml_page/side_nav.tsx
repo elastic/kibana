@@ -139,14 +139,14 @@ export const TAB_DATA: Record<TabId, TabData> = {
   },
   data_view_datavisualizer: {
     testSubject: 'mlMainTab dataVisualizer dataViewDatavisualizer',
-    name: i18n.translate('xpack.ml.dataVisualizerTabLabel', {
+    name: i18n.translate('xpack.ml.dataViewDataVisualizerTabLabel', {
       defaultMessage: 'Data View',
     }),
     pathId: 'datavisualizer_index_select',
   },
   filedatavisualizer: {
     testSubject: 'mlMainTab dataVisualizer fileDatavisualizer',
-    name: i18n.translate('xpack.ml.dataVisualizerTabLabel', {
+    name: i18n.translate('xpack.ml.fileDataVisualizerTabLabel', {
       defaultMessage: 'File',
     }),
     pathId: 'filedatavisualizer',
