@@ -43,6 +43,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./ephemeral'));
     loadTestFile(require.resolve('./event_log_alerts'));
     loadTestFile(require.resolve('./scheduled_task_id'));
+    // Do not place test files here, due to https://github.com/elastic/kibana/issues/123059
 
     // note that this test will destroy existing spaces
     loadTestFile(require.resolve('./migrations'));

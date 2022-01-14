@@ -24,8 +24,6 @@ export default function monitoringAlertTests({ getService }: FtrProviderContext)
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestAlertData({ schedule: { interval: '3s' } }));
-      // eslint-disable-next-line no-console
-      console.log('CHRIS DEBUGGING: ', JSON.stringify(createResponse));
       expect(createResponse.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, createResponse.body.id, 'rule', 'alerting');
 
