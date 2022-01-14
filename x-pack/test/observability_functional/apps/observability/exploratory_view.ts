@@ -50,6 +50,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
+    beforeEach(async () => {
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    });
+
     it('should able to open exploratory view from ux app', async () => {
       await testSubjects.exists('uxAnalyzeBtn');
       await testSubjects.click('uxAnalyzeBtn');
