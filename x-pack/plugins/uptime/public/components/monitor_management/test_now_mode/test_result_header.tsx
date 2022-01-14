@@ -14,6 +14,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import * as React from 'react';
 import { formatDuration } from '../../monitor/ping_list/ping_list';
 import { JourneyStep, Ping } from '../../../../common/runtime_types';
@@ -40,18 +41,21 @@ export function TestResultHeader({ doc, title, summaryDocs, journeyStarted, isCo
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
-          <h3>{title ?? 'Test run'}</h3>
+          <h3>{title ?? TEST_RUN}</h3>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
         {isCompleted ? (
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiBadge color="success">COMPLETED</EuiBadge>
+              <EuiBadge color="success">{COMPLETED_LABEL}</EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="xs" color="subdued">
-                Took {formatDuration(duration)}
+                {i18n.translate('xpack.uptime.monitorManagement.timeTaken', {
+                  defaultMessage: 'Took {timeTaken}',
+                  values: { timeTaken: formatDuration(duration) },
+                })}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -59,7 +63,7 @@ export function TestResultHeader({ doc, title, summaryDocs, journeyStarted, isCo
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiBadge style={{ width: 100 }} color={journeyStarted ? 'primary' : 'warning'}>
-                {journeyStarted ? 'IN PROGRESS' : 'PENDING'}
+                {journeyStarted ? IN_PROGRESS : PENDING_LABEL}
               </EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -74,10 +78,30 @@ export function TestResultHeader({ doc, title, summaryDocs, journeyStarted, isCo
             href={`${basePath}/app/uptime/journey/${doc.monitor.check_group}/steps`}
             target="_blank"
           >
-            View test result details
+            {VIEW_DETAILS}
           </EuiLink>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
   );
 }
+
+const PENDING_LABEL = i18n.translate('xpack.uptime.monitorManagement.pending', {
+  defaultMessage: 'PENDING',
+});
+
+const TEST_RUN = i18n.translate('xpack.uptime.monitorManagement.testRun', {
+  defaultMessage: 'Test run',
+});
+
+const COMPLETED_LABEL = i18n.translate('xpack.uptime.monitorManagement.completed', {
+  defaultMessage: 'COMPLETED',
+});
+
+const IN_PROGRESS = i18n.translate('xpack.uptime.monitorManagement.inProgress', {
+  defaultMessage: 'IN PROGRESS',
+});
+
+const VIEW_DETAILS = i18n.translate('xpack.uptime.monitorManagement.viewTestRunDetails', {
+  defaultMessage: 'View test result details',
+});

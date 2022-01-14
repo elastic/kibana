@@ -7,6 +7,7 @@
 
 import * as React from 'react';
 import { EuiAccordion, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { StepsList } from '../../../synthetics/check_steps/steps_list';
 import { JourneyStep } from '../../../../../common/runtime_types';
@@ -34,7 +35,12 @@ export const BrowserTestRunResult = ({ monitorId }: Props) => {
       />
       <EuiText size="s">
         <p>
-          <EuiText color="subdued">{stepEnds.length} steps completed</EuiText>
+          <EuiText color="subdued">
+            {i18n.translate('xpack.uptime.monitorManagement.stepCompleted', {
+              defaultMessage: '{noOfSteps} steps completed',
+              values: { noOfSteps: stepEnds.length },
+            })}
+          </EuiText>
         </p>
       </EuiText>
     </div>
@@ -49,12 +55,8 @@ export const BrowserTestRunResult = ({ monitorId }: Props) => {
       buttonContent={getButtonContent}
       paddingSize="s"
     >
-      {summaryDoc && stepEnds.length === 0 && (
-        <EuiText color="danger">Failed to run steps.</EuiText>
-      )}
-      {!summaryDoc && journeyStarted && stepEnds.length === 0 && (
-        <EuiText>Loading steps...</EuiText>
-      )}
+      {summaryDoc && stepEnds.length === 0 && <EuiText color="danger">{FAILED_TO_RUN}</EuiText>}
+      {!summaryDoc && journeyStarted && stepEnds.length === 0 && <EuiText>{LOADING_STEPS}</EuiText>}
       {stepEnds.length > 0 && (
         <StepsList
           data={stepEnds}
@@ -71,7 +73,12 @@ const AccordionWrapper = styled(EuiAccordion)`
   .euiAccordion__buttonContent {
     width: 100%;
   }
-  .mobileImagesViewTable .euiImage.syntheticsStepImage img {
-    width: 5rem;
-  }
 `;
+
+const FAILED_TO_RUN = i18n.translate('xpack.uptime.monitorManagement.failedRun', {
+  defaultMessage: 'Failed to run steps',
+});
+
+const LOADING_STEPS = i18n.translate('xpack.uptime.monitorManagement.loadingSteps', {
+  defaultMessage: 'Loading steps...',
+});
