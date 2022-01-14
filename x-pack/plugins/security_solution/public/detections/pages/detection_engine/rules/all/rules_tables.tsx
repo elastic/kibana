@@ -565,7 +565,7 @@ export const RulesTables = React.memo<RulesTableProps>(
             customRulesCount={isAllSelected ? customRulesCount : selectedCustomRuleIds.length}
             elasticRulesCount={
               isAllSelected
-                ? Math.min((pagination.total ?? 0) - customRulesCount, 0)
+                ? Math.max((pagination.total ?? 0) - customRulesCount, 0)
                 : selectedElasticRuleIds.length
             }
             onCancel={handleBulkEditCancel}

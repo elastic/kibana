@@ -19,9 +19,6 @@ import {
 } from '@elastic/eui';
 import * as i18n from '../../translations';
 
-import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
-import { useKibana } from '../../../../../../common/lib/kibana';
-
 import {
   BulkAction,
   BulkActionEditType,
@@ -40,18 +37,9 @@ import {
 } from '../../../../../../shared_imports';
 
 import { IndexPatternsForm, schema as indexPatternsFormSchema } from './forms/index_patterns_form';
-interface IndexPatternForm {
-  index: string[];
-}
-interface TagsForm {
-  tags: string[];
-}
+import { TagsForm, schema as tagsFormSchema } from './forms/tags_form';
 
 type BulkeEditForm = IndexPatternForm | TagsForm;
-
-interface IndexEditActions {
-  index: string[];
-}
 
 interface FormComponentProps<T> {
   data: T;
@@ -77,6 +65,9 @@ const computeFormSchema = (editAction: BulkActionEditType) => {
   if (isIndexPatternsEditAction(editAction)) {
     return indexPatternsFormSchema;
   }
+  if (isTagsEditAction(editAction)) {
+    return tagsFormSchema;
+  }
 };
 
 export const FormComponent = <T,>({ data, onChange, editAction }: FormComponentProps<T>) => {
@@ -100,7 +91,7 @@ export const FormComponent = <T,>({ data, onChange, editAction }: FormComponentP
       {isIndexPatternsEditAction(editAction) ? (
         <IndexPatternsForm editAction={editAction} form={form} />
       ) : isTagsEditAction(editAction) ? (
-        <h2>Tags form</h2>
+        <TagsForm editAction={editAction} form={form} />
       ) : null}
     </Form>
   );
