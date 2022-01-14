@@ -15,6 +15,7 @@ import {
 import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
+import { CreateGroups } from '../../app/service_inventory/service_groups/create_groups';
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { getNoDataConfig } from './no_data_config';
 
@@ -35,12 +36,14 @@ export function ApmMainTemplate({
   pageHeader,
   children,
   environmentFilter = true,
+  shoudCreateServiceGroupsButton,
   ...pageTemplateProps
 }: {
   pageTitle?: React.ReactNode;
   pageHeader?: EuiPageHeaderProps;
   children: React.ReactNode;
   environmentFilter?: boolean;
+  shoudCreateServiceGroupsButton?: boolean;
 } & KibanaPageTemplateProps) {
   const location = useLocation();
 
@@ -64,7 +67,10 @@ export function ApmMainTemplate({
     location.pathname.includes(path)
   );
 
-  const rightSideItems = environmentFilter ? [<ApmEnvironmentFilter />] : [];
+  const rightSideItems = [
+    shoudCreateServiceGroupsButton ? <CreateGroups /> : undefined,
+    environmentFilter ? <ApmEnvironmentFilter /> : undefined,
+  ];
 
   const pageTemplate = (
     <ObservabilityPageTemplate
