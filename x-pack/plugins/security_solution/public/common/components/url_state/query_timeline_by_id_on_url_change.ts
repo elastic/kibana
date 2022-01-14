@@ -9,16 +9,9 @@ import { Action } from 'typescript-fsa';
 import { DispatchUpdateTimeline } from '../../../timelines/components/open_timeline/types';
 import { queryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import { TimelineTabs } from '../../../../common/types/timeline';
-import {
-  decodeRisonUrlState,
-  getQueryStringFromLocation,
-  getParamFromQueryString,
-} from './helpers';
+import { decodeRisonUrlState, getQueryStringKeyValue } from './helpers';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { CONSTANTS } from './constants';
-
-const getQueryStringKeyValue = ({ search, urlKey }: { search: string; urlKey: string }) =>
-  getParamFromQueryString(getQueryStringFromLocation(search), urlKey);
 
 interface QueryTimelineIdOnUrlChange {
   oldSearch?: string;

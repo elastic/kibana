@@ -10,9 +10,7 @@ import { Dispatch } from 'redux';
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { useLocation } from 'react-router-dom';
 import type { Filter, Query } from '@kbn/es-query';
-import { ToggleDetailPanel } from '../../../../common/types/timeline';
 import { inputsActions, sourcererActions } from '../../store/actions';
 import { InputsModelId, TimeRangeKinds } from '../../store/inputs/constants';
 import {
@@ -23,12 +21,7 @@ import {
 } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { CONSTANTS } from './constants';
-import {
-  decodeRisonUrlState,
-  getParamFromQueryString,
-  getQueryStringFromLocation,
-  isDetectionsPages,
-} from './helpers';
+import { decodeRisonUrlState, isDetectionsPages } from './helpers';
 import { normalizeTimeRange } from './normalize_time_range';
 import { SetInitialStateFromUrl } from './types';
 import {
@@ -36,29 +29,8 @@ import {
   dispatchUpdateTimeline,
 } from '../../../timelines/components/open_timeline/helpers';
 import { SourcererScopeName, SourcererUrlState } from '../../store/sourcerer/model';
-import { timelineActions, timelineSelectors } from '../../../timelines/store/timeline';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
-
-const getQueryStringKeyValue = ({ search, urlKey }: { search: string; urlKey: string }) =>
-  getParamFromQueryString(getQueryStringFromLocation(search), urlKey);
-
-const useInitializeDetailPanel = () => {
-  const { search } = useLocation();
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const urlDetailPanel = useMemo(
-    () =>
-      decodeRisonUrlState<ToggleDetailPanel>(
-        getQueryStringKeyValue({
-          search,
-          urlKey: CONSTANTS.detailPanel,
-        }) ?? undefined
-      ),
-    [search]
-  );
-  const timelineId = urlDetailPanel?.timelineId ?? '';
-  const existingTimeline = useDeepEqualSelector((state) => getTimeline(state, timelineId));
-  return { detailPanel: urlDetailPanel, wasTimelineCreated: existingTimeline != null };
-};
+import { timelineActions } from '../../../timelines/store/timeline';
+import { useInitializeDetailPanel } from './use_initialize_detail_panel';
 
 export const useSetInitialStateFromUrl = () => {
   const dispatch = useDispatch();

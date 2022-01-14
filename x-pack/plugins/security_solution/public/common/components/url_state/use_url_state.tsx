@@ -15,8 +15,6 @@ import { useSetInitialStateFromUrl } from './initialize_redux_by_url';
 import { useKibana } from '../../lib/kibana';
 import { CONSTANTS, UrlStateType } from './constants';
 import {
-  getQueryStringFromLocation,
-  getParamFromQueryString,
   getUrlType,
   getTitle,
   replaceStatesInLocation,
@@ -25,6 +23,8 @@ import {
   encodeRisonUrlState,
   isQueryStateEmpty,
   updateTimerangeUrl,
+  getQueryStringKeyValue,
+  getUrlStateKeyValue,
 } from './helpers';
 import {
   UrlStateContainerPropTypes,
@@ -33,7 +33,6 @@ import {
   KeyUrlState,
   ALL_URL_STATE_KEYS,
   UrlStateToRedux,
-  UrlState,
   isAdministration,
   ValueUrlState,
 } from './types';
@@ -204,12 +203,6 @@ export const useUrlStateHooks = ({
 
   return null;
 };
-
-const getUrlStateKeyValue = (urlState: UrlState, urlKey: KeyUrlState) =>
-  isQueryStateEmpty(urlState[urlKey], urlKey) ? '' : urlState[urlKey];
-
-const getQueryStringKeyValue = ({ search, urlKey }: { search: string; urlKey: string }) =>
-  getParamFromQueryString(getQueryStringFromLocation(search), urlKey);
 
 export const getUpdateToFormatUrlStateString = ({
   isFirstPageLoad,

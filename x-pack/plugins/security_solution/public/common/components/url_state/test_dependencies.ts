@@ -121,6 +121,10 @@ export const defaultProps: UrlStateContainerPropTypes = {
       isOpen: false,
     },
     [CONSTANTS.sourcerer]: {},
+    [CONSTANTS.detailPanel]: {
+      tabType: TimelineTabs.query,
+      timelineId: '',
+    },
   },
   history: {
     ...mockHistory,
@@ -190,7 +194,7 @@ export const getMockPropsObj = ({ page, examplePath, pageName, detailName }: Get
       {
         hash: '',
         pathname: examplePath,
-        search: `?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
+        search: `?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))&detailPanel=(panelView:eventDetail,params:(eventId:%27049edacba26686023c363340861669eaa94ffa0fd7b7b8f47371e7504c8b4c66%27,indexName:.internal.alerts-security.alerts-default-000001),tabType:query,timelineId:detections-page)`,
         state: '',
       },
       page,
@@ -202,7 +206,7 @@ export const getMockPropsObj = ({ page, examplePath, pageName, detailName }: Get
       {
         hash: '',
         pathname: examplePath,
-        search: `?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
+        search: `?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))&detailPanel=(panelView:eventDetail,params:(eventId:%27049edacba26686023c363340861669eaa94ffa0fd7b7b8f47371e7504c8b4c66%27,indexName:.internal.alerts-security.alerts-default-000001),tabType:query,timelineId:detections-page)`,
         state: '',
       },
       page,
@@ -214,7 +218,7 @@ export const getMockPropsObj = ({ page, examplePath, pageName, detailName }: Get
       {
         hash: '',
         pathname: examplePath,
-        search: `?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(global),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
+        search: `?query=(language:kuery,query:'host.name:%22siem-es%22')&timerange=(global:(linkTo:!(timeline),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(global),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))&detailPanel=(panelView:eventDetail,params:(eventId:%27049edacba26686023c363340861669eaa94ffa0fd7b7b8f47371e7504c8b4c66%27,indexName:.internal.alerts-security.alerts-default-000001),tabType:query,timelineId:detections-page)`,
         state: '',
       },
       page,
@@ -229,7 +233,7 @@ export const getMockPropsObj = ({ page, examplePath, pageName, detailName }: Get
         hash: '',
         pathname: examplePath,
         search:
-          '?timerange=(global:(linkTo:!(timeline),timerange:(from:1556736012685,kind:absolute,to:1556822416082)),timeline:(linkTo:!(global),timerange:(from:1556736012685,kind:absolute,to:1556822416082)))',
+          '?timerange=(global:(linkTo:!(timeline),timerange:(from:1556736012685,kind:absolute,to:1556822416082)),timeline:(linkTo:!(global),timerange:(from:1556736012685,kind:absolute,to:1556822416082)))&detailPanel=(panelView:eventDetail,params:(eventId:%27049edacba26686023c363340861669eaa94ffa0fd7b7b8f47371e7504c8b4c66%27,indexName:.internal.alerts-security.alerts-default-000001),tabType:query,timelineId:detections-page)',
         state: '',
       },
       page,
@@ -242,7 +246,7 @@ export const getMockPropsObj = ({ page, examplePath, pageName, detailName }: Get
         hash: '',
         pathname: examplePath,
         search:
-          '?timerange=(global:(linkTo:!(timeline),timerange:(from:1556736012685,kind:absolute,to:1556822416082)),timeline:(linkTo:!(global),timerange:(from:1556736012685,kind:absolute,to:1556822416082)))',
+          '?timerange=(global:(linkTo:!(timeline),timerange:(from:1556736012685,kind:absolute,to:1556822416082)),timeline:(linkTo:!(global),timerange:(from:1556736012685,kind:absolute,to:1556822416082)))&detailPanel=(panelView:eventDetail,params:(eventId:%27049edacba26686023c363340861669eaa94ffa0fd7b7b8f47371e7504c8b4c66%27,indexName:.internal.alerts-security.alerts-default-000001),tabType:query,timelineId:detections-page)',
         state: '',
       },
       page,
@@ -256,7 +260,7 @@ export const getMockPropsObj = ({ page, examplePath, pageName, detailName }: Get
       {
         hash: '',
         pathname: examplePath,
-        search: `?query=(query:'host.name:%22siem-es%22',language:kuery)&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))`,
+        search: `?query=(query:'host.name:%22siem-es%22',language:kuery)&timerange=(global:(linkTo:!(),timerange:(from:1558591200000,fromStr:now-1d%2Fd,kind:relative,to:1558677599999,toStr:now-1d%2Fd)),timeline:(linkTo:!(),timerange:(from:1558732849370,fromStr:now-15m,kind:relative,to:1558733749370,toStr:now)))&detailPanel=(panelView:eventDetail,params:(eventId:%27049edacba26686023c363340861669eaa94ffa0fd7b7b8f47371e7504c8b4c66%27,indexName:.internal.alerts-security.alerts-default-000001),tabType:query,timelineId:detections-page)`,
         state: '',
       },
       page,
@@ -324,6 +328,15 @@ export const testCases: Array<
     /* pathName */ '/timeline',
     /* type */ null,
     /* pageName */ SecurityPageName.timelines,
+    /* detailName */ undefined,
+  ],
+  [
+    /* page */ CONSTANTS.alertsPage,
+    /* namespaceLower */ 'alerts',
+    /* namespaceUpper */ 'Alerts',
+    /* pathName */ '/alerts',
+    /* type */ null,
+    /* pageName */ SecurityPageName.alerts,
     /* detailName */ undefined,
   ],
 ];

@@ -92,7 +92,7 @@ export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const encodeRisonUrlState = (state: any) => encode(state);
 
-export const getQueryStringFromLocation = (search: string) => search.substring(1);
+export const getQueryStringFromLocation = (search: string) => search?.substring(1);
 
 export const getParamFromQueryString = (queryString: string, key: string) => {
   const parsedQueryString = parse(queryString, { sort: false });
@@ -122,6 +122,12 @@ export const replaceStateKeyInQueryString =
           };
     return stringify(url.encodeQuery(newValue), { sort: false, encode: false });
   };
+
+export const getUrlStateKeyValue = (urlState: UrlState, urlKey: KeyUrlState) =>
+  isQueryStateEmpty(urlState[urlKey], urlKey) ? '' : urlState[urlKey];
+
+export const getQueryStringKeyValue = ({ search, urlKey }: { search: string; urlKey: string }) =>
+  getParamFromQueryString(getQueryStringFromLocation(search), urlKey);
 
 export const replaceQueryStringInLocation = (
   location: H.Location,
