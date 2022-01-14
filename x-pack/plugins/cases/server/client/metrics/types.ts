@@ -7,6 +7,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CaseMetricsResponse } from '../../../common/api';
+import { CasesClient } from '../client';
+import { CasesClientArgs } from '../types';
 
 export interface MetricsHandler {
   getFeatures(): Set<string>;
@@ -21,3 +23,9 @@ export interface AggregationBuilder {
 }
 
 export type AggregationResponse = Record<string, estypes.AggregationsAggregate> | undefined;
+
+export interface BaseHandlerCommonOptions {
+  caseId: string;
+  casesClient: CasesClient;
+  clientArgs: CasesClientArgs;
+}
