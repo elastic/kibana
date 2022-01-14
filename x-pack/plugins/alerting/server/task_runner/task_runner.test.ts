@@ -230,6 +230,7 @@ describe('Task Runner', () => {
                                         "history": Array [
                                           Object {
                                             "success": true,
+                                            "timestamp": 0,
                                           },
                                         ],
                                       },
@@ -2329,6 +2330,7 @@ describe('Task Runner', () => {
             "history": Array [
               Object {
                 "success": false,
+                "timestamp": 0,
               },
             ],
           },
@@ -2443,6 +2445,7 @@ describe('Task Runner', () => {
             "history": Array [
               Object {
                 "success": true,
+                "timestamp": 0,
               },
             ],
           },
@@ -2503,6 +2506,7 @@ describe('Task Runner', () => {
             "history": Array [
               Object {
                 "success": false,
+                "timestamp": 0,
               },
             ],
           },
@@ -2622,6 +2626,7 @@ describe('Task Runner', () => {
             "history": Array [
               Object {
                 "success": false,
+                "timestamp": 0,
               },
             ],
           },
@@ -2750,6 +2755,7 @@ describe('Task Runner', () => {
             "history": Array [
               Object {
                 "success": false,
+                "timestamp": 0,
               },
             ],
           },
@@ -2878,6 +2884,7 @@ describe('Task Runner', () => {
             "history": Array [
               Object {
                 "success": false,
+                "timestamp": 0,
               },
             ],
           },
@@ -3005,6 +3012,7 @@ describe('Task Runner', () => {
             "history": Array [
               Object {
                 "success": false,
+                "timestamp": 0,
               },
             ],
           },
@@ -3136,6 +3144,7 @@ describe('Task Runner', () => {
             "history": Array [
               Object {
                 "success": false,
+                "timestamp": 0,
               },
             ],
           },
@@ -4391,6 +4400,7 @@ describe('Task Runner', () => {
                                         "history": Array [
                                           Object {
                                             "success": true,
+                                            "timestamp": 0,
                                           },
                                         ],
                                       },
@@ -4632,6 +4642,7 @@ describe('Task Runner', () => {
                                           "history": Array [
                                             Object {
                                               "success": true,
+                                              "timestamp": 0,
                                             },
                                           ],
                                         },
@@ -4688,6 +4699,7 @@ describe('Task Runner', () => {
                                           "history": Array [
                                             Object {
                                               "success": false,
+                                              "timestamp": 0,
                                             },
                                           ],
                                         },
@@ -4745,15 +4757,19 @@ describe('Task Runner', () => {
                                           "history": Array [
                                             Object {
                                               "success": true,
+                                              "timestamp": 0,
                                             },
                                             Object {
                                               "success": true,
+                                              "timestamp": 0,
                                             },
                                             Object {
                                               "success": true,
+                                              "timestamp": 0,
                                             },
                                             Object {
                                               "success": false,
+                                              "timestamp": 0,
                                             },
                                           ],
                                         },

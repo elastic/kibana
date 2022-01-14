@@ -708,6 +708,7 @@ export class TaskRunner<
 
     const monitoringHistory = {
       success: true,
+      timestamp: +new Date(),
     };
     // if executionStatus indicates an error, fill in fields in
     // event from it

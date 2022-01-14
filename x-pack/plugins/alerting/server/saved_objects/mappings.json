@@ -101,6 +101,9 @@
                 "properties": {
                   "success": {
                     "type": "boolean"
+                  },
+                  "timestamp": {
+                    "type": "date"
                   }
                 }
               },

@@ -141,6 +141,7 @@ export interface RuleMonitoring extends SavedObjectAttributes {
   execution: {
     history: Array<{
       success: boolean;
+      timestamp: number;
     }>;
     calculated_metrics: {
       success_ratio: number;
