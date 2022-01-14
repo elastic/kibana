@@ -7,3 +7,4 @@
 
 export * from './uptime.journey';
 export * from './step_duration.journey';
+export * from './alert_flyouts_in_alerting_app';
