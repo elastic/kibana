@@ -1,0 +1,6 @@
+steps:
+  - command: .buildkite/scripts/steps/artifacts/snapshot.sh
+    label: Build Snapshot Artifacts
+    agents:
+      queue: c2-16
+    timeout_in_minutes: 60
