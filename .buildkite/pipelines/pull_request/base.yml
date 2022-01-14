@@ -26,18 +26,6 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  # Move to hourly
-  - command: .buildkite/scripts/steps/docker_context/build.sh
-    label: 'Docker Build Context'
-    agents:
-      queue: n2-4
-    timeout_in_minutes: 30
-    key: build-docker-context
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
   - command: CI_GROUP=Docker .buildkite/scripts/steps/functional/xpack_cigroup.sh
     label: 'Docker CI Group'
     agents:
