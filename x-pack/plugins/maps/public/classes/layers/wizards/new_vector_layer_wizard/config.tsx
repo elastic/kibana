@@ -16,6 +16,7 @@ import { LAYER_WIZARD_CATEGORY } from '../../../../../common/constants';
 const ADD_VECTOR_DRAWING_LAYER = 'ADD_VECTOR_DRAWING_LAYER';
 
 export const newVectorLayerWizardConfig: LayerWizard = {
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.newVectorLayerWizard.description', {
     defaultMessage: 'Draw shapes on the map and index in Elasticsearch',
