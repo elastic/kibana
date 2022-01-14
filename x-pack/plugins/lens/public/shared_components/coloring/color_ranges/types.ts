@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import type { CustomPaletteParams } from '../../../../common';
 import type { PaletteContinuity } from '../../../../../../../src/plugins/charts/common';
 import type { DataBounds } from '../types';
@@ -24,29 +25,29 @@ export interface ColorRangesState {
 /** @internal **/
 interface BasicPayload {
   dataBounds: DataBounds;
-  palettes: any;
+  palettes?: PaletteRegistry;
 }
 
 /** @internal **/
-export type UpdateColorPayload = BasicPayload & {
+export interface UpdateColorPayload extends BasicPayload {
   index: number;
   color: string;
 };
 
 /** @internal **/
-export type UpdateColorRangeValuePayload = BasicPayload & {
+export interface UpdateColorRangeValuePayload extends BasicPayload {
   index: number;
   value: string;
   accessor: ColorRangeAccessor;
 };
 
 /** @internal **/
-export type DeleteColorRangePayload = BasicPayload & {
+export interface DeleteColorRangePayload extends BasicPayload {
   index: number;
 };
 
 /** @internal **/
-export type UpdateContinuityPayload = BasicPayload & {
+export interface UpdateContinuityPayload extends BasicPayload {
   isLast: boolean;
   continuity: PaletteContinuity;
 };

@@ -46,7 +46,7 @@ export const paletteConfigurationReducer: Reducer<
       );
 
       return withUpdatingPalette(
-        palettes,
+        palettes!,
         state.activePalette,
         updateColorRangeValue(
           isLast ? state.colorRanges.length - 1 : 0,
@@ -61,7 +61,7 @@ export const paletteConfigurationReducer: Reducer<
     case 'addColorRange': {
       const { dataBounds, palettes } = action.payload;
       return withUpdatingPalette(
-        palettes,
+        palettes!,
         state.activePalette,
         addColorRange(
           state.colorRanges,
@@ -74,7 +74,7 @@ export const paletteConfigurationReducer: Reducer<
     case 'reversePalette': {
       const { dataBounds, palettes } = action.payload;
       return withUpdatingPalette(
-        palettes,
+        palettes!,
         state.activePalette,
         reversePalette(state.colorRanges),
         dataBounds
@@ -83,7 +83,7 @@ export const paletteConfigurationReducer: Reducer<
     case 'distributeEqually': {
       const { dataBounds, palettes } = action.payload;
       return withUpdatingPalette(
-        palettes,
+        palettes!,
         state.activePalette,
         distributeEqually(
           state.colorRanges,
@@ -97,7 +97,7 @@ export const paletteConfigurationReducer: Reducer<
     case 'updateColor': {
       const { index, color, palettes, dataBounds } = action.payload;
       return withUpdatingPalette(
-        palettes,
+        palettes!,
         state.activePalette,
         updateColorRangeColor(index, color, state.colorRanges),
         dataBounds
@@ -106,7 +106,7 @@ export const paletteConfigurationReducer: Reducer<
     case 'sortColorRanges': {
       const { dataBounds, palettes } = action.payload;
       return withUpdatingPalette(
-        palettes,
+        palettes!,
         state.activePalette,
         sortColorRanges(state.colorRanges),
         dataBounds
@@ -115,7 +115,7 @@ export const paletteConfigurationReducer: Reducer<
     case 'updateValue': {
       const { index, value, accessor, dataBounds, palettes } = action.payload;
       return withUpdatingPalette(
-        palettes,
+        palettes!,
         state.activePalette,
         updateColorRangeValue(index, value, accessor, state.colorRanges),
         dataBounds
@@ -124,7 +124,7 @@ export const paletteConfigurationReducer: Reducer<
     case 'deleteColorRange': {
       const { index, dataBounds, palettes } = action.payload;
       return withUpdatingPalette(
-        palettes,
+        palettes!,
         state.activePalette,
         deleteColorRange(index, state.colorRanges),
         dataBounds
