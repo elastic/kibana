@@ -45,7 +45,7 @@ export function ColorRangeDeleteButton({ index, dispatch }: ColorRangesItemButto
   const { dataBounds, palettes } = useContext(ColorRangesContext);
   const onExecuteAction = useCallback(() => {
     dispatch({ type: 'deleteColorRange', payload: { index, dataBounds, palettes } });
-  }, [dispatch, index, dataBounds, palettes ]);
+  }, [dispatch, index, dataBounds, palettes]);
 
   const title = i18n.translate('xpack.lens.dynamicColoring.customPalette.deleteButtonAriaLabel', {
     defaultMessage: 'Delete',

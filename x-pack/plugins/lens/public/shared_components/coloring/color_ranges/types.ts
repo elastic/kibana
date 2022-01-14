@@ -31,29 +31,29 @@ interface BasicPayload {
 export type UpdateColorPayload = BasicPayload & {
   index: number;
   color: string;
-}
+};
 
 /** @internal **/
 export type UpdateColorRangeValuePayload = BasicPayload & {
   index: number;
   value: string;
   accessor: ColorRangeAccessor;
-}
+};
 
 /** @internal **/
 export type DeleteColorRangePayload = BasicPayload & {
   index: number;
-}
+};
 
 /** @internal **/
 export type UpdateContinuityPayload = BasicPayload & {
   isLast: boolean;
   continuity: PaletteContinuity;
-}
+};
 
 /** @internal **/
 export type ColorRangesActions =
-  | { type: 'reversePalette'; payload: BasicPayload}
+  | { type: 'reversePalette'; payload: BasicPayload }
   | { type: 'sortColorRanges'; payload: BasicPayload }
   | { type: 'distributeEqually'; payload: BasicPayload }
   | { type: 'updateContinuity'; payload: UpdateContinuityPayload }

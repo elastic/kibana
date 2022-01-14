@@ -153,7 +153,7 @@ export function ColorRangeItem({
 
   const onUpdateColor = useCallback(
     (color) => {
-      dispatch({ type: 'updateColor', payload: { index, color, dataBounds, palettes  } });
+      dispatch({ type: 'updateColor', payload: { index, color, dataBounds, palettes } });
     },
     [dispatch, index, dataBounds, palettes]
   );

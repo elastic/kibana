@@ -34,7 +34,7 @@ export function ColorRangesExtraActions({
       type: 'addColorRange',
       payload: { dataBounds, palettes },
     });
-  }, [dataBounds, dispatch]);
+  }, [dataBounds, dispatch, palettes]);
 
   const onReversePalette = useCallback(() => {
     dispatch({ type: 'reversePalette', payload: { dataBounds, palettes } });
