@@ -506,6 +506,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         setHasAgentPolicyError={setHasAgentPolicyError}
         updateSelectedTab={updateSelectedPolicy}
         onNewAgentPolicyCreate={handleInlineAgentPolicyCreate}
+        selectedAgentPolicyId={queryParamsPolicyId}
       />
     ),
     [
@@ -518,6 +519,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       withSysMonitoring,
       updateSelectedPolicy,
       handleInlineAgentPolicyCreate,
+      queryParamsPolicyId,
     ]
   );
 

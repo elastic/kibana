@@ -45,12 +45,14 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
   updateAgentPolicy: (agentPolicy: AgentPolicy | undefined) => void;
   setHasAgentPolicyError: (hasError: boolean) => void;
   onNewAgentPolicyCreate: () => void;
+  selectedAgentPolicyId?: string;
 }> = ({
   packageInfo,
   agentPolicy,
   updateAgentPolicy,
   setHasAgentPolicyError,
   onNewAgentPolicyCreate,
+  selectedAgentPolicyId,
 }) => {
   const { isReady: isFleetReady } = useFleetStatus();
 
@@ -88,7 +90,8 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
 
   // Selected agent policy state
   const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>(
-    agentPolicy?.id ?? (agentPolicies.length === 1 ? agentPolicies[0].id : undefined)
+    agentPolicy?.id ??
+      (selectedAgentPolicyId || (agentPolicies.length === 1 ? agentPolicies[0].id : undefined))
   );
 
   const doesAgentPolicyHaveLimitedPackage = useCallback(
