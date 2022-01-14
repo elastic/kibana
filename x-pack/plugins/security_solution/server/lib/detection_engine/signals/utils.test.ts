@@ -661,7 +661,7 @@ describe('utils', () => {
           },
         },
       };
-      mockLogger.error.mockClear();
+      mockLogger.warn.mockClear();
       const res = await hasTimestampFields({
         timestampField,
         executionId: '7a7065d7-b33f-4aae-8d20-c93613dec9fb',
@@ -678,11 +678,12 @@ describe('utils', () => {
         logger: mockLogger,
         buildRuleMessage,
       });
-      expect(mockLogger.error).toHaveBeenCalledWith(
+      expect(mockLogger.warn).toHaveBeenCalledWith(
         'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
       expect(res).toBeTruthy();
     });
+
     test('returns true when missing timestamp field', async () => {
       const timestampField = '@timestamp';
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -707,7 +708,7 @@ describe('utils', () => {
           },
         },
       };
-      mockLogger.error.mockClear();
+      mockLogger.warn.mockClear();
       const res = await hasTimestampFields({
         timestampField,
         executionId: '7a7065d7-b33f-4aae-8d20-c93613dec9fb',
@@ -724,7 +725,7 @@ describe('utils', () => {
         logger: mockLogger,
         buildRuleMessage,
       });
-      expect(mockLogger.error).toHaveBeenCalledWith(
+      expect(mockLogger.warn).toHaveBeenCalledWith(
         'The following indices are missing the timestamp field "@timestamp": ["myfakeindex-1","myfakeindex-2"] name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
       expect(res).toBeTruthy();
@@ -739,7 +740,7 @@ describe('utils', () => {
           fields: {},
         },
       };
-      mockLogger.error.mockClear();
+      mockLogger.warn.mockClear();
       const res = await hasTimestampFields({
         timestampField,
         executionId: '7a7065d7-b33f-4aae-8d20-c93613dec9fb',
@@ -756,7 +757,7 @@ describe('utils', () => {
         logger: mockLogger,
         buildRuleMessage,
       });
-      expect(mockLogger.error).toHaveBeenCalledWith(
+      expect(mockLogger.warn).toHaveBeenCalledWith(
         'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. If you have recently enrolled agents enabled with Endpoint Security through Fleet, this warning should stop once an alert is sent from an agent. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
       expect(res).toBeTruthy();
@@ -771,7 +772,7 @@ describe('utils', () => {
           fields: {},
         },
       };
-      mockLogger.error.mockClear();
+      mockLogger.warn.mockClear();
       const res = await hasTimestampFields({
         timestampField,
         executionId: '7a7065d7-b33f-4aae-8d20-c93613dec9fb',
@@ -788,7 +789,7 @@ describe('utils', () => {
         logger: mockLogger,
         buildRuleMessage,
       });
-      expect(mockLogger.error).toHaveBeenCalledWith(
+      expect(mockLogger.warn).toHaveBeenCalledWith(
         'This rule is attempting to query data from Elasticsearch indices listed in the "Index pattern" section of the rule definition, however no index matching: ["logs-endpoint.alerts-*"] was found. This warning will continue to appear until a matching index is created or this rule is de-activated. name: "fake name" id: "fake id" rule id: "fake rule id" signals index: "fakeindex"'
       );
       expect(res).toBeTruthy();
