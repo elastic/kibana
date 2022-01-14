@@ -54,7 +54,7 @@ describe('migration v2', () => {
   });
 
   it('fails with a descriptive message when maxBatchSizeBytes exceeds ES http.max_content_length', async () => {
-    root = createRoot({ maxBatchSizeBytes: 1715275 });
+    root = createRoot({ maxBatchSizeBytes: 1715329 });
     esServer = await startES();
     await root.preboot();
     await root.setup();

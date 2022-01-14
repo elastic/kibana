@@ -27,6 +27,7 @@ import {
   ExpressionAstFunction,
   ExpressionAstExpression,
 } from '../../../types';
+import { isExpressionWithFilters } from '../../lib/filter';
 
 type Modify<T, R> = Pick<T, Exclude<keyof T, keyof R>> & R;
 type WorkpadInfo = Modify<CanvasWorkpad, { pages: undefined }>;
@@ -248,7 +249,7 @@ function extractFilterGroups(
     // TODO: we always get a function here, right?
     const { function: fn, arguments: args } = item;
 
-    if (fn === 'filters') {
+    if (isExpressionWithFilters(fn)) {
       // we have a filter function, extract groups from args
       return groups.concat(
         buildGroupValues(args, (argValue) => {

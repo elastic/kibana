@@ -6565,7 +6565,7 @@
     "xpack.canvas.error.esService.indicesFetchErrorMessage": "Elasticsearch インデックスを取得できませんでした",
     "xpack.canvas.error.RenderWithFn.renderErrorMessage": "「{functionName}」のレンダリングが失敗しました",
     "xpack.canvas.error.useCloneWorkpad.cloneFailureErrorMessage": "ワークパッドのクローンを作成できませんでした",
-    "xpack.canvas.error.useCreateWorkpad.uploadFailureErrorMessage": "ワークパッドをアップロードできませんでした",
+    "xpack.canvas.error.useUploadWorkpad.uploadFailureErrorMessage": "ワークパッドをアップロードできませんでした",
     "xpack.canvas.error.useDeleteWorkpads.deleteFailureErrorMessage": "すべてのワークパッドを削除できませんでした",
     "xpack.canvas.error.useFindWorkpads.findFailureErrorMessage": "ワークパッドが見つかりませんでした",
     "xpack.canvas.error.useImportWorkpad.acceptJSONOnlyErrorMessage": "{JSON} 個のファイルしか受け付けられませんでした",

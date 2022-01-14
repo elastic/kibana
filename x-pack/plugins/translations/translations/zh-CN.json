@@ -6610,7 +6610,7 @@
     "xpack.canvas.error.esService.indicesFetchErrorMessage": "无法提取 Elasticsearch 索引",
     "xpack.canvas.error.RenderWithFn.renderErrorMessage": "呈现“{functionName}”失败。",
     "xpack.canvas.error.useCloneWorkpad.cloneFailureErrorMessage": "无法克隆 Workpad",
-    "xpack.canvas.error.useCreateWorkpad.uploadFailureErrorMessage": "无法上传 Workpad",
+    "xpack.canvas.error.useUploadWorkpad.uploadFailureErrorMessage": "无法上传 Workpad",
     "xpack.canvas.error.useDeleteWorkpads.deleteFailureErrorMessage": "无法删除所有 Workpad",
     "xpack.canvas.error.useFindWorkpads.findFailureErrorMessage": "无法查找 Workpad",
     "xpack.canvas.error.useImportWorkpad.acceptJSONOnlyErrorMessage": "仅接受 {JSON} 文件",

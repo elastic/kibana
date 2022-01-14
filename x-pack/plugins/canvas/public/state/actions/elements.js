@@ -20,7 +20,6 @@ import {
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
 import { ErrorStrings } from '../../../i18n';
-import { runInterpreter, interpretAst } from '../../lib/run_interpreter';
 import { subMultitree } from '../../lib/aeroelastic/functional';
 import { pluginServices } from '../../services';
 import { selectToplevelNodes } from './transient';
@@ -101,11 +100,16 @@ export const fetchContext = createThunk(
     });
 
     const variables = getWorkpadVariablesAsObject(getState());
+
+    const { expressions } = pluginServices.getServices();
     const elementWithNewAst = set(element, pathToTarget, astChain);
+
     // get context data from a partial AST
-    return interpretAst(elementWithNewAst.ast, variables, prevContextValue).then((value) => {
-      dispatch(args.setValue({ path: contextPath, value }));
-    });
+    return expressions
+      .interpretAst(elementWithNewAst.ast, variables, prevContextValue)
+      .then((value) => {
+        dispatch(args.setValue({ path: contextPath, value }));
+      });
   }
 );
 
@@ -124,14 +128,14 @@ const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, cont
     });
 
   const variables = getWorkpadVariablesAsObject(getState());
-
-  return runInterpreter(ast, context, variables, { castToRender: true })
+  const { expressions, notify } = pluginServices.getServices();
+  return expressions
+    .runInterpreter(ast, context, variables, { castToRender: true })
     .then((renderable) => {
       dispatch(getAction(renderable));
     })
     .catch((err) => {
-      const notifyService = pluginServices.getServices().notify;
-      notifyService.error(err);
+      notify.error(err);
       dispatch(getAction(err));
     });
 };
@@ -171,12 +175,13 @@ export const fetchAllRenderables = createThunk(
         const argumentPath = [element.id, 'expressionRenderable'];
 
         const variables = getWorkpadVariablesAsObject(getState());
+        const { expressions, notify } = pluginServices.getServices();
 
-        return runInterpreter(ast, null, variables, { castToRender: true })
+        return expressions
+          .runInterpreter(ast, null, variables, { castToRender: true })
           .then((renderable) => ({ path: argumentPath, value: renderable }))
           .catch((err) => {
-            const notifyService = pluginServices.getServices().notify;
-            notifyService.error(err);
+            notify.error(err);
             return { path: argumentPath, value: err };
           });
       });
