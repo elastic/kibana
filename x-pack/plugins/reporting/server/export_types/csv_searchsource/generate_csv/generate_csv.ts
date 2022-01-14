@@ -13,7 +13,7 @@ import type { Datatable } from 'src/plugins/expressions/server';
 import type { Writable } from 'stream';
 import type { ReportingConfig } from '../../..';
 import type {
-  IndexPattern,
+  DataView,
   ISearchSource,
   ISearchStartSearchSource,
   SearchFieldValue,
@@ -81,11 +81,7 @@ export class CsvGenerator {
     private stream: Writable
   ) {}
 
-  private async scan(
-    index: IndexPattern,
-    searchSource: ISearchSource,
-    settings: CsvExportSettings
-  ) {
+  private async scan(index: DataView, searchSource: ISearchSource, settings: CsvExportSettings) {
     const { scroll: scrollSettings, includeFrozen } = settings;
     const searchBody = searchSource.getSearchRequestBody();
     this.logger.debug(`executing search request`);
