@@ -1651,60 +1651,60 @@ exports[`discover Discover CSV Export Generate CSV: archived search generates a 
 
 exports[`discover Discover CSV Export Generate CSV: new search generates a large export 1`] = `
 "\\"_id\\",\\"_index\\",\\"_score\\",\\"_type\\",category,\\"category.keyword\\",currency,\\"customer_first_name\\",\\"customer_first_name.keyword\\",\\"customer_full_name\\",\\"customer_full_name.keyword\\",\\"customer_gender\\",\\"customer_id\\",\\"customer_last_name\\",\\"customer_last_name.keyword\\",\\"customer_phone\\",\\"day_of_week\\",\\"day_of_week_i\\",email,\\"geoip.city_name\\",\\"geoip.continent_name\\",\\"geoip.country_iso_code\\",\\"geoip.location\\",\\"geoip.region_name\\",manufacturer,\\"manufacturer.keyword\\",\\"order_date\\",\\"order_id\\",\\"products._id\\",\\"products._id.keyword\\",\\"products.base_price\\",\\"products.base_unit_price\\",\\"products.category\\",\\"products.category.keyword\\",\\"products.created_on\\",\\"products.discount_amount\\",\\"products.discount_percentage\\",\\"products.manufacturer\\",\\"products.manufacturer.keyword\\",\\"products.min_price\\",\\"products.price\\",\\"products.product_id\\",\\"products.product_name\\",\\"products.product_name.keyword\\",\\"products.quantity\\",\\"products.sku\\",\\"products.tax_amount\\",\\"products.taxful_price\\",\\"products.taxless_price\\",\\"products.unit_discount_amount\\",sku,\\"taxful_total_price\\",\\"taxless_total_price\\",\\"total_quantity\\",\\"total_unique_products\\",type,user
-3AMtOW0BH63Xcmy432DJ,ecommerce,\\"-\\",\\"_doc\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",EUR,\\"Sultan Al\\",\\"Sultan Al\\",\\"Sultan Al Boone\\",\\"Sultan Al Boone\\",MALE,19,Boone,Boone,\\"(empty)\\",Saturday,5,\\"sultan al@boone-family.zzz\\",\\"Abu Dhabi\\",Asia,AE,\\"{
+3AMtOW0BH63Xcmy432DJ,ecommerce,\\"-\\",\\"-\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",EUR,\\"Sultan Al\\",\\"Sultan Al\\",\\"Sultan Al Boone\\",\\"Sultan Al Boone\\",MALE,19,Boone,Boone,\\"(empty)\\",Saturday,5,\\"sultan al@boone-family.zzz\\",\\"Abu Dhabi\\",Asia,AE,\\"{
   \\"\\"coordinates\\"\\": [
     54.4,
     24.5
   ],
   \\"\\"type\\"\\": \\"\\"Point\\"\\"
 }\\",\\"Abu Dhabi\\",\\"Angeldale, Oceanavigations, Microlutions\\",\\"Angeldale, Oceanavigations, Microlutions\\",\\"Jul 12, 2019 @ 00:00:00.000\\",716724,\\"sold_product_716724_23975, sold_product_716724_6338, sold_product_716724_14116, sold_product_716724_15290\\",\\"sold_product_716724_23975, sold_product_716724_6338, sold_product_716724_14116, sold_product_716724_15290\\",\\"80, 60, 21.984, 11.992\\",\\"80, 60, 21.984, 11.992\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Men's Shoes, Men's Clothing, Women's Accessories, Men's Accessories\\",\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"0, 0, 0, 0\\",\\"0, 0, 0, 0\\",\\"Angeldale, Oceanavigations, Microlutions, Oceanavigations\\",\\"Angeldale, Oceanavigations, Microlutions, Oceanavigations\\",\\"42.375, 33, 10.344, 6.109\\",\\"80, 60, 21.984, 11.992\\",\\"23,975, 6,338, 14,116, 15,290\\",\\"Winter boots - cognac, Trenchcoat - black, Watch - black, Hat - light grey multicolor\\",\\"Winter boots - cognac, Trenchcoat - black, Watch - black, Hat - light grey multicolor\\",\\"1, 1, 1, 1\\",\\"ZO0687606876, ZO0290502905, ZO0126701267, ZO0308503085\\",\\"0, 0, 0, 0\\",\\"80, 60, 21.984, 11.992\\",\\"80, 60, 21.984, 11.992\\",\\"0, 0, 0, 0\\",\\"ZO0687606876, ZO0290502905, ZO0126701267, ZO0308503085\\",174,174,4,4,order,sultan
-9gMtOW0BH63Xcmy432DJ,ecommerce,\\"-\\",\\"_doc\\",\\"Women's Shoes, Women's Clothing\\",\\"Women's Shoes, Women's Clothing\\",EUR,Pia,Pia,\\"Pia Richards\\",\\"Pia Richards\\",FEMALE,45,Richards,Richards,\\"(empty)\\",Saturday,5,\\"pia@richards-family.zzz\\",Cannes,Europe,FR,\\"{
+9gMtOW0BH63Xcmy432DJ,ecommerce,\\"-\\",\\"-\\",\\"Women's Shoes, Women's Clothing\\",\\"Women's Shoes, Women's Clothing\\",EUR,Pia,Pia,\\"Pia Richards\\",\\"Pia Richards\\",FEMALE,45,Richards,Richards,\\"(empty)\\",Saturday,5,\\"pia@richards-family.zzz\\",Cannes,Europe,FR,\\"{
   \\"\\"coordinates\\"\\": [
     7,
     43.6
   ],
   \\"\\"type\\"\\": \\"\\"Point\\"\\"
 }\\",\\"Alpes-Maritimes\\",\\"Tigress Enterprises, Pyramidustries\\",\\"Tigress Enterprises, Pyramidustries\\",\\"Jul 12, 2019 @ 00:00:00.000\\",591503,\\"sold_product_591503_14761, sold_product_591503_11632\\",\\"sold_product_591503_14761, sold_product_591503_11632\\",\\"20.984, 20.984\\",\\"20.984, 20.984\\",\\"Women's Shoes, Women's Clothing\\",\\"Women's Shoes, Women's Clothing\\",\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"0, 0\\",\\"0, 0\\",\\"Tigress Enterprises, Pyramidustries\\",\\"Tigress Enterprises, Pyramidustries\\",\\"10.703, 9.867\\",\\"20.984, 20.984\\",\\"14,761, 11,632\\",\\"Classic heels - blue, Summer dress - coral/pink\\",\\"Classic heels - blue, Summer dress - coral/pink\\",\\"1, 1\\",\\"ZO0006400064, ZO0150601506\\",\\"0, 0\\",\\"20.984, 20.984\\",\\"20.984, 20.984\\",\\"0, 0\\",\\"ZO0006400064, ZO0150601506\\",\\"41.969\\",\\"41.969\\",2,2,order,pia
-BgMtOW0BH63Xcmy432LJ,ecommerce,\\"-\\",\\"_doc\\",\\"Women's Clothing\\",\\"Women's Clothing\\",EUR,Brigitte,Brigitte,\\"Brigitte Meyer\\",\\"Brigitte Meyer\\",FEMALE,12,Meyer,Meyer,\\"(empty)\\",Saturday,5,\\"brigitte@meyer-family.zzz\\",\\"New York\\",\\"North America\\",US,\\"{
+BgMtOW0BH63Xcmy432LJ,ecommerce,\\"-\\",\\"-\\",\\"Women's Clothing\\",\\"Women's Clothing\\",EUR,Brigitte,Brigitte,\\"Brigitte Meyer\\",\\"Brigitte Meyer\\",FEMALE,12,Meyer,Meyer,\\"(empty)\\",Saturday,5,\\"brigitte@meyer-family.zzz\\",\\"New York\\",\\"North America\\",US,\\"{
   \\"\\"coordinates\\"\\": [
     -74,
     40.8
   ],
   \\"\\"type\\"\\": \\"\\"Point\\"\\"
 }\\",\\"New York\\",\\"Spherecords, Tigress Enterprises\\",\\"Spherecords, Tigress Enterprises\\",\\"Jul 12, 2019 @ 00:00:00.000\\",591709,\\"sold_product_591709_20734, sold_product_591709_7539\\",\\"sold_product_591709_20734, sold_product_591709_7539\\",\\"7.988, 33\\",\\"7.988, 33\\",\\"Women's Clothing, Women's Clothing\\",\\"Women's Clothing, Women's Clothing\\",\\"Dec 31, 2016 @ 00:00:00.000, Dec 31, 2016 @ 00:00:00.000\\",\\"0, 0\\",\\"0, 0\\",\\"Spherecords, Tigress Enterprises\\",\\"Spherecords, Tigress Enterprises\\",\\"3.6, 17.484\\",\\"7.988, 33\\",\\"20,734, 7,539\\",\\"Basic T-shirt - dark blue, Summer dress - scarab\\",\\"Basic T-shirt - dark blue, Summer dress - scarab\\",\\"1, 1\\",\\"ZO0638206382, ZO0038800388\\",\\"0, 0\\",\\"7.988, 33\\",\\"7.988, 33\\",\\"0, 0\\",\\"ZO0638206382, ZO0038800388\\",\\"40.969\\",\\"40.969\\",2,2,order,brigitte
-KQMtOW0BH63Xcmy432LJ,ecommerce,\\"-\\",\\"_doc\\",\\"Me"
+KQMtOW0BH63Xcmy432LJ,ecommerce,\\"-\\",\\"-\\",\\"Men's Clothing"
 `;
 
 exports[`discover Discover CSV Export Generate CSV: new search generates a large export 2`] = `
-"rce,\\"-\\",\\"_doc\\",\\"Women's Clothing, Women's Accessories\\",\\"Women's Clothing, Women's Accessories\\",EUR,Elyssa,Elyssa,\\"Elyssa Graves\\",\\"Elyssa Graves\\",FEMALE,27,Graves,Graves,\\"(empty)\\",Thursday,3,\\"elyssa@graves-family.zzz\\",\\"New York\\",\\"North America\\",US,\\"{
+"cmy46HLV,ecommerce,\\"-\\",\\"-\\",\\"Women's Clothing, Women's Accessories\\",\\"Women's Clothing, Women's Accessories\\",EUR,Elyssa,Elyssa,\\"Elyssa Graves\\",\\"Elyssa Graves\\",FEMALE,27,Graves,Graves,\\"(empty)\\",Thursday,3,\\"elyssa@graves-family.zzz\\",\\"New York\\",\\"North America\\",US,\\"{
   \\"\\"coordinates\\"\\": [
     -74,
     40.8
   ],
   \\"\\"type\\"\\": \\"\\"Point\\"\\"
 }\\",\\"New York\\",Pyramidustries,Pyramidustries,\\"Jun 12, 2019 @ 00:00:00.000\\",551204,\\"sold_product_551204_16805, sold_product_551204_12896\\",\\"sold_product_551204_16805, sold_product_551204_12896\\",\\"13.992, 20.984\\",\\"13.992, 20.984\\",\\"Women's Clothing, Women's Accessories\\",\\"Women's Clothing, Women's Accessories\\",\\"Dec 1, 2016 @ 00:00:00.000, Dec 1, 2016 @ 00:00:00.000\\",\\"0, 0\\",\\"0, 0\\",\\"Pyramidustries, Pyramidustries\\",\\"Pyramidustries, Pyramidustries\\",\\"7.129, 9.656\\",\\"13.992, 20.984\\",\\"16,805, 12,896\\",\\"Bustier - white, Across body bag - cognac\\",\\"Bustier - white, Across body bag - cognac\\",\\"1, 1\\",\\"ZO0212602126, ZO0200702007\\",\\"0, 0\\",\\"13.992, 20.984\\",\\"13.992, 20.984\\",\\"0, 0\\",\\"ZO0212602126, ZO0200702007\\",\\"34.969\\",\\"34.969\\",2,2,order,elyssa
-7gMtOW0BH63Xcmy46HLV,ecommerce,\\"-\\",\\"_doc\\",\\"Women's Clothing, Women's Shoes\\",\\"Women's Clothing, Women's Shoes\\",EUR,Pia,Pia,\\"Pia Rose\\",\\"Pia Rose\\",FEMALE,45,Rose,Rose,\\"(empty)\\",Thursday,3,\\"pia@rose-family.zzz\\",Cannes,Europe,FR,\\"{
+7gMtOW0BH63Xcmy46HLV,ecommerce,\\"-\\",\\"-\\",\\"Women's Clothing, Women's Shoes\\",\\"Women's Clothing, Women's Shoes\\",EUR,Pia,Pia,\\"Pia Rose\\",\\"Pia Rose\\",FEMALE,45,Rose,Rose,\\"(empty)\\",Thursday,3,\\"pia@rose-family.zzz\\",Cannes,Europe,FR,\\"{
   \\"\\"coordinates\\"\\": [
     7,
     43.6
   ],
   \\"\\"type\\"\\": \\"\\"Point\\"\\"
 }\\",\\"Alpes-Maritimes\\",\\"Oceanavigations, Primemaster\\",\\"Oceanavigations, Primemaster\\",\\"Jun 12, 2019 @ 00:00:00.000\\",550466,\\"sold_product_550466_19198, sold_product_550466_16409\\",\\"sold_product_550466_19198, sold_product_550466_16409\\",\\"50, 100\\",\\"50, 100\\",\\"Women's Clothing, Women's Shoes\\",\\"Women's Clothing, Women's Shoes\\",\\"Dec 1, 2016 @ 00:00:00.000, Dec 1, 2016 @ 00:00:00.000\\",\\"0, 0\\",\\"0, 0\\",\\"Oceanavigations, Primemaster\\",\\"Oceanavigations, Primemaster\\",\\"24, 52\\",\\"50, 100\\",\\"19,198, 16,409\\",\\"Summer dress - grey, Boots - passion\\",\\"Summer dress - grey, Boots - passion\\",\\"1, 1\\",\\"ZO0260702607, ZO0363203632\\",\\"0, 0\\",\\"50, 100\\",\\"50, 100\\",\\"0, 0\\",\\"ZO0260702607, ZO0363203632\\",150,150,2,2,order,pia
-7wMtOW0BH63Xcmy46HLV,ecommerce,\\"-\\",\\"_doc\\",\\"Men's Clothing\\",\\"Men's Clothing\\",EUR,Wagdi,Wagdi,\\"Wagdi Boone\\",\\"Wagdi Boone\\",MALE,15,Boone,Boone,\\"(empty)\\",Thursday,3,\\"wagdi@boone-family.zzz\\",\\"-\\",Asia,SA,\\"{
+7wMtOW0BH63Xcmy46HLV,ecommerce,\\"-\\",\\"-\\",\\"Men's Clothing\\",\\"Men's Clothing\\",EUR,Wagdi,Wagdi,\\"Wagdi Boone\\",\\"Wagdi Boone\\",MALE,15,Boone,Boone,\\"(empty)\\",Thursday,3,\\"wagdi@boone-family.zzz\\",\\"-\\",Asia,SA,\\"{
   \\"\\"coordinates\\"\\": [
     45,
     25
   ],
   \\"\\"type\\"\\": \\"\\"Point\\"\\"
 }\\",\\"-\\",Elitelligence,Elitelligence,\\"Jun 12, 2019 @ 00:00:00.000\\",550503,\\"sold_product_550503_13211, sold_product_550503_24369\\",\\"sold_product_550503_13211, sold_product_550503_24369\\",\\"34, 11.992\\",\\"34, 11.992\\",\\"Men's Clothing, Men's Clothing\\",\\"Men's Clothing, Men's Clothing\\",\\"Dec 1, 2016 @ 00:00:00.000, Dec 1, 2016 @ 00:00:00.000\\",\\"0, 0\\",\\"0, 0\\",\\"Elitelligence, Elitelligence\\",\\"Elitelligence, Elitelligence\\",\\"15.641, 6.109\\",\\"34, 11.992\\",\\"13,211, 24,369\\",\\"Tracksuit top - black, Print T-shirt - khaki\\",\\"Tracksuit top - black, Print T-shirt - khaki\\",\\"1, 1\\",\\"ZO0587505875, ZO0566405664\\",\\"0, 0\\",\\"34, 11.992\\",\\"34, 11.992\\",\\"0, 0\\",\\"ZO0587505875, ZO0566405664\\",\\"45.969\\",\\"45.969\\",2,2,order,wagdi
-8AMtOW0BH63Xcmy46HLV,ecommerce,\\"-\\",\\"_doc\\",\\"Women's Accessories, Women's Shoes\\",\\"Women's Accessories, Women's Shoes\\",EUR,Elyssa,Elyssa,\\"Elyssa Hale\\",\\"Elyssa Hale\\",FEMALE,27,Hale,Hale,\\"(empty)\\",Thursday,3,\\"elyssa@hale-family.zzz\\",\\"New York\\",\\"North America\\",US,\\"{
+8AMtOW0BH63Xcmy46HLV,ecommerce,\\"-\\",\\"-\\",\\"Women's Accessories, Women's Shoes\\",\\"Women's Accessories, Women's Shoes\\",EUR,Elyssa,Elyssa,\\"Elyssa Hale\\",\\"Elyssa Hale\\",FEMALE,27,Hale,Hale,\\"(empty)\\",Thursday,3,\\"elyssa@hale-family.zzz\\",\\"New York\\",\\"North America\\",US,\\"{
   \\"\\"coordinates\\"\\": [
     -74,
     40.8
   ],
   \\"\\"type\\"\\": \\"\\"Point\\"\\"
 }\\",\\"New York\\",\\"Angeldale, Oceanavigations\\",\\"Angeldale, Oceanavigations\\",\\"Jun 12, 2019 @ 00:00:00.000\\",550538,\\"sold_product_550538_15047, sold_product_550538_18189\\",\\"sold_product_550538_15047, sold_product_550538_18189\\",\\"75, 60\\",\\"75, 60\\",\\"Women's Accessories, Women's Shoes\\",\\"Women's Accessories, Women's Shoes\\",\\"Dec 1, 2016 @ 00:00:00.000, Dec 1, 2016 @ 00:00:00.000\\",\\"0, 0\\",\\"0, 0\\",\\"Angeldale, Oceanavigations\\",\\"Angeldale, Oceanavigations\\",\\"34.5, 28.797\\",\\"75, 60\\",\\"15,047, 18,189\\",\\"Handbag - black, Ankle boots - grey\\",\\"Handbag - black, Ankle boots - grey\\",\\"1, 1\\",\\"ZO0699406994, ZO0246202462\\",\\"0, 0\\",\\"75, 60\\",\\"75, 60\\",\\"0, 0\\",\\"ZO0699406994, ZO0246202462\\",135,135,2,2,order,elyssa
-8QMtOW0BH63Xcmy46HLV,ecommerce,\\"-\\",\\"_doc\\",\\"Men's Shoes, Men's Clothing\\",\\"Men's Shoes, Men's Clothing\\",EUR,Jackson,Jackson,\\"Jackson Love\\",\\"Jackson Love\\",MALE,13,Love,Love,\\"(empty)\\",Thursday,3,\\"jackson@love-family.zzz\\",\\"Los Angeles\\",\\"North America\\",US,\\"{
+8QMtOW0BH63Xcmy46HLV,ecommerce,\\"-\\",\\"-\\",\\"Men's Shoes, Men's Clothing\\",\\"Men's Shoes, Men's Clothing\\",EUR,Jackson,Jackson,\\"Jackson Love\\",\\"Jackson Love\\",MALE,13,Love,Love,\\"(empty)\\",Thursday,3,\\"jackson@love-family.zzz\\",\\"Los Angeles\\",\\"North America\\",US,\\"{
   \\"\\"coordinates\\"\\": [
     -118.2,
     34.1
