@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import Color from 'color';
 import { LegendColorPicker, Position } from '@elastic/charts';
-import { PopoverAnchorPosition, EuiPopover, EuiOutsideClickDetector } from '@elastic/eui';
+import { PopoverAnchorPosition, EuiWrappingPopover } from '@elastic/eui';
 import type { DatatableRow } from '../../../../expressions/public';
 import type { PersistedState } from '../../../../visualizations/public';
 import { ColorPicker } from '../../../../charts/public';
@@ -81,10 +81,6 @@ export const getColorPicker =
       keyDownEventOn = true;
     };
 
-    const handleOutsideClick = useCallback(() => {
-      onClose?.();
-    }, [onClose]);
-
     if (!distinctColors) {
       const enablePicker =
         isOnInnerLayer(bucketColumns[0], data, seriesName) || !bucketColumns[0].id;
@@ -92,27 +88,25 @@ export const getColorPicker =
     }
     const hexColor = new Color(color).hex();
     return (
-      <EuiOutsideClickDetector onOutsideClick={handleOutsideClick}>
-        <EuiPopover
-          isOpen
-          ownFocus
-          display="block"
-          button={anchor}
-          anchorPosition={getAnchorPosition(legendPosition)}
-          closePopover={onClose}
-          panelPaddingSize="s"
-        >
-          <ColorPicker
-            color={palette === 'kibana_palette' ? hexColor : hexColor.toLowerCase()}
-            onChange={handleChange}
-            label={seriesName}
-            maxDepth={bucketColumns.length}
-            layerIndex={getLayerIndex(seriesName, data, bucketColumns)}
-            useLegacyColors={palette === 'kibana_palette'}
-            colorIsOverwritten={colorIsOverwritten}
-            onKeyDown={onKeyDown}
-          />
-        </EuiPopover>
-      </EuiOutsideClickDetector>
+      <EuiWrappingPopover
+        isOpen
+        ownFocus
+        display="block"
+        button={anchor}
+        anchorPosition={getAnchorPosition(legendPosition)}
+        closePopover={onClose}
+        panelPaddingSize="s"
+      >
+        <ColorPicker
+          color={palette === 'kibana_palette' ? hexColor : hexColor.toLowerCase()}
+          onChange={handleChange}
+          label={seriesName}
+          maxDepth={bucketColumns.length}
+          layerIndex={getLayerIndex(seriesName, data, bucketColumns)}
+          useLegacyColors={palette === 'kibana_palette'}
+          colorIsOverwritten={colorIsOverwritten}
+          onKeyDown={onKeyDown}
+        />
+      </EuiWrappingPopover>
     );
   };
