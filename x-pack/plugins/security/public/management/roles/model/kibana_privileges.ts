@@ -58,7 +58,7 @@ export class KibanaPrivileges {
 
   public createCollectionFromRoleKibanaPrivileges(roleKibanaPrivileges: RoleKibanaPrivilege[]) {
     const filterAssigned = (assignedPrivileges: string[]) => (privilege: KibanaPrivilege) =>
-      assignedPrivileges.includes(privilege.id);
+      Array.isArray(assignedPrivileges) && assignedPrivileges.includes(privilege.id);
 
     const privileges: KibanaPrivilege[] = roleKibanaPrivileges
       .map((entry) => {

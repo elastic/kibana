@@ -178,6 +178,7 @@ export const basicCaseMetricsFeatures: CaseMetricsFeature[] = [
   'alerts.count',
   'alerts.users',
   'alerts.hosts',
+  'actions.isolateHost',
   'connectors',
 ];
 
@@ -187,8 +188,8 @@ export const basicCaseMetrics: CaseMetrics = {
     hosts: {
       total: 2,
       values: [
-        { name: 'foo', count: 2 },
-        { name: 'bar', count: 10 },
+        { name: 'foo', count: 2, id: 'foo' },
+        { name: 'bar', count: 10, id: 'bar' },
       ],
     },
     users: {
@@ -196,8 +197,22 @@ export const basicCaseMetrics: CaseMetrics = {
       values: [{ name: 'Jon', count: 12 }],
     },
   },
+  actions: {
+    isolateHost: {
+      isolate: { total: 5 },
+      unisolate: { total: 3 },
+    },
+  },
   connectors: { total: 1 },
-  lifespan: { creationDate: basicCreatedAt, closeDate: basicClosedAt },
+  lifespan: {
+    creationDate: basicCreatedAt,
+    closeDate: basicClosedAt,
+    statusInfo: {
+      inProgressDuration: 20,
+      openDuration: 10,
+      numberOfReopens: 1,
+    },
+  },
 };
 
 export const collectionCase: Case = {

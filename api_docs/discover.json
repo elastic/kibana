@@ -244,13 +244,7 @@
             "text": "DiscoverAppLocatorParams"
           },
           " extends ",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "server",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
-            "text": "SerializableRecord"
-          }
+          "SerializableRecord"
         ],
         "path": "src/plugins/discover/public/locator.ts",
         "deprecated": false,
@@ -326,13 +320,7 @@
                 "text": "RefreshInterval"
               },
               " & ",
-              {
-                "pluginId": "@kbn/utility-types",
-                "scope": "server",
-                "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.SerializableRecord",
-                "text": "SerializableRecord"
-              },
+              "SerializableRecord",
               ") | undefined"
             ],
             "path": "src/plugins/discover/public/locator.ts",
@@ -985,7 +973,9 @@
               },
               "<",
               "SearchResponse",
-              "<any>>>; fetch: (options?: ",
+              "<any, Record<string, ",
+              "AggregationsAggregate",
+              ">>>>; fetch: (options?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -995,7 +985,9 @@
               },
               ") => Promise<",
               "SearchResponse",
-              "<any>>; onRequestStart: (handler: (searchSource: ",
+              "<any, Record<string, ",
+              "AggregationsAggregate",
+              ">>>; onRequestStart: (handler: (searchSource: ",
               {
                 "pluginId": "data",
                 "scope": "common",

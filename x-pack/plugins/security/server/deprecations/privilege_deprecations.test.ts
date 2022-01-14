@@ -17,15 +17,17 @@ const application = `kibana-${kibanaIndexName}`;
 describe('#getPrivilegeDeprecationsService', () => {
   describe('#getKibanaRolesByFeatureId', () => {
     const mockAsCurrentUser = elasticsearchServiceMock.createScopedClusterClient();
+    const mockGetFeatures = jest.fn().mockResolvedValue([]);
     const mockLicense = licenseMock.create();
     const mockLogger = loggingSystemMock.createLogger();
     const authz = { applicationName: application };
 
-    const { getKibanaRolesByFeatureId } = getPrivilegeDeprecationsService(
+    const { getKibanaRolesByFeatureId } = getPrivilegeDeprecationsService({
       authz,
-      mockLicense,
-      mockLogger
-    );
+      getFeatures: mockGetFeatures,
+      license: mockLicense,
+      logger: mockLogger,
+    });
 
     it('happy path to find siem roles with feature_siem privileges', async () => {
       mockAsCurrentUser.asCurrentUser.security.getRole.mockResolvedValue(
