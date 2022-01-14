@@ -12,7 +12,7 @@ import React from 'react';
 import { DefaultDraggable } from '../../../../common/components/draggables';
 import { TruncatableText } from '../../../../common/components/truncatable_text';
 import { Severity } from '../../../components/severity';
-import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
+import { useGetMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
 import { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 
@@ -39,7 +39,7 @@ export const RenderCellValue: React.FC<EuiDataGridCellValueElementProps & CellVa
     timelineId,
   }) => {
     const value =
-      getMappedNonEcsValue({
+      useGetMappedNonEcsValue({
         data,
         fieldName: columnId,
       })?.reduce((x) => x[0]) ?? '';
