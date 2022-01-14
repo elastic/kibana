@@ -6,14 +6,30 @@
  */
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useState } from 'react';
+import { CreateGroupsModal } from './create_groups_modal';
 
 export function CreateGroups() {
+  const [isModalVisible, setIsModalVisible] = useState(true);
   return (
-    <EuiButton iconType="plusInCircle">
-      {i18n.translate('xpack.apm.serviceGroups.createGroupLabel', {
-        defaultMessage: 'Create group',
-      })}
-    </EuiButton>
+    <>
+      <EuiButton
+        iconType="plusInCircle"
+        onClick={() => {
+          setIsModalVisible((state) => !state);
+        }}
+      >
+        {i18n.translate('xpack.apm.serviceGroups.createGroupLabel', {
+          defaultMessage: 'Create group',
+        })}
+      </EuiButton>
+      {isModalVisible && (
+        <CreateGroupsModal
+          onClose={() => {
+            setIsModalVisible(false);
+          }}
+        />
+      )}
+    </>
   );
 }
