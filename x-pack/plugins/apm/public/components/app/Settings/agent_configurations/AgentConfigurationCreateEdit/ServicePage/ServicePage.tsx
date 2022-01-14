@@ -17,7 +17,7 @@ import {
 } from '../../../../../../../common/agent_configuration/all_option';
 import { useFetcher, FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { FormRowSelect } from './FormRowSelect';
-import { APMLink } from '../../../../../shared/Links/apm/APMLink';
+import { APMLink } from '../../../../../shared/links/apm/apm_link';
 
 interface Props {
   newConfig: AgentConfigurationIntake;
