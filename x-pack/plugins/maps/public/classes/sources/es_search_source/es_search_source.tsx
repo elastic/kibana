@@ -281,14 +281,19 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
     const indexPattern: IndexPattern = await this.getIndexPattern();
 
-    const fieldNames = searchFilters.fieldNames.filter((fieldName) => fieldName !== this._descriptor.geoField);
-    const { docValueFields, sourceOnlyFields, scriptFields } =
-      getDocValueAndSourceFields(indexPattern, fieldNames, 'epoch_millis');
+    const fieldNames = searchFilters.fieldNames.filter(
+      (fieldName) => fieldName !== this._descriptor.geoField
+    );
+    const { docValueFields, sourceOnlyFields, scriptFields } = getDocValueAndSourceFields(
+      indexPattern,
+      fieldNames,
+      'epoch_millis'
+    );
     const topHits: {
       size: number;
       script_fields: Record<string, { script: ScriptField }>;
       docvalue_fields: Array<string | { format: string; field: string }>;
-      fields: Array<string>;
+      fields: string[];
       _source?: boolean | { includes: string[] };
       sort?: Array<Record<string, SortDirectionNumeric>>;
     } = {
@@ -389,7 +394,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   ) {
     const indexPattern = await this.getIndexPattern();
 
-    const fieldNames = searchFilters.fieldNames.filter((fieldName) => fieldName !== this._descriptor.geoField);
+    const fieldNames = searchFilters.fieldNames.filter(
+      (fieldName) => fieldName !== this._descriptor.geoField
+    );
     const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
       indexPattern,
       fieldNames,
@@ -802,7 +809,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const indexPattern = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(indexPattern.title);
 
-    const fieldNames = searchFilters.fieldNames.filter((fieldName) => fieldName !== this._descriptor.geoField);
+    const fieldNames = searchFilters.fieldNames.filter(
+      (fieldName) => fieldName !== this._descriptor.geoField
+    );
     const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
       indexPattern,
       fieldNames,
