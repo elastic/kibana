@@ -24,6 +24,7 @@ describe('AddFilterButton component', () => {
             disabled={false}
             flush="left"
             iconType="plusInCircleFilled"
+            isLoading={false}
             onClick={[Function]}
             size="s"
           >
@@ -90,6 +91,7 @@ describe('AddFilterButton component', () => {
             disabled={false}
             flush="left"
             iconType="plusInCircleFilled"
+            isLoading={false}
             onClick={[Function]}
             size="s"
           >

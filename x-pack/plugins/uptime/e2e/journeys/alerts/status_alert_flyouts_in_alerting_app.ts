@@ -4,17 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import { journey, step, expect, before } from '@elastic/synthetics';
-import { assertText, byTestId, loginToKibana, waitForLoadingToFinish } from './utils';
+import { assertText, byTestId, loginToKibana, waitForLoadingToFinish } from '../utils';
 
-journey('AlertingFlyoutInAlertingApp', async ({ page, params }) => {
+journey('StatusFlyoutInAlertingApp', async ({ page, params }) => {
   before(async () => {
     await waitForLoadingToFinish({ page });
   });
@@ -46,6 +40,8 @@ journey('AlertingFlyoutInAlertingApp', async ({ page, params }) => {
     await page.click(byTestId('"xpack.uptime.alerts.monitorStatus.filterBar"'));
 
     await page.fill(byTestId('"xpack.uptime.alerts.monitorStatus.filterBar"'), 'monitor.type : ');
+
+    await waitForLoadingToFinish({ page });
 
     await assertText({ page, text: 'browser' });
     await assertText({ page, text: 'http' });
