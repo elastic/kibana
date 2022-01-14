@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }) {
       await PageObjects.maps.loadSavedMap('document example');
       const { rawResponse: response } = await PageObjects.maps.getResponse();
       const firstHit = response.hits.hits[0];
-      expect(firstHit).to.only.have.keys(['_id', '_index', '_type', '_score', 'fields']);
+      expect(firstHit).to.only.have.keys(['_id', '_index', '_score', 'fields']);
       expect(firstHit.fields).to.only.have.keys(['@timestamp', 'geo.coordinates']);
     });
 
@@ -32,7 +32,7 @@ export default function ({ getPageObjects, getService }) {
       await PageObjects.maps.loadSavedMap('document example with data driven styles');
       const { rawResponse: response } = await PageObjects.maps.getResponse();
       const firstHit = response.hits.hits[0];
-      expect(firstHit).to.only.have.keys(['_id', '_index', '_type', '_score', 'fields']);
+      expect(firstHit).to.only.have.keys(['_id', '_index', '_score', 'fields']);
       expect(firstHit.fields).to.only.have.keys([
         '@timestamp',
         'bytes',
@@ -48,7 +48,7 @@ export default function ({ getPageObjects, getService }) {
         return hit._id === 'AU_x3_g4GFA8no6QjkSR';
       });
       expect(targetHit).not.to.be(undefined);
-      expect(targetHit).to.only.have.keys(['_id', '_index', '_type', '_score', 'fields']);
+      expect(targetHit).to.only.have.keys(['_id', '_index', '_score', 'fields']);
       expect(targetHit.fields).to.only.have.keys(['@timestamp', 'bytes', 'geo.coordinates']);
       expect(targetHit.fields['@timestamp']).to.be.an('array');
       expect(targetHit.fields['@timestamp'][0]).to.eql('1442709321445');
