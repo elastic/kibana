@@ -29,7 +29,7 @@ export class RedirectManager {
       chromeless: true,
       mount: async (params) => {
         const { render } = await import('./render');
-        const unmount = render(params.element, { manager: this });
+        const unmount = render(params.element, { manager: this, theme: core.theme });
         this.onMount(params.history.location.search);
         return () => {
           unmount();
