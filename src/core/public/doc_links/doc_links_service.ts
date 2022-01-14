@@ -222,7 +222,10 @@ export class DocLinksService {
           runtimeFields: `${KIBANA_DOCS}managing-data-views.html#runtime-fields`,
         },
         addData: `${KIBANA_DOCS}connect-to-elasticsearch.html`,
-        kibana: `${KIBANA_DOCS}index.html`,
+        kibana: {
+          guide: `${KIBANA_DOCS}index.html`,
+          autocompleteSuggestions: `${KIBANA_DOCS}kibana-concepts-analysts.html#autocomplete-suggestions`,
+        },
         upgradeAssistant: {
           overview: `${KIBANA_DOCS}upgrade-assistant.html`,
           batchReindex: `${KIBANA_DOCS}batch-start-resume-reindex.html`,
@@ -272,6 +275,7 @@ export class DocLinksService {
           mappingJoinFieldsPerformance: `${ELASTICSEARCH_DOCS}parent-join.html#_parent_join_and_performance`,
           mappingMeta: `${ELASTICSEARCH_DOCS}mapping-field-meta.html`,
           mappingMetaFields: `${ELASTICSEARCH_DOCS}mapping-meta-field.html`,
+          mappingMultifields: `${ELASTICSEARCH_DOCS}multi-fields.html`,
           mappingNormalizer: `${ELASTICSEARCH_DOCS}normalizer.html`,
           mappingNorms: `${ELASTICSEARCH_DOCS}norms.html`,
           mappingNullValue: `${ELASTICSEARCH_DOCS}null-value.html`,
@@ -295,6 +299,7 @@ export class DocLinksService {
           remoteClusersProxySettings: `${ELASTICSEARCH_DOCS}remote-clusters-settings.html#remote-cluster-proxy-settings`,
           scriptParameters: `${ELASTICSEARCH_DOCS}modules-scripting-using.html#prefer-params`,
           shardAllocationSettings: `${ELASTICSEARCH_DOCS}modules-cluster.html#cluster-shard-allocation-settings`,
+          sortSearch: `${ELASTICSEARCH_DOCS}sort-search-results.html`,
           transportSettings: `${ELASTICSEARCH_DOCS}modules-network.html#common-network-settings`,
           typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
           setupUpgrade: `${ELASTICSEARCH_DOCS}setup-upgrade.html`,
@@ -317,6 +322,7 @@ export class DocLinksService {
         query: {
           eql: `${ELASTICSEARCH_DOCS}eql.html`,
           kueryQuerySyntax: `${KIBANA_DOCS}kuery-query.html`,
+          luceneQuery: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html`,
           luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
           percolate: `${ELASTICSEARCH_DOCS}query-dsl-percolate-query.html`,
           queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
@@ -472,6 +478,7 @@ export class DocLinksService {
           cronExpressions: `${ELASTICSEARCH_DOCS}cron-expressions.html`,
           executeWatchActionModes: `${ELASTICSEARCH_DOCS}watcher-api-execute-watch.html#watcher-api-execute-watch-action-mode`,
           indexExists: `${ELASTICSEARCH_DOCS}indices-exists.html`,
+          multiSearch: `${ELASTICSEARCH_DOCS}search-multi-search.html`,
           openIndex: `${ELASTICSEARCH_DOCS}indices-open-close.html`,
           putComponentTemplate: `${ELASTICSEARCH_DOCS}indices-component-template.html`,
           painlessExecute: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-execute-api.html`,
@@ -481,8 +488,10 @@ export class DocLinksService {
           putIndexTemplateV1: `${ELASTICSEARCH_DOCS}indices-templates-v1.html`,
           putSnapshotLifecyclePolicy: `${ELASTICSEARCH_DOCS}slm-api-put-policy.html`,
           putWatch: `${ELASTICSEARCH_DOCS}watcher-api-put-watch.html`,
+          searchPreference: `${ELASTICSEARCH_DOCS}search-search.html#search-preference`,
           simulatePipeline: `${ELASTICSEARCH_DOCS}simulate-pipeline-api.html`,
           timeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#time-units`,
+          unfreezeIndex: `${ELASTICSEARCH_DOCS}unfreeze-index-api.html`,
           updateTransform: `${ELASTICSEARCH_DOCS}update-transform.html`,
         },
         plugins: {
@@ -783,7 +792,10 @@ export interface DocLinksStart {
       readonly runtimeFields: string;
     };
     readonly addData: string;
-    readonly kibana: string;
+    readonly kibana: {
+      readonly guide: string;
+      readonly autocompleteSuggestions: string;
+    };
     readonly upgradeAssistant: {
       readonly overview: string;
       readonly batchReindex: string;
@@ -808,6 +820,7 @@ export interface DocLinksStart {
     readonly query: {
       readonly eql: string;
       readonly kueryQuerySyntax: string;
+      readonly luceneQuery: string;
       readonly luceneQuerySyntax: string;
       readonly percolate: string;
       readonly queryDsl: string;
@@ -836,6 +849,7 @@ export interface DocLinksStart {
       cronExpressions: string;
       executeWatchActionModes: string;
       indexExists: string;
+      multiSearch: string;
       openIndex: string;
       putComponentTemplate: string;
       painlessExecute: string;
@@ -844,8 +858,10 @@ export interface DocLinksStart {
       putSnapshotLifecyclePolicy: string;
       putIndexTemplateV1: string;
       putWatch: string;
+      searchPreference: string;
       simulatePipeline: string;
       timeUnits: string;
+      unfreezeIndex: string;
       updateTransform: string;
     }>;
     readonly observability: Readonly<{
