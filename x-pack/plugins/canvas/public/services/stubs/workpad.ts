@@ -6,8 +6,6 @@
  */
 
 import moment from 'moment';
-
-import { SavedObject } from 'src/core/types';
 import { PluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
 
 // @ts-expect-error
