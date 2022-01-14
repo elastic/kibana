@@ -92,11 +92,29 @@ export class ConsolePageObject extends FtrService {
     // There should be autocomplete for this on all license levels
     await textArea.pressKeys('\nGET s');
     await textArea.pressKeys([Key.CONTROL, Key.SPACE]);
+    await textArea.pressKeys(Key.ENTER);
+    await textArea.type(
+      `
+      {
+        "query": {
+          "match": {}
+      `
+    );
+    await textArea.pressKeys(Key.ENTER);
+    await textArea.pressKeys([Key.CONTROL, Key.SPACE]);
   }
 
   public async hasAutocompleter(): Promise<boolean> {
     try {
       return Boolean(await this.find.byCssSelector('.ace_autocomplete'));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async hasComma(): Promise<boolean> {
+    try {
+      return Boolean(await this.find.byCssSelector('.ace_punctuation.ace_comma'));
     } catch (e) {
       return false;
     }

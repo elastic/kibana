@@ -764,6 +764,9 @@ export default function ({
         if (nonEmptyToken && nonEmptyToken.type.indexOf('url') < 0) {
           const { position, value } = nonEmptyToken;
 
+          // We can not rely on prefixToAdd here, because it adds a comma at the beginning of the new token
+          // Since we have access to the position of the previous token here, this could be a good place to insert a comma manually
+          context.prefixToAdd = '';
           editor.insert(
             {
               column: position.column + value.length,
@@ -771,7 +774,6 @@ export default function ({
             },
             ', '
           );
-          context.prefixToAdd = '';
         }
     }
 

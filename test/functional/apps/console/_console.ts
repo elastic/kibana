@@ -89,6 +89,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor('autocomplete to be visible', () =>
         PageObjects.console.hasAutocompleter()
       );
+      await retry.waitFor('comma to be inserted at end of the line', () =>
+        PageObjects.console.hasComma()
+      );
     });
 
     describe('with a data URI in the load_from query', () => {
