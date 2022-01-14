@@ -13,7 +13,7 @@ import { DistributeEquallyIcon } from '../../../assets/distribute_equally';
 import { TooltipWrapper } from '../../index';
 
 import type { ColorRangesActions } from './types';
-import { ColorRangesContext } from '../palette_configuration';
+import { ColorRangesContext } from './color_ranges_context';
 
 export interface ColorRangesExtraActionsProps {
   dispatch: Dispatch<ColorRangesActions>;

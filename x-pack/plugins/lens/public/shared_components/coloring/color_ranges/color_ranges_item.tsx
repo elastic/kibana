@@ -31,7 +31,7 @@ import {
 } from './color_ranges_item_buttons';
 
 import type { ColorRange, ColorRangeAccessor, ColorRangesActions } from './types';
-import { ColorRangesContext } from '../palette_configuration';
+import { ColorRangesContext } from './color_ranges_context';
 import type { ColorRangeValidation } from './color_ranges_validation';
 import type { CustomPaletteParams } from '../../../../common';
 import {
@@ -159,7 +159,7 @@ export function ColorRangeItem({
   );
 
   useUpdateEffect(() => {
-    if (parseFloat(value) !== parseFloat(localValue)) {
+    if (isValid && parseFloat(value) !== parseFloat(localValue)) {
       setLocalValue(value);
     }
   }, [localValue, value]);

@@ -5,28 +5,20 @@
  * 2.0.
  */
 
-import React, { useReducer } from 'react';
+import React, { useReducer, useMemo } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { EuiFormRow, htmlIdGenerator, EuiButtonGroup, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PalettePicker } from './palette_picker';
-import { DataBounds } from './types';
+import type { DataBounds } from './types';
 
 import './palette_configuration.scss';
 
 import type { CustomPaletteParams, RequiredPaletteParamTypes } from '../../../common';
 import { toColorRanges, getFallbackDataBounds } from './utils';
-
-import { ColorRanges } from './color_ranges';
-
+import { ColorRanges, ColorRangesContext } from './color_ranges';
 import { paletteConfigurationReducer } from './palette_configuration_reducer';
-const idPrefix = htmlIdGenerator()();
-
-export const ColorRangesContext = React.createContext<{
-  dataBounds: DataBounds;
-  palettes?: PaletteRegistry;
-}>({ dataBounds: { min: 0, max: 100 } });
 
 export function CustomizablePalette({
   palettes,
@@ -41,6 +33,7 @@ export function CustomizablePalette({
   dataBounds?: DataBounds;
   showRangeTypeSelector?: boolean;
 }) {
+  const idPrefix = useMemo(() => htmlIdGenerator()(), [htmlIdGenerator]);
   const colorRangesToShow = toColorRanges(
     palettes,
     activePalette.params?.colorStops || [],
@@ -70,10 +63,10 @@ export function CustomizablePalette({
     <div className="lnsPalettePanel__section lnsPalettePanel__section--shaded">
       <EuiFormRow
         display="rowCompressed"
-        fullWidth
         label={i18n.translate('xpack.lens.palettePicker.label', {
           defaultMessage: 'Color palette',
         })}
+        fullWidth
       >
         <PalettePicker
           data-test-subj="lnsPalettePanel_dynamicColoring_palette_picker"
@@ -112,7 +105,6 @@ export function CustomizablePalette({
           display="rowCompressed"
         >
           <EuiButtonGroup
-            isFullWidth
             legend={i18n.translate('xpack.lens.table.dynamicColoring.rangeType.label', {
               defaultMessage: 'Value type',
             })}
@@ -151,6 +143,7 @@ export function CustomizablePalette({
                 payload: { rangeType: newRangeType, dataBounds, palettes },
               });
             }}
+            isFullWidth
           />
         </EuiFormRow>
       )}
@@ -158,8 +151,8 @@ export function CustomizablePalette({
         label={i18n.translate('xpack.lens.palettePicker.colorRangesLabel', {
           defaultMessage: 'Color Ranges',
         })}
-        fullWidth
         display="rowCompressed"
+        fullWidth
       >
         <ColorRangesContext.Provider
           value={{

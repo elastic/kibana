@@ -22,7 +22,7 @@ import type { PaletteConfigurationActions } from '../types';
 
 import { defaultPaletteParams } from '../constants';
 
-import { ColorRangesContext } from '../palette_configuration';
+import { ColorRangesContext } from './color_ranges_context';
 
 export interface ColorRangesProps {
   colorRanges: ColorRange[];

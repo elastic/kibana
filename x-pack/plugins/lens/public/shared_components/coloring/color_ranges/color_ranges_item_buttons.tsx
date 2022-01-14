@@ -15,7 +15,7 @@ import { ValueMinIcon } from '../../../assets/value_min';
 import { isLastItem } from './utils';
 
 import type { ColorRangesActions, ColorRange, ColorRangeAccessor } from './types';
-import { ColorRangesContext } from '../palette_configuration';
+import { ColorRangesContext } from './color_ranges_context';
 import type { CustomPaletteParams } from '../../../../common';
 import type { PaletteContinuity } from '../../../../../../../src/plugins/charts/common';
 

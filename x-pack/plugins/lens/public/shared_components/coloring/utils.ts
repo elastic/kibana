@@ -148,7 +148,7 @@ export function withUpdatingPalette(
     palettes,
     activePalette!,
     {
-      continuity,
+      continuity: currentContinuity,
       colorStops,
       steps: activePalette!.params?.steps || DEFAULT_COLOR_STEPS,
       reverse: activePalette!.params?.reverse,

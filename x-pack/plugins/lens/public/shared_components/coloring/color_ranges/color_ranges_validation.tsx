@@ -69,15 +69,19 @@ export const getOutsideDataBoundsWarningMessage = (warnings: ColorRangeValidatio
   }
 };
 
-const checkForComplianceWithDataBounds = (value: number, [min, max]: [number, number]) => {
+const checkForComplianceWithDataBounds = (value: number, minMax?: [number, number]) => {
   const warnings: ColorRangeValidationWarnings[] = [];
+  if (minMax) {
+    const [min, max] = minMax;
 
-  if (value < min) {
-    warnings.push('lowerThanDataBounds');
+    if (value < min) {
+      warnings.push('lowerThanDataBounds');
+    }
+    if (value > max) {
+      warnings.push('greaterThanDataBounds');
+    }
   }
-  if (value > max) {
-    warnings.push('greaterThanDataBounds');
-  }
+
   return warnings;
 };
 
@@ -85,7 +89,7 @@ const checkForComplianceWithDataBounds = (value: number, [min, max]: [number, nu
 export const validateColorRange = (
   colorRange: ColorRange,
   accessor: ColorRangeAccessor,
-  minMax: [number, number]
+  minMax?: [number, number]
 ) => {
   const errors: ColorRangeValidationErrors[] = [];
   let warnings: ColorRangeValidationWarnings[] = [];
@@ -118,17 +122,23 @@ export const validateColorRanges = (
   dataBounds: DataBounds,
   rangeType: CustomPaletteParams['rangeType']
 ) => {
-  const { min, max } = getDataMinMax(rangeType, dataBounds);
+  let minMax: [number, number] | undefined;
+
+  if ((dataBounds.fallback && rangeType === 'percent') || !dataBounds.fallback) {
+    const { min, max } = getDataMinMax(rangeType, dataBounds);
+    minMax = [min, max];
+  }
+
   const validations = colorRanges.reduce<Record<string, ColorRangeValidation>>(
     (acc, item, index) => ({
       ...acc,
-      [index]: validateColorRange(item, 'start', [min, max]),
+      [index]: validateColorRange(item, 'start', minMax),
     }),
     {}
   );
 
   return {
     ...validations,
-    last: validateColorRange(colorRanges[colorRanges.length - 1], 'end', [min, max]),
+    last: validateColorRange(colorRanges[colorRanges.length - 1], 'end', minMax),
   };
 };
