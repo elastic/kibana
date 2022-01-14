@@ -26,7 +26,7 @@ export function getActionType(): ActionTypeModel<
   XmattersActionParams
 > {
   return {
-    id: 'xmatters',
+    id: '.xmatters',
     iconClass: 'logoXmatters',
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.xmattersAction.selectMessageText',
