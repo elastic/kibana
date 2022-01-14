@@ -19,8 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const rangeFrom = '2021-01-17T16%3A46%3A15.338Z';
   const rangeTo = '2021-01-19T17%3A01%3A32.309Z';
 
-  // Failing: See https://github.com/elastic/kibana/issues/106934
-  describe.skip('ExploratoryView', () => {
+  describe('ExploratoryView', () => {
     before(async () => {
       await esArchiver.loadIfNeeded(
         Path.join('x-pack/test/apm_api_integration/common/fixtures/es_archiver', '8.0.0')
