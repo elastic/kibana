@@ -8,10 +8,13 @@
 import axios from 'axios';
 import { forkJoin, from as rxjsFrom, Observable, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
+import * as https from 'https';
+import { SslConfig } from '@kbn/server-http-tools';
 import { getServiceLocations } from './get_service_locations';
 import { Logger } from '../../../../../../src/core/server';
 import { MonitorFields, ServiceLocations } from '../../../common/runtime_types';
 import { convertToDataStreamFormat } from './formatters/convert_to_data_stream';
+import { ServiceConfig } from '../../../common/config';
 
 const TEST_SERVICE_USERNAME = 'localKibanaIntegrationTestsUser';
 
@@ -24,20 +27,42 @@ export interface ServiceData {
 }
 
 export class ServiceAPIClient {
-  private readonly username: string;
+  private readonly username?: string;
   private readonly authorization: string;
   private locations: ServiceLocations;
   private logger: Logger;
+  private readonly config: ServiceConfig;
 
-  constructor(manifestUrl: string, username: string, password: string, logger: Logger) {
+  constructor(logger: Logger, config: ServiceConfig) {
+    this.config = config;
+    const { username, password, manifestUrl } = config;
     this.username = username;
-    this.authorization = 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
+
+    if (username && password) {
+      this.authorization = 'Basic ' + Buffer.from(`${username}:${password}`).toString('base64');
+    } else {
+      this.authorization = '';
+    }
+
     this.logger = logger;
     this.locations = [];
 
     getServiceLocations({ manifestUrl }).then((result) => {
       this.locations = result.locations;
     });
+  }
+
+  getHttpsAgent() {
+    const config = this.config;
+    if (config.tls && config.tls.certificate && config.tls.key) {
+      const tlsConfig = new SslConfig(config.tls);
+
+      return new https.Agent({
+        rejectUnauthorized: true, // (NOTE: this will disable client verification)
+        cert: tlsConfig.certificate,
+        key: tlsConfig.key,
+      });
+    }
   }
 
   async post(data: ServiceData) {
@@ -68,9 +93,12 @@ export class ServiceAPIClient {
         method,
         url: url + '/monitors',
         data: { monitors: monitorsStreams, output },
-        headers: {
-          Authorization: this.authorization,
-        },
+        headers: this.authorization
+          ? {
+              Authorization: this.authorization,
+            }
+          : undefined,
+        httpsAgent: this.getHttpsAgent(),
       });
     };
 

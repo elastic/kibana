@@ -22,11 +22,11 @@ import { APIReturnType } from '../../../services/rest/createCallApmApi';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { TransactionOverviewLink } from '../Links/apm/transaction_overview_link';
+import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
 import { getTimeRangeComparison } from '../time_comparison/get_time_range_comparison';
 import { OverviewTableContainer } from '../overview_table_container';
 import { getColumns } from './get_columns';
-import { ElasticDocsLink } from '../Links/ElasticDocsLink';
+import { ElasticDocsLink } from '../links/elastic_docs_link';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
 type ApiResponse =

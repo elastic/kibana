@@ -11,7 +11,7 @@ import { orderBy } from 'lodash';
 import React, { ReactNode, useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
-import { fromQuery, toQuery } from '../Links/url_helpers';
+import { fromQuery, toQuery } from '../links/url_helpers';
 
 // TODO: this should really be imported from EUI
 export interface ITableColumn<T> {
