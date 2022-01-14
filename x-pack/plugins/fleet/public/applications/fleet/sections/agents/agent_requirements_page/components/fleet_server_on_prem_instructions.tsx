@@ -565,12 +565,16 @@ const DeploymentModeStepContent = ({
 }) => {
   const onChangeCallback = useCallback(
     (v: string) => {
-      if (v === 'production' || v === 'quickstart') {
-        setDeploymentMode(v);
+      const value = v.split('_')[0];
+      if (value === 'production' || value === 'quickstart') {
+        setDeploymentMode(value);
       }
     },
     [setDeploymentMode]
   );
+
+  // radio id has to be unique so that the component works even if appears twice in DOM (Agents tab, Add agent flyout)
+  const radioSuffix = useMemo(() => Date.now(), []);
 
   return (
     <>
@@ -584,7 +588,7 @@ const DeploymentModeStepContent = ({
       <EuiRadioGroup
         options={[
           {
-            id: 'quickstart',
+            id: `quickstart_${radioSuffix}`,
             label: (
               <FormattedMessage
                 id="xpack.fleet.fleetServerSetup.deploymentModeQuickStartOption"
@@ -603,7 +607,7 @@ const DeploymentModeStepContent = ({
             ),
           },
           {
-            id: 'production',
+            id: `production_${radioSuffix}`,
             label: (
               <FormattedMessage
                 id="xpack.fleet.fleetServerSetup.deploymentModeProductionOption"
@@ -622,9 +626,9 @@ const DeploymentModeStepContent = ({
             ),
           },
         ]}
-        idSelected={deploymentMode}
+        idSelected={`${deploymentMode}_${radioSuffix}`}
         onChange={onChangeCallback}
-        name="radio group"
+        name={`radio group ${radioSuffix}`}
       />
     </>
   );
