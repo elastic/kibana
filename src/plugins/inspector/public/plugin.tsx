@@ -106,7 +106,8 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
               uiSettings: core.uiSettings,
               share: startDeps.share,
             }}
-          />
+          />,
+          { theme$: core.theme.theme$ }
         ),
         {
           'data-test-subj': 'inspectorPanel',
