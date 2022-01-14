@@ -132,7 +132,7 @@ describe('source/index.tsx', () => {
         const { type: sourceType, payload } = mockDispatch.mock.calls[1][0];
         expect(sourceType).toEqual('x-pack/security_solution/local/sourcerer/SET_DATA_VIEW');
         expect(payload.id).toEqual('neato');
-        expect(Object.keys(payload.browserFields)).toHaveLength(10);
+        expect(Object.keys(payload.browserFields)).toHaveLength(12);
         expect(payload.docValueFields).toEqual([{ field: '@timestamp' }]);
       });
     });

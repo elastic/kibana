@@ -147,9 +147,12 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     // Clean any removed custom field that may still be present in stored columnHeaders
     useEffect(() => {
       if (browserFields && columnHeaders) {
-        columnHeaders.forEach(({ id: columnId, category }) => {
-          if (category && browserFields[category]?.fields?.[columnId] == null) {
-            dispatch(timelineActions.removeColumn({ id, columnId }));
+        columnHeaders.forEach(({ id: columnId }) => {
+          if (browserFields.base?.fields?.[columnId] == null) {
+            const [category] = columnId.split('.');
+            if (browserFields[category]?.fields?.[columnId] == null) {
+              dispatch(timelineActions.removeColumn({ id, columnId }));
+            }
           }
         });
       }
