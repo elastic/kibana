@@ -12,6 +12,7 @@ import { ClientFileCreateSourceEditor, UPLOAD_STEPS } from './wizard';
 import { getFileUpload } from '../../../../kibana_services';
 
 export const uploadLayerWizardConfig: LayerWizard = {
+  order: 10,
   categories: [],
   description: i18n.translate('xpack.maps.fileUploadWizard.description', {
     defaultMessage: 'Index GeoJSON data in Elasticsearch',
