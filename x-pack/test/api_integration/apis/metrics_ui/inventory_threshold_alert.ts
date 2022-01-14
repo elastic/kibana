@@ -77,6 +77,8 @@ export default function ({ getService }: FtrProviderContext) {
     startTime: DATES['8.0.0'].hosts_only.max,
   };
 
+  // TODO: Need a test for: host rx, pods rx, logRate
+
   describe('Inventory Threshold Rule Executor', () => {
     before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
     after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/hosts_only'));
@@ -86,7 +88,20 @@ export default function ({ getService }: FtrProviderContext) {
         esClient: convertToKibanaClient(esClient),
       });
       expect(results).to.eql({
-        'host-01': {
+        'host-0': {
+          metric: 'cpu',
+          timeSize: 1,
+          timeUnit: 'm',
+          sourceId: 'default',
+          threshold: [100],
+          comparator: '>',
+          shouldFire: [false],
+          shouldWarn: [false],
+          isNoData: [false],
+          isError: false,
+          currentValue: 0.8713333333333334,
+        },
+        'host-1': {
           metric: 'cpu',
           timeSize: 1,
           timeUnit: 'm',
@@ -97,7 +112,7 @@ export default function ({ getService }: FtrProviderContext) {
           shouldWarn: [false],
           isNoData: [false],
           isError: false,
-          currentValue: 1.01,
+          currentValue: 1.1636666666666668,
         },
       });
     });
@@ -109,18 +124,31 @@ export default function ({ getService }: FtrProviderContext) {
       };
       const results = await evaluateCondition(options);
       expect(results).to.eql({
-        'host-01': {
+        'host-0': {
           metric: 'cpu',
           timeSize: 5,
           timeUnit: 'm',
           sourceId: 'default',
           threshold: [100],
           comparator: '>',
-          shouldFire: [false],
+          shouldFire: [true],
           shouldWarn: [false],
           isNoData: [false],
           isError: false,
-          currentValue: 0.24000000000000002,
+          currentValue: 1.0622333333333334,
+        },
+        'host-1': {
+          metric: 'cpu',
+          timeSize: 5,
+          timeUnit: 'm',
+          sourceId: 'default',
+          threshold: [100],
+          comparator: '>',
+          shouldFire: [true],
+          shouldWarn: [false],
+          isNoData: [false],
+          isError: false,
+          currentValue: 1.0942666666666665,
         },
       });
     });

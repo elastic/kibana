@@ -20,8 +20,8 @@ export const DATES = {
   },
   '8.0.0': {
     hosts_only: {
-      min: new Date('2022-01-02T00:00:00.000Z').getTime(),
-      max: new Date('2022-01-02T00:05:30.000Z').getTime(),
+      min: new Date('2022-01-13T18:57:30.633Z').getTime(),
+      max: new Date('2022-01-13T19:02:43.581Z').getTime(),
     },
     logs_and_metrics: {
       min: 1562786660845,
