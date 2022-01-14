@@ -53,8 +53,8 @@ import { useValueChanged } from '../../../../../common/hooks/use_value_changed';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useAsyncConfirmation } from '../../../../containers/detection_engine/rules/rules_table/use_async_confirmation';
-import { useBulkEditFlyout } from '../../../../containers/detection_engine/rules/rules_table/use_bulk_edit_flyout';
-import { useRulesCount } from '../../../../containers/detection_engine/rules/use_rules_count';
+import { useBulkEditFormFlyout } from '../../../../containers/detection_engine/rules/rules_table/use_bulk_edit_form_flyout';
+import { useCustomRulesCount } from '../../../../containers/detection_engine/rules/rules_table/use_custom_rules_count';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -190,7 +190,7 @@ export const RulesTables = React.memo<RulesTableProps>(
       [actions]
     );
 
-    const { rulesCount, fetchRulesCount } = useRulesCount();
+    const { customRulesCount, fetchCustomRulesCount } = useCustomRulesCount();
     const [isDeleteConfirmationVisible, showDeleteConfirmation, hideDeleteConfirmation] =
       useBoolState();
 
@@ -208,12 +208,12 @@ export const RulesTables = React.memo<RulesTableProps>(
     });
 
     const {
-      isBulkEditFlyoutVisible,
-      handlePerformBulkEditConfirm,
-      handlePerformBulkEditCancel,
       bulkEditActionType,
-      performBulkEdit,
-    } = useBulkEditFlyout();
+      isBulkEditFlyoutVisible,
+      handleBulkEditFormConfirm,
+      handleBulkEditFormCancel,
+      completeBulkEditForm,
+    } = useBulkEditFormFlyout();
 
     const selectedItemsCount = isAllSelected ? pagination.total : selectedRuleIds.length;
     const hasPagination = pagination.total > pagination.perPage;
@@ -242,8 +242,8 @@ export const RulesTables = React.memo<RulesTableProps>(
           filterOptions,
           confirmDeletion,
           confirmBulkEdit,
-          performBulkEdit,
-          fetchRulesCount,
+          completeBulkEditForm,
+          fetchCustomRulesCount,
           selectedItemsCount,
         });
       },
@@ -262,9 +262,9 @@ export const RulesTables = React.memo<RulesTableProps>(
         filterOptions,
         confirmDeletion,
         confirmBulkEdit,
-        performBulkEdit,
+        completeBulkEditForm,
         selectedItemsCount,
-        fetchRulesCount,
+        fetchCustomRulesCount,
       ]
     );
 
@@ -562,11 +562,12 @@ export const RulesTables = React.memo<RulesTableProps>(
         )}
         {isBulkEditConfirmationVisible && (
           <BulkEditConfirmation
-            isAllSelected={isAllSelected}
-            customRulesCount={rulesCount?.custom_rules_count ?? 0}
-            elasticRulesCount={rulesCount?.elastic_rules_count ?? 0}
-            selectedCustomRulesCount={selectedCustomRuleIds.length}
-            selectedElasticRulesCount={selectedElasticRuleIds.length}
+            customRulesCount={isAllSelected ? customRulesCount : selectedCustomRuleIds.length}
+            elasticRulesCount={
+              isAllSelected
+                ? Math.min((pagination.total ?? 0) - customRulesCount, 0)
+                : selectedElasticRuleIds.length
+            }
             onCancel={handleBulkEditCancel}
             onConfirm={handleBulkEditConfirm}
           />
@@ -574,8 +575,8 @@ export const RulesTables = React.memo<RulesTableProps>(
         {isBulkEditFlyoutVisible && bulkEditActionType !== undefined && (
           <BulkEditFlyout
             editAction={bulkEditActionType}
-            onClose={handlePerformBulkEditCancel}
-            onConfirm={handlePerformBulkEditConfirm}
+            onClose={handleBulkEditFormCancel}
+            onConfirm={handleBulkEditFormConfirm}
           />
         )}
         {shouldShowRulesTable && (

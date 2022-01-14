@@ -57,7 +57,7 @@ interface GetBatchItems {
   confirmDeletion: () => Promise<boolean>;
   confirmBulkEdit: () => Promise<boolean>;
   performBulkEdit: (bulkActionEditType: BulkActionEditType) => Promise<BulkActionEditPayload>;
-  fetchRulesCount: (filter: string) => Promise<void>;
+  fetchCustomRulesCount: (filterOptions: FilterOptions) => Promise<{ customRulesCount: number }>;
   selectedItemsCount: number;
 }
 
@@ -78,8 +78,8 @@ export const getBatchItems = ({
   filterOptions,
   confirmDeletion,
   confirmBulkEdit,
-  performBulkEdit,
-  fetchRulesCount,
+  completeBulkEditForm,
+  fetchCustomRulesCount,
   selectedItemsCount,
 }: GetBatchItems): EuiContextMenuPanelDescriptor[] => {
   const selectedRules = rules.filter(({ id }) => selectedRuleIds.includes(id));
@@ -212,8 +212,14 @@ export const getBatchItems = ({
   const handleBulkEdit = (bulkEditActionType: BulkActionEditType) => async () => {
     closePopover();
 
+    const customSelectedRuleIds = selectedRules
+      .filter((rule) => rule.immutable === false)
+      .map((rule) => rule.id);
+    let customRulesCount = customSelectedRuleIds.length;
+
     if (isAllSelected) {
-      await fetchRulesCount(filterQuery);
+      const res = await fetchCustomRulesCount(filterOptions);
+      customRulesCount = res.customRulesCount;
     }
 
     if ((await confirmBulkEdit()) === false) {
@@ -222,10 +228,10 @@ export const getBatchItems = ({
     }
 
     try {
-      const editPayload = await performBulkEdit(bulkEditActionType);
+      const editPayload = await completeBulkEditForm(bulkEditActionType);
       const rulesBulkAction = initRulesBulkAction({
-        visibleRuleIds: selectedRuleIds,
-        selectedItemsCount,
+        visibleRuleIds: customSelectedRuleIds,
+        selectedItemsCount: customRulesCount,
         action: BulkAction.edit,
         dispatch,
         toastsApi,
@@ -233,7 +239,7 @@ export const getBatchItems = ({
         onSuccess: () => {
           toastsApi.addSuccess({
             title: 'Rules changes updated',
-            text: `You’ve successfully updated ${selectedItemsCount} rule.`,
+            text: `You’ve successfully updated ${customRulesCount} rule.`,
           });
         },
         onError: (error: Error) => {
@@ -257,10 +263,7 @@ export const getBatchItems = ({
         });
         await rulesBulkAction.byQuery(customRulesOnlyFilterQuery);
       } else {
-        const customSlectedRuleIds = selectedRules
-          .filter((rule) => rule.immutable === false)
-          .map((rule) => rule.id);
-        await rulesBulkAction.byIds(customSlectedRuleIds);
+        await rulesBulkAction.byIds(customSelectedRuleIds);
       }
 
       await reFetchRules();

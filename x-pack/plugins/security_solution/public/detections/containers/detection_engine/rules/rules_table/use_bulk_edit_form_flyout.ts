@@ -10,7 +10,7 @@ import { useAsyncConfirmation } from './use_async_confirmation';
 import { BulkActionEditType } from '../../../../../../common/detection_engine/schemas/common/schemas';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 
-export const useBulkEditFlyout = () => {
+export const useBulkEditFormFlyout = () => {
   const dataFormRef = useRef<unknown>();
   const [actionType, setActionType] = useState<BulkActionEditType>();
   const [isBulkEditFlyoutVisible, showBulkEditFlyout, hideBulkEditFlyout] = useBoolState();
@@ -20,7 +20,7 @@ export const useBulkEditFlyout = () => {
     onFinish: hideBulkEditFlyout,
   });
 
-  const performBulkEdit = useCallback(
+  const completeBulkEditForm = useCallback(
     async (editActionType: BulkActionEditType) => {
       setActionType(editActionType);
       if ((await confirmForm()) === true) {
@@ -32,7 +32,7 @@ export const useBulkEditFlyout = () => {
     [confirmForm]
   );
 
-  const handlePerformBulkEditConfirm = useCallback(
+  const handleBulkEditFormConfirm = useCallback(
     <T>(data: T) => {
       dataFormRef.current = data;
       onConfirm();
@@ -41,10 +41,10 @@ export const useBulkEditFlyout = () => {
   );
 
   return {
-    performBulkEdit,
     bulkEditActionType: actionType,
     isBulkEditFlyoutVisible,
-    handlePerformBulkEditConfirm,
-    handlePerformBulkEditCancel: onCancel,
+    handleBulkEditFormConfirm,
+    handleBulkEditFormCancel: onCancel,
+    completeBulkEditForm,
   };
 };
