@@ -23,7 +23,7 @@ import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useApmParams } from '../../../../../../../hooks/use_apm_params';
 import { BackendLink } from '../../../../../../shared/backend_link';
-import { TransactionDetailLink } from '../../../../../../shared/Links/apm/transaction_detail_link';
+import { TransactionDetailLink } from '../../../../../../shared/links/apm/transaction_detail_link';
 import { ServiceLink } from '../../../../../../shared/service_link';
 import { StickyProperties } from '../../../../../../shared/sticky_properties';
 

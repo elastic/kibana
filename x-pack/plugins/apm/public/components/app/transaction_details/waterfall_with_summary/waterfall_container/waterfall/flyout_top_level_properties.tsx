@@ -15,7 +15,7 @@ import { getNextEnvironmentUrlParam } from '../../../../../../../common/environm
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
 import { useLegacyUrlParams } from '../../../../../../context/url_params_context/use_url_params';
 import { useApmParams } from '../../../../../../hooks/use_apm_params';
-import { TransactionDetailLink } from '../../../../../shared/Links/apm/transaction_detail_link';
+import { TransactionDetailLink } from '../../../../../shared/links/apm/transaction_detail_link';
 import { ServiceLink } from '../../../../../shared/service_link';
 import { StickyProperties } from '../../../../../shared/sticky_properties';
 
