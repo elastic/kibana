@@ -72,8 +72,6 @@ export function getStateDefaults({
   if (savedSearch.hideChart !== undefined) {
     defaultState.hideChart = savedSearch.hideChart;
   }
-  // eslint-disable-next-line no-console
-  console.log('defaultState', defaultState.rowHeight, 'savedSearch', savedSearch.rowHeight);
   if (savedSearch.rowHeight !== undefined) {
     defaultState.rowHeight = savedSearch.rowHeight;
   }
