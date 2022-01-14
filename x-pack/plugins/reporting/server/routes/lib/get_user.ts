@@ -6,8 +6,8 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
-import { SecurityPluginStart } from '../../../../security/server';
+import { SecurityPluginSetup } from '../../../../security/server';
 
-export function getUser(request: KibanaRequest, security?: SecurityPluginStart) {
+export function getUser(request: KibanaRequest, security?: SecurityPluginSetup) {
   return security?.authc.getCurrentUser(request) ?? false;
 }
