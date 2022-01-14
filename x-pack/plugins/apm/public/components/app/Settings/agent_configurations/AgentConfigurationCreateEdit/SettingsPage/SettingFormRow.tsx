@@ -24,7 +24,7 @@ import {
   amountAndUnitToString,
   amountAndUnitToObject,
 } from '../../../../../../../common/agent_configuration/amount_and_unit';
-import { SelectWithPlaceholder } from '../../../../../shared/SelectWithPlaceholder';
+import { SelectWithPlaceholder } from '../../../../../shared/select_with_placeholder';
 
 function FormRow({
   setting,
