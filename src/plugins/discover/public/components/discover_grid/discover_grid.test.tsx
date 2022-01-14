@@ -18,6 +18,7 @@ import { uiSettingsMock } from '../../__mocks__/ui_settings';
 import { DiscoverServices } from '../../build_services';
 import { getDocId } from './discover_grid_document_selection';
 import { ElasticSearchHit } from '../../types';
+import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
 
 jest.mock('../../kibana_services', () => ({
   ...jest.requireActual('../../kibana_services'),
@@ -27,7 +28,8 @@ jest.mock('../../kibana_services', () => ({
 function getProps() {
   const servicesMock = {
     uiSettings: uiSettingsMock,
-  } as DiscoverServices;
+    storage: new LocalStorageMock({}) as unknown as Storage,
+  } as unknown as DiscoverServices;
   return {
     ariaLabelledBy: '',
     columns: [],

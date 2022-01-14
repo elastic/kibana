@@ -6,13 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { EuiDataGridStyle } from '@elastic/eui';
+
 // data types
 export const kibanaJSON = 'kibana-json';
 export const GRID_STYLE = {
   border: 'all',
   fontSize: 's',
   cellPadding: 's',
-};
+  rowHover: 'none',
+} as EuiDataGridStyle;
 
 export const pageSizeArr = [25, 50, 100, 250];
 export const defaultPageSize = 100;
