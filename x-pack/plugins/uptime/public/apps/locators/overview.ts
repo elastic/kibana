@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uptimeOverviewLocator } from '../../../../observability/public';
+import { uptimeOverviewLocatorID } from '../../../../observability/public';
 import { OVERVIEW_ROUTE } from '../../../common/constants';
 
 const formatSearchKey = (key: string, value: string) => `${key}: "${value}"`;
@@ -29,6 +29,6 @@ async function navigate({ ip, hostname }: { ip?: string; hostname?: string }) {
 }
 
 export const uptimeOverviewNavigatorParams = {
-  id: uptimeOverviewLocator,
+  id: uptimeOverviewLocatorID,
   getLocation: navigate,
 };

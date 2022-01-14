@@ -27,4 +27,4 @@ export const casesPath = '/cases';
 
 // Name of a locator created by the uptime plugin. Intended for use
 // by other plugins as well, so defined here to prevent cross-references.
-export const uptimeOverviewLocator = 'uptime-overview-locator';
+export const uptimeOverviewLocatorID = 'uptime-overview-locator';
