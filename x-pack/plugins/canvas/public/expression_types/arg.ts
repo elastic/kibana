@@ -11,13 +11,14 @@ import { Ast } from '@kbn/interpreter';
 // @ts-expect-error unconverted components
 import { ArgForm } from '../components/arg_form';
 import { argTypeRegistry } from './arg_type_registry';
-import type { ArgType, ArgTypeDef, ExpressionType } from './types';
+import type { Args, ArgType, ArgTypeDef, ArgValue, ExpressionType } from './types';
 import {
   AssetType,
   CanvasElement,
   ExpressionAstExpression,
   ExpressionValue,
   ExpressionContext,
+  DatatableColumn,
 } from '../../types';
 import { BaseFormProps } from './base_form';
 
@@ -26,6 +27,7 @@ interface ArtOwnProps {
   multi?: boolean;
   required?: boolean;
   types?: string[];
+  type?: 'model' | 'argument';
   default?: string | null;
   resolve?: (...args: any[]) => any;
   options?: {
@@ -38,10 +40,25 @@ interface ArtOwnProps {
     shapes?: string[];
   };
 }
-export type ArgProps = ArtOwnProps & BaseFormProps;
+export type ArgUiConfig = ArtOwnProps & BaseFormProps;
+
+export interface ResolvedColumns {
+  columns: DatatableColumn[];
+}
+export interface ResolvedLabels {
+  labels: string[];
+}
+
+export interface ResolvedDataurl {
+  dataurl: string;
+}
+
+export interface ResolvedArgProps<T = ResolvedColumns | ResolvedLabels | ResolvedDataurl | {}> {
+  resolved: T;
+}
 
 export interface DataArg {
-  argValue?: string | Ast | null;
+  argValue?: ArgValue | null;
   skipRender?: boolean;
   label?: string;
   valueIndex: number;
@@ -50,16 +67,15 @@ export interface DataArg {
   contextExpression?: string;
   name: string;
   argResolver: (ast: ExpressionAstExpression) => Promise<ExpressionValue>;
-  args: Record<string, Array<string | Ast>> | null;
+  args: Args;
   argType: ArgType;
   argTypeDef?: ArgTypeDef;
   filterGroups: string[];
   context?: ExpressionContext;
-  expressionIndex: number;
   expressionType: ExpressionType;
   nextArgType?: ArgType;
   nextExpressionType?: ExpressionType;
-  onValueAdd: (argName: string, argValue: string | Ast | null) => () => void;
+  onValueAdd: (argName: string, argValue: ArgValue | null) => () => void;
   onAssetAdd: (type: AssetType['type'], content: AssetType['value']) => string;
   onValueChange: (value: Ast | string) => void;
   onValueRemove: () => void;
@@ -81,7 +97,7 @@ export class Arg {
   displayName?: string;
   help?: string;
 
-  constructor(props: ArgProps) {
+  constructor(props: ArgUiConfig) {
     const argType = argTypeRegistry.get(props.argType);
     if (!argType) {
       throw new Error(`Invalid arg type: ${props.argType}`);
@@ -117,26 +133,32 @@ export class Arg {
   }
 
   // TODO: Document what these otherProps are. Maybe make them named arguments?
-  render(data: DataArg) {
-    const { onValueChange, onValueRemove, argValue, key, label, ...otherProps } = data;
+  render(data: DataArg & ResolvedArgProps) {
+    const { onValueChange, onValueRemove, key, label, ...otherProps } = data;
+    const resolvedProps = this.resolve?.(otherProps);
+    const { argValue, onAssetAdd, resolved, filterGroups, argResolver } = otherProps;
+    const argId = key;
     // This is everything the arg_type template needs to render
     const templateProps = {
-      ...otherProps,
-      ...this.resolve?.(otherProps),
-      onValueChange,
       argValue,
+      argId,
+      onAssetAdd,
+      onValueChange,
       typeInstance: this,
+      resolved: { ...resolved, ...resolvedProps },
+      argResolver,
+      filterGroups,
     };
 
     const formProps = {
       key,
       argTypeInstance: this,
-      valueMissing: this.required && argValue == null,
+      valueMissing: this.required && data.argValue == null,
       label,
       onValueChange,
       onValueRemove,
       templateProps,
-      argId: key,
+      argId,
       options: this.options,
     };
 
