@@ -23,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         path: '/includes-plus-symbol-doc-id/_doc/1+1=2',
         method: 'PUT',
         body: {
-          username: 'matt',
+          username: 'Dmitry',
           '@timestamp': '2015-09-21T09:30:23',
         },
       });
