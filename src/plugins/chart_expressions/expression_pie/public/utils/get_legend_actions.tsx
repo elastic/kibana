@@ -14,6 +14,7 @@ import { LegendAction, SeriesIdentifier, useLegendAction } from '@elastic/charts
 import { DataPublicPluginStart } from '../../../../data/public';
 import { PieVisParams } from '../../common/types';
 import { ClickTriggerEvent } from '../../../../charts/public';
+import { FieldFormatsStart } from '../../../../field_formats/public';
 
 export const getLegendActions = (
   canFilter: (
@@ -24,7 +25,7 @@ export const getLegendActions = (
   onFilter: (data: ClickTriggerEvent, negate?: any) => void,
   visParams: PieVisParams,
   actions: DataPublicPluginStart['actions'],
-  formatter: DataPublicPluginStart['fieldFormats']
+  formatter: FieldFormatsStart
 ): LegendAction => {
   return ({ series: [pieSeries] }) => {
     const [popoverOpen, setPopoverOpen] = useState(false);

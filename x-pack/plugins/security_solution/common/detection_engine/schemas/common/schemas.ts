@@ -453,6 +453,53 @@ export enum BulkAction {
   'export' = 'export',
   'delete' = 'delete',
   'duplicate' = 'duplicate',
+  'edit' = 'edit',
 }
 
 export const bulkAction = enumeration('BulkAction', BulkAction);
+
+export enum BulkActionEditType {
+  'add_tags' = 'add_tags',
+  'delete_tags' = 'delete_tags',
+  'set_tags' = 'set_tags',
+  'add_index_patterns' = 'add_index_patterns',
+  'delete_index_patterns' = 'delete_index_patterns',
+  'set_index_patterns' = 'set_index_patterns',
+  'set_timeline' = 'set_timeline',
+}
+
+export const bulkActionEditType = enumeration('BulkActionEditType', BulkActionEditType);
+
+const bulkActionEditPayloadTags = t.type({
+  type: t.union([
+    t.literal(BulkActionEditType.add_tags),
+    t.literal(BulkActionEditType.delete_tags),
+    t.literal(BulkActionEditType.set_tags),
+  ]),
+  value: tags,
+});
+
+const bulkActionEditPayloadIndexPatterns = t.type({
+  type: t.union([
+    t.literal(BulkActionEditType.add_index_patterns),
+    t.literal(BulkActionEditType.delete_index_patterns),
+    t.literal(BulkActionEditType.set_index_patterns),
+  ]),
+  value: index,
+});
+
+const bulkActionEditPayloadTimeline = t.type({
+  type: t.literal(BulkActionEditType.set_timeline),
+  value: t.type({
+    timeline_id,
+    timeline_title,
+  }),
+});
+
+export const bulkActionEditPayload = t.union([
+  bulkActionEditPayloadTags,
+  bulkActionEditPayloadIndexPatterns,
+  bulkActionEditPayloadTimeline,
+]);
+
+export type BulkActionEditPayload = t.TypeOf<typeof bulkActionEditPayload>;

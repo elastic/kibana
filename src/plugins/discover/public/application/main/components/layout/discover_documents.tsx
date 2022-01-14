@@ -24,7 +24,7 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../../../../common';
 import { useColumns } from '../../../../utils/use_data_grid_columns';
-import { IndexPattern } from '../../../../../../data/common';
+import { DataView } from '../../../../../../data/common';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { DataDocumentsMsg, DataDocuments$ } from '../../utils/use_saved_search';
 import { DiscoverServices } from '../../../../build_services';
@@ -50,7 +50,7 @@ function DiscoverDocumentsComponent({
 }: {
   documents$: DataDocuments$;
   expandedDoc?: ElasticSearchHit;
-  indexPattern: IndexPattern;
+  indexPattern: DataView;
   navigateTo: (url: string) => void;
   onAddFilter: DocViewFilterFn;
   savedSearch: SavedSearch;
@@ -121,7 +121,7 @@ function DiscoverDocumentsComponent({
   }
 
   return (
-    <EuiFlexItem className="dscTable" tabIndex={-1} aria-labelledby="documentsAriaLabel">
+    <EuiFlexItem className="dscTable" aria-labelledby="documentsAriaLabel">
       <EuiScreenReaderOnly>
         <h2 id="documentsAriaLabel">
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
