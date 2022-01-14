@@ -165,8 +165,7 @@
         "gis-map" : {
           "properties" : {
             "bounds" : {
-              "type" : "geo_shape",
-              "tree" : "quadtree"
+              "type" : "geo_shape"
             },
             "description" : {
               "type" : "text"
