@@ -7,13 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import { KibanaRequest } from 'src/core/server';
-import { Writable } from 'stream';
+import { PassThrough } from 'stream';
 import { ReportingCore } from '../../';
 import { CSV_SEARCHSOURCE_IMMEDIATE_TYPE } from '../../../common/constants';
 import { runTaskFnFactory } from '../../export_types/csv_searchsource_immediate/execute_job';
 import { JobParamsDownloadCSV } from '../../export_types/csv_searchsource_immediate/types';
 import { LevelLogger as Logger } from '../../lib';
-import { TaskRunResult } from '../../lib/tasks';
 import { BaseParams } from '../../types';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { RequestHandler } from '../lib/request_handler';
@@ -69,58 +68,70 @@ export function registerGenerateCsvFromSavedObjectImmediate(
         const logger = parentLogger.clone([CSV_SEARCHSOURCE_IMMEDIATE_TYPE]);
         const runTaskFn = runTaskFnFactory(reporting, logger);
         const requestHandler = new RequestHandler(reporting, user, context, req, res, logger);
-
         const eventLog = reporting.getEventLogger({
           jobtype: CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
           created_by: user && user.username,
           payload: { browserTimezone: (req.params as BaseParams).browserTimezone },
         });
 
-        eventLog.logExecutionStart();
+        const stream = new (class extends PassThrough {
+          private onFirstByte?(): void;
 
-        try {
-          let buffer = Buffer.from('');
-          const stream = new Writable({
-            write(chunk, encoding, callback) {
-              buffer = Buffer.concat([
-                buffer,
-                Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk, encoding),
-              ]);
-              callback();
-            },
+          bytesWritten = 0;
+          firstBytePromise = new Promise<void>((resolve) => {
+            this.onFirstByte = resolve;
           });
 
-          const { content_type: jobOutputContentType }: TaskRunResult = await runTaskFn(
-            null,
-            req.body,
-            context,
-            stream,
-            req
-          );
-          stream.end();
-          const jobOutputContent = buffer.toString();
-          const jobOutputSize = buffer.byteLength;
+          _write(
+            chunk: Buffer | string,
+            encoding: BufferEncoding,
+            callback: (error?: Error | null) => void
+          ) {
+            const size = Buffer.isBuffer(chunk) ? chunk.byteLength : chunk.length;
 
-          logger.info(`Job output size: ${jobOutputSize} bytes.`);
+            if (!this.bytesWritten && size) {
+              this.onFirstByte?.();
+            }
+            this.bytesWritten += size;
 
-          // convert null to undefined so the value can be sent to h.response()
-          if (jobOutputContent === null) {
-            logger.warn('CSV Job Execution created empty content result');
+            return super._write(chunk, encoding, callback);
           }
+        })();
 
-          eventLog.logExecutionComplete({ byteSize: jobOutputSize });
+        const logError = (error: Error) => {
+          logger.error(error);
+          eventLog.logError(error);
+        };
+
+        try {
+          eventLog.logExecutionStart();
+          const taskPromise = runTaskFn(null, req.body, context, stream, req)
+            .then(() => {
+              logger.info(`Job output size: ${stream.bytesWritten} bytes.`);
+
+              if (!stream.bytesWritten) {
+                logger.warn('CSV Job Execution created empty content result');
+              }
+
+              eventLog.logExecutionComplete({ byteSize: stream.bytesWritten });
+            })
+            .finally(() => stream.end());
+
+          await Promise.race([stream.firstBytePromise, taskPromise]);
+
+          taskPromise.catch(logError);
 
           return res.ok({
-            body: jobOutputContent || '',
+            body: stream,
             headers: {
-              'content-type': jobOutputContentType ? jobOutputContentType : [],
+              'content-type': 'text/csv;charset=utf-8',
               'accept-ranges': 'none',
             },
           });
-        } catch (err) {
-          logger.error(err);
-          eventLog.logError(err);
-          return requestHandler.handleError(err);
+        } catch (error) {
+          logError(error);
+
+          return requestHandler.handleError(error);
         }
       }
     )
