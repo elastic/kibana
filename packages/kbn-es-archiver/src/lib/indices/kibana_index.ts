@@ -158,7 +158,6 @@ export async function createDefaultSpace({
   await client.create(
     {
       index,
-      type: '_doc',
       id: 'space:default',
       refresh: 'wait_for',
       body: {
