@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  ExceptionListItemSchema,
+  CreateExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { BaseDataGenerator } from './base_data_generator';
 import { ConditionEntryField } from '../types';
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../service/artifacts/constants';
@@ -38,7 +41,7 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       id: this.seededUUIDv4(),
       item_id: this.seededUUIDv4(),
       list_id: 'endpoint_list_id',
-      meta: {},
+      meta: undefined,
       name: `Generated Exception (${this.randomString(5)})`,
       namespace_type: 'agnostic',
       os_types: [this.randomOSFamily()] as ExceptionListItemSchema['os_types'],
@@ -48,6 +51,41 @@ export class ExceptionsListItemGenerator extends BaseDataGenerator<ExceptionList
       updated_at: '2020-04-20T15:25:31.830Z',
       updated_by: this.randomUser(),
       ...(overrides || {}),
+    };
+  }
+
+  generateForCreate(
+    overrides: Partial<CreateExceptionListItemSchema> = {}
+  ): CreateExceptionListItemSchema {
+    const {
+      /* eslint-disable @typescript-eslint/naming-convention */
+      description,
+      entries,
+      list_id,
+      name,
+      type,
+      comments,
+      item_id,
+      meta,
+      namespace_type,
+      os_types,
+      tags,
+      /* eslint-enable @typescript-eslint/naming-convention */
+    } = this.generate();
+
+    return {
+      description,
+      entries,
+      list_id,
+      name,
+      type,
+      comments,
+      item_id,
+      meta,
+      namespace_type,
+      os_types,
+      tags,
+      ...overrides,
     };
   }
 }
