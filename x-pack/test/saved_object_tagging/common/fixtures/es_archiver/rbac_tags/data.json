@@ -12,7 +12,7 @@
       "type": "space",
       "updated_at": "2017-09-21T18:49:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -29,7 +29,7 @@
       "type": "space",
       "updated_at": "2017-09-21T18:49:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -46,7 +46,7 @@
       "type": "space",
       "updated_at": "2017-09-21T18:49:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -64,7 +64,7 @@
       "type": "tag",
       "updated_at": "2017-09-21T18:49:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -82,7 +82,7 @@
       "type": "tag",
       "updated_at": "2017-09-21T18:49:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
 
@@ -101,6 +101,6 @@
       "namespace": "space_1",
       "updated_at": "2017-09-21T18:49:16.270Z"
     },
-    "type": "doc"
+    "type": "_doc"
   }
 }
