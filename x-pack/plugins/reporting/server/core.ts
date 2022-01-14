@@ -8,37 +8,36 @@
 import Hapi from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { filter, first, map, switchMap, take } from 'rxjs/operators';
-import {
+import type {
   BasePath,
   IClusterClient,
-  KibanaRequest,
   PackageInfo,
   PluginInitializerContext,
   SavedObjectsClientContract,
   SavedObjectsServiceStart,
-  ServiceStatusLevels,
   StatusServiceSetup,
   UiSettingsServiceStart,
 } from 'src/core/server';
-import { PluginStart as DataPluginStart } from 'src/plugins/data/server';
-import { FieldFormatsStart } from 'src/plugins/field_formats/server';
-import { IEventLogService } from '../../event_log/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginStart } from '../../licensing/server';
+import type { PluginStart as DataPluginStart } from 'src/plugins/data/server';
+import type { FieldFormatsStart } from 'src/plugins/field_formats/server';
+import { KibanaRequest, ServiceStatusLevels } from '../../../../src/core/server';
+import type { IEventLogService } from '../../event_log/server';
+import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
+import type { LicensingPluginStart } from '../../licensing/server';
 import type { ScreenshotResult, ScreenshottingStart } from '../../screenshotting/server';
-import { SecurityPluginSetup } from '../../security/server';
+import type { SecurityPluginSetup } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
-import { SpacesPluginSetup } from '../../spaces/server';
-import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+import type { SpacesPluginSetup } from '../../spaces/server';
+import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { durationToNumber } from '../common/schema_utils';
-import { ReportingConfig, ReportingSetup } from './';
+import type { ReportingConfig, ReportingSetup } from './';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry, LevelLogger } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
-import { IReport, ReportingStore } from './lib/store';
+import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
-import { ReportingPluginRouter, ScreenshotOptions } from './types';
+import type { ReportingPluginRouter, ScreenshotOptions } from './types';
 
 export interface ReportingInternalSetup {
   eventLog: IEventLogService;

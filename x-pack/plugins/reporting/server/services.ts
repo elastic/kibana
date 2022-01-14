@@ -6,7 +6,7 @@
  */
 
 import { FieldFormatsStart } from 'src/plugins/field_formats/server';
-import { createGetterSetter } from 'src/plugins/kibana_utils/server';
+import { createGetterSetter } from '../../../../src/plugins/kibana_utils/server';
 
 export const [getFieldFormats, setFieldFormats] =
   createGetterSetter<FieldFormatsStart>('FieldFormats');
