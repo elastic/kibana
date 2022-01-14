@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { CoreStart } from 'kibana/public';
 import { DashboardPanelState } from '../embeddable';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
-
 import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
-import { CoreStart } from 'kibana/public';
+
 import { ClonePanelAction } from '.';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
@@ -175,31 +175,116 @@ test('Clones a non-RefOrVal embeddable by reference if the panel has a savedObje
   expect(newPanel.type).toEqual(genericEmbeddable.type);
 });
 
-test('Gets a unique title ', async () => {
+test('Gets a unique from the saved objects library', async () => {
   coreStart.savedObjects.client.find = jest.fn().mockImplementation(({ search }) => {
-    if (search === '"testFirstTitle"') return { total: 1 };
-    else if (search === '"testSecondTitle"') return { total: 41 };
-    else if (search === '"testThirdTitle"') return { total: 90 };
+    if (search === '"testFirstClone"') {
+      return {
+        savedObjects: [
+          {
+            attributes: { title: 'testFirstClone' },
+            get: jest.fn().mockReturnValue('testFirstClone'),
+          },
+        ],
+        total: 1,
+      };
+    } else if (search === '"testBeforePageLimit"') {
+      return {
+        savedObjects: [
+          {
+            attributes: { title: 'testBeforePageLimit (copy 9)' },
+            get: jest.fn().mockReturnValue('testBeforePageLimit (copy 9)'),
+          },
+        ],
+        total: 10,
+      };
+    } else if (search === '"testMaxLogic"') {
+      return {
+        savedObjects: [
+          {
+            attributes: { title: 'testMaxLogic (copy 10000)' },
+            get: jest.fn().mockReturnValue('testMaxLogic (copy 10000)'),
+          },
+        ],
+        total: 2,
+      };
+    } else if (search === '"testAfterPageLimit"') {
+      return { total: 11 };
+    }
   });
+
   const action = new ClonePanelAction(coreStart);
   // @ts-ignore
-  expect(await action.getUniqueTitle('testFirstTitle', genericEmbeddable.type)).toEqual(
-    'testFirstTitle (copy)'
+  expect(await action.getCloneTitle(genericEmbeddable, 'testFirstClone')).toEqual(
+    'testFirstClone (copy)'
   );
   // @ts-ignore
-  expect(await action.getUniqueTitle('testSecondTitle (copy 39)', genericEmbeddable.type)).toEqual(
-    'testSecondTitle (copy 40)'
+  expect(await action.getCloneTitle(genericEmbeddable, 'testBeforePageLimit')).toEqual(
+    'testBeforePageLimit (copy 10)'
   );
   // @ts-ignore
-  expect(await action.getUniqueTitle('testSecondTitle (copy 20)', genericEmbeddable.type)).toEqual(
-    'testSecondTitle (copy 40)'
+  expect(await action.getCloneTitle(genericEmbeddable, 'testBeforePageLimit (copy 9)')).toEqual(
+    'testBeforePageLimit (copy 10)'
   );
   // @ts-ignore
-  expect(await action.getUniqueTitle('testThirdTitle', genericEmbeddable.type)).toEqual(
-    'testThirdTitle (copy 89)'
+  expect(await action.getCloneTitle(genericEmbeddable, 'testMaxLogic')).toEqual(
+    'testMaxLogic (copy 10001)'
   );
-  expect(
-    // @ts-ignore
-    await action.getUniqueTitle('testThirdTitle (copy 10000)', genericEmbeddable.type)
-  ).toEqual('testThirdTitle (copy 89)');
+  // @ts-ignore
+  expect(await action.getCloneTitle(genericEmbeddable, 'testAfterPageLimit')).toEqual(
+    'testAfterPageLimit (copy 11)'
+  );
+  // @ts-ignore
+  expect(await action.getCloneTitle(genericEmbeddable, 'testAfterPageLimit (copy 10)')).toEqual(
+    'testAfterPageLimit (copy 11)'
+  );
+  // @ts-ignore
+  expect(await action.getCloneTitle(genericEmbeddable, 'testAfterPageLimit (copy 10000)')).toEqual(
+    'testAfterPageLimit (copy 11)'
+  );
+});
+
+test('Gets a unique title from dashboard', async () => {
+  const dashboard = genericEmbeddable.getRoot() as DashboardContainer;
+  const action = new ClonePanelAction(coreStart);
+
+  // @ts-ignore
+  expect(await action.getCloneTitle(byRefOrValEmbeddable, '')).toEqual('');
+
+  dashboard.getPanelTitles = jest.fn().mockImplementation(() => {
+    return ['testDuplicateTitle', 'testDuplicateTitle (copy)', 'testUniqueTitle'];
+  });
+  // @ts-ignore
+  expect(await action.getCloneTitle(byRefOrValEmbeddable, 'testUniqueTitle')).toEqual(
+    'testUniqueTitle (copy)'
+  );
+  // @ts-ignore
+  expect(await action.getCloneTitle(byRefOrValEmbeddable, 'testDuplicateTitle')).toEqual(
+    'testDuplicateTitle (copy 1)'
+  );
+
+  dashboard.getPanelTitles = jest.fn().mockImplementation(() => {
+    return ['testDuplicateTitle', 'testDuplicateTitle (copy)'].concat(
+      Array.from([...Array(39)], (_, index) => `testDuplicateTitle (copy ${index + 1})`)
+    );
+  });
+  // @ts-ignore
+  expect(await action.getCloneTitle(byRefOrValEmbeddable, 'testDuplicateTitle')).toEqual(
+    'testDuplicateTitle (copy 40)'
+  );
+  // @ts-ignore
+  expect(await action.getCloneTitle(byRefOrValEmbeddable, 'testDuplicateTitle (copy 100)')).toEqual(
+    'testDuplicateTitle (copy 40)'
+  );
+
+  dashboard.getPanelTitles = jest.fn().mockImplementation(() => {
+    return ['testDuplicateTitle (copy 100)'];
+  });
+  // @ts-ignore
+  expect(await action.getCloneTitle(byRefOrValEmbeddable, 'testDuplicateTitle')).toEqual(
+    'testDuplicateTitle (copy 101)'
+  );
+  // @ts-ignore
+  expect(await action.getCloneTitle(byRefOrValEmbeddable, 'testDuplicateTitle (copy 100)')).toEqual(
+    'testDuplicateTitle (copy 101)'
+  );
 });

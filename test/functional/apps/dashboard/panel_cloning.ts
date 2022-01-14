@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(panelDimensions[0]).to.eql(panelDimensions[1]);
     });
 
-    it('clone is by value', async () => {
+    it('clone of a by reference embeddable is by value', async () => {
       const panelName = PIE_CHART_VIS_NAME.replace(/\s+/g, '');
       const clonedPanel = await testSubjects.find(`embeddablePanelHeading-${panelName}(copy)`);
       const descendants = await testSubjects.findAllDescendant(
@@ -73,8 +73,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const postPanelTitles = await PageObjects.dashboard.getPanelTitles();
       expect(postPanelTitles.length).to.equal(initialPanelTitles.length + 1);
       expect(postPanelTitles[postPanelTitles.length - 1]).to.equal(
-        PIE_CHART_VIS_NAME + ' (copy) (copy)'
+        PIE_CHART_VIS_NAME + ' (copy 1)'
       );
+    });
+
+    it('clone of a by value embeddable is by value', async () => {
+      const panelName = PIE_CHART_VIS_NAME.replace(/\s+/g, '');
+      const clonedPanel = await testSubjects.find(`embeddablePanelHeading-${panelName}(copy1)`);
+      const descendants = await testSubjects.findAllDescendant(
+        'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION',
+        clonedPanel
+      );
+      expect(descendants.length).to.equal(0);
     });
   });
 }
