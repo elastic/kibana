@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs/operators';
 import { createHashHistory } from 'history';
 import { BehaviorSubject } from 'rxjs';
+import { isFilterPinned } from '@kbn/es-query';
 import {
   AppMountParameters,
   AppUpdater,
@@ -57,7 +58,6 @@ import {
 import { VisualizeLocatorDefinition } from '../common/locator';
 import { showNewVisModal } from './wizard';
 import { createVisEditorsRegistry, VisEditorsRegistry } from './vis_editors_registry';
-import { esFilters } from '../../../plugins/data/public';
 import { FeatureCatalogueCategory } from '../../home/public';
 
 import type { VisualizeServices } from './visualize_app/types';
@@ -189,7 +189,7 @@ export class VisualizationsPlugin
             ),
             map(({ state }) => ({
               ...state,
-              filters: state.filters?.filter(esFilters.isFilterPinned),
+              filters: state.filters?.filter(isFilterPinned),
             }))
           ),
         },
