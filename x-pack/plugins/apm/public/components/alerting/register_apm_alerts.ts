@@ -92,12 +92,8 @@ export function registerApmAlerts(
       }
     ),
     format: ({ fields, formatters: { asDuration } }) => ({
-      reason: formatTransactionDurationReason({
-        threshold: fields[ALERT_EVALUATION_THRESHOLD]!,
-        measured: fields[ALERT_EVALUATION_VALUE]!,
-        serviceName: String(fields[SERVICE_NAME][0]),
-        asDuration,
-      }),
+      reason: fields[ALERT_REASON]!,
+
       link: format({
         pathname: `/app/apm/services/${fields[SERVICE_NAME][0]!}`,
         query: {
