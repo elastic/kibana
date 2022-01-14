@@ -6,29 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiDataGridStyle } from '@elastic/eui';
-
 // data types
 export const kibanaJSON = 'kibana-json';
 export const GRID_STYLE = {
   border: 'all',
-  rowHover: 'none',
   fontSize: 's',
   cellPadding: 's',
-} as EuiDataGridStyle;
-export const DENSITY_STYLES: { [key: string]: Partial<EuiDataGridStyle> } = {
-  expanded: {
-    fontSize: 'l',
-    cellPadding: 'l',
-  },
-  normal: {
-    fontSize: 'm',
-    cellPadding: 'm',
-  },
-  compact: {
-    fontSize: 's',
-    cellPadding: 's',
-  },
 };
 
 export const pageSizeArr = [25, 50, 100, 250];

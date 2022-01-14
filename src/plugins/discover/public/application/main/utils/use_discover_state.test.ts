@@ -42,6 +42,7 @@ describe('test useDiscoverState', () => {
     });
     expect(result.current.state.index).toBe(indexPatternMock.id);
     expect(result.current.stateContainer).toBeInstanceOf(Object);
+    expect(result.current.setState).toBeInstanceOf(Function);
     expect(result.current.searchSource).toBeInstanceOf(SearchSource);
   });
 
