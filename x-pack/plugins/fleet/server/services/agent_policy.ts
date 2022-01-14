@@ -593,7 +593,7 @@ class AgentPolicyService {
     await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'deleted', id);
 
     if (options?.removeFleetServerDocuments) {
-      this.deleteFleetServerPoliciesForPolicyId(esClient, id);
+      await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
     }
 
     return {
