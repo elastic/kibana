@@ -162,7 +162,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     inputs: [],
   });
 
-  const [wasNewAgentPolicyCreated, setWasNewAgentPolicyCreated] = useState<boolean>(false);
+  const [wasAgentPolicyChanged, setWasAgentPolicyChanged] = useState<boolean>(false);
 
   // Validation state
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
@@ -189,6 +189,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     (updatedAgentPolicy: AgentPolicy | undefined) => {
       if (updatedAgentPolicy) {
         setAgentPolicy(updatedAgentPolicy);
+        setWasAgentPolicyChanged(true);
         if (packageInfo) {
           setFormState('VALID');
         }
@@ -337,7 +338,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const doOnSaveNavigation = useRef<boolean>(true);
 
   const handleInlineAgentPolicyCreate = useCallback(() => {
-    setWasNewAgentPolicyCreated(true);
+    setWasAgentPolicyChanged(true);
   }, []);
 
   // Detect if user left page
@@ -368,7 +369,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           const pathWithQueryString = appendOnSaveQueryParamsToPath({
             // In cases where we created a new agent policy inline, we need to override the initial `path`
             // value and navigate to the newly-created agent policy instead
-            path: wasNewAgentPolicyCreated ? packagePolicyPath : options.path,
+            path: wasAgentPolicyChanged ? packagePolicyPath : options.path,
             policy,
             mappingOptions: routeState.onSaveQueryParams,
             paramsToApply,
@@ -381,7 +382,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
         history.push(packagePolicyPath);
       }
     },
-    [packagePolicy.policy_id, getPath, navigateToApp, history, routeState, wasNewAgentPolicyCreated]
+    [packagePolicy.policy_id, getPath, navigateToApp, history, routeState, wasAgentPolicyChanged]
   );
 
   const onSubmit = useCallback(async () => {
