@@ -10,56 +10,43 @@ import { merge } from 'lodash';
 import { CaseMetricsResponse } from '../../../../common/api';
 import { createCaseError } from '../../../common/error';
 
-import { CasesClient } from '../../client';
-import { CasesClientArgs } from '../../types';
-import { MetricsHandler, AggregationBuilder, AggregationResponse } from '../types';
+import { AggregationHandler } from '../aggregation_handler';
+import { AggregationBuilder, AggregationResponse, BaseHandlerCommonOptions } from '../types';
 import { AlertHosts, AlertUsers } from './aggregations';
 
-export class AlertDetails implements MetricsHandler {
-  private aggregationsToBuild: AggregationBuilder[] = [];
-  private readonly aggregations = new Map<string, AggregationBuilder>([
-    ['alerts.hosts', new AlertHosts()],
-    ['alerts.users', new AlertUsers()],
-  ]);
-
-  constructor(
-    private readonly caseId: string,
-    private readonly casesClient: CasesClient,
-    private readonly clientArgs: CasesClientArgs
-  ) {}
-
-  public getFeatures(): Set<string> {
-    return new Set(this.aggregations.keys());
-  }
-
-  public setupFeature(feature: string) {
-    const aggregation = this.aggregations.get(feature);
-    if (aggregation) {
-      this.aggregationsToBuild.push(aggregation);
-    }
+export class AlertDetails extends AggregationHandler {
+  constructor(options: BaseHandlerCommonOptions) {
+    super(
+      options,
+      new Map<string, AggregationBuilder>([
+        ['alerts.hosts', new AlertHosts()],
+        ['alerts.users', new AlertUsers()],
+      ])
+    );
   }
 
   public async compute(): Promise<CaseMetricsResponse> {
-    const { alertsService, logger } = this.clientArgs;
+    const { alertsService, logger } = this.options.clientArgs;
+    const { caseId, casesClient } = this.options;
 
     try {
-      const alerts = await this.casesClient.attachments.getAllAlertsAttachToCase({
-        caseId: this.caseId,
+      const alerts = await casesClient.attachments.getAllAlertsAttachToCase({
+        caseId,
       });
 
-      if (alerts.length <= 0 || this.aggregationsToBuild.length <= 0) {
+      if (alerts.length <= 0 || this.aggregationBuilders.length <= 0) {
         return this.formatResponse();
       }
 
       const aggregationsResponse = await alertsService.executeAggregations({
-        aggregationBuilders: this.aggregationsToBuild,
+        aggregationBuilders: this.aggregationBuilders,
         alerts,
       });
 
       return this.formatResponse(aggregationsResponse);
     } catch (error) {
       throw createCaseError({
-        message: `Failed to retrieve alerts details attached case id: ${this.caseId}: ${error}`,
+        message: `Failed to retrieve alerts details attached case id: ${caseId}: ${error}`,
         error,
         logger,
       });
@@ -67,7 +54,7 @@ export class AlertDetails implements MetricsHandler {
   }
 
   private formatResponse(aggregationsResponse?: AggregationResponse): CaseMetricsResponse {
-    return this.aggregationsToBuild.reduce(
+    return this.aggregationBuilders.reduce(
       (acc, feature) => merge(acc, feature.formatResponse(aggregationsResponse)),
       {}
     );
