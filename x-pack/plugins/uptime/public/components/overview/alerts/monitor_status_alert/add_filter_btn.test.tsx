@@ -145,6 +145,7 @@ describe('AddFilterButton component', () => {
             disabled={true}
             flush="left"
             iconType="plusInCircleFilled"
+            isLoading={false}
             onClick={[Function]}
             size="s"
           >
