@@ -21,7 +21,7 @@ import {
   disableConsoleWarning,
   renderWithTheme,
 } from '../../../utils/testHelpers';
-import { fromQuery } from '../../shared/Links/url_helpers';
+import { fromQuery } from '../../shared/links/url_helpers';
 import { TransactionOverview } from './';
 
 const KibanaReactContext = createKibanaReactContext({

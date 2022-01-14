@@ -26,7 +26,7 @@ import {
 import { TRANSACTION_REQUEST } from '../../../../../common/transaction_types';
 import { asDuration, asInteger } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
-import { MLSingleMetricLink } from '../../../shared/Links/MachineLearningLinks/MLSingleMetricLink';
+import { MLSingleMetricLink } from '../../../shared/links/machine_learning_links/mlsingle_metric_link';
 import { popoverWidth } from '../cytoscape_options';
 
 const HealthStatusTitle = euiStyled(EuiTitle)`

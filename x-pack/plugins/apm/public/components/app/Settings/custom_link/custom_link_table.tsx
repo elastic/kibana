@@ -18,9 +18,9 @@ import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
+import { LoadingStatePrompt } from '../../../shared/loading_state_prompt';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
-import { TimestampTooltip } from '../../../shared/TimestampTooltip';
+import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 
 interface Props {
   items: CustomLink[];

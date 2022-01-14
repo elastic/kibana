@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { IBasePath } from 'kibana/public';
 import moment from 'moment';
 import { APIReturnType } from '../../../../../services/rest/createCallApmApi';
-import { getInfraHref } from '../../../../shared/Links/InfraLink';
+import { getInfraHref } from '../../../../shared/links/infra_link';
 import {
   Action,
   getNonEmptySections,

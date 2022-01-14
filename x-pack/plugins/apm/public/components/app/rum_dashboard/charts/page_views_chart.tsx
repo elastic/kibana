@@ -29,7 +29,7 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useUiSetting$ } from '../../../../../../../../src/plugins/kibana_react/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
+import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { ChartWrapper } from '../chart_wrapper';
 import { I18LABELS } from '../translations';
 

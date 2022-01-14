@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
-import { fromQuery, toQuery } from '../../../../shared/Links/url_helpers';
+import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
 
 interface Props {
   serviceNames: string[];

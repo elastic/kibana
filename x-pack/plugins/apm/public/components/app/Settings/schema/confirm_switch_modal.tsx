@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useUiTracker } from '../../../../../../observability/public';
-import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
+import { ElasticDocsLink } from '../../../shared/links/elastic_docs_link';
 
 interface Props {
   onConfirm: () => void;

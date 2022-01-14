@@ -17,7 +17,7 @@ import type { ApmUrlParams } from '../../context/url_params_context/types';
 import * as useFetcherHook from '../../hooks/use_fetcher';
 import * as useServiceTransactionTypesHook from '../../context/apm_service/use_service_transaction_types_fetcher';
 import { renderWithTheme } from '../../utils/testHelpers';
-import { fromQuery } from './Links/url_helpers';
+import { fromQuery } from './links/url_helpers';
 import { CoreStart } from 'kibana/public';
 import { SearchBar } from './search_bar';
 

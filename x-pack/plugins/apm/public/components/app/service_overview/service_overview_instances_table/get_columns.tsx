@@ -25,8 +25,8 @@ import {
   asTransactionRate,
 } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { MetricOverviewLink } from '../../../shared/Links/apm/MetricOverviewLink';
-import { ServiceNodeMetricOverviewLink } from '../../../shared/Links/apm/ServiceNodeMetricOverviewLink';
+import { MetricOverviewLink } from '../../../shared/links/apm/metric_overview_link';
+import { ServiceNodeMetricOverviewLink } from '../../../shared/links/apm/service_node_metric_overview_link';
 import { ListMetric } from '../../../shared/list_metric';
 import { getLatencyColumnLabel } from '../../../shared/transactions_table/get_latency_column_label';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';

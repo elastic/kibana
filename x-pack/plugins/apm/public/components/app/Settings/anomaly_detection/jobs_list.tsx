@@ -27,9 +27,9 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useMlManageJobsHref } from '../../../../hooks/use_ml_manage_jobs_href';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
-import { MLExplorerLink } from '../../../shared/Links/MachineLearningLinks/MLExplorerLink';
-import { MLManageJobsLink } from '../../../shared/Links/MachineLearningLinks/MLManageJobsLink';
-import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
+import { MLExplorerLink } from '../../../shared/links/machine_learning_links/mlexplorer_link';
+import { MLManageJobsLink } from '../../../shared/links/machine_learning_links/mlmanage_jobs_link';
+import { LoadingStatePrompt } from '../../../shared/loading_state_prompt';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
 import { MLCallout, shouldDisplayMlCallout } from '../../../shared/ml_callout';
 import { AnomalyDetectionApiResponse } from './index';

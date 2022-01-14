@@ -11,7 +11,7 @@ import {
   EuiSelectOption,
   EuiFormRow,
 } from '@elastic/eui';
-import { SelectWithPlaceholder } from '../../../../../shared/SelectWithPlaceholder';
+import { SelectWithPlaceholder } from '../../../../../shared/select_with_placeholder';
 
 interface Props {
   title: string;

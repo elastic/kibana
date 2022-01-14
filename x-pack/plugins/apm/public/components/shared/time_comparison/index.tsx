@@ -18,7 +18,7 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import * as urlHelpers from '../../shared/Links/url_helpers';
+import * as urlHelpers from '../../shared/links/url_helpers';
 import { getComparisonEnabled } from './get_comparison_enabled';
 import { getComparisonTypes } from './get_comparison_types';
 import { getTimeRangeComparison } from './get_time_range_comparison';

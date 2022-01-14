@@ -7,7 +7,7 @@
 import React from 'react';
 import { useUxUrlParams } from '../../../../context/url_params_context/use_ux_url_params';
 import { useDateRangeRedirect } from '../../../../hooks/use_date_range_redirect';
-import { DatePicker } from '../../../shared/DatePicker';
+import { DatePicker } from '../../../shared/date_picker';
 
 export function RumDatePicker() {
   const {

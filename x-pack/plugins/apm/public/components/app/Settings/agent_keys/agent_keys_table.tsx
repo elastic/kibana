@@ -12,7 +12,7 @@ import {
   EuiBasicTableColumn,
   EuiInMemoryTableProps,
 } from '@elastic/eui';
-import { TimestampTooltip } from '../../../shared/TimestampTooltip';
+import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { ApiKey } from '../../../../../../security/common/model';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 

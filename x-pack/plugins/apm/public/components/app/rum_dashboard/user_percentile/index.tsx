@@ -10,7 +10,7 @@ import React, { useCallback, useEffect } from 'react';
 import { EuiSelect } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
+import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { I18LABELS } from '../translations';
 
 const DEFAULT_P = 50;

@@ -21,7 +21,7 @@ import {
   useUiSetting$,
 } from '../../../../../src/plugins/kibana_react/public';
 import { APMRouteDefinition } from '../application/routes';
-import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
+import { ScrollToTopOnPathChange } from '../components/app/main/ScrollToTopOnPathChange';
 import {
   RumHome,
   DASHBOARD_LABEL,

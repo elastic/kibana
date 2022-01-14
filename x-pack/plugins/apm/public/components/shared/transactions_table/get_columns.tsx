@@ -22,8 +22,8 @@ import {
   asTransactionRate,
 } from '../../../../common/utils/formatters';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { ImpactBar } from '../ImpactBar';
-import { TransactionDetailLink } from '../Links/apm/transaction_detail_link';
+import { ImpactBar } from '../impact_bar';
+import { TransactionDetailLink } from '../links/apm/transaction_detail_link';
 import { ListMetric } from '../list_metric';
 import { TruncateWithTooltip } from '../truncate_with_tooltip';
 import { getLatencyColumnLabel } from './get_latency_column_label';
