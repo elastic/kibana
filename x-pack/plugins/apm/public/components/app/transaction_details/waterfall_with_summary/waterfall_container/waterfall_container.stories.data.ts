@@ -226,6 +226,9 @@ export const simpleTrace = {
       timestamp: {
         us: 1584975868787052,
       },
+      faas: {
+        coldstart: 'true',
+      },
     },
     {
       parent: {
