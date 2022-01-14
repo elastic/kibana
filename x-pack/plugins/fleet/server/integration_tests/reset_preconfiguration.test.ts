@@ -57,6 +57,7 @@ describe('Fleet preconfiguration reset', () => {
                 name: 'fleet-server',
                 version: 'latest',
               },
+              // Preconfigure two policies test-12345 and test-456789
               agentPolicies: [
                 {
                   name: 'Elastic Cloud agent policy 0001',
@@ -69,6 +70,36 @@ describe('Fleet preconfiguration reset', () => {
                   package_policies: [
                     {
                       name: 'fleet_server123456789',
+                      package: {
+                        name: 'fleet_server',
+                      },
+                      inputs: [
+                        {
+                          type: 'fleet-server',
+                          keep_enabled: true,
+                          vars: [
+                            {
+                              name: 'host',
+                              value: '127.0.0.1',
+                              frozen: true,
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  name: 'Second preconfigured policy',
+                  description: 'second policy',
+                  is_default: false,
+                  is_managed: true,
+                  id: 'test-456789',
+                  namespace: 'default',
+                  monitoring_enabled: [],
+                  package_policies: [
+                    {
+                      name: 'fleet_server987654321',
                       package: {
                         name: 'fleet_server',
                       },
@@ -143,11 +174,12 @@ describe('Fleet preconfiguration reset', () => {
     await new Promise((res) => setTimeout(res, 10000));
   };
 
-  beforeEach(async () => {
+  // Share the same servers for all the test to make test a lot faster (but test are not isolated anymore)
+  beforeAll(async () => {
     await startServers();
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await stopServers();
   });
 
@@ -166,11 +198,14 @@ describe('Fleet preconfiguration reset', () => {
           type: 'ingest-agent-policies',
           perPage: 10000,
         });
-      expect(agentPolicies.saved_objects).toHaveLength(1);
+      expect(agentPolicies.saved_objects).toHaveLength(2);
       expect(agentPolicies.saved_objects.map((ap) => ap.attributes)).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             name: 'Elastic Cloud agent policy 0001',
+          }),
+          expect.objectContaining({
+            name: 'Second preconfigured policy',
           }),
         ])
       );
@@ -185,6 +220,13 @@ describe('Fleet preconfiguration reset', () => {
 
       await soClient.delete('ingest-agent-policies', POLICY_ID);
 
+      const oldAgentPolicies = await soClient.find<AgentPolicySOAttributes>({
+        type: 'ingest-agent-policies',
+        perPage: 10000,
+      });
+
+      const secondAgentPoliciesUpdatedAt = oldAgentPolicies.saved_objects[0].updated_at;
+
       const resetAPI = kbnTestServer.getSupertest(
         kbnServer.root,
         'post',
@@ -198,11 +240,17 @@ describe('Fleet preconfiguration reset', () => {
           type: 'ingest-agent-policies',
           perPage: 10000,
         });
-      expect(agentPolicies.saved_objects).toHaveLength(1);
-      expect(agentPolicies.saved_objects.map((ap) => ap.attributes)).toEqual(
+      expect(agentPolicies.saved_objects).toHaveLength(2);
+      expect(
+        agentPolicies.saved_objects.map((ap) => ({ ...ap.attributes, updated_at: ap.updated_at }))
+      ).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             name: 'Elastic Cloud agent policy 0001',
+          }),
+          expect.objectContaining({
+            name: 'Second preconfigured policy',
+            updated_at: secondAgentPoliciesUpdatedAt, // Check that policy was not updated
           }),
         ])
       );
@@ -226,12 +274,15 @@ describe('Fleet preconfiguration reset', () => {
         type: 'ingest-agent-policies',
         perPage: 10000,
       });
-      expect(agentPolicies.saved_objects).toHaveLength(1);
+      expect(agentPolicies.saved_objects).toHaveLength(2);
       expect(agentPolicies.saved_objects.map((ap) => ap.attributes)).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             name: 'Elastic Cloud agent policy 0001',
             package_policies: expect.arrayContaining([expect.stringMatching(/.*/)]),
+          }),
+          expect.objectContaining({
+            name: 'Second preconfigured policy',
           }),
         ])
       );

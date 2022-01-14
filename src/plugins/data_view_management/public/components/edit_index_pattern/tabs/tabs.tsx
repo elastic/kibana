@@ -22,11 +22,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { fieldWildcardMatcher } from '../../../../../kibana_utils/public';
 import {
-  IndexPattern,
-  IndexPatternField,
-  UI_SETTINGS,
-  DataPublicPluginStart,
-} from '../../../../../../plugins/data/public';
+  DataView,
+  DataViewField,
+  DataViewsPublicPluginStart,
+  META_FIELDS,
+} from '../../../../../../plugins/data_views/public';
 import { useKibana } from '../../../../../../plugins/kibana_react/public';
 import { IndexPatternManagmentContext } from '../../../types';
 import { createEditIndexPatternPageStateContainer } from '../edit_index_pattern_state_container';
@@ -38,9 +38,9 @@ import { getTabs, getPath, convertToEuiSelectOption } from './utils';
 import { getFieldInfo } from '../../utils';
 
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
-  indexPattern: IndexPattern;
-  fields: IndexPatternField[];
-  saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
+  indexPattern: DataView;
+  fields: DataViewField[];
+  saveIndexPattern: DataViewsPublicPluginStart['updateSavedObject'];
   refreshFields: () => void;
 }
 
@@ -150,7 +150,7 @@ export function Tabs({
   }, [closeFieldEditor]);
 
   const fieldWildcardMatcherDecorated = useCallback(
-    (filters: string[]) => fieldWildcardMatcher(filters, uiSettings.get(UI_SETTINGS.META_FIELDS)),
+    (filters: string[]) => fieldWildcardMatcher(filters, uiSettings.get(META_FIELDS)),
     [uiSettings]
   );
 
@@ -254,7 +254,7 @@ export function Tabs({
                 fieldFilter={fieldFilter}
                 scriptedFieldLanguageFilter={scriptedFieldLanguageFilter}
                 helpers={{
-                  redirectToRoute: (field: IndexPatternField) => {
+                  redirectToRoute: (field: DataViewField) => {
                     history.push(getPath(field, indexPattern));
                   },
                 }}

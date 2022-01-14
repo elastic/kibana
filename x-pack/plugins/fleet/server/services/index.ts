@@ -9,7 +9,6 @@ import type { SavedObjectsClientContract } from 'kibana/server';
 
 import type { agentPolicyService } from './agent_policy';
 import * as settingsService from './settings';
-import type { getInstallation, ensureInstalledPackage } from './epm/packages';
 
 export { ESIndexPatternSavedObjectService } from './es_index_pattern';
 export { getRegistryUrl } from './epm/registry/registry_url';
@@ -28,11 +27,6 @@ export interface ESIndexPatternService {
 /**
  * Service that provides exported function that return information about EPM packages
  */
-
-export interface PackageService {
-  getInstallation: typeof getInstallation;
-  ensureInstalledPackage: typeof ensureInstalledPackage;
-}
 
 export interface AgentPolicyServiceInterface {
   get: typeof agentPolicyService['get'];
@@ -60,3 +54,7 @@ export * from './artifacts';
 
 // Policy preconfiguration functions
 export { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
+
+// Package Services
+export { PackageServiceImpl } from './epm';
+export type { PackageService, PackageClient } from './epm';
