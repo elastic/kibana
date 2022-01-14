@@ -127,7 +127,12 @@ const PermissionsError: React.FunctionComponent<{ error: string }> = memo(({ err
 
 export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
   useBreadcrumbs('base');
-  const { notifications } = useStartServices();
+  const core = useStartServices();
+  const { notifications, application } = core;
+  const { capabilities } = application;
+  const hasFleetWritePermissions = capabilities.fleetv2.write;
+  const hasIntegrationsPermissions = capabilities.fleet.write || capabilities.fleet.read;
+  const hasPrivileges = hasFleetWritePermissions && hasIntegrationsPermissions;
 
   const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
   const [permissionsError, setPermissionsError] = useState<string>();
@@ -159,6 +164,9 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
                 }),
               });
             }
+            if (!hasPrivileges) {
+              setPermissionsError('MISSING_PRIVILEGE');
+            }
           } catch (err) {
             setInitializationError(err);
           }
@@ -170,7 +178,7 @@ export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
         setPermissionsError('REQUEST_ERROR');
       }
     })();
-  }, [notifications.toasts]);
+  }, [notifications.toasts, hasPrivileges]);
 
   if (isPermissionsLoading || permissionsError) {
     return (

@@ -186,7 +186,9 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                         onClick={onSubmit}
                         isLoading={isLoading}
                         isDisabled={
-                          !hasFleetWriteCapabilites || isLoading || Object.keys(validation).length > 0
+                          !hasFleetWriteCapabilites ||
+                          isLoading ||
+                          Object.keys(validation).length > 0
                         }
                         iconType="save"
                         color="primary"

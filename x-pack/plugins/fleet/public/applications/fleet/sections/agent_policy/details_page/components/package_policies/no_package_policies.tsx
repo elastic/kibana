@@ -20,7 +20,7 @@ export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
   const { application } = useStartServices();
   const hasFleetWriteCapabilities = useFleetCapabilities().write;
   const hasIntWriteCapabilities = useIntegrationsCapabilities().write;
-  const hasPermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
+  const hasAllWritePermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
 
   return (
     <EuiEmptyPrompt
@@ -41,7 +41,7 @@ export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
       }
       actions={
         <EuiButton
-          isDisabled={!hasPermissions}
+          isDisabled={!hasAllWritePermissions}
           fill
           onClick={() =>
             application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
