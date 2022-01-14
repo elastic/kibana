@@ -585,7 +585,7 @@ export const AlertsList: React.FunctionComponent = () => {
       },
     },
     {
-      field: 'monitoring.execution.stats.success_to_failure_ratio',
+      field: 'monitoring.execution.calculated_metrics.success_ratio',
       width: '12%',
       name: (
         <EuiToolTip
@@ -606,8 +606,8 @@ export const AlertsList: React.FunctionComponent = () => {
       sortable: true,
       truncateText: false,
       'data-test-subj': 'alertsTableCell-successRatio',
-      render: (value: number) => {
-        return <span>{getFormattedSuccessRatio(value)}</span>;
+      render: (value: number, all: any) => {
+        return <span data-test-subj="successRatio">{getFormattedSuccessRatio(value)}</span>;
       },
     },
     {
