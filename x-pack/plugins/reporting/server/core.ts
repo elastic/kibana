@@ -25,7 +25,7 @@ import type { IEventLogService } from '../../event_log/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import type { LicensingPluginStart } from '../../licensing/server';
 import type { ScreenshotResult, ScreenshottingStart } from '../../screenshotting/server';
-import type { SecurityPluginSetup } from '../../security/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
 import { DEFAULT_SPACE_ID } from '../../spaces/common/constants';
 import type { SpacesPluginSetup } from '../../spaces/server';
 import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
@@ -61,6 +61,7 @@ export interface ReportingInternalStart {
   licensing: LicensingPluginStart;
   logger: LevelLogger;
   screenshotting: ScreenshottingStart;
+  security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
 }
 

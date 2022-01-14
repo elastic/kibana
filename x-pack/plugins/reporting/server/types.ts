@@ -19,7 +19,11 @@ import type {
   ScreenshotOptions as BaseScreenshotOptions,
   ScreenshottingStart,
 } from '../../screenshotting/server';
-import type { AuthenticatedUser, SecurityPluginSetup } from '../../security/server';
+import type {
+  AuthenticatedUser,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '../../security/server';
 import type { SpacesPluginSetup } from '../../spaces/server';
 import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import type { CancellationToken } from '../common/cancellation_token';
@@ -109,6 +113,7 @@ export interface ReportingStartDeps {
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   screenshotting: ScreenshottingStart;
+  security?: SecurityPluginStart;
   taskManager: TaskManagerStartContract;
 }
 
