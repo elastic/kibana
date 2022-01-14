@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
 import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-shared-deps-src';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-
-import { DocValueFields, HostItem } from '../../../../common/search_strategy';
+import styled from 'styled-components';
+import { DocValueFields, HostItem, HostRiskSeverity } from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
@@ -26,7 +26,7 @@ import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { AnomalyScores } from '../../../common/components/ml/score/anomaly_scores';
 import { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
-import { OverviewWrapper } from '../../../common/components/page';
+import { DescriptionListStyled, OverviewWrapper } from '../../../common/components/page';
 import {
   FirstLastSeenHost,
   FirstLastSeenHostType,
@@ -35,6 +35,8 @@ import {
 import * as i18n from './translations';
 import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
+import { useHostsRiskScore } from '../../../common/containers/hosts_risk/use_hosts_risk_score';
+import { HostRiskScore } from '../../../hosts/components/common/host_risk_score';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -50,7 +52,13 @@ interface HostSummaryProps {
   startDate: string;
   endDate: string;
   narrowDateRange: NarrowDateRange;
+  hostName: string;
 }
+
+const HostRiskOverviewWrapper = styled(EuiFlexGroup)`
+  padding-top: ${({ theme }) => theme.eui.euiSizeM};
+  width: 50%;
+`;
 
 export const HostOverview = React.memo<HostSummaryProps>(
   ({
@@ -67,10 +75,14 @@ export const HostOverview = React.memo<HostSummaryProps>(
     loading,
     narrowDateRange,
     startDate,
+    hostName,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
     const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
+    const hostRisk = useHostsRiskScore({
+      hostName,
+    });
 
     const getDefaultRenderer = useCallback(
       (fieldName: string, fieldData: HostItem) => (
@@ -83,6 +95,40 @@ export const HostOverview = React.memo<HostSummaryProps>(
       ),
       [contextID, isDraggable]
     );
+
+    const [hostRiskScore, hostRiskLevel] = useMemo(() => {
+      if (hostRisk?.isModuleEnabled) {
+        const hostRiskData =
+          hostRisk.result && hostRisk.result.length > 0 ? hostRisk.result[0] : undefined;
+        return [
+          {
+            title: i18n.HOST_RISK_SCORE,
+            description: (
+              <>
+                {hostRiskData ? Math.round(hostRiskData.risk_stats.risk_score) : getEmptyTagValue()}
+              </>
+            ),
+          },
+
+          {
+            title: i18n.HOST_RISK_CLASSIFICATION,
+            description: (
+              <>
+                {hostRiskData ? (
+                  <HostRiskScore
+                    severity={hostRiskData.risk as HostRiskSeverity}
+                    hideBackgroundColor
+                  />
+                ) : (
+                  getEmptyTagValue()
+                )}
+              </>
+            ),
+          },
+        ];
+      }
+      return [undefined, undefined];
+    }, [hostRisk]);
 
     const column: DescriptionList[] = useMemo(
       () => [
@@ -228,6 +274,21 @@ export const HostOverview = React.memo<HostSummaryProps>(
             )}
           </OverviewWrapper>
         </InspectButtonContainer>
+        {hostRiskScore && hostRiskLevel && (
+          <HostRiskOverviewWrapper
+            gutterSize={isInDetailsSidePanel ? 'm' : 'none'}
+            direction={isInDetailsSidePanel ? 'column' : 'row'}
+            data-test-subj="host-risk-overview"
+          >
+            <EuiFlexItem>
+              <DescriptionListStyled listItems={[hostRiskScore]} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <DescriptionListStyled listItems={[hostRiskLevel]} />
+            </EuiFlexItem>
+          </HostRiskOverviewWrapper>
+        )}
+
         {data && data.endpoint != null ? (
           <>
             <EuiHorizontalRule />

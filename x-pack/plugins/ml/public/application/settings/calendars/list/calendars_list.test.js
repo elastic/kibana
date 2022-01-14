@@ -11,10 +11,6 @@ import { ml } from '../../../services/ml_api_service';
 
 import { CalendarsList } from './calendars_list';
 
-jest.mock('../../../components/navigation_menu', () => ({
-  NavigationMenu: () => <div id="mockNavigationMenu" />,
-}));
-
 jest.mock('../../../components/help_menu', () => ({
   HelpMenu: () => <div id="mockHelpMenu" />,
 }));

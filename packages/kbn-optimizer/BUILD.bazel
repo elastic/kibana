@@ -69,7 +69,7 @@ TYPES_DEPS = [
   "//packages/kbn-config-schema:npm_module_types",
   "//packages/kbn-dev-utils:npm_module_types",
   "//packages/kbn-std:npm_module_types",
-  "//packages/kbn-ui-shared-deps-npm",
+  "//packages/kbn-ui-shared-deps-npm:npm_module_types",
   "//packages/kbn-ui-shared-deps-src:npm_module_types",
   "//packages/kbn-utils:npm_module_types",
   "@npm//chalk",

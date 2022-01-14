@@ -604,6 +604,7 @@ export const createLegacyRuleAction = async (
         },
       ],
     });
+
 /**
  * Deletes the signals index for use inside of afterEach blocks of tests
  * @param supertest The supertest client library
@@ -1832,72 +1833,6 @@ export const getOpenSignals = async (
  * Cluster stats URL. Replace this with any from kibana core if there is ever a constant there for this.
  */
 export const getStatsUrl = (): string => '/api/telemetry/v2/clusters/_stats';
-
-/**
- * Initial detection metrics initialized.
- */
-export const getInitialDetectionMetrics = (): DetectionMetrics => ({
-  ml_jobs: {
-    ml_job_usage: {
-      custom: {
-        enabled: 0,
-        disabled: 0,
-      },
-      elastic: {
-        enabled: 0,
-        disabled: 0,
-      },
-    },
-    ml_job_metrics: [],
-  },
-  detection_rules: {
-    detection_rule_detail: [],
-    detection_rule_usage: {
-      query: {
-        enabled: 0,
-        disabled: 0,
-        alerts: 0,
-        cases: 0,
-      },
-      threshold: {
-        enabled: 0,
-        disabled: 0,
-        alerts: 0,
-        cases: 0,
-      },
-      eql: {
-        enabled: 0,
-        disabled: 0,
-        alerts: 0,
-        cases: 0,
-      },
-      machine_learning: {
-        enabled: 0,
-        disabled: 0,
-        alerts: 0,
-        cases: 0,
-      },
-      threat_match: {
-        enabled: 0,
-        disabled: 0,
-        alerts: 0,
-        cases: 0,
-      },
-      elastic_total: {
-        enabled: 0,
-        disabled: 0,
-        alerts: 0,
-        cases: 0,
-      },
-      custom_total: {
-        enabled: 0,
-        disabled: 0,
-        alerts: 0,
-        cases: 0,
-      },
-    },
-  },
-});
 
 /**
  * Given a body this will return the detection metrics from it.
