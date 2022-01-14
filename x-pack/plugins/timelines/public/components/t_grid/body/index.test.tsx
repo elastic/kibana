@@ -95,6 +95,10 @@ describe('Body', () => {
     indexNames: [''],
   };
 
+  beforeEach(() => {
+    mockDispatch.mockReset();
+  });
+
   describe('rendering', () => {
     test('it renders the body data grid', () => {
       const wrapper = mount(
@@ -335,7 +339,10 @@ describe('Body', () => {
     const customFieldId = 'my.custom.runtimeField';
     const extraFieldProps = {
       ...props,
-      columnHeaders: [...defaultHeaders, { id: customFieldId } as ColumnHeaderOptions],
+      columnHeaders: [
+        ...defaultHeaders,
+        { id: customFieldId, category: 'my' } as ColumnHeaderOptions,
+      ],
     };
     render(
       <TestProviders>
@@ -343,6 +350,7 @@ describe('Body', () => {
       </TestProviders>
     );
 
+    expect(mockDispatch).toBeCalledTimes(1);
     expect(mockDispatch).toBeCalledWith({
       payload: { columnId: customFieldId, id: 'timeline-test' },
       type: 'x-pack/timelines/t-grid/REMOVE_COLUMN',

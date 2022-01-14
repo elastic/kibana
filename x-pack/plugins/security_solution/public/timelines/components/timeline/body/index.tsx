@@ -8,7 +8,7 @@
 import { noop } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
 import {
@@ -99,6 +99,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
     leadingControlColumns = [],
     trailingControlColumns = [],
   }) => {
+    const dispatch = useDispatch();
     const containerRef = useRef<HTMLDivElement | null>(null);
     const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
     const { queryFields, selectAll } = useDeepEqualSelector((state) =>
@@ -142,6 +143,17 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         onSelectAll({ isSelected: true });
       }
     }, [isSelectAllChecked, onSelectAll, selectAll]);
+
+    // Clean any removed custom field that may still be present in stored columnHeaders
+    useEffect(() => {
+      if (browserFields && columnHeaders) {
+        columnHeaders.forEach(({ id: columnId, category }) => {
+          if (category && browserFields[category]?.fields?.[columnId] == null) {
+            dispatch(timelineActions.removeColumn({ id, columnId }));
+          }
+        });
+      }
+    }, [browserFields, columnHeaders, dispatch, id]);
 
     const enabledRowRenderers = useMemo(() => {
       if (
