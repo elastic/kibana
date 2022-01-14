@@ -14,6 +14,11 @@ import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 export type LayerWizard = {
   title: string;
   categories: LAYER_WIZARD_CATEGORY[];
+  /*
+   * Sets display order.
+   * Lower numbers are displayed before higher numbers.
+   * 0-99 reserved for Maps-plugin wizards.
+   */
   order: number;
   description: string;
   icon: string | FunctionComponent<any>;
