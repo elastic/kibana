@@ -26,7 +26,7 @@ export class Connectors extends BaseHandler {
       Operations.getUserActionMetrics
     );
 
-    const uniqueConnector = await userActionService.getUniqueConnectorOfCase({
+    const uniqueConnectors = await userActionService.getUniqueConnectorOfCase({
       unsecuredSavedObjectsClient,
       caseId,
       filter: authorizationFilter,
@@ -34,11 +34,11 @@ export class Connectors extends BaseHandler {
 
     try {
       return {
-        connectors: { total: uniqueConnector.length },
+        connectors: { total: uniqueConnectors.length },
       };
     } catch (error) {
       throw createCaseError({
-        message: `Failed to retrieve lifespan metrics for case id: ${caseId}: ${error}`,
+        message: `Failed to retrieve total connectors metrics for case id: ${caseId}: ${error}`,
         error,
         logger,
       });

@@ -444,7 +444,7 @@ export class CaseUserActionService {
     caseId: string;
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     filter?: KueryNode;
-  }): Promise<string[]> {
+  }): Promise<Array<{ id: string }>> {
     try {
       this.log.debug(`Attempting to count connectors for case id ${caseId}`);
       const connectorsFilter = buildFilter({
@@ -470,7 +470,9 @@ export class CaseUserActionService {
       });
 
       return (
-        response.aggregations?.references?.connectors?.ids?.buckets?.map(({ key }) => key) ?? []
+        response.aggregations?.references?.connectors?.ids?.buckets?.map(({ key }) => ({
+          id: key,
+        })) ?? []
       );
     } catch (error) {
       this.log.error(`Error while counting connectors for case id ${caseId}: ${error}`);

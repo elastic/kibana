@@ -282,7 +282,7 @@ describe('CaseUserActionService', () => {
   describe('transformFindResponseToExternalModel', () => {
     it('does not populate the ids when the response is an empty array', () => {
       expect(transformFindResponseToExternalModel(createSOFindResponse([]))).toMatchInlineSnapshot(`
-        Object {
+         {
           "page": 1,
           "per_page": 0,
           "saved_objects": Array [],
@@ -297,26 +297,26 @@ describe('CaseUserActionService', () => {
       );
 
       expect(transformed).toMatchInlineSnapshot(`
-        Object {
+         {
           "page": 1,
           "per_page": 1,
           "saved_objects": Array [
-            Object {
-              "attributes": Object {
+             {
+              "attributes":  {
                 "action": "create",
                 "action_id": "100",
                 "case_id": "1",
                 "comment_id": null,
                 "created_at": "abc",
-                "created_by": Object {
+                "created_by":  {
                   "email": "a",
                   "full_name": "abc",
                   "username": "b",
                 },
                 "owner": "securitySolution",
-                "payload": Object {
-                  "connector": Object {
-                    "fields": Object {
+                "payload":  {
+                  "connector":  {
+                    "fields":  {
                       "issueType": "bug",
                       "parent": "2",
                       "priority": "high",
@@ -331,12 +331,12 @@ describe('CaseUserActionService', () => {
               },
               "id": "100",
               "references": Array [
-                Object {
+                 {
                   "id": "1",
                   "name": "associated-cases",
                   "type": "cases",
                 },
-                Object {
+                 {
                   "id": "1",
                   "name": "connectorId",
                   "type": "action",
@@ -922,6 +922,157 @@ describe('CaseUserActionService', () => {
           { title: 'test' },
           { references: [] }
         );
+      });
+    });
+
+    describe('getUniqueConnectorOfCase', () => {
+      const findResponse = createUserActionFindSO(createConnectorUserAction());
+      const aggregationResponse = {
+        aggregations: {
+          references: {
+            doc_count: 8,
+            connectors: {
+              doc_count: 4,
+              ids: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
+                buckets: [
+                  {
+                    key: '865b6040-7533-11ec-8bcc-a9fc6f9d63b2',
+                    doc_count: 2,
+                    docs: {},
+                  },
+                  {
+                    key: '915c2600-7533-11ec-8bcc-a9fc6f9d63b2',
+                    doc_count: 1,
+                    docs: {},
+                  },
+                  {
+                    key: 'b2635b10-63e1-11ec-90af-6fe7d490ff66',
+                    doc_count: 1,
+                    docs: {},
+                  },
+                ],
+              },
+            },
+          },
+        },
+      };
+
+      beforeAll(() => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          findResponse as unknown as Promise<SavedObjectsFindResponse>
+        );
+      });
+
+      beforeEach(() => {
+        jest.clearAllMocks();
+      });
+
+      it('it returns an empty array if the response is not valid', async () => {
+        const res = await service.getUniqueConnectorOfCase({
+          unsecuredSavedObjectsClient,
+          caseId: '123',
+        });
+
+        expect(res).toEqual([]);
+      });
+
+      it('it returns the connectors', async () => {
+        unsecuredSavedObjectsClient.find.mockResolvedValue({
+          ...findResponse,
+          ...aggregationResponse,
+        } as unknown as Promise<SavedObjectsFindResponse>);
+
+        const res = await service.getUniqueConnectorOfCase({
+          unsecuredSavedObjectsClient,
+          caseId: '123',
+        });
+
+        expect(res).toEqual([
+          { id: '865b6040-7533-11ec-8bcc-a9fc6f9d63b2' },
+          { id: '915c2600-7533-11ec-8bcc-a9fc6f9d63b2' },
+          { id: 'b2635b10-63e1-11ec-90af-6fe7d490ff66' },
+        ]);
+      });
+
+      it('it returns the unique connectors', async () => {
+        await service.getUniqueConnectorOfCase({
+          unsecuredSavedObjectsClient,
+          caseId: '123',
+        });
+
+        expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith({
+          aggs: {
+            references: {
+              aggregations: {
+                connectors: {
+                  aggregations: {
+                    ids: {
+                      aggregations: {
+                        docs: {
+                          aggregations: {
+                            top_docs: {
+                              top_hits: {
+                                size: 1,
+                                sort: [
+                                  {
+                                    'cases-user-actions.created_at': {
+                                      order: 'desc',
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                          },
+                          reverse_nested: {},
+                        },
+                      },
+                      terms: {
+                        field: 'cases-user-actions.references.id',
+                        size: 100,
+                      },
+                    },
+                  },
+                  filter: {
+                    term: {
+                      'cases-user-actions.references.type': 'action',
+                    },
+                  },
+                },
+              },
+              nested: {
+                path: 'cases-user-actions.references',
+              },
+            },
+          },
+          filter: {
+            arguments: [
+              {
+                type: 'literal',
+                value: 'cases-user-actions.attributes.type',
+              },
+              {
+                type: 'literal',
+                value: 'connector',
+              },
+              {
+                type: 'literal',
+                value: false,
+              },
+            ],
+            function: 'is',
+            type: 'function',
+          },
+          hasReference: {
+            id: '123',
+            type: 'cases',
+          },
+          page: 1,
+          perPage: 1,
+          sortField: 'created_at',
+          type: 'cases-user-actions',
+        });
       });
     });
   });

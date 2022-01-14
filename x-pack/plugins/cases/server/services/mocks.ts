@@ -93,6 +93,7 @@ export const createUserActionServiceMock = (): CaseUserActionServiceMock => {
     getAll: jest.fn(),
     bulkCreate: jest.fn(),
     findStatusChanges: jest.fn(),
+    getUniqueConnectorOfCase: jest.fn(),
   };
 
   // the cast here is required because jest.Mocked tries to include private members and would throw an error
