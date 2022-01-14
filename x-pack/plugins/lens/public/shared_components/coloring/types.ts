@@ -15,17 +15,24 @@ export interface PaletteConfigurationState {
 }
 
 /** @internal **/
+export interface DataBounds {
+  min: number;
+  max: number;
+  fallback?: boolean;
+}
+
+/** @internal **/
 export interface UpdateRangeTypePayload {
   rangeType: CustomPaletteParams['rangeType'];
   palettes: PaletteRegistry;
-  dataBounds: { min: number; max: number };
+  dataBounds: DataBounds;
 }
 
 /** @internal **/
 export interface ChangeColorPalettePayload {
   palette: PaletteOutput<CustomPaletteParams>;
   palettes: PaletteRegistry;
-  dataBounds: { min: number; max: number };
+  dataBounds: DataBounds;
 }
 
 export type PaletteConfigurationActions =

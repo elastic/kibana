@@ -11,6 +11,7 @@ import type { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { EuiFormRow, htmlIdGenerator, EuiButtonGroup, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PalettePicker } from './palette_picker';
+import { DataBounds } from './types';
 
 import './palette_configuration.scss';
 
@@ -19,7 +20,6 @@ import type { CustomPaletteParams, RequiredPaletteParamTypes } from '../../../co
 import { getSwitchToCustomParams, toColorRanges } from './utils';
 
 import { toColorStops } from './color_ranges/utils';
-
 import { ColorRanges } from './color_ranges';
 
 import { paletteConfigurationReducer } from './palette_configuration_reducer';
@@ -35,7 +35,7 @@ export function CustomizablePalette({
   palettes: PaletteRegistry;
   activePalette?: PaletteOutput<CustomPaletteParams>;
   setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
-  dataBounds?: { min: number; max: number };
+  dataBounds?: DataBounds;
   showRangeTypeSelector?: boolean;
 }) {
   if (!dataBounds || !activePalette) {

@@ -7,7 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import { getDataMinMax, isValidColor } from '../utils';
 
-import type { ColorRange, ColorRangeAccessor, DataBounds } from './types';
+import type { ColorRange, ColorRangeAccessor } from './types';
+import type { DataBounds } from '../types';
+
 import { CustomPaletteParams } from '../../../../common';
 
 /** @internal **/

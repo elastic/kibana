@@ -19,7 +19,7 @@ import {
   DEFAULT_CONTINUITY,
 } from './constants';
 import type { ColorRange } from './color_ranges';
-import type { PaletteConfigurationState } from './types';
+import type { PaletteConfigurationState, DataBounds } from './types';
 import type { CustomPaletteParams, ColorStop } from '../../../common';
 import {
   checkIsMinContinuity,
@@ -46,7 +46,7 @@ import {
 export function updateRangeType(
   newRangeType: CustomPaletteParams['rangeType'],
   activePalette: PaletteConfigurationState['activePalette'],
-  dataBounds: { min: number; max: number },
+  dataBounds: DataBounds,
   palettes: PaletteRegistry,
   colorRanges: PaletteConfigurationState['colorRanges']
 ) {
@@ -96,7 +96,7 @@ export function changeColorPalette(
   newPalette: PaletteConfigurationState['activePalette'],
   activePalette: PaletteConfigurationState['activePalette'],
   palettes: PaletteRegistry,
-  dataBounds: { min: number; max: number }
+  dataBounds: DataBounds
 ) {
   const isNewPaletteCustom = newPalette.name === CUSTOM_PALETTE;
   const newParams: CustomPaletteParams = {
@@ -151,7 +151,7 @@ export function updatePalette(
 export function applyPaletteParams<T extends PaletteOutput<CustomPaletteParams>>(
   palettes: PaletteRegistry,
   activePalette: T,
-  dataBounds: { min: number; max: number }
+  dataBounds: DataBounds
 ) {
   // make a copy of it as they have to be manipulated later on
   const displayStops = getPaletteStops(palettes, activePalette?.params || {}, {
@@ -236,10 +236,7 @@ export function getStopsFromColorRangesByNewInterval(
   });
 }
 
-function getOverallMinMax(
-  params: CustomPaletteParams | undefined,
-  dataBounds: { min: number; max: number }
-) {
+function getOverallMinMax(params: CustomPaletteParams | undefined, dataBounds: DataBounds) {
   const { min: dataMin, max: dataMax } = getDataMinMax(params?.rangeType, dataBounds);
   const minStopValue = params?.colorStops?.[0]?.stop ?? Infinity;
   const maxStopValue = params?.colorStops?.[params.colorStops.length - 1]?.stop ?? -Infinity;
@@ -250,7 +247,7 @@ function getOverallMinMax(
 
 export function getDataMinMax(
   rangeType: CustomPaletteParams['rangeType'] | undefined,
-  dataBounds: { min: number; max: number }
+  dataBounds: DataBounds
 ) {
   const dataMin = rangeType === 'number' ? dataBounds.min : DEFAULT_MIN_STOP;
   const dataMax = rangeType === 'number' ? dataBounds.max : DEFAULT_MAX_STOP;
@@ -271,7 +268,7 @@ export function getPaletteStops(
     defaultPaletteName,
   }: {
     prevPalette?: string;
-    dataBounds: { min: number; max: number };
+    dataBounds: DataBounds;
     mapFromMinValue?: boolean;
     defaultPaletteName?: string;
   }
@@ -370,7 +367,7 @@ export function getSwitchToCustomParams(
   palettes: PaletteRegistry,
   activePalette: PaletteOutput<CustomPaletteParams>,
   newParams: CustomPaletteParams,
-  dataBounds: { min: number; max: number }
+  dataBounds: DataBounds
 ) {
   // if it's already a custom palette just return the params
   if (activePalette?.params?.name === CUSTOM_PALETTE) {
@@ -415,7 +412,7 @@ export function getColorStops(
   palettes: PaletteRegistry,
   colorStops: Required<CustomPaletteParams>['stops'],
   activePalette: PaletteOutput<CustomPaletteParams>,
-  dataBounds: { min: number; max: number }
+  dataBounds: DataBounds
 ) {
   // just forward the current stops if custom
   if (activePalette?.name === CUSTOM_PALETTE && colorStops?.length) {
@@ -449,7 +446,7 @@ export function toColorRanges(
   palettes: PaletteRegistry,
   colorStops: CustomPaletteParams['colorStops'],
   activePalette: PaletteOutput<CustomPaletteParams>,
-  dataBounds: { min: number; max: number }
+  dataBounds: DataBounds
 ) {
   const {
     continuity = defaultPaletteParams.continuity,
@@ -499,6 +496,12 @@ export function getNumericValue(rowValue: number | number[] | undefined) {
   return rowValue;
 }
 
+export const getFallbackDataBounds = () => ({
+  max: 100,
+  min: 0,
+  fallback: true,
+});
+
 export const findMinMaxByColumnId = (
   columnIds: string[],
   table: Datatable | undefined,
@@ -524,7 +527,7 @@ export const findMinMaxByColumnId = (
       });
       // what happens when there's no data in the table? Fallback to a percent range
       if (minMax[originalId].max === -Infinity) {
-        minMax[originalId] = { max: 100, min: 0, fallback: true };
+        minMax[originalId] = getFallbackDataBounds();
       }
     }
   }

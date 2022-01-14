@@ -12,6 +12,7 @@ import {
 } from '../../../../../../../../src/plugins/charts/common';
 import type { CustomPaletteParams } from '../../../../../common';
 import type { ColorRange, ColorRangeAccessor } from '../types';
+import type { DataBounds } from '../../types';
 
 /**
  * Check if item is last
@@ -82,7 +83,7 @@ export const getValueForContinuity = (
   continuity: PaletteContinuity,
   isLast: boolean,
   rangeType: CustomPaletteParams['rangeType'],
-  dataBounds: { min: number; max: number }
+  dataBounds: DataBounds
 ) => {
   const { max, min } = getDataMinMax(rangeType, dataBounds);
   let value;

@@ -12,7 +12,8 @@ import { EuiFlexGroup, EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 import { DistributeEquallyIcon } from '../../../assets/distribute_equally';
 import { TooltipWrapper } from '../../index';
 
-import type { DataBounds, ColorRangesActions } from './types';
+import type { ColorRangesActions } from './types';
+import type { DataBounds } from '../types';
 
 export interface ColorRangesExtraActionsProps {
   dispatch: Dispatch<ColorRangesActions>;

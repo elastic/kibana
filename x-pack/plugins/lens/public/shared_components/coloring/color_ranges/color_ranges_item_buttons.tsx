@@ -14,7 +14,8 @@ import { ValueMaxIcon } from '../../../assets/value_max';
 import { ValueMinIcon } from '../../../assets/value_min';
 import { isLastItem } from './utils';
 
-import type { DataBounds, ColorRangesActions, ColorRange, ColorRangeAccessor } from './types';
+import type { ColorRangesActions, ColorRange, ColorRangeAccessor } from './types';
+import type { DataBounds } from '../types';
 import type { CustomPaletteParams } from '../../../../common';
 import type { PaletteContinuity } from '../../../../../../../src/plugins/charts/common';
 
@@ -110,7 +111,7 @@ export function ColorRangeAutoDetectButton({
       type: 'updateContinuity',
       payload: { isLast, continuity: newContinuity, dataBounds },
     });
-  }, [continuity, dispatch, isLast]);
+  }, [continuity, dataBounds, dispatch, isLast]);
 
   const title = isLast
     ? i18n.translate('xpack.lens.dynamicColoring.customPalette.autoDetectMaximumAriaLabel', {

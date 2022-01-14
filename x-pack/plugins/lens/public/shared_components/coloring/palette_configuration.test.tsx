@@ -14,6 +14,7 @@ import { ReactWrapper } from 'enzyme';
 import type { CustomPaletteParams } from '../../../common';
 import { CustomizablePalette } from './palette_configuration';
 import { act } from 'react-dom/test-utils';
+import type { DataBounds } from './types';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {
@@ -34,7 +35,7 @@ describe('palette panel', () => {
     palettes: PaletteRegistry;
     activePalette: PaletteOutput<CustomPaletteParams>;
     setPalette: (palette: PaletteOutput<CustomPaletteParams>) => void;
-    dataBounds: { min: number; max: number };
+    dataBounds: DataBounds;
   };
 
   describe('palette picker', () => {

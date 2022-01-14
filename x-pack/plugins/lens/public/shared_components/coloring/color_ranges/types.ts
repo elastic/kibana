@@ -6,17 +6,12 @@
  */
 import type { CustomPaletteParams } from '../../../../common';
 import type { PaletteContinuity } from '../../../../../../../src/plugins/charts/common';
+import type { DataBounds } from '../types';
 
 export interface ColorRange {
   color: string;
   start: number;
   end: number;
-}
-
-/** @internal **/
-export interface DataBounds {
-  min: number;
-  max: number;
 }
 
 /** @internal **/

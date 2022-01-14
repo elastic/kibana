@@ -7,7 +7,8 @@
 import { getDataMinMax, roundValue } from '../../utils';
 import { calculateMaxStep } from './utils';
 
-import type { ColorRange, DataBounds, ColorRangeAccessor } from '../types';
+import type { ColorRange, ColorRangeAccessor } from '../types';
+import type { DataBounds } from '../../types';
 import type { CustomPaletteParamsConfig } from '../../../../../common';
 
 /**

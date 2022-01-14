@@ -7,7 +7,8 @@
 
 import { getDataMinMax, roundValue } from '../../utils';
 
-import type { ColorRange, DataBounds } from '../types';
+import type { ColorRange } from '../types';
+import type { DataBounds } from '../../types';
 import type { CustomPaletteParamsConfig } from '../../../../../common';
 import {
   PaletteContinuity,

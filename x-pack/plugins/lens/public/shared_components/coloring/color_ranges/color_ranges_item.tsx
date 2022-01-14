@@ -30,7 +30,8 @@ import {
   ColorRangeEditButton,
 } from './color_ranges_item_buttons';
 
-import type { ColorRange, DataBounds, ColorRangeAccessor, ColorRangesActions } from './types';
+import type { ColorRange, ColorRangeAccessor, ColorRangesActions } from './types';
+import type { DataBounds } from '../types';
 import type { ColorRangeValidation } from './color_ranges_validation';
 import type { CustomPaletteParams } from '../../../../common';
 import {

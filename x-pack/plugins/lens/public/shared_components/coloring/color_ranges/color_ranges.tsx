@@ -17,8 +17,8 @@ import {
 } from './color_ranges_validation';
 
 import type { CustomPaletteParamsConfig } from '../../../../common';
-import type { ColorRange, DataBounds } from './types';
-import type { PaletteConfigurationActions } from '../types';
+import type { ColorRange } from './types';
+import type { PaletteConfigurationActions, DataBounds } from '../types';
 
 import { defaultPaletteParams } from '../constants';
 
