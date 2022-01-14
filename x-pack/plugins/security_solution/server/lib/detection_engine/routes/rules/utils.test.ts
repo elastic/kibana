@@ -856,8 +856,8 @@ describe.each([
         [rule],
         soClient
       );
-      expect(res[0] instanceof Error).toBeTruthy();
-      expect((res[0] as unknown as Error).message).toEqual(
+      expect(res[1] instanceof Error).toBeTruthy();
+      expect((res[1] as unknown as Error).message).toEqual(
         JSON.stringify({
           rule_id: 'rule-1',
           error: {
