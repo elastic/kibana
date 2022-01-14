@@ -19,7 +19,7 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { ErrorOverviewLink } from '../../../shared/Links/apm/ErrorOverviewLink';
+import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
 import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_columns';
