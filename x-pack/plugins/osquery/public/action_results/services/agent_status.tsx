@@ -29,7 +29,7 @@ export const AGENT_STATUSES: ActionAgentStatus[] = [
 export function getColorForAgentStatus(agentStatus: ActionAgentStatus): string {
   switch (agentStatus) {
     case ActionAgentStatus.SUCCESS:
-      return colorToHexMap.success;
+      return colorToHexMap.secondary;
     case ActionAgentStatus.PENDING:
       return colorToHexMap.default;
     case ActionAgentStatus.FAILED:

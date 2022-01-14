@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-export const preparePack = (packName: string) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const preparePack = (packName: string, savedQueryId: string) => {
   cy.contains('Packs').click();
   const createdPack = cy.contains(packName);
   createdPack.click();
