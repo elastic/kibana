@@ -9,7 +9,15 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiLink, EuiSelect, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiLink,
+  EuiSelect,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
 import type { AgentPolicy } from '../../types';
 import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
@@ -97,6 +105,32 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
 
   return (
     <>
+      <EuiText>
+        {isFleetServerPolicy ? (
+          <FormattedMessage
+            id="xpack.fleet.enrollmentStepAgentPolicy.selectAgentPolicyFleetServerText"
+            defaultMessage="Fleet Server runs on Elastic Agent, and agents are enrolled in agent policies which represent hosts. You can select an existing agent policy configured for Fleet Server, or you may choose to create a new one."
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.enrollmentStepAgentPolicy.createAgentPolicyText"
+            defaultMessage="Type of hosts are controlled by an {agentPolicy}. Choose an agent policy or create a new one."
+            values={{
+              agentPolicy: (
+                <EuiLink
+                  href={'https://www.elastic.co/guide/en/fleet/current/agent-policy.html'}
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.agentPolicyForm.createAgentPolicyDocLink"
+                    defaultMessage="agent policy"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        )}
+      </EuiText>
       <AgentPolicyFormRow
         fullWidth={true}
         label={

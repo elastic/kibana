@@ -95,7 +95,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
         {isFleetServerPolicy ? (
           <FormattedMessage
             id="xpack.fleet.agentPolicyForm.createAgentPolicyFleetServer"
-            defaultMessage="Agent policies allow you to configure your agents remotely. We recommend creating a dedicated agent policy for Fleet Server that runs on dedicated hosts."
+            defaultMessage="Fleet Server runs on Elastic Agent, and agents are enrolled in agent policies which represent hosts. We'll need to create a dedicated agent policy for Fleet Server to run on dedicated hosts."
           />
         ) : (
           <FormattedMessage
