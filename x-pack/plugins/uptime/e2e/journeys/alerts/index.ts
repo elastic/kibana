@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './uptime.journey';
-export * from './step_duration.journey';
-export * from './alerts';
+export * from './tls_alert_flyouts_in_alerting_app';
+export * from './status_alert_flyouts_in_alerting_app';
