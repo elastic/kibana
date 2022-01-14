@@ -14,7 +14,7 @@ import { Legend } from '../../../../shared/charts/Timeline/legend';
 import {
   IWaterfallLegend,
   WaterfallLegendType,
-} from './Waterfall/waterfall_helpers/waterfall_helpers';
+} from './waterfall/waterfall_helpers/waterfall_helpers';
 
 interface Props {
   legends: IWaterfallLegend[];

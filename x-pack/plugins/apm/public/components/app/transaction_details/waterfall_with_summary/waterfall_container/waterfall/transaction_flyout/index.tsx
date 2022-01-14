@@ -20,10 +20,10 @@ import React from 'react';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { TransactionActionMenu } from '../../../../../../shared/transaction_action_menu/TransactionActionMenu';
 import { TransactionSummary } from '../../../../../../shared/Summary/TransactionSummary';
-import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
-import { ResponsiveFlyout } from '../ResponsiveFlyout';
+import { FlyoutTopLevelProperties } from '../flyout_top_level_properties';
+import { ResponsiveFlyout } from '../responsive_flyout';
 import { TransactionMetadata } from '../../../../../../shared/MetadataTable/TransactionMetadata';
-import { DroppedSpansWarning } from './DroppedSpansWarning';
+import { DroppedSpansWarning } from './dropped_spans_warning';
 
 interface Props {
   onClose: () => void;

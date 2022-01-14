@@ -15,7 +15,7 @@ import type { ApmUrlParams } from '../../../../context/url_params_context/types'
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { TransactionMetadata } from '../../../shared/MetadataTable/TransactionMetadata';
 import { WaterfallContainer } from './waterfall_container';
-import { IWaterfall } from './waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
+import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 interface Props {
   transaction: Transaction;

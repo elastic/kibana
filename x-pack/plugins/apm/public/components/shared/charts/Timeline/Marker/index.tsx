@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
-import { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks/get_agent_marks';
-import { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks/get_error_marks';
+import { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
+import { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
 import { AgentMarker } from './agent_marker';
 import { ErrorMarker } from './error_marker';
 

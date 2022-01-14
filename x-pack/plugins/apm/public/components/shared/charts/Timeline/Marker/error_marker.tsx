@@ -15,7 +15,7 @@ import {
 import { asDuration } from '../../../../../../common/utils/formatters';
 import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { useTheme } from '../../../../../hooks/use_theme';
-import { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/Marks/get_error_marks';
+import { ErrorMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_error_marks';
 import { ErrorDetailLink } from '../../../Links/apm/ErrorDetailLink';
 import { Legend, Shape } from '../legend';
 

@@ -22,9 +22,9 @@ import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 import { TransactionSummary } from '../../../shared/Summary/TransactionSummary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/TransactionActionMenu';
 import type { TraceSample } from '../../../../hooks/use_transaction_trace_samples_fetcher';
-import { MaybeViewTraceLink } from './MaybeViewTraceLink';
-import { TransactionTabs } from './TransactionTabs';
-import { IWaterfall } from './waterfall_container/Waterfall/waterfall_helpers/waterfall_helpers';
+import { MaybeViewTraceLink } from './maybe_view_trace_link';
+import { TransactionTabs } from './transaction_tabs';
+import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 
 interface Props {

@@ -14,7 +14,7 @@ import { SpanFlyout } from './';
 type Args = ComponentProps<typeof SpanFlyout>;
 
 export default {
-  title: 'app/TransactionDetails/Waterfall/SpanFlyout',
+  title: 'app/TransactionDetails/waterfall/SpanFlyout',
   component: SpanFlyout,
   decorators: [
     (StoryComponent: ComponentType) => {
