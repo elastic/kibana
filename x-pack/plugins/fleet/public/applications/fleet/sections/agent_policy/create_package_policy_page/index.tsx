@@ -193,7 +193,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           setFormState('VALID');
         }
       } else {
-        setFormState('INVALID');
+        setHasAgentPolicyError(true);
         setAgentPolicy(undefined);
       }
 
