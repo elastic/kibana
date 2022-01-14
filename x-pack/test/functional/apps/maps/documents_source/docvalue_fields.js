@@ -24,6 +24,8 @@ export default function ({ getPageObjects, getService }) {
       await PageObjects.maps.loadSavedMap('document example');
       const { rawResponse: response } = await PageObjects.maps.getResponse();
       const firstHit = response.hits.hits[0];
+      // _type might be present when run tests against v7, but not v8
+      delete firstHit._type;
       expect(firstHit).to.only.have.keys(['_id', '_index', '_score', 'fields']);
       expect(firstHit.fields).to.only.have.keys(['@timestamp', 'geo.coordinates']);
     });
@@ -32,6 +34,8 @@ export default function ({ getPageObjects, getService }) {
       await PageObjects.maps.loadSavedMap('document example with data driven styles');
       const { rawResponse: response } = await PageObjects.maps.getResponse();
       const firstHit = response.hits.hits[0];
+      // _type might be present when run tests against v7, but not v8
+      delete firstHit._type;
       expect(firstHit).to.only.have.keys(['_id', '_index', '_score', 'fields']);
       expect(firstHit.fields).to.only.have.keys([
         '@timestamp',
@@ -48,6 +52,8 @@ export default function ({ getPageObjects, getService }) {
         return hit._id === 'AU_x3_g4GFA8no6QjkSR';
       });
       expect(targetHit).not.to.be(undefined);
+      // _type might be present when run tests against v7, but not v8
+      delete targetHit._type;
       expect(targetHit).to.only.have.keys(['_id', '_index', '_score', 'fields']);
       expect(targetHit.fields).to.only.have.keys(['@timestamp', 'bytes', 'geo.coordinates']);
       expect(targetHit.fields['@timestamp']).to.be.an('array');
