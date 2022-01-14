@@ -152,7 +152,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
           <EuiPage className={classNames({ dscDocsPage: !isLegacy })}>
             <EuiPageContent paddingSize="s" className="dscDocsContent">
               <EuiSpacer size="s" />
-              <EuiText>
+              <EuiText data-test-subj="contextDocumentSurroundingHeader">
                 <strong>
                   <FormattedMessage
                     id="discover.context.contextOfTitle"
