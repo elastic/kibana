@@ -428,7 +428,6 @@ export class CsvGenerator {
 
     this.logger.debug(`Finished generating. Row count: ${this.csvRowCount}.`);
 
-    // FIXME: https://github.com/elastic/kibana/issues/112186 -- find root cause
     if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
       this.logger.warning(
         `ES scroll returned fewer total hits than expected! ` +
