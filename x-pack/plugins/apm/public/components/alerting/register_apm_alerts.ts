@@ -47,11 +47,7 @@ export function registerApmAlerts(
     }),
     format: ({ fields }) => {
       return {
-        reason: formatErrorCountReason({
-          threshold: fields[ALERT_EVALUATION_THRESHOLD]!,
-          measured: fields[ALERT_EVALUATION_VALUE]!,
-          serviceName: String(fields[SERVICE_NAME][0]),
-        }),
+        reason: fields[ALERT_REASON]!,
         link: format({
           pathname: `/app/apm/services/${String(
             fields[SERVICE_NAME][0]

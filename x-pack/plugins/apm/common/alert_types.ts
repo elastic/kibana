@@ -33,17 +33,23 @@ export function formatErrorCountReason({
   threshold,
   measured,
   serviceName,
+  windowSize,
+  windowUnit,
 }: {
   threshold: number;
   measured: number;
   serviceName: string;
+  windowSize: number;
+  windowUnit: string;
 }) {
   return i18n.translate('xpack.apm.alertTypes.errorCount.reason', {
-    defaultMessage: `Error count is {measured} for {serviceName}. Alert when > {threshold}`,
+    defaultMessage: `Error count is {measured} in the last {windowSize}{windowUnit} for {serviceName}. Alert when > {threshold}.`,
     values: {
       threshold,
       measured,
       serviceName,
+      windowSize,
+      windowUnit,
     },
   });
 }
@@ -85,7 +91,7 @@ export function formatTransactionErrorRateReason({
   windowUnit: string;
 }) {
   return i18n.translate('xpack.apm.alertTypes.transactionErrorRate.reason', {
-    defaultMessage: `Failed transactions is {measured} in the last {windowSize} {windowUnit} for {serviceName}. Alert when > {threshold}`,
+    defaultMessage: `Failed transactions is {measured} in the last {windowSize}{windowUnit} for {serviceName}. Alert when > {threshold}`,
     values: {
       threshold: asPercent(threshold, 100),
       measured: asPercent(measured, 100),
@@ -114,7 +120,7 @@ export function formatTransactionDurationAnomalyReason({
   return i18n.translate(
     'xpack.apm.alertTypes.transactionDurationAnomaly.reason',
     {
-      defaultMessage: `{severityLevel} anomaly with a score of {measured} was detected in the last {windowSize} {windowUnit} for {serviceName}. Alert when {threshold}`,
+      defaultMessage: `{severityLevel} anomaly with a score of {measured} was detected in the last {windowSize}{windowUnit} for {serviceName}. Alert when {threshold}`,
       values: {
         threshold,
         serviceName,
