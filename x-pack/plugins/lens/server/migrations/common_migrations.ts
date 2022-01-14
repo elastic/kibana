@@ -7,10 +7,7 @@
 
 import { cloneDeep, mapValues } from 'lodash';
 import { PaletteOutput } from 'src/plugins/charts/common';
-import {
-  MigrateFunctionsObject,
-  getApplyMigrationWithinObject,
-} from '../../../../../src/plugins/kibana_utils/common';
+import { MigrateFunctionsObject } from '../../../../../src/plugins/kibana_utils/common';
 import {
   LensDocShapePre712,
   OperationTypePre712,
@@ -23,6 +20,7 @@ import {
   VisState716,
 } from './types';
 import { CustomPaletteParams, layerTypes } from '../../common';
+import { LensDocShape } from './saved_object_migrations';
 
 export const commonRenameOperationsForFormula = (
   attributes: LensDocShapePre712
@@ -175,6 +173,10 @@ export const commonRenameFilterReferences = (attributes: LensDocShape715<VisStat
 export const getLensFilterMigrations = (
   filterMigrations: MigrateFunctionsObject
 ): MigrateFunctionsObject =>
-  mapValues(filterMigrations, (migrate) =>
-    getApplyMigrationWithinObject(migrate, 'attributes.state.filters')
-  );
+  mapValues(filterMigrations, (migrate) => (lensDoc: { attributes: LensDocShape }) => ({
+    ...lensDoc,
+    attributes: {
+      ...lensDoc.attributes,
+      state: { ...lensDoc.attributes.state, filters: migrate(lensDoc.attributes.state.filters) },
+    },
+  }));

@@ -16,9 +16,9 @@ import {
 import type { ISearchSource } from '../../data/common';
 import { ExpressionAstExpression } from '../../expressions/public';
 
-import type { SerializedVis, Vis } from './vis';
+import type { Vis } from './vis';
 import type { PersistedState } from './persisted_state';
-import type { VisParams } from '../common';
+import type { VisParams, SerializedVis } from '../common';
 
 export type { Vis, SerializedVis, VisParams };
 export interface SavedVisState {

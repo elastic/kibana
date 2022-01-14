@@ -9,10 +9,11 @@
 import { flow, mapValues } from 'lodash';
 import { EmbeddableRegistryDefinition } from 'src/plugins/embeddable/server';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { SerializedSearchSourceFields } from 'src/plugins/data/public';
 import {
   mergeMigrationFunctionMaps,
   MigrateFunctionsObject,
-  getApplyMigrationWithinObject,
+  MigrateFunction,
 } from '../../../kibana_utils/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,
@@ -25,6 +26,7 @@ import {
   commonAddDropLastBucketIntoTSVBModel714Above,
   commonRemoveMarkdownLessFromTSVB,
 } from '../migrations/visualization_common_migrations';
+import { SerializedVis } from '../../common';
 
 const byValueAddSupportOfDualIndexSelectionModeInTSVB = (state: SerializableRecord) => {
   return {
@@ -92,8 +94,22 @@ const byValueRemoveMarkdownLessFromTSVB = (state: SerializableRecord) => {
 const getEmbeddedVisualizationSearchSourceMigrations = (
   searchSourceMigrations: MigrateFunctionsObject
 ) =>
-  mapValues(searchSourceMigrations, (migrate) =>
-    getApplyMigrationWithinObject(migrate, 'savedVis.data.searchSource')
+  mapValues<MigrateFunctionsObject, MigrateFunction>(
+    searchSourceMigrations,
+    (migrate: MigrateFunction<SerializedSearchSourceFields>): MigrateFunction =>
+      (state) => {
+        const _state = state as unknown as { savedVis: SerializedVis };
+        return {
+          ..._state,
+          savedVis: {
+            ..._state.savedVis,
+            data: {
+              ..._state.savedVis.data,
+              searchSource: migrate(_state.savedVis.data.searchSource),
+            },
+          },
+        };
+      }
   );
 
 export const makeVisualizeEmbeddableFactory =
