@@ -57,16 +57,10 @@ export class ServiceAPIClient {
     if (config.tls && config.tls.certificate && config.tls.key) {
       const tlsConfig = new SslConfig(config.tls);
 
-      // TODO: Logging only for testing purpse, should be removed before mergin
-      this.logger.info(tlsConfig.certificate ?? '');
-      this.logger.info(tlsConfig.key ?? '');
-      this.logger.info(tlsConfig.certificateAuthorities?.[0] ?? '');
       return new https.Agent({
         rejectUnauthorized: true, // (NOTE: this will disable client verification)
         cert: tlsConfig.certificate,
         key: tlsConfig.key,
-        ca: tlsConfig.certificateAuthorities,
-        passphrase: tlsConfig.keyPassphrase,
       });
     }
   }
