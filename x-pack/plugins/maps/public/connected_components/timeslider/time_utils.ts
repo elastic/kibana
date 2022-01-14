@@ -47,7 +47,7 @@ function getScaledDateFormat(interval: number): string {
 }
 
 export function epochToKbnDateFormat(epoch: number): string {
-  const dateFormat = getUiSettings().get('dateFormat', 'MMM D, YYYY @ HH:mm:ss');
+  const dateFormat = getUiSettings().get('dateFormat', 'MMM D, YYYY @ HH:mm:ss.SSS');
   const timezone = getTimezone();
   return moment.tz(epoch, timezone).format(dateFormat);
 }
@@ -70,30 +70,23 @@ export function getInterval(min: number, max: number, steps = 6): number {
 export function getTicks(min: number, max: number, interval: number): EuiRangeTick[] {
   const format = getScaledDateFormat(interval);
   const timezone = getTimezone();
-  let ticks = [];
-  for (let i = min; i <= max; i += interval) {
-    ticks.push({
-      value: i,
-      label: moment.tz(i, timezone).format(format),
-    });
-  }
 
-  if (ticks.length < 2) {
-    ticks.push({
-      value: max,
-      label: moment.tz(max, timezone).format(format),
-    });
-  }
+  let tick = Math.ceil(min / interval) * interval;
+  const ticks: EuiRangeTick[] = [];
+  while (tick < max) {
+    let value = tick;
+    let label = moment.tz(tick, timezone).format(format);
 
-  const maxTicks = 19;
-  let filteredArr: Array<{ value: number; label: string }> = [];
-  if (ticks.length > maxTicks) {
-    const nth = Math.ceil(ticks.length / maxTicks);
-    filteredArr = ticks.filter((_value, index) => {
-      return index % nth === 0;
+    if (max - min > moment.duration(2, 'd').asMilliseconds()) {
+      value = moment(tick).startOf('day').valueOf();
+      label = moment.tz(moment(tick).startOf('day').valueOf(), timezone).format(format);
+    }
+
+    ticks.push({
+      value,
+      label,
     });
-    filteredArr.push(ticks[ticks.length - 1]);
-    ticks = filteredArr;
+    tick += interval;
   }
 
   return ticks;
@@ -167,59 +160,10 @@ export function getTimeRanges(timeRangeBounds: TimeRangeBounds) {
   const min = timeRangeBounds.min.valueOf();
   const max = timeRangeBounds.max.valueOf();
   const timeRange = max - min;
-  let value: Array<{ label: string; ms: number }> = [];
+  const interval = getInterval(min, max, 20);
 
-  switch (true) {
-    case timeRange > moment.duration(2, 'y').asMilliseconds():
-      value = RANGE.slice(0, 3);
-      break;
-
-    case timeRange < moment.duration(2, 'y').asMilliseconds() &&
-      timeRange > moment.duration(2, 'M').asMilliseconds():
-      value = RANGE.slice(3, 6);
-      break;
-
-    case timeRange < moment.duration(2, 'M').asMilliseconds() &&
-      timeRange > moment.duration(2, 'd').asMilliseconds():
-      value = RANGE.slice(4, 7);
-      break;
-
-    case timeRange < moment.duration(2, 'd').asMilliseconds() &&
-      timeRange > moment.duration(2, 'h').asMilliseconds():
-      value = RANGE.slice(8, 12);
-      break;
-
-    case timeRange < moment.duration(2, 'h').asMilliseconds():
-      value = RANGE.slice(9, 13);
-      break;
-  }
-
-  return value;
-}
-
-export function getCustomLabel(value: { time: { value: string }; type: { value: string } }) {
-  return value.time.value + ' ' + value.type.value; // i18n ?
-}
-
-export function getCustomInterval(value: { time: { value: string }; type: { value: string } }) {
-  return moment
-    .duration(value.time.value, value.type.value as moment.unitOfTime.DurationConstructor)
-    .asMilliseconds();
-}
-
-const DROPDOWN_OPTIONS = [
-  { value: 'minutes', text: 'minutes' },
-  { value: 'hours', text: 'hours' },
-  { value: 'days', text: 'days' },
-  { value: 'months', text: 'months' },
-  { value: 'years', text: 'years' },
-];
-
-export function filterOptions(max: number) {
-  return DROPDOWN_OPTIONS.filter((el: { value: string }) => {
-    return (
-      moment.duration(1, el.value as moment.unitOfTime.DurationConstructor).asMilliseconds() < max
-    );
+  return RANGE.filter((range) => {
+    return timeRange > range.ms && range.ms >= interval;
   });
 }
 

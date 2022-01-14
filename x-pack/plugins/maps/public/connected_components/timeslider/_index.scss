@@ -12,15 +12,6 @@ $timesliderWidth: 650px;
   background: $euiColorEmptyShade;
   padding: $euiSizeL $euiSize;
   border-radius: $euiSize;
-
-  .euiRangeTick--isMax {
-    display: none;
-  }
-}
-
-.mapTimeslider--large {
-  width: 900px;
-  margin-left: -450px;
 }
 
 .mapTimeslider__row {
