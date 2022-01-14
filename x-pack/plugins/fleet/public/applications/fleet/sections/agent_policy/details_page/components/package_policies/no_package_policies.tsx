@@ -9,12 +9,18 @@ import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
-import { useCapabilities, useStartServices } from '../../../../../hooks';
+import {
+  useFleetCapabilities,
+  useIntegrationsCapabilities,
+  useStartServices,
+} from '../../../../../hooks';
 import { pagePathGetters, INTEGRATIONS_PLUGIN_ID } from '../../../../../constants';
 
 export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
   const { application } = useStartServices();
-  const hasWriteCapabilities = useCapabilities().write;
+  const hasFleetWriteCapabilities = useFleetCapabilities().write;
+  const hasIntWriteCapabilities = useIntegrationsCapabilities().write;
+  const hasPermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
 
   return (
     <EuiEmptyPrompt
@@ -35,7 +41,7 @@ export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
       }
       actions={
         <EuiButton
-          isDisabled={!hasWriteCapabilities}
+          isDisabled={!hasPermissions}
           fill
           onClick={() =>
             application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {

@@ -26,7 +26,7 @@ import {
 
 import { dataTypes } from '../../../../../../../common';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
-import { useCapabilities, useStartServices, sendCreateAgentPolicy } from '../../../../hooks';
+import { useFleetCapabilities, useStartServices, sendCreateAgentPolicy } from '../../../../hooks';
 import { AgentPolicyForm, agentPolicyFormValidation } from '../../components';
 
 const FlyoutWithHigherZIndex = styled(EuiFlyout)`
@@ -43,7 +43,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   ...restOfProps
 }) => {
   const { notifications } = useStartServices();
-  const hasWriteCapabilites = useCapabilities().write;
+  const hasFleetWriteCapabilites = useFleetCapabilities().write;
   const [agentPolicy, setAgentPolicy] = useState<NewAgentPolicy>({
     name: '',
     description: '',
@@ -115,7 +115,9 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
           <EuiButton
             fill
             isLoading={isLoading}
-            isDisabled={!hasWriteCapabilites || isLoading || Object.keys(validation).length > 0}
+            isDisabled={
+              !hasFleetWriteCapabilites || isLoading || Object.keys(validation).length > 0
+            }
             onClick={async () => {
               setIsLoading(true);
               try {

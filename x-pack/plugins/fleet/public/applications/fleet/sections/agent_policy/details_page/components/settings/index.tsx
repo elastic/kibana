@@ -23,7 +23,7 @@ import type { AgentPolicy } from '../../../../../types';
 import {
   useLink,
   useStartServices,
-  useCapabilities,
+  useFleetCapabilities,
   sendUpdateAgentPolicy,
   useConfig,
   sendGetAgentStatus,
@@ -51,7 +51,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
     } = useConfig();
     const history = useHistory();
     const { getPath } = useLink();
-    const hasWriteCapabilites = useCapabilities().write;
+    const hasFleetWriteCapabilites = useFleetCapabilities().write;
     const refreshAgentPolicy = useAgentPolicyRefresh();
     const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>({
       ...originalAgentPolicy,
@@ -186,7 +186,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                         onClick={onSubmit}
                         isLoading={isLoading}
                         isDisabled={
-                          !hasWriteCapabilites || isLoading || Object.keys(validation).length > 0
+                          !hasFleetWriteCapabilites || isLoading || Object.keys(validation).length > 0
                         }
                         iconType="save"
                         color="primary"

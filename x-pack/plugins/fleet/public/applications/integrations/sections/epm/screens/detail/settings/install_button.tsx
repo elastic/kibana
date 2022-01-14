@@ -12,7 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { PackageInfo, UpgradePackagePolicyDryRunResponse } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
-  useCapabilities,
+  useFleetCapabilities,
+  useIntegrationsCapabilities,
   useGetPackageInstallStatus,
   useInstallPackage,
 } from '../../../../../hooks';
@@ -30,7 +31,9 @@ type InstallationButtonProps = Pick<PackageInfo, 'name' | 'title' | 'version'> &
 };
 export function InstallButton(props: InstallationButtonProps) {
   const { name, numOfAssets, title, version } = props;
-  const hasWriteCapabilites = useCapabilities().write;
+  const hasFleetWriteCapabilities = useFleetCapabilities().write;
+  const hasIntWriteCapabilities = useIntegrationsCapabilities().write;
+  const hasAllWritePermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
   const installPackage = useInstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { status: installationStatus } = getPackageInstallStatus(name);
@@ -56,7 +59,7 @@ export function InstallButton(props: InstallationButtonProps) {
     />
   );
 
-  return hasWriteCapabilites ? (
+  return hasAllWritePermissions ? (
     <Fragment>
       <EuiButton iconType={'importAction'} isLoading={isInstalling} onClick={toggleInstallModal}>
         {isInstalling ? (

@@ -35,7 +35,8 @@ import {
   useGetPackageInstallStatus,
   sendUpgradePackagePolicy,
   useStartServices,
-  useCapabilities,
+  useFleetCapabilities,
+  useIntegrationsCapabilities,
   useLink,
 } from '../../../../../hooks';
 import { toMountPoint } from '../../../../../../../../../../../src/plugins/kibana_react/public';
@@ -82,7 +83,9 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
   const { getPath } = useLink();
 
   const { notifications } = useStartServices();
-  const hasWriteCapabilites = useCapabilities().write;
+  const hasFleetWriteCapabilities = useFleetCapabilities().write;
+  const hasIntWriteCapabilities = useIntegrationsCapabilities().write;
+  const hasAllWritePermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
 
   const installPackage = useInstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
@@ -287,7 +290,7 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
     </EuiConfirmModal>
   );
 
-  return hasWriteCapabilites ? (
+  return hasAllWritePermissions ? (
     <>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={false}>

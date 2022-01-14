@@ -12,7 +12,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy, InMemoryPackagePolicy } from '../types';
 
-import { useAgentPolicyRefresh, useCapabilities, useLink } from '../hooks';
+import {
+  useAgentPolicyRefresh,
+  useFleetCapabilities,
+  useIntegrationsCapabilities,
+  useLink,
+} from '../hooks';
 
 import { AgentEnrollmentFlyout } from './agent_enrollment_flyout';
 import { ContextMenuActions } from './context_menu_actions';
@@ -36,7 +41,9 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
 }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
-  const hasWriteCapabilities = useCapabilities().write;
+  const hasFleetWriteCapabilities = useFleetCapabilities().write;
+  const hasIntWriteCapabilities = useIntegrationsCapabilities().write;
+  const hasAllWritePermissions = (hasFleetWriteCapabilities && hasIntWriteCapabilities) as boolean;
   const refreshAgentPolicy = useAgentPolicyRefresh();
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(defaultIsOpen);
 
@@ -75,7 +82,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         ]
       : []),
     <EuiContextMenuItem
-      disabled={!hasWriteCapabilities}
+      disabled={!hasAllWritePermissions}
       icon="pencil"
       href={getHref('integration_policy_edit', {
         packagePolicyId: packagePolicy.id,
@@ -88,7 +95,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       />
     </EuiContextMenuItem>,
     <EuiContextMenuItem
-      disabled={!packagePolicy.hasUpgrade}
+      disabled={!packagePolicy.hasUpgrade || !hasAllWritePermissions}
       icon="refresh"
       href={upgradePackagePolicyHref}
       key="packagePolicyUpgrade"
@@ -113,7 +120,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
         {(deletePackagePoliciesPrompt) => {
           return (
             <DangerEuiContextMenuItem
-              disabled={!hasWriteCapabilities}
+              disabled={!hasAllWritePermissions}
               icon="trash"
               onClick={() => {
                 deletePackagePoliciesPrompt([packagePolicy.id], () => {

@@ -26,7 +26,8 @@ import { pagePathGetters } from '../../../../../../../constants';
 import type { AgentPolicy, InMemoryPackagePolicy, PackagePolicy } from '../../../../../types';
 import { PackageIcon, PackagePolicyActionsMenu } from '../../../../../components';
 import {
-  useCapabilities,
+  useFleetCapabilities,
+  useIntegrationsCapabilities,
   useLink,
   usePackageInstallations,
   useStartServices,
@@ -55,7 +56,9 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
   ...rest
 }) => {
   const { application } = useStartServices();
-  const hasWriteCapabilities = useCapabilities().write;
+  const hasFleetWriteCapabilities = useFleetCapabilities().write;
+  const hasIntWriteCapabilities = useIntegrationsCapabilities().write;
+  const hasAllWritePermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
   const { updatableIntegrations } = usePackageInstallations();
   const { getHref } = useLink();
 
@@ -109,7 +112,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         render: (value: string, packagePolicy: InMemoryPackagePolicy) => (
           <EuiLink
             title={value}
-            {...(hasWriteCapabilities
+            {...(hasAllWritePermissions
               ? {
                   href: getHref('edit_integration', {
                     policyId: agentPolicy.id,
@@ -142,42 +145,49 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           }
         ),
         render(packageTitle: string, packagePolicy: InMemoryPackagePolicy) {
+          const integrationPackageName = (
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              {packagePolicy.package && (
+                <EuiFlexItem grow={false}>
+                  <PackageIcon
+                    packageName={packagePolicy.package.name}
+                    version={packagePolicy.package.version}
+                    size="m"
+                    tryApi={true}
+                  />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={false}>{packageTitle}</EuiFlexItem>
+              {packagePolicy.package && (
+                <EuiFlexItem grow={false}>
+                  <EuiText color="subdued" size="xs" className="eui-textNoWrap">
+                    <FormattedMessage
+                      id="xpack.fleet.policyDetails.packagePoliciesTable.packageVersion"
+                      defaultMessage="v{version}"
+                      values={{ version: packagePolicy.package.version }}
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          );
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiLink
-                  href={
-                    packagePolicy.package &&
-                    getHref('integration_details_overview', {
-                      pkgkey: pkgKeyFromPackageInfo(packagePolicy.package),
-                    })
-                  }
-                >
-                  <EuiFlexGroup gutterSize="s" alignItems="center">
-                    {packagePolicy.package && (
-                      <EuiFlexItem grow={false}>
-                        <PackageIcon
-                          packageName={packagePolicy.package.name}
-                          version={packagePolicy.package.version}
-                          size="m"
-                          tryApi={true}
-                        />
-                      </EuiFlexItem>
-                    )}
-                    <EuiFlexItem grow={false}>{packageTitle}</EuiFlexItem>
-                    {packagePolicy.package && (
-                      <EuiFlexItem grow={false}>
-                        <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                          <FormattedMessage
-                            id="xpack.fleet.policyDetails.packagePoliciesTable.packageVersion"
-                            defaultMessage="v{version}"
-                            values={{ version: packagePolicy.package.version }}
-                          />
-                        </EuiText>
-                      </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
-                </EuiLink>
+              <EuiFlexItem data-test-subj="PackagePoliciesTableLink" grow={false}>
+                {hasAllWritePermissions ? (
+                  <EuiLink
+                    href={
+                      packagePolicy.package &&
+                      getHref('integration_details_overview', {
+                        pkgkey: pkgKeyFromPackageInfo(packagePolicy.package),
+                      })
+                    }
+                  >
+                    {integrationPackageName}
+                  </EuiLink>
+                ) : (
+                  integrationPackageName
+                )}
               </EuiFlexItem>
               {packagePolicy.hasUpgrade && (
                 <>
@@ -195,6 +205,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
                     <EuiButton
                       size="s"
                       minWidth="0"
+                      isDisabled={Boolean(!hasAllWritePermissions)}
                       href={`${getHref('upgrade_package_policy', {
                         policyId: agentPolicy.id,
                         packagePolicyId: packagePolicy.id,
@@ -246,7 +257,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         ],
       },
     ],
-    [agentPolicy, getHref, hasWriteCapabilities]
+    [agentPolicy, getHref, hasAllWritePermissions]
   );
 
   return (
@@ -268,7 +279,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
               <EuiButton
                 key="addPackagePolicyButton"
                 fill
-                isDisabled={!hasWriteCapabilities}
+                isDisabled={!hasAllWritePermissions}
                 iconType="plusInCircle"
                 onClick={() => {
                   application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {

@@ -28,7 +28,7 @@ import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../..
 import {
   useGetAgentPolicies,
   sendGetOneAgentPolicy,
-  useCapabilities,
+  useFleetCapabilities,
   useFleetStatus,
 } from '../../../hooks';
 import { CreateAgentPolicyFlyout } from '../list_page/components';
@@ -63,7 +63,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
   const [selectedAgentPolicyError, setSelectedAgentPolicyError] = useState<Error>();
 
   // Create new agent policy flyout state
-  const hasWriteCapabilites = useCapabilities().write;
+  const hasFleetWriteCapabilites = useFleetCapabilities().write;
   const [isCreateAgentPolicyFlyoutOpen, setIsCreateAgentPolicyFlyoutOpen] =
     useState<boolean>(false);
 
@@ -251,7 +251,7 @@ export const StepSelectAgentPolicy: React.FunctionComponent<{
                   <EuiFlexItem grow={false}>
                     <div>
                       <EuiLink
-                        disabled={!hasWriteCapabilites}
+                        disabled={!hasFleetWriteCapabilites}
                         onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
                       >
                         <FormattedMessage

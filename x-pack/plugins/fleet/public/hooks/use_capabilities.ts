@@ -8,7 +8,7 @@
 import { useStartServices } from './use_core';
 
 // Expose fleet capabilities
-export function useCapabilities() {
+export function useFleetCapabilities() {
   const core = useStartServices();
   return core.application.capabilities.fleetv2;
 }

@@ -35,6 +35,8 @@ import {
   useUIExtension,
   useBreadcrumbs,
   useStartServices,
+  useFleetCapabilities,
+  useIntegrationsCapabilities,
   usePermissionCheck,
 } from '../../../../hooks';
 import {
@@ -97,16 +99,18 @@ export function Detail() {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref } = useLink();
-  const services = useStartServices();
-  const hasWriteCapabilities = services.authz.fleet.all;
+  const hasFleetWriteCapabilities = useFleetCapabilities().write;
+  const hasIntWriteCapabilities = useIntegrationsCapabilities().write;
+  const hasAllWritePermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
   const permissionCheck = usePermissionCheck();
   const missingSecurityConfiguration =
     !permissionCheck.data?.success && permissionCheck.data?.error === 'MISSING_SECURITY';
-  const userCanInstallIntegrations = hasWriteCapabilities && permissionCheck.data?.success;
+  const userCanInstallIntegrations = hasAllWritePermissions && permissionCheck.data?.success;
   const history = useHistory();
   const { pathname, search, hash } = useLocation();
   const queryParams = useMemo(() => new URLSearchParams(search), [search]);
   const integration = useMemo(() => queryParams.get('integration'), [queryParams]);
+  const services = useStartServices();
   const agentPolicyIdFromContext = getAgentPolicyId();
 
   // Package info state

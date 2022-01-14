@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 
 import type { AgentPolicy } from '../../../types';
-import { useCapabilities } from '../../../hooks';
+import { useFleetCapabilities, useIntegrationsCapabilities } from '../../../hooks';
 import { AgentEnrollmentFlyout, ContextMenuActions } from '../../../components';
 
 import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
@@ -30,7 +30,9 @@ export const AgentPolicyActionMenu = memo<{
     enrollmentFlyoutOpenByDefault = false,
     onCancelEnrollment,
   }) => {
-    const hasWriteCapabilities = useCapabilities().write;
+    const hasFleetWriteCapabilities = useFleetCapabilities().write;
+    const hasIntWriteCapabilities = useIntegrationsCapabilities().write;
+    const hasAllWritePermissions = (hasFleetWriteCapabilities && hasIntWriteCapabilities) as boolean;
     const [isYamlFlyoutOpen, setIsYamlFlyoutOpen] = useState<boolean>(false);
     const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(
       enrollmentFlyoutOpenByDefault
@@ -76,7 +78,7 @@ export const AgentPolicyActionMenu = memo<{
             ? [viewPolicyItem]
             : [
                 <EuiContextMenuItem
-                  disabled={!hasWriteCapabilities}
+                  disabled={!hasAllWritePermissions}
                   icon="plusInCircle"
                   onClick={() => {
                     setIsContextMenuOpen(false);
@@ -91,7 +93,7 @@ export const AgentPolicyActionMenu = memo<{
                 </EuiContextMenuItem>,
                 viewPolicyItem,
                 <EuiContextMenuItem
-                  disabled={!hasWriteCapabilities}
+                  disabled={!hasAllWritePermissions}
                   icon="copy"
                   onClick={() => {
                     setIsContextMenuOpen(false);

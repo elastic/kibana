@@ -25,7 +25,8 @@ import { useHistory } from 'react-router-dom';
 import type { AgentPolicy } from '../../../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
-  useCapabilities,
+  useFleetCapabilities,
+  useIntegrationsCapabilities,
   useGetAgentPolicies,
   usePagination,
   useSorting,
@@ -42,7 +43,10 @@ import { CreateAgentPolicyFlyout } from './components';
 export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
   useBreadcrumbs('policies_list');
   const { getPath } = useLink();
-  const hasWriteCapabilites = useCapabilities().write;
+  const hasFleetWriteCapabilities = useFleetCapabilities().write;
+  const hasIntWriteCapabilities = useIntegrationsCapabilities().write;
+  const hasAllWritePermissions = (hasFleetWriteCapabilities && hasIntWriteCapabilities) as boolean;
+
   const {
     agents: { enabled: isFleetEnabled },
   } = useConfig();
@@ -148,6 +152,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
           packagePolicies ? packagePolicies.length : 0,
       },
       {
+        field: 'actions',
         name: i18n.translate('xpack.fleet.agentPolicyList.actionsColumnTitle', {
           defaultMessage: 'Actions',
         }),
@@ -177,7 +182,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
       <EuiButton
         fill
         iconType="plusInCircle"
-        isDisabled={!hasWriteCapabilites}
+        isDisabled={!hasAllWritePermissions}
         onClick={() => setIsCreateAgentPolicyFlyoutOpen(true)}
       >
         <FormattedMessage
@@ -186,7 +191,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
         />
       </EuiButton>
     ),
-    [hasWriteCapabilites, setIsCreateAgentPolicyFlyoutOpen]
+    [hasAllWritePermissions, setIsCreateAgentPolicyFlyoutOpen]
   );
 
   const emptyPrompt = useMemo(

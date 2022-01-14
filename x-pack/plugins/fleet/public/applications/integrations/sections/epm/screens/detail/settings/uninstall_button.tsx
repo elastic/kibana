@@ -13,7 +13,8 @@ import { InstallStatus } from '../../../../../types';
 import type { PackageInfo } from '../../../../../types';
 
 import {
-  useCapabilities,
+  useFleetCapabilities,
+  useIntegrationsCapabilities,
   useGetPackageInstallStatus,
   useUninstallPackage,
 } from '../../../../../hooks';
@@ -34,7 +35,9 @@ export const UninstallButton: React.FunctionComponent<UninstallButtonProps> = ({
   title,
   version,
 }) => {
-  const hasWriteCapabilites = useCapabilities().write;
+  const hasFleetWriteCapabilities = useFleetCapabilities().write;
+  const hasIntWriteCapabilities = useIntegrationsCapabilities().write;
+  const hasAllWritePermissions = hasFleetWriteCapabilities && hasIntWriteCapabilities;
   const uninstallPackage = useUninstallPackage();
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { status: installationStatus } = getPackageInstallStatus(name);
@@ -59,7 +62,7 @@ export const UninstallButton: React.FunctionComponent<UninstallButtonProps> = ({
     />
   );
 
-  return hasWriteCapabilites ? (
+  return hasAllWritePermissions ? (
     <>
       <EuiButton
         iconType={'trash'}

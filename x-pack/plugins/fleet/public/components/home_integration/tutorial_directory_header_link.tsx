@@ -11,12 +11,12 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import type { TutorialDirectoryHeaderLinkComponent } from 'src/plugins/home/public';
 
 import { RedirectAppLinks } from '../../../../../../src/plugins/kibana_react/public';
-import { useLink, useCapabilities, useStartServices } from '../../hooks';
+import { useLink, useFleetCapabilities, useStartServices } from '../../hooks';
 
 const TutorialDirectoryHeaderLink: TutorialDirectoryHeaderLinkComponent = memo(() => {
   const { getHref } = useLink();
   const { application } = useStartServices();
-  const { show: hasIngestManager } = useCapabilities();
+  const { show: hasIngestManager } = useFleetCapabilities();
   const [noticeState] = useState({
     settingsDataLoaded: false,
   });

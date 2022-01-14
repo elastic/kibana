@@ -16,7 +16,7 @@ import {
   useConfig,
   useFleetStatus,
   useBreadcrumbs,
-  useCapabilities,
+  useFleetCapabilities,
   useGetSettings,
   useGetAgentPolicies,
 } from '../../hooks';
@@ -32,7 +32,7 @@ export const AgentsApp: React.FunctionComponent = () => {
   useBreadcrumbs('agent_list');
   const history = useHistory();
   const { agents } = useConfig();
-  const capabilities = useCapabilities();
+  const capabilities = useFleetCapabilities();
 
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,

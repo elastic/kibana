@@ -16,10 +16,11 @@ import type {
 } from 'src/core/server';
 
 import type { FleetAuthz } from '../../common';
-import { calculateAuthz } from '../../common';
+import { calculateAuthz, INTEGRATIONS_PLUGIN_ID } from '../../common';
 
 import { appContextService } from '../services';
 import type { FleetRequestHandlerContext } from '../types';
+import { PLUGIN_ID } from '../constants';
 
 function checkSecurityEnabled() {
   return appContextService.getSecurityLicense().isEnabled();
@@ -63,15 +64,21 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
     const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(req);
     const { privileges } = await checkPrivileges({
       kibana: [
-        security.authz.actions.api.get('fleet-all'),
-        security.authz.actions.api.get('integrations-all'),
-        security.authz.actions.api.get('integrations-read'),
+        security.authz.actions.api.get(`${PLUGIN_ID}-all`),
+        security.authz.actions.api.get(`${INTEGRATIONS_PLUGIN_ID}-all`),
+        security.authz.actions.api.get(`${INTEGRATIONS_PLUGIN_ID}-read`),
         security.authz.actions.api.get('fleet-setup'),
       ],
     });
-    const fleetAllAuth = getAuthorizationFromPrivileges(privileges.kibana, 'fleet-all');
-    const intAllAuth = getAuthorizationFromPrivileges(privileges.kibana, 'integrations-all');
-    const intReadAuth = getAuthorizationFromPrivileges(privileges.kibana, 'integrations-read');
+    const fleetAllAuth = getAuthorizationFromPrivileges(privileges.kibana, `${PLUGIN_ID}-all`);
+    const intAllAuth = getAuthorizationFromPrivileges(
+      privileges.kibana,
+      `${INTEGRATIONS_PLUGIN_ID}-all`
+    );
+    const intReadAuth = getAuthorizationFromPrivileges(
+      privileges.kibana,
+      `${INTEGRATIONS_PLUGIN_ID}-read`
+    );
     const fleetSetupAuth = getAuthorizationFromPrivileges(privileges.kibana, 'fleet-setup');
 
     return calculateAuthz({
