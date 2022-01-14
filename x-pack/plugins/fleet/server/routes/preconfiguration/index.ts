@@ -6,47 +6,42 @@
  */
 
 import type { IRouter, RequestHandler } from 'src/core/server';
-import type { TypeOf } from '@kbn/config-schema';
-
-import type { PreconfiguredAgentPolicy } from '../../../common';
 
 import { PLUGIN_ID, PRECONFIGURATION_API_ROUTES } from '../../constants';
-import { PutPreconfigurationSchema } from '../../types';
-import { defaultIngestErrorHandler } from '../../errors';
-import { ensurePreconfiguredPackagesAndPolicies, outputService } from '../../services';
+import {
+  PutPreconfigurationSchema,
+  PostResetOnePreconfiguredAgentPoliciesSchema,
+} from '../../types';
 
-export const updatePreconfigurationHandler: RequestHandler<
-  undefined,
-  undefined,
-  TypeOf<typeof PutPreconfigurationSchema.body>
-> = async (context, request, response) => {
-  const soClient = context.core.savedObjects.client;
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
-  const defaultOutput = await outputService.ensureDefaultOutput(soClient);
-
-  const { agentPolicies, packages } = request.body;
-
-  try {
-    const body = await ensurePreconfiguredPackagesAndPolicies(
-      soClient,
-      esClient,
-      (agentPolicies as PreconfiguredAgentPolicy[]) ?? [],
-      packages ?? [],
-      defaultOutput
-    );
-    return response.ok({ body });
-  } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
-  }
-};
+import {
+  updatePreconfigurationHandler,
+  resetPreconfigurationHandler,
+  resetOnePreconfigurationHandler,
+} from './handler';
 
 export const registerRoutes = (router: IRouter) => {
+  router.post(
+    {
+      path: PRECONFIGURATION_API_ROUTES.RESET_PATTERN,
+      validate: false,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    resetPreconfigurationHandler as RequestHandler
+  );
+  router.post(
+    {
+      path: PRECONFIGURATION_API_ROUTES.RESET_ONE_PATTERN,
+      validate: PostResetOnePreconfiguredAgentPoliciesSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    resetOnePreconfigurationHandler as RequestHandler
+  );
   router.put(
     {
       path: PRECONFIGURATION_API_ROUTES.UPDATE_PATTERN,
       validate: PutPreconfigurationSchema,
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
-    updatePreconfigurationHandler
+    updatePreconfigurationHandler as RequestHandler
   );
 };

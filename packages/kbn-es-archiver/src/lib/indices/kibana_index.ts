@@ -114,7 +114,6 @@ export async function cleanKibanaIndices({
             bool: {
               must_not: {
                 ids: {
-                  type: '_doc',
                   values: ['space:default'],
                 },
               },
