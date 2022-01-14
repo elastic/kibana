@@ -6,7 +6,7 @@
  */
 
 import React, { Dispatch } from 'react';
-import { NavigateToAppOptions } from '../../../../../../../../../src/core/public';
+import type { ToastsStart, NavigateToAppOptions } from '../../../../../../../../../src/core/public';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import {
   BulkAction,
@@ -179,9 +179,11 @@ interface ExecuteRulesBulkActionArgs {
   selectedItemsCount: number;
   action: BulkAction;
   dispatch: React.Dispatch<RulesTableAction>;
-  dispatchToaster: Dispatch<ActionToaster>;
+  toastsApi: ToastsStart;
   search: { query: string } | { ids: string[] };
   payload?: { edit?: BulkActionEditPayload[] };
+  onSuccess?: () => void;
+  onError?: (error: Error) => void;
 }
 
 const executeRulesBulkAction = async ({
@@ -189,9 +191,11 @@ const executeRulesBulkAction = async ({
   selectedItemsCount,
   action,
   dispatch,
-  dispatchToaster,
+  toastsApi,
   search,
   payload,
+  onSuccess,
+  onError,
 }: ExecuteRulesBulkActionArgs) => {
   try {
     dispatch({ type: 'loadingRuleIds', ids: visibleRuleIds, actionType: action });
@@ -200,15 +204,19 @@ const executeRulesBulkAction = async ({
       const blob = await performBulkAction({ ...search, action });
       downloadBlob(blob, `${i18n.EXPORT_FILENAME}.ndjson`);
       const exportedRulesCount = await getExportedRulesCount(blob);
-      displaySuccessToast(
-        i18n.SUCCESSFULLY_EXPORTED_RULES(exportedRulesCount, selectedItemsCount),
-        dispatchToaster
+      toastsApi.addSuccess(
+        i18n.SUCCESSFULLY_EXPORTED_RULES(exportedRulesCount, selectedItemsCount)
       );
     } else {
       await performBulkAction({ ...search, action, edit: payload?.edit });
     }
+    onSuccess?.();
   } catch (e) {
-    displayErrorToast(i18n.BULK_ACTION_FAILED, [e.message], dispatchToaster);
+    if (onError) {
+      onError(e);
+    } else {
+      toastsApi.addError(e, { title: i18n.BULK_ACTION_FAILED });
+    }
   } finally {
     dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
   }

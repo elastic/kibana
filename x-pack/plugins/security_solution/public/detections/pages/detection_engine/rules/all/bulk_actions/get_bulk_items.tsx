@@ -15,7 +15,9 @@
 import { EuiTextColor, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-shared-deps-src/theme';
 import React, { Dispatch } from 'react';
+import type { ToastsStart } from 'src/core/public';
 import * as i18n from '../../translations';
+
 import { RulesTableAction } from '../../../../../containers/detection_engine/rules/rules_table';
 import {
   initRulesBulkAction,
@@ -29,6 +31,9 @@ import { Rule } from '../../../../../containers/detection_engine/rules';
 import * as detectionI18n from '../../../translations';
 import { isMlRule } from '../../../../../../../common/machine_learning/helpers';
 import { canEditRuleWithActions } from '../../../../../../common/utils/privileges';
+import { convertRulesFilterToKQL } from '../../../../../containers/detection_engine/rules/utils';
+import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
+
 import {
   BulkAction,
   BulkActionEditType,
@@ -39,6 +44,7 @@ interface GetBatchItems {
   closePopover: () => void;
   dispatch: Dispatch<RulesTableAction>;
   dispatchToaster: Dispatch<ActionToaster>;
+  toastsApi: ToastsStart;
   hasMlPermissions: boolean;
   hasActionsPrivileges: boolean;
   loadingRuleIds: string[];
@@ -47,7 +53,7 @@ interface GetBatchItems {
   rules: Rule[];
   selectedRuleIds: string[];
   isAllSelected: boolean;
-  filterQuery: string;
+  filterOptions: FilterOptions;
   confirmDeletion: () => Promise<boolean>;
   confirmBulkEdit: () => Promise<boolean>;
   performBulkEdit: (bulkActionEditType: BulkActionEditType) => Promise<BulkActionEditPayload>;
@@ -60,6 +66,7 @@ export const getBatchItems = ({
   closePopover,
   dispatch,
   dispatchToaster,
+  toastsApi,
   hasMlPermissions,
   loadingRuleIds,
   reFetchRules,
@@ -68,7 +75,7 @@ export const getBatchItems = ({
   selectedRuleIds,
   hasActionsPrivileges,
   isAllSelected,
-  filterQuery,
+  filterOptions,
   confirmDeletion,
   confirmBulkEdit,
   performBulkEdit,
@@ -86,6 +93,8 @@ export const getBatchItems = ({
     !hasActionsPrivileges &&
     selectedRules.some((rule) => !canEditRuleWithActions(rule, hasActionsPrivileges));
 
+  const filterQuery = convertRulesFilterToKQL(filterOptions);
+
   const handleActivateAction = async () => {
     closePopover();
     const deactivatedRules = selectedRules.filter(({ enabled }) => !enabled);
@@ -93,7 +102,7 @@ export const getBatchItems = ({
 
     const mlRuleCount = deactivatedRules.length - deactivatedRulesNoML.length;
     if (!hasMlPermissions && mlRuleCount > 0) {
-      displayWarningToast(detectionI18n.ML_RULES_UNAVAILABLE(mlRuleCount), dispatchToaster);
+      toastsApi.addWarning(detectionI18n.ML_RULES_UNAVAILABLE(mlRuleCount));
     }
 
     const ruleIds = hasMlPermissions
@@ -106,7 +115,7 @@ export const getBatchItems = ({
         selectedItemsCount,
         action: BulkAction.enable,
         dispatch,
-        dispatchToaster,
+        toastsApi,
       });
 
       await rulesBulkAction.byQuery(filterQuery);
@@ -126,7 +135,7 @@ export const getBatchItems = ({
         selectedItemsCount,
         action: BulkAction.disable,
         dispatch,
-        dispatchToaster,
+        toastsApi,
       });
 
       await rulesBulkAction.byQuery(filterQuery);
@@ -144,11 +153,10 @@ export const getBatchItems = ({
         selectedItemsCount,
         action: BulkAction.duplicate,
         dispatch,
-        dispatchToaster,
+        toastsApi,
       });
 
       await rulesBulkAction.byQuery(filterQuery);
-      await reFetchRules();
     } else {
       await duplicateRulesAction(selectedRules, selectedRuleIds, dispatch, dispatchToaster);
     }
@@ -169,7 +177,7 @@ export const getBatchItems = ({
         selectedItemsCount,
         action: BulkAction.delete,
         dispatch,
-        dispatchToaster,
+        toastsApi,
       });
 
       await rulesBulkAction.byQuery(filterQuery);
@@ -188,7 +196,7 @@ export const getBatchItems = ({
         selectedItemsCount,
         action: BulkAction.export,
         dispatch,
-        dispatchToaster,
+        toastsApi,
       });
 
       await rulesBulkAction.byQuery(filterQuery);
@@ -220,14 +228,39 @@ export const getBatchItems = ({
         selectedItemsCount,
         action: BulkAction.edit,
         dispatch,
-        dispatchToaster,
+        toastsApi,
         payload: { edit: [editPayload] },
+        onSuccess: () => {
+          toastsApi.addSuccess({
+            title: 'Rules changes updated',
+            text: `You’ve successfully updated ${selectedItemsCount} rule.`,
+          });
+        },
+        onError: (error: Error) => {
+          toastsApi.addError(error, {
+            title: 'Some rules failed to update',
+            toastMessage: (
+              <>
+                There some rules are failed to update the actions you’ve applied.{' '}
+                <a>Show failed rules</a>
+              </>
+            ) as unknown as string,
+          });
+        },
       });
 
+      // only edit custom rules, as elastic rule are immutable
       if (isAllSelected) {
-        await rulesBulkAction.byQuery(filterQuery);
+        const customRulesOnlyFilterQuery = convertRulesFilterToKQL({
+          ...filterOptions,
+          showCustomRules: true,
+        });
+        await rulesBulkAction.byQuery(customRulesOnlyFilterQuery);
       } else {
-        await rulesBulkAction.byIds(selectedRuleIds);
+        const customSlectedRuleIds = selectedRules
+          .filter((rule) => rule.immutable === false)
+          .map((rule) => rule.id);
+        await rulesBulkAction.byIds(customSlectedRuleIds);
       }
 
       await reFetchRules();

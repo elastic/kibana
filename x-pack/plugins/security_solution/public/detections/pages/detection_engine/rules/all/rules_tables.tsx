@@ -36,8 +36,7 @@ import { PrePackagedRulesPrompt } from '../../../../components/rules/pre_package
 import { getPrePackagedRuleStatus } from '../helpers';
 import * as i18n from '../translations';
 import { EuiBasicTableOnChange } from '../types';
-// import { getBatchItems } from './batch_actions';
-import { getBatchItems } from './bulk_actions';
+import { getBatchItems } from './bulk_actions/get_bulk_items';
 import { BulkEditConfirmation } from './bulk_actions/bulk_edit_confirmation';
 import { BulkEditFlyout } from './bulk_actions/bulk_edit_flyout';
 import { getRulesColumns, getMonitoringColumns } from './columns';
@@ -51,8 +50,8 @@ import { AllRulesUtilityBar } from './utility_bar';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
 import { AllRulesTabs } from '.';
 import { useValueChanged } from '../../../../../common/hooks/use_value_changed';
-import { convertRulesFilterToKQL } from '../../../../containers/detection_engine/rules/utils';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useAsyncConfirmation } from '../../../../containers/detection_engine/rules/rules_table/use_async_confirmation';
 import { useBulkEditFlyout } from '../../../../containers/detection_engine/rules/rules_table/use_bulk_edit_flyout';
 import { useRulesCount } from '../../../../containers/detection_engine/rules/use_rules_count';
@@ -150,6 +149,7 @@ export const RulesTables = React.memo<RulesTableProps>(
     } = rulesTable;
 
     const [, dispatchToaster] = useStateToaster();
+    const { api: toastsApi } = useAppToasts();
     const mlCapabilities = useMlCapabilities();
     const { navigateToApp } = useKibana().services.application;
 
@@ -231,6 +231,7 @@ export const RulesTables = React.memo<RulesTableProps>(
           closePopover,
           dispatch,
           dispatchToaster,
+          toastsApi,
           hasMlPermissions,
           hasActionsPrivileges,
           loadingRuleIds,
@@ -238,7 +239,7 @@ export const RulesTables = React.memo<RulesTableProps>(
           reFetchRules,
           refetchPrePackagedRulesStatus,
           rules,
-          filterQuery: convertRulesFilterToKQL(filterOptions),
+          filterOptions,
           confirmDeletion,
           confirmBulkEdit,
           performBulkEdit,
@@ -250,6 +251,7 @@ export const RulesTables = React.memo<RulesTableProps>(
         isAllSelected,
         dispatch,
         dispatchToaster,
+        toastsApi,
         hasMlPermissions,
         loadingRuleIds,
         reFetchRules,

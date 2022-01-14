@@ -365,7 +365,7 @@ export const DUPLICATE_RULE_ERROR = i18n.translate(
 export const BULK_ACTION_FAILED = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.actions.bulkActionFailedDescription',
   {
-    defaultMessage: 'Failed to execte bulk action',
+    defaultMessage: 'Failed to execute bulk action',
   }
 );
 
