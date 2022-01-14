@@ -1499,6 +1499,7 @@ export const ecsFieldMap = {
     type: 'scaled_float',
     array: false,
     required: false,
+    scaling_factor: 1000,
   },
   'host.disk.read.bytes': {
     type: 'long',
