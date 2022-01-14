@@ -64,7 +64,7 @@ export function registerLayerWizardInternal(layerWizard: LayerWizard) {
 
 export function registerLayerWizardExternal(layerWizard: LayerWizard) {
   if (layerWizard.order < 100) {
-    throw new Error(`layerWizard.order should be greater than or equal to '100`);
+    throw new Error(`layerWizard.order should be greater than or equal to '100'`);
   }
   registerLayerWizardInternal(layerWizard);
 }
