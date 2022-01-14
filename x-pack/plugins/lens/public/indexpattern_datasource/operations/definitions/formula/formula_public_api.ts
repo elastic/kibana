@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { IndexPattern } from '../../../types';
+import type { IndexPattern, PersistedIndexPatternLayer } from '../../../types';
 import type { DataView } from '../../../../../../../../src/plugins/data_views/public';
 
 import { insertOrReplaceFormulaColumn } from '.';
 import { operationDefinitionMap } from '../../operations';
 import { convertDataViewIntoLensIndexPattern } from '../../../loader';
-import { PersistedIndexPatternLayer } from '../../../types';
 
 /** @public **/
 export interface FormulaPublicApi {
@@ -42,19 +41,15 @@ export interface FormulaPublicApi {
 
 /** @public **/
 export const createFormulaPublicApi = (): FormulaPublicApi => {
-  const cache: Map<string, IndexPattern> = new Map();
+  const cache: WeakMap<DataView, IndexPattern> = new WeakMap();
 
   const getCachedLensIndexPattern = (dataView: DataView): IndexPattern => {
-    if (dataView.id) {
-      const cachedIndexPattern = cache.get(dataView.id);
-      if (cachedIndexPattern) {
-        return cachedIndexPattern;
-      }
+    const cachedIndexPattern = cache.get(dataView);
+    if (cachedIndexPattern) {
+      return cachedIndexPattern;
     }
     const indexPattern = convertDataViewIntoLensIndexPattern(dataView);
-    if (indexPattern.id) {
-      cache.set(indexPattern.id, indexPattern);
-    }
+    cache.set(dataView, indexPattern);
     return indexPattern;
   };
 
