@@ -105,9 +105,7 @@ export function DiscoverSidebarComponent({
   editField,
   viewMode,
 }: DiscoverSidebarProps) {
-  const {
-    services: { uiSettings, dataViewFieldEditor },
-  } = useDiscoverServices();
+  const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
   const [fields, setFields] = useState<DataViewField[] | null>(null);
 
   const dataViewFieldEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();

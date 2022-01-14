@@ -100,7 +100,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     savedSearchRefetch$,
     searchSessionId,
   } = props;
-  const { services } = useDiscoverServices();
+  const services = useDiscoverServices();
   const [embeddable, setEmbeddable] = useState<
     | ErrorEmbeddable
     | IEmbeddable<DataVisualizerGridEmbeddableInput, DataVisualizerGridEmbeddableOutput>

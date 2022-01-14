@@ -133,6 +133,7 @@ export function useContextAppFetch({
           SortDirection.desc,
           count,
           filters,
+          data,
           useNewFieldsApi
         );
         setState({ [type]: rows, [statusKey]: { value: LoadingStatus.LOADED } });
@@ -156,6 +157,7 @@ export function useContextAppFetch({
       toastNotifications,
       useNewFieldsApi,
       theme$,
+      data,
     ]
   );
 

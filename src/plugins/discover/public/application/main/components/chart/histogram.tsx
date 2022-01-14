@@ -65,9 +65,7 @@ export function DiscoverHistogram({
   savedSearchData$,
   timefilterUpdateHandler,
 }: DiscoverHistogramProps) {
-  const {
-    services: { data, theme, uiSettings },
-  } = useDiscoverServices();
+  const { data, theme, uiSettings } = useDiscoverServices();
   const chartTheme = theme.useChartsTheme();
   const chartBaseTheme = theme.useChartsBaseTheme();
 

@@ -9,4 +9,4 @@
 import { useKibana } from '../../../kibana_react/public';
 import { DiscoverServices } from '../build_services';
 
-export const useDiscoverServices = () => useKibana<DiscoverServices>();
+export const useDiscoverServices = () => useKibana<DiscoverServices>().services;

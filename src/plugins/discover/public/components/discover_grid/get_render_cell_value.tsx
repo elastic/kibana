@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useContext, useEffect } from 'react';
+import React, { Fragment, useContext, useEffect, useMemo } from 'react';
 import {
   euiLightVars as themeLight,
   euiDarkVars as themeDark,
@@ -26,6 +26,8 @@ import { EsHitRecord } from '../../application/types';
 import { formatFieldValue } from '../../utils/format_value';
 import { formatHit } from '../../utils/format_hit';
 import { ElasticSearchHit } from '../../types';
+import { useDiscoverServices } from '../../utils/use_discover_services';
+import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
 
 export const getRenderCellValueFn =
   (
@@ -37,6 +39,10 @@ export const getRenderCellValueFn =
     maxDocFieldsDisplayed: number
   ) =>
   ({ rowIndex, columnId, isDetails, setCellProps }: EuiDataGridCellValueElementProps) => {
+    const { uiSettings, fieldFormats } = useDiscoverServices();
+
+    const maxEntries = useMemo(() => uiSettings.get(MAX_DOC_FIELDS_DISPLAYED), [uiSettings]);
+
     const row = rows ? rows[rowIndex] : undefined;
     const rowFlattened = rowsFlattened
       ? (rowsFlattened[rowIndex] as Record<string, unknown>)
@@ -149,7 +155,7 @@ export const getRenderCellValueFn =
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return <JsonCodeEditor json={row as any} width={defaultMonacoEditorWidth} />;
       }
-      const pairs = formatHit(row, indexPattern, fieldsToShow);
+      const pairs = formatHit(row, indexPattern, fieldsToShow, maxEntries, fieldFormats);
 
       return (
         <EuiDescriptionList type="inline" compressed className="dscDiscoverGrid__descriptionList">
@@ -180,7 +186,7 @@ export const getRenderCellValueFn =
         // formatFieldValue guarantees sanitized values
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{
-          __html: formatFieldValue(rowFlattened[columnId], row, indexPattern, field),
+          __html: formatFieldValue(rowFlattened[columnId], row, fieldFormats, indexPattern, field),
         }}
       />
     );

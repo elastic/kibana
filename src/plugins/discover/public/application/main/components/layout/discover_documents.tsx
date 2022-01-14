@@ -57,9 +57,7 @@ function DiscoverDocumentsComponent({
   state: AppState;
   stateContainer: GetStateReturn;
 }) {
-  const {
-    services: { capabilities, indexPatterns, uiSettings },
-  } = useDiscoverServices();
+  const { capabilities, indexPatterns, uiSettings } = useDiscoverServices();
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
 
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);

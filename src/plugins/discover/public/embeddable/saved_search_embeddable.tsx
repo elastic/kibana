@@ -29,7 +29,6 @@ import {
 } from '../../../data/common';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { UiActionsStart } from '../../../ui_actions/public';
-import { getServices } from '../kibana_services';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
@@ -339,7 +338,7 @@ export class SavedSearchEmbeddable
         ? this.savedSearch.sort
         : getDefaultSort(
             this.searchProps?.indexPattern,
-            getServices().uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
+            this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc')
           );
     searchProps.sort = this.input.sort || savedSearchSort;
     searchProps.sharedItemTitle = this.panelTitle;

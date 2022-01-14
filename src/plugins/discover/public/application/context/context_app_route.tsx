@@ -23,7 +23,7 @@ export interface ContextUrlParams {
 }
 
 export function ContextAppRoute() {
-  const { services } = useDiscoverServices();
+  const services = useDiscoverServices();
   const { chrome } = services;
 
   const { indexPatternId, id } = useParams<ContextUrlParams>();

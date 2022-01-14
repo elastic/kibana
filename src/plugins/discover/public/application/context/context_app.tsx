@@ -35,7 +35,7 @@ export interface ContextAppProps {
 }
 
 export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
-  const { services } = useDiscoverServices();
+  const services = useDiscoverServices();
   const { uiSettings, capabilities, indexPatterns, navigation, filterManager } = services;
 
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);

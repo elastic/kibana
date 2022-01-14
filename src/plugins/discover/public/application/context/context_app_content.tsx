@@ -73,9 +73,7 @@ export function ContextAppContent({
   setAppState,
   addFilter,
 }: ContextAppContentProps) {
-  const {
-    services: { uiSettings: config },
-  } = useDiscoverServices();
+  const { uiSettings: config } = useDiscoverServices();
 
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>();
   const isAnchorLoading =

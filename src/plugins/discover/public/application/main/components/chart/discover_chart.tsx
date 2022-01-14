@@ -50,9 +50,7 @@ export function DiscoverChart({
   viewMode: VIEW_MODE;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
 }) {
-  const {
-    services: { uiSettings, data, storage },
-  } = useDiscoverServices();
+  const { uiSettings, data, storage } = useDiscoverServices();
   const [showChartOptionsPopover, setShowChartOptionsPopover] = useState(false);
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
 

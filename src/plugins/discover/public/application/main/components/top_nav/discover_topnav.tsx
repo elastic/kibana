@@ -44,7 +44,7 @@ export const DiscoverTopNav = ({
     () => indexPattern.isTimeBased() && indexPattern.type !== DataViewType.ROLLUP,
     [indexPattern]
   );
-  const { services } = useDiscoverServices();
+  const services = useDiscoverServices();
   const { TopNavMenu } = services.navigation.ui;
 
   const onOpenSavedSearch = useCallback(

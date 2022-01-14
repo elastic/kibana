@@ -33,17 +33,15 @@ interface DiscoverLandingParams {
 
 export function DiscoverMainRoute() {
   const history = useHistory();
+  const services = useDiscoverServices();
   const {
-    services: {
-      core,
-      chrome,
-      uiSettings: config,
-      data,
-      toastNotifications,
-      http: { basePath },
-    },
-    services,
-  } = useDiscoverServices();
+    core,
+    chrome,
+    uiSettings: config,
+    data,
+    toastNotifications,
+    http: { basePath },
+  } = services;
   const [error, setError] = useState<Error>();
   const [savedSearch, setSavedSearch] = useState<SavedSearch>();
   const indexPattern = savedSearch?.searchSource?.getField('index');

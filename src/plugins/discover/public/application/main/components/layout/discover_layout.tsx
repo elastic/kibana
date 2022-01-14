@@ -78,18 +78,16 @@ export function DiscoverLayout({
   stateContainer,
 }: DiscoverLayoutProps) {
   const {
-    services: {
-      trackUiMetric,
-      capabilities,
-      indexPatterns,
-      data,
-      uiSettings,
-      filterManager,
-      storage,
-      history,
-      spaces,
-      inspector,
-    },
+    trackUiMetric,
+    capabilities,
+    indexPatterns,
+    data,
+    uiSettings,
+    filterManager,
+    storage,
+    history,
+    spaces,
+    inspector,
   } = useDiscoverServices();
   const { main$, charts$, totalHits$ } = savedSearchData$;
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);

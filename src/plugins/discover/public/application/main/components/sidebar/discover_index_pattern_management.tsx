@@ -29,9 +29,7 @@ export interface DiscoverIndexPatternManagementProps {
 }
 
 export function DiscoverIndexPatternManagement(props: DiscoverIndexPatternManagementProps) {
-  const {
-    services: { dataViewFieldEditor, core },
-  } = useDiscoverServices();
+  const { dataViewFieldEditor, core } = useDiscoverServices();
   const { useNewFieldsApi, selectedIndexPattern, editField } = props;
   const dataViewEditPermission = dataViewFieldEditor?.userPermissions.editIndexPattern();
   const canEditDataViewField = !!dataViewEditPermission && useNewFieldsApi;

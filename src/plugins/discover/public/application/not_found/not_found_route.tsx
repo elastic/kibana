@@ -17,7 +17,7 @@ import { useDiscoverServices } from '../../utils/use_discover_services';
 let bannerId: string | undefined;
 
 export function NotFoundRoute() {
-  const { services } = useDiscoverServices();
+  const services = useDiscoverServices();
   const { urlForwarding, core, history } = services;
   const currentLocation = history().location.pathname;
 

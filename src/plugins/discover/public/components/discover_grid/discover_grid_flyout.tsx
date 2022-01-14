@@ -68,7 +68,7 @@ export function DiscoverGridFlyout({
   onAddColumn,
   setExpandedDoc,
 }: DiscoverGridFlyoutProps) {
-  const { services } = useDiscoverServices();
+  const services = useDiscoverServices();
   // Get actual hit with updated highlighted searches
   const actualHit = useMemo(() => hits?.find(({ _id }) => _id === hit?._id) || hit, [hit, hits]);
   const pageCount = useMemo<number>(() => (hits ? hits.length : 0), [hits]);

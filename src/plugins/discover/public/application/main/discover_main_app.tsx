@@ -32,10 +32,8 @@ export interface DiscoverMainProps {
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
   const { savedSearch, indexPatternList } = props;
-  const {
-    services: { chrome, docLinks, uiSettings: config, data },
-    services,
-  } = useDiscoverServices();
+  const services = useDiscoverServices();
+  const { chrome, docLinks, uiSettings: config, data } = services;
   const history = useHistory();
   const [expandedDoc, setExpandedDoc] = useState<ElasticSearchHit | undefined>(undefined);
   const navigateTo = useCallback(

@@ -188,7 +188,7 @@ export const DiscoverGrid = ({
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
   className,
 }: DiscoverGridProps) => {
-  const { services } = useDiscoverServices();
+  const services = useDiscoverServices();
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, indexPattern);

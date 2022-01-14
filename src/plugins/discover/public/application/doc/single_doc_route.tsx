@@ -30,7 +30,7 @@ export interface DocUrlParams {
 }
 
 const SingleDoc = ({ id }: SingleDocRouteProps) => {
-  const { services } = useDiscoverServices();
+  const services = useDiscoverServices();
   const { chrome, timefilter } = services;
 
   const { indexPatternId, index } = useParams<DocUrlParams>();

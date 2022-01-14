@@ -34,7 +34,7 @@ export interface DocViewRenderProps {
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;
 }
-export type DocViewerComponent = ComponentType<DocViewRenderProps>;
+export type DocViewerComponent = React.FC<DocViewRenderProps>;
 export type DocViewRenderFn = (
   domeNode: HTMLDivElement,
   renderProps: DocViewRenderProps
@@ -48,12 +48,12 @@ export interface BaseDocViewInput {
 
 export interface RenderDocViewInput extends BaseDocViewInput {
   render: DocViewRenderFn;
-  component?: undefined;
+  Component?: undefined;
   directive?: undefined;
 }
 
 interface ComponentDocViewInput extends BaseDocViewInput {
-  component: DocViewerComponent;
+  Component: DocViewerComponent;
   render?: undefined;
   directive?: undefined;
 }
