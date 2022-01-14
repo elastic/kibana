@@ -90,39 +90,62 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
     );
   }
 
-  private async getUniqueTitle(rawTitle: string, embeddableType: string): Promise<string> {
+  private async getCloneTitle(embeddable: IEmbeddable, rawTitle: string) {
     const clonedTag = dashboardClonePanelAction.getClonedTag();
     const cloneRegex = new RegExp(`\\(${clonedTag}\\)`, 'g');
     const cloneNumberRegex = new RegExp(`\\(${clonedTag} [0-9]+\\)`, 'g');
     const baseTitle = rawTitle.replace(cloneNumberRegex, '').replace(cloneRegex, '').trim();
 
-    const similarSavedObjects = await this.core.savedObjects.client.find<SavedObject>({
-      type: embeddableType,
-      perPage: 0,
-      fields: ['title'],
-      searchFields: ['title'],
-      search: `"${baseTitle}"`,
-    });
-    const similarBaseTitlesCount: number = similarSavedObjects.total - 1;
+    let similarTitles: string[];
+    if (isReferenceOrValueEmbeddable(embeddable)) {
+      if (rawTitle === '') return '';
+      const dashboard: DashboardContainer = embeddable.getRoot() as DashboardContainer;
+      similarTitles = _.filter(await dashboard.getPanelTitles(), (title) => {
+        return title.startsWith(baseTitle);
+      });
+    } else {
+      const perPage = 10;
+      const similarSavedObjects = await this.core.savedObjects.client.find<SavedObject>({
+        type: embeddable.type,
+        perPage,
+        fields: ['title'],
+        searchFields: ['title'],
+        search: `"${baseTitle}"`,
+      });
+      if (similarSavedObjects.total <= perPage) {
+        similarTitles = similarSavedObjects.savedObjects.map((savedObject) => {
+          return savedObject.get('title');
+        });
+      } else {
+        similarTitles = [baseTitle + ` (${clonedTag} ${similarSavedObjects.total - 1})`];
+      }
+    }
 
-    return similarBaseTitlesCount <= 0
+    const cloneNumbers = _.map(similarTitles, (title) => {
+      if (title.match(cloneRegex)) return 0;
+      const cloneTag = title.match(cloneNumberRegex);
+      return cloneTag ? parseInt(cloneTag[0].replace(/[^0-9.]/g, ''), 10) : -1;
+    });
+    const similarBaseTitlesCount = _.max(cloneNumbers) || 0;
+
+    return similarBaseTitlesCount < 0
       ? baseTitle + ` (${clonedTag})`
-      : baseTitle + ` (${clonedTag} ${similarBaseTitlesCount})`;
+      : baseTitle + ` (${clonedTag} ${similarBaseTitlesCount + 1})`;
   }
 
   private async addCloneToLibrary(
-    objectIdToClone: string,
-    embeddableType: string
+    embeddable: IEmbeddable,
+    objectIdToClone: string
   ): Promise<string> {
     const savedObjectToClone = await this.core.savedObjects.client.get<SavedObject>(
-      embeddableType,
+      embeddable.type,
       objectIdToClone
     );
 
     // Clone the saved object
-    const newTitle = await this.getUniqueTitle(savedObjectToClone.attributes.title, embeddableType);
+    const newTitle = await this.getCloneTitle(embeddable, savedObjectToClone.attributes.title);
     const clonedSavedObject = await this.core.savedObjects.client.create(
-      embeddableType,
+      embeddable.type,
       {
         ..._.cloneDeep(savedObjectToClone.attributes),
         title: newTitle,
@@ -138,12 +161,13 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
   ): Promise<Partial<PanelState>> {
     let panelState: PanelState<EmbeddableInput>;
     if (isReferenceOrValueEmbeddable(embeddable)) {
+      const newTitle = await this.getCloneTitle(embeddable, embeddable.getTitle() || '');
       panelState = {
         type: embeddable.type,
         explicitInput: {
           ...(await embeddable.getInputAsValueType()),
           id: uuid.v4(),
-          title: embeddable.getTitle() ? embeddable.getTitle() + ' (copy)' : '',
+          title: newTitle,
         },
       };
     } else {
@@ -156,8 +180,8 @@ export class ClonePanelAction implements Action<ClonePanelActionContext> {
       };
       if (panelToClone.explicitInput.savedObjectId) {
         const clonedSavedObjectId = await this.addCloneToLibrary(
-          panelToClone.explicitInput.savedObjectId,
-          embeddable.type
+          embeddable,
+          panelToClone.explicitInput.savedObjectId
         );
         (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId =
           clonedSavedObjectId;
