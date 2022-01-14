@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
+import { Filter, isFilterPinned } from '@kbn/es-query';
 import type { UrlGeneratorsDefinition } from '../../share/public';
-import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
-import { esFilters } from '../../data/public';
+import type { TimeRange, Query, QueryState, RefreshInterval } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
 import { VIEW_MODE } from './components/view_mode_toggle';
 
@@ -125,8 +124,7 @@ export class DiscoverUrlGenerator
     const queryState: QueryState = {};
 
     if (query) appState.query = query;
-    if (filters && filters.length)
-      appState.filters = filters?.filter((f) => !esFilters.isFilterPinned(f));
+    if (filters && filters.length) appState.filters = filters?.filter((f) => !isFilterPinned(f));
     if (indexPatternId) appState.index = indexPatternId;
     if (columns) appState.columns = columns;
     if (savedQuery) appState.savedQuery = savedQuery;
@@ -134,8 +132,7 @@ export class DiscoverUrlGenerator
     if (interval) appState.interval = interval;
 
     if (timeRange) queryState.time = timeRange;
-    if (filters && filters.length)
-      queryState.filters = filters?.filter((f) => esFilters.isFilterPinned(f));
+    if (filters && filters.length) queryState.filters = filters?.filter((f) => isFilterPinned(f));
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
     if (viewMode) appState.viewMode = viewMode;
     if (hideAggregatedPreview) appState.hideAggregatedPreview = hideAggregatedPreview;

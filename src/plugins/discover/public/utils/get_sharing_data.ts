@@ -9,7 +9,8 @@
 import type { Capabilities } from 'kibana/public';
 import type { IUiSettingsClient } from 'kibana/public';
 import type { DataPublicPluginStart } from 'src/plugins/data/public';
-import type { Filter, ISearchSource, SerializedSearchSourceFields } from 'src/plugins/data/common';
+import type { Filter } from '@kbn/es-query';
+import type { ISearchSource, SerializedSearchSourceFields } from 'src/plugins/data/common';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../common';
 import type { SavedSearch, SortOrder } from '../services/saved_searches';
 import { getSortForSearchSource } from '../components/doc_table';

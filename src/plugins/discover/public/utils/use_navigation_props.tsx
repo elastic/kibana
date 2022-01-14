@@ -10,7 +10,8 @@ import { useMemo, useRef } from 'react';
 import { useHistory, matchPath } from 'react-router-dom';
 import { stringify } from 'query-string';
 import rison from 'rison-node';
-import { esFilters, FilterManager } from '../../../data/public';
+import { disableFilter } from '@kbn/es-query';
+import { FilterManager } from '../../../data/public';
 import { url } from '../../../kibana_utils/common';
 import { getServices } from '../kibana_services';
 
@@ -38,7 +39,7 @@ export const getContextHash = (columns: string[], filterManager: FilterManager) 
       }),
       _a: rison.encode({
         columns,
-        filters: (appFilters || []).map(esFilters.disableFilter),
+        filters: (appFilters || []).map(disableFilter),
       }),
     }),
     { encode: false, sort: false }

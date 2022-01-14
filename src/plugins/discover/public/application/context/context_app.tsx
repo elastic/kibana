@@ -12,7 +12,6 @@ import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
-import { esFilters } from '../../../../data/public';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { ContextErrorMessage } from './components/context_error_message';
 import { DataView, DataViewField } from '../../../../data/common';
@@ -26,6 +25,7 @@ import { popularizeField } from '../../utils/popularize_field';
 import { ContextAppContent } from './context_app_content';
 import { SurrDocType } from './services/context';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
+import { generateFilters } from '../../../../data/public';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
@@ -112,13 +112,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
 
   const addFilter = useCallback(
     async (field: DataViewField | string, values: unknown, operation: string) => {
-      const newFilters = esFilters.generateFilters(
-        filterManager,
-        field,
-        values,
-        operation,
-        indexPattern.id!
-      );
+      const newFilters = generateFilters(filterManager, field, values, operation, indexPattern.id!);
       filterManager.addFilters(newFilters);
       if (indexPatterns) {
         const fieldName = typeof field === 'string' ? field : field.name;

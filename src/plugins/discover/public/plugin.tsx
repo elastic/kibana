@@ -18,6 +18,7 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'kibana/public';
+import { isFilterPinned } from '@kbn/es-query';
 import { UiActionsStart, UiActionsSetup } from 'src/plugins/ui_actions/public';
 import { EmbeddableStart, EmbeddableSetup } from 'src/plugins/embeddable/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
@@ -27,7 +28,7 @@ import { UrlForwardingSetup, UrlForwardingStart } from 'src/plugins/url_forwardi
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { EuiLoadingContent } from '@elastic/eui';
-import { DataPublicPluginStart, DataPublicPluginSetup, esFilters } from '../../data/public';
+import { DataPublicPluginStart, DataPublicPluginSetup } from '../../data/public';
 import { SavedObjectsStart } from '../../saved_objects/public';
 import { createKbnUrlTracker } from '../../kibana_utils/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
@@ -306,7 +307,7 @@ export class DiscoverPlugin
             ),
             map(({ state }) => ({
               ...state,
-              filters: state.filters?.filter(esFilters.isFilterPinned),
+              filters: state.filters?.filter(isFilterPinned),
             }))
           ),
         },
