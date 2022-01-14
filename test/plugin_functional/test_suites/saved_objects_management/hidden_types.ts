@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const testSubjects = getService('testSubjects');
 
   // Failing: See https://github.com/elastic/kibana/issues/116059
+  // Failing: See https://github.com/elastic/kibana/issues/116059
   describe.skip('saved objects management with hidden types', () => {
     before(async () => {
       await esArchiver.load(
