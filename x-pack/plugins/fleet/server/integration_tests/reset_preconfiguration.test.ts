@@ -53,10 +53,12 @@ describe('Fleet preconfiguration reset', () => {
         {
           xpack: {
             fleet: {
-              packages: {
-                name: 'fleet-server',
-                version: 'latest',
-              },
+              packages: [
+                {
+                  name: 'fleet-server',
+                  version: 'latest',
+                },
+              ],
               agentPolicies: [
                 {
                   name: 'Elastic Cloud agent policy 0001',
