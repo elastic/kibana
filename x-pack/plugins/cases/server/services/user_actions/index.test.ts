@@ -282,7 +282,7 @@ describe('CaseUserActionService', () => {
   describe('transformFindResponseToExternalModel', () => {
     it('does not populate the ids when the response is an empty array', () => {
       expect(transformFindResponseToExternalModel(createSOFindResponse([]))).toMatchInlineSnapshot(`
-         {
+        Object {
           "page": 1,
           "per_page": 0,
           "saved_objects": Array [],
@@ -297,26 +297,26 @@ describe('CaseUserActionService', () => {
       );
 
       expect(transformed).toMatchInlineSnapshot(`
-         {
+        Object {
           "page": 1,
           "per_page": 1,
           "saved_objects": Array [
-             {
-              "attributes":  {
+            Object {
+              "attributes": Object {
                 "action": "create",
                 "action_id": "100",
                 "case_id": "1",
                 "comment_id": null,
                 "created_at": "abc",
-                "created_by":  {
+                "created_by": Object {
                   "email": "a",
                   "full_name": "abc",
                   "username": "b",
                 },
                 "owner": "securitySolution",
-                "payload":  {
-                  "connector":  {
-                    "fields":  {
+                "payload": Object {
+                  "connector": Object {
+                    "fields": Object {
                       "issueType": "bug",
                       "parent": "2",
                       "priority": "high",
@@ -331,12 +331,12 @@ describe('CaseUserActionService', () => {
               },
               "id": "100",
               "references": Array [
-                 {
+                Object {
                   "id": "1",
                   "name": "associated-cases",
                   "type": "cases",
                 },
-                 {
+                Object {
                   "id": "1",
                   "name": "connectorId",
                   "type": "action",
