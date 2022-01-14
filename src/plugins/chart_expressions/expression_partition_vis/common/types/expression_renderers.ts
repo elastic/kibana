@@ -67,6 +67,7 @@ export interface PartitionVisParams extends VisCommonParams {
   labels: LabelsParams;
   palette: PaletteOutput;
   isDonut?: boolean;
+  showValuesInLegend?: boolean;
   respectSourceOrder?: boolean;
   emptySizeRatio?: EmptySizeRatios;
 }
@@ -88,6 +89,7 @@ export interface MosaicVisConfig extends VisCommonConfig {
 
 export interface WaffleVisConfig extends VisCommonConfig {
   bucket?: ExpressionValueVisDimension;
+  showValuesInLegend: boolean;
 }
 
 export interface RenderValue {

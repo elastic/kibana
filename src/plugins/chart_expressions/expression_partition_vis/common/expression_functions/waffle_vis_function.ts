@@ -84,6 +84,11 @@ export const waffleVisFunction = (): WaffleVisExpressionFunctionDefinition => ({
       help: strings.getLabelsArgHelp(),
       default: `{${PARTITION_LABELS_FUNCTION}}`,
     },
+    showValuesInLegend: {
+      types: ['boolean'],
+      help: strings.getShowValuesInLegendArgHelp(),
+      default: false,
+    },
   },
   fn(context, args, handlers) {
     const buckets = args.bucket ? [args.bucket] : [];

@@ -82,6 +82,10 @@ export const strings = {
     i18n.translate('expressionPartitionVis.reusable.function.args.labelsHelpText', {
       defaultMessage: 'Pie labels config',
     }),
+  getShowValuesInLegendArgHelp: () =>
+    i18n.translate('expressionPartitionVis.waffle.function.args.showValuesInLegendHelpText', {
+      defaultMessage: 'Show values in legend',
+    }),
 
   getSliceSizeHelp: () =>
     i18n.translate('expressionPartitionVis.reusable.function.dimension.metric', {

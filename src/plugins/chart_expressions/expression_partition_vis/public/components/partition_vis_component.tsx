@@ -39,6 +39,7 @@ import {
   BucketColumns,
   ValueFormats,
   PieContainerDimensions,
+  LabelPositions,
 } from '../../common/types/expression_renderers';
 import {
   getColorPicker,
@@ -267,8 +268,10 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     () => getConfig(visType, visParams, visData, chartTheme, dimensions, rescaleFactor),
     [visType, visParams, visData, chartTheme, dimensions, rescaleFactor]
   );
+
+  const fixedViewPort = document.getElementById('app-fixed-viewport');
   const tooltip: TooltipProps = {
-    boundary: document.getElementById('app-fixed-viewport') ?? undefined,
+    ...(fixedViewPort ? { boundary: fixedViewPort } : {}),
     type: visParams.addTooltip ? TooltipType.Follow : TooltipType.None,
   };
   const legendPosition = visParams.legendPosition ?? Position.Right;
@@ -363,6 +366,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
               legendColorPicker={props.uiState ? legendColorPicker : undefined}
               flatLegend={flatLegend}
               tooltip={tooltip}
+              showLegendExtra={visParams.showValuesInLegend}
               onElementClick={(args) => {
                 handleSliceClick(
                   args[0][0] as LayerValue[],
@@ -382,7 +386,13 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
               )}
               theme={[
                 // Chart background should be transparent for the usage at Canvas.
-                { ...chartTheme, background: { color: 'transparent' } },
+                {
+                  ...chartTheme,
+                  background: {
+                    ...chartTheme.background,
+                    color: 'transparent',
+                  },
+                },
                 {
                   legend: {
                     labelOptions: {
@@ -395,7 +405,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
               onRenderChange={onRenderChange}
             />
             <Partition
-              id="pie"
+              id={visType}
               smallMultiples={SMALL_MULTIPLES_ID}
               data={visData.rows}
               valueAccessor={(d: Datum) => getSliceValue(d, metricColumn)}
@@ -414,7 +424,11 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
               }
               layers={layers}
               config={config}
-              topGroove={!visParams.labels.show ? 0 : undefined}
+              topGroove={
+                !visParams.labels.show || visParams.labels.position === LabelPositions.HIDE
+                  ? 0
+                  : undefined
+              }
             />
           </Chart>
         </div>
