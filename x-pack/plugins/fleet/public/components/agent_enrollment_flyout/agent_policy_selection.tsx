@@ -131,6 +131,7 @@ export const EnrollmentStepAgentPolicy: React.FC<Props> = (props) => {
           )}
           hasNoInitialSelection={agentPolicies.length > 1}
           data-test-subj="agentPolicyDropdown"
+          isInvalid={!selectedAgentPolicyId}
         />
       </AgentPolicyFormRow>
       {selectedAgentPolicyId && !isFleetServerPolicy && (
