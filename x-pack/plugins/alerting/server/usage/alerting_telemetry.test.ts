@@ -11,7 +11,7 @@ import {
   getTotalCountAggregations,
   getTotalCountInUse,
   getExecutionsPerDayCount,
-} from './alerts_telemetry';
+} from './alerting_telemetry';
 
 describe('alerts telemetry', () => {
   test('getTotalCountInUse should replace first "." symbol to "__" in alert types names', async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface AlertsUsage {
+export interface AlertingUsage {
   count_total: number;
   count_active_total: number;
   count_disabled_total: number;

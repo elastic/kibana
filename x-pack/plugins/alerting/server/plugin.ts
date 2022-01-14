@@ -51,7 +51,7 @@ import {
   AlertTypeState,
   Services,
 } from './types';
-import { registerAlertsUsageCollector } from './usage';
+import { registerAlertingUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
 import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
@@ -208,7 +208,7 @@ export class AlertingPlugin {
 
     const usageCollection = plugins.usageCollection;
     if (usageCollection) {
-      registerAlertsUsageCollector(
+      registerAlertingUsageCollector(
         usageCollection,
         core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );

@@ -17,7 +17,7 @@ import {
   getTotalCountAggregations,
   getTotalCountInUse,
   getExecutionsPerDayCount,
-} from './alerts_telemetry';
+} from './alerting_telemetry';
 
 export const TELEMETRY_TASK_TYPE = 'alerting_telemetry';
 

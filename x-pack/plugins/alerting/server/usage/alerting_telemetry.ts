@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient } from 'kibana/server';
-import { AlertsUsage } from './types';
+import { AlertingUsage } from './types';
 
 const alertTypeMetric = {
   scripted_metric: {
@@ -102,7 +102,7 @@ export async function getTotalCountAggregations(
   kibanaInex: string
 ): Promise<
   Pick<
-    AlertsUsage,
+    AlertingUsage,
     | 'count_total'
     | 'count_by_type'
     | 'throttle_time'
@@ -237,14 +237,14 @@ export async function getTotalCountAggregations(
     avg_actions_count: { value: number };
   };
 
-  const totalAlertsCount = Object.keys(aggregations.byAlertTypeId.value.ruleTypes).reduce(
+  const totalRulesCount = Object.keys(aggregations.byAlertTypeId.value.ruleTypes).reduce(
     (total: number, key: string) =>
       parseInt(aggregations.byAlertTypeId.value.ruleTypes[key], 10) + total,
     0
   );
 
   return {
-    count_total: totalAlertsCount,
+    count_total: totalRulesCount,
     count_by_type: Object.keys(aggregations.byAlertTypeId.value.ruleTypes).reduce(
       // ES DSL aggregations are returned as `any` by esClient.search
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
