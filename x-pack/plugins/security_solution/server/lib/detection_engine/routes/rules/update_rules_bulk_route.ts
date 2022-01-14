@@ -85,13 +85,10 @@ export const updateRulesBulkRoute = (
             });
 
             const rule = await updateRules({
-              spaceId: context.securitySolution.getSpaceId(),
               rulesClient,
-              ruleStatusClient,
               defaultOutputIndex: siemClient.getSignalsIndex(),
               existingRule: migratedRule,
               ruleUpdate: payloadRule,
-              isRuleRegistryEnabled,
             });
             if (rule != null) {
               const ruleStatus = await ruleStatusClient.getCurrentStatus({

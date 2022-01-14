@@ -9,8 +9,8 @@ import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { APMLink } from '../../../../shared/Links/apm/APMLink';
-import { useFleetCloudAgentPolicyHref } from '../../../../shared/Links/kibana';
+import { APMLink } from '../../../../shared/links/apm/apm_link';
+import { useFleetCloudAgentPolicyHref } from '../../../../shared/links/kibana';
 
 export function CardFooterContent() {
   const fleetCloudAgentPolicyHref = useFleetCloudAgentPolicyHref();

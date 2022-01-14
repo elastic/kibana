@@ -8,19 +8,20 @@
 jest.mock('../../../lib/content_stream', () => ({
   getContentStream: jest.fn(),
 }));
-
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
 import { ElasticsearchClient } from 'kibana/server';
-import { of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { setupServer } from 'src/core/server/test_utils';
 import { Readable } from 'stream';
 import supertest from 'supertest';
 import { ReportingCore } from '../../../';
-import { ReportingInternalSetup } from '../../../core';
+import { licensingMock } from '../../../../../licensing/server/mocks';
+import { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
 import { ContentStream, ExportTypesRegistry, getContentStream } from '../../../lib';
 import {
   createMockConfigSchema,
   createMockPluginSetup,
+  createMockPluginStart,
   createMockReportingCore,
 } from '../../../test_helpers';
 import { ExportTypeDefinition, ReportingRequestHandlerContext } from '../../../types';
@@ -35,6 +36,7 @@ describe('GET /api/reporting/jobs/download', () => {
   let exportTypesRegistry: ExportTypesRegistry;
   let core: ReportingCore;
   let mockSetupDeps: ReportingInternalSetup;
+  let mockStartDeps: ReportingInternalStart;
   let mockEsClient: DeeplyMockedKeys<ElasticsearchClient>;
   let stream: jest.Mocked<ContentStream>;
 
@@ -53,34 +55,31 @@ describe('GET /api/reporting/jobs/download', () => {
       'reporting',
       () => ({ usesUiCapabilities: jest.fn() })
     );
+
+    const mockConfigSchema = createMockConfigSchema({ roles: { enabled: false } });
+
     mockSetupDeps = createMockPluginSetup({
       security: {
-        license: {
-          isEnabled: () => true,
-        },
+        license: { isEnabled: () => true },
         authc: {
-          getCurrentUser: () => ({
-            id: '123',
-            roles: ['superuser'],
-            username: 'Tom Riddle',
-          }),
+          getCurrentUser: () => ({ id: '123', roles: ['superuser'], username: 'Tom Riddle' }),
         },
       },
       router: httpSetup.createRouter(''),
-      licensing: {
-        license$: of({
-          isActive: true,
-          isAvailable: true,
-          type: 'gold',
-        }),
-      },
     });
 
-    core = await createMockReportingCore(
-      createMockConfigSchema({ roles: { enabled: false } }),
-      mockSetupDeps
+    mockStartDeps = await createMockPluginStart(
+      {
+        licensing: {
+          ...licensingMock.createStart(),
+          license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
+        },
+      },
+      mockConfigSchema
     );
-    // @ts-ignore
+
+    core = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
+
     exportTypesRegistry = new ExportTypesRegistry();
     exportTypesRegistry.register({
       id: 'unencoded',

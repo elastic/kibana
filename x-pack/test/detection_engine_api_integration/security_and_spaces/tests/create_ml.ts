@@ -17,7 +17,6 @@ import {
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   SPACE_IDS,
-  TAGS,
   VERSION,
 } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
@@ -159,7 +158,6 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_STATUS]: 'active',
         [SPACE_IDS]: ['default'],
-        [TAGS]: [`__internal_rule_id:${createdRule.rule_id}`, '__internal_immutable:false'],
         [ALERT_SEVERITY]: 'critical',
         [ALERT_RISK_SCORE]: 50,
         [ALERT_RULE_PARAMETERS]: {

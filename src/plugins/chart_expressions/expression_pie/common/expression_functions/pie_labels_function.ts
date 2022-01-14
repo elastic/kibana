@@ -28,7 +28,7 @@ export const pieLabelsFunction = (): ExpressionFunctionDefinition<
       help: i18n.translate('expressionPie.pieLabels.function.args.show.help', {
         defaultMessage: 'Displays the pie labels',
       }),
-      required: true,
+      default: true,
     },
     position: {
       types: ['string'],
