@@ -15,7 +15,6 @@ import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
-import { Observable } from 'rxjs';
 import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
 import {
   Embeddable,
@@ -74,6 +73,7 @@ import {
   getChartsPaletteServiceGetColor,
   getSpacesApi,
   getSearchService,
+  getTheme,
 } from '../kibana_services';
 import { LayerDescriptor, MapExtent } from '../../common/descriptor_types';
 import { MapContainer } from '../connected_components/map_container';
@@ -90,7 +90,6 @@ import {
   MapEmbeddableInput,
   MapEmbeddableOutput,
 } from './types';
-import { CoreTheme } from '../../../../../src/core/public/theme/types';
 
 function getIsRestore(searchSessionId?: string) {
   if (!searchSessionId) {
@@ -126,11 +125,8 @@ export class MapEmbeddable
   private _onInitialRenderComplete?: () => void = undefined;
   private _hasInitialRenderCompleteFired = false;
   private _isSharable = true;
-  private _theme$?: Observable<CoreTheme>;
 
   constructor(config: MapEmbeddableConfig, initialInput: MapEmbeddableInput, parent?: IContainer) {
-    console.trace();
-    console.log('Create new embeddalbe', config, initialInput, parent);
     super(
       initialInput,
       {
@@ -141,7 +137,6 @@ export class MapEmbeddable
       parent
     );
 
-    this._theme$ = config.theme$;
     this._isActive = true;
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
@@ -405,16 +400,11 @@ export class MapEmbeddable
       );
 
     const I18nContext = getCoreI18n().Context;
-
-    const themedContent = this._theme$ ? (
-      <KibanaThemeProvider theme$={this._theme$}>content</KibanaThemeProvider>
-    ) : (
-      content
-    );
-
     render(
       <Provider store={this._savedMap.getStore()}>
-        <I18nContext>{themedContent}</I18nContext>
+        <I18nContext>
+          <KibanaThemeProvider theme$={getTheme().theme$}>{content}</KibanaThemeProvider>;
+        </I18nContext>
       </Provider>,
       this._domNode
     );
