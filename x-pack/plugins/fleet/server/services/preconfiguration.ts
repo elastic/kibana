@@ -35,6 +35,7 @@ import {
   ensurePackagesCompletedInstall,
   getInstallType,
   installPackage,
+  updateInstallStatus,
 } from './epm/packages/install';
 import { bulkInstallPackages } from './epm/packages/bulk_install_packages';
 import { agentPolicyService, addPackageToAgentPolicy } from './agent_policy';
@@ -513,6 +514,13 @@ async function installBundledPackages(
       archiveBuffer: bundledPackage.buffer,
       contentType: 'application/zip',
       spaceId,
+    });
+
+    // Mark bundled packages with a unique status to prevent them from appearing as "installed" in the UI
+    await updateInstallStatus({
+      savedObjectsClient: soClient,
+      pkgName: packageInfo.name,
+      status: 'installed_bundled',
     });
 
     results.push({ name: bundledPackage.name, ...result });
