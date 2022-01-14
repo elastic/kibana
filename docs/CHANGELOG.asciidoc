@@ -134,17 +134,19 @@ The `xpack.apm.autocreateApmIndexPattern` APM setting has been removed. For more
 *Impact* +
 To automatically create data views in APM, use `xpack.apm.autoCreateApmDataView`.
 ====
-      
+
 [discrete]
 [[deprecation-119494]]
-.Updates Fleet API responses for consistency
+.Updates Fleet API to improve consistency
 [%collapsible]
 ====
 *Details* +
-To make sure all Fleet API GET resposes return `items`, the following have been updated:
+The Fleet API has been updated to improve consistency:
 
-* `/api/fleet/enrollment-api-keys`
-* `/api/fleet/agents`
+* Hyphens are changed to underscores in some names.
+* The `pkgkey` path parameter in the packages endpoint is split.
+* The `response` and `list` properties are renamed to `items` or `item` in some
+responses.
 
 For more information, refer to {kibana-pull}119494[#119494].
 
@@ -157,24 +159,30 @@ When you upgrade to 8.0.0, use the following API changes:
 
 * Use `service_tokens` instead of `service-tokens`.
 
-* `check-permissions` is no longer supported.
-
 * Use `/epm/packages/{packageName}/{version}` instead of `/epm/packages/{pkgkey}`.
 
-* Use `items[]` or `item` instead of `response[]` in the following:
-
+* Use `items[]` (or `item`) instead of `response[]` in:
++
 [source,text]
 --
+/api/fleet/enrollment_api_keys
+/api/fleet/agents
 /epm/packages/
-/epm/packages/{pkgkey}
 /epm/categories
 /epm/packages/_bulk
 /epm/packages/limited
+/epm/packages/{packageName}/{version} <1>
 --
+<1> Use `items[]` when the verb is `POST` or `DELETE`. Use `item` when the verb
+is `GET` or `PUT`.
+
+For more information, refer to {fleet-guide}/fleet-api-docs.html[Fleet APIs].
+
 ====
 
-To review the depcrecations in previous versions, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
-      
+To review the deprecations in previous versions, refer to the <<deprecations-8.0.0-alpha1,8.0.0-alpha1 release notes>>. 
+
+
 [float]
 [[features-8.0.0-rc1]]
 === Features
