@@ -97,6 +97,12 @@ export { enableComparisonByDefault } from '../common/ui_settings_keys';
 export type { SeriesConfig, ConfigProps } from './components/shared/exploratory_view/types';
 export {
   ReportTypes,
+  FILTER_RECORDS,
   REPORT_METRIC_FIELD,
+  USE_BREAK_DOWN_COLUMN,
+  RECORDS_FIELD,
+  OPERATION_COLUMN,
+  TERMS_COLUMN,
+  RECORDS_PERCENTAGE_FIELD,
 } from './components/shared/exploratory_view/configurations/constants';
 export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';

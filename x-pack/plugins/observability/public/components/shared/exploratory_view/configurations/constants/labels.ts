@@ -203,6 +203,13 @@ export const DEVICE_DISTRIBUTION_LABEL = i18n.translate(
   }
 );
 
+export const SINGLE_METRIC_LABEL = i18n.translate(
+  'xpack.observability.expView.fieldLabels.singleMetric',
+  {
+    defaultMessage: 'Single metric',
+  }
+);
+
 export const MOBILE_RESPONSE_LABEL = i18n.translate(
   'xpack.observability.expView.fieldLabels.mobileResponse',
   {

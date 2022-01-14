@@ -17,6 +17,7 @@ import {
   DEVICE_DISTRIBUTION_LABEL,
   KPI_OVER_TIME_LABEL,
   PERF_DIST_LABEL,
+  SINGLE_METRIC_LABEL,
 } from './configurations/constants/labels';
 import { SELECT_REPORT_TYPE } from './series_editor/series_editor';
 import { DataTypes } from './configurations/constants';
@@ -30,6 +31,7 @@ import { getMobileKPIConfig } from './configurations/mobile/kpi_over_time_config
 import { getMobileDeviceDistributionConfig } from './configurations/mobile/device_distribution_config';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { getMetricsKPIConfig } from './configurations/infra_metrics/kpi_over_time_config';
+import { getSingleMetricConfig } from './configurations/rum/single_metric_config';
 
 export const DataTypesLabels = {
   [DataTypes.UX]: i18n.translate('xpack.observability.overview.exploratoryView.uxLabel', {
@@ -80,11 +82,17 @@ export const reportTypesList: Array<{
   { reportType: 'kpi-over-time', label: KPI_OVER_TIME_LABEL },
   { reportType: 'data-distribution', label: PERF_DIST_LABEL },
   { reportType: 'core-web-vitals', label: CORE_WEB_VITALS_LABEL },
+  { reportType: 'single-metric', label: SINGLE_METRIC_LABEL },
   { reportType: 'device-data-distribution', label: DEVICE_DISTRIBUTION_LABEL },
 ];
 
 export const obsvReportConfigMap = {
-  [DataTypes.UX]: [getKPITrendsLensConfig, getRumDistributionConfig, getCoreWebVitalsConfig],
+  [DataTypes.UX]: [
+    getKPITrendsLensConfig,
+    getRumDistributionConfig,
+    getCoreWebVitalsConfig,
+    getSingleMetricConfig,
+  ],
   [DataTypes.SYNTHETICS]: [getSyntheticsKPIConfig, getSyntheticsDistributionConfig],
   [DataTypes.MOBILE]: [
     getMobileKPIConfig,

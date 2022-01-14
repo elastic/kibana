@@ -25,6 +25,7 @@ import { useTheme } from '../../../../hooks/use_theme';
 import { EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
 import { LABEL_FIELDS_BREAKDOWN } from '../configurations/constants';
 import { ReportConfigMap, useExploratoryView } from '../contexts/exploratory_view_config';
+import { SingleMetricLensAttributes } from '../configurations/lens_attributes/single_metric_attributes';
 
 export const getFiltersFromDefs = (reportDefinitions: SeriesUrl['reportDefinitions']) => {
   return Object.entries(reportDefinitions ?? {})
@@ -116,7 +117,13 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
       return null;
     }
 
-    const lensAttributes = new LensAttributes(layerConfigs);
+    if (reportTypeT === 'single-metric') {
+      const lensAttributes = new SingleMetricLensAttributes(layerConfigs, reportTypeT);
+
+      return lensAttributes.getJSON(lastRefresh);
+    }
+
+    const lensAttributes = new LensAttributes(layerConfigs, reportTypeT);
 
     return lensAttributes.getJSON(lastRefresh);
     // we also want to check the state on allSeries changes
