@@ -55,7 +55,7 @@ describe('Fleet preconfiguration reset', () => {
             fleet: {
               packages: [
                 {
-                  name: 'fleet-server',
+                  name: 'fleet_server',
                   version: 'latest',
                 },
               ],

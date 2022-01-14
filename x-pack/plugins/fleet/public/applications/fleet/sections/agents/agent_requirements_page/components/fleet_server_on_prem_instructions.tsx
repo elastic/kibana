@@ -43,9 +43,10 @@ import {
   useLink,
 } from '../../../../hooks';
 import type { PLATFORM_TYPE } from '../../../../hooks';
-import type { AgentPolicy, PackagePolicy } from '../../../../types';
-import { FLEET_SERVER_PACKAGE } from '../../../../constants';
+import type { AgentPolicy } from '../../../../types';
 import { FleetServerOnPremRequiredCallout } from '../../components';
+
+import { policyHasFleetServer } from '../../services/has_fleet_server';
 
 import { getInstallCommandForPlatform } from './install_command_utils';
 
@@ -326,16 +327,7 @@ const AgentPolicySelectionStep = ({
   const { data, resendRequest: refreshAgentPolicies } = useGetAgentPolicies({ full: true });
 
   const agentPolicies = useMemo(
-    () =>
-      data
-        ? data.items.filter((item) => {
-            return item.package_policies.some(
-              (p: string | PackagePolicy) =>
-                (p as PackagePolicy).package?.name === FLEET_SERVER_PACKAGE
-            );
-            return false;
-          })
-        : [],
+    () => (data ? data.items.filter((item) => policyHasFleetServer(item)) : []),
     [data]
   );
 

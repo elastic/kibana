@@ -37,6 +37,7 @@ export const AgentsApp: React.FunctionComponent = () => {
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
     perPage: 1000,
+    full: true,
   });
 
   const agentPolicies = useMemo(
