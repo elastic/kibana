@@ -2026,20 +2026,6 @@
       },
       {
         "parentPluginId": "uiActions",
-        "id": "def-public.ACTION_CONVERT_TO_LENS",
-        "type": "string",
-        "tags": [],
-        "label": "ACTION_CONVERT_TO_LENS",
-        "description": [],
-        "signature": [
-          "\"ACTION_CONVERT_TO_LENS\""
-        ],
-        "path": "src/plugins/ui_actions/public/types.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "uiActions",
         "id": "def-public.ACTION_VISUALIZE_LENS_FIELD",
         "type": "string",
         "tags": [],
