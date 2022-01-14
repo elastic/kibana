@@ -26,7 +26,7 @@ const zlib = require('zlib');
 
 const OUTPUT_DIRECTORY = resolve('scripts', 'beat_docs');
 const OUTPUT_SERVER_DIRECTORY = resolve('server', 'utils', 'beat_schema');
-const BEATS_VERSION = '7.14.0';
+const BEATS_VERSION = '8.0.0-rc1';
 
 const beats = [
   {
