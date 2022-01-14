@@ -38,7 +38,7 @@ export const registerUptimeSavedObjects = (
 };
 
 export interface UMSavedObjectsAdapter {
-  config: UptimeConfig;
+  config: UptimeConfig | null;
   getUptimeDynamicSettings: UMSavedObjectsQueryFn<DynamicSettings>;
   setUptimeDynamicSettings: UMSavedObjectsQueryFn<void, DynamicSettings>;
 }

@@ -7,46 +7,50 @@
 
 import { PluginConfigDescriptor } from 'kibana/server';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { sslSchema } from '@kbn/server-http-tools';
 
-export const config: PluginConfigDescriptor = {
-  exposeToBrowser: {
-    ui: true,
-  },
-  schema: schema.maybe(
+const serviceConfig = schema.object({
+  enabled: schema.boolean(),
+  username: schema.maybe(schema.string()),
+  password: schema.maybe(schema.string()),
+  manifestUrl: schema.string(),
+  hosts: schema.maybe(schema.arrayOf(schema.string())),
+  syncInterval: schema.maybe(schema.string()),
+  tls: schema.maybe(sslSchema),
+});
+
+const uptimeConfig = schema.object({
+  index: schema.maybe(schema.string()),
+  ui: schema.maybe(
     schema.object({
-      index: schema.maybe(schema.string()),
-      ui: schema.maybe(
-        schema.object({
-          unsafe: schema.maybe(
-            schema.object({
-              monitorManagement: schema.maybe(
-                schema.object({
-                  enabled: schema.boolean(),
-                })
-              ),
-            })
-          ),
-        })
-      ),
       unsafe: schema.maybe(
         schema.object({
-          service: schema.maybe(
+          monitorManagement: schema.maybe(
             schema.object({
               enabled: schema.boolean(),
-              username: schema.string(),
-              password: schema.string(),
-              manifestUrl: schema.string(),
-              hosts: schema.maybe(schema.arrayOf(schema.string())),
-              syncInterval: schema.maybe(schema.string()),
             })
           ),
         })
       ),
     })
   ),
+  unsafe: schema.maybe(
+    schema.object({
+      service: serviceConfig,
+    })
+  ),
+});
+
+export const config: PluginConfigDescriptor = {
+  exposeToBrowser: {
+    ui: true,
+  },
+  schema: uptimeConfig,
 };
 
-export type UptimeConfig = TypeOf<typeof config.schema>;
+export type UptimeConfig = TypeOf<typeof uptimeConfig>;
+export type ServiceConfig = TypeOf<typeof serviceConfig>;
+
 export interface UptimeUiConfig {
   ui?: TypeOf<typeof config.schema>['ui'];
 }
