@@ -10,6 +10,7 @@ export interface FieldMap {
     type: string;
     required?: boolean;
     array?: boolean;
+    path?: string;
     scaling_factor?: number;
   };
 }
