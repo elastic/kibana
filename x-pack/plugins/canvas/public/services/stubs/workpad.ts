@@ -95,21 +95,7 @@ export const findNoTemplates =
       .then(() => getNoTemplates());
   };
 
-export const exportWorkpad = (id: string) => {
-  const exportedWorkpad = getExportedWorkpad();
-  return {
-    ...exportedWorkpad,
-    attributes: { ...exportedWorkpad.attributes, id },
-    id,
-  };
-};
-
-export const importWorkpad = (workpad: SavedObject<CanvasWorkpad> | CanvasWorkpad) =>
-  Promise.resolve({
-    ...((workpad as SavedObject<CanvasWorkpad>).attributes ?? workpad),
-    id: workpad.id ?? 1,
-  });
-
+export const importWorkpad = (workpad: CanvasWorkpad) => Promise.resolve(workpad);
 export const getNoTemplates = () => ({ templates: [] });
 export const getSomeTemplates = () => ({ templates });
 
@@ -120,7 +106,6 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = () => ({
   findTemplates: findNoTemplates(),
   create: (workpad) => Promise.resolve(workpad),
   import: (workpad) => importWorkpad(workpad),
-  export: (id) => Promise.resolve(exportWorkpad(id)),
   createFromTemplate: (_templateId: string) => Promise.resolve(getDefaultWorkpad()),
   find: findNoWorkpads(),
   remove: (_id: string) => Promise.resolve(),

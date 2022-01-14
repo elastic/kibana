@@ -16,15 +16,13 @@ import { WorkpadAttributes } from './routes/workpad/workpad_attributes';
 import { CANVAS_TYPE } from '../common/lib/constants';
 import { injectReferences, extractReferences } from './saved_objects/workpad_references';
 import { getId } from '../common/lib/get_id';
-import { CanvasWorkpad, ImportedCanvasWorkpadSavedObject } from '../types';
+import { CanvasWorkpad, ImportedCanvasWorkpad } from '../types';
 
 export interface CanvasRouteHandlerContext extends RequestHandlerContext {
   canvas: {
     workpad: {
       create: (attributes: CanvasWorkpad) => Promise<SavedObject<WorkpadAttributes>>;
-      import: (
-        workpad: ImportedCanvasWorkpadSavedObject
-      ) => Promise<SavedObject<WorkpadAttributes>>;
+      import: (workpad: ImportedCanvasWorkpad) => Promise<SavedObject<WorkpadAttributes>>;
       get: (id: string) => Promise<SavedObject<WorkpadAttributes>>;
       resolve: (id: string) => Promise<SavedObjectsResolveResponse<WorkpadAttributes>>;
       update: (
@@ -65,20 +63,15 @@ export const createWorkpadRouteContext: (
           { id, references }
         );
       },
-      import: async (workpad: ImportedCanvasWorkpadSavedObject) => {
+      import: async (workpad: ImportedCanvasWorkpad) => {
         const now = new Date().toISOString();
-        const { attributes, ...options } = workpad;
-        const { id: maybeId, ...attrsWithoutId } = attributes;
-        // Functionality of migrations on import of workpads was implemented in v8.1.0.
-        // All the workpads, imported before this version don't have specified migration versions
-        // and have different structure of the JSON file.
+        const { id: maybeId, ...workpadWithoutId } = workpad;
+
+        // Functionality of running migrations on import of workpads was implemented in v8.1.0.
+        // As only attributes of the saved object workpad are exported, to run migrations it is necessary
+        // to specify the minimal version of possible migrations to execute them. It is v8.0.0 in the current case.
         const DEFAULT_MIGRATION_VERSION = { [CANVAS_TYPE]: '8.0.0' };
         const DEFAULT_CORE_MIGRATION_VERSION = '8.0.0';
-
-        const {
-          migrationVersion = DEFAULT_MIGRATION_VERSION,
-          coreMigrationVersion = DEFAULT_CORE_MIGRATION_VERSION,
-        } = options;
 
         const id = maybeId ? maybeId : getId('workpad');
 
@@ -86,11 +79,15 @@ export const createWorkpadRouteContext: (
           CANVAS_TYPE,
           {
             isWriteable: true,
-            ...attrsWithoutId,
+            ...workpadWithoutId,
             '@timestamp': now,
             '@created': now,
           },
-          { ...options, migrationVersion, coreMigrationVersion, id }
+          {
+            migrationVersion: DEFAULT_MIGRATION_VERSION,
+            coreMigrationVersion: DEFAULT_CORE_MIGRATION_VERSION,
+            id,
+          }
         );
       },
       get: async (id: string) => {

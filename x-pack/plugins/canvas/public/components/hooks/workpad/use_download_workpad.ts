@@ -8,7 +8,6 @@
 import { useCallback } from 'react';
 import fileSaver from 'file-saver';
 import { i18n } from '@kbn/i18n';
-import { SavedObject } from 'kibana/public';
 import { useNotifyService, useWorkpadService } from '../../../services';
 import { CanvasWorkpad } from '../../../../types';
 import { CanvasRenderedWorkpad } from '../../../../shareable_runtime/types';
@@ -35,9 +34,9 @@ export const useDownloadWorkpad = () => {
   return useCallback(
     async (workpadId: string) => {
       try {
-        const workpad = await workpadService.export(workpadId);
+        const workpad = await workpadService.get(workpadId);
 
-        download(workpad, `canvas-workpad-${workpad.attributes.name}-${workpad.id}`);
+        download(workpad, `canvas-workpad-${workpad.name}-${workpad.id}`);
       } catch (err) {
         notifyService.error(err, { title: strings.getDownloadFailureErrorMessage() });
       }
@@ -65,11 +64,8 @@ export const useDownloadRenderedWorkpad = () => {
 };
 
 const useDownloadWorkpadBlob = () => {
-  return useCallback(
-    (workpad: SavedObject<CanvasWorkpad> | CanvasRenderedWorkpad, filename: string) => {
-      const jsonBlob = new Blob([JSON.stringify(workpad)], { type: 'application/json' });
-      fileSaver.saveAs(jsonBlob, `${filename}.json`);
-    },
-    []
-  );
+  return useCallback((workpad: CanvasWorkpad | CanvasRenderedWorkpad, filename: string) => {
+    const jsonBlob = new Blob([JSON.stringify(workpad)], { type: 'application/json' });
+    fileSaver.saveAs(jsonBlob, `${filename}.json`);
+  }, []);
 };

@@ -20,7 +20,6 @@ import {
   API_ROUTE_SHAREABLE_ZIP,
 } from '../../../common/lib/constants';
 import { CanvasWorkpad } from '../../../types';
-import { isWorkpad } from '../../lib/workpad';
 
 export type CanvasWorkpadServiceFactory = KibanaPluginServiceFactory<
   CanvasWorkpadService,
@@ -110,19 +109,14 @@ export const workpadServiceFactory: CanvasWorkpadServiceFactory = ({ coreStart, 
         }),
       });
     },
-    import: (workpad: CanvasWorkpad | SavedObject<CanvasWorkpad>) => {
-      const workpadToImport = isWorkpad(workpad) ? { attributes: workpad } : workpad;
-      return coreStart.http.post(`${getApiPath()}/import`, {
+    import: (workpad: CanvasWorkpad) =>
+      coreStart.http.post(`${getApiPath()}/import`, {
         body: JSON.stringify({
-          ...workpadToImport,
-          attributes: {
-            ...sanitizeWorkpad({ ...workpadToImport.attributes }),
-            assets: workpadToImport.attributes.assets || {},
-            variables: workpadToImport.attributes.variables || [],
-          },
+          ...sanitizeWorkpad({ ...workpad }),
+          assets: workpad.assets || {},
+          variables: workpad.variables || [],
         }),
-      });
-    },
+      }),
     createFromTemplate: (templateId: string) => {
       return coreStart.http.post(getApiPath(), {
         body: JSON.stringify({ templateId }),

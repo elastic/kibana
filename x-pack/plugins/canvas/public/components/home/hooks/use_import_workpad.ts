@@ -8,7 +8,6 @@
 import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { SavedObject } from 'kibana/public';
 
 // @ts-expect-error
 import { getDefaultWorkpad } from '../../../state/defaults';
@@ -22,7 +21,7 @@ export const useImportWorkpad = () => {
   const history = useHistory();
 
   return useCallback(
-    async (workpad: CanvasWorkpad | SavedObject<CanvasWorkpad>) => {
+    async (workpad: CanvasWorkpad) => {
       try {
         const importedWorkpad = await workpadService.import(workpad);
         history.push(`/workpad/${importedWorkpad.id}/page/1`);

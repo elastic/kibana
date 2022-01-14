@@ -123,30 +123,3 @@ export const ImportedWorkpadSchema = ImportedWorkpadSchemaWithoutValidation.exte
     validate,
   }
 );
-
-const SavedObjectReference = schema.object({
-  name: schema.string(),
-  type: schema.string(),
-  id: schema.string(),
-});
-
-const SavedObjectError = schema.object({
-  error: schema.string(),
-  message: schema.string(),
-  statusCode: schema.number(),
-  metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-});
-
-export const SavedObjectImportedWorkpadSchema = schema.object({
-  id: schema.maybe(schema.string()),
-  type: schema.maybe(schema.string()),
-  version: schema.maybe(schema.string()),
-  updated_at: schema.maybe(schema.string()),
-  error: schema.maybe(SavedObjectError),
-  references: schema.maybe(schema.arrayOf(SavedObjectReference)),
-  migrationVersion: schema.maybe(schema.recordOf(schema.string(), schema.string())),
-  coreMigrationVersion: schema.maybe(schema.string()),
-  namespaces: schema.maybe(schema.arrayOf(schema.string())),
-  originId: schema.maybe(schema.string()),
-  attributes: ImportedWorkpadSchema,
-});

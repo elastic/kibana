@@ -15,10 +15,9 @@ import { useNotifyService } from '../../../services';
 import { getId } from '../../../lib/get_id';
 import { useImportWorkpad as useImportWorkpadHook } from './use_import_workpad';
 import type { CanvasWorkpad } from '../../../../types';
-import { isSavedObjectWorkpad, isWorkpad } from '../../../lib/workpad';
 
-const isValidWorkpad = (workpad: CanvasWorkpad) =>
-  !(!Array.isArray(workpad.pages) || workpad.pages.length === 0 || !workpad.assets);
+const isInvalidWorkpad = (workpad: CanvasWorkpad) =>
+  !Array.isArray(workpad.pages) || workpad.pages.length === 0 || !workpad.assets;
 
 export const useImportWorkpad = () => {
   const notifyService = useNotifyService();
@@ -49,17 +48,12 @@ export const useImportWorkpad = () => {
       // handle reading the uploaded file
       reader.onload = async () => {
         try {
-          const workpad: CanvasWorkpad | SavedObject<CanvasWorkpad> = JSON.parse(
-            reader.result as string
-          ); // Type-casting because we catch below.
+          const workpad: CanvasWorkpad = JSON.parse(reader.result as string); // Type-casting because we catch below.
 
           workpad.id = getId('workpad');
 
           // sanity check for workpad object
-          if (
-            (isWorkpad(workpad) && !isValidWorkpad(workpad)) ||
-            (isSavedObjectWorkpad(workpad) && !isValidWorkpad(workpad.attributes))
-          ) {
+          if (isInvalidWorkpad(workpad)) {
             onComplete();
             throw new Error(errors.getMissingPropertiesErrorMessage());
           }

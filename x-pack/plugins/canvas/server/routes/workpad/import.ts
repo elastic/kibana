@@ -7,12 +7,12 @@
 
 import { RouteInitializerDeps } from '../';
 import { API_ROUTE_WORKPAD_IMPORT } from '../../../common/lib/constants';
-import { ImportedCanvasWorkpadSavedObject } from '../../../types';
-import { SavedObjectImportedWorkpadSchema } from './workpad_schema';
+import { ImportedCanvasWorkpad } from '../../../types';
+import { ImportedWorkpadSchema } from './workpad_schema';
 import { okResponse } from '../ok_response';
 import { catchErrorHandler } from '../catch_error_handler';
 
-const createRequestBodySchema = SavedObjectImportedWorkpadSchema;
+const createRequestBodySchema = ImportedWorkpadSchema;
 
 export function initializeImportWorkpadRoute(deps: RouteInitializerDeps) {
   const { router } = deps;
@@ -30,7 +30,7 @@ export function initializeImportWorkpadRoute(deps: RouteInitializerDeps) {
       },
     },
     catchErrorHandler(async (context, request, response) => {
-      const workpad = request.body as ImportedCanvasWorkpadSavedObject;
+      const workpad = request.body as ImportedCanvasWorkpad;
 
       const createdObject = await context.canvas.workpad.import(workpad);
 
