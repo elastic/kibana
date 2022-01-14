@@ -12,10 +12,9 @@ import {
   EuiCommentList,
   EuiCommentProps,
 } from '@elastic/eui';
-import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils/technical_field_names';
 
 import classNames from 'classnames';
-import { get, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -49,6 +48,9 @@ import {
   RuleDetailsNavigation,
   ActionsNavigation,
   getActionAttachment,
+  getNonEmptyField,
+  getRuleId,
+  getRuleName,
 } from './helpers';
 import { UserActionAvatar } from './user_action_avatar';
 import { UserActionMarkdown } from './user_action_markdown';
@@ -404,33 +406,16 @@ export const UserActionTree = React.memo(
                 isRight(AlertCommentRequestRt.decode(comment)) &&
                 comment.type === CommentType.alert
               ) {
-                // TODO: clean this up
-                const alertId = Array.isArray(comment.alertId)
-                  ? comment.alertId.length > 0
-                    ? comment.alertId[0]
-                    : ''
-                  : comment.alertId;
+                const alertId = getNonEmptyField(comment.alertId);
+                const alertIndex = getNonEmptyField(comment.index);
 
-                const alertIndex = Array.isArray(comment.index)
-                  ? comment.index.length > 0
-                    ? comment.index[0]
-                    : ''
-                  : comment.index;
-
-                if (isEmpty(alertId)) {
+                if (!alertId || !alertIndex) {
                   return comments;
                 }
 
-                const ruleId =
-                  comment?.rule?.id ??
-                  manualAlertsData[alertId]?.signal?.rule?.id?.[0] ??
-                  get(manualAlertsData[alertId], ALERT_RULE_UUID)[0] ??
-                  null;
-                const ruleName =
-                  comment?.rule?.name ??
-                  manualAlertsData[alertId]?.signal?.rule?.name?.[0] ??
-                  get(manualAlertsData[alertId], ALERT_RULE_NAME)[0] ??
-                  null;
+                const alertField: Ecs | undefined = manualAlertsData[alertId];
+                const ruleId = getRuleId(comment, alertField);
+                const ruleName = getRuleName(comment, alertField);
 
                 return [
                   ...comments,

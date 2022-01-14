@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { get, isEmpty } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,10 +14,11 @@ import {
   EuiCommentProps,
   EuiToken,
 } from '@elastic/eui';
+import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils/technical_field_names';
 import React, { useContext } from 'react';
 import classNames from 'classnames';
 import { ThemeContext } from 'styled-components';
-import { Comment } from '../../../common/ui/types';
+import { Comment, Ecs } from '../../../common/ui/types';
 import {
   CaseFullExternalService,
   ActionConnector,
@@ -24,6 +26,7 @@ import {
   CommentType,
   CommentRequestActionsType,
   noneConnectorId,
+  CommentRequestAlertType,
 } from '../../../common/api';
 import { CaseUserActions } from '../../containers/types';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
@@ -458,3 +461,55 @@ export interface Alert {
   signal: Signal;
   [key: string]: unknown;
 }
+
+export const getFirstItem = (items?: string | string[] | null): string | null => {
+  if (items == null) {
+    return null;
+  }
+
+  return Array.isArray(items) ? (items.length > 0 ? items[0] : null) : items;
+};
+
+export const getRuleId = (comment: CommentRequestAlertType, alertData?: Ecs): string | null =>
+  getRuleField({
+    commentRuleField: comment?.rule?.id,
+    alertData,
+    signalRuleFieldPath: 'signal.rule.id',
+    kibanaAlertFieldPath: ALERT_RULE_UUID,
+  });
+
+export const getRuleName = (comment: CommentRequestAlertType, alertData?: Ecs): string | null =>
+  getRuleField({
+    commentRuleField: comment?.rule?.name,
+    alertData,
+    signalRuleFieldPath: 'signal.rule.name',
+    kibanaAlertFieldPath: ALERT_RULE_NAME,
+  });
+
+const getRuleField = ({
+  commentRuleField,
+  alertData,
+  signalRuleFieldPath,
+  kibanaAlertFieldPath,
+}: {
+  commentRuleField: string | string[] | null | undefined;
+  alertData: Ecs | undefined;
+  signalRuleFieldPath: string;
+  kibanaAlertFieldPath: string;
+}): string | null => {
+  const field =
+    getNonEmptyField(commentRuleField) ??
+    getNonEmptyField(get(alertData, signalRuleFieldPath)) ??
+    getNonEmptyField(get(alertData, kibanaAlertFieldPath));
+
+  return field;
+};
+
+export const getNonEmptyField = (field: string | string[] | undefined | null): string | null => {
+  const firstItem = getFirstItem(field);
+  if (firstItem == null || isEmpty(firstItem)) {
+    return null;
+  }
+
+  return firstItem;
+};
