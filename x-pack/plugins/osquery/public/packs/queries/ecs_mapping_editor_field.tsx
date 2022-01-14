@@ -762,6 +762,7 @@ export const ECSMappingEditorForm = forwardRef<ECSMappingEditorFormRef, ECSMappi
                             defaultMessage: 'Delete ECS mapping row',
                           }
                         )}
+                        id={`${defaultValue?.key}-trash`}
                         iconType="trash"
                         color="danger"
                         onClick={handleDeleteClick}
